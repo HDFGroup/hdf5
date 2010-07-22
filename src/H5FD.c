@@ -2127,3 +2127,590 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_get_base_addr() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDaio_read
+ *
+ * Purpose:     Initiate an asynchronous read from the indicated file of
+ *              the specified number of bytes starting at the specified
+ *              offset and loading the data  into the provided buffer.
+ *
+ *              The buffer must be large enough to contain the requested
+ *              data, and is undefined and must not be read or modified
+ *              until the read completes successfully.  Completion is
+ *              determined via either a call to H5FDaio_test() or a
+ *              call to H5FDaio_wait(), and success via a call to
+ *              H5FDaio_finish().
+ *
+ *              If successful, the H5FDaio_read routine will return a 
+ *		pointer to an internal control block in *ctlblk_ptr_ptr.  
+ *		This pointer must be used in all subsequent 
+ *		H5FDaio_test() / H5FDaio_wait() / H5FDaio_finish() 
+ *		calls referring to this request.
+ *
+ *              Note that a successful return from this function does not
+ *              imply a successful read -- simply that no errors were
+ *              immediately evident.  
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/17/10
+ *
+ * Changes:	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5FDaio_read(H5FD_t *file, 
+             H5FD_mem_t type, 
+             hid_t dxpl_id,
+             haddr_t addr, 
+             size_t size, 
+             void *buffer,
+             void **ctlblk_ptr_ptr)
+{
+    herr_t      	ret_value = SUCCEED;       /* Return value */
+    herr_t		result;
+
+    FUNC_ENTER_API(H5FDaio_read, FAIL)
+    H5TRACE7("e", "*xMtiaz*x**x", file, type, dxpl_id, addr, size, buffer,
+             ctlblk_ptr_ptr);
+
+    /* Check args */
+    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    }
+
+    /* Get the default dataset transfer property list if the user 
+     * didn't provide one 
+     */
+    if ( H5P_DEFAULT == dxpl_id ) {
+
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+
+    } else {
+
+        if ( TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER) ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
+                        "not a data transfer property list")
+        }
+    }
+
+    if ( buffer == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null result buffer")
+    }
+
+    if ( ( ctlblk_ptr_ptr == NULL ) ||
+         ( *ctlblk_ptr_ptr != NULL ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad ctlblk_ptr_ptr")
+    }
+
+    /* do the real work */
+    result = H5FD_aio_read(file, type, dxpl_id, addr, size, 
+                           buffer, ctlblk_ptr_ptr);
+
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_VFL, H5E_AIOREADERROR, FAIL, \
+                    "aio read request failed")
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5FDaio_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDaio_write
+ *
+ * Purpose:     Initiate an asynchronous write to the indicated file of
+ *              the specified number of bytes from the supplied  buffer
+ *              to the indicated location.
+ *
+ *              The buffer must not be discarded or modified until the
+ *              write completes successfully.  Completion is determined
+ *              via either H5FDaio_test() or H5FDaio_wait(), and 
+ *		success via H5FDaio_finish().
+ *
+ *              If successful, the H5FDaio_write routine will return a 
+ *		pointer to an internal control block in *ctlblk_ptr_ptr.  
+ *		This pointer must be used in all subsequent H5FDaio_test() 
+ *		/ H5FDaio_wait() / H5FDaio_finish() calls referring to 
+ *		this request.
+ *
+ *              Note that a successful return from this function does not
+ *              imply a successful write -- simply that no errors were
+ *              immediately evident.
+ *
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/17/10
+ *
+ * Changes: 	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5FDaio_write(H5FD_t *file, 
+              H5FD_mem_t type, 
+              hid_t dxpl_id,
+              haddr_t addr, 
+              size_t size, 
+              void *buffer,
+              void **ctlblk_ptr_ptr)
+{
+    herr_t              ret_value = SUCCEED;       /* Return value */
+    herr_t		result;
+
+    FUNC_ENTER_API(H5FDaio_write, FAIL)
+    H5TRACE7("e", "*xMtiaz*x**x", file, type, dxpl_id, addr, size, buffer,
+             ctlblk_ptr_ptr);
+
+    /* Check args */
+    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    }
+
+    /* Get the default dataset transfer property list if the user 
+     * didn't provide one 
+     */
+    if ( H5P_DEFAULT == dxpl_id ) {
+
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+
+    } else {
+
+        if ( TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER) ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
+                        "not a data transfer property list")
+        }
+    }
+
+    if ( buffer == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null buffer")
+    }
+
+    if ( ( ctlblk_ptr_ptr == NULL ) ||
+         ( *ctlblk_ptr_ptr != NULL ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad ctlblk_ptr_ptr")
+    }
+
+    /* do the real work */
+    result = H5FD_aio_write(file, type, dxpl_id, addr, size, 
+                            buffer, ctlblk_ptr_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_VFL, H5E_AIOWRITEERROR, FAIL, \
+                    "aio write request failed")
+    }
+
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5FDaio_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDaio_test
+ *
+ * Purpose:	This function is used to determine if the asynchronous
+ *		operation associated with the supplied control block 
+ *		pointer is complete.  If it is, *done_ptr should be set
+ *		to TRUE, if it isn't, *done_ptr should be set to FALSE.
+ *		In all cases, there function should return immediately.
+ *
+ *		Note that the return value only reflects errors in the 
+ *		process of testing whether the operation is complete.
+ *
+ *		After the operation is complete, a call to 
+ *		H5FDaio_finish() must be made to determine whether 
+ *		the operation completed successfully and to allow the 
+ *		driver to tidy its data structures.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/17/10
+ *
+ * Changes:	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5FDaio_test(H5FD_t *file, 
+             hbool_t *done_ptr, 
+             void *ctlblk_ptr)
+{
+    herr_t		ret_value = SUCCEED;  /* Return value */
+    herr_t		result;
+
+    FUNC_ENTER_API(H5FDaio_test, FAIL)
+    H5TRACE3("e", "*x*b*x", file, done_ptr, ctlblk_ptr);
+
+    /* Check args */
+    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    }
+
+    if ( done_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL done pointer")
+    }
+
+    if ( ctlblk_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL control block pointer")
+    }
+
+    result = H5FD_aio_test(file, done_ptr, ctlblk_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_VFL, H5E_AIOTESTFAIL, FAIL, "aio test request failed")
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5FDaio_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDaio_wait
+ *
+ * Purpose:	Wait until the asynchronous read, write, or fsync operation 
+ *		indicated by *ctlblk_ptr has completed (successfully or 
+ *		otherwise).
+ *
+ *		Note that the error code returned refers only to the 
+ *		operation of waiting until read/write/fsync is
+ *		complete -- Success does not imply that the read, write,
+ *		or fsync operation completed successfully, only that
+ *		no error was encountered while waiting for the operation 
+ *		to finish.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/17/10
+ *
+ * Changes:	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5FDaio_wait(H5FD_t *file,
+             void *ctlblk_ptr)
+{
+    herr_t    		ret_value = SUCCEED;       /* Return value */
+    herr_t		result;
+
+    FUNC_ENTER_API(H5FDaio_wait, FAIL)
+    H5TRACE2("e", "*x*x", file, ctlblk_ptr);
+
+    /* Check args */
+    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    }
+
+    if ( ctlblk_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL control block pointer")
+    }
+
+    result = H5FD_aio_wait(file, ctlblk_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_VFL, H5E_AIOWAITFAIL, FAIL, "aio wait request failed")
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5FDaio_wait() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDaio_finish
+ *
+ * Purpose:	Determine whether the read, write, or fsync operation 
+ *		indicated by *ctlblk_ptr completed successfully.  If it 
+ *		did, set *errno_ptr to 0.  If if didn't, set *errno_ptr 
+ *		to the appropriate error code.
+ *
+ *		Return SUCCEED if successful, and the appropriate error 
+ *		code if not.
+ *
+ *		Note that the returned error code only refers to the 
+ *		success or failure of the finish operation.  The caller 
+ *		must examine *errno_ptr to determine if the underlying 
+ *		asynchronous operation succeeded.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/17/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5FDaio_finish(H5FD_t *file,
+               int *errno_ptr, 
+               void *ctlblk_ptr)
+{
+    herr_t              ret_value = SUCCEED;       /* Return value */
+    herr_t		result;
+
+    FUNC_ENTER_API(H5FDaio_finish, FAIL)
+    H5TRACE3("e", "*x*Is*x", file, errno_ptr, ctlblk_ptr);
+
+    /* Check args */
+    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    }
+
+    if ( errno_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL errno pointer")
+    }
+
+    if ( ctlblk_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL control block pointer")
+    }
+
+    result = H5FD_aio_finish(file, errno_ptr, ctlblk_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_VFL, H5E_AIOFINISHFAIL, FAIL, \
+		    "aio finish request failed")
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5FDaio_finish() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDaio_fsync
+ *
+ * Purpose:	Queue a sync of all asynchronous writes outstanding as of 
+ *		the time this function is called.  Return SUCCEED if no 
+ *		errors are encountered, but note that a good error return 
+ *		from H5FD_aio_fsync() does not imply a successful 
+ *		operation, only that no immediate errors were detected.
+ *
+ *		The sync is not known to be successful until reported 
+ *		complete by either H5FDaio_test or H5FDaio_wait, 
+ *		and reported successful by H5FDaio_finish.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/17/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5FDaio_fsync(H5FD_t *file, 
+              void **ctlblk_ptr_ptr)
+{
+    herr_t     		ret_value = SUCCEED;       /* Return value */
+    herr_t		result;
+
+    FUNC_ENTER_API(H5FDaio_fsync, FAIL)
+    H5TRACE2("e", "*x**x", file, ctlblk_ptr_ptr);
+
+    /* Check args */
+    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    }
+
+    if ( ( ctlblk_ptr_ptr == NULL ) ||
+         ( * ctlblk_ptr_ptr != NULL ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "NULL ctlblk_ptr_ptr or *ctlblk_ptr_ptr != NULL")
+    }
+
+    result = H5FD_aio_fsync(file, ctlblk_ptr_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_VFL, H5E_AIOSYNCFAIL, FAIL, \
+                    "aio fsync request failed")
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5FDaio_fsync() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDaio_cancel
+ *
+ * Purpose:	Attempt to cancel the asynchronous operation associated 
+ *		with the control block pointed to by ctlblk_ptr.  
+ *
+ *		Note that this operation may have completed, but it is 
+ *		an error if H5FDaio_finish() has been called on it.
+ *
+ *		As part of the cancel, free the associated control blocks.
+ *
+ *		Return SUCCEED if successful, and the appropriate error 
+ *		code otherwise.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/17/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5FDaio_cancel(H5FD_t *file,
+               void *ctlblk_ptr)
+{
+    herr_t   		ret_value = SUCCEED;       /* Return value */
+    herr_t		result;
+
+    FUNC_ENTER_API(H5FDaio_cancel, FAIL)
+    H5TRACE2("e", "*x*x", file, ctlblk_ptr);
+
+    /* Check args */
+    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    }
+
+    if ( ctlblk_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "ctlblk_ptr NULL on entry")
+    }
+
+    result = H5FDaio_cancel(file, ctlblk_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_VFL, H5E_AIOCANCELFAIL, FAIL, \
+                    "aio cancel request failed")
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5FDaio_cancel() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDfsync
+ *
+ * Purpose:	fsync the target file.  The file should be synced to disk
+ *		upon return.
+ *
+ * Return:	Success:	Non-negative.
+ *
+ *		Failure:	Negative.
+ *
+ * Programmer:	John Mainzer
+ *              7/7/10
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDfsync(H5FD_t *file, 
+          hid_t dxpl_id)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(H5FDfsync, FAIL)
+    H5TRACE2("e", "*xi", file, dxpl_id);
+
+    /* Check args */
+    if ( ( file == NULL ) || ( file->cls == NULL ) ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    }
+
+    /* Get the default dataset transfer property list if the user didn't 
+     * provide one 
+     */
+    if ( H5P_DEFAULT == dxpl_id ) {
+
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+
+    } else {
+
+        if ( TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER) ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
+                         "not a data transfer property list")
+        }
+    }
+
+    /* Do the real work */
+    if ( H5FD_fsync(file, dxpl_id) < 0 ) {
+
+	HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, "file sync request failed")
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5FDfsync() */
+

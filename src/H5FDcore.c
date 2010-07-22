@@ -127,6 +127,7 @@ static herr_t H5FD_core_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, had
 			      size_t size, const void *buf);
 static herr_t H5FD_core_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_core_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD_core_fsync(H5FD_t *file, hid_t dxpl_id);
 
 static const H5FD_class_t H5FD_core_g = {
     "core",					/*name			*/
@@ -159,6 +160,14 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD_core_truncate,				/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+    NULL,                                       /*aio_read              */
+    NULL,                                       /*aio_write             */
+    NULL,                                       /*aio_test              */
+    NULL,                                       /*aio_wait              */
+    NULL,                                       /*aio_finish            */
+    NULL,                                       /*aio_fsync             */
+    NULL,                                       /*aio_cancel            */
+    H5FD_core_fsync,                            /*fsync                 */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
 
@@ -1123,4 +1132,56 @@ if(file->eof < new_eof)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_truncate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_core_fsync
+ *
+ * Purpose:	Fsync the backing store file if there is one. 
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	John Mainzer
+ *              7/12/10
+ *
+ * Modifications:
+ *              None
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5FD_core_fsync(H5FD_t *file, 
+                hid_t UNUSED dxpl_id)
+{
+    H5FD_core_t	* core_file = (H5FD_core_t*)file;
+    herr_t        ret_value=SUCCEED;       /* Return value */
+    int           result;
+
+    FUNC_ENTER_NOAPI(H5FD_core_flush, FAIL)
+
+    HDassert( file != NULL );
+
+    core_file = (H5FD_core_t *)file;
+
+    /* sync the backing store file -- if it exists  */
+    if ( ( core_file->fd >= 0 ) && 
+         ( core_file->backing_store ) ) {
+
+        result = HDfsync(core_file->fd);
+
+        if ( result != 0 ) {
+
+            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, \
+                        "core file fsync request failed")
+        }
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_core_fsync() */
 

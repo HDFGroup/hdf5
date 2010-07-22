@@ -139,6 +139,14 @@ MINOR, FILE, H5E_WRITEERROR, Write failed
 MINOR, FILE, H5E_CLOSEERROR, Close failed
 MINOR, FILE, H5E_OVERFLOW, Address overflowed
 MINOR, FILE, H5E_FCNTL, File control (fcntl) failed
+MINOR, FILE, H5E_SYNCFAIL, File sync failed
+MINOR, FILE, H5E_AIOREADERROR, File sync failed
+MINOR, FILE, H5E_AIOWRITEERROR, File sync failed
+MINOR, FILE, H5E_AIOSYNCFAIL, File sync failed
+MINOR, FILE, H5E_AIOCANCELFAIL, AIO File op cancel failed
+MINOR, FILE, H5E_AIOTESTFAIL, AIO File op test failed
+MINOR, FILE, H5E_AIOWAITFAIL, AIO File op wait failed
+MINOR, FILE, H5E_AIOFINISHFAIL, AIO File op finish failed
 
 # Function entry/exit interface errors
 MINOR, FUNC, H5E_CANTINIT, Unable to initialize object

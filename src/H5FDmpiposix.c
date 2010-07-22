@@ -194,6 +194,7 @@ static herr_t H5FD_mpiposix_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closi
 static int H5FD_mpiposix_mpi_rank(const H5FD_t *_file);
 static int H5FD_mpiposix_mpi_size(const H5FD_t *_file);
 static MPI_Comm H5FD_mpiposix_communicator(const H5FD_t *_file);
+static herr_t H5FD_mpiposix_fsync(H5FD_t *file, hid_t UNUSED dxpl);
 
 /* MPIPOSIX-specific file access properties */
 typedef struct H5FD_mpiposix_fapl_t {
@@ -234,6 +235,14 @@ static const H5FD_class_mpi_t H5FD_mpiposix_g = {
     H5FD_mpiposix_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+    NULL,                                       /*aio_read              */
+    NULL,                                       /*aio_write             */
+    NULL,                                       /*aio_test              */
+    NULL,                                       /*aio_wait              */
+    NULL,                                       /*aio_finish            */
+    NULL,                                       /*aio_fsync             */
+    NULL,                                       /*aio_cancel            */
+    H5FD_mpiposix_fsync,			/*fsync			*/
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
     },  /* End of superclass information */
     H5FD_mpiposix_mpi_rank,                     /*get_rank              */
@@ -1542,6 +1551,61 @@ H5FD_mpiposix_communicator(const H5FD_t *_file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpi_posix_communicator() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_mpiposix_fsync
+ *
+ * Purpose:     Sync the file to disk.
+ *
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              7/14/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+H5FD_mpiposix_fsync(H5FD_t *file,
+                    hid_t UNUSED dxpl)
+{
+    herr_t            ret_value = SUCCEED;       /* Return value */
+    int               result;
+    H5FD_mpiposix_t * mpiposix_file = NULL;
+
+    FUNC_ENTER_NOAPI(H5FD_mpiposix_fsync, FAIL)
+
+    if ( file == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
+    }
+
+    /* Question: Do we really want every process doing the fsync()?
+     *           Or would it be better to have just one?  This is a
+     *		 moot issue right now, as the fsync call is only used
+     *		 for journaling, and we don't support journaling in
+     *		 parallel right now.  However we will have to address
+     *		 it eventually.
+     */
+
+    mpiposix_file = (H5FD_mpiposix_t *)file;
+
+    result = HDfsync(mpiposix_file->fd);
+
+    if ( result != 0 ) {
+
+        HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, "fsync request failed")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_mpiposix_fsync() */
+
 
 #endif /*H5_HAVE_PARALLEL*/
 

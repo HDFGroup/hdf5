@@ -221,6 +221,46 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "File control (fcntl) failed"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_FCNTL_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_SYNCFAIL_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "File sync failed"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_SYNCFAIL_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_AIOREADERROR_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "File sync failed"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_AIOREADERROR_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_AIOWRITEERROR_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "File sync failed"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_AIOWRITEERROR_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_AIOSYNCFAIL_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "File sync failed"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_AIOSYNCFAIL_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_AIOCANCELFAIL_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "AIO File op cancel failed"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_AIOCANCELFAIL_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_AIOTESTFAIL_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "AIO File op test failed"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_AIOTESTFAIL_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_AIOWAITFAIL_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "AIO File op wait failed"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_AIOWAITFAIL_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_AIOFINISHFAIL_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "AIO File op finish failed"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_AIOFINISHFAIL_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Resource errors */
 assert(H5E_NOSPACE_g==(-1));

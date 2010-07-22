@@ -56,7 +56,8 @@ if test "X-" = "X-$cc_flags_set"; then
        && PROD_CFLAGS="`echo $PROD_CFLAGS | sed -e 's/-O//'`"
 fi
 
-LIBS="$LIBS"
+# Add real time lib for AIO
+LIBS="$LIBS -lrt"
 
 # The default Fortran 90 compiler
 

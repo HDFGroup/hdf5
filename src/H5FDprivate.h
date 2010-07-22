@@ -79,5 +79,18 @@ H5_DLL herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle);
 H5_DLL herr_t H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
 H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 
+H5_DLL herr_t H5FD_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl,
+                            haddr_t addr, size_t size, void *buffer,
+                            void **ctlblk_ptr_ptr);
+H5_DLL herr_t H5FD_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl,
+                             haddr_t addr, size_t size, void *buffer,
+                             void **ctlblk_ptr_ptr);
+H5_DLL herr_t H5FD_aio_test(H5FD_t *file, hbool_t *done_ptr, void *ctlblk_ptr);
+H5_DLL herr_t H5FD_aio_wait(H5FD_t *file, void *ctlblk_ptr);
+H5_DLL herr_t H5FD_aio_finish(H5FD_t *file, int *errno_ptr, void *ctlblk_ptr);
+H5_DLL herr_t H5FD_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr);
+H5_DLL herr_t H5FD_aio_cancel(H5FD_t *file, void *ctlblk_ptr);
+H5_DLL herr_t H5FD_fsync(H5FD_t *file, hid_t dxpl);
+
 #endif /* !_H5FDprivate_H */
 

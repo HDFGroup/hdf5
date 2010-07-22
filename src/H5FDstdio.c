@@ -169,6 +169,7 @@ static herr_t H5FD_stdio_write(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr
                 size_t size, const void *buf);
 static herr_t H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_stdio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD_stdio_fsync(H5FD_t *file, hid_t dxpl_id);
 
 static const H5FD_class_t H5FD_stdio_g = {
     "stdio",				        /*name			*/
@@ -201,6 +202,14 @@ static const H5FD_class_t H5FD_stdio_g = {
     H5FD_stdio_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+    NULL,                                       /*aio_read              */
+    NULL,                                       /*aio_write             */
+    NULL,                                       /*aio_test              */
+    NULL,                                       /*aio_wait              */
+    NULL,                                       /*aio_finish            */
+    NULL,                                       /*aio_fsync             */
+    NULL,                                       /*aio_cancel            */
+    H5FD_stdio_fsync,				/*fsync			*/
     H5FD_FLMAP_SINGLE 		                /*fl_map		*/
 };
 
@@ -943,6 +952,16 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
  *
  * Purpose:	Makes sure that all data is on disk.
  *
+ *		Note: actually, this routine only ensures that all
+ *		      application buffers have been flushed -- the 
+ *		      data may still be in the operating systems
+ *		      buffers on return.
+ *
+ *		      To ensure that the data is actually on disk
+ *		      call H5FD_stdio_fsync() after the flush.
+ *
+ *					JRM -- 7/14/10
+ *
  * Errors:
  *		IO	  SEEKERROR     fseek failed.
  *		IO	  WRITEERROR    fflush or fwrite failed.
@@ -1057,6 +1076,60 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 
     return(0);
 } /* end H5FD_stdio_truncate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_stdio_fsync
+ *
+ * Purpose:	Sync out the file.  If we restricted ourselves to stdio,
+ *		we really couldn't do this, as fflush only writes all 
+ *		buffers in the application -- it doesn't sync.
+ *
+ *		For now, get around this by looking the the file's file
+ *		descriptor, and calling HDfsync().
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer
+ *		7/8/10
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_stdio_fsync(H5FD_t *file, 
+                 hid_t dxpl_id)
+{
+    static const char * func = "H5FD_stdio_fsync";  
+    herr_t              result;
+    int			filenum;
+    H5FD_stdio_t      * stdio_file = (H5FD_stdio_t*)file;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    dxpl_id = dxpl_id; /* to shut up the compiler */
+
+    stdio_file = (H5FD_stdio_t *)file;
+
+    filenum = fileno(stdio_file->fp);
+
+    if ( filenum == -1 ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_SYNCFAIL, \
+                    "fileno() request on log file failed", -1)
+    }
+
+    result = fsync(filenum);
+
+    if ( result != 0 ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_SYNCFAIL, \
+                    "log file fsync request failed", -1)
+    }
+
+    return(0);
+
+} /* end H5FD_stdio_fsync() */
 
 
 #ifdef _H5private_H

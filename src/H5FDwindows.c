@@ -144,6 +144,7 @@ static herr_t H5FD_windows_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, 
 			      size_t size, const void *buf);
 static herr_t H5FD_windows_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_windows_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD_windows_fsync(H5FD_t *file, hid_t UNUSED dxpl_id);
 
 static const H5FD_class_t H5FD_windows_g = {
     "windows",					/*name			*/
@@ -176,6 +177,14 @@ static const H5FD_class_t H5FD_windows_g = {
     H5FD_windows_truncate,			/*truncate		*/
     NULL,					/*lock          */
     NULL,					/*unlock        */
+    NULL,                                       /*aio_read              */
+    NULL,                                       /*aio_write             */
+    NULL,                                       /*aio_test              */
+    NULL,                                       /*aio_wait              */
+    NULL,                                       /*aio_finish            */
+    NULL,                                       /*aio_fsync             */
+    NULL,                                       /*aio_cancel            */
+    H5FD_windows_fsync,				/*fsync			*/
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
 
@@ -1078,6 +1087,69 @@ H5FD_windows_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closin
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_windows_truncate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_windows_fsync
+ *
+ * Purpose:	Sync out the file.  
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              7/14/10
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5FD_windows_fsync(H5FD_t *file, 
+                   hid_t UNUSED dxpl_id)
+{
+    H5FD_windows_t * windows_file = (H5FD_windows_t*)file;
+    herr_t           ret_value = SUCCEED;       /* Return value */
+    int              result;
+    int              filenum;
+
+    FUNC_ENTER_NOAPI(H5FD_windows_flush, FAIL)
+
+    HDassert( windows_file != NULL );
+
+    /* no point in syncing the file unless we have write access */
+    if ( file->write_access ) {
+
+#ifndef WINDOWS_USE_STDIO
+        filenum = windows_file->fd;
+
+        if ( filenum == -1 ) {
+
+            HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
+                        "invalid windows_file->fd?!?!")
+        }
+#else /* WINDOWS_USE_STDIO */
+        filenum = fileno(windows_file->fp);
+
+        if ( filenum == -1 ) {
+
+            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, "fileno() failed")
+        }
+#endif /* WINDOWS_USE_STDIO */
+
+        result = fsync(filenum);
+
+        if ( result != 0 ) {
+
+            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, \
+                        "file fsync request failed")
+        }
+    } /* end if */
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_windows_fsync() */
 
 #endif /* H5_HAVE_WINDOWS */
 

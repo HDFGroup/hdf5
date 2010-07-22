@@ -73,6 +73,51 @@
 
 #define END_MEMBERS	}}
 
+/* Type definitions of the structures used to store the aio control i
+ * block(s) returned by any underlying file driver(s) that support AIO, 
+ * along with the information needed to route the control block to the 
+ * appropriate driver when it is passed down to the multi driver.
+ *
+ * The magic field must always be set to H5FD_MULTI_AIO_CTLBLK_T__MAGIC.
+ *
+ * While AIO reads and writes will only involve a single underlying 
+ * file driver, an aio fsync request can (if all underlying drivers 
+ * support AIO) involve all drivers associated with this instance of 
+ * the multi file driver.
+ *
+ * To support this, for each underlying file driver we must maintain 
+ * a pointer to the associated instance of H5FD_t, a pointer to the 
+ * AIO control block, and booleans to store the done and finished status
+ * of each operation.  Store this data in an instance of 
+ * H5FD_multi_aio_subctlblk_t.
+ *
+ * Since the number possible underlying file drivers is strictly limited,
+ * we use an array of struct H5FD_multi_aio_subctlblk_t, and store the 
+ * number of active entries in this array in num_subctlblks.
+ *
+ * The driver, ctlblk, done, and finished fields of each entry 
+ * in the array are set to NULL, NULL, FALSE, and FALSE respectively,
+ * and retain those values when not in use.
+ */
+
+#define H5FD_MULTI_AIO_CTLBLK_T__MAGIC	0x4D414344	/* 'MACB' */
+
+typedef struct H5FD_multi_aio_subctlblk_t {
+
+    H5FD_t * driver;
+    void   * ctlblk;
+    hbool_t  done;
+    hbool_t  finished;
+} H5FD_multi_aio_subctlblk_t;
+
+typedef struct H5FD_multi_aio_ctlblk_t {
+
+    uint32_t                   magic;
+    int                        num_subctlblks;
+    H5FD_multi_aio_subctlblk_t sub_ctlblks[H5FD_MEM_NTYPES];
+
+} H5FD_multi_aio_ctlblk_t;
+
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_MULTI_g = 0;
@@ -144,6 +189,20 @@ static herr_t H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, ha
 			       size_t size, const void *_buf);
 static herr_t H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD_multi_aio_alloc_ctlblk(H5FD_multi_aio_ctlblk_t **ctlblk_ptr_ptr);
+static herr_t H5FD_multi_aio_discard_ctlblk(H5FD_multi_aio_ctlblk_t *ctlblk_ptr);
+static herr_t H5FD_multi_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+                                  haddr_t addr, size_t size, void *buffer,
+                                  void **ctlblk_ptr_ptr);
+static herr_t H5FD_multi_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+                                   haddr_t addr, size_t size, void *buffer,
+                                   void **ctlblk_ptr_ptr);
+static herr_t H5FD_multi_aio_test(hbool_t *done_ptr, void *ctlblk_ptr);
+static herr_t H5FD_multi_aio_wait(void *ctlblk_ptr);
+static herr_t H5FD_multi_aio_finish(int *errno_ptr, void *ctlblk_ptr);
+static herr_t H5FD_multi_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr);
+static herr_t H5FD_multi_aio_cancel(void *ctlblk_ptr);
+static herr_t H5FD_multi_fsync(H5FD_t *file, hid_t dxpl_id);
 
 /* The class struct */
 static const H5FD_class_t H5FD_multi_g = {
@@ -177,6 +236,14 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+    H5FD_multi_aio_read,                        /*aio_read              */
+    H5FD_multi_aio_write,                       /*aio_write             */
+    H5FD_multi_aio_test,                        /*aio_test              */
+    H5FD_multi_aio_wait,                        /*aio_wait              */
+    H5FD_multi_aio_finish,                      /*aio_finish            */
+    H5FD_multi_aio_fsync,                       /*aio_fsync             */
+    H5FD_multi_aio_cancel,                      /*aio_cancel            */
+    H5FD_multi_fsync,				/*fsync			*/
     H5FD_FLMAP_DEFAULT 				/*fl_map		*/
 };
 
@@ -2111,6 +2178,1196 @@ open_members(H5FD_multi_t *file)
 
     return 0;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_multi_aio_alloc_ctlblk
+ *
+ * Purpose:     Allocate a control block for use in an asynchronous
+ *              read, write, or fsync.
+ *
+ *              If successful, return a pointer to the newly allocated
+ *              and initialized control block in *ctlblk_ptr_ptr.
+ *
+ * Return:      Success:        zero
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              6/20/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+H5FD_multi_aio_alloc_ctlblk(H5FD_multi_aio_ctlblk_t **ctlblk_ptr_ptr)
+{
+    static const char       * func = "H5FD_multi_aio_alloc_ctlblk"; 
+    int			      i;
+    H5FD_multi_aio_ctlblk_t * ctlblk_ptr = NULL;
+
+    if ( ( ctlblk_ptr_ptr == NULL ) ||
+         ( *ctlblk_ptr_ptr != NULL ) ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADVALUE, \
+                    "bad ctlblk_ptr_ptr on entry", -1)
+    }
+
+    ctlblk_ptr = (H5FD_multi_aio_ctlblk_t *)
+                 malloc(sizeof(H5FD_multi_aio_ctlblk_t));
+
+    if ( ctlblk_ptr == NULL ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, \
+                    "memory allocation failed", -1)
+    }
+
+    ctlblk_ptr->magic          = H5FD_MULTI_AIO_CTLBLK_T__MAGIC;
+    ctlblk_ptr->num_subctlblks = 0;
+
+    for ( i = 0; i < H5FD_MEM_NTYPES; i++ ) 
+    {
+        (ctlblk_ptr->sub_ctlblks[i]).driver   = NULL;
+        (ctlblk_ptr->sub_ctlblks[i]).ctlblk   = NULL;
+        (ctlblk_ptr->sub_ctlblks[i]).done     = FALSE;
+        (ctlblk_ptr->sub_ctlblks[i]).finished = FALSE;
+    }
+
+    return(0);
+
+} /* H5FD_multi_aio_alloc_ctlblk() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Purpose:     Free the control block pointed to by ctlblk_ptr, marking
+ *              it as invalid in passing.
+ *
+ * Return:      Success:        zero
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              6/20/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+H5FD_multi_aio_discard_ctlblk(H5FD_multi_aio_ctlblk_t *ctlblk_ptr)
+{
+    static const char * func = "H5FD_multi_aio_discard_ctlblk"; 
+    int                 i;
+
+    if ( ctlblk_ptr == NULL ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADVALUE, \
+                    "ctlblk_ptr NULL on entry", -1)
+    }
+
+    if ( ctlblk_ptr->magic != H5FD_MULTI_AIO_CTLBLK_T__MAGIC ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADVALUE, \
+                    "bad ctlblk magic", -1)
+    }
+
+    ctlblk_ptr->magic          = 0;
+    ctlblk_ptr->num_subctlblks = 0;
+
+    for ( i = 0; i < H5FD_MEM_NTYPES; i++ ) 
+    {
+        (ctlblk_ptr->sub_ctlblks[i]).driver   = NULL;
+        (ctlblk_ptr->sub_ctlblks[i]).ctlblk   = NULL;
+        (ctlblk_ptr->sub_ctlblks[i]).done     = FALSE;
+        (ctlblk_ptr->sub_ctlblks[i]).finished = FALSE;
+    }
+
+    free((void *)ctlblk_ptr);
+
+    return(0);
+
+} /* H5FD_multi_aio_discard_ctlblk */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_multi_aio_read
+ *
+ * Purpose:     Initiate an asynchronous read from the indicated file of
+ *              the specified number of bytes starting at the specified
+ *              offset and loading the data  into the provided buffer.
+ *
+ *              The buffer must be large enough to contain the requested
+ *              data, and is undefined and must not be read or modified
+ *              until the read completes successfully.  Completion is
+ *              determined via either a call to H5FD_multi_aio_test() or a
+ *              call to H5FD_multi_aio_wait(), and success via a call to
+ *              H5FD_multi_aio_finish().
+ *
+ *              If successful, the H5FD_multi_aio_read routine will return 
+ *		a pointer to an internal control block in *ctlblk_ptr_ptr.  
+ *		This pointer must be used in all subsequent 
+ *		H5FD_multi_aio_test() / H5FD_multi_aio_wait() / 
+ *		H5FD_multiaio_finish() calls referring to this request.
+ *
+ *              Note that a successful return from this function does not
+ *              imply a successful read -- simply that no errors were
+ *              immediately evident.  
+ *
+ *		As the multi file driver does no direct file I/O itself,
+ *		it must pass the aio read call through to the appropriate 
+ *		file driver if that driver supports AIO, or translate 
+ *		the call into a synchronous read if it doesn't.  In either
+ *		case, it must construct its own AIO control block, and 
+ *		pass its address back to the caller if successful.
+ *
+ *		Note that all calls to the underlying files will be 
+ *		through the public H5FD interface, which will fake 
+ *		AIO if it is not supported.  Thus, this function 
+ *		presumes that AIO is supported.
+ *
+ *		Determine the correct underlying driver, and pass the 
+ *		call through to it.
+ *
+ *		If the call is successful, allocate an instance of 
+ *		H5FD_sec2_multi_discard_ctlblk, load the address of 
+ *		the target driver's instance of H5FD_t into it along with 
+ *		address	of the control block returned by the driver, and 
+ *		return the address of new instance of 
+ *		H5FD_sec2_multi_discard_ctlblk to the caller.
+ *
+ *		If the call is not successful, simply fail.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ * Changes:	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_multi_aio_read(H5FD_t *file, 
+                    H5FD_mem_t type, 
+                    hid_t dxpl_id,
+                    haddr_t addr, 
+                    size_t size, 
+                    void *buffer,
+                    void **ctlblk_ptr_ptr)
+{
+    static const char       * func = "H5FD_multi_aio_read"; 
+    herr_t		      result;
+    H5FD_multi_dxpl_t       * dx = NULL;
+    H5FD_mem_t                mt;
+    H5FD_mem_t                mmt;
+    H5FD_mem_t                hi = H5FD_MEM_DEFAULT;
+    haddr_t                   start_addr = 0;
+    H5FD_multi_t            * multi_file;
+    H5FD_t                  * tgt_file;
+    void                    * subctlblk_ptr = NULL;
+    H5FD_multi_aio_ctlblk_t * ctlblk_ptr;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    if ( ( file == NULL ) ||
+         ( file->cls == NULL ) ||
+         ( addr == HADDR_UNDEF ) ||
+         ( size <= 0 ) ||
+         ( buffer == NULL ) ||
+         ( ctlblk_ptr_ptr == NULL ) ||
+         ( *ctlblk_ptr_ptr != NULL ) ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "bad arg(s) on entry.", -1)
+    }
+
+    multi_file = (H5FD_multi_t *)file;
+
+    /* Get the data transfer properties */
+    if ( ( H5P_FILE_ACCESS_DEFAULT != dxpl_id ) && 
+         ( H5FD_MULTI == H5Pget_driver(dxpl_id) ) ) {
+
+        dx = (H5FD_multi_dxpl_t *)H5Pget_driver_info(dxpl_id);
+    }
+
+
+    /* find the file to which this address belongs */
+    for ( mt = H5FD_MEM_SUPER; 
+          mt < H5FD_MEM_NTYPES; 
+          mt = (H5FD_mem_t)(mt + 1) ) {
+
+        mmt = multi_file->fa.memb_map[mt];
+
+        if ( H5FD_MEM_DEFAULT == mmt ) {
+
+            mmt = mt;
+        }
+
+        assert ( ( mmt > 0 ) && ( mmt < H5FD_MEM_NTYPES ) );
+
+        if ( multi_file->fa.memb_addr[mmt] > addr ) {
+
+            continue;
+        }
+
+        if ( multi_file->fa.memb_addr[mmt] >= start_addr ) {
+
+            start_addr = multi_file->fa.memb_addr[mmt];
+            hi = mmt;
+        }
+    }
+
+    assert ( hi > 0 );
+
+    tgt_file = multi_file->memb[hi];
+
+    /* pass on the aio read */
+    result = H5FDaio_read(tgt_file, type, 
+                          (dx ? dx->memb_dxpl[hi] : H5P_DEFAULT),
+                          (addr - start_addr), size, buffer, &subctlblk_ptr);
+
+    if ( result < 0 ) { /* failure */
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOREADERROR, \
+                    "aio read request failed", -1)
+    }
+
+    assert( subctlblk_ptr != NULL );
+
+    /* allocate the control block */
+
+    result = H5FD_multi_aio_alloc_ctlblk(&ctlblk_ptr);
+
+    if ( result < 0 ) { /* failure */
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, \
+                    "can't allocate aio control block", -1)
+    }
+
+    assert( ctlblk_ptr != NULL );
+    assert( ctlblk_ptr->magic == H5FD_MULTI_AIO_CTLBLK_T__MAGIC );
+
+    ctlblk_ptr->num_subctlblks = 1;
+
+    (ctlblk_ptr->sub_ctlblks[0]).driver   = tgt_file;
+    (ctlblk_ptr->sub_ctlblks[0]).ctlblk   = subctlblk_ptr;
+    (ctlblk_ptr->sub_ctlblks[0]).done     = FALSE;
+    (ctlblk_ptr->sub_ctlblks[0]).finished = FALSE;
+
+    *ctlblk_ptr_ptr = ctlblk_ptr;
+
+    return(0);
+
+} /* end H5FD_multi_aio_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_multi_aio_write
+ *
+ * Purpose:     Initiate an asynchronous write to the indicated file of
+ *              the specified number of bytes from the supplied  buffer
+ *              to the indicated location.
+ *
+ *              The buffer must not be discarded or modified until the
+ *              write completes successfully.  Completion is determined
+ *              via either H5FD_multi_aio_test() or H5FD_multi_aio_wait(), 
+ *		and success via H5FD_multi_aio_finish().
+ *
+ *              If successful, the H5FD_aio_write routine will return a 
+ *		pointer to an internal control block in *ctlblk_ptr_ptr.  
+ *		This pointer must be used in all subsequent 
+ *		H5FD_multi_aio_test() / H5FD_multi_aio_wait() / 
+ *		H5FD_multi_aio_finish() calls referring to this request.
+ *
+ *              Note that a successful return from this function does not
+ *              imply a successful write -- simply that no errors were
+ *              immediately evident.
+ *
+ *		Note that all calls to the underlying files will be 
+ *		through the public H5FD interface, which will fake 
+ *		AIO if it is not supported.  Thus, this function 
+ *		presumes that AIO is supported.
+ *
+ *		Determine the correct underlying driver, and pass the 
+ *		call through to it.
+ *
+ *		If the call is successful, allocate an instance of 
+ *		H5FD_sec2_multi_discard_ctlblk, load the address of 
+ *		the target driver's instance of H5FD_t into it along with 
+ *		address	of the control block returned by the driver, and 
+ *		return the address of new instance of 
+ *		H5FD_sec2_multi_discard_ctlblk to the caller.
+ *
+ *		If the call is not successful, simply fail.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ * Changes: 	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_multi_aio_write(H5FD_t *file, 
+                     H5FD_mem_t type, 
+                     hid_t dxpl_id,
+                     haddr_t addr, 
+                     size_t size, 
+                     void *buffer,
+                     void **ctlblk_ptr_ptr)
+{
+    static const char       * func = "H5FD_multi_aio_write"; 
+    herr_t		      result;
+    H5FD_multi_dxpl_t       * dx = NULL;
+    H5FD_mem_t                mt;
+    H5FD_mem_t                mmt;
+    H5FD_mem_t                hi = H5FD_MEM_DEFAULT;
+    haddr_t                   start_addr = 0;
+    H5FD_multi_t            * multi_file;
+    H5FD_t                  * tgt_file;
+    void                    * subctlblk_ptr = NULL;
+    H5FD_multi_aio_ctlblk_t * ctlblk_ptr;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    if ( ( file == NULL ) ||
+         ( file->cls == NULL ) ||
+         ( addr == HADDR_UNDEF ) ||
+         ( size <= 0 ) ||
+         ( buffer == NULL ) ||
+         ( ctlblk_ptr_ptr == NULL ) ||
+         ( *ctlblk_ptr_ptr != NULL ) ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "bad arg(s) on entry.", -1)
+    }
+
+    multi_file = (H5FD_multi_t *)file;
+
+    /* Get the data transfer properties */
+    if ( ( H5P_FILE_ACCESS_DEFAULT != dxpl_id ) && 
+         ( H5FD_MULTI == H5Pget_driver(dxpl_id) ) ) {
+
+        dx = (H5FD_multi_dxpl_t *)H5Pget_driver_info(dxpl_id);
+    }
+
+    /* find the file to which this address belongs */
+    for ( mt = H5FD_MEM_SUPER; 
+          mt < H5FD_MEM_NTYPES; 
+          mt = (H5FD_mem_t)(mt + 1) ) {
+
+        mmt = multi_file->fa.memb_map[mt];
+
+        if ( H5FD_MEM_DEFAULT == mmt ) {
+
+            mmt = mt;
+        }
+
+        assert ( ( mmt > 0 ) && ( mmt < H5FD_MEM_NTYPES ) );
+
+        if ( multi_file->fa.memb_addr[mmt] > addr ) {
+
+            continue;
+        }
+
+        if ( multi_file->fa.memb_addr[mmt] >= start_addr ) {
+
+            start_addr = multi_file->fa.memb_addr[mmt];
+            hi = mmt;
+        }
+    }
+
+    assert ( hi > 0 );
+
+    tgt_file = multi_file->memb[hi];
+
+    /* pass on the aio write */
+    result = H5FDaio_write(tgt_file, type, 
+                           (dx ? dx->memb_dxpl[hi] : H5P_DEFAULT),
+                           (addr - start_addr), size, buffer, &subctlblk_ptr);
+
+    if ( result < 0 ) { /* failure */
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOWRITEERROR, \
+                    "aio write request failed", -1)
+    }
+
+    assert( subctlblk_ptr != NULL );
+
+    /* allocate the control block */
+    result = H5FD_multi_aio_alloc_ctlblk(&ctlblk_ptr);
+
+    if ( result < 0 ) { /* failure */
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, \
+                    "can't allocate aio control block", -1)
+    }
+
+    assert( ctlblk_ptr != NULL );
+    assert( ctlblk_ptr->magic == H5FD_MULTI_AIO_CTLBLK_T__MAGIC );
+
+    ctlblk_ptr->num_subctlblks = 1;
+
+    (ctlblk_ptr->sub_ctlblks[0]).driver   = tgt_file;
+    (ctlblk_ptr->sub_ctlblks[0]).ctlblk   = subctlblk_ptr;
+    (ctlblk_ptr->sub_ctlblks[0]).done     = FALSE;
+    (ctlblk_ptr->sub_ctlblks[0]).finished = FALSE;
+
+    *ctlblk_ptr_ptr = ctlblk_ptr;
+
+    return(0);
+
+} /* end H5FD_multi_aio_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_multi_aio_test
+ *
+ * Purpose:	This function is used to determine if the asynchronous
+ *		operation associated with the supplied control block 
+ *		pointer is done.  If it is, *done_ptr should be set
+ *		to TRUE, if it isn't, *done_ptr should be set to FALSE.
+ *		In all cases, there function should return immediately.
+ *
+ *		Note that the return value only reflects errors in the 
+ *		process of testing whether the operation is complete.
+ *
+ *		After the operation is done, a call to 
+ *		H5FD_multi_aio_finish() must be made to determine whether 
+ *		the operation completed successfully and to allow the 
+ *		driver to tidy its data structures.
+ *
+ *		Note that all calls to the underlying files will be 
+ *		through the public H5FD interface, which will fake 
+ *		AIO if it is not supported.  Thus, this function 
+ *		presumes that AIO is supported.
+ *
+ *		However, it is possible that multiple underlying 
+ *		files may be involved (at present this can only happen
+ *		with an aio fsync call).
+ *
+ *		For each underlying file / driver first check the 
+ *		control block, and see if that driver is done with
+ *		the operation.  If it is, go on to the next file / 
+ *		driver pair.
+ *
+ *		If the file / driver pair is not marked as being 
+ *		done, call H5FDaio_test with the target driver.  If the
+ *		call fails, fail.
+ *
+ *		If the call indicates that the aio operation on the 
+ *		target file/driver pair is still in progress, set *done_ptr
+ *		to FALSE, and return.  Otherwise go onto the next 
+ *		file / driver pair and repeat.  If all underlying 
+ *		file / driver pairs report the operation complete,
+ *		set *done_ptr to TRUE and then return.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ * Changes:	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_multi_aio_test(hbool_t *done_ptr, 
+                    void *ctlblk_ptr)
+{
+    static const char         * func = "H5FD_multi_aio_test"; 
+    herr_t			result;
+    hbool_t			done = TRUE;
+    hbool_t			tgt_done;
+    hbool_t			already_done = TRUE;
+    int                         i = 0;
+    H5FD_multi_aio_ctlblk_t   * multi_ctlblk_ptr;
+    H5FD_t                    * tgt_file;
+    void                      * subctlblk_ptr;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    if ( ( done_ptr == NULL ) ||
+         ( ctlblk_ptr == NULL ) ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "bad arg(s) on entry.", -1)
+
+    } 
+
+    multi_ctlblk_ptr = (H5FD_multi_aio_ctlblk_t *)ctlblk_ptr;
+
+    if ( multi_ctlblk_ptr->magic != H5FD_MULTI_AIO_CTLBLK_T__MAGIC ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "bad ctlblk magic on entry.", -1)
+
+    } else if ( multi_ctlblk_ptr->num_subctlblks < 1 ) {
+
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "empty control block on entry.", -1)
+    }
+
+    while ( ( done ) && ( i < multi_ctlblk_ptr->num_subctlblks ) ) {
+
+        tgt_file      = (multi_ctlblk_ptr->sub_ctlblks[i]).driver;
+        subctlblk_ptr = (multi_ctlblk_ptr->sub_ctlblks[i]).ctlblk;
+
+        if ( ( tgt_file == NULL ) ||
+             ( subctlblk_ptr == NULL ) ) {
+
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                        "NULL tgt file or sub ctl blk.", -1)
+        }
+
+        if ( (multi_ctlblk_ptr->sub_ctlblks[i]).finished ) {
+
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                        "sub op already finished?!?!", -1)
+        }
+
+        if ( ! ((multi_ctlblk_ptr->sub_ctlblks[i]).done) ) {
+
+            already_done = FALSE;
+
+            tgt_done = FALSE;
+
+            result = H5FDaio_test(tgt_file, &tgt_done, subctlblk_ptr);
+
+            if ( result < 0 ) {
+
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOTESTFAIL, \
+                            "aio test sub-request failed", -1)
+            }
+
+            if ( tgt_done ) {
+
+                (multi_ctlblk_ptr->sub_ctlblks[i]).done = TRUE;
+                
+            } else {
+
+                done = FALSE;
+
+            }
+        }
+
+        i++;
+    }
+
+    if ( already_done ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "operation already done?!?!?", -1)
+    }
+
+    *done_ptr = done;
+
+    return(0);
+
+} /* end H5FD_multi_aio_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_aio_wait
+ *
+ * Purpose:	Wait until the asynchronous read, write, or fsync operation 
+ *		indicated by *ctlblk_ptr has completed (successfully or 
+ *		otherwise).
+ *
+ *		Note that the error code returned refers only to the 
+ *		operation of waiting until the read/write/fsync is
+ *		complete -- Success does not imply that the read, write,
+ *		or fsync operation completed successfully, only that
+ *		no error was encountered while waiting for the operation 
+ *		to finish.
+ *
+ *		Note that all calls to the underlying files will be 
+ *		through the public H5FD interface, which will fake 
+ *		AIO if it is not supported.  Thus, this function 
+ *		presumes that AIO is supported.
+ *
+ *		However, it is possible that multiple underlying 
+ *		files may be involved (at present this can only happen
+ *		with an aio fsync call).
+ *
+ *		For each underlying file / driver listed in the control
+ *		block, first check the control block particular to the 
+ *		file / driver pair, and then wait until the associated
+ *		operation is done -- if it is not done already.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ * Changes:	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_multi_aio_wait(void *ctlblk_ptr)
+{
+    static const char         * func = "H5FD_multi_aio_wait"; 
+    herr_t			result;
+    hbool_t			already_done = TRUE;
+    int                         i;
+    H5FD_multi_aio_ctlblk_t   * multi_ctlblk_ptr;
+    H5FD_t                    * tgt_file;
+    void                      * subctlblk_ptr;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    if ( ctlblk_ptr == NULL ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "bad arg(s) on entry.", -1)
+
+    } 
+
+    multi_ctlblk_ptr = (H5FD_multi_aio_ctlblk_t *)ctlblk_ptr;
+
+    if ( multi_ctlblk_ptr->magic != H5FD_MULTI_AIO_CTLBLK_T__MAGIC ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "bad ctlblk magic on entry.", -1)
+
+    } else if ( multi_ctlblk_ptr->num_subctlblks < 1 ) {
+
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "empty control block on entry.", -1)
+    }
+
+    i = 0;
+
+    while ( i < multi_ctlblk_ptr->num_subctlblks ) {
+
+        tgt_file      = (multi_ctlblk_ptr->sub_ctlblks[i]).driver;
+        subctlblk_ptr = (multi_ctlblk_ptr->sub_ctlblks[i]).ctlblk;
+
+        if ( ( tgt_file == NULL ) ||
+             ( subctlblk_ptr == NULL ) ) {
+
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                        "NULL tgt file or sub ctl blk.", -1)
+        }
+
+        if ( (multi_ctlblk_ptr->sub_ctlblks[i]).finished ) {
+
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                        "sub op already finished?!?!", -1)
+        }
+
+        if ( ! ((multi_ctlblk_ptr->sub_ctlblks[i]).done) ) {
+
+            already_done = FALSE;
+
+            result = H5FDaio_wait(tgt_file, subctlblk_ptr);
+
+            if ( result < 0 ) {
+
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOTESTFAIL, \
+                            "aio sub wait request failed", -1)
+            }
+
+            (multi_ctlblk_ptr->sub_ctlblks[i]).done = TRUE;
+        }
+
+        i++;
+    }
+
+    if ( already_done ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "operation already done?!?!?", -1)
+    }
+
+    return(0);
+
+} /* end H5FD_aio_wait() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_multi_aio_finish
+ *
+ * Purpose:	Determine whether the read, write, or fsync operation 
+ *		indicated by *ctlblk_ptr completed successfully.  If it 
+ *		did, set *errno_ptr to 0.  If if didn't, set *errno_ptr 
+ *		to the appropriate error code.
+ *
+ *		Return SUCCEED if successful, and the appropriate error 
+ *		code if not.
+ *
+ *		Note that the returned error code only refers to the 
+ *		success or failure of the finish operation.  The caller 
+ *		must examine *errno_ptr to determine if the underlying 
+ *		asynchronous operation succeeded.
+ *
+ *		Note that all calls to the underlying files will be 
+ *		through the public H5FD interface, which will fake 
+ *		AIO if it is not supported.  Thus, this function 
+ *		presumes that AIO is supported.
+ *
+ *		However, it is possible that multiple underlying 
+ *		files may be involved (at present this can only happen
+ *		with an aio fsync call).
+ *
+ *		For each underlying file / driver listed in the control
+ *		block, first check the control block particular to the 
+ *		file / driver pair and verify that it is listed as being
+ *		done but not finished.  Then call the associated aio 
+ *		finish function for each file -- set *errno_ptr to 0
+ *		if no errors are detected, and to the last non-zero
+ *		errno reported if any error is reported.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_multi_aio_finish(int *errno_ptr, 
+                      void *ctlblk_ptr)
+{
+    static const char         * func = "H5FD_multi_aio_finish"; 
+    herr_t			result;
+    int                         i;
+    int				error_num = 0;
+    int				sub_errno;
+    H5FD_multi_aio_ctlblk_t   * multi_ctlblk_ptr;
+    H5FD_t                    * tgt_file;
+    void                      * subctlblk_ptr;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    if ( ( errno_ptr == NULL ) ||
+         ( ctlblk_ptr == NULL ) ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "bad arg(s) on entry.", -1)
+
+    } 
+
+    multi_ctlblk_ptr = (H5FD_multi_aio_ctlblk_t *)ctlblk_ptr;
+
+    if ( multi_ctlblk_ptr->magic != H5FD_MULTI_AIO_CTLBLK_T__MAGIC ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "bad ctlblk magic on entry.", -1)
+
+    } else if ( multi_ctlblk_ptr->num_subctlblks < 1 ) {
+
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "empty control block on entry.", -1)
+    }
+
+    /* finish all the sub operations */
+
+    i = 0;
+    while ( i < multi_ctlblk_ptr->num_subctlblks ) {
+
+        tgt_file      = (multi_ctlblk_ptr->sub_ctlblks[i]).driver;
+        subctlblk_ptr = (multi_ctlblk_ptr->sub_ctlblks[i]).ctlblk;
+
+        if ( ( tgt_file == NULL ) ||
+             ( subctlblk_ptr == NULL ) ) {
+
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                        "NULL tgt file or sub ctl blk.", -1)
+        }
+
+        if ( ! ((multi_ctlblk_ptr->sub_ctlblks[i]).done) ) {
+
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                        "sub op not done?!?!", -1)
+        }
+
+        if ( (multi_ctlblk_ptr->sub_ctlblks[i]).finished ) {
+
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                        "sub op already finished?!?!", -1)
+        }
+
+        sub_errno = 0;
+
+        result = H5FDaio_finish(tgt_file, &sub_errno, subctlblk_ptr);
+
+        if ( result < 0 ) {
+
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOTESTFAIL, \
+                        "aio finish sub-request failed", -1)
+        }
+
+        if ( sub_errno != 0 ) {
+
+            error_num = sub_errno;
+        }
+
+        (multi_ctlblk_ptr->sub_ctlblks[i]).finished = TRUE;
+
+        i++;
+    }
+
+    /* discard the control block */
+
+    result = H5FD_multi_aio_discard_ctlblk(multi_ctlblk_ptr);
+
+    if ( result < 0 ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_CANTFREE, \
+                    "Attempt to discard control block failed", -1)
+    }
+
+    *errno_ptr = error_num;
+
+    return(0);
+
+} /* end H5FD_multi_aio_finish() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_multi_aio_fsync
+ *
+ * Purpose:	Queue a sync of all asynchronous writes outstanding as of 
+ *		the time this function is called.  Return zero if no 
+ *		errors are encountered, but note that a good error return 
+ *		from H5FD_multi_aio_fsync() does not imply a successful 
+ *		operation, only that no immediate errors were detected.
+ *
+ *		The sync is not known to be successful until reported 
+ *		complete by either H5FD_multi_aio_test or 
+ *		H5FD_multi_aio_wait, and reported successful by 
+ *		H5FD_multi_aio_finish.
+ *
+ *              Note that a successful return from this function does not
+ *              imply a successful write -- simply that no errors were
+ *              immediately evident.
+ *
+ *		Also note that all calls to the underlying files will be 
+ *		through the public H5FD interface, which will fake 
+ *		AIO if it is not supported.  Thus, this function 
+ *		presumes that AIO is supported.
+ *
+ *		To implement the aio_fsync, we must send an aio fsync
+ *		to each of the underlying files, construct a control
+ *		block containing pointers to all the sub control block
+ *		returned, and return the constructed control block 
+ *		to the users.
+ *
+ *		To do this, first construct a list of all the unique,
+ *		open, underlying files.
+ *
+ *		Then, pass the aio_fsync to each of them, making note
+ *		of the returned control block.
+ *
+ *		If all calls complete without error, allocate an aio
+ *		control block, load it with pointers to the drivers
+ *		and to the returned control blocks, and return the 
+ *		address of the control block in *ctlblk_ptr_ptr.
+ *
+ *		If any errors are detected, simply fail.
+ *		
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_multi_aio_fsync(H5FD_t *file, 
+                     void **ctlblk_ptr_ptr)
+{
+    static const char       * func = "H5FD_multi_aio_fsync"; 
+    herr_t	 	      result;
+    int                       i;
+    int			      num_unique_open_files = 0;
+    H5FD_multi_t            * multi_file;
+    H5FD_t                  * drivers[H5FD_MEM_NTYPES];
+    void                    * ctlblks[H5FD_MEM_NTYPES];
+    H5FD_multi_aio_ctlblk_t * ctlblk_ptr;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    if ( ( file == NULL ) ||
+         ( file->cls == NULL ) ||
+         ( ctlblk_ptr_ptr == NULL ) ||
+         ( *ctlblk_ptr_ptr != NULL ) ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "bad arg(s) on entry.", -1)
+
+    } 
+
+    multi_file = (H5FD_multi_t *)file;
+
+    /* construct a list of the unique open files */ 
+    UNIQUE_MEMBERS(multi_file->fa.memb_map, mt) { 
+
+        /* if there are any unopened unique files, skip them */
+        if ( multi_file->memb[mt] != NULL ) {
+
+            drivers[num_unique_open_files] = multi_file->memb[mt];
+            ctlblks[num_unique_open_files] = NULL;
+            num_unique_open_files++;
+
+        }
+    } END_MEMBERS;
+
+    /* pass the aio fsync on to each of the underlying files,
+     * making note of the returned aio control blocks.
+     */
+    i = 0;
+    while ( i < num_unique_open_files ) {
+
+        result = H5FDaio_fsync(drivers[i], &(ctlblks[i]));
+
+        if ( result < 0 ) {
+
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOSYNCFAIL, \
+                        "sub aio fsync request failed.", -1)
+        }
+    }
+
+    /* if all goes well, allocate the control block and initialize it */
+
+    result = H5FD_multi_aio_alloc_ctlblk(&ctlblk_ptr);
+
+    if ( result < 0 ) { /* failure */
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, \
+                    "can't allocate aio control block", -1)
+    }
+
+    assert( ctlblk_ptr != NULL );
+    assert( ctlblk_ptr->magic == H5FD_MULTI_AIO_CTLBLK_T__MAGIC );
+
+    ctlblk_ptr->num_subctlblks = num_unique_open_files;
+
+    for ( i = 0; i < num_unique_open_files; i++ ) {
+
+        (ctlblk_ptr->sub_ctlblks[i]).driver   = drivers[i];
+        (ctlblk_ptr->sub_ctlblks[i]).ctlblk   = ctlblks[i];
+        (ctlblk_ptr->sub_ctlblks[i]).done     = FALSE;
+        (ctlblk_ptr->sub_ctlblks[i]).finished = FALSE;
+    }
+
+    *ctlblk_ptr_ptr = (void *)ctlblk_ptr;
+
+    return(0);
+
+} /* end H5FD_multi_aio_fsync() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_aio_cancel
+ *
+ * Purpose:	Attempt to cancel the asynchronous operation associated 
+ *		with the control block pointed to by ctlblk_ptr.  
+ *
+ *		Note that this operation may have completed, but it is 
+ *		an error if H5FD_aio_finish() has been called on it.
+ *
+ *		As part of the cancel, free the associated control blocks.
+ *
+ *		Return SUCCEED if successful, and the appropriate error 
+ *		code otherwise.
+ *
+ *		Note that all calls to the underlying files will be 
+ *		through the public H5FD interface, which will fake 
+ *		AIO if it is not supported.  Thus, this function 
+ *		presumes that AIO is supported.
+ *
+ *		However, it is possible that multiple underlying 
+ *		files may be involved (at present this can only happen
+ *		with an aio fsync call).
+ *
+ *		For each underlying file / driver listed in the control
+ *		block, first check the control block particular to the 
+ *		file / driver pair and verify that it is not listed as 
+ *		being finished.  Then call the associated aio cancel 
+ *		function for each file.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_multi_aio_cancel(void *ctlblk_ptr)
+{
+    static const char         * func = "H5FD_multi_aio_cancel"; 
+    herr_t			result;
+    int                         i;
+    H5FD_multi_aio_ctlblk_t   * multi_ctlblk_ptr;
+    H5FD_t                    * tgt_file;
+    void                      * subctlblk_ptr;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    if ( ctlblk_ptr == NULL ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "bad arg(s) on entry.", -1)
+
+    } 
+
+    multi_ctlblk_ptr = (H5FD_multi_aio_ctlblk_t *)ctlblk_ptr;
+
+    if ( multi_ctlblk_ptr->magic != H5FD_MULTI_AIO_CTLBLK_T__MAGIC ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "bad ctlblk magic on entry.", -1)
+
+    } else if ( multi_ctlblk_ptr->num_subctlblks < 1 ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "empty control block on entry.", -1)
+    }
+
+    i = 0;
+
+    while ( i < multi_ctlblk_ptr->num_subctlblks ) {
+
+        tgt_file      = (multi_ctlblk_ptr->sub_ctlblks[i]).driver;
+        subctlblk_ptr = (multi_ctlblk_ptr->sub_ctlblks[i]).ctlblk;
+
+        if ( ( tgt_file == NULL ) ||
+             ( subctlblk_ptr == NULL ) ) {
+
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                        "NULL tgt file or sub ctl blk.", -1)
+        }
+
+        if ( (multi_ctlblk_ptr->sub_ctlblks[i]).finished ) {
+
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                        "sub op already finished?!?!", -1)
+        }
+
+        result = H5FDaio_cancel(tgt_file, subctlblk_ptr);
+
+        if ( result < 0 ) {
+
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOTESTFAIL, \
+                        "aio sub wait request failed", -1)
+        }
+
+	(multi_ctlblk_ptr->sub_ctlblks[i]).driver   = NULL;
+	(multi_ctlblk_ptr->sub_ctlblks[i]).ctlblk   = NULL;
+	(multi_ctlblk_ptr->sub_ctlblks[i]).done     = FALSE;
+	(multi_ctlblk_ptr->sub_ctlblks[i]).finished = FALSE;
+
+        i++;
+    }
+
+    /* discard the control block */
+
+    result = H5FD_multi_aio_discard_ctlblk(multi_ctlblk_ptr);
+
+    if ( result < 0 ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_CANTFREE, \
+                    "Attempt to discard control block failed", -1)
+    }
+
+    return(0);
+
+} /* end H5FD_multi_aio_cancel() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_multi_fsync
+ *
+ * Purpose:     Sync out all underlying files.
+ *
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              7/7/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+H5FD_multi_fsync(H5FD_t *file,
+                 hid_t dxpl_id)
+{
+    static const char        * func = "H5FD_multi_fsync"; 
+    herr_t                     result;
+    H5FD_multi_t             * multi_file_ptr;
+    H5FD_t                   * tgt_file;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    if ( file == NULL ) {
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, \
+                    "bad arg(s) on entry.", -1)
+
+    } 
+
+    multi_file_ptr = (H5FD_multi_t *)file;
+
+    UNIQUE_MEMBERS(multi_file_ptr->fa.memb_map, mt) { 
+
+        /* if there are any unopened unique files, skip them */
+        if ( multi_file_ptr->memb[mt] != NULL ) {
+
+            tgt_file = multi_file_ptr->memb[mt];
+
+            result = H5FDfsync(tgt_file, dxpl_id);
+
+            if ( result < 0 ) {
+
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_SYNCFAIL, \
+                            "sub fsync request failed", -1)
+            }
+        }
+    } END_MEMBERS;
+
+    return(0);
+
+} /* end H5FD_multi_fsync() */
 
 
 #ifdef _H5private_H

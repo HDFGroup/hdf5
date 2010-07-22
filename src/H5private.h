@@ -759,7 +759,9 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
         #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
     #endif /* H5_SIZEOF_OFF_T!=8 && ... */
 #endif /* !defined(HDfstat) || !defined(HDstat) */
-
+#ifndef HDfsync
+    #define HDfsync(F)		fsync(F)
+#endif /* HDfsync */
 #ifndef HDftell
     #define HDftell(F)		ftell(F)
 #endif /* HDftell */

@@ -252,6 +252,18 @@ typedef struct H5FD_class_t {
     herr_t  (*truncate)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t  (*lock)(H5FD_t *file, unsigned char *oid, unsigned lock_type, hbool_t last);
     herr_t  (*unlock)(H5FD_t *file, unsigned char *oid, hbool_t last);
+    herr_t  (*aio_read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, 
+                        haddr_t addr, size_t size, void *buffer, 
+                        void **ctlblk_ptr_ptr);
+    herr_t  (*aio_write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, 
+                         haddr_t addr, size_t size, void *buffer,
+                         void **ctlblk_ptr_ptr);
+    herr_t  (*aio_test)(hbool_t *done_ptr, void *ctlblk_ptr);
+    herr_t  (*aio_wait)(void *ctlblk_ptr);
+    herr_t  (*aio_finish)(int *errno_ptr, void *ctlblk_ptr);
+    herr_t  (*aio_fsync)(H5FD_t *file, void **ctlblk_ptr_ptr);
+    herr_t  (*aio_cancel)(void *ctlblk_ptr);
+    herr_t  (*fsync)(H5FD_t *file, hid_t dxpl_id);
     H5FD_mem_t fl_map[H5FD_MEM_NTYPES];
 } H5FD_class_t;
 
@@ -305,6 +317,18 @@ H5_DLL herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
 H5_DLL herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, unsigned closing);
 H5_DLL herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 
+H5_DLL herr_t H5FDaio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+                           haddr_t addr, size_t size, void *buffer,
+                           void **ctlblk_ptr_ptr);
+H5_DLL herr_t H5FDaio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+                            haddr_t addr, size_t size, void *buffer,
+                            void **ctlblk_ptr_ptr);
+H5_DLL herr_t H5FDaio_test(H5FD_t *file, hbool_t *done_ptr, void *ctlblk_ptr);
+H5_DLL herr_t H5FDaio_wait(H5FD_t *file, void *ctlblk_ptr);
+H5_DLL herr_t H5FDaio_finish(H5FD_t *file, int *errno_ptr, void *ctlblk_ptr);
+H5_DLL herr_t H5FDaio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr);
+H5_DLL herr_t H5FDaio_cancel(H5FD_t *file, void *ctlblk_ptr);
+H5_DLL herr_t H5FDfsync(H5FD_t *file, hid_t dxpl_id);
 #ifdef __cplusplus
 }
 #endif

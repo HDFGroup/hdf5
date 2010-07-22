@@ -43,6 +43,7 @@
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FDfamily.h"         /* Family file driver 			*/
+#include "H5FLprivate.h"        /* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -51,6 +52,75 @@
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
 #undef MIN
 #define MIN(X,Y)	((X)<(Y)?(X):(Y))
+
+
+
+/* Type definitions of the data structure used to store the aio control 
+ * block(s) returned by any underlying file driver(s) that support AIO, 
+ * along with the information needed to route the control block to the 
+ * appropriate driver when a family aio control block is passed down to 
+ * the family driver.
+ *
+ * The magic field of H5FD_family_aio_ctlblk_t must always be set to 
+ * H5FD_FAMILY_AIO_CTLBLK_T__MAGIC. That of H5FD_family_aio_subctlblk_t
+ * must be set to H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC.
+ *
+ * While AIO reads and writes will usually only involve a single 
+ * underlying file, they can, in pricipal, involve all files in the
+ * family file.  Further, in general, aio fsync operations will involve
+ * all open files in the family file.  Thus the aio control block returned 
+ * by the family file driver must be able to accomodate an arbitrarily
+ * large list of driver/aio control block pairs.  Do this by allocating
+ * an array of struct H5FD_family_aio_subctlblk_t and storing the base 
+ * address of the array in the instance of H5FD_family_aio_ctlblk_t whose
+ * address is passed back to the caller.  Initially set the size of the
+ * array to H5FD_FAMILY_AIO_SUBCTLBLK_INIT_ARRAY_SIZE, and double its
+ * size each time we run out of space. Store the number of array entries
+ * currently in use in num_subctlblks, and the current size of the 
+ * array in array_len.
+ *
+ * In each element of the array of H5FD_family_aio_subctlblk_t, we 
+ * maintain a a pointer to the associated instance of H5FD_t, a 
+ * pointer to the AIO control block, and booleans to store the done 
+ * and finished status of each sub operation.  
+ *
+ * The driver, ctlblk, done, and finished fields of each entry
+ * in the array are set to NULL, NULL, FALSE, and FALSE respectively,
+ * and retain those values when not in use.
+ */
+
+#define H5FD_FAMILY_AIO_CTLBLK_T__MAGIC		  0x00000000 /* 'FACB' */
+#define H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC	  0x00000000 /* 'FSCB' */
+#define H5FD_FAMILY_AIO_SUBCTLBLK_INIT_ARRAY_SIZE 1
+
+typedef struct H5FD_family_aio_subctlblk_t {
+
+    uint32_t   magic;
+    H5FD_t   * driver;
+    void     * ctlblk;
+    hbool_t    done;
+    hbool_t    finished;
+
+} H5FD_family_aio_subctlblk_t;
+
+typedef struct H5FD_family_aio_ctlblk_t {
+
+    uint32_t                      magic;
+    int			          array_len;
+    int                           num_subctlblks;
+    H5FD_family_aio_subctlblk_t * subctlblks;
+
+} H5FD_family_aio_ctlblk_t;
+
+/* declare a free list to manage top level aio control blocks */
+H5FL_DEFINE_STATIC(H5FD_family_aio_ctlblk_t);
+
+/* declare a free list to manage singleton aio sub control blocks.
+ * This is the common case -- when we ever need more than one we will
+ * just do a malloc.
+ */
+H5FL_DEFINE_STATIC(H5FD_family_aio_subctlblk_t);
+
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_FAMILY_g = 0;
@@ -113,6 +183,32 @@ static herr_t H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, h
 				size_t size, const void *_buf);
 static herr_t H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_family_aio_alloc_ctlblk(int init_array_len, 
+                                     H5FD_family_aio_ctlblk_t **ctlblk_ptr_ptr);
+static herr_t H5FD_family_aio_discard_ctlblk(
+                                     H5FD_family_aio_ctlblk_t *ctlblk_ptr);
+static herr_t H5FD_family_aio_extend_ctlblk(
+                                     H5FD_family_aio_ctlblk_t *ctlblk_ptr);
+static herr_t H5FD_family_aio_read(H5FD_t *file, 
+                                   H5FD_mem_t type, 
+                                   hid_t dxpl_id,
+                                   haddr_t addr, 
+                                   size_t size, 
+                                   void *buffer,
+                                   void **ctlblk_ptr_ptr);
+static herr_t H5FD_family_aio_write(H5FD_t *file, 
+                                    H5FD_mem_t type, 
+                                    hid_t dxpl_id,
+                                    haddr_t addr, 
+                                    size_t size, 
+                                    void *buffer,
+                                    void **ctlblk_ptr_ptr);
+static herr_t H5FD_family_aio_test(hbool_t *done_ptr, void *ctlblk_ptr);
+static herr_t H5FD_family_aio_wait(void *ctlblk_ptr);
+static herr_t H5FD_family_aio_finish(int *errno_ptr, void *ctlblk_ptr);
+static herr_t H5FD_family_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr);
+static herr_t H5FD_family_aio_cancel(void *ctlblk_ptr);
+static herr_t H5FD_family_fsync(H5FD_t *file, hid_t dxpl_id);
 
 /* The class struct */
 static const H5FD_class_t H5FD_family_g = {
@@ -146,6 +242,14 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+    H5FD_family_aio_read,                       /*aio_read              */
+    H5FD_family_aio_write,                      /*aio_write             */
+    H5FD_family_aio_test,                       /*aio_test              */
+    H5FD_family_aio_wait,                       /*aio_wait              */
+    H5FD_family_aio_finish,                     /*aio_finish            */
+    H5FD_family_aio_fsync,                      /*aio_fsync             */
+    H5FD_family_aio_cancel,                     /*aio_cancel            */
+    H5FD_family_fsync,				/*fsync			*/
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
 
@@ -1449,3 +1553,1643 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_family_truncate() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_family_aio_alloc_ctlblk
+ *
+ * Purpose:     Allocate a control block for use in an asynchronous
+ *              read, write, or fsync.  Allocate the array of sub aio 
+ *		control blocks with initial size init_array_len.
+ *
+ *              If successful, return a pointer to the newly allocated
+ *              and initialized control block in *ctlblk_ptr_ptr.
+ *
+ * Return:      Success:        SUCCEED
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              6/20/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+H5FD_family_aio_alloc_ctlblk(int init_array_len,
+                             H5FD_family_aio_ctlblk_t **ctlblk_ptr_ptr)
+{
+    herr_t                     ret_value = SUCCEED;       /* Return value */
+    int                        i;
+    H5FD_family_aio_ctlblk_t * ctlblk_ptr = NULL;
+
+    FUNC_ENTER_NOAPI(H5FD_family_aio_alloc_ctlblk, FAIL)
+
+    if ( ( ctlblk_ptr_ptr == NULL ) ||
+         ( *ctlblk_ptr_ptr != NULL ) ||
+         ( init_array_len <= 0 ) ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad param(s) on entry")
+    }
+
+    ctlblk_ptr = H5FL_CALLOC(H5FD_family_aio_ctlblk_t);
+
+    if ( ctlblk_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "memory allocation failed(1)")
+    }
+
+    ctlblk_ptr->magic          = H5FD_FAMILY_AIO_CTLBLK_T__MAGIC;
+    ctlblk_ptr->array_len      = init_array_len;
+    ctlblk_ptr->num_subctlblks = 0;
+    ctlblk_ptr->subctlblks     = NULL;
+
+
+    /* for the most common case of only one underlying file associated
+     * with the operation, use the free list of instances of 
+     * H5FD_family_aio_subctlblk_t.  For larger numbers of underlying 
+     * files, just malloc an array of the desired size. 
+     */
+    if ( init_array_len == 1 ) {
+
+        ctlblk_ptr->subctlblks =  H5FL_CALLOC(H5FD_family_aio_subctlblk_t);
+
+        if ( ctlblk_ptr->subctlblks == NULL ) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                        "memory allocation failed(2)")
+        }
+    } else {
+
+        HDassert( init_array_len > 1 );
+
+        ctlblk_ptr->subctlblks = (H5FD_family_aio_subctlblk_t *)
+		H5MM_malloc(((size_t)init_array_len) * 
+                            sizeof(H5FD_family_aio_subctlblk_t));
+
+
+        if ( ctlblk_ptr->subctlblks == NULL ) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                        "memory allocation failed(3)")
+        }
+    }
+
+    for ( i = 0; i < ctlblk_ptr->array_len; i++ )
+    {
+        (ctlblk_ptr->subctlblks[i]).magic = H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC;
+        (ctlblk_ptr->subctlblks[i]).driver   = NULL;
+        (ctlblk_ptr->subctlblks[i]).ctlblk   = NULL;
+        (ctlblk_ptr->subctlblks[i]).done     = FALSE;
+        (ctlblk_ptr->subctlblks[i]).finished = FALSE;
+    }
+
+    *ctlblk_ptr_ptr = ctlblk_ptr;
+
+done:
+
+    if ( ret_value != SUCCEED ) {
+
+        if ( ctlblk_ptr != NULL ) {
+
+            /* only way we should be able to get here is if the 
+             * allocation of the H5FD_family_aio_ctlblk_t succeeded,
+             * but the allocation of the array of 
+             * H5FD_family_aio_subctlblk_t failed.  Thus, all we need to
+             * do is discard the instance of H5FD_family_aio_ctlblk_t
+             * before we return.
+             */
+            HDassert( ctlblk_ptr->subctlblks == NULL );
+
+            ctlblk_ptr = H5FL_FREE(H5FD_family_aio_ctlblk_t, ctlblk_ptr);
+
+            if ( ctlblk_ptr != NULL ) {
+
+                HDONE_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                            "base ctlblk de-allocation failed")
+            }
+
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5FD_family_aio_alloc_ctlblk() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Purpose:     Free the control block pointed to by ctlblk_ptr, marking
+ *              it as invalid in passing.
+ *
+ * Return:      Success:        zero
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              6/20/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+H5FD_family_aio_discard_ctlblk(H5FD_family_aio_ctlblk_t *ctlblk_ptr)
+{
+    herr_t                        ret_value = SUCCEED;  /* Return value */
+    hbool_t		          bad_subctlblk_magic = FALSE;
+    int                           i;
+    int				  array_len = 0;
+    H5FD_family_aio_subctlblk_t * subctlblks = NULL;
+
+    FUNC_ENTER_NOAPI(H5FD_family_aio_discard_ctlblk, FAIL)
+
+    if ( ctlblk_ptr == NULL ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "ctlblk_ptr NULL on entry")
+    }
+
+    if ( ctlblk_ptr->magic != H5FD_FAMILY_AIO_CTLBLK_T__MAGIC ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "bad ctlblk magic")
+    }
+
+    if ( ( ctlblk_ptr->subctlblks == NULL ) ||
+         (  ctlblk_ptr->array_len <= 1 ) ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "subctlblks fields corrupt?")
+    }
+
+    array_len = ctlblk_ptr->array_len;
+    subctlblks = ctlblk_ptr->subctlblks;
+
+    for ( i = 0; i < array_len; i++ )
+    {
+        if ( subctlblks[i].magic != H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC ) {
+
+            bad_subctlblk_magic = TRUE;
+        }
+    }
+
+    if ( bad_subctlblk_magic ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "bad subctlblk magic(s)")
+    }
+
+    /* mark the control block as invalid, and null out its fields */
+
+    ctlblk_ptr->magic          = 0;
+    ctlblk_ptr->array_len      = 0;
+    ctlblk_ptr->num_subctlblks = 0;
+    ctlblk_ptr->subctlblks     = NULL;
+
+    for ( i = 0; i < array_len; i++ )
+    {
+        (subctlblks[i]).magic    = 0;
+        (subctlblks[i]).driver   = NULL;
+        (subctlblks[i]).ctlblk   = NULL;
+        (subctlblks[i]).done     = FALSE;
+        (subctlblks[i]).finished = FALSE;
+    }
+
+    /* now free the data */
+
+    ctlblk_ptr = H5FL_FREE(H5FD_family_aio_ctlblk_t, ctlblk_ptr);
+
+    /* recall that we use the free list for singleton instaces of 
+     * H5FD_family_aio_subctlblk_t, and malloc to allocate larger 
+     * arrays.
+     */
+    if ( array_len == 1 ) {
+
+        subctlblks = H5FL_FREE(H5FD_family_aio_subctlblk_t, subctlblks);
+
+    } else {
+
+	subctlblks = (H5FD_family_aio_subctlblk_t *)H5MM_xfree(subctlblks);
+    }
+
+    if ( ( ctlblk_ptr != NULL ) ||
+         ( subctlblks != NULL ) ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                    "control block free(s) failed")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5FD_family_aio_discard_ctlblk */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_family_aio_extend_ctlblk
+ *
+ * Purpose:     Double the size of the array of sub aio control blocks
+ *		in the control block.  Ensure that the entries currently
+ *		in use contain the same data after the doubling as before,
+ *		and that new entries are all correctly initialized.
+ *
+ * Return:      Success:        SUCCEED
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              6/20/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+H5FD_family_aio_extend_ctlblk(H5FD_family_aio_ctlblk_t *ctlblk_ptr)
+{
+    herr_t                        ret_value = SUCCEED;  /* Return value */
+    hbool_t		          bad_subctlblk_magic = FALSE;
+    int                           i;
+    int			          old_array_len;
+    int			          new_array_len;
+    H5FD_family_aio_subctlblk_t * old_subctlblks = NULL;
+    H5FD_family_aio_subctlblk_t * new_subctlblks = NULL;
+
+    FUNC_ENTER_NOAPI(H5FD_family_aio_extend_ctlblk, FAIL)
+
+    if ( ctlblk_ptr == NULL ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "ctlblk_ptr NULL on entry")
+    }
+
+    if ( ctlblk_ptr->magic != H5FD_FAMILY_AIO_CTLBLK_T__MAGIC ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "bad ctlblk magic")
+    }
+
+    if ( ( ctlblk_ptr->subctlblks == NULL ) ||
+         (  ctlblk_ptr->array_len <= 1 ) ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "subctlblks fields corrupt?")
+    }
+
+    old_array_len = ctlblk_ptr->array_len;
+    old_subctlblks = ctlblk_ptr->subctlblks;
+
+    for ( i = 0; i < old_array_len; i++ )
+    {
+        if ( old_subctlblks[i].magic != H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC ) {
+
+            bad_subctlblk_magic = TRUE;
+        }
+    }
+
+    if ( bad_subctlblk_magic ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "bad subctlblk magic(s)")
+    }
+
+    /* everything looks good.  Allocate the new array of sub control blocks */
+    new_array_len = 2 * old_array_len;
+    HDassert( new_array_len > 1);
+    new_subctlblks = (H5FD_family_aio_subctlblk_t *)
+		     H5MM_malloc(((size_t)new_array_len) * 
+                                 sizeof(H5FD_family_aio_subctlblk_t));
+
+    if ( ctlblk_ptr->subctlblks == NULL ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "memory allocation failed")
+    }
+
+    /* copy existing data from old_subctlblks to new_sub_cltblks, and 
+     * initialize the remaining new fields.
+     */
+    for ( i = 0; i < old_array_len; i++ ) {
+
+        new_subctlblks[i].magic    = old_subctlblks[i].magic;
+        new_subctlblks[i].driver   = old_subctlblks[i].driver;
+        new_subctlblks[i].ctlblk   = old_subctlblks[i].ctlblk;
+        new_subctlblks[i].done     = old_subctlblks[i].done;
+        new_subctlblks[i].finished = old_subctlblks[i].finished;
+    }
+
+    for ( i = old_array_len; i < new_array_len; i++ ) {
+
+        new_subctlblks[i].magic    = H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC;
+        new_subctlblks[i].driver   = NULL;
+        new_subctlblks[i].ctlblk   = NULL;
+        new_subctlblks[i].done     = FALSE;
+        new_subctlblks[i].finished = FALSE;
+    }
+
+    /* replace the old subctlblks array for the new */
+    ctlblk_ptr->array_len  = new_array_len;
+    ctlblk_ptr->subctlblks = new_subctlblks;
+
+    /* null out the old subctlblks array prior to discarding it */
+    for ( i = 0; i < old_array_len; i++ )
+    {
+        old_subctlblks[i].magic    = 0;
+        old_subctlblks[i].driver   = NULL;
+        old_subctlblks[i].ctlblk   = NULL;
+        old_subctlblks[i].done     = FALSE;
+        old_subctlblks[i].finished = FALSE;
+    }
+
+    /* free the old sub control blocks array */
+    if ( old_array_len == 1 ) {
+
+        old_subctlblks = H5FL_FREE(H5FD_family_aio_subctlblk_t, old_subctlblks);
+
+    } else {
+
+	old_subctlblks = 
+		(H5FD_family_aio_subctlblk_t *)H5MM_xfree(old_subctlblks);
+    }
+
+    if ( old_subctlblks != NULL ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                    "old sub control blocks free failed")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5FD_family_aio_extend_ctlblk() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_family_aio_read
+ *
+ * Purpose:     Initiate an asynchronous read from the indicated file of
+ *              the specified number of bytes starting at the specified
+ *              offset and loading the data  into the provided buffer.
+ *
+ *              The buffer must be large enough to contain the requested
+ *              data, and is undefined and must not be read or modified
+ *              until the read completes successfully.  Completion is
+ *              determined via either a call to H5FD_family_aio_test() or a
+ *              call to H5FD_family_aio_wait(), and success via a call to
+ *              H5FD_family_aio_finish().
+ *
+ *              If successful, the H5FD_family_aio_read routine will return 
+ *		a pointer to an internal control block in *ctlblk_ptr_ptr.  
+ *		This pointer must be used in all subsequent 
+ *		H5FD_family_aio_test() / H5FD_family_aio_wait() / 
+ *		H5FD_family_aio_finish() calls referring to this request.
+ *
+ *              Note that a successful return from this function does not
+ *              imply a successful read -- simply that no errors were
+ *              immediately evident.  
+ *
+ *		As the family file driver does no direct file I/O itself,
+ *		it must pass the aio read call through to the appropriate 
+ *		file driver.  As all calls to the underlying files will be
+ *              make through the public H5FD interface, which will fake
+ *              AIO if it is not supported, this function presumes that 
+ *		AIO is supported.
+ *
+ *		If the call is successful, it returns a pointer to an 
+ *		instance of H5FD_sec2_family_discard_ctlblk, loaded 
+ *		with the address(s) of the target driver's instance of 
+ *		H5FD_t, along with the address(s) of the aio control block(s)
+ *		returned by the driver(s).
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ * Changes:	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_family_aio_read(H5FD_t *file, 
+                     H5FD_mem_t type, 
+                     hid_t dxpl_id,
+                     haddr_t addr, 
+                     size_t size, 
+                     void *buffer,
+                     void **ctlblk_ptr_ptr)
+{
+    herr_t                     ret_value = SUCCEED;  /* Return value */
+    herr_t		       result;
+    hbool_t		       success = FALSE;
+    int                        i;
+    unsigned                   sub_file_num;         /* Local index variable */
+    hid_t                      memb_dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    size_t		       size_remaining;
+    size_t		       subfile_size;
+    hsize_t		       temp_subfile_size;
+    haddr_t                    addr_of_remainder;
+    haddr_t		       subfile_addr;
+    H5P_genplist_t           * plist;      /* Property list pointer */
+    H5FD_family_t            * family_file;
+    void                     * buffer_remaining;
+    void                     * subctlblk_ptr = NULL;
+    H5FD_family_aio_ctlblk_t * ctlblk_ptr = NULL;
+
+    FUNC_ENTER_NOAPI(H5FD_family_aio_read, FAIL)
+
+    if ( ( file == NULL ) ||
+         ( file->cls == NULL ) ||
+         ( addr == HADDR_UNDEF ) ||
+         ( size <= 0 ) ||
+         ( buffer == NULL ) ||
+         ( ctlblk_ptr_ptr == NULL ) ||
+         ( *ctlblk_ptr_ptr != NULL ) ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad arg(s) on entry")
+    }
+
+    family_file = (H5FD_family_t *)file;
+
+    /* Get the member data transfer property list. If the transfer property
+     * list does not belong to this driver then assume defaults
+     */
+    plist = (H5P_genplist_t *)H5I_object(dxpl_id);
+
+    if ( plist == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
+                    "not a file access property list")
+    }
+
+    if ( ( dxpl_id != H5P_DATASET_XFER_DEFAULT ) &&
+         ( H5P_get_driver(plist) == H5FD_FAMILY ) ) {
+
+        H5FD_family_dxpl_t *dx;
+
+	dx = (H5FD_family_dxpl_t *)H5P_get_driver_info(plist);
+
+        HDassert( H5P_isa_class(dxpl_id, H5P_DATASET_XFER) == TRUE );
+        HDassert( dx != NULL ); 
+
+        memb_dxpl_id = dx->memb_dxpl_id;
+    }
+
+    /* allocate the family file AIO control block */
+    result = H5FD_family_aio_alloc_ctlblk
+             (
+	       H5FD_FAMILY_AIO_SUBCTLBLK_INIT_ARRAY_SIZE,
+               &ctlblk_ptr
+             );
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "can't allocate aio control block")
+
+    } else if ( ( ctlblk_ptr == NULL ) ||
+                ( ctlblk_ptr->magic != H5FD_FAMILY_AIO_CTLBLK_T__MAGIC ) ) {
+
+        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
+                    "NULL ctlblk_ptr or bad ctlblk magic")
+
+    } else if ( ( ctlblk_ptr->array_len <= 1 ) ||
+                ( ctlblk_ptr->num_subctlblks != 0 ) ||
+                ( ctlblk_ptr->subctlblks == NULL ) ||
+                ( (ctlblk_ptr->subctlblks)[0].magic != 
+                  H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC ) ) {
+
+        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
+                    "bad sub control block array")
+    }
+
+
+    /* Queue async reads for each member that handles a chunk of the data */
+
+    size_remaining = size;
+    addr_of_remainder = addr;
+    buffer_remaining = buffer;
+
+    while ( size_remaining > 0 ) {
+
+	H5_ASSIGN_OVERFLOW(sub_file_num, \
+                           addr_of_remainder/family_file->memb_size, \
+                           hsize_t, unsigned);
+
+        subfile_addr = addr_of_remainder % family_file->memb_size;
+
+        /* This check is for mainly for IA32 architecture whose size_t's size
+         * is 4 bytes, to prevent overflow when user application is trying to
+         * write files bigger than 4GB. */
+
+        temp_subfile_size = family_file->memb_size - subfile_addr;
+
+        if ( temp_subfile_size > SIZET_MAX ) {
+
+            temp_subfile_size = SIZET_MAX;
+        }
+
+        subfile_size = MIN(size_remaining, (size_t)temp_subfile_size);
+
+        HDassert( sub_file_num < family_file->nmembs );
+
+        /* check to see if we have a slot in the aio control block 
+         * for this sub file -- if not, extend the control block.
+         */
+        if ( ctlblk_ptr->array_len <= ctlblk_ptr->num_subctlblks ) {
+
+	    result = H5FD_family_aio_extend_ctlblk(ctlblk_ptr);
+
+            if ( result != SUCCEED ) {
+
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                            "can't extend aio control block")
+
+            } else if ( ctlblk_ptr->array_len <= ctlblk_ptr->num_subctlblks ) {
+
+                HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
+                            "sub control block array still full?!?")
+            }
+        }
+
+        result = H5FDaio_read(family_file->memb[sub_file_num], type, 
+                              memb_dxpl_id, subfile_addr, subfile_size, 
+                              buffer_remaining, &subctlblk_ptr);
+
+	if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_IO, H5E_AIOREADERROR, FAIL, \
+                        "member file aio read failed")
+        }
+
+        i = ctlblk_ptr->num_subctlblks;
+
+        (ctlblk_ptr->subctlblks[i]).driver   = family_file->memb[sub_file_num];
+        (ctlblk_ptr->subctlblks[i]).ctlblk   = subctlblk_ptr;
+        (ctlblk_ptr->subctlblks[i]).done     = FALSE;
+        (ctlblk_ptr->subctlblks[i]).finished = FALSE;
+
+        (ctlblk_ptr->num_subctlblks)++;
+
+        HDassert( ctlblk_ptr->num_subctlblks <= ctlblk_ptr->array_len );
+
+        addr_of_remainder += subfile_size;
+        size_remaining    -= subfile_size;
+
+        buffer_remaining = 
+		(void *)(((char *)(buffer_remaining)) + subfile_size );
+    }
+
+    /* pass back the address of the control block */
+    *ctlblk_ptr_ptr = ctlblk_ptr;
+
+    /* make note of success */
+    success = TRUE;
+
+done:
+
+    /* discard the control block if not successful */
+    if ( ( ctlblk_ptr != NULL ) && ( ! success ) ) {
+
+        result = H5FD_family_aio_discard_ctlblk(ctlblk_ptr);
+
+        if ( result != SUCCEED ) {
+
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "ctlblk de-allocation failed")
+        }
+
+        ctlblk_ptr = NULL;
+    }
+
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_family_aio_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_family_aio_write
+ *
+ * Purpose:     Initiate an asynchronous write to the indicated file of
+ *              the specified number of bytes from the supplied  buffer
+ *              to the indicated location.
+ *
+ *              The buffer must not be discarded or modified until the
+ *              write completes successfully.  Completion is determined
+ *              via either H5FD_family_aio_test() or H5FD_family_aio_wait(), 
+ *		and success via H5FD_family_aio_finish().
+ *
+ *              Note that a successful return from this function does not
+ *              imply a successful read -- simply that no errors were
+ *              immediately evident.  
+ *
+ *		As the family file driver does no direct file I/O itself,
+ *		it must pass the aio write call through to the appropriate 
+ *		file driver.  As all calls to the underlying files will be
+ *              make through the public H5FD interface, which will fake
+ *              AIO if it is not supported, this function presumes that 
+ *		AIO is supported.
+ *
+ *		If the call is successful, it returns a pointer to an 
+ *		instance of H5FD_family_aio_ctlblk_t, loaded 
+ *		with the address(s) of the target driver's instances of 
+ *		H5FD_t, along with the address(s) of the aio control block(s)
+ *		returned by the driver(s).
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ * Changes: 	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_family_aio_write(H5FD_t *file, 
+                     H5FD_mem_t type, 
+                     hid_t dxpl_id,
+                     haddr_t addr, 
+                     size_t size, 
+                     void *buffer,
+                     void **ctlblk_ptr_ptr)
+{
+    herr_t                     ret_value = SUCCEED;  /* Return value */
+    herr_t		       result;
+    hbool_t		       success = FALSE;
+    int                        i;
+    unsigned                   sub_file_num;         /* Local index variable */
+    hid_t                      memb_dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    size_t		       size_remaining;
+    size_t		       subfile_size;
+    hsize_t		       temp_subfile_size;
+    haddr_t                    addr_of_remainder;
+    haddr_t		       subfile_addr;
+    H5P_genplist_t           * plist;      /* Property list pointer */
+    H5FD_family_t            * family_file;
+    void                     * buffer_remaining;
+    void                     * subctlblk_ptr = NULL;
+    H5FD_family_aio_ctlblk_t * ctlblk_ptr = NULL;
+
+    FUNC_ENTER_NOAPI(H5FD_family_aio_write, FAIL)
+
+    if ( ( file == NULL ) ||
+         ( file->cls == NULL ) ||
+         ( addr == HADDR_UNDEF ) ||
+         ( size <= 0 ) ||
+         ( buffer == NULL ) ||
+         ( ctlblk_ptr_ptr == NULL ) ||
+         ( *ctlblk_ptr_ptr != NULL ) ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad arg(s) on entry")
+    }
+
+    family_file = (H5FD_family_t *)file;
+
+    /* Get the member data transfer property list. If the transfer property
+     * list does not belong to this driver then assume defaults
+     */
+    plist = (H5P_genplist_t *)H5I_object(dxpl_id);
+
+    if ( plist == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
+                    "not a file access property list")
+    }
+
+    if ( ( dxpl_id != H5P_DATASET_XFER_DEFAULT ) &&
+         ( H5P_get_driver(plist) == H5FD_FAMILY ) ) {
+
+        H5FD_family_dxpl_t *dx;
+
+	dx = (H5FD_family_dxpl_t *)H5P_get_driver_info(plist);
+
+        HDassert( H5P_isa_class(dxpl_id, H5P_DATASET_XFER) == TRUE );
+        HDassert( dx != NULL ); 
+
+        memb_dxpl_id = dx->memb_dxpl_id;
+    }
+
+    /* allocate the family file AIO control block */
+    result = H5FD_family_aio_alloc_ctlblk
+             (
+	       H5FD_FAMILY_AIO_SUBCTLBLK_INIT_ARRAY_SIZE,
+               &ctlblk_ptr
+             );
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "can't allocate aio control block")
+
+    } else if ( ( ctlblk_ptr == NULL ) ||
+                ( ctlblk_ptr->magic != H5FD_FAMILY_AIO_CTLBLK_T__MAGIC ) ) {
+
+        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
+                    "NULL ctlblk_ptr or bad ctlblk magic")
+
+    } else if ( ( ctlblk_ptr->array_len <= 1 ) ||
+                ( ctlblk_ptr->num_subctlblks != 0 ) ||
+                ( ctlblk_ptr->subctlblks == NULL ) ||
+                ( (ctlblk_ptr->subctlblks)[0].magic != 
+                  H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC ) ) {
+
+        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
+                    "bad sub control block array")
+    }
+
+
+    /* Queue async writes for each member that handles a chunk of the data */
+
+    size_remaining = size;
+    addr_of_remainder = addr;
+    buffer_remaining = buffer;
+
+    while ( size_remaining > 0 ) {
+
+	H5_ASSIGN_OVERFLOW(sub_file_num, \
+                           addr_of_remainder/family_file->memb_size, \
+                           hsize_t, unsigned);
+
+        subfile_addr = addr_of_remainder % family_file->memb_size;
+
+        /* This check is for mainly for IA32 architecture whose size_t's size
+         * is 4 bytes, to prevent overflow when user application is trying to
+         * write files bigger than 4GB. */
+
+        temp_subfile_size = family_file->memb_size - subfile_addr;
+
+        if ( temp_subfile_size > SIZET_MAX ) {
+
+            temp_subfile_size = SIZET_MAX;
+        }
+
+        subfile_size = MIN(size_remaining, (size_t)temp_subfile_size);
+
+        HDassert( sub_file_num < family_file->nmembs );
+
+        /* check to see if we have a slot in the aio control block 
+         * for this sub file -- if not, extend the control block.
+         */
+        if ( ctlblk_ptr->array_len <= ctlblk_ptr->num_subctlblks ) {
+
+	    result = H5FD_family_aio_extend_ctlblk(ctlblk_ptr);
+
+            if ( result != SUCCEED ) {
+
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                            "can't extend aio control block")
+
+            } else if ( ctlblk_ptr->array_len <= ctlblk_ptr->num_subctlblks ) {
+
+                HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
+                            "sub control block array still full?!?")
+            }
+        }
+
+        result = H5FDaio_write(family_file->memb[sub_file_num], type, 
+                               memb_dxpl_id, subfile_addr, subfile_size, 
+                               buffer_remaining, &subctlblk_ptr);
+
+	if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_IO, H5E_AIOWRITEERROR, FAIL, \
+                        "member file aio write failed")
+        }
+
+        i = ctlblk_ptr->num_subctlblks;
+
+        (ctlblk_ptr->subctlblks[i]).driver   = family_file->memb[sub_file_num];
+        (ctlblk_ptr->subctlblks[i]).ctlblk   = subctlblk_ptr;
+        (ctlblk_ptr->subctlblks[i]).done     = FALSE;
+        (ctlblk_ptr->subctlblks[i]).finished = FALSE;
+
+        (ctlblk_ptr->num_subctlblks)++;
+
+        HDassert( ctlblk_ptr->num_subctlblks <= ctlblk_ptr->array_len );
+
+        addr_of_remainder += subfile_size;
+        size_remaining    -= subfile_size;
+
+        buffer_remaining = 
+		(void *)(((char *)(buffer_remaining)) + subfile_size );
+    }
+
+    /* pass back the address of the control block */
+    *ctlblk_ptr_ptr = ctlblk_ptr;
+
+    /* make note of success */
+    success = TRUE;
+
+done:
+
+    /* discard the control block if not successful */
+    if ( ( ctlblk_ptr != NULL ) && ( ! success ) ) {
+
+        result = H5FD_family_aio_discard_ctlblk(ctlblk_ptr);
+
+        if ( result != SUCCEED ) {
+
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "ctlblk de-allocation failed")
+        }
+
+        ctlblk_ptr = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_family_aio_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_family_aio_test
+ *
+ * Purpose:	This function is used to determine if the asynchronous
+ *		operation associated with the supplied control block 
+ *		pointer is done.  If it is, *done_ptr should be set
+ *		to TRUE, if it isn't, *done_ptr should be set to FALSE.
+ *		In all cases, there function should return immediately.
+ *
+ *		Note that the return value only reflects errors in the 
+ *		process of testing whether the operation is complete.
+ *
+ *		After the operation is done, a call to 
+ *		H5FD_family_aio_finish() must be made to determine whether 
+ *		the operation completed successfully and to allow the 
+ *		driver to tidy its data structures.
+ *
+ *		Note that all calls to the underlying files will be 
+ *		through the public H5FD interface, which will fake 
+ *		AIO if it is not supported.  Thus, this function 
+ *		presumes that AIO is supported.
+ *
+ *		However, it is possible that multiple underlying 
+ *		files may be involved.
+ *
+ *		For each underlying file / driver first check the 
+ *		control block, and see if that driver is done with
+ *		the operation.  If it is, go on to the next file / 
+ *		driver pair.
+ *
+ *		If the file / driver pair is not marked as being 
+ *		done, call H5FDaio_test with the target driver.  If the
+ *		call fails, fail.
+ *
+ *		If the call indicates that the aio operation on the 
+ *		target file/driver pair is still in progress, set *done_ptr
+ *		to FALSE, and return.  Otherwise go onto the next 
+ *		file / driver pair and repeat.  If all underlying 
+ *		file / driver pairs report the operation complete,
+ *		set *done_ptr to TRUE and then return.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ * Changes:	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_family_aio_test(hbool_t *done_ptr, 
+                     void *ctlblk_ptr)
+{
+    herr_t                      ret_value = SUCCEED;  /* Return value */
+    herr_t			result;
+    hbool_t			done = TRUE;
+    hbool_t			tgt_done;
+    hbool_t			already_done = TRUE;
+    int                         i = 0;
+    H5FD_family_aio_ctlblk_t  * family_ctlblk_ptr;
+    H5FD_t                    * tgt_file;
+    void                      * subctlblk_ptr;
+
+    FUNC_ENTER_NOAPI(H5FD_family_aio_test, FAIL)
+
+    if ( ( done_ptr == NULL ) ||
+         ( ctlblk_ptr == NULL ) ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad arg(s) on entry")
+
+    } 
+
+    family_ctlblk_ptr = (H5FD_family_aio_ctlblk_t *)ctlblk_ptr;
+
+    if ( family_ctlblk_ptr->magic != H5FD_FAMILY_AIO_CTLBLK_T__MAGIC ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad ctlblk magic")
+
+    } else if ( family_ctlblk_ptr->num_subctlblks < 1 ) {
+
+
+	HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                     "empty control block on entry.")
+    }
+
+    while ( ( done ) && ( i < family_ctlblk_ptr->num_subctlblks ) ) {
+
+        if ( (family_ctlblk_ptr->subctlblks[i]).magic != 
+	     H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "bad subctlblk magic")
+        }
+
+        tgt_file      = (family_ctlblk_ptr->subctlblks[i]).driver;
+        subctlblk_ptr = (family_ctlblk_ptr->subctlblks[i]).ctlblk;
+
+        if ( ( tgt_file == NULL ) ||
+             ( subctlblk_ptr == NULL ) ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                        "NULL tgt file or sub ctl blk.")
+        }
+
+        if ( (family_ctlblk_ptr->subctlblks[i]).finished ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                        "sub op already finished?!?!")
+        }
+
+        if ( ! ((family_ctlblk_ptr->subctlblks[i]).done) ) {
+
+            already_done = FALSE;
+
+            tgt_done = FALSE;
+
+            result = H5FDaio_test(tgt_file, &tgt_done, subctlblk_ptr);
+
+            if ( result < 0 ) {
+
+	        HGOTO_ERROR(H5E_VFL, H5E_AIOTESTFAIL, FAIL, \
+                            "aio test sub-request failed")
+            }
+
+            if ( tgt_done ) {
+
+                (family_ctlblk_ptr->subctlblks[i]).done = TRUE;
+                
+            } else {
+
+                done = FALSE;
+
+            }
+        }
+
+        i++;
+    }
+
+    if ( already_done ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                    "operation already done?!?!?")
+    }
+
+    *done_ptr = done;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_family_aio_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_family_aio_wait
+ *
+ * Purpose:	Wait until the asynchronous read, write, or fsync operation 
+ *		indicated by *ctlblk_ptr has completed (successfully or 
+ *		otherwise).
+ *
+ *		Note that the error code returned refers only to the 
+ *		operation of waiting until the read/write/fsync is
+ *		complete -- Success does not imply that the read, write,
+ *		or fsync operation completed successfully, only that
+ *		no error was encountered while waiting for the operation 
+ *		to finish.
+ *
+ *		Note that all calls to the underlying files will be 
+ *		through the public H5FD interface, which will fake 
+ *		AIO if it is not supported.  Thus, this function 
+ *		presumes that AIO is supported.
+ *
+ *		However, it is possible that multiple underlying 
+ *		files may be involved.
+ *
+ *		For each underlying file / driver listed in the control
+ *		block, first check the control block particular to the 
+ *		file / driver pair, and then wait until the associated
+ *		operation is done -- if it is not done already.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ * Changes:	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_family_aio_wait(void *ctlblk_ptr)
+{
+    herr_t                      ret_value = SUCCEED;  /* Return value */
+    herr_t			result;
+    hbool_t			already_done = TRUE;
+    int                         i;
+    H5FD_family_aio_ctlblk_t  * family_ctlblk_ptr;
+    H5FD_t                    * tgt_file;
+    void                      * subctlblk_ptr;
+
+    FUNC_ENTER_NOAPI(H5FD_family_aio_wait, FAIL)
+
+    if ( ctlblk_ptr == NULL ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL ctlblk_ptr on entry")
+
+    } 
+
+    family_ctlblk_ptr = (H5FD_family_aio_ctlblk_t *)ctlblk_ptr;
+
+    if ( family_ctlblk_ptr->magic != H5FD_FAMILY_AIO_CTLBLK_T__MAGIC ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad ctlblk magic")
+
+    } else if ( family_ctlblk_ptr->num_subctlblks < 1 ) {
+
+
+	HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                     "empty control block on entry.")
+    }
+
+    i = 0;
+
+    while ( i < family_ctlblk_ptr->num_subctlblks ) {
+
+        if ( (family_ctlblk_ptr->subctlblks[i]).magic != 
+	     H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "bad subctlblk magic")
+        }
+
+        tgt_file      = (family_ctlblk_ptr->subctlblks[i]).driver;
+        subctlblk_ptr = (family_ctlblk_ptr->subctlblks[i]).ctlblk;
+
+        if ( ( tgt_file == NULL ) ||
+             ( subctlblk_ptr == NULL ) ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                        "NULL tgt file or sub ctl blk.")
+        }
+
+        if ( (family_ctlblk_ptr->subctlblks[i]).finished ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                        "sub op already finished?!?!")
+        }
+
+        if ( ! ((family_ctlblk_ptr->subctlblks[i]).done) ) {
+
+            already_done = FALSE;
+
+            result = H5FDaio_wait(tgt_file, subctlblk_ptr);
+
+            if ( result < 0 ) {
+
+	        HGOTO_ERROR(H5E_VFL, H5E_AIOTESTFAIL, FAIL, \
+                            "aio wait sub-request failed")
+            }
+
+            (family_ctlblk_ptr->subctlblks[i]).done = TRUE;
+        }
+
+        i++;
+    }
+
+    if ( already_done ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                    "operation already done?!?!?")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_family_aio_wait() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_family_aio_finish
+ *
+ * Purpose:	Determine whether the read, write, or fsync operation 
+ *		indicated by *ctlblk_ptr completed successfully.  If it 
+ *		did, set *errno_ptr to 0.  If if didn't, set *errno_ptr 
+ *		to the appropriate error code.
+ *
+ *		Return SUCCEED if successful, and the appropriate error 
+ *		code if not.
+ *
+ *		Note that the returned error code only refers to the 
+ *		success or failure of the finish operation.  The caller 
+ *		must examine *errno_ptr to determine if the underlying 
+ *		asynchronous operation succeeded.
+ *
+ *		Note that all calls to the underlying files will be 
+ *		through the public H5FD interface, which will fake 
+ *		AIO if it is not supported.  Thus, this function 
+ *		presumes that AIO is supported.
+ *
+ *		However, it is possible that multiple underlying 
+ *		files may be involved.
+ *
+ *		For each underlying file / driver listed in the control
+ *		block, first check the control block particular to the 
+ *		file / driver pair and verify that it is listed as being
+ *		done but not finished.  Then call the associated aio 
+ *		finish function for each file -- set *errno_ptr to 0
+ *		if no errors are detected, and to the last non-zero
+ *		errno reported if any error is reported.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_family_aio_finish(int *errno_ptr, 
+                       void *ctlblk_ptr)
+{
+    herr_t                      ret_value = SUCCEED;  /* Return value */
+    herr_t			result;
+    int                         i;
+    int				error_num = 0;
+    int				sub_errno;
+    H5FD_family_aio_ctlblk_t  * family_ctlblk_ptr;
+    H5FD_t                    * tgt_file;
+    void                      * subctlblk_ptr;
+
+    FUNC_ENTER_NOAPI(H5FD_family_aio_finish, FAIL)
+
+    if ( ( errno_ptr == NULL ) ||
+         ( ctlblk_ptr == NULL ) ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad arg(s) on entry")
+
+    } 
+
+    family_ctlblk_ptr = (H5FD_family_aio_ctlblk_t *)ctlblk_ptr;
+
+    if ( family_ctlblk_ptr->magic != H5FD_FAMILY_AIO_CTLBLK_T__MAGIC ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad ctlblk magic")
+
+    } else if ( family_ctlblk_ptr->num_subctlblks < 1 ) {
+
+
+	HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                     "empty control block on entry.")
+    }
+
+
+    /* finish all the sub operations */
+
+    i = 0;
+    while ( i < family_ctlblk_ptr->num_subctlblks ) {
+
+        if ( (family_ctlblk_ptr->subctlblks[i]).magic != 
+	     H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "bad subctlblk magic")
+        }
+
+        tgt_file      = (family_ctlblk_ptr->subctlblks[i]).driver;
+        subctlblk_ptr = (family_ctlblk_ptr->subctlblks[i]).ctlblk;
+
+        if ( ( tgt_file == NULL ) ||
+             ( subctlblk_ptr == NULL ) ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                        "NULL tgt file or sub ctl blk.")
+        }
+
+        if ( ! ((family_ctlblk_ptr->subctlblks[i]).done) ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                        "sub op not done?!?!")
+        }
+
+        if ( (family_ctlblk_ptr->subctlblks[i]).finished ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                        "sub op already finished?!?!")
+        }
+
+        sub_errno = 0;
+
+        result = H5FDaio_finish(tgt_file, &sub_errno, subctlblk_ptr);
+
+        if ( result < 0 ) {
+
+	    HGOTO_ERROR(H5E_VFL, H5E_AIOTESTFAIL, FAIL, \
+                        "aio finish sub-request failed")
+        }
+
+        if ( sub_errno != 0 ) {
+
+            error_num = sub_errno;
+        }
+
+        (family_ctlblk_ptr->subctlblks[i]).finished = TRUE;
+
+        i++;
+    }
+
+    /* discard the control block */
+
+    result = H5FD_family_aio_discard_ctlblk(family_ctlblk_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                    "Attempt to discard control block failed")
+    }
+
+    *errno_ptr = error_num;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_family_aio_finish() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_family_aio_fsync
+ *
+ * Purpose:	Queue a sync of all asynchronous writes outstanding as of 
+ *		the time this function is called.  Return zero if no 
+ *		errors are encountered, but note that a good error return 
+ *		from H5FD_family_aio_fsync() does not imply a successful 
+ *		operation, only that no immediate errors were detected.
+ *
+ *		The sync is not known to be successful until reported 
+ *		complete by either H5FD_family_aio_test or 
+ *		H5FD_family_aio_wait, and reported successful by 
+ *		H5FD_family_aio_finish.
+ *
+ *		Note that all calls to the underlying files will be 
+ *		through the public H5FD interface, which will fake 
+ *		AIO if it is not supported.  Thus, this function 
+ *		presumes that AIO is supported.
+ *
+ *		To implement the aio_fsync, we must send an aio fsync
+ *		to each of the underlying files, construct a control
+ *		block containing pointers to all the sub control block
+ *		returned, and return the constructed control block 
+ *		to the users.
+ *
+ *		To do this, first allocate a control block with sufficient
+ *		space to contain references to all underlying files.
+ *
+ *		Then, pass the aio_fsync to each underlying file, 
+ *		recording the pointer to the associated instance of 
+ *		H5FD_t and the returned aio control block for each 
+ *		underlying file in the family file aio control block.
+ *
+ *		If all calls complete without error, return the 
+ *		address of the control block in *ctlblk_ptr_ptr.
+ *
+ *		If any errors are detected, simply fail.
+ *		
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_family_aio_fsync(H5FD_t *file, 
+                      void **ctlblk_ptr_ptr)
+{
+    herr_t                     ret_value = SUCCEED;  /* Return value */
+    herr_t	 	       result;
+    hbool_t                    success = FALSE;
+    int                        i;
+    int		 	       num_sub_files;
+    H5FD_family_t            * family_file;
+    H5FD_t                   * tgt_file;
+    H5FD_family_aio_ctlblk_t * ctlblk_ptr = NULL;
+    void                     * subctlblk_ptr;
+
+    FUNC_ENTER_NOAPI(H5FD_family_aio_finish, FAIL)
+
+    if ( ( file == NULL ) ||
+         ( file->cls == NULL ) ||
+         ( ctlblk_ptr_ptr == NULL ) ||
+         ( *ctlblk_ptr_ptr != NULL ) ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad arg(s) on entry")
+
+    } 
+
+    family_file = (H5FD_family_t *)file;
+
+    num_sub_files = family_file->nmembs;
+
+    /* allocate an aio control block large enough to contain refereces to
+     * all the members of the family file.
+     */
+    result = H5FD_family_aio_alloc_ctlblk(num_sub_files, &ctlblk_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "can't allocate aio control block")
+
+    } else if ( ( ctlblk_ptr == NULL ) ||
+                ( ctlblk_ptr->magic != H5FD_FAMILY_AIO_CTLBLK_T__MAGIC ) ) {
+
+        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
+                    "NULL ctlblk_ptr or bad ctlblk magic")
+
+    } else if ( ( ctlblk_ptr->array_len != num_sub_files ) ||
+                ( ctlblk_ptr->num_subctlblks != 0 ) ||
+                ( ctlblk_ptr->subctlblks == NULL ) ||
+                ( (ctlblk_ptr->subctlblks)[0].magic != 
+                  H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC ) ) {
+
+        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
+                    "bad sub control block array")
+    }
+
+    for ( i = i; i < num_sub_files; i++ ) {
+
+        if ( (ctlblk_ptr->subctlblks[i]).magic != 
+	     H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "bad subctlblk magic")
+        }
+
+        tgt_file      = family_file->memb[i];
+        subctlblk_ptr = NULL;
+
+        result = H5FDaio_fsync(tgt_file, &subctlblk_ptr);
+
+        if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_VFL, H5E_AIOSYNCFAIL, FAIL, \
+                        "sub aio fsync request failed.")
+        }
+
+        (ctlblk_ptr->subctlblks[i]).driver   = tgt_file;
+        (ctlblk_ptr->subctlblks[i]).ctlblk   = subctlblk_ptr;
+        (ctlblk_ptr->subctlblks[i]).done     = FALSE;
+        (ctlblk_ptr->subctlblks[i]).finished = FALSE;
+
+        (ctlblk_ptr->num_subctlblks)++;
+
+        HDassert( ctlblk_ptr->num_subctlblks <= ctlblk_ptr->array_len );
+    }
+
+    HDassert( ctlblk_ptr->num_subctlblks == ctlblk_ptr->array_len );
+
+    *ctlblk_ptr_ptr = (void *)ctlblk_ptr;
+
+    success = TRUE;
+
+done:
+
+    /* discard the control block if not successful */
+    if ( ( ctlblk_ptr != NULL ) && ( ! success ) ) {
+
+        result = H5FD_family_aio_discard_ctlblk(ctlblk_ptr);
+
+        if ( result != SUCCEED ) {
+
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "ctlblk de-allocation failed")
+        }
+
+        ctlblk_ptr = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_family_aio_fsync() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_fmily_aio_cancel
+ *
+ * Purpose:	Attempt to cancel the asynchronous operation associated 
+ *		with the control block pointed to by ctlblk_ptr.  
+ *
+ *		Note that this operation may have completed, but it is 
+ *		an error if H5FD_family_aio_finish() has been called on 
+ *		it.
+ *
+ *		As part of the cancel, free the associated control blocks.
+ *
+ *		Return SUCCEED if successful, and the appropriate error 
+ *		code otherwise.
+ *
+ *		Note that all calls to the underlying files will be 
+ *		through the public H5FD interface, which will fake 
+ *		AIO if it is not supported.  Thus, this function 
+ *		presumes that AIO is supported.
+ *
+ *		However, it is possible that multiple underlying 
+ *		files may be involved.
+ *
+ *		For each underlying file / driver listed in the control
+ *		block, first check the control block particular to the 
+ *		file / driver pair and verify that it is not listed as 
+ *		being finished.  Then call the associated aio cancel 
+ *		function for each file.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_family_aio_cancel(void *ctlblk_ptr)
+{
+    herr_t                       ret_value = SUCCEED;  /* Return value */
+    herr_t			 result;
+    int                          i;
+    H5FD_family_aio_ctlblk_t   * family_ctlblk_ptr;
+    H5FD_t                     * tgt_file;
+    void                       * subctlblk_ptr;
+
+    FUNC_ENTER_NOAPI(H5FD_family_aio_cancel, FAIL)
+
+    if ( ctlblk_ptr == NULL ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL ctlblk_ptr on entry")
+
+    } 
+
+    family_ctlblk_ptr = (H5FD_family_aio_ctlblk_t *)ctlblk_ptr;
+
+    if ( family_ctlblk_ptr->magic != H5FD_FAMILY_AIO_CTLBLK_T__MAGIC ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad ctlblk magic")
+
+    } else if ( family_ctlblk_ptr->num_subctlblks < 1 ) {
+
+
+	HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                     "empty control block on entry.")
+    }
+
+    i = 0;
+
+    while ( i < family_ctlblk_ptr->num_subctlblks ) {
+
+        if ( (family_ctlblk_ptr->subctlblks[i]).magic != 
+	     H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "bad subctlblk magic")
+        }
+
+        tgt_file      = (family_ctlblk_ptr->subctlblks[i]).driver;
+        subctlblk_ptr = (family_ctlblk_ptr->subctlblks[i]).ctlblk;
+
+        if ( ( tgt_file == NULL ) ||
+             ( subctlblk_ptr == NULL ) ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                        "NULL tgt file or sub ctl blk.")
+        }
+
+        if ( (family_ctlblk_ptr->subctlblks[i]).finished ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
+                        "sub op already finished?!?!")
+        }
+
+        result = H5FDaio_cancel(tgt_file, subctlblk_ptr);
+
+        if ( result < 0 ) {
+
+	    HGOTO_ERROR(H5E_VFL, H5E_AIOTESTFAIL, FAIL, \
+                        "aio cance sub-request failed")
+        }
+
+	(family_ctlblk_ptr->subctlblks[i]).driver   = NULL;
+	(family_ctlblk_ptr->subctlblks[i]).ctlblk   = NULL;
+	(family_ctlblk_ptr->subctlblks[i]).done     = FALSE;
+	(family_ctlblk_ptr->subctlblks[i]).finished = FALSE;
+
+        i++;
+    }
+
+    /* discard the control block */
+
+    result = H5FD_family_aio_discard_ctlblk(family_ctlblk_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                    "Attempt to discard control block failed")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_family_aio_cancel() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_family_fsync
+ *
+ * Purpose:	Sync out all underlying files.
+ *		
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              6/12/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_family_fsync(H5FD_t *file, 
+		  hid_t dxpl_id)
+{
+    herr_t                     ret_value = SUCCEED;  /* Return value */
+    herr_t	 	       result;
+    int                        i;
+    int		 	       num_sub_files;
+    H5FD_family_t            * family_file;
+    H5FD_t                   * tgt_file;
+
+    FUNC_ENTER_NOAPI(H5FD_family_fsync, FAIL)
+
+    if ( file == NULL ) {
+
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad arg(s) on entry")
+
+    } 
+
+    family_file = (H5FD_family_t *)file;
+
+    num_sub_files = family_file->nmembs;
+
+    for ( i = i; i < num_sub_files; i++ ) {
+
+        tgt_file = family_file->memb[i];
+
+	result = H5FDfsync(tgt_file, dxpl_id);
+
+        if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, \
+                        "family sub fsync request failed.")
+        }
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_family_fsync() */

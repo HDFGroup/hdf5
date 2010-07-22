@@ -52,6 +52,26 @@ const char *FILENAME[] = {
 
 #define COMPAT_BASENAME "family_v16_"
 
+static int generic_aio_test(const char * test_banner, 
+                            const char * file_name,
+		            hid_t fapl_id,
+                            haddr_t maxaddr);
+
+static void generic_aio_test__single_write_read_test(H5FD_t * file,
+                                                     char * tag_string,
+                                                     haddr_t offset,
+                                                     const size_t write_size,
+                                                     hbool_t do_wait,
+                                                     hbool_t * pass_ptr,
+                                                     char ** failure_mssg_ptr);
+
+static void generic_aio_test__multiple_write_sync_read_test(H5FD_t * file,
+							   int write_count,
+							   haddr_t offsets[],
+							   size_t lengths[],
+                	                                   hbool_t * pass_ptr, 
+               	                                           char ** failure_mssg_ptr);
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_sec2
@@ -1123,6 +1143,945 @@ error:
     return -1;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    generic_aio_test()
+ *
+ * Purpose:     Run a basic functionality test with the specified file
+ *		and driver.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  JRM -- 7/15/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static int
+generic_aio_test(const char * test_banner, 
+                 const char * file_name,
+		 hid_t fapl_id,
+                 haddr_t maxaddr)
+{
+    const char * fcn_name = "generic_aio_test()";
+    char * failure_mssg = NULL;
+    char read_buf[128];
+    hbool_t done;
+    hbool_t pass = TRUE;
+    int error_num;
+    int i;
+    int ret_val = 0;
+    int write_count = 10;
+    size_t write_size;
+    size_t lengths[] =  {  1024, 
+                            512, 
+                             16,
+                           4096, 
+                             31, 
+                  (1024 * 1024), 
+              (4 * 1024 * 1024), 
+              (1024 * 1024 + 1), 
+              (64 * 1024 *1024), 
+                            24};
+    herr_t result;
+    haddr_t offset;
+    haddr_t offsets[] = {(haddr_t)0, 
+                         (haddr_t)1024, 
+                         (haddr_t)1536, 
+                         (haddr_t)1552,
+                         (haddr_t)5648, 
+                         (haddr_t)5679, 
+                         (haddr_t)1054255,
+                         (haddr_t)5248559,
+			 (haddr_t)6297136,
+                         (haddr_t)73406000};
+    H5FD_t * file;
+
+    TESTING(test_banner);
+
+    /* create the file */
+    if ( pass ) {
+
+        file = H5FDopen(file_name, (H5F_ACC_RDWR | H5F_ACC_CREAT), 
+                        fapl_id, maxaddr);
+
+        if ( file == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "H5FDopen() failed.";
+        }
+    }
+
+    /* first do some simple write, read back, and compare results tests with 
+     * buffers of various sizes
+     */
+
+    offset = (haddr_t)0;
+    write_size = (size_t)64;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "64 bytes -- test for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "64 bytes -- wait for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    write_size *= (size_t)4;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "256 bytes -- test for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "256 bytes -- wait for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    write_size *= (size_t)4;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "1 KB -- test for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "1 KB -- wait for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    write_size *= (size_t)4;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "4 KB -- test for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "4 KB -- wait for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    write_size *= (size_t)16;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "64 KB -- test for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "64 KB -- wait for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    write_size *= (size_t)16;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "1 MB -- test for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "1 MB -- wait for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    write_size *= (size_t)16;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "16 MB -- test for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "16 MB -- wait for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    write_size *= (size_t)16;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "256 MB -- test for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+    offset += (haddr_t)write_size;
+
+    generic_aio_test__single_write_read_test(file,
+                                             "256 MB -- wait for completion",
+                                             offset,
+                                             write_size,
+                                             /* do_wait = */ FALSE,
+                                             &pass,
+                                             &failure_mssg);
+
+
+
+    generic_aio_test__multiple_write_sync_read_test(file,
+						    write_count,
+						    offsets,
+						    lengths,
+                                                    &pass,
+                                                    &failure_mssg);
+
+
+    if ( file != NULL ) {
+
+        result = H5FDclose(file);
+
+        if ( result < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "H5FDclose() failed.";
+
+        } else if ( HDremove(file_name) < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "HDremove() failed.\n";
+        }
+
+    }
+
+    if ( pass ) { 
+
+	PASSED(); 
+
+    } else { 
+
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
+	H5_FAILED(); 
+        ret_val = -1;
+    }
+
+    return(ret_val);
+
+} /* generic_aio_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    generic_aio_test__single_write_read_test()
+ *
+ * Purpose:     Kick of a single asynchronous write, wait until it is done
+ *		(via either H5FDtest or H5FDwait, as directed), and then
+ *		conplete the write.
+ *
+ *		Kick off a single asynchronous read of the data just 
+ *		written, wait until it is done, (via either H5FDtest 
+ *		or H5FDwait, as directed), and then complete the read.
+ *
+ *		Verify that the write buffer contains the expected data.
+ *
+ *		In the event of failure, set *pass_ptr to FALSE, and set
+ *		*failure_mssg_ptr to an appropriate error message.
+ *
+ *		If *pass_ptr is FALSE on entry, do nothing and return.
+ *
+ * Return:      void.
+ *
+ * Programmer:  JRM -- 7/15/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+generic_aio_test__single_write_read_test(H5FD_t * file,
+                                         char * tag_string,
+                                         haddr_t offset,
+                                         const size_t write_size,
+                                         hbool_t do_wait,
+                                         hbool_t * pass_ptr,
+                                         char ** failure_mssg_ptr)
+{
+    const char * fcn_name = "generic_aio_test__single_write_read_test()";
+    char * write_buf = NULL;
+    char * read_buf = NULL;
+    hbool_t done;
+    int error_num;
+    int i;
+    int tag_len;
+    int ret_val = 0;
+    herr_t result;
+    void * aioctlblk_ptr = NULL;
+
+    if ( *pass_ptr ) {
+
+        if ( ( file == NULL ) ||
+             ( tag_string == NULL ) ||
+             ( write_size <= 0 ) ||
+             ( HDstrlen(tag_string) > write_size ) ) {
+
+	    *pass_ptr = FALSE;
+            *failure_mssg_ptr = 
+		"bad param(s) passed to generic_aio_test__single_write_read_test()";
+        }
+    }
+
+    if ( *pass_ptr ) { /* allocate and initialize buffers */
+
+        write_buf = (char *)HDmalloc(write_size + 1);
+        read_buf  = (char *)HDmalloc(write_size + 1);
+
+        if ( ( write_buf == NULL ) ||
+             ( read_buf == NULL ) ) {
+
+            *pass_ptr = NULL;
+            *failure_mssg_ptr = "buffer allocation(s) failed.";
+
+        } else {
+
+            tag_len = strlen(tag_string);
+
+            for ( i = 0; i < write_size; i++ ) {
+
+                if ( i < tag_len ) {
+
+                    write_buf[i] = tag_string[i];
+
+                } else {
+
+                    write_buf[i] = ' ';
+                }
+                
+                read_buf[i] = '\0';
+            }
+        }
+    }
+
+    if ( *pass_ptr ) {
+
+        result = H5FDaio_write(file, H5FD_MEM_DRAW, H5P_DEFAULT, 
+                               offset, write_size, (void *)(write_buf), 
+                               &aioctlblk_ptr);
+
+        if ( ( result < 0 ) || ( aioctlblk_ptr == NULL ) ) {
+
+            *pass_ptr = FALSE;
+            *failure_mssg_ptr = "H5FDaio_write(0) failed.";
+        }
+    }
+
+    if ( do_wait ) {
+
+        if ( *pass_ptr ) {
+
+            result = H5FDaio_wait(file, aioctlblk_ptr);
+
+            if ( result < 0 ) {
+
+                *pass_ptr = FALSE;
+                *failure_mssg_ptr = "H5FDaio_wait(1) failed.";
+            }
+        }
+    } else {
+
+        done = FALSE;
+        while ( ( *pass_ptr ) && ( ! done ) ) {
+
+            result = H5FDaio_test(file, &done, aioctlblk_ptr);
+
+            if ( result < 0 ) {
+
+                *pass_ptr = FALSE;
+                *failure_mssg_ptr = "H5FDaio_test(0) failed.";
+            }
+        }
+    }
+
+    if ( *pass_ptr ) {
+
+        result = H5FDaio_finish(file, &error_num, aioctlblk_ptr);
+
+        if ( ( result < 0 ) || ( error_num != 0 ) ) {
+
+            *pass_ptr = FALSE;
+            *failure_mssg_ptr = "H5FDaio_finish(0) failed.";
+        }
+    }
+
+    if ( *pass_ptr ) {
+
+        aioctlblk_ptr = NULL;
+
+        result = H5FDaio_read(file, H5FD_MEM_DRAW, H5P_DEFAULT,
+                              offset, write_size, (void *)read_buf, 
+                              &aioctlblk_ptr);
+
+        if ( ( result < 0 ) || ( aioctlblk_ptr == NULL ) ) {
+
+            *pass_ptr = FALSE;
+            *failure_mssg_ptr = "H5FDaio_read(0) failed.";
+        }
+    }
+
+    if ( do_wait ) {
+
+        if ( *pass_ptr ) {
+
+            result = H5FDaio_wait(file, aioctlblk_ptr);
+
+            if ( result < 0 ) {
+
+                *pass_ptr = FALSE;
+                *failure_mssg_ptr = "H5FDaio_wait(1) failed.";
+            }
+        }
+    } else {
+
+        done = FALSE;
+        while ( ( *pass_ptr ) && ( ! done ) ) {
+
+            result = H5FDaio_test(file, &done, aioctlblk_ptr);
+
+            if ( result < 0 ) {
+
+                *pass_ptr = FALSE;
+                *failure_mssg_ptr = "H5FDaio_test(1) failed.";
+            }
+        }
+    }
+
+    if ( *pass_ptr ) {
+
+        result = H5FDaio_finish(file, &error_num, aioctlblk_ptr);
+
+        if ( ( result < 0 ) || ( error_num != 0 ) ) {
+
+            *pass_ptr = FALSE;
+            *failure_mssg_ptr = "H5FDaio_finish(1) failed.";
+        }
+    }
+
+    i = 0;
+    while ( ( *pass_ptr ) && ( i < (int)write_size ) ) {
+
+        if ( read_buf[i] != write_buf[i] ) {
+
+            *pass_ptr = FALSE;
+            *failure_mssg_ptr = "data mismatch(1).";
+        }
+        i++;
+    }
+
+    if ( write_buf != NULL ) { /* must discard write buffer */
+
+        HDfree(write_buf);
+        write_buf = NULL;
+    }
+
+    if ( read_buf != NULL ) { /* must discard read buffer */
+
+        HDfree(read_buf);
+        read_buf = NULL;
+    }
+
+    return;
+
+} /* generic_aio_test__single_write_read_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	generic_aio_test__multiple_write_sync_read_test
+ *
+ * Purpose:	Kick off the specified number of writes, each of the 
+ *		the specified length.  
+ *
+ *		Wait and/or test until the aio writes are complete, and
+ *              all aio_fsync.
+ *
+ *		Then read the data back into memory, and verify that 
+ *		we read the expected data.
+ *
+ *		Do nothing if *pass_ptr is FALSE on entry.
+ *
+ *		Set *pass_ptr to FALSE and set *failure_mssg_ptr if any
+ *		error is detected.
+ *
+ *
+ * Return:      void.
+ *
+ * Programmer:  JRM -- 7/15/10
+ * 
+ *-------------------------------------------------------------------------
+ */
+
+static void
+generic_aio_test__multiple_write_sync_read_test(H5FD_t * file,
+						int write_count,
+						haddr_t offsets[],
+						size_t lengths[],
+                                                hbool_t * pass_ptr, 
+                                                char ** failure_mssg_ptr)
+{
+    const char * fcn_name = "generic_aio_test__multiple_write_sync_read_test()";
+    char ** write_bufs = NULL;
+    char ** read_bufs = NULL;
+    void * fsync_aioctlblk = NULL;
+    void ** ctlblks = NULL;
+    hbool_t done;
+    hbool_t do_wait;
+    hbool_t show_progress = FALSE;
+    int error_num;
+    int i;
+    int j;
+    int tag_len;
+    int ret_val = 0;
+    herr_t result;
+
+    if ( *pass_ptr ) {
+
+        if ( ( file == NULL ) ||
+             ( write_count <= 0  ) ||
+             ( offsets == NULL ) ||
+             ( lengths == NULL ) ||
+             ( failure_mssg_ptr == NULL ) ) {
+
+	    *pass_ptr = FALSE;
+            *failure_mssg_ptr = 
+	"bad param(s) passed to generic_aio_test__multiple_write_sync_read_test()";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s:%d: allocating buffers.\n", fcn_name, *pass_ptr);
+
+    if ( *pass_ptr ) { /* allocate arrays of pointers to */
+
+        write_bufs = (char **)HDmalloc((size_t)write_count * sizeof(char *));
+        read_bufs  = (char **)HDmalloc((size_t)write_count * sizeof(char *));
+        ctlblks    = (void **)HDmalloc((size_t)write_count * sizeof(void *));
+
+        if ( ( write_bufs == NULL ) ||
+             ( read_bufs == NULL ) ||
+             ( ctlblks == NULL ) ) {
+
+            *pass_ptr = NULL;
+            *failure_mssg_ptr = "buffer allocation(s) failed(1).";
+
+        } else {
+
+            for ( i = 0; i < write_count; i++ ) {
+
+                write_bufs[i] = NULL;
+                read_bufs[i] = NULL;
+                ctlblks[i] = NULL;
+            }
+        }
+    }
+
+    if ( *pass_ptr ) { /* allocate and intialize read and write buffers */
+
+        i = 0;
+
+        while ( ( *pass_ptr ) &&
+                ( i < write_count ) ) {
+
+            if ( lengths[i] <= 0 ) {
+
+                *pass_ptr = NULL;
+                *failure_mssg_ptr = "length[i] <= 16.";
+
+            } else {
+
+                write_bufs[i] = (char *)HDmalloc(lengths[i] * sizeof(char));
+                read_bufs[i]  = (char *)HDmalloc(lengths[i] * sizeof(char));
+
+                if ( ( write_bufs[i] == NULL ) ||
+                     ( read_bufs[i] == NULL ) ) {
+
+                    *pass_ptr = NULL;
+                    *failure_mssg_ptr = "buffer allocation(s) failed(2).";
+                }
+                else 
+                {
+                    sprintf(write_bufs[i], "%d", i);
+
+                    tag_len = HDstrlen(write_bufs[i]);
+
+                    HDassert( tag_len < 16 );
+
+                    for ( j = 0; j < lengths[i]; j++ ) {
+
+                        if ( j >= tag_len ) {
+
+                            *(write_bufs[i] + j) = ' ';
+                        }
+                    
+                        *(read_bufs[i] + j) = '\0';
+                    }
+                }
+            }
+
+            i++;
+        }
+    }
+
+    if ( show_progress ) 
+	HDfprintf(stdout, "%s:%d: kicking off writes.\n", fcn_name, *pass_ptr);
+
+    /* kick off the writes */
+    i = 0;
+    while ( ( *pass_ptr ) &&
+            ( i < write_count ) ) {
+
+        result = H5FDaio_write(file, H5FD_MEM_DRAW, H5P_DEFAULT, 
+                               offsets[i], lengths[i], (void *)(write_bufs[i]), 
+                               &(ctlblks[i]));
+
+        if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
+
+            *pass_ptr = FALSE;
+            *failure_mssg_ptr = "H5FDaio_write(0) failed.";
+        }
+
+        i++;
+    }
+
+    if ( show_progress ) 
+	HDfprintf(stdout, "%s:%d: waiting for writes.\n", fcn_name, *pass_ptr);
+
+    /* wait for the writes to complete -- test have the time, and wait the 
+     * other half 
+     */
+    i = 0;
+    do_wait = FALSE;
+    while ( ( *pass_ptr ) &&
+            ( i < write_count ) ) {
+
+        if ( do_wait ) {
+
+            if ( *pass_ptr ) {
+
+                result = H5FDaio_wait(file, ctlblks[i]);
+
+                if ( result < 0 ) {
+
+                    *pass_ptr = FALSE;
+                    *failure_mssg_ptr = "H5FDaio_wait(0) failed.";
+                }
+            }
+        } else {
+
+            done = FALSE;
+            while ( ( *pass_ptr ) && ( ! done ) ) {
+
+                result = H5FDaio_test(file, &done, ctlblks[i]);
+
+                if ( result < 0 ) {
+
+                    *pass_ptr = FALSE;
+                    *failure_mssg_ptr = "H5FDaio_test(0) failed.";
+                }
+            }
+        }
+
+        do_wait = ! do_wait;
+
+        i++;
+    }
+
+    if ( show_progress ) 
+	HDfprintf(stdout, "%s:%d: finishing writes.\n", fcn_name, *pass_ptr);
+
+    /* finish the writes */
+    i = 0;
+    while ( ( *pass_ptr ) &&
+            ( i < write_count ) ) {
+
+        result = H5FDaio_finish(file, &error_num, ctlblks[i]);
+
+        if ( ( result < 0 ) || ( error_num != 0 ) ) {
+
+            *pass_ptr = FALSE;
+            *failure_mssg_ptr = "H5FDaio_finish(0) failed.";
+        }
+
+        ctlblks[i] = NULL;
+
+        i++;
+    }
+
+    if ( show_progress ) 
+	HDfprintf(stdout, "%s:%d: doing aio fsync.\n", fcn_name, *pass_ptr);
+
+    /* do an aio_fsync */
+    if ( *pass_ptr ) {
+
+        result = H5FDaio_fsync(file, &fsync_aioctlblk);
+
+        if ( ( result < 0 ) || ( fsync_aioctlblk ==  NULL ) ) {
+
+            *pass_ptr = FALSE;
+            *failure_mssg_ptr = "H5FDaio_fsync(0) failed.";
+        }
+    }
+
+    if ( * pass_ptr ) {
+
+        result = H5FDaio_wait(file, fsync_aioctlblk);
+
+        if ( result < 0 ) {
+
+            *pass_ptr = FALSE;
+            *failure_mssg_ptr = "H5FDaio_fsync(0) failed.";
+        }
+    }
+
+    if ( * pass_ptr ) {
+
+        result = H5FDaio_finish(file, &error_num, fsync_aioctlblk);
+
+        if ( ( result < 0 ) || ( error_num != 0 ) ) {
+
+            *pass_ptr = FALSE;
+            *failure_mssg_ptr = "H5FDaio_finish(0) failed.";
+        }
+    }
+
+
+    /* kick off the reads */
+
+    if ( show_progress ) 
+	HDfprintf(stdout, "%s:%d: starting reads.\n", fcn_name, *pass_ptr);
+
+    i = 0;
+    while ( ( *pass_ptr ) &&
+            ( i < write_count ) ) {
+
+        result = H5FDaio_read(file, H5FD_MEM_DRAW, H5P_DEFAULT, 
+                              offsets[i], lengths[i], (void *)(read_bufs[i]), 
+                              &(ctlblks[i]));
+
+        if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
+
+            *pass_ptr = FALSE;
+            *failure_mssg_ptr = "H5FDaio_write(0) failed.";
+        }
+
+        i++;
+    }
+
+    /* wait for the reads to complete -- test have the time, and wait the 
+     * other half 
+     */
+
+    if ( show_progress ) 
+	HDfprintf(stdout, "%s:%d: waiting for reads.\n", fcn_name, *pass_ptr);
+
+    i = 0;
+    do_wait = TRUE;
+    while ( ( *pass_ptr ) &&
+            ( i < write_count ) ) {
+
+        if ( do_wait ) {
+
+            if ( *pass_ptr ) {
+
+                result = H5FDaio_wait(file, ctlblks[i]);
+
+                if ( result < 0 ) {
+
+                    *pass_ptr = FALSE;
+                    *failure_mssg_ptr = "H5FDaio_wait(0) failed.";
+                }
+            }
+        } else {
+
+            done = FALSE;
+            while ( ( *pass_ptr ) && ( ! done ) ) {
+
+                result = H5FDaio_test(file, &done, ctlblks[i]);
+
+                if ( result < 0 ) {
+
+                    *pass_ptr = FALSE;
+                    *failure_mssg_ptr = "H5FDaio_test(0) failed.";
+                }
+            }
+        }
+
+        do_wait = ! do_wait;
+
+        i++;
+    }
+
+    /* finish the reads */
+
+    if ( show_progress ) 
+	HDfprintf(stdout, "%s:%d: finishing reads.\n", fcn_name, *pass_ptr);
+
+    i = 0;
+    while ( ( *pass_ptr ) &&
+            ( i < write_count ) ) {
+
+        result = H5FDaio_finish(file, &error_num, ctlblks[i]);
+
+        if ( ( result < 0 ) || ( error_num != 0 ) ) {
+
+            *pass_ptr = FALSE;
+            *failure_mssg_ptr = "H5FDaio_finish(0) failed.";
+        }
+
+        ctlblks[i] = NULL;
+
+        i++;
+    }
+
+
+    /* verify the reads */
+
+    if ( show_progress ) 
+	HDfprintf(stdout, "%s:%d: verifying reads.\n", fcn_name, *pass_ptr);
+
+    i = 0;
+    while ( ( *pass_ptr ) &&
+            ( i < write_count ) ) {
+
+        j = 0;
+        while ( ( *pass_ptr ) &&
+                ( j < lengths[i] ) ) {
+
+            if ( (write_bufs[i])[j] != (read_bufs[i])[j] ) {
+
+                HDfprintf(stdout, "lengths[%d] = %d\n", i, lengths[i]);
+                HDfprintf(stdout, "offsets[%d] = %lld\n", 
+                          i, (long long)(offsets[i]));
+                HDfprintf(stdout, "write_bufs[%d][%d] = %c\n", 
+                          i, j, (write_bufs[i])[j]);
+                HDfprintf(stdout, "read_bufs[%d][%d] = %c\n", 
+                          i, j, (read_bufs[i])[j]);
+                *pass_ptr = FALSE;
+                *failure_mssg_ptr = "data mismatch(1).";
+            }
+            j++;
+        }
+
+        i++;
+    }
+
+    /* discard the buffers */
+
+    if ( show_progress ) 
+	HDfprintf(stdout, "%s:%d: discarding buffers.\n", fcn_name, *pass_ptr);
+
+    if ( write_bufs != NULL ) {
+
+        for ( i = 0; i < write_count; i++ ) {
+
+            if ( write_bufs[i] != NULL ) {
+
+                HDfree(write_bufs[i]);
+                write_bufs[i] = NULL;
+            }
+        }
+        HDfree(write_bufs);
+        write_bufs = NULL;
+    }
+
+    if ( read_bufs != NULL ) {
+
+        for ( i = 0; i < write_count; i++ ) {
+
+            if ( read_bufs[i] != NULL ) {
+
+                HDfree(read_bufs[i]);
+                read_bufs[i] = NULL;
+            }
+        }
+        HDfree(write_bufs);
+        write_bufs = NULL;
+    }
+
+    if ( ctlblks != NULL ) {
+
+        HDfree(ctlblks);
+        ctlblks = NULL;
+    }
+
+    if ( show_progress ) 
+	HDfprintf(stdout, "%s:%d: done.\n", fcn_name, *pass_ptr);
+
+    return;
+
+} /* generic_aio_test__multiple_write_sync_read_test() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -1141,6 +2100,7 @@ int
 main(void)
 {
     int nerrors = 0;
+    hid_t fapl;
 
     h5_reset();
 
@@ -1151,6 +2111,36 @@ main(void)
     nerrors += test_multi() < 0     ? 1 : 0;
     nerrors += test_direct() < 0      ? 1 : 0;
 
+    fapl = h5_fileaccess();
+    if ( H5Pset_fapl_sec2(fapl) < 0 ) {
+
+        nerrors++;
+
+    } else {
+
+        nerrors += generic_aio_test("SEC2 AIO VFD", "sec2_aio_test",
+		                    fapl, (haddr_t)0x40000000);
+    }
+
+    H5Pclose(fapl);
+#if 0
+/* TODO:  Add tests for other file drivers.
+ *        Add test for new synchronous fsync VFD call.
+ */
+
+    fapl = h5_fileaccess();
+    if(H5Pset_fapl_core(fapl, (size_t)0x40000000, TRUE) < 0) {
+
+        nerrors++;
+
+    } else {
+
+        nerrors += generic_aio_test("CORE VFD", "core_aio_test",
+		                    fapl, (haddr_t)0x40000000);
+    }
+
+    H5Pclose(fapl);
+#endif
     if(nerrors) {
 	printf("***** %d Virtual File Driver TEST%s FAILED! *****\n",
 		nerrors, nerrors > 1 ? "S" : "");

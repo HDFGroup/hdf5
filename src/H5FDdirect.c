@@ -203,6 +203,14 @@ static const H5FD_class_t H5FD_direct_g = {
     H5FD_direct_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+    NULL,                                       /*aio_read              */
+    NULL,                                       /*aio_write             */
+    NULL,                                       /*aio_test              */
+    NULL,                                       /*aio_wait              */
+    NULL,                                       /*aio_finish            */
+    NULL,                                       /*aio_fsync             */
+    NULL,                                       /*aio_cancel            */
+    NULL,					/*fsync			*/
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
 

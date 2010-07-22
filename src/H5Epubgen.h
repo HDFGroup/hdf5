@@ -100,12 +100,28 @@ H5_DLLVAR hid_t H5E_CACHE_g;         /* Object cache */
 #define H5E_CLOSEERROR       (H5OPEN H5E_CLOSEERROR_g)
 #define H5E_OVERFLOW         (H5OPEN H5E_OVERFLOW_g)
 #define H5E_FCNTL            (H5OPEN H5E_FCNTL_g)
+#define H5E_SYNCFAIL         (H5OPEN H5E_SYNCFAIL_g)
+#define H5E_AIOREADERROR     (H5OPEN H5E_AIOREADERROR_g)
+#define H5E_AIOWRITEERROR    (H5OPEN H5E_AIOWRITEERROR_g)
+#define H5E_AIOSYNCFAIL      (H5OPEN H5E_AIOSYNCFAIL_g)
+#define H5E_AIOCANCELFAIL    (H5OPEN H5E_AIOCANCELFAIL_g)
+#define H5E_AIOTESTFAIL      (H5OPEN H5E_AIOTESTFAIL_g)
+#define H5E_AIOWAITFAIL      (H5OPEN H5E_AIOWAITFAIL_g)
+#define H5E_AIOFINISHFAIL    (H5OPEN H5E_AIOFINISHFAIL_g)
 H5_DLLVAR hid_t H5E_SEEKERROR_g;     /* Seek failed */
 H5_DLLVAR hid_t H5E_READERROR_g;     /* Read failed */
 H5_DLLVAR hid_t H5E_WRITEERROR_g;    /* Write failed */
 H5_DLLVAR hid_t H5E_CLOSEERROR_g;    /* Close failed */
 H5_DLLVAR hid_t H5E_OVERFLOW_g;      /* Address overflowed */
 H5_DLLVAR hid_t H5E_FCNTL_g;         /* File control (fcntl) failed */
+H5_DLLVAR hid_t H5E_SYNCFAIL_g;      /* File sync failed */
+H5_DLLVAR hid_t H5E_AIOREADERROR_g;  /* File sync failed */
+H5_DLLVAR hid_t H5E_AIOWRITEERROR_g; /* File sync failed */
+H5_DLLVAR hid_t H5E_AIOSYNCFAIL_g;   /* File sync failed */
+H5_DLLVAR hid_t H5E_AIOCANCELFAIL_g; /* AIO File op cancel failed */
+H5_DLLVAR hid_t H5E_AIOTESTFAIL_g;   /* AIO File op test failed */
+H5_DLLVAR hid_t H5E_AIOWAITFAIL_g;   /* AIO File op wait failed */
+H5_DLLVAR hid_t H5E_AIOFINISHFAIL_g; /* AIO File op finish failed */
 
 /* Resource errors */
 #define H5E_NOSPACE          (H5OPEN H5E_NOSPACE_g)

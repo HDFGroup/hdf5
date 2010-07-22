@@ -190,7 +190,9 @@ static herr_t H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr
 			     size_t size, void *buf);
 static herr_t H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
+static herr_t H5FD_log_flush(H5FD_t *file, hid_t UNUSED dxpl, unsigned closing);
 static herr_t H5FD_log_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD_log_fsync(H5FD_t *file, hid_t UNUSED dxpl);
 
 #ifdef OLD_WAY
 /*
@@ -234,10 +236,18 @@ static const H5FD_class_t H5FD_log_g = {
     H5FD_log_get_handle,                        /*get_handle            */
     H5FD_log_read,				/*read			*/
     H5FD_log_write,				/*write			*/
-    NULL,					/*flush			*/
+    H5FD_log_flush,				/*flush			*/
     H5FD_log_truncate,				/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+    NULL,                                       /*aio_read              */
+    NULL,                                       /*aio_write             */
+    NULL,                                       /*aio_test              */
+    NULL,                                       /*aio_wait              */
+    NULL,                                       /*aio_finish            */
+    NULL,                                       /*aio_fsync             */
+    NULL,                                       /*aio_cancel            */
+    H5FD_log_fsync,				/*fsync			*/
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
 
@@ -1303,6 +1313,58 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD_log_flush
+ *
+ * Purpose:     Flush the log file.  Since the data file is written 
+ *		without buffering, there is no need to flush it as well.
+ *
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              7/14/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+H5FD_log_flush(H5FD_t *file,
+               hid_t UNUSED dxpl,
+               unsigned closing)
+{
+    herr_t       ret_value = SUCCEED;       /* Return value */
+    int          result;
+    H5FD_log_t * log_file_ptr = NULL;
+
+    FUNC_ENTER_NOAPI(H5FD_log_fsync, FAIL)
+
+    if ( file == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
+    }
+
+    log_file_ptr = (H5FD_log_t *)file;
+
+    if ( ( ! closing ) && ( log_file_ptr->logfp != NULL ) )  {
+
+        result = HDfflush(log_file_ptr->logfp);
+
+        if ( result != 0 ) {
+
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
+                        "log file fflush request failed")
+        }
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_log_flush() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_log_truncate
  *
  * Purpose:	Makes sure that the true file size is the same (or larger)
@@ -1338,4 +1400,75 @@ H5FD_log_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_log_truncate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_log_fsync
+ *
+ * Purpose:     Sync the data and log files.  
+ *
+ *		Note that a sycn and a flush are two different things, 
+ *		and that since the log file may be buffered, a flush may 
+ *		be necessary before the sync to	obtain the desired result.
+ *
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              7/8/10
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+H5FD_log_fsync(H5FD_t *file,
+                hid_t UNUSED dxpl)
+{
+    herr_t       ret_value = SUCCEED;       /* Return value */
+    int		 filenum;
+    int          result;
+    H5FD_log_t * log_file_ptr = NULL;
+
+    FUNC_ENTER_NOAPI(H5FD_log_fsync, FAIL)
+
+    if ( file == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
+    }
+
+    log_file_ptr = (H5FD_log_t *)file;
+
+    result = HDfsync(log_file_ptr->fd);
+
+    if ( result != 0 ) {
+
+        HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, \
+		    "unix file fsync request failed")
+    }
+
+    if ( log_file_ptr->logfp != NULL ) {
+
+        filenum = HDfileno(log_file_ptr->logfp);
+
+        if ( filenum == -1 ) {
+
+            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, \
+                        "fileno() request on log file failed")
+        }
+
+        result = HDfsync(filenum);
+
+        if ( result != 0 ) {
+
+            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, \
+                        "log file fsync request failed")
+        }
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_log_fsync() */
 

@@ -63,6 +63,14 @@ hid_t H5E_WRITEERROR_g     = FAIL;      /* Write failed */
 hid_t H5E_CLOSEERROR_g     = FAIL;      /* Close failed */
 hid_t H5E_OVERFLOW_g       = FAIL;      /* Address overflowed */
 hid_t H5E_FCNTL_g          = FAIL;      /* File control (fcntl) failed */
+hid_t H5E_SYNCFAIL_g       = FAIL;      /* File sync failed */
+hid_t H5E_AIOREADERROR_g   = FAIL;      /* File sync failed */
+hid_t H5E_AIOWRITEERROR_g  = FAIL;      /* File sync failed */
+hid_t H5E_AIOSYNCFAIL_g    = FAIL;      /* File sync failed */
+hid_t H5E_AIOCANCELFAIL_g  = FAIL;      /* AIO File op cancel failed */
+hid_t H5E_AIOTESTFAIL_g    = FAIL;      /* AIO File op test failed */
+hid_t H5E_AIOWAITFAIL_g    = FAIL;      /* AIO File op wait failed */
+hid_t H5E_AIOFINISHFAIL_g  = FAIL;      /* AIO File op finish failed */
 
 /* Resource errors */
 hid_t H5E_NOSPACE_g        = FAIL;      /* No space available for allocation */
