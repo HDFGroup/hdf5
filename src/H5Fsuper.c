@@ -108,6 +108,9 @@
 /********************/
 /* Local Prototypes */
 /********************/
+static herr_t H5F_super_ext_create(H5F_t *f, hid_t dxpl_id, H5O_loc_t *ext_ptr);
+static herr_t H5F_super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr);
+static herr_t H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr);
 
 
 /*********************/
@@ -210,6 +213,139 @@ H5F_locate_signature(H5FD_t *file, hid_t dxpl_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_locate_signature() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_super_ext_create
+ *
+ * Purpose:     Create the superblock extension
+ *
+ * Return:      Success:        non-negative on success
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi; Feb 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_super_ext_create(H5F_t *f, hid_t dxpl_id, H5O_loc_t *ext_ptr)
+{
+    H5P_genplist_t *plist;                      /* File creation property list */
+    unsigned        super_vers;                 /* Superblock version              */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5F_super_ext_create)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(ext_ptr);
+
+    /* Get the shared file creation property list */
+    if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Grab values from property list */
+    if(H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get superblock version")
+
+    /* Check for older version of superblock format */
+    if(super_vers < HDF5_SUPERBLOCK_VERSION_2)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "superblock extension not permitted?!?!")
+    else if(f->shared->extension_addr != HADDR_UNDEF)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "superblock extension already exists?!?!")
+    else {
+        /* The superblock extension isn't actually a group, but the
+         * default group creation list should work fine.
+         * If we don't supply a size for the object header, HDF5 will
+         * allocate H5O_MIN_SIZE by default.  This is currently
+         * big enough to hold the biggest possible extension, but should
+         * be tuned if more information is added to the superblock
+         * extension.
+         */
+        H5O_loc_reset(ext_ptr);
+        if(H5O_create(f, dxpl_id, 0, H5P_GROUP_CREATE_DEFAULT, ext_ptr) < 0)
+    	HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "unable to create superblock extension")
+
+        /* Record the address of the superblock extension */
+        f->shared->extension_addr = ext_ptr->addr;
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_super_ext_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_super_ext_open
+ *
+ * Purpose:     Open an existing superblock extension
+ *
+ * Return:      Success:        non-negative on success
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi; Feb 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5F_super_ext_open)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(H5F_addr_defined(ext_addr));
+    HDassert(ext_ptr);
+
+    /* Set up "fake" object location for superblock extension */
+    H5O_loc_reset(ext_ptr);
+    ext_ptr->file = f;
+    ext_ptr->addr = ext_addr;
+
+    /* Open the superblock extension object header */
+    if(H5O_open(ext_ptr) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open superblock extension")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_super_ext_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:   H5F_super_ext_close
+ *
+ * Purpose:    Close superblock extension
+ *
+ * Return:     Success:        non-negative on success
+ *             Failure:        Negative
+ *
+ * Programmer:  Vailin Choi; Feb 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5F_super_ext_close)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(ext_ptr);
+
+    /* Twiddle the number of open objects to avoid closing the file. */
+    f->nopen_objs++;
+    if(H5O_close(ext_ptr) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close superblock extension")
+    f->nopen_objs--;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_super_ext_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -560,14 +696,9 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
          */
         HDassert(super_vers >= HDF5_SUPERBLOCK_VERSION_2);
 
-        /* Set up "fake" object location for superblock extension */
-        H5O_loc_reset(&ext_loc);
-        ext_loc.file = f;
-        ext_loc.addr = shared->extension_addr;
-
         /* Open the superblock extension */
-        if(H5O_open(&ext_loc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open superblock extension")
+	if(H5F_super_ext_open(f, shared->extension_addr, &ext_loc) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
 
         /* Read in the shared OH message information if there is any */
         if(H5SM_get_info(&ext_loc, c_plist, dxpl_id) < 0)
@@ -618,13 +749,9 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
             H5O_msg_reset(H5O_DRVINFO_ID, &drvinfo);
         } /* end else */
 
-        /* Close the extension.  Twiddle the number of open objects to avoid
-         * closing the file (since this will be the only open object).
-         */
-        f->nopen_objs++;
-        if(H5O_close(&ext_loc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to close superblock extension")
-        f->nopen_objs--;
+        /* Close superblock extension */
+	if(H5F_super_ext_close(f, &ext_loc) < 0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close file's superblock extension")
     } /* end if */
 
 done:
@@ -754,12 +881,8 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
          * be tuned if more information is added to the superblock
          * extension.
          */
-        H5O_loc_reset(&ext_loc);
-        if(H5O_create(f, dxpl_id, 0, H5P_GROUP_CREATE_DEFAULT, &ext_loc) < 0)
+	if(H5F_super_ext_create(f, dxpl_id, &ext_loc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create superblock extension")
-
-        /* Record the address of the superblock extension */
-        f->shared->extension_addr = ext_loc.addr;
 
         /* Create the Shared Object Header Message table and register it with
          *      the metadata cache, if this file supports shared messages.
@@ -803,13 +926,9 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update driver info header message")
         } /* end if */
 
-        /* Twiddle the number of open objects to avoid closing the file
-         * (since this will be the only open object currently).
-         */
-        f->nopen_objs++;
-        if(H5O_close(&ext_loc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close superblock extension")
-        f->nopen_objs--;
+        /* Close superblock extension */
+	if(H5F_super_ext_close(f, &ext_loc) < 0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close file's superblock extension")
     } /* end if */
 
 done:
@@ -1007,4 +1126,136 @@ H5F_super_ext_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_ext_size)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_super_ext_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_super_ext_write_msg()
+ *
+ * Purpose:     Write the message with ID to the superblock extension
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; Feb 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, void *mesg, unsigned id, hbool_t may_create)
+{
+    H5O_loc_t 	ext_loc; 	/* "Object location" for superblock extension */
+    htri_t 	status;       	/* Indicate whether the message exists or not */
+    herr_t 	ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_super_ext_write_msg, FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->extension_addr);
+
+    /* Open/create the superblock extension object header */
+    if(H5F_addr_defined(f->shared->extension_addr)) {
+	if(H5F_super_ext_open(f, f->shared->extension_addr, &ext_loc) < 0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
+    } /* end if */
+    else {
+        HDassert(may_create);
+	if(H5F_super_ext_create(f, dxpl_id, &ext_loc) < 0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create file's superblock extension")
+    } /* end else */
+    HDassert(H5F_addr_defined(ext_loc.addr));
+
+    /* Check if message with ID does not exist in the object header */
+    if((status = H5O_msg_exists(&ext_loc, id, dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check object header for message or message exists")
+
+    /* Check for creating vs. writing */
+    if(may_create) {
+	if(status)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "Message should not exist")
+
+	/* Create the message with ID in the superblock extension */
+	if(H5O_msg_create(&ext_loc, id, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, mesg, dxpl_id) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to create the message in object header")
+    } /* end if */
+    else {
+	if(!status)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "Message should exist")
+
+	/* Update the message with ID in the superblock extension */
+	if(H5O_msg_write(&ext_loc, id, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, mesg, dxpl_id) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to write the message in object header")
+    } /* end else */
+
+    /* Close the superblock extension object header */
+    if(H5F_super_ext_close(f, &ext_loc) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close file's superblock extension")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_super_ext_write_msg() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_super_ext_remove_msg
+ *
+ * Purpose:     Remove the message with ID from the superblock extension
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; Feb 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_super_ext_remove_msg(H5F_t *f, hid_t dxpl_id, unsigned id)
+{
+    htri_t 	status;       	/* Indicate whether the message exists or not */
+    H5O_loc_t 	ext_loc; 	/* "Object location" for superblock extension */
+    int		null_count = 0;	/* # of null messages */
+    herr_t 	ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_super_ext_remove_msg, FAIL)
+
+    /* Make sure that the superblock extension object header exists */
+    HDassert(H5F_addr_defined(f->shared->extension_addr));
+
+    /* Open superblock extension object header */
+    if(H5F_super_ext_open(f, f->shared->extension_addr, &ext_loc) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in starting file's superblock extension")
+
+    /* Check if message with ID exists in the object header */
+    if((status = H5O_msg_exists(&ext_loc, id, dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check object header for message")
+    else if(status) { /* message exists */
+	H5O_hdr_info_t 	hdr_info;       /* Object header info for superblock extension */
+
+	/* Remove the message */
+	if(H5O_msg_remove(&ext_loc, id, H5O_ALL, TRUE, dxpl_id) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete free-space manager info message")
+
+	/* Get info for the superblock extension's object header */
+	if(H5O_get_hdr_info(&ext_loc, dxpl_id, &hdr_info) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve superblock extension info")
+
+	/* If the object header is an empty base chunk, remove superblock extension */
+	if(hdr_info.nchunks == 1) {
+	    if((null_count = H5O_msg_count(&ext_loc, H5O_NULL_ID, dxpl_id)) < 0)
+		HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to count messages")
+	    else if((unsigned)null_count == hdr_info.nmesgs) {
+		HDassert(H5F_addr_defined(ext_loc.addr));
+		if(H5O_delete(f, dxpl_id, ext_loc.addr) < 0)
+		    HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to count messages")
+		f->shared->extension_addr = HADDR_UNDEF;
+	    } /* end if */
+	} /* end if */
+    } /* end if */
+
+    /* Close superblock extension object header */
+    if(H5F_super_ext_close(f, &ext_loc) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close file's superblock extension")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_super_ext_remove_msg() */
 

@@ -1741,7 +1741,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log dirtied entry")
     }
 
-    if ( ( (flags & H5C__DELETED_FLAG) != 0 ) &&
+    if ( ( deleted ) &&
          ( NULL != (aux_ptr = f->shared->cache->aux_ptr) ) &&
          ( aux_ptr->mpi_rank == 0 ) ) {
 

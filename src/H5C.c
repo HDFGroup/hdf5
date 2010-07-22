@@ -223,7 +223,6 @@ H5C_epoch_marker_load(H5F_t UNUSED * f,
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "called unreachable fcn.")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -242,7 +241,6 @@ H5C_epoch_marker_flush(H5F_t UNUSED *f,
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -257,7 +255,6 @@ H5C_epoch_marker_dest(H5F_t UNUSED * f,
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -273,7 +270,6 @@ H5C_epoch_marker_clear(H5F_t UNUSED * f,
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -289,7 +285,6 @@ H5C_epoch_marker_size(const H5F_t UNUSED * f,
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
