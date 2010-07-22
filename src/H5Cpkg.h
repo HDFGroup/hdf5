@@ -1021,6 +1021,18 @@ typedef struct H5C_mdjsc_record_t
  * 		remaining fields in this section are undefined if
  * 		mdj_enabled is FALSE.
  *
+ * jnl_magic:   Randomly selected int32_t used to reduce the possibility
+ *              of running the wrong journal on an HDF5 file.  The basic
+ *              idea is to pick a random number, store it in both the HDF5
+ *		file and the journal file, and then refuse to run the
+ *		journal unless the numbers match.
+ *
+ * jnl_file_name_len: Length of the journal file name, or zero if the
+ *		journal file name is undefined.
+ *
+ * jnl_file_name: Array of char of length H5C__MAX_JOURNAL_FILE_NAME_LEN
+ *		+ 1 used to store the journal file path.
+ *
  * trans_in_progress Boolean flag used to indicate whether a metadata
  * 		transaction is in progress. 
  *
@@ -1050,18 +1062,6 @@ typedef struct H5C_mdjsc_record_t
  * 		the journal entries of all transactions in which it has
  * 		been modified have been written to disk in the journal
  * 		file.
- *
- * jnl_magic:   Randomly selected int32_t used to reduce the possibility
- *              of running the wrong journal on an HDF5 file.  The basic
- *              idea is to pick a random number, store it in both the HDF5
- *		file and the journal file, and then refuse to run the
- *		journal unless the numbers match.
- *
- * jnl_file_name_len: Length of the journal file name, or zero if the
- *		journal file name is undefined.
- *
- * jnl_file_name: Array of char of length H5C__MAX_JOURNAL_FILE_NAME_LEN
- *		+ 1 used to store the journal file path.
  *
  * mdj_jbrb:    Instance of H5C_jbrb_t used to manage logging of journal
  * 		entries to the journal file.
@@ -1455,14 +1455,13 @@ struct H5C_t
     int64_t			cache_accesses;
 
     hbool_t			mdj_enabled;
+    int32_t			jnl_magic;
+    size_t			jnl_file_name_len;
+    char 			jnl_file_name[H5C__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t			trans_in_progress;
     char			trans_api_name[H5C__MAX_API_NAME_LEN];
     uint64_t			trans_num;
     uint64_t			last_trans_on_disk;
-    int32_t			jnl_magic;
-    int32_t			jnl_file_name_len;
-    char 			jnl_file_name[H5C__MAX_JOURNAL_FILE_NAME_LEN
-                                              + 1];
     struct H5C_jbrb_t		mdj_jbrb;
     int32_t			tl_len;
     size_t			tl_size;

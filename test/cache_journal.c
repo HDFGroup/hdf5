@@ -6628,6 +6628,7 @@ check_superblock_extensions(void)
      */
 
     if ( pass ) {
+        H5O_mdj_msg_t	mdj_msg;        /* Metadata journaling message to insert in superblock extension */
 
         file_ptr->shared->mdc_jnl_enabled       = TRUE;
         file_ptr->shared->mdc_jnl_magic         = 123;
@@ -6648,10 +6649,20 @@ check_superblock_extensions(void)
                       file_ptr->shared->mdc_jnl_file_name);
         }
 
-	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
+        /* create a metadata journaling message and insert it in
+         * the superblock extension.
+         */
+        mdj_msg.mdc_jnl_enabled       = file_ptr->shared->mdc_jnl_enabled;
+        mdj_msg.mdc_jnl_magic         = file_ptr->shared->mdc_jnl_magic;
+        mdj_msg.mdc_jnl_file_name_len = file_ptr->shared->mdc_jnl_file_name_len;
+        HDstrncpy(mdj_msg.mdc_jnl_file_name, file_ptr->shared->mdc_jnl_file_name,
+                  file_ptr->shared->mdc_jnl_file_name_len + 1);
+
+        /* Write metadata journaling message to superblock extension */
+        if(H5F_super_ext_write_msg(file_ptr, -1, &mdj_msg, H5O_MDJ_MSG_ID, TRUE) < 0) {
 
             pass = FALSE;
-	    failure_mssg = "H5F_super_write_mdj_msg failed (1).";
+	    failure_mssg = "H5F_super_ext_write_msg failed (1).";
 	}
     }
 
@@ -6743,10 +6754,10 @@ check_superblock_extensions(void)
 
 	file_ptr->shared->mdc_jnl_enabled = FALSE;
 
-	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
+        if(H5F_super_ext_remove_msg(file_ptr, -1, H5O_MDJ_MSG_ID) < 0) {
 
             pass = FALSE;
-	    failure_mssg = "H5F_super_write_mdj_msg failed (2).";
+	    failure_mssg = "H5F_super_ext_remove_msg failed (2).";
 	}
     }
 
@@ -6813,6 +6824,7 @@ check_superblock_extensions(void)
     /*******************************************************************/
 
     if ( pass ) {
+        H5O_mdj_msg_t	mdj_msg;        /* Metadata journaling message to insert in superblock extension */
 
         file_ptr->shared->mdc_jnl_enabled       = TRUE;
         file_ptr->shared->mdc_jnl_magic         = 456;
@@ -6821,16 +6833,27 @@ check_superblock_extensions(void)
                   "qrst",
                   file_ptr->shared->mdc_jnl_file_name_len + 1);
 
-	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
+        /* create a metadata journaling message and insert it in
+         * the superblock extension.
+         */
+        mdj_msg.mdc_jnl_enabled       = file_ptr->shared->mdc_jnl_enabled;
+        mdj_msg.mdc_jnl_magic         = file_ptr->shared->mdc_jnl_magic;
+        mdj_msg.mdc_jnl_file_name_len = file_ptr->shared->mdc_jnl_file_name_len;
+        HDstrncpy(mdj_msg.mdc_jnl_file_name, file_ptr->shared->mdc_jnl_file_name,
+                  file_ptr->shared->mdc_jnl_file_name_len + 1);
+
+        /* Write metadata journaling message to superblock extension */
+        if(H5F_super_ext_write_msg(file_ptr, -1, &mdj_msg, H5O_MDJ_MSG_ID, TRUE) < 0) {
 
             pass = FALSE;
-	    failure_mssg = "H5F_super_write_mdj_msg failed (3).";
+	    failure_mssg = "H5F_super_ext_write_msg failed (3).";
 	}
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     if ( pass ) {
+        H5O_mdj_msg_t	mdj_msg;        /* Metadata journaling message to insert in superblock extension */
 
         file_ptr->shared->mdc_jnl_enabled       = TRUE;
         file_ptr->shared->mdc_jnl_magic         = 789;
@@ -6839,10 +6862,20 @@ check_superblock_extensions(void)
                   "z",
                   file_ptr->shared->mdc_jnl_file_name_len + 1);
 
-	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
+        /* create a metadata journaling message and insert it in
+         * the superblock extension.
+         */
+        mdj_msg.mdc_jnl_enabled       = file_ptr->shared->mdc_jnl_enabled;
+        mdj_msg.mdc_jnl_magic         = file_ptr->shared->mdc_jnl_magic;
+        mdj_msg.mdc_jnl_file_name_len = file_ptr->shared->mdc_jnl_file_name_len;
+        HDstrncpy(mdj_msg.mdc_jnl_file_name, file_ptr->shared->mdc_jnl_file_name,
+                  file_ptr->shared->mdc_jnl_file_name_len + 1);
+
+        /* Write metadata journaling message to superblock extension */
+        if(H5F_super_ext_write_msg(file_ptr, -1, &mdj_msg, H5O_MDJ_MSG_ID, FALSE) < 0) {
 
             pass = FALSE;
-	    failure_mssg = "H5F_super_write_mdj_msg failed (4).";
+	    failure_mssg = "H5F_super_ext_write_msg failed (4).";
 	}
     }
 
@@ -6935,10 +6968,10 @@ check_superblock_extensions(void)
 
 	file_ptr->shared->mdc_jnl_enabled = FALSE;
 
-	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
+        if(H5F_super_ext_remove_msg(file_ptr, -1, H5O_MDJ_MSG_ID) < 0) {
 
             pass = FALSE;
-	    failure_mssg = "H5F_super_write_mdj_msg failed (5).";
+	    failure_mssg = "H5F_super_ext_remove_msg failed (5).";
 	}
     }
 

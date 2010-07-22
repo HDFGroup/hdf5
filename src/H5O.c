@@ -84,6 +84,7 @@ static herr_t H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type);
 static herr_t H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id,
     hid_t dxpl_id);
+static herr_t H5O_get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr);
 
 
 /*********************/
@@ -2513,6 +2514,131 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_get_hdr_info
+ *
+ * Purpose:	Retrieve the object header information for an object
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		September 22 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_get_hdr_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_hdr_info_t *hdr)
+{
+    H5O_t *oh = NULL;                   /* Object header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_get_hdr_info, FAIL)
+
+    /* Check args */
+    HDassert(loc);
+    HDassert(hdr);
+
+    /* Reset the object header info structure */
+    HDmemset(hdr, 0, sizeof(*hdr));
+
+    /* Get the object header */
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Get the information for the object header */
+    if(H5O_get_hdr_info_real(oh, hdr) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve object header info")
+
+done:
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_get_hdr_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_get_hdr_info_real
+ *
+ * Purpose:	Internal routine to retrieve the object header information for an object
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		September 22 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
+{
+    const H5O_mesg_t *curr_msg;         /* Pointer to current message being operated on */
+    const H5O_chunk_t *curr_chunk;	/* Pointer to current message being operated on */
+    unsigned u;                         /* Local index variable */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_get_hdr_info_real)
+
+    /* Check args */
+    HDassert(oh);
+    HDassert(hdr);
+
+    /* Set the version for the object header */
+    hdr->version = oh->version;
+
+    /* Set the number of messages & chunks */
+    hdr->nmesgs = oh->nmesgs;
+    hdr->nchunks = oh->nchunks;
+
+    /* Set the status flags */
+    hdr->flags = oh->flags;
+
+    /* Iterate over all the messages, accumulating message size & type information */
+    hdr->space.meta = H5O_SIZEOF_HDR(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
+    hdr->space.mesg = 0;
+    hdr->space.free = 0;
+    hdr->mesg.present = 0;
+    hdr->mesg.shared = 0;
+    for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
+        uint64_t type_flag;             /* Flag for message type */
+
+        /* Accumulate space usage information, based on the type of message */
+	if(H5O_NULL_ID == curr_msg->type->id)
+            hdr->space.free += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
+        else if(H5O_CONT_ID == curr_msg->type->id)
+            hdr->space.meta += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
+        else {
+            hdr->space.meta += H5O_SIZEOF_MSGHDR_OH(oh);
+            hdr->space.mesg += curr_msg->raw_size;
+        } /* end else */
+
+        /* Set flag to indicate presence of message type */
+        type_flag = ((uint64_t)1) << curr_msg->type->id;
+        hdr->mesg.present |= type_flag;
+
+        /* Set flag if the message is shared in some way */
+        if(curr_msg->flags & H5O_MSG_FLAG_SHARED)                                   \
+            hdr->mesg.shared |= type_flag;
+    } /* end for */
+
+    /* Iterate over all the chunks, adding any gaps to the free space */
+    hdr->space.total = 0;
+    for(u = 0, curr_chunk = &oh->chunk[0]; u < oh->nchunks; u++, curr_chunk++) {
+        /* Accumulate the size of the header on disk */
+        hdr->space.total += curr_chunk->size;
+
+        /* If the chunk has a gap, add it to the free space */
+        hdr->space.free += curr_chunk->gap;
+    } /* end for */
+
+    /* Sanity check that all the bytes are accounted for */
+    HDassert(hdr->space.total == (hdr->space.free + hdr->space.meta + hdr->space.mesg));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_get_hdr_info_real() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_get_info
  *
  * Purpose:	Retrieve the information for an object
@@ -2598,43 +2724,9 @@ H5O_get_info(const H5O_loc_t *loc, hid_t dxpl_id, hbool_t want_ih_info, H5O_info
         } /* end if */
     } /* end else */
 
-    /* Set the version for the object header */
-    oinfo->hdr.version = oh->version;
-
-    /* Set the number of messages & chunks */
-    oinfo->hdr.nmesgs = oh->nmesgs;
-    oinfo->hdr.nchunks = oh->nchunks;
-
-    /* Set the status flags */
-    oinfo->hdr.flags = oh->flags;
-
-    /* Iterate over all the messages, accumulating message size & type information */
-    oinfo->hdr.space.meta = H5O_SIZEOF_HDR(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
-    oinfo->hdr.space.mesg = 0;
-    oinfo->hdr.space.free = 0;
-    oinfo->hdr.mesg.present = 0;
-    oinfo->hdr.mesg.shared = 0;
-    for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
-        uint64_t type_flag;             /* Flag for message type */
-
-        /* Accumulate space usage information, based on the type of message */
-	if(H5O_NULL_ID == curr_msg->type->id)
-            oinfo->hdr.space.free += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
-        else if(H5O_CONT_ID == curr_msg->type->id)
-            oinfo->hdr.space.meta += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
-        else {
-            oinfo->hdr.space.meta += H5O_SIZEOF_MSGHDR_OH(oh);
-            oinfo->hdr.space.mesg += curr_msg->raw_size;
-        } /* end else */
-
-        /* Set flag to indicate presence of message type */
-        type_flag = ((uint64_t)1) << curr_msg->type->id;
-        oinfo->hdr.mesg.present |= type_flag;
-
-        /* Set flag if the message is shared in some way */
-        if(curr_msg->flags & H5O_MSG_FLAG_SHARED)                                   \
-            oinfo->hdr.mesg.shared |= type_flag;
-    } /* end for */
+    /* Get the information for the object header */
+    if(H5O_get_hdr_info_real(oh, &oinfo->hdr) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve object header info")
 
     /* Retrieve # of attributes */
     oinfo->num_attrs = H5O_attr_count_real(loc->file, dxpl_id, oh);
@@ -2644,19 +2736,6 @@ H5O_get_info(const H5O_loc_t *loc, hid_t dxpl_id, hbool_t want_ih_info, H5O_info
         if((oinfo->num_attrs > 0) && (H5O_attr_bh_info(loc->file, dxpl_id, oh, &oinfo->meta_size.attr/*out*/) < 0))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve attribute btree & heap info")
     } /* end if */
-
-    /* Iterate over all the chunks, adding any gaps to the free space */
-    oinfo->hdr.space.total = 0;
-    for(u = 0, curr_chunk = &oh->chunk[0]; u < oh->nchunks; u++, curr_chunk++) {
-        /* Accumulate the size of the header on disk */
-        oinfo->hdr.space.total += curr_chunk->size;
-
-        /* If the chunk has a gap, add it to the free space */
-        oinfo->hdr.space.free += curr_chunk->gap;
-    } /* end for */
-
-    /* Sanity check that all the bytes are accounted for */
-    HDassert(oinfo->hdr.space.total == (oinfo->hdr.space.free + oinfo->hdr.space.meta + oinfo->hdr.space.mesg));
 
 done:
     if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)

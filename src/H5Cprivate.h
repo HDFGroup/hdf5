@@ -1616,15 +1616,6 @@ H5_DLL herr_t H5C_check_for_journaling(H5F_t * f,
 		                       H5C_t * cache_ptr,
                                        hbool_t journal_recovered);
 
-H5_DLL herr_t H5C_mark_journaling_in_progress(H5F_t * f,
-                                            hid_t dxpl_id,
-					    const int32_t journal_magic,
-                                            const char * journal_file_name_ptr);
-
-H5_DLL herr_t H5C_unmark_journaling_in_progress(H5F_t * f,
-                                                hid_t dxpl_id,
-						H5C_t * cache_ptr);
-
 
 /**************************************************************************/
 /****** metadata journaling status change callback management code ********/

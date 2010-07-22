@@ -76,6 +76,14 @@ static herr_t H5C_call_mdjsc_callbacks(H5C_t * cache_ptr,
 static herr_t H5C_get_journaling_in_progress(const H5F_t * f,
 					      H5C_t * cache_ptr);
 
+static herr_t H5C_mark_journaling_in_progress(H5F_t * f,
+                                            hid_t dxpl_id,
+					    const int32_t journal_magic,
+                                            const char * journal_file_name_ptr);
+
+static herr_t H5C_unmark_journaling_in_progress(H5F_t * f,
+                                                hid_t dxpl_id);
+
 static herr_t H5C_grow_mdjsc_callback_table(H5C_t * cache_ptr);
 
 static herr_t H5C_jb_aio__await_buffer_write_completion(
@@ -490,13 +498,8 @@ H5C_end_journaling(H5F_t * f,
          * extension.  In passing, also discard the cache's copies of the 
          * metadata journaling magic, and the journal file name.
          */
-        result = H5C_unmark_journaling_in_progress(f, dxpl_id, cache_ptr);
-
-        if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C_unmark_journaling_in_progress() failed.")
-        }
+        if(H5C_unmark_journaling_in_progress(f, dxpl_id) < 0 )
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTMODIFY, FAIL, "can't mark file as not being journaled")
 
         result = H5C_jb__takedown(&(cache_ptr->mdj_jbrb));
 
@@ -1217,6 +1220,7 @@ done:
 /************* superblock journaling message management code **************/
 /**************************************************************************/
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5C_check_for_journaling()
  *
@@ -1242,7 +1246,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5C_check_for_journaling(H5F_t * f,
                           hid_t dxpl_id,
@@ -1257,71 +1260,38 @@ H5C_check_for_journaling(H5F_t * f,
 	"journal recovery tool on this file.  The journal was written \n";
     const char * l3 = "to \"";
     const char * l4 = "\".\n";
-    herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_check_for_journaling, FAIL)
 
-    HDassert( f );
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->jnl_magic == 0 );
-    HDassert( cache_ptr->jnl_file_name_len == 0 );
+    HDassert(f);
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->jnl_magic == 0);
+    HDassert(cache_ptr->jnl_file_name_len == 0);
 
-    if ( H5C__check_for_journaling ) {
+    if(H5C__check_for_journaling ) {
+        if(H5C_get_journaling_in_progress(f, cache_ptr) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_get_journaling_in_progress() failed.")
 
-        result = H5C_get_journaling_in_progress(f, cache_ptr);
-
-        if ( result != SUCCEED ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C_get_journaling_in_progress() failed.")
-        }
-
-        if ( cache_ptr->jnl_file_name_len > 0 ) { /* journaling was in */
-					          /* progress          */
-
-            if ( journal_recovered ) {
-
-	        /* Just forget that we were journaling.  Do this by
-                 * deleting the superblock extension message that says
-                 * we were.
-	         */
-
-                result = H5C_unmark_journaling_in_progress(f, 
-                                                            dxpl_id, 
-                                                            cache_ptr);
-
-	        if ( result != SUCCEED ) {
-
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                                "H5C_unmark_journaling_in_progress() failed.")
-                }
-	    } else {
-
-                /* we have to play some games here to set up an error message 
-		 * that contains the journal file path.  In essence, what 
-		 * follows is a somewhat modified version of the HGOTO_ERROR() 
-		 * macro.
-	         */
-                (void)H5Epush2(H5E_DEFAULT, __FILE__, FUNC, __LINE__, 
-			       H5E_ERR_CLS_g, H5E_CACHE, H5E_CANTJOURNAL, 
-			       "%s%s%s%s%s%s", l0, l1, l2, l3, 
-			       cache_ptr->jnl_file_name, l4);
-	        (void)H5E_dump_api_stack((int)H5_IS_API(FUNC));
-	        HGOTO_DONE(FAIL)
-
-	    }
-        }
-    }
+        /* Check if journaling was in progress */
+        if(cache_ptr->jnl_file_name_len > 0) {
+            if(journal_recovered) {
+	        /* Forget that we were journaling */
+	        if(H5C_unmark_journaling_in_progress(f, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTMODIFY, FAIL, "can't mark file as not being journaled")
+	    } /* end if */
+            else
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL,  \
+                        "%s%s%s%s%s%s", l0, l1, l2, l3, cache_ptr->jnl_file_name, l4)
+        } /* end if */
+    } /* end if */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_check_for_journaling() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5C_get_journaling_in_progress()
  *
@@ -1360,7 +1330,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5C_get_journaling_in_progress(const H5F_t * f,
 				H5C_t * cache_ptr)
@@ -1412,7 +1381,7 @@ done:
 
 } /* H5C_get_journaling_in_progress() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5C_mark_journaling_in_progress()
  *
@@ -1443,88 +1412,86 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
-herr_t
+static herr_t
 H5C_mark_journaling_in_progress(H5F_t * f,
                                  hid_t dxpl_id,
 				 const int32_t journal_magic,
                                  const char * journal_file_name_ptr)
 {
+    H5O_mdj_msg_t	mdj_msg;        /* Metadata journaling message to insert in superblock extension */
     H5C_t * cache_ptr;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_mark_journaling_in_progress, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_mark_journaling_in_progress)
 
-    HDassert( f != NULL );
-    HDassert( f->shared != NULL );
-    HDassert( ! f->shared->mdc_jnl_enabled );
-
+    HDassert(f != NULL);
+    HDassert(f->shared != NULL);
+    HDassert(! f->shared->mdc_jnl_enabled);
     cache_ptr = f->shared->cache;
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->jnl_file_name_len == 0 );
-    HDassert( journal_file_name_ptr != NULL );
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->jnl_file_name_len == 0);
+    HDassert(journal_file_name_ptr != NULL);
 
     /* Can't journal a read only file, so verify that we are
      * opened read/write and fail if we are not.
      */
-    if ( (f->shared->flags & H5F_ACC_RDWR) == 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "File is opened read only.")
-    }
+    if((f->shared->flags & H5F_ACC_RDWR) == 0 )
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "file is opened read only.")
 
     cache_ptr->jnl_magic = journal_magic;
-    cache_ptr->jnl_file_name_len = (int32_t)HDstrlen(journal_file_name_ptr);
+    cache_ptr->jnl_file_name_len = HDstrlen(journal_file_name_ptr);
+    if(0 == cache_ptr->jnl_file_name_len)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADRANGE, FAIL, "length of journal file name is zero.")
+    if(cache_ptr->jnl_file_name_len > H5C__MAX_JOURNAL_FILE_NAME_LEN)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADRANGE, FAIL, "journal file name too long.")
+    HDstrncpy(cache_ptr->jnl_file_name, journal_file_name_ptr,
+              (cache_ptr->jnl_file_name_len + 1));
 
-    if ( cache_ptr->jnl_file_name_len <= 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "length of journal file name is zero.")
-    }
-
-    if ( cache_ptr->jnl_file_name_len > H5C__MAX_JOURNAL_FILE_NAME_LEN ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "journal file name too long.")
-    }
-
-    HDstrncpy(cache_ptr->jnl_file_name,
-              journal_file_name_ptr,
-              (size_t)(cache_ptr->jnl_file_name_len + 1));
-
-    /* now, load the journaling information into shared, and then call
-     * H5F_super_write_mdj_msg() to write the metadata journaling 
-     * superblock extension message to file.  
+    /* now, load the journaling information into shared, and then 
+     * write the metadata journaling superblock extension message to file.  
      */
     f->shared->mdc_jnl_enabled       = TRUE;
     f->shared->mdc_jnl_magic         = journal_magic;
     f->shared->mdc_jnl_file_name_len = (size_t)(cache_ptr->jnl_file_name_len);
-    HDstrncpy(f->shared->mdc_jnl_file_name,
-              journal_file_name_ptr,
-              (size_t)(cache_ptr->jnl_file_name_len + 1));
+    HDstrncpy(f->shared->mdc_jnl_file_name, journal_file_name_ptr,
+              (cache_ptr->jnl_file_name_len + 1));
 
-    if ( H5F_super_write_mdj_msg(f, dxpl_id) < 0 ) {
+    /* create a metadata journaling message and insert it in
+     * the superblock extension.
+     */
+    mdj_msg.mdc_jnl_enabled       = f->shared->mdc_jnl_enabled;
+    mdj_msg.mdc_jnl_magic         = f->shared->mdc_jnl_magic;
+    mdj_msg.mdc_jnl_file_name_len = f->shared->mdc_jnl_file_name_len;
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5F_super_write_mdj_msg() failed.")
-    }
+    /* Sanity check journal file name */
+    if(f->shared->mdc_jnl_file_name_len == 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADRANGE, FAIL, "journaling enabled, but journal file path empty?!?")
+    if(f->shared->mdc_jnl_file_name_len > H5C__MAX_JOURNAL_FILE_NAME_LEN)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADRANGE, FAIL, "journal file path too long?!?")
+
+    /* Copy journal file name into message to store */
+    HDstrncpy(mdj_msg.mdc_jnl_file_name, f->shared->mdc_jnl_file_name,
+              f->shared->mdc_jnl_file_name_len + 1);
+
+    /* Sanity check copied name */
+    if(((mdj_msg.mdc_jnl_file_name)[mdj_msg.mdc_jnl_file_name_len] != '\0')
+            || (HDstrlen(mdj_msg.mdc_jnl_file_name) != mdj_msg.mdc_jnl_file_name_len))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "bad journal file path and/or path len???")
+
+    /* Write metadata journaling message to superblock extension */
+    if(H5F_super_ext_write_msg(f, dxpl_id, &mdj_msg, H5O_MDJ_MSG_ID, TRUE) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "can't write metadata journaling message to superblock extension")
 
     /* Finally, flush the file to ensure that changes made it to disk. */
-
-    if ( H5F_flush(f, dxpl_id, H5F_SCOPE_GLOBAL, H5F_FLUSH_NONE) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5F_flush() failed.")
-    }
+    if(H5F_flush(f, dxpl_id, H5F_SCOPE_GLOBAL, H5F_FLUSH_NONE) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush file")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_mark_journaling_in_progress() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5C_unmark_journaling_in_progress()
  *
@@ -1556,37 +1523,28 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
-herr_t
+static herr_t
 H5C_unmark_journaling_in_progress(H5F_t * f,
-                                   hid_t dxpl_id,
-#ifndef NDEBUG
-				   H5C_t * cache_ptr)
-#else /* NDEBUG */
-				   H5C_t UNUSED * cache_ptr)
-#endif /* NDEBUG */
+                                   hid_t dxpl_id)
 {
-    herr_t ret_value = SUCCEED;      /* Return value */
+    H5C_t * cache_ptr;                  /* Pointer to metadata cache */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_unmark_journaling_in_progress, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_unmark_journaling_in_progress)
 
-    HDassert( f != NULL );
-    HDassert( f->shared != NULL );
-    HDassert( f->shared->mdc_jnl_enabled );
-    HDassert( f->shared->cache == cache_ptr );
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->jnl_file_name_len > 0 );
-
+    HDassert(f != NULL);
+    HDassert(f->shared != NULL);
+    HDassert(f->shared->mdc_jnl_enabled);
+    cache_ptr = f->shared->cache;
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->jnl_file_name_len > 0);
 
     /* Can't journal a read only file, so verify that we are
      * opened read/write and fail if we are not.
      */
-    if ( (f->shared->flags & H5F_ACC_RDWR) == 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "File is opened read only.")
-    }
+    if((f->shared->flags & H5F_ACC_RDWR) == 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "file is opened read only.")
 
     /* Discard the journal file name and magic in *cache_ptr */
     cache_ptr->jnl_magic          = 0;
@@ -1594,31 +1552,23 @@ H5C_unmark_journaling_in_progress(H5F_t * f,
     (cache_ptr->jnl_file_name)[0] = '\0';
 
     /* now, mark f->shared to indicate that journaling is not in 
-     * progress, and then call H5F_super_write_mdj_msg() to write
-     * the changes to disk.
+     * progress.
      */
     f->shared->mdc_jnl_enabled        = FALSE;
     f->shared->mdc_jnl_magic          = 0;
     f->shared->mdc_jnl_file_name_len  = 0;
     (f->shared->mdc_jnl_file_name)[0] = '\0';
 
-    if ( H5F_super_write_mdj_msg(f, dxpl_id) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5F_super_write_mdj_msg() failed.")
-    }
+    /* Delete the metadata journaling message from the superblock extension */
+    if(H5F_super_ext_remove_msg(f, dxpl_id, H5O_MDJ_MSG_ID) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove metadata journaling message from superblock extension")
 
     /* Finally, flush the file to ensure that changes made it to disk. */
-
-    if ( H5F_flush(f, dxpl_id, H5F_SCOPE_GLOBAL, H5F_FLUSH_NONE) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5F_flush() failed.")
-    }
+    if(H5F_flush(f, dxpl_id, H5F_SCOPE_GLOBAL, H5F_FLUSH_NONE) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush file")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_unmark_journaling_in_progress() */
 
 
@@ -1851,21 +1801,13 @@ H5C_deregister_mdjsc_callback(H5C_t * cache_ptr,
          ( cache_ptr->mdjsc_cb_tbl_len > H5C__MIN_MDJSC_CB_TBL_LEN ) &&
          ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use < 
 	   (cache_ptr->mdjsc_cb_tbl_len / 2) ) ) {
-        herr_t result;
 
-        result = H5C_shrink_mdjsc_callback_table(cache_ptr);
-
-	if ( result != SUCCEED ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-			"H5C_shrink_mdjsc_callback_table() failed.");
-        }
-    }
+	if(H5C_shrink_mdjsc_callback_table(cache_ptr) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSHRINK, FAIL, "can't reduce metadata journaling callback table")
+    } /* end if */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_deregister_mdjsc_callback() */
 
 
