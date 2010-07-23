@@ -2235,7 +2235,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
                    xfer_plist, 
                    large_ds_buf_0);
 
-    if ( ret < 0 ) H5Eprint(H5E_DEFAULT, stderr);
+    if ( ret < 0 ) H5Eprint2(H5E_DEFAULT, stderr);
     VRFY((ret >= 0), "H5Dwrite() large_dataset initial write succeeded");
 
 
