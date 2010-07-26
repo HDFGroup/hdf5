@@ -566,7 +566,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     /* write the initial value of the large data set to file */
     ret = H5Dwrite(large_dataset, dset_type, mem_large_ds_sid, file_large_ds_sid,
                    xfer_plist, large_ds_buf_0);
-    if ( ret < 0 ) H5Eprint(H5E_DEFAULT, stderr);
+    if ( ret < 0 ) H5Eprint2(H5E_DEFAULT, stderr);
     VRFY((ret >= 0), "H5Dwrite() large_dataset initial write succeeded");
 
 
@@ -2785,7 +2785,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     /* write the initial value of the large data set to file */
     ret = H5Dwrite(large_dataset, dset_type, mem_large_ds_sid, file_large_ds_sid_0,
                    xfer_plist, large_ds_buf_0);
-    if ( ret < 0 ) H5Eprint(H5E_DEFAULT, stderr);
+    if ( ret < 0 ) H5Eprint2(H5E_DEFAULT, stderr);
     VRFY((ret >= 0), "H5Dwrite() large_dataset initial write succeeded");
 
 
