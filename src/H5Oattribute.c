@@ -849,16 +849,9 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         if(NULL == (chk_proxy = H5O_chunk_protect(udata->f, udata->dxpl_id, oh, mesg->chunkno)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load object header chunk")
 
-        /* Allocate storage for the message's data, if necessary */
-        if(NULL == ((H5A_t *)mesg->native)->shared->data)
-            if(NULL == (((H5A_t *)mesg->native)->shared->data = H5FL_BLK_MALLOC(attr_buf, udata->attr->shared->data_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed")
-
-        /* Copy the data into the header message */
-        /* (Needs to occur before updating the shared message, or the hash
-         *      value on the old & new messages will be the same)
-         */
-        HDmemcpy(((H5A_t *)mesg->native)->shared->data, udata->attr->shared->data, udata->attr->shared->data_size);
+        /* No need to allocate data buffer or copy the data because the structure is shared
+         * now.  Only do an assertion check, instead. SLU - 2010/7/28 */
+        HDassert(((H5A_t *)mesg->native)->shared == udata->attr->shared);
 
         /* Mark the message as modified */
         mesg->dirty = TRUE;
