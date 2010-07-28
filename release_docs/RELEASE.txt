@@ -114,6 +114,9 @@ Bug Fixes since HDF5-1.8.5
 
     Library
     -------
+    - valgrind reported an error of copying data to itself when a new attribute 
+      is written (Bug #1956).  I fixed it by taking out the memcpy step in the
+      attribute code. (SLU - 2010/07/28)
     - Corrected various issues in the MPI datatype creation code which could
       cause resource leaks or incorrect behavior (and may improve the
       performance as well).  (QAK - 2010/07/19)
