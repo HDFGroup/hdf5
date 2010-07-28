@@ -234,6 +234,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - valgrind reported an error of copying data to itself when a new attribute
+            is written (Bug #1956).  I fixed it by taking out the memcpy step in 
+            the attribute code. (SLU - 2010/07/28)
       - Fixed a bug that could cause file corruption when using non-default
             sizes of addresses and/or lengths.  This bug could also cause
             uncorrupted files with this property to be unreadable.  This bug
