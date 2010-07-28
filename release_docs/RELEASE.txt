@@ -114,6 +114,8 @@ Bug Fixes since HDF5-1.8.5
 
     Library
     -------
+    - Fixed a bug in the direct I/O driver that could render files with certain
+      kinds of unaligned data unreadable or corrupt them. (NAF - 2010/07/28)
     - valgrind reported an error of copying data to itself when a new attribute 
       is written (Bug #1956).  I fixed it by taking out the memcpy step in the
       attribute code. (SLU - 2010/07/28)
