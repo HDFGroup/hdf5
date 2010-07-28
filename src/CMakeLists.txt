@@ -501,6 +501,7 @@ SET (common_SRCS
     ${HDF5_SRC_DIR}/H5FO.c
     ${HDF5_SRC_DIR}/H5HP.c
     ${HDF5_SRC_DIR}/H5I.c
+    ${HDF5_SRC_DIR}/H5Itest.c
     ${HDF5_SRC_DIR}/H5L.c
     ${HDF5_SRC_DIR}/H5Lexternal.c
     ${HDF5_SRC_DIR}/H5MM.c
