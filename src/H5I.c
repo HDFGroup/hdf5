@@ -936,7 +936,7 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 
 	    /* new ID to check for */
 	    next_id = H5I_MAKE(type, type_ptr->nextid);
-	    hash_loc = H5I_LOC(type_ptr->nextid, type_ptr->hash_size);
+	    hash_loc = (unsigned)H5I_LOC(type_ptr->nextid, type_ptr->hash_size);
 	    curr_id = type_ptr->id_list[hash_loc];
 	    if(curr_id == NULL)
                 break; /* Ha! this is not likely... */
@@ -1490,15 +1490,16 @@ H5I_dec_ref(hid_t id, hbool_t app_ref)
         if(!type_ptr->free_func || (type_ptr->free_func)((void *)id_ptr->obj_ptr) >= 0) {
             H5I_remove(id);
             ret_value = 0;
-        } else {
+        } /* end if */
+        else
             ret_value = FAIL;
-        }
-    } else {
+    } /* end if */
+    else {
         --(id_ptr->count);
-        if (app_ref)
+        if(app_ref)
             --(id_ptr->app_count);
         HDassert(id_ptr->count >= id_ptr->app_count);
-        ret_value = app_ref ? id_ptr->app_count : id_ptr->count;
+        ret_value = (int)(app_ref ? id_ptr->app_count : id_ptr->count);
     }
 
 done:
@@ -1594,7 +1595,7 @@ H5I_inc_ref(hid_t id, hbool_t app_ref)
         ++(id_ptr->app_count);
 
     /* Set return value */
-    ret_value = app_ref ? id_ptr->app_count : id_ptr->count;
+    ret_value = (int)(app_ref ? id_ptr->app_count : id_ptr->count);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1684,7 +1685,7 @@ H5I_get_ref(hid_t id, hbool_t app_ref)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID")
 
     /* Set return value */
-    ret_value = app_ref ? id_ptr->app_count : id_ptr->count;
+    ret_value = (int)(app_ref ? id_ptr->app_count : id_ptr->count);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1765,7 +1766,7 @@ H5I_inc_type_ref(H5I_type_t type)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
 
     /* Set return value */
-    ret_value = ++(type_ptr->count);
+    ret_value = (int)(++(type_ptr->count));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1866,7 +1867,7 @@ H5I_dec_type_ref(H5I_type_t type)
     } /* end if */
     else {
         --(type_ptr->count);
-        ret_value = type_ptr->count;
+        ret_value = (herr_t)type_ptr->count;
     } /* end else */
 
 done:
@@ -1948,7 +1949,7 @@ H5I_get_type_ref(H5I_type_t type)
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
 
     /* Set return value */
-    ret_value = type_ptr->count;
+    ret_value = (int)type_ptr->count;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2202,13 +2203,18 @@ done:
 ssize_t
 H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 {
+    H5G_loc_t     loc;          /* Object location */
     ssize_t       ret_value;    /* Return value */
 
     FUNC_ENTER_API(H5Iget_name, FAIL)
     H5TRACE3("Zs", "ixz", id, name, size);
 
+    /* Get object location */
+    if(H5G_loc(id, &loc) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
+
     /* Call internal group routine to retrieve object's name */
-    if((ret_value = H5G_get_name(id, name, size, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_get_name(&loc, name, size, NULL, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
 
 done:
@@ -2256,7 +2262,6 @@ done:
  *              ID given an object ID.
  *
  * Return:	Success:	file ID
- *
  *		Failure:	a negative value
  *
  * Programmer:  Raymond Lu
@@ -2267,7 +2272,6 @@ done:
 hid_t
 H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
 {
-    H5G_loc_t loc;              /* Location of object */
     H5I_type_t type;            /* ID type */
     hid_t ret_value;            /* Return value */
 
@@ -2276,18 +2280,24 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
     /* Get object type */
     type = H5I_TYPE(obj_id);
     if(type == H5I_FILE) {
-        ret_value = obj_id;
-
-        /* Increment reference count on atom. */
-        if(H5I_inc_ref(ret_value, app_ref) < 0)
+        /* Increment reference count on file ID */
+        if(H5I_inc_ref(obj_id, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
-    }
+
+        /* Set return value */
+        ret_value = obj_id;
+    } /* end if */
     else if(type == H5I_DATATYPE || type == H5I_GROUP || type == H5I_DATASET || type == H5I_ATTR) {
+        H5G_loc_t loc;              /* Location of object */
+
+        /* Get the object location information */
         if(H5G_loc(obj_id, &loc) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get object location")
+
+        /* Get the file ID for the object */
         if((ret_value = H5F_get_id(loc.oloc->file, app_ref)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get file ID")
-    }
+    } /* end if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID")
 
