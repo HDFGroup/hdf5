@@ -142,6 +142,9 @@ Bug Fixes since HDF5-1.8.4
 
     Library
     -------
+    - valgrind reported an error of copying data to itself when a new attribute
+      is written (Bug #1956).  I fixed it by taking out the memcpy step in the
+      attribute code. (SLU - 2010/07/28)
     - Fixed a file corruption bug that could happen when shrinking a compressed
       dataset. (NAF - 2010/05/20)
     - Fixed some memory leaks in VL datatype conversion when strings are
