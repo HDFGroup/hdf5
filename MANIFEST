@@ -638,6 +638,7 @@
 ./src/H5Ipkg.h
 ./src/H5Iprivate.h
 ./src/H5Ipublic.h
+./src/H5Itest.c
 ./src/H5L.c
 ./src/H5Lexternal.c
 ./src/H5Lpkg.h
