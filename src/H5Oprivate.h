@@ -334,6 +334,28 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_NDIMS	(H5S_MAX_RANK+1)
 
+/* Flags for chunked layout feature encoding */
+#ifdef NOT_YET
+#define H5O_LAYOUT_CHUNK_STORE_ELEM_PHASE_CHANGE                  0x01
+#define H5O_LAYOUT_CHUNK_STORE_CHUNK_PHASE_CHANGE                 0x02
+#define H5O_LAYOUT_CHUNK_STORE_ELEM_CHUNK_TRANS                   0x04
+#define H5O_LAYOUT_CHUNK_ABBREVIATE_PARTIAL_BOUND_CHUNKS          0x08
+#endif /* NOT_YET */
+#define H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS         0x10
+#ifdef NOT_YET
+#define H5O_LAYOUT_ALL_CHUNK_FLAGS                    (                             \
+    H5O_LAYOUT_CHUNK_STORE_ELEM_PHASE_CHANGE                                        \
+    | H5O_LAYOUT_CHUNK_STORE_CHUNK_PHASE_CHANGE                                     \
+    | H5O_LAYOUT_CHUNK_STORE_ELEM_CHUNK_TRANS                                       \
+    | H5O_LAYOUT_CHUNK_ABBREVIATE_PARTIAL_BOUND_CHUNKS                              \
+    | H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS                             \
+    )
+#else /* NOT_YET */
+#define H5O_LAYOUT_ALL_CHUNK_FLAGS                    (                             \
+    H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS                               \
+    )
+#endif /* NOT_YET */
+
 /* Initial version of the layout information.  Used when space is allocated */
 #define H5O_LAYOUT_VERSION_1	1
 
@@ -439,6 +461,7 @@ typedef struct H5O_layout_chunk_earray_t {
 
 typedef struct H5O_layout_chunk_t {
     H5D_chunk_index_t idx_type;		/* Type of chunk index               */
+    uint8_t     flags;                  /* Chunk layout flags                */
     unsigned	ndims;			/* Num dimensions in chunk           */
     uint32_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
     unsigned    enc_bytes_per_dim;      /* Encoded # of bytes for storing each chunk dimension */

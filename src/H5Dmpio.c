@@ -1256,7 +1256,7 @@ if(H5DEBUG(D))
                         entire_chunk = FALSE;
 
                     /* Lock the chunk into the cache */
-                    if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, entire_chunk)))
+                    if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, entire_chunk, FALSE)))
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
 
                     /* Set up the storage buffer information for this chunk */
@@ -1484,7 +1484,7 @@ if(H5DEBUG(D)) {
                     entire_chunk = FALSE;
 
                 /* Lock the chunk into the cache */
-                if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, entire_chunk)))
+                if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, entire_chunk, FALSE)))
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
 
                 /* Set up the storage buffer information for this chunk */

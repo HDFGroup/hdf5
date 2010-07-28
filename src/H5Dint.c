@@ -2306,11 +2306,21 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
          * and if the chunks are written
          *-------------------------------------------------------------------------
          */
-        if(shrink && H5D_CHUNKED == dset->shared->layout.type &&
-                (*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
-            /* Remove excess chunks */
-            if(H5D_chunk_prune_by_extent(dset, dxpl_id, curr_dims) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks")
+        if(H5D_CHUNKED == dset->shared->layout.type) {
+            if(shrink && (*dset->shared->layout.ops->is_space_alloc)(
+                    &dset->shared->layout.storage))
+                /* Remove excess chunks */
+                if(H5D_chunk_prune_by_extent(dset, dxpl_id, curr_dims) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks")
+
+            /* Update chunks that are no longer edge chunks as a result of
+             * expansion */
+            if(expand && (dset->shared->layout.u.chunk.flags
+                    & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS)
+                    && (dset->shared->dcpl_cache.pline.nused > 0))
+                if(H5D_chunk_update_old_edge_chunks(dset, dxpl_id, curr_dims)
+                        < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to do update old edge chunks")
         } /* end if */
 
         /* Mark the dataspace as dirty, for later writing to the file */

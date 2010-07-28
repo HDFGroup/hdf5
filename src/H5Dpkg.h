@@ -276,6 +276,7 @@ typedef struct H5D_chunk_ud_t {
     uint32_t	nbytes;			/*size of stored data	*/
     unsigned	filter_mask;		/*excluded filters	*/
     haddr_t	addr;			/*file address of chunk */
+    hbool_t     new_unfilt_chunk;       /*whether the chunk just became unfiltered */
 } H5D_chunk_ud_t;
 
 /* Typedef for "generic" chunk callbacks */
@@ -505,11 +506,17 @@ typedef struct {
     hsize_t size;       /* Accumulated number of bytes for the selection */
 } H5D_vlen_bufsize_t;
 
+/* Flags for the "edge_chunk_state" field below */
+#define H5D_RDCC_DISABLE_FILTERS 0x01u          /* Disable filters on this chunk */
+#define H5D_RDCC_NEWLY_DISABLED_FILTERS 0x02u   /* Filters have been disabled since
+                                                 * the last flush */
+
 /* Raw data chunks are cached.  Each entry in the cache is: */
 typedef struct H5D_rdcc_ent_t {
     hbool_t	locked;		/*entry is locked in cache		*/
     hbool_t	dirty;		/*needs to be written to disk?		*/
     hbool_t     deleted;        /*chunk about to be deleted (do not flush) */
+    unsigned    edge_chunk_state; /*states related to edge chunks (see above) */
     hsize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
     uint32_t	rd_count;	/*bytes remaining to be read		*/
     uint32_t	wr_count;	/*bytes remaining to be written		*/
@@ -640,7 +647,7 @@ H5_DLL hbool_t H5D_chunk_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL herr_t H5D_chunk_lookup(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *chunk_offset, hsize_t chunk_idx, H5D_chunk_ud_t *udata);
 H5_DLL void *H5D_chunk_lock(const H5D_io_info_t *io_info,
-    H5D_chunk_ud_t *udata, hbool_t relax);
+    H5D_chunk_ud_t *udata, hbool_t relax, hbool_t prev_unfilt_chunk);
 H5_DLL herr_t H5D_chunk_unlock(const H5D_io_info_t *io_info,
     const H5D_chunk_ud_t *udata, hbool_t dirty, void *chunk,
     uint32_t naccessed);
@@ -649,6 +656,8 @@ H5_DLL herr_t H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id,
 H5_DLL herr_t H5D_chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes);
 H5_DLL herr_t H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id,
     hbool_t full_overwrite, hsize_t old_dim[]);
+H5_DLL herr_t H5D_chunk_update_old_edge_chunks(H5D_t *dset, hid_t dxpl_id,
+    hsize_t old_dim[]);
 H5_DLL herr_t H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id,
     const hsize_t *old_dim);
 #ifdef H5_HAVE_PARALLEL

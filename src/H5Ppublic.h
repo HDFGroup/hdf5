@@ -295,6 +295,8 @@ H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*
 H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/);
 H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
           hsize_t size);
+H5_DLL herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
+H5_DLL herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned *opts);
 H5_DLL int H5Pget_external_count(hid_t plist_id);
 H5_DLL herr_t H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size,
           char *name/*out*/, off_t *offset/*out*/,

@@ -35,24 +35,6 @@
 
 /* Local macros */
 
-/* Flags for chunked layout feature encoding */
-#ifdef NOT_YET
-#define H5O_LAYOUT_CHUNK_STORE_ELEM_PHASE_CHANGE                  0x01
-#define H5O_LAYOUT_CHUNK_STORE_CHUNK_PHASE_CHANGE                 0x02
-#define H5O_LAYOUT_CHUNK_STORE_ELEM_CHUNK_TRANS                   0x04
-#define H5O_LAYOUT_CHUNK_ABBREVIATE_PARTIAL_BOUND_CHUNKS          0x08
-#define H5O_LAYOUT_CHUNK_APPLY_FILTER_TO_PARTIAL_BOUND_CHUNKS     0x10
-#define H5O_LAYOUT_ALL_CHUNK_FLAGS                    (                             \
-    H5O_LAYOUT_CHUNK_STORE_ELEM_PHASE_CHANGE                                        \
-    | H5O_LAYOUT_CHUNK_STORE_CHUNK_PHASE_CHANGE                                     \
-    | H5O_LAYOUT_CHUNK_STORE_ELEM_CHUNK_TRANS                                       \
-    | H5O_LAYOUT_CHUNK_ABBREVIATE_PARTIAL_BOUND_CHUNKS                              \
-    | H5O_LAYOUT_CHUNK_APPLY_FILTER_TO_PARTIAL_BOUND_CHUNKS                         \
-    )
-#else /* NOT_YET */
-#define H5O_LAYOUT_ALL_CHUNK_FLAGS             0
-#endif /* NOT_YET */
-
 
 /* PRIVATE PROTOTYPES */
 static void *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
@@ -264,6 +246,9 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                     /* Set the storage type */
                     mesg->storage.type = mesg->type;
 
+                    /* Set the chunked layout flags */
+                    mesg->u.chunk.flags = (uint8_t)0;
+
                     /* Dimensionality */
                     mesg->u.chunk.ndims = *p++;
                     if(mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
@@ -286,16 +271,14 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                     mesg->storage.u.chunk.ops = H5D_COPS_BTREE;
                 } /* end if */
                 else {
-                    unsigned char       flags;          /* Flags for encoding group info */
-
                     /* Get the chunked layout flags */
-                    flags = *p++;
+                    mesg->u.chunk.flags = *p++;
 
                     /* Check for valid flags */
                     /* (Currently issues an error for all non-zero values,
                      *      until features are added for the flags)
                      */
-                    if(flags & ~H5O_LAYOUT_ALL_CHUNK_FLAGS)
+                    if(mesg->u.chunk.flags & ~H5O_LAYOUT_ALL_CHUNK_FLAGS)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
 
                     /* Dimensionality */
@@ -479,7 +462,7 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
             } /* end if */
             else {
                 /* Chunk feature flags */
-                *p++ = 0;               /* (no features supported yet) */
+                *p++ = mesg->u.chunk.flags;
 
                 /* Number of dimensions */
                 HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);

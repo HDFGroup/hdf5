@@ -58,7 +58,8 @@ const char *FILENAME[] = {
     "chunk_fast",	/* 10 */
     "chunk_expand",	/* 11 */
     "chunk_fixed",	/* 12 */
-    "copy_dcpl_newfile",
+    "copy_dcpl_newfile",/* 13 */
+    "partial_chunks",   /* 14 */
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -134,6 +135,7 @@ const char *FILENAME[] = {
 #define H5Z_FILTER_SET_LOCAL_TEST	308
 #define H5Z_FILTER_DEPREC       309
 #define H5Z_FILTER_EXPAND	310
+#define H5Z_FILTER_COUNT        311
 
 /* Flags for testing filters */
 #define DISABLE_FLETCHER32      0
@@ -214,6 +216,8 @@ const char *FILENAME[] = {
 #define DSET_DIM2       200
 int	points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
 double	points_dbl[DSET_DIM1][DSET_DIM2], check_dbl[DSET_DIM1][DSET_DIM2];
+size_t  count_nbytes_read = 0;
+size_t  count_nbytes_written = 0;
 
 /* Declarations for test_idx_compatible() */
 #define DSET            "dset"
@@ -235,6 +239,51 @@ static size_t filter_corrupt(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_expand(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_count(unsigned int flags, size_t cd_nelmts,
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+
+/* This message derives from H5Z */
+const H5Z_class2_t H5Z_COUNT[1] = {{
+    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
+    H5Z_FILTER_COUNT,           /* Filter id number             */
+    1, 1,               /* Encoding and decoding enabled */
+    "count",                    /* Filter name for debugging    */
+    NULL,                       /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
+    filter_count,               /* The actual filter function   */
+}};
+
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_count
+ *
+ * Purpose:     This filter counts the number of bytes read and written,
+ *              incrementing count_nbytes_read or count_nbytes_written as
+ *              appropriate.
+ *
+ * Return:      Success:        Data chunk size
+ *
+ *              Failure:        0
+ *
+ * Programmer:  Neil Fortner
+ *              Wednesday, March 17, 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static size_t
+filter_count(unsigned int flags, size_t UNUSED cd_nelmts,
+      const unsigned int UNUSED *cd_values, size_t nbytes,
+      size_t UNUSED *buf_size, void UNUSED **buf)
+{
+    if(flags & H5Z_FLAG_REVERSE)
+        count_nbytes_read += nbytes;
+    else
+        count_nbytes_written += nbytes;
+
+    return nbytes;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -5678,7 +5727,7 @@ test_copy_dcpl(hid_t file, hid_t fapl)
 
     /* Create a second file and create 2 datasets with the copies of the DCPLs in the first
      * file.  Test whether the copies of DCPLs work. */
-    h5_fixname(FILENAME[11], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[13], fapl, filename, sizeof filename);
     if((new_file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
@@ -8275,12 +8324,9 @@ test_idx_compatible(void)
 {
     hid_t	fid;		/* File id */
     hid_t       did;		/* Dataset id */
-    ssize_t     nread;          /* Number of bytes read in */
-    char  	*srcdir = HDgetenv("srcdir"); 	   /* where the src code is located */
-    char        filename[FILENAME_BUF_SIZE] = "";  /* old test file name */
+    const char  *filename = NULL;  /* old test file name */
     unsigned    j;              /* Local index variable */
     H5D_chunk_index_t idx_type; /* Chunked dataset index type */
-    herr_t      ret;        	/* Return value */
 
     /* Output message about test being performed */
     TESTING("compatibility for 1.6/1.8 datasets that use B-tree indexing");
@@ -8288,15 +8334,11 @@ test_idx_compatible(void)
     for(j = 0; j < NELMTS(OLD_FILENAME); j++) {
 
 	/* Generate correct name for test file by prepending the source path */
-	if(srcdir && ((HDstrlen(srcdir) + HDstrlen(OLD_FILENAME[j]) + 1) < sizeof(filename))) {
-	    HDstrcpy(filename, srcdir);
-	    HDstrcat(filename, "/");
-	}
-	HDstrcat(filename, OLD_FILENAME[j]);
+	filename = H5_get_srcdir_filename(OLD_FILENAME[j]);
 
 	/* Open the file */
 	if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-	    FAIL_STACK_ERROR
+	    TEST_ERROR
 
 	/* Should be able to read the dataset w/o filter created under 1.8/1.6 */
 	if((did = H5Dopen2(fid, DSET, H5P_DEFAULT)) < 0)
@@ -8338,6 +8380,146 @@ error:
     } H5E_END_TRY;
     return -1;
 } /* test_idx_compatible */
+
+/*-------------------------------------------------------------------------
+ *
+ *  test_unfiltered_edge_chunks():
+ *      Tests that partial edge chunks aren't filtered when the
+ *      H5D_CHUNK_FILTER_PARTIAL_CHUNKS option is set.
+ *
+ *  Programmer: Neil Fortner; 17th March, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_unfiltered_edge_chunks(hid_t fapl)
+{
+    hid_t       fid;            /* File id */
+    hid_t       did;            /* Dataset id */
+    hid_t       sid;            /* Dataspace id */
+    hid_t       dcpl;           /* DCPL id */
+    hsize_t     dim[2] = {4, 3}; /* Dataset dimensions */
+    hsize_t     cdim[2] = {2, 2}; /* Chunk dimension */
+    char        wbuf[4][3];     /* Write buffer */
+    char        rbuf[4][3];     /* Read buffer */
+    char        filename[FILENAME_BUF_SIZE] = "";  /* old test file name */
+    unsigned    opts;           /* Chunk options */
+    unsigned    i, j;           /* Local index variables */
+
+    /* Output message about test being performed */
+    TESTING("disabled partial chunk filters");
+
+    h5_fixname(FILENAME[14], fapl, filename, sizeof filename);
+
+    /* Create the file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Register byte-counting filter */
+    if(H5Zregister(H5Z_COUNT) < 0)
+        TEST_ERROR
+
+    /* Create dataspace */
+    if((sid = H5Screate_simple(2, dim, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create DCPL */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR
+
+    /* Set chunk dimensions */
+    if(H5Pset_chunk(dcpl, 2, cdim) < 0)
+        TEST_ERROR
+
+    /* Add "count" filter */
+    if(H5Pset_filter(dcpl, H5Z_FILTER_COUNT, 0u, (size_t)0, NULL) < 0)
+        TEST_ERROR
+
+    /* Disable filters on partial chunks */
+    if(H5Pget_chunk_opts(dcpl, &opts) < 0)
+        TEST_ERROR
+    opts |= H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS;
+    if(H5Pset_chunk_opts(dcpl, opts) < 0)
+        TEST_ERROR
+
+    /* Initialize write buffer */
+    for(i=0; i<dim[0]; i++)
+        for(j=0; j<dim[1]; j++)
+            wbuf[i][j] = (char)(2 * i) - (char)j;
+
+    /* Reset byte counts */
+    count_nbytes_read = (size_t)0;
+    count_nbytes_written = (size_t)0;
+
+    /* Create dataset */
+    if((did = H5Dcreate2(fid, DSET_CHUNKED_NAME, H5T_NATIVE_CHAR, sid,
+            H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Nothing should have been written, as we are not using early allocation */
+    if(count_nbytes_read != (size_t)0)
+        TEST_ERROR
+    if(count_nbytes_written != (size_t)0)
+        TEST_ERROR
+
+    /* Write data */
+    if(H5Dwrite(did, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR
+
+    /* Close dataset */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR
+
+    /* Make sure only 2 of the 4 chunks were written through the filter (4 bytes
+     * each) */
+    if(count_nbytes_read != (size_t)0)
+        TEST_ERROR
+    if(count_nbytes_written != (size_t)(2 * cdim[0] * cdim[1]))
+        TEST_ERROR
+
+    /* Reopen the dataset */
+    if((did = H5Dopen2(fid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Read the dataset */
+    if(H5Dread(did, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        TEST_ERROR
+
+    /* Verify that data read == data written */
+    for(i=0; i<dim[0]; i++)
+        for(j=0; j<dim[1]; j++)
+            if(rbuf[i][j] != wbuf[i][j])
+                TEST_ERROR
+
+    /* Make sure only 2 of the 4 chunks were read through the filter (4 bytes
+     * each) */
+    if(count_nbytes_read != (size_t)(2 * cdim[0] * cdim[1]))
+        TEST_ERROR
+    if(count_nbytes_written != (size_t)(2 * cdim[0] * cdim[1]))
+        TEST_ERROR
+
+    /* Close IDs */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR
+    if(H5Pclose(dcpl) < 0)
+        TEST_ERROR
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(did);
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* test_unfiltered_edge_chunks */
 
 
 /*-------------------------------------------------------------------------
@@ -8468,6 +8650,7 @@ main(void)
         nerrors += (test_chunk_expand(my_fapl) < 0		? 1 : 0);
         nerrors += (test_fixed_array(my_fapl) < 0		? 1 : 0);
 	nerrors += (test_idx_compatible() < 0			? 1 : 0);
+	nerrors += (test_unfiltered_edge_chunks(my_fapl) < 0    ? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;

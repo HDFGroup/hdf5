@@ -2951,6 +2951,148 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_copy_dataset_no_edge_filt
+ *
+ * Purpose:     Create a compressed, chunked dataset in SRC file and copy it to DST file
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, May 11, 2010
+ *              Mostly copied from test_copy_dataset_compressed, by
+ *              Quincey Koziol
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_dataset_no_edge_filt(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
+{
+#ifdef H5_HAVE_FILTER_DEFLATE
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t pid = -1;                             /* Dataset creation property list ID */
+    hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hsize_t dim2d[2];                           /* Dataset dimensions */
+    hsize_t chunk_dim2d[2] ={CHUNK_SIZE_1, CHUNK_SIZE_2};             /* Chunk dimensions */
+    float buf[DIM_SIZE_1][DIM_SIZE_2];          /* Buffer for writing data */
+    int i, j;                                   /* Local index variables */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
+    TESTING("H5Ocopy(): compressed dataset with no edge filters");
+
+#ifndef H5_HAVE_FILTER_DEFLATE
+    SKIPPED();
+    puts("    Deflation filter not available");
+#else /* H5_HAVE_FILTER_DEFLATE */
+    /* set initial data values */
+    for (i=0; i<DIM_SIZE_1; i++)
+        for (j=0; j<DIM_SIZE_2; j++)
+            buf[i][j] = (float)(100.0);         /* Something easy to compress */
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim2d[0]=DIM_SIZE_1;
+    dim2d[1]=DIM_SIZE_2;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+
+    /* create and set comp & chunk plist, and disable partial chunk filters */
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
+    if(H5Pset_deflate(pid, 9) < 0) TEST_ERROR
+    if(H5Pset_chunk_opts(pid, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0) TEST_ERROR
+
+    /* create dataset */
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close chunk plist */
+    if(H5Pclose(pid) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    /* attach attributes to the dataset */
+    if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
+
+    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* copy the dataset from SRC to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the dataset for copy */
+    if((did = H5Dopen2(fid_src, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* open the destination dataset */
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    if(compare_idx_type(fapl, did2, H5D_CHUNK_IDX_FARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+        TEST_ERROR
+
+    /* Check if the datasets are equal */
+    if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
+
+    /* close the destination dataset */
+    if(H5Dclose(did2) < 0) TEST_ERROR
+
+    /* close the source dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    PASSED();
+#endif /* H5_HAVE_FILTER_DEFLATE */
+    return 0;
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Pclose(pid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
+    } H5E_END_TRY;
+    return 1;
+#endif /* H5_HAVE_FILTER_DEFLATE */
+} /* end test_copy_dataset_no_edge_filt */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_compact
  *
  * Purpose:     Create a compact dataset in SRC file and copy it to DST file
@@ -8412,6 +8554,7 @@ main(void)
         nerrors += test_copy_dataset_chunked_empty(fcpl_src, fcpl_dst, my_fapl);
         nerrors += test_copy_dataset_chunked_sparse(fcpl_src, fcpl_dst, my_fapl);
         nerrors += test_copy_dataset_compressed(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_no_edge_filt(fcpl_src, fcpl_dst, my_fapl);
         nerrors += test_copy_dataset_compact(fcpl_src, fcpl_dst, my_fapl);
         nerrors += test_copy_dataset_multi_ohdr_chunks(fcpl_src, fcpl_dst, my_fapl);
         nerrors += test_copy_dataset_attr_named_dtype(fcpl_src, fcpl_dst, my_fapl);

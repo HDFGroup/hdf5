@@ -54,7 +54,7 @@
 #define H5D_DEF_STORAGE_COMPACT_INIT  {(hbool_t)FALSE, (size_t)0, NULL}
 #define H5D_DEF_STORAGE_CONTIG_INIT   {HADDR_UNDEF, (hsize_t)0}
 #define H5D_DEF_STORAGE_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, HADDR_UNDEF, H5D_COPS_BTREE, {{NULL}}}
-#define H5D_DEF_LAYOUT_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, (unsigned)1, {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, (unsigned)0, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {{{(uint8_t)0}}}}
+#define H5D_DEF_LAYOUT_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, (uint8_t)0, (unsigned)1, {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, (unsigned)0, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {{{(uint8_t)0}}}}
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
 #define H5D_DEF_STORAGE_COMPACT  {H5D_COMPACT, { .compact = H5D_DEF_STORAGE_COMPACT_INIT }}
 #define H5D_DEF_STORAGE_CONTIG   {H5D_CONTIGUOUS, { .contig = H5D_DEF_STORAGE_CONTIG_INIT }}
@@ -950,6 +950,129 @@ H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_chunk() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_chunk_opts
+ *
+ * Purpose:     Sets the options related to chunked storage for a dataset.
+ *              The storage must already be set to chunked.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Thursday, January 21, 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_chunk_opts(hid_t plist_id, unsigned options)
+{
+    H5P_genplist_t      *plist;         /* Property list pointer */
+    H5O_layout_t        layout;         /* Layout information for setting chunk info */
+    uint8_t             layout_flags = 0; /* "options" translated into layout message flags format */
+    herr_t              ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(H5Pset_chunk_opts, FAIL)
+
+    /* Check arguments */
+    if(options & ~(H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "unknown chunk options")
+
+#ifndef H5_HAVE_C99_DESIGNATED_INITIALIZER
+    /* If the compiler doesn't support C99 designated initializers, check if
+     *  the default layout structs have been initialized yet or not.  *ick* -QAK
+     */
+    if(!H5P_dcrt_def_layout_init_g)
+        if(H5P_init_def_layout() < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't initialize default layout info")
+#endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Retrieve the layout property */
+    if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout")
+    if(H5D_CHUNKED != layout.type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout")
+
+    /* Translate options into flags that can be used with the layout message */
+    if(options & H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+        layout_flags |= H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS;
+
+    /* Update the layout message, including the version (if necessary) */
+    /* This probably isn't the right way to do this, and should be changed once
+     * this branch gets the "real" way to set the layout version */
+    layout.u.chunk.flags = layout_flags;
+    if(layout.version < H5O_LAYOUT_VERSION_4)
+        layout.version = H5O_LAYOUT_VERSION_4;
+
+    /* Set layout value */
+    if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_chunk_opts() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_chunk_opts
+ *
+ * Purpose:     Gets the options related to chunked storage for a dataset.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, January 22, 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_chunk_opts(hid_t plist_id, unsigned *options)
+{
+    H5P_genplist_t      *plist;         /* Property list pointer */
+    H5O_layout_t        layout;         /* Layout information for setting chunk info */
+    herr_t              ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(H5Pget_chunk_opts, FAIL)
+
+#ifndef H5_HAVE_C99_DESIGNATED_INITIALIZER
+    /* If the compiler doesn't support C99 designated initializers, check if
+     *  the default layout structs have been initialized yet or not.  *ick* -QAK
+     */
+    if(!H5P_dcrt_def_layout_init_g)
+        if(H5P_init_def_layout() < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't initialize default layout info")
+#endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Retrieve the layout property */
+    if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout")
+    if(H5D_CHUNKED != layout.type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout")
+
+    if(options) {
+        /* Translate options from flags that can be used with the layout message
+         * to those known to the public */
+        *options = 0;
+        if(layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS)
+            *options |= H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_chunk_opts() */
 
 
 /*-------------------------------------------------------------------------
