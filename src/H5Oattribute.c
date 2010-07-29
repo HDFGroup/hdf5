@@ -851,12 +851,17 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
         /* Because the attribute structure is shared now. The only situation that requires
          * copying the data is when the metadata cache evicts and reloads this attribute. 
-         * The attribute structure will be different in that situation. SLU-2010/7/29 */
-        if(((H5A_t *)mesg->native)->shared != udata->attr->shared)
+         * The shared attribute structure will be different in that situation. SLU-2010/7/29 */
+        if(((H5A_t *)mesg->native)->shared != udata->attr->shared) {
+            /* Sanity check */
+            HDassert(((H5A_t *)mesg->native)->shared->data);
+            HDassert(udata->attr->shared->data);
+            HDassert(((H5A_t *)mesg->native)->shared->data != udata->attr->shared->data);
+
             /* (Needs to occur before updating the shared message, or the hash
              *      value on the old & new messages will be the same) */
-            HDmemcpy(((H5A_t *)mesg->native)->shared->data, udata->attr->shared->data, 
-                     udata->attr->shared->data_size);
+            HDmemcpy(((H5A_t *)mesg->native)->shared->data, udata->attr->shared->data, udata->attr->shared->data_size);
+        } /* end if */
 
         /* Mark the message as modified */
         mesg->dirty = TRUE;
