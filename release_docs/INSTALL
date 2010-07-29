@@ -370,14 +370,12 @@ CONTENTS
               LDFLAGS=-L/home/robb/lib \
               ./configure
 
-        HDF5 uses the zlib library for two purposes: it provides support
-        for the HDF5 deflate data compression filter, and it is used by
-        the h5toh4 converter and  the h4toh5 converter in support of
-        HDF4. Configure searches the standard places (plus those specified 
-        above with the CPPFLAGS and LDFLAGS variables) for the zlib
-        headers and library. The search can be disabled by specifying
-        `--without-zlib' or alternate directories can be specified with
-        `--with-zlib=INCDIR,LIBDIR' or through the CPPFLAGS and LDFLAGS
+        HDF5 uses the zlib library to support the HDF5 deflate 
+        data compression filter.  Configure searches the standard places 
+        (plus those specified above with the CPPFLAGS and LDFLAGS variables) 
+        for the zlib headers and library. The search can be disabled by 
+        specifying `--without-zlib' or alternate directories can be specified 
+        with `--with-zlib=INCDIR,LIBDIR' or through the CPPFLAGS and LDFLAGS
         variables:
 
             $ ./configure --with-zlib=/usr/unsup/include,/usr/unsup/lib
@@ -385,14 +383,6 @@ CONTENTS
             $ CPPFLAGS=-I/usr/unsup/include \
               LDFLAGS=-L/usr/unsup/lib \
               ./configure
-
-        The HDF5-to-HDF4 and HDF4-to-HDF5 conversion tool requires the
-        HDF4 library and header files, which are detected the same way as
-        zlib. The switch to give to configure is `--with-hdf4'.  Note
-        that HDF5 requires a newer version of zlib than the one shipped
-        with some versions of HDF4. Also, unless you have the "correct"
-        version of HDF4, the confidence testing will fail in the tools
-        directory.
 
         HDF5 includes Szip as a predefined compression method (see 3.2).  
         To enable Szip compression, the HDF5 Library must be configured 
