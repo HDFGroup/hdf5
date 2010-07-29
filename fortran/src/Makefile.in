@@ -919,7 +919,6 @@ clean-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
 	  $(RM) *.$(F9XMODEXT);                                         \
 	fi
-	$(RM) $(DESTDIR)$(includedir)/H5f90i*.h
 
 install-data-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
