@@ -148,8 +148,8 @@ done:
 H5O_chunk_proxy_t *
 H5O_chunk_protect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
 {
-    H5O_chunk_proxy_t *chk_proxy;       /* Proxy for protected chunk */
-    H5O_chunk_proxy_t *ret_value;       /* Return value */
+    H5O_chunk_proxy_t *chk_proxy = NULL;        /* Proxy for protected chunk */
+    H5O_chunk_proxy_t *ret_value;               /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_chunk_protect, NULL)
 
@@ -196,6 +196,11 @@ H5O_chunk_protect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     ret_value = chk_proxy;
 
 done:
+    /* Cleanup on error */
+    if(!ret_value)
+        if(0 == idx && chk_proxy)
+            chk_proxy = H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_chunk_protect() */
 

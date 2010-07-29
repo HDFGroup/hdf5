@@ -338,11 +338,11 @@ print_version(const char *progname)
 static void
 init_table(table_t **tbl)
 {
-    table_t *table = HDmalloc(sizeof(table_t));
+    table_t *table = (table_t *)HDmalloc(sizeof(table_t));
 
     table->size = 20;
     table->nobjs = 0;
-    table->objs = HDmalloc(table->size * sizeof(obj_t));
+    table->objs = (obj_t *)HDmalloc(table->size * sizeof(obj_t));
 
     *tbl = table;
 }
@@ -653,63 +653,59 @@ tmpfile(void)
  *
  * Date: Feb 8, 2010
  *-------------------------------------------------------------------------*/
-int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info)
+int
+H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info)
 {
-    int ret = -1; /* init to fail */
     htri_t l_ret;
     H5O_info_t trg_oinfo;
-    hid_t fapl;
+    hid_t fapl = H5P_DEFAULT;
     hid_t lapl = H5P_DEFAULT;
+    int ret = -1; /* init to fail */
 
     /* init */
     link_info->trg_type = H5O_TYPE_UNKNOWN;
 
     /* check if link itself exist */
-    if((H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0)) 
-    {
-        if(link_info->opt.msg_mode==1)
+    if(H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0) {
+        if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: link <%s> doesn't exist \n",linkpath);
         goto out;
-    }
+    } /* end if */
 
     /* get info from link */
-    if(H5Lget_info(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0)
-    {
-        if(link_info->opt.msg_mode==1)
+    if(H5Lget_info(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0) {
+        if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to get link info from <%s>\n",linkpath);
         goto out;
-    }
+    } /* end if */
 
     /* given path is hard link (object) */
-    if (link_info->linfo.type == H5L_TYPE_HARD)
-    {
+    if(link_info->linfo.type == H5L_TYPE_HARD) {
         ret = 2;
         goto out;
-    }
+    } /* end if */
 
     /* trg_path must be freed out of this function when finished using */
     link_info->trg_path = (char*)HDcalloc(link_info->linfo.u.val_size, sizeof(char));
     HDassert(link_info->trg_path);
 
     /* get link value */
-    if(H5Lget_val(file_id, linkpath, link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) < 0)
-    {
-        if(link_info->opt.msg_mode==1)
+    if(H5Lget_val(file_id, linkpath, link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) < 0) {
+        if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to get link value from <%s>\n",linkpath);
         goto out;
-    }
+    } /* end if */
 
     /*-----------------------------------------------------
      * if link type is external link use different lapl to 
      * follow object in other file
      */
-    if (link_info->linfo.type == H5L_TYPE_EXTERNAL)
-    {
+    if(link_info->linfo.type == H5L_TYPE_EXTERNAL) {
         fapl = H5Pcreate(H5P_FILE_ACCESS);
         H5Pset_fapl_sec2(fapl);
         lapl = H5Pcreate(H5P_LINK_ACCESS);
         H5Pset_elink_fapl(lapl, fapl);
-    }
+    } /* end if */
 
     /*--------------------------------------------------------------
      * if link's target object exist, get type
@@ -718,47 +714,42 @@ int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info
     l_ret = H5Oexists_by_name(file_id, linkpath, lapl);
     
     /* detect dangling link */
-    if(l_ret == FALSE) 
-    {
-            ret = 0;
-            goto out;
-    }
+    if(l_ret == FALSE) {
+        ret = 0;
+        goto out;
+    } /* end if */
     /* function failed */
-    else if (l_ret < 0)
-    {
+    else if(l_ret < 0)
         goto out;    
-    }
 
     /* get target object info */
-    if(H5Oget_info_by_name(file_id, linkpath, &trg_oinfo, lapl) < 0) 
-    {
-        if(link_info->opt.msg_mode==1)
+    if(H5Oget_info_by_name(file_id, linkpath, &trg_oinfo, lapl) < 0) {
+        if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to get object information for <%s>\n", linkpath);
         goto out;
-    }
+    } /* end if */
 
     /* check unknown type */
-    if (trg_oinfo.type < H5O_TYPE_GROUP || trg_oinfo.type >=H5O_TYPE_NTYPES)
-    {
-        if(link_info->opt.msg_mode==1)
+    if(trg_oinfo.type < H5O_TYPE_GROUP || trg_oinfo.type >=H5O_TYPE_NTYPES) {
+        if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: target object of <%s> is unknown type\n", linkpath);
         goto out;
-    } 
+    }  /* end if */
 
     /* set target obj type to return */
     link_info->trg_type = trg_oinfo.type;
 
     /* succeed */
     ret = 1;
+
 out:
-    if (link_info->linfo.type == H5L_TYPE_EXTERNAL)
-    {
+    if(fapl != H5P_DEFAULT)
         H5Pclose(fapl);
+    if(lapl != H5P_DEFAULT)
         H5Pclose(lapl);
-    }
 
     return ret;
-}
+} /* end H5tools_get_link_info() */
 
 /*-------------------------------------------------------------------------
  * Audience:    Public
