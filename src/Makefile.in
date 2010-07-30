@@ -118,8 +118,8 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5HFdtable.lo H5HFhdr.lo H5HFhuge.lo H5HFiblock.lo H5HFiter.lo \
 	H5HFman.lo H5HFsection.lo H5HFspace.lo H5HFstat.lo H5HFtest.lo \
 	H5HFtiny.lo H5HG.lo H5HGcache.lo H5HGdbg.lo H5HL.lo \
-	H5HLcache.lo H5HLdbg.lo H5HLint.lo H5HP.lo H5I.lo H5Itest.lo H5L.lo \
-	H5Lexternal.lo H5lib_settings.lo H5MF.lo H5MFaggr.lo \
+	H5HLcache.lo H5HLdbg.lo H5HLint.lo H5HP.lo H5I.lo H5Itest.lo \
+	H5L.lo H5Lexternal.lo H5lib_settings.lo H5MF.lo H5MFaggr.lo \
 	H5MFdbg.lo H5MFsection.lo H5MM.lo H5MP.lo H5MPtest.lo H5O.lo \
 	H5Oainfo.lo H5Oalloc.lo H5Oattr.lo H5Oattribute.lo H5Obogus.lo \
 	H5Obtreek.lo H5Ocache.lo H5Ochunk.lo H5Ocont.lo H5Ocopy.lo \

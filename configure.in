@@ -1370,7 +1370,7 @@ AC_TRY_COMPILE([#include <sys/types.h>],
                [off64_t n = 0;],
                [AC_CHECK_FUNCS([lseek64 fseek64 ftruncate64])],
                [AC_MSG_RESULT([skipping test for lseek64(), fseek64(), ftruncate64()])])
-AC_CHECK_FUNCS(fseeko ftello)
+AC_CHECK_FUNCS(fseeko fseeko64 ftello ftello64)
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/stat.h>],
