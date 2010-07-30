@@ -327,7 +327,7 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
                         iter->u.hyp.diminfo[curr_dim].count = tdiminfo[i].count;
                         iter->u.hyp.diminfo[curr_dim].block = tdiminfo[i].block * acc;
                         iter->u.hyp.size[curr_dim] = mem_size[i] * acc;
-                        iter->u.hyp.sel_off[curr_dim] = space->select.offset[i] * acc;
+                        iter->u.hyp.sel_off[curr_dim] = space->select.offset[i] * (hssize_t)acc;
 
                         /* Reset the "last dim flattened" flag to avoid flattened any further dimensions */
                         last_dim_flattened = 0;
@@ -2662,10 +2662,10 @@ H5S_hyper_bounds_helper(const H5S_hyper_span_info_t *spans, const hssize_t *offs
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds")
 
         /* Check if the current span extends the bounding box */
-        if((curr->low + offset[rank]) < start[rank])
-            start[rank] = curr->low + offset[rank];
-        if((curr->high + offset[rank]) > end[rank])
-            end[rank] = curr->high + offset[rank];
+        if((curr->low + (hsize_t)offset[rank]) < start[rank])
+            start[rank] = curr->low + (hsize_t)offset[rank];
+        if((curr->high + (hsize_t)offset[rank]) > end[rank])
+            end[rank] = curr->high + (hsize_t)offset[rank];
 
         /* Recurse if this node has down spans */
         if(curr->down != NULL) {
@@ -2739,10 +2739,10 @@ H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds")
 
             /* Compute the smallest location in this dimension */
-            start[i] = diminfo[i].start + space->select.offset[i];
+            start[i] = diminfo[i].start + (hsize_t)space->select.offset[i];
 
             /* Compute the largest location in this dimension */
-            end[i] = diminfo[i].start + diminfo[i].stride * (diminfo[i].count - 1) + (diminfo[i].block - 1) + space->select.offset[i];
+            end[i] = diminfo[i].start + diminfo[i].stride * (diminfo[i].count - 1) + (diminfo[i].block - 1) + (hsize_t)space->select.offset[i];
         } /* end for */
     } /* end if */
     else {
@@ -2812,7 +2812,7 @@ H5S_hyper_offset(const H5S_t *space, hsize_t *offset)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds")
 
             /* Add the hyperslab's offset in this dimension to the total linear offset */
-            *offset += hyp_offset * accum;
+            *offset += (hsize_t)(hyp_offset * (hssize_t)accum);
 
             /* Increase the accumulator */
             accum *= dim_size[i];
@@ -2845,7 +2845,7 @@ H5S_hyper_offset(const H5S_t *space, hsize_t *offset)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds")
 
             /* Add the hyperslab's offset in this dimension to the total linear offset */
-            *offset += hyp_offset * dim_accum[i];
+            *offset += (hsize_t)(hyp_offset * (hssize_t)dim_accum[i]);
 
             /* Advance to first span in "down" dimension */
             if(span->down) {
@@ -4436,8 +4436,8 @@ H5S_hyper_adjust_helper_s(H5S_hyper_span_info_t *spans, const hssize_t *offset)
         while(span != NULL) {
             /* Adjust span offset */
             HDassert((hssize_t)span->low >= *offset);
-            span->low -= *offset;
-            span->high -= *offset;
+            span->low = (hsize_t)((hssize_t)span->low - *offset);
+            span->high = (hsize_t)((hssize_t)span->high - *offset);
 
             /* Recursively adjust spans in next dimension down */
             if(span->down != NULL)
@@ -4474,32 +4474,32 @@ herr_t
 H5S_hyper_adjust_s(H5S_t *space, const hssize_t *offset)
 {
     unsigned u;                         /* Local index variable */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_adjust_s);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_adjust_s)
 
-    assert(space);
-    assert(offset);
+    HDassert(space);
+    HDassert(offset);
 
     /* Subtract the offset from the "regular" coordinates, if they exist */
     if(space->select.sel_info.hslab->diminfo_valid) {
-        for(u=0; u<space->extent.rank; u++) {
-            assert((hssize_t)space->select.sel_info.hslab->opt_diminfo[u].start>=offset[u]);
-            space->select.sel_info.hslab->opt_diminfo[u].start-=offset[u];
+        for(u = 0; u < space->extent.rank; u++) {
+            HDassert((hssize_t)space->select.sel_info.hslab->opt_diminfo[u].start >= offset[u]);
+            space->select.sel_info.hslab->opt_diminfo[u].start = (hsize_t)((hssize_t)space->select.sel_info.hslab->opt_diminfo[u].start - offset[u]);
         } /* end for */
     } /* end if */
 
     /* Subtract the offset from the span tree coordinates, if they exist */
     if(space->select.sel_info.hslab->span_lst) {
-        if(H5S_hyper_adjust_helper_s(space->select.sel_info.hslab->span_lst,offset)<0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab offset adjustment");
+        if(H5S_hyper_adjust_helper_s(space->select.sel_info.hslab->span_lst, offset) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab offset adjustment")
 
         /* Reset the scratch pointers for the next routine which needs them */
         H5S_hyper_span_scratch(space->select.sel_info.hslab->span_lst, NULL);
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_hyper_adjust_s() */
 
 
@@ -7552,17 +7552,17 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     H5S_hyper_span_t *curr_span;    /* Current hyperslab span node */
     H5S_hyper_span_t **ispan;       /* Iterator's hyperslab span nodes */
     hsize_t slab[H5O_LAYOUT_NDIMS]; /* Cumulative size of each dimension in bytes */
-    hsize_t acc;        /* Accumulator for computing cumulative sizes */
-    hsize_t loc_off;    /* Element offset in the dataspace */
-    hsize_t last_span_end=0; /* The offset of the end of the last span */
+    hsize_t acc;       /* Accumulator for computing cumulative sizes */
+    hsize_t loc_off;   /* Element offset in the dataspace */
+    hsize_t last_span_end = 0; /* The offset of the end of the last span */
     hsize_t *abs_arr;  /* Absolute hyperslab span position */
     const hssize_t *off_arr;  /* Offset within the dataspace extent */
-    size_t span_size=0; /* Number of bytes in current span to actually process */
-    size_t io_left;     /* Number of elements left to process */
+    size_t span_size = 0; /* Number of bytes in current span to actually process */
+    size_t io_left;    /* Number of elements left to process */
     size_t io_bytes_left;   /* Number of bytes left to process */
-    size_t io_used;     /* Number of elements processed */
-    size_t curr_seq=0; /* Number of sequence/offsets stored in the arrays */
-    size_t elem_size;   /* Size of each element iterating over */
+    size_t io_used;    /* Number of elements processed */
+    size_t curr_seq = 0; /* Number of sequence/offsets stored in the arrays */
+    size_t elem_size;  /* Size of each element iterating over */
     unsigned ndims;    /* Number of dimensions of dataset */
     unsigned fast_dim; /* Rank of the fastest changing dimension for the dataspace */
     int curr_dim;      /* Current dimension being operated on */
@@ -7606,7 +7606,7 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     /* Set the offset of the first element iterated on */
     for(u = 0, loc_off = 0; u < ndims; u++)
         /* Compute the sequential element offset */
-        loc_off += (abs_arr[u] + off_arr[u]) * slab[u];
+        loc_off += ((hsize_t)((hssize_t)abs_arr[u] + off_arr[u])) * slab[u];
 
     /* Range check against number of elements left in selection */
     HDassert(io_bytes_left <= (iter->elmt_left * elem_size));
@@ -7738,7 +7738,7 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
 
                 /* Reset the buffer offset */
                 for(u = 0, loc_off = 0; u < ndims; u++)
-                    loc_off += (abs_arr[u] + off_arr[u]) * slab[u];
+                    loc_off += ((hsize_t)((hssize_t)abs_arr[u] + off_arr[u])) * slab[u];
             } /* end else */
             else
                 /* We had better be done with I/O or bad things are going to happen... */
@@ -7772,25 +7772,18 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
                 /* Store the I/O information for the span */
 
                 /* Check if this is appending onto previous sequence */
-                if(curr_seq>0 && last_span_end==loc_off)
-                    len[curr_seq-1]+=span_size;
+                if(curr_seq > 0 && last_span_end == loc_off)
+                    len[curr_seq - 1] += span_size;
                 else {
-                    off[curr_seq]=loc_off;
-                    len[curr_seq]=span_size;
+                    off[curr_seq] = loc_off;
+                    len[curr_seq] = span_size;
 
                     /* Increment the number of sequences in arrays */
                     curr_seq++;
                 } /* end else */
 
                 /* Set the location of the last span's end */
-                last_span_end=loc_off+span_size;
-
-                /* If the sequence & offset arrays are full, do what? */
-                if(curr_seq>=maxseq) {
-                    /* Break out now, we are finished with sequences */
-                    break;
-
-                } /* end else */
+                last_span_end = loc_off + span_size;
 /* end COMMON */
 
                 /* Break out now, we are finished with I/O */
@@ -7798,31 +7791,31 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
             } /* end if */
             else {
                 /* Decrement I/O left to perform */
-                io_bytes_left-=span_size;
+                io_bytes_left -= span_size;
 
 /* COMMON */
                 /* Store the I/O information for the span */
 
                 /* Check if this is appending onto previous sequence */
-                if(curr_seq>0 && last_span_end==loc_off)
+                if(curr_seq > 0 && last_span_end == loc_off)
                     len[curr_seq-1]+=span_size;
                 else {
-                    off[curr_seq]=loc_off;
-                    len[curr_seq]=span_size;
+                    off[curr_seq] = loc_off;
+                    len[curr_seq] = span_size;
 
                     /* Increment the number of sequences in arrays */
                     curr_seq++;
                 } /* end else */
 
                 /* Set the location of the last span's end */
-                last_span_end=loc_off+span_size;
+                last_span_end = loc_off + span_size;
+/* end COMMON */
 
                 /* If the sequence & offset arrays are full, do what? */
-                if(curr_seq>=maxseq) {
+                if(curr_seq >= maxseq) {
                     /* Break out now, we are finished with sequences */
                     break;
                 } /* end else */
-/* end COMMON */
             } /* end else */
 
 	    /* Move to next span in fastest changing dimension */
@@ -7925,7 +7918,7 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
 
         /* Reset the buffer offset */
         for(u = 0, loc_off = 0; u < ndims; u++)
-            loc_off += (abs_arr[u] + off_arr[u]) * slab[u];
+            loc_off += ((hsize_t)((hssize_t)abs_arr[u] + off_arr[u])) * slab[u];
     } /* end while */
 
     /* Decrement number of elements left in iterator */
@@ -7973,7 +7966,7 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
+H5S_hyper_get_seq_list_opt(const H5S_t *space, H5S_sel_iter_t *iter,
     size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
@@ -8011,20 +8004,20 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
     size_t start_io_left; /* The initial number of elements left in I/O operation */
     size_t elem_size;   /* Size of each element iterating over */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_get_seq_list_opt);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_get_seq_list_opt)
 
     /* Check args */
-    assert(space);
-    assert(iter);
-    assert(maxseq>0);
-    assert(maxelem>0);
-    assert(nseq);
-    assert(nelem);
-    assert(off);
-    assert(len);
+    HDassert(space);
+    HDassert(iter);
+    HDassert(maxseq > 0);
+    HDassert(maxelem > 0);
+    HDassert(nseq);
+    HDassert(nelem);
+    HDassert(off);
+    HDassert(len);
 
     /* Set the local copy of the diminfo pointer */
-    tdiminfo=iter->u.hyp.diminfo;
+    tdiminfo = iter->u.hyp.diminfo;
 
     /* Check if this is a "flattened" regular hyperslab selection */
     if(iter->u.hyp.iter_rank != 0 && iter->u.hyp.iter_rank < space->extent.rank) {
@@ -8079,11 +8072,11 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 
         /* Compute the initial buffer offset */
         for(u = 0, loc = 0; u < ndims; u++)
-            loc += (iter->u.hyp.off[u] + sel_off[u]) * slab[u];
+            loc += ((hsize_t)((hssize_t)iter->u.hyp.off[u] + sel_off[u])) * slab[u];
 
         /* Add a new sequence */
-        off[curr_seq]=loc;
-        H5_ASSIGN_OVERFLOW(len[curr_seq],actual_elem*elem_size,hsize_t,size_t);
+        off[curr_seq] = loc;
+        H5_ASSIGN_OVERFLOW(len[curr_seq], actual_elem * elem_size, hsize_t, size_t);
 
         /* Increment sequence count */
         curr_seq++;
@@ -8092,10 +8085,10 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         io_left -= actual_elem;
 
         /* Advance the hyperslab iterator */
-        H5S_hyper_iter_next(iter,actual_elem);
+        H5S_hyper_iter_next(iter, actual_elem);
 
         /* Decrement the number of elements left in selection */
-        iter->elmt_left-=actual_elem;
+        iter->elmt_left -= actual_elem;
     } /* end if */
 
     /* Now that we've cleared the "remainder" of the previous fastest dimension
@@ -8103,16 +8096,16 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
      * algorithm to compute the offsets and run through as many as possible,
      * until the buffer fills up.
      */
-    if(io_left>0 && curr_seq<maxseq) { /* Just in case the "remainder" above filled the buffer */
+    if(io_left > 0 && curr_seq < maxseq) { /* Just in case the "remainder" above filled the buffer */
         /* Keep the number of elements we started with */
-        nelmts=io_left;
+        nelmts = io_left;
 
         /* Compute the arrays to perform I/O on */
 
         /* Copy the location of the point to get */
         /* (Add in the selection offset) */
         for(u = 0; u < ndims; u++)
-            offset[u] = iter->u.hyp.off[u] + sel_off[u];
+            offset[u] = (hsize_t)((hssize_t)iter->u.hyp.off[u] + sel_off[u]);
 
         /* Compute the current "counts" for this location */
         for(u = 0; u < ndims; u++) {
@@ -8137,18 +8130,18 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         actual_bytes=actual_elem*elem_size;
 
         /* Set local copies of information for the fastest changing dimension */
-        fast_dim_start=tdiminfo[fast_dim].start;
-        fast_dim_stride=tdiminfo[fast_dim].stride;
-        fast_dim_block=tdiminfo[fast_dim].block;
-        H5_ASSIGN_OVERFLOW(fast_dim_buf_off,slab[fast_dim]*fast_dim_stride,hsize_t,size_t);
-        fast_dim_offset=fast_dim_start+sel_off[fast_dim];
+        fast_dim_start = tdiminfo[fast_dim].start;
+        fast_dim_stride = tdiminfo[fast_dim].stride;
+        fast_dim_block = tdiminfo[fast_dim].block;
+        H5_ASSIGN_OVERFLOW(fast_dim_buf_off, slab[fast_dim] * fast_dim_stride, hsize_t, size_t);
+        fast_dim_offset = (hsize_t)((hssize_t)fast_dim_start + sel_off[fast_dim]);
 
         /* Compute the number of blocks which would fit into the buffer */
-        H5_CHECK_OVERFLOW(io_left/fast_dim_block,hsize_t,size_t);
-        tot_blk_count=(size_t)(io_left/fast_dim_block);
+        H5_CHECK_OVERFLOW(io_left / fast_dim_block, hsize_t, size_t);
+        tot_blk_count = (size_t)(io_left / fast_dim_block);
 
         /* Don't go over the maximum number of sequences allowed */
-        tot_blk_count=MIN(tot_blk_count,(maxseq-curr_seq));
+        tot_blk_count = MIN(tot_blk_count, (maxseq - curr_seq));
 
         /* Compute the amount to wrap at the end of each row */
         for(u = 0; u < ndims; u++)
@@ -8159,9 +8152,9 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
             skip[u] = (tdiminfo[u].stride - tdiminfo[u].block) * slab[u];
 
         /* Check if there is a partial row left (with full blocks) */
-        if(tmp_count[fast_dim]>0) {
+        if(tmp_count[fast_dim] > 0) {
             /* Get number of blocks in fastest dimension */
-            H5_ASSIGN_OVERFLOW(fast_dim_count,tdiminfo[fast_dim].count-tmp_count[fast_dim],hsize_t,size_t);
+            H5_ASSIGN_OVERFLOW(fast_dim_count, tdiminfo[fast_dim].count - tmp_count[fast_dim], hsize_t, size_t);
 
             /* Make certain this entire row will fit into buffer */
             fast_dim_count=MIN(fast_dim_count,tot_blk_count);
@@ -8205,29 +8198,29 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 
                 /* Increment the offset and count for the other dimensions */
                 temp_dim = (int)fast_dim - 1;
-                while(temp_dim>=0) {
+                while(temp_dim >= 0) {
                     /* Move to the next row in the curent dimension */
                     offset[temp_dim]++;
                     tmp_block[temp_dim]++;
 
                     /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                    if(tmp_block[temp_dim]<tdiminfo[temp_dim].block)
+                    if(tmp_block[temp_dim] < tdiminfo[temp_dim].block)
                         break;
                     else {
                         /* Move to the next block in the current dimension */
-                        offset[temp_dim]+=(tdiminfo[temp_dim].stride-tdiminfo[temp_dim].block);
+                        offset[temp_dim] += (tdiminfo[temp_dim].stride - tdiminfo[temp_dim].block);
                         loc += skip[temp_dim];
-                        tmp_block[temp_dim]=0;
+                        tmp_block[temp_dim] = 0;
                         tmp_count[temp_dim]++;
 
                         /* If this block is still in the range of blocks to output for the dimension, break out of loop */
                         if(tmp_count[temp_dim]<tdiminfo[temp_dim].count)
                             break;
                         else {
-                            offset[temp_dim]=tdiminfo[temp_dim].start+sel_off[temp_dim];
+                            offset[temp_dim] = (hsize_t)((hssize_t)tdiminfo[temp_dim].start + sel_off[temp_dim]);
                             loc += wrap[temp_dim];
-                            tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
-                            tmp_block[temp_dim]=0;
+                            tmp_count[temp_dim] = 0; /* reset back to the beginning of the line */
+                            tmp_block[temp_dim] = 0;
                         } /* end else */
                     } /* end else */
 
@@ -8237,13 +8230,13 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
             } /* end if */
             else {
                 /* Update the offset in the fastest dimension */
-                offset[fast_dim]+=(fast_dim_stride*act_blk_count);
+                offset[fast_dim] += (fast_dim_stride * act_blk_count);
             } /* end else */
         } /* end if */
 
         /* Compute the number of entire rows to read in */
-        H5_CHECK_OVERFLOW( tot_blk_count/tdiminfo[fast_dim].count ,hsize_t,size_t);
-        curr_rows=total_rows=(size_t)(tot_blk_count/tdiminfo[fast_dim].count);
+        H5_CHECK_OVERFLOW(tot_blk_count / tdiminfo[fast_dim].count, hsize_t, size_t);
+        curr_rows = total_rows = (size_t)(tot_blk_count / tdiminfo[fast_dim].count);
 
         /* Reset copy of number of blocks in fastest dimension */
         H5_ASSIGN_OVERFLOW(fast_dim_count,tdiminfo[fast_dim].count,hsize_t,size_t);
@@ -8253,14 +8246,14 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 
 #define DUFF_GUTS							      \
     /* Store the sequence information */				      \
-    off[curr_seq]=loc;							      \
-    len[curr_seq]=actual_bytes;						      \
+    off[curr_seq] = loc;						      \
+    len[curr_seq] = actual_bytes;					      \
 									      \
     /* Increment sequence count */					      \
     curr_seq++;								      \
 									      \
     /* Increment information to reflect block just processed */		      \
-    loc+=fast_dim_buf_off;
+    loc += fast_dim_buf_off;
 
 #ifdef NO_DUFFS_DEVICE
             /* Loop over all the blocks in the fastest changing dimension */
@@ -8305,29 +8298,29 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 
             /* Increment the offset and count for the other dimensions */
             temp_dim = (int)fast_dim - 1;
-            while(temp_dim>=0) {
+            while(temp_dim >= 0) {
                 /* Move to the next row in the curent dimension */
                 offset[temp_dim]++;
                 tmp_block[temp_dim]++;
 
                 /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                if(tmp_block[temp_dim]<tdiminfo[temp_dim].block)
+                if(tmp_block[temp_dim] < tdiminfo[temp_dim].block)
                     break;
                 else {
                     /* Move to the next block in the current dimension */
-                    offset[temp_dim]+=(tdiminfo[temp_dim].stride-tdiminfo[temp_dim].block);
+                    offset[temp_dim] += (tdiminfo[temp_dim].stride - tdiminfo[temp_dim].block);
                     loc += skip[temp_dim];
-                    tmp_block[temp_dim]=0;
+                    tmp_block[temp_dim] = 0;
                     tmp_count[temp_dim]++;
 
                     /* If this block is still in the range of blocks to output for the dimension, break out of loop */
                     if(tmp_count[temp_dim]<tdiminfo[temp_dim].count)
                         break;
                     else {
-                        offset[temp_dim]=tdiminfo[temp_dim].start+sel_off[temp_dim];
+                        offset[temp_dim] = (hsize_t)((hssize_t)tdiminfo[temp_dim].start + sel_off[temp_dim]);
                         loc += wrap[temp_dim];
-                        tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
-                        tmp_block[temp_dim]=0;
+                        tmp_count[temp_dim] = 0; /* reset back to the beginning of the line */
+                        tmp_block[temp_dim] = 0;
                     } /* end else */
                 } /* end else */
 
@@ -8342,8 +8335,8 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         /* Adjust the number of blocks & elements left to transfer */
 
         /* Decrement number of elements left */
-        H5_CHECK_OVERFLOW( actual_elem*(total_rows*tdiminfo[fast_dim].count) ,hsize_t,size_t);
-        io_left -= (size_t)(actual_elem*(total_rows*tdiminfo[fast_dim].count));
+        H5_CHECK_OVERFLOW(actual_elem * (total_rows * tdiminfo[fast_dim].count), hsize_t, size_t);
+        io_left -= (size_t)(actual_elem * (total_rows * tdiminfo[fast_dim].count));
 
         /* Decrement number of blocks left */
         H5_CHECK_OVERFLOW( (total_rows*tdiminfo[fast_dim].count) ,hsize_t,size_t);
@@ -8404,7 +8397,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         /* Update the iterator with the location we stopped */
         /* (Subtract out the selection offset) */
         for(u = 0; u < ndims; u++)
-            iter->u.hyp.off[u] = offset[u] - sel_off[u];
+            iter->u.hyp.off[u] = (hsize_t)((hssize_t)offset[u] - sel_off[u]);
 
         /* Decrement the number of elements left in selection */
         iter->elmt_left -= (nelmts - io_left);

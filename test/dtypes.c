@@ -25,9 +25,6 @@
 #include "h5test.h"
 #include "H5Iprivate.h"     /* For checking that datatype id's don't leak */
 
-/* Number of times to run each test */
-#define NTESTS	1
-
 /* Number of elements in each test */
 #define NTESTELEM	100000
 
@@ -184,64 +181,64 @@ test_classes(void)
     hid_t memb_id;      /* Compound member datatype */
     H5T_class_t         memb_cls;
     H5T_class_t         tcls;
-    unsigned int        nmembs, i;
+    int                 nmembs;
+    unsigned            u;
 
     TESTING("H5Tget_class()");
 
     /*-------------------------------------------------------------
      *  Check class of some atomic types.
      *-----------------------------------------------------------*/
-    if ((tcls=H5Tget_class(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if (H5T_INTEGER!=tcls) TEST_ERROR
+    if((tcls = H5Tget_class(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if(H5T_INTEGER != tcls) TEST_ERROR
 
-    if ((tcls=H5Tget_class(H5T_NATIVE_DOUBLE)) < 0) TEST_ERROR
-    if (H5T_FLOAT!=tcls) TEST_ERROR
+    if((tcls = H5Tget_class(H5T_NATIVE_DOUBLE)) < 0) TEST_ERROR
+    if(H5T_FLOAT != tcls) TEST_ERROR
 
     /* Create a VL datatype of char.  It should be a VL, not a string class. */
-    if((vlc_id=H5Tvlen_create(H5T_NATIVE_CHAR)) < 0) TEST_ERROR
+    if((vlc_id = H5Tvlen_create(H5T_NATIVE_CHAR)) < 0) TEST_ERROR
 
     /* Make certain that the correct classes can be detected */
-    if ((tcls=H5Tget_class(vlc_id)) < 0) TEST_ERROR
-    if (H5T_VLEN!=tcls) TEST_ERROR
+    if((tcls = H5Tget_class(vlc_id)) < 0) TEST_ERROR
+    if(H5T_VLEN != tcls) TEST_ERROR
 
     /* Make certain that an incorrect class is not detected */
-    if (H5T_STRING==tcls) TEST_ERROR
+    if(H5T_STRING == tcls) TEST_ERROR
 
     /* Create a VL string.  It should be a string, not a VL class. */
-    if((vls_id=H5Tcopy(H5T_C_S1)) < 0) TEST_ERROR
+    if((vls_id = H5Tcopy(H5T_C_S1)) < 0) TEST_ERROR
     if(H5Tset_size(vls_id, H5T_VARIABLE) < 0) TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if ((tcls=H5Tget_class(vls_id)) < 0) TEST_ERROR
-    if (H5T_STRING!=tcls) TEST_ERROR
+    if((tcls = H5Tget_class(vls_id)) < 0) TEST_ERROR
+    if(H5T_STRING != tcls) TEST_ERROR
 
     /* Make certain that an incorrect class is not detected */
-    if (H5T_VLEN==tcls) TEST_ERROR
+    if(H5T_VLEN == tcls) TEST_ERROR
 
     /*-------------------------------------------------------------
      *  Check class for member types of compound type.
      *-----------------------------------------------------------*/
     /* Create a compound datatype and insert some complex types */
-    if ((cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex))) < 0) TEST_ERROR
-    if (H5Tinsert(cmpd_id, "vl_c", HOFFSET(struct complex, vl_c), vlc_id) < 0) TEST_ERROR
-    if (H5Tinsert(cmpd_id, "vl_s", HOFFSET(struct complex, vl_s), vls_id) < 0) TEST_ERROR
+    if((cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex))) < 0) TEST_ERROR
+    if(H5Tinsert(cmpd_id, "vl_c", HOFFSET(struct complex, vl_c), vlc_id) < 0) TEST_ERROR
+    if(H5Tinsert(cmpd_id, "vl_s", HOFFSET(struct complex, vl_s), vls_id) < 0) TEST_ERROR
 
-    nmembs = H5Tget_nmembers(cmpd_id);
+    if((nmembs = H5Tget_nmembers(cmpd_id)) < 0) TEST_ERROR
 
-    for (i=0;i<nmembs;i++)
-    {
+    for(u = 0; u < (unsigned)nmembs; u++) {
         /* Get member type ID */
-        if((memb_id = H5Tget_member_type(cmpd_id, i)) < 0) TEST_ERROR
+        if((memb_id = H5Tget_member_type(cmpd_id, u)) < 0) TEST_ERROR
 
         /* Get member type class */
-        if((memb_cls = H5Tget_member_class (cmpd_id, i)) < 0) TEST_ERROR
+        if((memb_cls = H5Tget_member_class (cmpd_id, u)) < 0) TEST_ERROR
 
         /* Verify member class */
-        if(H5Tdetect_class (memb_id, memb_cls) < 0) TEST_ERROR
+        if(H5Tdetect_class(memb_id, memb_cls) < 0) TEST_ERROR
 
         /* Close member type ID */
         if(H5Tclose(memb_id) < 0) TEST_ERROR
-    }
+    } /* end for */
 
     /* Close datatypes */
     if(H5Tclose(cmpd_id) < 0) TEST_ERROR
@@ -2316,7 +2313,7 @@ test_compound_13(void)
         float y;
     };
     struct s1   data_out, data_in;
-    hid_t       fileid, grpid, typeid, array1_tid, spaceid, attid;
+    hid_t       fileid, grpid, dtypeid, array1_tid, spaceid, attid;
     hid_t       fapl_id;
     hsize_t     dims[1] = {COMPOUND13_ARRAY_SIZE + 1};
     char        filename[1024];
@@ -2341,24 +2338,24 @@ test_compound_13(void)
     if((grpid = H5Gopen2(fileid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create a compound type. */
-    if((typeid = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0) FAIL_STACK_ERROR
+    if((dtypeid = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0) FAIL_STACK_ERROR
     if((array1_tid = H5Tarray_create2(H5T_NATIVE_UCHAR, 1, dims)) < 0) FAIL_STACK_ERROR
-    if(H5Tinsert(typeid, "x", HOFFSET(struct s1, x), array1_tid) < 0) FAIL_STACK_ERROR
-    if(H5Tinsert(typeid, "y", HOFFSET(struct s1, y), H5T_NATIVE_FLOAT) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(dtypeid, "x", HOFFSET(struct s1, x), array1_tid) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(dtypeid, "y", HOFFSET(struct s1, y), H5T_NATIVE_FLOAT) < 0) FAIL_STACK_ERROR
 
     /* Create a space. */
     if((spaceid = H5Screate(H5S_SCALAR)) < 0) FAIL_STACK_ERROR
 
     /* Create an attribute of this compound type. */
-    if((attid = H5Acreate2(grpid, COMPOUND13_ATTR_NAME, typeid, spaceid, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((attid = H5Acreate2(grpid, COMPOUND13_ATTR_NAME, dtypeid, spaceid, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Write some data. */
-    if(H5Awrite(attid, typeid, &data_out) < 0) FAIL_STACK_ERROR
+    if(H5Awrite(attid, dtypeid, &data_out) < 0) FAIL_STACK_ERROR
 
     /* Release all resources. */
     if(H5Aclose(attid) < 0) FAIL_STACK_ERROR
     if(H5Tclose(array1_tid) < 0) FAIL_STACK_ERROR
-    if(H5Tclose(typeid) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(dtypeid) < 0) FAIL_STACK_ERROR
     if(H5Sclose(spaceid) < 0) FAIL_STACK_ERROR
     if(H5Gclose(grpid) < 0) FAIL_STACK_ERROR
     if(H5Fclose(fileid) < 0) FAIL_STACK_ERROR
@@ -2368,11 +2365,11 @@ test_compound_13(void)
     if((fileid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((grpid = H5Gopen2(fileid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((attid = H5Aopen(grpid, COMPOUND13_ATTR_NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((typeid = H5Aget_type(attid)) < 0) FAIL_STACK_ERROR
-    if(H5Tget_class(typeid) != H5T_COMPOUND) FAIL_STACK_ERROR
-    if(HOFFSET(struct s1, x) != H5Tget_member_offset(typeid, 0)) TEST_ERROR
-    if(HOFFSET(struct s1, y) != H5Tget_member_offset(typeid, 1)) TEST_ERROR
-    if(H5Aread(attid, typeid, &data_in) < 0) FAIL_STACK_ERROR
+    if((dtypeid = H5Aget_type(attid)) < 0) FAIL_STACK_ERROR
+    if(H5Tget_class(dtypeid) != H5T_COMPOUND) FAIL_STACK_ERROR
+    if(HOFFSET(struct s1, x) != H5Tget_member_offset(dtypeid, 0)) TEST_ERROR
+    if(HOFFSET(struct s1, y) != H5Tget_member_offset(dtypeid, 1)) TEST_ERROR
+    if(H5Aread(attid, dtypeid, &data_in) < 0) FAIL_STACK_ERROR
 
     /* Check the data. */
     for (u = 0; u < COMPOUND13_ARRAY_SIZE + 1; u++)
@@ -2381,7 +2378,7 @@ test_compound_13(void)
 
     /* Release all resources. */
     if(H5Aclose(attid) < 0) FAIL_STACK_ERROR
-    if(H5Tclose(typeid) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(dtypeid) < 0) FAIL_STACK_ERROR
     if(H5Gclose(grpid) < 0) FAIL_STACK_ERROR
     if(H5Fclose(fileid) < 0) FAIL_STACK_ERROR
 
@@ -4050,7 +4047,7 @@ test_conv_str_2(void)
     char		*buf = NULL, s[80];
     hid_t		c_type = -1;
     hid_t       	f_type = -1;
-    const size_t	nelmts = NTESTELEM, ntests=NTESTS;
+    const size_t	nelmts = NTESTELEM;
     size_t		i, j, nchars;
     int			ret_value = 1;
 
@@ -4069,19 +4066,14 @@ test_conv_str_2(void)
     } /* end for */
 
     /* Do the conversions */
-    for(i = 0; i < ntests; i++) {
-	if(ntests > 1)
-	    sprintf(s, "Testing random string conversion speed (test %d/%d)", (int)(i + 1), (int)ntests);
-	else
-	    sprintf(s, "Testing random string conversion speed");
-        printf("%-70s", s);
-        HDfflush(stdout);
-        if(H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
-            goto error;
-        if(H5Tconvert(f_type, c_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
-            goto error;
-        PASSED();
-    } /* end for */
+    sprintf(s, "Testing random string conversion speed");
+    printf("%-70s", s);
+    HDfflush(stdout);
+    if(H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
+        goto error;
+    if(H5Tconvert(f_type, c_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
+        goto error;
+    PASSED();
 
     ret_value = 0;
 
@@ -4233,7 +4225,6 @@ static int
 test_conv_enum_1(void)
 {
     const size_t nelmts=NTESTELEM;
-    const int	ntests=NTESTS;
     int		i, val, *buf=NULL;
     hid_t	t1 = -1;
     hid_t	t2 = -1;
@@ -4258,27 +4249,17 @@ test_conv_enum_1(void)
         buf[u] = HDrand() % 26;
 
     /* Conversions */
-    for(i = 0; i < ntests; i++) {
-	if(ntests > 1)
-	    sprintf(s, "Testing random enum conversion O(N) (test %d/%d)", i + 1, ntests);
-	else
-	    sprintf(s, "Testing random enum conversion O(N)");
-        printf("%-70s", s);
-        HDfflush(stdout);
-        if(H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT) < 0) goto error;
-        PASSED();
-    } /* end for */
+    sprintf(s, "Testing random enum conversion O(N)");
+    printf("%-70s", s);
+    HDfflush(stdout);
+    if(H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT) < 0) goto error;
+    PASSED();
 
-    for(i = 0; i < ntests; i++) {
-	if(ntests > 1)
-	    sprintf(s, "Testing random enum conversion O(N log N) (test %d/%d)", i + 1, ntests);
-	else
-	    sprintf(s, "Testing random enum conversion O(N log N)");
-        printf("%-70s", s);
-        HDfflush(stdout);
-        if(H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT) < 0) goto error;
-        PASSED();
-    }
+    sprintf(s, "Testing random enum conversion O(N log N)");
+    printf("%-70s", s);
+    HDfflush(stdout);
+    if(H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT) < 0) goto error;
+    PASSED();
 
     ret_value = 0;
 
