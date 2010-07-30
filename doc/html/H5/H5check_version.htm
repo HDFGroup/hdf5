@@ -4,7 +4,7 @@
 <dl>
 
 <dt><div align=right><font color=999999 size=-1><i>
-    Last modified: 21 July 2010
+    Last modified: 30 July 2010
     </i></font></div>
 
 <dt><strong>Name:</strong> <a name="Library-VersCheck">H5check_version</a>
@@ -25,13 +25,6 @@
         library with which an application was compiled, as indicated by
         the passed parameters, matches the version of the HDF5 library 
         against which the application is currently linked.
-<!--
-    <dd><code>H5check_version</code> verifies that the arguments provided 
-        with the function call match the version numbers compiled into 
-        the library.  
-        If that check succeeds, <code>H5check_version</code> determines 
-        whether other less critical information is consistent.
--->
         <p>
         <code>majnum</code> is the major version number of the HDF library 
         with which the application was compiled,
@@ -53,13 +46,6 @@
         </dir>  
         <p>
 
-<!--
-        As stated above, <code>H5check_version</code> serves two slightly 
-        different purposes.
-        One may look at the <code>H5check</code> definition in the file 
-        <code>H5public.h</code> as an example.
-        <p>
--->
         As stated above,
         <code>H5check_version</code> first verifies that the version 
         of the HDF5 library with which an application was compiled 
@@ -77,30 +63,6 @@
         with a different version different version.
         <p>
 
-<!-- SEEMS UNNECESSARY WITH THE REWRITE
-        Note that <code>H5check_version</code> verifies only the 
-        major and minor version numbers and the release number; 
-        it does not verify the sub-release value as that should be 
-        an empty string for any official release.
-	This means that any two incompatible library versions must
-	have different {major,minor,release} numbers. (Notice the
-	reverse is not necessarily true.)
-        <p>
--->
-<!-- SEEMS INCONSISTENT
-        , if the above check succeeds and no <code>abort()</code> 
-        is called, <code>H5check_version</code> determines whether the 
-        library version identifiers <code>H5_VERS_MAJOR</code>, 
-        <code>H5_VERS_MINOR</code>, <code>H5_VERS_RELEASE</code>, 
-        <code>H5_VERS_SUBRELEASE</code>, and <code>H5_VERS_INFO</code> 
-        are consistent.
-        This is designed to catch source code inconsistencies, 
-        but does not generate the fatal error as in the first stage
-	because this inconsistency does not cause errors in the data files.
-        If this check reveals inconsistencies, the library issues a warning
-        but the function does not fail.
--->
-        <p>
         If the above test passes, <code>H5check_version</code> proceeds to 
         verify the consistency of additional library version information.
         This is designed to catch source code inconsistencies that 
