@@ -698,6 +698,16 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
         } /* end for */
     } /* end for */
 
+    /* Also free any ID structures being retained for potential re-use */
+    while(type_ptr->next_id_ptr) {
+        H5I_id_info_t *tmp_id_ptr;          /* temp ptr to next atom */
+
+        tmp_id_ptr = type_ptr->next_id_ptr->next;
+        (void)H5FL_FREE(H5I_id_info_t, type_ptr->next_id_ptr);
+        type_ptr->next_id_ptr = tmp_id_ptr;
+    } /* end while */
+    type_ptr->free_count = 0;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_clear_type() */
@@ -866,8 +876,7 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
 
     /* If there is an available ID structure, use it. */
-    if (type_ptr->next_id_ptr) {
-    
+    if(type_ptr->next_id_ptr) {
         /* Use existing available ID struct */
         id_ptr = type_ptr->next_id_ptr;
     
@@ -876,11 +885,10 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 
         /* Decrease count of available ID structures */
         type_ptr->free_count--;
-
+    } /* end if */
     /* If no available ID structure, then create a new id for use, and
      * allocate a new struct to house it. */
-    } else {
-
+    else {
         /* Allocate new ID struct */
         if(NULL == (id_ptr = H5FL_MALLOC(H5I_id_info_t)))
             HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -890,7 +898,6 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 
         /* Increment nextid value */
         type_ptr->nextid++;
-
     } /* end if */
 
     /* Fill in remaining fields of ID struct */
@@ -1340,7 +1347,8 @@ H5I_remove(hid_t id)
         /* Otherwise, just toss it. */
         else
             curr_id = H5FL_FREE(H5I_id_info_t, curr_id);
-    } else {
+    } /* end if */
+    else {
         /* couldn't find the ID in the proper place */
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "invalid ID")
     }
@@ -1350,20 +1358,16 @@ H5I_remove(hid_t id)
 
     /* If there are no more IDs of this type, then we can free all available
        ID strutures, and reset starting typeid and wrapped status. */
-    if (type_ptr->ids == 0) {
-
-        while (type_ptr->next_id_ptr) {
-
+    if(type_ptr->ids == 0) {
+        while(type_ptr->next_id_ptr) {
             tmp_id_ptr = type_ptr->next_id_ptr->next;
             (void)H5FL_FREE(H5I_id_info_t, type_ptr->next_id_ptr);
             type_ptr->next_id_ptr = tmp_id_ptr;
-            type_ptr->free_count--;
-
         } /* end while */
+        type_ptr->free_count = 0;
 
         type_ptr->nextid = type_ptr->reserved;
         type_ptr->wrapped = FALSE;
-
     } /* end if */
 
 done:
