@@ -914,9 +914,16 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #endif /* HDlongjmp */
 #ifndef HDlseek
     #ifdef H5_HAVE_LSEEK64
-       #define HDlseek(F,O,W)	lseek64(F,O,W)
+        #define HDlseek(F,O,W)	lseek64(F,O,W)
+        #define HDoff_t		off64_t
     #else
-       #define HDlseek(F,O,W)	lseek(F,O,W)
+        #define HDlseek(F,O,W)	lseek(F,O,W)
+	#if defined (_WIN32) && !defined(__MWERKS__)
+	# /*MSVC*/
+	#   define HDoff_t        __int64
+	#else
+	#   define HDoff_t	off_t
+	#endif
     #endif
 #endif /* HDlseek */
 #ifndef HDmalloc
