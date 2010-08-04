@@ -2238,7 +2238,7 @@ checker_board_hyperslab_dr_pio_test__verify_data(uint32_t * buf_ptr,
 #define PAR_SS_DR_MAX_RANK	5
 #define CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 0
 
-void
+static void
 checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                                               const int edge_size,
                                               const int checker_edge_size,
@@ -3254,7 +3254,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                     /* zero out the value for the next pass */
                     *ptr_1 = 0;
 
-                    *ptr_1++;
+                    ptr_1++;
                 }
 
                 VRFY((data_ok == TRUE), 
