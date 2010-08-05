@@ -38,7 +38,7 @@ typedef struct {
 } parms_atomic;
 
 /* Local function prototypes */
-static herr_t H5Z_can_apply_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static htri_t H5Z_can_apply_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                               size_t nbytes, size_t *buf_size, void **buf);
@@ -129,11 +129,11 @@ static unsigned parms_index = 0;
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static htri_t
 H5Z_can_apply_nbit(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 {
     const H5T_t	*type;                  /* Datatype */
-    herr_t ret_value = TRUE;            /* Return value */
+    htri_t ret_value = TRUE;            /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_can_apply_nbit, FAIL)
 
