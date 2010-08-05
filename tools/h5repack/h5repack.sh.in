@@ -183,6 +183,37 @@ TOOLTEST1()
     fi
     rm -f $outfile
 }
+          
+# Call h5repack and compare output to a text file for -v option
+#
+TOOLTESTV() 
+{
+    expect="$srcdir/../testfiles/$1"
+    actual="../testfiles/`basename $1 .ddl`.out"
+    actual_err="../testfiles/`basename $1 .ddl`.err"
+    shift
+
+    # Run test.
+    TESTING $H5REPACK $@
+
+    infile=$srcdir/testfiles/$1
+    path=`pwd`
+    outfile=$path/out.$1
+    shift
+    $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile >$actual 2>$actual_err
+    cat $actual_err >> $actual
+
+    if cmp -s $expect $actual; then
+     echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.ddl) differs from actual result (*.out)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && diff -c $expect $actual |sed 's/^/    /'
+    fi
+    
+#    rm -f $actual $actual_err
+}
 
 #
 # The tests
@@ -282,6 +313,14 @@ fi
 # all filters
 arg="$FILE4 -f dset2:SHUF -f dset2:FLET -f dset2:SZIP=8,NN -f dset2:GZIP=1 -l dset2:CHUNK=20x10"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SHUFFLE != "yes" -o $USE_FILTER_FLETCHER32 != "yes" -o $USE_FILTER_DEFLATE != "yes" ; then
+ SKIP $arg
+else
+ TOOLTEST $arg
+fi
+
+# verbose gzip with individual object
+arg="$FILE11 -v -f dset_deflate:GZIP=9"
+if test  $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
  TOOLTEST $arg

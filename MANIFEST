@@ -1347,6 +1347,8 @@
 ./tools/testfiles/torderattr.h5
 ./tools/testfiles/tfpformat.ddl
 ./tools/testfiles/tfpformat.h5
+# h5dump h5repack validation
+./tools/testfiles/h5repack_filters.h5.ddl
 
 
 # Expected output from h5ls tests
@@ -1419,6 +1421,7 @@
 ./tools/testfiles/tdset2.h5.xml
 ./tools/testfiles/tempty.h5.xml
 ./tools/testfiles/tenum.h5.xml
+./tools/testfiles/tfpformat.h5.xml
 ./tools/testfiles/tgroup.h5.xml
 ./tools/testfiles/thlink.h5.xml
 ./tools/testfiles/tloop.h5.xml
