@@ -696,15 +696,6 @@ out:
     /*
      * Close/release resources.
      */
-    H5Sclose(dataspace);
-    H5Gclose(gid1);
-    H5Gclose(gid2);
-    H5Dclose(dset1);
-    H5Dclose(dset2);
-    H5Fclose(fileid1);
-    /*
-     * Close/release resources.
-     */
     if(dataspace >= 0 && H5Sclose(dataspace) < 0) {
         fprintf(stderr, "Error: %s> H5Sclose failed.\n", FILE4_1);
         status = FAIL;
