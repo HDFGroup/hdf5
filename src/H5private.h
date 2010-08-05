@@ -480,8 +480,9 @@ typedef struct {
  * function (or any other non-HDF5 function) in the source!
  */
 
- /* Use platform-specific versions if necessary */
-#include "H5win32defs.h"
+/* Put all platform-specific definitions in the following file */
+/* so that the following definitions are platform free. */
+#include "H5win32defs.h"	/* For Windows-specific definitions */
 
 #ifndef HDabort
     #define HDabort()		abort()
@@ -912,18 +913,14 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDlongjmp
     #define HDlongjmp(J,N)		longjmp(J,N)
 #endif /* HDlongjmp */
+/* HDlseek and HDoff_t must be defined together for consistency. */
 #ifndef HDlseek
     #ifdef H5_HAVE_LSEEK64
         #define HDlseek(F,O,W)	lseek64(F,O,W)
         #define HDoff_t		off64_t
     #else
         #define HDlseek(F,O,W)	lseek(F,O,W)
-	#if defined (_WIN32) && !defined(__MWERKS__)
-	# /*MSVC*/
-	#   define HDoff_t        __int64
-	#else
-	#   define HDoff_t	off_t
-	#endif
+	#define HDoff_t		off_t
     #endif
 #endif /* HDlseek */
 #ifndef HDmalloc
