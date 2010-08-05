@@ -80,6 +80,7 @@ const char *FILENAME[] = {
 #define DSET_BOGUS_NAME		"bogus"
 #define DSET_MISSING_NAME	"missing"
 #define DSET_CAN_APPLY_NAME	"can_apply"
+#define DSET_CAN_APPLY_NAME2	"can_apply2"
 #define DSET_CAN_APPLY_SZIP_NAME	"can_apply_szip"
 #define DSET_SET_LOCAL_NAME	"set_local"
 #define DSET_SET_LOCAL_NAME_2	"set_local_2"
@@ -117,6 +118,7 @@ const char *FILENAME[] = {
 #define H5Z_FILTER_SET_LOCAL_TEST	308
 #define H5Z_FILTER_DEPREC       309
 #define H5Z_FILTER_EXPAND	310
+#define H5Z_FILTER_CAN_APPLY_TEST2	311
 
 /* Flags for testing filters */
 #define DISABLE_FLETCHER32      0
@@ -194,9 +196,11 @@ double	points_dbl[DSET_DIM1][DSET_DIM2], check_dbl[DSET_DIM1][DSET_DIM2];
 /* Local prototypes for filter functions */
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
-static herr_t can_apply_bogus(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static htri_t can_apply_bogus(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t filter_bogus2(unsigned int flags, size_t cd_nelmts,
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_bogus3(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_corrupt(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
@@ -1103,13 +1107,15 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static htri_t
 can_apply_bogus(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 {
     if(H5Tequal(type_id,H5T_NATIVE_DOUBLE))
         return 0;
-    else
+    else if(H5Tequal(type_id,H5T_NATIVE_INT))
         return 1;
+    else
+        return -1;
 }
 
 
@@ -1247,6 +1253,31 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
     /* Filter is "no op" */
     else
         return(nbytes);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	filter_bogus3
+ *
+ * Purpose:	A bogus compression method that returns a failure.
+ *
+ * Return:	Success:	Data chunk size
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Raymond Lu
+ *              4 August 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static size_t
+filter_bogus3(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
+      const unsigned int UNUSED *cd_values, size_t nbytes,
+      size_t UNUSED *buf_size, void UNUSED **buf)
+{
+    return 0;
 }
 
 /* This message derives from H5Z */
@@ -4855,7 +4886,9 @@ const H5Z_class2_t H5Z_CAN_APPLY_TEST[1] = {{
  * Function:	test_can_apply
  *
  * Purpose:	Tests library behavior when filter indicates it can't
- *              apply to certain combinations of creation parameters
+ *              apply to certain combinations of creation parameters.
+ *              The filter is mandate.  If the CAN_APPLY callback function
+ *              indicates wrong datatype, the dataset creation should fail.
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -4894,6 +4927,7 @@ test_can_apply(hid_t file)
         printf("    Line %d: Can't register 'can apply' filter\n",__LINE__);
         goto error;
     }
+    /* The filter is mandate. */
     if(H5Pset_filter(dcpl, H5Z_FILTER_CAN_APPLY_TEST, 0, (size_t)0, NULL) < 0) {
         H5_FAILED();
         printf("    Line %d: Can't set bogus filter\n",__LINE__);
@@ -4908,9 +4942,21 @@ test_can_apply(hid_t file)
     } /* end if */
 
     /* Create new dataset */
-    /* (Should fail because the 'can apply' filter should indicate inappropriate combination) */
+    /* (Should fail because the 'can apply' function should indicate inappropriate 
+     * combination.  And the filter is mandate.) */
     H5E_BEGIN_TRY {
         dsid = H5Dcreate2(file, DSET_CAN_APPLY_NAME, H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(dsid >=0) {
+        H5_FAILED();
+        printf("    Line %d: Shouldn't have created dataset!\n",__LINE__);
+        H5Dclose(dsid);
+        goto error;
+    } /* end if */
+
+    /* (Should fail because the 'can apply' function should fail) */
+    H5E_BEGIN_TRY {
+        dsid = H5Dcreate2(file, DSET_CAN_APPLY_NAME, H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     } H5E_END_TRY;
     if(dsid >=0) {
         H5_FAILED();
@@ -5004,6 +5050,166 @@ test_can_apply(hid_t file)
 error:
     return -1;
 } /* end test_can_apply() */
+
+/* This message derives from H5Z */
+const H5Z_class2_t H5Z_CAN_APPLY_TEST2[1] = {{
+    H5Z_CLASS_T_VERS,
+    H5Z_FILTER_CAN_APPLY_TEST2,	/* Filter id number		*/
+    1, 1,
+    "can_apply_test",		/* Filter name for debugging	*/
+    can_apply_bogus,            /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
+    filter_bogus3,		/* The actual filter function	*/
+}};
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_can_apply2
+ *
+ * Purpose:	Tests library behavior when an optional filter indicates 
+ *              it can't apply to certain combinations of creation 
+ *              parameters.  The filter function FILTER_BOGUS3 does nothing
+ *              than returning a failure.  Because the filter is optional, 
+ *              the library skips the filter even though the CAN_APPLY_BOGUS
+ *              indicates the datatype DOUBLE can't apply to the dataset.  
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *              4 August 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_can_apply2(hid_t file)
+{
+    hid_t       dsid;           /* Dataset ID */
+    hid_t       sid;            /* Dataspace ID */
+    hid_t       dcpl;           /* Dataspace creation property list ID */
+    const hsize_t dims[2] = {DSET_DIM1, DSET_DIM2};         /* Dataspace dimensions */
+    const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
+    hsize_t     dset_size;      /* Dataset size */
+    size_t      i,j;            /* Local index variables */
+
+    TESTING("dataset filter 'can apply' callback second");
+
+    /* Create dcpl with special filter */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dcpl\n",__LINE__);
+        goto error;
+    } /* end if */
+    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set chunk sizes\n",__LINE__);
+        goto error;
+    } /* end if */
+    if(H5Zregister (H5Z_CAN_APPLY_TEST2) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't register 'can apply' filter\n",__LINE__);
+        goto error;
+    }
+    /* The filter is optional. */
+    if(H5Pset_filter(dcpl, H5Z_FILTER_CAN_APPLY_TEST2, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set bogus filter\n",__LINE__);
+        goto error;
+    }
+
+    /* Create the data space */
+    if((sid = H5Screate_simple(2, dims, NULL)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open dataspace\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Create new dataset */
+    if((dsid = H5Dcreate2(file, DSET_CAN_APPLY_NAME2, H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dataset\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Write data */
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error writing dataset data\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Flush the file (to clear the cache) */
+    if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error flushing file\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Query the dataset's size on disk */
+    if((dset_size=H5Dget_storage_size(dsid))==0) {
+        H5_FAILED();
+        printf("    Line %d: Error querying dataset size\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Verify that the size indicates data is uncompressed */
+    if((H5Tget_size(H5T_NATIVE_DOUBLE)*dims[0]*dims[1])!=dset_size) {
+        H5_FAILED();
+        printf("    Line %d: Incorrect dataset size: %lu\n",__LINE__,(unsigned long)dset_size);
+        goto error;
+    } /* end if */
+
+    /* Read data */
+    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Error reading dataset data\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Compare data */
+    /* Check that the values read are the same as the values written */
+    for(i=0; i<(size_t)dims[0]; i++) {
+	for(j=0; j<(size_t)dims[1]; j++) {
+	    if(points[i][j] != check[i][j]) {
+		H5_FAILED();
+		printf("    Line %d: Read different values than written.\n",__LINE__);
+		printf("    At index %lu,%lu\n", (unsigned long)(i), (unsigned long)(j));
+		printf("    At original: %d\n",points[i][j]);
+		printf("    At returned: %d\n",check[i][j]);
+		goto error;
+	    } /* end if */
+	} /* end for */
+    } /* end for */
+
+    /* Close dataset */
+    if(H5Dclose(dsid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataset\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close dataspace */
+    if(H5Sclose(sid) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataspace\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close dataset creation property list */
+    if(H5Pclose(dcpl) < 0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dcpl\n",__LINE__);
+        goto error;
+    } /* end if */
+
+
+    PASSED();
+    return 0;
+
+error:
+    return -1;
+} /* end test_can_apply2() */
+
 
 
 /*-------------------------------------------------------------------------
@@ -6357,7 +6563,7 @@ error:
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 /* Empty can_apply and set_local callbacks */
-static herr_t
+static htri_t
 can_apply_deprec(hid_t UNUSED dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
 {
     return 1;
@@ -7507,6 +7713,7 @@ main(void)
         nerrors += (test_userblock_offset(envval, my_fapl) < 0     	? 1 : 0);
         nerrors += (test_missing_filter(file) < 0		? 1 : 0);
         nerrors += (test_can_apply(file) < 0		? 1 : 0);
+        nerrors += (test_can_apply2(file) < 0		? 1 : 0);
         nerrors += (test_set_local(my_fapl) < 0		? 1 : 0);
         nerrors += (test_can_apply_szip(file) < 0		? 1 : 0);
         nerrors += (test_compare_dcpl(file) < 0		? 1 : 0);

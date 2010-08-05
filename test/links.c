@@ -8853,7 +8853,7 @@ static enum {
     LFS_DECODED
 } link_filter_state;
 
-static herr_t link_filter_can_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+static htri_t link_filter_can_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 {
     if(dcpl_id >= 0 || type_id >= 0 || space_id >= 0)
         return -1;
