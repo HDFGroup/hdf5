@@ -113,16 +113,44 @@ typedef struct H5FD_stdio_t {
 #endif
 } H5FD_stdio_t;
 
-#ifdef H5_HAVE_LSEEK64
-#   define file_offset_t	off64_t
-#   define file_truncate	ftruncate64
-#elif defined (_WIN32) && !defined(__MWERKS__)
-# /*MSVC*/
-#   define file_offset_t __int64
-#   define file_truncate	_chsize
-#else
-#   define file_offset_t	off_t
-#   define file_truncate	ftruncate
+/* Use similar structure as in H5private.h by defining Windows stuff first. */
+#ifdef _WIN32
+    #if _MSC_VER > 1310 /* Newer than VS.NET 2003 */
+    #   define file_fseek	_fseeki64
+    #   define file_offset_t	__int64
+    #   define file_ftruncate	_chsize_s   /* Supported in VS 2005 or newer */
+    #   define file_ftell	__ftelli64
+    #else
+    #   define file_fseek	fseek
+    #   define file_offset_t	long
+    #   define file_ftruncate	_chsize
+    #   define file_ftell	ftell
+    #endif
+#endif
+
+/* Use file_xxx to indicate these are local macros, avoiding confusing 
+ * with the global HD_xxx macros. 
+ * Need fseeko, off_t, ftell and ftruncate are all of the same 32 or 64 
+ * versions. 
+ * Assume fseeko, which is POSIX standard, is always supported; 
+ * but prefer to use fseeko64 if supported. 
+ * [Note: the ifndef H5_HAVE_FSEEKO condition to determine BIG FILE not
+ * supported was old code. This condition is not supposed to be true in Unix
+ * like systems but may happen in non-Unix systems like Windows. They are left
+ * in for now and will be cleaned later. -AKC-]
+ */
+#ifndef file_fseek
+    #ifdef H5_HAVE_FSEEKO64
+    #   define file_fseek	fseeko64
+    #   define file_offset_t	off64_t
+    #   define file_ftruncate	ftruncate64
+    #   define file_ftell	ftello64
+    #else
+    #   define file_fseek	fseeko
+    #   define file_offset_t	off_t
+    #   define file_ftruncate	ftruncate
+    #   define file_ftell	ftello
+    #endif
 #endif
 
 /*
@@ -383,18 +411,10 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
     file->op = H5FD_STDIO_OP_SEEK;
     file->pos = HADDR_UNDEF;
     file->write_access=write_access;    /* Note the write_access for later */
-#ifdef H5_HAVE_FSEEKO
-    if(fseeko(file->fp, (off_t)0, SEEK_END) < 0) {
-#else
-    if(fseek(file->fp, (long)0L, SEEK_END) < 0) {
-#endif
+    if(file_fseek(file->fp, (file_offset_t)0, SEEK_END) < 0) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
     } else {
-#ifdef H5_HAVE_FTELLO
-        off_t x = ftello (file->fp);
-#else
-        long x = ftell (file->fp);
-#endif
+        file_offset_t x = file_ftell (file->fp);
         assert (x>=0);
         file->eof = (haddr_t)x;
     }
@@ -807,11 +827,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
      */
     if (!(file->op == H5FD_STDIO_OP_READ || file->op==H5FD_STDIO_OP_SEEK) ||
             file->pos != addr) {
-#ifdef H5_HAVE_FSEEKO
-        if (fseeko(file->fp, (off_t)addr, SEEK_SET) < 0) {
-#else
-        if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
-#endif
+        if (file_fseek(file->fp, (file_offset_t)addr, SEEK_SET) < 0) {
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "fseek failed", -1)
@@ -901,11 +917,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      */
     if ((file->op != H5FD_STDIO_OP_WRITE && file->op != H5FD_STDIO_OP_SEEK) ||
                 file->pos != addr) {
-#ifdef H5_HAVE_FSEEKO
-        if (fseeko(file->fp, (off_t)addr, SEEK_SET) < 0) {
-#else
-        if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
-#endif
+        if (file_fseek(file->fp, (file_offset_t)addr, SEEK_SET) < 0) {
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "fseek failed", -1)
@@ -1043,7 +1055,7 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
             rewind(file->fp);
 
             /* Truncate file to proper length */
-            if(-1 == file_truncate(fd, (file_offset_t)file->eoa))
+            if(-1 == file_ftruncate(fd, (file_offset_t)file->eoa))
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "unable to truncate/extend file properly", -1)
 #endif /* _WIN32 */
 
