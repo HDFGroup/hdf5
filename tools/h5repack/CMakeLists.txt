@@ -142,6 +142,7 @@ IF (BUILD_TESTING)
       tfamily00008.h5
       tfamily00009.h5
       tfamily00010.h5
+      h5repack_filters.h5.ddl
   )
 
   FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
@@ -166,10 +167,12 @@ IF (BUILD_TESTING)
     )
   ENDFOREACH (h5c_file ${HDF5_COMMON_TEST_FILES})
 
-
   MACRO (ADD_H5_TEST testname testtype testfile)
     IF (${testtype} STREQUAL "SKIP")
-      MESSAGE (STATUS "SKIP ${testfile} ${ARGN}")
+      ADD_TEST (
+          NAME H5REPACK-${testname}
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out.${testfile}"
+      )
     ELSE (${testtype} STREQUAL "SKIP")
       ADD_TEST (
           NAME H5REPACK-${testname}
@@ -181,6 +184,28 @@ IF (BUILD_TESTING)
       )
     ENDIF (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_H5_TEST testname testfile testtype)
+
+  MACRO (ADD_H5_CMP_TEST testname testfilter testtype resultcode resultfile)
+    IF (${testtype} STREQUAL "SKIP")
+      ADD_TEST (
+          NAME H5REPACK-${testname}
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out.${resultfile}"
+      )
+    ELSE (${testtype} STREQUAL "SKIP")
+      ADD_TEST (
+          NAME H5REPACK-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
+              -D "TEST_ARGS:STRING=${ARGN};${PROJECT_BINARY_DIR}/testfiles/${resultfile};${PROJECT_BINARY_DIR}/testfiles/out.${resultfile}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_FILTER=${testfilter}"
+              -D "TEST_REFERENCE=${PROJECT_BINARY_DIR}/testfiles/${resultfile}.ddl"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+    ENDIF (${testtype} STREQUAL "SKIP")
+  ENDMACRO (ADD_H5_CMP_TEST file)
 
 #
 # The tests
@@ -306,6 +331,14 @@ IF (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SHUFFLE
   SET (TESTTYPE "SKIP")
 ENDIF (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SHUFFLE OR NOT USE_FILTER_FLETCHER32 OR NOT USE_FILTER_DEFLATE)
 ADD_H5_TEST (all_filters ${TESTTYPE} ${arg})
+
+# verbose gzip with individual object
+SET (arg ${FILE11} -v -f /dset_deflate:GZIP=9)
+SET (TESTTYPE "TEST")
+IF (NOT USE_FILTER_DEFLATE)
+  SET (TESTTYPE "SKIP")
+ENDIF (NOT USE_FILTER_DEFLATE)
+ADD_H5_CMP_TEST (gzip_verbose_filters "O?...ing file[^\n]+\n" ${TESTTYPE} 0 ${arg})
   
 ###########################################################
 # the following tests assume the input files have filters

@@ -5614,6 +5614,12 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
     int                     depth;
     int                     stdindent = COL;    /* should be 3 */
 
+    if (fp_format)
+    {
+        outputformat->fmt_double = fp_format;
+        outputformat->fmt_float = fp_format;
+    }
+
     if (nCols==0) {
         outputformat->line_ncols = 65535;
         outputformat->line_per_line = 1;
