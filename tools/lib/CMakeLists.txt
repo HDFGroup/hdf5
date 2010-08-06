@@ -8,27 +8,27 @@ PROJECT (HDF5_TOOLS_LIB)
 #INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 SET (H5_TOOLS_LIB_SRCS
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5diff.c
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5diff_array.c
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5diff_attr.c
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5diff_dset.c
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5diff_util.c
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5tools.c
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5tools_filters.c
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5tools_ref.c
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5tools_str.c
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5tools_type.c
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5tools_utils.c
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5trav.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff_array.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff_attr.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff_dset.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff_util.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_filters.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_ref.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_str.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_type.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_utils.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5trav.c
 )
 
 SET (H5_TOOLS_LIB_HDRS
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5trav.h
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5tools.h
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5tools_utils.h
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5tools_str.h
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5tools_ref.h
-    ${HDF5_TOOLS_SOURCE_DIR}/lib/h5diff.h
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5trav.h
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools.h
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_utils.h
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_str.h
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_ref.h
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff.h
 )
 
 #-- Always build a static library for linking the ${HDF5_LIB_NAME} tools together
