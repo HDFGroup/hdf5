@@ -188,19 +188,19 @@ TOOLTEST1()
 #
 TOOLTESTV() 
 {
-    expect="$srcdir/../testfiles/$1"
-    actual="../testfiles/`basename $1 .ddl`.out"
-    actual_err="../testfiles/`basename $1 .ddl`.err"
-    shift
-
     # Run test.
     TESTING $H5REPACK $@
+    expect="$srcdir/../testfiles/$1.ddl"
+    actual="../testfiles/`basename $1 .ddl`.out"
+    actual_err="../testfiles/`basename $1 .ddl`.err"
 
     infile=$srcdir/testfiles/$1
     path=`pwd`
     outfile=$path/out.$1
     shift
     $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile >$actual 2>$actual_err
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
     cat $actual_err >> $actual
 
     if cmp -s $expect $actual; then
@@ -212,7 +212,18 @@ TOOLTESTV()
      test yes = "$verbose" && diff -c $expect $actual |sed 's/^/    /'
     fi
     
-#    rm -f $actual $actual_err
+   rm -f $actual $actual_err $actual_sav
+}
+
+STDOUT_FILTER() {
+    result_file=$1
+    tmp_file=/tmp/h5test_tmp_$$
+    # Filter name of files.
+    cp $result_file $tmp_file
+    sed -e '/^Opening file/d' -e '/^Making file/d' \
+    < $tmp_file > $result_file
+    # cleanup
+    rm -f $tmp_file
 }
 
 #
@@ -319,7 +330,7 @@ else
 fi
 
 # verbose gzip with individual object
-arg="$FILE11 -v -f dset_deflate:GZIP=9"
+arg="$FILE11 -v -f /dset_deflate:GZIP=9"
 if test  $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
