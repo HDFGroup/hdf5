@@ -196,12 +196,12 @@ IF (BUILD_TESTING)
           NAME H5REPACK-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
-              -D "TEST_ARGS:STRING=${ARGN};${PROJECT_BINARY_DIR}/testfiles/${resultfile};${PROJECT_BINARY_DIR}/testfiles/out.${resultfile}"
+              -D "TEST_ARGS:STRING=${ARGN};testfiles/${resultfile};testfiles/out.${resultfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_FILTER=${testfilter}"
-              -D "TEST_REFERENCE=${PROJECT_BINARY_DIR}/testfiles/${resultfile}.ddl"
+              -D "TEST_FILTER:STRING=${testfilter}"
+              -D "TEST_REFERENCE=testfiles/${resultfile}.ddl"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
     ENDIF (${testtype} STREQUAL "SKIP")
