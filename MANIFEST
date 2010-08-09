@@ -1143,6 +1143,7 @@
 ./tools/testfiles/tattrreg.h5
 ./tools/testfiles/tattrreg.ddl 
 ./tools/testfiles/tattrregR.ddl 
+./tools/testfiles/tbinregR.exp
 ./tools/testfiles/tbitfields.h5
 ./tools/testfiles/tchar.h5
 ./tools/testfiles/tchar1.ddl
