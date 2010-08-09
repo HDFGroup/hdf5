@@ -133,6 +133,10 @@ typedef enum H5F_libver_t {
     H5F_LIBVER_LATEST           /* Use the latest possible format available for storing objects*/
 } H5F_libver_t;
 
+/* Define file format version for 1.8 to prepare for 1.10 release.  
+ * (Not used anywhere now)*/
+#define H5F_LIBVER_18 H5F_LIBVER_LATEST
+
 #ifdef __cplusplus
 extern "C" {
 #endif
