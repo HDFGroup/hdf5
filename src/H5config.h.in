@@ -120,9 +120,6 @@
 /* Define to 1 if you have the `frexpl' function. */
 #undef HAVE_FREXPL
 
-/* Define to 1 if you have the `fseek64' function. */
-#undef HAVE_FSEEK64
-
 /* Define to 1 if you have the `fseeko' function. */
 #undef HAVE_FSEEKO
 
