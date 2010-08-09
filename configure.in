@@ -1368,8 +1368,8 @@ CPPFLAGS="$AM_CPPFLAGS $CPPFLAGS"
 
 AC_TRY_COMPILE([#include <sys/types.h>],
                [off64_t n = 0;],
-               [AC_CHECK_FUNCS([lseek64 fseek64 fseeko64 ftello64 ftruncate64])],
-               [AC_MSG_RESULT([skipping test for lseek64(), fseek64(), fseeko64 , ftello64, ftruncate64() because off64_t is not defined])])
+               [AC_CHECK_FUNCS([lseek64 fseeko64 ftello64 ftruncate64])],
+               [AC_MSG_RESULT([skipping test for lseek64(), fseeko64 , ftello64, ftruncate64() because off64_t is not defined])])
 AC_CHECK_FUNCS(fseeko ftello)
 AC_TRY_COMPILE([
 #include <sys/types.h>
