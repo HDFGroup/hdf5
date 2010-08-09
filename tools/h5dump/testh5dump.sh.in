@@ -144,6 +144,44 @@ TOOLTEST1() {
 
 }
 
+# same as TOOLTEST1 but compares generated file to Expected output
+# used for the binary tests that expect a full path in -o without -b
+TOOLTEST2() {
+
+    expect="$srcdir/../testfiles/`basename $1 .exp`.txt"
+    actual="../testfiles/`basename $1 .exp`.out"
+    actual_err="../testfiles/`basename $1 .exp`.err"
+    shift
+
+    # Run test.
+    TESTING $DUMPER $@
+    (
+      
+      cd $srcdir/../testfiles
+      $RUNSERIAL $DUMPER_BIN $@
+    ) >$actual 2>$actual_err
+    cat $actual_err >> $actual
+
+    if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+     echo " CREATED"
+     cp $actual $expect
+    elif $CMP $expect $actual; then
+     echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.ddl) differs from actual result (*.txt)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
+
+}
+
 
 # Print a "SKIP" message
 SKIP() {
@@ -482,13 +520,13 @@ if test -z "$HDF5_NOCLEANUP"; then
  rm -f $TESTDIR/out3.h5
 fi
 
-
-
 # test for dataset region references 
 TOOLTEST tdatareg.ddl tdatareg.h5
 TOOLTEST tdataregR.ddl -R tdatareg.h5
 TOOLTEST tattrreg.ddl tattrreg.h5
 TOOLTEST tattrregR.ddl -R tattrreg.h5
+
+TOOLTEST2   tbinregR.exp -d /Dataset1 -s 0 -y -o $TESTDIR/tbinregR.txt    tdatareg.h5
 
 # tests for group creation order
 # "1" tracked, "2" name, root tracked
@@ -504,7 +542,6 @@ TOOLTEST torderattr2.ddl -H --sort_by=name --sort_order=descending torderattr.h5
 TOOLTEST torderattr3.ddl -H --sort_by=creation_order --sort_order=ascending torderattr.h5
 TOOLTEST torderattr4.ddl -H --sort_by=creation_order --sort_order=descending torderattr.h5
 
-
 # tests for floating point user defined printf format
 TOOLTEST tfpformat.ddl -m %.7f tfpformat.h5
 
@@ -513,6 +550,7 @@ TOOLTEST textlinksrc.ddl textlinksrc.h5
 TOOLTEST textlinkfar.ddl textlinkfar.h5
 
 
+# Report test results and exit
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."
     exit $EXIT_SUCCESS
