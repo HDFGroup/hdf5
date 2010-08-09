@@ -119,7 +119,7 @@ typedef struct H5FD_stdio_t {
     #   define file_fseek	_fseeki64
     #   define file_offset_t	__int64
     #   define file_ftruncate	_chsize_s   /* Supported in VS 2005 or newer */
-    #   define file_ftell	__ftelli64
+    #   define file_ftell	_ftelli64
     #else
     #   define file_fseek	fseek
     #   define file_offset_t	long
