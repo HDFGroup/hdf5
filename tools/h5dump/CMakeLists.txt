@@ -312,6 +312,13 @@ IF (BUILD_TESTING)
       ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/tbin1.ddl ${PROJECT_BINARY_DIR}/tbin1LE.ddl
   )
   
+  ADD_CUSTOM_COMMAND (
+      TARGET     h5dump
+      POST_BUILD
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/tbinregR.exp
+  )
+  
   MACRO (ADD_SKIP_H5_TEST skipresultfile skipresultcode testtype)
     IF (${testtype} STREQUAL "SKIP")
       MESSAGE (STATUS "SKIP ${skipresultfile} ${ARGN}")
@@ -628,6 +635,15 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tdataregR 0 -R tdatareg.h5)
   ADD_H5_TEST (tattrreg 0 tattrreg.h5)
   ADD_H5_TEST (tattrregR 0 -R tattrreg.h5)
+
+  ADD_TEST (
+      NAME H5DUMP-output-tdatreg
+      COMMAND $<TARGET_FILE:h5dump> -d /Dataset1 -s 0 -R -y -o ${PROJECT_BINARY_DIR}/tbinregR.txt ${PROJECT_BINARY_DIR}/tdatareg.h5)
+
+  ADD_TEST (
+      NAME H5DUMP-output-cmp-tdatreg
+      COMMAND ${CMAKE_COMMAND}
+            -E compare_files ${PROJECT_BINARY_DIR}/tbinregR.txt ${PROJECT_BINARY_DIR}/tbinregR.exp)
 
   # tests for group creation order
   # "1" tracked, "2" name, root tracked

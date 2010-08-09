@@ -574,7 +574,6 @@ int             h5tools_print_datatype(h5tools_str_t *buffer/*in,out*/,
                          const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
                          hid_t type);
 int             h5tools_print_enum(h5tools_str_t *buffer/*in,out*/, hid_t type);
-
 #ifdef __cplusplus
 }
 #endif
