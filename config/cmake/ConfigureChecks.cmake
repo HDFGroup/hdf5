@@ -525,7 +525,6 @@ ENDIF (WINDOWS)
 #-----------------------------------------------------------------------------
 IF (HAVE_OFF64_T)
   CHECK_FUNCTION_EXISTS (lseek64           H5_HAVE_LSEEK64)
-  CHECK_FUNCTION_EXISTS (fseek64           H5_HAVE_FSEEK64)
 ENDIF (HAVE_OFF64_T)
 
 #-----------------------------------------------------------------------------
