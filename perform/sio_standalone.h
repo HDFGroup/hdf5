@@ -255,7 +255,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
         #define HDlseek(F,O,W)  _lseeki64(F,O,W)
      #endif
 #else
-     #ifdef H5_HAVE_FSEEK64
+     #ifdef H5_HAVE_LSEEK64
         #define HDlseek(F,O,W)  lseek64(F,O,W)
      #else
         #define HDlseek(F,O,W)  lseek(F,O,W)
@@ -386,6 +386,7 @@ H5_DLL void HDsrand(unsigned int seed);
 #endif
 /* sscanf() variable arguments */
 
+#define HDstrcasecmp(X,Y)	strcasecmp(X,Y)
 #define HDstrcat(X,Y)           strcat(X,Y)
 #define HDstrchr(S,C)           strchr(S,C)
 #define HDstrcmp(X,Y)           strcmp(X,Y)
