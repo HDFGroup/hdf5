@@ -41,38 +41,27 @@ PROJECT (HDF5 C CXX)
 #   SET(HDF5_EXTERNALLY_CONFIGURED 1)
 #   # Avoid duplicating names of installed libraries
 #   SET(HDF5_EXTERNAL_LIB_PREFIX "vtk")
-#   # Targets linking to the HDF5 libs need to know their names
-#   # if they are changed in the sub project, they should be here too
-#   SET(HDF5_LIB_NAME "vtkhdf5")
-#   SET(HDF5_HL_LIB_NAME "vtkhdf5_hl")
-#   SET(HDF5_LIBRARY "${HDF5_LIB_NAME};${HDF5_HL_LIB_NAME}")
 #   # Export configuration to this export variable
 #   SET(HDF5_EXPORTED_TARGETS "paraview-targets")
 #
 #   # Setup all necessary overrides for zlib so that HDF5 uses our
 #   # internally compiled zlib rather than any other version
 #   IF(HDF5_ENABLE_Z_LIB_SUPPORT)
-#    # We must tell the main HDF5 library that it depends on our zlib 
+#     # We must tell the main HDF5 library that it depends on our zlib 
 #     SET(HDF5_LIB_DEPENDENCIES vtkzlib)    
 #     # Override the zlib header file
 #     IF(VTK_USE_SYSTEM_ZLIB)
 #       SET(H5_ZLIB_HEADER "zlib.h")
 #     ELSE(VTK_USE_SYSTEM_ZLIB)
-#      SET(H5_ZLIB_HEADER "vtk_zlib.h")
+#       SET(H5_ZLIB_HEADER "vtk_zlib.h")
 #       # Set vars that FindZlib would have set if used in sub project
 #       SET(ZLIB_INCLUDE_DIRS "${VTK_ZLIB_INCLUDE_DIRS}")
 #       SET(ZLIB_LIBRARIES vtkzlib)
 #     ENDIF(VTK_USE_SYSTEM_ZLIB)
-#  ENDIF(HDF5_ENABLE_Z_LIB_SUPPORT)
-#   
+#   ENDIF(HDF5_ENABLE_Z_LIB_SUPPORT)
+# 
 #   # Add the sub project
 #   ADD_SUBDIRECTORY(Utilities/hdf5-1.8)
-#   # Add the HDF5 dirs to our include path
-#   SET(HDF5_INCLUDE_DIR 
-#     ${ParaView_SOURCE_DIR}/Utilities/hdf5-1.8/src
-#     ${ParaView_BINARY_DIR}/Utilities/hdf5-1.8
-#     ${ParaView_SOURCE_DIR}/Utilities/hdf5-1.8/hl/src)
-#
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -598,9 +587,9 @@ INSTALL (
     EXPORT
         ${HDF5_EXPORTED_TARGETS}
     DESTINATION
-        lib
+        lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
     FILE
-        HDF5-targets.cmake
+        hdf5-targets.cmake
 )
 
 #-----------------------------------------------------------------------------
@@ -610,11 +599,10 @@ EXPORT (
     TARGETS
         ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES}
     FILE
-        HDF5-targets.cmake
+        hdf5-targets.cmake
 )
-
 #-----------------------------------------------------------------------------
-# Configure the HDF5-config.cmake file for the build directory
+# Configure the hdf5-config.cmake file for the build directory
 #-----------------------------------------------------------------------------
 SET (HDF5_INCLUDES_BUILD_TIME
     ${HDF5_SRC_DIR} ${HDF5_CPP_SOURCE_DIR} ${HDF5_HL_SOURCE_DIR}
@@ -625,21 +613,22 @@ SET (HDF5_VERSION_MAJOR  @HDF5_PACKAGE_VERSION_MAJOR@)
 SET (HDF5_VERSION_MINOR  @HDF5_PACKAGE_VERSION_MINOR@)
 
 CONFIGURE_FILE (
-    ${HDF5_RESOURCES_DIR}/HDF5-config.cmake.build.in 
-    ${HDF5_BINARY_DIR}/HDF5-config.cmake @ONLY
+    ${HDF5_RESOURCES_DIR}/hdf5-config.cmake.build.in 
+    ${HDF5_BINARY_DIR}/hdf5-config.cmake @ONLY
 )
 
 #-----------------------------------------------------------------------------
-# Configure the HDF5-config.cmake file for the install directory
+# Configure the hdf5-config.cmake file for the install directory
 #-----------------------------------------------------------------------------
-INSTALL (CODE
-    "SET (HDF5_INSTALL_SKIP_TARGETS 1)
-     INCLUDE (${HDF5_BINARY_DIR}/HDF5-config.cmake) 
-     CONFIGURE_FILE (
-         \"${HDF5_RESOURCES_DIR}/HDF5-config.cmake.install.in\" 
-         \"${CMAKE_INSTALL_PREFIX}/lib/HDF5-config.cmake\" @ONLY
-     )
-    "
+CONFIGURE_FILE (
+    ${HDF5_RESOURCES_DIR}/hdf5-config.cmake.install.in
+    ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config.cmake @ONLY
+)
+INSTALL (
+    FILES
+        ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config.cmake
+    DESTINATION
+        lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
 )
 
 #-----------------------------------------------------------------------------

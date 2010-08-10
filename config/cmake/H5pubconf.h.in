@@ -142,9 +142,6 @@
 /* Define to 1 if you have the `frexpl' function. */
 #cmakedefine H5_HAVE_FREXPL @H5_HAVE_FREXPL@
 
-/* Define to 1 if you have the `fseek64' function. */
-#cmakedefine H5_HAVE_FSEEK64 @H5_HAVE_FSEEK64@
-
 /* Define to 1 if you have the `fseeko' function. */
 #cmakedefine H5_HAVE_FSEEKO @H5_HAVE_FSEEKO@
 
