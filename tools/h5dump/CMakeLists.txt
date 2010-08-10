@@ -296,6 +296,22 @@ IF (BUILD_TESTING)
     )
   ENDMACRO (ADD_H5_TEST file)
 
+  MACRO (ADD_H5_EXPORT_TEST resultfile targetfile resultcode)
+    ADD_TEST (
+        NAME H5DUMP-output-${resultfile}
+        COMMAND $<TARGET_FILE:h5dump> -d /Dataset1 -s 0 -R -y -o ${PROJECT_BINARY_DIR}/${resultfile}.txt ${PROJECT_BINARY_DIR}/${targetfile}
+    )
+    IF (WIN32 AND NOT MINGW)
+      FILE (READ ${PROJECT_BINARY_DIR}/${resultfile}.exp TEST_STREAM)
+      FILE (WRITE ${PROJECT_BINARY_DIR}/${resultfile}.exp "${TEST_STREAM}")
+    ENDIF (WIN32 AND NOT MINGW)
+    ADD_TEST (
+        NAME H5DUMP-output-cmp-${resultfile}
+        COMMAND ${CMAKE_COMMAND}
+              -E compare_files ${PROJECT_BINARY_DIR}/${resultfile}.txt ${PROJECT_BINARY_DIR}/${resultfile}.exp
+    )
+  ENDMACRO (ADD_H5_EXPORT_TEST file)
+
   # Determine which filters are available
   SET (USE_FILTER_SZIP H5_HAVE_FILTER_SZIP)
   SET (USE_FILTER_DEFLATE H5_HAVE_FILTER_DEFLATE)
@@ -590,15 +606,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tdataregR 0 -R tdatareg.h5)
   ADD_H5_TEST (tattrreg 0 tattrreg.h5)
   ADD_H5_TEST (tattrregR 0 -R tattrreg.h5)
-
-  ADD_TEST (
-      NAME H5DUMP-output-tdatreg
-      COMMAND $<TARGET_FILE:h5dump> -d /Dataset1 -s 0 -R -y -o ${PROJECT_BINARY_DIR}/tbinregR.txt ${PROJECT_BINARY_DIR}/tdatareg.h5)
-
-  ADD_TEST (
-      NAME H5DUMP-output-cmp-tdatreg
-      COMMAND ${CMAKE_COMMAND}
-            -E compare_files ${PROJECT_BINARY_DIR}/tbinregR.txt ${PROJECT_BINARY_DIR}/tbinregR.exp)
+  ADD_H5_EXPORT_TEST (tbinregR tdatareg.h5 0 -d /Dataset1 -s 0 -R -y -o)
 
   # tests for group creation order
   # "1" tracked, "2" name, root tracked
