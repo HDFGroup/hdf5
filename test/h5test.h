@@ -127,7 +127,7 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 /*
  * Alarm definitions to wait up (terminate) a test that runs too long.
  */
-#define alarm_seconds	3600	/* default is 60 minutes */
+#define alarm_seconds	1200	/* default is 20 minutes */
 #define ALARM_ON	HDalarm(alarm_seconds)
 #define ALARM_OFF	HDalarm(0)
 /* set alarms to N seconds if N > 0, else use default alarm_seconds. */
