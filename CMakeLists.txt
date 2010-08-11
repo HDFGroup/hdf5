@@ -511,65 +511,62 @@ ENDIF (BUILD_TESTING)
 # Make sure this appears before the CONFIGURE_FILE step
 # so that fortran name mangling is detected before writing H5pubconf.h
 #-----------------------------------------------------------------------------
-OPTION (HDF5_BUILD_FORTRAN "Build FORTRAN support" OFF)
-IF (HDF5_BUILD_FORTRAN)
-  # Set default name mangling : overridden by Fortran detection in fortran dir
-  SET (H5_FC_FUNC "H5_FC_FUNC(name,NAME) name ## _")
-  SET (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) name ## _")
-  IF(EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/fortran")
+# Set default name mangling : overridden by Fortran detection in fortran dir
+SET (H5_FC_FUNC  "H5_FC_FUNC(name,NAME) name ## _")
+SET (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) name ## _")
+IF(EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/fortran")
+  OPTION (HDF5_BUILD_FORTRAN "Build FORTRAN support" OFF)
+  IF (HDF5_BUILD_FORTRAN)
     ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/fortran ${PROJECT_BINARY_DIR}/fortran)
-  ENDIF(EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/fortran")
-  IF (HDF5_BUILD_HL_LIB)
-    IF(EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
-      #-- Build the High Level Fortran source codes
-      ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/hl/fortran ${HDF5_BINARY_DIR}/hl/fortran)
-    ENDIF(EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
-  ENDIF (HDF5_BUILD_HL_LIB)
-ELSE (HDF5_BUILD_FORTRAN)
-  SET (H5_FC_FUNC "H5_FC_FUNC(name,NAME) name ## _")
-  SET (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) name ## _")
-ENDIF (HDF5_BUILD_FORTRAN)
+    IF (HDF5_BUILD_HL_LIB)
+      IF(EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
+        #-- Build the High Level Fortran source codes
+        ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/hl/fortran ${HDF5_BINARY_DIR}/hl/fortran)
+      ENDIF(EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
+    ENDIF (HDF5_BUILD_HL_LIB)
+  ENDIF (HDF5_BUILD_FORTRAN)
+ENDIF(EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/fortran")
 
 #-----------------------------------------------------------------------------
 # Option to build examples
 #-----------------------------------------------------------------------------
-OPTION (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" OFF)
-IF (HDF5_BUILD_EXAMPLES)
-  IF(EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
+IF(EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
+  OPTION (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" OFF)
+  IF (HDF5_BUILD_EXAMPLES)
     ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/examples ${PROJECT_BINARY_DIR}/examples)
-  ENDIF(EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
-ENDIF (HDF5_BUILD_EXAMPLES)
+  ENDIF (HDF5_BUILD_EXAMPLES)
+ENDIF(EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
 
 #-----------------------------------------------------------------------------
 # Option to build HDF5 C++ Library
 #-----------------------------------------------------------------------------
-OPTION (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" OFF)
-IF (HDF5_BUILD_CPP_LIB)
-  IF(EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
+IF(EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
+  OPTION (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" OFF)
+  IF (HDF5_BUILD_CPP_LIB)
     ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/c++ ${PROJECT_BINARY_DIR}/c++)
-  ENDIF(EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
-ENDIF (HDF5_BUILD_CPP_LIB)
+  ENDIF (HDF5_BUILD_CPP_LIB)
+ENDIF(EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
 
 #-----------------------------------------------------------------------------
 # Option to build HDF5 Tools
 #-----------------------------------------------------------------------------
-OPTION (HDF5_BUILD_TOOLS  "Build HDF5 Tools" OFF)
-IF (HDF5_BUILD_TOOLS)
-  IF(EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
+IF(EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
+  OPTION (HDF5_BUILD_TOOLS  "Build HDF5 Tools" OFF)
+  IF (HDF5_BUILD_TOOLS)
     ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
-  ENDIF(EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
-ENDIF (HDF5_BUILD_TOOLS)
+  ENDIF (HDF5_BUILD_TOOLS)
+ENDIF(EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
 
 #-----------------------------------------------------------------------------
 # Option to build High Level API's
 #-----------------------------------------------------------------------------
-OPTION (HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" OFF)
-IF (HDF5_BUILD_HL_LIB)
-  IF(EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
+IF(EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
+  OPTION (HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" OFF)
+  IF (HDF5_BUILD_HL_LIB)
     SET (H5_INCLUDE_HL 1)
     ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/hl ${PROJECT_BINARY_DIR}/hl)
-  ENDIF(EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
-ENDIF (HDF5_BUILD_HL_LIB)
+  ENDIF (HDF5_BUILD_HL_LIB)
+ENDIF(EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
 
 #-----------------------------------------------------------------------------
 # Generate the H5pubconf.h file containing user settings needed by compilation
