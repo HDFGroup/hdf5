@@ -5825,8 +5825,6 @@ void print_header(int        pp,        /* print percentage */
                 const char *obj1,
                 const char *obj2 )
 {
-    int i;
-
     /* print header */
     parallel_print("%-16s","size:");
     print_dimensions (rank,dims);
@@ -5834,8 +5832,7 @@ void print_header(int        pp,        /* print percentage */
     print_dimensions (rank,dims);
     parallel_print("\n");
 
-    if (pp)
-    {
+    if(pp) {
         parallel_print("%-15s %-15s %-15s %-15s %-15s\n",
             "position",
             (obj1!=NULL) ? obj1 : " ",
@@ -5844,8 +5841,7 @@ void print_header(int        pp,        /* print percentage */
             "relative");
         parallel_print("------------------------------------------------------------------------\n");
     }
-    else
-    {
+    else {
         parallel_print("%-15s %-15s %-15s %-20s\n",
             "position",
             (obj1!=NULL) ? obj1 : " ",
