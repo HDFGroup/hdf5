@@ -8982,31 +8982,21 @@ done:
  * Programmer:  Mike McGreevy
  *              December 1, 2009
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5C_ignore_tags(H5C_t * cache_ptr)
 {
-    /* Variable Declarations */
-    herr_t    ret_value = SUCCEED;      /* Return value */
-
-    /* Function Enter Macro */
-    FUNC_ENTER_NOAPI(H5C_ignore_tags, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5C_ignore_tags)
 
     /* Assertions */
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* Set variable to ignore tag values upon assignment */
     cache_ptr->ignore_tags = TRUE;
 
-done:
-
-    /* Function Leave Macro */
-    FUNC_LEAVE_NOAPI(ret_value)
-
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5C_ignore_tags */
 
 
@@ -9031,38 +9021,32 @@ done:
 static herr_t
 H5C_tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
 {
-    /* Variable Declarations */
-    hid_t ret_value = SUCCEED;
-    haddr_t tag;
-    H5P_genplist_t *dxpl;    /* dataset transfer property list */
+    H5P_genplist_t *dxpl;       /* dataset transfer property list */
+    haddr_t tag;                /* Tag address */
+    hid_t ret_value = SUCCEED;  /* Return value */
 
-    /* Function Enter Macro */
     FUNC_ENTER_NOAPI(H5C_tag_entry, FAIL)
 
     /* Assertions */
-    HDassert( cache_ptr != NULL );
-    HDassert( entry_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert(cache_ptr != NULL);
+    HDassert(entry_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* Get the dataset transfer property list */
     if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get the tag from the DXPL */
-    if( (H5P_get(dxpl, "H5AC_metadata_tag", &tag)) < 0 )
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value");
+    if((H5P_get(dxpl, "H5AC_metadata_tag", &tag)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value")
 
-    if (cache_ptr->ignore_tags != TRUE) {
-
-        /* Perform some sanity checks to ensure that 
-           a correct tag is being applied */
-        #if H5C_DO_TAGGING_SANITY_CHECKS
-        if ( (H5C_verify_tag(entry_ptr->type->id, tag)) < 0 )
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "tag verification failed");
-        #endif
-
+    if(cache_ptr->ignore_tags != TRUE) {
+#if H5C_DO_TAGGING_SANITY_CHECKS
+        /* Perform some sanity checks to ensure that a correct tag is being applied */
+        if(H5C_verify_tag(entry_ptr->type->id, tag) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "tag verification failed")
+#endif
     } else {
-
         /* if we're ignoring tags, it's because we're running
            tests on internal functions and may not have inserted a tag 
            value into a given dxpl_id before creating some metadata. Thus,
@@ -9070,19 +9054,15 @@ H5C_tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
            arbitrarily set it to something for the sake of passing the tests. 
            If the tag value is set, then we'll just let it get assigned without
            additional checking for correctness. */
-
-        if (!tag) tag = H5AC__IGNORE_TAG;
-
+        if(!tag)
+            tag = H5AC__IGNORE_TAG;
     } /* end if */
 
     /* Apply the tag to the entry */
     entry_ptr->tag = tag;
 
 done:
-
-    /* Function Leave Macro */
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_tag_entry */
 
 
@@ -9106,34 +9086,25 @@ done:
 static herr_t
 H5C_flush_tagged_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, H5C_t * cache_ptr, haddr_t tag)
 {
-    /* Variable Declarations */
-    herr_t      result;
     herr_t      ret_value = SUCCEED;
 
-    /* Function Enter Macro */
     FUNC_ENTER_NOAPI(H5C_flush_tagged_entries, FAIL)
 
     /* Assertions */
     HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* Mark all entries with specified tag */
-    if ( (result = H5C_mark_tagged_entries(cache_ptr, tag)) < 0 )
+    if(H5C_mark_tagged_entries(cache_ptr, tag) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
 
     /* Flush all marked entries */
-    if ( (result = H5C_flush_marked_entries(f,
-                                            primary_dxpl_id,
-                                            secondary_dxpl_id,
-                                            cache_ptr)) < 0 )
+    if(H5C_flush_marked_entries(f, primary_dxpl_id, secondary_dxpl_id, cache_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries")
 
 done:
- 
-    /* Function Leave Macro */
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_flush_tagged_entries */
 
 
@@ -9158,44 +9129,29 @@ done:
 static herr_t 
 H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag) 
 {
-    /* Variable Declarations */
-    int i;                          /* Iterator */
-    herr_t result;                  /* Result */
-    H5C_cache_entry_t *next_entry_ptr = NULL; /* entry pointer */
-    herr_t ret_value = SUCCEED;     /* Return Value */
+    H5C_cache_entry_t *next_entry_ptr;  /* entry pointer */
+    unsigned u;                         /* Local index variable */
 
-    /* Function Enter Macro */
-    FUNC_ENTER_NOAPI(H5C_mark_tagged_entries, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_mark_tagged_entries)
 
     /* Assertions */
     HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* Iterate through entries, marking those with specified tag. */
-    for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
+    for(u = 0; u < H5C__HASH_TABLE_LEN; u++) {
 
-        next_entry_ptr = cache_ptr->index[i];
-
-        while ( next_entry_ptr != NULL ) {
-
-            if ( next_entry_ptr->tag == tag )  {
-
+        next_entry_ptr = cache_ptr->index[u];
+        while(next_entry_ptr != NULL) {
+            if(next_entry_ptr->tag == tag)
                 next_entry_ptr->flush_marker = TRUE;
 
-            } /* end if */
-
             next_entry_ptr = next_entry_ptr->ht_next;
-
         } /* end while */
-
     } /* for */
 
-done:
- 
-    /* Function Leave Macro */
-    FUNC_LEAVE_NOAPI(ret_value); 
-
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5C_mark_tagged_entries */
 
 
@@ -9219,26 +9175,19 @@ done:
 static herr_t
 H5C_flush_marked_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, H5C_t * cache_ptr)
 { 
-    /* Variable Declarations */
     herr_t ret_value = SUCCEED;
 
-    /* Function Enter Macro */
     FUNC_ENTER_NOAPI(H5C_flush_marked_entries, FAIL)
 
     /* Assertions */
     HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* Flush all marked entries */
-    if(H5C_flush_cache(f,
-                        primary_dxpl_id,
-                        secondary_dxpl_id,
-                        H5C__FLUSH_MARKED_ENTRIES_FLAG |
-                        H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0) {
-
+    if(H5C_flush_cache(f, primary_dxpl_id, secondary_dxpl_id,
+            H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache")
-    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9262,65 +9211,59 @@ done:
 static herr_t
 H5C_verify_tag(int id, haddr_t tag) 
 {
-    /* Variable Declarations */
     herr_t ret_value = SUCCEED;
 
-    /* Function Enter Macro */
     FUNC_ENTER_NOAPI(H5C_verify_tag, FAIL)
 
     /* Perform some sanity checks on tag value. Certain entry
      * types require certain tag values, so check that these
      * constraints are met. */
-    if (tag == H5AC__IGNORE_TAG) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "cannot ignore a tag while doing verification.");
-
-    } else if (tag == H5AC__INVALID_TAG) {
-    
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "no metadata tag provided");
-
-    } else {
+    if(tag == H5AC__IGNORE_TAG)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "cannot ignore a tag while doing verification.")
+    else if(tag == H5AC__INVALID_TAG)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "no metadata tag provided")
+    else {
 
         /* Perform some sanity checks on tag value. Certain entry
          * types require certain tag values, so check that these
          * constraints are met. */
 
         /* Superblock */
-        if (id == H5AC_SUPERBLOCK_ID) {
-            if (tag != H5AC__SUPERBLOCK_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "superblock not tagged with H5AC__SUPERBLOCK_TAG");
+        if(id == H5AC_SUPERBLOCK_ID) {
+            if(tag != H5AC__SUPERBLOCK_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "superblock not tagged with H5AC__SUPERBLOCK_TAG")
         }
         else {
-            if (tag == H5AC__SUPERBLOCK_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__SUPERBLOCK_TAG applied to non-superblock entry");
+            if(tag == H5AC__SUPERBLOCK_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__SUPERBLOCK_TAG applied to non-superblock entry")
         }
     
         /* Free Space Manager */
-        if ((id == H5AC_FSPACE_HDR_ID) || (id == H5AC_FSPACE_SINFO_ID)) {
-            if (tag != H5AC__FREESPACE_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "freespace entry not tagged with H5AC__FREESPACE_TAG");
+        if((id == H5AC_FSPACE_HDR_ID) || (id == H5AC_FSPACE_SINFO_ID)) {
+            if(tag != H5AC__FREESPACE_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "freespace entry not tagged with H5AC__FREESPACE_TAG")
         }
         else {
-            if (tag == H5AC__FREESPACE_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__FREESPACE_TAG applied to non-freespace entry");
+            if(tag == H5AC__FREESPACE_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__FREESPACE_TAG applied to non-freespace entry")
         }
     
         /* SOHM */
-        if ((id == H5AC_SOHM_TABLE_ID) || (id == H5AC_SOHM_LIST_ID)) { 
-            if (tag != H5AC__SOHM_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "sohm entry not tagged with H5AC__SOHM_TAG");
+        if((id == H5AC_SOHM_TABLE_ID) || (id == H5AC_SOHM_LIST_ID)) { 
+            if(tag != H5AC__SOHM_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "sohm entry not tagged with H5AC__SOHM_TAG")
         }
     
         /* Global Heap */
-        if (id == H5AC_GHEAP_ID) {
-            if (tag != H5AC__GLOBALHEAP_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "global heap not tagged with H5AC__GLOBALHEAP_TAG");
+        if(id == H5AC_GHEAP_ID) {
+            if(tag != H5AC__GLOBALHEAP_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "global heap not tagged with H5AC__GLOBALHEAP_TAG")
         }
         else {
-            if (tag == H5AC__GLOBALHEAP_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__GLOBALHEAP_TAG applied to non-globalheap entry");
+            if(tag == H5AC__GLOBALHEAP_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__GLOBALHEAP_TAG applied to non-globalheap entry")
         }
-    }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9346,24 +9289,21 @@ done:
 void
 H5C_retag_copied_metadata(H5C_t * cache_ptr, haddr_t metadata_tag) 
 {
-    /* Variable Declarations */
-    int i = 0; /* Iterator */
+    unsigned u;         /* Local index variable */
 
-    /* Assertions */
-    HDassert(cache_ptr);
-
-    /* Function Enter Macro */
     FUNC_ENTER_NOAPI_NOFUNC(H5C_retag_copied_metadata)
 
+    HDassert(cache_ptr);
+
     /* Iterate through entries, retagging those with the H5AC__COPIED_TAG tag */
-    for(i = 0; i < H5C__HASH_TABLE_LEN; i++) {
+    for(u = 0; u < H5C__HASH_TABLE_LEN; u++) {
         H5C_cache_entry_t *next_entry_ptr;      /* entry pointer */
 
-        next_entry_ptr = cache_ptr->index[i];
+        next_entry_ptr = cache_ptr->index[u];
         while(next_entry_ptr != NULL) {
-            if(cache_ptr->index[i] != NULL) {
-                if((cache_ptr->index[i])->tag == H5AC__COPIED_TAG)
-                    (cache_ptr->index[i])->tag = metadata_tag;
+            if(cache_ptr->index[u] != NULL) {
+                if((cache_ptr->index[u])->tag == H5AC__COPIED_TAG)
+                    (cache_ptr->index[u])->tag = metadata_tag;
             } /* end if */
 
             next_entry_ptr = next_entry_ptr->ht_next;
