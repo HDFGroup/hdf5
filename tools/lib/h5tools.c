@@ -204,10 +204,12 @@ static const h5tools_dump_header_t * h5tools_dump_header_format;
 /* local prototypes */
 static int do_bin_output(FILE *stream, hid_t container, hsize_t nelmts, hid_t tid, void *_mem);
 static int render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem);
+static int render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
+    hid_t container, int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata);
 static hbool_t render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
-                         FILE *stream, hid_t container, hid_t tid, void *_mem);
+                         FILE *stream, hid_t container);
 static hbool_t render_bin_output_region_points(hid_t region_space, hid_t region_id,
-                         FILE *stream, hid_t container, hid_t tid, void *_mem);
+                         FILE *stream, hid_t container);
 static hbool_t h5tools_is_zero(const void *_mem, size_t size);
 
 hbool_t h5tools_render_element(FILE *stream, const h5tool_format_t *info,
@@ -225,7 +227,7 @@ hbool_t h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
                 hsize_t local_elmt_counter/*element counter*/,
                 hsize_t elmt_counter);
 
-int h5tools_print_region_data_blocks(hid_t region_space, hid_t region_id,
+static int h5tools_print_region_data_blocks(hid_t region_id,
         FILE *stream, const h5tool_format_t *info, h5tools_context_t ctx,
         h5tools_str_t *buffer/*string into which to render */, size_t ncols,
         int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata);
@@ -669,8 +671,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     }
 
     /* Calculate new prefix */
-    h5tools_str_prefix(&prefix, info, elmtno, ctx->ndims, ctx->p_min_idx,
-                       ctx->p_max_idx, ctx);
+    h5tools_str_prefix(&prefix, info, elmtno, ctx->ndims, ctx);
 
     /* Write new prefix to output */
     if (ctx->indent_level >= 0) {
@@ -759,7 +760,7 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
     }
 
     /* Calculate new prefix */
-    h5tools_str_region_prefix(&prefix, info, elmtno, ptdata, ctx->ndims, ctx->p_min_idx,
+    h5tools_str_region_prefix(&prefix, info, elmtno, ptdata, ctx->ndims, 
             ctx->p_max_idx, ctx);
 
     /* Write new prefix to output */
@@ -1299,8 +1300,8 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
  *      hssize_t nblocks is the number of blocks in the region
  *-------------------------------------------------------------------------
  */
-int
-h5tools_print_region_data_blocks(hid_t region_space, hid_t region_id,
+static int
+h5tools_print_region_data_blocks(hid_t region_id,
         FILE *stream, const h5tool_format_t *info, h5tools_context_t ctx,
         h5tools_str_t *buffer/*string into which to render */, size_t ncols,
         int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata) {
@@ -1584,8 +1585,8 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
 
     ctx->need_prefix = TRUE;
 
-    h5tools_print_region_data_blocks(region_space, region_id,
-            rawdatastream, info, *ctx, buffer, ncols, ndims, type_id, nblocks, ptdata);
+    h5tools_print_region_data_blocks(region_id, rawdatastream, info, *ctx,
+        buffer, ncols, ndims, type_id, nblocks, ptdata);
 
  done:
     free(ptdata);
@@ -1645,12 +1646,11 @@ int
 h5tools_print_region_data_points(hid_t region_space, hid_t region_id,
         FILE *stream, const h5tool_format_t *info, h5tools_context_t ctx,
         h5tools_str_t *buffer, size_t ncols,
-        int ndims, hid_t type_id, hssize_t npoints, hsize_t *ptdata) {
+        int ndims, hid_t type_id, hssize_t npoints, hsize_t *ptdata)
+{
     HERR_INIT(int, SUCCEED)
     hbool_t  dimension_break = TRUE;
-    hsize_t  alloc_size;
     hsize_t *dims1 = NULL;
-    h5tools_context_t region_ctx; /* print context  */
     hsize_t  elmtno; /* elemnt index  */
     unsigned int region_flags; /* buffer extent flags */
     hsize_t  curr_pos;
@@ -3867,10 +3867,10 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem)
                 region_space = H5Rget_region(container, H5R_DATASET_REGION, mem);
                 if (region_space >= 0) {
                     region_type = H5Sget_select_type(region_space);
-                    if(region_type==H5S_SEL_POINTS)
-                        render_bin_output_region_points(region_space, region_id, stream, container, tid, mem);
+                    if(region_type == H5S_SEL_POINTS)
+                        render_bin_output_region_points(region_space, region_id, stream, container);
                     else
-                        render_bin_output_region_blocks(region_space, region_id, stream, container, tid, mem);
+                        render_bin_output_region_blocks(region_space, region_id, stream, container);
                     H5Sclose(region_space);
                 } /* end if (region_space >= 0) */
                 H5Dclose(region_id);
@@ -3918,17 +3918,16 @@ CATCH
  *
  *-------------------------------------------------------------------------
  */
-int
-render_bin_output_region_data_blocks(hid_t region_space, hid_t region_id,
-        FILE *stream, hid_t container,
-        int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata) {
+static int
+render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
+    hid_t container, int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata)
+{
     HERR_INIT(int, SUCCEED)
     hsize_t     *dims1 = NULL;
     hsize_t     *start = NULL;
     hsize_t     *count = NULL;
     size_t       numelem;
     hsize_t      total_size[H5S_MAX_RANK];
-    unsigned int region_flags; /* buffer extent flags */
     int          jndx;
     int          type_size;
     hid_t        mem_space = -1;
@@ -4020,9 +4019,10 @@ CATCH
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+static hbool_t
 render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
-        FILE *stream, hid_t container, hid_t tid, void *_mem) {
+        FILE *stream, hid_t container)
+{
     HERR_INIT(hbool_t, TRUE)
     hssize_t     nblocks;
     hsize_t      alloc_size;
@@ -4030,7 +4030,6 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
     int          ndims;
     hid_t        dtype;
     hid_t        type_id;
-    int          i;
 
     if((nblocks = H5Sget_select_hyper_nblocks(region_space)) <= 0)
         H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_select_hyper_nblocks failed");
@@ -4053,8 +4052,8 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
     if((type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
         HGOTO_ERROR(FALSE, H5E_tools_min_id_g, "H5Tget_native_type failed");
 
-    render_bin_output_region_data_blocks(region_space, region_id,
-            stream, container, ndims, type_id, nblocks, ptdata);
+    render_bin_output_region_data_blocks(region_id, stream, container, ndims,
+            type_id, nblocks, ptdata);
 
  done:
     free(ptdata);
@@ -4092,12 +4091,10 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
 int
 render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
         FILE *stream, hid_t container,
-        int ndims, hid_t type_id, hssize_t npoints, hsize_t *ptdata) {
+        int ndims, hid_t type_id, hssize_t npoints, hsize_t *ptdata)
+{
     HERR_INIT(int, SUCCEED)
-    hsize_t  alloc_size;
     hsize_t *dims1 = NULL;
-    unsigned int region_flags; /* buffer extent flags */
-    int      indx;
     int      jndx;
     int      type_size;
     hid_t    mem_space = -1;
@@ -4150,15 +4147,15 @@ CATCH
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+static hbool_t
 render_bin_output_region_points(hid_t region_space, hid_t region_id,
-        FILE *stream, hid_t container, hid_t tid, void *_mem) {
+        FILE *stream, hid_t container)
+{
     HERR_INIT(hbool_t, TRUE)
     hssize_t npoints;
     hsize_t  alloc_size;
     hsize_t *ptdata;
     int      ndims;
-    int      indx;
     hid_t    dtype;
     hid_t    type_id;
 

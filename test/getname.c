@@ -2836,7 +2836,6 @@ test_elinks(hid_t fapl)
     char        name[NAME_BUF_SIZE];    /* Buffer for storing object's name */
     ssize_t     namelen;                /* Length of object's name */
     hbool_t     name_cached;            /* Indicate if name is cached */
-    unsigned    u;                      /* Counting variables */
 
     /* Initialize the file names */
     h5_fixname(FILENAME[1], fapl, filename1, sizeof filename1);
