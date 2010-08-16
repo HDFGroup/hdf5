@@ -150,6 +150,10 @@ Bug Fixes since HDF5-1.8.4
 
     Library
     -------
+    - Fixed a bug that could cause file corruption when using non-default sizes
+      of addresses and/or lengths.  This bug could also cause uncorrupted files
+      with this property to be unreadable.  This bug was introduced in 1.8.5.
+      (NAF - 2010/07/16 - 1951)
     - valgrind reported an error of copying data to itself when a new attribute
       is written (Bug #1956).  I fixed it by taking out the memcpy step in the
       attribute code. (SLU - 2010/07/28)
