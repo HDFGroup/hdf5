@@ -130,6 +130,14 @@ Support for New Platforms, Languages, and Compilers
 ===================================================
     - AIX 6.1 has been added. (AKC - 2010/1/4)
 
+Bug Fixes since HDF5-1.8.5
+==========================
+
+    Library
+    -------
+    - Fixed a memory leak during library shutdown when objects opened by
+      an application are not closed before the library shuts down. 
+      (MAM - 2010/08/16)
 
 Bug Fixes since HDF5-1.8.4
 ==========================

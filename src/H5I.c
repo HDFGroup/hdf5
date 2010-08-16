@@ -698,6 +698,16 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
         } /* end for */
     } /* end for */
 
+    /* Also free any ID structures being retained for potential re-use */
+    while(type_ptr->next_id_ptr) {
+        H5I_id_info_t *tmp_id_ptr;          /* temp ptr to next atom */
+
+        tmp_id_ptr = type_ptr->next_id_ptr->next;
+        (void)H5FL_FREE(H5I_id_info_t, type_ptr->next_id_ptr);
+        type_ptr->next_id_ptr = tmp_id_ptr;
+    } /* end while */
+    type_ptr->free_count = 0;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_clear_type() */
