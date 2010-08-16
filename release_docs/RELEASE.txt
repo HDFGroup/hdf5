@@ -150,6 +150,8 @@ Bug Fixes since HDF5-1.8.4
 
     Library
     -------
+    - Fixed a bug in the direct I/O driver that could render files with certain
+      kinds of unaligned data unreadable or corrupt them. (NAF - 2010/07/28)
     - Fixed a bug that could cause file corruption when using non-default sizes
       of addresses and/or lengths.  This bug could also cause uncorrupted files
       with this property to be unreadable.  This bug was introduced in 1.8.5.
