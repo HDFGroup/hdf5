@@ -3266,17 +3266,15 @@ test_nbit_compound(hid_t file)
     if(H5Tinsert(mem_cmpd_tid, "s", HOFFSET(atomic, s), s_tid) < 0) goto error;
     if(H5Tinsert(mem_cmpd_tid, "f", HOFFSET(atomic, f), H5T_NATIVE_FLOAT) < 0) goto error;
 
-    /* Set order of dataset compound member datatype */
-    if(H5Tset_order(i_tid, H5T_ORDER_BE) < 0) goto error;
-    if(H5Tset_order(c_tid, H5T_ORDER_BE) < 0) goto error;
-    if(H5Tset_order(s_tid, H5T_ORDER_BE) < 0) goto error;
-
     /* Create a dataset compound datatype and insert some atomic types */
     cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
     if(H5Tinsert(cmpd_tid, "i", HOFFSET(atomic, i), i_tid) < 0) goto error;
     if(H5Tinsert(cmpd_tid, "c", HOFFSET(atomic, c), c_tid) < 0) goto error;
     if(H5Tinsert(cmpd_tid, "s", HOFFSET(atomic, s), s_tid) < 0) goto error;
     if(H5Tinsert(cmpd_tid, "f", HOFFSET(atomic, f), f_tid) < 0) goto error;
+
+    /* Set order of dataset compound datatype */
+    if(H5Tset_order(cmpd_tid, H5T_ORDER_BE) < 0) goto error;
 
     /* Create the data space */
     if((space = H5Screate_simple(2, size, NULL)) < 0) goto error;
@@ -3482,17 +3480,15 @@ test_nbit_compound_2(hid_t file)
     if(H5Tinsert(mem_cmpd_tid1, "s", HOFFSET(atomic, s), s_tid) < 0) goto error;
     if(H5Tinsert(mem_cmpd_tid1, "f", HOFFSET(atomic, f), H5T_NATIVE_FLOAT) < 0) goto error;
 
-    /* Set order of dataset atomic compound member datatype */
-    if(H5Tset_order(i_tid, H5T_ORDER_BE) < 0) goto error;
-    if(H5Tset_order(c_tid, H5T_ORDER_BE) < 0) goto error;
-    if(H5Tset_order(s_tid, H5T_ORDER_BE) < 0) goto error;
-
     /* Create a dataset atomic compound datatype and insert some atomic types */
     cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
     if(H5Tinsert(cmpd_tid1, "i", HOFFSET(atomic, i), i_tid) < 0) goto error;
     if(H5Tinsert(cmpd_tid1, "c", HOFFSET(atomic, c), c_tid) < 0) goto error;
     if(H5Tinsert(cmpd_tid1, "s", HOFFSET(atomic, s), s_tid) < 0) goto error;
     if(H5Tinsert(cmpd_tid1, "f", HOFFSET(atomic, f), f_tid) < 0) goto error;
+
+    /* Set order of dataset compound datatype */
+    if(H5Tset_order(cmpd_tid1, H5T_ORDER_BE) < 0) goto error;
 
     /* Set precision and offset of the other data member */
     if(H5Tset_precision(v_tid,precision[3]) < 0) goto error;

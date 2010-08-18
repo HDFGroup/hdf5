@@ -63,6 +63,8 @@ New Features
 
     Library
     -------
+    - H5Tset_order now supports all data types.  Please see bug #1934. (SLU -
+      2010/8/18)
     - Improved performance of metadata I/O by changing the default algorithm
       to perform I/O from all processes (instead of just process 0) when using
       parallel I/O drivers. (QAK - 2010/07/19)
