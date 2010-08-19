@@ -1183,6 +1183,7 @@
 ./tools/testfiles/tattrreg.ddl 
 ./tools/testfiles/tattrregR.ddl 
 ./tools/testfiles/tbinregR.exp
+./tools/testfiles/tbinregR.txt
 ./tools/testfiles/tbitfields.h5
 ./tools/testfiles/tchar.h5
 ./tools/testfiles/tchar1.ddl
@@ -1204,6 +1205,10 @@
 ./tools/testfiles/tempty.ddl
 ./tools/testfiles/tempty.h5
 ./tools/testfiles/tenum.h5
+./tools/testfiles/texceedsubblock.ddl
+./tools/testfiles/texceedsubcount.ddl
+./tools/testfiles/texceedsubstart.ddl
+./tools/testfiles/texceedsubstride.ddl
 ./tools/testfiles/textlink.h5
 ./tools/testfiles/textlink.h5.xml
 ./tools/testfiles/textlinkfar.ddl
