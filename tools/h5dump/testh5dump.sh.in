@@ -421,6 +421,12 @@ TOOLTEST tindicessub3.ddl -d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2  -k 1,2,2  taindices.
 # 4D case
 TOOLTEST tindicessub4.ddl -d 4d -s 0,0,1,2  -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2  taindices.h5
 
+#Exceed the dimensions for subsetting
+TOOLTEST1 texceedsubstart.ddl -d 1d -s 1,3 taindices.h5
+TOOLTEST1 texceedsubcount.ddl -d 1d -c 1,3 taindices.h5
+TOOLTEST1 texceedsubstride.ddl -d 1d -S 1,3 taindices.h5
+TOOLTEST1 texceedsubblock.ddl -d 1d -k 1,3 taindices.h5
+
 
 # tests for filters
 # SZIP
@@ -527,6 +533,11 @@ TOOLTEST tattrreg.ddl tattrreg.h5
 TOOLTEST tattrregR.ddl -R tattrreg.h5
 
 TOOLTEST2   tbinregR.exp -d /Dataset1 -s 0 -y -o $TESTDIR/tbinregR.txt    tdatareg.h5
+
+# Clean up text output files
+if test -z "$HDF5_NOCLEANUP"; then
+ rm -f $TESTDIR/tbinregR.txt
+fi
 
 # tests for group creation order
 # "1" tracked, "2" name, root tracked

@@ -1985,7 +1985,7 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
     if (ctx->ndims > 0)
         init_acc_pos(ctx, total_size);
 
-    size_row_block = sset->block[row_dim];
+    size_row_block = sset->block.data[row_dim];
 
     /* display loop */
     for (; hyperslab_count > 0; temp_start[row_dim] += temp_stride[row_dim], hyperslab_count--) {
@@ -1993,9 +1993,9 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
          cases where block > 1 only and stride > block */
         if (size_row_block > 1
                 && row_counter == size_row_block
-                && sset->stride[row_dim] > sset->block[row_dim]) {
+                && sset->stride.data[row_dim] > sset->block.data[row_dim]) {
 
-            hsize_t increase_rows = sset->stride[row_dim] - sset->block[row_dim];
+            hsize_t increase_rows = sset->stride.data[row_dim] - sset->block.data[row_dim];
             temp_start[row_dim] += increase_rows;
             row_counter = 0;
         }
@@ -2153,22 +2153,22 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
     if (ctx->ndims > 2)
         for (i = 0; i < (size_t) ctx->ndims - 2; i++) {
             /* consider block size */
-            outer_count = outer_count * sset->count[i] * sset->block[i];
+            outer_count = outer_count * sset->count.data[i] * sset->block.data[i];
 
         }
 
     /* initialize temporary start, count and maximum start */
     for (i = 0; i < (size_t) ctx->ndims; i++) {
-        temp_start[i] = sset->start[i];
-        temp_count[i] = sset->count[i];
-        temp_block[i] = sset->block[i];
-        temp_stride[i] = sset->stride[i];
+        temp_start[i] = sset->start.data[i];
+        temp_count[i] = sset->count.data[i];
+        temp_block[i] = sset->block.data[i];
+        temp_stride[i] = sset->stride.data[i];
         max_start[i] = 0;
     }
 
     if (ctx->ndims > 2) {
         for (i = 0; i < (size_t) ctx->ndims - 2; i++) {
-            max_start[i] = temp_start[i] + sset->count[i];
+            max_start[i] = temp_start[i] + sset->count.data[i];
             temp_count[i] = 1;
 
         }
@@ -2181,14 +2181,14 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
 
             /* count is the number of iterations to display all the rows,
              the block size count times */
-            count = sset->count[row_dim] * sset->block[row_dim];
+            count = sset->count.data[row_dim] * sset->block.data[row_dim];
 
             /* always 1 row_counter at a time, that is a block of size 1, 1 time */
             temp_count[row_dim] = 1;
             temp_block[row_dim] = 1;
 
             /* advance 1 row_counter at a time  */
-            if (sset->block[row_dim] > 1)
+            if (sset->block.data[row_dim] > 1)
                 temp_stride[row_dim] = 1;
 
         }
@@ -2207,7 +2207,7 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
 
             /* set start to original from current_outer_dim up */
             for (i = current_outer_dim + 1; i < ctx->ndims; i++) {
-                temp_start[i] = sset->start[i];
+                temp_start[i] = sset->start.data[i];
             }
 
             /* increment start dimension */
@@ -2215,10 +2215,10 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
                 reset_dim = 0;
                 temp_start[current_outer_dim]++;
                 if (temp_start[current_outer_dim] >= max_start[current_outer_dim]) {
-                    temp_start[current_outer_dim] = sset->start[current_outer_dim];
+                    temp_start[current_outer_dim] = sset->start.data[current_outer_dim];
 
                     /* consider block */
-                    if (sset->block[current_outer_dim] > 1)
+                    if (sset->block.data[current_outer_dim] > 1)
                         temp_start[current_outer_dim]++;
 
                     current_outer_dim--;
@@ -2626,7 +2626,6 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
     H5S_class_t space_type;
     int       status = FAIL;
     h5tool_format_t info_dflt;
-
     /* Use default values */
     if (!stream)
         stream = stdout;
@@ -2661,12 +2660,10 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
 
     /* Print the data */
     if (space_type == H5S_SIMPLE || space_type == H5S_SCALAR) {
-        if (!sset) {
+        if(!sset)
             status = h5tools_dump_simple_dset(stream, info, dset, p_type, indentlevel);
-        }
-        else {
+        else
             status = h5tools_dump_simple_subset(stream, info, dset, p_type, sset, indentlevel);
-        }
     }
     else
         /* space is H5S_NULL */

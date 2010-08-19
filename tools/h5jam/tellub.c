@@ -104,7 +104,7 @@ parse_command_line (int argc, const char *argv[])
   /* check for file name to be processed */
   if (argc <= opt_ind)
     {
-      error_msg(h5tools_getprogname(), "missing file name\n");
+      error_msg("missing file name\n");
       usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
