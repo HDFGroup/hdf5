@@ -170,7 +170,7 @@ void parse_command_line(int argc,
     /* check for file names to be processed */
     if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL)
     {
-        error_msg(h5tools_getprogname(), "missing file names\n");
+        error_msg("missing file names\n");
         usage();
         h5diff_exit(EXIT_FAILURE);
     }

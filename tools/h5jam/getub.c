@@ -97,7 +97,7 @@ parse_command_line (int argc, const char *argv[])
 
   if (argc <= opt_ind)
     {
-      error_msg (h5tools_getprogname(), "missing file name\n");
+      error_msg("missing file name\n");
       usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
@@ -120,13 +120,13 @@ main (int argc, const char *argv[])
   if (nbytes == NULL)
     {
       /* missing arg */
-      error_msg (h5tools_getprogname(), "missing size\n");
+      error_msg("missing size\n");
       usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
   if (argc <= (opt_ind))
     {
-      error_msg (h5tools_getprogname(), "missing file name\n");
+      error_msg("missing file name\n");
       usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
@@ -137,7 +137,7 @@ main (int argc, const char *argv[])
   if (res == EOF)
     {
       /* fail */
-      error_msg (h5tools_getprogname(), "missing file name\n");
+      error_msg("missing file name\n");
       usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
@@ -145,7 +145,7 @@ main (int argc, const char *argv[])
   fd = HDopen (filename, O_RDONLY, 0);
   if (fd < 0)
     {
-      error_msg (h5tools_getprogname(), "can't open file %s\n", filename);
+      error_msg("can't open file %s\n", filename);
       exit (EXIT_FAILURE);
     }
 

@@ -104,7 +104,7 @@ parse_command_line (int argc, const char *argv[])
   /* check for file name to be processed */
   if (argc <= opt_ind)
     {
-      error_msg (h5tools_getprogname(), "missing file name\n");
+      error_msg("missing file name\n");
       usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
@@ -147,7 +147,7 @@ main (int argc, const char *argv[])
 
   if (argc <= (opt_ind))
     {
-      error_msg (h5tools_getprogname(), "missing file name\n");
+      error_msg("missing file name\n");
       usage (h5tools_getprogname());
       return (EXIT_FAILURE);
     }
@@ -158,7 +158,7 @@ main (int argc, const char *argv[])
 
   if (testval <= 0)
     {
-      error_msg (h5tools_getprogname(), "Input HDF5 file is not HDF \"%s\"\n", ifname);
+      error_msg("Input HDF5 file is not HDF \"%s\"\n", ifname);
       return (EXIT_FAILURE);
     }
 
@@ -166,14 +166,14 @@ main (int argc, const char *argv[])
 
   if (ifile < 0)
     {
-      error_msg (h5tools_getprogname(), "Can't open input HDF5 file \"%s\"\n", ifname);
+      error_msg("Can't open input HDF5 file \"%s\"\n", ifname);
       return (EXIT_FAILURE);
     }
 
   plist = H5Fget_create_plist (ifile);
   if (plist < 0)
     {
-      error_msg (h5tools_getprogname(), "Can't get file creation plist for file \"%s\"\n",
+      error_msg("Can't get file creation plist for file \"%s\"\n",
 		 ifname);
       return (EXIT_FAILURE);
     }
@@ -181,7 +181,7 @@ main (int argc, const char *argv[])
   status = H5Pget_userblock (plist, &usize);
   if (status < 0)
     {
-      error_msg (h5tools_getprogname(), "Can't get user block for file \"%s\"\n", ifname);
+      error_msg("Can't get user block for file \"%s\"\n", ifname);
       return (EXIT_FAILURE);
     }
 

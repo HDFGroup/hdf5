@@ -124,7 +124,7 @@ int main(int argc, const char **argv)
 
             if ( strcmp( infile, outfile ) == 0 )
             {
-                error_msg(h5tools_getprogname(), "file names cannot be the same\n");
+                error_msg("file names cannot be the same\n");
                 usage(h5tools_getprogname());
                 exit(EXIT_FAILURE);
 
@@ -133,7 +133,7 @@ int main(int argc, const char **argv)
 
         else
         {
-            error_msg(h5tools_getprogname(), "file names missing\n");
+            error_msg("file names missing\n");
             usage(h5tools_getprogname());
             exit(EXIT_FAILURE);
         }
@@ -320,7 +320,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             /* parse the -f filter option */
             if (h5repack_addfilter( opt_arg, options)<0)
             {
-                error_msg(h5tools_getprogname(), "in parsing filter\n");
+                error_msg("in parsing filter\n");
                 exit(EXIT_FAILURE);
             }
             break;
@@ -329,7 +329,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             /* parse the -l layout option */
             if (h5repack_addlayout( opt_arg, options)<0)
             {
-                error_msg(h5tools_getprogname(), "in parsing layout\n");
+                error_msg("in parsing layout\n");
                 exit(EXIT_FAILURE);
             }
             break;
@@ -340,7 +340,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             options->min_comp = atoi( opt_arg );
             if ((int)options->min_comp<=0)
             {
-                error_msg(h5tools_getprogname(), "invalid minimum compress size <%s>\n", opt_arg );
+                error_msg("invalid minimum compress size <%s>\n", opt_arg );
                 exit(EXIT_FAILURE);
             }
             break;
@@ -433,7 +433,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             options->alignment = atol( opt_arg );
             if ( options->alignment < 1 )
             {
-                error_msg(h5tools_getprogname(), "invalid alignment size\n", opt_arg );
+                error_msg("invalid alignment size\n", opt_arg );
                 exit(EXIT_FAILURE);
             }
             break;
@@ -448,7 +448,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
         /* check for file names to be processed */
         if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL)
         {
-            error_msg(h5tools_getprogname(), "missing file names\n");
+            error_msg("missing file names\n");
             usage(h5tools_getprogname());
             exit(EXIT_FAILURE);
         }
@@ -492,7 +492,7 @@ void read_info(const char *filename,
 
 
     if ((fp = fopen(data_file, "r")) == (FILE *)NULL) {
-        error_msg(h5tools_getprogname(), "cannot open options file %s\n", filename);
+        error_msg("cannot open options file %s\n", filename);
         exit(EXIT_FAILURE);
     }
 
@@ -529,7 +529,7 @@ void read_info(const char *filename,
             comp_info[i-1]='\0'; /*cut the last " */
 
             if (h5repack_addfilter(comp_info,options)==-1){
-                error_msg(h5tools_getprogname(), "could not add compression option\n");
+                error_msg("could not add compression option\n");
                 exit(EXIT_FAILURE);
             }
         }
@@ -559,7 +559,7 @@ void read_info(const char *filename,
             comp_info[i-1]='\0'; /*cut the last " */
 
             if (h5repack_addlayout(comp_info,options)==-1){
-                error_msg(h5tools_getprogname(), "could not add chunck option\n");
+                error_msg("could not add chunck option\n");
                 exit(EXIT_FAILURE);
             }
         }
@@ -568,7 +568,7 @@ void read_info(const char *filename,
         *-------------------------------------------------------------------------
         */
         else {
-            error_msg(h5tools_getprogname(), "bad file format for %s", filename);
+            error_msg("bad file format for %s", filename);
             exit(EXIT_FAILURE);
         }
     }

@@ -507,12 +507,17 @@ typedef struct h5tools_context_t {
     hsize_t sm_pos;                   /* current stripmine element position */
 } h5tools_context_t;
 
+typedef struct subset_d {
+    hsize_t     *data;
+    unsigned int len;
+} subset_d;
+
 /* a structure to hold the subsetting particulars for a dataset */
 struct subset_t {
-    hsize_t *start;
-    hsize_t *stride;
-    hsize_t *count;
-    hsize_t *block;
+    subset_d start;
+    subset_d stride;
+    subset_d count;
+    subset_d block;
 };
 
 /* The following include, h5tools_str.h, must be after the

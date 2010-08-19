@@ -312,12 +312,12 @@ int h5repack_cmp_pl(const char *fname1,
         /* Open the files */
         if ((fid1=H5Fopen(fname1,H5F_ACC_RDONLY,H5P_DEFAULT)) < 0 )
         {
-            error_msg(h5tools_getprogname(), "<%s>: %s\n", fname1, H5FOPENERROR );
+            error_msg("<%s>: %s\n", fname1, H5FOPENERROR );
             return -1;
         }
         if ((fid2=H5Fopen(fname2,H5F_ACC_RDONLY,H5P_DEFAULT)) < 0 )
         {
-            error_msg(h5tools_getprogname(), "<%s>: %s\n", fname2, H5FOPENERROR );
+            error_msg("<%s>: %s\n", fname2, H5FOPENERROR );
             H5Fclose(fid1);
             return -1;
         }
@@ -366,7 +366,7 @@ int h5repack_cmp_pl(const char *fname1,
 
             if ( crt_order_flag1 != crt_order_flag2 )
             {
-                error_msg(h5tools_getprogname(), "property lists for <%s> are different\n",trav->objs[i].name);
+                error_msg("property lists for <%s> are different\n",trav->objs[i].name);
                 goto error;
             }
 
@@ -394,7 +394,7 @@ int h5repack_cmp_pl(const char *fname1,
 
             if(ret == 0)
             {
-                error_msg(h5tools_getprogname(), "property lists for <%s> are different\n",trav->objs[i].name);
+                error_msg("property lists for <%s> are different\n",trav->objs[i].name);
                 goto error;
             }
 

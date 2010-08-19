@@ -42,12 +42,84 @@ const char *opt_arg;        /*flag argument (or value)               */
 static int  h5tools_d_status = 0;
 static const char  *h5tools_progname = "h5tools";
 
+/* ``parallel_print'' variables */
+unsigned char  g_Parallel = 0;  /*0 for serial, 1 for parallel */
+char     outBuff[OUTBUFF_SIZE];
+int      outBuffOffset;
+FILE*    overflow_file = NULL;
+
 /* local functions */
 static void init_table(table_t **tbl);
 #ifdef H5DUMP_DEBUG
 static void dump_table(char* tablename, table_t *table);
 #endif  /* H5DUMP_DEBUG */
 static void add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t recorded);
+
+/*-------------------------------------------------------------------------
+ * Function: parallel_print
+ *
+ * Purpose: wrapper for printf for use in parallel mode.
+ *
+ * Programmer: Leon Arber
+ *
+ * Date: December 1, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+void parallel_print(const char* format, ...)
+{
+ int  bytes_written;
+ va_list ap;
+
+ va_start(ap, format);
+
+ if(!g_Parallel)
+  vprintf(format, ap);
+ else
+ {
+
+  if(overflow_file == NULL) /*no overflow has occurred yet */
+  {
+#if 0
+   printf("calling HDvsnprintf: OUTBUFF_SIZE=%ld, outBuffOffset=%ld, ", (long)OUTBUFF_SIZE, (long)outBuffOffset);
+#endif
+   bytes_written = HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
+#if 0
+   printf("bytes_written=%ld\n", (long)bytes_written);
+#endif
+   va_end(ap);
+   va_start(ap, format);
+
+#if 0
+   printf("Result: bytes_written=%ld, OUTBUFF_SIZE-outBuffOffset=%ld\n", (long)bytes_written, (long)OUTBUFF_SIZE-outBuffOffset);
+#endif
+
+   if ((bytes_written < 0) ||
+#ifdef H5_VSNPRINTF_WORKS
+    (bytes_written >= (OUTBUFF_SIZE-outBuffOffset))
+#else
+    ((bytes_written+1) == (OUTBUFF_SIZE-outBuffOffset))
+#endif
+    )
+   {
+    /* Terminate the outbuff at the end of the previous output */
+    outBuff[outBuffOffset] = '\0';
+
+    overflow_file = HDtmpfile();
+    if(overflow_file == NULL)
+     fprintf(stderr, "warning: could not create overflow file.  Output may be truncated.\n");
+    else
+     bytes_written = HDvfprintf(overflow_file, format, ap);
+   }
+   else
+    outBuffOffset += bytes_written;
+  }
+  else
+   bytes_written = HDvfprintf(overflow_file, format, ap);
+
+ }
+ va_end(ap);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -66,13 +138,13 @@ static void add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t 
  *-------------------------------------------------------------------------
  */
 void
-error_msg(const char *progname, const char *fmt, ...)
+error_msg(const char *fmt, ...)
 {
     va_list ap;
 
     va_start(ap, fmt);
     HDfflush(stdout);
-    HDfprintf(stderr, "%s error: ", progname);
+    HDfprintf(stderr, "%s error: ", h5tools_getprogname());
     HDvfprintf(stderr, fmt, ap);
 
     va_end(ap);
@@ -95,13 +167,13 @@ error_msg(const char *progname, const char *fmt, ...)
  *-------------------------------------------------------------------------
  */
 void
-warn_msg(const char *progname, const char *fmt, ...)
+warn_msg(const char *fmt, ...)
 {
     va_list ap;
 
     va_start(ap, fmt);
     HDfflush(stdout);
-    HDfprintf(stderr, "%s warning: ", progname);
+    HDfprintf(stderr, "%s warning: ", h5tools_getprogname());
     HDvfprintf(stderr, fmt, ap);
     va_end(ap);
 }
@@ -591,7 +663,7 @@ add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t record)
     /* See if we need to make table larger */
     if(table->nobjs == table->size) {
         table->size *= 2;
-        table->objs = HDrealloc(table->objs, table->size * sizeof(table->objs[0]));
+        table->objs = (struct obj_t *)HDrealloc(table->objs, table->size * sizeof(table->objs[0]));
     } /* end if */
 
     /* Increment number of objects in table */
@@ -690,7 +762,7 @@ H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *
     HDassert(link_info->trg_path);
 
     /* get link value */
-    if(H5Lget_val(file_id, linkpath, link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) < 0) {
+    if(H5Lget_val(file_id, linkpath, (void *)link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) < 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to get link value from <%s>\n",linkpath);
         goto out;
@@ -769,12 +841,12 @@ void h5tools_setstatus(int D_status)
     h5tools_d_status = D_status;
 }
 
-const char*h5tools_getprogname()
+const char*h5tools_getprogname(void)
 {
    return h5tools_progname;
 }
 
-int h5tools_getstatus()
+int h5tools_getstatus(void)
 {
    return h5tools_d_status;
 }

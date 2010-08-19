@@ -65,7 +65,7 @@ static void aux_tblinsert_filter(pack_opttbl_t *table,
     }
     else
     {
-    error_msg(h5tools_getprogname(), "cannot insert the filter in this object.\
+    error_msg("cannot insert the filter in this object.\
         Maximum capacity exceeded\n");
     }
 }
@@ -124,7 +124,7 @@ static int aux_inctable(pack_opttbl_t *table, int n_objs )
     table->size += n_objs;
     table->objs = (pack_info_t*)realloc(table->objs, table->size * sizeof(pack_info_t));
     if (table->objs==NULL) {
-        error_msg(h5tools_getprogname(), "not enough memory for options table\n");
+        error_msg("not enough memory for options table\n");
         return -1;
     }
     for (i = table->nelems; i < table->size; i++)
@@ -151,7 +151,7 @@ int options_table_init( pack_opttbl_t **tbl )
 
     if(NULL == (table = (pack_opttbl_t *)malloc(sizeof(pack_opttbl_t))))
     {
-        error_msg(h5tools_getprogname(), "not enough memory for options table\n");
+        error_msg("not enough memory for options table\n");
         return -1;
     }
 
@@ -159,7 +159,7 @@ int options_table_init( pack_opttbl_t **tbl )
     table->nelems = 0;
     if(NULL == (table->objs = (pack_info_t*)malloc(table->size * sizeof(pack_info_t))))
     {
-        error_msg(h5tools_getprogname(), "not enough memory for options table\n");
+        error_msg("not enough memory for options table\n");
         free(table);
         return -1;
     }
@@ -230,7 +230,7 @@ int options_add_layout( obj_list_t *obj_list,
                     /* already chunk info inserted for this one; exit */
                     if (table->objs[i].chunk.rank>0)
                     {
-                        error_msg(h5tools_getprogname(), "chunk information already inserted for <%s>\n",obj_list[j].obj);
+                        error_msg("chunk information already inserted for <%s>\n",obj_list[j].obj);
                         exit(EXIT_FAILURE);
                     }
                     /* insert the layout info */

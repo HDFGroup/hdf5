@@ -28,6 +28,10 @@
 extern "C" {
 #endif
 
+/* ``parallel_print'' information */
+#define PRINT_DATA_MAX_SIZE 	512
+#define OUTBUFF_SIZE 		(PRINT_DATA_MAX_SIZE*4)
+
 /*
  * begin get_option section
  */
@@ -110,8 +114,9 @@ H5TOOLS_DLLVAR int     nCols;               /*max number of columns for outputti
 /* Definitions of useful routines */
 H5TOOLS_DLL void     indentation(int);
 H5TOOLS_DLL void     print_version(const char *progname);
-H5TOOLS_DLL void     error_msg(const char *progname, const char *fmt, ...);
-H5TOOLS_DLL void     warn_msg(const char *progname, const char *fmt, ...);
+H5TOOLS_DLL void     parallel_print(const char* format, ... );
+H5TOOLS_DLL void     error_msg(const char *fmt, ...);
+H5TOOLS_DLL void     warn_msg(const char *fmt, ...);
 H5TOOLS_DLL void     free_table(table_t *table);
 #ifdef H5DUMP_DEBUG
 H5TOOLS_DLL void     dump_tables(find_objs_t *info)

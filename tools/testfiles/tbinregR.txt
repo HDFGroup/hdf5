@@ -1,0 +1,15 @@
+HDF5 "tdatareg.h5" {
+DATASET "/Dataset1" {
+   DATATYPE  H5T_REFERENCE
+   DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
+   SUBSET {
+      START ( 0 );
+      STRIDE ( 1 );
+      COUNT ( 1 );
+      BLOCK ( 1 );
+      DATA {
+         
+      }
+   }
+}
+}

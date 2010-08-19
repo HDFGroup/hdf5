@@ -153,7 +153,7 @@ parse_command_line(int argc, const char *argv[], param_t *params)
 
     /* Check for file name to be processed */
     if(argc <= opt_ind) {
-        error_msg(h5tools_getprogname(), "missing file name\n");
+        error_msg("missing file name\n");
         usage();
         leave(EXIT_FAILURE);
     } /* end if */
@@ -164,7 +164,7 @@ parse_command_line(int argc, const char *argv[], param_t *params)
 
     /* Check for group(s) to be created */
     if(argc <= opt_ind) {
-        error_msg(h5tools_getprogname(), "missing group name(s)\n");
+        error_msg("missing group name(s)\n");
         usage();
         leave(EXIT_FAILURE);
     } /* end if */
@@ -224,13 +224,13 @@ main(int argc, const char *argv[])
     /* Parse command line */
     HDmemset(&params, 0, sizeof(params));
     if(parse_command_line(argc, argv, &params) < 0) {
-        error_msg(h5tools_getprogname(), "unable to parse command line arguments\n");
+        error_msg("unable to parse command line arguments\n");
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* Create file access property list */
     if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-        error_msg(h5tools_getprogname(), "Could not create file access property list\n");
+        error_msg("Could not create file access property list\n");
         leave(EXIT_FAILURE);
     } /* end if */
 
@@ -238,7 +238,7 @@ main(int argc, const char *argv[])
     if(params.latest) {
         /* Set the "use the latest version of the format" bounds */
         if(H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
-            error_msg(h5tools_getprogname(), "Could not set property for using latest version of the format\n");
+            error_msg("Could not set property for using latest version of the format\n");
             leave(EXIT_FAILURE);
         } /* end if */
 
@@ -257,13 +257,13 @@ main(int argc, const char *argv[])
 
     /* Test for error in opening file */
     if(fid < 0) {
-        error_msg(h5tools_getprogname(), "Could not open output file '%s'\n", params.fname);
+        error_msg("Could not open output file '%s'\n", params.fname);
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* Create link creation property list */
     if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) {
-        error_msg(h5tools_getprogname(), "Could not create link creation property list\n");
+        error_msg("Could not create link creation property list\n");
         leave(EXIT_FAILURE);
     } /* end if */
 
@@ -271,7 +271,7 @@ main(int argc, const char *argv[])
     if(params.parents) {
         /* Set the intermediate group creation property */
         if(H5Pset_create_intermediate_group(lcpl_id, TRUE) < 0) {
-            error_msg(h5tools_getprogname(), "Could not set property for creating parent groups\n");
+            error_msg("Could not set property for creating parent groups\n");
             leave(EXIT_FAILURE);
         } /* end if */
 
@@ -286,13 +286,13 @@ main(int argc, const char *argv[])
 
         /* Attempt to create a group */
         if((gid = H5Gcreate2(fid, params.groups[curr_group], lcpl_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-            error_msg(h5tools_getprogname(), "Could not create group '%s'\n", params.groups[curr_group]);
+            error_msg("Could not create group '%s'\n", params.groups[curr_group]);
             leave(EXIT_FAILURE);
         } /* end if */
 
         /* Close the group */
         if(H5Gclose(gid) < 0) {
-            error_msg(h5tools_getprogname(), "Could not close group '%s'??\n", params.groups[curr_group]);
+            error_msg("Could not close group '%s'??\n", params.groups[curr_group]);
             leave(EXIT_FAILURE);
         } /* end if */
 
@@ -303,19 +303,19 @@ main(int argc, const char *argv[])
 
     /* Close link creation property list */
     if(H5Pclose(lcpl_id) < 0) {
-        error_msg(h5tools_getprogname(), "Could not close link creation property list\n");
+        error_msg("Could not close link creation property list\n");
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* Close file */
     if(H5Fclose(fid) < 0) {
-        error_msg(h5tools_getprogname(), "Could not close output file '%s'??\n", params.fname);
+        error_msg("Could not close output file '%s'??\n", params.fname);
         leave(EXIT_FAILURE);
     } /* end if */
 
     /* Close file access property list */
     if(H5Pclose(fapl_id) < 0) {
-        error_msg(h5tools_getprogname(), "Could not close file access property list\n");
+        error_msg("Could not close file access property list\n");
         leave(EXIT_FAILURE);
     } /* end if */
 
