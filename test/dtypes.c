@@ -4859,13 +4859,8 @@ opaque_funcs(void)
         TEST_ERROR
     } /* end if */
 
-    H5E_BEGIN_TRY {
-        ret=H5Tset_order(type, H5T_ORDER_BE);
-    } H5E_END_TRY;
-    if (ret>=0) {
-        printf("Operation not allowed for this type.\n");
-        TEST_ERROR
-    } /* end if */
+    /* No effect on opaque type */
+    if(H5Tset_order(type, H5T_ORDER_BE) < 0) TEST_ERROR
 
     H5E_BEGIN_TRY {
         sign = H5Tget_sign(type);
@@ -5846,23 +5841,18 @@ test_set_order(void)
     if (H5T_ORDER_BE != H5Tget_order(dtype)) TEST_ERROR;
     if (H5Tclose(dtype) < 0) TEST_ERROR
 
-    /* Opaque - functions should fail */
+    /* Opaque - No effect on the order */
     if ((dtype = H5Tcreate(H5T_OPAQUE, (size_t)96)) < 0) TEST_ERROR
-    H5E_BEGIN_TRY
-        ret = H5Tset_order(dtype, H5T_ORDER_LE);
-        order = H5Tget_order(dtype);
-    H5E_END_TRY
-    if (ret >= 0) TEST_ERROR
-    if (order >= 0) TEST_ERROR
+    if (H5Tset_order(dtype, H5T_ORDER_NONE) < 0) TEST_ERROR
+    if (H5Tset_order(dtype, H5T_ORDER_BE) < 0) TEST_ERROR
     if (H5Tclose(dtype) < 0) TEST_ERROR
 
-    /* Compound - functions should fail */
+    /* Compound */
     if ((dtype = H5Tcreate(H5T_COMPOUND, (size_t)48)) < 0) TEST_ERROR
+    if (H5Tset_order(dtype, H5T_ORDER_BE) < 0) TEST_ERROR
     H5E_BEGIN_TRY
-        ret = H5Tset_order(dtype, H5T_ORDER_LE);
         order = H5Tget_order(dtype);
     H5E_END_TRY
-    if (ret >= 0) TEST_ERROR
     if (order >= 0) TEST_ERROR
     if (H5Tclose(dtype) < 0) TEST_ERROR
 
@@ -5922,6 +5912,116 @@ error:
     H5E_END_TRY;
     return 1;
 } /* end test_set_order() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_set_order_compound
+ *
+ * Purpose:     Tests H5Tset_order/H5Tget_order for complicated compound 
+ *              type.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu
+ *              18 August 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_set_order_compound(hid_t fapl)
+{
+    typedef struct {     /* Struct with atomic fields */
+        int   i;
+        char  c;
+        short s;
+        float f;
+    } atomic_cmpd;
+
+    typedef struct {     /* Struct with complex fields */
+        atomic_cmpd a;
+        hvl_t       vl;
+        double      b[3][4];
+        atomic_cmpd d[3][4];
+    } complex_cmpd;
+
+    hid_t       file;
+    hid_t       cmpd, memb_cmpd, memb_array1, memb_array2;
+    hid_t       vl_id;
+    H5T_order_t order;              /* Byte order */
+    hsize_t     dims[2] = {3, 4};   /* Array dimenstions */
+    char	filename[1024];
+    herr_t      ret;                /* Generic return value */
+
+    TESTING("H5Tset/get_order for compound type");
+
+    if ((memb_cmpd = H5Tcreate(H5T_COMPOUND, sizeof(atomic_cmpd))) < 0) TEST_ERROR
+    if(H5Tinsert(memb_cmpd, "i", HOFFSET(atomic_cmpd, i), H5T_NATIVE_INT) < 0) TEST_ERROR 
+    if(H5Tinsert(memb_cmpd, "c", HOFFSET(atomic_cmpd, c), H5T_NATIVE_CHAR) < 0) TEST_ERROR
+    if(H5Tinsert(memb_cmpd, "s", HOFFSET(atomic_cmpd, s), H5T_NATIVE_SHORT) < 0) TEST_ERROR
+    if(H5Tinsert(memb_cmpd, "f", HOFFSET(atomic_cmpd, f), H5T_NATIVE_FLOAT) < 0) TEST_ERROR
+
+    /* Create the simple array datatype */
+    memb_array1 = H5Tarray_create2(H5T_NATIVE_DOUBLE, 2, dims);
+    memb_array2 = H5Tarray_create2(memb_cmpd, 2, dims);
+
+    /* Create a variable-length datatype */
+    if ((vl_id = H5Tvlen_create(H5T_NATIVE_UINT)) < 0) TEST_ERROR
+
+    /* Create a compound type using the types above. */
+    if ((cmpd = H5Tcreate(H5T_COMPOUND, sizeof(complex_cmpd))) < 0) TEST_ERROR
+    if(H5Tinsert(cmpd, "a", HOFFSET(complex_cmpd, a), memb_cmpd) < 0) TEST_ERROR 
+    if(H5Tinsert(cmpd, "vl_type", HOFFSET(complex_cmpd, vl), vl_id) < 0) TEST_ERROR 
+    if(H5Tinsert(cmpd, "b", HOFFSET(complex_cmpd, b), memb_array1) < 0) TEST_ERROR 
+    if(H5Tinsert(cmpd, "d", HOFFSET(complex_cmpd, d), memb_array2) < 0) TEST_ERROR 
+
+    /* Verify that the order can't be 'none'. */
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(cmpd, H5T_ORDER_NONE);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+
+    /* Change the order */
+    if (H5Tset_order(cmpd, H5T_ORDER_BE) < 0) TEST_ERROR
+
+    /* Create file */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Commit the data type */
+    if(H5Tcommit2(file, "compound", cmpd, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify that committed type can't change order */
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(cmpd, H5T_ORDER_LE);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+
+    if (H5Tclose(memb_cmpd) < 0) TEST_ERROR
+    if (H5Tclose(memb_array1) < 0) TEST_ERROR
+    if (H5Tclose(memb_array2) < 0) TEST_ERROR
+    if (H5Tclose(vl_id) < 0) TEST_ERROR
+    if (H5Tclose(cmpd) < 0) TEST_ERROR
+    if (H5Fclose(file) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+        H5Tclose(memb_cmpd);
+        H5Tclose(memb_array1);
+        H5Tclose(memb_array2);
+        H5Tclose(vl_id);
+        H5Tclose(cmpd);
+	H5Fclose(file);
+    H5E_END_TRY;
+    return 1;
+} /* end test_set_order_compound() */
 
 
 /*-------------------------------------------------------------------------
@@ -6320,6 +6420,7 @@ main(void)
     nerrors += test_latest();
     nerrors += test_int_float_except();
     nerrors += test_named_indirect_reopen(fapl);
+    nerrors += test_set_order_compound(fapl);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     nerrors += test_deprec(fapl);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
