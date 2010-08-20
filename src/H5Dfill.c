@@ -600,7 +600,7 @@ H5D_fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
 
     /* Replicate the fill value into the cached buffer */
-    H5V_array_fill(fb_info->fill_buf, fb_info->fill_buf, fb_info->mem_elmt_size, nelmts);
+    H5V_array_fill((void *)((unsigned char *)fb_info->fill_buf + fb_info->mem_elmt_size), fb_info->fill_buf, fb_info->mem_elmt_size, (nelmts - 1));
 
     /* Reset the entire background buffer, if necessary */
     if(H5T_path_bkg(fb_info->mem_to_dset_tpath))
@@ -618,12 +618,14 @@ H5D_fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
 
 done:
-    if (buf) {
+    if(buf) {
         /* Free dynamically allocated VL elements in fill buffer */
-        if (fb_info->fill->type)
-            H5T_vlen_reclaim_elmt(buf, fb_info->fill->type, dxpl_id);
+        if(fb_info->fill->type)
+            if(H5T_vlen_reclaim_elmt(buf, fb_info->fill->type, dxpl_id) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't reclaim vlen element")
         else
-            H5T_vlen_reclaim_elmt(buf, fb_info->mem_type, dxpl_id);
+            if(H5T_vlen_reclaim_elmt(buf, fb_info->mem_type, dxpl_id) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't reclaim vlen element")
 
         /* Free temporary fill buffer */
         if(fb_info->fill_free_func)

@@ -1191,12 +1191,18 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 	tent_flags = flags;
 
     if(NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
-	if(tent_flags == flags)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
+	if(tent_flags == flags) {
+            time_t mytime = HDtime(NULL);
+
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: time = %s, name = '%s', tent_flags = %x", HDctime(&mytime), name, tent_flags)
+        } /* end if */
         H5E_clear_stack(NULL);
 	tent_flags = flags;
-	if(NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF)))
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
+	if(NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
+            time_t mytime = HDtime(NULL);
+
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: time = %s, name = '%s', tent_flags = %x", HDctime(&mytime), name, tent_flags)
+        } /* end if */
     } /* end if */
 
     /* Is the file already open? */

@@ -894,6 +894,10 @@ test_h5s_compound_scalar_write(void)
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
+    /* Close compound datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
     /* Close scalar dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");

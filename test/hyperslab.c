@@ -125,7 +125,7 @@ print_ref(size_t nx, size_t ny, size_t nz)
 {
     uint8_t *array;
 
-    if(NULL != (array = HDmalloc(nx * ny * nz))) {
+    if(NULL != (array = (uint8_t *)HDmalloc(nx * ny * nz))) {
         printf("Reference array:\n");
         init_full(array, nx, ny, nz);
         print_array(array, nx, ny, nz);
@@ -190,7 +190,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
     fflush(stdout);
 
     /* Allocate array */
-    if(NULL == (dst = HDcalloc((size_t)1, nx * ny * nz)))
+    if(NULL == (dst = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
         TEST_ERROR
     
     init_full(dst, nx, ny, nz);
@@ -387,9 +387,9 @@ test_copy(int mode,
     /*
      * Allocate arrays
      */
-    if(NULL == (src = HDcalloc((size_t)1, nx * ny * nz)))
+    if(NULL == (src = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
         TEST_ERROR
-    if(NULL == (dst = HDcalloc((size_t)1, nx * ny * nz)))
+    if(NULL == (dst = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
         TEST_ERROR
 
     init_full(src, nx, ny, nz);
@@ -602,9 +602,9 @@ test_multifill(size_t nx)
     fflush(stdout);
 
     /* Initialize the source and destination */
-    if(NULL == (src = HDmalloc(nx * sizeof(*src))))
+    if(NULL == (src = (struct a_struct *)HDmalloc(nx * sizeof(*src))))
         TEST_ERROR
-    if(NULL == (dst = HDmalloc(nx * sizeof(*dst))))
+    if(NULL == (dst = (struct a_struct *)HDmalloc(nx * sizeof(*dst))))
         TEST_ERROR
 
     for(i = 0; i < nx; i++) {
@@ -717,9 +717,9 @@ test_endian(size_t nx)
     fflush(stdout);
 
     /* Initialize arrays */
-    if(NULL == (src = HDmalloc(nx * 4)))
+    if(NULL == (src = (uint8_t *)HDmalloc(nx * 4)))
         TEST_ERROR
-    if(NULL == (dst = HDcalloc(nx , (size_t)4)))
+    if(NULL == (dst = (uint8_t *)HDcalloc(nx , (size_t)4)))
         TEST_ERROR
 
     init_full(src, nx, (size_t)4,(size_t)1);
@@ -805,9 +805,9 @@ test_transpose(size_t nx, size_t ny)
     fflush(stdout);
 
     /* Initialize */
-    if(NULL == (src = HDmalloc(nx * ny * sizeof(*src))))
+    if(NULL == (src = (int *)HDmalloc(nx * ny * sizeof(*src))))
         TEST_ERROR
-    if(NULL == (dst = HDcalloc(nx * ny, sizeof(*dst))))
+    if(NULL == (dst = (int *)HDcalloc(nx * ny, sizeof(*dst))))
         TEST_ERROR
 
     for(i = 0; i < nx; i++)
@@ -911,11 +911,11 @@ test_sub_super(size_t nx, size_t ny)
     fflush(stdout);
 
     /* Initialize */
-    if(NULL == (full = HDmalloc(4 * nx * ny)))
+    if(NULL == (full = (uint8_t *)HDmalloc(4 * nx * ny)))
         TEST_ERROR
-    if(NULL == (half = HDcalloc((size_t)1, nx * ny)))
+    if(NULL == (half = (uint8_t *)HDcalloc((size_t)1, nx * ny)))
         TEST_ERROR
-    if(NULL == (twice = HDcalloc((size_t)4, nx * ny)))
+    if(NULL == (twice = (uint8_t *)HDcalloc((size_t)4, nx * ny)))
         TEST_ERROR
 
     init_full(full, 2 * nx, 2 * ny, (size_t)1);
@@ -1063,7 +1063,7 @@ test_array_fill(size_t lo, size_t hi)
     TESTING(s);
 
     /* Initialize */
-    if(NULL == (dst = HDcalloc(sizeof(int),ARRAY_FILL_SIZE * hi)))
+    if(NULL == (dst = (int *)HDcalloc(sizeof(int),ARRAY_FILL_SIZE * hi)))
         TEST_ERROR
 
     /* Setup */
@@ -1128,7 +1128,7 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
     TESTING(s);
 
     /* Initialize */
-    if(NULL == (a = HDmalloc(sizeof(hsize_t) * x * y *z)))
+    if(NULL == (a = (hsize_t *)HDmalloc(sizeof(hsize_t) * x * y *z)))
         TEST_ERROR
 
     dims[0] = z;

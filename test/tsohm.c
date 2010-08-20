@@ -74,6 +74,7 @@ typedef struct dtype1_struct {
     int    i8;
     float  f1;
 } dtype1_struct;
+
 #define DTYPE2_SIZE 1024
 const char *DSETNAME[] = {
     "dataset0",    "dataset1",
@@ -167,7 +168,9 @@ static hid_t make_dtype_1(void);
 static hid_t make_dtype_2(void);
 static hid_t close_reopen_file(hid_t file, const char* filename, hid_t fapl_id);
 static void test_sohm_attrs(void);
+#ifdef NOT_NOW
 static void size2_dump_struct(const char *name, size2_helper_struct *sizes);
+#endif /* NOT_NOW */
 static void size2_verify(void);
 static void test_sohm_delete(void);
 static void test_sohm_delete_revert(void);
@@ -280,11 +283,10 @@ static void test_sohm_fcpl(void)
     /* Set up index values */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, TEST_NUM_INDEXES);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    for(x=0; x<TEST_NUM_INDEXES; ++x)
-    {
+    for(x = 0; x < TEST_NUM_INDEXES; ++x) {
         ret = H5Pset_shared_mesg_index(fcpl_id, x, test_type_flags[x], test_minsizes[x]);
         CHECK_I(ret, "H5Pset_shared_mesg_index");
-    }
+    } /* end for */
 
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, TEST_L2B, TEST_B2L);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
@@ -419,8 +421,6 @@ static void test_sohm_fcpl(void)
  * Programmer:  James Laird
  *              Saturday, August 26, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -429,23 +429,23 @@ make_dtype_1(void)
     hid_t dtype1_id = -1;
     hid_t str_id = -1;
 
-   /* Create compound datatype. */
-    if((dtype1_id = H5Tcreate( H5T_COMPOUND, sizeof(struct dtype1_struct))) < 0) TEST_ERROR
+    /* Create compound datatype. */
+    if((dtype1_id = H5Tcreate(H5T_COMPOUND, sizeof(struct dtype1_struct))) < 0) TEST_ERROR
 
-    if(H5Tinsert(dtype1_id,"i1",HOFFSET(struct dtype1_struct,i1),H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(dtype1_id, "i1", HOFFSET(dtype1_struct, i1), H5T_NATIVE_INT) < 0) TEST_ERROR
 
     str_id = H5Tcopy(H5T_C_S1);
-    if(H5Tset_size(str_id,(size_t) 10) < 0) TEST_ERROR
+    if(H5Tset_size(str_id, (size_t)10) < 0) TEST_ERROR
 
-    if(H5Tinsert(dtype1_id,"vl_string",HOFFSET(dtype1_struct,str),str_id) < 0) TEST_ERROR
-    if(H5Tinsert(dtype1_id,"i2",HOFFSET(struct dtype1_struct,i2),H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(dtype1_id,"i3",HOFFSET(struct dtype1_struct,i3),H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(dtype1_id,"i4",HOFFSET(struct dtype1_struct,i4),H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(dtype1_id,"i5",HOFFSET(struct dtype1_struct,i5),H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(dtype1_id,"i6",HOFFSET(struct dtype1_struct,i6),H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(dtype1_id,"i7",HOFFSET(struct dtype1_struct,i7),H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(dtype1_id,"i8",HOFFSET(struct dtype1_struct,i8),H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(dtype1_id,"f1",HOFFSET(struct dtype1_struct,f1),H5T_NATIVE_FLOAT) < 0) TEST_ERROR
+    if(H5Tinsert(dtype1_id, "string", HOFFSET(dtype1_struct, str), str_id) < 0) TEST_ERROR
+    if(H5Tinsert(dtype1_id, "i2", HOFFSET(dtype1_struct, i2), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(dtype1_id, "i3", HOFFSET(dtype1_struct, i3), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(dtype1_id, "i4", HOFFSET(dtype1_struct, i4), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(dtype1_id, "i5", HOFFSET(dtype1_struct, i5), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(dtype1_id, "i6", HOFFSET(dtype1_struct, i6), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(dtype1_id, "i7", HOFFSET(dtype1_struct, i7), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(dtype1_id, "i8", HOFFSET(dtype1_struct, i8), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(dtype1_id, "f1", HOFFSET(dtype1_struct, f1), H5T_NATIVE_FLOAT) < 0) TEST_ERROR
 
     if(H5Tclose(str_id) < 0) TEST_ERROR
 
@@ -488,15 +488,13 @@ make_dtype_2(void)
 
     /* Create an int with a strange precision */
     if((int_id = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if(H5Tset_precision(int_id, 24) < 0) TEST_ERROR
+    if(H5Tset_precision(int_id, (size_t)24) < 0) TEST_ERROR
 
     /* Create an enumeration using that int */
     if((enum_id = H5Tenum_create(int_id)) < 0) TEST_ERROR
 
-    for(x=0; x<ENUM_NUM_MEMBS; x++)
-    {
+    for(x = 0; x < ENUM_NUM_MEMBS; x++)
       if(H5Tenum_insert(enum_id, ENUM_NAME[x], &ENUM_VAL[x]) < 0) TEST_ERROR
-    }
 
     /* Create arrays of arrays of arrays of enums */
     if((dtype2_id = H5Tarray_create2(enum_id, 3, dims)) < 0) TEST_ERROR
@@ -572,14 +570,12 @@ error:
  * Programmer:  James Laird
  *              Monday, April 10, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
 size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_closing)
 {
-    dtype1_struct wdata = {11, "string", 22, 33, 44, 55, 66, 77, 88, 0.0};
+    dtype1_struct wdata;
     dtype1_struct rdata;
     hid_t       dtype1_id = -1;
     hid_t       space_id = -1;
@@ -593,23 +589,36 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
     if(GetTestExpress() > 1)
       test_file_closing = 0;
 
+    /* Intialize wdata */
+    HDmemset(&wdata, 0, sizeof(wdata));
+    wdata.i1 = 11;
+    HDstrcpy(wdata.str, "string");
+    wdata.i2 = 22;
+    wdata.i3 = 33;
+    wdata.i4 = 44;
+    wdata.i5 = 55;
+    wdata.i6 = 66;
+    wdata.i7 = 77;
+    wdata.i8 = 88;
+    wdata.f1 = 0.0;
+
     /* Intialize rdata */
-    strcpy(rdata.str, "\0");
+    HDmemset(&rdata, 0, sizeof(rdata));
 
     if((dtype1_id = make_dtype_1()) < 0) TEST_ERROR
 
     /* Create the dataspace and dataset */
     dim1[0] = 1;
-    if((space_id=H5Screate_simple(1,dim1,NULL)) < 0) TEST_ERROR
+    if((space_id = H5Screate_simple(1, dim1, NULL)) < 0) TEST_ERROR
 
-    if((dset_id = H5Dcreate2(file,DSETNAME[0],dtype1_id,space_id,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dset_id = H5Dcreate2(file, DSETNAME[0], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Test writing and reading */
-    if(H5Dwrite(dset_id,dtype1_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata) < 0) FAIL_STACK_ERROR
+    if(H5Dwrite(dset_id, dtype1_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0) FAIL_STACK_ERROR
 
-    if(H5Dread(dset_id,dtype1_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata) < 0) FAIL_STACK_ERROR
+    if(H5Dread(dset_id, dtype1_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) FAIL_STACK_ERROR
 
-    if(rdata.i1!=wdata.i1 || rdata.i2!=wdata.i2 || HDstrcmp(rdata.str, wdata.str)) {
+    if(rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || HDstrcmp(rdata.str, wdata.str)) {
         H5_FAILED(); AT();
         printf("incorrect read data\n");
         goto error;
@@ -617,26 +626,23 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
     if(H5Dclose(dset_id) < 0) FAIL_STACK_ERROR
 
     /* Close and re-open the file if requested*/
-    if(test_file_closing) {
+    if(test_file_closing)
         if((file = close_reopen_file(file, filename, fapl_id)) < 0) TEST_ERROR
-    }
 
     /* Create more datasets with the same datatype */
-    if((dset_id = H5Dcreate2(file,DSETNAME[1],dtype1_id,space_id,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dset_id = H5Dcreate2(file, DSETNAME[1], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Dclose(dset_id) < 0) FAIL_STACK_ERROR
 
     /* Close and re-open the file if requested*/
-    if(test_file_closing) {
+    if(test_file_closing)
         if((file = close_reopen_file(file, filename, fapl_id)) < 0) TEST_ERROR
-    }
 
-    if((dset_id = H5Dcreate2(file,DSETNAME[2],dtype1_id,space_id,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset_id = H5Dcreate2(file, DSETNAME[2], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(dset_id) < 0) TEST_ERROR
 
     /* Close and re-open the file if requested*/
-    if(test_file_closing) {
+    if(test_file_closing)
         if((file = close_reopen_file(file, filename, fapl_id)) < 0) TEST_ERROR
-    }
 
     if((dset_id = H5Dcreate2(file,DSETNAME[3],dtype1_id,space_id,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
@@ -654,10 +660,8 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
     if((dset_id = H5Dopen2(file, DSETNAME[0], H5P_DEFAULT)) < 0) TEST_ERROR
     if((dtype1_id = H5Dget_type(dset_id)) < 0) TEST_ERROR
 
-    rdata.i1 = rdata.i2 = 0;
-    HDstrcpy(rdata.str, "\0");
-
     /* Read data back again */
+    HDmemset(&rdata, 0, sizeof(rdata));
     if(H5Dread(dset_id, dtype1_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED(); AT();
         printf("Can't read data\n");
@@ -689,9 +693,8 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
     if((dset_id = H5Dopen2(file, DSETNAME[3], H5P_DEFAULT)) < 0) TEST_ERROR
     if((dtype1_id = H5Dget_type(dset_id)) < 0) TEST_ERROR
 
-    rdata.i1 = rdata.i2 = 0;
-
     /* Read data back again */
+    HDmemset(&rdata, 0, sizeof(rdata));
     if(H5Dread(dset_id, dtype1_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED(); AT();
         printf("Can't read data\n");
@@ -1016,12 +1019,11 @@ static void sohm_attr_helper(hid_t fcpl_id)
     CHECK_I(ret, "H5Fflush");
 
     /* Verify */
-    memset(rdata, 0, sizeof(rdata));
+    HDmemset(rdata, 0, sizeof(rdata));
     ret = H5Aread(attr_id, H5T_NATIVE_INT, rdata);
     CHECK_I(ret, "H5Aread");
-    for(x=0; x<(size_t)dims; ++x) {
+    for(x = 0; x < (size_t)dims; ++x)
         VERIFY(rdata[x], wdata[x], "H5Aread");
-    }
 
     /* Cleanup */
     ret = H5Aclose(attr_id);
@@ -1055,12 +1057,11 @@ static void sohm_attr_helper(hid_t fcpl_id)
     CHECK_I(ret, "H5Fflush");
 
     /* Verify */
-    memset(rdata, 0, sizeof(rdata));
+    HDmemset(rdata, 0, sizeof(rdata));
     ret = H5Aread(attr_id, H5T_NATIVE_INT, rdata);
     CHECK_I(ret, "H5Aread");
-    for(x=0; x<(size_t)dims; ++x) {
+    for(x = 0; x < (size_t)dims; ++x)
         VERIFY(rdata[x], wdata[x], "H5Aread");
-    }
 
     /* Cleanup */
     ret = H5Aclose(attr_id);
@@ -1092,13 +1093,12 @@ static void sohm_attr_helper(hid_t fcpl_id)
     CHECK_I(ret, "H5Fflush");
 
     /* Verify the data with another ID handle */
-    memset(rdata, 0, sizeof(rdata));
+    HDmemset(rdata, 0, sizeof(rdata));
     ret = H5Aread(attr_id2, H5T_NATIVE_INT, rdata);
     CHECK_I(ret, "H5Aread");
 
-    for(x=0; x<(size_t)dims; ++x) {
+    for(x = 0; x < (size_t)dims; ++x)
         VERIFY(rdata[x], wdata[x], "H5Aread");
-    }
 
     /* Cleanup */
     ret = H5Aclose(attr_id);
@@ -1249,23 +1249,23 @@ static void size2_verify_plist1(hid_t plist)
     /* Hardcoded to correspond to dcpl1_id created in size2_helper */
     /* Check filters */
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 0, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 0, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_SHUFFLE, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 1, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 1, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
     VERIFY(cd_value, 1, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 2, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 2, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_SHUFFLE, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 3, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 3, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_FLETCHER32, "H5Pget_filter2");
 
@@ -1273,7 +1273,7 @@ static void size2_verify_plist1(hid_t plist)
     /* Check fill value */
     dtype1_id=make_dtype_1();
     CHECK_I(dtype1_id, "make_dtype_1");
-    memset(&fill1_correct, '1', sizeof(fill1_correct));
+    HDmemset(&fill1_correct, '1', sizeof(fill1_correct));
 
     ret = H5Pget_fill_value(plist, dtype1_id, &fill1);
     CHECK_I(ret, "H5Pget_fill_value");
@@ -1308,48 +1308,49 @@ static void size2_verify_plist2(hid_t plist)
     /* Hardcoded to correspond to dcpl1_id created in size2_helper */
     /* Check filters */
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 0, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 0, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
     VERIFY(cd_value, 1, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 1, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 1, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
     VERIFY(cd_value, 2, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 2, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 2, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
     VERIFY(cd_value, 2, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 3, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 3, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
     VERIFY(cd_value, 1, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter2(plist, 4, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    filter = H5Pget_filter2(plist, 4, NULL, &cd_nelmts, &cd_value, (size_t)NAME_BUF_SIZE, name, NULL);
     CHECK_I(filter, "H5Pget_filter2");
     VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
     VERIFY(cd_value, 5, "H5Pget_filter2");
 
 
     /* Check fill value */
-    dtype2_id=make_dtype_2();
+    dtype2_id = make_dtype_2();
     CHECK_I(dtype2_id, "make_dtype_2");
-    memset(&fill2_correct, '2', DTYPE2_SIZE);
+    HDmemset(&fill2_correct, '2', (size_t)DTYPE2_SIZE);
 
     ret = H5Pget_fill_value(plist, dtype2_id, &fill2);
     CHECK_I(ret, "H5Pget_fill_value");
 
-    ret = memcmp(&fill2, &fill2_correct, DTYPE2_SIZE);
+    ret = HDmemcmp(&fill2, &fill2_correct, (size_t)DTYPE2_SIZE);
     VERIFY(ret, 0, memcmp);
 }
 
+#ifdef NOT_NOW
 
 /*-------------------------------------------------------------------------
  * Function:    size2_dump_struct
@@ -1378,6 +1379,7 @@ size2_dump_struct(const char *name, size2_helper_struct *sizes)
   printf("    attributes: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs1, (unsigned long long)(sizes->attrs1 - sizes->interleaved));
   printf("  attributes 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs2, (unsigned long long)(sizes->attrs2 - sizes->attrs1));
 }
+#endif /* NOT_NOW */
 
 
 /*-------------------------------------------------------------------------
@@ -1466,7 +1468,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
      * We'll set them in the DCPL.
      */
     HDmemset(&fill1, '1', sizeof(dtype1_struct));
-    HDmemset(&fill2, '2', DTYPE2_SIZE);
+    HDmemset(&fill2, '2', (size_t)DTYPE2_SIZE);
 
     dcpl1_id = H5Pcreate(H5P_DATASET_CREATE);
     CHECK_I(dcpl1_id, "H5Pcreate");
@@ -1509,8 +1511,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     size2_verify_plist2(dcpl2_id);
 
     /* Set up attribute data */
-    HDmemset(attr_string1, 0, NAME_BUF_SIZE);
-    HDmemset(attr_string2, 0, NAME_BUF_SIZE);
+    HDmemset(attr_string1, 0, (size_t)NAME_BUF_SIZE);
+    HDmemset(attr_string2, 0, (size_t)NAME_BUF_SIZE);
     HDstrcpy(attr_string1, LONG_STRING);
     HDstrcpy(attr_string2, LONG_STRING);
     attr_string2[1] = '1';        /* The second string starts "01 index..." */
@@ -1518,7 +1520,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* Set up attribute metadata */
     attr_type_id = H5Tcopy(H5T_C_S1);
     CHECK_I(attr_type_id, "H5Tcopy");
-    ret = H5Tset_size(attr_type_id ,NAME_BUF_SIZE);
+    ret = H5Tset_size(attr_type_id, (size_t)NAME_BUF_SIZE);
     CHECK_I(ret, "H5Tset_size");
     attr_space_id = H5Screate_simple(1, dims, dims);
     CHECK_I(attr_space_id, "H5Screate_simple");
@@ -1669,10 +1671,9 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     group_id = H5Gopen2(file_id, "group", H5P_DEFAULT);
     CHECK_I(group_id, "H5Gopen2");
 
-    strcpy(attr_name, "00 index");
+    HDstrcpy(attr_name, "00 index");
 
-    for(x=0; x<NUM_ATTRIBUTES; ++x)
-    {
+    for(x = 0; x < NUM_ATTRIBUTES; ++x) {
         /* Create a unique name and value for each attribute */
         attr_string1[0] = attr_name[0] = (x / 10) + '0';
         attr_string1[1] = attr_name[1] = (x % 10) + '0';
@@ -1917,7 +1918,7 @@ static void size2_verify(void)
     /* Create attribute data type */
     attr_type_id = H5Tcopy(H5T_C_S1);
     CHECK_I(attr_type_id, "H5Tcopy");
-    ret = H5Tset_size(attr_type_id ,NAME_BUF_SIZE);
+    ret = H5Tset_size(attr_type_id, (size_t)NAME_BUF_SIZE);
     CHECK_I(ret, "H5Tset_size");
 
     /* Read attributes on both groups and verify that they are correct */
@@ -1926,8 +1927,8 @@ static void size2_verify(void)
     group2_id = H5Gopen2(file_id, "interleaved group", H5P_DEFAULT);
     CHECK_I(group2_id, "H5Gopen2");
 
-    HDmemset(attr_string, 0, NAME_BUF_SIZE);
-    HDmemset(attr_correct_string, 0, NAME_BUF_SIZE);
+    HDmemset(attr_string, 0, (size_t)NAME_BUF_SIZE);
+    HDmemset(attr_correct_string, 0, (size_t)NAME_BUF_SIZE);
     HDstrcpy(attr_correct_string, LONG_STRING);
     HDstrcpy(attr_name, "00 index");
 
@@ -2785,11 +2786,12 @@ static void
 test_sohm_delete(void)
 {
     hid_t fcpl_id;
-    /* We'll use dataspaces, filter pipelines, and attributes for this
-     * test.  Create a number of distinct messages of each type.
+    /* We'll use dataspaces and filter pipelines for this test.
+     *  Create a number of distinct messages of each type.
      */
     hid_t dspace_id[DELETE_NUM_MESGS] = {0};
     hid_t dcpl_id[DELETE_NUM_MESGS] = {0};
+    unsigned u;
     int x;
     hsize_t dims[] = DELETE_DIMS;
     herr_t ret;
@@ -2797,10 +2799,10 @@ test_sohm_delete(void)
     /* Create a number of different dataspaces.
      * For simplicity, each dataspace has only one element.
      */
-   for(x=0; x<DELETE_NUM_MESGS; ++x) {
-        dspace_id[x] = H5Screate_simple(x + 1, dims, dims);
-        CHECK_I(dspace_id[x], "H5Screate_simple");
-    }
+   for(u = 0; u < DELETE_NUM_MESGS; ++u) {
+        dspace_id[u] = H5Screate_simple((int)(u + 1), dims, dims);
+        CHECK_I(dspace_id[u], "H5Screate_simple");
+    } /* end for */
 
     /* Create a number of different filter pipelines. */
     dcpl_id[0] = H5Pcreate(H5P_DATASET_CREATE);
@@ -2811,21 +2813,21 @@ test_sohm_delete(void)
     ret = H5Pset_shuffle(dcpl_id[0]);
     CHECK_I(ret, "H5Pset_shuffle");
 
-    for(x=1; x<DELETE_NUM_MESGS; x+=2) {
-        dcpl_id[x] = H5Pcopy(dcpl_id[x-1]);
-        CHECK_I(dcpl_id[x], "H5Pcopy");
-        ret = H5Pset_chunk(dcpl_id[x], x+1, dims);
+    for(u = 1; u < DELETE_NUM_MESGS; u += 2) {
+        dcpl_id[u] = H5Pcopy(dcpl_id[u - 1]);
+        CHECK_I(dcpl_id[u], "H5Pcopy");
+        ret = H5Pset_chunk(dcpl_id[u], (int)(u + 1), dims);
         CHECK_I(ret, "H5Pset_chunk");
-        ret = H5Pset_deflate(dcpl_id[x], 1);
+        ret = H5Pset_deflate(dcpl_id[u], 1);
         CHECK_I(ret, "H5Pset_deflate");
 
-        dcpl_id[x+1] = H5Pcopy(dcpl_id[x]);
-        CHECK_I(dcpl_id[x+1], "H5Pcopy");
-        ret = H5Pset_chunk(dcpl_id[x+1], x+2, dims);
+        dcpl_id[u + 1] = H5Pcopy(dcpl_id[u]);
+        CHECK_I(dcpl_id[u + 1], "H5Pcopy");
+        ret = H5Pset_chunk(dcpl_id[u + 1], (int)(u + 2), dims);
         CHECK_I(ret, "H5Pset_chunk");
-        ret = H5Pset_shuffle(dcpl_id[x+1]);
+        ret = H5Pset_shuffle(dcpl_id[u + 1]);
         CHECK_I(ret, "H5Pset_shuffle");
-    }
+    } /* end for */
 
     /* Create an fcpl where all messages are shared in the same index */
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
@@ -2889,22 +2891,22 @@ test_sohm_delete(void)
      */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    for(x=DELETE_MIN_MESG_SIZE; x<=DELETE_MAX_MESG_SIZE; x += 10) {
-        ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_SHMESG_ALL_FLAG, (size_t) x);
+    for(u = DELETE_MIN_MESG_SIZE; u <= DELETE_MAX_MESG_SIZE; u += 10) {
+        ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_SHMESG_ALL_FLAG, u);
         CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
         delete_helper(fcpl_id, dspace_id, dcpl_id);
-    }
+    } /* end for */
 
     /* Cleanup */
     ret = H5Pclose(fcpl_id);
     CHECK_I(ret, "H5Pclose");
 
-    for(x=DELETE_NUM_MESGS - 1; x>=0; --x) {
+    for(x = DELETE_NUM_MESGS - 1; x >= 0; --x) {
         ret = H5Sclose(dspace_id[x]);
         CHECK_I(ret, "H5Sclose");
         ret = H5Pclose(dcpl_id[x]);
         CHECK_I(ret, "H5Pclose");
-    }
+    } /* end for */
 } /* end test_sohm_delete() */
 
 

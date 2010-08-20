@@ -617,7 +617,7 @@ H5SM_list_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
                 if(H5SM_message_encode(p, &(list->messages[x]), &ctx) < 0)
                     HGOTO_ERROR(H5E_SOHM, H5E_CANTFLUSH, FAIL, "unable to write shared message to disk")
 
-                p+=H5SM_SOHM_ENTRY_SIZE(f);
+                p += H5SM_SOHM_ENTRY_SIZE(f);
                 ++mesgs_written;
             } /* end if */
         } /* end for */

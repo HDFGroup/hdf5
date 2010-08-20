@@ -803,7 +803,7 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
         /* Check the attributes are equal */
         for(i = 0; i < (unsigned)oinfo1.num_attrs; i++) {
             if((aid = H5Aopen_by_idx(oid, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)i, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-            if(H5Aget_name(aid, ATTR_NAME_LEN, attr_name) < 0) TEST_ERROR
+            if(H5Aget_name(aid, (size_t)ATTR_NAME_LEN, attr_name) < 0) TEST_ERROR
 
             if((aid2 = H5Aopen(oid2, attr_name, H5P_DEFAULT)) < 0) TEST_ERROR
 
@@ -988,8 +988,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 }
 
                 /* Check for types of objects handled */
-                switch(obj1_type)
-                {
+                switch(obj1_type) {
                     case H5O_TYPE_DATASET:
                         if(compare_datasets(obj1_id, obj2_id, pid, NULL) != TRUE) TEST_ERROR
                         break;
@@ -1002,6 +1001,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                         if(H5Tequal(obj1_id, obj2_id) != TRUE) TEST_ERROR
                         break;
 
+                    case H5O_TYPE_UNKNOWN:
+                    case H5O_TYPE_NTYPES:
                     default:
                         TEST_ERROR
                 } /* end switch */
@@ -1045,8 +1046,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 }
 
                 /* Check for types of objects handled */
-                switch(obj1_type)
-                {
+                switch(obj1_type) {
                     case H5O_TYPE_DATASET:
                         if(compare_datasets(obj1_id, obj2_id, pid, NULL) != TRUE) TEST_ERROR
                         break;
@@ -1059,6 +1059,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                         if(H5Tequal(obj1_id, obj2_id) != TRUE) TEST_ERROR
                         break;
 
+                    case H5O_TYPE_UNKNOWN:
+                    case H5O_TYPE_NTYPES:
                     default:
                         TEST_ERROR
                 } /* end switch */
@@ -1188,8 +1190,8 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
         /* Ensure that all external file information is the same */
         for(x=0; x < (unsigned) ext_count; ++x)
         {
-            if(H5Pget_external(dcpl, x, NAME_BUF_SIZE, name1, &offset1, &size1) < 0) TEST_ERROR
-            if(H5Pget_external(dcpl2, x, NAME_BUF_SIZE, name2, &offset2, &size2) < 0) TEST_ERROR
+            if(H5Pget_external(dcpl, x, (size_t)NAME_BUF_SIZE, name1, &offset1, &size1) < 0) TEST_ERROR
+            if(H5Pget_external(dcpl2, x, (size_t)NAME_BUF_SIZE, name2, &offset2, &size2) < 0) TEST_ERROR
 
             if(offset1 != offset2) TEST_ERROR
             if(size1 != size2) TEST_ERROR
@@ -1413,6 +1415,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                         if(H5Tequal(oid, oid2) != TRUE) TEST_ERROR
                         break;
 
+                    case H5O_TYPE_UNKNOWN:
+                    case H5O_TYPE_NTYPES:
                     default:
 HDassert(0 && "Unknown type of object");
                         break;
@@ -2112,10 +2116,13 @@ test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 
     TESTING("H5Ocopy(): compound dataset");
 
-    for (i=0; i<DIM_SIZE_1; i++) {
+#ifdef H5_CLEAR_MEMORY
+    HDmemset(buf, 0, sizeof(buf));
+#endif /* H5_CLEAR_MEMORY */
+    for(i = 0; i < DIM_SIZE_1; i++) {
         buf[i].a = i;
-        buf[i].d = 1./(i+1);
-    }
+        buf[i].d = 1. / (i + 1);
+    } /* end for */
 
     /* Initialize the filenames */
     h5_fixname(FILENAME[0], fapl, src_filename, sizeof src_filename);
@@ -2134,7 +2141,7 @@ test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create datatype */
-    if((tid = H5Tcreate (H5T_COMPOUND, sizeof(comp_t))) < 0) TEST_ERROR
+    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(comp_t))) < 0) TEST_ERROR
     if(H5Tinsert(tid, "int_name", HOFFSET(comp_t, a), H5T_NATIVE_INT) < 0) TEST_ERROR
     if(H5Tinsert(tid, "double_name", HOFFSET(comp_t, d), H5T_NATIVE_DOUBLE) < 0) TEST_ERROR
 
@@ -8287,7 +8294,7 @@ main(void)
     /* Create an FCPL with sharing enabled */
     if((fcpl_shared = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR
     if(H5Pset_shared_mesg_nindexes(fcpl_shared, 1) < 0) TEST_ERROR
-    if(H5Pset_shared_mesg_index(fcpl_shared, 0, H5O_SHMESG_ALL_FLAG, (size_t) 10) < 0) TEST_ERROR
+    if(H5Pset_shared_mesg_index(fcpl_shared, 0, H5O_SHMESG_ALL_FLAG, 10) < 0) TEST_ERROR
 
     /* Obtain the default attribute storage phase change values */
     if((ocpl = H5Pcreate(H5P_OBJECT_CREATE)) < 0) TEST_ERROR
@@ -8422,7 +8429,7 @@ main(void)
             nerrors += test_copy_same_file_named_datatype(fcpl_src, my_fapl);
             nerrors += test_copy_old_layout(fcpl_dst, my_fapl);
             nerrors += test_copy_null_ref(fcpl_src, fcpl_dst, my_fapl);
-    }
+        }
 
 /* TODO: not implemented
         nerrors += test_copy_mount(my_fapl);
