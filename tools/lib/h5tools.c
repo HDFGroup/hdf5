@@ -4150,6 +4150,8 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
 {
     HERR_INIT(hbool_t, TRUE)
     hssize_t npoints;
+    hsize_t  alloc_size;
+    hsize_t *ptdata;
     int      ndims;
     hid_t    dtype;
     hid_t    type_id;
@@ -4160,6 +4162,11 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
     /* Allocate space for the dimension array */
     if((ndims = H5Sget_simple_extent_ndims(region_space)) < 0)
         H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
+
+    alloc_size = npoints * ndims * sizeof(ptdata[0]);
+    assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
+    if((ptdata = malloc((size_t) alloc_size)) == NULL)
+        HGOTO_ERROR(FALSE, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
 
     H5_CHECK_OVERFLOW(npoints, hssize_t, hsize_t);
     if(H5Sget_select_elem_pointlist(region_space, (hsize_t) 0, (hsize_t) npoints, ptdata) < 0)
