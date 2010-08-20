@@ -649,11 +649,11 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         TEST_ERROR
 
     /* Allocate space for the block sizes */
-    if(NULL == (blk_size = HDmalloc(sizeof(size_t) * MPOOL_NUM_RANDOM)))
+    if(NULL == (blk_size = (size_t *)HDmalloc(sizeof(size_t) * MPOOL_NUM_RANDOM)))
         TEST_ERROR
 
     /* Allocate space for the block pointers */
-    if(NULL == (spc = HDmalloc(sizeof(void *) * MPOOL_NUM_RANDOM)))
+    if(NULL == (spc = (void **)HDmalloc(sizeof(void *) * MPOOL_NUM_RANDOM)))
         TEST_ERROR
 
     /* Initialize the block sizes with random values */

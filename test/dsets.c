@@ -67,21 +67,27 @@ const char *FILENAME[] = {
 #define DSET_CONV_BUF_NAME	"conv_buf"
 #define DSET_TCONV_NAME		"tconv"
 #define DSET_DEFLATE_NAME	"deflate"
+#ifdef H5_HAVE_FILTER_SZIP
 #define DSET_SZIP_NAME          "szip"
+#endif /* H5_HAVE_FILTER_SZIP */
 #define DSET_SHUFFLE_NAME	"shuffle"
 #define DSET_FLETCHER32_NAME	"fletcher32"
 #define DSET_FLETCHER32_NAME_2	"fletcher32_2"
 #define DSET_FLETCHER32_NAME_3	"fletcher32_3"
 #define DSET_SHUF_DEF_FLET_NAME	"shuffle+deflate+fletcher32"
 #define DSET_SHUF_DEF_FLET_NAME_2	"shuffle+deflate+fletcher32_2"
+#if defined H5_HAVE_FILTER_SZIP && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
 #define DSET_SHUF_SZIP_FLET_NAME	"shuffle+szip+fletcher32"
 #define DSET_SHUF_SZIP_FLET_NAME_2	"shuffle+szip+fletcher32_2"
+#endif /* defined H5_HAVE_FILTER_SZIP && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32 */
 
 #define DSET_BOGUS_NAME		"bogus"
 #define DSET_MISSING_NAME	"missing"
 #define DSET_CAN_APPLY_NAME	"can_apply"
 #define DSET_CAN_APPLY_NAME2	"can_apply2"
+#ifdef H5_HAVE_FILTER_SZIP
 #define DSET_CAN_APPLY_SZIP_NAME	"can_apply_szip"
+#endif /* H5_HAVE_FILTER_SZIP */
 #define DSET_SET_LOCAL_NAME	"set_local"
 #define DSET_SET_LOCAL_NAME_2	"set_local_2"
 #define DSET_ONEBYTE_SHUF_NAME	"onebyte_shuffle"
@@ -1274,7 +1280,7 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
  */
 static size_t
 filter_bogus3(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED *cd_values, size_t nbytes,
+      const unsigned int UNUSED *cd_values, size_t UNUSED nbytes,
       size_t UNUSED *buf_size, void UNUSED **buf)
 {
     return 0;
@@ -2374,7 +2380,7 @@ test_missing_filter(hid_t file)
     } /* end if */
 
     /* Query the dataset's size on disk */
-    if((dset_size=H5Dget_storage_size(dsid))==0) {
+    if(0 == (dset_size = H5Dget_storage_size(dsid))) {
         H5_FAILED();
         printf("    Line %d: Error querying dataset size, dset_size=%lu\n",__LINE__,(unsigned long)dset_size);
         goto error;
@@ -2382,7 +2388,7 @@ test_missing_filter(hid_t file)
 
     /* Verify that the size indicates data is uncompressed */
     /* (i.e. the deflation filter we asked for was silently ignored) */
-    if((H5Tget_size(H5T_NATIVE_INT)*DSET_DIM1*DSET_DIM2)!=dset_size) {
+    if((H5Tget_size(H5T_NATIVE_INT) * DSET_DIM1 * DSET_DIM2) != dset_size) {
         H5_FAILED();
         printf("    Line %d: Incorrect dataset size: %lu\n",__LINE__,(unsigned long)dset_size);
         goto error;
@@ -3750,6 +3756,7 @@ test_nbit_compound_3(hid_t file)
 
     /* Initialize data */
     for(i = 0; i < (size_t)size[0]; i++) {
+        HDmemset(&orig_data[i], 0, sizeof(orig_data[i]));
         orig_data[i].i = HDrandom() % (long)HDpow(2.0, 17.0 - 1.0);
         HDstrcpy(orig_data[i].str, "fixed-length C string");
         orig_data[i].vl_str = HDstrdup("variable-length C string");
@@ -5826,7 +5833,7 @@ test_copy_dcpl(hid_t file, hid_t fapl)
      * until the data is written to it. */
     if(H5Pset_layout(dcpl, H5D_CONTIGUOUS) < 0) TEST_ERROR
     if(H5Premove_filter(dcpl, H5Z_FILTER_FLETCHER32) < 0) TEST_ERROR
-    if(H5Pset_external(dcpl, COPY_DCPL_EXTFILE_NAME, 0, 500*4096*sizeof(int)) < 0) TEST_ERROR
+    if(H5Pset_external(dcpl, COPY_DCPL_EXTFILE_NAME, (off_t)0, (hsize_t)(500 * 4096 * sizeof(int))) < 0) TEST_ERROR
 
     /* Create second dataset of contiguous layout with external storage */
     if((dsid2 = H5Dcreate2(file, DSET_COPY_DCPL_NAME_2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
@@ -5964,7 +5971,7 @@ test_filter_delete(hid_t file)
 
     /* try to get the info for the deflate filter */
     H5E_BEGIN_TRY {
-        ret=H5Pget_filter_by_id2(dcpl1,H5Z_FILTER_DEFLATE,&flags,NULL,NULL,0,NULL,NULL);
+        ret = H5Pget_filter_by_id2(dcpl1, H5Z_FILTER_DEFLATE, &flags, NULL, NULL, (size_t)0, NULL, NULL);
     } H5E_END_TRY;
     if(ret >=0) {
         H5_FAILED();
@@ -6410,7 +6417,7 @@ test_random_chunks(hid_t fapl)
     if((m = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
     /* Select the random points for writing */
-    if(H5Sselect_elements(s, H5S_SELECT_SET, NPOINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
+    if(H5Sselect_elements(s, H5S_SELECT_SET, (size_t)NPOINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
 
     /* Write into dataset */
     if(H5Dwrite(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, wbuf) < 0) TEST_ERROR;
@@ -6435,7 +6442,7 @@ test_random_chunks(hid_t fapl)
     if((m = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
     /* Select the random points for reading */
-    if(H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
+    if(H5Sselect_elements (s, H5S_SELECT_SET, (size_t)NPOINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
 
     /* Read from dataset */
     if(H5Dread(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, rbuf) < 0) TEST_ERROR;
@@ -6500,7 +6507,7 @@ test_random_chunks(hid_t fapl)
     if((m = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
     /* Select the random points for writing */
-    if(H5Sselect_elements(s, H5S_SELECT_SET, NPOINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
+    if(H5Sselect_elements(s, H5S_SELECT_SET, (size_t)NPOINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
 
     /* Write into dataset */
     if(H5Dwrite(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, wbuf) < 0) TEST_ERROR;
@@ -6525,7 +6532,7 @@ test_random_chunks(hid_t fapl)
     if((m = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
     /* Select the random points for reading */
-    if(H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
+    if(H5Sselect_elements (s, H5S_SELECT_SET, (size_t)NPOINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
 
     /* Read from dataset */
     if(H5Dread(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, rbuf) < 0) TEST_ERROR;
@@ -6931,7 +6938,7 @@ test_chunk_cache(hid_t fapl)
         FAIL_PUTS_ERROR("    Cache values from default dapl do not match those from fapl.")
 
     /* Set a lapl property on dapl1 (to verify inheritance) */
-    if (H5Pset_nlinks(dapl1, 134) < 0) FAIL_STACK_ERROR
+    if (H5Pset_nlinks(dapl1, (size_t)134) < 0) FAIL_STACK_ERROR
     if (H5Pget_nlinks(dapl1, &nlinks) < 0) FAIL_STACK_ERROR
     if (nlinks != 134)
         FAIL_PUTS_ERROR("    nlinks parameter not set properly on dapl.")
