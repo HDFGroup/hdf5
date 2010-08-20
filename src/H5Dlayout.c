@@ -250,6 +250,11 @@ done:
  * Programmer:  Quincey Koziol
  *              Thursday, January 15, 2009
  *
+ * Modifications:
+ *	Vailin Choi; June 2010
+ *	Modified to use Fixed Array indexing for extendible chunked dataset.
+ *	(fixed max. dim. setting but exclude H5S_UNLIMITED)
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -275,52 +280,42 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
     /* Avoid scalar/null dataspace */
     if(ndims > 0) {
         hsize_t max_dims[H5O_LAYOUT_NDIMS];     /* Maximum dimension sizes */
-        hsize_t curr_dims[H5O_LAYOUT_NDIMS];    /* Current dimension sizes */
-        unsigned unlim_count;           /* Count of unlimited max. dimensions */
-	hbool_t	fixed = FALSE;		/* Fixed dimension or not */
+        unsigned unlim_count = 0;           	/* Count of unlimited max. dimensions */
         unsigned u;                     /* Local index variable */
 
         /* Query the dataspace's dimensions */
-        if(H5S_get_simple_extent_dims(space, curr_dims, max_dims) < 0)
+        if(H5S_get_simple_extent_dims(space, NULL, max_dims) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get dataspace max. dimensions")
 
         /* Spin through the max. dimensions, looking for unlimited dimensions */
-        unlim_count = 0;
         for(u = 0; u < ndims; u++)
             if(max_dims[u] == H5S_UNLIMITED)
                 unlim_count++;
 
-        /* Check if it is fixed dimension */
-	if(0 == unlim_count) {
-	    fixed = TRUE;
-	    for(u = 0; u < ndims; u++)
-		if(curr_dims[u] != max_dims[u]) {
-		    fixed = FALSE;
-		    break;
-		} /* end if */
-	} /* end if */
+	/* Chunked datasets with unlimited dimension(s) */
+        if(unlim_count) { /* dataset with unlimited dimension(s) must be chunked */
+	    HDassert(layout->type == H5D_CHUNKED); 
+	    if(1 == unlim_count) { /* Chunked dataset with only 1 unlimited dimension */
+		layout->u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
+		layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
+		layout->storage.u.chunk.ops = H5D_COPS_EARRAY;
 
-        /* If we have only 1 unlimited dimension, we can use extensible array index */
-        if(1 == unlim_count) {
-            /* Set the chunk index type to an extensible array */
-            layout->u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
-            layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
-            layout->storage.u.chunk.ops = H5D_COPS_EARRAY;
-
-            /* Set the extensible array creation parameters */
-            /* (use hard-coded defaults for now, until we give applications
-             *          control over this with a property list - QAK)
-             */
-            layout->u.chunk.u.earray.cparam.max_nelmts_bits = H5D_EARRAY_MAX_NELMTS_BITS;
-            layout->u.chunk.u.earray.cparam.idx_blk_elmts = H5D_EARRAY_IDX_BLK_ELMTS;
-            layout->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs = H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS;
-            layout->u.chunk.u.earray.cparam.data_blk_min_elmts = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
-            layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits = H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
-        } /* end if */
-        /* Chunked datasets with fixed dimensions */
-        else if(layout->type == H5D_CHUNKED && fixed) {
-            /* Set the chunk index type to a fixed array */
-	    layout->u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
+		/* Set the extensible array creation parameters */
+		/* (use hard-coded defaults for now, until we give applications
+		 *          control over this with a property list - QAK)
+		 */
+		layout->u.chunk.u.earray.cparam.max_nelmts_bits = H5D_EARRAY_MAX_NELMTS_BITS;
+		layout->u.chunk.u.earray.cparam.idx_blk_elmts = H5D_EARRAY_IDX_BLK_ELMTS;
+		layout->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs = H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS;
+		layout->u.chunk.u.earray.cparam.data_blk_min_elmts = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
+		layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits = H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
+	    } else { /* Chunked dataset with > 1 unlimited dimensions */
+		/* Add setup to use v2 B-tree chunk indices here */
+	    }
+        } else if(layout->type == H5D_CHUNKED) {
+	    /* Chunked dataset with fixed dimensions (with or without max. dimension setting)  */
+            /* Set the chunk index type to Fixed Array */
+            layout->u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
             layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
             layout->storage.u.chunk.ops = H5D_COPS_FARRAY;
 
@@ -330,9 +325,6 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
              */
             layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits = H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
 	} /* end if */
-        else {
-            /* Add setup for v2 B-tree indices here */
-        } /* end else */
     } /* end if */
 
 done:

@@ -190,7 +190,7 @@ H5D_nonexistent_readvv(const H5D_io_info_t *io_info,
 
 /* Helper routines */
 static herr_t H5D_chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
-    const hsize_t *curr_dims);
+    const hsize_t *curr_dims, const hsize_t *max_dims);
 static void *H5D_chunk_alloc(size_t size, const H5O_pline_t *pline);
 static void *H5D_chunk_xfree(void *chk, const H5O_pline_t *pline);
 static void *H5D_chunk_realloc(void *chk, size_t size,
@@ -283,10 +283,15 @@ H5FL_BLK_DEFINE_STATIC(chunk);
  * Programmer:	Quincey Koziol
  *              Tuesday, June 30, 2009
  *
+ * Modifications:
+ *      Vailin Choi; June 2010
+ *      Modified to handle extendible datdaset for Fixed Array Indexing.
+ *      (fixed max. dim. setting but not H5S_UNLIMITED)
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_t *curr_dims)
+H5D_chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_t *curr_dims, const hsize_t *max_dims)
 {
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -299,17 +304,21 @@ H5D_chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_
     HDassert(curr_dims);
 
     /* Compute the # of chunks in dataset dimensions */
-    for(u = 0, layout->nchunks = 1; u < ndims; u++) {
+    for(u = 0, layout->nchunks = 1, layout->max_nchunks = 1; u < ndims; u++) {
         /* Round up to the next integer # of chunks, to accomodate partial chunks */
 	layout->chunks[u] = ((curr_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
+	layout->max_chunks[u] = ((max_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
 
         /* Accumulate the # of chunks */
 	layout->nchunks *= layout->chunks[u];
+	layout->max_nchunks *= layout->max_chunks[u];
     } /* end for */
 
     /* Get the "down" sizes for each dimension */
     if(H5V_array_down(ndims, layout->chunks, layout->down_chunks) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute 'down' chunk size value")
+    if(H5V_array_down(ndims, layout->max_chunks, layout->max_down_chunks) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute 'down' chunk size value")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -326,12 +335,18 @@ done:
  * Programmer:	Quincey Koziol
  *              Tuesday, June 30, 2009
  *
+ * Modifications:
+ *      Vailin Choi; June 2010
+ *      Modified to handle extendible datdaset for Fixed Array Indexing.
+ *      (fixed max. dim. setting but not H5S_UNLIMITED)
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5D_chunk_set_info(const H5D_t *dset)
 {
     hsize_t curr_dims[H5O_LAYOUT_NDIMS];    /* Curr. size of dataset dimensions */
+    hsize_t max_dims[H5O_LAYOUT_NDIMS];     /* Max. size of dataset dimensions */ 
     int sndims;                 /* Rank of dataspace */
     unsigned ndims;             /* Rank of dataspace */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -342,12 +357,12 @@ H5D_chunk_set_info(const H5D_t *dset)
     HDassert(dset);
 
     /* Get the dim info for dataset */
-    if((sndims = H5S_get_simple_extent_dims(dset->shared->space, curr_dims, NULL)) < 0)
+    if((sndims = H5S_get_simple_extent_dims(dset->shared->space, curr_dims, max_dims)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
     H5_ASSIGN_OVERFLOW(ndims, sndims, int, unsigned);
 
     /* Set the base layout information */
-    if(H5D_chunk_set_info_real(&dset->shared->layout.u.chunk, ndims, curr_dims) < 0)
+    if(H5D_chunk_set_info_real(&dset->shared->layout.u.chunk, ndims, curr_dims, max_dims) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout's chunk info")
 
     /* Call the index's "resize" callback */
@@ -5062,6 +5077,11 @@ done:
  * Programmer:  Peter Cao
  *	        August 20, 2005
  *
+ * Modifications:
+ *      Vailin Choi; June 2010
+ *      Modified to handle extendible datdaset for Fixed Array Indexing.
+ *      (fixed max. dim. setting but not H5S_UNLIMITED)
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5075,6 +5095,7 @@ H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
     H5D_chk_idx_info_t idx_info_src;    /* Source chunked index info */
     int         sndims;                 /* Rank of dataspace */
     hsize_t     curr_dims[H5O_LAYOUT_NDIMS]; /* Curr. size of dataset dimensions */
+    hsize_t     max_dims[H5O_LAYOUT_NDIMS]; /* Curr. size of dataset dimensions */
     H5O_pline_t _pline;                 /* Temporary pipeline info */
     const H5O_pline_t *pline;           /* Pointer to pipeline info to use */
     H5T_path_t  *tpath_src_mem = NULL, *tpath_mem_dst = NULL;   /* Datatype conversion paths */
@@ -5133,12 +5154,12 @@ H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
         unsigned    ndims;                  /* Rank of dataspace */
 
         /* Get the dim info for dataset */
-        if((sndims = H5S_extent_get_dims(ds_extent_src, curr_dims, NULL)) < 0)
+        if((sndims = H5S_extent_get_dims(ds_extent_src, curr_dims, max_dims)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
         H5_ASSIGN_OVERFLOW(ndims, sndims, int, unsigned);
 
         /* Set the source layout chunk information */
-        if(H5D_chunk_set_info_real(layout_src, ndims, curr_dims) < 0)
+        if(H5D_chunk_set_info_real(layout_src, ndims, curr_dims, max_dims) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout's chunk info")
     } /* end block */
 

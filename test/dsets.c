@@ -119,9 +119,10 @@ const char *FILENAME[] = {
 #define DSET_DEPREC_NAME_FILTER         "deprecated_filter"
 
 /* Dataset names for testing Fixed Array Indexing */
-#define DSET_FIXED_NAME		"DSET_FIXED"
-#define DSET_BTREE_NAME		"DSET_BTREE"
-#define DSET_BIG_FIXED_NAME	"DSET_FIXED_BIG"
+#define DSET_FIXED_MAX		"DSET_FIXED_MAX"
+#define DSET_FIXED_NOMAX	"DSET_FIXED_NOMAX"
+#define DSET_FIXED_BIG		"DSET_FIXED_BIG"
+
 #define POINTS 			72
 #define POINTS_BIG 		2500
 
@@ -7974,24 +7975,30 @@ error:
  * Function: test_fixed_array
  *
  * Purpose: Tests support for Fixed Array Indexing
- *	Repeat the following test with/without compression filter 
- *		Repeat the following test with H5D_ALLOC_TIME_EARLY/H5D_ALLOC_TIME_LATE/H5D_ALLOC_TIME_INCR 
- *			Verify that the btree indexing type is used when the dataset
- *				is created with a current and maximum dimensions
- *			Create the first dataset with fixed dimensions
- *			Write elements to the first dataset
- *
- *			Create the second dataset with fixed dimensions but with bigger size so
- *				that Fixed Array Indexing with paging is involved
- *			Write elements to the second dataset
- *
- *			Read from the first dataset and verify the elements read are correct
- *			Read from the second dataset and verify the elements read are correct
+ *      Repeat the following test with/without compression filter
+ *              Repeat the following test with H5D_ALLOC_TIME_EARLY/H5D_ALLOC_TIME_LATE/H5D_ALLOC_TIME_INCR
+ *                      For the old format, verify that v1 btree indexing type is used for all
+ *                              following datasets
+ *                      For the new format, verify that Fixed Array indexing type is used when
+ *                              the dataset is created with the following dimension setting:
+ *                                      (cur dim, max dim) (but not H5S_UNLIMITED)
+ *                                      (cur dim, max dim = NULL)
+ *                                      (cur dim, max dim = curr dim)
+ *                      Write elements to each dataset
+ *                      Read from the dataset and verify the elements read are correct
+ *                      Note that the third dataset is created with fixed dimensions but with bigger size
+ *                              so that Fixed Array Indexing with paging is involved
  *
  * Return:      Success: 0
  *              Failure: -1
  *
  * Programmer:  Vailin Choi; 2009
+ *
+ * Modifications:
+ *      Vailin Choi; June 2010
+ *      Made changes to verify that Fixed Array indexing is used also for
+ *      extendible chunked dataset.
+ *	(fixed max. dim. setting but exclude H5S_UNLIMITED)
  *
  *-------------------------------------------------------------------------
  */
@@ -8094,47 +8101,6 @@ test_fixed_array(hid_t fapl)
             /* Set allocation time */
             if(H5Pset_alloc_time(dcpl, alloc_time) < 0) FAIL_STACK_ERROR
 
-	    /* 
-	     * Verify the correct indexing type is used
-	     */
-
-	    /* Create a dataset with current and maximum dimensions */
-	    if((sid_max = H5Screate_simple(2, dim2, dim2_max)) < 0) FAIL_STACK_ERROR
-	    dsid_max = H5Dcreate2(fid, DSET_BTREE_NAME, H5T_NATIVE_INT, sid_max, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-	    if(dsid_max < 0)
-		FAIL_PUTS_ERROR("    Creating Chunked Dataset with maximum dimensions.")
-
-	    /* Get the chunk index type */
-	    if(H5D_layout_idx_type_test(dsid_max, &idx_type) < 0) FAIL_STACK_ERROR
-
-	    /* Should be using btree indexing type */
-	    if(idx_type != H5D_CHUNK_IDX_BTREE)
-		FAIL_PUTS_ERROR("should be using v1 B-tree as index");
-
-	    /* Closing */
-	    if(H5Dclose(dsid_max) < 0) FAIL_STACK_ERROR
-	    if(H5Sclose(sid_max) < 0) FAIL_STACK_ERROR
-
-
-	    /* Create the first dataset with fixed dimensions */
-	    if((sid = H5Screate_simple(2, dim2, NULL)) < 0) FAIL_STACK_ERROR
-	    dsid = H5Dcreate2(fid, DSET_FIXED_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-	    if(dsid < 0)
-		FAIL_PUTS_ERROR("    Creating Chunked Dataset.")
-
-	    /* Get the chunk index type */
-	    if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
-
-	    /* Chunk index type depends on whether we are using the latest version of the format */
-	    if(low == H5F_LIBVER_LATEST) {
-		if(idx_type != H5D_CHUNK_IDX_FARRAY)
-		    FAIL_PUTS_ERROR("should be using Fixed Array as index");
-	    } /* end if */
-	    else {
-		if(idx_type != H5D_CHUNK_IDX_BTREE)
-		    FAIL_PUTS_ERROR("should be using v1 B-tree as index");
-	    } /* end else */
-
 	    /* Initialization of chunk array for repeated coordinates */
 	    for(i = 0; i < dim2[0]/chunk_dim2[0]; i++)
 		for(j = 0; j < dim2[1]/chunk_dim2[1]; j++)
@@ -8152,6 +8118,60 @@ test_fixed_array(hid_t fapl)
 		coord[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
 	    } /* end for */
 
+	    /* Create first dataset with cur and max dimensions */
+	    if((sid_max = H5Screate_simple(2, dim2, dim2_max)) < 0) FAIL_STACK_ERROR
+	    dsid_max = H5Dcreate2(fid, DSET_FIXED_MAX, H5T_NATIVE_INT, sid_max, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+	    if(dsid_max < 0)
+		FAIL_PUTS_ERROR("    Creating Chunked Dataset with maximum dimensions.")
+
+	    /* Get the chunk index type */
+	    if(H5D_layout_idx_type_test(dsid_max, &idx_type) < 0) FAIL_STACK_ERROR
+
+	    /* Chunk index type depends on whether we are using the latest version of the format */
+	    if(low == H5F_LIBVER_LATEST) {
+		if(idx_type != H5D_CHUNK_IDX_FARRAY)
+		    FAIL_PUTS_ERROR("should be using Fixed Array as index");
+	    } /* end if */
+	    else {
+		if(idx_type != H5D_CHUNK_IDX_BTREE)
+		    FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+	    } /* end else */
+
+	    /* Create dataspace for write buffer */
+	    if((mem_id = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
+
+	    /* Select the random points for writing */
+	    if(H5Sselect_elements(sid_max, H5S_SELECT_SET, POINTS, (const hsize_t *)coord) < 0) 
+		TEST_ERROR;
+
+	    /* Write into dataset */
+	    if(H5Dwrite(dsid_max, H5T_NATIVE_INT, mem_id, sid_max, H5P_DEFAULT, wbuf) < 0) TEST_ERROR;
+
+	    /* Closing */
+	    if(H5Dclose(dsid_max) < 0) FAIL_STACK_ERROR
+	    if(H5Sclose(sid_max) < 0) FAIL_STACK_ERROR
+    	    if(H5Sclose(mem_id) < 0) FAIL_STACK_ERROR
+
+
+	    /* Create second dataset with curr dim but NULL max dim */
+	    if((sid = H5Screate_simple(2, dim2, NULL)) < 0) FAIL_STACK_ERROR
+	    dsid = H5Dcreate2(fid, DSET_FIXED_NOMAX, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+	    if(dsid < 0)
+		FAIL_PUTS_ERROR("    Creating Chunked Dataset.")
+
+	    /* Get the chunk index type */
+	    if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
+
+	    /* Chunk index type depends on whether we are using the latest version of the format */
+	    if(low == H5F_LIBVER_LATEST) {
+		if(idx_type != H5D_CHUNK_IDX_FARRAY)
+		    FAIL_PUTS_ERROR("should be using Fixed Array as index");
+	    } /* end if */
+	    else {
+		if(idx_type != H5D_CHUNK_IDX_BTREE)
+		    FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+	    } /* end else */
+
 	    /* Create dataspace for write buffer */
 	    if((mem_id = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
@@ -8167,9 +8187,9 @@ test_fixed_array(hid_t fapl)
 	    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
     	    if(H5Sclose(mem_id) < 0) FAIL_STACK_ERROR
 
-	    /* Create the second dataset with bigger size and with fixed dimensions */
+	    /* Create the third dataset with bigger size and both curr & max dimensions are the same */
 	    if((sid_big = H5Screate_simple(2, dim2_big, dim2_big)) < 0) FAIL_STACK_ERROR
-	    dsid_big = H5Dcreate2(fid, DSET_BIG_FIXED_NAME, H5T_NATIVE_INT, sid_big, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+	    dsid_big = H5Dcreate2(fid, DSET_FIXED_BIG, H5T_NATIVE_INT, sid_big, H5P_DEFAULT, dcpl, H5P_DEFAULT);
 	    if(dsid_big < 0)
 		FAIL_PUTS_ERROR("    Creating Big Chunked Dataset.")
 
@@ -8220,7 +8240,7 @@ test_fixed_array(hid_t fapl)
     	    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
 
 	    /* Open the first dataset */
-	    if((dsid = H5Dopen2(fid, DSET_FIXED_NAME, H5P_DEFAULT)) < 0) TEST_ERROR;
+	    if((dsid = H5Dopen2(fid, DSET_FIXED_MAX, H5P_DEFAULT)) < 0) TEST_ERROR;
 
 	    /* Get dataset dataspace */
 	    if((sid = H5Dget_space(dsid)) < 0) TEST_ERROR;
@@ -8248,8 +8268,35 @@ test_fixed_array(hid_t fapl)
             if(H5Sclose(mem_id) < 0) FAIL_STACK_ERROR
 
 	    /* Open the second dataset */
-	    if((dsid_big = H5Dopen2(fid, DSET_BIG_FIXED_NAME, H5P_DEFAULT)) < 0) TEST_ERROR;
+	    if((dsid = H5Dopen2(fid, DSET_FIXED_NOMAX, H5P_DEFAULT)) < 0) TEST_ERROR;
 
+	    /* Get dataset dataspace */
+	    if((sid = H5Dget_space(dsid)) < 0) TEST_ERROR;
+
+	    /* Create dataspace for read buffer */
+	    if((mem_id = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
+
+	    /* Select the random points for reading */
+	    if(H5Sselect_elements (sid, H5S_SELECT_SET, POINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
+
+	    /* Read from dataset */
+	    if(H5Dread(dsid, H5T_NATIVE_INT, mem_id, sid, H5P_DEFAULT, rbuf) < 0) TEST_ERROR;
+
+	    /* Verify that written and read data are the same */
+	    for(i = 0; i < POINTS; i++)
+		if(rbuf[i] != wbuf[i]){
+		    printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n",
+			__LINE__,(unsigned)i,wbuf[i],(unsigned)i,rbuf[i]);
+		    TEST_ERROR;
+		} /* end if */
+
+	    /* Closing */
+	    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+            if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+            if(H5Sclose(mem_id) < 0) FAIL_STACK_ERROR
+
+	    /* Open the third dataset */
+	    if((dsid_big = H5Dopen2(fid, DSET_FIXED_BIG, H5P_DEFAULT)) < 0) TEST_ERROR; 
 	    /* Get dataset dataspace */
 	    if((sid_big = H5Dget_space(dsid_big)) < 0) TEST_ERROR;
 
@@ -8275,9 +8322,9 @@ test_fixed_array(hid_t fapl)
             if(H5Sclose(big_mem_id) < 0) FAIL_STACK_ERROR
 
             /* Delete datasets */
-            if(H5Ldelete(fid, DSET_BIG_FIXED_NAME, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
-            if(H5Ldelete(fid, DSET_FIXED_NAME, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
-            if(H5Ldelete(fid, DSET_BTREE_NAME, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+            if(H5Ldelete(fid, DSET_FIXED_BIG, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+            if(H5Ldelete(fid, DSET_FIXED_NOMAX, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+            if(H5Ldelete(fid, DSET_FIXED_MAX, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
             /* Close everything */
             if(H5Fclose(fid) < 0) FAIL_STACK_ERROR

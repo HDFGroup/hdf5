@@ -78,7 +78,7 @@ typedef struct H5D_farray_del_ud_t {
 typedef struct H5D_farray_it_ud_t {
     H5D_chunk_common_ud_t common;       /* Common info for Fixed Array user data (must be first) */
     H5D_chunk_rec_t     chunk_rec;      /* Generic chunk record for callback */
-    hsize_t	        chunk_offset[H5O_LAYOUT_NDIMS];	/* Chunk offset */
+    hsize_t	        chunk_offset[H5O_LAYOUT_NDIMS];	/* Chunk offset for max dim */
     hbool_t             filtered;       /* Whether the chunks are filtered */
     H5D_chunk_cb_func_t cb;             /* Chunk callback routine */
     void                *udata;         /* User data for chunk callback routine */
@@ -776,6 +776,11 @@ done:
  * Programmer:	Vailin Choi
  *              Thursday, April 30, 2009
  *
+ * Modifications:
+ *	Vailin Choi; June 2010
+ *	Modified to handle extendible datdaset.
+ *	(fixed max. dim. setting but not H5S_UNLIMITED)
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -817,7 +822,7 @@ H5D_farray_idx_create(const H5D_chk_idx_info_t *idx_info)
     } /* end else */
     cparam.max_dblk_page_nelmts_bits = idx_info->layout->u.farray.cparam.max_dblk_page_nelmts_bits;
     HDassert(cparam.max_dblk_page_nelmts_bits > 0);
-    cparam.nelmts = idx_info->layout->nchunks;
+    cparam.nelmts = idx_info->layout->max_nchunks;
 
     /* Set up the user data */
     udata.f = idx_info->f;
@@ -876,6 +881,11 @@ H5D_farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  * Programmer:	Vailin Choi
  *              Thursday, April 30, 2009
  *
+ * Modifications:
+ *	Vailin Choi; June 2010
+ *	Modified to handle extendible datdaset.
+ *	(fixed max. dim. setting but not H5S_UNLIMITED)
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -906,7 +916,7 @@ H5D_farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     fa = idx_info->storage->u.farray.fa;
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
+    if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Check for filters on chunks */
@@ -1022,6 +1032,11 @@ done:
  * Programmer:	Vailin Choi
  *              Thursday, April 30, 2009
  *
+ * Modifications:
+ *	Vailin Choi; June 2010
+ *	Modified to handle extendible datdaset.
+ *	(fixed max. dim. setting but not H5S_UNLIMITED)
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1052,7 +1067,7 @@ H5D_farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     fa = idx_info->storage->u.farray.fa;
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
+    if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Check for filters on chunks */
@@ -1093,6 +1108,11 @@ done:
  * Programmer:	Vailin Choi
  *              Thursday, April 30, 2009
  *
+ * Modifications:
+ *	Vailin Choi; June 2010
+ *	Modified to handle extendible datdaset.
+ *	(fixed max. dim. setting but not H5S_UNLIMITED)
+ *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1117,8 +1137,10 @@ H5D_farray_idx_iterate_cb(hsize_t UNUSED idx, const void *_elmt, void *_udata)
         udata->chunk_rec.chunk_addr = *(const haddr_t *)_elmt;
 
     /* Make "generic chunk" callback */
-    if((ret_value = (udata->cb)(&udata->chunk_rec, udata->udata)) < 0)
-        HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
+    if(H5F_addr_defined(udata->chunk_rec.chunk_addr)) {
+	if((ret_value = (udata->cb)(&udata->chunk_rec, udata->udata)) < 0)
+	    HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
+    }
 
     /* Update coordinates of chunk in dataset */
     ndims = udata->common.layout->ndims - 1;
@@ -1130,7 +1152,7 @@ H5D_farray_idx_iterate_cb(hsize_t UNUSED idx, const void *_elmt, void *_udata)
         udata->chunk_rec.offset[curr_dim] += udata->common.layout->dim[curr_dim];
 
         /* Check if we went off the end of the current dimension */
-        if(udata->chunk_offset[curr_dim] >= udata->common.layout->chunks[curr_dim]) {
+        if(udata->chunk_offset[curr_dim] >= udata->common.layout->max_chunks[curr_dim]) {
             /* Reset coordinate & move to next faster dimension */
             udata->chunk_offset[curr_dim] = 0;
             udata->chunk_rec.offset[curr_dim] = 0;
@@ -1228,6 +1250,11 @@ done:
  * Programmer:	Vailin Choi
  *              Thursday, April 30, 2009
  *
+ * Modifications:
+ *	Vailin Choi; June 2010
+ *	Modified to handle extendible datdaset.
+ *	(fixed max. dim. setting but not H5S_UNLIMITED)
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1258,7 +1285,7 @@ H5D_farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
     fa = idx_info->storage->u.farray.fa;
 
     /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
+    if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->offset, idx_info->layout->dim, idx_info->layout->max_down_chunks, &idx) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Check for filters on chunks */
