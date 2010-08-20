@@ -465,6 +465,10 @@ SET (H5Z_SRCS
     ${HDF5_SRC_DIR}/H5Zszip.c
     ${HDF5_SRC_DIR}/H5Ztrans.c
 )
+IF (H5_ZLIB_HEADER)
+  SET_PROPERTY(SOURCE ${HDF5_SRC_DIR}/H5Zdeflate.c PROPERTY
+      COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}")
+ENDIF (H5_ZLIB_HEADER)
 
 SET (H5Z_HDRS
     ${HDF5_SRC_DIR}/H5Zpkg.h
@@ -695,15 +699,17 @@ H5_SET_LIB_OPTIONS (${HDF5_LIB_TARGET} ${HDF5_LIB_NAME} ${LIB_TYPE})
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
-INSTALL (
-    FILES
-        ${H5_PUBLIC_HEADERS}
-        ${H5_PRIVATE_HEADERS}
-    DESTINATION
-        include
-    COMPONENT
-        headers
-)
+IF (NOT HDF5_INSTALL_NO_DEVELOPMENT)
+  INSTALL (
+      FILES
+          ${H5_PUBLIC_HEADERS}
+          ${H5_PRIVATE_HEADERS}
+      DESTINATION
+          ${HDF5_INSTALL_INCLUDE_DIR}
+      COMPONENT
+          headers
+  )
+ENDIF (NOT HDF5_INSTALL_NO_DEVELOPMENT)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
@@ -714,8 +720,8 @@ IF (HDF5_EXPORTED_TARGETS)
           ${HDF5_LIB_TARGET}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
-      LIBRARY DESTINATION lib COMPONENT libraries
-      ARCHIVE DESTINATION lib COMPONENT libraries
-      RUNTIME DESTINATION bin COMPONENT libraries
+      LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
+      ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
+      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT libraries
   )
 ENDIF (HDF5_EXPORTED_TARGETS)
