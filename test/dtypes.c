@@ -2322,6 +2322,7 @@ test_compound_13(void)
     TESTING("compound datatypes of boundary size with latest format");
 
     /* Create some phony data. */
+    HDmemset(&data_out, 0, sizeof(data_out));
     for(u = 0; u < COMPOUND13_ARRAY_SIZE + 1; u++)
         data_out.x[u] = u;
     data_out.y = 99.99;
@@ -5302,7 +5303,7 @@ test_encode(void)
         goto error;
     } /* end if */
 
-    if(vlstr_buf_size>0)
+    if(vlstr_buf_size > 0)
         vlstr_buf = (unsigned char*)HDcalloc((size_t)1, vlstr_buf_size);
 
     if(H5Tencode(tid3, vlstr_buf, &vlstr_buf_size) < 0) {
@@ -5317,6 +5318,7 @@ test_encode(void)
         printf("Can't decode VL string type\n");
         goto error;
     } /* end if */
+    free(vlstr_buf);
 
     /* Verify that the datatype was copied exactly */
     if(H5Tequal(decoded_tid3, tid3)<=0) {

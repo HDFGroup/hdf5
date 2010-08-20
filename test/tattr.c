@@ -9802,6 +9802,7 @@ test_attr_bug3(hid_t fcpl, hid_t fapl)
             dims2[2] = {3, 3}; /* Dimensions */
     int     wdata1[2][2];
     unsigned wdata2[3][3];  /* Write buffers */
+    unsigned u, v;          /* Local index variables */
     herr_t  ret;            /* Generic return status */
 
     /* Output message about test being performed */
@@ -9849,11 +9850,18 @@ test_attr_bug3(hid_t fcpl, hid_t fapl)
     aid2 = H5Aopen(did, "attr", H5P_DEFAULT);
     CHECK(aid2, FAIL, "H5Aopen");
 
-    /* Write data to the attributes (the data is uninitialized, we only care
-     * that H5Awrite succeeds for now) */
-    ret = H5Awrite(aid1, H5T_NATIVE_INT, wdata1[0]);
+    /* Initialize the write buffers */
+    for(u = 0; u < dims1[0]; u++)
+        for(v = 0; v < dims1[1]; v++)
+            wdata1[u][v] = (int)((u * dims1[1]) + v);
+    for(u = 0; u < dims2[0]; u++)
+        for(v = 0; v < dims2[1]; v++)
+            wdata2[u][v] = (int)((u * dims2[1]) + v);
+
+    /* Write data to the attributes */
+    ret = H5Awrite(aid1, H5T_NATIVE_INT, wdata1);
     CHECK(ret, FAIL, "H5Awrite");
-    ret = H5Awrite(aid2, H5T_NATIVE_UINT, wdata2[0]);
+    ret = H5Awrite(aid2, H5T_NATIVE_UINT, wdata2);
     CHECK(ret, FAIL, "H5Awrite");
 
     /* Close attributes */
