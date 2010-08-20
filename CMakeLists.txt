@@ -33,6 +33,12 @@ PROJECT (HDF5 C CXX)
 #   name conflicts with system versions, then a prefix may be added
 #   to ensure that the correct versions configured are used.
 #
+# HDF5_INSTALL_BIN_DIR, HDF5_INSTALL_LIB_DIR, HDF5_INSTALL_INCLUDE_DIR :
+#   Customize the 'bin', 'lib', and 'include' installation directories.
+#
+# HDF5_INSTALL_NO_DEVELOPMENT :
+#   Set to true to skip installation of headers and CMake package files.
+#
 # Consider this example from the ParaView project, it builds its own zlib
 # library and tells HDF5 to add it as a dependency - this ensures that
 # any project making use of this build of HDF5 will use the correct zlib
@@ -127,6 +133,16 @@ SET (HDF5_F90_SOURCE_DIR     ${HDF5_SOURCE_DIR}/fortran)
 
 # set default prefix location
 SET (CMAKE_INSTALL_PREFIX "./hdf5" CACHE PATH "Install path prefix, prepended onto install directories")
+
+IF (NOT HDF5_INSTALL_BIN_DIR)
+  SET(HDF5_INSTALL_BIN_DIR bin)
+ENDIF()
+IF (NOT HDF5_INSTALL_LIB_DIR)
+  SET(HDF5_INSTALL_LIB_DIR lib)
+ENDIF()
+IF (NOT HDF5_INSTALL_INCLUDE_DIR)
+  SET(HDF5_INSTALL_INCLUDE_DIR include)
+ENDIF()
 
 #-----------------------------------------------------------------------------
 # parse the full version number from H5public.h and include in H5_VERS_INFO
@@ -576,36 +592,43 @@ CONFIGURE_FILE (${HDF5_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_BINARY_DIR}/H5pubcon
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
-INSTALL (
-    FILES
-        ${PROJECT_BINARY_DIR}/H5pubconf.h
-    DESTINATION
-        include
-    COMPONENT
-        headers
-)
+IF (NOT HDF5_INSTALL_NO_DEVELOPMENT)
+  INSTALL (
+      FILES
+          ${PROJECT_BINARY_DIR}/H5pubconf.h
+      DESTINATION
+          ${HDF5_INSTALL_INCLUDE_DIR}
+      COMPONENT
+          headers
+  )
+ENDIF ()
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
-INSTALL (
-    EXPORT
-        ${HDF5_EXPORTED_TARGETS}
-    DESTINATION
-        lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
-    FILE
-        hdf5-targets.cmake
-)
+IF (NOT HDF5_EXTERNALLY_CONFIGURED)
+  INSTALL (
+      EXPORT
+          ${HDF5_EXPORTED_TARGETS}
+      DESTINATION
+          lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
+      FILE
+          hdf5-targets.cmake
+  )
+ENDIF ()
 
 #-----------------------------------------------------------------------------
 # Export all exported targets to the build tree for use by parent project
 #-----------------------------------------------------------------------------
-EXPORT (
-    TARGETS
-        ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES}
-    FILE
-        hdf5-targets.cmake
-)
+IF (NOT HDF5_EXTERNALLY_CONFIGURED)
+  EXPORT (
+      TARGETS
+          ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES}
+      FILE
+          hdf5-targets.cmake
+  )
+ENDIF ()
+
 #-----------------------------------------------------------------------------
 # Configure the hdf5-config.cmake file for the build directory
 #-----------------------------------------------------------------------------
@@ -625,16 +648,34 @@ CONFIGURE_FILE (
 #-----------------------------------------------------------------------------
 # Configure the hdf5-config.cmake file for the install directory
 #-----------------------------------------------------------------------------
-CONFIGURE_FILE (
-    ${HDF5_RESOURCES_DIR}/hdf5-config.cmake.install.in
-    ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config.cmake @ONLY
-)
-INSTALL (
-    FILES
-        ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config.cmake
-    DESTINATION
-        lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
-)
+IF (NOT HDF5_EXTERNALLY_CONFIGURED)
+  CONFIGURE_FILE (
+      ${HDF5_RESOURCES_DIR}/hdf5-config.cmake.install.in
+      ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config.cmake @ONLY
+  )
+  INSTALL (
+      FILES
+          ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config.cmake
+      DESTINATION
+          lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
+  )
+ENDIF ()
+
+#-----------------------------------------------------------------------------
+# Configure the hdf5-config-version .cmake file for the install directory
+#-----------------------------------------------------------------------------
+IF (NOT HDF5_EXTERNALLY_CONFIGURED)
+  CONFIGURE_FILE (
+      ${HDF5_RESOURCES_DIR}/hdf5-config-version.cmake.in
+      ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config-version.cmake @ONLY
+  )
+  INSTALL (
+      FILES
+          ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config-version.cmake
+      DESTINATION
+          lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
+  )
+ENDIF ()
 
 #-----------------------------------------------------------------------------
 # Set the cpack variables

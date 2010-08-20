@@ -326,7 +326,10 @@ IF (BUILD_TESTING)
   
   MACRO (ADD_SKIP_H5_TEST skipresultfile skipresultcode testtype)
     IF (${testtype} STREQUAL "SKIP")
-      MESSAGE (STATUS "SKIP ${skipresultfile} ${ARGN}")
+      ADD_TEST (
+          NAME H5REPACK-${testname}
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile} ${ARGN}"
+      )
     ELSE (${testtype} STREQUAL "SKIP")
       ADD_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
     ENDIF (${testtype} STREQUAL "SKIP")
