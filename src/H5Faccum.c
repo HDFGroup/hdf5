@@ -492,7 +492,7 @@ H5F_accum_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
 
                     /* Adjust the dirty region and mark accumulator dirty */
                     if(f->shared->accum.dirty) {
-                        size_t curr_dirty_end = old_offset + f->shared->accum.dirty_off + f->shared->accum.dirty_len;
+                        size_t curr_dirty_end = add_size + f->shared->accum.dirty_off + f->shared->accum.dirty_len;
 
                         f->shared->accum.dirty_off = 0;
                         if(size <= curr_dirty_end)
