@@ -70,6 +70,7 @@ IF (BUILD_TESTING)
       tattr-3.ddl
       tattrreg.ddl
       tattrregR.ddl
+      tbinregR.ddl
       tbigdims.ddl
       tboot1.ddl
       tboot2.ddl

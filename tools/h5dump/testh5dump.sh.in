@@ -144,11 +144,14 @@ TOOLTEST1() {
 
 }
 
-# same as TOOLTEST1 but compares generated file to Expected output
+# same as TOOLTEST1 but compares generated file to expected output
+#                   and compares the generated data file to the expected data file
 # used for the binary tests that expect a full path in -o without -b
 TOOLTEST2() {
 
-    expect="$srcdir/../testfiles/`basename $1 .exp`.txt"
+    expectdata="$srcdir/../testfiles/$1"
+    expect="$srcdir/../testfiles/`basename $1 .exp`.ddl"
+    actualdata="../testfiles/`basename $1 .exp`.txt"
     actual="../testfiles/`basename $1 .exp`.out"
     actual_err="../testfiles/`basename $1 .exp`.err"
     shift
@@ -167,17 +170,28 @@ TOOLTEST2() {
      echo " CREATED"
      cp $actual $expect
     elif $CMP $expect $actual; then
-     echo " PASSED"
+      if [ ! -f $expectdata ]; then
+      # Create the expect data file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actualdata $expectdata
+      elif $CMP $expectdata $actualdata; then
+        echo " PASSED"
+      else
+        echo "*FAILED*"
+        echo "    Expected datafile (*.exp) differs from actual datafile (*.txt)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expectdata $actualdata |sed 's/^/    /'
+      fi
     else
      echo "*FAILED*"
-     echo "    Expected result (*.ddl) differs from actual result (*.txt)"
+     echo "    Expected result (*.ddl) differs from actual result (*.out)"
      nerrors="`expr $nerrors + 1`"
      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
-
+    
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-     rm -f $actual $actual_err
+     rm -f $actual $actualdata $actual_err
     fi
 
 }
@@ -532,7 +546,7 @@ TOOLTEST tdataregR.ddl -R tdatareg.h5
 TOOLTEST tattrreg.ddl tattrreg.h5
 TOOLTEST tattrregR.ddl -R tattrreg.h5
 
-TOOLTEST2   tbinregR.exp -d /Dataset1 -s 0 -y -o $TESTDIR/tbinregR.txt    tdatareg.h5
+TOOLTEST2   tbinregR.exp -d /Dataset1 -s 0 -R -y -o $TESTDIR/tbinregR.txt    tdatareg.h5
 
 # Clean up text output files
 if test -z "$HDF5_NOCLEANUP"; then
