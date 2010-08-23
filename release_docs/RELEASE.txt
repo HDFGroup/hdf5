@@ -63,8 +63,9 @@ New Features
 
     Library
     -------
-    - H5Tset_order now supports all data types.  Please see bug #1934. (SLU -
-      2010/8/18)
+    - H5Tset_order and H5Tget_order now support all data types.  A new byte 
+      order H5T_ORDER_MIXED has been added specifically for compound datatype
+      and its derived type.  Please see bug #1934. (SLU - 2010/8/23)
     - Improved performance of metadata I/O by changing the default algorithm
       to perform I/O from all processes (instead of just process 0) when using
       parallel I/O drivers. (QAK - 2010/07/19)
