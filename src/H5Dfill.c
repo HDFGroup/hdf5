@@ -585,7 +585,8 @@ H5D_fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
 
     /* Replicate the fill value into the cached buffer */
-    H5V_array_fill((void *)((unsigned char *)fb_info->fill_buf + fb_info->mem_elmt_size), fb_info->fill_buf, fb_info->mem_elmt_size, (nelmts - 1));
+    if(nelmts > 1)
+        H5V_array_fill((void *)((unsigned char *)fb_info->fill_buf + fb_info->mem_elmt_size), fb_info->fill_buf, fb_info->mem_elmt_size, (nelmts - 1));
 
     /* Reset the entire background buffer, if necessary */
     if(H5T_path_bkg(fb_info->mem_to_dset_tpath))
