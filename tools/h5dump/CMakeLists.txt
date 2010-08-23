@@ -70,6 +70,7 @@ IF (BUILD_TESTING)
       tattr-3.ddl
       tattrreg.ddl
       tattrregR.ddl
+      tbinregR.ddl
       tbigdims.ddl
       tboot1.ddl
       tboot2.ddl
@@ -350,6 +351,17 @@ IF (BUILD_TESTING)
   ENDMACRO (ADD_H5_TEST file)
 
   MACRO (ADD_H5_EXPORT_TEST resultfile targetfile resultcode)
+#    ADD_TEST (
+#        NAME H5DUMP-${resultfile}
+#        COMMAND "${CMAKE_COMMAND}"
+#            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+#            -D "TEST_ARGS:STRING=-d /Dataset1 -s 0 -R -y -o ${resultfile}.txt ${targetfile}"
+#            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+#            -D "TEST_OUTPUT=${resultfile}.out"
+#            -D "TEST_EXPECT=${resultcode}"
+#            -D "TEST_REFERENCE=${resultfile}.ddl"
+#            -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+#    )
     ADD_TEST (
         NAME H5DUMP-output-${resultfile}
         COMMAND $<TARGET_FILE:h5dump> -d /Dataset1 -s 0 -R -y -o ${PROJECT_BINARY_DIR}/${resultfile}.txt ${PROJECT_BINARY_DIR}/${targetfile}
