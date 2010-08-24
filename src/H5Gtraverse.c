@@ -846,6 +846,17 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                 if(grp_loc.oloc->holding_file)
                     if(H5O_loc_hold_file(obj_loc.oloc) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to hold file open")
+
+                /* Reset any non-default object header messages */
+                if(ginfo != &def_ginfo)
+                    if(H5O_msg_reset(H5O_GINFO_ID, ginfo) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset group info message")
+                if(linfo != &def_linfo)
+                    if(H5O_msg_reset(H5O_LINFO_ID, linfo) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset link info message")
+                if(pline != &def_pline)
+                    if(H5O_msg_reset(H5O_PLINE_ID, pline) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset I/O pipeline message")
             } /* end if */
             else
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found")
@@ -896,7 +907,8 @@ done:
 
     /* If there's valid information in the link, reset it */
     if(link_valid)
-        H5O_msg_reset(H5O_LINK_ID, &lnk);
+        if(H5O_msg_reset(H5O_LINK_ID, &lnk) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset link message")
 
    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_traverse_real() */

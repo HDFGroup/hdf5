@@ -807,7 +807,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
     /* "Normal" removal of a single entry from the symbol table node */
     if(udata->common.name != NULL) {
         H5O_link_t lnk;         /* Constructed link for replacement */
-        size_t len;             /* Length of string in local heap */
+        size_t link_name_len;   /* Length of string in local heap */
         const char *base;       /* Base of heap */
 
         /* Get base address of heap */
@@ -833,6 +833,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         /* Get a pointer to the name of the link */
         if(NULL == (lnk.name = (char *)H5HL_offset_into(udata->common.heap, sn->entry[idx].name_off)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_INS_ERROR, "unable to get link name")
+        link_name_len = HDstrlen(lnk.name) + 1;
 
         /* Set up rest of link structure */
         lnk.corder_valid = FALSE;
@@ -866,15 +867,16 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         else {
             /* Remove the soft link's value from the local heap */
             if(lnk.u.soft.name) {
-                len = HDstrlen(lnk.u.soft.name) + 1;
-                if(H5HL_remove(f, dxpl_id, udata->common.heap, sn->entry[idx].cache.slink.lval_offset, len) < 0)
+                size_t soft_link_len;   /* Length of string in local heap */
+
+                soft_link_len = HDstrlen(lnk.u.soft.name) + 1;
+                if(H5HL_remove(f, dxpl_id, udata->common.heap, sn->entry[idx].cache.slink.lval_offset, soft_link_len) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR, "unable to remove soft link from local heap")
             } /* end if */
         } /* end else */
 
         /* Remove the link's name from the local heap */
-        len = HDstrlen(lnk.name) + 1;
-        if(H5HL_remove(f, dxpl_id, udata->common.heap, sn->entry[idx].name_off, len) < 0)
+        if(H5HL_remove(f, dxpl_id, udata->common.heap, sn->entry[idx].name_off, link_name_len) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR, "unable to remove link name from local heap")
 
         /* Remove the entry from the symbol table node */

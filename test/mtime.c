@@ -99,7 +99,7 @@ main(void)
     if(H5Fclose(file) < 0) TEST_ERROR;
 
     /* Compare addresses & times from the two ways of calling H5Oget_info() */
-    if(oi1.addr != oi2.addr || oi1.mtime != oi2.mtime) {
+    if(oi1.addr != oi2.addr || oi1.ctime != oi2.ctime) {
         H5_FAILED();
         puts("    Calling H5Oget_info() with the dataset ID returned");
         puts("    different values than calling it with a file and dataset");
@@ -108,15 +108,15 @@ main(void)
     }
 
     /* Compare times -- they must be within 60 seconds of one another */
-    if(0 == oi1.mtime) {
+    if(0 == oi1.ctime) {
         SKIPPED();
         puts("    The modification time could not be decoded on this OS.");
         puts("    Modification times will be mantained in the file but");
         puts("    cannot be queried on this system.  See H5O_mtime_decode().");
         return 0;
-    } else if(HDfabs(HDdifftime(now, oi1.mtime)) > 60.0) {
+    } else if(HDfabs(HDdifftime(now, oi1.ctime)) > 60.0) {
         H5_FAILED();
-        tm = HDlocaltime(&(oi1.mtime));
+        tm = HDlocaltime(&(oi1.ctime));
         HDstrftime((char*)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
         tm = HDlocaltime(&now);
         HDstrftime((char*)buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);
@@ -144,7 +144,7 @@ main(void)
         if(file >= 0){
             if(H5Oget_info_by_name(file, "/Dataset1", &oi1, H5P_DEFAULT) < 0)
                 TEST_ERROR;
-            if(oi1.mtime != MTIME1) {
+            if(oi1.ctime != MTIME1) {
                 H5_FAILED();
                    /* If this fails, examine H5Omtime.c.  Modification time is very
                     * system dependant (e.g., on Windows DST must be hardcoded). */
@@ -180,7 +180,7 @@ main(void)
         if(file >= 0){
             if(H5Oget_info_by_name(file, "/Dataset1", &oi2, H5P_DEFAULT) < 0)
                 TEST_ERROR;
-            if(oi2.mtime != MTIME2) {
+            if(oi2.ctime != MTIME2) {
                H5_FAILED();
                puts("    Modification time incorrect.");
                goto error;

@@ -135,6 +135,7 @@ Bug Fixes since HDF5-1.8.5
 
     Library
     -------
+    - Fixed many memory issues that valgrind exposed.  (QAK - 2010/08/24)
     - Fixed a memory leak during library shutdown when objects opened by
       an application are not closed before the library shuts down. 
       (MAM - 2010/08/16)
@@ -150,6 +151,8 @@ Bug Fixes since HDF5-1.8.4
 
     Library
     -------
+    - Fixed the bug in the filter's public CAN_APPLY function.  The return
+      value should be htri_t not herr_t (Bug #1239). (SLU - 2010/8/5)
     - Fixed a bug in the direct I/O driver that could render files with certain
       kinds of unaligned data unreadable or corrupt them. (NAF - 2010/07/28)
     - Fixed a bug that could cause file corruption when using non-default sizes
