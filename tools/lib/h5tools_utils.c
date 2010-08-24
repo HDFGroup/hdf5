@@ -726,7 +726,8 @@ tmpfile(void)
  * Date: Feb 8, 2010
  *-------------------------------------------------------------------------*/
 int
-H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info)
+H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info,
+    hbool_t get_obj_type)
 {
     htri_t l_ret;
     H5O_info_t trg_oinfo;
@@ -779,37 +780,42 @@ H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *
         H5Pset_elink_fapl(lapl, fapl);
     } /* end if */
 
-    /*--------------------------------------------------------------
-     * if link's target object exist, get type
-     */
-     /* check if target object exist */
-    l_ret = H5Oexists_by_name(file_id, linkpath, lapl);
-    
-    /* detect dangling link */
-    if(l_ret == FALSE) {
-        ret = 0;
-        goto out;
+    /* Check for retrieving object info */
+    if(get_obj_type) {
+        /*--------------------------------------------------------------
+         * if link's target object exist, get type
+         */
+         /* check if target object exist */
+        l_ret = H5Oexists_by_name(file_id, linkpath, lapl);
+        
+        /* detect dangling link */
+        if(l_ret == FALSE) {
+            ret = 0;
+            goto out;
+        } /* end if */
+        /* function failed */
+        else if(l_ret < 0)
+            goto out;    
+
+        /* get target object info */
+        if(H5Oget_info_by_name(file_id, linkpath, &trg_oinfo, lapl) < 0) {
+            if(link_info->opt.msg_mode == 1)
+                parallel_print("Warning: unable to get object information for <%s>\n", linkpath);
+            goto out;
+        } /* end if */
+
+        /* check unknown type */
+        if(trg_oinfo.type < H5O_TYPE_GROUP || trg_oinfo.type >=H5O_TYPE_NTYPES) {
+            if(link_info->opt.msg_mode == 1)
+                parallel_print("Warning: target object of <%s> is unknown type\n", linkpath);
+            goto out;
+        }  /* end if */
+
+        /* set target obj type to return */
+        link_info->trg_type = trg_oinfo.type;
     } /* end if */
-    /* function failed */
-    else if(l_ret < 0)
-        goto out;    
-
-    /* get target object info */
-    if(H5Oget_info_by_name(file_id, linkpath, &trg_oinfo, lapl) < 0) {
-        if(link_info->opt.msg_mode == 1)
-            parallel_print("Warning: unable to get object information for <%s>\n", linkpath);
-        goto out;
-    } /* end if */
-
-    /* check unknown type */
-    if(trg_oinfo.type < H5O_TYPE_GROUP || trg_oinfo.type >=H5O_TYPE_NTYPES) {
-        if(link_info->opt.msg_mode == 1)
-            parallel_print("Warning: target object of <%s> is unknown type\n", linkpath);
-        goto out;
-    }  /* end if */
-
-    /* set target obj type to return */
-    link_info->trg_type = trg_oinfo.type;
+    else
+        link_info->trg_type = H5O_TYPE_UNKNOWN;
 
     /* succeed */
     ret = 1;

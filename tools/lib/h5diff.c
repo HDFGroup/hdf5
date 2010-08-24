@@ -951,7 +951,7 @@ hsize_t diff_compare(hid_t file1_id,
         if (obj1type == H5TRAV_TYPE_LINK)
         {
             /* get type of target object */
-            l_ret = H5tools_get_link_info(file1_id, obj1_name, &linkinfo1);
+            l_ret = H5tools_get_link_info(file1_id, obj1_name, &linkinfo1, TRUE);
             /* dangling link */
             if (l_ret == 0)
             {
@@ -984,7 +984,7 @@ hsize_t diff_compare(hid_t file1_id,
         if (obj2type == H5TRAV_TYPE_LINK)
         {
             /* get type target object */
-            l_ret = H5tools_get_link_info(file2_id, obj2_name, &linkinfo2);
+            l_ret = H5tools_get_link_info(file2_id, obj2_name, &linkinfo2, TRUE);
             /* dangling link */
             if (l_ret == 0)
             {
@@ -1021,7 +1021,7 @@ hsize_t diff_compare(hid_t file1_id,
         if (obj1type == H5TRAV_TYPE_UDLINK)
         {
             /* get type and name of target object */
-            l_ret = H5tools_get_link_info(file1_id, obj1_name, &linkinfo1);
+            l_ret = H5tools_get_link_info(file1_id, obj1_name, &linkinfo1, TRUE);
             /* dangling link */
             if (l_ret == 0)
             {
@@ -1055,7 +1055,7 @@ hsize_t diff_compare(hid_t file1_id,
         if (obj2type == H5TRAV_TYPE_UDLINK)
         {
             /* get type and name of target object */
-            l_ret = H5tools_get_link_info(file2_id, obj2_name, &linkinfo2);
+            l_ret = H5tools_get_link_info(file2_id, obj2_name, &linkinfo2, TRUE);
             /* dangling link */
             if (l_ret == 0)
             {
@@ -1310,7 +1310,7 @@ hsize_t diff(hid_t file1_id,
         case H5TRAV_TYPE_LINK:
             {
             /* get type and name of target object */
-            ret = H5tools_get_link_info(file1_id, path1, &linkinfo1);
+            ret = H5tools_get_link_info(file1_id, path1, &linkinfo1, TRUE);
             /* dangling link */
             if (ret == 0)
             {
@@ -1328,7 +1328,7 @@ hsize_t diff(hid_t file1_id,
                 goto out;
 
             /* get type and name of target object */
-            ret = H5tools_get_link_info(file2_id, path2, &linkinfo2);
+            ret = H5tools_get_link_info(file2_id, path2, &linkinfo2, TRUE);
             /* dangling link */
             if (ret == 0)
             {
@@ -1394,7 +1394,7 @@ hsize_t diff(hid_t file1_id,
         case H5TRAV_TYPE_UDLINK:
             {
             /* get type and name of target object */
-            ret = H5tools_get_link_info(file1_id, path1, &linkinfo1);
+            ret = H5tools_get_link_info(file1_id, path1, &linkinfo1, TRUE);
             /* dangling link */
             if (ret == 0)
             {
@@ -1412,7 +1412,7 @@ hsize_t diff(hid_t file1_id,
                 goto out;
 
             /* get type and name of target object */
-            ret = H5tools_get_link_info(file2_id, path2, &linkinfo2);
+            ret = H5tools_get_link_info(file2_id, path2, &linkinfo2, TRUE);
             /* dangling link */
             if (ret == 0)
             {

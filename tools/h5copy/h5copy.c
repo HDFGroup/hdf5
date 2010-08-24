@@ -416,7 +416,7 @@ main (int argc, const char *argv[])
  if(verbose)
     linkinfo.opt.msg_mode = 1;
  
- li_ret = H5tools_get_link_info(fid_src, oname_src, &linkinfo);
+ li_ret = H5tools_get_link_info(fid_src, oname_src, &linkinfo, 1);
  if (li_ret == 0) /* dangling link */
  {
     if(H5Lcopy(fid_src, oname_src, 
