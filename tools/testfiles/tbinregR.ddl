@@ -1,4 +1,4 @@
-HDF5 "testfiles/tdatareg.h5" {
+HDF5 "tdatareg.h5" {
 DATASET "/Dataset1" {
    DATATYPE  H5T_REFERENCE { H5T_STD_REF_DSETREG }
    DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
