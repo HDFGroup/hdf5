@@ -63,8 +63,13 @@ H5T_init_order_interface(void)
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
-s
- *
+ * 
+ * Modifications:
+ *              Raymond Lu
+ *              23 August 2010
+ *              I added support for all data types.  If the type is compound
+ *              and its members have mixed orders, this function returns 
+ *              H5T_ORDER_MIXED.
  *-------------------------------------------------------------------------
  */
 H5T_order_t
@@ -103,20 +108,49 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_order_t
-H5T_get_order(const H5T_t *dt)
+H5T_get_order(const H5T_t *dtype)
 {
-    H5T_order_t		ret_value;      /* Return value */
+    int         nmemb;          /* Number of members in compound & enum types */
+    int         i;              /* Local index variable */
+    H5T_order_t	ret_value = H5T_ORDER_NONE;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_get_order, H5T_ORDER_ERROR)
 
     /*defer to parent*/
-    while(dt->shared->parent)
-        dt = dt->shared->parent;
-    if(!H5T_IS_ATOMIC(dt->shared))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_ORDER_ERROR, "operation not defined for specified datatype")
+    while(dtype->shared->parent)
+        dtype = dtype->shared->parent;
 
-    /* Order */
-    ret_value = dt->shared->u.atomic.order;
+    /* Set order for atomic type. */
+    if(H5T_IS_ATOMIC(dtype->shared)) {
+        ret_value = dtype->shared->u.atomic.order;
+        HGOTO_DONE(ret_value)
+    }
+
+    /* Loop through all fields of compound type */
+    if(H5T_COMPOUND == dtype->shared->type) {
+        H5T_order_t memb_order = H5T_ORDER_NONE;
+	if((nmemb = H5T_get_nmembers(dtype)) < 0)
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get number of members from compound data type")
+
+	/* Get order for each compound member type. */
+	for(i=0; i<nmemb; i++) {
+	    if((memb_order = H5T_get_order(dtype->shared->u.compnd.memb[i].type)) == H5T_ORDER_ERROR)
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "can't get order for compound member")
+
+            /* Ignore the H5T_ORDER_NONE, write down the first non H5T_ORDER_NONE order. */
+            if(memb_order != H5T_ORDER_NONE && ret_value == H5T_ORDER_NONE)
+                ret_value = memb_order;
+
+            /* If the orders are mixed, stop the loop and report it.  
+             * H5T_ORDER_NONE is ignored*/
+            if(memb_order != H5T_ORDER_NONE && ret_value != H5T_ORDER_NONE && 
+                memb_order != ret_value) {
+                ret_value = H5T_ORDER_MIXED;
+                break;
+            }
+	}
+    }
+
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -159,7 +193,7 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-    if (order < H5T_ORDER_LE || order > H5T_ORDER_NONE)
+    if (order < H5T_ORDER_LE || order > H5T_ORDER_NONE || order == H5T_ORDER_MIXED)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal byte order")
     if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
@@ -189,8 +223,7 @@ done:
 herr_t
 H5T_set_order(H5T_t *dtype, H5T_order_t order)
 {
-    H5T_t       *memb_type;         /* Datatype of compound members */
-    int         nmemb;             /* Number of members in compound & enum types */
+    int         nmemb;              /* Number of members in compound & enum types */
     int         i;                  /* Local index variable */
     herr_t      ret_value=SUCCEED;  /* Return value */
 
@@ -217,6 +250,9 @@ H5T_set_order(H5T_t *dtype, H5T_order_t order)
     if(H5T_COMPOUND == dtype->shared->type) {
 	if((nmemb = H5T_get_nmembers(dtype)) < 0)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get number of members from compound data type")
+
+        if(nmemb == 0)
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "no member is in the compound data type")
 
 	/* Set order for each compound member type. */
 	for(i=0; i<nmemb; i++) {

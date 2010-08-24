@@ -585,12 +585,11 @@ test_compound_1(void)
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
-    H5E_BEGIN_TRY {
-        order = H5Tget_order(complex_id);
-    } H5E_END_TRY;
-    if (order>-1) {
-        FAIL_PUTS_ERROR("Operation not allowed for this type.");
-    } /* end if */
+    /* We started to support this function for compound type in 1.8.6 release. */
+    if((order = H5Tget_order(complex_id)) == H5T_ORDER_ERROR)
+        FAIL_PUTS_ERROR("Can't get order for compound type.");
+    if(order != H5T_ORDER_LE && order != H5T_ORDER_BE)
+        FAIL_PUTS_ERROR("Wrong order for this type.");
 
     H5E_BEGIN_TRY {
         sign = H5Tget_sign(complex_id);
@@ -5851,11 +5850,12 @@ test_set_order(void)
 
     /* Compound */
     if ((dtype = H5Tcreate(H5T_COMPOUND, (size_t)48)) < 0) TEST_ERROR
-    if (H5Tset_order(dtype, H5T_ORDER_BE) < 0) TEST_ERROR
     H5E_BEGIN_TRY
-        order = H5Tget_order(dtype);
+        ret = H5Tset_order(dtype, H5T_ORDER_BE);
     H5E_END_TRY
-    if (order >= 0) TEST_ERROR
+    if (ret >= 0) TEST_ERROR
+    if ((order = H5Tget_order(dtype)) == H5T_ORDER_ERROR) TEST_ERROR
+    if (order != H5T_ORDER_NONE) TEST_ERROR
     if (H5Tclose(dtype) < 0) TEST_ERROR
 
     /* Object reference */
@@ -5951,7 +5951,7 @@ test_set_order_compound(hid_t fapl)
     } complex_cmpd;
 
     hid_t       file;
-    hid_t       cmpd, memb_cmpd, memb_array1, memb_array2;
+    hid_t       cmpd, memb_cmpd, memb_array1, memb_array2, cmpd_array;
     hid_t       vl_id;
     H5T_order_t order;              /* Byte order */
     hsize_t     dims[2] = {3, 4};   /* Array dimenstions */
@@ -5961,24 +5961,39 @@ test_set_order_compound(hid_t fapl)
     TESTING("H5Tset/get_order for compound type");
 
     if ((memb_cmpd = H5Tcreate(H5T_COMPOUND, sizeof(atomic_cmpd))) < 0) TEST_ERROR
-    if(H5Tinsert(memb_cmpd, "i", HOFFSET(atomic_cmpd, i), H5T_NATIVE_INT) < 0) TEST_ERROR 
-    if(H5Tinsert(memb_cmpd, "c", HOFFSET(atomic_cmpd, c), H5T_NATIVE_CHAR) < 0) TEST_ERROR
-    if(H5Tinsert(memb_cmpd, "s", HOFFSET(atomic_cmpd, s), H5T_NATIVE_SHORT) < 0) TEST_ERROR
-    if(H5Tinsert(memb_cmpd, "f", HOFFSET(atomic_cmpd, f), H5T_NATIVE_FLOAT) < 0) TEST_ERROR
+    if (H5Tinsert(memb_cmpd, "i", HOFFSET(atomic_cmpd, i), H5T_NATIVE_INT) < 0) TEST_ERROR 
+    if (H5Tinsert(memb_cmpd, "c", HOFFSET(atomic_cmpd, c), H5T_NATIVE_CHAR) < 0) TEST_ERROR
+    if (H5Tinsert(memb_cmpd, "s", HOFFSET(atomic_cmpd, s), H5T_NATIVE_SHORT) < 0) TEST_ERROR
+    if (H5Tinsert(memb_cmpd, "f", HOFFSET(atomic_cmpd, f), H5T_NATIVE_FLOAT) < 0) TEST_ERROR
+
+    /* Set the order to little-endian. */
+    if (H5Tset_order(memb_cmpd, H5T_ORDER_BE) < 0) TEST_ERROR
 
     /* Create the simple array datatype */
     memb_array1 = H5Tarray_create2(H5T_NATIVE_DOUBLE, 2, dims);
     memb_array2 = H5Tarray_create2(memb_cmpd, 2, dims);
+
+    /* Set the order to big-endian. */
+    if (H5Tset_order(memb_array1, H5T_ORDER_LE) < 0) TEST_ERROR
 
     /* Create a variable-length datatype */
     if ((vl_id = H5Tvlen_create(H5T_NATIVE_UINT)) < 0) TEST_ERROR
 
     /* Create a compound type using the types above. */
     if ((cmpd = H5Tcreate(H5T_COMPOUND, sizeof(complex_cmpd))) < 0) TEST_ERROR
-    if(H5Tinsert(cmpd, "a", HOFFSET(complex_cmpd, a), memb_cmpd) < 0) TEST_ERROR 
-    if(H5Tinsert(cmpd, "vl_type", HOFFSET(complex_cmpd, vl), vl_id) < 0) TEST_ERROR 
-    if(H5Tinsert(cmpd, "b", HOFFSET(complex_cmpd, b), memb_array1) < 0) TEST_ERROR 
-    if(H5Tinsert(cmpd, "d", HOFFSET(complex_cmpd, d), memb_array2) < 0) TEST_ERROR 
+    if (H5Tinsert(cmpd, "a", HOFFSET(complex_cmpd, a), memb_cmpd) < 0) TEST_ERROR 
+    if (H5Tinsert(cmpd, "vl_type", HOFFSET(complex_cmpd, vl), vl_id) < 0) TEST_ERROR 
+    if (H5Tinsert(cmpd, "b", HOFFSET(complex_cmpd, b), memb_array1) < 0) TEST_ERROR 
+    if (H5Tinsert(cmpd, "d", HOFFSET(complex_cmpd, d), memb_array2) < 0) TEST_ERROR 
+
+    /* The order should be mixed now. */
+    if((order = H5Tget_order(cmpd)) != H5T_ORDER_MIXED) TEST_ERROR 
+
+    /* Create an array of the compound type above */
+    cmpd_array = H5Tarray_create2(cmpd, 2, dims);
+
+    /* The order of the array type should be the same as the compound type */
+    if((order = H5Tget_order(cmpd_array)) != H5T_ORDER_MIXED) TEST_ERROR 
 
     /* Verify that the order can't be 'none'. */
     H5E_BEGIN_TRY
@@ -5986,8 +6001,23 @@ test_set_order_compound(hid_t fapl)
     H5E_END_TRY
     if (ret >= 0) TEST_ERROR
 
-    /* Change the order */
+    /* Verify that the order can't be 'mixed'. */
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(cmpd, H5T_ORDER_MIXED);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+
+    /* Change the order of the compound type to big-endian*/
     if (H5Tset_order(cmpd, H5T_ORDER_BE) < 0) TEST_ERROR
+
+    /* Verify that the order of the compound type is big-endian */
+    if ((order = H5Tget_order(cmpd)) != H5T_ORDER_BE) TEST_ERROR 
+
+    /* Change the order of the array type to little-endian*/
+    if (H5Tset_order(cmpd_array, H5T_ORDER_LE) < 0) TEST_ERROR
+
+    /* Verify that the order of the array type is little-endian */
+    if ((order = H5Tget_order(cmpd_array)) != H5T_ORDER_LE) TEST_ERROR 
 
     /* Create file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
@@ -6008,6 +6038,7 @@ test_set_order_compound(hid_t fapl)
     if (H5Tclose(memb_array2) < 0) TEST_ERROR
     if (H5Tclose(vl_id) < 0) TEST_ERROR
     if (H5Tclose(cmpd) < 0) TEST_ERROR
+    if (H5Tclose(cmpd_array) < 0) TEST_ERROR
     if (H5Fclose(file) < 0) TEST_ERROR
 
     PASSED();
@@ -6020,6 +6051,7 @@ error:
         H5Tclose(memb_array2);
         H5Tclose(vl_id);
         H5Tclose(cmpd);
+        H5Tclose(cmpd_array);
 	H5Fclose(file);
     H5E_END_TRY;
     return 1;
