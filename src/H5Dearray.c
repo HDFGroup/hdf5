@@ -89,12 +89,11 @@ typedef struct H5D_earray_filt_elmt_t {
 static void *H5D_earray_crt_context(void *udata);
 static herr_t H5D_earray_dst_context(void *ctx);
 static herr_t H5D_earray_fill(void *nat_blk, size_t nelmts);
-static herr_t H5D_earray_encode(void *raw, const void *elmt, size_t nelmts,
-    void *ctx);
-static herr_t H5D_earray_decode(const void *raw, void *elmt, size_t nelmts,
-    void *ctx);
-static herr_t H5D_earray_debug(FILE *stream, int indent, int fwidth,
-    hsize_t idx, const void *elmt);
+static herr_t H5D_earray_encode(void *raw, const void *elmt, size_t nelmts, void *ctx);
+static herr_t H5D_earray_decode(const void *raw, void *elmt, size_t nelmts, void *ctx);
+static herr_t H5D_earray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt);
+static void *H5D_earray_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr);
+static herr_t H5D_earray_dst_dbg_context(void *dbg_ctx);
 
 /* Extensible array class callbacks for chunks w/filters */
 /* (some shared with callbacks for chunks w/o filters) */
@@ -176,29 +175,37 @@ const H5D_chunk_ops_t H5D_COPS_EARRAY[1] = {{
 /* Extensible array class callbacks for dataset chunks w/o filters */
 const H5EA_class_t H5EA_CLS_CHUNK[1]={{
     H5EA_CLS_CHUNK_ID,          /* Type of extensible array */
+    "Chunk w/o filters",        /* Name of extensible array class */
     sizeof(haddr_t),            /* Size of native element */
     H5D_earray_crt_context,     /* Create context */
     H5D_earray_dst_context,     /* Destroy context */
     H5D_earray_fill,            /* Fill block of missing elements callback */
     H5D_earray_encode,          /* Element encoding callback */
     H5D_earray_decode,          /* Element decoding callback */
-    H5D_earray_debug            /* Element debugging callback */
+    H5D_earray_debug,		/* Element debugging callback */
+    H5D_earray_crt_dbg_context, /* Create debugging context */
+    H5D_earray_dst_dbg_context  /* Destroy debugging context */
 }};
 
 /* Extensible array class callbacks for dataset chunks w/filters */
 const H5EA_class_t H5EA_CLS_FILT_CHUNK[1]={{
     H5EA_CLS_FILT_CHUNK_ID,     /* Type of extensible array */
+    "Chunk w/filters",          /* Name of extensible array class */
     sizeof(H5D_earray_filt_elmt_t), /* Size of native element */
     H5D_earray_crt_context,     /* Create context */
     H5D_earray_dst_context,     /* Destroy context */
     H5D_earray_filt_fill,       /* Fill block of missing elements callback */
     H5D_earray_filt_encode,     /* Element encoding callback */
     H5D_earray_filt_decode,     /* Element decoding callback */
-    H5D_earray_filt_debug       /* Element debugging callback */
+    H5D_earray_filt_debug,      /* Element debugging callback */
+    H5D_earray_crt_dbg_context, /* Create debugging context */
+    H5D_earray_dst_dbg_context  /* Destroy debugging context */
 }};
 
 /* Declare a free list to manage the H5D_earray_ctx_t struct */
+/* Declare a free list to manage the H5D_earray_ctx_ud_t struct */
 H5FL_DEFINE_STATIC(H5D_earray_ctx_t);
+H5FL_DEFINE_STATIC(H5D_earray_ctx_ud_t);
 
 
 
@@ -432,6 +439,108 @@ H5D_earray_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_earray_debug() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_earray_crt_dbg_context
+ *
+ * Purpose:	Create context for debugging callback
+ *		(get the layout message in the specified object header)
+ *
+ * Return:	Success:	non-NULL
+ *		Failure:	NULL
+ *
+ * Programmer:	Vailin Choi; July 2010
+ *		
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5D_earray_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr)
+{
+    H5D_earray_ctx_ud_t	*dbg_ctx = NULL;   /* Context for fixed array callback */
+    H5O_loc_t obj_loc;          /* Pointer to an object's location */
+    hbool_t obj_opened = FALSE; /* Flag to indicate that the object header was opened */
+    H5O_layout_t layout;        /* Layout message */
+    void *ret_value;            /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_earray_crt_dbg_context)
+
+    HDassert(f);
+    HDassert(H5F_addr_defined(obj_addr));
+
+    /* Allocate context for debugging callback */
+    if(NULL == (dbg_ctx = H5FL_MALLOC(H5D_earray_ctx_ud_t)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate extensible array client callback context")
+
+    /* Set up the object header location info */
+    H5O_loc_reset(&obj_loc);
+    obj_loc.file = f;
+    obj_loc.addr = obj_addr;
+
+    /* Open the object header where the layout message resides */
+    if(H5O_open(&obj_loc) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "can't open object header")
+    obj_opened = TRUE;
+
+    /* Read the layout message */
+    if(NULL == H5O_msg_read(&obj_loc, H5O_LAYOUT_ID, &layout, dxpl_id))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get layout info")
+
+    /* close the object header */
+    if(H5O_close(&obj_loc) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header")
+
+    /* Create user data */
+    dbg_ctx->f = f;
+    dbg_ctx->chunk_size = layout.u.chunk.size;
+
+    /* Set return value */
+    ret_value = dbg_ctx;
+
+done:
+    /* Cleanup on error */
+    if(ret_value == NULL) {
+        /* Release context structure */
+        if(dbg_ctx)
+            dbg_ctx = H5FL_FREE(H5D_earray_ctx_ud_t, dbg_ctx);
+
+        /* Close object header */
+        if(obj_opened) {
+            if(H5O_close(&obj_loc) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header")
+        } /* end if */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_earray_crt_dbg_context() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_earray_dst_dbg_context
+ *
+ * Purpose:	Destroy context for debugging callback
+ *		(free the layout message from the specified object header)
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Vailin Choi; July 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_earray_dst_dbg_context(void *_dbg_ctx)
+{
+    H5D_earray_ctx_ud_t	*dbg_ctx = (H5D_earray_ctx_ud_t	*)_dbg_ctx; /* Context for extensible array callback */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_earray_dst_dbg_context)
+
+    HDassert(dbg_ctx);
+
+    /* Release context structure */
+    dbg_ctx = H5FL_FREE(H5D_earray_ctx_ud_t, dbg_ctx);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D_earray_dst_dbg_context() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_earray_filt_fill

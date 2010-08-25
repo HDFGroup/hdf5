@@ -64,6 +64,7 @@ typedef enum H5EA_cls_id_t {
  */
 typedef struct H5EA_class_t {
     H5EA_cls_id_t id;           /* ID of Extensible Array class, as found in file */
+    const char *name;           /* Name of class (for debugging) */
     size_t nat_elmt_size;       /* Size of native (memory) element */
 
     /* Extensible array client callback methods */
@@ -73,6 +74,8 @@ typedef struct H5EA_class_t {
     herr_t (*encode)(void *raw, const void *elmt, size_t nelmts, void *ctx);   /* Encode elements from native form to disk storage form */
     herr_t (*decode)(const void *raw, void *elmt, size_t nelmts, void *ctx);   /* Decode elements from disk storage form to native form */
     herr_t (*debug)(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt); /* Print an element for debugging */
+    void *(*crt_dbg_ctx)(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr); /* Create debugging context */
+    herr_t (*dst_dbg_ctx)(void *dbg_ctx);       /* Destroy debugging context */
 } H5EA_class_t;
 
 /* Extensible array creation parameters */

@@ -65,6 +65,7 @@
 #define H5FA_METADATA_PREFIX_SIZE(c) (                                        \
     H5_SIZEOF_MAGIC   /* Signature */                                         \
     + 1 /* Version */                                                         \
+    + 1	/* Array type */                                                \
     + ((c) ? H5FA_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \
     )
 
@@ -72,15 +73,11 @@
 #define H5FA_HEADER_SIZE(h)     (                                             \
     /* General metadata fields */                                             \
     H5FA_METADATA_PREFIX_SIZE(TRUE)                                           \
-                                                                              \
     /* General array information */                                           \
-    + 1 /* Array type */                                                      \
     + 1 /* Element Size */                                                    \
     + 1 /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */ \
-                                                                              \
     /* Fixed Array statistics fields */                                       \
     + (h)->sizeof_size /* # of elements in the fixed array */    	      \
-                                                                              \
     /* Fixed Array Header specific fields */                                  \
     + (h)->sizeof_addr /* File address of Fixed Array data block */  	      \
     )
@@ -89,11 +86,8 @@
 #define H5FA_DBLOCK_PREFIX_SIZE(d)  (                                         \
     /* General metadata fields */                                             \
     H5FA_METADATA_PREFIX_SIZE(TRUE)                                           \
-                                                                              \
     /* Sanity-checking fields */                                              \
-    + (d)->hdr->sizeof_addr    /* File address of Fixed Array header owning the data block */  \
-    + 1 /* Array type */                                                      \
-                                                                              \
+    + (d)->hdr->sizeof_addr    	/* File address of Fixed Array header owning the data block */  \
     /* Fixed Array Data Block specific fields */			      \
     + (d)->dblk_page_init_size /* Fixed array data block 'page init' bitmasks (can be 0 if no pages) */ \
     )
@@ -102,7 +96,6 @@
 #define H5FA_DBLOCK_SIZE(d)  (					      	      \
     /* Data block prefix size  */                                             \
     H5FA_DBLOCK_PREFIX_SIZE(d)                                                \
-                                                                              \
     /* Fixed Array Elements|Pages of Elements*/				      \
     + ((d)->hdr->cparam.nelmts * (size_t)(d)->hdr->cparam.raw_elmt_size)      \
     + ((d)->npages * H5FA_SIZEOF_CHKSUM)        /* Checksum */  	      \
