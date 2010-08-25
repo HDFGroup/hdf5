@@ -593,7 +593,7 @@ test_fs_sect_add(hid_t fapl)
     H5FS_create_t 	cparam; 		/* creation parameters */
     frspace_state_t 	state;          	/* State of free space*/
 
-    TEST_free_section_t 	*sect_node;
+    TEST_free_section_t 	*sect_node = NULL;
     unsigned			init_flags=0;
     h5_stat_size_t 		file_size=0, tmp_file_size=0, fr_meta_size=0;
     unsigned			can_shrink=FALSE;
@@ -858,6 +858,11 @@ test_fs_sect_add(hid_t fapl)
     if(H5FS_sect_remove(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node) < 0)
 	FAIL_STACK_ERROR
 
+    /* Free the section node(s) */
+    if(TEST_sect_free((H5FS_section_info_t *)sect_node) < 0)
+	TEST_ERROR
+    sect_node = NULL;
+
     /* Close the free space manager */
     if(H5FS_close(f, H5P_DATASET_XFER_DEFAULT, frsp) < 0)
 	FAIL_STACK_ERROR
@@ -878,6 +883,8 @@ test_fs_sect_add(hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
+        if(sect_node)
+            TEST_sect_free((H5FS_section_info_t *)sect_node);
         if(frsp)
 	    H5FS_close(f, H5P_DATASET_XFER_DEFAULT, frsp);
 	H5Fclose(file);
@@ -918,7 +925,7 @@ test_fs_sect_find(hid_t fapl)
     H5FS_create_t 	cparam; 		/* creation parameters */
     frspace_state_t 	state;          	/* State of free space*/
 
-    TEST_free_section_t 	*sect_node1, *sect_node2, *sect_node3, *sect_node4;
+    TEST_free_section_t 	*sect_node1 = NULL, *sect_node2, *sect_node3 = NULL, *sect_node4 = NULL;
     TEST_free_section_t 	*node;
     htri_t 			node_found = FALSE;
     unsigned			init_flags=0;
@@ -1077,6 +1084,17 @@ test_fs_sect_find(hid_t fapl)
     if(H5FS_sect_remove(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node4) < 0)
 	FAIL_STACK_ERROR
 
+    /* Free the section node(s) */
+    if(TEST_sect_free((H5FS_section_info_t *)sect_node1) < 0)
+	TEST_ERROR
+    sect_node1 = NULL;
+    if(TEST_sect_free((H5FS_section_info_t *)sect_node3) < 0)
+	TEST_ERROR
+    sect_node3 = NULL;
+    if(TEST_sect_free((H5FS_section_info_t *)sect_node4) < 0)
+	TEST_ERROR
+    sect_node4 = NULL;
+
     /* Close the free space manager */
     if(H5FS_close(f, H5P_DATASET_XFER_DEFAULT, frsp) < 0)
 	FAIL_STACK_ERROR
@@ -1145,10 +1163,16 @@ test_fs_sect_find(hid_t fapl)
 
     if(TEST_sect_free((H5FS_section_info_t *)node) < 0)
 	TEST_ERROR
+    node = NULL;
 
     /* remove sections A */
     if(H5FS_sect_remove(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1) < 0)
 	FAIL_STACK_ERROR
+
+    /* Free the section node(s) */
+    if(TEST_sect_free((H5FS_section_info_t *)sect_node1) < 0)
+	TEST_ERROR
+    sect_node1 = NULL;
 
     /* Close the free space manager */
     if(H5FS_close(f, H5P_DATASET_XFER_DEFAULT, frsp) < 0)
@@ -1199,6 +1223,11 @@ test_fs_sect_find(hid_t fapl)
     if(H5FS_sect_remove(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1) < 0)
 	FAIL_STACK_ERROR
 
+    /* Free the section node(s) */
+    if(TEST_sect_free((H5FS_section_info_t *)sect_node1) < 0)
+	TEST_ERROR
+    sect_node1 = NULL;
+
     /* Close the free space manager */
     if(H5FS_close(f, H5P_DATASET_XFER_DEFAULT, frsp) < 0)
 	FAIL_STACK_ERROR
@@ -1219,6 +1248,12 @@ test_fs_sect_find(hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
+        if(sect_node1)
+            TEST_sect_free((H5FS_section_info_t *)sect_node1);
+        if(sect_node3)
+            TEST_sect_free((H5FS_section_info_t *)sect_node3);
+        if(sect_node4)
+            TEST_sect_free((H5FS_section_info_t *)sect_node4);
         if(frsp)
 	    H5FS_close(f, H5P_DATASET_XFER_DEFAULT, frsp);
 	H5Fclose(file);
@@ -1484,6 +1519,12 @@ test_fs_sect_merge(hid_t fapl)
     if(H5FS_sect_remove(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2) < 0)
 	FAIL_STACK_ERROR
 
+    /* Free the section node(s) */
+    if(TEST_sect_free((H5FS_section_info_t *)sect_node1) < 0)
+	TEST_ERROR
+    if(TEST_sect_free((H5FS_section_info_t *)sect_node2) < 0)
+	TEST_ERROR
+
     /* Close the free space manager */
     if(H5FS_close(f, H5P_DATASET_XFER_DEFAULT, frsp) < 0)
 	FAIL_STACK_ERROR
@@ -1672,6 +1713,10 @@ test_fs_sect_merge(hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
+        if(sect_node1)
+            TEST_sect_free((H5FS_section_info_t *)sect_node1);
+        if(sect_node2)
+            TEST_sect_free((H5FS_section_info_t *)sect_node2);
         if(frsp)
 	    H5FS_close(f, H5P_DATASET_XFER_DEFAULT, frsp);
 	H5Fclose(file);
@@ -2152,6 +2197,11 @@ test_fs_sect_change_class(hid_t fapl)
     if(H5FS_sect_remove(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2) < 0)
 	FAIL_STACK_ERROR
 
+    /* Free the section node(s) */
+    if(TEST_sect_free((H5FS_section_info_t *)sect_node2) < 0)
+	TEST_ERROR
+    sect_node2 = NULL;
+
     /* Close the free space manager */
     if(H5FS_close(f, H5P_DATASET_XFER_DEFAULT, frsp) < 0)
 	FAIL_STACK_ERROR
@@ -2269,6 +2319,11 @@ test_fs_sect_change_class(hid_t fapl)
     if(H5FS_sect_remove(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1) < 0)
 	FAIL_STACK_ERROR
 
+    /* Free the section node(s) */
+    if(TEST_sect_free((H5FS_section_info_t *)sect_node1) < 0)
+	TEST_ERROR
+    sect_node1 = NULL;
+
     /* Close the free space manager */
     if(H5FS_close(f, H5P_DATASET_XFER_DEFAULT, frsp) < 0)
 	FAIL_STACK_ERROR
@@ -2289,6 +2344,10 @@ test_fs_sect_change_class(hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
+        if(sect_node1)
+            TEST_sect_free((H5FS_section_info_t *)sect_node1);
+        if(sect_node2)
+            TEST_sect_free((H5FS_section_info_t *)sect_node2);
         if(frsp)
 	    H5FS_close(f, H5P_DATASET_XFER_DEFAULT, frsp);
 	H5Fclose(file);

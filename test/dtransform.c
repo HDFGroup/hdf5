@@ -616,7 +616,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
 
     TESTING("H5Pget_data_transform, after resetting transform property")
 
-    if(NULL == (ptrgetTest = (char *)HDcalloc(1, HDstrlen(simple) + 1)))
+    if(NULL == (ptrgetTest = (char *)HDcalloc((size_t)1, HDstrlen(simple) + 1)))
         TEST_ERROR
     if(H5Pget_data_transform(dxpl_id_c_to_f, ptrgetTest, HDstrlen(simple) + 1) < 0)
         TEST_ERROR

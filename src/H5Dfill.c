@@ -609,12 +609,14 @@ H5D_fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts, hid_t dxpl_id)
 done:
     if(buf) {
         /* Free dynamically allocated VL elements in fill buffer */
-        if(fb_info->fill->type)
+        if(fb_info->fill->type) {
             if(H5T_vlen_reclaim_elmt(buf, fb_info->fill->type, dxpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't reclaim vlen element")
-        else
+        } /* end if */
+        else {
             if(H5T_vlen_reclaim_elmt(buf, fb_info->mem_type, dxpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't reclaim vlen element")
+        } /* end else */
 
         /* Free temporary fill buffer */
         if(fb_info->fill_free_func)
