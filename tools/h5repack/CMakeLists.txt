@@ -8,7 +8,7 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
 INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 # --------------------------------------------------------------------
-# Add h5Repack executables and tests
+# Add h5Repack executables
 # --------------------------------------------------------------------
 SET (REPACK_COMMON_SRCS
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_copy.c
@@ -36,7 +36,16 @@ TARGET_LINK_LIBRARIES (h5repack  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5repack)
 
+##############################################################################
+##############################################################################
+###           T E S T I N G                                                ###
+##############################################################################
+##############################################################################
+
 IF (BUILD_TESTING)
+  # --------------------------------------------------------------------
+  # Add h5Repack test executables
+  # --------------------------------------------------------------------
   ADD_EXECUTABLE (testh5repack_detect_szip ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testh5repack_detect_szip.c)
   H5_NAMING (testh5repack_detect_szip)
   IF (WIN32)
@@ -80,35 +89,10 @@ IF (BUILD_TESTING)
   TARGET_LINK_LIBRARIES (h5repacktest  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME h5repacktest COMMAND $<TARGET_FILE:h5repacktest>)
-
-  SET (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
-        h5repacktest
-        testh5repack_detect_szip
-  )
-
-
-  SET (INFO_FILE testfiles/h5repack.info)
-
-  SET (FILE0 h5repack_fill.h5)
-  SET (FILE1 h5repack_objs.h5)
-  SET (FILE2 h5repack_attr.h5)
-  SET (FILE3 h5repack_hlink.h5)
-  SET (FILE4 h5repack_layout.h5)
-  SET (FILE5 h5repack_early.h5)
-  SET (FILE7 h5repack_szip.h5)
-  SET (FILE8 h5repack_deflate.h5)
-  SET (FILE9 h5repack_shuffle.h5)
-  SET (FILE10 h5repack_fletcher.h5)
-  SET (FILE11 h5repack_filters.h5)
-  SET (FILE12 h5repack_nbit.h5)
-  SET (FILE13 h5repack_soffset.h5)
-  SET (FILE14 h5repack_layouto.h5 )     # A file with an older version of the layout message (copy of test/tlayouto.h5)
-  SET (FILE15 h5repack_named_dtypes.h5)
-  SET (FILE16 tfamily%05d.h5)           # located in common testfiles folder
-  SET (FILE_REF h5repack_refs.h5)
-  SET (FILE_ATTR_REF h5repack_attr_refs.h5)
     
-  #-- Copy all the HDF5 files from the test directory into the source directory
+  # --------------------------------------------------------------------
+  # Copy all the HDF5 files from the test directory into the source directory
+  # --------------------------------------------------------------------
   SET (HDF5_REFERENCE_TEST_FILES
       h5repack_ext.bin
       ublock.bin
@@ -168,6 +152,12 @@ IF (BUILD_TESTING)
         ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${h5c_file} ${dest}
     )
   ENDFOREACH (h5c_file ${HDF5_COMMON_TEST_FILES})
+  
+##############################################################################
+##############################################################################
+###           T H E   T E S T S  M A C R O S                               ###
+##############################################################################
+##############################################################################
 
   MACRO (ADD_H5_TEST testname testtype testfile)
     IF (${testtype} STREQUAL "SKIP")
@@ -208,6 +198,36 @@ IF (BUILD_TESTING)
       )
     ENDIF (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_H5_CMP_TEST file)
+
+##############################################################################
+##############################################################################
+###           T H E   T E S T S                                            ###
+##############################################################################
+##############################################################################
+
+  # --------------------------------------------------------------------
+  # test file names 
+  # --------------------------------------------------------------------
+  SET (INFO_FILE testfiles/h5repack.info)
+
+  SET (FILE0 h5repack_fill.h5)
+  SET (FILE1 h5repack_objs.h5)
+  SET (FILE2 h5repack_attr.h5)
+  SET (FILE3 h5repack_hlink.h5)
+  SET (FILE4 h5repack_layout.h5)
+  SET (FILE5 h5repack_early.h5)
+  SET (FILE7 h5repack_szip.h5)
+  SET (FILE8 h5repack_deflate.h5)
+  SET (FILE9 h5repack_shuffle.h5)
+  SET (FILE10 h5repack_fletcher.h5)
+  SET (FILE11 h5repack_filters.h5)
+  SET (FILE12 h5repack_nbit.h5)
+  SET (FILE13 h5repack_soffset.h5)
+  SET (FILE14 h5repack_layouto.h5 )     # A file with an older version of the layout message (copy of test/tlayouto.h5)
+  SET (FILE15 h5repack_named_dtypes.h5)
+  SET (FILE16 tfamily%05d.h5)           # located in common testfiles folder
+  SET (FILE_REF h5repack_refs.h5)
+  SET (FILE_ATTR_REF h5repack_attr_refs.h5)
 
 #
 # The tests
@@ -594,6 +614,12 @@ ADD_H5_TEST (bug1814 "TEST" ${FILE_REF})
 ADD_H5_TEST (bug1797 "SKIP" ${FILE_ATTR_REF})
   
 ENDIF (BUILD_TESTING)
+
+##############################################################################
+##############################################################################
+###           I N S T A L L A T I O N                                      ###
+##############################################################################
+##############################################################################
 
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
