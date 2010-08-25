@@ -2019,8 +2019,8 @@ H5_DLL uint32_t H5_hash_string(const char *str);
 H5_DLL herr_t   H5_build_extpath(const char *, char ** /*out*/ );
 
 /* Functions for debugging */
-H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, uint8_t *buf,
-    uint8_t *marker, size_t buf_offset, size_t buf_size);
+H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,
+    const uint8_t *marker, size_t buf_offset, size_t buf_size);
 
 #endif /* _H5private_H */
 

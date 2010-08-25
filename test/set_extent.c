@@ -131,10 +131,10 @@ int main( void )
     if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
     /* Set chunk cache so only part of the chunks can be cached on fapl */
-    if(H5Pset_cache(fapl, 0, 8, 256 * sizeof(int), 0.75) < 0) TEST_ERROR
+    if(H5Pset_cache(fapl, 0, (size_t)8, 256 * sizeof(int), 0.75) < 0) TEST_ERROR
 
     /* Disable chunk caching on fapl2 */
-    if(H5Pset_cache(fapl2, 0, 0, 0, 0.) < 0) TEST_ERROR
+    if(H5Pset_cache(fapl2, 0, (size_t)0, (size_t)0, 0.) < 0) TEST_ERROR
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */
     if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
