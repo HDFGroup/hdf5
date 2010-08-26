@@ -98,7 +98,7 @@ fi
 # Please follow the pattern below by adding new versions at the top, copying
 # the information from the previous version and adding modifications to that.
 case "$cc_vendor-$cc_version" in
-    icc-10.0*)
+    icc-10*)
         PROD_CFLAGS="-O1 -Wl,-s"
         ;;
     icc-8.0*)
