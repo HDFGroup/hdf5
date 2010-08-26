@@ -49,6 +49,7 @@ const char *FILENAME[] = {
     "big_chunk",
     "chunk_expand",
     "copy_dcpl_newfile",
+    "layout_extend",
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -850,6 +851,130 @@ error:
 
      return -1;
 } /* end test_max_compact() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_layout_extend
+ *
+ * Purpose:     Verify that the creation of extendible dataset with dataspace:
+ *		cur_dims < max_dims (max_dims can be fixed size or H5S_UNLIMITED)
+ *		will behave as follows:
+ *			H5D_COMPACT layout: fail
+ *			H5D_CONTIGUOUS layout: fail
+ *			H5D_CHUNKED layout: succeed
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Vailin Choi; August 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_layout_extend(hid_t fapl)
+{
+    char filename[FILENAME_BUF_SIZE];	/* File name */
+    hid_t fid; 				/* File id */
+    hid_t sid_fix, sid_unlim; 		/* Dataspace id */
+    hid_t dcpl_compact, dcpl_contig, dcpl_chunked;	/* Dataset creation property list id */
+    hid_t did_fixed, did_unlim;		/* Dataset id */
+    hsize_t cur_size[1] = {10};		/* Current size of dataspace */
+    hsize_t max_unlim[1] = {H5S_UNLIMITED};		/* Maximum size of dataspace (unlimited) */
+    hsize_t max_fix[1] = {100};				/* Maximum size of dataspace (fixed) */
+
+    TESTING("extendible dataset with various layout");
+
+    /* Create a file */
+    h5_fixname(FILENAME[12], fapl, filename, sizeof filename);
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create dataspace */
+    if((sid_fix = H5Screate_simple(1, cur_size, max_fix)) < 0)
+        FAIL_STACK_ERROR
+    if((sid_unlim = H5Screate_simple(1, cur_size, max_unlim)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create property list for compact dataset creation */
+    if((dcpl_compact = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_layout(dcpl_compact, H5D_COMPACT) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create dataset with extendible dataspace (fixed max_dims) should fail */
+    H5E_BEGIN_TRY {
+	if(H5Dcreate2(fid, "compact", H5T_NATIVE_INT, sid_fix, H5P_DEFAULT, dcpl_compact, H5P_DEFAULT) != FAIL)
+	    TEST_ERROR
+    } H5E_END_TRY;
+
+    /* Create dataset with extendible dataspace (unlimited max_dims) should fail */
+    H5E_BEGIN_TRY {
+	if(H5Dcreate2(fid, "compact", H5T_NATIVE_INT, sid_unlim, H5P_DEFAULT, dcpl_compact, H5P_DEFAULT) != FAIL)
+	    TEST_ERROR
+    } H5E_END_TRY;
+
+    /* Create property list for contiguous dataset creation */
+    if((dcpl_contig = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if((H5Pset_layout(dcpl_contig, H5D_CONTIGUOUS)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create dataset with extendible dataspace (fixed max_dims) should fail */
+    H5E_BEGIN_TRY {
+	if(H5Dcreate2(fid, "contig", H5T_NATIVE_INT, sid_fix, H5P_DEFAULT, dcpl_contig, H5P_DEFAULT) != FAIL)
+	    TEST_ERROR
+    } H5E_END_TRY;
+
+    /* Create dataset with extendible dataspace (unlimited max_dims) should fail*/
+    H5E_BEGIN_TRY {
+	if(H5Dcreate2(fid, "contig", H5T_NATIVE_INT, sid_unlim, H5P_DEFAULT, dcpl_contig, H5P_DEFAULT) != FAIL)
+	    TEST_ERROR
+    } H5E_END_TRY;
+
+    /* Create property list for chunked dataset creation */
+    if((dcpl_chunked = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_layout(dcpl_chunked, H5D_CHUNKED) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create dataset with extendible dataspace (fixed max_dims) should succeed */
+    if((did_fixed = H5Dcreate2(fid, "chunked_fixed", H5T_NATIVE_INT, sid_fix, H5P_DEFAULT, dcpl_chunked, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Create dataset with extendible dataspace (unlimited max_dims) should succeed */
+    if((did_unlim = H5Dcreate2(fid, "chunked_unlim", H5T_NATIVE_INT, sid_unlim, H5P_DEFAULT, dcpl_chunked, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Closing */
+    if(H5Sclose(sid_fix) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(sid_unlim) < 0) FAIL_STACK_ERROR
+
+    if(H5Pclose(dcpl_compact) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl_contig) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl_chunked) < 0) FAIL_STACK_ERROR
+
+    if(H5Dclose(did_fixed) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(did_unlim) < 0) FAIL_STACK_ERROR
+
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Sclose(sid_fix);
+        H5Sclose(sid_unlim);
+        H5Pclose(dcpl_compact);
+        H5Pclose(dcpl_contig);
+        H5Pclose(dcpl_chunked);
+        H5Dclose(did_fixed);
+        H5Dclose(did_unlim);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
+     return -1;
+} /* end test_layout_extend() */
 
 
 /*-------------------------------------------------------------------------
@@ -7817,6 +7942,7 @@ main(void)
         nerrors += (test_big_chunks_bypass_cache(my_fapl) < 0   ? 1 : 0);
         nerrors += (test_chunk_expand(my_fapl) < 0		? 1 : 0);
 	nerrors += (test_idx_compatible() < 0  			? 1 : 0);
+	nerrors += (test_layout_extend(my_fapl) < 0		? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;
