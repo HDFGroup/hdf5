@@ -1060,8 +1060,8 @@ test_conv_buffer(hid_t fid)
   if((arr_type3 = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, dimsc)) < 0) goto error;
 
   if(H5Tinsert(ctype1, "A", HOFFSET(CmpField, a), arr_type1) < 0) goto error;
-  if(H5Tinsert (ctype1, "B", HOFFSET(CmpField, b), arr_type2) < 0) goto error;
-  if(H5Tinsert (ctype1, "C", HOFFSET(CmpField, c), arr_type3) < 0) goto error;
+  if(H5Tinsert(ctype1, "B", HOFFSET(CmpField, b), arr_type2) < 0) goto error;
+  if(H5Tinsert(ctype1, "C", HOFFSET(CmpField, c), arr_type3) < 0) goto error;
 
   /* Create the dataset */
   if((dataset = H5Dcreate2(fid, DSET_CONV_BUF_NAME, ctype1, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
@@ -1072,18 +1072,18 @@ test_conv_buffer(hid_t fid)
   if((arr_type4 = H5Tarray_create2(H5T_NATIVE_FLOAT, 1, dimsb)) < 0) goto error;
   if((arr_type5 = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, dimsc)) < 0) goto error;
 
-  if(H5Tinsert (ctype2, "B", HOFFSET(CmpFieldR, b), arr_type4) < 0) goto error;
-  if(H5Tinsert (ctype2, "C", HOFFSET(CmpFieldR, c), arr_type5) < 0) goto error;
+  if(H5Tinsert(ctype2, "B", HOFFSET(CmpFieldR, b), arr_type4) < 0) goto error;
+  if(H5Tinsert(ctype2, "C", HOFFSET(CmpFieldR, c), arr_type5) < 0) goto error;
 
   /* Read should succeed since library will set conversion buffer big enough */
   cfrR = (CmpFieldR *)HDcalloc((size_t)1, sizeof(CmpFieldR));
   if(H5Dread(dataset, ctype2, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfrR) < 0) goto error;
 
   /* Read should fail since conversion buffer isn't big enough */
-  xfer_list = H5Pcreate (H5P_DATASET_XFER);
-  size = (DIM2*DIM3*(sizeof(int))+ DIM2*(sizeof(float))+
-         DIM3*(sizeof(double)));
-  if(H5Pset_buffer (xfer_list, size, NULL, NULL) < 0) goto error;
+  xfer_list = H5Pcreate(H5P_DATASET_XFER);
+  size = (DIM2 * DIM3 * (sizeof(int))+ DIM2 * (sizeof(float))+
+         DIM3 * (sizeof(double)));
+  if(H5Pset_buffer(xfer_list, size, NULL, NULL) < 0) goto error;
 
   H5E_BEGIN_TRY {
     status = H5Dread(dataset, ctype2, H5S_ALL, H5S_ALL, xfer_list, cfrR);
@@ -1095,9 +1095,9 @@ test_conv_buffer(hid_t fid)
   }
 
   /* Read will succeed since conversion buffer is big enough */
-  size = (DIM1*DIM2*DIM3*(sizeof(int))+ DIM2*(sizeof(float))+
-         DIM3*(sizeof(double)));
-  if(H5Pset_buffer (xfer_list, size, NULL, NULL) < 0) goto error;
+  size = (DIM1 * DIM2 * DIM3 * (sizeof(int))+ DIM2 * (sizeof(float))+
+         DIM3 * (sizeof(double)));
+  if(H5Pset_buffer(xfer_list, size, NULL, NULL) < 0) goto error;
 
   if(H5Dread(dataset, ctype2, H5S_ALL, H5S_ALL, xfer_list, cfrR) < 0) goto error;
 
