@@ -110,7 +110,6 @@ H5_DLL H5T_t *H5T_copy(const H5T_t *old_dt, H5T_copy_t method);
 H5_DLL herr_t H5T_lock(H5T_t *dt, hbool_t immutable);
 H5_DLL herr_t H5T_close(H5T_t *dt);
 H5_DLL H5T_t *H5T_get_super(const H5T_t *dt);
-H5_DLL herr_t H5T_set_order(H5T_t *dtype, H5T_order_t order);
 H5_DLL H5T_class_t H5T_get_class(const H5T_t *dt, htri_t internal);
 H5_DLL htri_t H5T_detect_class(const H5T_t *dt, H5T_class_t cls, hbool_t from_api);
 H5_DLL size_t H5T_get_size(const H5T_t *dt);

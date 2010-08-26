@@ -4859,9 +4859,6 @@ opaque_funcs(void)
         TEST_ERROR
     } /* end if */
 
-    /* No effect on opaque type */
-    if(H5Tset_order(type, H5T_ORDER_BE) < 0) TEST_ERROR
-
     H5E_BEGIN_TRY {
         sign = H5Tget_sign(type);
     } H5E_END_TRY;
@@ -5761,13 +5758,10 @@ error:
  *              H5T_ORDER_NONE cannot be set.
  *
  * Return:      Success:        0
- *
  *              Failure:        number of errors
  *
  * Programmer:  Neil Fortner
  *              January 23, 2009
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5844,8 +5838,10 @@ test_set_order(void)
 
     /* Opaque - No effect on the order */
     if ((dtype = H5Tcreate(H5T_OPAQUE, (size_t)96)) < 0) TEST_ERROR
+    if (H5T_ORDER_NONE != H5Tget_order(dtype)) TEST_ERROR;
     if (H5Tset_order(dtype, H5T_ORDER_NONE) < 0) TEST_ERROR
     if (H5Tset_order(dtype, H5T_ORDER_BE) < 0) TEST_ERROR
+    if (H5T_ORDER_NONE != H5Tget_order(dtype)) TEST_ERROR;
     if (H5Tclose(dtype) < 0) TEST_ERROR
 
     /* Compound */
@@ -5923,13 +5919,10 @@ error:
  *              type.
  *
  * Return:      Success:        0
- *
  *              Failure:        number of errors
  *
  * Programmer:  Raymond Lu
  *              18 August 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5950,96 +5943,95 @@ test_set_order_compound(hid_t fapl)
         atomic_cmpd d[3][4];
     } complex_cmpd;
 
-    hid_t       file;
-    hid_t       cmpd, memb_cmpd, memb_array1, memb_array2, cmpd_array;
-    hid_t       vl_id;
-    H5T_order_t order;              /* Byte order */
+    hid_t       file = -1;
+    hid_t       cmpd = -1, memb_cmpd = -1, memb_array1 = -1, memb_array2 = -1, cmpd_array = -1;
+    hid_t       vl_id = -1;
     hsize_t     dims[2] = {3, 4};   /* Array dimenstions */
     char	filename[1024];
     herr_t      ret;                /* Generic return value */
 
     TESTING("H5Tset/get_order for compound type");
 
-    if ((memb_cmpd = H5Tcreate(H5T_COMPOUND, sizeof(atomic_cmpd))) < 0) TEST_ERROR
-    if (H5Tinsert(memb_cmpd, "i", HOFFSET(atomic_cmpd, i), H5T_NATIVE_INT) < 0) TEST_ERROR 
-    if (H5Tinsert(memb_cmpd, "c", HOFFSET(atomic_cmpd, c), H5T_NATIVE_CHAR) < 0) TEST_ERROR
-    if (H5Tinsert(memb_cmpd, "s", HOFFSET(atomic_cmpd, s), H5T_NATIVE_SHORT) < 0) TEST_ERROR
-    if (H5Tinsert(memb_cmpd, "f", HOFFSET(atomic_cmpd, f), H5T_NATIVE_FLOAT) < 0) TEST_ERROR
+    if((memb_cmpd = H5Tcreate(H5T_COMPOUND, sizeof(atomic_cmpd))) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(memb_cmpd, "i", HOFFSET(atomic_cmpd, i), H5T_NATIVE_INT) < 0) FAIL_STACK_ERROR 
+    if(H5Tinsert(memb_cmpd, "c", HOFFSET(atomic_cmpd, c), H5T_NATIVE_CHAR) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(memb_cmpd, "s", HOFFSET(atomic_cmpd, s), H5T_NATIVE_SHORT) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(memb_cmpd, "f", HOFFSET(atomic_cmpd, f), H5T_NATIVE_FLOAT) < 0) FAIL_STACK_ERROR
 
     /* Set the order to little-endian. */
-    if (H5Tset_order(memb_cmpd, H5T_ORDER_BE) < 0) TEST_ERROR
+    if(H5Tset_order(memb_cmpd, H5T_ORDER_BE) < 0) FAIL_STACK_ERROR
 
-    /* Create the simple array datatype */
+    /* Create the array datatypes */
     memb_array1 = H5Tarray_create2(H5T_NATIVE_DOUBLE, 2, dims);
     memb_array2 = H5Tarray_create2(memb_cmpd, 2, dims);
 
     /* Set the order to big-endian. */
-    if (H5Tset_order(memb_array1, H5T_ORDER_LE) < 0) TEST_ERROR
+    if(H5Tset_order(memb_array1, H5T_ORDER_LE) < 0) FAIL_STACK_ERROR
 
     /* Create a variable-length datatype */
-    if ((vl_id = H5Tvlen_create(H5T_NATIVE_UINT)) < 0) TEST_ERROR
+    if((vl_id = H5Tvlen_create(H5T_NATIVE_UINT)) < 0) FAIL_STACK_ERROR
 
     /* Create a compound type using the types above. */
-    if ((cmpd = H5Tcreate(H5T_COMPOUND, sizeof(complex_cmpd))) < 0) TEST_ERROR
-    if (H5Tinsert(cmpd, "a", HOFFSET(complex_cmpd, a), memb_cmpd) < 0) TEST_ERROR 
-    if (H5Tinsert(cmpd, "vl_type", HOFFSET(complex_cmpd, vl), vl_id) < 0) TEST_ERROR 
-    if (H5Tinsert(cmpd, "b", HOFFSET(complex_cmpd, b), memb_array1) < 0) TEST_ERROR 
-    if (H5Tinsert(cmpd, "d", HOFFSET(complex_cmpd, d), memb_array2) < 0) TEST_ERROR 
+    if((cmpd = H5Tcreate(H5T_COMPOUND, sizeof(complex_cmpd))) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd, "a", HOFFSET(complex_cmpd, a), memb_cmpd) < 0) FAIL_STACK_ERROR 
+    if(H5Tinsert(cmpd, "vl_type", HOFFSET(complex_cmpd, vl), vl_id) < 0) FAIL_STACK_ERROR 
+    if(H5Tinsert(cmpd, "b", HOFFSET(complex_cmpd, b), memb_array1) < 0) FAIL_STACK_ERROR 
+    if(H5Tinsert(cmpd, "d", HOFFSET(complex_cmpd, d), memb_array2) < 0) FAIL_STACK_ERROR 
 
     /* The order should be mixed now. */
-    if((order = H5Tget_order(cmpd)) != H5T_ORDER_MIXED) TEST_ERROR 
+    if(H5Tget_order(cmpd) != H5T_ORDER_MIXED) FAIL_STACK_ERROR 
 
     /* Create an array of the compound type above */
     cmpd_array = H5Tarray_create2(cmpd, 2, dims);
 
     /* The order of the array type should be the same as the compound type */
-    if((order = H5Tget_order(cmpd_array)) != H5T_ORDER_MIXED) TEST_ERROR 
+    if(H5Tget_order(cmpd_array) != H5T_ORDER_MIXED) FAIL_STACK_ERROR 
 
     /* Verify that the order can't be 'none'. */
     H5E_BEGIN_TRY
         ret = H5Tset_order(cmpd, H5T_ORDER_NONE);
     H5E_END_TRY
-    if (ret >= 0) TEST_ERROR
+    if(ret >= 0) TEST_ERROR
 
     /* Verify that the order can't be 'mixed'. */
     H5E_BEGIN_TRY
         ret = H5Tset_order(cmpd, H5T_ORDER_MIXED);
     H5E_END_TRY
-    if (ret >= 0) TEST_ERROR
+    if(ret >= 0) TEST_ERROR
 
     /* Change the order of the compound type to big-endian*/
-    if (H5Tset_order(cmpd, H5T_ORDER_BE) < 0) TEST_ERROR
+    if(H5Tset_order(cmpd, H5T_ORDER_BE) < 0) FAIL_STACK_ERROR
 
     /* Verify that the order of the compound type is big-endian */
-    if ((order = H5Tget_order(cmpd)) != H5T_ORDER_BE) TEST_ERROR 
+    if(H5Tget_order(cmpd) != H5T_ORDER_BE) FAIL_STACK_ERROR 
 
     /* Change the order of the array type to little-endian*/
-    if (H5Tset_order(cmpd_array, H5T_ORDER_LE) < 0) TEST_ERROR
+    if(H5Tset_order(cmpd_array, H5T_ORDER_LE) < 0) FAIL_STACK_ERROR
 
     /* Verify that the order of the array type is little-endian */
-    if ((order = H5Tget_order(cmpd_array)) != H5T_ORDER_LE) TEST_ERROR 
+    if(H5Tget_order(cmpd_array) != H5T_ORDER_LE) FAIL_STACK_ERROR 
 
     /* Create file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Commit the data type */
-    if(H5Tcommit2(file, "compound", cmpd, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Tcommit2(file, "compound", cmpd, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify that committed type can't change order */
     H5E_BEGIN_TRY
         ret = H5Tset_order(cmpd, H5T_ORDER_LE);
     H5E_END_TRY
-    if (ret >= 0) TEST_ERROR
+    if(ret >= 0) TEST_ERROR
 
-    if (H5Tclose(memb_cmpd) < 0) TEST_ERROR
-    if (H5Tclose(memb_array1) < 0) TEST_ERROR
-    if (H5Tclose(memb_array2) < 0) TEST_ERROR
-    if (H5Tclose(vl_id) < 0) TEST_ERROR
-    if (H5Tclose(cmpd) < 0) TEST_ERROR
-    if (H5Tclose(cmpd_array) < 0) TEST_ERROR
-    if (H5Fclose(file) < 0) TEST_ERROR
+    if(H5Tclose(memb_cmpd) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(memb_array1) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(memb_array2) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(vl_id) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(cmpd) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(cmpd_array) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;
