@@ -862,7 +862,7 @@ IF (BUILD_TESTING)
   SET (TESTTYPE "TEST")
   IF (NOT "H5_LONE_COLON")
     SET (TESTTYPE "SKIP")
-  ENDIF ("H5_LONE_COLON")
+  ENDIF (NOT "H5_LONE_COLON")
   ADD_XML_SKIP_H5_TEST (tempty-nons.h5 0 ${TESTTYPE} -X : tempty.h5)
 
   ADD_XML_H5_TEST (tempty-nons-2.h5 0 --xml-ns=: tempty.h5)
