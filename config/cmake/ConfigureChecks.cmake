@@ -554,44 +554,46 @@ ENDIF (INLINE_TEST___inline__)
 #-----------------------------------------------------------------------------
 # Check how to print a Long Long integer
 #-----------------------------------------------------------------------------
-SET (H5_PRINTF_LL_WIDTH "H5_PRINTF_LL_WIDTH")
-IF (H5_PRINTF_LL_WIDTH MATCHES "^H5_PRINTF_LL_WIDTH$")
-  SET (PRINT_LL_FOUND 0)
-  MESSAGE (STATUS "Checking for appropriate format for 64 bit long:")
-  FOREACH (HDF5_PRINTF_LL l64 l L q I64 ll)
-    SET (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH=${HDF5_PRINTF_LL}")
-    IF (H5_SIZEOF_LONG_LONG)
-      SET (CURRENT_TEST_DEFINITIONS "${CURRENT_TEST_DEFINITIONS} -DHAVE_LONG_LONG")
-    ENDIF (H5_SIZEOF_LONG_LONG)
-    TRY_RUN (HDF5_PRINTF_LL_TEST_RUN   HDF5_PRINTF_LL_TEST_COMPILE
-        ${HDF5_BINARY_DIR}/CMake
-        ${HDF5_RESOURCES_DIR}/HDF5Tests.c
-        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CURRENT_TEST_DEFINITIONS}
-        OUTPUT_VARIABLE OUTPUT
-    )
-    IF (HDF5_PRINTF_LL_TEST_COMPILE)
-      IF (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
-        SET (H5_PRINTF_LL_WIDTH "\"${HDF5_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
-        SET (PRINT_LL_FOUND 1)
-      ELSE (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
-        MESSAGE ("Width with ${HDF5_PRINTF_LL} failed with result: ${HDF5_PRINTF_LL_TEST_RUN}")
-      ENDIF (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
-    ELSE (HDF5_PRINTF_LL_TEST_COMPILE)
-      FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-          "Test H5_PRINTF_LL_WIDTH for ${HDF5_PRINTF_LL} failed with the following output:\n ${OUTPUT}\n"
+IF (NOT H5_PRINTF_LL_WIDTH OR H5_PRINTF_LL_WIDTH MATCHES "unknown")
+  SET (H5_PRINTF_LL_WIDTH "H5_PRINTF_LL_WIDTH")
+  IF (H5_PRINTF_LL_WIDTH MATCHES "^H5_PRINTF_LL_WIDTH$")
+    SET (PRINT_LL_FOUND 0)
+    MESSAGE (STATUS "Checking for appropriate format for 64 bit long:")
+    FOREACH (HDF5_PRINTF_LL l64 l L q I64 ll)
+      SET (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH=${HDF5_PRINTF_LL}")
+      IF (H5_SIZEOF_LONG_LONG)
+        SET (CURRENT_TEST_DEFINITIONS "${CURRENT_TEST_DEFINITIONS} -DHAVE_LONG_LONG")
+      ENDIF (H5_SIZEOF_LONG_LONG)
+      TRY_RUN (HDF5_PRINTF_LL_TEST_RUN   HDF5_PRINTF_LL_TEST_COMPILE
+          ${HDF5_BINARY_DIR}/CMake
+          ${HDF5_RESOURCES_DIR}/HDF5Tests.c
+          CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CURRENT_TEST_DEFINITIONS}
+          OUTPUT_VARIABLE OUTPUT
       )
-    ENDIF (HDF5_PRINTF_LL_TEST_COMPILE)
-  ENDFOREACH (HDF5_PRINTF_LL)
+      IF (HDF5_PRINTF_LL_TEST_COMPILE)
+        IF (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
+          SET (H5_PRINTF_LL_WIDTH "\"${HDF5_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
+          SET (PRINT_LL_FOUND 1)
+        ELSE (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
+          MESSAGE ("Width with ${HDF5_PRINTF_LL} failed with result: ${HDF5_PRINTF_LL_TEST_RUN}")
+        ENDIF (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
+      ELSE (HDF5_PRINTF_LL_TEST_COMPILE)
+        FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+            "Test H5_PRINTF_LL_WIDTH for ${HDF5_PRINTF_LL} failed with the following output:\n ${OUTPUT}\n"
+        )
+      ENDIF (HDF5_PRINTF_LL_TEST_COMPILE)
+    ENDFOREACH (HDF5_PRINTF_LL)
 
-  IF (PRINT_LL_FOUND)
-    MESSAGE (STATUS "Checking for apropriate format for 64 bit long: found ${H5_PRINTF_LL_WIDTH}")
-  ELSE (PRINT_LL_FOUND)
-    MESSAGE (STATUS "Checking for apropriate format for 64 bit long: not found")
-    SET (H5_PRINTF_LL_WIDTH "\"unknown\"" CACHE INTERNAL
-        "Width for printf for type `long long' or `__int64', us. `ll"
-    )
-  ENDIF (PRINT_LL_FOUND)
-ENDIF (H5_PRINTF_LL_WIDTH MATCHES "^H5_PRINTF_LL_WIDTH$")
+    IF (PRINT_LL_FOUND)
+      MESSAGE (STATUS "Checking for apropriate format for 64 bit long: found ${H5_PRINTF_LL_WIDTH}")
+    ELSE (PRINT_LL_FOUND)
+      MESSAGE (STATUS "Checking for apropriate format for 64 bit long: not found")
+      SET (H5_PRINTF_LL_WIDTH "\"unknown\"" CACHE INTERNAL
+          "Width for printf for type `long long' or `__int64', us. `ll"
+      )
+    ENDIF (PRINT_LL_FOUND)
+  ENDIF (H5_PRINTF_LL_WIDTH MATCHES "^H5_PRINTF_LL_WIDTH$")
+ENDIF (NOT H5_PRINTF_LL_WIDTH OR H5_PRINTF_LL_WIDTH MATCHES "unknown")
 
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can handle converting
