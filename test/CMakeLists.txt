@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-PROJECT (H5_TEST)
+PROJECT (HDF5_TEST)
 
 #-----------------------------------------------------------------------------
 # Define Sources
@@ -30,6 +30,90 @@ ENDIF (BUILD_SHARED_LIBS)
 TARGET_LINK_LIBRARIES (${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_TEST_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_TEST_LIB_TARGET} ${HDF5_TEST_LIB_NAME} ${LIB_TYPE})
+
+# --------------------------------------------------------------------
+# Copy all the HDF5 files from the test directory into the source directory
+# --------------------------------------------------------------------
+SET (HDF5_TEST_FILES
+  tnullspace.h5
+)
+
+FOREACH (h5_tfile ${HDF5_TEST_FILES})
+  SET (dest "${PROJECT_BINARY_DIR}/${h5_tfile}")
+  #MESSAGE (STATUS " Copying ${h5_tfile}")
+  ADD_CUSTOM_COMMAND (
+      TARGET     ${HDF5_TEST_LIB_TARGET}
+      POST_BUILD
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_tfile} ${dest}
+  )
+ENDFOREACH (h5_tfile ${HDF5_TEST_FILES})
+
+# --------------------------------------------------------------------
+# Copy all the HDF5 files from the test directory into the source directory
+# --------------------------------------------------------------------
+SET (HDF5_REFERENCE_FILES
+    err_compat_1
+    err_compat_2
+    error_test_1
+    error_test_2
+)
+
+FOREACH (ref_file ${HDF5_REFERENCE_FILES})
+  SET (dest "${PROJECT_BINARY_DIR}/testfiles/${ref_file}")
+  #MESSAGE (STATUS " Copying ${h5_file}")
+  ADD_CUSTOM_COMMAND (
+      TARGET     ${HDF5_TEST_LIB_TARGET}
+      POST_BUILD
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file} ${dest}
+  )
+ENDFOREACH (ref_file ${HDF5_REFERENCE_FILES})
+
+# --------------------------------------------------------------------
+#-- Copy all the HDF5 files from the test directory into the source directory
+# --------------------------------------------------------------------
+SET (HDF5_REFERENCE_TEST_FILES
+    be_data.h5
+    be_extlink1.h5
+    be_extlink2.h5
+    corrupt_stab_msg.h5
+    deflate.h5
+    family_v16_00000.h5
+    family_v16_00001.h5
+    family_v16_00002.h5
+    family_v16_00003.h5
+    fill_old.h5
+    fixed_idx.h5
+    group_old.h5
+    le_data.h5
+    le_extlink1.h5
+    le_extlink2.h5
+    mergemsg.h5
+    noencoder.h5
+    specmetaread.h5
+    tarrold.h5
+    tbad_msg_count.h5
+    tbogus.h5
+    test_filters_be.hdf5
+    test_filters_le.hdf5
+    th5s.h5
+    tlayouto.h5
+    tmtimen.h5
+    tmtimeo.h5
+    vms_data.h5
+)
+
+FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  SET (dest "${HDF5_TEST_BINARY_DIR}/${h5_file}")
+  #MESSAGE (STATUS " Copying ${h5_file} to ${dest}")
+  ADD_CUSTOM_COMMAND (
+      TARGET     ${HDF5_TEST_LIB_TARGET}
+      POST_BUILD
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/${h5_file} ${dest}
+  )
+ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
 
 SET (testhdf5_SRCS
     ${HDF5_TEST_SOURCE_DIR}/testhdf5.c
@@ -75,6 +159,12 @@ ENDIF (WIN32)
 TARGET_LINK_LIBRARIES (testhdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 ADD_TEST (NAME testhdf5 COMMAND $<TARGET_FILE:testhdf5>)
+  
+##############################################################################
+##############################################################################
+###           T H E   T E S T S  M A C R O S                               ###
+##############################################################################
+##############################################################################
 
 MACRO (ADD_H5_TEST file)
   ADD_EXECUTABLE (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
@@ -137,23 +227,27 @@ SET (H5_TESTS
     earray
     btree2
     fheap
+    error_test
+    err_compat
+    tcheck_version
+    testmeta
 )
 
 FOREACH (test ${H5_TESTS})
     ADD_H5_TEST(${test})
 ENDFOREACH (test ${H5_TESTS})
 
-SET (H5_CHECK_TESTS
-)
-
-FOREACH (chktest ${H5_CHECK_TESTS})
-    ADD_H5_TEST(${chktest})
-ENDFOREACH (chktest ${H5_CHECK_TESTS})
-
 #-- Allow extra time for fheap to complete 30min
 IF (WIN32)
   SET_TESTS_PROPERTIES (fheap PROPERTIES TIMEOUT 2500)
 ENDIF (WIN32)
+
+
+##############################################################################
+##############################################################################
+###           A D D I T I O N A L   T E S T S                              ###
+##############################################################################
+##############################################################################
 
 #-- Adding test for cache
 ADD_EXECUTABLE (cache ${HDF5_TEST_SOURCE_DIR}/cache.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
@@ -205,85 +299,53 @@ ENDIF (WIN32)
 TARGET_LINK_LIBRARIES (cache_tagging ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME cache_tagging COMMAND $<TARGET_FILE:cache_tagging>)
-
 #-- Adding test for ttsafe
-SET (ttsafe_SRCS
-    ttsafe.c
-    ttsafe_dcreate.c
-    ttsafe_error.c
-    ttsafe_cancel.c
-    ttsafe_acreate.c
+ADD_EXECUTABLE (ttsafe
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_dcreate.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_error.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_cancel.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
 )
-
-ADD_EXECUTABLE (ttsafe ${ttsafe_SRCS})
 H5_NAMING (ttsafe)
+IF (WIN32)
+  IF (MSVC)
+    IF (NOT BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (ttsafe
+          PROPERTIES
+              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+      ) 
+    ENDIF (NOT BUILD_SHARED_LIBS)
+  ENDIF (MSVC)
+ENDIF (WIN32)
 TARGET_LINK_LIBRARIES (ttsafe ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME ttsafe COMMAND $<TARGET_FILE:ttsafe>)
 
-#-- Copy all the HDF5 files from the test directory into the source directory
-SET (HDF5_REFERENCE_TEST_FILES
-  tnullspace.h5
-)
+##############################################################################
+##############################################################################
+###           T H E   G E N E R A T O R S                                  ###
+##############################################################################
+##############################################################################
 
-FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-  SET (dest "${PROJECT_BINARY_DIR}/${h5_file}")
-  #MESSAGE (STATUS " Copying ${h5_file}")
-  ADD_CUSTOM_COMMAND (
-      TARGET     ${HDF5_TEST_LIB_TARGET}
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${h5_file} ${dest}
-  )
-ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
+IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
+  MACRO (ADD_H5_GENERATOR genfile)
+    ADD_EXECUTABLE (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
+    H5_NAMING (${genfile})
+    IF (WIN32)
+      IF (MSVC)
+        IF (NOT BUILD_SHARED_LIBS)
+          SET_TARGET_PROPERTIES (${genfile}
+              PROPERTIES
+                  LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+          ) 
+        ENDIF (NOT BUILD_SHARED_LIBS)
+      ENDIF (MSVC)
+    ENDIF (WIN32)
+    TARGET_LINK_LIBRARIES (${genfile} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+  ENDMACRO (ADD_H5_GENERATOR genfile)
 
-
-#-- Copy all the HDF5 files from the test directory into the source directory
-SET (HDF5_REFERENCE_TEST_FILES
-    be_data.h5
-    be_extlink1.h5
-    be_extlink2.h5
-    corrupt_stab_msg.h5
-    deflate.h5
-    family_v16_00000.h5
-    family_v16_00001.h5
-    family_v16_00002.h5
-    family_v16_00003.h5
-    filespace_1_6.h5
-    filespace_1_8.h5
-    fill_old.h5
-    group_old.h5
-    le_data.h5
-    le_extlink1.h5
-    le_extlink2.h5
-    mergemsg.h5
-    noencoder.h5
-    specmetaread.h5
-    tarrold.h5
-    tbad_msg_count.h5
-    tbogus.h5
-    test_filters_be.hdf5
-    test_filters_le.hdf5
-    th5s.h5
-    tlayouto.h5
-    tmtimen.h5
-    tmtimeo.h5
-    vms_data.h5
-)
-
-FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-  SET (dest "${H5_TEST_BINARY_DIR}/${h5_file}")
-  #MESSAGE (STATUS " Copying ${h5_file} to ${dest}")
-  ADD_CUSTOM_COMMAND (
-      TARGET     ${HDF5_TEST_LIB_TARGET}
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different ${H5_TEST_SOURCE_DIR}/${h5_file} ${dest}
-  )
-ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-
-# generator executables
-IF (CREATE_GENERATORS)
+  # generator executables
   SET (H5_GENERATORS
       gen_bad_ohdr
       gen_bogus
@@ -310,4 +372,5 @@ IF (CREATE_GENERATORS)
     TARGET_LINK_LIBRARIES (${gen} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
   ENDFOREACH (gen ${H5_GENERATORS})
 
-ENDIF (CREATE_GENERATORS)
+ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
+

@@ -4,7 +4,7 @@ PROJECT (HDF5_TOOLS_MISC)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
+INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 # --------------------------------------------------------------------
@@ -69,7 +69,7 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   # Add the misc test executables
   # --------------------------------------------------------------------
-  IF (NOT BUILD_SHARED_LIBS)
+  IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5repart_gentest ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5repart_gentest.c)
     H5_NAMING (h5repart_gentest)
     IF (WIN32)
@@ -82,7 +82,7 @@ IF (BUILD_TESTING)
     ENDIF (WIN32)
     TARGET_LINK_LIBRARIES (h5repart_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     #ADD_TEST (NAME h5repart_gentest COMMAND $<TARGET_FILE:h5repart_gentest>)
-  ENDIF (NOT BUILD_SHARED_LIBS)
+  ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
   ADD_EXECUTABLE (h5repart_test ${HDF5_TOOLS_MISC_SOURCE_DIR}/repart_test.c)
   H5_NAMING (h5repart_test)
@@ -129,7 +129,7 @@ IF (BUILD_TESTING)
         TARGET     h5repart
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${h5_file} ${dest}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file} ${dest}
     )
   ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
 
@@ -156,7 +156,6 @@ IF (BUILD_TESTING)
   ADD_TEST (NAME h5repart_test COMMAND $<TARGET_FILE:h5repart_test>)
 
   SET (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
-     #   h5repart_gentest
         h5repart_test
   )
 ENDIF (BUILD_TESTING)

@@ -4,8 +4,8 @@ PROJECT (HDF5_HL_CPP_EXAMPLES)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_HL_SOURCE_DIR}/src)
-INCLUDE_DIRECTORIES (${HDF5_HL_CPP_SOURCE_DIR}/src)
+INCLUDE_DIRECTORIES (${HDF5_HL_SRC_DIR}/src)
+INCLUDE_DIRECTORIES (${HDF5_HL_CPP_SRC_DIR}/src)
 
 # --------------------------------------------------------------------
 #  Add in the examples for the Packet Table codes

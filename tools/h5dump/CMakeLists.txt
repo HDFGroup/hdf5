@@ -4,7 +4,7 @@ PROJECT (HDF5_TOOLS_H5DUMP)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
+INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 # --------------------------------------------------------------------
@@ -36,7 +36,7 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   # Add the h5dump test executable
   # --------------------------------------------------------------------
-  IF (NOT BUILD_SHARED_LIBS)
+  IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5dumpgentest ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dumpgentest.c)
     H5_NAMING (h5dumpgentest)
     IF (WIN32)
@@ -50,7 +50,7 @@ IF (BUILD_TESTING)
     TARGET_LINK_LIBRARIES (h5dumpgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     
     #ADD_TEST (NAME h5dumpgentest COMMAND $<TARGET_FILE:h5dumpgentest>)
-  ENDIF (NOT BUILD_SHARED_LIBS)
+  ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
   
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the test directory into the source directory
@@ -341,7 +341,7 @@ IF (BUILD_TESTING)
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${XLATE_UTILITY}
-        ARGS       ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${ddl_file} ${ddldest} -l3
+        ARGS       ${HDF5_TOOLS_SRC_DIR}/testfiles/${ddl_file} ${ddldest} -l3
     )
   ENDFOREACH (ddl_file ${HDF5_REFERENCE_FILES})
 
@@ -352,7 +352,7 @@ IF (BUILD_TESTING)
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${XLATE_UTILITY}
-        ARGS       ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${xml_file} ${xmldest} -l3
+        ARGS       ${HDF5_TOOLS_SRC_DIR}/testfiles/${xml_file} ${xmldest} -l3
     )
   ENDFOREACH (xml_file ${HDF5_XML_REFERENCE_FILES})
 
@@ -363,7 +363,7 @@ IF (BUILD_TESTING)
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${h5_file} ${dest}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file} ${dest}
     )
   ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
 
@@ -374,7 +374,7 @@ IF (BUILD_TESTING)
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${h5_xml_file} ${dest}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_xml_file} ${dest}
     )
   ENDFOREACH (h5_xml_file ${HDF5_XML_REFERENCE_TEST_FILES})
   
@@ -389,14 +389,14 @@ IF (BUILD_TESTING)
   )
   
   IF (WIN32 AND NOT MINGW)
-    FILE (READ ${HDF5_TOOLS_SOURCE_DIR}/testfiles/tbinregR.exp TEST_STREAM)
+    FILE (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp TEST_STREAM)
     FILE (WRITE ${PROJECT_BINARY_DIR}/tbinregR.exp "${TEST_STREAM}")
   ELSE (WIN32 AND NOT MINGW)
     ADD_CUSTOM_COMMAND (
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/tbinregR.exp
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/tbinregR.exp
     )
   ENDIF (WIN32 AND NOT MINGW)
   
@@ -450,7 +450,7 @@ IF (BUILD_TESTING)
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile}.xml --xml ${ARGN}"
       )
     ELSE (${testtype} STREQUAL "SKIP")
-      ADD_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
+      ADD_XML_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
     ENDIF (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_XML_SKIP_H5_TEST)
 

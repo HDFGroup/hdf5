@@ -4,7 +4,7 @@ PROJECT (HDF5_TOOLS_LIB)
 #-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------
-#INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
+#INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 #INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 SET (H5_TOOLS_LIB_SRCS
@@ -59,6 +59,21 @@ INSTALL (
     COMPONENT
         toolsheaders
 )
+
+#-----------------------------------------------------------------------------
+# Because tools are installed into bin/tools we need to make sure the hdf5tools
+# library will be installed into the proper location.
+#-----------------------------------------------------------------------------
+IF (APPLE)
+    OPTION (HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path" OFF)
+    IF (HDF5_BUILD_WITH_INSTALL_NAME)
+      SET_TARGET_PROPERTIES(${HDF5_TOOLS_LIB_TARGET} PROPERTIES
+      LINK_FLAGS "-current_version ${HDF5_PACKAGE_VERSION} -compatibility_version ${HDF5_PACKAGE_VERSION}"
+      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib/tools"
+      BUILD_WITH_INSTALL_RPATH ${HDF5_BUILD_WITH_INSTALL_NAME}
+      )
+    ENDIF (HDF5_BUILD_WITH_INSTALL_NAME)
+ENDIF (APPLE)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects

@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
+PROJECT (HDF5_HL_TEST)
 # --------------------------------------------------------------------
 # Notes: When creating unit test executables they should be prefixed
 # with "hl_". This allows for easier filtering of the test suite when
@@ -7,8 +8,6 @@ cmake_minimum_required (VERSION 2.8)
 # which would only run the High Level based unit tests.
 # --------------------------------------------------------------------
 
-PROJECT (HDF5_HL_TEST)
-
 #-----------------------------------------------------------------------------
 # Generate the H5srcdir_str.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
@@ -16,7 +15,7 @@ SET (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 CONFIGURE_FILE (${HDF5_HL_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 
 INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
-INCLUDE_DIRECTORIES (${HDF5_TEST_SOURCE_DIR})
+INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
 
 # --------------------------------------------------------------------
 #  Macro used to add a unit test
@@ -42,7 +41,9 @@ MACRO (HL_ADD_TEST hl_name files)
 
   ADD_TEST (NAME hl_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
 
+  # --------------------------------------------------------------------
   #-- Copy the necessary files.
+  # --------------------------------------------------------------------
   FOREACH (h5_file ${files})
     SET (dest "${HDF5_HL_TEST_BINARY_DIR}/${h5_file}")
     #MESSAGE (STATUS " Copying HL Test File ${h5_file} to ${dest}")
@@ -66,7 +67,7 @@ HL_ADD_TEST (test_table "test_table_be.hdf5;test_table_cray.hdf5;test_table_le.h
 # This executable is used to generate test files for the test_ds test.
 # It should only be run during development when new test files are needed
 # --------------------------------------------------------------------
-IF (NOT BUILD_SHARED_LIBS)
+IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
   ADD_EXECUTABLE (hl_gen_test_ds gen_test_ds.c)
   H5_NAMING (hl_gen_test_ds)
   IF (WIN32)
@@ -84,4 +85,4 @@ IF (NOT BUILD_SHARED_LIBS)
       ${HDF5_LIB_TARGET}
       ${HDF5_TEST_LIB_TARGET}
   )
-ENDIF (NOT BUILD_SHARED_LIBS)
+ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)

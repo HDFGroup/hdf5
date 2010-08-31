@@ -1895,6 +1895,7 @@
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
 ./config/cmake/FindHDF5.cmake
+./config/cmake/FindMPI.cmake
 ./config/cmake/hdf5-config.cmake.build.in
 ./config/cmake/hdf5-config.cmake.install.in
 ./config/cmake/hdf5-config-version.cmake.in
@@ -1917,6 +1918,7 @@
 ./fortran/examples/CMakeLists.txt
 ./fortran/src/CMakeLists.txt
 ./fortran/test/CMakeLists.txt
+./fortran/testpar/CMakeLists.txt
 ./hl/CMakeLists.txt
 ./hl/c++/CMakeLists.txt
 ./hl/c++/examples/CMakeLists.txt
