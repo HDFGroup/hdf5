@@ -556,14 +556,14 @@ H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     if(*p++ != H5FA_DBLOCK_VERSION)
 	H5E_THROW(H5E_VERSION, "wrong fixed array data block version")
 
+    /* Fixed array type */
+    if(*p++ != (uint8_t)udata->hdr->cparam.cls->id)
+	H5E_THROW(H5E_BADTYPE, "incorrect fixed array class")
+
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(f, &p, &arr_addr);
     if(H5F_addr_ne(arr_addr, udata->hdr->addr))
 	H5E_THROW(H5E_BADVALUE, "wrong fixed array header address")
-
-    /* Fixed array type */
-    if(*p++ != (uint8_t)udata->hdr->cparam.cls->id)
-	H5E_THROW(H5E_BADTYPE, "incorrect fixed array class")
 
     /* Page initialization flags */
     if(dblock->npages > 0) {
@@ -672,11 +672,11 @@ H5FA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         /* Version # */
         *p++ = H5FA_DBLOCK_VERSION;
 
-        /* Address of array header for array which owns this block */
-        H5F_addr_encode(f, &p, dblock->hdr->addr);
-
         /* Fixed array type */
         *p++ = dblock->hdr->cparam.cls->id;
+
+        /* Address of array header for array which owns this block */
+        H5F_addr_encode(f, &p, dblock->hdr->addr);
 
         /* Page init flags */
 	if(dblock->npages > 0) {

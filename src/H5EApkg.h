@@ -61,6 +61,7 @@
 #define H5EA_METADATA_PREFIX_SIZE(c) (                                        \
     H5_SIZEOF_MAGIC   /* Signature */                                         \
     + 1 /* Version */                                                         \
+    + 1 /* Array type */                                                      \
     + ((c) ? H5EA_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \
     )
 
@@ -70,7 +71,6 @@
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* General array information */                                           \
-    + 1 /* Array type */                                                      \
     + 1 /* Element Size */                                                    \
     + 1 /* Max. # of elements bits */                                         \
     + 1 /* # of elements to store in index block */                           \
@@ -96,7 +96,6 @@
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* Sanity-checking fields */					      \
-    + 1 /* Array type */                                                      \
     + (i)->hdr->sizeof_addr          /* File address of array owning the block */ \
                                                                               \
     /* Extensible Array Index Block specific fields */			      \
@@ -111,7 +110,6 @@
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* Sanity-checking fields */					      \
-    + 1 /* Array type */                                                      \
     + (s)->hdr->sizeof_addr          /* File address of array owning the block */ \
     + (s)->hdr->arr_off_size         /* Offset of the block in the array */   \
                                                                               \
@@ -126,7 +124,6 @@
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* Sanity-checking fields */					      \
-    + 1 /* Array type */                                                      \
     + (d)->hdr->sizeof_addr          /* File address of array owning the block */ \
     + (d)->hdr->arr_off_size         /* Offset of the block in the array */   \
     )
@@ -352,9 +349,7 @@ H5_DLLVAR const H5AC_class_t H5AC_EARRAY_DBLOCK[1];
 H5_DLLVAR const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1];
 
 /* Internal extensible array testing class */
-#ifdef H5EA_TESTING
 H5_DLLVAR const H5EA_class_t H5EA_CLS_TEST[1];
-#endif /* H5EA_TESTING */
 
 /* Array of extensible array client ID -> client class mappings */
 extern const H5EA_class_t *const H5EA_client_class_g[H5EA_NUM_CLS_ID];
@@ -435,16 +430,16 @@ H5_DLL herr_t H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page);
 
 /* Debugging routines for dumping file structures */
 H5_DLL herr_t H5EA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    FILE *stream, int indent, int fwidth, const H5EA_class_t *cls);
+    FILE *stream, int indent, int fwidth, const H5EA_class_t *cls, haddr_t obj_addr);
 H5_DLL herr_t H5EA__iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5EA_class_t *cls,
-    haddr_t hdr_addr);
+    haddr_t hdr_addr, haddr_t obj_addr);
 H5_DLL herr_t H5EA__sblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5EA_class_t *cls,
-    haddr_t hdr_addr, unsigned sblk_idx);
+    haddr_t hdr_addr, unsigned sblk_idx, haddr_t obj_addr);
 H5_DLL herr_t H5EA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5EA_class_t *cls,
-    haddr_t hdr_addr, size_t dblk_nelmts);
+    haddr_t hdr_addr, size_t dblk_nelmts, haddr_t obj_addr);
 
 /* Testing routines */
 #ifdef H5EA_TESTING

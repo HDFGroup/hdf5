@@ -21,8 +21,6 @@
  *
  * Purpose:             Debugs an existing HDF5 file at a low level.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #define H5A_PACKAGE		/*suppress error about including H5Apkg  */
@@ -259,6 +257,12 @@ main(int argc, char *argv[])
         HDexit(2);
     } /* end if */
 
+    /* Ignore metadata tags while using h5debug */
+    if(H5AC_ignore_tags(f) < 0) {
+        fprintf(stderr, "cannot ignore metadata tags\n");
+        HDexit(1);
+    }
+
     /*
      * Parse command arguments.
      */
@@ -479,7 +483,16 @@ main(int argc, char *argv[])
          */
         const H5EA_class_t *cls = get_H5EA_class(sig);
         HDassert(cls);
-        status = H5EA__hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls);
+
+	 /* Check for enough valid parameters */
+        if(extra == 0) {
+            fprintf(stderr, "ERROR: Need object header address containing the layout message in order to dump header\n");
+            fprintf(stderr, "Extensible array header block usage:\n");
+            fprintf(stderr, "\th5debug <filename> <Extensible Array header address> <object header address>\n");
+            HDexit(4);
+        } /* end if */
+
+        status = H5EA__hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra);
 
     } else if(!HDmemcmp(sig, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -489,14 +502,14 @@ main(int argc, char *argv[])
         HDassert(cls);
 
         /* Check for enough valid parameters */
-        if(extra == 0) {
-            fprintf(stderr, "ERROR: Need extensible array header address in order to dump index block\n");
+        if(extra == 0 || extra2 == 0) {
+            fprintf(stderr, "ERROR: Need extensible array header address and object header address containing the layout message in order to dump index block\n");
             fprintf(stderr, "Extensible array index block usage:\n");
-            fprintf(stderr, "\th5debug <filename> <index block address> <array header address>\n");
+            fprintf(stderr, "\th5debug <filename> <index block address> <array header address> <object header address\n");
             HDexit(4);
         } /* end if */
 
-        status = H5EA__iblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra);
+        status = H5EA__iblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, extra2);
 
     } else if(!HDmemcmp(sig, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -506,14 +519,14 @@ main(int argc, char *argv[])
         HDassert(cls);
 
         /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0) {
-            fprintf(stderr, "ERROR: Need extensible array header address and super block index in order to dump super block\n");
+        if(extra == 0 || extra2 == 0 || extra3 == 0) {
+            fprintf(stderr, "ERROR: Need extensible array header address, super block index and object header address containing the layout message in order to dump super block\n");
             fprintf(stderr, "Extensible array super block usage:\n");
-            fprintf(stderr, "\th5debug <filename> <super block address> <array header address> <super block index>\n");
+            fprintf(stderr, "\th5debug <filename> <super block address> <array header address> <super block index> <object header address>\n");
             HDexit(4);
         } /* end if */
 
-        status = H5EA__sblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2);
+        status = H5EA__sblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, extra3);
 
     } else if(!HDmemcmp(sig, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -523,14 +536,14 @@ main(int argc, char *argv[])
         HDassert(cls);
 
         /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0) {
-            fprintf(stderr, "ERROR: Need extensible array header address and # of elements in data block in order to dump data block\n");
+        if(extra == 0 || extra2 == 0 || extra3 == 0) {
+            fprintf(stderr, "ERROR: Need extensible array header address, # of elements in data block and object header address containing the layout message in order to dump data block\n");
             fprintf(stderr, "Extensible array data block usage:\n");
-            fprintf(stderr, "\th5debug <filename> <data block address> <array header address> <# of elements in data block>\n");
+            fprintf(stderr, "\th5debug <filename> <data block address> <array header address> <# of elements in data block> <object header address\n");
             HDexit(4);
         } /* end if */
 
-        status = H5EA__dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (size_t)extra2);
+        status = H5EA__dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (size_t)extra2, extra3);
 
     } else if(!HDmemcmp(sig, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -541,7 +554,7 @@ main(int argc, char *argv[])
 
 	/* Check for enough valid parameters */
         if(extra == 0) {
-	    fprintf(stderr, "ERROR: Need object header address containing the layout messagein order to dump header\n");
+	    fprintf(stderr, "ERROR: Need object header address containing the layout message in order to dump header\n");
             fprintf(stderr, "Fixed array header block usage:\n");
 	    fprintf(stderr, "\th5debug <filename> <Fixed Array header address> <object header address>\n");
             HDexit(4);
@@ -564,7 +577,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5FA__dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (size_t)extra2);
+        status = H5FA__dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, extra2);
 
     } else if(!HDmemcmp(sig, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
