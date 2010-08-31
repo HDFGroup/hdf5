@@ -385,8 +385,6 @@ END_FUNC(STATIC)  /* end H5EA__test_crt_dbg_context() */
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5EA__test_dst_dbg_context(void *_ctx);
-
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
 H5EA__test_dst_dbg_context(void *_ctx))
