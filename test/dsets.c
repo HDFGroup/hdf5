@@ -881,6 +881,7 @@ test_layout_extend(hid_t fapl)
     hsize_t cur_size[1] = {10};		/* Current size of dataspace */
     hsize_t max_unlim[1] = {H5S_UNLIMITED};		/* Maximum size of dataspace (unlimited) */
     hsize_t max_fix[1] = {100};				/* Maximum size of dataspace (fixed) */
+    hsize_t chunk_dim[1] = {10};			/* Chunk size */
 
     TESTING("extendible dataset with various layout");
 
@@ -936,6 +937,7 @@ test_layout_extend(hid_t fapl)
         FAIL_STACK_ERROR
     if(H5Pset_layout(dcpl_chunked, H5D_CHUNKED) < 0)
         FAIL_STACK_ERROR
+    if(H5Pset_chunk(dcpl_chunked, 1, chunk_dim) < 0) FAIL_STACK_ERROR
 
     /* Create dataset with extendible dataspace (fixed max_dims) should succeed */
     if((did_fixed = H5Dcreate2(fid, "chunked_fixed", H5T_NATIVE_INT, sid_fix, H5P_DEFAULT, dcpl_chunked, H5P_DEFAULT)) < 0)
@@ -6353,8 +6355,6 @@ error:
  * Programmer: Quincey Koziol
  *              Tuesday, July 27, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6362,19 +6362,41 @@ test_zero_dims(hid_t file)
 {
     hid_t       s=-1, d=-1, dcpl=-1;
     hsize_t     dsize=0, dmax=H5S_UNLIMITED, csize=5;
+    herr_t      ret;
 
     TESTING("I/O on datasets with zero-sized dims");
 
-    if((s = H5Screate_simple(1, &dsize, &dmax)) < 0) TEST_ERROR;
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
-    if(H5Pset_chunk(dcpl, 1, &csize) < 0) TEST_ERROR;
-    if((d = H5Dcreate2(file, ZERODIM_DATASET, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((s = H5Screate_simple(1, &dsize, &dmax)) < 0) FAIL_STACK_ERROR
 
-    if(H5Dwrite(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, (void*)911) < 0) TEST_ERROR;
+    /* Try creating chunked dataset with zero-sized chunk dimensions */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+    if(H5Pset_layout(dcpl, H5D_CHUNKED) < 0) FAIL_STACK_ERROR
+    H5E_BEGIN_TRY {
+        d = H5Dcreate2(file, ZERODIM_DATASET, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(d > 0) {
+        H5Dclose(d);
+        FAIL_PUTS_ERROR("created dataset with undefined chunk dimensions")
+    } /* end if */
 
-    if(H5Pclose(dcpl) < 0) TEST_ERROR;
-    if(H5Sclose(s) < 0) TEST_ERROR;
-    if(H5Dclose(d) < 0) TEST_ERROR;
+    H5E_BEGIN_TRY {
+        ret = H5Pset_chunk(dcpl, 1, &dsize);
+    } H5E_END_TRY;
+    if(ret > 0)
+        FAIL_PUTS_ERROR("set zero-sized chunk dimensions")
+
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+    if(H5Pset_chunk(dcpl, 1, &csize) < 0) FAIL_STACK_ERROR
+    if((d = H5Dcreate2(file, ZERODIM_DATASET, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    if(H5Dwrite(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, (void*)911) < 0) FAIL_STACK_ERROR
+
+    if(H5Dclose(d) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+
+    if(H5Sclose(s) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -6487,7 +6509,7 @@ error:
         H5Sclose(s);
     } H5E_END_TRY;
     return -1;
-} /* end test_zero_dims() */
+} /* end test_missing_chunk() */
 
 
 /*-------------------------------------------------------------------------
