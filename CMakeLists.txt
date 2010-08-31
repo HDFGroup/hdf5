@@ -123,13 +123,14 @@ SET (HDF5_HL_F90_C_LIB_TARGET     ${HDF5_HL_F90_C_LIB_CORENAME})
 #-----------------------------------------------------------------------------
 SET (HDF5_RESOURCES_DIR      ${HDF5_SOURCE_DIR}/config/cmake)
 SET (HDF5_SRC_DIR            ${HDF5_SOURCE_DIR}/src)
-SET (HDF5_TEST_SOURCE_DIR    ${HDF5_SOURCE_DIR}/test)
-SET (HDF5_CPP_SOURCE_DIR     ${HDF5_SOURCE_DIR}/c++)
-SET (HDF5_CPP_TEST_DIR       ${HDF5_CPP_SOURCE_DIR}/test)
-SET (HDF5_HL_SOURCE_DIR      ${HDF5_SOURCE_DIR}/hl)
-SET (HDF5_TOOLS_SOURCE_DIR   ${HDF5_SOURCE_DIR}/tools)
-SET (HDF5_PERFORM_SOURCE_DIR ${HDF5_SOURCE_DIR}/perform)
-SET (HDF5_F90_SOURCE_DIR     ${HDF5_SOURCE_DIR}/fortran)
+SET (HDF5_TEST_SRC_DIR       ${HDF5_SOURCE_DIR}/test)
+SET (HDF5_CPP_SRC_DIR        ${HDF5_SOURCE_DIR}/c++)
+SET (HDF5_CPP_TST_DIR        ${HDF5_SOURCE_DIR}/c++/test)
+SET (HDF5_HL_SRC_DIR         ${HDF5_SOURCE_DIR}/hl)
+SET (HDF5_HL_CPP_SRC_DIR     ${HDF5_SOURCE_DIR}/hl/c++)
+SET (HDF5_TOOLS_SRC_DIR      ${HDF5_SOURCE_DIR}/tools)
+SET (HDF5_PERFORM_SRC_DIR    ${HDF5_SOURCE_DIR}/perform)
+SET (HDF5_F90_SRC_DIR        ${HDF5_SOURCE_DIR}/fortran)
 
 # set default prefix location
 SET (CMAKE_INSTALL_PREFIX "./hdf5" CACHE PATH "Install path prefix, prepended onto install directories")
@@ -372,6 +373,7 @@ INCLUDE_DIRECTORIES (${HDF5_BINARY_DIR} ${HDF5_SRC_DIR})
 #-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
+SET (CMAKE_MODULE_PATH ${HDF5_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
 OPTION (HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
 IF (HDF5_ENABLE_PARALLEL)
   INCLUDE (FindMPI)
@@ -517,6 +519,11 @@ IF (BUILD_TESTING)
     IF (EXISTS "${HDF5_SOURCE_DIR}/perform" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/perform")
       ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/perform   ${PROJECT_BINARY_DIR}/perform)
     ENDIF(EXISTS "${HDF5_SOURCE_DIR}/perform" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/perform")
+    IF (H5_HAVE_PARALLEL)
+      IF (EXISTS "${HDF5_SOURCE_DIR}/testpar" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/testpar")
+        ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/testpar ${PROJECT_BINARY_DIR}/testpar)
+      ENDIF (EXISTS "${HDF5_SOURCE_DIR}/testpar" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/testpar")
+    ENDIF (H5_HAVE_PARALLEL)
   ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
   INCLUDE (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
 ENDIF (BUILD_TESTING)
@@ -632,8 +639,8 @@ ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 # Configure the hdf5-config.cmake file for the build directory
 #-----------------------------------------------------------------------------
 SET (HDF5_INCLUDES_BUILD_TIME
-    ${HDF5_SRC_DIR} ${HDF5_CPP_SOURCE_DIR} ${HDF5_HL_SOURCE_DIR}
-    ${HDF5_TOOLS_SOURCE_DIR} ${HDF5_BINARY_DIR}
+    ${HDF5_SRC_DIR} ${HDF5_CPP_SRC_DIR} ${HDF5_HL_SRC_DIR}
+    ${HDF5_TOOLS_SRC_DIR} ${HDF5_BINARY_DIR}
 )
 SET (HDF5_VERSION_STRING @HDF5_PACKAGE_VERSION@)
 SET (HDF5_VERSION_MAJOR  @HDF5_PACKAGE_VERSION_MAJOR@)

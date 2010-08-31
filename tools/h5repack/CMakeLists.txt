@@ -4,8 +4,8 @@ PROJECT (HDF5_TOOLS_H5REPACK)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
-INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
+INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
+INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
 
 # --------------------------------------------------------------------
 # Add h5Repack executables
@@ -19,7 +19,7 @@ SET (REPACK_COMMON_SRCS
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_verify.c
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack.c
 )
-INCLUDE_DIRECTORIES (${HDF5_TEST_SOURCE_DIR})
+
 ADD_EXECUTABLE (h5repack ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
 H5_NAMING (h5repack)
 IF (WIN32)
@@ -148,7 +148,7 @@ IF (BUILD_TESTING)
         TARGET     h5repack
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${h5c_file} ${dest}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5c_file} ${dest}
     )
   ENDFOREACH (h5c_file ${HDF5_COMMON_TEST_FILES})
   
