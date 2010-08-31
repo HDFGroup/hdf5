@@ -356,9 +356,7 @@ H5_DLLVAR const H5EA_class_t H5EA_CLS_CHUNK[1];
 H5_DLLVAR const H5EA_class_t H5EA_CLS_FILT_CHUNK[1];
 
 /* Internal extensible array testing class */
-#ifdef H5EA_TESTING
 H5_DLLVAR const H5EA_class_t H5EA_CLS_TEST[1];
-#endif /* H5EA_TESTING */
 
 /* Array of extensible array client ID -> client class mappings */
 extern const H5EA_class_t *const H5EA_client_class_g[H5EA_NUM_CLS_ID];

@@ -91,9 +91,6 @@
  *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
- * Modifications:
- *	Vailin Choi; July 2010
- * 	Create debugging context so that header can be loaded properly.
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PKG, ERR,
@@ -174,7 +171,6 @@ H5EA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 CATCH
     if(dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
         H5E_THROW(H5E_CANTRELEASE, "unable to release extensible array debugging context")
-
     if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_EARRAY_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
 
@@ -192,9 +188,6 @@ END_FUNC(PKG)   /* end H5EA__hdr_debug() */
  *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
- * Modifications:
- *	Vailin Choi; July 2010
- * 	Create debugging context so that header can be loaded properly.
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PKG, ERR,
@@ -320,9 +313,6 @@ END_FUNC(PKG)   /* end H5EA__iblock_debug() */
  *		koziol@hdfgroup.org
  *		Sep 30 2008
  *
- * Modifications:
- *	Vailin Choi; July 2010
- * 	Create debugging context so that header can be loaded properly.
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PKG, ERR,
@@ -415,9 +405,6 @@ END_FUNC(PKG)   /* end H5EA__sblock_debug() */
  *		koziol@hdfgroup.org
  *		Sep 22 2008
  *
- * Modifications:
- *	Vailin Choi; July 2010
- * 	Create debugging context so that header can be loaded properly.
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PKG, ERR,

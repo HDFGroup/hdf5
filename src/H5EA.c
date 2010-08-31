@@ -84,10 +84,6 @@ typedef herr_t (*H5EA__unprotect_func_t)(void *thing, hid_t dxpl_id,
 /* Remember to add client ID to H5EA_cls_id_t in H5EAprivate.h when adding a new
  * client class..
  */
-extern const H5EA_class_t H5EA_CLS_CHUNK[1];
-extern const H5EA_class_t H5EA_CLS_FILT_CHUNK[1];
-extern const H5EA_class_t H5EA_CLS_TEST[1];
-
 const H5EA_class_t *const H5EA_client_class_g[] = {
     H5EA_CLS_CHUNK,		/* 0 - H5EA_CLS_CHUNK_ID 		*/
     H5EA_CLS_FILT_CHUNK,	/* 1 - H5EA_CLS_FILT_CHUNK_ID 		*/

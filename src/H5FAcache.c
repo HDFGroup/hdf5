@@ -496,9 +496,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_dest() */
  * Programmer:	Vailin Choi
  *              Thursday, April 30, 2009
  *
- * Modifications: 
- *	Vailin Choi; July 2010
- *	Moved Fixed array type to be right after MAGIC # and version.
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, ERR,
@@ -628,9 +625,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_load() */
  * Programmer:	Vailin Choi
  *              Thursday, April 30, 2009
  *
- * Modifications: 
- *	Vailin Choi; July 2010
- *	Moved Fixed array type to be right after MAGIC # and version.
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, ERR,

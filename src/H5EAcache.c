@@ -560,10 +560,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_dest() */
  *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
- * Modifications:
- *      Vailin Choi; July 2010
- *      Moved Fixed array type to be right after MAGIC # and version.
-
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, ERR,
@@ -704,9 +700,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_load() */
  *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
- * Modifications:
- *      Vailin Choi; July 2010
- *      Moved Fixed array type to be right after MAGIC # and version.
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, ERR,
@@ -985,9 +978,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_dest() */
  *		koziol@hdfgroup.org
  *		Sep 30 2008
  *
- * Modifications:
- *      Vailin Choi; July 2010
- *      Moved Fixed array type to be right after MAGIC # and version.
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, ERR,
@@ -1119,9 +1109,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_load() */
  *		koziol@hdfgroup.org
  *		Sep 30 2008
  *
- * Modifications:
- *      Vailin Choi; July 2010
- *      Moved Fixed array type to be right after MAGIC # and version.
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, ERR,
@@ -1390,9 +1377,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_dest() */
  *		koziol@hdfgroup.org
  *		Sep 16 2008
  *
- * Modifications:
- *      Vailin Choi; July 2010
- *      Moved Fixed array type to be right after MAGIC # and version.
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, ERR,
@@ -1522,9 +1506,6 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_load() */
  *		koziol@hdfgroup.org
  *		Sep 18 2008
  *
- * Modifications:
- *      Vailin Choi; July 2010
- *      Moved Fixed array type to be right after MAGIC # and version.
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, ERR,

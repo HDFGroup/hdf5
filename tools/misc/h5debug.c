@@ -21,8 +21,6 @@
  *
  * Purpose:             Debugs an existing HDF5 file at a low level.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #define H5A_PACKAGE		/*suppress error about including H5Apkg  */
@@ -144,10 +142,6 @@ get_H5B2_class(const uint8_t *sig)
  *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added Extensible Array class callbacks.
- *
  *-------------------------------------------------------------------------
  */
 static const H5EA_class_t *
@@ -234,9 +228,6 @@ get_H5FA_class(const uint8_t *sig)
  *              matzke@llnl.gov
  *              Jul 18 1997
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Modified to handle Extensible Array and Fixed Array meta data.
  *-------------------------------------------------------------------------
  */
 int

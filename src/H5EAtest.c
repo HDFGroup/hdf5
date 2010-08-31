@@ -79,7 +79,6 @@ static herr_t H5EA__test_encode(void *raw, const void *elmt, size_t nelmts, void
 static herr_t H5EA__test_decode(const void *raw, void *elmt, size_t nelmts, void *ctx);
 static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt);
 static void *H5EA__test_crt_dbg_context(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED obj_addr);
-
 static herr_t H5EA__test_dst_dbg_context(void *_ctx);
 
 /*********************/
@@ -113,6 +112,7 @@ const H5EA_class_t H5EA_CLS_TEST[1]={{
 
 /* Declare a free list to manage the H5EA__test_ctx_t struct */
 H5FL_DEFINE_STATIC(H5EA__test_ctx_t);
+
 /* Declare a free list to manage the H5EA__ctx_cb_t struct */
 H5FL_DEFINE_STATIC(H5EA__ctx_cb_t);
 
