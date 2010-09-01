@@ -462,12 +462,18 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
      * possible is if the first file of a family of files was opened
      * individually.
      */
-    if(HADDR_UNDEF == (eof = H5FD_get_eof(lf)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to determine file size")
+    /* (This check can be skipped when the file is opened for SWMR read,
+     * as the file can appear truncated if only part of it has been
+     * been flushed to disk by the single writer process.)
+     */
+    if (!(f->intent && H5F_ACC_SWMR_READ)) {
+        if(HADDR_UNDEF == (eof = H5FD_get_eof(lf)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to determine file size")
 
-    /* (Account for the stored EOA being absolute offset -QAK) */
-    if((eof + sblock->base_addr) < stored_eoa)
-        HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, "truncated file")
+        /* (Account for the stored EOA being absolute offset -QAK) */
+        if((eof + sblock->base_addr) < stored_eoa)
+            HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, "truncated file")
+    } /* end if */
 
     /*
      * Tell the file driver how much address space has already been
