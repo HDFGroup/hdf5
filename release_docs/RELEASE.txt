@@ -76,6 +76,9 @@ New Features
 
     Library:
     --------
+    - H5Tset_order and H5Tget_order now support all data types.  A new byte
+      order H5T_ORDER_MIXED has been added specifically for compound datatype
+      and its derived type.  Please see bug #1934. (SLU - 2010/8/23)
     - Improved performance of the chunk cache by avoiding unnecessary b-tree
       lookups of chunks already in cache. (NAF - 2010/06/15) 
     - Greatly improved performance of extending a dataset with early
@@ -234,6 +237,14 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed the bug in the filter's public CAN_APPLY function.  The return
+            value should be htri_t not herr_t (Bug #1239). (SLU - 2010/8/5)
+      - Fixed a bug in the direct I/O driver that could render files with
+            certain kinds of unaligned data unreadable or corrupt them.
+            (NAF - 2010/07/28)
+      - valgrind reported an error of copying data to itself when a new attribute
+            is written (Bug #1956).  I fixed it by taking out the memcpy step in 
+            the attribute code. (SLU - 2010/07/28)
       - Fixed a bug that could cause file corruption when using non-default
             sizes of addresses and/or lengths.  This bug could also cause
             uncorrupted files with this property to be unreadable.  This bug

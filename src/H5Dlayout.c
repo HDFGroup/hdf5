@@ -274,7 +274,7 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
 
     /* Query the dimensionality of the dataspace */
     if((sndims = H5S_GET_EXTENT_NDIMS(space)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "invalid dataspace rank")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "invalid dataspace rank")
     ndims = (unsigned)sndims;
 
     /* Avoid scalar/null dataspace */
@@ -285,7 +285,7 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
 
         /* Query the dataspace's dimensions */
         if(H5S_get_simple_extent_dims(space, NULL, max_dims) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get dataspace max. dimensions")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace max. dimensions")
 
         /* Spin through the max. dimensions, looking for unlimited dimensions */
         for(u = 0; u < ndims; u++)
@@ -294,7 +294,10 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
 
 	/* Chunked datasets with unlimited dimension(s) */
         if(unlim_count) { /* dataset with unlimited dimension(s) must be chunked */
-	    HDassert(layout->type == H5D_CHUNKED); 
+            /* Check for invalid layout type */
+            if(layout->type != H5D_CHUNKED)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "dataset with unlimited dimensions is not chunked")
+
 	    if(1 == unlim_count) { /* Chunked dataset with only 1 unlimited dimension */
 		layout->u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
 		layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;

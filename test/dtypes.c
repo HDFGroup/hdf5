@@ -25,9 +25,6 @@
 #include "h5test.h"
 #include "H5Iprivate.h"     /* For checking that datatype id's don't leak */
 
-/* Number of times to run each test */
-#define NTESTS	1
-
 /* Number of elements in each test */
 #define NTESTELEM	100000
 
@@ -184,64 +181,64 @@ test_classes(void)
     hid_t memb_id;      /* Compound member datatype */
     H5T_class_t         memb_cls;
     H5T_class_t         tcls;
-    unsigned int        nmembs, i;
+    int                 nmembs;
+    unsigned            u;
 
     TESTING("H5Tget_class()");
 
     /*-------------------------------------------------------------
      *  Check class of some atomic types.
      *-----------------------------------------------------------*/
-    if ((tcls=H5Tget_class(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if (H5T_INTEGER!=tcls) TEST_ERROR
+    if((tcls = H5Tget_class(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if(H5T_INTEGER != tcls) TEST_ERROR
 
-    if ((tcls=H5Tget_class(H5T_NATIVE_DOUBLE)) < 0) TEST_ERROR
-    if (H5T_FLOAT!=tcls) TEST_ERROR
+    if((tcls = H5Tget_class(H5T_NATIVE_DOUBLE)) < 0) TEST_ERROR
+    if(H5T_FLOAT != tcls) TEST_ERROR
 
     /* Create a VL datatype of char.  It should be a VL, not a string class. */
-    if((vlc_id=H5Tvlen_create(H5T_NATIVE_CHAR)) < 0) TEST_ERROR
+    if((vlc_id = H5Tvlen_create(H5T_NATIVE_CHAR)) < 0) TEST_ERROR
 
     /* Make certain that the correct classes can be detected */
-    if ((tcls=H5Tget_class(vlc_id)) < 0) TEST_ERROR
-    if (H5T_VLEN!=tcls) TEST_ERROR
+    if((tcls = H5Tget_class(vlc_id)) < 0) TEST_ERROR
+    if(H5T_VLEN != tcls) TEST_ERROR
 
     /* Make certain that an incorrect class is not detected */
-    if (H5T_STRING==tcls) TEST_ERROR
+    if(H5T_STRING == tcls) TEST_ERROR
 
     /* Create a VL string.  It should be a string, not a VL class. */
-    if((vls_id=H5Tcopy(H5T_C_S1)) < 0) TEST_ERROR
+    if((vls_id = H5Tcopy(H5T_C_S1)) < 0) TEST_ERROR
     if(H5Tset_size(vls_id, H5T_VARIABLE) < 0) TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if ((tcls=H5Tget_class(vls_id)) < 0) TEST_ERROR
-    if (H5T_STRING!=tcls) TEST_ERROR
+    if((tcls = H5Tget_class(vls_id)) < 0) TEST_ERROR
+    if(H5T_STRING != tcls) TEST_ERROR
 
     /* Make certain that an incorrect class is not detected */
-    if (H5T_VLEN==tcls) TEST_ERROR
+    if(H5T_VLEN == tcls) TEST_ERROR
 
     /*-------------------------------------------------------------
      *  Check class for member types of compound type.
      *-----------------------------------------------------------*/
     /* Create a compound datatype and insert some complex types */
-    if ((cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex))) < 0) TEST_ERROR
-    if (H5Tinsert(cmpd_id, "vl_c", HOFFSET(struct complex, vl_c), vlc_id) < 0) TEST_ERROR
-    if (H5Tinsert(cmpd_id, "vl_s", HOFFSET(struct complex, vl_s), vls_id) < 0) TEST_ERROR
+    if((cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex))) < 0) TEST_ERROR
+    if(H5Tinsert(cmpd_id, "vl_c", HOFFSET(struct complex, vl_c), vlc_id) < 0) TEST_ERROR
+    if(H5Tinsert(cmpd_id, "vl_s", HOFFSET(struct complex, vl_s), vls_id) < 0) TEST_ERROR
 
-    nmembs = H5Tget_nmembers(cmpd_id);
+    if((nmembs = H5Tget_nmembers(cmpd_id)) < 0) TEST_ERROR
 
-    for (i=0;i<nmembs;i++)
-    {
+    for(u = 0; u < (unsigned)nmembs; u++) {
         /* Get member type ID */
-        if((memb_id = H5Tget_member_type(cmpd_id, i)) < 0) TEST_ERROR
+        if((memb_id = H5Tget_member_type(cmpd_id, u)) < 0) TEST_ERROR
 
         /* Get member type class */
-        if((memb_cls = H5Tget_member_class (cmpd_id, i)) < 0) TEST_ERROR
+        if((memb_cls = H5Tget_member_class (cmpd_id, u)) < 0) TEST_ERROR
 
         /* Verify member class */
-        if(H5Tdetect_class (memb_id, memb_cls) < 0) TEST_ERROR
+        if(H5Tdetect_class(memb_id, memb_cls) < 0) TEST_ERROR
 
         /* Close member type ID */
         if(H5Tclose(memb_id) < 0) TEST_ERROR
-    }
+    } /* end for */
 
     /* Close datatypes */
     if(H5Tclose(cmpd_id) < 0) TEST_ERROR
@@ -588,12 +585,11 @@ test_compound_1(void)
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
-    H5E_BEGIN_TRY {
-        order = H5Tget_order(complex_id);
-    } H5E_END_TRY;
-    if (order>-1) {
-        FAIL_PUTS_ERROR("Operation not allowed for this type.");
-    } /* end if */
+    /* We started to support this function for compound type in 1.8.6 release. */
+    if((order = H5Tget_order(complex_id)) == H5T_ORDER_ERROR)
+        FAIL_PUTS_ERROR("Can't get order for compound type.");
+    if(order != H5T_ORDER_LE && order != H5T_ORDER_BE)
+        FAIL_PUTS_ERROR("Wrong order for this type.");
 
     H5E_BEGIN_TRY {
         sign = H5Tget_sign(complex_id);
@@ -2315,7 +2311,7 @@ test_compound_13(void)
         float y;
     };
     struct s1   data_out, data_in;
-    hid_t       fileid, grpid, typeid, array1_tid, spaceid, attid;
+    hid_t       fileid, grpid, dtypeid, array1_tid, spaceid, attid;
     hid_t       fapl_id;
     hsize_t     dims[1] = {COMPOUND13_ARRAY_SIZE + 1};
     char        filename[1024];
@@ -2324,6 +2320,7 @@ test_compound_13(void)
     TESTING("compound datatypes of boundary size with latest format");
 
     /* Create some phony data. */
+    HDmemset(&data_out, 0, sizeof(data_out));
     for(u = 0; u < COMPOUND13_ARRAY_SIZE + 1; u++)
         data_out.x[u] = u;
     data_out.y = 99.99;
@@ -2340,24 +2337,24 @@ test_compound_13(void)
     if((grpid = H5Gopen2(fileid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create a compound type. */
-    if((typeid = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0) FAIL_STACK_ERROR
+    if((dtypeid = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0) FAIL_STACK_ERROR
     if((array1_tid = H5Tarray_create2(H5T_NATIVE_UCHAR, 1, dims)) < 0) FAIL_STACK_ERROR
-    if(H5Tinsert(typeid, "x", HOFFSET(struct s1, x), array1_tid) < 0) FAIL_STACK_ERROR
-    if(H5Tinsert(typeid, "y", HOFFSET(struct s1, y), H5T_NATIVE_FLOAT) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(dtypeid, "x", HOFFSET(struct s1, x), array1_tid) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(dtypeid, "y", HOFFSET(struct s1, y), H5T_NATIVE_FLOAT) < 0) FAIL_STACK_ERROR
 
     /* Create a space. */
     if((spaceid = H5Screate(H5S_SCALAR)) < 0) FAIL_STACK_ERROR
 
     /* Create an attribute of this compound type. */
-    if((attid = H5Acreate2(grpid, COMPOUND13_ATTR_NAME, typeid, spaceid, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((attid = H5Acreate2(grpid, COMPOUND13_ATTR_NAME, dtypeid, spaceid, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Write some data. */
-    if(H5Awrite(attid, typeid, &data_out) < 0) FAIL_STACK_ERROR
+    if(H5Awrite(attid, dtypeid, &data_out) < 0) FAIL_STACK_ERROR
 
     /* Release all resources. */
     if(H5Aclose(attid) < 0) FAIL_STACK_ERROR
     if(H5Tclose(array1_tid) < 0) FAIL_STACK_ERROR
-    if(H5Tclose(typeid) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(dtypeid) < 0) FAIL_STACK_ERROR
     if(H5Sclose(spaceid) < 0) FAIL_STACK_ERROR
     if(H5Gclose(grpid) < 0) FAIL_STACK_ERROR
     if(H5Fclose(fileid) < 0) FAIL_STACK_ERROR
@@ -2367,11 +2364,11 @@ test_compound_13(void)
     if((fileid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((grpid = H5Gopen2(fileid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((attid = H5Aopen(grpid, COMPOUND13_ATTR_NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((typeid = H5Aget_type(attid)) < 0) FAIL_STACK_ERROR
-    if(H5Tget_class(typeid) != H5T_COMPOUND) FAIL_STACK_ERROR
-    if(HOFFSET(struct s1, x) != H5Tget_member_offset(typeid, 0)) TEST_ERROR
-    if(HOFFSET(struct s1, y) != H5Tget_member_offset(typeid, 1)) TEST_ERROR
-    if(H5Aread(attid, typeid, &data_in) < 0) FAIL_STACK_ERROR
+    if((dtypeid = H5Aget_type(attid)) < 0) FAIL_STACK_ERROR
+    if(H5Tget_class(dtypeid) != H5T_COMPOUND) FAIL_STACK_ERROR
+    if(HOFFSET(struct s1, x) != H5Tget_member_offset(dtypeid, 0)) TEST_ERROR
+    if(HOFFSET(struct s1, y) != H5Tget_member_offset(dtypeid, 1)) TEST_ERROR
+    if(H5Aread(attid, dtypeid, &data_in) < 0) FAIL_STACK_ERROR
 
     /* Check the data. */
     for (u = 0; u < COMPOUND13_ARRAY_SIZE + 1; u++)
@@ -2380,7 +2377,7 @@ test_compound_13(void)
 
     /* Release all resources. */
     if(H5Aclose(attid) < 0) FAIL_STACK_ERROR
-    if(H5Tclose(typeid) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(dtypeid) < 0) FAIL_STACK_ERROR
     if(H5Gclose(grpid) < 0) FAIL_STACK_ERROR
     if(H5Fclose(fileid) < 0) FAIL_STACK_ERROR
 
@@ -4049,7 +4046,7 @@ test_conv_str_2(void)
     char		*buf = NULL, s[80];
     hid_t		c_type = -1;
     hid_t       	f_type = -1;
-    const size_t	nelmts = NTESTELEM, ntests=NTESTS;
+    const size_t	nelmts = NTESTELEM;
     size_t		i, j, nchars;
     int			ret_value = 1;
 
@@ -4068,19 +4065,14 @@ test_conv_str_2(void)
     } /* end for */
 
     /* Do the conversions */
-    for(i = 0; i < ntests; i++) {
-	if(ntests > 1)
-	    sprintf(s, "Testing random string conversion speed (test %d/%d)", (int)(i + 1), (int)ntests);
-	else
-	    sprintf(s, "Testing random string conversion speed");
-        printf("%-70s", s);
-        HDfflush(stdout);
-        if(H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
-            goto error;
-        if(H5Tconvert(f_type, c_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
-            goto error;
-        PASSED();
-    } /* end for */
+    sprintf(s, "Testing random string conversion speed");
+    printf("%-70s", s);
+    HDfflush(stdout);
+    if(H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
+        goto error;
+    if(H5Tconvert(f_type, c_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
+        goto error;
+    PASSED();
 
     ret_value = 0;
 
@@ -4232,7 +4224,6 @@ static int
 test_conv_enum_1(void)
 {
     const size_t nelmts=NTESTELEM;
-    const int	ntests=NTESTS;
     int		i, val, *buf=NULL;
     hid_t	t1 = -1;
     hid_t	t2 = -1;
@@ -4257,27 +4248,17 @@ test_conv_enum_1(void)
         buf[u] = HDrand() % 26;
 
     /* Conversions */
-    for(i = 0; i < ntests; i++) {
-	if(ntests > 1)
-	    sprintf(s, "Testing random enum conversion O(N) (test %d/%d)", i + 1, ntests);
-	else
-	    sprintf(s, "Testing random enum conversion O(N)");
-        printf("%-70s", s);
-        HDfflush(stdout);
-        if(H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT) < 0) goto error;
-        PASSED();
-    } /* end for */
+    sprintf(s, "Testing random enum conversion O(N)");
+    printf("%-70s", s);
+    HDfflush(stdout);
+    if(H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT) < 0) goto error;
+    PASSED();
 
-    for(i = 0; i < ntests; i++) {
-	if(ntests > 1)
-	    sprintf(s, "Testing random enum conversion O(N log N) (test %d/%d)", i + 1, ntests);
-	else
-	    sprintf(s, "Testing random enum conversion O(N log N)");
-        printf("%-70s", s);
-        HDfflush(stdout);
-        if(H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT) < 0) goto error;
-        PASSED();
-    }
+    sprintf(s, "Testing random enum conversion O(N log N)");
+    printf("%-70s", s);
+    HDfflush(stdout);
+    if(H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT) < 0) goto error;
+    PASSED();
 
     ret_value = 0;
 
@@ -4879,14 +4860,6 @@ opaque_funcs(void)
     } /* end if */
 
     H5E_BEGIN_TRY {
-        ret=H5Tset_order(type, H5T_ORDER_BE);
-    } H5E_END_TRY;
-    if (ret>=0) {
-        printf("Operation not allowed for this type.\n");
-        TEST_ERROR
-    } /* end if */
-
-    H5E_BEGIN_TRY {
         sign = H5Tget_sign(type);
     } H5E_END_TRY;
     if (sign>-1) {
@@ -5325,7 +5298,7 @@ test_encode(void)
         goto error;
     } /* end if */
 
-    if(vlstr_buf_size>0)
+    if(vlstr_buf_size > 0)
         vlstr_buf = (unsigned char*)HDcalloc((size_t)1, vlstr_buf_size);
 
     if(H5Tencode(tid3, vlstr_buf, &vlstr_buf_size) < 0) {
@@ -5340,6 +5313,7 @@ test_encode(void)
         printf("Can't decode VL string type\n");
         goto error;
     } /* end if */
+    free(vlstr_buf);
 
     /* Verify that the datatype was copied exactly */
     if(H5Tequal(decoded_tid3, tid3)<=0) {
@@ -5784,13 +5758,10 @@ error:
  *              H5T_ORDER_NONE cannot be set.
  *
  * Return:      Success:        0
- *
  *              Failure:        number of errors
  *
  * Programmer:  Neil Fortner
  *              January 23, 2009
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5865,24 +5836,22 @@ test_set_order(void)
     if (H5T_ORDER_BE != H5Tget_order(dtype)) TEST_ERROR;
     if (H5Tclose(dtype) < 0) TEST_ERROR
 
-    /* Opaque - functions should fail */
+    /* Opaque - No effect on the order */
     if ((dtype = H5Tcreate(H5T_OPAQUE, (size_t)96)) < 0) TEST_ERROR
-    H5E_BEGIN_TRY
-        ret = H5Tset_order(dtype, H5T_ORDER_LE);
-        order = H5Tget_order(dtype);
-    H5E_END_TRY
-    if (ret >= 0) TEST_ERROR
-    if (order >= 0) TEST_ERROR
+    if (H5T_ORDER_NONE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tset_order(dtype, H5T_ORDER_NONE) < 0) TEST_ERROR
+    if (H5Tset_order(dtype, H5T_ORDER_BE) < 0) TEST_ERROR
+    if (H5T_ORDER_NONE != H5Tget_order(dtype)) TEST_ERROR;
     if (H5Tclose(dtype) < 0) TEST_ERROR
 
-    /* Compound - functions should fail */
+    /* Compound */
     if ((dtype = H5Tcreate(H5T_COMPOUND, (size_t)48)) < 0) TEST_ERROR
     H5E_BEGIN_TRY
-        ret = H5Tset_order(dtype, H5T_ORDER_LE);
-        order = H5Tget_order(dtype);
+        ret = H5Tset_order(dtype, H5T_ORDER_BE);
     H5E_END_TRY
     if (ret >= 0) TEST_ERROR
-    if (order >= 0) TEST_ERROR
+    if ((order = H5Tget_order(dtype)) == H5T_ORDER_ERROR) TEST_ERROR
+    if (order != H5T_ORDER_NONE) TEST_ERROR
     if (H5Tclose(dtype) < 0) TEST_ERROR
 
     /* Object reference */
@@ -5941,6 +5910,144 @@ error:
     H5E_END_TRY;
     return 1;
 } /* end test_set_order() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_set_order_compound
+ *
+ * Purpose:     Tests H5Tset_order/H5Tget_order for complicated compound 
+ *              type.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu
+ *              18 August 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_set_order_compound(hid_t fapl)
+{
+    typedef struct {     /* Struct with atomic fields */
+        int   i;
+        char  c;
+        short s;
+        float f;
+    } atomic_cmpd;
+
+    typedef struct {     /* Struct with complex fields */
+        atomic_cmpd a;
+        hvl_t       vl;
+        double      b[3][4];
+        atomic_cmpd d[3][4];
+    } complex_cmpd;
+
+    hid_t       file = -1;
+    hid_t       cmpd = -1, memb_cmpd = -1, memb_array1 = -1, memb_array2 = -1, cmpd_array = -1;
+    hid_t       vl_id = -1;
+    hsize_t     dims[2] = {3, 4};   /* Array dimenstions */
+    char	filename[1024];
+    herr_t      ret;                /* Generic return value */
+
+    TESTING("H5Tset/get_order for compound type");
+
+    if((memb_cmpd = H5Tcreate(H5T_COMPOUND, sizeof(atomic_cmpd))) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(memb_cmpd, "i", HOFFSET(atomic_cmpd, i), H5T_NATIVE_INT) < 0) FAIL_STACK_ERROR 
+    if(H5Tinsert(memb_cmpd, "c", HOFFSET(atomic_cmpd, c), H5T_NATIVE_CHAR) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(memb_cmpd, "s", HOFFSET(atomic_cmpd, s), H5T_NATIVE_SHORT) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(memb_cmpd, "f", HOFFSET(atomic_cmpd, f), H5T_NATIVE_FLOAT) < 0) FAIL_STACK_ERROR
+
+    /* Set the order to little-endian. */
+    if(H5Tset_order(memb_cmpd, H5T_ORDER_BE) < 0) FAIL_STACK_ERROR
+
+    /* Create the array datatypes */
+    memb_array1 = H5Tarray_create2(H5T_NATIVE_DOUBLE, 2, dims);
+    memb_array2 = H5Tarray_create2(memb_cmpd, 2, dims);
+
+    /* Set the order to big-endian. */
+    if(H5Tset_order(memb_array1, H5T_ORDER_LE) < 0) FAIL_STACK_ERROR
+
+    /* Create a variable-length datatype */
+    if((vl_id = H5Tvlen_create(H5T_NATIVE_UINT)) < 0) FAIL_STACK_ERROR
+
+    /* Create a compound type using the types above. */
+    if((cmpd = H5Tcreate(H5T_COMPOUND, sizeof(complex_cmpd))) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd, "a", HOFFSET(complex_cmpd, a), memb_cmpd) < 0) FAIL_STACK_ERROR 
+    if(H5Tinsert(cmpd, "vl_type", HOFFSET(complex_cmpd, vl), vl_id) < 0) FAIL_STACK_ERROR 
+    if(H5Tinsert(cmpd, "b", HOFFSET(complex_cmpd, b), memb_array1) < 0) FAIL_STACK_ERROR 
+    if(H5Tinsert(cmpd, "d", HOFFSET(complex_cmpd, d), memb_array2) < 0) FAIL_STACK_ERROR 
+
+    /* The order should be mixed now. */
+    if(H5Tget_order(cmpd) != H5T_ORDER_MIXED) FAIL_STACK_ERROR 
+
+    /* Create an array of the compound type above */
+    cmpd_array = H5Tarray_create2(cmpd, 2, dims);
+
+    /* The order of the array type should be the same as the compound type */
+    if(H5Tget_order(cmpd_array) != H5T_ORDER_MIXED) FAIL_STACK_ERROR 
+
+    /* Verify that the order can't be 'none'. */
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(cmpd, H5T_ORDER_NONE);
+    H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    /* Verify that the order can't be 'mixed'. */
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(cmpd, H5T_ORDER_MIXED);
+    H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    /* Change the order of the compound type to big-endian*/
+    if(H5Tset_order(cmpd, H5T_ORDER_BE) < 0) FAIL_STACK_ERROR
+
+    /* Verify that the order of the compound type is big-endian */
+    if(H5Tget_order(cmpd) != H5T_ORDER_BE) FAIL_STACK_ERROR 
+
+    /* Change the order of the array type to little-endian*/
+    if(H5Tset_order(cmpd_array, H5T_ORDER_LE) < 0) FAIL_STACK_ERROR
+
+    /* Verify that the order of the array type is little-endian */
+    if(H5Tget_order(cmpd_array) != H5T_ORDER_LE) FAIL_STACK_ERROR 
+
+    /* Create file */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Commit the data type */
+    if(H5Tcommit2(file, "compound", cmpd, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    /* Verify that committed type can't change order */
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(cmpd, H5T_ORDER_LE);
+    H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    if(H5Tclose(memb_cmpd) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(memb_array1) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(memb_array2) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(vl_id) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(cmpd) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(cmpd_array) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+        H5Tclose(memb_cmpd);
+        H5Tclose(memb_array1);
+        H5Tclose(memb_array2);
+        H5Tclose(vl_id);
+        H5Tclose(cmpd);
+        H5Tclose(cmpd_array);
+	H5Fclose(file);
+    H5E_END_TRY;
+    return 1;
+} /* end test_set_order_compound() */
 
 
 /*-------------------------------------------------------------------------
@@ -6339,6 +6446,7 @@ main(void)
     nerrors += test_latest();
     nerrors += test_int_float_except();
     nerrors += test_named_indirect_reopen(fapl);
+    nerrors += test_set_order_compound(fapl);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     nerrors += test_deprec(fapl);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

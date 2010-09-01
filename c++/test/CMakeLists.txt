@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
+PROJECT (HDF5_CPP_TEST)
 # --------------------------------------------------------------------
 # Notes: When creating unit test executables they should be prefixed
 # with "cpp_". This allows for easier filtering of the test suite when
@@ -6,8 +7,6 @@ cmake_minimum_required (VERSION 2.8)
 #  ctest -R cpp_
 # which would only run the C++ based unit tests.
 # --------------------------------------------------------------------
-
-PROJECT (HDF5_CPP_TEST)
 
 #-----------------------------------------------------------------------------
 # Define Sources
@@ -34,7 +33,7 @@ SET (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 CONFIGURE_FILE (${HDF5_CPP_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
 
-INCLUDE_DIRECTORIES (${HDF5_TEST_SOURCE_DIR} )
+INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR} )
 
 ADD_EXECUTABLE (cpp_testhdf5 ${CPP_TEST_SRCS} )
 H5_NAMING (cpp_testhdf5)

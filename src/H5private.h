@@ -480,8 +480,9 @@ typedef struct {
  * function (or any other non-HDF5 function) in the source!
  */
 
- /* Use platform-specific versions if necessary */
-#include "H5win32defs.h"
+/* Put all platform-specific definitions in the following file */
+/* so that the following definitions are platform free. */
+#include "H5win32defs.h"	/* For Windows-specific definitions */
 
 #ifndef HDabort
     #define HDabort()		abort()
@@ -912,11 +913,14 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDlongjmp
     #define HDlongjmp(J,N)		longjmp(J,N)
 #endif /* HDlongjmp */
+/* HDlseek and HDoff_t must be defined together for consistency. */
 #ifndef HDlseek
     #ifdef H5_HAVE_LSEEK64
-       #define HDlseek(F,O,W)	lseek64(F,O,W)
+        #define HDlseek(F,O,W)	lseek64(F,O,W)
+        #define HDoff_t		off64_t
     #else
-       #define HDlseek(F,O,W)	lseek(F,O,W)
+        #define HDlseek(F,O,W)	lseek(F,O,W)
+	#define HDoff_t		off_t
     #endif
 #endif /* HDlseek */
 #ifndef HDmalloc
@@ -2338,8 +2342,8 @@ H5_DLL uint32_t H5_hash_string(const char *str);
 H5_DLL herr_t   H5_build_extpath(const char *, char ** /*out*/ );
 
 /* Functions for debugging */
-H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, uint8_t *buf,
-    uint8_t *marker, size_t buf_offset, size_t buf_size);
+H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,
+    const uint8_t *marker, size_t buf_offset, size_t buf_size);
 
 #endif /* _H5private_H */
 

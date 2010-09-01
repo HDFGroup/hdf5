@@ -350,7 +350,7 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
     proxy->ent = ent;
 
     /* Insert chunk proxy into metadata cache, pinned */
-    if(H5AC_set(dset->oloc.file, dxpl_id, H5AC_CHUNK_PROXY, ent->proxy_addr, proxy, H5AC__PIN_ENTRY_FLAG) < 0)
+    if(H5AC_insert_entry(dset->oloc.file, dxpl_id, H5AC_CHUNK_PROXY, ent->proxy_addr, proxy, H5AC__PIN_ENTRY_FLAG) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't add chunk proxy to cache")
 
     /* Compose chunked index info struct */

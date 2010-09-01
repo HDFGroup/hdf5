@@ -1811,18 +1811,18 @@ test_pack_ooo(void)
         TESTING("random member insertion with empty compound subtype");
 
         /* Create inner compound type.  It will be empty for the first run */
-        if((sub_cmpd = H5Tcreate(H5T_COMPOUND, 4)) < 0) PACK_OOO_ERROR
+        if((sub_cmpd = H5Tcreate(H5T_COMPOUND, (size_t)4)) < 0) PACK_OOO_ERROR
 
         /* Create main compound type, with extra space at the end */
-        if((cmpd = H5Tcreate(H5T_COMPOUND, (4 * PACK_NMEMBS) + extra_space)) < 0) PACK_OOO_ERROR
+        if((cmpd = H5Tcreate(H5T_COMPOUND, (size_t)((4 * PACK_NMEMBS) + extra_space))) < 0) PACK_OOO_ERROR
 
         /* Insert the compound members in the random order previously generated */
         for(i=0; i<PACK_NMEMBS; i++) {
             sprintf(name, "%05d", i);
             if(i == sub_cmpd_order) {
-                if(H5Tinsert(cmpd, name, 4 * order[i], sub_cmpd) < 0) PACK_OOO_ERROR
+                if(H5Tinsert(cmpd, name, (size_t)(4 * order[i]), sub_cmpd) < 0) PACK_OOO_ERROR
             } else
-                if(H5Tinsert(cmpd, name, 4 * order[i], H5T_STD_I32BE) < 0) PACK_OOO_ERROR
+                if(H5Tinsert(cmpd, name, (size_t)(4 * order[i]), H5T_STD_I32BE) < 0) PACK_OOO_ERROR
         } /* end for */
 
         /* Verify that the compound is not packed */
@@ -1837,18 +1837,18 @@ test_pack_ooo(void)
         TESTING("random member insertion with full compound subtype");
 
         /* Complete the inner compound type */
-        if(H5Tinsert(sub_cmpd, "int", 0, H5T_STD_I32LE) < 0) PACK_OOO_ERROR
+        if(H5Tinsert(sub_cmpd, "int", (size_t)0, H5T_STD_I32LE) < 0) PACK_OOO_ERROR
 
         /* Recreate main compound type */
-        if((cmpd = H5Tcreate(H5T_COMPOUND, (4 * PACK_NMEMBS) + extra_space)) < 0) PACK_OOO_ERROR
+        if((cmpd = H5Tcreate(H5T_COMPOUND, (size_t)((4 * PACK_NMEMBS) + extra_space))) < 0) PACK_OOO_ERROR
 
         /* Insert the compound members in the random order previously generated */
         for(i=0; i<PACK_NMEMBS; i++) {
             sprintf(name, "%05d", i);
             if(i == sub_cmpd_order) {
-                if(H5Tinsert(cmpd, name, 4 * order[i], sub_cmpd) < 0) PACK_OOO_ERROR
+                if(H5Tinsert(cmpd, name, (size_t)(4 * order[i]), sub_cmpd) < 0) PACK_OOO_ERROR
             } else
-                if(H5Tinsert(cmpd, name, 4 * order[i], H5T_STD_I32BE) < 0) PACK_OOO_ERROR
+                if(H5Tinsert(cmpd, name, (size_t)(4 * order[i]), H5T_STD_I32BE) < 0) PACK_OOO_ERROR
         } /* end for */
 
         /* Verify that the compound is not packed */
@@ -1864,18 +1864,18 @@ test_pack_ooo(void)
         TESTING("reverse member insertion with empty compound subtype");
 
         /* Create inner compound type.  It will be empty for the first run */
-        if((sub_cmpd = H5Tcreate(H5T_COMPOUND, 4)) < 0) PACK_OOO_ERROR
+        if((sub_cmpd = H5Tcreate(H5T_COMPOUND, (size_t)4)) < 0) PACK_OOO_ERROR
 
         /* Create main compound type, with extra space at the end */
-        if((cmpd = H5Tcreate(H5T_COMPOUND, (4 * PACK_NMEMBS) + extra_space)) < 0) PACK_OOO_ERROR
+        if((cmpd = H5Tcreate(H5T_COMPOUND, (size_t)((4 * PACK_NMEMBS) + extra_space))) < 0) PACK_OOO_ERROR
 
         /* Insert the compound members in reverse order, with compound last */
         for(i=0; i<PACK_NMEMBS; i++) {
             sprintf(name, "%05d", i);
             if(i == PACK_NMEMBS - 1) {
-                if(H5Tinsert(cmpd, name, 4 * (PACK_NMEMBS - i - 1), sub_cmpd) < 0) PACK_OOO_ERROR
+                if(H5Tinsert(cmpd, name, (size_t)(4 * (PACK_NMEMBS - i - 1)), sub_cmpd) < 0) PACK_OOO_ERROR
             } else
-                if(H5Tinsert(cmpd, name, 4 * (PACK_NMEMBS - i - 1), H5T_STD_I32BE) < 0) PACK_OOO_ERROR
+                if(H5Tinsert(cmpd, name, (size_t)(4 * (PACK_NMEMBS - i - 1)), H5T_STD_I32BE) < 0) PACK_OOO_ERROR
         } /* end for */
 
         /* Verify that the compound is not packed */
@@ -1890,18 +1890,18 @@ test_pack_ooo(void)
         TESTING("reverse member insertion with full compound subtype");
 
         /* Complete the inner compound type */
-        if(H5Tinsert(sub_cmpd, "int", 0, H5T_STD_I32LE) < 0) PACK_OOO_ERROR
+        if(H5Tinsert(sub_cmpd, "int", (size_t)0, H5T_STD_I32LE) < 0) PACK_OOO_ERROR
 
         /* Recreate main compound type */
-        if((cmpd = H5Tcreate(H5T_COMPOUND, (4 * PACK_NMEMBS) + extra_space)) < 0) PACK_OOO_ERROR
+        if((cmpd = H5Tcreate(H5T_COMPOUND, (size_t)((4 * PACK_NMEMBS) + extra_space))) < 0) PACK_OOO_ERROR
 
         /* Insert the compound members in reverse order, with compound last */
         for(i=0; i<PACK_NMEMBS; i++) {
             sprintf(name, "%05d", i);
             if(i == PACK_NMEMBS - 1) {
-                if(H5Tinsert(cmpd, name, 4 * (PACK_NMEMBS - i - 1), sub_cmpd) < 0) PACK_OOO_ERROR
+                if(H5Tinsert(cmpd, name, (size_t)(4 * (PACK_NMEMBS - i - 1)), sub_cmpd) < 0) PACK_OOO_ERROR
             } else
-                if(H5Tinsert(cmpd, name, 4 * (PACK_NMEMBS - i - 1), H5T_STD_I32BE) < 0) PACK_OOO_ERROR
+                if(H5Tinsert(cmpd, name, (size_t)(4 * (PACK_NMEMBS - i - 1)), H5T_STD_I32BE) < 0) PACK_OOO_ERROR
         } /* end for */
 
         /* Verify that the compound is packed */
@@ -1917,18 +1917,18 @@ test_pack_ooo(void)
         TESTING("forward member insertion with empty compound subtype");
 
         /* Create inner compound type.  It will be empty for the first run */
-        if((sub_cmpd = H5Tcreate(H5T_COMPOUND, 4)) < 0) PACK_OOO_ERROR
+        if((sub_cmpd = H5Tcreate(H5T_COMPOUND, (size_t)4)) < 0) PACK_OOO_ERROR
 
         /* Create main compound type, with extra space at the end */
-        if((cmpd = H5Tcreate(H5T_COMPOUND, (4 * PACK_NMEMBS) + extra_space)) < 0) PACK_OOO_ERROR
+        if((cmpd = H5Tcreate(H5T_COMPOUND, (size_t)((4 * PACK_NMEMBS) + extra_space))) < 0) PACK_OOO_ERROR
 
         /* Insert the compound members in forward order, with compound first */
         for(i=0; i<PACK_NMEMBS; i++) {
             sprintf(name, "%05d", i);
             if(i == 0) {
-                if(H5Tinsert(cmpd, name, 4 * i, sub_cmpd) < 0) PACK_OOO_ERROR
+                if(H5Tinsert(cmpd, name, (size_t)(4 * i), sub_cmpd) < 0) PACK_OOO_ERROR
             } else
-                if(H5Tinsert(cmpd, name, 4 * i, H5T_STD_I32BE) < 0) PACK_OOO_ERROR
+                if(H5Tinsert(cmpd, name, (size_t)(4 * i), H5T_STD_I32BE) < 0) PACK_OOO_ERROR
         } /* end for */
 
         /* Verify that the compound is not packed */
@@ -1943,18 +1943,18 @@ test_pack_ooo(void)
         TESTING("forward member insertion with full compound subtype");
 
         /* Complete the inner compound type */
-        if(H5Tinsert(sub_cmpd, "int", 0, H5T_STD_I32LE) < 0) PACK_OOO_ERROR
+        if(H5Tinsert(sub_cmpd, "int", (size_t)0, H5T_STD_I32LE) < 0) PACK_OOO_ERROR
 
         /* Recreate main compound type */
-        if((cmpd = H5Tcreate(H5T_COMPOUND, (4 * PACK_NMEMBS) + extra_space)) < 0) PACK_OOO_ERROR
+        if((cmpd = H5Tcreate(H5T_COMPOUND, (size_t)((4 * PACK_NMEMBS) + extra_space))) < 0) PACK_OOO_ERROR
 
         /* Insert the compound members in forward order */
         for(i=0; i<PACK_NMEMBS; i++) {
             sprintf(name, "%05d", i);
             if(i == 0) {
-                if(H5Tinsert(cmpd, name, 4 * i, sub_cmpd) < 0) PACK_OOO_ERROR
+                if(H5Tinsert(cmpd, name, (size_t)(4 * i), sub_cmpd) < 0) PACK_OOO_ERROR
             } else
-                if(H5Tinsert(cmpd, name, 4 * i, H5T_STD_I32BE) < 0) PACK_OOO_ERROR
+                if(H5Tinsert(cmpd, name, (size_t)(4 * i), H5T_STD_I32BE) < 0) PACK_OOO_ERROR
         } /* end for */
 
         /* Verify that the compound is packed */
@@ -2010,11 +2010,11 @@ test_ooo_order(char *filename)
         TEST_ERROR
 
     /* Create the compound */
-    if((dtype = H5Tcreate(H5T_COMPOUND, 20)) < 0) TEST_ERROR
-    if(H5Tinsert(dtype, "A", 8, H5T_STD_I32LE) < 0) TEST_ERROR
-    if(H5Tinsert(dtype, "B", 12, H5T_STD_I32LE) < 0) TEST_ERROR
-    if(H5Tinsert(dtype, "C", 0, H5T_STD_I32LE) < 0) TEST_ERROR
-    if(H5Tinsert(dtype, "D", 16, H5T_STD_I32LE) < 0) TEST_ERROR
+    if((dtype = H5Tcreate(H5T_COMPOUND, (size_t)20)) < 0) TEST_ERROR
+    if(H5Tinsert(dtype, "A", (size_t)8, H5T_STD_I32LE) < 0) TEST_ERROR
+    if(H5Tinsert(dtype, "B", (size_t)12, H5T_STD_I32LE) < 0) TEST_ERROR
+    if(H5Tinsert(dtype, "C", (size_t)0, H5T_STD_I32LE) < 0) TEST_ERROR
+    if(H5Tinsert(dtype, "D", (size_t)16, H5T_STD_I32LE) < 0) TEST_ERROR
 
     /* Verify that the compound is not packed */
     if(NULL == (dt = (H5T_t *) H5I_object_verify(dtype, H5I_DATATYPE)))
@@ -2065,7 +2065,7 @@ test_ooo_order(char *filename)
     if(H5Tget_member_offset(dtype, 3) != 16) TEST_ERROR
 
     /* Insert the last member */
-    if(H5Tinsert(dtype, "E", 4, H5T_STD_I32LE) < 0) TEST_ERROR
+    if(H5Tinsert(dtype, "E", (size_t)4, H5T_STD_I32LE) < 0) TEST_ERROR
 
     /* Verify that the compound is packed */
     if(NULL == (dt = (H5T_t *) H5I_object_verify(dtype, H5I_DATATYPE)))
@@ -2112,7 +2112,7 @@ test_ooo_order(char *filename)
     if(H5Tget_member_offset(dtype, 4) != 4) TEST_ERROR
 
     /* Expand the type, and verify that it became unpacked */
-    if(H5Tset_size(dtype, 21) < 0) TEST_ERROR
+    if(H5Tset_size(dtype, (size_t)21) < 0) TEST_ERROR
     if(NULL == (dt = (H5T_t *) H5I_object_verify(dtype, H5I_DATATYPE)))
         TEST_ERROR
     if(dt->shared->u.compnd.packed) TEST_ERROR
@@ -2123,7 +2123,7 @@ test_ooo_order(char *filename)
     if(H5Tget_member_offset(dtype, 4) != 4) TEST_ERROR
 
     /* Shrink the type, and verify that it became packed */
-    if(H5Tset_size(dtype, 20) < 0) TEST_ERROR
+    if(H5Tset_size(dtype, (size_t)20) < 0) TEST_ERROR
     if(NULL == (dt = (H5T_t *) H5I_object_verify(dtype, H5I_DATATYPE)))
         TEST_ERROR
     if(!dt->shared->u.compnd.packed) TEST_ERROR

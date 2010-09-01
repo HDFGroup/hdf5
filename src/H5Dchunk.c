@@ -402,6 +402,10 @@ H5D_chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
     HDassert(f);
     HDassert(dset);
 
+    /* Check for invalid chunk dimension rank */
+    if(0 == dset->shared->layout.u.chunk.ndims)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "no chunk information set?")
+
     /* Set up layout information */
     if((ndims = H5S_GET_EXTENT_NDIMS(dset->shared->space)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get rank")
@@ -424,13 +428,18 @@ H5D_chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to query maximum dimensions")
 
     /* Sanity check dimensions */
-    for(u = 0; u < dset->shared->layout.u.chunk.ndims - 1; u++)
+    for(u = 0; u < dset->shared->layout.u.chunk.ndims - 1; u++) {
+        /* Don't allow zero-sized chunk dimensions */
+        if(0 == dset->shared->layout.u.chunk.dim[u])
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size must be > 0, dim = %u ", u)
+
         /*
          * The chunk size of a dimension with a fixed size cannot exceed
          * the maximum dimension size
          */
         if(max_dim[u] != H5S_UNLIMITED && max_dim[u] < dset->shared->layout.u.chunk.dim[u])
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size must be <= maximum dimension size for fixed-sized dimensions")
+    } /* end for */
 
     /* Compute the total size of a chunk */
     /* (Use 64-bit value to ensure that we can detect >4GB chunks) */

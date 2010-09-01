@@ -1607,8 +1607,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                             begin_obj(dump_header_format->datasetbegin, name,
                                       dump_header_format->datasetblockbegin);
                             indentation(indent + COL);
-                            error_msg(h5tools_getprogname(),
-                                      "internal error (file %s:line %d)\n",
+                            error_msg("internal error (file %s:line %d)\n",
                                       __FILE__, __LINE__);
                             indentation(indent);
                             end_obj(dump_header_format->datasetend,
@@ -2116,8 +2115,7 @@ dump_group(hid_t gid, const char *name)
 
         if (found_obj == NULL) {
             indentation(indent);
-            error_msg("internal error (file %s:line %d)\n",
-                __FILE__, __LINE__);
+            error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
             h5tools_setstatus(EXIT_FAILURE);
         }
         else if (found_obj->displayed) {
@@ -2354,14 +2352,14 @@ dump_subsetting_header(struct subset_t *sset, int dims)
     indentation(indent);
     printf("%s %s ", dump_header_format->startbegin,
            dump_header_format->startblockbegin);
-    dump_dims((hsize_t *)sset->start, dims);
+    dump_dims(sset->start.data, dims);
     printf("%s %s\n", dump_header_format->startend,
            dump_header_format->startblockend);
 
     indentation(indent);
     printf("%s %s ", dump_header_format->stridebegin,
            dump_header_format->strideblockbegin);
-    dump_dims(sset->stride, dims);
+    dump_dims(sset->stride.data, dims);
     printf("%s %s\n", dump_header_format->strideend,
            dump_header_format->strideblockend);
 
@@ -2369,8 +2367,8 @@ dump_subsetting_header(struct subset_t *sset, int dims)
     printf("%s %s ", dump_header_format->countbegin,
            dump_header_format->countblockbegin);
 
-    if (sset->count)
-        dump_dims(sset->count, dims);
+    if(sset->count.data)
+        dump_dims(sset->count.data, dims);
     else
         printf("DEFAULT");
 
@@ -2381,8 +2379,8 @@ dump_subsetting_header(struct subset_t *sset, int dims)
     printf("%s %s ", dump_header_format->blockbegin,
            dump_header_format->blockblockbegin);
 
-    if (sset->block)
-        dump_dims(sset->block, dims);
+    if(sset->block.data)
+        dump_dims(sset->block.data, dims);
     else
         printf("DEFAULT");
 
@@ -3418,25 +3416,22 @@ handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int UNUSED pe
  *              semicolons (;). The lists themselves can be separated by
  *              either commas (,) or white spaces.
  *
- * Return:      Success:    hsize_t array. NULL is a valid return type if
- *                          there aren't any elements in the array.
+ * Return:      <none>
  *
  * Programmer:  Bill Wendling
  *              Tuesday, 6. February 2001
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static hsize_t *
-parse_hsize_list(const char *h_list)
+static void
+parse_hsize_list(const char *h_list, subset_d *d)
 {
     hsize_t        *p_list;
     const char     *ptr;
     unsigned int    size_count = 0, i = 0, last_digit = 0;
 
     if (!h_list || !*h_list || *h_list == ';')
-        return NULL;
+        return;
 
     /* count how many integers do we have */
     for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
@@ -3452,10 +3447,10 @@ parse_hsize_list(const char *h_list)
 
     if (size_count == 0)
         /* there aren't any integers to read */
-        return NULL;
+        return;
 
     /* allocate an array for the integers in the list */
-    p_list = calloc(size_count, sizeof(hsize_t));
+    p_list = (hsize_t *)calloc(size_count, sizeof(hsize_t));
 
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
         if(isdigit(*ptr)) {
@@ -3466,8 +3461,10 @@ parse_hsize_list(const char *h_list)
                 /* scroll to end of integer */
                 ptr++;
         }
-
-    return p_list;
+    d->data = p_list;
+    d->len = size_count;
+    
+    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -3499,8 +3496,8 @@ parse_subset_params(char *dset)
         if (brace > slash) {
             *brace++ = '\0';
 
-            s = calloc(1, sizeof(struct subset_t));
-            s->start = parse_hsize_list(brace);
+            s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
+            parse_hsize_list(brace, &s->start);
 
             while (*brace && *brace != ';')
                 brace++;
@@ -3508,7 +3505,7 @@ parse_subset_params(char *dset)
             if (*brace)
                 brace++;
 
-            s->stride = parse_hsize_list(brace);
+            parse_hsize_list(brace, &s->stride);
 
             while (*brace && *brace != ';')
                 brace++;
@@ -3516,7 +3513,7 @@ parse_subset_params(char *dset)
             if (*brace)
                 brace++;
 
-            s->count = parse_hsize_list(brace);
+            parse_hsize_list(brace, &s->count);
 
             while (*brace && *brace != ';')
                 brace++;
@@ -3524,7 +3521,7 @@ parse_subset_params(char *dset)
             if (*brace)
                 brace++;
 
-            s->block = parse_hsize_list(brace);
+            parse_hsize_list(brace, &s->block);
         }
     }
 
@@ -3576,79 +3573,83 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
     } /* end if */
 
     if(sset) {
-        if(!sset->start || !sset->stride || !sset->count || !sset->block) {
-            /* they didn't specify a ``stride'' or ``block''. default to 1 in all
-             * dimensions */
-            hid_t sid = H5Dget_space(dsetid);
-            unsigned int ndims = H5Sget_simple_extent_ndims(sid);
-
-            if(!sset->start)
-                /* default to (0, 0, ...) for the start coord */
-                sset->start = calloc(ndims, sizeof(hsize_t));
-
-            if(!sset->stride) {
-                unsigned int i;
-
-                sset->stride = calloc(ndims, sizeof(hsize_t));
-
-                for (i = 0; i < ndims; i++)
-                    sset->stride[i] = 1;
-            }
-
-            if (!sset->count) {
-                unsigned int i;
-
-
-                sset->count = calloc(ndims, sizeof(hsize_t));
-
-                for (i = 0; i < ndims; i++)
-                    sset->count[i] = 1;
-            }
-
-            if (!sset->block) {
-                unsigned int i;
-
-                sset->block = calloc(ndims, sizeof(hsize_t));
-
-                for (i = 0; i < ndims; i++)
-                    sset->block[i] = 1;
-            }
-
-            H5Sclose(sid);
-        }
-    }
-
-
-   /*-------------------------------------------------------------------------
-    * check for block overlap
-    *-------------------------------------------------------------------------
-    */
-
-    if(sset)
-    {
+        unsigned int i;
         hid_t sid = H5Dget_space(dsetid);
         unsigned int ndims = H5Sget_simple_extent_ndims(sid);
-        unsigned int i;
 
-        for ( i = 0; i < ndims; i++)
-        {
-            if ( sset->count[i] > 1 )
-            {
+        H5Sclose(sid);
 
-                if ( sset->stride[i] < sset->block[i] )
-                {
+        if(!sset->start.data || !sset->stride.data || !sset->count.data || !sset->block.data) {
+            /* they didn't specify a ``stride'' or ``block''. default to 1 in all
+             * dimensions */
+            if(!sset->start.data) {
+                /* default to (0, 0, ...) for the start coord */
+                sset->start.data = (hsize_t *)calloc(ndims, sizeof(hsize_t));
+                sset->start.len = ndims;
+            }
+
+            if(!sset->stride.data) {
+                sset->stride.data = (hsize_t *)calloc(ndims, sizeof(hsize_t));
+                sset->stride.len = ndims;
+                for (i = 0; i < ndims; i++)
+                    sset->stride.data[i] = 1;
+            }
+
+            if(!sset->count.data) {
+                sset->count.data = (hsize_t *)calloc(ndims, sizeof(hsize_t));
+                sset->count.len = ndims;
+                for (i = 0; i < ndims; i++)
+                    sset->count.data[i] = 1;
+            }
+
+            if(!sset->block.data) {
+                sset->block.data = (hsize_t *)calloc(ndims, sizeof(hsize_t));
+                sset->block.len = ndims;
+                for (i = 0; i < ndims; i++)
+                    sset->block.data[i] = 1;
+            }
+        }
+
+        /*-------------------------------------------------------------------------
+         * check for dimension overflow
+         *-------------------------------------------------------------------------
+         */
+        if(sset->start.len > ndims) {
+            error_msg("number of start dims (%u) exceed dataset dims (%u)\n", sset->start.len, ndims);
+            h5tools_setstatus(EXIT_FAILURE);
+            return;
+        }
+        if(sset->stride.len > ndims) {
+            error_msg("number of stride dims (%u) exceed dataset dims (%u)\n", sset->stride.len, ndims);
+            h5tools_setstatus(EXIT_FAILURE);
+            return;
+        }
+        if(sset->count.len > ndims) {
+            error_msg("number of count dims (%u) exceed dataset dims (%u)\n", sset->count.len, ndims);
+            h5tools_setstatus(EXIT_FAILURE);
+            return;
+        }
+        if(sset->block.len > ndims) {
+            error_msg("number of block dims (%u) exceed dataset dims (%u)\n", sset->block.len, ndims);
+            h5tools_setstatus(EXIT_FAILURE);
+            return;
+        }
+        
+        /*-------------------------------------------------------------------------
+         * check for block overlap
+         *-------------------------------------------------------------------------
+         */
+        for(i = 0; i < ndims; i++) {
+            if(sset->count.data[i] > 1) {
+                if(sset->stride.data[i] < sset->block.data[i]) {
                     error_msg("wrong subset selection; blocks overlap\n");
                     h5tools_setstatus(EXIT_FAILURE);
                     return;
+                } /* end if */
+            } /* end if */
+        } /* end for */
+    } /* end if */
 
-                }
-
-            }
-
-        }
-        H5Sclose(sid);
-
-    }
 
     H5Oget_info(dsetid, &oinfo);
     if(oinfo.rc > 1 || hit_elink) {
@@ -3726,7 +3727,7 @@ handle_groups(hid_t fid, const char *group, void UNUSED * data, int pe, const ch
         if(prefix_len <= new_len)
         {
             prefix_len = new_len;
-            prefix = HDrealloc(prefix, prefix_len);
+            prefix = (char *)HDrealloc(prefix, prefix_len);
         } /* end if */
 
         HDstrcpy(prefix, group);
@@ -3764,7 +3765,7 @@ handle_links(hid_t fid, const char *links, void UNUSED * data, int UNUSED pe, co
         error_msg("\"%s\" is a hard link\n", links);
         h5tools_setstatus(EXIT_FAILURE);
     } else {
-        char *buf = HDmalloc(linfo.u.val_size);
+        char *buf = (char *)HDmalloc(linfo.u.val_size);
 
         switch(linfo.type) {
             case H5L_TYPE_SOFT:    /* Soft link */
@@ -3938,7 +3939,7 @@ parse_command_line(int argc, const char *argv[])
     }
 
     /* this will be plenty big enough to hold the info */
-    hand = calloc((size_t)argc, sizeof(struct handler_t));
+    hand = (struct handler_t *)calloc((size_t)argc, sizeof(struct handler_t));
 
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
@@ -4010,7 +4011,7 @@ parse_start:
                     hand[i].func = handle_datasets;
                     hand[i].obj = HDstrdup(opt_arg);
                     hand[i].subset_info = parse_subset_params(hand[i].obj);
-                    last_dset = hand;
+                    last_dset = &hand[i];
                     break;
                 }
 
@@ -4163,8 +4164,7 @@ parse_start:
             struct subset_t *s;
 
             if (!last_was_dset) {
-                error_msg(h5tools_getprogname(),
-                          "option `-%c' can only be used after --dataset option\n",
+                error_msg("option `-%c' can only be used after --dataset option\n",
                           opt);
                 leave(EXIT_FAILURE);
             }
@@ -4176,7 +4176,7 @@ parse_start:
                  */
                 s = last_dset->subset_info;
             } else {
-                last_dset->subset_info = s = calloc(1, sizeof(struct subset_t));
+                last_dset->subset_info = s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
             }
 
             /*
@@ -4192,10 +4192,10 @@ parse_start:
              */
             do {
                 switch ((char)opt) {
-                case 's': free(s->start); s->start = parse_hsize_list(opt_arg); break;
-                case 'S': free(s->stride); s->stride = parse_hsize_list(opt_arg); break;
-                case 'c': free(s->count); s->count = parse_hsize_list(opt_arg); break;
-                case 'k': free(s->block); s->block = parse_hsize_list(opt_arg); break;
+                case 's': free(s->start.data); parse_hsize_list(opt_arg, &s->start); break;
+                case 'S': free(s->stride.data); parse_hsize_list(opt_arg, &s->stride); break;
+                case 'c': free(s->count.data); parse_hsize_list(opt_arg, &s->count); break;
+                case 'k': free(s->block.data); parse_hsize_list(opt_arg, &s->block); break;
                 default: goto end_collect;
                 }
             } while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF);
@@ -4256,10 +4256,10 @@ free_handler(struct handler_t *hand, int len)
         free(hand[i].obj);
 
         if (hand[i].subset_info) {
-            free(hand[i].subset_info->start);
-            free(hand[i].subset_info->stride);
-            free(hand[i].subset_info->count);
-            free(hand[i].subset_info->block);
+            free(hand[i].subset_info->start.data);
+            free(hand[i].subset_info->stride.data);
+            free(hand[i].subset_info->count.data);
+            free(hand[i].subset_info->block.data);
             free(hand[i].subset_info);
         }
     }
@@ -4588,8 +4588,8 @@ print_enum(hid_t type)
         dst_size = H5Tget_size(type);
 
     /* Get the names and raw values of all members */
-    name = calloc(nmembs, sizeof(char *));
-    value = calloc(nmembs, MAX(H5Tget_size(type), dst_size));
+    name = (char **)calloc(nmembs, sizeof(char *));
+    value = (unsigned char *)calloc(nmembs, MAX(H5Tget_size(type), dst_size));
 
     for (i = 0; i < nmembs; i++) {
     name[i] = H5Tget_member_name(type, i);
@@ -4749,7 +4749,7 @@ xml_escape_the_name(const char *str)
     return HDstrdup(str);
 
     cp = str;
-    rcp = ncp = HDmalloc(len + extra + 1);
+    rcp = ncp = (char *)HDmalloc(len + extra + 1);
 
     if (!ncp)
         return NULL;    /* ?? */
@@ -4838,7 +4838,7 @@ xml_escape_the_string(const char *str, int slen)
     }
 
     cp = str;
-    rcp = ncp = calloc((len + extra + 1), sizeof(char));
+    rcp = ncp = (char *)calloc((len + extra + 1), sizeof(char));
 
     if (ncp == NULL)
     return NULL;        /* ?? */
@@ -4930,7 +4930,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
             /* This should be defined somewhere else */
             /* These 2 cases are handled the same right now, but
                probably will have something different eventually */
-            char * dtxid = malloc(100);
+            char * dtxid = (char *)malloc(100);
 
             xml_name_to_XID(found_obj->objname, dtxid, 100, 1);
             if (!found_obj->recorded) {
@@ -5290,7 +5290,7 @@ xml_dump_datatype(hid_t type)
         if(found_obj) {
             /* Shared datatype, must be entered as an object  */
             /* These 2 cases are the same now, but may change */
-            char * dtxid = malloc(100);
+            char * dtxid = (char *)malloc(100);
 
             xml_name_to_XID(found_obj->objname, dtxid, 100, 1);
             if (!found_obj->recorded) {
@@ -5428,6 +5428,12 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
     hsize_t                 size[64], nelmts = 1;
     int                     depth;
     int                     stdindent = COL;    /* should be 3 */
+
+    if (fp_format)
+    {
+        outputformat->fmt_double = fp_format;
+        outputformat->fmt_float = fp_format;
+    }
 
     if (nCols==0) {
         outputformat->line_ncols = 65535;
@@ -5663,14 +5669,14 @@ xml_dump_named_datatype(hid_t type, const char *name)
     char *t_prefix;
     char   *t_name;
 
-    tmp = HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    tmp = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
     HDstrcpy(tmp, prefix);
     HDstrcat(tmp, "/");
     HDstrcat(tmp, name);
 
     indentation(indent);
-    dtxid = HDmalloc(100);
-    parentxid = HDmalloc(100);
+    dtxid = (char *)HDmalloc(100);
+    parentxid = (char *)HDmalloc(100);
     t_tmp = xml_escape_the_name(tmp);
     t_prefix = xml_escape_the_name(prefix);
     t_name = xml_escape_the_name(name);
@@ -5818,7 +5824,7 @@ xml_dump_group(hid_t gid, const char *name)
         isRoot = 1;
         tmp = HDstrdup("/");
     } else {
-        tmp = HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+        tmp = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
         HDstrcpy(tmp, prefix);
         par = HDstrdup(tmp);
         cp = HDstrrchr(par, '/');
@@ -5848,11 +5854,11 @@ xml_dump_group(hid_t gid, const char *name)
             h5tools_setstatus(EXIT_FAILURE);
         } else {
             char *t_name = xml_escape_the_name(name);
-            char *grpxid = malloc(100);
-            char *parentxid = malloc(100);
+            char *grpxid = (char *)malloc(100);
+            char *parentxid = (char *)malloc(100);
 
             if(found_obj->displayed) {
-                char *ptrstr = malloc(100);
+                char *ptrstr = (char *)malloc(100);
 
                 /* already seen: enter a groupptr */
                 if(isRoot) {
@@ -5954,8 +5960,8 @@ xml_dump_group(hid_t gid, const char *name)
 
         /* only link -- must be first time! */
         char *t_name = xml_escape_the_name(name);
-        char *grpxid = malloc(100);
-        char *parentxid = malloc(100);
+        char *grpxid = (char *)malloc(100);
+        char *parentxid = (char *)malloc(100);
 
         if(isRoot) {
             xml_name_to_XID("/", grpxid, 100, 1);
@@ -6072,7 +6078,7 @@ xml_print_refs(hid_t did, int source)
         ssiz = H5Sget_simple_extent_npoints(space);
         ssiz *= H5Tget_size(type);
 
-        buf = calloc((size_t)ssiz, sizeof(char));
+        buf = (char *)calloc((size_t)ssiz, sizeof(char));
         if(buf == NULL)
             return FAIL;
         e = H5Dread(did, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
@@ -6086,7 +6092,7 @@ xml_print_refs(hid_t did, int source)
         ssiz = H5Sget_simple_extent_npoints(space);
         ssiz *= H5Tget_size(type);
 
-        buf = calloc((size_t)ssiz, sizeof(char));
+        buf = (char *)calloc((size_t)ssiz, sizeof(char));
         if (buf == NULL) {
             free(buf);
             return FAIL;
@@ -6207,7 +6213,7 @@ xml_print_strs(hid_t did, int source)
     tsiz = H5Tget_size(type);
     bp = (char*)buf;
     if(!is_vlstr)
-        onestring = (char *) calloc(tsiz, sizeof(char));
+        onestring = (char *)calloc(tsiz, sizeof(char));
 
     for (i = 0; i < ssiz; i++) {
         if(is_vlstr) {
@@ -6480,10 +6486,10 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
     char                   *tmp;
     char                   *t_name, *t_tmp, *t_prefix;
     unsigned                attr_crt_order_flags;
-    char *rstr = HDmalloc(100);
-    char *pstr = HDmalloc(100);
+    char *rstr = (char *)HDmalloc(100);
+    char *pstr = (char *)HDmalloc(100);
 
-    tmp = HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    tmp = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
     HDstrcpy(tmp, prefix);
     HDstrcat(tmp, "/");
     HDstrcat(tmp, name);
@@ -6515,7 +6521,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
     /* Print information about storage layout */
     if(H5D_CHUNKED == H5Pget_layout(dcpl)) {
         maxdims = H5Sget_simple_extent_ndims(space);
-        chsize = (hsize_t *) malloc(maxdims * sizeof(hsize_t));
+        chsize = (hsize_t *)malloc(maxdims * sizeof(hsize_t));
         indent += COL;
         indentation(indent);
         printf("<%sStorageLayout>\n",xmlnsprefix);
@@ -6798,8 +6804,8 @@ xml_print_enum(hid_t type)
     }
 
     /* Get the names and raw values of all members */
-    name = calloc(nmembs, sizeof(char *));
-    value = calloc(nmembs, MAX(H5Tget_size(type), dst_size));
+    name = (char **)calloc(nmembs, sizeof(char *));
+    value = (unsigned char *)calloc(nmembs, MAX(H5Tget_size(type), dst_size));
 
     for (i = 0; i < nmembs; i++) {
         name[i] = H5Tget_member_name(type, i);
@@ -6983,7 +6989,7 @@ static void
 init_prefix(char **prfx, size_t prfx_len)
 {
     HDassert(prfx_len > 0);
-    *prfx = HDcalloc(prfx_len, 1);
+    *prfx = (char *)HDcalloc(prfx_len, 1);
 }
 
 
@@ -7004,7 +7010,7 @@ add_prefix(char **prfx, size_t *prfx_len, const char *name)
     /* Check if we need more space */
     if(*prfx_len <= new_len) {
         *prfx_len = new_len + 1;
-        *prfx = HDrealloc(*prfx, *prfx_len);
+        *prfx = (char *)HDrealloc(*prfx, *prfx_len);
     }
 
     /* Append object name to prefix */

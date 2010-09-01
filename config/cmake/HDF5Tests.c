@@ -364,3 +364,11 @@ int main(void)
 }
 #endif
 
+#ifdef LONE_COLON
+int main(int argc, char * argv) 
+{
+  return 0;
+}
+#endif
+
+

@@ -14,7 +14,7 @@ SET (GIF2H5_SRCS
 )
 
 #-- Add gif2hdf5 program
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
+INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 INCLUDE_DIRECTORIES (${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5)
 
 ADD_EXECUTABLE (gif2h5 ${GIF2H5_SRCS})
@@ -55,7 +55,7 @@ TARGET_LINK_LIBRARIES (hdf2gif ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_T
 #  used in the CMake Build system as we rely on the test files that are
 #  shipped with HDF5 source archives
 # --------------------------------------------------------------------
-IF (NOT BUILD_SHARED_LIBS)
+IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (hl_h52gifgentest ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/h52gifgentst.c)
     H5_NAMING (hl_h52gifgentest)
     IF (WIN32)
@@ -69,7 +69,7 @@ IF (NOT BUILD_SHARED_LIBS)
     TARGET_LINK_LIBRARIES (hl_h52gifgentest ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
     
 #    ADD_TEST (NAME hl_h52gifgentest COMMAND $<TARGET_FILE:hl_h52gifgentest>)
-ENDIF (NOT BUILD_SHARED_LIBS)
+ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install

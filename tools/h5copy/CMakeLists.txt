@@ -4,7 +4,7 @@ PROJECT (HDF5_TOOLS_H5COPY)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
+INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 # --------------------------------------------------------------------
@@ -26,8 +26,14 @@ TARGET_LINK_LIBRARIES (h5copy  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5copy)
 
+##############################################################################
+##############################################################################
+###           T E S T I N G                                                ###
+##############################################################################
+##############################################################################
+
 IF (BUILD_TESTING)
-  IF (NOT BUILD_SHARED_LIBS)
+  IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5copygentest ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copygentest.c)
     H5_NAMING (h5copygentest)
     IF (WIN32)
@@ -41,13 +47,11 @@ IF (BUILD_TESTING)
     TARGET_LINK_LIBRARIES (h5copygentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 
     #ADD_TEST (NAME h5copygentest COMMAND $<TARGET_FILE:h5copygentest>)
-
-    SET (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
-        #h5copygentest
-    )
-  ENDIF (NOT BUILD_SHARED_LIBS)
+  ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
   
-  #-- Copy all the HDF5 files from the test directory into the source directory
+  # --------------------------------------------------------------------
+  # Copy all the HDF5 files from the test directory into the source directory
+  # --------------------------------------------------------------------
   SET (HDF5_REFERENCE_FILES
       h5copy_extlinks_src.out.ls
       h5copy_ref.out.ls
@@ -82,12 +86,12 @@ IF (BUILD_TESTING)
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/${h5_file} ${dest}
     )
   ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-
-  # Test files
-  SET (HDF_FILE1 h5copytst)
-  SET (HDF_FILE2 h5copy_ref)
-  SET (HDF_EXT_SRC_FILE h5copy_extlinks_src)
-  SET (HDF_EXT_TRG_FILE h5copy_extlinks_trg)
+  
+##############################################################################
+##############################################################################
+###           T H E   T E S T S  M A C R O S                               ###
+##############################################################################
+##############################################################################
 
   MACRO (ADD_H5_TEST testname resultcode testfile vparam srcname dstname)
   
@@ -128,6 +132,20 @@ IF (BUILD_TESTING)
             -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
     )
   ENDMACRO (ADD_H5LS_TEST file)
+
+##############################################################################
+##############################################################################
+###           T H E   T E S T S                                            ###
+##############################################################################
+##############################################################################
+
+  # --------------------------------------------------------------------
+  # test file names 
+  # --------------------------------------------------------------------
+  SET (HDF_FILE1 h5copytst)
+  SET (HDF_FILE2 h5copy_ref)
+  SET (HDF_EXT_SRC_FILE h5copy_extlinks_src)
+  SET (HDF_EXT_TRG_FILE h5copy_extlinks_trg)
 
 ############# COPY OBJECTS ##############
 
@@ -235,6 +253,12 @@ IF (BUILD_TESTING)
   ADD_H5LS_TEST (${HDF_EXT_SRC_FILE})
   
 ENDIF (BUILD_TESTING)
+
+##############################################################################
+##############################################################################
+###           I N S T A L L A T I O N                                      ###
+##############################################################################
+##############################################################################
 
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target

@@ -2795,7 +2795,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
      * hence the following assertion.  Delete it if we convert
      * to 32 bit values.
      */
-    HDassert(large_cube_size < (size_t)(UINT16_MAX));
+    HDassert(large_cube_size < (size_t)(64 * 1024));
 
 
     /* Allocate & initialize buffers */

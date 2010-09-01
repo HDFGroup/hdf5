@@ -3836,7 +3836,7 @@ check_invalid_tag_application(void)
     /* Create dxpl */
     if ( (dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
 
-    /* Call H5HL_create, an internal function that calls H5AC_set without setting up a tag */
+    /* Call H5HL_create, an internal function that calls H5AC_insert_entry without setting up a tag */
     /* Ensure this returns FAILURE, as a tag has not been set up. */
     if ( H5HL_create(f, H5AC_ind_dxpl_id, (size_t)1024, &addr) >= 0) TEST_ERROR;
 

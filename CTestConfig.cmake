@@ -11,3 +11,5 @@ set(CTEST_DROP_METHOD "http")
 set(CTEST_DROP_SITE "nei.hdfgroup.uiuc.edu")
 set(CTEST_DROP_LOCATION "/cdash/submit.php?project=HDF5+Trunk")
 set(CTEST_DROP_SITE_CDASH TRUE)
+
+set(UPDATE_TYPE svn)

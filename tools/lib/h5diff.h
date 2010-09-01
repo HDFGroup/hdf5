@@ -154,7 +154,6 @@ hsize_t diff_attr(hid_t loc1_id,
  */
 
 void        print_found(hsize_t nfound);
-void        parallel_print(const char* format, ... );
 void        print_type(hid_t type);
 const char* diff_basename(const char *name);
 const char* get_type(h5trav_type_t type);

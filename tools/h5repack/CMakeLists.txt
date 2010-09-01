@@ -4,11 +4,11 @@ PROJECT (HDF5_TOOLS_H5REPACK)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
-INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
+INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
+INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
 
 # --------------------------------------------------------------------
-# Add h5Repack executables and tests
+# Add h5Repack executables
 # --------------------------------------------------------------------
 SET (REPACK_COMMON_SRCS
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_copy.c
@@ -19,7 +19,7 @@ SET (REPACK_COMMON_SRCS
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_verify.c
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack.c
 )
-INCLUDE_DIRECTORIES (${HDF5_TEST_SOURCE_DIR})
+
 ADD_EXECUTABLE (h5repack ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
 H5_NAMING (h5repack)
 IF (WIN32)
@@ -36,7 +36,16 @@ TARGET_LINK_LIBRARIES (h5repack  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5repack)
 
+##############################################################################
+##############################################################################
+###           T E S T I N G                                                ###
+##############################################################################
+##############################################################################
+
 IF (BUILD_TESTING)
+  # --------------------------------------------------------------------
+  # Add h5Repack test executables
+  # --------------------------------------------------------------------
   ADD_EXECUTABLE (testh5repack_detect_szip ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testh5repack_detect_szip.c)
   H5_NAMING (testh5repack_detect_szip)
   IF (WIN32)
@@ -80,39 +89,16 @@ IF (BUILD_TESTING)
   TARGET_LINK_LIBRARIES (h5repacktest  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME h5repacktest COMMAND $<TARGET_FILE:h5repacktest>)
-
-  SET (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
-        h5repacktest
-        testh5repack_detect_szip
-  )
-
-
-  SET (INFO_FILE testfiles/h5repack.info)
-
-  SET (FILE0 h5repack_fill.h5)
-  SET (FILE1 h5repack_objs.h5)
-  SET (FILE2 h5repack_attr.h5)
-  SET (FILE3 h5repack_hlink.h5)
-  SET (FILE4 h5repack_layout.h5)
-  SET (FILE5 h5repack_early.h5)
-  SET (FILE7 h5repack_szip.h5)
-  SET (FILE8 h5repack_deflate.h5)
-  SET (FILE9 h5repack_shuffle.h5)
-  SET (FILE10 h5repack_fletcher.h5)
-  SET (FILE11 h5repack_filters.h5)
-  SET (FILE12 h5repack_nbit.h5)
-  SET (FILE13 h5repack_soffset.h5)
-  SET (FILE14 h5repack_layouto.h5 )     # A file with an older version of the layout message (copy of test/tlayouto.h5)
-  SET (FILE15 h5repack_named_dtypes.h5)
-  SET (FILE16 tfamily%05d.h5)           # located in common testfiles folder
-  SET (FILE_REF h5repack_refs.h5)
     
-  #-- Copy all the HDF5 files from the test directory into the source directory
+  # --------------------------------------------------------------------
+  # Copy all the HDF5 files from the test directory into the source directory
+  # --------------------------------------------------------------------
   SET (HDF5_REFERENCE_TEST_FILES
       h5repack_ext.bin
       ublock.bin
       h5repack.info
       h5repack_attr.h5
+      h5repack_attr_refs.h5
       h5repack_deflate.h5
       h5repack_early.h5
       h5repack_ext.h5
@@ -142,6 +128,7 @@ IF (BUILD_TESTING)
       tfamily00008.h5
       tfamily00009.h5
       tfamily00010.h5
+      h5repack_filters.h5.ddl
   )
 
   FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
@@ -162,14 +149,22 @@ IF (BUILD_TESTING)
         TARGET     h5repack
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${h5c_file} ${dest}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5c_file} ${dest}
     )
   ENDFOREACH (h5c_file ${HDF5_COMMON_TEST_FILES})
-
+  
+##############################################################################
+##############################################################################
+###           T H E   T E S T S  M A C R O S                               ###
+##############################################################################
+##############################################################################
 
   MACRO (ADD_H5_TEST testname testtype testfile)
     IF (${testtype} STREQUAL "SKIP")
-      MESSAGE (STATUS "SKIP ${testfile} ${ARGN}")
+      ADD_TEST (
+          NAME H5REPACK-${testname}
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out.${testfile}"
+      )
     ELSE (${testtype} STREQUAL "SKIP")
       ADD_TEST (
           NAME H5REPACK-${testname}
@@ -181,6 +176,58 @@ IF (BUILD_TESTING)
       )
     ENDIF (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_H5_TEST testname testfile testtype)
+
+  MACRO (ADD_H5_CMP_TEST testname testfilter testtype resultcode resultfile)
+    IF (${testtype} STREQUAL "SKIP")
+      ADD_TEST (
+          NAME H5REPACK-${testname}
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out.${resultfile}"
+      )
+    ELSE (${testtype} STREQUAL "SKIP")
+      ADD_TEST (
+          NAME H5REPACK-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
+              -D "TEST_ARGS:STRING=${ARGN};testfiles/${resultfile};testfiles/out.${resultfile}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_FILTER:STRING=${testfilter}"
+              -D "TEST_REFERENCE=testfiles/${resultfile}.ddl"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+    ENDIF (${testtype} STREQUAL "SKIP")
+  ENDMACRO (ADD_H5_CMP_TEST file)
+
+##############################################################################
+##############################################################################
+###           T H E   T E S T S                                            ###
+##############################################################################
+##############################################################################
+
+  # --------------------------------------------------------------------
+  # test file names 
+  # --------------------------------------------------------------------
+  SET (INFO_FILE testfiles/h5repack.info)
+
+  SET (FILE0 h5repack_fill.h5)
+  SET (FILE1 h5repack_objs.h5)
+  SET (FILE2 h5repack_attr.h5)
+  SET (FILE3 h5repack_hlink.h5)
+  SET (FILE4 h5repack_layout.h5)
+  SET (FILE5 h5repack_early.h5)
+  SET (FILE7 h5repack_szip.h5)
+  SET (FILE8 h5repack_deflate.h5)
+  SET (FILE9 h5repack_shuffle.h5)
+  SET (FILE10 h5repack_fletcher.h5)
+  SET (FILE11 h5repack_filters.h5)
+  SET (FILE12 h5repack_nbit.h5)
+  SET (FILE13 h5repack_soffset.h5)
+  SET (FILE14 h5repack_layouto.h5 )     # A file with an older version of the layout message (copy of test/tlayouto.h5)
+  SET (FILE15 h5repack_named_dtypes.h5)
+  SET (FILE16 tfamily%05d.h5)           # located in common testfiles folder
+  SET (FILE_REF h5repack_refs.h5)
+  SET (FILE_ATTR_REF h5repack_attr_refs.h5)
 
 #
 # The tests
@@ -306,6 +353,14 @@ IF (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SHUFFLE
   SET (TESTTYPE "SKIP")
 ENDIF (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SHUFFLE OR NOT USE_FILTER_FLETCHER32 OR NOT USE_FILTER_DEFLATE)
 ADD_H5_TEST (all_filters ${TESTTYPE} ${arg})
+
+# verbose gzip with individual object
+SET (arg ${FILE11} -v -f /dset_deflate:GZIP=9)
+SET (TESTTYPE "TEST")
+IF (NOT USE_FILTER_DEFLATE)
+  SET (TESTTYPE "SKIP")
+ENDIF (NOT USE_FILTER_DEFLATE)
+ADD_H5_CMP_TEST (gzip_verbose_filters "O?...ing file[^\n]+\n" ${TESTTYPE} 0 ${arg})
   
 ###########################################################
 # the following tests assume the input files have filters
@@ -550,10 +605,21 @@ ADD_H5_TEST (committed_dt "TEST" ${FILE15})
 # tests family driver (file is located in common testfiles folder, uses TOOLTEST1
 #ADD_H5_TEST ( family "FAMILY" ${FILE16})
 
-# test various references (bug 1814)
+# test various references (bug 1814 and 1726)
 ADD_H5_TEST (bug1814 "TEST" ${FILE_REF})
+
+# test attribute with various references (bug 1797)
+# the references in attribute of compund or vlen datatype 
+# TODO: include this test when code portion is completed.
+ADD_H5_TEST (bug1797 "SKIP" ${FILE_ATTR_REF})
   
 ENDIF (BUILD_TESTING)
+
+##############################################################################
+##############################################################################
+###           I N S T A L L A T I O N                                      ###
+##############################################################################
+##############################################################################
 
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target

@@ -406,59 +406,61 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
 
 /* test utility functions */
 
-void expunge_entry(H5F_t * file_ptr, int32_t idx);
-void insert_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
+static void expunge_entry(H5F_t * file_ptr, int32_t idx);
+static void insert_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
                   int32_t idx, unsigned int flags);
-void local_pin_and_unpin_random_entries(H5F_t * file_ptr, int min_idx,
+static void local_pin_and_unpin_random_entries(H5F_t * file_ptr, int min_idx,
                                         int max_idx, int min_count,
                                         int max_count);
-void local_pin_random_entry(H5F_t * file_ptr, int min_idx, int max_idx);
-void local_unpin_all_entries(H5F_t * file_ptr, hbool_t via_unprotect);
-int local_unpin_next_pinned_entry(H5F_t * file_ptr, int start_idx,
+static void local_pin_random_entry(H5F_t * file_ptr, int min_idx, int max_idx);
+static void local_unpin_all_entries(H5F_t * file_ptr, hbool_t via_unprotect);
+static int local_unpin_next_pinned_entry(H5F_t * file_ptr, int start_idx,
                                   hbool_t via_unprotect);
-void lock_and_unlock_random_entries(H5F_t * file_ptr, int min_idx, int max_idx,
+static void lock_and_unlock_random_entries(H5F_t * file_ptr, int min_idx, int max_idx,
                                     int min_count, int max_count);
-void lock_and_unlock_random_entry(H5F_t * file_ptr,
+static void lock_and_unlock_random_entry(H5F_t * file_ptr,
                                   int min_idx, int max_idx);
-void lock_entry(H5F_t * file_ptr, int32_t idx);
-void mark_entry_dirty(int32_t idx);
-void pin_entry(H5F_t * file_ptr, int32_t idx, hbool_t global, hbool_t dirty);
-void pin_protected_entry(int32_t idx, hbool_t global);
-void move_entry(H5F_t * file_ptr, int32_t old_idx, int32_t new_idx);
+static void lock_entry(H5F_t * file_ptr, int32_t idx);
+static void mark_entry_dirty(int32_t idx);
+static void pin_entry(H5F_t * file_ptr, int32_t idx, hbool_t global, hbool_t dirty);
+#ifdef H5_METADATA_TRACE_FILE
+static void pin_protected_entry(int32_t idx, hbool_t global);
+#endif /* H5_METADATA_TRACE_FILE */
+static void move_entry(H5F_t * file_ptr, int32_t old_idx, int32_t new_idx);
 static hbool_t reset_server_counts(void);
-void resize_entry(int32_t idx, size_t  new_size);
-hbool_t setup_cache_for_test(hid_t * fid_ptr, 
+static void resize_entry(int32_t idx, size_t  new_size);
+static hbool_t setup_cache_for_test(hid_t * fid_ptr, 
                              H5F_t ** file_ptr_ptr,
                              H5C_t ** cache_ptr_ptr, 
                              int metadata_write_strategy);
-void setup_rand(void);
-hbool_t take_down_cache(hid_t fid);
+static void setup_rand(void);
+static hbool_t take_down_cache(hid_t fid);
 static hbool_t verify_entry_reads(haddr_t addr, int expected_entry_reads);
 static hbool_t verify_entry_writes(haddr_t addr, int expected_entry_writes);
 static hbool_t verify_total_reads(int expected_total_reads);
 static hbool_t verify_total_writes(int expected_total_writes);
-void verify_writes(int num_writes, haddr_t * written_entries_tbl);
-void unlock_entry(H5F_t * file_ptr, int32_t type, unsigned int flags);
-void unpin_entry(H5F_t * file_ptr, int32_t idx, hbool_t global,
+static void verify_writes(int num_writes, haddr_t * written_entries_tbl);
+static void unlock_entry(H5F_t * file_ptr, int32_t type, unsigned int flags);
+static void unpin_entry(H5F_t * file_ptr, int32_t idx, hbool_t global,
                  hbool_t dirty, hbool_t via_unprotect);
 
 
 /* test functions */
 
-hbool_t server_smoke_check(void);
-hbool_t smoke_check_1(int metadata_write_strategy);
-hbool_t smoke_check_2(int metadata_write_strategy);
-hbool_t smoke_check_3(int metadata_write_strategy);
-hbool_t smoke_check_4(int metadata_write_strategy);
-hbool_t smoke_check_5(int metadata_write_strategy);
-hbool_t trace_file_check(int metadata_write_strategy);
+static hbool_t server_smoke_check(void);
+static hbool_t smoke_check_1(int metadata_write_strategy);
+static hbool_t smoke_check_2(int metadata_write_strategy);
+static hbool_t smoke_check_3(int metadata_write_strategy);
+static hbool_t smoke_check_4(int metadata_write_strategy);
+static hbool_t smoke_check_5(int metadata_write_strategy);
+static hbool_t trace_file_check(int metadata_write_strategy);
 
 
 /*****************************************************************************/
 /****************************** stats functions ******************************/
 /*****************************************************************************/
 
-#ifdef UNUSED
+#ifdef NOT_USED
 /*****************************************************************************
  *
  * Function:	print_stats()
@@ -497,7 +499,7 @@ print_stats(void)
     return;
 
 } /* print_stats() */
-#endif /* UNUSED */
+#endif /* NOT_USED */
 
 /*****************************************************************************
  *
@@ -2822,7 +2824,7 @@ size_datum(H5F_t UNUSED *  f,
  *
  *****************************************************************************/
 
-void
+static void
 expunge_entry(H5F_t * file_ptr,
               int32_t idx)
 {
@@ -2905,7 +2907,7 @@ expunge_entry(H5F_t * file_ptr,
  *
  *****************************************************************************/
 
-void
+static void
 insert_entry(H5C_t * cache_ptr,
              H5F_t * file_ptr,
              int32_t idx,
@@ -2932,7 +2934,7 @@ insert_entry(H5C_t * cache_ptr,
         (entry_ptr->ver)++;
         entry_ptr->dirty = TRUE;
 
-        result = H5AC_set(file_ptr, H5P_DATASET_XFER_DEFAULT, &(types[0]), 
+        result = H5AC_insert_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, &(types[0]),
                 entry_ptr->base_addr, (void *)(&(entry_ptr->header)), flags);
 
         if ( ( result < 0 ) ||
@@ -2942,7 +2944,7 @@ insert_entry(H5C_t * cache_ptr,
 
             nerrors++;
             if ( verbose ) {
-	        HDfprintf(stdout, "%d:%s: Error in H5AC_set().\n",
+	        HDfprintf(stdout, "%d:%s: Error in H5AC_insert_entry().\n",
 	                  world_mpi_rank, fcn_name);
             }
         }
@@ -3011,7 +3013,7 @@ insert_entry(H5C_t * cache_ptr,
  *
  *****************************************************************************/
 
-void
+static void
 local_pin_and_unpin_random_entries(H5F_t * file_ptr,
                                    int min_idx,
                                    int max_idx,
@@ -3082,7 +3084,7 @@ local_pin_and_unpin_random_entries(H5F_t * file_ptr,
  *              4/12/06
  *
  *****************************************************************************/
-void
+static void
 local_pin_random_entry(H5F_t * file_ptr,
                        int min_idx,
                        int max_idx)
@@ -3130,7 +3132,7 @@ local_pin_random_entry(H5F_t * file_ptr,
  *
  *****************************************************************************/
 
-void
+static void
 local_unpin_all_entries(H5F_t * file_ptr,
 			hbool_t via_unprotect)
 {
@@ -3175,7 +3177,7 @@ local_unpin_all_entries(H5F_t * file_ptr,
  *
  *****************************************************************************/
 
-int
+static int
 local_unpin_next_pinned_entry(H5F_t * file_ptr,
                               int start_idx,
 			      hbool_t via_unprotect)
@@ -3236,7 +3238,7 @@ local_unpin_next_pinned_entry(H5F_t * file_ptr,
  *
  *****************************************************************************/
 
-void
+static void
 lock_and_unlock_random_entries(H5F_t * file_ptr,
                                int min_idx,
                                int max_idx,
@@ -3286,7 +3288,7 @@ lock_and_unlock_random_entries(H5F_t * file_ptr,
  *
  *****************************************************************************/
 
-void
+static void
 lock_and_unlock_random_entry(H5F_t * file_ptr,
                              int min_idx,
                              int max_idx)
@@ -3336,7 +3338,7 @@ lock_and_unlock_random_entry(H5F_t * file_ptr,
  *
  *****************************************************************************/
 
-void
+static void
 lock_entry(H5F_t * file_ptr,
            int32_t idx)
 {
@@ -3396,7 +3398,7 @@ lock_entry(H5F_t * file_ptr,
  *
  *****************************************************************************/
 
-void
+static void
 mark_entry_dirty(int32_t idx)
 {
     const char * fcn_name = "mark_entry_dirty()";
@@ -3454,7 +3456,7 @@ mark_entry_dirty(int32_t idx)
  *
  *****************************************************************************/
 
-void
+static void
 pin_entry(H5F_t * file_ptr,
           int32_t idx,
 	  hbool_t global,
@@ -3508,6 +3510,7 @@ pin_entry(H5F_t * file_ptr,
 } /* pin_entry() */
 
 
+#ifdef H5_METADATA_TRACE_FILE
 /*****************************************************************************
  * Function:    pin_protected_entry()
  *
@@ -3527,7 +3530,7 @@ pin_entry(H5F_t * file_ptr,
  *
  *****************************************************************************/
 
-void
+static void
 pin_protected_entry(int32_t idx,
 		    hbool_t global)
 {
@@ -3581,6 +3584,7 @@ pin_protected_entry(int32_t idx,
     return;
 
 } /* pin_protected_entry() */
+#endif /* H5_METADATA_TRACE_FILE */
 
 
 /*****************************************************************************
@@ -3599,7 +3603,7 @@ pin_protected_entry(int32_t idx,
  *              1/10/06
  *
  *****************************************************************************/
-void
+static void
 move_entry(H5F_t * file_ptr,
            int32_t old_idx,
            int32_t new_idx)
@@ -3807,7 +3811,7 @@ reset_server_counts(void)
  *
  *****************************************************************************/
 
-void
+static void
 resize_entry(int32_t idx,
 	     size_t  new_size)
 {
@@ -3880,7 +3884,7 @@ resize_entry(int32_t idx,
  * Programmer:	JRM -- 1/4/06
  *
  *****************************************************************************/
-hbool_t
+static hbool_t
 setup_cache_for_test(hid_t * fid_ptr,
                      H5F_t ** file_ptr_ptr,
                      H5C_t ** cache_ptr_ptr,
@@ -3944,7 +3948,6 @@ setup_cache_for_test(hid_t * fid_ptr,
         *fid_ptr = fid;
         *file_ptr_ptr = file_ptr;
         *cache_ptr_ptr = cache_ptr;
-        H5C_set_skip_flags(cache_ptr, TRUE, TRUE);
         H5C_stats__reset(cache_ptr);
         success = TRUE;
     }
@@ -4108,14 +4111,14 @@ setup_cache_for_test(hid_t * fid_ptr,
  * Programmer:	JRM -- 5/9/10
  *
  *****************************************************************************/
-void
+static void
 verify_writes(int num_writes,
 	      haddr_t * written_entries_tbl)
 {
     const char * fcn_name = "verify_writes()";
     const hbool_t report = FALSE;
     hbool_t proceed = TRUE;
-    int i;
+    int i = 0;
 
     HDassert( world_mpi_rank != world_server_mpi_rank );
     HDassert( num_writes >= 0 );
@@ -4349,7 +4352,7 @@ setup_noblock_dxpl_id(void)
  *
  *****************************************************************************/
 
-void
+static void
 setup_rand(void)
 {
     const char * fcn_name = "setup_rand()";
@@ -4418,7 +4421,7 @@ setup_rand(void)
  *
  *****************************************************************************/
 
-hbool_t
+static hbool_t
 take_down_cache(hid_t fid)
 {
     const char * fcn_name = "take_down_cache()";
@@ -4981,7 +4984,7 @@ unlock_entry(H5F_t * file_ptr,
  *
  *****************************************************************************/
 
-void
+static void
 unpin_entry(H5F_t * file_ptr,
             int32_t idx,
             hbool_t global,
@@ -5074,7 +5077,7 @@ unpin_entry(H5F_t * file_ptr,
  * Programmer:	JRM -- 12/21/05
  *
  *****************************************************************************/
-hbool_t
+static hbool_t
 server_smoke_check(void)
 {
     const char * fcn_name = "server_smoke_check()";
@@ -5423,7 +5426,7 @@ server_smoke_check(void)
  * Programmer:	JRM -- 1/4/06
  *
  *****************************************************************************/
-hbool_t
+static hbool_t
 smoke_check_1(int metadata_write_strategy)
 {
     const char * fcn_name = "smoke_check_1()";
@@ -5599,7 +5602,7 @@ smoke_check_1(int metadata_write_strategy)
  * Programmer:	JRM -- 1/12/06
  *
  *****************************************************************************/
-hbool_t
+static hbool_t
 smoke_check_2(int metadata_write_strategy)
 {
     const char * fcn_name = "smoke_check_2()";
@@ -5825,7 +5828,7 @@ smoke_check_2(int metadata_write_strategy)
  * Programmer:	JRM -- 1/13/06
  *
  *****************************************************************************/
-hbool_t
+static hbool_t
 smoke_check_3(int metadata_write_strategy)
 {
     const char * fcn_name = "smoke_check_3()";
@@ -6197,7 +6200,7 @@ smoke_check_3(int metadata_write_strategy)
  * Programmer:	JRM -- 1/13/06
  *
  *****************************************************************************/
-hbool_t
+static hbool_t
 smoke_check_4(int metadata_write_strategy)
 {
     const char * fcn_name = "smoke_check_4()";
@@ -6510,7 +6513,7 @@ smoke_check_4(int metadata_write_strategy)
  * Programmer:	JRM -- 5/18/06
  *
  *****************************************************************************/
-hbool_t
+static hbool_t
 smoke_check_5(int metadata_write_strategy)
 {
     const char * fcn_name = "smoke_check_5()";
@@ -6785,7 +6788,7 @@ smoke_check_5(int metadata_write_strategy)
  *              functions:
  *
  *                    - H5AC_flush()
- *                    - H5AC_set()
+ *                    - H5AC_insert_entry()
  *                    - H5AC_mark_entry_dirty()
  *                    - H5AC_move_entry()
  *                    - H5AC_pin_protected_entry()
@@ -6805,7 +6808,7 @@ smoke_check_5(int metadata_write_strategy)
  * Programmer:	JRM -- 6/13/06
  *
  *****************************************************************************/
-hbool_t
+static hbool_t
 trace_file_check(int metadata_write_strategy)
 {
     hbool_t success = TRUE;
@@ -6818,10 +6821,10 @@ trace_file_check(int metadata_write_strategy)
     {
       "### HDF5 metadata cache trace file version 1 ###\n",
       "H5AC_set_cache_auto_resize_config 1 0 1 0 \"t_cache_trace.txt\" 1 0 2097152 0.300000 33554432 1048576 50000 1 0.900000 2.000000 1 1.000000 0.250000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0 0\n",
-      "H5AC_set 0x200 25 0x0 2 0\n",
-      "H5AC_set 0x202 25 0x0 2 0\n",
-      "H5AC_set 0x204 25 0x0 4 0\n",
-      "H5AC_set 0x208 25 0x0 6 0\n",
+      "H5AC_insert_entry 0x200 25 0x0 2 0\n",
+      "H5AC_insert_entry 0x202 25 0x0 2 0\n",
+      "H5AC_insert_entry 0x204 25 0x0 4 0\n",
+      "H5AC_insert_entry 0x208 25 0x0 6 0\n",
       "H5AC_protect 0x200 25 H5AC_WRITE 2 1\n",
       "H5AC_mark_entry_dirty 0x200 0\n",
       "H5AC_unprotect 0x200 25 0 0 0\n",
@@ -6846,10 +6849,10 @@ trace_file_check(int metadata_write_strategy)
     {
       "### HDF5 metadata cache trace file version 1 ###\n",
       "H5AC_set_cache_auto_resize_config 1 0 1 0 \"t_cache_trace.txt\" 1 0 2097152 0.300000 33554432 1048576 50000 1 0.900000 2.000000 1 1.000000 0.250000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 1 0\n",
-      "H5AC_set 0x200 25 0x0 2 0\n",
-      "H5AC_set 0x202 25 0x0 2 0\n",
-      "H5AC_set 0x204 25 0x0 4 0\n",
-      "H5AC_set 0x208 25 0x0 6 0\n",
+      "H5AC_insert_entry 0x200 25 0x0 2 0\n",
+      "H5AC_insert_entry 0x202 25 0x0 2 0\n",
+      "H5AC_insert_entry 0x204 25 0x0 4 0\n",
+      "H5AC_insert_entry 0x208 25 0x0 6 0\n",
       "H5AC_protect 0x200 25 H5AC_WRITE 2 1\n",
       "H5AC_mark_entry_dirty 0x200 0\n",
       "H5AC_unprotect 0x200 25 0 0 0\n",
@@ -7406,6 +7409,8 @@ finish:
 	}
 	printf("===================================\n");
     }
+
+    takedown_derived_types();
 
     /* close HDF5 library */
     H5close();

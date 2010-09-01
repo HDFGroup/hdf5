@@ -1149,8 +1149,8 @@ H5A_dense_copy_file_cb(const H5A_t *attr_src, void *_udata)
     HDassert(udata->file);
     HDassert(udata->cpy_info);
 
-    if ( NULL == (attr_dst=H5A_attr_copy_file(attr_src, udata->file,
-        udata->recompute_size, udata->cpy_info,  udata->dxpl_id)))
+    if(NULL == (attr_dst = H5A_attr_copy_file(attr_src, udata->file,
+            udata->recompute_size, udata->cpy_info,  udata->dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
 
     /* Reset shared location information */
@@ -1168,10 +1168,8 @@ H5A_dense_copy_file_cb(const H5A_t *attr_src, void *_udata)
     H5_END_TAG(H5_ITER_ERROR);
 
 done:
-    if(attr_dst) {
-        (void)H5A_free(attr_dst);
-        attr_dst = H5FL_FREE(H5A_t, attr_dst);
-    } /* end if */
+    if(attr_dst && H5A_close(attr_dst) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close destination attribute")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_dense_copy_file_cb() */

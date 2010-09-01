@@ -32,8 +32,7 @@ const char *FILENAME[] = {
 #define WRT_SIZE	4*1024
 #define FAMILY_SIZE	1024*1024*1024
 
-/* Define big file as 2GB */
-#define BIG_FILE (off_t)0x80000000UL
+#define GB (HDoff_t)0x40000000L
 
 #define MAX_TRIES	100
 
@@ -165,15 +164,15 @@ supports_big(void)
     if ((fd=HDopen("y.h5", O_RDWR|O_TRUNC|O_CREAT, 0666)) < 0) return 0;
 
     /* Write a few bytes at 2GB */
-    if (HDlseek(fd, BIG_FILE, SEEK_SET)!=BIG_FILE) return 0;
+    if (HDlseek(fd, 2*GB, SEEK_SET)!=2*GB) return 0;
     if (5!=HDwrite(fd, "hello", (size_t)5)) return 0;
 
     /* Write a few bytes at 4GB */
-    if (HDlseek(fd, 2*BIG_FILE, SEEK_SET) != 2*BIG_FILE) return 0;
+    if (HDlseek(fd, 4*GB, SEEK_SET) != 4*GB) return 0;
     if (5!=HDwrite(fd, "hello", (size_t)5)) return 0;
 
     if (HDclose(fd) < 0) return 0;
-    if (HDunlink("y.h5") < 0) return 0;
+    if (HDremove("y.h5") < 0) return 0;
 
     return (1);
 }

@@ -2694,8 +2694,6 @@ setup_cache(size_t max_cache_size,
 
         H5C_stats__reset(cache_ptr);
 
-        H5C_set_skip_flags(cache_ptr, TRUE, TRUE);
-
         ret_val = file_ptr;
     }
 

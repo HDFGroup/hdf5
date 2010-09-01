@@ -4,13 +4,12 @@ PROJECT (HDF5_TOOLS_H5LS)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
+INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
-# --------------------------------------------------------------------
-# If testing was NOT enabled, then we need to build the tools library
-# --------------------------------------------------------------------
-#-- Add the h5ls executable
+#-----------------------------------------------------------------------------
+# Add the h5ls executable
+#-----------------------------------------------------------------------------
 ADD_EXECUTABLE (h5ls ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
 H5_NAMING (h5ls)
 IF (WIN32)
@@ -29,8 +28,16 @@ SET (H5_DEP_EXECUTABLES
     h5ls
 )
 
+##############################################################################
+##############################################################################
+###           T E S T I N G                                                ###
+##############################################################################
+##############################################################################
+
 IF (BUILD_TESTING)
-  #-- Copy all the HDF5 files from the test directory into the source directory
+  # --------------------------------------------------------------------
+  # Copy all the HDF5 files from the test directory into the source directory
+  # --------------------------------------------------------------------
   SET (HDF5_REFERENCE_FILES
       help-1.ls
       help-2.ls
@@ -112,7 +119,7 @@ IF (BUILD_TESTING)
         TARGET     h5ls
         POST_BUILD
         COMMAND    ${XLATE_UTILITY}
-        ARGS       ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${ls_file} ${lsdest} -l3
+        ARGS       ${HDF5_TOOLS_SRC_DIR}/testfiles/${ls_file} ${lsdest} -l3
     )
   ENDFOREACH (ls_file ${HDF5_REFERENCE_FILES})
 
@@ -123,9 +130,15 @@ IF (BUILD_TESTING)
         TARGET     h5ls
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${h5_file} ${dest}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file} ${dest}
     )
   ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  
+##############################################################################
+##############################################################################
+###           T H E   T E S T S  M A C R O S                               ###
+##############################################################################
+##############################################################################
 
   MACRO (ADD_H5_TEST resultfile resultcode)
     ADD_TEST (
@@ -140,6 +153,12 @@ IF (BUILD_TESTING)
             -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
     )
   ENDMACRO (ADD_H5_TEST file)
+
+##############################################################################
+##############################################################################
+###           T H E   T E S T S                                            ###
+##############################################################################
+##############################################################################
 
   # test the help syntax
   ADD_H5_TEST (help-1 0 -w80 -h)
@@ -246,6 +265,12 @@ IF (BUILD_TESTING)
   ENDIF (WORDS_BIGENDIAN)
 
 ENDIF (BUILD_TESTING)
+
+##############################################################################
+##############################################################################
+###           I N S T A L L A T I O N                                      ###
+##############################################################################
+##############################################################################
 
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target

@@ -1142,7 +1142,7 @@ H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
     htri_t linfo_exists;        /* Whether the link info message exists */
     H5G_obj_t ret_value;        /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_obj_get_type_by_idx, H5G_UNKNOWN)
+    FUNC_ENTER_NOAPI_TAG(H5G_obj_get_type_by_idx, dxpl_id, oloc->addr, H5G_UNKNOWN)
 
     /* Sanity check */
     HDassert(oloc);
@@ -1169,7 +1169,7 @@ H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
     } /* end else */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, H5G_UNKNOWN)
 } /* end H5G_obj_get_type_by_idx() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

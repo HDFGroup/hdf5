@@ -35,6 +35,11 @@ if test "X-$enable_parallel" = "X-yes" -o X-$CC_BASENAME = X-mpcc_r; then
     RUNPARALLEL=${RUNPARALLEL="env MP_PROCS=\$\${NPROCS:=3} MP_TASKS_PER_NODE=\$\${NPROCS:=3} poe"}
 fi
 
+# Temporary patch for Bug 1678. -q32 binary default to run with smaller memory.
+# Ask for more memory so that "make check" will pass. Not necessary for -q64
+# mode but it does no harm.
+RUNSERIAL=${RUNSERIAL="env LDR_CNTRL=MAXDATA=0x20000000@DSA"}
+
 
 #----------------------------------------------------------------------------
 # Compiler flags. The CPPFLAGS values should not include package debug

@@ -1992,7 +1992,7 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
 
     switch(linfo->type) {
         case H5L_TYPE_SOFT:
-            ret = H5tools_get_link_info(iter->fid, name, &lnk_info);
+            ret = H5tools_get_link_info(iter->fid, name, &lnk_info, follow_symlink_g);
             /* lnk_info.trg_path is malloced in H5tools_get_link_info()
              * so it will be freed via buf later */
             buf = lnk_info.trg_path;
@@ -2048,8 +2048,9 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
             {
             const char *filename;
             const char *path;
+            hbool_t follow_link = follow_symlink_g || follow_elink_g;
 
-            ret = H5tools_get_link_info(iter->fid, name, &lnk_info);
+            ret = H5tools_get_link_info(iter->fid, name, &lnk_info, follow_link);
             /* lnk_info.trg_path is malloced in H5tools_get_link_info()
              * so it will be freed via buf later */
             buf = lnk_info.trg_path;
@@ -2073,7 +2074,7 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
 
             /* Recurse through the external link */
             /* keep the follow_elink_g for backward compatibility with -E */
-            if(follow_symlink_g || follow_elink_g) 
+            if(follow_link)
             {
                 hbool_t orig_grp_literal = grp_literal_g;
                 HDfputc(' ', stdout);

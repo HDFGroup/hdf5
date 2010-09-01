@@ -853,10 +853,14 @@
 				RelativePath="..\..\..\src\H5HP.c"
 				>
 			</File>
-			<File
-				RelativePath="..\..\..\src\H5I.c"
-				>
-			</File>
+            <File
+                RelativePath="..\..\..\src\H5I.c"
+                >
+            </File>
+            <File
+                RelativePath="..\..\..\src\H5Itest.c"
+                >
+            </File>
 			<File
 				RelativePath="..\..\..\src\H5L.c"
 				>

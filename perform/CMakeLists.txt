@@ -4,8 +4,8 @@ PROJECT (HDF5_PERFORM )
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TEST_SOURCE_DIR})
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib )
+INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
+INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib )
 
 #-----------------------------------------------------------------------------
 # Add Tests
@@ -132,3 +132,67 @@ ENDIF (WIN32)
 TARGET_LINK_LIBRARIES (zip_perf ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 ADD_TEST (NAME zip_perf COMMAND $<TARGET_FILE:zip_perf> "-h")
+
+IF (H5_HAVE_PARALLEL)
+  #-- Adding test for h5perf
+  SET (h5perf_SRCS
+      ${HDF5_PERFORM_SOURCE_DIR}/pio_timer.c
+      ${HDF5_PERFORM_SOURCE_DIR}/pio_perf.c
+      ${HDF5_PERFORM_SOURCE_DIR}/pio_engine.c
+  )
+  ADD_EXECUTABLE (h5perf ${h5perf_SRCS})
+  H5_NAMING (h5perf)
+  IF (WIN32)
+    IF (MSVC)
+      IF (NOT BUILD_SHARED_LIBS)
+        SET_TARGET_PROPERTIES (h5perf
+            PROPERTIES
+                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+        ) 
+      ENDIF (NOT BUILD_SHARED_LIBS)
+    ENDIF (MSVC)
+  ENDIF (WIN32)
+  TARGET_LINK_LIBRARIES (h5perf ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+  ADD_TEST (NAME h5perf COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:h5perf>)
+
+  #-- Adding test for benchpar
+  SET (benchpar_SRCS
+      ${HDF5_PERFORM_SOURCE_DIR}/benchpar.c
+  )
+  ADD_EXECUTABLE (benchpar ${benchpar_SRCS})
+  H5_NAMING (benchpar)
+  IF (WIN32)
+    IF (MSVC)
+      IF (NOT BUILD_SHARED_LIBS)
+        SET_TARGET_PROPERTIES (benchpar
+            PROPERTIES
+                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+        ) 
+      ENDIF (NOT BUILD_SHARED_LIBS)
+    ENDIF (MSVC)
+  ENDIF (WIN32)
+  TARGET_LINK_LIBRARIES (benchpar ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+  ADD_TEST (NAME benchpar COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:benchpar>)
+
+  #-- Adding test for mpi-perf
+  SET (mpi-perf_SRCS
+      ${HDF5_PERFORM_SOURCE_DIR}/mpi-perf.c
+  )
+  ADD_EXECUTABLE (mpi-perf ${mpi-perf_SRCS})
+  H5_NAMING (mpi-perf)
+  IF (WIN32)
+    IF (MSVC)
+      IF (NOT BUILD_SHARED_LIBS)
+        SET_TARGET_PROPERTIES (mpi-perf
+            PROPERTIES
+                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+        ) 
+      ENDIF (NOT BUILD_SHARED_LIBS)
+    ENDIF (MSVC)
+  ENDIF (WIN32)
+  TARGET_LINK_LIBRARIES (mpi-perf ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+  ADD_TEST (NAME mpi-perf COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:mpi-perf>)
+ENDIF (H5_HAVE_PARALLEL)

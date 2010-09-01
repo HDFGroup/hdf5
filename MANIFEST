@@ -641,6 +641,7 @@
 ./src/H5Ipkg.h
 ./src/H5Iprivate.h
 ./src/H5Ipublic.h
+./src/H5Itest.c
 ./src/H5L.c
 ./src/H5Lexternal.c
 ./src/H5Lpkg.h
@@ -1196,6 +1197,8 @@
 ./tools/testfiles/tattrreg.h5
 ./tools/testfiles/tattrreg.ddl 
 ./tools/testfiles/tattrregR.ddl 
+./tools/testfiles/tbinregR.exp
+./tools/testfiles/tbinregR.ddl
 ./tools/testfiles/tbitfields.h5
 ./tools/testfiles/tchar.h5
 ./tools/testfiles/tchar1.ddl
@@ -1220,6 +1223,10 @@
 ./tools/testfiles/tempty.ddl
 ./tools/testfiles/tempty.h5
 ./tools/testfiles/tenum.h5
+./tools/testfiles/texceedsubblock.ddl
+./tools/testfiles/texceedsubcount.ddl
+./tools/testfiles/texceedsubstart.ddl
+./tools/testfiles/texceedsubstride.ddl
 ./tools/testfiles/textlink.h5
 ./tools/testfiles/textlink.h5.xml
 ./tools/testfiles/textlinkfar.ddl
@@ -1364,6 +1371,8 @@
 ./tools/testfiles/torderattr.h5
 ./tools/testfiles/tfpformat.ddl
 ./tools/testfiles/tfpformat.h5
+# h5dump h5repack validation
+./tools/testfiles/h5repack_filters.h5.ddl
 
 
 # Expected output from h5ls tests
@@ -1436,6 +1445,7 @@
 ./tools/testfiles/tdset2.h5.xml
 ./tools/testfiles/tempty.h5.xml
 ./tools/testfiles/tenum.h5.xml
+./tools/testfiles/tfpformat.h5.xml
 ./tools/testfiles/tgroup.h5.xml
 ./tools/testfiles/thlink.h5.xml
 ./tools/testfiles/tloop.h5.xml
@@ -1494,7 +1504,6 @@
 ./tools/testfiles/torderattr2.h5.xml
 ./tools/testfiles/torderattr3.h5.xml
 ./tools/testfiles/torderattr1.h5.xml
-
 
 
 #test files for h5diff
@@ -1680,8 +1689,6 @@
 ./tools/h5jam/testfiles/twithub513.h5
 ./tools/h5jam/testfiles/u513.txt
 
-
-
 # test files for h5copy
 ./tools/h5copy/testfiles/h5copytst.h5
 ./tools/h5copy/testfiles/h5copytst.out.ls
@@ -1810,7 +1817,6 @@
 ./hl/tools/gif2h5/testfiles/image1.gif
 ./hl/tools/gif2h5/testfiles/h52giftst.h5
 
-
 # hl fortran
 ./hl/fortran/COPYING
 ./hl/fortran/Makefile.am
@@ -1911,10 +1917,11 @@
 ./config/cmake/CheckTypeSize.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
-./config/cmake/hdf5_zlib.h.in
 ./config/cmake/FindHDF5.cmake
-./config/cmake/HDF5-config.cmake.build.in
-./config/cmake/HDF5-config.cmake.install.in
+./config/cmake/FindMPI.cmake
+./config/cmake/hdf5-config.cmake.build.in
+./config/cmake/hdf5-config.cmake.install.in
+./config/cmake/hdf5-config-version.cmake.in
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/cacheinit.cmake
@@ -1934,6 +1941,7 @@
 ./fortran/examples/CMakeLists.txt
 ./fortran/src/CMakeLists.txt
 ./fortran/test/CMakeLists.txt
+./fortran/testpar/CMakeLists.txt
 ./hl/CMakeLists.txt
 ./hl/c++/CMakeLists.txt
 ./hl/c++/examples/CMakeLists.txt

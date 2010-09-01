@@ -929,7 +929,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_set
+ * Function:    H5AC_insert_entry
  *
  * Purpose:     Adds the specified thing to the cache.  The thing need not
  *              exist on disk yet, but it must have an address and disk
@@ -944,7 +944,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
+H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     void *thing, unsigned int flags)
 {
 #if H5AC__TRACE_FILE_ENABLED
@@ -954,7 +954,7 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 #endif /* H5AC__TRACE_FILE_ENABLED */
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5AC_set, FAIL)
+    FUNC_ENTER_NOAPI(H5AC_insert_entry, FAIL)
 
     HDassert(f);
     HDassert(f->shared);
@@ -983,7 +983,7 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
          ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
          ( trace_file_ptr != NULL ) ) {
 
-        sprintf(trace, "H5AC_set 0x%lx %d 0x%x",
+        sprintf(trace, "H5AC_insert_entry 0x%lx %d 0x%x",
 	        (unsigned long)addr,
 		type->id,
 		flags);
@@ -1028,7 +1028,7 @@ done:
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_set() */
+} /* H5AC_insert_entry() */
 
 
 /*-------------------------------------------------------------------------
