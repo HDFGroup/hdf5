@@ -124,7 +124,7 @@ IF (BUILD_TESTING)
       tlonglinks.ddl
       tloop-1.ddl
       tmulti.ddl
-      tnamed_dtype_attr.ddl"/usr/share/CMake/bin/cmake" "-D" "TEST_PROGRAM=/home/abyrne/HDF_Projects/HDF5-C-Trunk/build/bin/h5dump" "-D" "TEST_ARGS:STRING=-X;:;tempty.h5" "-D" "TEST_FOLDER=/home/abyrne/HDF_Projects/HDF5-C-Trunk/build/tools/h5dump" "-D" "TEST_OUTPUT=tempty-nons.h5.out" "-D" "TEST_EXPECT=0" "-D" "TEST_REFERENCE=tempty-nons.h5.ddl" "-P" "/home/abyrne/HDF_Projects/HDF5-C-Trunk/config/cmake/runTest.cmake"
+      tnamed_dtype_attr.ddl
       tnestcomp-1.ddl
       tnbit.ddl
       tnofilename.ddl
