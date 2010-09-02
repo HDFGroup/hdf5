@@ -563,8 +563,6 @@ ENDIF (INLINE_TEST___inline__)
 # Check how to print a Long Long integer
 #-----------------------------------------------------------------------------
 IF (NOT H5_PRINTF_LL_WIDTH OR H5_PRINTF_LL_WIDTH MATCHES "unknown")
-  SET (H5_PRINTF_LL_WIDTH "H5_PRINTF_LL_WIDTH")
-  IF (H5_PRINTF_LL_WIDTH MATCHES "^H5_PRINTF_LL_WIDTH$")
     SET (PRINT_LL_FOUND 0)
     MESSAGE (STATUS "Checking for appropriate format for 64 bit long:")
     FOREACH (HDF5_PRINTF_LL l64 l L q I64 ll)
@@ -600,7 +598,6 @@ IF (NOT H5_PRINTF_LL_WIDTH OR H5_PRINTF_LL_WIDTH MATCHES "unknown")
           "Width for printf for type `long long' or `__int64', us. `ll"
       )
     ENDIF (PRINT_LL_FOUND)
-  ENDIF (H5_PRINTF_LL_WIDTH MATCHES "^H5_PRINTF_LL_WIDTH$")
 ENDIF (NOT H5_PRINTF_LL_WIDTH OR H5_PRINTF_LL_WIDTH MATCHES "unknown")
 
 # ----------------------------------------------------------------------
