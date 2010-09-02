@@ -479,6 +479,39 @@ IF (HDF5_ENABLE_SZIP_SUPPORT)
 ENDIF (HDF5_ENABLE_SZIP_SUPPORT)
 
 #-----------------------------------------------------------------------------
+# Option for external libraries on windows
+#-----------------------------------------------------------------------------
+IF (WIN32)
+  OPTION (HDF5_PACKAGE_EXTLIBS "CPACK - include external libraries" OFF)
+  IF (BUILD_SHARED_LIBS)
+    FILE (MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${BLDTYPE})
+    
+    IF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
+      GET_FILENAME_COMPONENT(ZLIB_DLL_NAME ${ZLIB_LIBRARY} NAME_WE)
+      # MESSAGE (STATUS "ZLIB_DLL_NAME: ${ZLIB_DLL_NAME}")
+      GET_FILENAME_COMPONENT(ZLIB_BIN_PATH ${ZLIB_LIBRARY} PATH)
+      # MESSAGE (STATUS "ZLIB_BIN_PATH: ${ZLIB_BIN_PATH}")
+      ADD_CUSTOM_TARGET (ZLIB-Release-Copy ALL
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZLIB_BIN_PATH}/${ZLIB_DLL_NAME}.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/
+          COMMENT "Copying ${ZLIB_BIN_PATH}/${ZLIB_DLL_NAME}.dll to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/"
+      )
+    ENDIF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
+    
+    IF (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
+      GET_FILENAME_COMPONENT(SZIP_DLL_NAME ${SZIP_LIBRARY} NAME_WE)
+      # MESSAGE (STATUS "SZIP_DLL_NAME: ${SZIP_DLL_NAME}")
+      GET_FILENAME_COMPONENT(SZIP_BIN_PATH ${SZIP_LIBRARY} PATH)
+      # MESSAGE (STATUS "SZIP_BIN_PATH: ${SZIP_BIN_PATH}")
+      ADD_CUSTOM_TARGET (SZIP-Release-Copy ALL
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SZIP_BIN_PATH}/${SZIP_DLL_NAME}.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/
+          COMMENT "Copying ${SZIP_BIN_PATH}/${SZIP_DLL_NAME}.dll to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/"
+      )
+    ENDIF (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
+    
+  ENDIF (BUILD_SHARED_LIBS)
+ENDIF (WIN32)
+
+#-----------------------------------------------------------------------------
 # Option to use PACKED BITS SUPPORT
 #-----------------------------------------------------------------------------
 OPTION (HDF5_USE_H5DUMP_PACKED_BITS "Use the PACKED BITS feature in h5dump" OFF)
@@ -600,26 +633,74 @@ CONFIGURE_FILE (${HDF5_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_BINARY_DIR}/H5pubcon
 #-----------------------------------------------------------------------------
 IF (NOT HDF5_INSTALL_NO_DEVELOPMENT)
   INSTALL (
-      FILES
-          ${PROJECT_BINARY_DIR}/H5pubconf.h
-      DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}
-      COMPONENT
-          headers
+      FILES ${PROJECT_BINARY_DIR}/H5pubconf.h
+      DESTINATION ${HDF5_INSTALL_INCLUDE_DIR}
+      COMPONENT headers
   )
 ENDIF (NOT HDF5_INSTALL_NO_DEVELOPMENT)
+
+#-----------------------------------------------------------------------------
+# Option for external libraries on windows
+#-----------------------------------------------------------------------------
+IF (NOT HDF5_EXTERNALLY_CONFIGURED)
+  IF (HDF5_PACKAGE_EXTLIBS)
+    IF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
+      INSTALL (
+          FILES ${ZLIB_INCLUDE_DIR}/zconf.h ${ZLIB_INCLUDE_DIR}/zlib.h
+          DESTINATION ${HDF5_INSTALL_INCLUDE_DIR}
+          COMPONENT headers
+      )
+      INSTALL(
+          FILES ${ZLIB_LIBRARY}
+          DESTINATION ${HDF5_INSTALL_LIB_DIR}
+          COMPONENT libraries
+      )
+      IF (BUILD_SHARED_LIBS)
+        GET_FILENAME_COMPONENT(ZLIB_DLL_NAME ${ZLIB_LIBRARY} NAME_WE)
+        # message(STATUS "ZLIB_DLL_NAME: ${ZLIB_DLL_NAME}")
+        GET_FILENAME_COMPONENT(ZLIB_BIN_PATH ${ZLIB_LIBRARY} PATH)
+        # message(STATUS "ZLIB_BIN_PATH: ${ZLIB_BIN_PATH}")
+        INSTALL(
+            FILES ${ZLIB_BIN_PATH}/${ZLIB_DLL_NAME}.dll
+            DESTINATION ${HDF5_INSTALL_BIN_DIR}
+            COMPONENT libraries
+        )
+      ENDIF (BUILD_SHARED_LIBS)
+    ENDIF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
+    IF (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
+      INSTALL (
+          FILES ${SZIP_INCLUDE_DIR}/SZconfig.h ${SZIP_INCLUDE_DIR}/szlib.h ${SZIP_INCLUDE_DIR}/szip_adpt.h ${SZIP_INCLUDE_DIR}/ricehdf.h
+          DESTINATION ${HDF5_INSTALL_INCLUDE_DIR}
+          COMPONENT headers
+      )
+      INSTALL(
+          FILES ${SZIP_LIBRARY}
+          DESTINATION ${HDF5_INSTALL_LIB_DIR}
+          COMPONENT libraries
+      )
+      IF (BUILD_SHARED_LIBS)
+        GET_FILENAME_COMPONENT(SZIP_DLL_NAME ${SZIP_LIBRARY} NAME_WE)
+        # message(STATUS "SZIP_DLL_NAME: ${SZIP_DLL_NAME}")
+        GET_FILENAME_COMPONENT(SZIP_BIN_PATH ${SZIP_LIBRARY} PATH)
+        # message(STATUS "SZIP_BIN_PATH: ${ZLIB_BIN_PATH}")
+        INSTALL(
+            FILES ${SZIP_BIN_PATH}/${SZIP_DLL_NAME}.dll
+            DESTINATION ${HDF5_INSTALL_BIN_DIR}
+            COMPONENT libraries
+        )
+      ENDIF (BUILD_SHARED_LIBS)
+    ENDIF (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
+  ENDIF (HDF5_PACKAGE_EXTLIBS)
+ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   INSTALL (
-      EXPORT
-          ${HDF5_EXPORTED_TARGETS}
-      DESTINATION
-          lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
-      FILE
-          hdf5-targets.cmake
+      EXPORT ${HDF5_EXPORTED_TARGETS}
+      DESTINATION lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
+      FILE hdf5-targets.cmake
   )
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 
@@ -628,10 +709,8 @@ ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 #-----------------------------------------------------------------------------
 IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   EXPORT (
-      TARGETS
-          ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES}
-      FILE
-          hdf5-targets.cmake
+      TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES}
+      FILE hdf5-targets.cmake
   )
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 
@@ -660,10 +739,8 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
       ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config.cmake @ONLY
   )
   INSTALL (
-      FILES
-          ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config.cmake
-      DESTINATION
-          lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
+      FILES ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config.cmake
+      DESTINATION lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
   )
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 
@@ -676,10 +753,8 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
       ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config-version.cmake @ONLY
   )
   INSTALL (
-      FILES
-          ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config-version.cmake
-      DESTINATION
-          lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
+      FILES ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config-version.cmake
+      DESTINATION lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
   )
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 
@@ -704,7 +779,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED AND EXISTS "${HDF5_SOURCE_DIR}/release_docs")
   #---------------------------------------------------------------------------
   # Now list the cpack commands
   #---------------------------------------------------------------------------
-  CPACK_ADD_COMPONENT (applications 
+  CPACK_ADD_COMPONENT (hdfapplications 
       DISPLAY_NAME "HDF5 Applications" 
       DEPENDS libraries
       GROUP Applications
