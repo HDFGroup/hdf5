@@ -22,6 +22,9 @@
 
 #define H5S_PACKAGE             /*suppress error about including H5Spkg   */
 
+/* Define this macro to indicate that the testing APIs should be available */
+#define H5S_TESTING
+
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -47,7 +50,7 @@
 #define PAR_SS_DR_MAX_RANK	5
 #define CONTIG_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 0
 
-void
+static void
 contig_hyperslab_dr_pio_test__run_test(const int test_num,
                                        const int edge_size,
                                        const int chunk_edge_size,
@@ -56,11 +59,13 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                                        const hbool_t use_collective_io,
                                        const hid_t dset_type)
 {
-    const char *fcnName = "contig_hyperslab_dr_pio_test()";
+#if CONTIG_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 
+    const char *fcnName = "contig_hyperslab_dr_pio_test__run_test()";
+#endif /* CONTIG_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG */
     const char *filename;
     hbool_t	use_gpfs = FALSE;   /* Use GPFS hints */
     hbool_t	mis_match = FALSE;
-    int		i, j, k, l, m, n;
+    int		i, j, k, l, n;
     int         mrc;
     int		mpi_size = -1;
     int         mpi_rank = -1;
@@ -1619,7 +1624,6 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 void
 contig_hyperslab_dr_pio_test(void)
 {
-    const char *fcnName = "contig_hyperslab_dr_pio_test()";
     int	        test_num = 0;
     int		edge_size = 10;
     int		chunk_edge_size = 0;
@@ -1645,7 +1649,6 @@ contig_hyperslab_dr_pio_test(void)
                                                        (hbool_t)use_collective_io,
                                                        dset_type);
                 test_num++;
-#if 1
                 chunk_edge_size = 5;
                 contig_hyperslab_dr_pio_test__run_test(test_num,
                                                        edge_size,
@@ -1655,7 +1658,6 @@ contig_hyperslab_dr_pio_test(void)
                                                        (hbool_t)use_collective_io,
                                                        dset_type);
                 test_num++;
-#endif
             }
         }
     }
@@ -2068,7 +2070,6 @@ checker_board_hyperslab_dr_pio_test__select_checker_board(
 
 static hbool_t
 checker_board_hyperslab_dr_pio_test__verify_data(uint32_t * buf_ptr,
-                                                 const int mpi_rank,
                                                  const int rank,
                                                  const int edge_size,
                                                  const int checker_edge_size,
@@ -2097,12 +2098,17 @@ checker_board_hyperslab_dr_pio_test__verify_data(uint32_t * buf_ptr,
     HDassert( test_max_rank <= PAR_SS_DR_MAX_RANK );
 
 #if CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__VERIFY_DATA__DEBUG 
+
+    int		mpi_rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     HDfprintf(stdout, "%s mpi_rank = %d.\n", fcnName, mpi_rank);
     HDfprintf(stdout, "%s rank = %d.\n", fcnName, rank);
     HDfprintf(stdout, "%s edge_size = %d.\n", fcnName, edge_size);
     HDfprintf(stdout, "%s checker_edge_size = %d.\n", fcnName, checker_edge_size);
     HDfprintf(stdout, "%s first_expected_val = %d.\n", fcnName, (int)first_expected_val);
     HDfprintf(stdout, "%s starts_in_checker = %d.\n", fcnName, (int)buf_starts_in_checker);
+}
 #endif
 
     val_ptr = buf_ptr;
@@ -2248,12 +2254,14 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                                               const hbool_t use_collective_io,
                                               const hid_t dset_type)
 {
+#if CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG
     const char *fcnName = "checker_board_hyperslab_dr_pio_test__run_test()";
+#endif /* CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG */
     const char *filename;
     hbool_t	use_gpfs = FALSE;   /* Use GPFS hints */
     hbool_t	data_ok = FALSE;
     hbool_t	mis_match = FALSE;
-    int		i, j, k, l, m, n;
+    int		i, j, k, l, n;
     int         mrc;
     int         start_index;
     int         stop_index;
@@ -2308,10 +2316,6 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     hsize_t     count[PAR_SS_DR_MAX_RANK];
     hsize_t     block[PAR_SS_DR_MAX_RANK];
     hsize_t     sel_start[PAR_SS_DR_MAX_RANK];
-    hsize_t   * start_ptr = NULL;
-    hsize_t   * stride_ptr = NULL;
-    hsize_t   * count_ptr = NULL;
-    hsize_t   * block_ptr = NULL;
     htri_t      check;          /* Shape comparison return value */
     herr_t	ret;		/* Generic return value */
 
@@ -2355,13 +2359,6 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
     HDassert( 0 <= large_ds_offset );
     HDassert( large_ds_offset < PAR_SS_DR_MAX_RANK );
-
-
-    /* set up the start, stride, count, and block pointers */
-    start_ptr  = &(start[PAR_SS_DR_MAX_RANK - large_rank]);
-    stride_ptr = &(stride[PAR_SS_DR_MAX_RANK - large_rank]);
-    count_ptr  = &(count[PAR_SS_DR_MAX_RANK - large_rank]);
-    block_ptr  = &(block[PAR_SS_DR_MAX_RANK - large_rank]);
 
 
     /* Allocate buffers */
@@ -3020,7 +3017,6 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                 data_ok = checker_board_hyperslab_dr_pio_test__verify_data
                           (
                             small_ds_slice_buf,
-                            mpi_rank,
                             small_rank - 1,
                             edge_size,
                             checker_edge_size,
@@ -3221,6 +3217,8 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                 stop_index = start_index + (int)small_ds_slice_size - 1;
 
 #if CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 
+{
+int		m;
 		HDfprintf(stdout, "%s:%d: expected_value = %d.\n", 
                           fcnName, mpi_rank, expected_value);
 		HDfprintf(stdout, "%s:%d: start/stop index = %d/%d.\n",
@@ -3238,6 +3236,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                 HDfprintf(stdout, "\n");
                 fsync(stdout);
                 ptr_1 = large_ds_buf_1;
+}
 #endif 
 
                 HDassert( 0 <= start_index );
@@ -3263,7 +3262,6 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                 data_ok = checker_board_hyperslab_dr_pio_test__verify_data
                           (
                             ptr_1,
-                            mpi_rank,
                             small_rank - 1,
                             edge_size,
                             checker_edge_size,
@@ -3566,7 +3564,6 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                 data_ok &= checker_board_hyperslab_dr_pio_test__verify_data
                            (
                              ptr_1 + start_index,
-                             mpi_rank,
                              small_rank - 1,
                              edge_size,
                              checker_edge_size,
@@ -3859,7 +3856,6 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                 data_ok &= checker_board_hyperslab_dr_pio_test__verify_data
                            (
                              ptr_1 + start_index,
-                             mpi_rank,
                              small_rank - 1,
                              edge_size,
                              checker_edge_size,
@@ -3965,7 +3961,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
     return;
 
-} /* contig_hyperslab_dr_pio_test__run_test() */
+} /* checker_board_hyperslab_dr_pio_test__run_test() */
 
 
 /*-------------------------------------------------------------------------
@@ -3986,7 +3982,6 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 void
 checker_board_hyperslab_dr_pio_test(void)
 {
-    const char *fcnName = "checker_board_hyperslab_dr_pio_test()";
     int	        test_num = 0;
     int		edge_size = 10;
     int         checker_edge_size = 3;
