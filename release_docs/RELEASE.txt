@@ -117,6 +117,9 @@ Bug Fixes since HDF5-1.8.5
 
     Library
     -------
+    - Corrected situation where 1-D chunked dataset could get created by an
+      application without calling H5Pset_chunk().  H5Pset_chunk is now
+      required for creating all chunked datasets.  (QAK - 2010/09/02)
     - Fixed many memory issues that valgrind exposed.  (QAK - 2010/08/24)
     - Fixed the bug in the filter's public CAN_APPLY function.  The return
       value should be htri_t not herr_t (Bug #1239). (SLU - 2010/8/5)
