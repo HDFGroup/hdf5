@@ -1776,12 +1776,6 @@ done:
  * Programmer:	Raymond Lu
  *		Thursday, April 10, 2003
  *
- * Modification:Raymond Lu
- *              4 Feb 2009
- *              One case that was considered cacheable was when the chunk
- *              was bigger than the cache size but not allocated on disk.
- *              I moved it to uncacheable branch to bypass the cache to
- *              improve performance.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2667,12 +2661,12 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     hbool_t relax)
 {
     H5D_t *dset = io_info->dset;                /* Local pointer to the dataset info */
-    const H5O_pline_t  *pline = &(dset->shared->dcpl_cache.pline);    /* I/O pipeline info */
-    const H5O_layout_t *layout = &(dset->shared->layout);       /* Dataset layout */
-    const H5O_fill_t    *fill = &(dset->shared->dcpl_cache.fill);    /* Fill value info */
+    const H5O_pline_t   *pline = &(dset->shared->dcpl_cache.pline); /* I/O pipeline info - always equal to the pline passed to H5D_chunk_alloc */
+    const H5O_layout_t  *layout = &(dset->shared->layout); /* Dataset layout */
+    const H5O_fill_t    *fill = &(dset->shared->dcpl_cache.fill); /* Fill value info */
     H5D_fill_buf_info_t fb_info;                /* Dataset's fill buffer info */
     hbool_t             fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
-    H5D_rdcc_t		*rdcc = &(dset->shared->cache.chunk);   /*raw data chunk cache*/
+    H5D_rdcc_t		*rdcc = &(dset->shared->cache.chunk); /*raw data chunk cache*/
     H5D_rdcc_ent_t	*ent = NULL;		/*cache entry		*/
     haddr_t             chunk_addr = HADDR_UNDEF; /* Address of chunk on disk */
     size_t		chunk_size;		/*size of a chunk	*/
@@ -3664,14 +3658,6 @@ done:
  * that needs to be released.
  * To release the chunks, we traverse the B-tree to obtain a list of unused
  * allocated chunks, and then call H5B_remove() for each chunk.
- *
- * Modifications: Neil Fortner
- *                4 May 2010
- *                Rewrote algorithm to work in a way similar to
- *                H5D_chunk_allocate: it now iterates over all chunks that need
- *                to be filled or removed, and does so as appropriate.  This
- *                avoids various issues with coherency of locally cached data
- *                which could occur with the previous implementation.
  *
  *-------------------------------------------------------------------------
  */
