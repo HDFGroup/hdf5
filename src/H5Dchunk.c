@@ -283,11 +283,6 @@ H5FL_BLK_DEFINE_STATIC(chunk);
  * Programmer:	Quincey Koziol
  *              Tuesday, June 30, 2009
  *
- * Modifications:
- *      Vailin Choi; June 2010
- *      Modified to handle extendible datdaset for Fixed Array Indexing.
- *      (fixed max. dim. setting but not H5S_UNLIMITED)
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -334,11 +329,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, June 30, 2009
- *
- * Modifications:
- *      Vailin Choi; June 2010
- *      Modified to handle extendible datdaset for Fixed Array Indexing.
- *      (fixed max. dim. setting but not H5S_UNLIMITED)
  *
  *-------------------------------------------------------------------------
  */
@@ -1747,8 +1737,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 src_accessed_bytes = chunk_info->chunk_points * (uint32_t)type_info->src_type_size;
 
                 /* Lock the chunk into the cache */
-                if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, FALSE,
-                        FALSE)))
+                if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, FALSE, FALSE)))
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
 
                 /* Set up the storage buffer information for this chunk */
@@ -1781,8 +1770,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed")
 
             /* Release the cache lock on the chunk. */
-            if(chunk && H5D_chunk_unlock(io_info, &udata, FALSE,
-                    chunk, src_accessed_bytes) < 0)
+            if(chunk && H5D_chunk_unlock(io_info, &udata, FALSE, chunk, src_accessed_bytes) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
         } /* end if */
 
@@ -1805,12 +1793,6 @@ done:
  * Programmer:	Raymond Lu
  *		Thursday, April 10, 2003
  *
- * Modification:Raymond Lu
- *              4 Feb 2009
- *              One case that was considered cacheable was when the chunk
- *              was bigger than the cache size but not allocated on disk.
- *              I moved it to uncacheable branch to bypass the cache to
- *              improve performance.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1887,8 +1869,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 entire_chunk = FALSE;
 
             /* Lock the chunk into the cache */
-            if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, entire_chunk,
-                    FALSE)))
+            if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, entire_chunk, FALSE)))
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
 
             /* Set up the storage buffer information for this chunk */
@@ -1940,8 +1921,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked write failed")
 
         /* Release the cache lock on the chunk. */
-        if(chunk && H5D_chunk_unlock(io_info, &udata, TRUE, chunk,
-                dst_accessed_bytes) < 0)
+        if(chunk && H5D_chunk_unlock(io_info, &udata, TRUE, chunk, dst_accessed_bytes) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
 
         /* Advance to next chunk in list */
@@ -2754,14 +2734,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
  *
- * Modifications: Neil Fortner
- *              Tuesday, December 15, 2009
- *              Added new_unfilt_chunk parameter - if true indicates that
- *              the chunk just became a partial edge chunk and the dataset
- *              is set to disable filters on partial chunks.
- *              Added prev_unfilt_chunk parameter - if true indicates that
- *              the chunk just had filters re-enabled after being disabled.
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -3536,12 +3508,13 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
          * for each chunk. */
         fill_buf = &fb_info.fill_buf;
 
-       /* Check if there are filters which need to be applied to the chunk */
-       /* (only do this in advance when the chunk info can be re-used (i.e.
-        *      it doesn't contain any non-default VL datatype fill values)
-        */
-       if(!fb_info.has_vlen_fill_type && pline->nused > 0) {
-           size_t buf_size = orig_chunk_size;
+        /* Check if there are filters which need to be applied to the chunk */
+        /* (only do this in advance when the chunk info can be re-used (i.e.
+         *      it doesn't contain any non-default VL datatype fill values)
+         */
+        if(!fb_info.has_vlen_fill_type && pline->nused > 0) {
+            size_t buf_size = orig_chunk_size;
+
             /* If the dataset has disabled partial chunk filters, create a copy
              * of the unfiltered fill_buf to use for partial chunks */
             if(has_unfilt_edge_chunks) {
@@ -4095,8 +4068,7 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "unable to select hyperslab")
 
     /* Lock the chunk into the cache, to get a pointer to the chunk buffer */
-    if(NULL == (chunk = (void *)H5D_chunk_lock(io_info, &chk_udata, FALSE,
-            FALSE)))
+    if(NULL == (chunk = (void *)H5D_chunk_lock(io_info, &chk_udata, FALSE, FALSE)))
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to lock raw data chunk")
 
 
@@ -4137,8 +4109,7 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk)
     bytes_accessed = (uint32_t)sel_nelmts * layout->u.chunk.dim[rank];
 
     /* Release lock on chunk */
-    if(H5D_chunk_unlock(io_info, &chk_udata, TRUE, chunk,
-            bytes_accessed) < 0)
+    if(H5D_chunk_unlock(io_info, &chk_udata, TRUE, chunk, bytes_accessed) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to unlock raw data chunk")
 
 done:
@@ -4242,14 +4213,6 @@ done:
  * that needs to be released.
  * To release the chunks, we traverse the B-tree to obtain a list of unused
  * allocated chunks, and then call H5B_remove() for each chunk.
- *
- * Modifications: Neil Fortner
- *                4 May 2010
- *                Rewrote algorithm to work in a way similar to
- *                H5D_chunk_allocate: it now iterates over all chunks that need
- *                to be filled or removed, and does so as appropriate.  This
- *                avoids various issues with coherency of locally cached data
- *                which could occur with the previous implementation.
  *
  *-------------------------------------------------------------------------
  */
@@ -5085,11 +5048,6 @@ done:
  *
  * Programmer:  Peter Cao
  *	        August 20, 2005
- *
- * Modifications:
- *      Vailin Choi; June 2010
- *      Modified to handle extendible datdaset for Fixed Array Indexing.
- *      (fixed max. dim. setting but not H5S_UNLIMITED)
  *
  *-------------------------------------------------------------------------
  */
