@@ -30,6 +30,8 @@ IF (HDF5_BUILD_EXAMPLES)
       ${HDF5_LIB_TARGET}
   )
 
+  ADD_TEST (NAME cpp_hl_ex_ptExampleFL COMMAND $<TARGET_FILE:ptExampleFL>)
+
   ADD_EXECUTABLE (ptExampleVL ${HDF5_HL_CPP_EXAMPLES_SOURCE_DIR}/ptExampleVL.cpp)
   H5_NAMING (ptExampleVL)
   IF (WIN32)
@@ -48,4 +50,7 @@ IF (HDF5_BUILD_EXAMPLES)
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_LIB_TARGET}
   )
+
+  ADD_TEST (NAME cpp_hl_ex_ptExampleVL COMMAND $<TARGET_FILE:ptExampleVL>)
+
 ENDIF (HDF5_BUILD_EXAMPLES)

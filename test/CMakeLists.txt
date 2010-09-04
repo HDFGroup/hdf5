@@ -83,8 +83,9 @@ SET (HDF5_REFERENCE_TEST_FILES
     family_v16_00001.h5
     family_v16_00002.h5
     family_v16_00003.h5
+    filespace_1_6.h5
+    filespace_1_8.h5
     fill_old.h5
-    fixed_idx.h5
     group_old.h5
     le_data.h5
     le_extlink1.h5
@@ -101,6 +102,7 @@ SET (HDF5_REFERENCE_TEST_FILES
     tlayouto.h5
     tmtimen.h5
     tmtimeo.h5
+    tsizeslheap.h5
     vms_data.h5
 )
 
