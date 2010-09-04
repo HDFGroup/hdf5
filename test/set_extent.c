@@ -261,29 +261,25 @@ static int do_ranks( hid_t fapl )
                     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
                         TEST_ERROR
 
-                if(test_rank1(fapl, dcpl, do_fillvalue, FALSE) < 0)
-                        {
+                if(test_rank1(fapl, dcpl, do_fillvalue, FALSE) < 0) {
                     DO_RANKS_PRINT_CONFIG("Rank 1")
                     printf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET"
                             : "H5D_FILL_TIME_ALLOC"));
                     goto error;
                 } /* end if */
-                if(test_rank2(fapl, dcpl, do_fillvalue, FALSE) < 0)
-                        {
+                if(test_rank2(fapl, dcpl, do_fillvalue, FALSE) < 0) {
                     DO_RANKS_PRINT_CONFIG("Rank 2")
                     printf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET"
                             : "H5D_FILL_TIME_ALLOC"));
                     goto error;
                 } /* end if */
-                if(test_rank3(fapl, dcpl, do_fillvalue, FALSE) < 0)
-                        {
+                if(test_rank3(fapl, dcpl, do_fillvalue, FALSE) < 0) {
                     DO_RANKS_PRINT_CONFIG("Rank 3")
                     printf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET"
                             : "H5D_FILL_TIME_ALLOC"));
                     goto error;
                 } /* end if */
-                if(test_rank2(fapl, dcpl, do_fillvalue, TRUE) < 0)
-                        {
+                if(test_rank2(fapl, dcpl, do_fillvalue, TRUE) < 0) {
                     DO_RANKS_PRINT_CONFIG("Rank 2 with non-default indexed storage B-tree")
                     printf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET"
                             : "H5D_FILL_TIME_ALLOC"));
@@ -297,23 +293,19 @@ static int do_ranks( hid_t fapl )
             if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
                 TEST_ERROR
 
-            if(test_rank1(fapl, dcpl, do_fillvalue, FALSE) < 0)
-                    {
+            if(test_rank1(fapl, dcpl, do_fillvalue, FALSE) < 0) {
                 DO_RANKS_PRINT_CONFIG("Rank 1")
                 goto error;
             } /* end if */
-            if(test_rank2(fapl, dcpl, do_fillvalue, FALSE) < 0)
-                    {
+            if(test_rank2(fapl, dcpl, do_fillvalue, FALSE) < 0) {
                 DO_RANKS_PRINT_CONFIG("Rank 2")
                 goto error;
             } /* end if */
-            if(test_rank3(fapl, dcpl, do_fillvalue, FALSE) < 0)
-                    {
+            if(test_rank3(fapl, dcpl, do_fillvalue, FALSE) < 0) {
                 DO_RANKS_PRINT_CONFIG("Rank 3")
                 goto error;
             } /* end if */
-            if(test_rank2(fapl, dcpl, do_fillvalue, TRUE) < 0)
-                    {
+            if(test_rank2(fapl, dcpl, do_fillvalue, TRUE) < 0) {
                 DO_RANKS_PRINT_CONFIG("Rank 2 with non-default indexed storage B-tree")
                 goto error;
             } /* end if */
@@ -363,14 +355,10 @@ static int do_layouts( hid_t fapl )
     TESTING("storage layout use");
 
     if (test_layouts( H5D_COMPACT, fapl ) < 0)
-    {
         goto error;
-    }
 
     if (test_layouts( H5D_CONTIGUOUS, fapl ) < 0)
-    {
         goto error;
-    }
 
     PASSED();
 
@@ -2728,8 +2716,9 @@ static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
 
     /* Main loop */
     for(i=0; i<RAND4_NITER; i++) {
+
+        /* Generate random write buffer */
         if(writing && !zero_dim) {
-            /* Generate random write buffer */
             for(j=0; j<dims[0]; j++)
                 for(k=0; k<dims[1]; k++)
                     for(l=0; l<dims[2]; l++)
