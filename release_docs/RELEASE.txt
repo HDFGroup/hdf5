@@ -117,6 +117,9 @@ Bug Fixes since HDF5-1.8.5
 
     Library
     -------
+    - H5Eset_current_stack now also closes the error stack to be set as the
+      default.  This is to avoid a potential problem (Bug 1799). 
+      (SLU - 2010/9/7)
     - Corrected situation where 1-D chunked dataset could get created by an
       application without calling H5Pset_chunk().  H5Pset_chunk is now
       required for creating all chunked datasets.  (QAK - 2010/09/02)

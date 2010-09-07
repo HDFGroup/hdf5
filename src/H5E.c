@@ -1000,13 +1000,19 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Eset_current_stack
  *
- * Purpose:     Replaces current stack with specified stack.
+ * Purpose:     Replaces current stack with specified stack.  This closes the
+ *		stack ID also.
  *
  * Return:	Non-negative value on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Friday, July 15, 2003
  *
+ * Modification:
+ *              Raymond Lu
+ *              7 September 2010
+ *              Also closes the stack to avoid potential problem (bug 1799)
+ * 
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1025,6 +1031,13 @@ H5Eset_current_stack(hid_t err_stack)
         /* Set the current error stack */
         if(H5E_set_current_stack(estack) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "unable to set error stack")
+
+        /*
+         * Decrement the counter on the error stack.  It will be freed if the count
+         * reaches zero.
+         */
+        if(H5I_dec_ref(err_stack, TRUE) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error stack")
     } /* end if */
 
 done:
