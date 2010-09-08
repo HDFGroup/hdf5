@@ -87,7 +87,7 @@ if test "X-pgcc" = "X-$cc_vendor"; then
     PROD_CPPFLAGS=
 
     # Debug
-    DEBUG_CFLAGS="-g -Mbounds -Mchkfpstk"
+    DEBUG_CFLAGS="-g -Mbounds"
     DEBUG_CPPFLAGS=
 
     # Profile
