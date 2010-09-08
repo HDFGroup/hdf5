@@ -1030,9 +1030,9 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 done:
     /* Release resources */
     if(src_id >= 0)
-        (void)H5I_dec_ref(src_id, FALSE);
+        (void)H5I_dec_ref(src_id, FALSE, FALSE);
     if(dst_id >= 0)
-        (void)H5I_dec_ref(dst_id, FALSE);
+        (void)H5I_dec_ref(dst_id, FALSE, FALSE);
     if(tconv_buf && !tconv_owned)
         tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
     if(bkg_buf)
@@ -1176,9 +1176,9 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
 done:
     /* Release resources */
     if(src_id >= 0)
-        (void)H5I_dec_ref(src_id, FALSE);
+        (void)H5I_dec_ref(src_id, FALSE, FALSE);
     if(dst_id >= 0)
-        (void)H5I_dec_ref(dst_id, FALSE);
+        (void)H5I_dec_ref(dst_id, FALSE, FALSE);
     if(tconv_buf)
         tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
     if(bkg_buf)
@@ -2047,7 +2047,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 done:
     /* Release resources */
     if(obj_loc_id > 0) {
-        if(H5I_dec_ref(obj_loc_id, TRUE) < 0)
+        if(H5I_dec_ref(obj_loc_id, TRUE, FALSE) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "unable to close temporary object")
     } /* end if */
     else if(loc_found && H5G_loc_free(&obj_loc) < 0)
@@ -2271,7 +2271,7 @@ H5Aclose(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Decrement references to that atom (and close it) */
-    if(H5I_dec_ref(attr_id, TRUE) < 0)
+    if(H5I_dec_ref(attr_id, TRUE, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't close attribute")
 
 done:

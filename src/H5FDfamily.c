@@ -472,7 +472,7 @@ H5FD_family_fapl_free(void *_fa)
 
     FUNC_ENTER_NOAPI(H5FD_family_fapl_free, FAIL)
 
-    if(H5I_dec_ref(fa->memb_fapl_id, FALSE)<0)
+    if(H5I_dec_ref(fa->memb_fapl_id, FALSE, FALSE)<0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
     H5MM_xfree(fa);
 
@@ -558,7 +558,7 @@ H5FD_family_dxpl_free(void *_dx)
 
     FUNC_ENTER_NOAPI(H5FD_family_dxpl_free, FAIL)
 
-    if(H5I_dec_ref(dx->memb_dxpl_id, FALSE)<0)
+    if(H5I_dec_ref(dx->memb_dxpl_id, FALSE, FALSE)<0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
     H5MM_xfree(dx);
 
@@ -870,7 +870,7 @@ done:
 
         if (file->memb)
             H5MM_xfree(file->memb);
-        if(H5I_dec_ref(file->memb_fapl_id, FALSE)<0)
+        if(H5I_dec_ref(file->memb_fapl_id, FALSE, FALSE)<0)
             HDONE_ERROR(H5E_VFL, H5E_CANTDEC, NULL, "can't close driver ID")
         if (file->name)
             H5MM_xfree(file->name);
@@ -921,7 +921,7 @@ H5FD_family_close(H5FD_t *_file)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close member files")
 
     /* Clean up other stuff */
-    if(H5I_dec_ref(file->memb_fapl_id, FALSE) < 0)
+    if(H5I_dec_ref(file->memb_fapl_id, FALSE, FALSE) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
     H5MM_xfree(file->memb);

@@ -332,9 +332,9 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
     } /* end else */
 
 done:
-    if(src_id != (-1) && H5I_dec_ref(src_id, FALSE) < 0)
+    if(src_id != (-1) && H5I_dec_ref(src_id, FALSE, FALSE) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
-    if(dst_id != (-1) && H5I_dec_ref(dst_id, FALSE) < 0)
+    if(dst_id != (-1) && H5I_dec_ref(dst_id, FALSE, FALSE) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(tmp_buf)
         tmp_buf = H5FL_BLK_FREE(type_conv, tmp_buf);
@@ -693,7 +693,7 @@ H5D_fill_term(H5D_fill_buf_info_t *fb_info)
     /* Free other resources for vlen fill values */
     if(fb_info->has_vlen_fill_type) {
         if(fb_info->mem_tid > 0)
-            H5I_dec_ref(fb_info->mem_tid, FALSE);
+            H5I_dec_ref(fb_info->mem_tid, FALSE, FALSE);
         else if(fb_info->mem_type)
             H5T_close(fb_info->mem_type);
         if(fb_info->bkg_buf)

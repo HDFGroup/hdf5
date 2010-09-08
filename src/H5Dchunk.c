@@ -825,7 +825,7 @@ done:
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
     } /* end if */
     if(f_tid!=(-1)) {
-        if(H5I_dec_ref(f_tid, FALSE) < 0)
+        if(H5I_dec_ref(f_tid, FALSE, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     } /* end if */
     if(file_space_normalized) {
@@ -2488,7 +2488,7 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     if(flush) {
 	/* Flush */
 	if(H5D_chunk_flush_entry(dset, dxpl_id, dxpl_cache, ent, TRUE) < 0)
-	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
+	    HDONE_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
     } /* end if */
     else {
         /* Don't flush, just free chunk */
@@ -4628,16 +4628,16 @@ H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
     bkg = udata.bkg;
 
 done:
-    if(sid_buf > 0 && H5I_dec_ref(sid_buf, FALSE) < 0)
+    if(sid_buf > 0 && H5I_dec_ref(sid_buf, FALSE, FALSE) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't decrement temporary dataspace ID")
     if(tid_src > 0)
-        if(H5I_dec_ref(tid_src, FALSE) < 0)
+        if(H5I_dec_ref(tid_src, FALSE, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(tid_dst > 0)
-        if(H5I_dec_ref(tid_dst, FALSE) < 0)
+        if(H5I_dec_ref(tid_dst, FALSE, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(tid_mem > 0)
-        if(H5I_dec_ref(tid_mem, FALSE) < 0)
+        if(H5I_dec_ref(tid_mem, FALSE, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(buf)
         H5MM_xfree(buf);
@@ -4839,8 +4839,10 @@ H5D_chunk_dest(H5F_t *f, hid_t dxpl_id, H5D_t *dset)
 	if(H5D_chunk_cache_evict(dset, dxpl_id, dxpl_cache, ent, TRUE) < 0)
 	    nerrors++;
     } /* end for */
+    
+    /* Continue even if there are failures. */
     if(nerrors)
-	HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
+	HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
 
     /* Release cache structures */
     if(rdcc->slot)

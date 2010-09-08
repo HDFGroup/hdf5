@@ -38,8 +38,8 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 # other current library code tests.
 TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
            pool hyperslab istore bittests dt_arith \
-           dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
-           fillval mount flush1 flush2 app_ref enum \
+           dtypes dsets cmpd_dset filter_fail extend external objcopy links unlink \
+           big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe \
            getname vfd ntypes dangle dtransform reserved cross_read \
            freespace mf btree2 fheap

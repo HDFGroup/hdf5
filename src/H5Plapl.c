@@ -208,7 +208,7 @@ H5P_lacc_elink_fapl_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UN
 
     l_fapl_id = (*(const hid_t *)value);
 
-    if((l_fapl_id > H5P_DEFAULT) && (H5I_dec_ref(l_fapl_id, FALSE) < 0))
+    if((l_fapl_id > H5P_DEFAULT) && (H5I_dec_ref(l_fapl_id, FALSE, FALSE) < 0))
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom for file access property list")
 
 done:
@@ -282,7 +282,7 @@ H5P_lacc_elink_fapl_close(const char UNUSED *name, size_t UNUSED size, void *val
     HDassert(value);
 
     l_fapl_id = (*(const hid_t *)value);
-    if((l_fapl_id > H5P_DEFAULT) && (H5I_dec_ref(l_fapl_id, FALSE) < 0))
+    if((l_fapl_id > H5P_DEFAULT) && (H5I_dec_ref(l_fapl_id, FALSE, FALSE) < 0))
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom for file access property list")
 
 done:
@@ -589,7 +589,7 @@ H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fapl")
 
     /* Close the current file access property list if set */
-    if((l_fapl_id > H5P_DEFAULT) && (H5I_dec_ref(l_fapl_id, FALSE) < 0))
+    if((l_fapl_id > H5P_DEFAULT) && (H5I_dec_ref(l_fapl_id, FALSE, FALSE) < 0))
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom for file access property list")
 
     if(NULL == (fapl_plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))

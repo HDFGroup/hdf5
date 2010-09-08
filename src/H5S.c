@@ -365,7 +365,7 @@ H5Sclose(hid_t space_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     /* When the reference count reaches zero the resources are freed */
-    if (H5I_dec_ref(space_id, TRUE) < 0)
+    if (H5I_dec_ref(space_id, TRUE, FALSE) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
 
 done:

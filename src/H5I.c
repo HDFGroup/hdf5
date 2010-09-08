@@ -1403,7 +1403,7 @@ H5Idec_ref(hid_t id)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID")
 
     /* Do actual decrement operation */
-    if((ret_value = H5I_dec_ref(id, TRUE)) < 0)
+    if((ret_value = H5I_dec_ref(id, TRUE, FALSE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, FAIL, "can't decrement ID ref count")
 
 done:
@@ -1442,20 +1442,25 @@ done:
  *	removed from the type and its reference count is not decremented.
  *	The type number is now passed to the free method.
  *
- *	Raymond, 11 Dec 2001
+ *	Raymond Lu, 11 Dec 2001
  *	If the freeing function fails, return failure instead of reference
  *	count 1.  This feature is needed by file close with H5F_CLOSE_SEMI
  *	value.
  *
- *  Neil Fortner, 7 Aug 2008
- *  Added app_ref parameter and support for the app_count field, to
- *  distiguish between reference count from the library and from the
- *  application.
+ *      Neil Fortner, 7 Aug 2008
+ *      Added app_ref parameter and support for the app_count field, to
+ *      distiguish between reference count from the library and from the
+ *      application.
+ *
+ *      Raymond Lu, 7 September 2010
+ *      I added the 3rd parameter to indicate whether H5Dclose is calling
+ *      this function.  All other calls should pass in FALSE.  Please see
+ *      the comments in the code below.  
  *
  *-------------------------------------------------------------------------
  */
 int
-H5I_dec_ref(hid_t id, hbool_t app_ref)
+H5I_dec_ref(hid_t id, hbool_t app_ref, hbool_t dset_close)
 {
     H5I_type_t		type;		/*type the object is in*/
     H5I_id_type_t	*type_ptr;	/*ptr to the type	*/
@@ -1488,6 +1493,11 @@ H5I_dec_ref(hid_t id, hbool_t app_ref)
      * reference count without calling the free method.
      *
      * Beware: the free method may call other H5I functions.
+     * 
+     * If a dataset is closing, we remove the ID even though the freeing 
+     * might fail.  This can happen when a mandatory filter fails to write
+     * when the dataset is closed and the chunk cache is flushed to the 
+     * file.  We have a close the dataset anyway. (SLU - 2010/9/7)
      */
     if(1 == id_ptr->count) {
         /* (Casting away const OK -QAK) */
@@ -1495,8 +1505,11 @@ H5I_dec_ref(hid_t id, hbool_t app_ref)
             H5I_remove(id);
             ret_value = 0;
         } /* end if */
-        else
+        else {
+            if(dset_close)
+                H5I_remove(id);
             ret_value = FAIL;
+        }
     } /* end if */
     else {
         --(id_ptr->count);

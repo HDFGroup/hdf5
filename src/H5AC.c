@@ -385,9 +385,9 @@ H5AC_term_interface(void)
             n = 1; /* H5I */
 
             /* Close H5AC dxpl */
-            if (H5I_dec_ref(H5AC_dxpl_id, FALSE) < 0 ||
-                    H5I_dec_ref(H5AC_noblock_dxpl_id, FALSE) < 0 ||
-                    H5I_dec_ref(H5AC_ind_dxpl_id, FALSE) < 0)
+            if (H5I_dec_ref(H5AC_dxpl_id, FALSE, FALSE) < 0 ||
+                    H5I_dec_ref(H5AC_noblock_dxpl_id, FALSE, FALSE) < 0 ||
+                    H5I_dec_ref(H5AC_ind_dxpl_id, FALSE, FALSE) < 0)
                 H5E_clear_stack(NULL); /*ignore error*/
             else {
                 /* Reset static IDs */
