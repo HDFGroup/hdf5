@@ -18,16 +18,7 @@ IF (BUILD_TESTING)
 
   ADD_EXECUTABLE (hl_ptableTest ${HDF5_HL_CPP_TEST_SOURCE_DIR}/ptableTest.cpp)
   H5_NAMING (hl_ptableTest)
-  IF (WIN32)
-    IF (MSVC)
-      IF (NOT BUILD_SHARED_LIBS)
-        SET_TARGET_PROPERTIES (hl_ptableTest
-            PROPERTIES
-                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
-        ) 
-      ENDIF (NOT BUILD_SHARED_LIBS)
-    ENDIF (MSVC)
-  ENDIF (WIN32)
+  TARGET_WIN_PROPERTIES (hl_ptableTest)
   TARGET_LINK_LIBRARIES (
       hl_ptableTest
       ${HDF5_LIB_TARGET}
