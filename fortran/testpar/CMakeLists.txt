@@ -22,6 +22,7 @@ ADD_EXECUTABLE (parallel_test
     mdset.f90
 )
 H5_NAMING (parallel_test)
+TARGET_FORTRAN_WIN_PROPERTIES (parallel_test)
 TARGET_LINK_LIBRARIES (parallel_test 
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
@@ -30,18 +31,6 @@ TARGET_LINK_LIBRARIES (parallel_test
 IF (WIN32)
   IF (MSVC)
     TARGET_LINK_LIBRARIES (parallel_test "ws2_32.lib")
-    IF (BUILD_SHARED_LIBS)
-      SET_TARGET_PROPERTIES (parallel_test
-          PROPERTIES
-              COMPILE_FLAGS "/dll"
-              LINK_FLAGS "/SUBSYSTEM:CONSOLE"
-      )
-    ELSE (BUILD_SHARED_LIBS)
-      SET_TARGET_PROPERTIES (parallel_test
-          PROPERTIES
-              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
-      ) 
-    ENDIF (BUILD_SHARED_LIBS)
   ENDIF (MSVC)
 ENDIF (WIN32)
 SET_TARGET_PROPERTIES (parallel_test PROPERTIES LINKER_LANGUAGE Fortran)

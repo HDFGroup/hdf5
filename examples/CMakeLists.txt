@@ -25,31 +25,13 @@ SET (examples
 FOREACH (example ${examples})
   ADD_EXECUTABLE (${example} ${HDF5_EXAMPLES_SOURCE_DIR}/${example}.c)
   H5_NAMING (${example})
-  IF (WIN32)
-    IF (MSVC)
-      IF (NOT BUILD_SHARED_LIBS)
-        SET_TARGET_PROPERTIES (${example}
-            PROPERTIES
-                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
-        ) 
-      ENDIF (NOT BUILD_SHARED_LIBS)
-    ENDIF (MSVC)
-  ENDIF (WIN32)
+  TARGET_WIN_PROPERTIES (${example})
   TARGET_LINK_LIBRARIES (${example} ${HDF5_LIB_TARGET})
 ENDFOREACH (example ${examples})
 
 IF (H5_HAVE_PARALLEL)
   ADD_EXECUTABLE (ph5example ${HDF5_EXAMPLES_SOURCE_DIR}/ph5example.c)
   H5_NAMING (ph5example)
-  IF (WIN32)
-    IF (MSVC)
-      IF (NOT BUILD_SHARED_LIBS)
-        SET_TARGET_PROPERTIES (ph5example
-            PROPERTIES
-                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
-        ) 
-      ENDIF (NOT BUILD_SHARED_LIBS)
-    ENDIF (MSVC)
-  ENDIF (WIN32)
+  TARGET_WIN_PROPERTIES (ph5example)
   TARGET_LINK_LIBRARIES (ph5example ${HDF5_LIB_TARGET})
 ENDIF (H5_HAVE_PARALLEL)
