@@ -1579,9 +1579,9 @@ done:
     if(bkg != value)
         H5MM_xfree(bkg);
     if(src_id >= 0)
-        H5I_dec_ref(src_id, FALSE);
+        H5I_dec_ref(src_id, FALSE, FALSE);
     if(dst_id >= 0)
-        H5I_dec_ref(dst_id, FALSE);
+        H5I_dec_ref(dst_id, FALSE, FALSE);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_get_fill_value() */

@@ -413,7 +413,7 @@ H5FDunregister(hid_t driver_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver")
 
     /* The H5FD_class_t struct will be freed by this function */
-    if(H5I_dec_ref(driver_id, TRUE) < 0)
+    if(H5I_dec_ref(driver_id, TRUE, FALSE) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to unregister file driver")
 
 done:
@@ -660,7 +660,7 @@ H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *), void *pl)
 	H5MM_xfree(pl);
 
     /* Decrement reference count for driver */
-    if(H5I_dec_ref(driver_id, FALSE) < 0)
+    if(H5I_dec_ref(driver_id, FALSE, FALSE) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't decrement reference count for driver")
 
 done:
@@ -1187,7 +1187,7 @@ H5FD_close(H5FD_t *file)
 
     /* Prepare to close file by clearing all public fields */
     driver = file->cls;
-    if(H5I_dec_ref(file->driver_id, FALSE) < 0)
+    if(H5I_dec_ref(file->driver_id, FALSE, FALSE) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
 
     /*

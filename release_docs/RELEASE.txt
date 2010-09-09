@@ -76,6 +76,9 @@ New Features
 
     Library:
     --------
+    - When a mandatory filter failed to write data chunks, the dataset
+      couldn't close (bug 1260).  The fix releases all resources and closes
+      the dataset but returns a failure. (SLU - 2010/9/8)
     - H5Tset_order and H5Tget_order now support all data types.  A new byte
       order H5T_ORDER_MIXED has been added specifically for compound datatype
       and its derived type.  Please see bug #1934. (SLU - 2010/8/23)

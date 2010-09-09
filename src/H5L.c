@@ -1762,7 +1762,7 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
 done:
     /* Close the location given to the user callback if it was created */
     if(grp_id >= 0) {
-        if(H5I_dec_ref(grp_id, TRUE) < 0)
+        if(H5I_dec_ref(grp_id, TRUE, FALSE) < 0)
             HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
     } /* end if */
     else if(grp != NULL) {
@@ -2464,7 +2464,7 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
 done:
     /* Close the location given to the user callback if it was created */
     if(grp_id >= 0) {
-        if(H5I_dec_ref(grp_id, TRUE) < 0)
+        if(H5I_dec_ref(grp_id, TRUE, FALSE) < 0)
             HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
     } /* end if */
     else if(grp != NULL) {

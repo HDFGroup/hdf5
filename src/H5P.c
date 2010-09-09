@@ -1392,7 +1392,7 @@ H5Pclose(hid_t plist_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Close the property list */
-    if(H5I_dec_ref(plist_id, TRUE) < 0)
+    if(H5I_dec_ref(plist_id, TRUE, FALSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
 
 done:
@@ -1525,7 +1525,7 @@ H5Pclose_class(hid_t cls_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Close the property list class */
-    if(H5I_dec_ref(cls_id, TRUE) < 0)
+    if(H5I_dec_ref(cls_id, TRUE, FALSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
 
 done:

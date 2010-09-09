@@ -539,30 +539,30 @@ H5O_fill_copy(const void *_src, void *_dst)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy/register datatype")
                 src_id = H5I_register(H5I_DATATYPE, H5T_copy(src->type, H5T_COPY_ALL), FALSE);
                 if(src_id < 0) {
-                    H5I_dec_ref(dst_id, FALSE);
+                    H5I_dec_ref(dst_id, FALSE, FALSE);
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy/register datatype")
                 } /* end if */
 
                 /* Allocate a background buffer */
                 bkg_size = MAX(H5T_get_size(dst->type), H5T_get_size(src->type));
                 if(H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size))) {
-                    H5I_dec_ref(src_id, FALSE);
-                    H5I_dec_ref(dst_id, FALSE);
+                    H5I_dec_ref(src_id, FALSE, FALSE);
+                    H5I_dec_ref(dst_id, FALSE, FALSE);
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
                 } /* end if */
 
                 /* Convert fill value */
                 if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, dst->buf, bkg_buf, H5AC_ind_dxpl_id) < 0) {
-                    H5I_dec_ref(src_id, FALSE);
-                    H5I_dec_ref(dst_id, FALSE);
+                    H5I_dec_ref(src_id, FALSE, FALSE);
+                    H5I_dec_ref(dst_id, FALSE, FALSE);
                     if(bkg_buf)
                         bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, NULL, "datatype conversion failed")
                 } /* end if */
 
                 /* Release the background buffer */
-                H5I_dec_ref(src_id, FALSE);
-                H5I_dec_ref(dst_id, FALSE);
+                H5I_dec_ref(src_id, FALSE, FALSE);
+                H5I_dec_ref(dst_id, FALSE, FALSE);
                 if(bkg_buf)
                     bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
             } /* end if */
@@ -726,7 +726,7 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
 
 done:
     if(fill_type_id > 0)
-        H5I_dec_ref(fill_type_id, FALSE);
+        H5I_dec_ref(fill_type_id, FALSE, FALSE);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_fill_reset_dyn() */
 
@@ -979,9 +979,9 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed, hid_
 
 done:
     if(src_id >= 0)
-        H5I_dec_ref(src_id, FALSE);
+        H5I_dec_ref(src_id, FALSE, FALSE);
     if(dst_id >= 0)
-        H5I_dec_ref(dst_id, FALSE);
+        H5I_dec_ref(dst_id, FALSE, FALSE);
     if(buf != fill->buf)
         H5MM_xfree(buf);
     if(bkg)

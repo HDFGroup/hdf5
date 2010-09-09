@@ -1723,7 +1723,7 @@ H5Tclose(hid_t type_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
 
     /* When the reference count reaches zero the resources are freed */
-    if(H5I_dec_ref(type_id, TRUE) < 0)
+    if(H5I_dec_ref(type_id, TRUE, FALSE) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
 
 done:
@@ -2348,8 +2348,8 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
             cdata.command = H5T_CONV_INIT;
             if ((func)(tmp_sid, tmp_did, &cdata, (size_t)0, (size_t)0, (size_t)0,
                     NULL, NULL, dxpl_id)<0) {
-                H5I_dec_ref(tmp_sid, FALSE);
-                H5I_dec_ref(tmp_did, FALSE);
+                H5I_dec_ref(tmp_sid, FALSE, FALSE);
+                H5I_dec_ref(tmp_did, FALSE, FALSE);
                 tmp_sid = tmp_did = -1;
                 H5E_clear_stack(NULL);
                 continue;
@@ -2389,8 +2389,8 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
             old_path = H5FL_FREE(H5T_path_t, old_path);
 
             /* Release temporary atoms */
-            H5I_dec_ref(tmp_sid, FALSE);
-            H5I_dec_ref(tmp_did, FALSE);
+            H5I_dec_ref(tmp_sid, FALSE, FALSE);
+            H5I_dec_ref(tmp_did, FALSE, FALSE);
             tmp_sid = tmp_did = -1;
 
             /* We don't care about any failures during the freeing process */
@@ -2408,9 +2408,9 @@ done:
             new_path = H5FL_FREE(H5T_path_t, new_path);
 	} /* end if */
 	if(tmp_sid >= 0)
-            H5I_dec_ref(tmp_sid, FALSE);
+            H5I_dec_ref(tmp_sid, FALSE, FALSE);
 	if(tmp_did >= 0)
-            H5I_dec_ref(tmp_did, FALSE);
+            H5I_dec_ref(tmp_did, FALSE, FALSE);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4409,9 +4409,9 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	if((func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to initialize conversion function")
 	if(src_id >= 0)
-            H5I_dec_ref(src_id, FALSE);
+            H5I_dec_ref(src_id, FALSE, FALSE);
 	if(dst_id >= 0)
-            H5I_dec_ref(dst_id, FALSE);
+            H5I_dec_ref(dst_id, FALSE, FALSE);
 	src_id = dst_id = -1;
 	path->func = func;
 	path->is_hard = TRUE;
@@ -4441,8 +4441,8 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	    path->func = H5T_g.soft[i].func;
 	    path->is_hard = FALSE;
 	} /* end else */
-	H5I_dec_ref(src_id, FALSE);
-	H5I_dec_ref(dst_id, FALSE);
+	H5I_dec_ref(src_id, FALSE, FALSE);
+	H5I_dec_ref(dst_id, FALSE, FALSE);
 	src_id = dst_id = -1;
     } /* end for */
     if(!path->func)
@@ -4529,9 +4529,9 @@ done:
         path = H5FL_FREE(H5T_path_t, path);
     } /* end if */
     if(src_id >= 0)
-        H5I_dec_ref(src_id, FALSE);
+        H5I_dec_ref(src_id, FALSE, FALSE);
     if(dst_id >= 0)
-        H5I_dec_ref(dst_id, FALSE);
+        H5I_dec_ref(dst_id, FALSE, FALSE);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5T_path_find() */

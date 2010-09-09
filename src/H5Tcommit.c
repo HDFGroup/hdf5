@@ -664,7 +664,7 @@ H5Tget_create_plist(hid_t dtype_id)
 done:
     if(ret_value < 0)
         if(new_tcpl_id > 0)
-            (void)H5I_dec_ref(new_tcpl_id, TRUE);
+            (void)H5I_dec_ref(new_tcpl_id, TRUE, FALSE);
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_create_plist() */
