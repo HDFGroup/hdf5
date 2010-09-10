@@ -28,6 +28,12 @@
 ./Makefile.dist
 ./Makefile.am
 ./Makefile.in
+./m4                                    _DO_NOT_DISTRIBUTE_
+./m4/ltsugar.m4                         _DO_NOT_DISTRIBUTE_
+./m4/libtool.m4                         _DO_NOT_DISTRIBUTE_
+./m4/ltversion.m4                       _DO_NOT_DISTRIBUTE_
+./m4/lt~obsolete.m4                     _DO_NOT_DISTRIBUTE_
+./m4/ltoptions.m4                       _DO_NOT_DISTRIBUTE_
 ./README.txt
 ./aclocal.m4
 ./acsite.m4
