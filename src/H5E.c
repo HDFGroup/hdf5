@@ -336,7 +336,7 @@ H5E_get_stack(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_stack)
 
-    estack = (H5E_t *)pthread_getspecific(H5TS_errstk_key_g);
+    estack = (H5E_t *)H5TS_get_thread_local_value(H5TS_errstk_key_g);
 
     if(!estack) {
         /* no associated value with current thread - create one */
@@ -351,7 +351,7 @@ H5E_get_stack(void)
          *      released by the "key destructor" set up in the H5TS
          *      routines.  See calls to pthread_key_create() in H5TS.c -QAK)
          */
-        pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
+        H5TS_set_thread_local_value(H5TS_errstk_key_g, (void *)estack);
     } /* end if */
 
     /* Set return value */

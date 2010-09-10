@@ -518,6 +518,18 @@ IF (WIN32)
 ENDIF (WIN32)
 
 #-----------------------------------------------------------------------------
+# Option to use threadsafe
+# Note: Currently CMake only allows configuring of threadsafe on WINDOWS.
+#-----------------------------------------------------------------------------
+IF (WIN32)
+OPTION (HDF5_ENABLE_THREADSAFE "Enable Threadsafety" OFF)
+IF (HDF5_ENABLE_THREADSAFE)
+    SET (H5_HAVE_WIN_THREADS 1)
+    SET (H5_HAVE_THREADSAFE 1)
+ENDIF (HDF5_ENABLE_THREADSAFE)
+ENDIF (WIN32)
+
+#-----------------------------------------------------------------------------
 # Option to use PACKED BITS SUPPORT
 #-----------------------------------------------------------------------------
 OPTION (HDF5_USE_H5DUMP_PACKED_BITS "Use the PACKED BITS feature in h5dump" OFF)

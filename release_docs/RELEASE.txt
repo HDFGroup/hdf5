@@ -76,6 +76,10 @@ New Features
 
     Library:
     --------
+    - Added support for threadsafety on windows using the windows threads
+      library. Use the HDF5_ENABLE_THREADSAFE option in CMake while on a 
+      windows platform to enable this functionality. This is supported on 
+      Windows Vista and newer Windows operating systems. (MAM - 2010/09/10)
     - When a mandatory filter failed to write data chunks, the dataset
       couldn't close (bug 1260).  The fix releases all resources and closes
       the dataset but returns a failure. (SLU - 2010/9/8)

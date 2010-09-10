@@ -89,11 +89,14 @@ int main(int argc, char *argv[])
         /* Initialize testing framework */
         TestInit(argv[0], NULL, NULL);
 
-	/* Tests are generally arranged from least to most complexity... */
-	AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
-	AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
-	AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
-	AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
+        /* Tests are generally arranged from least to most complexity... */
+        AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
+        AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
+#ifdef H5_HAVE_PTHREAD_H    
+        /* Thread cancellability only supported with pthreads ... */
+        AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
+#endif /* H5_HAVE_PTHREAD_H */
+        AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
 
         /* Display testing information */
         TestInfo(argv[0]);

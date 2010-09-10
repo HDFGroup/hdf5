@@ -71,12 +71,12 @@ err_num_t expected[8];
 
 int error_flag = 0;
 int error_count = 0;
-pthread_mutex_t error_mutex;
+H5TS_mutex_simple_t error_mutex;
 
 void tts_error(void)
 {
-    pthread_t threads[NUM_THREAD];
-    pthread_attr_t attribute;
+    H5TS_thread_t threads[NUM_THREAD];
+    H5TS_attr_t attribute;
     hid_t dataset;
     int value, i;
     int ret;
@@ -104,16 +104,15 @@ void tts_error(void)
     expected[6].min_num = H5E_EXISTS;
 
     /* set up mutex for global count of errors */
-    ret=pthread_mutex_init(&error_mutex, NULL);
-    assert(ret==0);
+    H5TS_mutex_init(&error_mutex);
 
     /* make thread scheduling global */
-    ret=pthread_attr_init(&attribute);
-    assert(ret==0);
+    H5TS_attr_init(&attribute);
+
+    /* set thread scope to system */
 
 #ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
-    ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-    assert(ret==0);
+    H5TS_attr_setscope(&attribute, H5TS_SCOPE_SYSTEM);
 #endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
     /*
@@ -124,13 +123,11 @@ void tts_error(void)
     assert(error_file>=0);
 
     for (i = 0; i < NUM_THREAD; i++){
-        ret=pthread_create(&threads[i], &attribute, tts_error_thread, NULL);
-        assert(ret==0);
+        threads[i] = H5TS_create_thread(tts_error_thread, &attribute, NULL);
     }
 
     for (i = 0; i < NUM_THREAD; i++){
-        ret=pthread_join(threads[i],NULL);
-        assert(ret==0);
+        H5TS_wait_for_thread(threads[i]);
     }
 
     if (error_flag)
@@ -153,9 +150,7 @@ void tts_error(void)
     ret=H5Fclose(error_file);
     assert(ret>=0);
 
-    /* Destroy the thread attribute */
-    ret=pthread_attr_destroy(&attribute);
-    assert(ret==0);
+    H5TS_attr_destroy(&attribute);
 }
 
 static
@@ -208,11 +203,9 @@ herr_t error_callback(hid_t estack_id, void *client_data)
 {
     int ret;
 
-    ret=pthread_mutex_lock(&error_mutex);
-    assert(ret==0);
+    H5TS_mutex_lock_simple(&error_mutex);
     error_count++;
-    ret=pthread_mutex_unlock(&error_mutex);
-    assert(ret==0);
+    H5TS_mutex_unlock_simple(&error_mutex);
     return H5Ewalk2(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, client_data);
 }
 

@@ -88,21 +88,21 @@ thread_info thread_out[NUM_THREAD];
  */
 void tts_dcreate(void)
 {
-    /* Pthread definitions */
-    pthread_t threads[NUM_THREAD];
+    /* thread definitions */
+    H5TS_thread_t threads[NUM_THREAD];
 
     /* HDF5 data definitions */
     hid_t file, dataset;
     int datavalue, i;
-    pthread_attr_t attribute;
+    H5TS_attr_t attribute;
     int ret;
 
     /* set pthread attribute to perform global scheduling */
-    ret=pthread_attr_init(&attribute);
-    assert(ret==0);
+    H5TS_attr_init(&attribute);
+
+    /* set thread scope to system */
 #ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
-    ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-    assert(ret==0);
+    H5TS_attr_setscope(&attribute, H5TS_SCOPE_SYSTEM);
 #endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
     /*
@@ -117,13 +117,11 @@ void tts_dcreate(void)
         thread_out[i].id = i;
         thread_out[i].file = file;
         thread_out[i].dsetname = dsetname[i];
-        ret=pthread_create(&threads[i], NULL, tts_dcreate_creator, &thread_out[i]);
-        assert(ret==0);
+        threads[i] = H5TS_create_thread(tts_dcreate_creator, NULL, &thread_out[i]);
     } /* end for */
 
     for(i = 0;i < NUM_THREAD; i++) {
-        ret = pthread_join(threads[i], NULL);
-        assert(ret == 0);
+        H5TS_wait_for_thread(threads[i]);
     } /* end for */
 
     /* compare data to see if it is written correctly */
@@ -157,8 +155,7 @@ void tts_dcreate(void)
     assert(ret >= 0);
 
     /* Destroy the thread attribute */
-    ret=pthread_attr_destroy(&attribute);
-    assert(ret==0);
+    H5TS_attr_destroy(&attribute);
 }
 
 void *tts_dcreate_creator(void *_thread_data)
