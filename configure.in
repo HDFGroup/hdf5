@@ -31,6 +31,7 @@ AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
 AC_CONFIG_AUX_DIR([bin])
+AC_CONFIG_MACRO_DIR([m4])
 
 dnl AM_INIT_AUTOMAKE takes a list of options that should be applied to
 dnl every Makefile.am when automake is run.
