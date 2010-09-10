@@ -65,6 +65,8 @@ AM_FCFLAGS=@AM_FCFLAGS@ @H5_FCFLAGS@
 AM_CXXFLAGS=@AM_CXXFLAGS@ @H5_CXXFLAGS@
 AM_CPPFLAGS=@AM_CPPFLAGS@ @H5_CPPFLAGS@
 
+ACLOCAL_AMFLAGS="-I m4"
+
 # The trace script; this is used on source files from the C library to
 # insert tracing macros.
 TRACE=perl $(top_srcdir)/bin/trace
