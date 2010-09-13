@@ -82,6 +82,8 @@ extern const H5B2_class_t H5G_BT2_CORDER[1];
 extern const H5B2_class_t H5SM_INDEX[1];
 extern const H5B2_class_t H5A_BT2_NAME[1];
 extern const H5B2_class_t H5A_BT2_CORDER[1];
+extern const H5B2_class_t H5D_BT2[1];
+extern const H5B2_class_t H5D_BT2_FILT[1];
 
 const H5B2_class_t *const H5B2_client_class_g[] = {
     H5B2_TEST,			/* 0 - H5B2_TEST_ID 			*/
@@ -90,10 +92,12 @@ const H5B2_class_t *const H5B2_client_class_g[] = {
     H5HF_HUGE_BT2_DIR,		/* 3 - H5B2_FHEAP_HUGE_DIR_ID 		*/
     H5HF_HUGE_BT2_FILT_DIR,	/* 4 - H5B2_FHEAP_HUGE_FILT_DIR_ID 	*/
     H5G_BT2_NAME,		/* 5 - H5B2_GRP_DENSE_NAME_ID 		*/
-    H5G_BT2_CORDER,		/* 6 - H5B2_GRP_DENSE_CORDER_ID 		*/
+    H5G_BT2_CORDER,		/* 6 - H5B2_GRP_DENSE_CORDER_ID 	*/
     H5SM_INDEX,			/* 7 - H5B2_SOHM_INDEX_ID 		*/
     H5A_BT2_NAME,		/* 8 - H5B2_ATTR_DENSE_NAME_ID 		*/
-    H5A_BT2_CORDER,		/* 9 - H5B2_ATTR_DENSE_CORDER_ID 		*/
+    H5A_BT2_CORDER,		/* 9 - H5B2_ATTR_DENSE_CORDER_ID 	*/
+    H5D_BT2,              	/* 10 - H5B2_CDSET_ID 			*/
+    H5D_BT2_FILT		/* 11 - H5B2_CDSET_FILT_ID 		*/
 };
 
 

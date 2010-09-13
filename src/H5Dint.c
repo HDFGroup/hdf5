@@ -1116,6 +1116,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve external file list")
     } /* end if */
 
+
     /* Set the latest version of the layout, pline & fill messages, if requested */
     if(H5F_USE_LATEST_FORMAT(file)) {
         /* Set the latest version for the I/O pipeline message */
@@ -1129,7 +1130,11 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         /* Set the latest version for the layout message */
         if(H5D_layout_set_latest_version(&new_dset->shared->layout, new_dset->shared->space) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of layout")
-    } /* end if */
+    } else if(new_dset->shared->layout.version >= H5O_LAYOUT_VERSION_4) {
+	/* Use latest indexing type for layout message version >= 4 */
+        if(H5D_layout_set_latest_indexing(&new_dset->shared->layout, new_dset->shared->space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest indexing")
+    }
 
     /* Check if this dataset is going into a parallel file and set space allocation time */
     if(IS_H5FD_MPI(file))

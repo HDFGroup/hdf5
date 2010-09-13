@@ -71,6 +71,9 @@
  * Programmer:	Quincey Koziol
  *		Thursday, March 20, 2008
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2 B-tree indexing.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -99,6 +102,10 @@ H5D_layout_set_io_ops(const H5D_t *dataset)
             switch(dataset->shared->layout.u.chunk.idx_type) {
                 case H5D_CHUNK_IDX_BTREE:
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_BTREE;
+                    break;
+
+		case H5D_CHUNK_IDX_BT2:
+                    dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_BT2;
                     break;
 
                 case H5D_CHUNK_IDX_FARRAY:
@@ -143,6 +150,10 @@ done:
  * Programmer:  Raymond Lu
  *              August 14, 2002
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2 B-tree indexing.
+ *	Removed v1 B-tree support for layout message version >= 4.
  *-------------------------------------------------------------------------
  */
 size_t
@@ -209,18 +220,19 @@ H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include
                 ret_value++;
 
                 switch(layout->u.chunk.idx_type) {
-                    case H5D_CHUNK_IDX_BTREE:   /* Remove this when v2 B-tree indices added */
-                        /* Nothing to do */
+		    case H5D_CHUNK_IDX_BT2:
+                        /* v2 B-tree creation parameters */
+                        ret_value += H5D_BT2_CREATE_PARAM_SIZE;
                         break;
 
                     case H5D_CHUNK_IDX_FARRAY:
                         /* Fixed array creation parameters */
-                        ret_value += 1;
+                        ret_value += H5D_FARRAY_CREATE_PARAM_SIZE;
                         break;
 
                     case H5D_CHUNK_IDX_EARRAY:
                         /* Extensible array creation parameters */
-                        ret_value += 5;
+                        ret_value += H5D_EARRAY_CREATE_PARAM_SIZE;
                         break;
 
                     default:
@@ -244,6 +256,42 @@ done:
  * Function:    H5D_layout_set_latest_version
  *
  * Purpose:     Set the encoding for a layout to the latest version.
+ *		Part of the coding in this routine is moved to
+ *		H5D_layout_set_latest_indexing().
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, January 15, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_layout_set_latest_version, FAIL)
+
+    /* Sanity check */
+    HDassert(layout);
+
+    /* Set encoding of layout to latest version */
+    layout->version = H5O_LAYOUT_VERSION_LATEST;
+
+    /* Set the latest indexing type for the layout message */
+    ret_value = H5D_layout_set_latest_indexing(layout, space);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_layout_set_latest_version() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_layout_set_latest_indexing
+ *
+ * Purpose:     Set the latest indexing type for a layout message
+ *		This is moved from H5D_layout_set_latest_version().
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -255,22 +303,21 @@ done:
  *	Modified to use Fixed Array indexing for extendible chunked dataset.
  *	(fixed max. dim. setting but exclude H5S_UNLIMITED)
  *
+ *	Vailin Choi; August 2010
+ *	Added v2 B-tree indexing for chunked dataset >1 unlimited dimensions.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
+H5D_layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space)
 {
     int sndims;                         /* Rank of dataspace */
     unsigned ndims;                     /* Rank of dataspace */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_layout_set_latest_version, FAIL)
+    FUNC_ENTER_NOAPI(H5D_layout_set_latest_indexing, FAIL)
 
     /* Sanity check */
     HDassert(layout);
-
-    /* Set encoding of layout to latest version */
-    layout->version = H5O_LAYOUT_VERSION_LATEST;
 
     /* Query the dimensionality of the dataspace */
     if((sndims = H5S_GET_EXTENT_NDIMS(space)) < 0)
@@ -299,6 +346,7 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "dataset with unlimited dimensions is not chunked")
 
 	    if(1 == unlim_count) { /* Chunked dataset with only 1 unlimited dimension */
+		/* Set the chunk index type to an extensible array */
 		layout->u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
 		layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
 		layout->storage.u.chunk.ops = H5D_COPS_EARRAY;
@@ -313,8 +361,16 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
 		layout->u.chunk.u.earray.cparam.data_blk_min_elmts = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
 		layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits = H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
 	    } else { /* Chunked dataset with > 1 unlimited dimensions */
-		/* Add setup to use v2 B-tree chunk indices here */
-	    }
+                /* Set the chunk index type to v2 B-tree */
+                layout->u.chunk.idx_type = H5D_CHUNK_IDX_BT2;
+                layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BT2;
+                layout->storage.u.chunk.ops = H5D_COPS_BT2;
+
+		/* Set the v2 B-tree creation parameters */
+		layout->u.chunk.u.btree2.cparam.node_size = H5D_BT2_NODE_SIZE;
+		layout->u.chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
+		layout->u.chunk.u.btree2.cparam.merge_percent =  H5D_BT2_MERGE_PERC;
+            }
         } else if(layout->type == H5D_CHUNKED) {
 	    /* Chunked dataset with fixed dimensions (with or without max. dimension setting)  */
             /* Set the chunk index type to Fixed Array */
@@ -332,7 +388,7 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_layout_set_latest_version() */
+} /* end H5D_layout_set_latest_indexing() */
 
 
 /*-------------------------------------------------------------------------

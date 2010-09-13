@@ -6786,13 +6786,18 @@ gent_fs_strategy_threshold(void)
 }
 
 /*
- * Create a file with new format.
- * Create one dataset with (set_chunk, fixed dimension) 
+ * Create a file with new format:
+ * Create one dataset with (set_chunk, fixed dims, null max. dims) 
  *	so that Fixed Array indexing will be used.
- * Create one dataset with (set_chunk, fixed dimension, filter) 
+ * Create one dataset with (set_chunk, fixed dims, null max. dims, filter) 
  *	so that Fixed Array indexing will be used.
- * Create one dataset with (set_chunk, non-fixed dimension) 
- *	so that B-tree indexing will be used.
+ * Create one dataset with (set_chunk, fixed dims, fixed max. dims)
+ *	so that Fixed Array indexing will be used.
+ * 
+ * Modifications:
+ *	Fixed Array indexing will be used for chunked dataset
+ *	with fixed max. dims setting.
+ *
  */
 static void
 gent_dataset_idx(void)

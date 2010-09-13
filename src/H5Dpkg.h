@@ -34,6 +34,7 @@
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Gprivate.h"		/* Groups 			  	*/
+#include "H5B2private.h"        /* v2 B-trees                           */
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Tprivate.h"		/* Datatypes         			*/
 
@@ -66,17 +67,25 @@
 #define H5D_CHUNK_HASH(D, ADDR) H5F_addr_hash(ADDR, (D)->cache.chunk.nslots)
 
 /* Default creation parameters for chunk index data structures */
+/* See H5O_layout_chunk_t */
 
 /* Fixed array creation values */
-#define H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS  10  /* i.e. 1024 elements per data block page */
+#define H5D_FARRAY_CREATE_PARAM_SIZE		1	/* Size of the creation parameters in bytes */
+#define H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS 	10  	/* i.e. 1024 elements per data block page */
 
 /* Extensible array creation values */
-#define H5D_EARRAY_MAX_NELMTS_BITS         32                      /* i.e. 4 giga-elements */
-#define H5D_EARRAY_IDX_BLK_ELMTS           4
-#define H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS   4
-#define H5D_EARRAY_DATA_BLK_MIN_ELMTS      16
-#define H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS     10              /* i.e. 1024 elements per data block page */
+#define H5D_EARRAY_CREATE_PARAM_SIZE		5	/* Size of the creation parameters in bytes */
+#define H5D_EARRAY_MAX_NELMTS_BITS         	32	/* i.e. 4 giga-elements */
+#define H5D_EARRAY_IDX_BLK_ELMTS           	4
+#define H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS   	4
+#define H5D_EARRAY_DATA_BLK_MIN_ELMTS      	16
+#define H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS 	10 	/* i.e. 1024 elements per data block page */
 
+/* v2 B-tree creation values for raw meta_size */
+#define H5D_BT2_CREATE_PARAM_SIZE	6		/* Size of the creation parameters in bytes */
+#define H5D_BT2_NODE_SIZE       	512
+#define H5D_BT2_SPLIT_PERC      	100
+#define H5D_BT2_MERGE_PERC      	40
 
 /****************************/
 /* Package Private Typedefs */
@@ -554,6 +563,12 @@ H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_CHUNK[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_EARRAY[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_FARRAY[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BT2[1];
+
+/* The v2 B-tree class for indexing chunked datasets with >1 unlimited dimensions */
+H5_DLLVAR const H5B2_class_t H5D_BT2[1];
+H5_DLLVAR const H5B2_class_t H5D_BT2_FILT[1];
+
 
 
 /******************************/
@@ -605,6 +620,8 @@ H5_DLL herr_t H5D_layout_set_io_ops(const H5D_t *dataset);
 H5_DLL size_t H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout,
     hbool_t include_compact_data);
 H5_DLL herr_t H5D_layout_set_latest_version(H5O_layout_t *layout,
+    const H5S_t *space);
+H5_DLL herr_t H5D_layout_set_latest_indexing(H5O_layout_t *layout,
     const H5S_t *space);
 H5_DLL herr_t H5D_layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh,
     H5D_t *dset, hid_t dapl_id);

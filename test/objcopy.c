@@ -3062,7 +3062,8 @@ test_copy_dataset_no_edge_filt(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     /* open the destination dataset */
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    if(compare_idx_type(fapl, did2, H5D_CHUNK_IDX_FARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+    /* H5Pset_chunk_opts() will set layout version to 4 which will use latest indexing available */
+    if(compare_idx_type(fapl, did2, H5D_CHUNK_IDX_FARRAY, H5D_CHUNK_IDX_FARRAY) != TRUE)
         TEST_ERROR
 
     /* Check if the datasets are equal */

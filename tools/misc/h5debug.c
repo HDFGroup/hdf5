@@ -24,6 +24,7 @@
  *-------------------------------------------------------------------------
  */
 #define H5A_PACKAGE		/*suppress error about including H5Apkg  */
+#define H5D_PACKAGE		/*suppress error about including H5Dpkg  */
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 #define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
 #define H5EA_PACKAGE		/*suppress error about including H5EApkg  */
@@ -39,7 +40,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"		/* Attributes				*/
 #include "H5B2pkg.h"		/* v2 B-trees				*/
-#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Dpkg.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5FApkg.h"		/* Fixed Arrays				*/
@@ -71,7 +72,10 @@
  *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
- *-------------------------------------------------------------------------
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2 B-tree indexing for chunked dataset >1 unlimited dimensions.
+ *---------------------------------------------------------------------------
  */
 static const H5B2_class_t *
 get_H5B2_class(const uint8_t *sig)
@@ -118,6 +122,14 @@ get_H5B2_class(const uint8_t *sig)
 
         case H5B2_ATTR_DENSE_CORDER_ID:
             cls = H5A_BT2_CORDER;
+            break;
+
+        case H5B2_CDSET_ID:
+            cls = H5D_BT2;
+            break;
+
+        case H5B2_CDSET_FILT_ID:
+            cls = H5D_BT2_FILT;
             break;
 
         default:
@@ -228,6 +240,9 @@ get_H5FA_class(const uint8_t *sig)
  *              matzke@llnl.gov
  *              Jul 18 1997
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Modified to handle v2 B-tree indexing for chunked dataset >1 unlimited dimensions.
  *-------------------------------------------------------------------------
  */
 int
@@ -235,7 +250,7 @@ main(int argc, char *argv[])
 {
     hid_t	fid, fapl, dxpl;
     H5F_t       *f;
-    haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0;
+    haddr_t     addr = 1, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
     herr_t      status = SUCCEED;
@@ -290,6 +305,8 @@ main(int argc, char *argv[])
         extra2 = (haddr_t)HDstrtoll(argv[4], NULL, 0);
     if(argc > 5)
         extra3 = (haddr_t)HDstrtoll(argv[5], NULL, 0);
+    if(argc > 6)
+        extra4 = (haddr_t)HDstrtoll(argv[6], NULL, 0);
 
     /*
      * Read the signature at the specified file position.
@@ -376,7 +393,15 @@ main(int argc, char *argv[])
          */
         const H5B2_class_t *cls = get_H5B2_class(sig);
         HDassert(cls);
-        status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls);
+
+	if((cls == H5D_BT2 || cls == H5D_BT2_FILT) && extra == 0) {
+            fprintf(stderr, "ERROR: Need v2 B-tree header address and object header address containing the layout message in order to dump header\n");
+            fprintf(stderr, "v2 B-tree hdr usage:\n");
+            fprintf(stderr, "\th5debug <filename> <v2 B-tree header address> <object header address>\n");
+            HDexit(4);
+	}
+
+        status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, (haddr_t)extra);
 
     } else if(!HDmemcmp(sig, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -386,7 +411,16 @@ main(int argc, char *argv[])
         HDassert(cls);
 
         /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0 || extra3 == 0) {
+	if((cls == H5D_BT2 || cls == H5D_BT2_FILT) &&
+	   (extra == 0 || extra2 == 0 || extra3 == 0 || extra4 == 0)) {
+
+            fprintf(stderr, "ERROR: Need v2 B-tree header address, the node's number of records, depth, and object header address containing the layout message in order to dump internal node\n");
+            fprintf(stderr, "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
+            fprintf(stderr, "v2 B-tree internal node usage:\n");
+            fprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> <number of records> <depth> <object header address>\n");
+            HDexit(4);
+
+        } else if(extra == 0 || extra2 == 0 || extra3 == 0) {
             fprintf(stderr, "ERROR: Need v2 B-tree header address and the node's number of records and depth in order to dump internal node\n");
             fprintf(stderr, "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
             fprintf(stderr, "v2 B-tree internal node usage:\n");
@@ -394,7 +428,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3);
+        status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3, (haddr_t)extra4);
 
     } else if(!HDmemcmp(sig, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -404,14 +438,22 @@ main(int argc, char *argv[])
         HDassert(cls);
 
         /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0) {
+	if((cls == H5D_BT2 || cls == H5D_BT2_FILT) &&
+	   (extra == 0 || extra2 == 0 || extra3 == 0 )) {
+
+            fprintf(stderr, "ERROR: Need v2 B-tree header address, number of records, and object header address containing the layout message in order to dump leaf node\n");
+            fprintf(stderr, "v2 B-tree leaf node usage:\n");
+            fprintf(stderr, "\th5debug <filename> <leaf node address> <v2 B-tree header address> <number of records> <object header address>\n");
+            HDexit(4);
+
+        } else if(extra == 0 || extra2 == 0) {
             fprintf(stderr, "ERROR: Need v2 B-tree header address and number of records in order to dump leaf node\n");
             fprintf(stderr, "v2 B-tree leaf node usage:\n");
             fprintf(stderr, "\th5debug <filename> <leaf node address> <v2 B-tree header address> <number of records>\n");
             HDexit(4);
         } /* end if */
 
-        status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2);
+        status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (haddr_t)extra3);
 
     } else if(!HDmemcmp(sig, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*

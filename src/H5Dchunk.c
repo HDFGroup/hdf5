@@ -464,6 +464,10 @@ done:
  * Programmer:	Robb Matzke
  *              Monday, May 18, 1998
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -483,6 +487,8 @@ H5D_chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset, hid_t dapl_id)
                 H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
+                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops));
 
@@ -547,6 +553,10 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, January 15, 2009
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -562,6 +572,8 @@ H5D_chunk_is_space_alloc(const H5O_storage_t *storage)
                 H5D_COPS_EARRAY == storage->u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == storage->u.chunk.idx_type && 
                 H5D_COPS_FARRAY == storage->u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == storage->u.chunk.idx_type &&
+                H5D_COPS_BT2 == storage->u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == storage->u.chunk.idx_type && 
                 H5D_COPS_BTREE == storage->u.chunk.ops));
 
@@ -2044,6 +2056,10 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, January 15, 2009
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2060,6 +2076,8 @@ H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
                 H5D_COPS_EARRAY == storage->ops) ||
             (H5D_CHUNK_IDX_FARRAY == storage->idx_type && 
                 H5D_COPS_FARRAY == storage->ops) ||
+	    (H5D_CHUNK_IDX_BT2 == storage->idx_type &&
+                H5D_COPS_BT2 == storage->ops) ||
             (H5D_CHUNK_IDX_BTREE == storage->idx_type && 
                 H5D_COPS_BTREE == storage->ops));
 
@@ -2201,6 +2219,10 @@ done:
  * Programmer:	Quincey Koziol
  *		Thursday, May 22, 2008
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2219,6 +2241,8 @@ H5D_chunk_create(H5D_t *dset /*in,out*/, hid_t dxpl_id)
                 H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
+                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops));
 #ifndef NDEBUG
@@ -2257,6 +2281,10 @@ done:
  * Programmer:	Albert Cheng
  *              June 27, 1998
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2276,6 +2304,8 @@ H5D_chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *chunk_offset,
                 H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
+                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops));
     HDassert(chunk_offset);
@@ -2350,6 +2380,10 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2368,6 +2402,8 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
                 H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
+                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops));
     HDassert(dxpl_cache);
@@ -3279,6 +3315,10 @@ H5D_chunk_allocated_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  * Programmer:	Quincey Koziol
  *              Tuesday, May 20, 2008
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3300,6 +3340,8 @@ H5D_chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes)
                 H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
+                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops));
 
@@ -3344,6 +3386,10 @@ done:
  *
  * Programmer:	Albert Cheng
  *		June 26, 1998
+ *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
  *
  *-------------------------------------------------------------------------
  */
@@ -3399,6 +3445,8 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                 H5D_COPS_EARRAY == layout->storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == layout->storage.u.chunk.idx_type && 
                 H5D_COPS_FARRAY == layout->storage.u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == layout->storage.u.chunk.idx_type &&
+                H5D_COPS_BT2 == layout->storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == layout->storage.u.chunk.idx_type && 
                 H5D_COPS_BTREE == layout->storage.u.chunk.ops));
     HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
@@ -3846,6 +3894,8 @@ H5D_chunk_update_old_edge_chunks(H5D_t *dset, hid_t dxpl_id, hsize_t old_dim[])
                 H5D_COPS_EARRAY == layout->storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == layout->storage.u.chunk.idx_type &&
                 H5D_COPS_FARRAY == layout->storage.u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == layout->storage.u.chunk.idx_type &&
+                H5D_COPS_BT2 == layout->storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == layout->storage.u.chunk.idx_type &&
                 H5D_COPS_BTREE == layout->storage.u.chunk.ops));
     HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
@@ -4214,6 +4264,9 @@ done:
  * To release the chunks, we traverse the B-tree to obtain a list of unused
  * allocated chunks, and then call H5B_remove() for each chunk.
  *
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4264,6 +4317,8 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
                 H5D_COPS_EARRAY == layout->storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == layout->storage.u.chunk.idx_type && 
                 H5D_COPS_FARRAY == layout->storage.u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == layout->storage.u.chunk.idx_type &&
+                H5D_COPS_BT2 == layout->storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == layout->storage.u.chunk.idx_type && 
                 H5D_COPS_BTREE == layout->storage.u.chunk.ops));
     HDassert(dxpl_cache);
@@ -4441,7 +4496,7 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
                     dims_outside_fill[i] = FALSE;
 
             carry = FALSE;
-        } /* end if */
+         } /* end if */
 
         while(!carry) {
             /* Calculate the index of this chunk */
@@ -4629,6 +4684,10 @@ done:
  * Programmer:  Kent Yang
  *              November 15, 2005
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4647,6 +4706,8 @@ H5D_chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[])
                 H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
+                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops));
     HDassert(chunk_addr);
@@ -4685,6 +4746,10 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, March 20, 2003
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4708,6 +4773,8 @@ H5D_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_storage_t *storage)
                 H5D_COPS_EARRAY == storage->u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == storage->u.chunk.idx_type && 
                 H5D_COPS_FARRAY == storage->u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == storage->u.chunk.idx_type &&
+                H5D_COPS_BT2 == storage->u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == storage->u.chunk.idx_type && 
                 H5D_COPS_BTREE == storage->u.chunk.ops));
 
@@ -5049,6 +5116,9 @@ done:
  * Programmer:  Peter Cao
  *	        August 20, 2005
  *
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5090,6 +5160,8 @@ H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
                 H5D_COPS_EARRAY == storage_src->ops) ||
             (H5D_CHUNK_IDX_FARRAY == storage_src->idx_type && 
                 H5D_COPS_FARRAY == storage_src->ops) ||
+	    (H5D_CHUNK_IDX_BT2 == storage_src->idx_type &&
+                H5D_COPS_BT2 == storage_src->ops) ||
             (H5D_CHUNK_IDX_BTREE == storage_src->idx_type && 
                 H5D_COPS_BTREE == storage_src->ops));
     HDassert(layout_src);
@@ -5099,6 +5171,8 @@ H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
                 H5D_COPS_EARRAY == storage_dst->ops) ||
             (H5D_CHUNK_IDX_FARRAY == storage_dst->idx_type && 
                 H5D_COPS_FARRAY == storage_dst->ops) ||
+	    (H5D_CHUNK_IDX_BT2 == storage_dst->idx_type &&
+                H5D_COPS_BT2 == storage_dst->ops) ||
             (H5D_CHUNK_IDX_BTREE == storage_dst->idx_type && 
                 H5D_COPS_BTREE == storage_dst->ops));
     HDassert(ds_extent_src);
@@ -5324,6 +5398,10 @@ done:
  * Programmer:  Vailin Choi
  *              June 8, 2007
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5342,6 +5420,8 @@ H5D_chunk_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
                 H5D_COPS_EARRAY == layout->storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == layout->storage.u.chunk.idx_type && 
                 H5D_COPS_FARRAY == layout->storage.u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == layout->storage.u.chunk.idx_type &&
+                H5D_COPS_BT2 == layout->storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == layout->storage.u.chunk.idx_type && 
                 H5D_COPS_BTREE == layout->storage.u.chunk.ops));
     HDassert(pline);
@@ -5421,6 +5501,10 @@ H5D_chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  * Programmer:	Robb Matzke
  *              Wednesday, April 28, 1999
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5436,6 +5520,8 @@ H5D_chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream)
                 H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
+                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops));
 
@@ -5481,6 +5567,10 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Added v2-btree indexing
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5502,6 +5592,8 @@ H5D_chunk_dest(H5F_t *f, hid_t dxpl_id, H5D_t *dset)
                 H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
+	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
+                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
             (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops));
 

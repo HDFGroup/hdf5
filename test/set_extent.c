@@ -2765,7 +2765,8 @@ static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
     /*!FIXME Skip the test if a fixed array index is requested, as resizing
      * fixed arrays is broken now.  Extensible arrays are also broken.  Remove
      * these lines as appropriate when these problems are fixed. */
-    if(index_type == RANK4_INDEX_FARRAY || index_type == RANK4_INDEX_EARRAY)
+    /* Fixed Array index type is now fixed */
+    if(index_type == RANK4_INDEX_EARRAY)
         return 0;
 
     /* create a new file */

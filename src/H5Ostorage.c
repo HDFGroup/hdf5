@@ -103,6 +103,11 @@ H5FL_DEFINE_STATIC(H5O_storage_t);
  * Programmer:  Quincey Koziol
  *              Wednesday, July 29, 2009
  *
+ * Modifications:
+ *	Vailin Choi; Aug 2010
+ *	Added v2 B-tree index.
+ *	Removed v1 B-tree support.
+ *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -173,9 +178,9 @@ H5O_storage_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                     /* Chunk index type */
                     mesg->u.chunk.idx_type = (H5D_chunk_index_t)*p++;
                     switch(mesg->u.chunk.idx_type) {
-                        case H5D_CHUNK_IDX_BTREE:       /* Remove this when v2 B-tree indices added */
+			case H5D_CHUNK_IDX_BT2:       /* v2 B-tree index */
                             /* Set the chunk operations */
-                            mesg->u.chunk.ops = H5D_COPS_BTREE;
+                            mesg->u.chunk.ops = H5D_COPS_BT2;
                             break;
 
                         case H5D_CHUNK_IDX_FARRAY:
@@ -603,6 +608,10 @@ done:
  * Programmer:  Quincey Koziol
  *              Thursday, July 30, 2009
  *
+ * Modifications:
+ *	Vailin Choi; Aug 2010
+ *	Added v2 B-tree index.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -632,6 +641,11 @@ H5O_storage_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                 case H5D_CHUNK_IDX_BTREE:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "v1 B-tree");
+                    break;
+
+		case H5D_CHUNK_IDX_BT2:
+                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                              "Index Type:", "v2 B-tree");
                     break;
 
                 case H5D_CHUNK_IDX_FARRAY:
