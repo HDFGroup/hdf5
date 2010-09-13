@@ -244,6 +244,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Added define check in H5public.h if stdint.h is supported by the C++
+            compiler. This define is only available on Windows with VS2010 and
+            using CMake to build the library. (ADB - 2010/09/13 - Bug 1938)
       - H5Eset_current_stack now also closes the error stack to be set as the
             default.  This is to avoid a potential problem (Bug 1799).
             (SLU - 2010/9/7)
