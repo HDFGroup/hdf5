@@ -114,25 +114,28 @@ Bug Fixes since HDF5-1.8.5
     -------------
     - Removed recognition of the parallel compilers of LAM(hcc) and
       ChMPIon(cmpicc) since we have no access to these two MPI implementations
-      and cannot verify their correctness. (AKC - 2010/7/14 - Bug 1921)
+      and cannot verify their correctness. (AKC - 2010/07/14 - Bug 1921)
     - PHDF5 changed to use "mpiexec", instead of mpirun, as the default MPI
       applications startup command as defined in the MPI-2 definition, section
       4.1. (AKC - 2010/06/11 - Bug 1921)
 
     Library
     -------
+    - Added define check in H5public.h if stdint.h is supported by the C++
+      compiler. This define is only available on Windows with VS2010 and using
+      CMake to build the library. (ADB - 2010/09/13 - Bug 1938)
     - When a mandatory filter failed to write data chunks, the dataset
       couldn't close (bug 1260).  The fix releases all resources and closes
-      the dataset but returns a failure. (SLU - 2010/9/8) 
+      the dataset but returns a failure. (SLU - 2010/09/08) 
     - H5Eset_current_stack now also closes the error stack to be set as the
       default.  This is to avoid a potential problem (Bug 1799). 
-      (SLU - 2010/9/7)
+      (SLU - 2010/09/07)
     - Corrected situation where 1-D chunked dataset could get created by an
       application without calling H5Pset_chunk().  H5Pset_chunk is now
       required for creating all chunked datasets.  (QAK - 2010/09/02)
     - Fixed many memory issues that valgrind exposed.  (QAK - 2010/08/24)
     - Fixed the bug in the filter's public CAN_APPLY function.  The return
-      value should be htri_t not herr_t (Bug #1239). (SLU - 2010/8/5)
+      value should be htri_t not herr_t (Bug #1239). (SLU - 2010/08/05)
     - Fixed a bug in the direct I/O driver that could render files with certain
       kinds of unaligned data unreadable or corrupt them. (NAF - 2010/07/28)
     - valgrind reported an error of copying data to itself when a new attribute 
@@ -260,14 +263,14 @@ The following platforms and compilers have been tested for this release.
     SMP x86_64 GNU/Linux          applications running on Intel(R) 64, 
     (SNL Glory)                   Versions 11.1.
     
-    Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1
+    Windows XP                    Visual Studio 2008 w/ Intel Fortran 11.1
                                   Cygwin(1.7.5 native gcc(4.3.4) compiler and gfortran)
 
-    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1
+    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 11.1
 
-    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 10.1
+    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 11.1
 
-    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 10.1
+    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 11.1
 
     MAC OS  10.5.6 (Intel)        i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
                                   GNU Fortran (GCC) 4.3.0 20070810
