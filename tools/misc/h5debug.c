@@ -24,9 +24,9 @@
  *-------------------------------------------------------------------------
  */
 #define H5A_PACKAGE		/*suppress error about including H5Apkg  */
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg  */
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 #define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
+#define H5D_PACKAGE		/*suppress error about including H5Dpkg  */
 #define H5EA_PACKAGE		/*suppress error about including H5EApkg  */
 #define H5EA_TESTING		/*suppress warning about H5EA testing funcs*/
 #define H5FA_PACKAGE		/*suppress error about including H5FApkg  */
@@ -72,10 +72,7 @@
  *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2 B-tree indexing for chunked dataset >1 unlimited dimensions.
- *---------------------------------------------------------------------------
+ *-------------------------------------------------------------------------
  */
 static const H5B2_class_t *
 get_H5B2_class(const uint8_t *sig)
@@ -240,9 +237,6 @@ get_H5FA_class(const uint8_t *sig)
  *              matzke@llnl.gov
  *              Jul 18 1997
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Modified to handle v2 B-tree indexing for chunked dataset >1 unlimited dimensions.
  *-------------------------------------------------------------------------
  */
 int

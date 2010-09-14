@@ -396,13 +396,6 @@ typedef struct H5O_storage_chunk_btree_t {
 } H5O_storage_chunk_btree_t;
 
 /* Forward declaration of structs used below */
-struct H5B2_t;                          /* Defined in H5B2pkg.h          */
-
-typedef struct H5O_storage_chunk_bt2_t {
-    struct H5B2_t *bt2;
-} H5O_storage_chunk_bt2_t;
-
-/* Forward declaration of structs used below */
 struct H5FA_t;                          /* Defined in H5FAprivate.h          */
 
 typedef struct H5O_storage_chunk_farray_t {
@@ -417,15 +410,22 @@ typedef struct H5O_storage_chunk_earray_t {
     struct H5EA_t *ea;                  /* Pointer to extensible index array struct */
 } H5O_storage_chunk_earray_t;
 
+/* Forward declaration of structs used below */
+struct H5B2_t;                          /* Defined in H5B2pkg.h          */
+
+typedef struct H5O_storage_chunk_bt2_t {
+    struct H5B2_t *bt2;
+} H5O_storage_chunk_bt2_t;
+
 typedef struct H5O_storage_chunk_t {
     H5D_chunk_index_t idx_type;		/* Type of chunk index               */
     haddr_t	idx_addr;		/* File address of chunk index       */
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked storage operations */
     union {
         H5O_storage_chunk_btree_t btree; /* Information for v1 B-tree index   */
-	H5O_storage_chunk_bt2_t btree2;  /* Information for v2 B-tree index */	
         H5O_storage_chunk_farray_t farray; /* Information for fixed array index   */
         H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
+	H5O_storage_chunk_bt2_t btree2;  /* Information for v2 B-tree index */	
     } u;
 } H5O_storage_chunk_t;
 
@@ -443,15 +443,6 @@ typedef struct H5O_storage_t {
         H5O_storage_compact_t compact;  /* Information for compact storage    */
     } u;
 } H5O_storage_t;
-
-typedef struct H5O_layout_chunk_bt2_t {
-    /* Creation parameters for v2 B-tree data structure */
-    struct {
-	uint32_t node_size;	/* Size of each node (in bytes) */
-	uint8_t split_percent;	/* % full to split nodes */
-	uint8_t merge_percent; 	/* % full to merge nodes */
-    } cparam;
-} H5O_layout_chunk_bt2_t;
 
 typedef struct H5O_layout_chunk_farray_t {
     /* Creation parameters for fixed array data structure */
@@ -475,6 +466,15 @@ typedef struct H5O_layout_chunk_earray_t {
     unsigned    unlim_dim;              /* Rank of unlimited dimension for dataset */
     hsize_t    	swizzled_down_chunks[H5O_LAYOUT_NDIMS];	/* swizzled "down" size of number of chunks in each dimension */
 } H5O_layout_chunk_earray_t;
+
+typedef struct H5O_layout_chunk_bt2_t {
+    /* Creation parameters for v2 B-tree data structure */
+    struct {
+	uint32_t node_size;	/* Size of each node (in bytes) */
+	uint8_t split_percent;	/* % full to split nodes */
+	uint8_t merge_percent; 	/* % full to merge nodes */
+    } cparam;
+} H5O_layout_chunk_bt2_t;
 
 typedef struct H5O_layout_chunk_t {
     H5D_chunk_index_t idx_type;		/* Type of chunk index               */
@@ -710,7 +710,6 @@ typedef struct {
 
 /* Forward declarations for prototype arguments */
 struct H5P_genplist_t;
-struct H5S_t;
 
 /* Object header routines */
 H5_DLL herr_t H5O_init(void);

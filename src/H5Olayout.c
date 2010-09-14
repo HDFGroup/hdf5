@@ -96,11 +96,6 @@ H5FL_DEFINE(H5O_layout_t);
  * Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
- * Modifications:
- *	Vailin Choi; Aug 2010
- *	Added v2 B-tree index.
- *	Removed v1 B-tree support for layout message version > 4.
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -311,12 +306,6 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                     mesg->storage.u.chunk.idx_type = mesg->u.chunk.idx_type;
 
                     switch(mesg->u.chunk.idx_type) {
-			case H5D_CHUNK_IDX_BT2:       /* v2 B-tree index */
-			    UINT32DECODE(p, mesg->u.chunk.u.btree2.cparam.node_size);
-                            mesg->u.chunk.u.btree2.cparam.split_percent = *p++;
-                            mesg->u.chunk.u.btree2.cparam.merge_percent = *p++;
-                            break;
-
                         case H5D_CHUNK_IDX_FARRAY:
                             /* Fixed array creation parameters */
                             mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits = *p++;
@@ -341,6 +330,12 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                             mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits = *p++;
                             if(0 == mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid extensible array creation parameter")
+                            break;
+
+			case H5D_CHUNK_IDX_BT2:       /* v2 B-tree index */
+			    UINT32DECODE(p, mesg->u.chunk.u.btree2.cparam.node_size);
+                            mesg->u.chunk.u.btree2.cparam.split_percent = *p++;
+                            mesg->u.chunk.u.btree2.cparam.merge_percent = *p++;
                             break;
 
                         default:
@@ -400,10 +395,6 @@ done:
  *      Quincey Koziol, 2009-3-31
  *      Added version number 4 case to allow different kinds of indices for
  *      looking up chunks.
- *
- *	Vailin Choi; Aug 2010
- *	Added v2 B-tree index.
- *	Removed v1 B-tree support for layout message version > 4.
  *
  *-------------------------------------------------------------------------
  */
@@ -491,12 +482,6 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
                 *p++ = (uint8_t)mesg->u.chunk.idx_type;
 
                 switch(mesg->u.chunk.idx_type) {
-		    case H5D_CHUNK_IDX_BT2:       /* v2 B-tree index */
-			UINT32ENCODE(p, mesg->u.chunk.u.btree2.cparam.node_size);
-                        *p++ = mesg->u.chunk.u.btree2.cparam.split_percent;
-                        *p++ = mesg->u.chunk.u.btree2.cparam.merge_percent;
-                        break;
-
                     case H5D_CHUNK_IDX_FARRAY:
                         /* Fixed array creation parameters */
                         *p++ = mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits;
@@ -509,6 +494,12 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
                         *p++ = mesg->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs;
                         *p++ = mesg->u.chunk.u.earray.cparam.data_blk_min_elmts;
                         *p++ = mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits;
+                        break;
+
+		    case H5D_CHUNK_IDX_BT2:       /* v2 B-tree index */
+			UINT32ENCODE(p, mesg->u.chunk.u.btree2.cparam.node_size);
+                        *p++ = mesg->u.chunk.u.btree2.cparam.split_percent;
+                        *p++ = mesg->u.chunk.u.btree2.cparam.merge_percent;
                         break;
 
                     default:
@@ -899,10 +890,6 @@ done:
  * Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
- * Modifications:
- *	Vailin Choi; Aug 2010
- *	Added v2 B-tree index.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -944,11 +931,6 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                               "Index Type:", "v1 B-tree");
                     break;
 
-		case H5D_CHUNK_IDX_BT2:
-                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                              "Index Type:", "v2 B-tree");
-                    break;
-
                 case H5D_CHUNK_IDX_FARRAY:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "Fixed Array");
@@ -957,6 +939,11 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                 case H5D_CHUNK_IDX_EARRAY:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "Extensible Array");
+                    break;
+
+		case H5D_CHUNK_IDX_BT2:
+                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                              "Index Type:", "v2 B-tree");
                     break;
 
                 default:

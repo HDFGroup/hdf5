@@ -84,10 +84,7 @@
  *		koziol@ncsa.uiuc.edu
  *		Feb  2 2005
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Created debugging context so that the header can be loaded correctly.
- *--------------------------------------------------------------------------
+ *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
@@ -202,9 +199,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb  4 2005
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Created debugging context so that the header can be loaded correctly.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -337,9 +331,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb  7 2005
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Created debugging context so that the header can be loaded correctly.
  *-------------------------------------------------------------------------
  */
 herr_t

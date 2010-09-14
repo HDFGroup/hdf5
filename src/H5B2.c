@@ -97,7 +97,7 @@ const H5B2_class_t *const H5B2_client_class_g[] = {
     H5A_BT2_NAME,		/* 8 - H5B2_ATTR_DENSE_NAME_ID 		*/
     H5A_BT2_CORDER,		/* 9 - H5B2_ATTR_DENSE_CORDER_ID 	*/
     H5D_BT2,              	/* 10 - H5B2_CDSET_ID 			*/
-    H5D_BT2_FILT		/* 11 - H5B2_CDSET_FILT_ID 		*/
+    H5D_BT2_FILT,		/* 11 - H5B2_CDSET_FILT_ID 		*/
 };
 
 

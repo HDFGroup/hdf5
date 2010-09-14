@@ -71,9 +71,6 @@
  * Programmer:	Quincey Koziol
  *		Thursday, March 20, 2008
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2 B-tree indexing.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -104,16 +101,16 @@ H5D_layout_set_io_ops(const H5D_t *dataset)
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_BTREE;
                     break;
 
-		case H5D_CHUNK_IDX_BT2:
-                    dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_BT2;
-                    break;
-
                 case H5D_CHUNK_IDX_FARRAY:
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_FARRAY;
                     break;
 
                 case H5D_CHUNK_IDX_EARRAY:
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_EARRAY;
+                    break;
+
+		case H5D_CHUNK_IDX_BT2:
+                    dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_BT2;
                     break;
 
                 default:
@@ -150,10 +147,6 @@ done:
  * Programmer:  Raymond Lu
  *              August 14, 2002
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2 B-tree indexing.
- *	Removed v1 B-tree support for layout message version >= 4.
  *-------------------------------------------------------------------------
  */
 size_t
@@ -220,11 +213,6 @@ H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include
                 ret_value++;
 
                 switch(layout->u.chunk.idx_type) {
-		    case H5D_CHUNK_IDX_BT2:
-                        /* v2 B-tree creation parameters */
-                        ret_value += H5D_BT2_CREATE_PARAM_SIZE;
-                        break;
-
                     case H5D_CHUNK_IDX_FARRAY:
                         /* Fixed array creation parameters */
                         ret_value += H5D_FARRAY_CREATE_PARAM_SIZE;
@@ -233,6 +221,11 @@ H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include
                     case H5D_CHUNK_IDX_EARRAY:
                         /* Extensible array creation parameters */
                         ret_value += H5D_EARRAY_CREATE_PARAM_SIZE;
+                        break;
+
+		    case H5D_CHUNK_IDX_BT2:
+                        /* v2 B-tree creation parameters */
+                        ret_value += H5D_BT2_CREATE_PARAM_SIZE;
                         break;
 
                     default:
@@ -280,7 +273,8 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
     layout->version = H5O_LAYOUT_VERSION_LATEST;
 
     /* Set the latest indexing type for the layout message */
-    ret_value = H5D_layout_set_latest_indexing(layout, space);
+    if(H5D_layout_set_latest_indexing(layout, space) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest indexing type")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -298,13 +292,6 @@ done:
  * Programmer:  Quincey Koziol
  *              Thursday, January 15, 2009
  *
- * Modifications:
- *	Vailin Choi; June 2010
- *	Modified to use Fixed Array indexing for extendible chunked dataset.
- *	(fixed max. dim. setting but exclude H5S_UNLIMITED)
- *
- *	Vailin Choi; August 2010
- *	Added v2 B-tree indexing for chunked dataset >1 unlimited dimensions.
  *-------------------------------------------------------------------------
  */
 herr_t

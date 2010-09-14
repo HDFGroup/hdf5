@@ -37,9 +37,11 @@
 #include "H5MFprivate.h"     	/* File space management                */
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
+
 /****************/
 /* Local Macros */
 /****************/
+
 
 /******************/
 /* Local Typedefs */
@@ -94,16 +96,18 @@ typedef struct H5D_bt2_find_ud_t {
     unsigned ndims;	/* Number of dimensions for the chunked dataset */
 } H5D_bt2_find_ud_t;
 
+
 /********************/
 /* Local Prototypes */
 /********************/
 
-/* v2 B-tree class for indexing non-filtered chunked datasets */
+/* Shared v2 B-tree methods for indexing filtered and non-filtered chunked datasets */
 static void *H5D_bt2_crt_context(void *udata);
 static herr_t H5D_bt2_dst_context(void *ctx);
 static void *H5D_bt2_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr);
 static herr_t H5D_bt2_dst_dbg_context(void *_u_ctx);
 
+/* v2 B-tree class for indexing non-filtered chunked datasets */
 static herr_t H5D_bt2_store(void *native, const void *udata);
 static herr_t H5D_bt2_compare(const void *rec1, const void *rec2);
 static herr_t H5D_bt2_encode(uint8_t *raw, const void *native, void *ctx);
@@ -139,7 +143,7 @@ static herr_t H5D_bt2_filt_remove_cb(const void *nrecord, void *_udata);
 /* Callback for H5B2_modify() which is called in H5D_bt2_idx_insert() */
 static herr_t H5D_bt2_mod_filt_cb(void *_record, void *_op_data, hbool_t *changed);
 
-/* Chunked dataset I/O ops for v2 B-tree indexing */
+/* Chunked layout indexing callbacks for v2 B-tree indexing */
 static herr_t H5D_bt2_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info,
@@ -160,6 +164,7 @@ static herr_t H5D_bt2_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr
 static herr_t H5D_bt2_idx_dump(const H5O_storage_chunk_t *storage,
     FILE *stream);
 static herr_t H5D_bt2_idx_dest(const H5D_chk_idx_info_t *idx_info);
+
 
 /*********************/
 /* Package Variables */
@@ -224,11 +229,18 @@ const H5B2_class_t H5D_BT2_FILT[1] = {{	/* B-tree class information */
     H5D_bt2_dst_dbg_context   	/* Destroy debugging context */
 }};
 
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 /* Declare a free list to manage the H5D_bt2_ctx_t struct */
 H5FL_DEFINE_STATIC(H5D_bt2_ctx_t);
 /* Declare a free list to manage the H5D_bt2_ctx_ud_t struct */
 H5FL_DEFINE_STATIC(H5D_bt2_ctx_ud_t);
 
+
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_bt2_crt_context
  *
@@ -335,32 +347,6 @@ H5D_bt2_store(void *record, const void *_udata)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D_bt2_filt_store
- *
- * Purpose:     Store native information into record for v2 B-tree
- *		(filtered)
- *
- * Return:      Success:        non-negative
- *              Failure:        negative
- *
- * Programmer:  Vailin Choi; June 2010
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_bt2_filt_store(void *record, const void *_udata)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_filt_store)
-
-    const H5D_bt2_find_ud_t *udata = (const H5D_bt2_find_ud_t *)_udata;	/* User data */
-
-    *(H5D_bt2_filt_rec_t *)record = *(const H5D_bt2_filt_rec_t *)udata->rec;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5D_bt2_filt_store() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5D_bt2_compare
  *
  * Purpose:     Compare two native information records, according to some key
@@ -393,6 +379,134 @@ H5D_bt2_compare(const void *_udata, const void *_rec2)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_bt2_compare() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_bt2_encode
+ *
+ * Purpose:     Encode native information into raw form for storing on disk
+ *		(non-filtered)
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *
+ * Programmer:  Vailin Choi; June 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_bt2_encode(uint8_t *raw, const void *_record, void *_ctx)
+{
+    H5D_bt2_ctx_t *ctx = (H5D_bt2_ctx_t *)_ctx;	/* Callback context structure */
+    const H5D_bt2_rec_t *record = (const H5D_bt2_rec_t *)_record; /* The native record */
+    unsigned	i;	/* Local index varible */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_encode)
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Encode the record's fields */
+    H5F_addr_encode_len(ctx->sizeof_addr, &raw, record->addr);
+    for(i = 0; i < ctx->ndims; i++)
+	UINT64ENCODE(raw, record->offset[i]);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5D_bt2_encode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_bt2_decode
+ *
+ * Purpose:     Decode raw disk form of record into native form
+ *		(non-filtered)
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *
+ * Programmer:  Vailin Choi; June 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_bt2_decode(const uint8_t *raw, void *_record, void *_ctx)
+{
+    H5D_bt2_ctx_t *ctx = (H5D_bt2_ctx_t *)_ctx;       	/* Callback context structure */
+    H5D_bt2_rec_t *record = (H5D_bt2_rec_t *)_record;	/* The native record */
+    unsigned	i;	/* Local index variable */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_decode)
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Decode the record's fields */
+    H5F_addr_decode_len(ctx->sizeof_addr, &raw, &record->addr);
+    for(i = 0; i < ctx->ndims; i++)
+	UINT64DECODE(raw, record->offset[i]);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5D_bt2_decode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_bt2_debug
+ *
+ * Purpose:	Debug native form of record (non-filtered)
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Vailin Choi; June 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_bt2_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
+    int indent, int fwidth, const void *_record, const void *_u_ctx)
+{
+    const H5D_bt2_rec_t *record = (const H5D_bt2_rec_t *)_record; /* The native record */
+    const H5D_bt2_ctx_ud_t *u_ctx = (const H5D_bt2_ctx_ud_t *)_u_ctx; 	  /* User data for creating callback context */
+    unsigned u;		/* Local index variable */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_debug)
+
+    HDassert(record);
+
+    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Chunk address:", (unsigned)record->addr);
+    HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
+    for(u = 0; u < u_ctx->ndims; u++)
+        HDfprintf(stream, "%s%Hd", u?", ":"", record->offset[u]);
+    HDfputs("}\n", stream);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5D_bt2_debug() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_bt2_filt_store
+ *
+ * Purpose:     Store native information into record for v2 B-tree
+ *		(filtered)
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *
+ * Programmer:  Vailin Choi; June 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_bt2_filt_store(void *record, const void *_udata)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_filt_store)
+
+    const H5D_bt2_find_ud_t *udata = (const H5D_bt2_find_ud_t *)_udata;	/* User data */
+
+    *(H5D_bt2_filt_rec_t *)record = *(const H5D_bt2_filt_rec_t *)udata->rec;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5D_bt2_filt_store() */
 
 
 /*-------------------------------------------------------------------------
@@ -429,39 +543,6 @@ H5D_bt2_filt_compare(const void *_udata, const void *_rec2)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_bt2_filt_compare() */
 
-/*-------------------------------------------------------------------------
- * Function:    H5D_bt2_encode
- *
- * Purpose:     Encode native information into raw form for storing on disk
- *		(non-filtered)
- *
- * Return:      Success:        non-negative
- *              Failure:        negative
- *
- * Programmer:  Vailin Choi; June 2010
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_bt2_encode(uint8_t *raw, const void *_record, void *_ctx)
-{
-    H5D_bt2_ctx_t *ctx = (H5D_bt2_ctx_t *)_ctx;	/* Callback context structure */
-    const H5D_bt2_rec_t *record = (const H5D_bt2_rec_t *)_record; /* The native record */
-    unsigned	i;	/* Local index varible */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_encode)
-
-    /* Sanity check */
-    HDassert(ctx);
-
-    /* Encode the record's fields */
-    H5F_addr_encode_len(ctx->sizeof_addr, &raw, record->addr);
-    for(i = 0; i < ctx->ndims; i++)
-	UINT64ENCODE(raw, record->offset[i]);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5D_bt2_encode() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5D_bt2_filt_encode
@@ -497,41 +578,6 @@ H5D_bt2_filt_encode(uint8_t *raw, const void *_record, void *_ctx)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5D_bt2_filt_encode() */
-
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D_bt2_decode
- *
- * Purpose:     Decode raw disk form of record into native form
- *		(non-filtered)
- *
- * Return:      Success:        non-negative
- *              Failure:        negative
- *
- * Programmer:  Vailin Choi; June 2010
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_bt2_decode(const uint8_t *raw, void *_record, void *_ctx)
-{
-    H5D_bt2_ctx_t *ctx = (H5D_bt2_ctx_t *)_ctx;       	/* Callback context structure */
-    H5D_bt2_rec_t *record = (H5D_bt2_rec_t *)_record;	/* The native record */
-    unsigned	i;	/* Local index variable */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_decode)
-
-    /* Sanity check */
-    HDassert(ctx);
-
-    /* Decode the record's fields */
-    H5F_addr_decode_len(ctx->sizeof_addr, &raw, &record->addr);
-    for(i = 0; i < ctx->ndims; i++)
-	UINT64DECODE(raw, record->offset[i]);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5D_bt2_decode() */
 
 
 /*-------------------------------------------------------------------------
@@ -571,40 +617,6 @@ H5D_bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_bt2_debug
- *
- * Purpose:	Debug native form of record (non-filtered)
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Vailin Choi; June 2010
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_bt2_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
-    int indent, int fwidth, const void *_record, const void *_u_ctx)
-{
-    const H5D_bt2_rec_t *record = (const H5D_bt2_rec_t *)_record; /* The native record */
-    const H5D_bt2_ctx_ud_t *u_ctx = (const H5D_bt2_ctx_ud_t *)_u_ctx; 	  /* User data for creating callback context */
-    unsigned u;		/* Local index variable */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_debug)
-
-    HDassert(record);
-
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Chunk address:", (unsigned)record->addr);
-    HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
-    for(u = 0; u < u_ctx->ndims; u++)
-        HDfprintf(stream, "%s%Hd", u?", ":"", record->offset[u]);
-    HDfputs("}\n", stream);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5D_bt2_debug() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5D_bt2_filt_debug
  *
  * Purpose:	Debug native form of record (filterd)
@@ -640,6 +652,7 @@ H5D_bt2_filt_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5D_bt2_filt_debug() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5D_bt2_crt_dbg_context
  *
@@ -792,7 +805,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_bt2_idx_open() */
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_bt2_idx_create 
@@ -825,8 +837,10 @@ H5D_bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     bt2_cparam.rrec_size = H5F_SIZEOF_ADDR(idx_info->f)	/* Address of chunk */
 		  + (idx_info->layout->ndims - 1) * 8;	/* # of dimensions x 64-bit chunk offsets */
 
+    /* General parameters */
     if(idx_info->pline->nused > 0) {
 	unsigned chunk_size_len;        /* Size of encoded chunk size */
+
         /* 
 	 * Compute the size required for encoding the size of a chunk,
          * allowing for an extra byte, in case the filter makes the chunk larger.
@@ -837,7 +851,8 @@ H5D_bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
 
 	bt2_cparam.rrec_size  += chunk_size_len	+ 4;	/* Size of encoded chunk size & filter mask */
 	bt2_cparam.cls = H5D_BT2_FILT;
-    } else
+    } /* end if */
+    else
 	bt2_cparam.cls = H5D_BT2;
 
     bt2_cparam.node_size = idx_info->layout->u.btree2.cparam.node_size;
@@ -890,58 +905,6 @@ H5D_bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_bt2_found_cb
- *
- * Purpose:	Retrieve record (non-filtered) for dataset chunk when it is found 
- *		in the v2 B-tree.
- * 		This is the callback for H5B2_find() which is called in 
- *		H5D_bt2_idx_get_addr() and H5D_bt2_idx_insert().
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Vailin Choi; June 2010
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_bt2_found_cb(const void *nrecord, void *op_data)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_found_cb)
-
-    *(H5D_bt2_rec_t *)op_data = *(const H5D_bt2_rec_t *)nrecord;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5D_bt2_found_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D_bt2_filt_found_cb
- *
- * Purpose:	Retrieve record (filtered) for dataset chunk when it is found 
- *		in the v2 B-tree.
- * 		This is the callback for H5B2_find() which is called in 
- *		H5D_bt2_idx_get_addr() and H5D_bt2_idx_insert().
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Vailin Choi; June 2010
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_bt2_filt_found_cb(const void *nrecord, void *op_data)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_filt_found_cb)
-
-    *(H5D_bt2_filt_rec_t *)op_data = *(const H5D_bt2_filt_rec_t *)nrecord;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5D_bt2_filt_found_cb() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5D_bt2_mod_filt_cb
  *
  * Purpose:	Modify record (filtered) for dataset chunk when it is found 
@@ -990,9 +953,9 @@ H5D_bt2_mod_filt_cb(void *_record, void *_op_data, hbool_t *changed)
 static herr_t
 H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 {
-    H5B2_t *bt2_cdset = NULL;           /* v2 B-tree handle for indexing chunks */
-    H5D_bt2_find_ud_t bt2_udata;
-    unsigned u;				/* local index variable */
+    H5B2_t *bt2;                        /* v2 B-tree handle for indexing chunks */
+    H5D_bt2_find_ud_t bt2_udata;        /* User data for v2 B-tree calls */
+    unsigned u;				/* Local index variable */
     herr_t ret_value = SUCCEED;		/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_insert)
@@ -1005,20 +968,22 @@ H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
 
+    /* Check if the v2 B-tree is open yet */
     if(NULL == idx_info->storage->u.btree2.bt2) {
 	/* Open existing v2 B-tree */
         if(H5D_bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
     } /* end if */
 
-    bt2_cdset = idx_info->storage->u.btree2.bt2;
+    /* Set convenience pointer to v2 B-tree structure */
+    bt2 = idx_info->storage->u.btree2.bt2;
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) { /* filtered chunk */
-	unsigned allow_chunk_size_len;	/* Allowed size of encoded chunk size */
-        unsigned new_chunk_size_len;  	/* Size of encoded chunk size */
 	H5D_bt2_filt_rec_t rec;  	/* Record for searching object */
 	H5D_bt2_filt_rec_t found_rec;  	/* Record found from searching for object */
+	unsigned allow_chunk_size_len;	/* Allowed size of encoded chunk size */
+        unsigned new_chunk_size_len;  	/* Size of encoded chunk size */
 
 	/* 
 	 * Compute the size required for encoding the size of a chunk,
@@ -1052,7 +1017,7 @@ H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 	bt2_udata.ndims = idx_info->layout->ndims - 1;
 
 	/* Try to find the chunked record */
-	if(H5B2_find(bt2_cdset, idx_info->dxpl_id, &bt2_udata, H5D_bt2_filt_found_cb, &found_rec) < 0)
+	if(H5B2_find(bt2, idx_info->dxpl_id, &bt2_udata, H5D_bt2_filt_found_cb, &found_rec) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
         /* Check for previous chunk */
@@ -1062,40 +1027,41 @@ H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 
             /* Check for chunk being same size */
             if(udata->nbytes != found_rec.nbytes) {
-
-		H5_CHECK_OVERFLOW(found_rec.nbytes, uint32_t, hsize_t);
-
 		/* Free the original chunk */
+		H5_CHECK_OVERFLOW(found_rec.nbytes, uint32_t, hsize_t);
 		if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, found_rec.addr, (hsize_t)found_rec.nbytes) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
 
 		/* Allocate a new chunk */
 		H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
-                rec.addr = udata->addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)udata->nbytes);
-
+                udata->addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)udata->nbytes);
                 if(!H5F_addr_defined(udata->addr))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
+                rec.addr = udata->addr;
 
 		/* Modify record for object in v2 B-tree */
-                if(H5B2_modify(bt2_cdset, idx_info->dxpl_id, &bt2_udata, H5D_bt2_mod_filt_cb, &rec) < 0)
+                if(H5B2_modify(bt2, idx_info->dxpl_id, &bt2_udata, H5D_bt2_mod_filt_cb, &rec) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to modify record in v2 B-tree")
-
-            } else
+            } /* end if */
+            else
                 /* Don't need to reallocate chunk, but send its address back up */
 		udata->addr = found_rec.addr;
-        }  else { /* Not found */
+        } /* end if */
+        else { /* Not found */
             H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
 
 	    /* Allocate a new chunk */
-            rec.addr = udata->addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)udata->nbytes);
+            udata->addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)udata->nbytes);
             if(!H5F_addr_defined(udata->addr))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
+            rec.addr = udata->addr;
 
 	    /* Insert record for object in v2 B-tree */
-            if(H5B2_insert(bt2_cdset, idx_info->dxpl_id, &bt2_udata) < 0)                
+            if(H5B2_insert(bt2, idx_info->dxpl_id, &bt2_udata) < 0)                
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "couldn't insert record in v2 B-tree")
-	}
-    } else { /* non-filtered chunk */
+	} /* end else */
+    } /* end if */
+    else { /* non-filtered chunk */
 	H5D_bt2_rec_t rec;  	
 
 	/* The record should not be there */
@@ -1111,13 +1077,13 @@ H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 
 	/* Allocate storage for the new chunk */
 	H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
-        rec.addr = udata->addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)udata->nbytes);
-
+        udata->addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)udata->nbytes);
 	if(!H5F_addr_defined(udata->addr))
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
+        rec.addr = udata->addr;
 
 	/* Insert record for object in v2 B-tree */
-	if(H5B2_insert(bt2_cdset, idx_info->dxpl_id, &bt2_udata) < 0)                
+	if(H5B2_insert(bt2, idx_info->dxpl_id, &bt2_udata) < 0)                
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "couldn't insert record in v2 B-tree")
     } /* end else */
     HDassert(H5F_addr_defined(udata->addr));
@@ -1125,6 +1091,58 @@ H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_bt2_idx_insert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_bt2_found_cb
+ *
+ * Purpose:	Retrieve record (non-filtered) for dataset chunk when it is found 
+ *		in the v2 B-tree.
+ * 		This is the callback for H5B2_find() which is called in 
+ *		H5D_bt2_idx_get_addr() and H5D_bt2_idx_insert().
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Vailin Choi; June 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_bt2_found_cb(const void *nrecord, void *op_data)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_found_cb)
+
+    *(H5D_bt2_rec_t *)op_data = *(const H5D_bt2_rec_t *)nrecord;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5D_bt2_found_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_bt2_filt_found_cb
+ *
+ * Purpose:	Retrieve record (filtered) for dataset chunk when it is found 
+ *		in the v2 B-tree.
+ * 		This is the callback for H5B2_find() which is called in 
+ *		H5D_bt2_idx_get_addr() and H5D_bt2_idx_insert().
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Vailin Choi; June 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_bt2_filt_found_cb(const void *nrecord, void *op_data)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_filt_found_cb)
+
+    *(H5D_bt2_filt_rec_t *)op_data = *(const H5D_bt2_filt_rec_t *)nrecord;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5D_bt2_filt_found_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1143,9 +1161,9 @@ done:
 static herr_t
 H5D_bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 {
-    H5B2_t 	*bt2_cdset = NULL;      /* v2 B-tree handle for indexing chunks */
+    H5B2_t 	*bt2;                   /* v2 B-tree handle for indexing chunks */
+    H5D_bt2_find_ud_t bt2_udata;        /* User data for v2 B-tree calls */
     unsigned	u;			/* Local index variable */
-    H5D_bt2_find_ud_t bt2_udata;
     herr_t	ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_get_addr)
@@ -1159,13 +1177,15 @@ H5D_bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
 
+    /* Check if the v2 B-tree is open yet */
     if(NULL == idx_info->storage->u.btree2.bt2) {
 	/* Open existing v2 B-tree */
         if(H5D_bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
     } /* end if */
 
-    bt2_cdset = idx_info->storage->u.btree2.bt2;
+    /* Set convenience pointer to v2 B-tree structure */
+    bt2 = idx_info->storage->u.btree2.bt2;
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) { /* filtered chunk */
@@ -1185,14 +1205,15 @@ H5D_bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 	bt2_udata.ndims = idx_info->layout->ndims - 1;
 
 	/* Go get chunk information from v2 B-tree */
-	if(H5B2_find(bt2_cdset, idx_info->dxpl_id, &bt2_udata, H5D_bt2_filt_found_cb, &found_rec) < 0)
+	if(H5B2_find(bt2, idx_info->dxpl_id, &bt2_udata, H5D_bt2_filt_found_cb, &found_rec) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
 	/* Set info for the chunk */
         udata->addr = found_rec.addr;
         udata->nbytes = found_rec.nbytes;
         udata->filter_mask = found_rec.filter_mask;
-    } else { /* non-filtered chunk */
+    } /* end if */
+    else { /* non-filtered chunk */
 	H5D_bt2_rec_t   search_rec; /* Record for searching object */
 	H5D_bt2_rec_t   found_rec;  /* Record found from searching for object */
 
@@ -1208,7 +1229,7 @@ H5D_bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 	bt2_udata.ndims = idx_info->layout->ndims - 1;
 
 	/* Go get chunk information from v2 B-tree */
-	if(H5B2_find(bt2_cdset, idx_info->dxpl_id, &bt2_udata, H5D_bt2_found_cb, &found_rec) < 0)
+	if(H5B2_find(bt2, idx_info->dxpl_id, &bt2_udata, H5D_bt2_found_cb, &found_rec) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
 	udata->addr = found_rec.addr;
@@ -1216,7 +1237,7 @@ H5D_bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 	/* Update the other (constant) information for the chunk */
         udata->nbytes = idx_info->layout->size;
         udata->filter_mask = 0;
-    }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1239,13 +1260,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static int
 H5D_bt2_idx_iterate_cb(const void *_record, void *_udata)
 {
-    H5D_bt2_it_ud_t	*udata = (H5D_bt2_it_ud_t *)_udata; /* User data */
-    unsigned u;		/* Local index variable */
-    int ret_value;      /* Return value */
+    H5D_bt2_it_ud_t *udata = (H5D_bt2_it_ud_t *)_udata; /* User data */
+    unsigned u;		        /* Local index variable */
+    int ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR(H5D_bt2_idx_iterate_cb, -)
 
@@ -1258,7 +1278,8 @@ H5D_bt2_idx_iterate_cb(const void *_record, void *_udata)
         udata->chunk_rec.filter_mask = filt_rec->filter_mask;
 	for(u = 0; u < (udata->common.layout->ndims - 1); u++)
 	    udata->chunk_rec.offset[u] = filt_rec->offset[u];
-    } else { /* non-filtered record */
+    } /* end if */
+    else { /* non-filtered record */
         const H5D_bt2_rec_t *rec = (const H5D_bt2_rec_t *)_record;
 
         udata->chunk_rec.chunk_addr = rec->addr;
@@ -1266,7 +1287,7 @@ H5D_bt2_idx_iterate_cb(const void *_record, void *_udata)
         udata->chunk_rec.filter_mask = 0;
 	for(u = 0; u < (udata->common.layout->ndims - 1); u++)
 	    udata->chunk_rec.offset[u] = rec->offset[u];
-    }
+    } /* end else */
 
     /* Make "generic chunk" callback */
     if((ret_value = (udata->cb)(&udata->chunk_rec, udata->udata)) < 0)
@@ -1275,6 +1296,7 @@ H5D_bt2_idx_iterate_cb(const void *_record, void *_udata)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_bt2_idx_iterate_cb() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5D_bt2_idx_iterate
  *
@@ -1291,8 +1313,8 @@ static int
 H5D_bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_cb_func_t chunk_cb, void *chunk_udata)
 {
-    H5D_bt2_it_ud_t	udata; 	/* User data for B-tree iterator callback */
-    H5B2_t *bt2_cdset = NULL;	/* v2 B-tree handle for indexing chunks */
+    H5B2_t *bt2;	        /* v2 B-tree handle for indexing chunks */
+    H5D_bt2_it_ud_t udata; 	/* User data for B-tree iterator callback */
     int ret_value;		/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_iterate)
@@ -1313,19 +1335,22 @@ H5D_bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     udata.filtered = idx_info->pline->nused > 0;
     HDmemset(&udata.chunk_rec, 0, sizeof(udata.chunk_rec));
 
+    /* Check if the v2 B-tree is open yet */
     if(NULL == idx_info->storage->u.btree2.bt2) {
 	/* Open existing v2 B-tree */
         if(H5D_bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
     } /* end if */
 
-    bt2_cdset = idx_info->storage->u.btree2.bt2;
+    /* Set convenience pointer to v2 B-tree structure */
+    bt2 = idx_info->storage->u.btree2.bt2;
 
+    /* Prepare user data for iterate callback */
     udata.cb = chunk_cb;
     udata.udata = chunk_udata;
 
     /* Iterate over the records in the v2 B-tree */
-    if((ret_value = H5B2_iterate(bt2_cdset, idx_info->dxpl_id, H5D_bt2_idx_iterate_cb, &udata)) < 0)
+    if((ret_value = H5B2_iterate(bt2, idx_info->dxpl_id, H5D_bt2_idx_iterate_cb, &udata)) < 0)
 	HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over v2 B-tree for dataset chunks");
 
 done:
@@ -1414,9 +1439,9 @@ done:
 static herr_t
 H5D_bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata)
 {
+    H5B2_t 	*bt2;                   /* v2 B-tree handle for indexing chunks */
     H5D_bt2_remove_ud_t remove_udata;	/* User data for removal callback */
-    H5B2_t 	*bt2_cdset = NULL;      /* v2 B-tree handle for indexing chunks */
-    H5D_bt2_find_ud_t bt2_udata;
+    H5D_bt2_find_ud_t bt2_udata;        /* User data for v2 B-tree find call */
     unsigned 	u;			/* Local index variable */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
@@ -1430,13 +1455,15 @@ H5D_bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *ud
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
 
+    /* Check if the v2 B-tree is open yet */
     if(NULL == idx_info->storage->u.btree2.bt2) {
 	/* Open existing v2 B-tree */
         if(H5D_bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
     } /* end if */
 
-    bt2_cdset = idx_info->storage->u.btree2.bt2;
+    /* Set convenience pointer to v2 B-tree structure */
+    bt2 = idx_info->storage->u.btree2.bt2;
 
     /* Initialize user data for removal callback */
     remove_udata.f = idx_info->f;
@@ -1454,9 +1481,10 @@ H5D_bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *ud
 	bt2_udata.rec = &search_rec;
 	bt2_udata.ndims = idx_info->layout->ndims - 1;
 
-	if(H5B2_remove(bt2_cdset, idx_info->dxpl_id, &bt2_udata, H5D_bt2_filt_remove_cb, &remove_udata) < 0)
+	if(H5B2_remove(bt2, idx_info->dxpl_id, &bt2_udata, H5D_bt2_filt_remove_cb, &remove_udata) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't remove object from B-tree")
-    } else { /* non-filtered chunk */
+    } /* end if */
+    else { /* non-filtered chunk */
 	H5D_bt2_rec_t   search_rec; 	/* Record for searching for object */
 
 	remove_udata.unfilt_size = idx_info->layout->size;
@@ -1468,7 +1496,7 @@ H5D_bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *ud
 	bt2_udata.rec = &search_rec;
 	bt2_udata.ndims = idx_info->layout->ndims - 1;
 
-	if(H5B2_remove(bt2_cdset, idx_info->dxpl_id, &bt2_udata, H5D_bt2_remove_cb, &remove_udata) < 0)
+	if(H5B2_remove(bt2, idx_info->dxpl_id, &bt2_udata, H5D_bt2_remove_cb, &remove_udata) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't remove object from B-tree")
     } /* end else */
 
@@ -1509,7 +1537,6 @@ H5D_bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
 
     /* Check if the index data structure has been allocated */
     if(H5F_addr_defined(idx_info->storage->idx_addr)) {
-
 	/* Set up user data for creating context */
 	u_ctx.f = idx_info->f;
 	u_ctx.ndims = idx_info->layout->ndims - 1;
@@ -1701,7 +1728,6 @@ H5D_bt2_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
     if(reset_addr)
 	storage->idx_addr = HADDR_UNDEF;
     storage->u.btree2.bt2 = NULL;
-    
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_bt2_idx_reset() */

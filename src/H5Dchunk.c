@@ -464,10 +464,6 @@ done:
  * Programmer:	Robb Matzke
  *              Monday, May 18, 1998
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -552,10 +548,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Thursday, January 15, 2009
- *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
  *
  *-------------------------------------------------------------------------
  */
@@ -2056,10 +2048,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, January 15, 2009
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2219,10 +2207,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Thursday, May 22, 2008
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2280,10 +2264,6 @@ done:
  *
  * Programmer:	Albert Cheng
  *              June 27, 1998
- *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
  *
  *-------------------------------------------------------------------------
  */
@@ -2379,10 +2359,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
- *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
  *
  *-------------------------------------------------------------------------
  */
@@ -3315,10 +3291,6 @@ H5D_chunk_allocated_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  * Programmer:	Quincey Koziol
  *              Tuesday, May 20, 2008
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3386,10 +3358,6 @@ done:
  *
  * Programmer:	Albert Cheng
  *		June 26, 1998
- *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
  *
  *-------------------------------------------------------------------------
  */
@@ -4684,10 +4652,6 @@ done:
  * Programmer:  Kent Yang
  *              November 15, 2005
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4745,10 +4709,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Thursday, March 20, 2003
- *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
  *
  *-------------------------------------------------------------------------
  */
@@ -5398,10 +5358,6 @@ done:
  * Programmer:  Vailin Choi
  *              June 8, 2007
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5501,10 +5457,6 @@ H5D_chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  * Programmer:	Robb Matzke
  *              Wednesday, April 28, 1999
  *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5566,10 +5518,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 21, 1998
- *
- * Modifications:
- *	Vailin Choi; August 2010
- *	Added v2-btree indexing
  *
  *-------------------------------------------------------------------------
  */

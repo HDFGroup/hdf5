@@ -285,8 +285,6 @@ const H5Z_class2_t H5Z_COUNT[1] = {{
  * Programmer:  Neil Fortner
  *              Wednesday, March 17, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -314,11 +312,6 @@ filter_count(unsigned int flags, size_t UNUSED cd_nelmts,
  *
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
- *
- * Modifications:
- *              Added test for compact dataset creation.
- *              Raymond Lu
- *              August 8, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -474,8 +467,6 @@ test_create(hid_t file)
  * Programmer:	Robb Matzke
  *		Wednesday, December 10, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -596,8 +587,6 @@ error:
  * Programmer:	Raymond Lu
  *		Wednesday, November 27, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -690,8 +679,6 @@ error:
  *
  * Programmer:  Raymond Lu
  *              August 8, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1074,8 +1061,6 @@ error:
  * Programmer:	Raymond Lu
  *		Monday, May 12, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1222,8 +1207,6 @@ error:
  * Programmer:	Robb Matzke
  *		Wednesday, January 14, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1324,8 +1307,6 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  * Programmer:	Quincey Koziol
  *              Friday, April  5, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -1352,8 +1333,6 @@ can_apply_bogus(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
  * Programmer:	Robb Matzke
  *              Tuesday, April 21, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -1377,8 +1356,6 @@ filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
  *
  * Programmer:	Quincey Koziol
  *              Friday, April  5, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1430,8 +1407,6 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
  *
  * Programmer:	Quincey Koziol
  *              Monday, April  7, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1488,8 +1463,6 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
  *
  * Programmer:	Raymond Lu
  *              4 August 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1587,8 +1560,6 @@ error:
  * Programmer:	Raymond Lu
  *              Jan 14, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5Z_cb_return_t
@@ -1611,8 +1582,6 @@ filter_cb_cont(H5Z_filter_t filter, void UNUSED *buf, size_t UNUSED buf_size,
  *
  * Programmer:	Raymond Lu
  *              Jan 14, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1640,10 +1609,6 @@ filter_cb_fail(H5Z_filter_t filter, void UNUSED *buf, size_t UNUSED buf_size,
  *
  * Programmer:	Robb Matzke
  *              Wednesday, April 15, 1998
- *
- * Modifications:
- *              Moved out of main test_compression routine
- *              Quincey Koziol, November 14, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1991,10 +1956,6 @@ error:
  * Programmer:	Nat Furrer and James Laird
  *              Monday, June 7, 2004
  *
- * Modifications:
- *              Make copy of data file since the test writes to the file.
- *              Larry Knox, October 14, 2009
- *
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_FILTER_SZIP
@@ -2116,8 +2077,6 @@ error:
  * Programmer:  Nat Furrer and James Laird
  *              Thursday, June 10, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2194,14 +2153,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *              Wednesday, April 15, 1998
- *
- * Modifications:
- *              Moved guts of filter testing out of main routine.
- *              Tests shuffle, deflate, fletcher32 checksum filters.
- *              Quincey Koziol, November 14, 2002
- *
- *              Added Fletcher32 filter testing
- *              Raymond Lu, Jan 22, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -2738,8 +2689,6 @@ error:
  * Programmer:	Kent Yang
  *              Wednesday, Nov. 13th, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2855,8 +2804,6 @@ error:
  *
  * Programmer:  Xiaowen Wu
  *              Wednesday, Dec. 23th, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2998,8 +2945,6 @@ error:
  * Programmer:  Xiaowen Wu
  *              Friday, Jan. 21th, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3128,8 +3073,6 @@ error:
  *
  * Programmer:  Xiaowen Wu
  *              Wednesday, Jan. 26th, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3261,8 +3204,6 @@ error:
  *
  * Programmer:  Xiaowen Wu
  *              Tuesday, Jan. 18th, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3409,8 +3350,6 @@ error:
  *
  * Programmer:  Xiaowen Wu
  *              Tuesday, Jan. 18th, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3607,8 +3546,6 @@ error:
  *
  * Programmer:  Xiaowen Wu
  *              Tuesday, Jan. 18th, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3897,8 +3834,6 @@ error:
  * Programmer:  Xiaowen Wu
  *              Thursday, Mar. 31th, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4096,8 +4031,6 @@ error:
  * Programmer:  Xiaowen Wu
  *              Monday, Feb. 14th, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4226,8 +4159,6 @@ error:
  *
  * Programmer:  Xiaowen Wu
  *              Tuesday, March 15th, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4374,8 +4305,6 @@ error:
  * Programmer:  Xiaowen Wu
  *              Wednesday, Apr. 20th, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4505,8 +4434,6 @@ error:
  *
  * Programmer:  Xiaowen Wu
  *              Wednesday, Apr. 20th, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4654,8 +4581,6 @@ error:
  * Programmer:  Xiaowen Wu
  *              Monday, Apr. 25th, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4785,8 +4710,6 @@ error:
  *
  * Programmer:  Xiaowen Wu
  *              Monday, Apr. 25th, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4937,8 +4860,6 @@ error:
  * Programmer:	Robb Matzke
  *              Tuesday, June  9, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -5002,8 +4923,6 @@ test_multiopen (hid_t file)
  *
  * Programmer:	Robb Matzke
  *              Monday, June  7, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6128,8 +6047,6 @@ error:
  * Programmer: Pedro Vicente
  *              Monday, January 26, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6256,8 +6173,6 @@ error:
  *
  * Programmer: Pedro Vicente
  *              Monday, March 8, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6416,10 +6331,6 @@ error:
  * Programmer: Quincey Koziol
  *              Tuesday, July 27, 2004
  *
- * Modifications:
- *	Vailin Choi; June 2010
- *	Added dataset with > 1 unlimited dimensions to the test.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6439,18 +6350,18 @@ test_zero_dims(hid_t file)
     TESTING("I/O on datasets with zero-sized dims");
 
     /* Get the file's file access property list */
-    if((fapl = H5Fget_access_plist(file)) < 0) TEST_ERROR; 
+    if((fapl = H5Fget_access_plist(file)) < 0) FAIL_STACK_ERROR
 
     /* Get library format */
-    if(H5Pget_libver_bounds(fapl, &low, NULL) < 0) TEST_ERROR;
+    if(H5Pget_libver_bounds(fapl, &low, NULL) < 0) FAIL_STACK_ERROR
 
     /* 
      * One-dimensional dataset 
      */
-    if((s = H5Screate_simple(1, &dsize, &dmax)) < 0) TEST_ERROR;
+    if((s = H5Screate_simple(1, &dsize, &dmax)) < 0) FAIL_STACK_ERROR
 
     /* Try creating chunked dataset with undefined chunk dimensions */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
     if(H5Pset_layout(dcpl, H5D_CHUNKED) < 0) FAIL_STACK_ERROR
 
     H5E_BEGIN_TRY {
@@ -6476,7 +6387,7 @@ test_zero_dims(hid_t file)
     if((d = H5Dcreate2(file, ZERODIM_DATASET, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Get the chunk index type */
-    if(H5D_layout_idx_type_test(d, &idx_type) < 0) TEST_ERROR;
+    if(H5D_layout_idx_type_test(d, &idx_type) < 0) FAIL_STACK_ERROR
 
     /* Verify index type */
     if(low == H5F_LIBVER_LATEST) {
@@ -6495,10 +6406,10 @@ test_zero_dims(hid_t file)
     /* 
      * Two-dimensional dataset 
      */
-    if((s2 = H5Screate_simple(2, dsize2, dmax2)) < 0) TEST_ERROR;
+    if((s2 = H5Screate_simple(2, dsize2, dmax2)) < 0) FAIL_STACK_ERROR
 
     /* Try creating chunked dataset with undefined chunk dimensions */
-    if((dcpl2 = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if((dcpl2 = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
     if(H5Pset_layout(dcpl2, H5D_CHUNKED) < 0) FAIL_STACK_ERROR
 
     H5E_BEGIN_TRY {
@@ -6526,7 +6437,7 @@ test_zero_dims(hid_t file)
     if((d2 = H5Dcreate2(file, ZERODIM_DATASET2, H5T_NATIVE_INT, s2, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Get the chunk index type */
-    if(H5D_layout_idx_type_test(d2, &idx_type) < 0) TEST_ERROR;
+    if(H5D_layout_idx_type_test(d2, &idx_type) < 0) FAIL_STACK_ERROR
 
     /* Verify index type */
     if(low == H5F_LIBVER_LATEST) {
@@ -6571,10 +6482,6 @@ error:
  *
  * Programmer: Quincey Koziol
  *              Tuesday, August 25, 2004
- *
- * Modifications:
- *	Vailin Choi; June 2010
- *	Added dataset with >1 unlimited dimensions to the test.
  *
  *-------------------------------------------------------------------------
  */
@@ -6762,10 +6669,6 @@ error:
  *
  * Programmer: Christian Chilan
  *             Monday, March 26, 2007
- *
- * Modifications:
- *	Vailin Choi; June 2010
- *	Added dataset with >1 unlimited dimensions to the test.
  *
  *-------------------------------------------------------------------------
  */
@@ -7542,9 +7445,6 @@ error:
  * Programmer:  Raymond Lu
  *              11 Feb 2009
  *
- * Modifications:
- *	Vailin Choi; June 2010
- *	Added 2-D dataset with unlimited dimensions to the test.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -8337,10 +8237,6 @@ filter_expand(unsigned int flags, size_t UNUSED cd_nelmts,
  * Programmer:  Quincey Koziol
  *              Tuesday, March 31, 2009
  *
- * Modifications:
- *	Vailin Choi; June 2010
- *	Added 2-D dataset with unlimited dimensions to the test.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -8747,12 +8643,6 @@ error:
  *              Failure: -1
  *
  * Programmer:  Vailin Choi; 2009
- *
- * Modifications:
- *      Vailin Choi; June 2010
- *      Made changes to verify that Fixed Array indexing is used also for
- *      extendible chunked dataset.
- *	(fixed max. dim. setting but exclude H5S_UNLIMITED)
  *
  *-------------------------------------------------------------------------
  */
@@ -9334,8 +9224,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

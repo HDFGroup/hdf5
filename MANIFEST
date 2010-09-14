@@ -471,6 +471,7 @@
 ./src/H5CSprivate.h
 ./src/H5D.c
 ./src/H5Dbtree.c
+./src/H5Dbtree2.c
 ./src/H5Dchunk.c
 ./src/H5Dcompact.c
 ./src/H5Dcontig.c

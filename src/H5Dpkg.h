@@ -33,8 +33,8 @@
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5B2private.h"        /* v2 B-trees                           */
+#include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Tprivate.h"		/* Datatypes         			*/
 
