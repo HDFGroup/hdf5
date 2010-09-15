@@ -110,7 +110,7 @@ extern      "C"
 {
 #endif	/* c_plusplus || __cplusplus */
 
-H5_DLL void   H5TS_first_thread_init(void);
+H5_DLL void   H5TS_pthread_first_thread_init(void);
 H5_DLL herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex);
 H5_DLL herr_t H5TS_mutex_unlock(H5TS_mutex_t *mutex);
 H5_DLL herr_t H5TS_cancel_count_inc(void);
