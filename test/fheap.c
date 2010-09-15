@@ -2912,10 +2912,6 @@ test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam)
     if(NULL == (f = (H5F_t *)H5I_object(file1)))
         FAIL_STACK_ERROR
 
-    /* Ignore metadata tags in the file's cache */
-    if (H5AC_ignore_tags(f) < 0)
-        FAIL_STACK_ERROR
-
     /* Display testing message */
     TESTING("reopening header through different file")
 
@@ -2954,10 +2950,6 @@ test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam)
 
     /* Get a pointer to the internal file object (file1) */
     if(NULL == (f = (H5F_t *)H5I_object(file1)))
-        FAIL_STACK_ERROR
-
-    /* Ignore metadata tags in the file's cache */
-    if (H5AC_ignore_tags(f) < 0)
         FAIL_STACK_ERROR
 
     /* Open the heap */
