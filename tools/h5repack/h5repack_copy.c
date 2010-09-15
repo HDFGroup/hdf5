@@ -687,14 +687,11 @@ int do_copy_objects(hid_t fidin,
 
             /* check if filters were requested for individual objects */
             for (u = 0; u < options->op_tbl->nelems; u++) {
-                int k;
 
                 if (strcmp(travt->objs[i].name, options->op_tbl->objs[u].path) == 0) {
-                    for (k = 0; k < options->op_tbl->objs[u].nfilters; k++) {
                         if (options->op_tbl->objs[u].filter->filtn > 0) {
                             req_filter = 1;
                         }
-                    }
                 }
             }
 
