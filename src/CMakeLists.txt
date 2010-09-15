@@ -81,19 +81,23 @@ IDE_GENERATED_PROPERTIES ("H5C" "${H5C_HDRS}" "${H5C_SRCS}" )
 
 SET (H5D_SRCS
     ${HDF5_SRC_DIR}/H5D.c
+    ${HDF5_SRC_DIR}/H5Dbtree2.c
     ${HDF5_SRC_DIR}/H5Dbtree.c
     ${HDF5_SRC_DIR}/H5Dchunk.c
     ${HDF5_SRC_DIR}/H5Dcompact.c
     ${HDF5_SRC_DIR}/H5Dcontig.c
     ${HDF5_SRC_DIR}/H5Ddbg.c
     ${HDF5_SRC_DIR}/H5Ddeprec.c
+    ${HDF5_SRC_DIR}/H5Dearray.c
     ${HDF5_SRC_DIR}/H5Defl.c
+    ${HDF5_SRC_DIR}/H5Dfarray.c
     ${HDF5_SRC_DIR}/H5Dfill.c
     ${HDF5_SRC_DIR}/H5Dint.c
     ${HDF5_SRC_DIR}/H5Dio.c
     ${HDF5_SRC_DIR}/H5Dlayout.c
     ${HDF5_SRC_DIR}/H5Dmpio.c
     ${HDF5_SRC_DIR}/H5Doh.c
+    ${HDF5_SRC_DIR}/H5Dproxy.c
     ${HDF5_SRC_DIR}/H5Dscatgath.c
     ${HDF5_SRC_DIR}/H5Dselect.c
     ${HDF5_SRC_DIR}/H5Dtest.c
