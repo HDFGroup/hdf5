@@ -244,6 +244,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a bug that could occur when getting information for a new-style
+            group that was previously opened through a file handle that was
+            later closed. (NAF - 2010/09/15)
       - Added define check in H5public.h if stdint.h is supported by the C++
             compiler. This define is only available on Windows with VS2010 and
             using CMake to build the library. (ADB - 2010/09/13 - Bug 1938)
