@@ -2828,7 +2828,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Re-open the heap */
-    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh = H5HF_open(f, dxpl, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Check the heap's size */
@@ -2871,6 +2871,145 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_reopen_hdr
+ *
+ * Purpose:     Test opening a header through one file handle, closing
+ *              that file handle, then reopening through a different file
+ *              handle that was open the whole time.  The header should
+ *              stay in cache between the two opens.
+ *
+ * Return:      Success:        0
+ *              Failure:        1
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, September 14, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam)
+{
+    hid_t       file1 = -1;             /* File ID */
+    hid_t       file2 = -2;             /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char        filename[FHEAP_FILENAME_LEN];         /* Filename to use */
+    H5F_t       *f = NULL;              /* Internal file object pointer */
+    H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
+    haddr_t     fh_addr;                /* Address of fractal heap */
+    hsize_t     heap_size;              /* Total size of heap on disk */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file1 = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = (H5F_t *)H5I_object(file1)))
+        FAIL_STACK_ERROR
+
+    /* Ignore metadata tags in the file's cache */
+    if (H5AC_ignore_tags(f) < 0)
+        FAIL_STACK_ERROR
+
+    /* Display testing message */
+    TESTING("reopening header through different file")
+
+
+    /* Create absolute heap */
+    if(NULL == (fh = H5HF_create(f, dxpl, cparam)))
+        FAIL_STACK_ERROR
+
+    /* Get heap's address */
+    if(H5HF_get_heap_addr(fh, &fh_addr) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        TEST_ERROR
+
+    /* Insert an object */
+    if(add_obj(fh, dxpl, (size_t)0, (size_t)10, NULL, NULL) < 0)
+        TEST_ERROR
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+    /* Close the file */
+    if(H5Fclose(file1) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Re-open the file */
+    if((file1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Re-open the file again */
+    if((file2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object (file1) */
+    if(NULL == (f = (H5F_t *)H5I_object(file1)))
+        FAIL_STACK_ERROR
+
+    /* Ignore metadata tags in the file's cache */
+    if (H5AC_ignore_tags(f) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the heap */
+    if(NULL == (fh = H5HF_open(f, dxpl, fh_addr)))
+        FAIL_STACK_ERROR
+
+    /* Close the heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+    /* Close the file (file1) */
+    if(H5Fclose(file1) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Get a pointer to the internal file object (file2) */
+    if(NULL == (f = (H5F_t *)H5I_object(file2)))
+        FAIL_STACK_ERROR
+
+    /* Reopen the heap */
+    if(NULL == (fh = H5HF_open(f, dxpl, fh_addr)))
+        FAIL_STACK_ERROR
+
+    /* Check the heap's size */
+    heap_size = 0;
+    if(H5HF_size(fh, dxpl, &heap_size) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Close the file (file2) */
+    if(H5Fclose(file2) < 0)
+        FAIL_STACK_ERROR
+
+    /* All tests passed */
+    PASSED()
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        if(fh)
+            H5HF_close(fh, dxpl);
+        H5Fclose(file1);
+        H5Fclose(file2);
+    } H5E_END_TRY;
+    return(1);
+} /* test_reopen_hdr() */
 
 #ifndef QAK2
 
@@ -15808,6 +15947,7 @@ curr_test = FHEAP_TEST_NORMAL;
         nerrors += test_id_limits(fapl, &small_cparam);
         nerrors += test_filtered_create(fapl, &small_cparam);
         nerrors += test_size(fapl, &small_cparam);
+        nerrors += test_reopen_hdr(fapl, &small_cparam);
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
