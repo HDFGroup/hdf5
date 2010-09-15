@@ -789,9 +789,15 @@ int do_copy_objects(hid_t fidin,
                         /* get the storage size of the input dataset */
                         dsize_in=H5Dget_storage_size(dset_in);
 
-                        /* check for datasets too small */
-                        if (nelmts*msize < options->min_comp )
-                            apply_s=0;
+                        /* check for small size datasets (less than 1k) except 
+                         * changing to COMPACT. For the reference, COMPACT is limited
+                         * by size 64K by library.
+                         */
+                        if (options->layout_g != H5D_COMPACT)
+                        {
+                            if ( nelmts*msize < options->min_comp )
+                                apply_s=0;
+                        }
 
                         /* apply the filter */
                         if (apply_s)

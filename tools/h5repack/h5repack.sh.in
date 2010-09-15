@@ -35,7 +35,12 @@ H5REPACK=h5repack               # The tool name
 H5REPACK_BIN=`pwd`/$H5REPACK    # The path of the tool binary
 
 H5DIFF=../h5diff/h5diff         # The h5diff tool name 
-H5DIFF_BIN=`pwd`/$H5DIFF        # The path of the h5diff  tool binary
+H5DIFF_BIN=`pwd`/$H5DIFF        # The path of the h5diff tool binary
+
+H5DUMP=../h5dump/h5dump         # The h5dump tool name
+H5DUMP_BIN=`pwd`/$H5DUMP        # The path of the h5dump tool binary
+
+GREP='grep'
 
 H5DETECTSZIP=testh5repack_detect_szip              
 H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP    
@@ -59,6 +64,7 @@ FILE14=h5repack_layouto.h5      # A file with an older version of the layout mes
                                 # (copy of test/tlayouto.h5)
 FILE15=h5repack_named_dtypes.h5
 FILE16=tfamily%05d.h5           # located in common testfiles folder
+FILE18=h5repack_layout2.h5
 FILE_REF=h5repack_refs.h5
 FILE_ATTR_REF=h5repack_attr_refs.h5
 
@@ -115,7 +121,20 @@ DIFFTEST()
           
 # Call h5repack
 #
+
+
+# call TOOLTEST_MAIN and delete $output file
 TOOLTEST() 
+{
+    echo $@
+    TOOLTEST_MAIN $@
+    path=`pwd`
+    outfile=$path/out.$1
+    rm -f $outfile
+}
+
+# TOOLTEST main function, doesn't delete $output file
+TOOLTEST_MAIN() 
 {
     # Run test.
     TESTING $H5REPACK $@
@@ -133,7 +152,98 @@ TOOLTEST()
 	echo " PASSED"
 	DIFFTEST $infile $outfile
     fi
+}
+
+#------------------------------------------
+# Verifying layouts of a dataset 
+VERIFY_LAYOUT_DSET()
+{
+    path=`pwd`
+    outfile=$path/out.$1
+    layoutfile=$path/layout.$1
+    dset=$2
+    expectlayout=$3
+    
+    #---------------------------------
+    # check the layout from a dataset
+    VERIFY  "Layout"
+    $H5DUMP_BIN -d $dset -pH $outfile > $layoutfile
+    $GREP $expectlayout $layoutfile > /dev/null
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
+    fi
+
+    # clean up tmp files
     rm -f $outfile
+    rm -f $layoutfile
+}
+
+#----------------------------------------
+# Verifying layouts from entire file
+VERIFY_LAYOUT_ALL()
+{
+    path=`pwd`
+    outfile=$path/out.$1
+    layoutfile=$path/layout.$1
+    expectlayout=$2
+    
+    #---------------------------------
+    # check the layout from a dataset
+    # check if the other layouts still exsit
+    VERIFY  "Layout "
+        # if CONTIGUOUS
+        if [ $expectlayout = "CONTIGUOUS" ]; then
+            $H5DUMP_BIN -pH $outfile > $layoutfile
+            $GREP "COMPACT" $layoutfile  > /dev/null
+            if [ $? -eq 0 ]; then
+                echo " FAILED"
+            else
+                $GREP "CHUNKED" $layoutfile  > /dev/null
+                if [ $? -eq 0 ]; then
+                    echo " FAILED"
+                else
+                    echo " PASSED"
+                fi
+            fi
+        else    
+            # if COMPACT
+            if [ $expectlayout = "COMPACT" ]; then
+                $H5DUMP_BIN -pH $outfile > $layoutfile
+                $GREP "CHUNKED" $layoutfile  > /dev/null
+                if [ $? -eq 0 ]; then
+                    echo " FAILED"
+                else
+                    $GREP "CONTIGUOUS" $layoutfile  > /dev/null
+                    if [ $? -eq 0 ]; then
+                        echo " FAILED"
+                    else
+                        echo " PASSED"
+                    fi
+                fi
+            else
+                # if CHUNKED
+                if [ $expectlayout = "CHUNKED" ]; then
+                    $H5DUMP_BIN -pH $outfile > $layoutfile
+                    $GREP "CONTIGUOUS" $layoutfile  > /dev/null
+                    if [ $? -eq 0 ]; then
+                        echo " FAILED"
+                    else
+                        $GREP "COMPACT" $layoutfile  > /dev/null
+                        if [ $? -eq 0 ]; then
+                            echo " FAILED"
+                        else
+                            echo " PASSED"
+                        fi
+                    fi
+                fi
+           fi
+        fi
+
+    # clean up tmp files
+    rm -f $outfile
+    rm -f $layoutfile
 }
 
 # same as TOOLTEST, but it uses the old syntax -i input_file -o output_file
@@ -494,32 +604,64 @@ else
  TOOLTEST $arg 
 fi
 
-
 #########################################################
 # layout options (these files have no filters)
 #########################################################
+TOOLTEST_MAIN $FILE4 --layout dset2:CHUNK=20x10
+VERIFY_LAYOUT_DSET $FILE4 dset2 CHUNKED
 
-TOOLTEST $FILE4 --layout=dset2:CHUNK=20x10
-TOOLTEST $FILE4 -l CHUNK=20x10
-TOOLTEST $FILE4 -l dset2:CONTI
-TOOLTEST $FILE4 -l CONTI
-TOOLTEST $FILE4 -l dset2:COMPA
-TOOLTEST $FILE4 -l COMPA
+TOOLTEST_MAIN $FILE4 -l CHUNK=20x10
+VERIFY_LAYOUT_ALL $FILE4 CHUNKED
 
+TOOLTEST_MAIN $FILE4 -l dset2:CONTI
+VERIFY_LAYOUT_DSET $FILE4 dset2 CONTIGUOUS
+
+TOOLTEST_MAIN $FILE4 -l CONTI
+VERIFY_LAYOUT_ALL $FILE4 CONTIGUOUS
+
+TOOLTEST_MAIN $FILE4 -l dset2:COMPA
+VERIFY_LAYOUT_DSET $FILE4 dset2 COMPACT
+
+TOOLTEST_MAIN $FILE4 -l COMPA
+VERIFY_LAYOUT_ALL $FILE4 COMPACT
 
 ################################################################
 # layout conversions (file has no filters)
 ###############################################################
 
-TOOLTEST $FILE4 -l dset_compact:CONTI
-TOOLTEST $FILE4 -l dset_compact:CHUNK=2x5
-TOOLTEST $FILE4 -l dset_compact:COMPA
-TOOLTEST $FILE4 -l dset_contiguous:COMPA
-TOOLTEST $FILE4 -l dset_contiguous:CHUNK=3x6
-TOOLTEST $FILE4 -l dset_contiguous:CONTI
-TOOLTEST $FILE4 -l dset_chunk:COMPA
-TOOLTEST $FILE4 -l dset_chunk:CONTI
-TOOLTEST $FILE4 -l dset_chunk:CHUNK=18x13
+TOOLTEST_MAIN $FILE4 -l dset_compact:CONTI
+VERIFY_LAYOUT_DSET $FILE4 dset_compact CONTIGUOUS
+
+TOOLTEST_MAIN $FILE4 -l dset_compact:CHUNK=2x5
+VERIFY_LAYOUT_DSET $FILE4 dset_compact CHUNKED
+
+TOOLTEST_MAIN $FILE4 -l dset_compact:COMPA
+VERIFY_LAYOUT_DSET $FILE4 dset_compact COMPACT
+
+TOOLTEST_MAIN $FILE4 -l dset_contiguous:COMPA
+VERIFY_LAYOUT_DSET $FILE4 dset_contiguous COMPACT
+
+TOOLTEST_MAIN $FILE4 -l dset_contiguous:CHUNK=3x6
+VERIFY_LAYOUT_DSET $FILE4 dset_contiguous CHUNKED
+
+TOOLTEST_MAIN $FILE4 -l dset_contiguous:CONTI
+VERIFY_LAYOUT_DSET $FILE4 dset_contiguous CONTIGUOUS
+
+TOOLTEST_MAIN $FILE4 -l dset_chunk:COMPA
+VERIFY_LAYOUT_DSET $FILE4 dset_chunk COMPACT
+
+TOOLTEST_MAIN $FILE4 -l dset_chunk:CONTI
+VERIFY_LAYOUT_DSET $FILE4 dset_chunk CONTIGUOUS
+
+TOOLTEST_MAIN $FILE4 -l dset_chunk:CHUNK=18x13
+VERIFY_LAYOUT_DSET $FILE4 dset_chunk CHUNKED
+
+# test convert small size dataset ( < 1k) to compact layout without -m
+TOOLTEST_MAIN $FILE18 -l contig_small:COMPA
+VERIFY_LAYOUT_DSET $FILE18 contig_small COMPACT
+
+TOOLTEST_MAIN $FILE18 -l chunked_small_fixed:COMPA
+VERIFY_LAYOUT_DSET $FILE18 chunked_small_fixed COMPACT
 
 # Native option
 # Do not use FILE1, as the named dtype will be converted to native, and h5diff will
@@ -533,7 +675,8 @@ arg="$FILE4 --layout CHUNK=20x10 --filter GZIP=1 --minimum=10 --native --latest 
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
- TOOLTEST $arg
+ TOOLTEST_MAIN $arg
+ VERIFY_LAYOUT_ALL $FILE4 CHUNKED
 fi
 
 # latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
@@ -541,7 +684,8 @@ arg="$FILE4 -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype]"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
- TOOLTEST $arg
+ TOOLTEST_MAIN $arg
+ VERIFY_LAYOUT_ALL $FILE4 CHUNKED
 fi
 
 # several global filters

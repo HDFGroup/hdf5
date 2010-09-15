@@ -466,6 +466,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Make h5repack be able to convert a layout to COMPACT for small size
+          dataset as default.  bug#1896 (JKM 2010/09/15)
         - Change h5ls not to manipulate special characters in object name or 
           attribute name for smart display.  bug#1784 (JKM 2010/06/28)
         - Fixed h5ls to return exit code 1 (error) when non-existent file is
