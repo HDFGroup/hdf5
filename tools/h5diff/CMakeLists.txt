@@ -194,6 +194,10 @@ IF (BUILD_TESTING)
       h5diff_danglelinks2.h5
       h5diff_grp_recurse1.h5
       h5diff_grp_recurse2.h5
+      h5diff_grp_recurse_ext1.h5
+      h5diff_grp_recurse_ext2-1.h5
+      h5diff_grp_recurse_ext2-2.h5
+      h5diff_grp_recurse_ext2-3.h5
       h5diff_exclude1-1.h5
       h5diff_exclude1-2.h5
       h5diff_exclude2-1.h5
@@ -304,6 +308,11 @@ SET (DANGLE_LINK_FILE1 h5diff_danglelinks1.h5)
 SET (DANGLE_LINK_FILE2 h5diff_danglelinks2.h5)
 SET (GRP_RECURSE_FILE1 h5diff_grp_recurse1.h5)
 SET (GRP_RECURSE_FILE2 h5diff_grp_recurse2.h5)
+# group recursive - same structure via external links through files 
+SET (GRP_RECURSE1_EXT h5diff_grp_recurse_ext1.h5)
+SET (GRP_RECURSE2_EXT1 h5diff_grp_recurse_ext2-1.h5)
+SET (GRP_RECURSE2_EXT2 h5diff_grp_recurse_ext2-2.h5)
+SET (GRP_RECURSE2_EXT3 h5diff_grp_recurse_ext2-3.h5)
 # same structure, same obj name with different value
 SET (EXCLUDE_FILE1_1 h5diff_exclude1-1.h5)
 SET (EXCLUDE_FILE1_2 h5diff_exclude1-2.h5)
@@ -731,6 +740,18 @@ ADD_H5_TEST (h5diff_512 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_
 # circled soft2ext-link vs soft2ext-link
 ADD_H5_TEST (h5diff_513 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
 ADD_H5_TEST (h5diff_514 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
+
+###############################################################################
+# Test for group recursive diff via multi-linked external links 
+# With follow-symlinks, file $GRP_RECURSE1_EXT and $GRP_RECURSE2_EXT1 should
+# be same with the external links.
+###############################################################################
+# file vs file
+ADD_H5_TEST (h5diff_515 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1})
+ADD_H5_TEST (h5diff_516 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1})
+# group vs group
+ADD_H5_TEST (h5diff_517 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
+ADD_H5_TEST (h5diff_518 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
 
 
 # ##############################################################################

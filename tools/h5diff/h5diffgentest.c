@@ -57,6 +57,11 @@
 #define DANGLE_LINK_FILE2   "h5diff_danglelinks2.h5"
 #define GRP_RECURSE_FILE1   "h5diff_grp_recurse1.h5"
 #define GRP_RECURSE_FILE2   "h5diff_grp_recurse2.h5"
+/* same structure via external links through files */
+#define GRP_RECURSE1_EXT    "h5diff_grp_recurse_ext1.h5"
+#define GRP_RECURSE2_EXT1   "h5diff_grp_recurse_ext2-1.h5"
+#define GRP_RECURSE2_EXT2   "h5diff_grp_recurse_ext2-2.h5"
+#define GRP_RECURSE2_EXT3   "h5diff_grp_recurse_ext2-3.h5"
 /* same structure, same obj name with different value */
 #define EXCLUDE_FILE1_1     "h5diff_exclude1-1.h5"
 #define EXCLUDE_FILE1_2     "h5diff_exclude1-2.h5"
@@ -108,6 +113,7 @@ static int test_external_links(const char *fname1, const char *fname2);
 static int test_ext2soft_links(const char *fname1, const char *fname2);
 static int test_dangle_links(const char *fname1, const char *fname2);
 static int test_group_recurse(const char *fname1, const char *fname2);
+static int test_group_recurse2();
 static int test_exclude_obj1(const char *fname1, const char *fname2);
 static int test_exclude_obj2(const char *fname1, const char *fname2);
 
@@ -160,10 +166,10 @@ int main(void)
     test_dangle_links(DANGLE_LINK_FILE1, DANGLE_LINK_FILE2);
 
     test_group_recurse(GRP_RECURSE_FILE1, GRP_RECURSE_FILE2);
+    test_group_recurse2();
 
     test_exclude_obj1(EXCLUDE_FILE1_1, EXCLUDE_FILE1_2);
     test_exclude_obj2(EXCLUDE_FILE2_1, EXCLUDE_FILE2_2);
-
 
     return 0;
 }
@@ -2302,6 +2308,334 @@ out:
 
     return status;
 }
+
+/*-------------------------------------------------------------------------
+*
+* Purpose: 
+*   For testing comparing group member objects recursively via multiple
+*   linked external links
+*
+* Programmer: Jonathan Kim (Sep 16, 2010)
+*
+*-------------------------------------------------------------------------*/
+#define GRP_R_DSETNAME1 "dset1"
+#define GRP_R_DSETNAME2 "dset2"
+static int test_group_recurse2()
+{
+    hid_t       fileid1;
+    hid_t       grp1=0, grp2;
+    hid_t       grp3=0;
+    hid_t       grp4=0;
+    hid_t       tid;
+    hid_t       dset1, dset2;
+    hid_t       datatype, dataspace;   /* handles */
+    hid_t       fileid2;
+    hid_t       fileid3;
+    hid_t       fileid4;
+    hid_t       fileid4_1;
+    hsize_t     dimsf[2];              /* dataset dimensions */
+    herr_t      status=0;
+    int data1[4][2] = {{0,0},{1,1},{2,2},{3,3}};
+    int data2[4][2] = {{0,0},{0,1},{0,2},{3,3}};
+    int         i, j;
+
+   /*-----------------------------------------------------------------------
+    * FILE 1
+    *------------------------------------------------------------------------*/
+    /*
+     * Create a new file using H5F_ACC_TRUNC access,
+     * default file creation properties, and default file
+     * access properties.
+     */
+    fileid1 = H5Fcreate(GRP_RECURSE1_EXT, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+   /*-----------------------------------------------------------------------
+    * Groups
+    *------------------------------------------------------------------------*/
+    grp1 = H5Gcreate2(fileid1, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (grp1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
+        status = FAIL;
+        goto out;
+    }
+
+    grp2 = H5Gcreate2(grp1, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (grp2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
+        status = FAIL;
+        goto out;
+    }
+
+    grp3 = H5Gcreate2(grp2, "g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (grp3 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
+        status = FAIL;
+        goto out;
+    }
+
+    grp4 = H5Gcreate2(grp3, "g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (grp4 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
+        status = FAIL;
+        goto out;
+    }
+
+
+   /*-----------------------------------------------------------------------
+    * Datasets
+    *------------------------------------------------------------------------*/
+    /*
+     * Describe the size of the array and create the data space for fixed
+     * size dataset.
+     */
+    dimsf[0] = 4;
+    dimsf[1] = 2;
+    dataspace = H5Screate_simple(2, dimsf, NULL);
+
+    /*
+     * Define datatype for the data in the file.
+     * We will store little endian INT numbers.
+     */
+    datatype = H5Tcopy(H5T_NATIVE_INT);
+    status = H5Tset_order(datatype, H5T_ORDER_LE);
+
+    /*---------------
+     * dset1
+     */
+    /*
+     * Create a new dataset within the file using defined dataspace and
+     * datatype and default dataset creation properties.
+     */
+    dset1 = H5Dcreate2(fileid1, GRP_R_DSETNAME1, datatype, dataspace,
+			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*
+     * Write the data to the dataset using default transfer properties.
+     */
+    status = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
+    H5Dclose(dset1);
+
+    /*---------------
+     * dset1
+     */
+    /*
+     * Create a new dataset within the file using defined dataspace and
+     * datatype and default dataset creation properties.
+     */
+    dset1 = H5Dcreate2(grp3, GRP_R_DSETNAME1, datatype, dataspace,
+			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*
+     * Write the data to the dataset using default transfer properties.
+     */
+    status = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
+
+    /*---------------
+     * dset2
+     */
+    /*
+     * Create a new dataset within the fileid1 using defined dataspace and
+     * datatype and default dataset creation properties.
+     */
+    dset2 = H5Dcreate2(grp4, GRP_R_DSETNAME2, datatype, dataspace,
+			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*
+     * Write the data to the dataset using default transfer properties.
+     */
+    status = H5Dwrite(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
+
+   /*-----------------------------------------------------------------------
+    * Soft links
+    *------------------------------------------------------------------------*/
+    /*
+     * under  '/' root
+     */
+    /* link to dset1 */
+    status = H5Lcreate_soft(GRP_R_DSETNAME1, fileid1, "soft_dset1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", GRP_RECURSE1_EXT);
+        status = FAIL;
+        goto out;
+    }
+
+    H5Dclose(dset1);
+    H5Dclose(dset2);
+    H5Gclose(grp1);
+    H5Gclose(grp2);
+    H5Gclose(grp3);
+    H5Gclose(grp4);
+
+   /*-----------------------------------------------------------------------
+    * FILE 2-3
+    *------------------------------------------------------------------------*/
+
+    /* crate target file */
+    fileid4 = H5Fcreate(GRP_RECURSE2_EXT3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+   /*-----------------------------------------------
+    * Groups 
+    */
+    grp4 = H5Gcreate2(fileid4, "/g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (grp4 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE2_EXT3);
+        status = FAIL;
+        goto out;
+    }
+
+    /*---------------
+     * dset2
+     */
+    /*
+     * Create a new dataset within the fileid1 using defined dataspace and
+     * datatype and default dataset creation properties.
+     */
+    dset2 = H5Dcreate2(grp4, GRP_R_DSETNAME2, datatype, dataspace,
+			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*
+     * Write the data to the dataset using default transfer properties.
+     */
+    status = H5Dwrite(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
+
+    H5Gclose(grp4);
+    H5Dclose(dset2);
+
+
+   /*-----------------------------------------------------------------------
+    * FILE 2-2
+    *------------------------------------------------------------------------*/
+
+    /* crate target file */
+    fileid3 = H5Fcreate(GRP_RECURSE2_EXT2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+   /*-----------------------------------------------
+    * Groups 
+    */
+    grp2 = H5Gcreate2(fileid3, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (grp2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE2_EXT2);
+        status = FAIL;
+        goto out;
+    }
+
+    grp3 = H5Gcreate2(grp2, "g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (grp3 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE2_EXT2);
+        status = FAIL;
+        goto out;
+    }
+
+    /*---------------
+     * dset1
+     */
+    /*
+     * Create a new dataset within the fileid1 using defined dataspace and
+     * datatype and default dataset creation properties.
+     */
+    dset1 = H5Dcreate2(grp3, GRP_R_DSETNAME1, datatype, dataspace,
+			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*
+     * Write the data to the dataset using default transfer properties.
+     */
+    status = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
+
+   /*-----------------------------------------------
+    * extlink to  $GRP_RECURSE2_EXT3/g4
+    */
+    status = H5Lcreate_external(GRP_RECURSE2_EXT3, "/g4", fileid3, "/g2/g3/g4", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", GRP_RECURSE2_EXT2);
+        status = FAIL;
+        goto out;
+    }
+
+    H5Dclose(dset1);
+    H5Gclose(grp2);
+    H5Gclose(grp3);
+
+   /*-----------------------------------------------------------------------
+    * FILE 2-1
+    *------------------------------------------------------------------------*/
+
+    /* crate target file */
+    fileid2 = H5Fcreate(GRP_RECURSE2_EXT1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+   /*-----------------------------------------------
+    * Groups 
+    */
+    grp1 = H5Gcreate2(fileid2, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (grp1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", GRP_RECURSE1_EXT);
+        status = FAIL;
+        goto out;
+    }
+
+    /*---------------
+     * dset1
+     */
+    dset1 = H5Dcreate2(fileid2, GRP_R_DSETNAME1, datatype, dataspace,
+			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*
+     * Write the data to the dataset using default transfer properties.
+     */
+    status = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
+
+   /*-----------------------------------------------------------------------
+    * Soft links
+    *------------------------------------------------------------------------*/
+    /*
+     * under  '/' root
+     */
+    /* link to dset1 */
+    status = H5Lcreate_soft(GRP_R_DSETNAME1, fileid2, "soft_dset1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", GRP_RECURSE2_EXT1);
+        status = FAIL;
+        goto out;
+    }
+
+   /*-----------------------------------------------
+    * extlink to  $GRP_RECURSE2_EXT2/g2
+    */
+    status = H5Lcreate_external(GRP_RECURSE2_EXT2, "/g2", fileid2, "/g1/g2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", GRP_RECURSE2_EXT1);
+        status = FAIL;
+        goto out;
+    }
+
+    H5Gclose(grp1);
+    H5Dclose(dset1);
+
+out:
+    /*
+     * Close/release resources.
+     */
+    H5Sclose(dataspace);
+    H5Tclose(datatype);
+    H5Fclose(fileid1);
+    H5Fclose(fileid2);
+    H5Fclose(fileid3);
+    H5Fclose(fileid4);
+
+    return status;
+}
+
 
 /*-------------------------------------------------------------------------
 *
