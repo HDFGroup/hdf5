@@ -121,6 +121,10 @@ Bug Fixes since HDF5-1.8.5
 
     Library
     -------
+    - Fixed a bug where the library could generate an assertion/core dump when
+      a file that had been created with H5Pset_libver_bounds(fapl,
+      H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) but didn't have a superblock
+      extension was later reopened.  (QAK - 2010/09/16 - Bug 1968)
     - Fixed a bug that could occur when getting information for a new-style
       group that was previously opened through a file handle that was later
       closed. (NAF - 2010/09/15)

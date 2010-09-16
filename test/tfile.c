@@ -2505,6 +2505,66 @@ test_userblock_alignment(void)
 
 /****************************************************************
 **
+**  test_libver_bounds():
+**	Verify that a file created with "LATEST, LATEST" can be
+**      opened later, with no setting.  (Further testing welcome)
+**
+****************************************************************/
+static void
+test_libver_bounds(void)
+{
+    hid_t       file, group;            /* Handles */
+    hid_t       fapl;                   /* File access property list */
+    herr_t	ret;                    /* Return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing setting library version bounds\n"));
+
+    /*
+     * Create a new file using the default properties.
+     */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    file = H5Fcreate("tfile5.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    file = H5Fopen("tfile5.h5", H5F_ACC_RDWR, fapl);
+    CHECK(file, FAIL, "H5Fopen");
+
+    /*
+     * Create a group named "G1" in the file.
+     */
+    group = H5Gcreate2(file, "/G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group, FAIL, "H5Gcreate");
+
+    ret = H5Gclose(group);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /*
+     * Create a group named "/G1/G3" in the file.
+     */
+    group = H5Gcreate2(file, "/G1/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group, FAIL, "H5Gcreate");
+
+    ret = H5Gclose(group);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* test_libver_bounds() */
+
+/****************************************************************
+**
 **  test_file(): Main low-level file I/O test routine.
 **
 ****************************************************************/
@@ -2538,6 +2598,7 @@ test_file(void)
     test_cached_stab_info();    /* Tests that files are created with cached stab info in the superblock */
     test_rw_noupdate();         /* Test to ensure that RW permissions don't write the file unless dirtied */
     test_userblock_alignment(); /* Tests that files created with a userblock and alignment interact properly */
+    test_libver_bounds();       /* Test compatibility for file space management */
 } /* test_file() */
 
 
