@@ -146,7 +146,7 @@ main(int argc, char *argv[])
 {
     hid_t	fid, fapl, dxpl;
     H5F_t       *f;
-    haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0;
+    haddr_t     addr = 1, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
     herr_t      status = SUCCEED;
@@ -195,6 +195,8 @@ main(int argc, char *argv[])
         extra2 = HDstrtoll(argv[4], NULL, 0);
     if(argc > 5)
         extra3 = HDstrtoll(argv[5], NULL, 0);
+    if(argc > 6)
+        extra4 = (haddr_t)HDstrtoll(argv[6], NULL, 0);
 
     /*
      * Read the signature at the specified file position.
@@ -281,7 +283,8 @@ main(int argc, char *argv[])
          */
         const H5B2_class_t *cls = get_H5B2_class(sig);
         HDassert(cls);
-        status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls);
+
+        status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, (haddr_t)extra);
 
     } else if(!HDmemcmp(sig, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -299,7 +302,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3);
+        status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3, (haddr_t)extra4);
 
     } else if(!HDmemcmp(sig, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -316,7 +319,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2);
+        status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (haddr_t)extra3);
 
     } else if(!HDmemcmp(sig, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
