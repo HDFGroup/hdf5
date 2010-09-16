@@ -522,11 +522,11 @@ ENDIF (WIN32)
 # Note: Currently CMake only allows configuring of threadsafe on WINDOWS.
 #-----------------------------------------------------------------------------
 IF (WIN32)
-OPTION (HDF5_ENABLE_THREADSAFE "Enable Threadsafety" OFF)
-IF (HDF5_ENABLE_THREADSAFE)
+  OPTION (HDF5_ENABLE_THREADSAFE "Enable Threadsafety" OFF)
+  IF (HDF5_ENABLE_THREADSAFE)
     SET (H5_HAVE_WIN_THREADS 1)
     SET (H5_HAVE_THREADSAFE 1)
-ENDIF (HDF5_ENABLE_THREADSAFE)
+  ENDIF (HDF5_ENABLE_THREADSAFE)
 ENDIF (WIN32)
 
 #-----------------------------------------------------------------------------
