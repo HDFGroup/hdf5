@@ -114,6 +114,10 @@ IF (BUILD_TESTING)
       h5diff_457.txt
       h5diff_458.txt
       h5diff_459.txt
+      h5diff_480.txt
+      h5diff_481.txt
+      h5diff_482.txt
+      h5diff_483.txt
       h5diff_50.txt
       h5diff_51.txt
       h5diff_52.txt
@@ -190,6 +194,10 @@ IF (BUILD_TESTING)
       h5diff_danglelinks2.h5
       h5diff_grp_recurse1.h5
       h5diff_grp_recurse2.h5
+      h5diff_exclude1-1.h5
+      h5diff_exclude1-2.h5
+      h5diff_exclude2-1.h5
+      h5diff_exclude2-2.h5
   )
 
   FOREACH (txt_file ${HDF5_REFERENCE_FILES})
@@ -296,6 +304,13 @@ SET (DANGLE_LINK_FILE1 h5diff_danglelinks1.h5)
 SET (DANGLE_LINK_FILE2 h5diff_danglelinks2.h5)
 SET (GRP_RECURSE_FILE1 h5diff_grp_recurse1.h5)
 SET (GRP_RECURSE_FILE2 h5diff_grp_recurse2.h5)
+# same structure, same obj name with different value
+SET (EXCLUDE_FILE1_1 h5diff_exclude1-1.h5)
+SET (EXCLUDE_FILE1_2 h5diff_exclude1-2.h5)
+# different structure and obj names
+SET (EXCLUDE_FILE2_1 h5diff_exclude2-1.h5)
+SET (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
+
 
 # ############################################################################
 # # Common usage
@@ -716,6 +731,27 @@ ADD_H5_TEST (h5diff_512 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_
 # circled soft2ext-link vs soft2ext-link
 ADD_H5_TEST (h5diff_513 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
 ADD_H5_TEST (h5diff_514 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
+
+
+# ##############################################################################
+# # Exclude path (--exclude-path)
+# ##############################################################################
+#
+# Same structure, same names and different value.
+#
+# Exclude the object with different value. Expect return - same
+ADD_H5_TEST (h5diff_480 0 -v --exclude-path /group1/dset3 ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2})
+# Verify different by not excluding. Expect return - diff
+ADD_H5_TEST (h5diff_481 1 -v ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2})
+
+#
+# Different structure, different names. 
+#
+# Exclude all the different objects. Expect return - same
+ADD_H5_TEST (h5diff_482 0 -v --exclude-path "/group1" --exclude-path "/dset1" ${EXCLUDE_FILE2_1} ${EXCLUDE_FILE2_2})
+# Exclude only some different objects. Expect return - diff
+ADD_H5_TEST (h5diff_483 1 -v --exclude-path "/group1" ${EXCLUDE_FILE2_1} ${EXCLUDE_FILE2_2})
+
   
 ENDIF (BUILD_TESTING)
 

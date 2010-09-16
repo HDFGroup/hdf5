@@ -57,6 +57,12 @@
 #define DANGLE_LINK_FILE2   "h5diff_danglelinks2.h5"
 #define GRP_RECURSE_FILE1   "h5diff_grp_recurse1.h5"
 #define GRP_RECURSE_FILE2   "h5diff_grp_recurse2.h5"
+/* same structure, same obj name with different value */
+#define EXCLUDE_FILE1_1     "h5diff_exclude1-1.h5"
+#define EXCLUDE_FILE1_2     "h5diff_exclude1-2.h5"
+/* different structure and obj names */
+#define EXCLUDE_FILE2_1     "h5diff_exclude2-1.h5"
+#define EXCLUDE_FILE2_2     "h5diff_exclude2-2.h5"
 
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
@@ -102,6 +108,8 @@ static int test_external_links(const char *fname1, const char *fname2);
 static int test_ext2soft_links(const char *fname1, const char *fname2);
 static int test_dangle_links(const char *fname1, const char *fname2);
 static int test_group_recurse(const char *fname1, const char *fname2);
+static int test_exclude_obj1(const char *fname1, const char *fname2);
+static int test_exclude_obj2(const char *fname1, const char *fname2);
 
 /* called by test_attributes() and test_datasets() */
 static void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
@@ -152,6 +160,10 @@ int main(void)
     test_dangle_links(DANGLE_LINK_FILE1, DANGLE_LINK_FILE2);
 
     test_group_recurse(GRP_RECURSE_FILE1, GRP_RECURSE_FILE2);
+
+    test_exclude_obj1(EXCLUDE_FILE1_1, EXCLUDE_FILE1_2);
+    test_exclude_obj2(EXCLUDE_FILE2_1, EXCLUDE_FILE2_2);
+
 
     return 0;
 }
@@ -2287,6 +2299,287 @@ out:
         H5Gclose(gid2_f2);
     if(gid3_f2)
         H5Gclose(gid3_f2);
+
+    return status;
+}
+
+/*-------------------------------------------------------------------------
+*
+* Purpose: Create test files for excluding obj.
+*          Same structure, same obj names
+* Test : exclude obj with different value to verify the rest are same
+*
+* Programmer: Jonathan Kim (July, 21, 2010)
+*
+*-------------------------------------------------------------------------*/
+static int test_exclude_obj1(const char *fname1, const char *fname2)
+{
+    hid_t   fid1=0;
+    hid_t   fid2=0;
+    hid_t   gid1=0;
+    hid_t   gid2=0;
+    hsize_t dims2[2] = {2,4};
+    int data1[4][2] = {{0,0},{0,0},{0,0},{0,0}};
+    int data2[4][2] = {{0,1},{2,3},{1,2},{3,4}};
+    herr_t  status = SUCCEED;
+
+    /*-----------------------------------------------------------------------
+    * Create file(s)
+    *------------------------------------------------------------------------*/
+    fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    fid2 = H5Fcreate (fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+
+   /*-----------------------------------------------------------------------
+    * Group
+    *------------------------------------------------------------------------*/
+    /* file1 */
+    gid1 = H5Gcreate2(fid1, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* file2 */
+    gid2 = H5Gcreate2(fid2, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    if (gid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+
+    /*-----------------------------------------------------------------------
+    * Datasets 
+    *------------------------------------------------------------------------*/
+    /* file1 */
+    status = write_dset(fid1,2,dims2,"dset1",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(gid1,2,dims2,"dset2",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(gid1,2,dims2,"dset3",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+
+    /* file2 */
+    status = write_dset(fid2,2,dims2,"dset1",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(gid2,2,dims2,"dset2",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(gid2,2,dims2,"dset3",H5T_NATIVE_INT,data2);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close
+    *-----------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    if(fid2)
+        H5Fclose(fid2);
+    if(gid1)
+        H5Gclose(gid1);
+    if(gid2)
+        H5Gclose(gid2);
+
+    return status;
+}
+
+/*-------------------------------------------------------------------------
+*
+* Purpose: Create test files for excluding obj.
+*          different structure and name
+* Test : exclude different objs to verify the rest are same 
+*
+* Programmer: Jonathan Kim (July, 21, 2010)
+*
+*-------------------------------------------------------------------------*/
+static int test_exclude_obj2(const char *fname1, const char *fname2)
+{
+    hid_t   fid1=0;
+    hid_t   fid2=0;
+    hid_t   gid1=0;
+    hid_t   gid2=0;
+    hid_t   gid3=0;
+    hsize_t dims2[2] = {2,4};
+    int data1[4][2] = {{0,0},{0,0},{0,0},{0,0}};
+    int data2[4][2] = {{0,1},{2,3},{1,2},{3,4}};
+    herr_t  status = SUCCEED;
+
+    /*-----------------------------------------------------------------------
+    * Create file(s)
+    *------------------------------------------------------------------------*/
+    fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    fid2 = H5Fcreate (fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+
+   /*-----------------------------------------------------------------------
+    * Group
+    *------------------------------------------------------------------------*/
+    /* file1 */
+    gid1 = H5Gcreate2(fid1, "group10", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* file2 */
+    gid2 = H5Gcreate2(fid2, "group10", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    if (gid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /* subset name from group10 */
+    gid3 = H5Gcreate2(fid2, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    if (gid3 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+
+    /*-----------------------------------------------------------------------
+    * Datasets 
+    *------------------------------------------------------------------------*/
+    /* file1 */
+    status = write_dset(fid1,2,dims2,"dset10",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(fid1,2,dims2,"dset1",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(gid1,2,dims2,"dset2",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+
+    /* file2 */
+    status = write_dset(fid2,2,dims2,"dset10",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(gid2,2,dims2,"dset2",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(gid3,2,dims2,"dset3",H5T_NATIVE_INT,data2);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close
+    *-----------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    if(fid2)
+        H5Fclose(fid2);
+    if(gid1)
+        H5Gclose(gid1);
+    if(gid2)
+        H5Gclose(gid2);
+    if(gid3)
+        H5Gclose(gid3);
 
     return status;
 }
