@@ -29,7 +29,8 @@ EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
 # Where the tool is installed.
-prefix="${prefix:-${DESTDIR}/@prefix@}"
+# Note: no '/' after DESTDIR.  Explanation in commence.am
+prefix="${prefix:-${DESTDIR}@prefix@}"
 PARALLEL=@PARALLEL@		# Am I in parallel mode?
 AR="@AR@"
 RANLIB="@RANLIB@"
