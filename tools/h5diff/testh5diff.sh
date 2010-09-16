@@ -54,6 +54,8 @@ FILE17=h5diff_ext2softlink_src.h5
 FILE18=h5diff_ext2softlink_trg.h5
 DANGLE_LINK_FILE1=h5diff_danglelinks1.h5
 DANGLE_LINK_FILE2=h5diff_danglelinks2.h5
+GRP_RECURSE_FILE1=h5diff_grp_recurse1.h5
+GRP_RECURSE_FILE2=h5diff_grp_recurse2.h5
 
 TESTNAME=h5diff
 EXIT_SUCCESS=0
@@ -305,7 +307,6 @@ SKIP() {
 # # Common usage
 # ############################################################################
 
-
 # 1.0
 TOOLTEST h5diff_10.txt -h
 
@@ -424,6 +425,9 @@ TOOLTEST h5diff_58.txt -v $FILE7 $FILE8 refreg
 
 # 6.0: Check if the command line number of arguments is less than 3
 TOOLTEST h5diff_600.txt $FILE1 
+
+# 6.1: Check if non-exist object name is specified 
+TOOLTEST h5diff_601.txt $FILE1 $FILE1 nono_obj
 
 
 # ##############################################################################
@@ -685,6 +689,44 @@ TOOLTEST h5diff_458.txt  --follow-symlinks -v --no-dangling-links  $FILE15 $FILE
 
 # dangling link found for ext links (obj to obj). Both dangle links
 TOOLTEST h5diff_459.txt  --follow-symlinks -v --no-dangling-links  $FILE15 $FILE15 /ext_link_noexist1 /ext_link_noexist2
+
+
+# ##############################################################################
+# # test for group diff recursivly
+# ##############################################################################
+# root 
+TOOLTEST h5diff_500.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 / /
+TOOLTEST h5diff_501.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 / /
+
+# root vs group
+TOOLTEST h5diff_502.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 / /grp1/grp2/grp3
+
+# group vs group (same name and structure)
+TOOLTEST h5diff_503.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp1 /grp1
+
+# group vs group (different name and structure)
+TOOLTEST h5diff_504.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp1/grp2 /grp1/grp2/grp3
+
+# groups vs soft-link
+TOOLTEST h5diff_505.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp1 /slink_grp1
+TOOLTEST h5diff_506.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp1/grp2 /slink_grp2
+
+# groups vs ext-link
+TOOLTEST h5diff_507.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp1 /elink_grp1
+TOOLTEST h5diff_508.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp1 /elink_grp1
+
+# soft-link vs ext-link
+TOOLTEST h5diff_509.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /slink_grp1 /elink_grp1
+TOOLTEST h5diff_510.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /slink_grp1 /elink_grp1
+
+# circled ext links
+TOOLTEST h5diff_511.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp10 /grp11
+TOOLTEST h5diff_512.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp10 /grp11
+
+# circled soft2ext-link vs soft2ext-link
+TOOLTEST h5diff_513.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /slink_grp10 /slink_grp11
+TOOLTEST h5diff_514.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /slink_grp10 /slink_grp11
+
 
 
 # ##############################################################################

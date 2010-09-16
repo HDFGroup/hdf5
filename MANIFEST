@@ -1504,6 +1504,7 @@
 ./tools/h5diff/testfiles/h5diff_57.txt
 ./tools/h5diff/testfiles/h5diff_58.txt
 ./tools/h5diff/testfiles/h5diff_600.txt
+./tools/h5diff/testfiles/h5diff_601.txt
 ./tools/h5diff/testfiles/h5diff_603.txt
 ./tools/h5diff/testfiles/h5diff_604.txt
 ./tools/h5diff/testfiles/h5diff_605.txt
@@ -1580,7 +1581,21 @@
 ./tools/h5diff/testfiles/h5diff_457.txt
 ./tools/h5diff/testfiles/h5diff_458.txt
 ./tools/h5diff/testfiles/h5diff_459.txt
-
+./tools/h5diff/testfiles/h5diff_500.txt
+./tools/h5diff/testfiles/h5diff_501.txt
+./tools/h5diff/testfiles/h5diff_502.txt
+./tools/h5diff/testfiles/h5diff_503.txt
+./tools/h5diff/testfiles/h5diff_504.txt
+./tools/h5diff/testfiles/h5diff_505.txt
+./tools/h5diff/testfiles/h5diff_506.txt
+./tools/h5diff/testfiles/h5diff_507.txt
+./tools/h5diff/testfiles/h5diff_508.txt
+./tools/h5diff/testfiles/h5diff_509.txt
+./tools/h5diff/testfiles/h5diff_510.txt
+./tools/h5diff/testfiles/h5diff_511.txt
+./tools/h5diff/testfiles/h5diff_512.txt
+./tools/h5diff/testfiles/h5diff_513.txt
+./tools/h5diff/testfiles/h5diff_514.txt
 
 ./tools/h5diff/testfiles/h5diff_attr1.h5
 ./tools/h5diff/testfiles/h5diff_attr2.h5
@@ -1602,6 +1617,8 @@
 ./tools/h5diff/testfiles/h5diff_softlinks.h5
 ./tools/h5diff/testfiles/h5diff_danglelinks1.h5
 ./tools/h5diff/testfiles/h5diff_danglelinks2.h5
+./tools/h5diff/testfiles/h5diff_grp_recurse1.h5
+./tools/h5diff/testfiles/h5diff_grp_recurse2.h5
 
 
 

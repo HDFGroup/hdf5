@@ -123,7 +123,21 @@ IF (BUILD_TESTING)
       h5diff_56.txt
       h5diff_57.txt
       h5diff_58.txt
+      h5diff_500.txt
+      h5diff_501.txt
+      h5diff_503.txt
+      h5diff_504.txt
+      h5diff_505.txt
+      h5diff_506.txt
+      h5diff_507.txt
+      h5diff_508.txt
+      h5diff_509.txt
+      h5diff_510.txt
+      h5diff_512.txt
+      h5diff_513.txt
+      h5diff_514.txt
       h5diff_600.txt
+      h5diff_601.txt
       h5diff_603.txt
       h5diff_604.txt
       h5diff_605.txt
@@ -174,6 +188,8 @@ IF (BUILD_TESTING)
       h5diff_ext2softlink_trg.h5
       h5diff_danglelinks1.h5
       h5diff_danglelinks2.h5
+      h5diff_grp_recurse1.h5
+      h5diff_grp_recurse2.h5
   )
 
   FOREACH (txt_file ${HDF5_REFERENCE_FILES})
@@ -278,6 +294,8 @@ SET (FILE17 h5diff_ext2softlink_src.h5)
 SET (FILE18 h5diff_ext2softlink_trg.h5)
 SET (DANGLE_LINK_FILE1 h5diff_danglelinks1.h5)
 SET (DANGLE_LINK_FILE2 h5diff_danglelinks2.h5)
+SET (GRP_RECURSE_FILE1 h5diff_grp_recurse1.h5)
+SET (GRP_RECURSE_FILE2 h5diff_grp_recurse2.h5)
 
 # ############################################################################
 # # Common usage
@@ -401,6 +419,9 @@ ADD_H5_TEST (h5diff_58 1 -v ${FILE7} ${FILE8} refreg)
 
 # 6.0: Check if the command line number of arguments is less than 3
 ADD_H5_TEST (h5diff_600 1 ${FILE1}) 
+
+# 6.1: Check if non-exist object name is specified 
+ADD_H5_TEST (h5diff_601 2 ${FILE1} ${FILE1} nono_obj)
 
 
 # ##############################################################################
@@ -659,6 +680,42 @@ ADD_H5_TEST (h5diff_458 2  --follow-symlinks -v --no-dangling-links  ${FILE15} $
 
 # dangling link found for ext links (obj to obj). Both dangle links
 ADD_H5_TEST (h5diff_459 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_noexist2)
+
+# ##############################################################################
+# # test for group diff recursivly
+# ##############################################################################
+# root 
+ADD_H5_TEST (h5diff_500 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
+ADD_H5_TEST (h5diff_501 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
+
+# root vs group
+ADD_H5_TEST (h5diff_502 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /grp1/grp2/grp3)
+
+# group vs group (same name and structure)
+ADD_H5_TEST (h5diff_503 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /grp1)
+
+# group vs group (different name and structure)
+ADD_H5_TEST (h5diff_504 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1/grp2 /grp1/grp2/grp3)
+
+# groups vs soft-link
+ADD_H5_TEST (h5diff_505 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /slink_grp1)
+ADD_H5_TEST (h5diff_506 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1/grp2 /slink_grp2)
+
+# groups vs ext-link
+ADD_H5_TEST (h5diff_507 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /elink_grp1)
+ADD_H5_TEST (h5diff_508 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /elink_grp1)
+
+# soft-link vs ext-link
+ADD_H5_TEST (h5diff_509 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp1 /elink_grp1)
+ADD_H5_TEST (h5diff_510 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp1 /elink_grp1)
+
+# circled ext links
+ADD_H5_TEST (h5diff_511 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp10 /grp11)
+ADD_H5_TEST (h5diff_512 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp10 /grp11)
+
+# circled soft2ext-link vs soft2ext-link
+ADD_H5_TEST (h5diff_513 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
+ADD_H5_TEST (h5diff_514 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
   
 ENDIF (BUILD_TESTING)
 

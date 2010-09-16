@@ -36,7 +36,7 @@ typedef herr_t (*h5trav_lnk_func_t)(const char *path_name, const H5L_info_t *lin
  *-------------------------------------------------------------------------
  */
 typedef enum {
-    H5TRAV_TYPE_UNKNOWN = -1,   /* Unknown object type */
+    H5TRAV_TYPE_UNKNOWN = -1,        /* Unknown object type */
     H5TRAV_TYPE_GROUP,          /* Object is a group */
     H5TRAV_TYPE_DATASET,        /* Object is a dataset */
     H5TRAV_TYPE_NAMED_DATATYPE, /* Object is a named datatype */
@@ -48,6 +48,20 @@ typedef enum {
  * public struct to store name and type of an object
  *-------------------------------------------------------------------------
  */
+/* Struct to keep track of symbolic link targets visited.
+ * Functions: symlink_visit_add() and symlink_is_visited()
+ */
+typedef struct symlink_trav_t {
+    size_t      nalloc;
+    size_t      nused;
+    struct {
+        H5L_type_t  type;
+        char *file;
+        char *path;
+    } *objs;
+    hbool_t dangle_link;
+} symlink_trav_t;
+
 typedef struct trav_path_t {
     char      *path;
     h5trav_type_t type;
@@ -56,7 +70,11 @@ typedef struct trav_path_t {
 typedef struct trav_info_t {
     size_t      nalloc;
     size_t      nused;
+    const char *fname;
+    hid_t fid;                          /* File ID */
     trav_path_t *paths;
+    symlink_trav_t symlink_visited;     /* already visited symbolic links */
+    void * opts;                        /* optional data passing */
 } trav_info_t;
 
 
@@ -110,9 +128,11 @@ extern "C" {
  * "h5trav general" public functions
  *-------------------------------------------------------------------------
  */
-H5TOOLS_DLL int h5trav_visit(hid_t file_id, const char *grp_name, hbool_t visit_start,
-    hbool_t recurse, h5trav_obj_func_t visit_obj, h5trav_lnk_func_t visit_lnk,
-    void *udata);
+H5TOOLS_DLL int h5trav_visit(hid_t file_id, const char *grp_name, 
+    hbool_t visit_start, hbool_t recurse, h5trav_obj_func_t visit_obj, 
+    h5trav_lnk_func_t visit_lnk, void *udata);
+H5TOOLS_DLL herr_t symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, const char *path);
+H5TOOLS_DLL hbool_t symlink_is_visited(symlink_trav_t *visited, H5L_type_t type, const char *file, const char *path);
 
 /*-------------------------------------------------------------------------
  * "h5trav info" public functions
@@ -120,6 +140,8 @@ H5TOOLS_DLL int h5trav_visit(hid_t file_id, const char *grp_name, hbool_t visit_
  */
 H5TOOLS_DLL int h5trav_getinfo(hid_t file_id, trav_info_t *info);
 H5TOOLS_DLL ssize_t h5trav_getindex(const trav_info_t *info, const char *obj);
+H5TOOLS_DLL int trav_info_visit_obj (const char *path, const H5O_info_t *oinfo, const char *already_visited, void *udata);
+H5TOOLS_DLL int trav_info_visit_lnk (const char *path, const H5L_info_t *linfo, void *udata);
 
 /*-------------------------------------------------------------------------
  * "h5trav table" public functions
@@ -144,9 +166,11 @@ H5TOOLS_DLL int h5trav_print(hid_t fid);
  *-------------------------------------------------------------------------
  */
 
-H5TOOLS_DLL void trav_info_init(trav_info_t **info);
+H5TOOLS_DLL void trav_info_init(const char *filename, hid_t fileid, trav_info_t **info);
 
 H5TOOLS_DLL void trav_info_free(trav_info_t *info);
+
+H5TOOLS_DLL void trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type);
 
 /*-------------------------------------------------------------------------
  * table private functions
