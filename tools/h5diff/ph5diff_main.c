@@ -135,7 +135,7 @@ ph5diff_worker(int nID)
 {
     struct diff_args args;
     hid_t file1_id, file2_id;
-    char    filenames[2][1024];
+    char    filenames[2][MAX_FILENAME];
     char    out_data[PRINT_DATA_MAX_SIZE] = {0};
     struct diffs_found  diffs;
     int i;
@@ -144,7 +144,7 @@ ph5diff_worker(int nID)
     MPI_Comm_rank(MPI_COMM_WORLD, &nID);
     outBuffOffset = 0;
 
-    MPI_Recv(filenames, 1024*2, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+    MPI_Recv(filenames, MAX_FILENAME*2, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
     if(Status.MPI_TAG == MPI_TAG_PARALLEL)
     {
     /* disable error reporting */
@@ -175,7 +175,7 @@ ph5diff_worker(int nID)
         /*Recv parameters for diff from manager task */
         MPI_Recv(&args, sizeof(args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
         /*Do the diff */
-        diffs.nfound = diff(file1_id, args.name, file2_id, args.name, &(args.options), args.type);
+        diffs.nfound = diff(file1_id, args.name1, file2_id, args.name2, &(args.options), args.type);
         diffs.not_cmp = args.options.not_cmp;
 
         /*If print buffer has something in it, request print token.*/

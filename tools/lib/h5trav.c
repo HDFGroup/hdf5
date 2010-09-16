@@ -292,7 +292,7 @@ traverse(hid_t file_id, const char *grp_name, hbool_t visit_start,
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type)
 {
     size_t idx;         /* Index of address to use  */
@@ -323,7 +323,7 @@ trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type)
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 trav_info_visit_obj(const char *path, const H5O_info_t *oinfo,
     const char UNUSED *already_visited, void *udata)
 {
@@ -348,7 +348,7 @@ trav_info_visit_obj(const char *path, const H5O_info_t *oinfo,
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 trav_info_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
 {
     /* Add the link to the 'info' struct */
@@ -438,14 +438,21 @@ h5trav_getindex(const trav_info_t *info, const char *obj)
  */
 
 void
-trav_info_init(trav_info_t **_info)
+trav_info_init(const char *filename, hid_t fileid, trav_info_t **_info)
 {
     trav_info_t *info = (trav_info_t *)HDmalloc(sizeof(trav_info_t));
 
     /* Init info structure */
     info->nused = info->nalloc = 0;
     info->paths = NULL;
+    info->fname = filename;
+    info->fid = fileid;
 
+    /* Initialize list of visited symbolic links */
+    info->symlink_visited.nused = 0;
+    info->symlink_visited.nalloc = 0;
+    info->symlink_visited.objs = NULL;
+    info->symlink_visited.dangle_link = FALSE;
     *_info = info;
 } /* end trav_info_init() */
 
@@ -464,6 +471,16 @@ trav_info_free(trav_info_t *info)
     size_t u;           /* Local index variable */
 
     if(info) {
+        /* Free visited symbolic links path and file (if alloc) */
+        for(u=0; u < info->symlink_visited.nused; u++) 
+        {
+            if (info->symlink_visited.objs[u].file)
+                HDfree(info->symlink_visited.objs[u].file);
+
+            HDfree(info->symlink_visited.objs[u].path);
+        }
+        HDfree(info->symlink_visited.objs);
+
         /* Free path names */
         for(u = 0; u < info->nused; u++)
             HDfree(info->paths[u].path);
@@ -972,4 +989,120 @@ h5trav_visit(hid_t fid, const char *grp_name, hbool_t visit_start,
 
     return 0;
 }
+
+/*-------------------------------------------------------------------------
+ * Function: symlink_visit_add
+ *
+ * Purpose: Add an symbolic link to visited data structure
+ *
+ * Return: 0 on success, -1 on failure
+ *
+ * Programmer: Neil Fortner, nfortne2@hdfgroup.org
+ *             Adapted from trav_addr_add in h5trav.c by Quincey Koziol
+ *
+ * Date: September 5, 2008
+ *
+ * Modified: 
+ *  Jonathan Kim
+ *   - Moved from h5ls.c to share among tools.  (Sep 16, 2010)
+ *   - Renamed from elink_trav_add to symlink_visit_add for both soft and 
+ *     external links.   (May 25, 2010)
+ *   - Add type parameter to distingush between soft and external link for 
+ *     sure, which prevent from mixing up visited link when the target names
+ *     are same between the soft and external link, as code marks with the
+ *     target name.  (May 25,2010) 
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, const char *path)
+{
+    size_t  idx;         /* Index of address to use */
+    void    *tmp_ptr;
+
+    /* Allocate space if necessary */
+    if(visited->nused == visited->nalloc) 
+    {
+        visited->nalloc = MAX(1, visited->nalloc * 2);
+        if(NULL == (tmp_ptr = HDrealloc(visited->objs, visited->nalloc * sizeof(visited->objs[0]))))
+            return -1;
+        visited->objs = tmp_ptr;
+    } /* end if */
+
+    /* Append it */
+    idx = visited->nused++;
+
+    visited->objs[idx].type = type;
+    visited->objs[idx].file = NULL;
+    visited->objs[idx].path = NULL;
+
+    if (type == H5L_TYPE_EXTERNAL)
+    {
+        if(NULL == (visited->objs[idx].file = HDstrdup(file))) 
+        {
+            visited->nused--;
+            return -1;
+        }
+    }
+
+    if(NULL == (visited->objs[idx].path = HDstrdup(path))) 
+    {
+        visited->nused--;
+        if (visited->objs[idx].file)
+            HDfree (visited->objs[idx].file);
+        return -1;
+    }
+
+    return 0;
+} /* end symlink_visit_add() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: symlink_is_visited
+ *
+ * Purpose: Check if an symbolic link has already been visited
+ *
+ * Return: TRUE/FALSE
+ *
+ * Programmer: Neil Fortner, nfortne2@hdfgroup.org
+ *             Adapted from trav_addr_visited in h5trav.c by Quincey Koziol
+ *
+ * Date: September 5, 2008
+ *
+ * Modified: 
+ *  Jonathan Kim
+ *   - Moved from h5ls.c to share among tools.  (Sep 16, 2010)
+ *   - Renamed from elink_trav_visited to symlink_is_visited for both soft and 
+ *     external links.  (May 25, 2010)
+ *   - Add type parameter to distingush between soft and external link for 
+ *     sure, which prevent from mixing up visited link when the target names
+ *     are same between the soft and external link, as code marks with the
+ *     target name.  (May 25,2010) 
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+symlink_is_visited(symlink_trav_t *visited, H5L_type_t type, const char *file, const char *path)
+{
+    size_t u;  /* Local index variable */
+
+    /* Look for symlink */
+    for(u = 0; u < visited->nused; u++)
+    {
+        /* Check for symlink values already in array */
+        /* check type and path pair to distingush between symbolic links */
+        if ((visited->objs[u].type == type) && !HDstrcmp(visited->objs[u].path, path))
+        {
+            /* if external link, file need to be matched as well */
+            if (visited->objs[u].type == H5L_TYPE_EXTERNAL)
+            {
+                if (!HDstrcmp(visited->objs[u].file, file))
+                    return (TRUE);
+            }
+            return (TRUE);
+        }
+    }
+    /* Didn't find symlink */
+    return(FALSE);
+} /* end symlink_is_visited() */
 

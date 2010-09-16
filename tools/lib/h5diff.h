@@ -19,6 +19,8 @@
 #include "hdf5.h"
 #include "h5trav.h"
 
+#define MAX_FILENAME 1024
+
 /*-------------------------------------------------------------------------
  * command line options
  *-------------------------------------------------------------------------
@@ -107,11 +109,9 @@ hsize_t diff_compare( hid_t file1_id,
                       trav_info_t *info2,
                       diff_opt_t *options );
 
-hsize_t diff_match( hid_t file1_id,
-                    trav_info_t *info1,
-                    hid_t file2_id,
-                    trav_info_t *info2,
-                    diff_opt_t *options );
+hsize_t diff_match( hid_t file1_id, const char *grp1, trav_info_t *info1,
+                    hid_t file2_id, const char *grp2, trav_info_t *info2,
+                    trav_table_t *table, diff_opt_t *options );
 
 hsize_t diff_array( void *_mem1,
                     void *_mem2,

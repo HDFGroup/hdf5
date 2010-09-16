@@ -1,5 +1,5 @@
 <-p 0x1> is not a valid option
-usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]] 
+usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]] 
   file1                    File name of the first HDF5 file
   file2                    File name of the second HDF5 file
   [obj1]                   Name of an HDF5 object, in absolute path
@@ -70,16 +70,26 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
   -v Verbose mode: print the above plus a list of objects and warnings
   -q Quiet mode: do not print output
 
- Compare criteria
-  If no objects [obj1[obj2]] are specified, h5diff only compares objects
-  with the same absolute path in both files
+ File comparison:
+  If no objects [obj1[ obj2]] are specified, the h5diff comparison proceeds as
+  a comparison of the two files' root groups.  That is, h5diff first compares
+  the names of root group members, generates a report of root group objects
+  that appear in only one file or in both files, and recursively compares
+  common objects.
 
- The compare criteria is:
-  1) datasets: numerical array differences
-  2) groups: name string difference
-  3) datatypes: the return value of H5Tequal
-  4) links: name string difference of the linked value as default
-            (refer to --follow-symlinks option).
+ Object comparison:
+  1) Groups 
+      First compares the names of member objects (relative path, from the
+      specified group) and generates a report of objects that appear in only
+      one group or in both groups. Common objects are then compared recursively.
+  2) Datasets 
+      Array rank and dimensions, datatypes, and data values are compared.
+  3) Datatypes 
+      The comparison is based on the return value of H5Tequal.
+  4) Symbolic links 
+      The paths to the target objects are compared.
+      (The option --follow-symlinks overrides the default behavior when
+       symbolic links are compared.).
 
  Exit code:
   0 if no differences, 1 if differences found, 2 if error

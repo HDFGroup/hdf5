@@ -351,7 +351,7 @@ check_d_input( const char *str )
 
 void usage(void)
 {
- printf("usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]] \n");
+ printf("usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]] \n");
  printf("  file1                    File name of the first HDF5 file\n");
  printf("  file2                    File name of the second HDF5 file\n");
  printf("  [obj1]                   Name of an HDF5 object, in absolute path\n");
@@ -425,18 +425,29 @@ void usage(void)
 
  printf("\n");
 
- printf(" Compare criteria\n");
- printf("  If no objects [obj1[obj2]] are specified, h5diff only compares objects\n");
- printf("  with the same absolute path in both files\n");
+ printf(" File comparison:\n");
+ printf("  If no objects [obj1[ obj2]] are specified, the h5diff comparison proceeds as\n");
+ printf("  a comparison of the two files' root groups.  That is, h5diff first compares\n");
+ printf("  the names of root group members, generates a report of root group objects\n");
+ printf("  that appear in only one file or in both files, and recursively compares\n");
+ printf("  common objects.\n");
  printf("\n");
 
- printf(" The compare criteria is:\n");
- printf("  1) datasets: numerical array differences\n");
- printf("  2) groups: name string difference\n");
- printf("  3) datatypes: the return value of H5Tequal\n");
- printf("  4) links: name string difference of the linked value as default\n");
- printf("            (refer to --follow-symlinks option).\n");
+ printf(" Object comparison:\n");
+ printf("  1) Groups \n");
+ printf("      First compares the names of member objects (relative path, from the\n");
+ printf("      specified group) and generates a report of objects that appear in only\n");
+ printf("      one group or in both groups. Common objects are then compared recursively.\n");
+ printf("  2) Datasets \n");
+ printf("      Array rank and dimensions, datatypes, and data values are compared.\n");
+ printf("  3) Datatypes \n");
+ printf("      The comparison is based on the return value of H5Tequal.\n");
+ printf("  4) Symbolic links \n");
+ printf("      The paths to the target objects are compared.\n");
+ printf("      (The option --follow-symlinks overrides the default behavior when\n");
+ printf("       symbolic links are compared.).\n");
  printf("\n");
+
  printf(" Exit code:\n");
  printf("  0 if no differences, 1 if differences found, 2 if error\n");
  printf("\n");
