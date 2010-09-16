@@ -1028,20 +1028,19 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     ret_value = attr_dst;
 
 done:
-    if(buf_sid > 0)
-        if(H5I_dec_ref(buf_sid, FALSE, FALSE) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary dataspace ID")
+    if(buf_sid > 0 && H5I_dec_ref(buf_sid) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary dataspace ID")
     if(tid_src > 0)
         /* Don't decrement ID, we want to keep underlying datatype */
-        if(H5I_remove(tid_src) == NULL)
+        if(NULL == H5I_remove(tid_src))
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
     if(tid_dst > 0)
         /* Don't decrement ID, we want to keep underlying datatype */
-        if(H5I_remove(tid_dst) == NULL)
+        if(NULL == H5I_remove(tid_dst))
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
     if(tid_mem > 0)
         /* Decrement the memory datatype ID, it's transient */
-        if(H5I_dec_ref(tid_mem, FALSE, FALSE) < 0)
+        if(H5I_dec_ref(tid_mem) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
     if(buf)
         buf = H5FL_BLK_FREE(attr_buf, buf);

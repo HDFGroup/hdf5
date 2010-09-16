@@ -820,18 +820,14 @@ done:
     fm->file_space = NULL;
     fm->mem_space = NULL;
 
-    if(iter_init) {
-        if(H5S_SELECT_ITER_RELEASE(&(fm->mem_iter)) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
-    } /* end if */
-    if(f_tid!=(-1)) {
-        if(H5I_dec_ref(f_tid, FALSE, FALSE) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
-    } /* end if */
+    if(iter_init && H5S_SELECT_ITER_RELEASE(&(fm->mem_iter)) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+    if(f_tid != (-1) && H5I_dec_ref(f_tid) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(file_space_normalized) {
         /* (Casting away const OK -QAK) */
         if(H5S_hyper_denormalize_offset((H5S_t *)file_space, old_offset) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+            HDONE_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2516,7 +2512,6 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     /* Free */
     ent = H5FL_FREE(H5D_rdcc_ent_t, ent);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_cache_evict() */
 
@@ -4628,17 +4623,14 @@ H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
     bkg = udata.bkg;
 
 done:
-    if(sid_buf > 0 && H5I_dec_ref(sid_buf, FALSE, FALSE) < 0)
+    if(sid_buf > 0 && H5I_dec_ref(sid_buf) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't decrement temporary dataspace ID")
-    if(tid_src > 0)
-        if(H5I_dec_ref(tid_src, FALSE, FALSE) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
-    if(tid_dst > 0)
-        if(H5I_dec_ref(tid_dst, FALSE, FALSE) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
-    if(tid_mem > 0)
-        if(H5I_dec_ref(tid_mem, FALSE, FALSE) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+    if(tid_src > 0 && H5I_dec_ref(tid_src) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+    if(tid_dst > 0 && H5I_dec_ref(tid_dst) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+    if(tid_mem > 0 && H5I_dec_ref(tid_mem) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(buf)
         H5MM_xfree(buf);
     if(bkg)

@@ -270,22 +270,20 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     /* We have a copy of the location and we're holding the file open.
      * Close the open ID the user passed back.
      */
-    if(H5I_dec_ref(cb_return, FALSE, FALSE) < 0)
+    if(H5I_dec_ref(cb_return) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
     cb_return = (-1);
 
 done:
     /* Close location given to callback. */
-    if(cur_grp > 0)
-        if(H5I_dec_ref(cur_grp, FALSE, FALSE) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close atom for current location")
+    if(cur_grp > 0 && H5I_dec_ref(cur_grp) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close atom for current location")
 
-    if(ret_value < 0 && cb_return > 0)
-        if(H5I_dec_ref(cb_return, FALSE, FALSE) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
+    if(ret_value < 0 && cb_return > 0 && H5I_dec_ref(cb_return) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
 
     /* Close the LAPL, if we copied one */
-    if(lapl_id > 0 && H5I_dec_ref(lapl_id, FALSE, FALSE) < 0)
+    if(lapl_id > 0 && H5I_dec_ref(lapl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close copied link access property list")
 
     FUNC_LEAVE_NOAPI(ret_value)

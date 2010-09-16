@@ -560,8 +560,8 @@ H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
 done:
     if(ret_value == NULL)
         if(new_dset != NULL) {
-            if(new_dset->dcpl_id != 0)
-                (void)H5I_dec_ref(new_dset->dcpl_id, FALSE, FALSE);
+            if(new_dset->dcpl_id != 0 && H5I_dec_ref(new_dset->dcpl_id) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement temporary datatype ID")
             new_dset = H5FL_FREE(H5D_shared_t, new_dset);
         } /* end if */
 
@@ -1060,10 +1060,8 @@ done:
             } /* end if */
             if(new_dset->shared->space && H5S_close(new_dset->shared->space) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace")
-            if(new_dset->shared->type) {
-                if(H5I_dec_ref(new_dset->shared->type_id, FALSE, FALSE) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
-            } /* end if */
+            if(new_dset->shared->type && H5I_dec_ref(new_dset->shared->type_id) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
             if(H5F_addr_defined(new_dset->oloc.addr)) {
                 if(H5O_close(&(new_dset->oloc)) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release object header")
@@ -1072,7 +1070,7 @@ done:
                         HDONE_ERROR(H5E_DATASET, H5E_CANTDELETE, NULL, "unable to delete object header")
                 } /* end if */
             } /* end if */
-            if(new_dset->shared->dcpl_id != 0 && H5I_dec_ref(new_dset->shared->dcpl_id, FALSE, FALSE) < 0)
+            if(new_dset->shared->dcpl_id != 0 && H5I_dec_ref(new_dset->shared->dcpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
             new_dset->shared = H5FL_FREE(H5D_shared_t, new_dset->shared);
         } /* end if */
@@ -1319,7 +1317,7 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
             if(dataset->shared->type) {
                 if(dataset->shared->type_id > 0) {
-                    if(H5I_dec_ref(dataset->shared->type_id, FALSE, FALSE) < 0)
+                    if(H5I_dec_ref(dataset->shared->type_id) < 0)
                         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
                 } /* end if */
                 else {
@@ -1427,8 +1425,8 @@ H5D_close(H5D_t *dataset)
         * Release datatype, dataspace and creation property list -- there isn't
         * much we can do if one of these fails, so we just continue.
         */
-        free_failed = (unsigned)(H5I_dec_ref(dataset->shared->type_id, FALSE, FALSE) < 0 || H5S_close(dataset->shared->space) < 0 ||
-                          H5I_dec_ref(dataset->shared->dcpl_id, FALSE, FALSE) < 0);
+        free_failed = (unsigned)(H5I_dec_ref(dataset->shared->type_id) < 0 || H5S_close(dataset->shared->space) < 0 ||
+                          H5I_dec_ref(dataset->shared->dcpl_id) < 0);
 
         /* Remove the dataset from the list of opened objects in the file */
         if(H5FO_top_decr(dataset->oloc.file, dataset->oloc.addr) < 0)
