@@ -50,6 +50,10 @@ set srclnkfile1=h5diff_danglelinks1.h5
 set srclnkfile2=h5diff_danglelinks2.h5
 set src_grp_recurse1=h5diff_grp_recurse1.h5
 set src_grp_recurse2=h5diff_grp_recurse2.h5
+set srcexclude1_1=h5diff_exclude1-1.h5
+set srcexclude1_2=h5diff_exclude1-2.h5
+set srcexclude2_1=h5diff_exclude2-1.h5
+set srcexclude2_2=h5diff_exclude2-2.h5
 
 set file1=%indir%\h5diff_basic1.h5
 set file2=%indir%\h5diff_basic2.h5
@@ -73,6 +77,10 @@ set lnkfile1=%indir%\h5diff_danglelinks1.h5
 set lnkfile2=%indir%\h5diff_danglelinks2.h5
 set grp_recurse1=%indir%\h5diff_grp_recurse1.h5
 set grp_recurse2=%indir%\h5diff_grp_recurse2.h5
+set exclude1_1=%indir%\h5diff_exclude1-1.h5
+set exclude1_2=%indir%\h5diff_exclude1-2.h5
+set exclude2_1=%indir%\h5diff_exclude2-1.h5
+set exclude2_2=%indir%\h5diff_exclude2-2.h5
 
 
 rem The tool name
@@ -785,6 +793,33 @@ rem ############################################################################
 
     call :testing %h5diff% -v --follow-symlinks %src_grp_recurse1% %src_grp_recurse2% /slink_grp10 /slink_grp11
 	call :tooltest h5diff_514.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% /slink_grp10 /slink_grp11
+
+
+    rem ##############################################################################
+    rem # Exclude objects (--exclude-object)
+    rem ##############################################################################
+    rem #-------------------------------------------------
+    rem # Same structure, same names and different value.
+
+    rem Exclude the object with different value. Expect return - same
+    call :testing %h5diff% -v --exclude-object /group1/dset3 %srcexclude1_1% %srcexclude1_2%
+    call :tooltest h5diff_480.txt -v --exclude-object /group1/dset3 %exclude1_1% %exclude1_2%
+
+    rem Verify different by not excluding. Expect return - diff
+    call :testing %h5diff% -v %srcexclude1_1% %srcexclude1_2%
+    call :tooltest h5diff_481.txt -v %exclude1_1% %exclude1_2%
+
+    rem #----------------------------------------
+    rem # Different structure, different names. 
+
+    rem Exclude all the different objects. Expect return - same
+    call :testing %h5diff% -v --exclude-object "/group1" --exclude-object "/dset1" %srcexclude2_1% %srcexclude2_2%
+    call :tooltest h5diff_482.txt -v --exclude-object "/group1" --exclude-object "/dset1" %exclude2_1% %exclude2_2%
+
+    rem Exclude only some different objects. Expect return - diff
+    call :testing %h5diff% -v --exclude-object "/group1" %srcexclude2_1% %srcexclude2_2%
+    call :tooltest h5diff_483.txt -v --exclude-object "/group1" %exclude2_1% %exclude2_2%
+
 	
     rem #######################################################################
     rem # END

@@ -56,6 +56,12 @@ DANGLE_LINK_FILE1=h5diff_danglelinks1.h5
 DANGLE_LINK_FILE2=h5diff_danglelinks2.h5
 GRP_RECURSE_FILE1=h5diff_grp_recurse1.h5
 GRP_RECURSE_FILE2=h5diff_grp_recurse2.h5
+# same structure, same obj name with different value
+EXCLUDE_FILE1_1=h5diff_exclude1-1.h5
+EXCLUDE_FILE1_2=h5diff_exclude1-2.h5
+# different structure and obj names
+EXCLUDE_FILE2_1=h5diff_exclude2-1.h5
+EXCLUDE_FILE2_2=h5diff_exclude2-2.h5
 
 TESTNAME=h5diff
 EXIT_SUCCESS=0
@@ -726,6 +732,25 @@ TOOLTEST h5diff_512.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FIL
 # circled soft2ext-link vs soft2ext-link
 TOOLTEST h5diff_513.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /slink_grp10 /slink_grp11
 TOOLTEST h5diff_514.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /slink_grp10 /slink_grp11
+
+# ##############################################################################
+# # Exclude objects (--exclude-path)
+# ##############################################################################
+#
+# Same structure, same names and different value.
+#
+# Exclude the object with different value. Expect return - same
+TOOLTEST h5diff_480.txt -v --exclude-path /group1/dset3 $EXCLUDE_FILE1_1 $EXCLUDE_FILE1_2
+# Verify different by not excluding. Expect return - diff
+TOOLTEST h5diff_481.txt -v $EXCLUDE_FILE1_1 $EXCLUDE_FILE1_2
+
+#
+# Different structure, different names. 
+#
+# Exclude all the different objects. Expect return - same
+TOOLTEST h5diff_482.txt -v --exclude-path "/group1" --exclude-path "/dset1" $EXCLUDE_FILE2_1 $EXCLUDE_FILE2_2
+# Exclude only some different objects. Expect return - diff
+TOOLTEST h5diff_483.txt -v --exclude-path "/group1" $EXCLUDE_FILE2_1 $EXCLUDE_FILE2_2
 
 
 

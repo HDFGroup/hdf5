@@ -224,6 +224,99 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+ * Function: is_exclude_path
+ *
+ * Purpose: check if 'paths' are part of exclude path list
+ *
+ * Return:  
+ *   1 - excluded path
+ *   0 - not excluded path
+ * 
+ * Programmer: Jonathan Kim
+ * Date: Aug 23, 2010
+ *------------------------------------------------------------------------*/
+static int is_exclude_path (trav_path_t * paths, diff_opt_t *options)
+{
+    struct exclude_path_list * exclude_path_ptr;
+    int ret_cmp;
+    int ret = 0;
+    int len_grp;
+
+    /* check if exclude path option is given */
+    if (!options->exclude_path)
+        goto out;
+
+    /* assign to local exclude list pointer */
+    exclude_path_ptr = options->exclude;
+
+    /* search objects in exclude list */
+    while (NULL != exclude_path_ptr)
+    {
+        /* if given object is group, exclude its members as well */
+        if (exclude_path_ptr->obj_type == H5TRAV_TYPE_GROUP)
+        {
+            ret_cmp = HDstrncmp(exclude_path_ptr->obj_path, paths->path,
+                                strlen(exclude_path_ptr->obj_path));
+            if (ret_cmp == 0)
+            {
+                /* check if given path belong to an excluding group, if so 
+                 * exclude it as well.
+                 * This verifies if “/grp1/dset1” is only under “/grp1”, but
+                 * not under “/grp1xxx/” group.  
+                 */ 
+                len_grp = HDstrlen(exclude_path_ptr->obj_path);
+                if (paths->path[len_grp] == '/')
+                {
+                    /* belong to excluded group! */
+                    ret = 1;
+                    break;  /* while */
+                }
+            }
+        }
+        /* exclude target is not group, just exclude the object */
+        else  
+        {
+            ret_cmp = HDstrcmp(exclude_path_ptr->obj_path, paths->path);
+            if (ret_cmp == 0)
+            {
+                /* excluded non-group object */
+                ret = 1;
+                /* assign type as scan progress, which is sufficient to 
+                 * determine type for excluding groups from the above if. */
+                exclude_path_ptr->obj_type = paths->type;
+                break; /* while */
+            }
+        }
+        exclude_path_ptr = exclude_path_ptr->next;
+    }
+
+out:
+    return  ret;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: free_exclude_path_list
+ *
+ * Purpose: free exclud object list from diff options
+ *
+ * Programmer: Jonathan Kim
+ * Date: Aug 23, 2010
+ *------------------------------------------------------------------------*/
+static void free_exclude_path_list(diff_opt_t *options)
+{
+    struct exclude_path_list * curr = options->exclude;
+    struct exclude_path_list * next;
+
+    while (NULL != curr)
+    {
+        next = curr->next;
+        HDfree(curr);
+        curr = next;
+    }
+}
+
+/*-------------------------------------------------------------------------
  * Function: build_match_list
  *
  * Purpose: get list of matching path_name from info1 and info2
@@ -283,25 +376,33 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
         cmp = HDstrcmp(path1_lp, path2_lp);
 
         if(cmp == 0) {
-            infile[0] = 1;
-            infile[1] = 1;
-            trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
-
+            if(!is_exclude_path(&(info1->paths[curr1]), options))
+            {
+                infile[0] = 1;
+                infile[1] = 1;
+                trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
+            }
             curr1++;
             curr2++;
         } /* end if */
         else if(cmp < 0)
         {
-            infile[0] = 1;
-            infile[1] = 0;
-            trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
+            if(!is_exclude_path(&(info1->paths[curr1]), options))
+            {
+                infile[0] = 1;
+                infile[1] = 0;
+                trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
+            }
             curr1++;
         } /* end else-if */
         else
         {
-            infile[0] = 0;
-            infile[1] = 1;
-            trav_table_addflags(infile, path2_lp, info2->paths[curr2].type, table);
+            if (!is_exclude_path(&(info2->paths[curr2]), options))
+            {
+                infile[0] = 0;
+                infile[1] = 1;
+                trav_table_addflags(infile, path2_lp, info2->paths[curr2].type, table);
+            }
             curr2++;
         } /* end else */
     } /* end while */
@@ -311,8 +412,11 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
     infile[1] = 0;
     while(curr1 < info1->nused)
     {
-        path1_lp = (info1->paths[curr1].path) + path1_offset;
-        trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
+        if(!is_exclude_path(&(info1->paths[curr1]), options))
+        {
+            path1_lp = (info1->paths[curr1].path) + path1_offset;
+            trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
+        }
         curr1++;
     } /* end while */
 
@@ -321,11 +425,15 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
     infile[1] = 1;
     while(curr2 < info2->nused)
     {
-        path2_lp = (info2->paths[curr2].path) + path2_offset;
-        trav_table_addflags(infile, path2_lp, info2->paths[curr2].type, table);
+        if (!is_exclude_path(&(info2->paths[curr2]), options))
+        {
+            path2_lp = (info2->paths[curr2].path) + path2_offset;
+            trav_table_addflags(infile, path2_lp, info2->paths[curr2].type, table);
+        } 
         curr2++;
     } /* end while */
 
+    free_exclude_path_list (options);
    /*------------------------------------------------------
     * print the list
     */
@@ -968,10 +1076,14 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
     *-------------------------------------------------------------------------
     */     
        
-    /* number of different objects */
-    if ( info1->nused != info2->nused )
+    /* not valid compare nused when --exclude-path option is used */
+    if (!options->exclude_path)
     {
-        options->contents = 0;
+        /* number of different objects */
+        if ( info1->nused != info2->nused )
+        {
+            options->contents = 0;
+        }
     }
     
     /* objects in one file and not the other */
@@ -980,6 +1092,7 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
         if( table->objs[i].flags[0] != table->objs[i].flags[1] )
         {
             options->contents = 0;
+            break;
         }
     }
 

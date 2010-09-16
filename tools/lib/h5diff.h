@@ -25,6 +25,12 @@
  * command line options
  *-------------------------------------------------------------------------
  */
+/* linked list to keep exclude path list */
+struct exclude_path_list {
+    char  *obj_path;
+    h5trav_type_t obj_type;
+    struct exclude_path_list * next;
+};
 
 typedef struct {
     int      m_quiet;               /* quiet mide: no output at all */
@@ -45,6 +51,8 @@ typedef struct {
     int      contents;              /* equal contents */
     int      do_nans;               /* consider Nans while diffing floats */
     int      m_list_not_cmp;        /* list not comparable messages */
+    int      exclude_path;          /* exclude path to an object */
+    struct   exclude_path_list * exclude; /* keep exclude path list */
 } diff_opt_t;
 
 
