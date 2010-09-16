@@ -892,11 +892,11 @@ H5E_clear_entries(H5E_t *estack, size_t nentries)
 
         /* Decrement the IDs to indicate that they are no longer used by this stack */
         /* (In reverse order that they were incremented, so that reference counts work well) */
-        if(H5I_dec_ref(error->min_num, FALSE, FALSE) < 0)
+        if(H5I_dec_ref(error->min_num) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message")
-        if(H5I_dec_ref(error->maj_num, FALSE, FALSE) < 0)
+        if(H5I_dec_ref(error->maj_num) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message")
-        if(H5I_dec_ref(error->cls_id, FALSE, FALSE) < 0)
+        if(H5I_dec_ref(error->cls_id) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error class")
 
         /* Release strings */
