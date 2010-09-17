@@ -129,6 +129,7 @@ IF (BUILD_TESTING)
       h5diff_58.txt
       h5diff_500.txt
       h5diff_501.txt
+      h5diff_502.txt
       h5diff_503.txt
       h5diff_504.txt
       h5diff_505.txt
@@ -137,9 +138,14 @@ IF (BUILD_TESTING)
       h5diff_508.txt
       h5diff_509.txt
       h5diff_510.txt
+      h5diff_511.txt
       h5diff_512.txt
       h5diff_513.txt
       h5diff_514.txt
+      h5diff_515.txt
+      h5diff_516.txt
+      h5diff_517.txt
+      h5diff_518.txt
       h5diff_600.txt
       h5diff_601.txt
       h5diff_603.txt
@@ -206,7 +212,7 @@ IF (BUILD_TESTING)
 
   FOREACH (txt_file ${HDF5_REFERENCE_FILES})
     SET (txtdest "${PROJECT_BINARY_DIR}/${txt_file}")
-    #MESSAGE (STATUS " Translating ${txt_file}")
+    #MESSAGE (STATUS " Copying ${txt_file}")
     ADD_CUSTOM_COMMAND (
         TARGET     h5diff
         POST_BUILD
@@ -395,7 +401,7 @@ ADD_H5_TEST (h5diff_24 0 -v ${FILE3} ${FILE3} t1 t1)
 ADD_H5_TEST (h5diff_25 0 -v ${FILE3} ${FILE3} l1 l1) 
 
 # 2.6
-ADD_H5_TEST (h5diff_26 1 -v ${FILE3} ${FILE3} g1 g2)
+ADD_H5_TEST (h5diff_26 0 -v ${FILE3} ${FILE3} g1 g2)
 
 # 2.7
 ADD_H5_TEST (h5diff_27 1 -v ${FILE3} ${FILE3} t1 t2)
@@ -642,7 +648,7 @@ ADD_H5_TEST (h5diff_414 1 --follow-symlinks -v ${FILE14} ${FILE14} /target_group
 ADD_H5_TEST (h5diff_415 1 --follow-symlinks -v ${FILE14} ${FILE14} /softlink3_to_slink2 /target_group)
 
 # linked_softlink_to_group1 vs linked_softlink_to_group2"
-ADD_H5_TEST (h5diff_416 1 --follow-symlinks -v ${FILE14} ${FILE14} /softlink3_to_slink2 /softlink4_to_slink2)
+ADD_H5_TEST (h5diff_416 0 --follow-symlinks -v ${FILE14} ${FILE14} /softlink3_to_slink2 /softlink4_to_slink2)
 
 # non-exist-softlink vs softlink"
 ADD_H5_TEST (h5diff_417 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_noexist /softlink_dset2)
@@ -709,37 +715,37 @@ ADD_H5_TEST (h5diff_459 2  --follow-symlinks -v --no-dangling-links  ${FILE15} $
 # # test for group diff recursivly
 # ##############################################################################
 # root 
-ADD_H5_TEST (h5diff_500 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
-ADD_H5_TEST (h5diff_501 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
+ADD_H5_TEST (h5diff_500 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
+ADD_H5_TEST (h5diff_501 1 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
 
 # root vs group
-ADD_H5_TEST (h5diff_502 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /grp1/grp2/grp3)
+ADD_H5_TEST (h5diff_502 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /grp1/grp2/grp3)
 
 # group vs group (same name and structure)
-ADD_H5_TEST (h5diff_503 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /grp1)
+ADD_H5_TEST (h5diff_503 0 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /grp1)
 
 # group vs group (different name and structure)
-ADD_H5_TEST (h5diff_504 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1/grp2 /grp1/grp2/grp3)
+ADD_H5_TEST (h5diff_504 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1/grp2 /grp1/grp2/grp3)
 
 # groups vs soft-link
-ADD_H5_TEST (h5diff_505 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /slink_grp1)
-ADD_H5_TEST (h5diff_506 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1/grp2 /slink_grp2)
+ADD_H5_TEST (h5diff_505 0 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /slink_grp1)
+ADD_H5_TEST (h5diff_506 0 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1/grp2 /slink_grp2)
 
 # groups vs ext-link
-ADD_H5_TEST (h5diff_507 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /elink_grp1)
-ADD_H5_TEST (h5diff_508 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /elink_grp1)
+ADD_H5_TEST (h5diff_507 0 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /elink_grp1)
+ADD_H5_TEST (h5diff_508 0 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /elink_grp1)
 
 # soft-link vs ext-link
-ADD_H5_TEST (h5diff_509 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp1 /elink_grp1)
-ADD_H5_TEST (h5diff_510 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp1 /elink_grp1)
+ADD_H5_TEST (h5diff_509 0 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp1 /elink_grp1)
+ADD_H5_TEST (h5diff_510 0 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp1 /elink_grp1)
 
 # circled ext links
-ADD_H5_TEST (h5diff_511 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp10 /grp11)
-ADD_H5_TEST (h5diff_512 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp10 /grp11)
+ADD_H5_TEST (h5diff_511 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp10 /grp11)
+ADD_H5_TEST (h5diff_512 1 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp10 /grp11)
 
 # circled soft2ext-link vs soft2ext-link
-ADD_H5_TEST (h5diff_513 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
-ADD_H5_TEST (h5diff_514 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
+ADD_H5_TEST (h5diff_513 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
+ADD_H5_TEST (h5diff_514 1 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
 
 ###############################################################################
 # Test for group recursive diff via multi-linked external links 
@@ -747,11 +753,11 @@ ADD_H5_TEST (h5diff_514 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_
 # be same with the external links.
 ###############################################################################
 # file vs file
-ADD_H5_TEST (h5diff_515 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1})
-ADD_H5_TEST (h5diff_516 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1})
+ADD_H5_TEST (h5diff_515 1 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1})
+ADD_H5_TEST (h5diff_516 0 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1})
 # group vs group
-ADD_H5_TEST (h5diff_517 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
-ADD_H5_TEST (h5diff_518 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
+ADD_H5_TEST (h5diff_517 1 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
+ADD_H5_TEST (h5diff_518 0 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
 
 
 # ##############################################################################
