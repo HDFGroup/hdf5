@@ -33,7 +33,9 @@
 
 #ifdef H5_HAVE_THREADSAFE
 /* Include pthread library for threadsafe tests */
+#ifdef H5_HAVE_PTHREAD_H
 #include <pthread.h>
+#endif /* H5_HAVE_PTHREAD_H */
 
 /* Prototypes for the support routines */
 extern char*            gen_name(int);

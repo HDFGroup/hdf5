@@ -504,7 +504,8 @@ H5Gget_create_plist(hid_t group_id)
 done:
     if(ret_value < 0) {
         if(new_gcpl_id > 0)
-            (void)H5I_dec_ref(new_gcpl_id, TRUE);
+            if(H5I_dec_app_ref(new_gcpl_id) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't free")
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
@@ -714,7 +715,7 @@ H5Gclose(hid_t group_id)
      * Decrement the counter on the group atom.	 It will be freed if the count
      * reaches zero.
      */
-    if(H5I_dec_ref(group_id, TRUE) < 0)
+    if(H5I_dec_app_ref(group_id) < 0)
     	HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
 
 done:
@@ -1536,7 +1537,7 @@ H5G_iterate(hid_t loc_id, const char *group_name,
 done:
     /* Release the group opened */
     if(gid > 0) {
-        if(H5I_dec_ref(gid, TRUE) < 0)
+        if(H5I_dec_app_ref(gid) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
     } /* end if */
     else if(grp && H5G_close(grp) < 0)
@@ -1869,7 +1870,7 @@ done:
 
     /* Release the group opened */
     if(gid > 0) {
-        if(H5I_dec_ref(gid, TRUE) < 0)
+        if(H5I_dec_app_ref(gid) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
     } /* end if */
     else if(grp && H5G_close(grp) < 0)

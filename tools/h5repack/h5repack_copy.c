@@ -687,14 +687,11 @@ int do_copy_objects(hid_t fidin,
 
             /* check if filters were requested for individual objects */
             for (u = 0; u < options->op_tbl->nelems; u++) {
-                int k;
 
                 if (strcmp(travt->objs[i].name, options->op_tbl->objs[u].path) == 0) {
-                    for (k = 0; k < options->op_tbl->objs[u].nfilters; k++) {
                         if (options->op_tbl->objs[u].filter->filtn > 0) {
                             req_filter = 1;
                         }
-                    }
                 }
             }
 
@@ -789,9 +786,15 @@ int do_copy_objects(hid_t fidin,
                         /* get the storage size of the input dataset */
                         dsize_in=H5Dget_storage_size(dset_in);
 
-                        /* check for datasets too small */
-                        if (nelmts*msize < options->min_comp )
-                            apply_s=0;
+                        /* check for small size datasets (less than 1k) except 
+                         * changing to COMPACT. For the reference, COMPACT is limited
+                         * by size 64K by library.
+                         */
+                        if (options->layout_g != H5D_COMPACT)
+                        {
+                            if ( nelmts*msize < options->min_comp )
+                                apply_s=0;
+                        }
 
                         /* apply the filter */
                         if (apply_s)

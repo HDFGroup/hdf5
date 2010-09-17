@@ -38,7 +38,8 @@ extern FILE *	overflow_file;
 
 struct diff_args
 {
-    char	name[256];
+    char	name1[256];
+    char	name2[256];
     h5trav_type_t   type;
     diff_opt_t	options;
 };

@@ -944,10 +944,10 @@ static herr_t
 test_layout_extend(hid_t fapl)
 {
     char filename[FILENAME_BUF_SIZE];	/* File name */
-    hid_t fid; 				/* File id */
-    hid_t sid_fix, sid_unlim; 		/* Dataspace id */
-    hid_t dcpl_compact, dcpl_contig, dcpl_chunked;	/* Dataset creation property list id */
-    hid_t did_fixed, did_unlim;		/* Dataset id */
+    hid_t fid = -1; 				/* File id */
+    hid_t sid_fix = -1, sid_unlim = -1; 	/* Dataspace id */
+    hid_t dcpl_compact = -1, dcpl_contig = -1, dcpl_chunked = -1; /* Dataset creation property list id */
+    hid_t did_fixed = -1, did_unlim = -1;	/* Dataset id */
     hsize_t cur_size[1] = {10};		/* Current size of dataspace */
     hsize_t max_unlim[1] = {H5S_UNLIMITED};		/* Maximum size of dataspace (unlimited) */
     hsize_t max_fix[1] = {100};				/* Maximum size of dataspace (fixed) */
@@ -6336,7 +6336,7 @@ error:
 static herr_t
 test_zero_dims(hid_t file)
 {
-    hid_t       s=-1, d=-1, dcpl=-1;
+    hid_t       s = -1, d = -1, dcpl = -1;
     hid_t       s2 = -1, d2 = -1, dcpl2 = -1;
     hsize_t     dsize = 0, dmax = H5S_UNLIMITED, csize = 5;
     hsize_t     dsize2[2] = {0, 0};
@@ -6748,7 +6748,7 @@ test_random_chunks(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR;
 
     /* Open file again */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR;
 
     /* Open dataset */
     if((d = H5Dopen2(file, dname, H5P_DEFAULT)) < 0) TEST_ERROR;
@@ -6850,7 +6850,7 @@ test_random_chunks(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR;
 
     /* Open file again */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR;
 
     /* Open dataset */
     if((d = H5Dopen2(file, dname, H5P_DEFAULT)) < 0) TEST_ERROR;

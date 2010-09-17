@@ -38,63 +38,33 @@ SET (examples
 FOREACH (example ${examples})
   ADD_EXECUTABLE (f90_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
   H5_NAMING (f90_ex_${example})
+  TARGET_FORTRAN_WIN_PROPERTIES (f90_ex_${example})
   IF (WIN32)
-    IF (BUILD_SHARED_LIBS)
-      IF (MSVC)
-        SET_TARGET_PROPERTIES (f90_ex_${example}
-            PROPERTIES
-                COMPILE_FLAGS "/dll"
-                LINK_FLAGS "/SUBSYSTEM:CONSOLE"
-        ) 
-      ENDIF (MSVC)
-    ELSE (BUILD_SHARED_LIBS)
-      IF (MSVC)
-        SET_TARGET_PROPERTIES (f90_ex_${example}
-            PROPERTIES
-                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
-        ) 
-      ENDIF (MSVC)
-    ENDIF (BUILD_SHARED_LIBS)
     SET_PROPERTY (TARGET f90_ex_${example} 
         APPEND PROPERTY COMPILE_DEFINITIONS 
   	      HDF5F90_WINDOWS
     )
-    SET_TARGET_PROPERTIES (f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
   ENDIF (WIN32)
   TARGET_LINK_LIBRARIES (f90_ex_${example}
       ${HDF5_F90_LIB_TARGET}
       ${HDF5_LIB_TARGET}
   )
+  SET_TARGET_PROPERTIES (f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
 ENDFOREACH (example ${examples})
 
 IF (H5_HAVE_PARALLEL)
   ADD_EXECUTABLE (f90_ex_ph5example ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
   H5_NAMING (f90_ex_ph5example)
+  TARGET_FORTRAN_WIN_PROPERTIES (f90_ex_ph5example)
   IF (WIN32)
-    IF (BUILD_SHARED_LIBS)
-      IF (MSVC)
-        SET_TARGET_PROPERTIES (f90_ex_ph5example
-            PROPERTIES
-                COMPILE_FLAGS "/dll"
-                LINK_FLAGS "/SUBSYSTEM:CONSOLE"
-        ) 
-      ENDIF (MSVC)
-    ELSE (BUILD_SHARED_LIBS)
-      IF (MSVC)
-        SET_TARGET_PROPERTIES (f90_ex_ph5example
-            PROPERTIES
-                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
-        ) 
-      ENDIF (MSVC)
-    ENDIF (BUILD_SHARED_LIBS)
     SET_PROPERTY (TARGET f90_ex_ph5example 
         APPEND PROPERTY COMPILE_DEFINITIONS 
           HDF5F90_WINDOWS
     )
-    SET_TARGET_PROPERTIES (f90_ex_ph5example PROPERTIES LINKER_LANGUAGE Fortran)
   ENDIF (WIN32)
   TARGET_LINK_LIBRARIES (f90_ex_ph5example
       ${HDF5_F90_LIB_TARGET}
       ${HDF5_LIB_TARGET}
   )
+  SET_TARGET_PROPERTIES (f90_ex_ph5example PROPERTIES LINKER_LANGUAGE Fortran)
 ENDIF (H5_HAVE_PARALLEL)

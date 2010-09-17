@@ -76,6 +76,9 @@
 #define FNAME17     "h5repack_named_dtypes.h5"
 #define FNAME17OUT  "h5repack_named_dtypes_out.h5"
 
+#define FNAME18     "h5repack_layout2.h5"
+#define FNAME18OUT  "h5repack_layout2_out.h5"
+
 #define FNAME_UB   "ublock.bin"
 
 /* obj and region references */
@@ -120,6 +123,7 @@ static int make_attributes(hid_t loc_id);
 static int make_hlinks(hid_t loc_id);
 static int make_early(void);
 static int make_layout(hid_t loc_id);
+static int make_layout2(hid_t loc_id);
 #ifdef H5_HAVE_FILTER_SZIP
 static int make_szip(hid_t loc_id);
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -1692,6 +1696,19 @@ int make_testfiles(void)
         return -1;
 
     /*-------------------------------------------------------------------------
+    * create a file for layout conversion test
+    *-------------------------------------------------------------------------
+    */
+    if((fid = H5Fcreate(FNAME18, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        return -1;
+
+    if(make_layout2(fid) < 0)
+        goto out;
+
+    if(H5Fclose(fid) < 0)
+        return -1;
+
+    /*-------------------------------------------------------------------------
     * create a file for the H5D_ALLOC_TIME_EARLY test
     *-------------------------------------------------------------------------
     */
@@ -2981,6 +2998,78 @@ out:
     } H5E_END_TRY;
     return -1;
 }
+
+/*-------------------------------------------------------------------------
+ * Function: make_layout2
+ *
+ * Purpose: create datasets with contiguous and chunked layouts:
+ *
+ *	contig_small: < 1k, fixed dims datspace
+ *	chunked_small_fixed: < 1k, fixed dims dataspace
+ *
+ *-------------------------------------------------------------------------
+ */
+#define S_DIM1	4
+#define S_DIM2	10
+#define CONTIG_S	"contig_small"
+#define CHUNKED_S_FIX	"chunked_small_fixed"
+
+static
+int make_layout2(hid_t loc_id)
+{
+
+    hid_t    contig_dcpl = -1; 	/* dataset creation property list */
+    hid_t    chunked_dcpl = -1; /* dataset creation property list */
+
+    int      i, j, n;		/* Local index variables */
+    int	     ret_value = -1;	/* Return value */
+    hid_t    s_sid = -1;	/* dataspace ID */
+
+    hsize_t  s_dims[RANK] = {S_DIM1,S_DIM2};	/* Dataspace (< 1 k) */
+    hsize_t  chunk_dims[RANK] = {S_DIM1/2, S_DIM2/2};	/* Dimension sizes for chunks */
+
+    int      s_buf[S_DIM1][S_DIM2];	/* Temporary buffer */
+
+    for(i = n = 0; i < S_DIM1; i++) {
+        for (j = 0; j < S_DIM2; j++) {
+            s_buf[i][j] = n++;
+        }
+    }
+
+    /* Create dataspaces */
+    if((s_sid = H5Screate_simple(RANK, s_dims, NULL)) < 0)
+        goto out;
+
+    /* Create contiguous datasets */
+    if((contig_dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto out;
+    if(H5Pset_layout(contig_dcpl, H5D_CONTIGUOUS) < 0)
+        goto out;
+    if(make_dset(loc_id, CONTIG_S, s_sid, contig_dcpl, s_buf) < 0)
+        goto out;
+
+    /* Create chunked datasets */
+    if((chunked_dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto out;
+    if(H5Pset_chunk(chunked_dcpl, RANK, chunk_dims) < 0)
+        goto out;
+    if(make_dset(loc_id, CHUNKED_S_FIX, s_sid, chunked_dcpl, s_buf) < 0)
+        goto out;
+
+    ret_value = 0;
+
+out:
+    H5E_BEGIN_TRY {
+        H5Pclose(contig_dcpl);
+        H5Pclose(chunked_dcpl);
+    
+        H5Sclose(s_sid);
+
+    } H5E_END_TRY;
+
+    return(ret_value);
+
+} /* make_layout2() */
 
 /*-------------------------------------------------------------------------
 * Function: make a file with an integer dataset with a fill value

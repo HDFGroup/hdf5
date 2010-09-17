@@ -294,17 +294,17 @@ COPY_OBJECTS()
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /grp_dsets/simple  -d /grp_dsets/simple_group
 
     echo "Test copying & renaming group"
-    TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d grp_rename
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d grp_rename
 
     echo "Test copying 'full' group hierarchy into group in destination file"
-    TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d /grp_rename/grp_dsets
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d /grp_rename/grp_dsets
 
     echo "Test copying objects into group hier. that doesn't exist yet in destination file"
     TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s simple    -d /A/B1/simple
     TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s simple    -d /A/B2/simple2
     TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets/simple    -d /C/D/simple
-    TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets -d /E/F/grp_dsets
-    TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_nested -d /G/H/grp_nested
+    TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets -d /E/F/grp_dsets
+    TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s /grp_nested -d /G/H/grp_nested
 
     # Verify that the file created above is correct
     H5LSTEST $FILEOUT

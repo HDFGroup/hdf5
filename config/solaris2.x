@@ -32,7 +32,9 @@ fi
 # Try solaris native compiler flags
 if test "X-" = "X-$cc_flags_set"; then
   H5_CFLAGS="$H5_CFLAGS -erroff=%none -DBSD_COMP"
-  DEBUG_CFLAGS="-g -xildoff"
+  # -g produces rather slow code. "-g -O" produces much faster code with some
+  # loss of debugger functions such as not able to print local variables.
+  DEBUG_CFLAGS="-g -O"
   DEBUG_CPPFLAGS=
   PROD_CFLAGS="-O -s"
   PROD_CPPFLAGS=
@@ -68,7 +70,9 @@ if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
   H5_FCFLAGS="$H5_FCFLAGS"
-  DEBUG_FCFLAGS="-g"
+  # -g produces rather slow code. "-g -O" produces much faster code with some
+  # loss of debugger functions such as not able to print local variables.
+  DEBUG_FCFLAGS="-g -O"
   PROD_FCFLAGS="-O2"
   PROFILE_FCFLAGS=""
   f9x_flags_set=yes
@@ -103,7 +107,9 @@ fi
 if test -z "$cxx_flags_set"; then
   H5_CXXFLAGS="$H5_CXXFLAGS -instances=static"
   H5_CPPFLAGS="$H5_CPPFLAGS -LANG:std"
-  DEBUG_CXXFLAGS=-g
+  # -g produces rather slow code. "-g -O" produces much faster code with some
+  # loss of debugger functions such as not able to print local variables.
+  DEBUG_CXXFLAGS="-g -O"
   DEBUG_CPPFLAGS=
   PROD_CXXFLAGS="-O -s"
   PROD_CPPFLAGS=

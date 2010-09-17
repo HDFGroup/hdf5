@@ -47,6 +47,7 @@
 #include "ttsafe.h"
 
 #ifdef H5_HAVE_THREADSAFE
+#ifndef H5_HAVE_WIN_THREADS
 
 #define FILENAME	"ttsafe_cancel.h5"
 #define DATASETNAME	"commonname"
@@ -253,4 +254,5 @@ void cleanup_cancel(void)
     HDunlink(FILENAME);
 }
 
+#endif /*H5_HAVE_WIN_THREADS*/
 #endif /*H5_HAVE_THREADSAFE*/

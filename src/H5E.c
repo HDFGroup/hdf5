@@ -336,7 +336,7 @@ H5E_get_stack(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_stack)
 
-    estack = (H5E_t *)pthread_getspecific(H5TS_errstk_key_g);
+    estack = (H5E_t *)H5TS_get_thread_local_value(H5TS_errstk_key_g);
 
     if(!estack) {
         /* no associated value with current thread - create one */
@@ -351,7 +351,7 @@ H5E_get_stack(void)
          *      released by the "key destructor" set up in the H5TS
          *      routines.  See calls to pthread_key_create() in H5TS.c -QAK)
          */
-        pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
+        H5TS_set_thread_local_value(H5TS_errstk_key_g, (void *)estack);
     } /* end if */
 
     /* Set return value */
@@ -505,7 +505,7 @@ H5Eunregister_class(hid_t class_id)
      * Decrement the counter on the dataset.  It will be freed if the count
      * reaches zero.
      */
-    if(H5I_dec_ref(class_id, TRUE) < 0)
+    if(H5I_dec_app_ref(class_id) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error class")
 
 done:
@@ -684,7 +684,7 @@ H5Eclose_msg(hid_t err_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an error class")
 
     /* Decrement the counter.  It will be freed if the count reaches zero. */
-    if(H5I_dec_ref(err_id, TRUE) < 0)
+    if(H5I_dec_app_ref(err_id) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message")
 
 done:
@@ -1000,13 +1000,19 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Eset_current_stack
  *
- * Purpose:     Replaces current stack with specified stack.
+ * Purpose:     Replaces current stack with specified stack.  This closes the
+ *		stack ID also.
  *
  * Return:	Non-negative value on success/Negative on failure
  *
  * Programmer:	Raymond Lu
  *              Friday, July 15, 2003
  *
+ * Modification:
+ *              Raymond Lu
+ *              7 September 2010
+ *              Also closes the stack to avoid potential problem (bug 1799)
+ * 
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1025,6 +1031,13 @@ H5Eset_current_stack(hid_t err_stack)
         /* Set the current error stack */
         if(H5E_set_current_stack(estack) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "unable to set error stack")
+
+        /*
+         * Decrement the counter on the error stack.  It will be freed if the count
+         * reaches zero.
+         */
+        if(H5I_dec_app_ref(err_stack) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error stack")
     } /* end if */
 
 done:
@@ -1118,14 +1131,14 @@ H5Eclose_stack(hid_t stack_id)
 
     if(H5E_DEFAULT != stack_id) {
         /* Check arguments */
-        if (H5I_ERROR_STACK != H5I_get_type(stack_id))
+        if(H5I_ERROR_STACK != H5I_get_type(stack_id))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
         /*
          * Decrement the counter on the error stack.  It will be freed if the count
          * reaches zero.
          */
-        if(H5I_dec_ref(stack_id, TRUE)<0)
+        if(H5I_dec_app_ref(stack_id) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error stack")
     } /* end if */
 

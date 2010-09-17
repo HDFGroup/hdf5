@@ -28,6 +28,11 @@
 ./Makefile.dist
 ./Makefile.am
 ./Makefile.in
+./m4/ltsugar.m4                         _DO_NOT_DISTRIBUTE_
+./m4/libtool.m4                         _DO_NOT_DISTRIBUTE_
+./m4/ltversion.m4                       _DO_NOT_DISTRIBUTE_
+./m4/lt~obsolete.m4                     _DO_NOT_DISTRIBUTE_
+./m4/ltoptions.m4                       _DO_NOT_DISTRIBUTE_
 ./README.txt
 ./aclocal.m4
 ./acsite.m4
@@ -845,6 +850,7 @@
 ./test/freespace.c
 ./test/fill_old.h5
 ./test/fillval.c
+./test/filter_fail.c
 ./test/flush1.c
 ./test/flush2.c
 ./test/gen_bad_ohdr.c                   _DO_NOT_DISTRIBUTE_
@@ -1542,6 +1548,7 @@
 ./tools/h5diff/testfiles/h5diff_57.txt
 ./tools/h5diff/testfiles/h5diff_58.txt
 ./tools/h5diff/testfiles/h5diff_600.txt
+./tools/h5diff/testfiles/h5diff_601.txt
 ./tools/h5diff/testfiles/h5diff_603.txt
 ./tools/h5diff/testfiles/h5diff_604.txt
 ./tools/h5diff/testfiles/h5diff_605.txt
@@ -1621,7 +1628,29 @@
 ./tools/h5diff/testfiles/h5diff_458.txt
 ./tools/h5diff/testfiles/h5diff_459.txt
 ./tools/h5diff/testfiles/h5diff_idx.txt
-
+./tools/h5diff/testfiles/h5diff_480.txt
+./tools/h5diff/testfiles/h5diff_481.txt
+./tools/h5diff/testfiles/h5diff_482.txt
+./tools/h5diff/testfiles/h5diff_483.txt
+./tools/h5diff/testfiles/h5diff_500.txt
+./tools/h5diff/testfiles/h5diff_501.txt
+./tools/h5diff/testfiles/h5diff_502.txt
+./tools/h5diff/testfiles/h5diff_503.txt
+./tools/h5diff/testfiles/h5diff_504.txt
+./tools/h5diff/testfiles/h5diff_505.txt
+./tools/h5diff/testfiles/h5diff_506.txt
+./tools/h5diff/testfiles/h5diff_507.txt
+./tools/h5diff/testfiles/h5diff_508.txt
+./tools/h5diff/testfiles/h5diff_509.txt
+./tools/h5diff/testfiles/h5diff_510.txt
+./tools/h5diff/testfiles/h5diff_511.txt
+./tools/h5diff/testfiles/h5diff_512.txt
+./tools/h5diff/testfiles/h5diff_513.txt
+./tools/h5diff/testfiles/h5diff_514.txt
+./tools/h5diff/testfiles/h5diff_515.txt
+./tools/h5diff/testfiles/h5diff_516.txt
+./tools/h5diff/testfiles/h5diff_517.txt
+./tools/h5diff/testfiles/h5diff_518.txt
 
 ./tools/h5diff/testfiles/h5diff_attr1.h5
 ./tools/h5diff/testfiles/h5diff_attr2.h5
@@ -1645,7 +1674,16 @@
 ./tools/h5diff/testfiles/h5diff_softlinks.h5
 ./tools/h5diff/testfiles/h5diff_danglelinks1.h5
 ./tools/h5diff/testfiles/h5diff_danglelinks2.h5
-
+./tools/h5diff/testfiles/h5diff_grp_recurse1.h5
+./tools/h5diff/testfiles/h5diff_grp_recurse2.h5
+./tools/h5diff/testfiles/h5diff_grp_recurse_ext1.h5
+./tools/h5diff/testfiles/h5diff_grp_recurse_ext2-1.h5
+./tools/h5diff/testfiles/h5diff_grp_recurse_ext2-2.h5
+./tools/h5diff/testfiles/h5diff_grp_recurse_ext2-3.h5
+./tools/h5diff/testfiles/h5diff_exclude1-1.h5
+./tools/h5diff/testfiles/h5diff_exclude1-2.h5
+./tools/h5diff/testfiles/h5diff_exclude2-1.h5
+./tools/h5diff/testfiles/h5diff_exclude2-2.h5
 
 
 #test files for h5repack
@@ -1655,6 +1693,7 @@
 ./tools/h5repack/testfiles/h5repack_hlink.h5
 ./tools/h5repack/testfiles/h5repack_layout.h5
 ./tools/h5repack/testfiles/h5repack_layouto.h5
+./tools/h5repack/testfiles/h5repack_layout2.h5
 ./tools/h5repack/testfiles/h5repack_early.h5
 ./tools/h5repack/testfiles/h5repack_szip.h5
 ./tools/h5repack/testfiles/h5repack_deflate.h5
@@ -1926,6 +1965,7 @@
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/cacheinit.cmake
+./config/cmake/grepTest.cmake
 ./config/cmake/runTest.cmake
 ./config/cmake/CTestCustom.ctest
 ./config/cmake/ConfigureChecks.cmake

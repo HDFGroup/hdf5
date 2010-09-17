@@ -1119,9 +1119,9 @@ static int
 H5D_farray_idx_iterate_cb(hsize_t UNUSED idx, const void *_elmt, void *_udata)
 {
     H5D_farray_it_ud_t   *udata = (H5D_farray_it_ud_t *)_udata; /* User data */
-    unsigned ndims;             /* Rank of chunk */
-    int curr_dim;               /* Current dimension */
-    int ret_value;              /* Return value */
+    unsigned ndims;                 /* Rank of chunk */
+    int curr_dim;                   /* Current dimension */
+    int ret_value = H5_ITER_CONT;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_iterate_cb)
 

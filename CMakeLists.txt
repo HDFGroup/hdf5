@@ -304,17 +304,25 @@ ENDIF (MAKE_SYSTEM)
 IF (CMAKE_BUILD_TYPE MATCHES Debug)
   ADD_DEFINITIONS (-DDEBUG)
   ADD_DEFINITIONS (
-      -DH5_DEBUG_API -DH5Z_DEBUG -DH5V_DEBUG -DH5T_DEBUG
+      -DH5Z_DEBUG -DH5V_DEBUG -DH5T_DEBUG
       -DH5S_DEBUG -DH5P_DEBUG -DH5O_DEBUG -DH5MM_DEBUG -DH5MF_DEBUG
       -DH5I_DEBUG -DH5HL_DEBUG -DH5HG_DEBUG -DH5G_DEBUG -DH5F_DEBUG
       -DH5E_DEBUG -DH5D_DEBUG -DH5B_DEBUG -DH5AC_DEBUG -UNDEBUG
   )
+  OPTION (HDF5_ENABLE_TRACE "Enable API tracing capability" ON)
+  IF (HDF5_ENABLE_TRACE)
+    ADD_DEFINITIONS (-DH5_DEBUG_API )
+  ENDIF (HDF5_ENABLE_TRACE)
   #-- NMake Makefiles will overwhelm the console with warnings if -Wall is used.
   IF (NOT WIN32)
     ADD_DEFINITIONS (-Wall)
   ENDIF (NOT WIN32)
 ELSE (CMAKE_BUILD_TYPE MATCHES Debug)
   ADD_DEFINITIONS (-UH5_DEBUG_API -DNDEBUG)
+  OPTION (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
+  IF (HDF5_ENABLE_TRACE)
+    ADD_DEFINITIONS (-DH5_DEBUG_API )
+  ENDIF (HDF5_ENABLE_TRACE)
 ENDIF (CMAKE_BUILD_TYPE MATCHES Debug)
 
 #-----------------------------------------------------------------------------
@@ -507,6 +515,18 @@ IF (WIN32)
     ENDIF (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
     
   ENDIF (BUILD_SHARED_LIBS)
+ENDIF (WIN32)
+
+#-----------------------------------------------------------------------------
+# Option to use threadsafe
+# Note: Currently CMake only allows configuring of threadsafe on WINDOWS.
+#-----------------------------------------------------------------------------
+IF (WIN32)
+  OPTION (HDF5_ENABLE_THREADSAFE "Enable Threadsafety" OFF)
+  IF (HDF5_ENABLE_THREADSAFE)
+    SET (H5_HAVE_WIN_THREADS 1)
+    SET (H5_HAVE_THREADSAFE 1)
+  ENDIF (HDF5_ENABLE_THREADSAFE)
 ENDIF (WIN32)
 
 #-----------------------------------------------------------------------------

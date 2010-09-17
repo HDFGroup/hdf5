@@ -371,4 +371,15 @@ int main(int argc, char * argv)
 }
 #endif
 
+#ifdef HAVE_GPFS
+
+#include <gpfs.h>
+int main ()
+{
+    int fd = 0; 
+    gpfs_fcntl(fd, (void *)0);
+}
+
+#endif /* HAVE_GPFS */
+
 

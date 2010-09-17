@@ -22,16 +22,7 @@ SET (REPACK_COMMON_SRCS
 
 ADD_EXECUTABLE (h5repack ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
 H5_NAMING (h5repack)
-IF (WIN32)
-  IF (MSVC)
-    IF (NOT BUILD_SHARED_LIBS)
-      SET_TARGET_PROPERTIES (h5repack
-          PROPERTIES
-              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
-      ) 
-    ENDIF (NOT BUILD_SHARED_LIBS)
-  ENDIF (MSVC)
-ENDIF (WIN32)
+TARGET_WIN_PROPERTIES (h5repack)
 TARGET_LINK_LIBRARIES (h5repack  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5repack)
@@ -48,16 +39,7 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   ADD_EXECUTABLE (testh5repack_detect_szip ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testh5repack_detect_szip.c)
   H5_NAMING (testh5repack_detect_szip)
-  IF (WIN32)
-    IF (MSVC)
-      IF (NOT BUILD_SHARED_LIBS)
-        SET_TARGET_PROPERTIES (testh5repack_detect_szip
-            PROPERTIES
-                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
-        ) 
-      ENDIF (NOT BUILD_SHARED_LIBS)
-    ENDIF (MSVC)
-  ENDIF (WIN32)
+  TARGET_WIN_PROPERTIES (testh5repack_detect_szip)
   TARGET_LINK_LIBRARIES (testh5repack_detect_szip ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME testh5repack_detect_szip COMMAND $<TARGET_FILE:testh5repack_detect_szip>)
@@ -76,16 +58,7 @@ IF (BUILD_TESTING)
 
   ADD_EXECUTABLE (h5repacktest ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repacktst.c)
   H5_NAMING (h5repacktest)
-  IF (WIN32)
-    IF (MSVC)
-      IF (NOT BUILD_SHARED_LIBS)
-        SET_TARGET_PROPERTIES (h5repacktest
-            PROPERTIES
-                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
-        ) 
-      ENDIF (NOT BUILD_SHARED_LIBS)
-    ENDIF (MSVC)
-  ENDIF (WIN32)
+  TARGET_WIN_PROPERTIES (h5repacktest)
   TARGET_LINK_LIBRARIES (h5repacktest  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME h5repacktest COMMAND $<TARGET_FILE:h5repacktest>)
@@ -108,6 +81,7 @@ IF (BUILD_TESTING)
       h5repack_hlink.h5
       h5repack_layout.h5
       h5repack_layouto.h5
+      h5repack_layout2.h5
       h5repack_named_dtypes.h5
       h5repack_nbit.h5
       h5repack_objs.h5
@@ -175,7 +149,7 @@ IF (BUILD_TESTING)
           COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out.${testfile}
       )
     ENDIF (${testtype} STREQUAL "SKIP")
-  ENDMACRO (ADD_H5_TEST testname testfile testtype)
+  ENDMACRO (ADD_H5_TEST)
 
   MACRO (ADD_H5_CMP_TEST testname testfilter testtype resultcode resultfile)
     IF (${testtype} STREQUAL "SKIP")
@@ -197,7 +171,53 @@ IF (BUILD_TESTING)
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
     ENDIF (${testtype} STREQUAL "SKIP")
-  ENDMACRO (ADD_H5_CMP_TEST file)
+  ENDMACRO (ADD_H5_CMP_TEST)
+
+  MACRO (ADD_H5_VERIFY_TEST testname testtype resultcode testfile testdset testfilter)
+    IF (${testtype} STREQUAL "SKIP")
+      ADD_TEST (
+          NAME H5REPACK_VERIFY_LAYOUT-${testname}
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP -d ${testdset} -pH ${PROJECT_BINARY_DIR}/testfiles/out.${resultfile}"
+      )
+    ELSE (${testtype} STREQUAL "SKIP")
+      IF (${resultcode} STREQUAL "0")
+        ADD_TEST (
+            NAME H5REPACK_VERIFY_LAYOUT-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                -D "TEST_ARGS:STRING=-d;${testdset};-pH;testfiles/out.${testfile}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=${testfile}-v.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_FILTER:STRING=${testfilter}"
+                -D "TEST_REFERENCE=${testfilter}"
+                -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
+        )
+      ELSE (${resultcode} STREQUAL "0")
+        IF (${testfilter} STREQUAL "CHUNKED")
+          SET (nottestfilter "(CONTIGUOUS|COMPACT)")
+        ENDIF (${testfilter} STREQUAL "CHUNKED")
+        IF (${testfilter} STREQUAL "CONTIGUOUS")
+          SET (nottestfilter "(CHUNK|COMPACT)")
+        ENDIF (${testfilter} STREQUAL "CONTIGUOUS")
+        IF (${testfilter} STREQUAL "COMPACT")
+          SET (nottestfilter "(CONTIGUOUS|CHUNK)")
+        ENDIF (${testfilter} STREQUAL "COMPACT")
+        ADD_TEST (
+            NAME H5REPACK_VERIFY_LAYOUT_ALL-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                -D "TEST_ARGS:STRING=-pH;testfiles/out.${testfile}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=${testfile}-v.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_FILTER:STRING=${nottestfilter}"
+                -D "TEST_REFERENCE=${testfilter}"
+                -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
+        )
+      ENDIF (${resultcode} STREQUAL "0")
+    ENDIF (${testtype} STREQUAL "SKIP")
+  ENDMACRO (ADD_H5_VERIFY_TEST)
 
 ##############################################################################
 ##############################################################################
@@ -226,6 +246,7 @@ IF (BUILD_TESTING)
   SET (FILE14 h5repack_layouto.h5 )     # A file with an older version of the layout message (copy of test/tlayouto.h5)
   SET (FILE15 h5repack_named_dtypes.h5)
   SET (FILE16 tfamily%05d.h5)           # located in common testfiles folder
+  SET (FILE18 h5repack_layout2.h5)
   SET (FILE_REF h5repack_refs.h5)
   SET (FILE_ATTR_REF h5repack_attr_refs.h5)
 
@@ -523,26 +544,47 @@ ADD_H5_TEST (deflate_file ${TESTTYPE} ${arg})
 #########################################################
 
 ADD_H5_TEST (dset2_chunk_20x10 "TEST" ${FILE4} --layout=dset2:CHUNK=20x10)
+ADD_H5_VERIFY_TEST (dset2_chunk_20x10 "TEST" 0 ${FILE4} dset2 CHUNKED)
 ADD_H5_TEST (chunk_20x10 "TEST" ${FILE4} -l CHUNK=20x10)
+ADD_H5_VERIFY_TEST (chunk_20x10 "TEST" 1 ${FILE4} null CHUNKED)
 ADD_H5_TEST (dset2_conti "TEST" ${FILE4} -l dset2:CONTI)
+ADD_H5_VERIFY_TEST (dset2_conti "TEST" 0 ${FILE4} dset2 CONTIGUOUS)
 ADD_H5_TEST (conti "TEST" ${FILE4} -l CONTI)
+ADD_H5_VERIFY_TEST (conti "TEST" 1 ${FILE4} null CONTIGUOUS)
 ADD_H5_TEST (dset2_compa "TEST" ${FILE4} -l dset2:COMPA)
+ADD_H5_VERIFY_TEST (dset2_compa "TEST" 0 ${FILE4} dset2 COMPACT)
 ADD_H5_TEST (compa "TEST" ${FILE4} -l COMPA)
-
+ADD_H5_VERIFY_TEST (compa "TEST" 1 ${FILE4} null COMPACT)
 
 ################################################################
 # layout conversions (file has no filters)
 ###############################################################
 
 ADD_H5_TEST (dset_compa_conti "TEST" ${FILE4} -l dset_compact:CONTI)
+ADD_H5_VERIFY_TEST (dset_compa_conti "TEST" 0 ${FILE4} dset_compact CONTIGUOUS)
 ADD_H5_TEST (dset_compa_chunk "TEST" ${FILE4} -l dset_compact:CHUNK=2x5)
+ADD_H5_VERIFY_TEST (dset_compa_chunk "TEST" 0 ${FILE4} dset_compact CHUNKED)
 ADD_H5_TEST (dset_compa_compa "TEST" ${FILE4} -l dset_compact:COMPA)
+ADD_H5_VERIFY_TEST (dset_compa_compa "TEST" 0 ${FILE4} dset_compact COMPACT)
 ADD_H5_TEST (dset_conti_compa "TEST" ${FILE4} -l dset_contiguous:COMPA)
+ADD_H5_VERIFY_TEST (dset_conti_compa "TEST" 0 ${FILE4} dset_contiguous COMPACT)
 ADD_H5_TEST (dset_conti_chunk "TEST" ${FILE4} -l dset_contiguous:CHUNK=3x6)
+ADD_H5_VERIFY_TEST (dset_conti_chunk "TEST" 0 ${FILE4} dset_contiguous CHUNKED)
 ADD_H5_TEST (dset_conti_conti "TEST" ${FILE4} -l dset_contiguous:CONTI)
+ADD_H5_VERIFY_TEST (dset_conti_conti "TEST" 0 ${FILE4} dset_contiguous CONTIGUOUS)
 ADD_H5_TEST (chunk_compa "TEST" ${FILE4} -l dset_chunk:COMPA)
+ADD_H5_VERIFY_TEST (chunk_compa "TEST" 0 ${FILE4} dset_chunk COMPACT)
 ADD_H5_TEST (chunk_conti "TEST" ${FILE4} -l dset_chunk:CONTI)
+ADD_H5_VERIFY_TEST (chunk_conti "TEST" 0 ${FILE4} dset_chunk CONTIGUOUS)
 ADD_H5_TEST (chunk_18x13 "TEST" ${FILE4} -l dset_chunk:CHUNK=18x13)
+ADD_H5_VERIFY_TEST (chunk_18x13 "TEST" 0 ${FILE4} dset_chunk CHUNKED)
+
+# test convert small size dataset ( < 1k) to compact layout without -m
+ADD_H5_TEST (contig_small_compa "TEST" ${FILE18} -l contig_small:COMPA)
+ADD_H5_VERIFY_TEST (contig_small_compa "TEST" 0 ${FILE18} contig_small COMPACT)
+
+ADD_H5_TEST (contig_small_fixed_compa "TEST" ${FILE18} -l chunked_small_fixed:COMPA)
+ADD_H5_VERIFY_TEST (contig_small_fixed_compa "TEST" 0 ${FILE18} chunked_small_fixed COMPACT)
 
 # Native option
 # Do not use FILE1, as the named dtype will be converted to native, and h5diff will
@@ -558,6 +600,7 @@ IF (NOT USE_FILTER_DEFLATE)
   SET (TESTTYPE "SKIP")
 ENDIF (NOT USE_FILTER_DEFLATE)
 ADD_H5_TEST (layout_long_switches ${TESTTYPE} ${arg})
+ADD_H5_VERIFY_TEST (layout_long_switches ${TESTTYPE} 1 ${FILE4} null CHUNKED)
 
 # latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
 SET (arg ${FILE4} -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype])
@@ -566,6 +609,7 @@ IF (NOT USE_FILTER_DEFLATE)
   SET (TESTTYPE "SKIP")
 ENDIF (NOT USE_FILTER_DEFLATE)
 ADD_H5_TEST (layout_short_switches ${TESTTYPE} ${arg})
+ADD_H5_VERIFY_TEST (layout_short_switches ${TESTTYPE} 1 ${FILE4} null CHUNKED)
 
 # several global filters
 SET (arg ${FILE4} --filter GZIP=1 --filter SHUF)

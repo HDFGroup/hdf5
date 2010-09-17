@@ -702,9 +702,9 @@ tmpfile(void)
 #endif
 
 /*-------------------------------------------------------------------------
- * Function: H5tools_get_link_info
+ * Function: H5tools_get_symlink_info
  *
- * Purpose: Get link (soft, external) info and its target object type 
+ * Purpose: Get symbolic link (soft, external) info and its target object type 
             (dataset, group, named datatype) and path, if exist
  *
  * Patameters:
@@ -726,7 +726,7 @@ tmpfile(void)
  * Date: Feb 8, 2010
  *-------------------------------------------------------------------------*/
 int
-H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info,
+H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info,
     hbool_t get_obj_type)
 {
     htri_t l_ret;
@@ -737,6 +737,14 @@ H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *
 
     /* init */
     link_info->trg_type = H5O_TYPE_UNKNOWN;
+
+    /* if path is root, return group type */
+    if(!HDstrcmp(linkpath,"/"))
+    {
+        link_info->trg_type = H5O_TYPE_GROUP;
+        ret = 2;
+        goto out;
+    }
 
     /* check if link itself exist */
     if(H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0) {
@@ -827,7 +835,7 @@ out:
         H5Pclose(lapl);
 
     return ret;
-} /* end H5tools_get_link_info() */
+} /* end H5tools_get_symlink_info() */
 
 /*-------------------------------------------------------------------------
  * Audience:    Public

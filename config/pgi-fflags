@@ -86,7 +86,7 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
     PROD_FCFLAGS="-fast -s -Mnoframe"
 
     # Debug
-    DEBUG_FCFLAGS="-g -Mbounds -Mchkfpstk -Mchkptr -Mdclchk"
+    DEBUG_FCFLAGS="-g -Mbounds -Mchkptr -Mdclchk"
 
     # Profile
     PROFILE_FCFLAGS="-g -Mprof=func,line"
