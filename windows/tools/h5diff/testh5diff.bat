@@ -50,6 +50,10 @@ set srclnkfile1=h5diff_danglelinks1.h5
 set srclnkfile2=h5diff_danglelinks2.h5
 set src_grp_recurse1=h5diff_grp_recurse1.h5
 set src_grp_recurse2=h5diff_grp_recurse2.h5
+set src_grp_recurse1_ext=h5diff_grp_recurse_ext1.h5
+set src_grp_recurse2_ext1=h5diff_grp_recurse_ext2-1.h5
+set src_grp_recurse2_ext2=h5diff_grp_recurse_ext2-2.h5
+set src_grp_recurse2_ext3=h5diff_grp_recurse_ext2-3.h5
 set srcexclude1_1=h5diff_exclude1-1.h5
 set srcexclude1_2=h5diff_exclude1-2.h5
 set srcexclude2_1=h5diff_exclude2-1.h5
@@ -77,6 +81,10 @@ set lnkfile1=%indir%\h5diff_danglelinks1.h5
 set lnkfile2=%indir%\h5diff_danglelinks2.h5
 set grp_recurse1=%indir%\h5diff_grp_recurse1.h5
 set grp_recurse2=%indir%\h5diff_grp_recurse2.h5
+set grp_recurse1_ext=%indir%\h5diff_grp_recurse_ext1.h5
+set grp_recurse2_ext1=%indir%\h5diff_grp_recurse_ext2-1.h5
+set grp_recurse2_ext2=%indir%\h5diff_grp_recurse_ext2-2.h5
+set grp_recurse2_ext3=%indir%\h5diff_grp_recurse_ext2-3.h5
 set exclude1_1=%indir%\h5diff_exclude1-1.h5
 set exclude1_2=%indir%\h5diff_exclude1-2.h5
 set exclude2_1=%indir%\h5diff_exclude2-1.h5
@@ -793,6 +801,25 @@ rem ############################################################################
 
     call :testing %h5diff% -v --follow-symlinks %src_grp_recurse1% %src_grp_recurse2% /slink_grp10 /slink_grp11
 	call :tooltest h5diff_514.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% /slink_grp10 /slink_grp11
+
+    rem ######################################################################
+    rem # Test for group recursive diff via multi-linked external links 
+    rem # With follow-symlinks, file $GRP_RECURSE1_EXT and $GRP_RECURSE2_EXT1 
+    rem # should be same with the external links.
+    rem ######################################################################
+    rem file vs file
+    call :testing %h5diff% -v %src_grp_recurse1_ext% %src_grp_recurse2_ext1%
+    call :tooltest h5diff_515.txt -v %grp_recurse1_ext% %grp_recurse2_ext1%
+
+    call :testing %h5diff% -v --follow-symlinks %src_grp_recurse1_ext% %src_grp_recurse2_ext1%
+    call :tooltest h5diff_516.txt -v --follow-symlinks %grp_recurse1_ext% %grp_recurse2_ext1%
+
+    rem group vs group
+    call :testing %h5diff% -v %src_grp_recurse1_ext% %src_grp_recurse2_ext1% /g1
+    call :tooltest h5diff_517.txt -v %grp_recurse1_ext% %grp_recurse2_ext1% /g1
+
+    call :testing %h5diff% -v --follow-symlinks %src_grp_recurse1_ext% %src_grp_recurse2_ext1% /g1
+    call :tooltest h5diff_518.txt -v --follow-symlinks %grp_recurse1_ext% %grp_recurse2_ext1% /g1
 
 
     rem ##############################################################################

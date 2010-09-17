@@ -54,8 +54,14 @@ FILE17=h5diff_ext2softlink_src.h5
 FILE18=h5diff_ext2softlink_trg.h5
 DANGLE_LINK_FILE1=h5diff_danglelinks1.h5
 DANGLE_LINK_FILE2=h5diff_danglelinks2.h5
+/* group recursive */
 GRP_RECURSE_FILE1=h5diff_grp_recurse1.h5
 GRP_RECURSE_FILE2=h5diff_grp_recurse2.h5
+/* group recursive - same structure via external links through files */
+GRP_RECURSE1_EXT=h5diff_grp_recurse_ext1.h5
+GRP_RECURSE2_EXT1=h5diff_grp_recurse_ext2-1.h5
+GRP_RECURSE2_EXT2=h5diff_grp_recurse_ext2-2.h5
+GRP_RECURSE2_EXT3=h5diff_grp_recurse_ext2-3.h5
 # same structure, same obj name with different value
 EXCLUDE_FILE1_1=h5diff_exclude1-1.h5
 EXCLUDE_FILE1_2=h5diff_exclude1-2.h5
@@ -732,6 +738,18 @@ TOOLTEST h5diff_512.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FIL
 # circled soft2ext-link vs soft2ext-link
 TOOLTEST h5diff_513.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /slink_grp10 /slink_grp11
 TOOLTEST h5diff_514.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /slink_grp10 /slink_grp11
+
+###############################################################################
+# Test for group recursive diff via multi-linked external links 
+# With follow-symlinks, file $GRP_RECURSE1_EXT and $GRP_RECURSE2_EXT1 should
+# be same with the external links.
+###############################################################################
+# file vs file
+TOOLTEST h5diff_515.txt -v $GRP_RECURSE1_EXT $GRP_RECURSE2_EXT1
+TOOLTEST h5diff_516.txt -v --follow-symlinks $GRP_RECURSE1_EXT $GRP_RECURSE2_EXT1
+# group vs group
+TOOLTEST h5diff_517.txt -v $GRP_RECURSE1_EXT $GRP_RECURSE2_EXT1 /g1
+TOOLTEST h5diff_518.txt -v --follow-symlinks $GRP_RECURSE1_EXT $GRP_RECURSE2_EXT1 /g1
 
 # ##############################################################################
 # # Exclude objects (--exclude-path)
