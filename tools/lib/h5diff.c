@@ -235,7 +235,7 @@ out:
  * Programmer: Jonathan Kim
  * Date: Aug 23, 2010
  *------------------------------------------------------------------------*/
-static int is_exclude_path (trav_path_t * paths, diff_opt_t *options)
+static int is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *options)
 {
     struct exclude_path_list * exclude_path_ptr;
     int ret_cmp;
@@ -255,7 +255,7 @@ static int is_exclude_path (trav_path_t * paths, diff_opt_t *options)
         /* if given object is group, exclude its members as well */
         if (exclude_path_ptr->obj_type == H5TRAV_TYPE_GROUP)
         {
-            ret_cmp = HDstrncmp(exclude_path_ptr->obj_path, paths->path,
+            ret_cmp = HDstrncmp(exclude_path_ptr->obj_path, path,
                                 strlen(exclude_path_ptr->obj_path));
             if (ret_cmp == 0)
             {
@@ -265,7 +265,7 @@ static int is_exclude_path (trav_path_t * paths, diff_opt_t *options)
                  * not under “/grp1xxx/” group.  
                  */ 
                 len_grp = HDstrlen(exclude_path_ptr->obj_path);
-                if (paths->path[len_grp] == '/')
+                if (path[len_grp] == '/')
                 {
                     /* belong to excluded group! */
                     ret = 1;
@@ -276,14 +276,14 @@ static int is_exclude_path (trav_path_t * paths, diff_opt_t *options)
         /* exclude target is not group, just exclude the object */
         else  
         {
-            ret_cmp = HDstrcmp(exclude_path_ptr->obj_path, paths->path);
+            ret_cmp = HDstrcmp(exclude_path_ptr->obj_path, path);
             if (ret_cmp == 0)
             {
                 /* excluded non-group object */
                 ret = 1;
                 /* assign type as scan progress, which is sufficient to 
                  * determine type for excluding groups from the above if. */
-                exclude_path_ptr->obj_type = paths->type;
+                exclude_path_ptr->obj_type = type;
                 break; /* while */
             }
         }
@@ -342,6 +342,8 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
     unsigned infile[2];
     char * path1_lp;
     char * path2_lp;
+    h5trav_type_t type1_l;
+    h5trav_type_t type2_l;
     int path1_offset = 0;
     int path2_offset = 0;
     int cmp;
@@ -371,12 +373,14 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
         
         path1_lp = (info1->paths[curr1].path) + path1_offset;
         path2_lp = (info2->paths[curr2].path) + path2_offset;
+        type1_l = info1->paths[curr1].type;
+        type2_l = info2->paths[curr2].type;
         
         /* criteria is string compare */
         cmp = HDstrcmp(path1_lp, path2_lp);
 
         if(cmp == 0) {
-            if(!is_exclude_path(&(info1->paths[curr1]), options))
+            if(!is_exclude_path(path1_lp, type1_l, options))
             {
                 infile[0] = 1;
                 infile[1] = 1;
@@ -387,7 +391,7 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
         } /* end if */
         else if(cmp < 0)
         {
-            if(!is_exclude_path(&(info1->paths[curr1]), options))
+            if(!is_exclude_path(path1_lp, type1_l, options))
             {
                 infile[0] = 1;
                 infile[1] = 0;
@@ -397,7 +401,7 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
         } /* end else-if */
         else
         {
-            if (!is_exclude_path(&(info2->paths[curr2]), options))
+            if (!is_exclude_path(path2_lp, type2_l, options))
             {
                 infile[0] = 0;
                 infile[1] = 1;
@@ -412,7 +416,7 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
     infile[1] = 0;
     while(curr1 < info1->nused)
     {
-        if(!is_exclude_path(&(info1->paths[curr1]), options))
+        if(!is_exclude_path(path1_lp, type1_l, options))
         {
             path1_lp = (info1->paths[curr1].path) + path1_offset;
             trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
@@ -425,7 +429,7 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
     infile[1] = 1;
     while(curr2 < info2->nused)
     {
-        if (!is_exclude_path(&(info2->paths[curr2]), options))
+        if (!is_exclude_path(path2_lp, type2_l, options))
         {
             path2_lp = (info2->paths[curr2].path) + path2_offset;
             trav_table_addflags(infile, path2_lp, info2->paths[curr2].type, table);
