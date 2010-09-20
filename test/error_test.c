@@ -21,7 +21,7 @@
  */
 #include "h5test.h"
 
-#ifdef H5_USE_16_API
+#ifdef H5_USE_16_API_DEFAULT
 int main(void)
 {
     printf("Test skipped because backward compatbility with v1.6 is configured in\n");
@@ -127,13 +127,8 @@ test_error(hid_t file)
 	TEST_ERROR;
     if(old_data != NULL)
 	TEST_ERROR;
-#ifdef H5_USE_16_API
-    if (old_func != (H5E_auto_t)H5Eprint)
-	TEST_ERROR;
-#else /* H5_USE_16_API */
     if (old_func != (H5E_auto2_t)H5Eprint2)
 	TEST_ERROR;
-#endif /* H5_USE_16_API */
 
     if(H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
         TEST_ERROR;

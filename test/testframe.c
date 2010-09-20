@@ -135,7 +135,11 @@ void TestInit(const char *ProgName, void (*private_usage)(void), int (*private_p
      * half the functions this test calls are private, so automatic error
      * reporting wouldn't do much good since it's triggered at the API layer.
      */
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+#ifdef H5_USE_16_API_DEFAULT
+    H5Eset_auto(NULL, NULL);
+#else /* H5_USE_16_API_DEFAULT */
+    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+#endif /* H5_USE_16_API_DEFAULT */
 
     /*
      * Record the program name and private routines if provided.

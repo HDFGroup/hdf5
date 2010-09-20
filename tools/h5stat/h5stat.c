@@ -1334,7 +1334,11 @@ main(int argc, const char *argv[])
     h5tools_setstatus(EXIT_SUCCESS);
 
     /* Disable error reporting */
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+#ifdef H5_USE_16_API_DEFAULT
+    H5Eset_auto(NULL, NULL);
+#else /* H5_USE_16_API_DEFAULT */
+    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+#endif /* H5_USE_16_API_DEFAULT */
 
     /* Initialize h5tools lib */
     h5tools_init();

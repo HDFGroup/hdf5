@@ -44,9 +44,144 @@ int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 
 herr_t custom_print_cb(int n, H5E_error1_t *err_desc, void* client_data);
 
+#ifdef H5_USE_16_API_DEFAULT
 
 /*-------------------------------------------------------------------------
- * Function:	test_error
+ * Function:	test_error1
+ *
+ * Purpose:	Test the backward compatibility of H5Eset/get_auto.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *		17 September 2010
+ *
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_error1(void)
+{
+    hid_t		dataset, space;
+    hsize_t		dims[2];
+    H5E_auto1_t         old_func1;
+    H5E_auto2_t         old_func2;
+    void                *old_data;
+    herr_t              ret;
+
+    TESTING("error API H5Eset/get_auto");
+    fprintf(stderr, "\n");
+
+    /* Create the data space */
+    dims[0] = DIM0;
+    dims[1] = DIM1;
+    if ((space = H5Screate_simple(2, dims, NULL))<0) TEST_ERROR;
+
+    /* Test whether the printing function is mismatched.  The library should indicate 
+     * H5Eprint1 as the default. */
+    if (H5Eget_auto2(H5E_DEFAULT, &old_func2, &old_data)<0)
+	TEST_ERROR;
+    if (old_data != NULL)
+	TEST_ERROR;
+    if (!old_func2)
+	TEST_ERROR;
+
+    /* This function changes the default printing function to be H5Eprint2. */
+    if(H5Eset_auto2(H5E_DEFAULT, old_func2, old_data)<0)
+        TEST_ERROR;
+
+    /* Dataset creation should fail because the file doesn't exist. */
+    dataset = H5Dcreate2(FAKE_ID, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT, 
+                             H5P_DEFAULT, H5P_DEFAULT);
+    if(dataset >= 0)    
+        TEST_ERROR;
+
+    /* This call should fail because the test mixes H5Eget_auto1 with H5Eset_auto2. 
+     * Once the H5Eset_auto2 is called, a call to H5Eget_auto1 will fail. */
+    if((ret = H5Eget_auto1(&old_func1, &old_data)) >= 0)
+        TEST_ERROR;
+
+    return 0;
+
+  error:
+    return -1;
+}
+
+#else /*H5_USE_16_API_DEFAULT*/
+
+/*-------------------------------------------------------------------------
+ * Function:	test_error2
+ *
+ * Purpose:	Test the backward compatibility of H5Eset/get_auto.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *		17 September 2010
+ *
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_error2(void)
+{
+    hid_t		dataset, space;
+    hsize_t		dims[2];
+    H5E_auto1_t         old_func1;
+    H5E_auto2_t         old_func2;
+    void                *old_data;
+    herr_t              ret;
+
+    TESTING("error API H5Eset/get_auto");
+    fprintf(stderr, "\n");
+
+    /* Create the data space */
+    dims[0] = DIM0;
+    dims[1] = DIM1;
+    if ((space = H5Screate_simple(2, dims, NULL))<0) TEST_ERROR;
+
+    /* Test whether the printing function is mismatched.  The library should indicate 
+     * H5Eprint2 as the default. */
+    if (H5Eget_auto1(&old_func1, &old_data)<0)
+	TEST_ERROR;
+    if (old_data != NULL)
+	TEST_ERROR;
+    if (!old_func1)
+	TEST_ERROR;
+
+    /* This function changes the default printing function to be H5Eprint1. */
+    if(H5Eset_auto1(old_func1, old_data)<0)
+        TEST_ERROR;
+
+    /* Dataset creation should fail because the file doesn't exist. */
+    dataset = H5Dcreate2(FAKE_ID, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT, 
+                             H5P_DEFAULT, H5P_DEFAULT);
+    if(dataset >= 0)    
+        TEST_ERROR;
+
+    /* This call should fail because it mixed H5Eget_auto2 with H5Eset_auto1. 
+     * Once the H5Eset_auto1 is called, a call to H5Eget_auto2 will fail. */
+    if((ret = H5Eget_auto2(H5E_DEFAULT, &old_func2, &old_data)) >= 0)
+        TEST_ERROR;
+
+    return 0;
+
+  error:
+    return -1;
+}
+#endif /*H5_USE_16_API_DEFAULT*/
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_error3
  *
  * Purpose:	Test error API functions
  *
@@ -63,7 +198,7 @@ herr_t custom_print_cb(int n, H5E_error1_t *err_desc, void* client_data);
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_error(hid_t file)
+test_error3(hid_t file)
 {
     hid_t		dataset, space;
     hsize_t		dims[2];
@@ -92,35 +227,21 @@ test_error(hid_t file)
         goto error;
     }
 
-    /* Test enabling and disabling default printing */
-    if (H5Eget_auto1(&old_func, &old_data)<0)
-	TEST_ERROR;
-    if (old_data != NULL)
-	TEST_ERROR;
-    if (!old_func)
-	TEST_ERROR;
-#ifdef H5_USE_16_API
-    if (old_func != (H5E_auto1_t)H5Eprint1)
-	TEST_ERROR;
-#else /* H5_USE_16_API */
-    if (old_func != (H5E_auto1_t)H5Eprint2)
-	TEST_ERROR;
-#endif /* H5_USE_16_API */
-
-    if(H5Eset_auto1(NULL, NULL)<0)
+    /* Disable the library's default printing function */
+#ifdef H5_USE_16_API_DEFAULT
+    if(H5Eset_auto(NULL, NULL)<0)
+#else
+    if(H5Eset_auto(H5E_DEFAULT, NULL, NULL)<0)
+#endif
         TEST_ERROR;
 
-    /* Make H5Dwrite fail, verify default print is disabled */
+    /* Make H5Dwrite fail, verify default printing is disabled */
     if (H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)<0) {
         H5Epush1(__FILE__, FUNC_test_error, __LINE__, H5E_ERROR, H5E_WRITEERROR,
                 "H5Dwrite shouldn't succeed");
         goto error;
     }
 
-    if(H5Eset_auto1(old_func, old_data)<0)
-        TEST_ERROR;
-
-    /* In case program comes to this point, close dataset */
     if(H5Dclose(dataset)<0) TEST_ERROR;
 
     TEST_ERROR;
@@ -258,7 +379,13 @@ main(void)
     H5Eclear1();
 
     /* Test error API */
-    if(test_error(file) < 0) {
+#ifdef H5_USE_16_API_DEFAULT
+    if(test_error1() < 0) TEST_ERROR ;
+#else /*H5_USE_16_API_DEFAULT*/
+    if(test_error2() < 0) TEST_ERROR ;
+#endif /*H5_USE_16_API_DEFAULT*/
+
+    if(test_error3(file) < 0) {
         H5Epush1(__FILE__, FUNC_main, __LINE__, H5E_ERROR, H5E_BADMESG,
                 "Error test failed");
         H5Eprint1(stderr);

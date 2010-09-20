@@ -71,6 +71,8 @@ TEST() {
 	-e 's/line [0-9]*/line (number)/' \
         -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
 	-e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+        -e 's/H5Eget_auto[1-2]*/H5Eget_auto(1 or 2)/' \
+        -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
 	$actual_err > $actual_ext
    cat $actual_ext >> $actual
     
