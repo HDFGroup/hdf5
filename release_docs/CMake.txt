@@ -14,10 +14,15 @@ Notes: This short instruction is written for users who want to quickly build
        all the operating systems supported by CMake.
        
        NOTES:
-         1. CMake is being introduced in this release as early-access. While
-            we have attempted to provide error-free files, please understand
-            that this development with CMake has just began. The CMake 
-            specific files may change before the next release.
+         1. CMake use is still experimental. While we have attempted to 
+            provide error-free files, please understand that development
+            with CMake has just began. The CMake specific files may change
+            before the next release.
+            
+         2. CMake has been introduced to support development on Windows, however
+            it should be usuable on any system where CMake is supported. Please
+            send us any comments on how CMake support can be improved on any
+            system.
             
 
 ========================================================================
@@ -25,7 +30,7 @@ Notes: This short instruction is written for users who want to quickly build
 ========================================================================                          
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.8.x product requires CMake version 2.8.1.                     
+      web site. The HDF5 1.8.x product requires CMake version 2.8.2.                     
                                                                          
    2. If you plan to use Zlib or Szip, download the packages and install them
       in a central location. For example on Windows, create a folder extlibs 
@@ -46,26 +51,84 @@ Notes: This short instruction is written for users who want to quickly build
       choose a build directory different then the source directory 
       (for example on Windows, if the source is at c:\MyHDFstuff\hdf5, then
       use c:\MyHDFstuff\hdf5\build or c:\MyHDFstuff\build\hdf5). 
+      
+      OPTIONAL:
+        Users can perform the configuration step without using the visual cmake-gui
+        program. We use the file cacheinit.cmake in the config/cmake folder for
+        our testing. This file enables all the basic options and we turn specific 
+        options on or off for testing using the following command line within the build
+        directory:
+        
+        cmake -C <sourcepath>/config/cmake/cacheinit.cmake -G "<generator>"  [-D<options>]  <sourcepath>
+        
+        Where <generator> is    
+            * Borland Makefiles
+            * MSYS Makefiles
+            * MinGW Makefiles
+            * NMake Makefiles
+            * Unix Makefiles
+            * Visual Studio 10
+            * Visual Studio 10 Win64
+            * Visual Studio 6
+            * Visual Studio 7
+            * Visual Studio 7 .NET 2003
+            * Visual Studio 8 2005
+            * Visual Studio 8 2005 Win64
+            * Visual Studio 9 2008
+            * Visual Studio 9 2008 Win64
+
+        <options> is:
+            * SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
+            * SZIP_LIBRARY:FILEPATH=<path to szip/library file>
+            * ZLIB_INCLUDE_DIR:PATH=<path to szip includes directory>
+            * ZLIB_LIBRARY:FILEPATH=<path to szip/library file>
+            * <HDF5OPTION>:BOOL=[ON | OFF]
+
+        <cacheinit.cmake> is:
+            # This is the CMakeCache file.
+            ########################
+            # EXTERNAL cache entries
+            ########################
+            SET (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries" FORCE)
+            SET (BUILD_TESTING ON CACHE BOOL "Build HDF5 Unit Testing" FORCE)
+            SET (HDF5_BUILD_CPP_LIB ON CACHE BOOL "Build HDF5 C++ Library" FORCE)
+            SET (HDF5_BUILD_EXAMPLES ON CACHE BOOL "Build HDF5 Library Examples" FORCE)
+            SET (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
+            SET (HDF5_BUILD_HL_LIB ON CACHE BOOL "Build HIGH Level HDF5 Library" FORCE)
+            SET (HDF5_BUILD_TOOLS ON CACHE BOOL "Build HDF5 Tools" FORCE)
+            SET (HDF5_DISABLE_COMPILER_WARNINGS OFF CACHE BOOL "Disable compiler warnings" FORCE)
+            SET (HDF5_ENABLE_HSIZET ON CACHE BOOL "Enable datasets larger than memory" FORCE)
+            SET (HDF5_ENABLE_PARALLEL OFF CACHE BOOL "Enable parallel build (requires MPI)" FORCE)
+            SET (HDF5_ENABLE_SZIP_ENCODING ON CACHE BOOL "Use SZip Encoding" FORCE)
+            SET (HDF5_ENABLE_SZIP_SUPPORT ON CACHE BOOL "Use SZip Filter" FORCE)
+            SET (HDF5_ENABLE_Z_LIB_SUPPORT ON CACHE BOOL "Enable Zlib Filters" FORCE)
+            SET (HDF5_USE_H5DUMP_PACKED_BITS ON CACHE BOOL "Use the PACKED BITS feature in h5dump" FORCE)
+            SET (HDF5_ENABLE_COVERAGE OFF CACHE BOOL "Enable code coverage for Libraries and Programs" FORCE)
 
    2. Configure the cache settings
 
-      Click the Configure button. If this is the first time you are 
-      running cmake-gui in this directory, you will be prompted for the 
-      generator you wish to use (for example on Windows, Visual Studio 9 2008). 
-      CMake will read in the CMakeLists.txt files from the source directory and 
-      display options for the HDF5 project. After the first configure you 
-      can adjust the cache settings and/or specify locations of other programs.
+      2.1  Click the Configure button. If this is the first time you are 
+           running cmake-gui in this directory, you will be prompted for the 
+           generator you wish to use (for example on Windows, Visual Studio 9 2008). 
+           CMake will read in the CMakeLists.txt files from the source directory and 
+           display options for the HDF5 project. After the first configure you 
+           can adjust the cache settings and/or specify locations of other programs.
       
-      Any conflicts or new values will be highlighted by the configure
-      process in red. Once you are happy with all the settings and there are no 
-      more values in red, click the Generate button to produce the appropriate 
-      build files. 
+           Any conflicts or new values will be highlighted by the configure
+           process in red. Once you are happy with all the settings and there are no 
+           more values in red, click the Generate button to produce the appropriate 
+           build files. 
       
-      On Windows, if you are using a Visual Studio generator, the solution and 
-      project files will be created in the build folder.
+           On Windows, if you are using a Visual Studio generator, the solution and 
+           project files will be created in the build folder.
       
-      On linux, if you are using the Unix Makefiles generator, the Makefiles will
-      be created in the build folder.
+           On linux, if you are using the Unix Makefiles generator, the Makefiles will
+           be created in the build folder.
+
+      2.2  Alternative command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
+      
+               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 9 2008" \
+               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF ..
 
    3. Build HDF5
    
@@ -94,12 +157,25 @@ Notes: This short instruction is written for users who want to quickly build
       NOTE: "-C {Debug | Release}" may be optional on your platform. We
             recommend choosing either Debug or Release to match the build
             step on Windows.                                                                                      
-              
+
+   5. Packaging HDF5
+   
+      To package the build into a simple installer using the NullSoft installer NSIS
+      on Windows, or into compressed files (.tar.gz, .sh, .zip), use the CPack tool.
+
+      To pacakage the build, navigate to your build directory and execute;
+      
+              cpack -C CPackConfig.cmake
+              cpack -C CPackSourceConfig.cmake
+      
+      NOTE: We have just introduced the packaging capability and it has not been 
+            extensively tested. Please send us comments on how it can be improved.
+           
    5. The files that support building HDF5 with CMake are all the files in the 
-      config/cmake folder, the CMakeLists.txt files in each source folder, and two 
-      additional files, ConfigureChecks.cmake and CTestConfig.cmake. The 
-      CTestConfig.cmake is specific to the internal testing performed by The HDF 
-      Group. It should be altered for the users installation and needs.
+      config/cmake folder, the CMakeLists.txt files in each source folder, and 
+      CTestConfig.cmake. CTestConfig.cmake is specific to the internal testing 
+      performed by The HDF Group. It should be altered for the users 
+      installation and needs.
 
    6. More information about using CMake can be found at the KitWare site, 
       www.cmake.org.
