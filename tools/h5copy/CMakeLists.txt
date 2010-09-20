@@ -166,17 +166,17 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (simple_group 0 ${HDF_FILE1} v /grp_dsets/simple /grp_dsets/simple_group)
 
   # "Test copying & renaming group"
-  ADD_H5_TEST (grp_rename 1 ${HDF_FILE1} v grp_dsets grp_rename)
+  ADD_H5_TEST (grp_rename 0 ${HDF_FILE1} v grp_dsets grp_rename)
 
   # "Test copying 'full' group hierarchy into group in destination file"
-  ADD_H5_TEST (grp_dsets_rename 1 ${HDF_FILE1} v grp_dsets /grp_rename/grp_dsets)
+  ADD_H5_TEST (grp_dsets_rename 0 ${HDF_FILE1} v grp_dsets /grp_rename/grp_dsets)
 
   # "Test copying objects into group hier. that doesn't exist yet in destination file"
   ADD_H5_TEST (A_B1_simple 0 ${HDF_FILE1} vp simple /A/B1/simple)
   ADD_H5_TEST (A_B2_simple2 0 ${HDF_FILE1} vp simple /A/B2/simple2)
   ADD_H5_TEST (C_D_simple 0 ${HDF_FILE1} vp /grp_dsets/simple /C/D/simple)
-  ADD_H5_TEST (E_F_grp_dsets 1 ${HDF_FILE1} vp /grp_dsets /E/F/grp_dsets)
-  ADD_H5_TEST (G_H_grp_nested 1 ${HDF_FILE1} vp /grp_nested /G/H/grp_nested)
+  ADD_H5_TEST (E_F_grp_dsets 0 ${HDF_FILE1} vp /grp_dsets /E/F/grp_dsets)
+  ADD_H5_TEST (G_H_grp_nested 0 ${HDF_FILE1} vp /grp_nested /G/H/grp_nested)
 
   # Verify that the file created above is correct
   ADD_H5LS_TEST (${HDF_FILE1})
