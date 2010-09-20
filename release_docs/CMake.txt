@@ -165,8 +165,7 @@ Notes: This short instruction is written for users who want to quickly build
 
       To pacakage the build, navigate to your build directory and execute;
       
-              cpack -C CPackConfig.cmake
-              cpack -C CPackSourceConfig.cmake
+              cpack -C {Debug | Release} CPackConfig.cmake
       
       NOTE: We have just introduced the packaging capability and it has not been 
             extensively tested. Please send us comments on how it can be improved.
