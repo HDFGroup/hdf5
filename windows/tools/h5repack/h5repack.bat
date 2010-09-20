@@ -42,6 +42,11 @@ set h5diff=..\h5diff%2\%1\h5diff%2
 rem The path of the h5diff tool binary
 set h5diff_bin=%CD%\%h5diff%
 
+rem The h5dump tool name
+set h5dump=..\h5dump%2\%1\h5dump%2
+rem The path of the h5dump tool binary
+set h5dump_bin=%CD%\%h5dump%
+
 set h5detectszip=testh5repack_detect_szip%2
 set h5detectszip_bin=%CD%\..\testfiles\%h5detectszip%\%1\%h5detectszip%
 
@@ -66,6 +71,7 @@ set file14=h5repack_layouto.h5
 set file15=h5repack_named_dtypes.h5
 rem located in common testfiles folder
 set file16=tfamilyPERCENT05d.h5
+set file18=h5repack_layout2.h5
 
 
 set nerrors=0
@@ -125,7 +131,7 @@ rem
 :difftest
     set params=%*
     %h5diff_bin% -q !params:PERCENT=%%!
-    if %errorlevel% neq 0 (
+    if !errorlevel! neq 0 (
         call :verify *FAILED* %*
         set /a nerrors=!nerrors!+1
     ) else (
@@ -137,7 +143,18 @@ rem
     
 rem Call h5repack
 rem
+
+rem call TOOLTEST_MAIN and delete $output file
 :tooltest
+
+    call :tooltest_main %*
+    set outfile=%CD%\out.%1
+    del /f %outfile%
+    
+    exit /b
+
+rem TOOLTEST main function, doesn't delete $output file
+:tooltest_main
 
     rem Run test.
     set infile=%CD%\testfiles\%1
@@ -157,17 +174,114 @@ rem
     )
     %h5repack_bin% %params% %infile% %outfile%
     
-    if %errorlevel% neq 0 (
+    if !errorlevel! neq 0 (
         call :testing *FAILED* %*
         set /a nerrors=!nerrors!+1
     ) else (
         call :testing PASSED %*
         call :difftest %infile% %outfile%
     )
-    del /f %outfile%
     
     exit /b
+
+rem ------------------------------------------
+rem Verifying layouts of a dataset 
+:verify_layout_dset
+
+    rem Run test.
+    set outfile=%CD%\out.%1
+    set layoutfile=%CD%\layout.%1
+    set dset=%2
+    set expectlayout=%3
     
+    rem ---------------------------------
+    rem check the layout from a dataset
+    %h5dump_bin% -d %dset% -pH %outfile% > %layoutfile%
+    findstr /c:"%expectlayout%" %layoutfile% > nul
+    if !errorlevel! neq 0 (
+        call :verify *FAILED* %*
+        set /a nerrors=!nerrors!+1
+    ) else (
+        call :verify PASSED %*
+    )
+
+    rem clean up tmp files
+    del /f %outfile%
+    del /f %layoutfile%
+    
+    exit /b
+
+rem----------------------------------------
+rem Verifying layouts from entire file
+:verify_layout_all
+
+    rem Run test.
+    set outfile=%CD%\out.%1
+    set layoutfile=%CD%\layout.%1
+    set expectlayout=%2
+    
+    rem ---------------------------------
+    rem check the layout from a dataset
+    rem check if the other layouts still exsit
+        rem if CONTIGUOUS
+        if "%expectlayout%"=="CONTIGUOUS" (
+            %h5dump_bin% -pH %outfile% > %layoutfile%
+            findstr /c:"COMPACT" %layoutfile% > nul
+            if !errorlevel! neq 0 (
+                findstr /c:"CHUNKED" %layoutfile% > nul
+                if !errorlevel! equ 0 (
+                    call :verify *FAILED* %*
+                    set /a nerrors=!nerrors!+1
+                ) else (
+                    call :verify PASSED %*
+                )
+            ) else (
+                call :verify *FAILED* %*
+                set /a nerrors=!nerrors!+1
+            )
+        ) else (
+            rem if COMPACT
+            if "%expectlayout%"=="COMPACT" (
+                %h5dump_bin% -pH %outfile% > %layoutfile%
+                findstr /c:"CHUNKED" %layoutfile% > nul
+                if !errorlevel! neq 0 (
+                    findstr /c:"CONTIGUOUS" %layoutfile% > nul
+                    if !errorlevel! equ 0 (
+                        call :verify *FAILED* %*
+                        set /a nerrors=!nerrors!+1
+                    ) else (
+                        call :verify PASSED %*
+                    )
+                ) else (
+                    call :verify *FAILED* %*
+                    set /a nerrors=!nerrors!+1
+                )
+            ) else (
+                rem if CHUNKED
+                if "%expectlayout%"=="CHUNKED" (
+                    %h5dump_bin% -pH %outfile% > %layoutfile%
+                    findstr/c:"CONTIGUOUS" %layoutfile% > nul
+                    if !errorlevel! neq 0 (
+                        findstr /c:"COMPACT" %layoutfile% > nul
+                        if !errorlevel! equ 0 (
+                            call :verify *FAILED* %*
+                            set /a nerrors=!nerrors!+1
+                        ) else (
+                            call :verify PASSED %*
+                        )
+                    ) else (
+                        call :verify *FAILED* %*
+                        set /a nerrors=!nerrors!+1
+                    )
+                )
+           )
+        )
+
+    rem clean up tmp files
+    del /f %outfile%
+    del /f %layoutfile%
+    
+    exit /b
     
 rem Call h5repack with old syntax
 rem
@@ -191,7 +305,7 @@ rem
     )
     %h5repack_bin% -i %infile% -o %outfile% %params%
     
-    if %errorlevel% neq 0 (
+    if !errorlevel! neq 0 (
         call :testing *FAILED* %*
         set /a nerrors=!nerrors!+1
     ) else (
@@ -225,7 +339,7 @@ rem
     )
     %h5repack_bin% %params% !infile:PERCENT=%%! !outfile:PERCENT=%%!
     
-    if %errorlevel% neq 0 (
+    if !errorlevel! neq 0 (
         call :testing *FAILED* %*
         set /a nerrors=!nerrors!+1
     ) else (
@@ -245,7 +359,7 @@ rem If we find a better way to test this in the future, we should use it.
 rem --SJW 9/4/07
 :detect_filter
     findstr /b /i /c:"#define H5_HAVE_FILTER_%1" %h5pubconf% > nul
-    if %errorlevel% equ 0 (
+    if !errorlevel! equ 0 (
         set use_filter_%1=yes
     ) else (
         set use_filter_%1=no
@@ -558,12 +672,18 @@ rem
     rem  layout options (these files have no filters)
     rem ########################################################
 
-    call :tooltest %file4% --layout=dset2:CHUNK=20x10
-    call :tooltest %file4% -l CHUNK=20x10
-    call :tooltest %file4% -l dset2:CONTI
-    call :tooltest %file4% -l CONTI
-    call :tooltest %file4% -l dset2:COMPA
-    call :tooltest %file4% -l COMPA
+    call :tooltest_main %file4% --layout=dset2:CHUNK=20x10
+    call :verify_layout_dset %file4% dset2 CHUNKED
+    call :tooltest_main %file4% -l CHUNK=20x10
+    call :verify_layout_all %file4% CHUNKED
+    call :tooltest_main %file4% -l dset2:CONTI
+    call :verify_layout_dset %file4% dset2 CONTIGUOUS
+    call :tooltest_main %file4% -l CONTI
+    call :verify_layout_all %file4% CONTIGUOUS
+    call :tooltest_main %file4% -l dset2:COMPA
+    call :verify_layout_dset %file4% dset2 COMPACT
+    call :tooltest_main %file4% -l COMPA
+    call :verify_layout_all %file4% COMPACT
 
 
     rem ###############################################################
@@ -579,15 +699,31 @@ rem
     set arg7=%file4% -l dset_chunk:COMPA
     set arg8=%file4% -l dset_chunk:CONTI
     set arg9=%file4% -l dset_chunk:CHUNK=18x13
-    call :tooltest %arg1%
-    call :tooltest %arg2%
-    call :tooltest %arg3%
-    call :tooltest %arg4%
-    call :tooltest %arg5%
-    call :tooltest %arg6%
-    call :tooltest %arg7%
-    call :tooltest %arg8%
-    call :tooltest %arg9%
+    call :tooltest_main %arg1%
+    call :verify_layout_dset %file4% dset_compact CONTIGUOUS
+    call :tooltest_main %arg2%
+    call :verify_layout_dset %file4% dset_compact CHUNKED
+    call :tooltest_main %arg3%
+    call :verify_layout_dset %file4% dset_compact COMPACT
+    call :tooltest_main %arg4%
+    call :verify_layout_dset %file4% dset_contiguous COMPACT
+    call :tooltest_main %arg5%
+    call :verify_layout_dset %file4% dset_contiguous CHUNKED
+    call :tooltest_main %arg6%
+    call :verify_layout_dset %file4% dset_contiguous CONTIGUOUS
+    call :tooltest_main %arg7%
+    call :verify_layout_dset %file4% dset_chunk COMPACT
+    call :tooltest_main %arg8%
+    call :verify_layout_dset %file4% dset_chunk CONTIGUOUS
+    call :tooltest_main %arg9%
+    call :verify_layout_dset %file4% dset_chunk CHUNKED
+
+    rem test convert small size dataset ( < 1k) to compact layout without -m
+    call :tooltest_main %file18% -l contig_small:COMPA
+    call :verify_layout_dset %file18% contig_small COMPACT
+
+    call :tooltest_main %file18% -l chunked_small_fixed:COMPA
+    call :verify_layout_dset %file18% chunked_small_fixed COMPACT
 
     rem Native option
     rem Do not use FILE1, as the named dtype will be converted to native, and h5diff will
@@ -601,15 +737,17 @@ rem
     if not "%use_filter_deflate%"=="yes" (
        call :skip %arg%
     ) else (
-       call :tooltest %arg%
+       call :tooltest_main %arg%
+       call :verify_layout_all %file4% CHUNKED
     )
 
     rem latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
     set arg=%file4% -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype]
     if not "%use_filter_deflate%"=="yes" (
-     call :skip %arg%
+       call :skip %arg%
     ) else (
-     call :tooltest %arg%
+       call :tooltest_main %arg%
+       call :verify_layout_all %file4% CHUNKED
     )
     
     rem several global filters
