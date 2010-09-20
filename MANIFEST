@@ -90,6 +90,7 @@
 ./config/i686-pc-cygwin
 ./config/ia64-linux-gnu
 ./config/ibm-aix
+./config/ibm-aix6.x
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
