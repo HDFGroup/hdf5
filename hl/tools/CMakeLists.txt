@@ -54,7 +54,7 @@ INSTALL (
         gif2h5
         hdf2gif
     RUNTIME DESTINATION
-        bin/tools
+        ${HDF5_INSTALL_BIN_DIR}/tools
     COMPONENT
         hltoolsapplications
 )

@@ -145,7 +145,7 @@ INSTALL (
     TARGETS
         h5stat
     RUNTIME DESTINATION
-        bin/tools
+        ${HDF5_INSTALL_BIN_DIR}/tools
     COMPONENT
         toolsapplications
 )

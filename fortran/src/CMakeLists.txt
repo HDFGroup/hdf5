@@ -223,7 +223,7 @@ INSTALL (
         ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
         ${HDF5_F90_BINARY_DIR}/H5fortran_types.f90
     DESTINATION 
-        include/fortran 
+        ${HDF5_INSTALL_INCLUDE_DIR}/fortran 
     COMPONENT 
         fortheaders
 )
@@ -232,7 +232,7 @@ INSTALL (
     DIRECTORY
         ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
     DESTINATION
-        include/fortran
+        ${HDF5_INSTALL_INCLUDE_DIR}/fortran
     COMPONENT
         fortheaders
 )
@@ -247,8 +247,8 @@ IF (HDF5_EXPORTED_TARGETS)
           ${HDF5_F90_LIB_TARGET}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
-      LIBRARY DESTINATION lib COMPONENT fortlibraries
-      ARCHIVE DESTINATION lib COMPONENT fortlibraries
-      RUNTIME DESTINATION bin COMPONENT fortlibraries
+      LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
+      ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
+      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT fortlibraries
   )
 ENDIF (HDF5_EXPORTED_TARGETS)

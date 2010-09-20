@@ -82,6 +82,19 @@ H5_SET_LIB_OPTIONS (${HDF5_HL_F90_LIB_TARGET} ${HDF5_HL_F90_LIB_NAME} ${LIB_TYPE
 ADD_DEPENDENCIES (${HDF5_HL_F90_LIB_TARGET} ${HDF5_HL_F90_C_LIB_TARGET})
 
 #-----------------------------------------------------------------------------
+# Add file(s) to CMake Install
+#-----------------------------------------------------------------------------
+
+INSTALL (
+    DIRECTORY
+        ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
+    DESTINATION
+        ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+    COMPONENT
+        fortheaders
+)
+
+#-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 IF (HDF5_EXPORTED_TARGETS)
@@ -91,8 +104,8 @@ IF (HDF5_EXPORTED_TARGETS)
           ${HDF5_HL_F90_LIB_TARGET}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
-      LIBRARY DESTINATION lib COMPONENT hlfortlibraries
-      ARCHIVE DESTINATION lib COMPONENT hlfortlibraries
-      RUNTIME DESTINATION bin COMPONENT hlfortlibraries
+      LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hlfortlibraries
+      ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hlfortlibraries
+      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hlfortlibraries
   )
 ENDIF (HDF5_EXPORTED_TARGETS)

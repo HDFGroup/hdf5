@@ -130,7 +130,7 @@ INSTALL (
     TARGETS
         h5debug h5repart
     RUNTIME DESTINATION
-        bin/tools
+        ${HDF5_INSTALL_BIN_DIR}/tools
     COMPONENT
         toolsapplications
 )

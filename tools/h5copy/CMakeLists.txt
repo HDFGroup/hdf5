@@ -251,7 +251,7 @@ INSTALL (
     TARGETS
         h5copy
     RUNTIME DESTINATION
-        bin/tools
+        ${HDF5_INSTALL_BIN_DIR}/tools
     COMPONENT
         toolsapplications
 )

@@ -270,7 +270,7 @@ INSTALL (
     TARGETS
         h5ls
     RUNTIME DESTINATION
-        bin/tools
+        ${HDF5_INSTALL_BIN_DIR}/tools
     COMPONENT
         toolsapplications
 )
