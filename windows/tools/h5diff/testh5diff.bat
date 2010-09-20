@@ -399,7 +399,9 @@ rem ############################################################################
 
     rem 6.1: Check if non-exist object name is specified 
     call :testing %h5diff% %srcfile1% %srcfile1% nono_obj
-    call :tooltest h5diff_601.txt %file1% %file1% nono_obj
+    rem SKIP this test as on Wondows legacy specific 
+    rem call :tooltest h5diff_601.txt %file1% %file1% nono_obj
+    call :results -SKIP-
 
 
     rem ########################################################################
@@ -823,14 +825,14 @@ rem ############################################################################
 
 
     rem ##############################################################################
-    rem # Exclude objects (--exclude-object)
+    rem # Exclude objects (--exclude-path)
     rem ##############################################################################
     rem #-------------------------------------------------
     rem # Same structure, same names and different value.
 
     rem Exclude the object with different value. Expect return - same
-    call :testing %h5diff% -v --exclude-object /group1/dset3 %srcexclude1_1% %srcexclude1_2%
-    call :tooltest h5diff_480.txt -v --exclude-object /group1/dset3 %exclude1_1% %exclude1_2%
+    call :testing %h5diff% -v --exclude-path /group1/dset3 %srcexclude1_1% %srcexclude1_2%
+    call :tooltest h5diff_480.txt -v --exclude-path /group1/dset3 %exclude1_1% %exclude1_2%
 
     rem Verify different by not excluding. Expect return - diff
     call :testing %h5diff% -v %srcexclude1_1% %srcexclude1_2%
@@ -840,12 +842,12 @@ rem ############################################################################
     rem # Different structure, different names. 
 
     rem Exclude all the different objects. Expect return - same
-    call :testing %h5diff% -v --exclude-object "/group1" --exclude-object "/dset1" %srcexclude2_1% %srcexclude2_2%
-    call :tooltest h5diff_482.txt -v --exclude-object "/group1" --exclude-object "/dset1" %exclude2_1% %exclude2_2%
+    call :testing %h5diff% -v --exclude-path "/group1" --exclude-path "/dset1" %srcexclude2_1% %srcexclude2_2%
+    call :tooltest h5diff_482.txt -v --exclude-path "/group1" --exclude-path "/dset1" %exclude2_1% %exclude2_2%
 
     rem Exclude only some different objects. Expect return - diff
-    call :testing %h5diff% -v --exclude-object "/group1" %srcexclude2_1% %srcexclude2_2%
-    call :tooltest h5diff_483.txt -v --exclude-object "/group1" %exclude2_1% %exclude2_2%
+    call :testing %h5diff% -v --exclude-path "/group1" %srcexclude2_1% %srcexclude2_2%
+    call :tooltest h5diff_483.txt -v --exclude-path "/group1" %exclude2_1% %exclude2_2%
 
 	
     rem #######################################################################
