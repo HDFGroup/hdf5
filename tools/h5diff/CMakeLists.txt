@@ -118,6 +118,7 @@ IF (BUILD_TESTING)
       h5diff_481.txt
       h5diff_482.txt
       h5diff_483.txt
+      h5diff_484.txt
       h5diff_50.txt
       h5diff_51.txt
       h5diff_52.txt
@@ -778,6 +779,9 @@ ADD_H5_TEST (h5diff_481 1 -v ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2})
 ADD_H5_TEST (h5diff_482 0 -v --exclude-path "/group1" --exclude-path "/dset1" ${EXCLUDE_FILE2_1} ${EXCLUDE_FILE2_2})
 # Exclude only some different objects. Expect return - diff
 ADD_H5_TEST (h5diff_483 1 -v --exclude-path "/group1" ${EXCLUDE_FILE2_1} ${EXCLUDE_FILE2_2})
+
+# Exclude from group compare
+ADD_H5_TEST (h5diff_484 0 -v --exclude-path "/dset3" ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2} /group1)
 
   
 ENDIF (BUILD_TESTING)

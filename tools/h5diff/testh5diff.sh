@@ -770,6 +770,8 @@ TOOLTEST h5diff_482.txt -v --exclude-path "/group1" --exclude-path "/dset1" $EXC
 # Exclude only some different objects. Expect return - diff
 TOOLTEST h5diff_483.txt -v --exclude-path "/group1" $EXCLUDE_FILE2_1 $EXCLUDE_FILE2_2
 
+# Exclude from group compare
+TOOLTEST h5diff_484.txt -v --exclude-path "/dset3" h5diff_exclude1-1.h5 h5diff_exclude1-2.h5 /group1
 
 
 # ##############################################################################

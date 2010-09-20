@@ -849,6 +849,10 @@ rem ############################################################################
     call :testing %h5diff% -v --exclude-path "/group1" %srcexclude2_1% %srcexclude2_2%
     call :tooltest h5diff_483.txt -v --exclude-path "/group1" %exclude2_1% %exclude2_2%
 
+    rem Exclude from group compare
+    call :testing %h5diff% -v --exclude-path "/dset3" %srcexclude2_1% %srcexclude2_2% /group1
+    call :tooltest h5diff_484.txt -v --exclude-path "/dset3" %srcexclude2_1% %srcexclude2_2% /group1
+
 	
     rem #######################################################################
     rem # END
