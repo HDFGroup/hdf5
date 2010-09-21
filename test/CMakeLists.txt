@@ -259,6 +259,43 @@ TARGET_LINK_LIBRARIES (ttsafe ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME ttsafe COMMAND $<TARGET_FILE:ttsafe>)
 
+IF (HDF5_TEST_VFD)
+
+  SET (VFD_LIST
+      sec2
+      stdio
+      core
+      split
+      multi
+      family
+  )
+  
+  IF (DIRECT_VFD)
+    SET (VFD_LIST ${VFD_LIST} direct)
+  ENDIF (DIRECT_VFD)
+
+  MACRO (ADD_VFD_TEST vfdname resultcode)
+    FOREACH (test ${H5_TESTS})
+      ADD_TEST (
+        NAME VFD-${vfdname}-${test} 
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:${test}>"
+            -D "TEST_ARGS:STRING="
+            -D "TEST_VFD:STRING=${vfdname}"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+            -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
+      )
+    ENDFOREACH (test ${H5_TESTS})
+  ENDMACRO (ADD_VFD_TEST)
+  
+  # Run test with different Virtual File Driver
+  FOREACH (vfd ${VFD_LIST})
+    ADD_VFD_TEST (${vfd} 0)
+  ENDFOREACH (vfd ${VFD_LIST})
+
+ENDIF (HDF5_TEST_VFD)
+
 ##############################################################################
 ##############################################################################
 ###           T H E   G E N E R A T O R S                                  ###
