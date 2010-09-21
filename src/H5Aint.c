@@ -872,7 +872,8 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
         dst_oloc->file = file_dst;
 
         /* Copy the shared object from source to destination */
-        if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, cpy_info, FALSE) < 0)
+        if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, cpy_info, FALSE,
+                NULL, NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
 
         /* Update shared message info from named datatype info */
