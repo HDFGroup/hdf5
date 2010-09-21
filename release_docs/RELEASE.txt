@@ -125,6 +125,9 @@ Bug Fixes since HDF5-1.8.5
 
     Library
     -------
+    - Modified library to always cache symbol table information.  Libraries
+      version 1.6.3 have a bug which causes them to require this information for
+      some operations. (NAF - 2010/09/21 - 1864)
     - Fixed a bug where the library could generate an assertion/core dump when
       a file that had been created with H5Pset_libver_bounds(fapl,
       H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) but didn't have a superblock
