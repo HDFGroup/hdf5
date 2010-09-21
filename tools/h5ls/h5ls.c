@@ -2417,7 +2417,11 @@ main(int argc, const char *argv[])
 
     /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
     if(!show_errors_g)
-        H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+#ifdef H5_USE_16_API_DEFAULT
+        H5Eset_auto(NULL, NULL);
+#else /* H5_USE_16_API_DEFAULT */
+        H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+#endif /* H5_USE_16_API_DEFAULT */
 
 
     /* Each remaining argument is an hdf5 file followed by an optional slash

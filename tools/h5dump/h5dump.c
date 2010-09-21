@@ -4312,7 +4312,7 @@ main(int argc, const char *argv[])
     hid_t               fid, gid;
     char               *fname = NULL;
     void               *edata;
-    H5E_auto2_t         func;
+    H5E_auto_t          func;
     H5O_info_t          oi;
     struct handler_t   *hand;
     int                 i;
@@ -4324,8 +4324,13 @@ main(int argc, const char *argv[])
     dump_function_table = &ddl_function_table;
 
     /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+#ifdef H5_USE_16_API_DEFAULT
+    H5Eget_auto(&func, &edata);
+    H5Eset_auto(NULL, NULL);
+#else /* H5_USE_16_API_DEFAULT */
+    H5Eget_auto(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+#endif /* H5_USE_16_API_DEFAULT */
 
     /* Initialize h5tools lib */
     h5tools_init();
@@ -4533,8 +4538,11 @@ done:
     HDfree(fname);
 
     /* To Do:  clean up XML table */
-
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
+#ifdef H5_USE_16_API_DEFAULT
+    H5Eset_auto(func, edata);
+#else /* H5_USE_16_API_DEFAULT */
+    H5Eset_auto(H5E_DEFAULT, func, edata);
+#endif /* H5_USE_16_API_DEFAULT */
 
     leave(h5tools_getstatus());
 }

@@ -212,7 +212,11 @@ h5_reset(void)
     HDfflush(stdout);
     HDfflush(stderr);
     H5close();
-    H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
+#ifdef H5_USE_16_API_DEFAULT
+    H5Eset_auto(h5_errors, NULL);
+#else /* H5_USE_16_API_DEFAULT */
+    H5Eset_auto(H5E_DEFAULT, h5_errors, NULL);
+#endif /* H5_USE_16_API_DEFAULT */
 
 /*
  * I commented this chunk of code out because it's not clear what diagnostics

@@ -170,13 +170,19 @@ H5E_set_default_auto(H5E_t *stk)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_set_default_auto)
 
-#ifdef H5_USE_16_API
+#ifdef H5_USE_16_API_DEFAULT
     stk->auto_op.vers = 1;
-    stk->auto_op.u.func1 = (H5E_auto1_t)H5Eprint1;
-#else /* H5_USE_16_API */
+#else /* H5_USE_16_API_DEFAULT */
     stk->auto_op.vers = 2;
-    stk->auto_op.u.func2 = (H5E_auto2_t)H5Eprint2;
-#endif /* H5_USE_16_API */
+#endif /* H5_USE_16_API_DEFAULT */
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+    stk->auto_op.vers = 2;
+    stk->auto_op.func1 = NULL;
+#else
+    stk->auto_op.func1 = (H5E_auto1_t)H5Eprint1;
+#endif
+    stk->auto_op.func2 = (H5E_auto2_t)H5Eprint2;
+    stk->auto_op.user_set = FALSE;
     stk->auto_data = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1578,8 +1584,12 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
     /* Get the automatic error reporting information */
     if(H5E_get_auto(estack, &op, client_data) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info")
+
+    if(op.user_set && op.vers == 1)
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "wrong API function, H5Eset_auto1 has been called")
+
     if(func)
-        *func = op.u.func2;
+        *func = op.func2;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1629,7 +1639,8 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
 
     /* Set the automatic error reporting information */
     op.vers = 2;
-    op.u.func2 = func;
+    op.user_set = TRUE;
+    op.func2 = func;
     if(H5E_set_auto(estack, &op, client_data) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set automatic error info")
 

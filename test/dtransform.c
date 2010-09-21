@@ -641,7 +641,7 @@ static int
 test_set(void)
 {
     hid_t dxpl_id = -1;
-    H5E_auto2_t func;
+    H5E_auto_t func;
     const char *str = "(9/5.0)*x + 32";
     char *ptrgetTest = NULL;
 
@@ -654,9 +654,15 @@ test_set(void)
         TEST_ERROR
 
     /* Test get before set */
-    H5Eget_auto2(H5E_DEFAULT, &func, NULL);
+#ifdef H5_USE_16_API_DEFAULT
+    H5Eget_auto(&func, NULL);
 
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+    H5Eset_auto(NULL, NULL);
+#else /* H5_USE_16_API_DEFAULT */
+    H5Eget_auto(H5E_DEFAULT, &func, NULL);
+
+    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+#endif /* H5_USE_16_API_DEFAULT */
 
     if(H5Pget_data_transform(dxpl_id, ptrgetTest, HDstrlen(str) + 1) < 0)
         PASSED()
@@ -693,7 +699,11 @@ test_set(void)
     TESTING("H5Pset_data_transform (set with invalid transform 8)")
     INVALID_SET_TEST("(9/5)*x + x^2");
 
-    H5Eset_auto2(H5E_DEFAULT, func, NULL);
+#ifdef H5_USE_16_API_DEFAULT
+    H5Eset_auto(func, NULL);
+#else /* H5_USE_16_API_DEFAULT */
+    H5Eset_auto(H5E_DEFAULT, func, NULL);
+#endif /* H5_USE_16_API_DEFAULT */
 
     if(H5Pclose(dxpl_id) < 0)
         TEST_ERROR
