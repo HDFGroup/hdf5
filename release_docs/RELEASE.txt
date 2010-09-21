@@ -4,7 +4,7 @@ HDF5 version 1.8.6-pre1 currently under development
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.6 and 
+This document describes the differences between HDF5-1.8.5 and 
 HDF5 1.8.6-*, and contains information on the platforms tested and 
 known problems in HDF5-1.8.6-*. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
