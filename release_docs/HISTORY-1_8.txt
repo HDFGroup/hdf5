@@ -11,6 +11,12 @@ This file contains development history of HDF5 1.8 branch
 
 [Search on the string '%%%%' for per-release section breaks.]
 
+%%%%1.8.6%%%%   
+
+
+  ===> Copy RELEASE.TXT from 1.8.6 release branch HERE after it is completed!!!
+
+
 %%%%1.8.5%%%%   
 
 
