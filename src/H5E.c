@@ -177,7 +177,6 @@ H5E_set_default_auto(H5E_t *stk)
 #endif /* H5_USE_16_API_DEFAULT */
 #ifdef H5_NO_DEPRECATED_SYMBOLS
     stk->auto_op.vers = 2;
-    stk->auto_op.func1 = NULL;
 #else
     stk->auto_op.func1 = (H5E_auto1_t)H5Eprint1;
 #endif
