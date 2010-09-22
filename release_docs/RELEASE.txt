@@ -84,13 +84,13 @@ New Features
  
     Tools
     -----
-    - h5diff: Add a new flag --exclude-path. Specified path to an object will
-              be excluded from comparing the two files or two groups. If group
-              is specified all the member objects will be excluded.  
-              (JKM - 2010/09/16).
-    - h5ls: Add new flag --no-dangling-links. (refer to --help for details)
+    - h5diff: Add new flag --exclude-path.  The specified path to an object 
+      will be excluded when comparing two files or two groups. If a group is 
+      specified to be excluded, all member objects of that group will be 
+      excluded.  (JKM - 2010/09/16).
+    - h5ls: Add new flag --no-dangling-links.  See --help output for details.
       (JKM - 2010/06/15)
-    - h5ls: Add new flag --follow-symlinks. (refer to --help for details)
+    - h5ls: Add new flag --follow-symlinks.  See --help output for details.
       (JKM - 2010/05/25)
 
     High-Level APIs
@@ -127,10 +127,10 @@ Bug Fixes since HDF5-1.8.5
     -------
     - H5Eset_auto causes a seg fault when an application uses -DH5_USE_16_API
       to compile with the library. The problem is fixed and the behavior
-      of H5Eget_auto is modified (Bug #1707). (SLU - 2010/9/21)
+      of H5Eget_auto is modified. (SLU - 2010/9/21 - Bug 1707)
     - Modified library to always cache symbol table information.  Libraries
-      version 1.6.3 have a bug which causes them to require this information for
-      some operations. (NAF - 2010/09/21 - 1864)
+      from version 1.6.3 and earler have a bug which causes them to require 
+      this information for some operations. (NAF - 2010/09/21 - Bug 1864)
     - Fixed a bug where the library could generate an assertion/core dump when
       a file that had been created with H5Pset_libver_bounds(fapl,
       H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) but didn't have a superblock
@@ -145,19 +145,19 @@ Bug Fixes since HDF5-1.8.5
       couldn't close (bug 1260).  The fix releases all resources and closes
       the dataset but returns a failure. (SLU - 2010/09/08) 
     - H5Eset_current_stack now also closes the error stack to be set as the
-      default.  This is to avoid a potential problem (Bug 1799). 
-      (SLU - 2010/09/07)
+      default.  This is to avoid a potential problem. 
+      (SLU - 2010/09/07 - Bug 1799)
     - Corrected situation where 1-D chunked dataset could get created by an
       application without calling H5Pset_chunk().  H5Pset_chunk is now
       required for creating all chunked datasets.  (QAK - 2010/09/02)
     - Fixed many memory issues that valgrind exposed.  (QAK - 2010/08/24)
     - Fixed the bug in the filter's public CAN_APPLY function.  The return
-      value should be htri_t not herr_t (Bug #1239). (SLU - 2010/08/05)
+      value should be htri_t not herr_t. (SLU - 2010/08/05 - Bug 1239)
     - Fixed a bug in the direct I/O driver that could render files with certain
       kinds of unaligned data unreadable or corrupt them. (NAF - 2010/07/28)
     - valgrind reported an error of copying data to itself when a new attribute 
-      is written (Bug #1956).  I fixed it by taking out the memcpy step in the
-      attribute code. (SLU - 2010/07/28)
+      is written.  Fixed by taking out the memcpy step in the attribute code. 
+      (SLU - 2010/07/28 - Bug 1956)
     - Corrected various issues in the MPI datatype creation code which could
       cause resource leaks or incorrect behavior (and may improve the
       performance as well).  (QAK - 2010/07/19)
@@ -172,13 +172,13 @@ Bug Fixes since HDF5-1.8.5
 
     Tools
     -----
-    - Fixed to compare member objects and groups recursively when two 
-      files or groups are specified to be compared. Bug#1975
-      (JKM 2010/9/16)
+    - Fixed h5diff to compare member objects and groups recursively when two 
+      files or groups are specieied to be compared. 
+      (JKM - 2010/9/16 - Bug 1975)
     - Make h5repack be able to convert a layout to COMPACT for small size
-      dataset as default.  bug#1896 (JKM 2010/09/15)
+      dataset as default.  (JKM - 2010/09/15 - Bug 1896)
     - Change h5ls not to manipulate special characters in object name or 
-      attribute name for smart display. (JKM 2010/06/28 - Bug 1784)
+      attribute name for smart display. (JKM - 2010/06/28 - Bug 1784)
 
 
     F90 API
