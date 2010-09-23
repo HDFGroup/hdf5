@@ -1048,9 +1048,9 @@ test_h5s_chunk(void)
     dsetID = H5Dopen2(fileID, "coords", H5P_DEFAULT);
     CHECK(dsetID, FAIL, "H5Dopen2");
 
-    status= H5Dread (dsetID, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_dbl);
+    status= H5Dread(dsetID, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_dbl);
     CHECK(status, FAIL, "H5Dread");
-    status= H5Dread (dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt);
+    status= H5Dread(dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt);
     CHECK(status, FAIL, "H5Dread");
 
     status = H5Dclose(dsetID);
