@@ -420,11 +420,9 @@ H5D_efl_readvv(const H5D_io_info_t *io_info,
     const H5O_efl_t *efl = &(io_info->store->efl); /* Pointer to efl info */
     unsigned char *buf;         /* Pointer to buffer to write */
     haddr_t addr;               /* Actual address to read */
-    size_t total_size = 0;      /* Total size of sequence in bytes */
     size_t size;                /* Size of sequence in bytes */
-    size_t u;                   /* Counting variable */
-    size_t v;                   /* Counting variable */
-    ssize_t ret_value;          /* Return value */
+    size_t u, v;                /* Counting variables */
+    ssize_t ret_value = 0;      /* Return value (Total size of sequence in bytes) */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_efl_readvv)
 
@@ -452,26 +450,25 @@ H5D_efl_readvv(const H5D_io_info_t *io_info,
 
         /* Update memory information */
         mem_len_arr[v] -= size;
-        mem_offset_arr[v] += size;
         if(mem_len_arr[v] == 0)
             v++;
+        else
+            mem_offset_arr[v] += size;
 
         /* Update file information */
         dset_len_arr[u] -= size;
-        dset_offset_arr[u] += size;
         if(dset_len_arr[u] == 0)
             u++;
+        else
+            dset_offset_arr[u] += size;
 
         /* Increment number of bytes copied */
-        total_size += size;
+        ret_value += (ssize_t)size;
     } /* end for */
 
     /* Update current sequence vectors */
     *dset_curr_seq = u;
     *mem_curr_seq = v;
-
-    /* Set return value */
-    H5_ASSIGN_OVERFLOW(ret_value, total_size, size_t, ssize_t);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -501,11 +498,9 @@ H5D_efl_writevv(const H5D_io_info_t *io_info,
     const H5O_efl_t *efl = &(io_info->store->efl); /* Pointer to efl info */
     const unsigned char *buf;   /* Pointer to buffer to write */
     haddr_t addr;               /* Actual address to read */
-    size_t total_size = 0;      /* Total size of sequence in bytes */
     size_t size;                /* Size of sequence in bytes */
-    size_t u;                   /* Counting variable */
-    size_t v;                   /* Counting variable */
-    ssize_t ret_value;          /* Return value */
+    size_t u, v;                /* Counting variables */
+    ssize_t ret_value = 0;      /* Return value (Total size of sequence in bytes) */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_efl_writevv)
 
@@ -533,26 +528,25 @@ H5D_efl_writevv(const H5D_io_info_t *io_info,
 
         /* Update memory information */
         mem_len_arr[v] -= size;
-        mem_offset_arr[v] += size;
         if(mem_len_arr[v] == 0)
             v++;
+        else
+            mem_offset_arr[v] += size;
 
         /* Update file information */
         dset_len_arr[u] -= size;
-        dset_offset_arr[u] += size;
         if(dset_len_arr[u] == 0)
             u++;
+        else
+            dset_offset_arr[u] += size;
 
         /* Increment number of bytes copied */
-        total_size += size;
+        ret_value += (ssize_t)size;
     } /* end for */
 
     /* Update current sequence vectors */
     *dset_curr_seq = u;
     *mem_curr_seq = v;
-
-    /* Set return value */
-    H5_ASSIGN_OVERFLOW(ret_value, total_size, size_t, ssize_t);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

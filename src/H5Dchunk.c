@@ -4949,9 +4949,8 @@ H5D_nonexistent_readvv(const H5D_io_info_t *io_info,
     H5D_t *dset = io_info->dset;    /* Local pointer to the dataset info */
     H5D_fill_buf_info_t fb_info;    /* Dataset's fill buffer info */
     hbool_t fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
-    ssize_t bytes_processed = 0;    /* Eventual return value */
     size_t u, v;                    /* Local index variables */
-    ssize_t ret_value;              /* Return value */
+    ssize_t ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_nonexistent_readvv)
 
@@ -4993,26 +4992,25 @@ H5D_nonexistent_readvv(const H5D_io_info_t *io_info,
 
         /* Update source information */
         chunk_len_arr[v] -= size;
-        chunk_offset_arr[v] += size;
         if(chunk_len_arr[v] == 0)
             v++;
+        else
+            chunk_offset_arr[v] += size;
 
         /* Update destination information */
         mem_len_arr[u] -= size;
-        mem_offset_arr[u] += size;
         if(mem_len_arr[u] == 0)
             u++;
+        else
+            mem_offset_arr[u] += size;
 
         /* Increment number of bytes copied */
-        bytes_processed += (ssize_t)size;
+        ret_value += (ssize_t)size;
     } /* end for */
 
     /* Update current sequence vectors */
     *mem_curr_seq = u;
     *chunk_curr_seq = v;
-
-    /* Set return value */
-    ret_value = bytes_processed;
 
 done:
     /* Release the fill buffer info, if it's been initialized */
