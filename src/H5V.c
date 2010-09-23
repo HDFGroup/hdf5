@@ -1304,8 +1304,6 @@ H5V_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
  * Programmer:	Quincey Koziol
  *		Friday, May 2, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1316,64 +1314,62 @@ H5V_memcpyvv(void *_dst,
 {
     unsigned char *dst;         /* Destination buffer pointer */
     const unsigned char *src;   /* Source buffer pointer */
-    size_t total_size=0;        /* Total size of sequence in bytes */
     size_t size;                /* Size of sequence in bytes */
     size_t u,v;                 /* Local index variables */
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value = 0;      /* Return value (Total size of sequence in bytes) */
 
     FUNC_ENTER_NOAPI_NOFUNC(H5V_memcpyvv)
 
     /* Sanity check */
-    assert(_dst);
-    assert(dst_curr_seq);
-    assert(*dst_curr_seq<dst_max_nseq);
-    assert(dst_len_arr);
-    assert(dst_off_arr);
-    assert(_src);
-    assert(src_curr_seq);
-    assert(*src_curr_seq<src_max_nseq);
-    assert(src_len_arr);
-    assert(src_off_arr);
+    HDassert(_dst);
+    HDassert(dst_curr_seq);
+    HDassert(*dst_curr_seq < dst_max_nseq);
+    HDassert(dst_len_arr);
+    HDassert(dst_off_arr);
+    HDassert(_src);
+    HDassert(src_curr_seq);
+    HDassert(*src_curr_seq < src_max_nseq);
+    HDassert(src_len_arr);
+    HDassert(src_off_arr);
 
     /* Work through all the sequences */
-    for(u=*dst_curr_seq, v=*src_curr_seq; u<dst_max_nseq && v<src_max_nseq; ) {
+    for(u = *dst_curr_seq, v = *src_curr_seq; u < dst_max_nseq && v < src_max_nseq; ) {
         /* Choose smallest buffer to write */
-        if(src_len_arr[v]<dst_len_arr[u])
-            size=src_len_arr[v];
+        if(src_len_arr[v] < dst_len_arr[u])
+            size = src_len_arr[v];
         else
-            size=dst_len_arr[u];
+            size = dst_len_arr[u];
 
         /* Compute offset on disk */
-        dst=(unsigned char *)_dst+dst_off_arr[u];
+        dst = (unsigned char *)_dst + dst_off_arr[u];
 
         /* Compute offset in memory */
-        src=(const unsigned char *)_src+src_off_arr[v];
+        src = (const unsigned char *)_src + src_off_arr[v];
 
         /* Copy data */
-        HDmemcpy(dst,src,size);
+        HDmemcpy(dst, src, size);
 
         /* Update source information */
-        src_len_arr[v]-=size;
-        src_off_arr[v]+=size;
-        if(src_len_arr[v]==0)
+        src_len_arr[v] -= size;
+        if(0 == src_len_arr[v])
             v++;
+        else
+            src_off_arr[v] += size;
 
         /* Update destination information */
-        dst_len_arr[u]-=size;
-        dst_off_arr[u]+=size;
-        if(dst_len_arr[u]==0)
+        dst_len_arr[u] -= size;
+        if(0 == dst_len_arr[u])
             u++;
+        else
+            dst_off_arr[u] += size;
 
         /* Increment number of bytes copied */
-        total_size+=size;
+        ret_value += (ssize_t)size;
     } /* end for */
 
     /* Update current sequence vectors */
-    *dst_curr_seq=u;
-    *src_curr_seq=v;
-
-    /* Set return value */
-    H5_ASSIGN_OVERFLOW(ret_value,total_size,size_t,ssize_t);
+    *dst_curr_seq = u;
+    *src_curr_seq = v;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5V_memcpyvv() */
