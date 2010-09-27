@@ -158,24 +158,16 @@ void *tts_error_thread(void UNUSED *arg)
 {
     hid_t dataspace, datatype, dataset;
     hsize_t dimsf[1]; /* dataset dimensions */
-    H5E_auto_t old_error_cb;
+    H5E_auto2_t old_error_cb;
     void *old_error_client_data;
     int value;
     int ret;
 
-#ifdef H5_USE_16_API_DEFAULT
     /* preserve previous error stack handler */
-    H5Eget_auto(&old_error_cb, &old_error_client_data);
+    H5Eget_auto2(H5E_DEFAULT, &old_error_cb, &old_error_client_data);
 
     /* set each thread's error stack handler */
-    H5Eset_auto(error_callback, NULL);
-#else /* H5_USE_16_API_DEFAULT */
-    /* preserve previous error stack handler */
-    H5Eget_auto(H5E_DEFAULT, &old_error_cb, &old_error_client_data);
-
-    /* set each thread's error stack handler */
-    H5Eset_auto(H5E_DEFAULT, error_callback, NULL);
-#endif /* H5_USE_16_API_DEFAULT */
+    H5Eset_auto2(H5E_DEFAULT, error_callback, NULL);
 
     /* define dataspace for dataset */
     dimsf[0] = 1;
@@ -201,11 +193,7 @@ void *tts_error_thread(void UNUSED *arg)
     assert(ret >= 0);
 
     /* turn our error stack handler off */
-#ifdef H5_USE_16_API_DEFAULT
-    H5Eset_auto(old_error_cb, old_error_client_data);
-#else /* H5_USE_16_API_DEFAULT */
-    H5Eset_auto(H5E_DEFAULT, old_error_cb, old_error_client_data);
-#endif /* H5_USE_16_API_DEFAULT */
+    H5Eset_auto2(H5E_DEFAULT, old_error_cb, old_error_client_data);
 
     return NULL;
 }

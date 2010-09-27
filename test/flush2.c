@@ -158,7 +158,7 @@ int
 main(void)
 {
     hid_t fapl;
-    H5E_auto_t func;
+    H5E_auto2_t func;
     char	name[1024];
 
     h5_reset();
@@ -178,14 +178,8 @@ main(void)
     /* Check the case where the file was not flushed.  This should give an error
      * so we turn off the error stack temporarily */
     TESTING("H5Fflush (part2 without flush)");
-
-#ifdef H5_USE_16_API_DEFAULT
-    H5Eget_auto(&func,NULL);
-    H5Eset_auto(NULL, NULL);
-#else /* H5_USE_16_API_DEFAULT */
-    H5Eget_auto(H5E_DEFAULT,&func,NULL);
-    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
-#endif /* H5_USE_16_API_DEFAULT */
+    H5Eget_auto2(H5E_DEFAULT,&func,NULL);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     h5_fixname(FILENAME[1], fapl, name, sizeof name);
     if(check_file(name, fapl, FALSE))
@@ -202,23 +196,13 @@ main(void)
     goto error;
 #endif
     }
-#ifdef H5_USE_16_API_DEFAULT
-    H5Eset_auto(func, NULL);
-#else /* H5_USE_16_API_DEFAULT */
-    H5Eset_auto(H5E_DEFAULT, func, NULL);
-#endif /* H5_USE_16_API_DEFAULT */
+    H5Eset_auto2(H5E_DEFAULT, func, NULL);
 
     /* Check the case where the file was flushed, but more data was added afterward.  This should give an error
      * so we turn off the error stack temporarily */
     TESTING("H5Fflush (part2 with flush and later addition)");
-
-#ifdef H5_USE_16_API_DEFAULT
-    H5Eget_auto(&func,NULL);
-    H5Eset_auto(NULL, NULL);
-#else /* H5_USE_16_API_DEFAULT */
-    H5Eget_auto(H5E_DEFAULT,&func,NULL);
-    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
-#endif /* H5_USE_16_API_DEFAULT */
+    H5Eget_auto2(H5E_DEFAULT,&func,NULL);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     h5_fixname(FILENAME[2], fapl, name, sizeof name);
     if(check_file(name, fapl, TRUE))
@@ -236,12 +220,7 @@ main(void)
 #endif
 
     }
-#ifdef H5_USE_16_API_DEFAULT
-    H5Eset_auto(func, NULL);
-#else /* H5_USE_16_API_DEFAULT */
-    H5Eset_auto(H5E_DEFAULT, func, NULL);
-#endif /* H5_USE_16_API_DEFAULT */
-
+    H5Eset_auto2(H5E_DEFAULT, func, NULL);
 
     h5_cleanup(FILENAME, fapl);
 
