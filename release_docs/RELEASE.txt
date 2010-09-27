@@ -251,9 +251,6 @@ Bug Fixes since HDF5-1.8.0 release
       - Modified library to always cache symbol table information.  Libraries
             version 1.6.3 have a bug which causes them to require this
             information for some operations. (NAF - 2010/09/21 - 1864)
-      - H5Eset_auto causes a seg fault when an application uses -DH5_USE_16_API 
-            to compile with the library. The problem is fixed and the behavior 
-            of H5Eget_auto is modified (Bug #1707). (SLU - 2010/9/21)
       - Fixed a bug that could occur when getting information for a new-style
             group that was previously opened through a file handle that was
             later closed. (NAF - 2010/09/15)

@@ -129,7 +129,7 @@ main (int argc, const char *argv[])
 {
   char *ifname;
   void *edata;
-  H5E_auto_t func;
+  H5E_auto2_t func;
   hid_t ifile;
   hsize_t usize;
   htri_t testval;
@@ -140,13 +140,8 @@ main (int argc, const char *argv[])
   h5tools_setstatus(EXIT_SUCCESS);
 
   /* Disable error reporting */
-#ifdef H5_USE_16_API_DEFAULT
-  H5Eget_auto(&func, &edata);
-  H5Eset_auto(NULL, NULL);
-#else /* H5_USE_16_API_DEFAULT */
-  H5Eget_auto(H5E_DEFAULT, &func, &edata);
-  H5Eset_auto(H5E_DEFAULT, NULL, NULL);
-#endif /* H5_USE_16_API_DEFAULT */
+  H5Eget_auto2(H5E_DEFAULT, &func, &edata);
+  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
   parse_command_line (argc, argv);
 
