@@ -8420,18 +8420,16 @@ H5S_hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
     hsize_t base_offset[H5O_LAYOUT_NDIMS];   /* Base coordinate offset in dataspace */
     hsize_t offset[H5O_LAYOUT_NDIMS];   /* Coordinate offset in dataspace */
     hsize_t slab[H5O_LAYOUT_NDIMS];     /* Hyperslab size */
-    hsize_t skip[H5O_LAYOUT_NDIMS];     /* Bytes to skip between blocks */
     hsize_t fast_dim_block;     /* Local copies of fastest changing dimension info */
     hsize_t acc;	        /* Accumulator */
     hsize_t loc;                /* Coordinate offset */
     size_t tot_blk_count;       /* Total number of blocks left to output */
-    size_t blk_count;           /* Total number of blocks left to output */
     size_t elem_size;           /* Size of each element iterating over */
     size_t io_left;             /* The number of elements left in I/O operation */
     size_t actual_elem;         /* The actual number of elements to count */
     unsigned ndims;             /* Number of dimensions of dataset */
     unsigned fast_dim;          /* Rank of the fastest changing dimension for the dataspace */
-    int temp_dim;               /* Temporary rank holder */
+    unsigned skip_dim;          /* Rank of the dimension to skip along */
     unsigned u;                 /* Local index variable */
     int i;                      /* Local index variable */
 
@@ -8454,7 +8452,6 @@ H5S_hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
     if(iter->u.hyp.iter_rank != 0 && iter->u.hyp.iter_rank < space->extent.rank) {
         /* Set the aliases for a few important dimension ranks */
         ndims = iter->u.hyp.iter_rank;
-        fast_dim = ndims - 1;
 
         /* Set the local copy of the selection offset */
         sel_off = iter->u.hyp.sel_off;
@@ -8465,7 +8462,6 @@ H5S_hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
     else {
         /* Set the aliases for a few important dimension ranks */
         ndims = space->extent.rank;
-        fast_dim = ndims - 1;
 
         /* Set the local copy of the selection offset */
         sel_off = space->select.offset;
@@ -8473,6 +8469,7 @@ H5S_hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
         /* Set up the pointer to the size of the memory space */
         mem_size = space->extent.size;
     } /* end else */
+    fast_dim = ndims - 1;
 
     /* initialize row sizes for each dimension */
     elem_size = iter->elmt_size;
@@ -8480,10 +8477,6 @@ H5S_hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
         slab[i] = acc;
         acc *= mem_size[i];
     } /* end for */
-
-    /* Compute the amount to skip between sequences */
-    for(u = 0; u < ndims; u++)
-        skip[u] = (mem_size[u] - tdiminfo[u].block) * slab[u];
 
     /* Copy the base location of the block */
     /* (Add in the selection offset) */
@@ -8518,15 +8511,10 @@ H5S_hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
 
     /* Check for blocks to operate on */
     if(tot_blk_count > 0) {
-        hsize_t tmp_block[H5O_LAYOUT_NDIMS];/* Temporary block offset */
         size_t actual_bytes;        /* The actual number of bytes to copy */
 
         /* Set the number of actual bytes */
         actual_bytes = actual_elem * elem_size;
-
-        /* Set the starting block location */
-        for(u = 0; u < ndims; u++)
-            tmp_block[u] = iter->u.hyp.off[u] - tdiminfo[u].start;
 
         /* Check for 1-dim selection */
         if(0 == fast_dim) {
@@ -8539,52 +8527,100 @@ H5S_hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
             *len++ = actual_bytes;
         } /* end if */
         else {
-            /* Create sequences until an entire row can't be used */
-            blk_count = tot_blk_count;
-            while(blk_count > 0) {
-                /* Store the sequence information */
-                *off++ = loc;
-                *len++ = actual_bytes;
+            hsize_t skip_slab;          /* Temporary copy of slab[fast_dim - 1] */
+            size_t blk_count;           /* Total number of blocks left to output */
 
-                /* Set temporary dimension for advancing offsets */
-                temp_dim = (int)fast_dim - 1;
+            /* Find first dimension w/block >1 */
+            skip_dim = fast_dim;
+            for(i = (int)(fast_dim - 1); i >= 0; i--)
+                if(tdiminfo[i].block > 1) {
+                    skip_dim = (unsigned)i;
+                    break;
+                } /* end if */
+            skip_slab = slab[skip_dim];
 
-                /* Increment offset in destination buffer */
-                loc += slab[temp_dim];
+            /* Check for being able to use fast algorithm for 1-D */
+            if(0 == skip_dim) {
+                /* Create sequences until an entire row can't be used */
+                blk_count = tot_blk_count;
+                while(blk_count > 0) {
+                    /* Store the sequence information */
+                    *off++ = loc;
+                    *len++ = actual_bytes;
 
-                /* Increment the offset and count for the other dimensions */
-                while(temp_dim >= 0) {
-                    /* Move to the next row in the curent dimension */
-                    offset[temp_dim]++;
-                    tmp_block[temp_dim]++;
+                    /* Increment offset in destination buffer */
+                    loc += skip_slab;
 
-                    /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                    if(tmp_block[temp_dim] < tdiminfo[temp_dim].block)
-                        break;
-                    else {
-                        offset[temp_dim] = base_offset[temp_dim];
-                        loc += skip[temp_dim];
-                        tmp_block[temp_dim] = 0;
-                    } /* end else */
-
-                    /* Decrement dimension count */
-                    temp_dim--;
+                    /* Decrement block count */
+                    blk_count--;
                 } /* end while */
 
-                /* Decrement block count */
-                blk_count--;
-            } /* end while */
+                /* Move to the next location */
+                offset[skip_dim] += tot_blk_count;
+            } /* end if */
+            else {
+                hsize_t tmp_block[H5O_LAYOUT_NDIMS];/* Temporary block offset */
+                hsize_t skip[H5O_LAYOUT_NDIMS];     /* Bytes to skip between blocks */
+                int temp_dim;               /* Temporary rank holder */
+
+                /* Set the starting block location */
+                for(u = 0; u < ndims; u++)
+                    tmp_block[u] = iter->u.hyp.off[u] - tdiminfo[u].start;
+
+                /* Compute the amount to skip between sequences */
+                for(u = 0; u < ndims; u++)
+                    skip[u] = (mem_size[u] - tdiminfo[u].block) * slab[u];
+
+                /* Create sequences until an entire row can't be used */
+                blk_count = tot_blk_count;
+                while(blk_count > 0) {
+                    /* Store the sequence information */
+                    *off++ = loc;
+                    *len++ = actual_bytes;
+
+                    /* Set temporary dimension for advancing offsets */
+                    temp_dim = (int)skip_dim;
+
+                    /* Increment offset in destination buffer */
+                    loc += skip_slab;
+
+                    /* Increment the offset and count for the other dimensions */
+                    while(temp_dim >= 0) {
+                        /* Move to the next row in the curent dimension */
+                        offset[temp_dim]++;
+                        tmp_block[temp_dim]++;
+
+                        /* If this block is still in the range of blocks to output for the dimension, break out of loop */
+                        if(tmp_block[temp_dim] < tdiminfo[temp_dim].block)
+                            break;
+                        else {
+                            offset[temp_dim] = base_offset[temp_dim];
+                            loc += skip[temp_dim];
+                            tmp_block[temp_dim] = 0;
+                        } /* end else */
+
+                        /* Decrement dimension count */
+                        temp_dim--;
+                    } /* end while */
+
+                    /* Decrement block count */
+                    blk_count--;
+                } /* end while */
+            } /* end else */
         } /* end else */
 
         /* Update the iterator, if there were any blocks used */
 
-        /* Update the iterator with the location we stopped */
-        /* (Subtract out the selection offset) */
-        for(u = 0; u < ndims; u++)
-            iter->u.hyp.off[u] = (hsize_t)((hssize_t)offset[u] - sel_off[u]);
-
         /* Decrement the number of elements left in selection */
         iter->elmt_left -= tot_blk_count * actual_elem;
+
+        /* Check if there are elements left in iterator */
+        if(iter->elmt_left > 0) {
+            /* Update the iterator with the location we stopped */
+            /* (Subtract out the selection offset) */
+            for(u = 0; u < ndims; u++)
+                iter->u.hyp.off[u] = (hsize_t)((hssize_t)offset[u] - sel_off[u]);
+        } /* end if */
 
         /* Increment the number of sequences generated */
         *nseq += tot_blk_count;
