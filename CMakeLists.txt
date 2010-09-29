@@ -614,12 +614,14 @@ ENDIF (HDF5_USE_H5DUMP_PACKED_BITS)
 #-----------------------------------------------------------------------------
 ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
-IF (ZLIB_FOUND)
-  ADD_DEPENDENCIES (${HDF5_LIB_TARGET} ZLIB)
-ENDIF (ZLIB_FOUND)
-IF (SZIP_FOUND)
-  ADD_DEPENDENCIES (${HDF5_LIB_TARGET} SZIP)
-ENDIF (SZIP_FOUND)
+IF (NOT HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "NO")
+  IF (ZLIB_FOUND)
+    ADD_DEPENDENCIES (${HDF5_LIB_TARGET} ZLIB)
+  ENDIF (ZLIB_FOUND)
+  IF (SZIP_FOUND)
+    ADD_DEPENDENCIES (${HDF5_LIB_TARGET} SZIP)
+  ENDIF (SZIP_FOUND)
+ENDIF (NOT HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "NO")
 
 #-----------------------------------------------------------------------------
 # Build utility to copy and strip X lines of file
