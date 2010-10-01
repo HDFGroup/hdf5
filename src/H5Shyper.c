@@ -8652,6 +8652,10 @@ H5S_hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
         *nelem += elmt_remainder;
     } /* end if */
 
+    /* Sanity check */
+    HDassert(*nseq > 0);
+    HDassert(*nelem > 0);
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S_hyper_get_seq_list_single() */
 
@@ -8699,6 +8703,7 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t
     /* Check args */
     HDassert(space);
     HDassert(iter);
+    HDassert(iter->elmt_left > 0);
     HDassert(maxseq > 0);
     HDassert(maxelem > 0);
     HDassert(nseq);

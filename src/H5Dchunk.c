@@ -161,6 +161,13 @@ typedef struct H5D_chunk_it_ud4_t {
     unsigned            ndims;                  /* Number of dimensions for chunk/dataset */
 } H5D_chunk_it_ud4_t;
 
+/* Callback info for nonexistent readvv operation */
+typedef struct H5D_chunk_readvv_ud_t {
+    unsigned char *rbuf;        /* Read buffer to initialize */
+    H5D_t *dset;                /* Dataset to operate on */
+    hid_t dxpl_id;              /* DXPL for operation */
+} H5D_chunk_readvv_ud_t;
+
 
 /********************/
 /* Local Prototypes */
@@ -4922,6 +4929,55 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_nonexistent_readvv_cb
+ *
+ * Purpose:	Callback operation for performing fill value I/O operation
+ *              on memory buffer.
+ *
+ * Note:	This algorithm is pretty inefficient about initializing and
+ *              terminating the fill buffer info structure and it would be
+ *              faster to refactor this into a "real" initialization routine,
+ *              and a "vectorized fill" routine. -QAK
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		30 Sep 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_nonexistent_readvv_cb(hsize_t UNUSED dst_off, hsize_t src_off, size_t len,
+    void *_udata)
+{
+    H5D_chunk_readvv_ud_t *udata = (H5D_chunk_readvv_ud_t *)_udata; /* User data for H5V_opvv() operator */
+    H5D_fill_buf_info_t fb_info;    /* Dataset's fill buffer info */
+    hbool_t fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_nonexistent_readvv_cb)
+
+    /* Initialize the fill value buffer */
+    if(H5D_fill_init(&fb_info, (udata->rbuf + src_off), NULL, NULL, NULL, NULL,
+            &udata->dset->shared->dcpl_cache.fill, udata->dset->shared->type,
+            udata->dset->shared->type_id, (size_t)0, len, udata->dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
+    fb_info_init = TRUE;
+
+    /* Check for VL datatype & fill the buffer with VL datatype fill values */
+    if(fb_info.has_vlen_fill_type && H5D_fill_refill_vl(&fb_info, fb_info.elmts_per_buf, udata->dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer")
+
+done:
+    /* Release the fill buffer info, if it's been initialized */
+    if(fb_info_init && H5D_fill_term(&fb_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D_nonexistent_readvv_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_nonexistent_readvv
  *
  * Purpose:	When the chunk doesn't exist on disk and the chunk is bigger
@@ -4943,80 +4999,35 @@ done:
  */
 static ssize_t
 H5D_nonexistent_readvv(const H5D_io_info_t *io_info,
-    size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[])
+    size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_off_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    H5D_t *dset = io_info->dset;    /* Local pointer to the dataset info */
-    H5D_fill_buf_info_t fb_info;    /* Dataset's fill buffer info */
-    hbool_t fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
-    size_t u, v;                    /* Local index variables */
-    ssize_t ret_value = 0;          /* Return value */
+    H5D_chunk_readvv_ud_t udata;        /* User data for H5V_opvv() operator */
+    ssize_t ret_value;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_nonexistent_readvv)
 
     /* Check args */
+    HDassert(io_info);
+    HDassert(chunk_curr_seq);
     HDassert(chunk_len_arr);
-    HDassert(chunk_offset_arr);
+    HDassert(chunk_off_arr);
+    HDassert(mem_curr_seq);
     HDassert(mem_len_arr);
-    HDassert(mem_offset_arr);
+    HDassert(mem_off_arr);
 
-    /* Work through all the sequences */
-    for(u = *mem_curr_seq, v = *chunk_curr_seq; u < mem_max_nseq && v < chunk_max_nseq; ) {
-        unsigned char *buf;     /* Temporary pointer into read buffer */
-        size_t size;            /* Size of sequence in bytes */
+    /* Set up user data for H5V_opvv() */
+    udata.rbuf = (unsigned char *)io_info->u.rbuf;
+    udata.dset = io_info->dset;
+    udata.dxpl_id = io_info->dxpl_id;
 
-        /* Choose smallest buffer to write */
-        if(chunk_len_arr[v] < mem_len_arr[u])
-            size = chunk_len_arr[v];
-        else
-            size = mem_len_arr[u];
-
-        /* Compute offset in memory */
-        buf = (unsigned char *)io_info->u.rbuf + mem_offset_arr[u];
-
-	/* Initialize the fill value buffer */
-	if(H5D_fill_init(&fb_info, buf, NULL, NULL, NULL, NULL,
-		&dset->shared->dcpl_cache.fill, dset->shared->type,
-		dset->shared->type_id, (size_t)0, size, io_info->dxpl_id) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
-        fb_info_init = TRUE;
-
-	/* Check for VL datatype & fill the buffer with VL datatype fill values */
-	if(fb_info.has_vlen_fill_type && H5D_fill_refill_vl(&fb_info, fb_info.elmts_per_buf, io_info->dxpl_id) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer")
-
-        /* Release the fill buffer info */
-        if(H5D_fill_term(&fb_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
-        fb_info_init = FALSE;
-
-        /* Update source information */
-        chunk_len_arr[v] -= size;
-        if(chunk_len_arr[v] == 0)
-            v++;
-        else
-            chunk_offset_arr[v] += size;
-
-        /* Update destination information */
-        mem_len_arr[u] -= size;
-        if(mem_len_arr[u] == 0)
-            u++;
-        else
-            mem_offset_arr[u] += size;
-
-        /* Increment number of bytes copied */
-        ret_value += (ssize_t)size;
-    } /* end for */
-
-    /* Update current sequence vectors */
-    *mem_curr_seq = u;
-    *chunk_curr_seq = v;
+    /* Call generic sequence operation routine */
+    if((ret_value = H5V_opvv(chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_off_arr,
+            mem_max_nseq, mem_curr_seq, mem_len_arr, mem_off_arr,
+            H5D_nonexistent_readvv_cb, &udata)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPERATE, FAIL, "can't perform vectorized fill value init")
 
 done:
-    /* Release the fill buffer info, if it's been initialized */
-    if(fb_info_init && H5D_fill_term(&fb_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_nonexistent_readvv() */
 
