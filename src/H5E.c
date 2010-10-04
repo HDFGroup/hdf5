@@ -178,10 +178,10 @@ H5E_set_default_auto(H5E_t *stk)
 #ifdef H5_NO_DEPRECATED_SYMBOLS
     stk->auto_op.vers = 2;
 #else
-    stk->auto_op.func1 = (H5E_auto1_t)H5Eprint1;
+    stk->auto_op.func1 = stk->auto_op.func1_default = (H5E_auto1_t)H5Eprint1;
 #endif
-    stk->auto_op.func2 = (H5E_auto2_t)H5Eprint2;
-    stk->auto_op.user_set = FALSE;
+    stk->auto_op.func2 = stk->auto_op.func2_default = (H5E_auto2_t)H5Eprint2;
+    stk->auto_op.is_default = TRUE;
     stk->auto_data = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1560,6 +1560,11 @@ done:
  * Programmer:	Robb Matzke
  *              Saturday, February 28, 1998
  *
+ * Modification:Raymond Lu
+ *              4 October 2010
+ *              If the printing function isn't the default H5Eprint1 or 2, 
+ *              and H5Eset_auto1 has been called to set the old style 
+ *              printing function, a call to H5Eget_auto2 should fail.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1584,7 +1589,8 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
     if(H5E_get_auto(estack, &op, client_data) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info")
 
-    if(op.user_set && op.vers == 1)
+    /* Fail if the printing function isn't the default(user-set) and set through H5Eset_auto1 */
+    if(!op.is_default && op.vers == 1)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "wrong API function, H5Eset_auto1 has been called")
 
     if(func)
@@ -1615,6 +1621,9 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
  *
+ * Modification:Raymond Lu
+ *              4 October 2010
+ *              If the FUNC is H5Eprint2, put the IS_DEFAULT flag on.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1636,10 +1645,18 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
         if(NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
+    /* Get the automatic error reporting information */
+    if(H5E_get_auto(estack, &op, NULL) < 0)
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info")
+
     /* Set the automatic error reporting information */
     op.vers = 2;
-    op.user_set = TRUE;
+    if(func != op.func2_default)
+        op.is_default = FALSE;
+    else
+        op.is_default = TRUE;
     op.func2 = func;
+
     if(H5E_set_auto(estack, &op, client_data) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set automatic error info")
 

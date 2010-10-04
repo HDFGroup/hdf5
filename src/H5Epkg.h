@@ -71,15 +71,18 @@
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 typedef struct {
     unsigned    vers;       /* Which version callback to use */
-    hbool_t     user_set;   /* If the printing function has been set. */
+    hbool_t     is_default; /* If the printing function is the library's own. */
     H5E_auto1_t func1;      /* Old-style callback, NO error stack param. */
     H5E_auto2_t func2;      /* New-style callback, with error stack param. */
+    H5E_auto1_t func1_default;      /* The saved library's default function - old style. */
+    H5E_auto2_t func2_default;      /* The saved library's default function - new style. */
 } H5E_auto_op_t;
 #else
 typedef struct {
     unsigned    vers;       /* Which version callback to use */
-    hbool_t     user_set;   /* If the printing function has been set. */
+    hbool_t     is_default; /* If the printing function is the library's own. */
     H5E_auto_t  func2;      /* Only the new style callback function is available. */
+    H5E_auto2_t func2_default;      /* The saved library's default function - new style. */
 } H5E_auto_op_t;
 #endif
 
