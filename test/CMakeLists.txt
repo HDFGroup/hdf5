@@ -183,6 +183,7 @@ SET (H5_TESTS
     dt_arith
     dtypes
     cmpd_dset
+    filter_fail
     extend
     external
     objcopy

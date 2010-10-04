@@ -372,17 +372,17 @@ IF (BUILD_TESTING)
       ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/tbin1.ddl ${PROJECT_BINARY_DIR}/tbin1LE.ddl
   )
   
-  IF (WIN32 AND NOT MINGW)
+  IF (WIN32 AND NOT CYGWIN)
     FILE (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp TEST_STREAM)
     FILE (WRITE ${PROJECT_BINARY_DIR}/tbinregR.exp "${TEST_STREAM}")
-  ELSE (WIN32 AND NOT MINGW)
+  ELSE (WIN32 AND NOT CYGWIN)
     ADD_CUSTOM_COMMAND (
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/tbinregR.exp
     )
-  ENDIF (WIN32 AND NOT MINGW)
+  ENDIF (WIN32 AND NOT CYGWIN)
   
 ##############################################################################
 ##############################################################################

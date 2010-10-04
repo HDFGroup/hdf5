@@ -222,9 +222,9 @@ INCLUDE (${HDF5_RESOURCES_DIR}/ConfigureChecks.cmake)
 #-----------------------------------------------------------------------------
 # Option to use legacy naming for windows libs/programs, default is legacy
 #-----------------------------------------------------------------------------
-IF (WIN32)
+IF (WIN32 AND NOT CYGWIN)
   OPTION (H5_LEGACY_NAMING "Use Legacy Names for Libraries and Programs" ON)
-ENDIF (WIN32)
+ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Option to Build Shared/Static libs, default is static
@@ -284,8 +284,10 @@ ENDIF (HDF5_ENABLE_COVERAGE)
 SET (EXE_EXT "")
 IF (WIN32)
   SET (EXE_EXT ".exe")
-  ADD_DEFINITIONS (-DBIND_TO_CURRENT_VCLIBS_VERSION=1)
-  ADD_DEFINITIONS (-D_CRT_SECURE_NO_WARNINGS)
+  IF (NOT CYGWIN)
+    ADD_DEFINITIONS (-DBIND_TO_CURRENT_VCLIBS_VERSION=1)
+    ADD_DEFINITIONS (-D_CRT_SECURE_NO_WARNINGS)
+  ENDIF (NOT CYGWIN)
 ENDIF (WIN32)
 
 SET (MAKE_SYSTEM)
@@ -345,9 +347,9 @@ IF (HDF5_DISABLE_COMPILER_WARNINGS)
         CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
   ENDIF (MSVC)
-  IF (WIN32)
+  IF (WIN32 AND NOT CYGWIN)
     ADD_DEFINITIONS (-D_CRT_SECURE_NO_WARNINGS)
-  ENDIF (WIN32)
+  ENDIF (WIN32 AND NOT CYGWIN)
   # Borland uses -w- to suppress warnings.
   IF (BORLAND)
     SET (HDF5_WARNINGS_BLOCKED 1)
@@ -558,7 +560,7 @@ ENDIF (HDF5_ENABLE_SZIP_SUPPORT)
 #-----------------------------------------------------------------------------
 # Option for external libraries on windows
 #-----------------------------------------------------------------------------
-IF (WIN32)
+IF (WIN32 AND NOT CYGWIN)
   OPTION (HDF5_PACKAGE_EXTLIBS "CPACK - include external libraries" OFF)
   IF (BUILD_SHARED_LIBS)
     FILE (MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${BLDTYPE})
@@ -586,19 +588,19 @@ IF (WIN32)
     ENDIF (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
     
   ENDIF (BUILD_SHARED_LIBS)
-ENDIF (WIN32)
+ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Option to use threadsafe
 # Note: Currently CMake only allows configuring of threadsafe on WINDOWS.
 #-----------------------------------------------------------------------------
-IF (WIN32)
+IF (WIN32 AND NOT CYGWIN)
   OPTION (HDF5_ENABLE_THREADSAFE "Enable Threadsafety" OFF)
   IF (HDF5_ENABLE_THREADSAFE)
     SET (H5_HAVE_WIN_THREADS 1)
     SET (H5_HAVE_THREADSAFE 1)
   ENDIF (HDF5_ENABLE_THREADSAFE)
-ENDIF (WIN32)
+ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Option to use PACKED BITS SUPPORT

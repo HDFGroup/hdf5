@@ -233,7 +233,7 @@ IF (BUILD_TESTING)
     )
   ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
 
-  IF (WIN32)
+  IF (WIN32 AND NOT CYGWIN)
     ADD_CUSTOM_COMMAND (
         TARGET     h5diff
         POST_BUILD
@@ -247,7 +247,7 @@ IF (BUILD_TESTING)
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102w.txt ${PROJECT_BINARY_DIR}/h5diff_102.txt
     )
-  ELSE (WIN32)
+  ELSE (WIN32 AND NOT CYGWIN)
     ADD_CUSTOM_COMMAND (
         TARGET     h5diff
         POST_BUILD
@@ -261,7 +261,7 @@ IF (BUILD_TESTING)
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102.txt ${PROJECT_BINARY_DIR}/h5diff_102.txt
     )
-  ENDIF (WIN32)
+  ENDIF (WIN32 AND NOT CYGWIN)
   
 ##############################################################################
 ##############################################################################

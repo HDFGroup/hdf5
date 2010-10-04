@@ -100,39 +100,7 @@ IF (HDF5_ENABLE_CODESTACK)
 ENDIF (HDF5_ENABLE_CODESTACK)
 MARK_AS_ADVANCED (HDF5_ENABLE_CODESTACK)
 
-#IF (WIN32)
-#  SET (DEFAULT_STREAM_VFD OFF)
-#ELSE (WIN32)
-#  SET (DEFAULT_STREAM_VFD ON)
-#ENDIF (WIN32)
-#OPTION (HDF5_STREAM_VFD "Compile Stream Virtual File Driver support" ${DEFAULT_STREAM_VFD})
 OPTION (HDF5_ENABLE_HSIZET "Enable datasets larger than memory" ON)
-
-SET (WINDOWS)
-IF (WIN32)
-  IF (NOT UNIX)
-    SET (WINDOWS 1)
-  ENDIF (NOT UNIX)
-ENDIF (WIN32)
-
-# TODO --------------------------------------------------------------------------
-# Should the Default Virtual File Driver be compiled?
-# This is hard-coded now but option should added to match configure
-#
-IF (WINDOWS)
-  SET (H5_HAVE_WINDOWS 1)
-#  SET (H5_WINDOWS_USE_STDIO 0)
-  # ----------------------------------------------------------------------
-  # Set the flag to indicate that the machine has window style pathname,
-  # that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
-  # (This flag should be _unset_ for all machines, except for Windows)
-  #
-  SET (H5_HAVE_WINDOW_PATH 1)
-  SET (WINDOWS_MAX_BUF (1024 * 1024 * 1024))
-  SET (H5_DEFAULT_VFD H5FD_WINDOWS)
-ELSE (WINDOWS)
-  SET (H5_DEFAULT_VFD H5FD_SEC2)
-ENDIF (WINDOWS)
 
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can handle converting
@@ -156,14 +124,89 @@ MACRO (CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
   ENDIF (${VARIABLE})
 ENDMACRO (CHECK_LIBRARY_EXISTS_CONCAT)
 
+# ----------------------------------------------------------------------
+# WINDOWS Hard code Values
+# ----------------------------------------------------------------------
+
+SET (WINDOWS)
+IF (WIN32)
+  IF (NOT UNIX AND NOT CYGWIN)
+    SET (WINDOWS 1)
+  ENDIF (NOT UNIX AND NOT CYGWIN)
+ENDIF (WIN32)
+
+#IF (WIN32)
+#  SET (DEFAULT_STREAM_VFD OFF)
+#ELSE (WIN32)
+#  SET (DEFAULT_STREAM_VFD ON)
+#ENDIF (WIN32)
+#OPTION (HDF5_STREAM_VFD "Compile Stream Virtual File Driver support" ${DEFAULT_STREAM_VFD})
+
+# TODO --------------------------------------------------------------------------
+# Should the Default Virtual File Driver be compiled?
+# This is hard-coded now but option should added to match configure
+#
+IF (WINDOWS)
+  SET (H5_HAVE_WINDOWS 1)
+#  SET (H5_WINDOWS_USE_STDIO 0)
+  # ----------------------------------------------------------------------
+  # Set the flag to indicate that the machine has window style pathname,
+  # that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
+  # (This flag should be _unset_ for all machines, except for Windows)
+  #
+  SET (H5_HAVE_WINDOW_PATH 1)
+  SET (WINDOWS_MAX_BUF (1024 * 1024 * 1024))
+  SET (H5_DEFAULT_VFD H5FD_WINDOWS)
+ELSE (WINDOWS)
+  SET (H5_DEFAULT_VFD H5FD_SEC2)
+ENDIF (WINDOWS)
+
+#-----------------------------------------------------------------------------
+# Check for some functions that are used
+IF (WINDOWS)
+  SET (H5_HAVE_IO_H 1)
+  SET (H5_HAVE_SETJMP_H 1)
+  SET (H5_HAVE_STDDEF_H 1)
+  SET (H5_HAVE_SYS_STAT_H 1)
+  SET (H5_HAVE_SYS_TIMEB_H 1)
+  SET (H5_HAVE_SYS_TYPES_H 1)
+  SET (H5_HAVE_WINSOCK_H 1)
+  SET (H5_HAVE_LIBM 1)
+  SET (H5_HAVE_STRDUP 1)
+  SET (H5_HAVE_SYSTEM 1)
+  SET (H5_HAVE_DIFFTIME 1)
+  SET (H5_HAVE_LONGJMP 1)
+  SET (H5_STDC_HEADERS 1)
+  SET (H5_HAVE_GETHOSTNAME 1)
+  SET (H5_HAVE_TIMEZONE 1)
+  SET (H5_HAVE_FUNCTION 1)
+  SET (H5_LONE_COLON 0)
+ENDIF (WINDOWS)
+
+#-----------------------------------------------------------------------------
+# These tests need to be manually SET for windows since there is currently
+# something not quite correct with the actual test implementation. This affects
+# the 'dt_arith' test and most likely lots of other code
+# ----------------------------------------------------------------------------
+IF (WINDOWS)
+  SET (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "" CACHE INTERNAL "")
+ENDIF (WINDOWS)
+
+# ----------------------------------------------------------------------
+# END of WINDOWS Hard code Values
+# ----------------------------------------------------------------------
+
+IF (CYGWIN)
+  SET (H5_HAVE_LSEEK64 0)
+ENDIF (CYGWIN)
+
 #-----------------------------------------------------------------------------
 #  Check for the math library "m"
 #-----------------------------------------------------------------------------
-IF (WINDOWS)
-  SET (H5_HAVE_LIBM 1)
-ELSE (WINDOWS)
+IF (NOT WINDOWS)
   CHECK_LIBRARY_EXISTS_CONCAT ("m" printf     H5_HAVE_LIBM)
-ENDIF (WINDOWS)
+ENDIF (NOT WINDOWS)
+
 CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" printf  H5_HAVE_LIBWS2_32)
 CHECK_LIBRARY_EXISTS_CONCAT ("wsock32" printf H5_HAVE_LIBWSOCK32)
 #CHECK_LIBRARY_EXISTS_CONCAT ("dl"     dlopen       H5_HAVE_LIBDL)
@@ -187,19 +230,6 @@ MACRO (CHECK_INCLUDE_FILE_CONCAT FILE VARIABLE)
     SET (USE_INCLUDES ${USE_INCLUDES} ${FILE})
   ENDIF (${VARIABLE})
 ENDMACRO (CHECK_INCLUDE_FILE_CONCAT)
-
-#-----------------------------------------------------------------------------
-# If we are on Windows we know some of the answers to these tests already
-#-----------------------------------------------------------------------------
-IF (WINDOWS)
-  SET (H5_HAVE_IO_H 1)
-  SET (H5_HAVE_SETJMP_H 1)
-  SET (H5_HAVE_STDDEF_H 1)
-  SET (H5_HAVE_SYS_STAT_H 1)
-  SET (H5_HAVE_SYS_TIMEB_H 1)
-  SET (H5_HAVE_SYS_TYPES_H 1)
-  SET (H5_HAVE_WINSOCK_H 1)
-ENDIF (WINDOWS)
 
 #-----------------------------------------------------------------------------
 #  Check for the existence of certain header files
@@ -235,9 +265,11 @@ CHECK_INCLUDE_FILE_CONCAT ("memory.h"        H5_HAVE_MEMORY_H)
 CHECK_INCLUDE_FILE_CONCAT ("dlfcn.h"         H5_HAVE_DLFCN_H)
 CHECK_INCLUDE_FILE_CONCAT ("features.h"      H5_HAVE_FEATURES_H)
 CHECK_INCLUDE_FILE_CONCAT ("inttypes.h"      H5_HAVE_INTTYPES_H)
-CHECK_INCLUDE_FILE_CONCAT ("winsock2.h"      H5_HAVE_WINSOCK_H)
 CHECK_INCLUDE_FILE_CONCAT ("netinet/in.h"    H5_HAVE_NETINET_IN_H)
 
+IF (NOT CYGWIN)
+  CHECK_INCLUDE_FILE_CONCAT ("winsock2.h"      H5_HAVE_WINSOCK_H)
+ENDIF (NOT CYGWIN)
 
 # IF the c compiler found stdint, check the C++ as well. On some systems this
 # file will be found by C but not C++, only do this test IF the C++ compiler
@@ -284,7 +316,6 @@ MACRO (H5_CHECK_TYPE_SIZE type var)
 #    MESSAGE (STATUS "Size of ${aType} was NOT Found")
   ENDIF (NOT ${aVar})
 ENDMACRO (H5_CHECK_TYPE_SIZE)
-
 
 
 H5_CHECK_TYPE_SIZE (char           H5_SIZEOF_CHAR)
@@ -346,15 +377,7 @@ SET (CMAKE_REQUIRED_LIBRARIES ${LINK_LIBS})
 
 #-----------------------------------------------------------------------------
 # Check for some functions that are used
-IF (WINDOWS)
-  SET (H5_HAVE_STRDUP 1)
-  SET (H5_HAVE_SYSTEM 1)
-  SET (H5_HAVE_DIFFTIME 1)
-  SET (H5_HAVE_LONGJMP 1)
-  SET (H5_STDC_HEADERS 1)
-  SET (H5_HAVE_GETHOSTNAME 1)
-ENDIF (WINDOWS)
-
+#
 CHECK_FUNCTION_EXISTS (alarm             H5_HAVE_ALARM)
 CHECK_FUNCTION_EXISTS (fork              H5_HAVE_FORK)
 CHECK_FUNCTION_EXISTS (frexpf            H5_HAVE_FREXPF)
@@ -517,11 +540,7 @@ ENDMACRO (HDF5_FUNCTION_TEST)
 #-----------------------------------------------------------------------------
 # Check a bunch of other functions
 #-----------------------------------------------------------------------------
-IF (WINDOWS)
-  SET (H5_HAVE_TIMEZONE 1)
-  SET (H5_HAVE_FUNCTION 1)
-  SET (H5_LONE_COLON 0)
-ELSE (WINDOWS)
+IF (NOT WINDOWS)
   FOREACH (test
       TIME_WITH_SYS_TIME
       STDC_HEADERS
@@ -530,7 +549,7 @@ ELSE (WINDOWS)
       HAVE_ATTRIBUTE
       HAVE_FUNCTION
       HAVE_TM_GMTOFF
-      HAVE_TIMEZONE
+#      HAVE_TIMEZONE
       HAVE_STRUCT_TIMEZONE
       HAVE_STAT_ST_BLOCKS
       HAVE_FUNCTION
@@ -546,8 +565,12 @@ ELSE (WINDOWS)
       LONE_COLON
   )
     HDF5_FUNCTION_TEST (${test})
+    IF (NOT CYGWIN)
+      HDF5_FUNCTION_TEST (HAVE_TIMEZONE)
+#      HDF5_FUNCTION_TEST (HAVE_STAT_ST_BLOCKS)
+    ENDIF (NOT CYGWIN)
   ENDFOREACH (test)
-ENDIF (WINDOWS)
+ENDIF (NOT WINDOWS)
 
 #-----------------------------------------------------------------------------
 # Option to see if GPFS is available on this filesystem --enable-gpfs
@@ -645,9 +668,6 @@ SET (H5_CONVERT_DENORMAL_FLOAT 1)
 IF (HDF5_ENABLE_HSIZET)
   SET (H5_HAVE_LARGE_HSIZET 1)
 ENDIF (HDF5_ENABLE_HSIZET)
-IF (CYGWIN)
-  SET (H5_HAVE_LSEEK64 0)
-ENDIF (CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Macro to determine the various conversion capabilities
@@ -821,11 +841,8 @@ H5ConversionTests (H5_LDOUBLE_TO_LLONG_ACCURATE "Checking IF correctly convertin
 H5ConversionTests (H5_LLONG_TO_LDOUBLE_CORRECT "Checking IF correctly converting (unsigned) long long to long double values")
 H5ConversionTests (H5_NO_ALIGNMENT_RESTRICTIONS "Checking IF alignment restrictions are strictly enforced")
 
-#-----------------------------------------------------------------------------
-# These tests need to be manually SET for windows since there is currently
-# something not quite correct with the actual test implementation. This affects
-# the 'dt_arith' test and most likely lots of other code
-# ----------------------------------------------------------------------------
-IF (WINDOWS)
-  SET (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "" CACHE INTERNAL "")
-ENDIF (WINDOWS)
+# Define a macro for Cygwin (on XP only) where the compiler has rounding
+#   problem converting from unsigned long long to long double */
+IF (CYGWIN)
+  SET (H5_CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM 1)
+ENDIF (CYGWIN)
