@@ -20,9 +20,12 @@ Notes: This short instruction is written for users who want to quickly build
             before the next release.
             
          2. CMake has been introduced to support development on Windows, however
-            it should be usuable on any system where CMake is supported. Please
+            it should be usable on any system where CMake is supported. Please
             send us any comments on how CMake support can be improved on any
             system.
+            
+         3. Building HDF5 using CMake within Cygwin on Windows will not work 
+            properly. This will be addressed in a future release.
             
 
 ========================================================================

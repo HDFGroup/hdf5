@@ -54,10 +54,10 @@ FILE17=h5diff_ext2softlink_src.h5
 FILE18=h5diff_ext2softlink_trg.h5
 DANGLE_LINK_FILE1=h5diff_danglelinks1.h5
 DANGLE_LINK_FILE2=h5diff_danglelinks2.h5
-/* group recursive */
+# group recursive
 GRP_RECURSE_FILE1=h5diff_grp_recurse1.h5
 GRP_RECURSE_FILE2=h5diff_grp_recurse2.h5
-/* group recursive - same structure via external links through files */
+# group recursive - same structure via external links through files
 GRP_RECURSE1_EXT=h5diff_grp_recurse_ext1.h5
 GRP_RECURSE2_EXT1=h5diff_grp_recurse_ext2-1.h5
 GRP_RECURSE2_EXT2=h5diff_grp_recurse_ext2-2.h5
