@@ -369,6 +369,9 @@ Cray XT3 2.1.56                      n       n         n         n
 
 Known Problems
 ==============
+* H5Eset_auto can cause a seg fault for a library API call if the application
+  compiles with -DH5_USE_16_API (see bug 1707).  It will be fixed in the 
+  next release. SLU - 2010/10/5
 * The library's test dt_arith.c showed a compiler's rounding problem on
   Cygwin when converting from unsigned long long to long double.  The 
   library's own conversion works fine.  We defined a macro for Cygwin to
