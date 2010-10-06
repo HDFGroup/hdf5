@@ -168,6 +168,78 @@ MACRO (ADD_H5_TEST file)
   ADD_TEST (NAME ${file} COMMAND $<TARGET_FILE:${file}>)
 ENDMACRO (ADD_H5_TEST file)
 
+# Remove any output file left over from previous test run
+ADD_TEST (
+    NAME h5test-clear-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove 
+        cache_test.h5
+        coord.h5
+        dt_arith1.h5
+        dt_arith2.h5
+        dtransform.h5
+        dtypes4.h5
+        dtypes5.h5
+        extlinks16A00000.h5
+        extlinks16A00001.h5
+        extlinks16A00002.h5
+        extlinks16B-b.h5
+        extlinks16B-g.h5
+        extlinks16B-l.h5
+        extlinks16B-r.h5
+        extlinks16B-s.h5
+        extlinks19B00000.h5
+        extlinks19B00001.h5
+        extlinks19B00002.h5
+        extlinks19B00003.h5
+        extlinks19B00004.h5
+        extlinks19B00005.h5
+        extlinks19B00006.h5
+        extlinks19B00007.h5
+        extlinks19B00008.h5
+        extlinks19B00009.h5
+        extlinks19B00010.h5
+        extlinks19B00011.h5
+        extlinks19B00012.h5
+        extlinks19B00013.h5
+        extlinks19B00014.h5
+        extlinks19B00015.h5
+        extlinks19B00016.h5
+        extlinks19B00017.h5
+        extlinks19B00018.h5
+        extlinks19B00019.h5
+        extlinks19B00020.h5
+        extlinks19B00021.h5
+        extlinks19B00022.h5
+        extlinks19B00023.h5
+        extlinks19B00024.h5
+        extlinks19B00025.h5
+        extlinks19B00026.h5
+        extlinks19B00027.h5
+        extlinks19B00028.h5
+        fheap.h5
+        objcopy_ext.h5
+        sys_file1
+        tattr.h5
+        testmeta.h5
+        tfile1.h5
+        tfile2.h5
+        tfile3.h5
+        tfile4.h5
+        tfile5.h5
+        th5o_file
+        th5s1.h5
+        th5s2.h5
+        th5s3.h5
+        tnullspace.h5
+        tselect.h5
+        tsohm.h5
+        tsohm_dst.h5
+        tsohm_src.h5
+        tstint1.h5
+        tstint2.h5
+)
+
 SET (H5_TESTS
     lheap
     ohdr

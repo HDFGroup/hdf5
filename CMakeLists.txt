@@ -659,6 +659,7 @@ IF (BUILD_TESTING)
     ENDIF (H5_HAVE_PARALLEL)
   ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
   INCLUDE (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
+  CONFIGURE_FILE (${HDF5_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
 ENDIF (BUILD_TESTING)
 
 #-----------------------------------------------------------------------------

@@ -473,6 +473,225 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
+  # Remove any output file left over from previous test run
+  ADD_TEST (
+      NAME H5DUMP-clearall-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          tall-1.out
+          tall-1.out.err
+          tall-2.out
+          tall-2.out.err
+          tall-2A.out
+          tall-2A.out.err
+          tall-2B.out
+          tall-2B.out.err
+          tall-3.out
+          tall-3.out.err
+          tall-4s.out
+          tall-4s.out.err
+          tall-5s.out
+          tall-5s.out.err
+          tallfilters.out
+          tallfilters.out.err
+          tarray1.out
+          tarray1.out.err
+          tarray2.out
+          tarray2.out.err
+          tarray3.out
+          tarray3.out.err
+          tarray4.out
+          tarray4.out.err
+          tarray5.out
+          tarray5.out.err
+          tarray6.out
+          tarray6.out.err
+          tarray7.out
+          tarray7.out.err
+          tarray8.out
+          tarray8.out.err
+          tattr-1.out
+          tattr-1.out.err
+          tattr-2.out
+          tattr-2.out.err
+          tattr-3.out
+          tattr-3.out.err
+          tattrreg.out
+          tattrreg.out.err
+          tattrregR.out
+          tattrregR.out.err
+          tbinregR.out
+          tbinregR.out.err
+          tbigdims.out
+          tbigdims.out.err
+          tboot1.out
+          tboot1.out.err
+          tboot2.out
+          tboot2.out.err
+          tchar1.out
+          tchar1.out.err
+          tchunked.out
+          tchunked.out.err
+          tcomp-1.out
+          tcomp-1.out.err
+          tcomp-2.out
+          tcomp-2.out.err
+          tcomp-3.out
+          tcomp-3.out.err
+          tcomp-4.out
+          tcomp-4.out.err
+          tcompact.out
+          tcompact.out.err
+          tcontents.out
+          tcontents.out.err
+          tcontiguos.out
+          tcontiguos.out.err
+          tdatareg.out
+          tdatareg.out.err
+          tdataregR.out
+          tdataregR.out.err
+          tdeflate.out
+          tdeflate.out.err
+          tdset-1.out
+          tdset-1.out.err
+          tdset-2.out
+          tdset-2.out.err
+          tdset-3s.out
+          tdset-3s.out.err
+          tempty.out
+          tempty.out.err
+          texternal.out
+          texternal.out.err
+          textlinksrc.out
+          textlinksrc.out.err
+          textlinkfar.out
+          textlinkfar.out.err
+          tfamily.out
+          tfamily.out.err
+          tfill.out
+          tfill.out.err
+          tfletcher32.out
+          tfletcher32.out.err
+          tfpformat.out
+          tfpformat.out.err
+          tgroup-1.out
+          tgroup-1.out.err
+          tgroup-2.out
+          tgroup-2.out.err
+          tgrp_comments.out
+          tgrp_comments.out.err
+          thlink-1.out
+          thlink-1.out.err
+          thlink-2.out
+          thlink-2.out.err
+          thlink-3.out
+          thlink-3.out.err
+          thlink-4.out
+          thlink-4.out.err
+          thlink-5.out
+          thlink-5.out.err
+          thyperslab.out
+          thyperslab.out.err
+          tindicesno.out
+          tindicesno.out.err
+          tindicessub1.out
+          tindicessub1.out.err
+          tindicessub2.out
+          tindicessub2.out.err
+          tindicessub3.out
+          tindicessub3.out.err
+          tindicessub4.out
+          tindicessub4.out.err
+          tindicesyes.out
+          tindicesyes.out.err
+          tlarge_objname.out
+          tlarge_objname.out.err
+          tldouble.out
+          tldouble.out.err
+          tlonglinks.out
+          tlonglinks.out.err
+          tloop-1.out
+          tloop-1.out.err
+          tmulti.out
+          tmulti.out.err
+          tnamed_dtype_attr.out
+          tnamed_dtype_attr.out.err
+          tnestcomp-1.out
+          tnestcomp-1.out.err
+          tnbit.out
+          tnbit.out.err
+          tnofilename.out
+          tnofilename.out.err
+          tnullspace.out
+          tnullspace.out.err
+          tordergr1.out
+          tordergr1.out.err
+          tordergr2.out
+          tordergr2.out.err
+          tordergr3.out
+          tordergr3.out.err
+          tordergr4.out
+          tordergr4.out.err
+          tordergr5.out
+          tordergr5.out.err
+          torderattr1.out
+          torderattr1.out.err
+          torderattr2.out
+          torderattr2.out.err
+          torderattr3.out
+          torderattr3.out.err
+          torderattr4.out
+          torderattr4.out.err
+          tperror.out
+          tperror.out.err
+          treference.out
+          treference.out.err
+          tsaf.out
+          tsaf.out.err
+          tscaleoffset.out
+          tscaleoffset.out.err
+          tshuffle.out
+          tshuffle.out.err
+          tslink-1.out
+          tslink-1.out.err
+          tslink-2.out
+          tslink-2.out.err
+          tsplit_file.out
+          tsplit_file.out.err
+          tstr-1.out
+          tstr-1.out.err
+          tstr-2.out
+          tstr-2.out.err
+          tstring.out
+          tstring.out.err
+          tstring2.out
+          tstring2.out.err
+          tstringe.out
+          tstringe.out.err
+          tszip.out
+          tszip.out.err
+          tudlink-1.out
+          tudlink-1.out.err
+          tudlink-2.out
+          tudlink-2.out.err
+          tuserfilter.out
+          tuserfilter.out.err
+          tvldtypes1.out
+          tvldtypes1.out.err
+          tvldtypes2.out
+          tvldtypes2.out.err
+          tvldtypes3.out
+          tvldtypes3.out.err
+          tvldtypes4.out
+          tvldtypes4.out.err
+          tvldtypes5.out
+          tvldtypes5.out.err
+          tvlstr.out
+          tvlstr.out.err
+          tvms.out
+          tvms.out.err
+  )
+
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 tgroup.h5)
   # test for displaying the selected groups
@@ -583,11 +802,7 @@ IF (BUILD_TESTING)
 
   # test failure handling
   # Missing file name
-  IF (${USE_PACKED_BITS})
-    ADD_H5_TEST (tnofilename-with-packed-bits 1)
-  ELSE (${USE_PACKED_BITS})
-    ADD_H5_TEST (tnofilename 1)
-  ENDIF (${USE_PACKED_BITS})
+  ADD_H5_TEST (tnofilename 1)
 
   # rev. 2004
 
@@ -774,13 +989,156 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (textlinksrc 0 textlinksrc.h5)
   ADD_H5_TEST (textlinkfar 0 textlinkfar.h5)
 
-  # test for dataset packed bits 
-  SET (TESTTYPE "TEST")
-  IF (NOT ${USE_PACKED_BITS})
-    SET (TESTTYPE "SKIP")
-  ENDIF (NOT ${USE_PACKED_BITS})
-  ADD_SKIP_H5_TEST (tpackedbits 0 ${TESTTYPE} -d /dset1 -M 0,2 tdset.h5)
-  ADD_SKIP_H5_TEST (tpackedbits2 0 ${TESTTYPE} -d /dset1 -M 0,2,2,1 tdset.h5)
+  ####### test for dataset packed bits ######
+  IF (HDF5_USE_H5DUMP_PACKED_BITS)
+    # Remove any output file left over from previous test run
+    ADD_TEST (
+        NAME H5DUMP_PACKED_BITS-clearall-objects
+        COMMAND    ${CMAKE_COMMAND}
+            -E remove 
+            tpackedbits.out
+            tpackedbits.out.err
+            tpackedbits2.out
+            tpackedbits2.out.err
+    )
+    ADD_H5_TEST (tpackedbits 0 -d /dset1 -M 0,2 tdset.h5)
+    ADD_H5_TEST (tpackedbits2 0 -d /dset1 -M 0,2,2,1 tdset.h5)
+  ENDIF (HDF5_USE_H5DUMP_PACKED_BITS)
+   
+  # Remove any output file left over from previous test run
+  ADD_TEST (
+      NAME H5DUMP-XML-clearall-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          tall.h5.out
+          tall.h5.out.err
+          tall-2A.h5.out
+          tall-2A.h5.out.err
+          tarray1.h5.out
+          tarray1.h5.out.err
+          tarray2.h5.out
+          tarray2.h5.out.err
+          tarray3.h5.out
+          tarray3.h5.out.err
+          tarray6.h5.out
+          tarray6.h5.out.err
+          tarray7.h5.out
+          tarray7.h5.out.err
+          tattr.h5.out
+          tattr.h5.out.err
+          tbitfields.h5.out
+          tbitfields.h5.out.err
+          tcompound.h5.out
+          tcompound.h5.out.err
+          tcompound2.h5.out
+          tcompound2.h5.out.err
+          tcompound_complex.h5.out
+          tcompound_complex.h5.out.err
+          tdatareg.h5.out
+          tdatareg.h5.out.err
+          tdset.h5.out
+          tdset.h5.out.err
+          tdset2.h5.out
+          tdset2.h5.out.err
+          tempty-dtd-2.h5.out
+          tempty-dtd-2.h5.out.err
+          tempty-dtd-uri.h5.out
+          tempty-dtd-uri.h5.out.err
+          tempty-dtd.h5.out
+          tempty-dtd.h5.out.err
+          tempty-nons-2.h5.out
+          tempty-nons-2.h5.out.err
+          tempty-nons-uri.h5.out
+          tempty-nons-uri.h5.out.err
+          tempty-nons.h5.out
+          tempty-nons.h5.out.err
+          tempty-ns-2.h5.out
+          tempty-ns-2.h5.out.err
+          tempty-ns.h5.out
+          tempty-ns.h5.out.err
+          tempty.h5.out
+          tempty.h5.out.err
+          tenum.h5.out
+          tenum.h5.out.err
+          textlink.h5.out
+          textlink.h5.out.err
+          tfpformat.h5.out
+          tfpformat.h5.out.err
+          tgroup.h5.out
+          tgroup.h5.out.err
+          thlink.h5.out
+          thlink.h5.out.err
+          tloop.h5.out
+          tloop.h5.out.err
+          tloop2.h5.out
+          tloop2.h5.out.err
+          tmany.h5.out
+          tmany.h5.out.err
+          tname-amp.h5.out
+          tname-amp.h5.out.err
+          tname-apos.h5.out
+          tname-apos.h5.out.err
+          tname-gt.h5.out
+          tname-gt.h5.out.err
+          tname-lt.h5.out
+          tname-lt.h5.out.err
+          tname-quot.h5.out
+          tname-quot.h5.out.err
+          tname-sp.h5.out
+          tname-sp.h5.out.err
+          tnamed_dtype_attr.h5.out
+          tnamed_dtype_attr.h5.out.err
+          tnestedcomp.h5.out
+          tnestedcomp.h5.out.err
+          tnodata.h5.out
+          tnodata.h5.out.err
+          tnoname.h5.out
+          tnoname.h5.out.err
+          tobjref.h5.out
+          tobjref.h5.out.err
+          topaque.h5.out
+          topaque.h5.out.err
+          torderattr1.h5.out
+          torderattr1.h5.out.err
+          torderattr2.h5.out
+          torderattr2.h5.out.err
+          torderattr3.h5.out
+          torderattr3.h5.out.err
+          torderattr4.h5.out
+          torderattr4.h5.out.err
+          tref-escapes-at.h5.out
+          tref-escapes-at.h5.out.err
+          tref-escapes.h5.out
+          tref-escapes.h5.out.err
+          tref.h5.out
+          tref.h5.out.err
+          tsaf.h5.out
+          tsaf.h5.out.err
+          tslink.h5.out
+          tslink.h5.out.err
+          tstr.h5.out
+          tstr.h5.out.err
+          tstr2.h5.out
+          tstr2.h5.out.err
+          tstring.h5.out
+          tstring.h5.out.err
+          tstring-at.h5.out
+          tstring-at.h5.out.err
+          tudlink.h5.out
+          tudlink.h5.out.err
+          tvldtypes1.h5.out
+          tvldtypes1.h5.out.err
+          tvldtypes2.h5.out
+          tvldtypes2.h5.out.err
+          tvldtypes3.h5.out
+          tvldtypes3.h5.out.err
+          tvldtypes4.h5.out
+          tvldtypes4.h5.out.err
+          tvldtypes5.h5.out
+          tvldtypes5.h5.out.err
+          tvlstr.h5.out
+          tvlstr.h5.out.err
+  )
 
   ########## test XML
   ADD_XML_H5_TEST (tall.h5 0 tall.h5)

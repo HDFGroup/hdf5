@@ -109,6 +109,41 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
+  # Remove any output file left over from previous test run
+  ADD_TEST (
+      NAME H5STAT-clearall-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          h5stat_help1.out
+          h5stat_help1.out.err
+          h5stat_help2.out
+          h5stat_help2.out.err
+          h5stat_filters.out
+          h5stat_filters.out.err
+          h5stat_filters-file.out
+          h5stat_filters-file.out.err
+          h5stat_filters-F.out
+          h5stat_filters-F.out.err
+          h5stat_filters-d.out
+          h5stat_filters-d.out.err
+          h5stat_filters-g.out
+          h5stat_filters-g.out.err
+          h5stat_filters-dT.out
+          h5stat_filters-dT.out.err
+          h5stat_filters-UD.out
+          h5stat_filters-UD.out.err
+          h5stat_filters-UT.out
+          h5stat_filters-UT.out.err
+          h5stat_tsohm.out
+          h5stat_tsohm.out.err
+          h5stat_newgrat.out
+          h5stat_newgrat.out.err
+          h5stat_newgrat-UG.out
+          h5stat_newgrat-UG.out.err
+          h5stat_newgrat-UA.out
+          h5stat_newgrat-UA.out.err
+  )
+
 # Test for help flag
   ADD_H5_TEST (h5stat_help1 0 -h)
   ADD_H5_TEST (h5stat_help2 0 --help)
