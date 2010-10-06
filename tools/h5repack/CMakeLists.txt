@@ -224,6 +224,71 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
+  # Remove any output file left over from previous test run
+  ADD_TEST (
+      NAME H5REPACK-clearall-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          h5repack_attr.h5.out
+          h5repack_attr.h5.out.err
+          h5repack_deflate.h5.out
+          h5repack_deflate.h5.out.err
+          h5repack_early.h5.out
+          h5repack_early.h5.out.err
+          h5repack_ext.h5.out
+          h5repack_ext.h5.out.err
+          h5repack_fill.h5.out
+          h5repack_fill.h5.out.err
+          h5repack_filters.h5.out
+          h5repack_filters.h5.out.err
+          h5repack_fletcher.h5.out
+          h5repack_fletcher.h5.out.err
+          h5repack_hlink.h5.out
+          h5repack_hlink.h5.out.err
+          h5repack_layout.h5.out
+          h5repack_layout.h5.out.err
+          h5repack_layout.h5-v.out
+          h5repack_layout.h5-v.out.err
+          h5repack_layouto.h5.out
+          h5repack_layouto.h5.out.err
+          h5repack_layout2.h5-v.out
+          h5repack_layout2.h5-v.out.err
+          h5repack_named_dtypes.h5.out
+          h5repack_named_dtypes.h5.out.err
+          h5repack_nbit.h5.out
+          h5repack_nbit.h5.out.err
+          h5repack_objs.h5.out
+          h5repack_objs.h5.out.err
+          h5repack_refs.h5.out
+          h5repack_refs.h5.out.err
+          h5repack_shuffle.h5.out
+          h5repack_shuffle.h5.out.err
+          h5repack_soffset.h5.out
+          h5repack_soffset.h5.out.err
+          h5repack_szip.h5.out
+          h5repack_szip.h5.out.err
+          h5repack_attr_out.h5
+          h5repack_deflate_out.h5
+          h5repack_early_out.h5
+          h5repack_ext_out.h5
+          h5repack_fill_out.h5
+          h5repack_filters_out.h5
+          h5repack_fletcher_out.h5
+          h5repack_hlink_out.h5
+          h5repack_layout_out.h5
+          h5repack_layouto_out.h5
+          h5repack_layout2_out.h5
+          h5repack_named_dtypes_out.h5
+          h5repack_nbit_out.h5
+          h5repack_objs_out.h5
+          h5repack_refs_out.h5
+          h5repack_shuffle_out.h5
+          h5repack_soffset_out.h5
+          h5repack_szip_out.h5
+          h5repack_ub.h5
+          h5repack_ub_out.h5
+  )
+
   # --------------------------------------------------------------------
   # test file names 
   # --------------------------------------------------------------------

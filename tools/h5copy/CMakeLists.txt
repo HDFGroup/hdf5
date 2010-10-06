@@ -131,15 +131,23 @@ IF (BUILD_TESTING)
   SET (HDF_EXT_SRC_FILE h5copy_extlinks_src)
   SET (HDF_EXT_TRG_FILE h5copy_extlinks_trg)
 
-############# COPY OBJECTS ##############
-
   # Remove any output file left over from previous test run
   ADD_TEST (
-      NAME H5COPY-clear-objects
+      NAME H5COPY-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
           ./testfiles/${HDF_FILE1}.out.h5
+          ./testfiles/${HDF_FILE1}.out.ls
           ./testfiles/${HDF_FILE1}.out.out
+          ./testfiles/${HDF_FILE1}.out.out.err
+          ./testfiles/${HDF_FILE2}.out.h5
+          ./testfiles/${HDF_FILE2}.out.ls
+          ./testfiles/${HDF_FILE2}.out.out
+          ./testfiles/${HDF_FILE2}.out.out.err
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.h5
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.ls
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.out
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.out.err
   )
   
   # "Test copying various forms of datasets"
@@ -190,6 +198,7 @@ IF (BUILD_TESTING)
           -E remove 
           ./testfiles/${HDF_FILE2}.out.h5
           ./testfiles/${HDF_FILE2}.out.out
+          ./testfiles/${HDF_FILE2}.out.out.err
   )
 
   # "Test copying object and region references"
@@ -207,6 +216,7 @@ IF (BUILD_TESTING)
           -E remove 
           ./testfiles/${HDF_EXT_SRC_FILE}.out.h5
           ./testfiles/${HDF_EXT_SRC_FILE}.out.out
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.out.err
   )
 
   # "Test copying external link directly without -f ext"

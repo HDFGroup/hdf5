@@ -102,10 +102,36 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
+  # Remove any output file left over from previous test run
+  ADD_TEST (
+      NAME h5repart_20K-clear-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          fst_family00000.h5
+  )
   # repartition family member size to 20,000 bytes.
   ADD_TEST (NAME h5repart_20K COMMAND $<TARGET_FILE:h5repart> -m 20000 family_file%05d.h5 fst_family%05d.h5)
+
+  # Remove any output file left over from previous test run
+  ADD_TEST (
+      NAME h5repart_5K-clear-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          scd_family00000.h5
+          scd_family00001.h5
+          scd_family00002.h5
+          scd_family00003.h5
+  )
   # repartition family member size to 5 KB.
   ADD_TEST (NAME h5repart_5K COMMAND $<TARGET_FILE:h5repart> -m 5k family_file%05d.h5 scd_family%05d.h5)
+
+  # Remove any output file left over from previous test run
+  ADD_TEST (
+      NAME h5repart_sec2-clear-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          family_to_sec2.h5
+  )
   # convert family file to sec2 file of 20,000 bytes
   ADD_TEST (NAME h5repart_sec2 COMMAND $<TARGET_FILE:h5repart> -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5)
 

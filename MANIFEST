@@ -1923,7 +1923,7 @@
 ./config/cmake/grepTest.cmake
 ./config/cmake/runTest.cmake
 ./config/cmake/vfdTest.cmake
-./config/cmake/CTestCustom.ctest
+./config/cmake/CTestCustom.cmake
 ./config/cmake/ConfigureChecks.cmake
 ./CMakeLists.txt
 ./CTestConfig.cmake

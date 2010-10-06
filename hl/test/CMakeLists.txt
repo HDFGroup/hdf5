@@ -48,6 +48,33 @@ MACRO (HL_ADD_TEST hl_name files)
   ENDFOREACH (h5_file ${HL_REFERENCE_TEST_FILES})
 ENDMACRO (HL_ADD_TEST)
 
+# Remove any output file left over from previous test run
+ADD_TEST (
+    NAME hl_test-clear-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove 
+        combine_tables1.h5
+        combine_tables2.h5
+        test_detach.h5
+        test_ds1.h5
+        test_ds2.h5
+        test_ds3.h5
+        test_ds4.h5
+        test_ds5.h5
+        test_ds6.h5
+        test_ds7.h5
+        test_ds8.h5
+        test_ds9.h5
+        test_image1.h5
+        test_image2.h5
+        test_image3.h5
+        test_lite1.h5
+        test_lite2.h5
+        test_packet_compress.h5
+        test_packet_table.h5
+        test_table.h5
+)
+
 HL_ADD_TEST (test_ds "dsdata.txt;dslat.txt;dslon.txt;test_ds_be.h5;test_ds_le.h5")
 HL_ADD_TEST (test_image "image8.txt;sepia.pal;earth.pal;image24pixel.txt;image24plane.txt;usa.wri")
 HL_ADD_TEST (test_lite "dtype_file.txt")
