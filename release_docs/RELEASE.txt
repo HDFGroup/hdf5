@@ -283,14 +283,20 @@ The following platforms and compilers have been tested for this release.
     (SNL Glory)                   Versions 11.1.
     
     Windows XP                    Visual Studio 2008 w/ Intel Fortran 11.1
+                                  Visual Studio 2010
                                   Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
 
     Windows XP x64                Visual Studio 2008 w/ Intel Fortran 11.1
+                                  Visual Studio 2010
                                   Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
 
     Windows Vista                 Visual Studio 2008 w/ Intel Fortran 11.1
 
     Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 11.1
+
+    Windows 7                     Visual Studio 2010
+
+    Windows 7 x64                 Visual Studio 2010
 
     Mac OS X 10.6.3 (Intel 64-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1
     Darwin Kernel Version 10.3.1  GNU Fortran (GCC) 4.5.0 20090910  
@@ -343,8 +349,8 @@ Solaris2.10 32-bit                   y       y         y         y
 Solaris2.10 64-bit                   y       y         y         y        
 Windows XP                           y       y(4)      y         n        
 Windows XP x64                       y       y(4)      y         n        
-Windows Vista                        y       y(4)      y         n        
-Windows Vista x64                    y       y(4)      y         n        
+Windows Vista                        y       y(4)      y         y        
+Windows Vista x64                    y       y(4)      y         y        
 Mac OS X 10.6                        y(5)    n         y         n        
 AIX 5.3 32- and 64-bit               n       n         n         n        
 AIX 6.1 32- and 64-bit               n       n         n         n        
