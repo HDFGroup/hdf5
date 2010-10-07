@@ -172,10 +172,10 @@ Bug Fixes since HDF5-1.8.5
     - Fixed h5diff to compare member objects and groups recursively when two 
       files or groups are specieied to be compared. 
       (JKM - 2010/9/16 - Bug 1975)
-    - Make h5repack be able to convert a layout to COMPACT for small size
-      dataset as default.  (JKM - 2010/09/15 - Bug 1896)
-    - Change h5ls not to manipulate special characters in object name or 
-      attribute name for smart display. (JKM - 2010/06/28 - Bug 1784)
+    - Fixed h5repack to be able to convert a dataset to COMPACT layout.
+      (JKM - 2010/09/15 - Bug 1896)
+    - Changed h5ls to not interpret special characters in object or attribute
+      name for output. (JKM - 2010/06/28 - Bug 1784)
 
 
     F90 API
