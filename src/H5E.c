@@ -180,9 +180,9 @@ H5E_set_default_auto(H5E_t *stk)
     stk->auto_op.func1 = stk->auto_op.func1_default = (H5E_auto1_t)H5Eprint1;
     stk->auto_op.func2 = stk->auto_op.func2_default = (H5E_auto2_t)H5Eprint2;
     stk->auto_op.is_default = TRUE;
-#else
+#else /* H5_NO_DEPRECATED_SYMBOLS */
     stk->auto_op.func2 = (H5E_auto2_t)H5Eprint2;
-#endif
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     stk->auto_data = NULL;
 
@@ -1595,7 +1595,7 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
     /* Fail if the printing function isn't the default(user-set) and set through H5Eset_auto1 */
     if(!op.is_default && op.vers == 1)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "wrong API function, H5Eset_auto1 has been called")
-#endif
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     if(func)
         *func = op.func2;
@@ -1661,7 +1661,7 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
         op.is_default = TRUE;
 
     op.vers = 2;
-#endif
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     /* Set the automatic error reporting function */
     op.func2 = func;

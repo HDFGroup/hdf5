@@ -77,11 +77,11 @@ typedef struct {
     H5E_auto1_t func1_default;      /* The saved library's default function - old style. */
     H5E_auto2_t func2_default;      /* The saved library's default function - new style. */
 } H5E_auto_op_t;
-#else
+#else /* H5_NO_DEPRECATED_SYMBOLS */
 typedef struct {
     H5E_auto_t  func2;      /* Only the new style callback function is available. */
 } H5E_auto_op_t;
-#endif
+#endif /* H5_NO_DEPRECATED_SYMBOLS */ 
 
 /* Some syntactic sugar to make the compiler happy with two different kinds of callbacks */
 typedef struct {

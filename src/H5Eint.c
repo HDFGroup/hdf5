@@ -1015,7 +1015,7 @@ H5E_dump_api_stack(hbool_t is_api)
 #ifdef H5_NO_DEPRECATED_SYMBOLS
             if(estack->auto_op.func2)
                 (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
-#else
+#else /* H5_NO_DEPRECATED_SYMBOLS */ 
         if(estack->auto_op.vers == 1) {
             if(estack->auto_op.func1)
                 (void)((estack->auto_op.func1)(estack->auto_data));
@@ -1024,7 +1024,7 @@ H5E_dump_api_stack(hbool_t is_api)
             if(estack->auto_op.func2)
                 (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
         } /* end else */
-#endif
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     } /* end if */
 
 done:
