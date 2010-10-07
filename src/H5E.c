@@ -170,18 +170,20 @@ H5E_set_default_auto(H5E_t *stk)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_set_default_auto)
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 #ifdef H5_USE_16_API_DEFAULT
     stk->auto_op.vers = 1;
 #else /* H5_USE_16_API_DEFAULT */
     stk->auto_op.vers = 2;
 #endif /* H5_USE_16_API_DEFAULT */
-#ifdef H5_NO_DEPRECATED_SYMBOLS
-    stk->auto_op.vers = 2;
-#else
+
     stk->auto_op.func1 = stk->auto_op.func1_default = (H5E_auto1_t)H5Eprint1;
-#endif
     stk->auto_op.func2 = stk->auto_op.func2_default = (H5E_auto2_t)H5Eprint2;
     stk->auto_op.is_default = TRUE;
+#else
+    stk->auto_op.func2 = (H5E_auto2_t)H5Eprint2;
+#endif
+
     stk->auto_data = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1589,9 +1591,11 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
     if(H5E_get_auto(estack, &op, client_data) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info")
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Fail if the printing function isn't the default(user-set) and set through H5Eset_auto1 */
     if(!op.is_default && op.vers == 1)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "wrong API function, H5Eset_auto1 has been called")
+#endif
 
     if(func)
         *func = op.func2;
@@ -1645,16 +1649,21 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
         if(NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Get the automatic error reporting information */
     if(H5E_get_auto(estack, &op, NULL) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info")
 
     /* Set the automatic error reporting information */
-    op.vers = 2;
     if(func != op.func2_default)
         op.is_default = FALSE;
     else
         op.is_default = TRUE;
+
+    op.vers = 2;
+#endif
+
+    /* Set the automatic error reporting function */
     op.func2 = func;
 
     if(H5E_set_auto(estack, &op, client_data) < 0)
@@ -1699,7 +1708,11 @@ H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
 
     /* Check if the error stack reporting function is the "newer" stack type */
     if(is_stack)
+#ifndef H5_NO_DEPRECATED_SYMBOLS
         *is_stack = estack->auto_op.vers > 1;
+#else
+        *is_stack = 1;
+#endif
 
 done:
     FUNC_LEAVE_API(ret_value)
