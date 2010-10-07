@@ -15,7 +15,7 @@
 # Configuration file for building on the IBM AIX 6.X platforms.
 # This file is part of the HDF5 build script.  It is processed shortly
 # after configure starts and defines, among other things, flags for
-# the various compile modesrcdir/config/ibm-aix
+# the various compile modes.
 
 # Use the generic ibm-aix.
 . $srcdir/config/ibm-aix
