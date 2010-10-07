@@ -1,5 +1,5 @@
-# runTest.cmake executes a command and captures the output in a file. File is then compared
-# against a reference file. Exit status of command can also be compared.
+# vfdTest.cmake executes a command and captures the output in a file. Command uses specified VFD.
+# Exit status of command can also be compared.
 
 # arguments checking
 IF (NOT TEST_PROGRAM)
