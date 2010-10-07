@@ -161,8 +161,6 @@ ELSE (WINDOWS)
   SET (H5_DEFAULT_VFD H5FD_SEC2)
 ENDIF (WINDOWS)
 
-#-----------------------------------------------------------------------------
-# Check for some functions that are used
 IF (WINDOWS)
   SET (H5_HAVE_IO_H 1)
   SET (H5_HAVE_SETJMP_H 1)
@@ -617,41 +615,41 @@ ENDIF (INLINE_TEST___inline__)
 # Check how to print a Long Long integer
 #-----------------------------------------------------------------------------
 IF (NOT H5_PRINTF_LL_WIDTH OR H5_PRINTF_LL_WIDTH MATCHES "unknown")
-    SET (PRINT_LL_FOUND 0)
-    MESSAGE (STATUS "Checking for appropriate format for 64 bit long:")
-    FOREACH (HDF5_PRINTF_LL l64 l L q I64 ll)
-      SET (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH=${HDF5_PRINTF_LL}")
-      IF (H5_SIZEOF_LONG_LONG)
-        SET (CURRENT_TEST_DEFINITIONS "${CURRENT_TEST_DEFINITIONS} -DHAVE_LONG_LONG")
-      ENDIF (H5_SIZEOF_LONG_LONG)
-      TRY_RUN (HDF5_PRINTF_LL_TEST_RUN   HDF5_PRINTF_LL_TEST_COMPILE
-          ${HDF5_BINARY_DIR}/CMake
-          ${HDF5_RESOURCES_DIR}/HDF5Tests.c
-          CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CURRENT_TEST_DEFINITIONS}
-          OUTPUT_VARIABLE OUTPUT
+  SET (PRINT_LL_FOUND 0)
+  MESSAGE (STATUS "Checking for appropriate format for 64 bit long:")
+  FOREACH (HDF5_PRINTF_LL l64 l L q I64 ll)
+    SET (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH=${HDF5_PRINTF_LL}")
+    IF (H5_SIZEOF_LONG_LONG)
+      SET (CURRENT_TEST_DEFINITIONS "${CURRENT_TEST_DEFINITIONS} -DHAVE_LONG_LONG")
+    ENDIF (H5_SIZEOF_LONG_LONG)
+    TRY_RUN (HDF5_PRINTF_LL_TEST_RUN   HDF5_PRINTF_LL_TEST_COMPILE
+        ${HDF5_BINARY_DIR}/CMake
+        ${HDF5_RESOURCES_DIR}/HDF5Tests.c
+        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CURRENT_TEST_DEFINITIONS}
+        OUTPUT_VARIABLE OUTPUT
+    )
+    IF (HDF5_PRINTF_LL_TEST_COMPILE)
+      IF (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
+        SET (H5_PRINTF_LL_WIDTH "\"${HDF5_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
+        SET (PRINT_LL_FOUND 1)
+      ELSE (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
+        MESSAGE ("Width with ${HDF5_PRINTF_LL} failed with result: ${HDF5_PRINTF_LL_TEST_RUN}")
+      ENDIF (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
+    ELSE (HDF5_PRINTF_LL_TEST_COMPILE)
+      FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+          "Test H5_PRINTF_LL_WIDTH for ${HDF5_PRINTF_LL} failed with the following output:\n ${OUTPUT}\n"
       )
-      IF (HDF5_PRINTF_LL_TEST_COMPILE)
-        IF (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
-          SET (H5_PRINTF_LL_WIDTH "\"${HDF5_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
-          SET (PRINT_LL_FOUND 1)
-        ELSE (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
-          MESSAGE ("Width with ${HDF5_PRINTF_LL} failed with result: ${HDF5_PRINTF_LL_TEST_RUN}")
-        ENDIF (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
-      ELSE (HDF5_PRINTF_LL_TEST_COMPILE)
-        FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-            "Test H5_PRINTF_LL_WIDTH for ${HDF5_PRINTF_LL} failed with the following output:\n ${OUTPUT}\n"
-        )
-      ENDIF (HDF5_PRINTF_LL_TEST_COMPILE)
-    ENDFOREACH (HDF5_PRINTF_LL)
+    ENDIF (HDF5_PRINTF_LL_TEST_COMPILE)
+  ENDFOREACH (HDF5_PRINTF_LL)
 
-    IF (PRINT_LL_FOUND)
-      MESSAGE (STATUS "Checking for apropriate format for 64 bit long: found ${H5_PRINTF_LL_WIDTH}")
-    ELSE (PRINT_LL_FOUND)
-      MESSAGE (STATUS "Checking for apropriate format for 64 bit long: not found")
-      SET (H5_PRINTF_LL_WIDTH "\"unknown\"" CACHE INTERNAL
-          "Width for printf for type `long long' or `__int64', us. `ll"
-      )
-    ENDIF (PRINT_LL_FOUND)
+  IF (PRINT_LL_FOUND)
+    MESSAGE (STATUS "Checking for apropriate format for 64 bit long: found ${H5_PRINTF_LL_WIDTH}")
+  ELSE (PRINT_LL_FOUND)
+    MESSAGE (STATUS "Checking for apropriate format for 64 bit long: not found")
+    SET (H5_PRINTF_LL_WIDTH "\"unknown\"" CACHE INTERNAL
+        "Width for printf for type `long long' or `__int64', us. `ll"
+    )
+  ENDIF (PRINT_LL_FOUND)
 ENDIF (NOT H5_PRINTF_LL_WIDTH OR H5_PRINTF_LL_WIDTH MATCHES "unknown")
 
 # ----------------------------------------------------------------------
@@ -684,7 +682,7 @@ MACRO (H5ConversionTests TEST msg)
     IF (${TEST}_COMPILE)
       IF (${TEST}_RUN  MATCHES 0)
         SET (${TEST} 1 CACHE INTERNAL ${msg})
-        MESSAGE(STATUS "${msg}... yes")
+        MESSAGE (STATUS "${msg}... yes")
       ELSE (${TEST}_RUN  MATCHES 0)
         SET (${TEST} "" CACHE INTERNAL ${msg})
         MESSAGE (STATUS "${msg}... no")
