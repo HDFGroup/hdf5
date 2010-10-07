@@ -656,7 +656,8 @@ uninstall-local:
 install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
 	@for f in X $(INSTALL_FILES); do                                     \
 	  if test $$f != X; then                                             \
-	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);    \
+            chmod a-x $(EXAMPLEDIR)/$$f;                                     \
 	  fi;                                                                \
 	done
 	@for f in X $(INSTALL_SCRIPT_FILES); do                                   \
