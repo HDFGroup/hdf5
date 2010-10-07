@@ -278,6 +278,14 @@ IF (HDF5_ENABLE_COVERAGE)
 ENDIF (HDF5_ENABLE_COVERAGE)
 
 #-----------------------------------------------------------------------------
+# Option to indicate using a memory checker
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
+IF (HDF5_ENABLE_USING_MEMCHECKER)
+    SET (H5_USING_MEMCHECKER 1)   
+ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
+#-----------------------------------------------------------------------------
 # When building utility executables that generate other (source) files :
 # we make use of the following variables defined in the root CMakeLists.
 # Certain systems may add /Debug or /Release to output paths
