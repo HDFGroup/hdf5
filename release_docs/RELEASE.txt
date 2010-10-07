@@ -56,6 +56,10 @@ New Features
 
     Configuration
     -------------
+    - CMake: Improved CPack packaging, added parallel commands, improved
+      configuration options (better similarity to configure), added more
+      tests, better support for use in external cmake projects. 
+      (ADB - 2010/10/07)
     - Changed configure default setting to --disable-production (was
       --enable-production). This affects all unoffical releases such as
       snapshot releases. It will be set to --enable-production for all
