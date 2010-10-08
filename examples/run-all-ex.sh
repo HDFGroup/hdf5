@@ -26,12 +26,18 @@
 
 if (echo "Run c examples" && \ 
    (cd c; sh ./run-c-ex.sh) && \
-   echo "Run fortran examples" && \
-   (cd fortran; sh ./run-fortran-ex.sh) && \
-   echo "Run c++ examples" && \
-   (cd c++; sh ./run-c++-ex.sh) && \
-   echo "Run hl examples." && \
-   (cd hl; sh ./run-hl-ex.sh)); then
+   (if test -d fortran; then   
+       echo "Run fortran examples" 
+       cd fortran; sh ./run-fortran-ex.sh 
+    fi) 
+   (if test -d c++; then
+       echo "Run c++ examples" 
+       cd c++; sh ./run-c++-ex.sh
+    fi)
+   (if test -d hl; then
+       echo "Run hl examples." 
+       cd hl; sh ./run-hl-ex.sh
+    fi)); then
    echo "Done"
    exit 0
 else

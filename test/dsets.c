@@ -7854,7 +7854,7 @@ test_chunk_fast(hid_t fapl)
                         /* Fill existing elements */
                         for(u = 0; u < npoints; u++) {
                             /* Compute the coordinate from the linear offset */
-                            if(H5V_array_calc_pre(u, ndims, dim, down, hs_offset) < 0) FAIL_STACK_ERROR
+                            if(H5V_array_calc_pre(u, ndims, down, hs_offset) < 0) FAIL_STACK_ERROR
 
                             /* Un-swizzle hyperslab offset in same way as swizzled dimensions */
                             H5V_unswizzle_coords(hs_offset, unlim_dim);
@@ -7979,7 +7979,7 @@ test_chunk_fast(hid_t fapl)
                         /* Read elements */
                         for(u = 0; u < npoints; u++) {
                             /* Compute the coordinate from the linear offset */
-                            if(H5V_array_calc_pre(u, ndims, swizzled_dim, down, hs_offset) < 0) FAIL_STACK_ERROR
+                            if(H5V_array_calc_pre(u, ndims, down, hs_offset) < 0) FAIL_STACK_ERROR
 
                             /* Unswizzle hyperslab offset in same way as swizzled dimensions */
                             H5V_unswizzle_coords(hs_offset, unlim_dim);

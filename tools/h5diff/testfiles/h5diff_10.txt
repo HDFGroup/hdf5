@@ -62,6 +62,30 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
                            comparing floating point values.
                            By default, strict equality is used. Use -p or -d to
                            set specific tolerance.
+   --exclude-path "path"   Exclude the specified path to an object when
+                           comparing files or groups. If a group is excluded,
+                           all member objects will also be excluded.
+                           The specified path is excluded wherever it occurs.
+                           This flexibility enables the same option to exclude
+                           either objects that exist only in one file or
+                           common objects that are known to differ.
+
+                           When comparing files, "path" is the absolute path to
+                           the excluded object; when comparing groups, "path" is
+                           similar to the relative path from the group to the
+                           excluded object. This "path" can be taken from the
+                           first section of the output of the --verbose option.
+                           For example, if you are comparing the group /groupA
+                           in two files and you want to exclude
+                           /groupA/groupB/groupC in both files, the exclude
+                           option would read as follows:
+                             --exclude-path "/groupB/groupC"
+
+                           If there are multiple paths to an object, only the
+                           specified path(s) will be excluded; the comparison
+                           will include any path not explicitly excluded.
+                           This option can be used repeatedly to exclude
+                           multiple paths.
 
  Modes of output:
   Default mode: print the number of differences found and where they occured

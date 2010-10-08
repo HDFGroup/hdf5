@@ -1632,6 +1632,7 @@
 ./tools/h5diff/testfiles/h5diff_481.txt
 ./tools/h5diff/testfiles/h5diff_482.txt
 ./tools/h5diff/testfiles/h5diff_483.txt
+./tools/h5diff/testfiles/h5diff_484.txt
 ./tools/h5diff/testfiles/h5diff_500.txt
 ./tools/h5diff/testfiles/h5diff_501.txt
 ./tools/h5diff/testfiles/h5diff_502.txt
@@ -1967,7 +1968,8 @@
 ./config/cmake/cacheinit.cmake
 ./config/cmake/grepTest.cmake
 ./config/cmake/runTest.cmake
-./config/cmake/CTestCustom.ctest
+./config/cmake/vfdTest.cmake
+./config/cmake/CTestCustom.cmake
 ./config/cmake/ConfigureChecks.cmake
 ./CMakeLists.txt
 ./CTestConfig.cmake

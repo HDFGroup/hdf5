@@ -563,7 +563,7 @@ done:
     if(ret_value == NULL)
         if(new_dset != NULL) {
             if(new_dset->dcpl_id != 0 && H5I_dec_ref(new_dset->dcpl_id) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement temporary datatype ID")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "can't decrement temporary datatype ID")
             new_dset = H5FL_FREE(H5D_shared_t, new_dset);
         } /* end if */
 

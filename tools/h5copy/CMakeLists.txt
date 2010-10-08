@@ -131,15 +131,23 @@ IF (BUILD_TESTING)
   SET (HDF_EXT_SRC_FILE h5copy_extlinks_src)
   SET (HDF_EXT_TRG_FILE h5copy_extlinks_trg)
 
-############# COPY OBJECTS ##############
-
   # Remove any output file left over from previous test run
   ADD_TEST (
-      NAME H5COPY-clear-objects
+      NAME H5COPY-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
           ./testfiles/${HDF_FILE1}.out.h5
+          ./testfiles/${HDF_FILE1}.out.ls
           ./testfiles/${HDF_FILE1}.out.out
+          ./testfiles/${HDF_FILE1}.out.out.err
+          ./testfiles/${HDF_FILE2}.out.h5
+          ./testfiles/${HDF_FILE2}.out.ls
+          ./testfiles/${HDF_FILE2}.out.out
+          ./testfiles/${HDF_FILE2}.out.out.err
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.h5
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.ls
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.out
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.out.err
   )
   
   # "Test copying various forms of datasets"
@@ -166,17 +174,17 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (simple_group 0 ${HDF_FILE1} v /grp_dsets/simple /grp_dsets/simple_group)
 
   # "Test copying & renaming group"
-  ADD_H5_TEST (grp_rename 1 ${HDF_FILE1} v grp_dsets grp_rename)
+  ADD_H5_TEST (grp_rename 0 ${HDF_FILE1} v grp_dsets grp_rename)
 
   # "Test copying 'full' group hierarchy into group in destination file"
-  ADD_H5_TEST (grp_dsets_rename 1 ${HDF_FILE1} v grp_dsets /grp_rename/grp_dsets)
+  ADD_H5_TEST (grp_dsets_rename 0 ${HDF_FILE1} v grp_dsets /grp_rename/grp_dsets)
 
   # "Test copying objects into group hier. that doesn't exist yet in destination file"
   ADD_H5_TEST (A_B1_simple 0 ${HDF_FILE1} vp simple /A/B1/simple)
   ADD_H5_TEST (A_B2_simple2 0 ${HDF_FILE1} vp simple /A/B2/simple2)
   ADD_H5_TEST (C_D_simple 0 ${HDF_FILE1} vp /grp_dsets/simple /C/D/simple)
-  ADD_H5_TEST (E_F_grp_dsets 1 ${HDF_FILE1} vp /grp_dsets /E/F/grp_dsets)
-  ADD_H5_TEST (G_H_grp_nested 1 ${HDF_FILE1} vp /grp_nested /G/H/grp_nested)
+  ADD_H5_TEST (E_F_grp_dsets 0 ${HDF_FILE1} vp /grp_dsets /E/F/grp_dsets)
+  ADD_H5_TEST (G_H_grp_nested 0 ${HDF_FILE1} vp /grp_nested /G/H/grp_nested)
 
   # Verify that the file created above is correct
   ADD_H5LS_TEST (${HDF_FILE1})
@@ -190,6 +198,7 @@ IF (BUILD_TESTING)
           -E remove 
           ./testfiles/${HDF_FILE2}.out.h5
           ./testfiles/${HDF_FILE2}.out.out
+          ./testfiles/${HDF_FILE2}.out.out.err
   )
 
   # "Test copying object and region references"
@@ -207,6 +216,7 @@ IF (BUILD_TESTING)
           -E remove 
           ./testfiles/${HDF_EXT_SRC_FILE}.out.h5
           ./testfiles/${HDF_EXT_SRC_FILE}.out.out
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.out.err
   )
 
   # "Test copying external link directly without -f ext"
@@ -251,7 +261,7 @@ INSTALL (
     TARGETS
         h5copy
     RUNTIME DESTINATION
-        bin/tools
+        ${HDF5_INSTALL_BIN_DIR}/tools
     COMPONENT
         toolsapplications
 )

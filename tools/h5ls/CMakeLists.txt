@@ -151,6 +151,111 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
+  # Remove any output file left over from previous test run
+  ADD_TEST (
+      NAME H5LS-clearall-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          help-1.out
+          help-1.out.err
+          help-2.out
+          help-2.out.err
+          help-3.out
+          help-3.out.err
+          nosuchfile.out
+          nosuchfile.out.err
+          tall-1.out
+          tall-1.out.err
+          tall-2.out
+          tall-2.out.err
+          tarray1.out
+          tarray1.out.err
+          tattr2.out
+          tattr2.out.err
+          tcomp-1.out
+          tcomp-1.out.err
+          tdataregbe.out
+          tdataregbe.out.err
+          tdataregle.out
+          tdataregle.out.err
+          tdset-1.out
+          tdset-1.out.err
+          tempty.out
+          tempty.out.err
+          textlink-1.out
+          textlink-1.out.err
+          textlinksrc-1.out
+          textlinksrc-1.out.err
+          textlinksrc-2.out
+          textlinksrc-2.out.err
+          textlinksrc-3.out
+          textlinksrc-3.out.err
+          textlinksrc-4.out
+          textlinksrc-4.out.err
+          textlinksrc-5.out
+          textlinksrc-5.out.err
+          textlinksrc-6.out
+          textlinksrc-6.out.err
+          textlinksrc-7.out
+          textlinksrc-7.out.err
+          textlinksrc-1-old.out
+          textlinksrc-1-old.out.err
+          textlinksrc-2-old.out
+          textlinksrc-2-old.out.err
+          textlinksrc-3-old.out
+          textlinksrc-3-old.out.err
+          textlinksrc-6-old.out
+          textlinksrc-6-old.out.err
+          textlinksrc-7-old.out
+          textlinksrc-7-old.out.err
+          tsoftlinks-1.out
+          tsoftlinks-1.out.err
+          tsoftlinks-2.out
+          tsoftlinks-2.out.err
+          tsoftlinks-3.out
+          tsoftlinks-3.out.err
+          tsoftlinks-4.out
+          tsoftlinks-4.out.err
+          tsoftlinks-5.out
+          tsoftlinks-5.out.err
+          textlinksrc-nodangle-1.out
+          textlinksrc-nodangle-1.out.err
+          textlinksrc-nodangle-2.out
+          textlinksrc-nodangle-2.out.err
+          tsoftlinks-nodangle-1.out
+          tsoftlinks-nodangle-1.out.err
+          thlinks-nodangle-1.out
+          thlinks-nodangle-1.out.err
+          tgroup.out
+          tgroup.out.err
+          tgroup-1.out
+          tgroup-1.out.err
+          tgroup-2.out
+          tgroup-2.out.err
+          tgroup-3.out
+          tgroup-3.out.err
+          thlink-1.out
+          thlink-1.out.err
+          tloop-1.out
+          tloop-1.out.err
+          tnestcomp-1.out
+          tnestcomp-1.out.err
+          tsaf.out
+          tsaf.out.err
+          tslink-1.out
+          tslink-1.out.err
+          tstr-1.out
+          tstr-1.out.err
+          tudlink-1.out
+          tudlink-1.out.err
+          tvldtypes1.out
+          tvldtypes1.out.err
+          tvldtypes2le.out
+          tvldtypes2le.out.err
+          tvldtypes2be.out
+          tvldtypes2be.out.err
+  )
+
   # test the help syntax
   ADD_H5_TEST (help-1 0 -w80 -h)
   ADD_H5_TEST (help-2 0 -w80 --help)
@@ -270,7 +375,7 @@ INSTALL (
     TARGETS
         h5ls
     RUNTIME DESTINATION
-        bin/tools
+        ${HDF5_INSTALL_BIN_DIR}/tools
     COMPONENT
         toolsapplications
 )

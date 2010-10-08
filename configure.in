@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.9.75-FA_a5], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.76-FA_a5], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -252,6 +252,9 @@ case $host_os in
     ;;
   aix5.*)
     host_os_novers=aix5.x
+    ;;
+  aix6.*)
+    host_os_novers=aix6.x
     ;;
   freebsd*)
     host_os_novers=freebsd

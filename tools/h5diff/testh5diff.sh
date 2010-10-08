@@ -56,10 +56,10 @@ FILE19=h5diff_dset_idx1.h5
 FILE20=h5diff_dset_idx2.h5
 DANGLE_LINK_FILE1=h5diff_danglelinks1.h5
 DANGLE_LINK_FILE2=h5diff_danglelinks2.h5
-/* group recursive */
+# group recursive
 GRP_RECURSE_FILE1=h5diff_grp_recurse1.h5
 GRP_RECURSE_FILE2=h5diff_grp_recurse2.h5
-/* group recursive - same structure via external links through files */
+# group recursive - same structure via external links through files
 GRP_RECURSE1_EXT=h5diff_grp_recurse_ext1.h5
 GRP_RECURSE2_EXT1=h5diff_grp_recurse_ext2-1.h5
 GRP_RECURSE2_EXT2=h5diff_grp_recurse_ext2-2.h5
@@ -778,6 +778,8 @@ TOOLTEST h5diff_482.txt -v --exclude-path "/group1" --exclude-path "/dset1" $EXC
 # Exclude only some different objects. Expect return - diff
 TOOLTEST h5diff_483.txt -v --exclude-path "/group1" $EXCLUDE_FILE2_1 $EXCLUDE_FILE2_2
 
+# Exclude from group compare
+TOOLTEST h5diff_484.txt -v --exclude-path "/dset3" h5diff_exclude1-1.h5 h5diff_exclude1-2.h5 /group1
 
 
 # ##############################################################################

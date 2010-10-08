@@ -39,7 +39,8 @@ chunks.chkexe_: extend_ds.chkexe_
 CXX_API=yes
 
 # Where to install examples
-EXAMPLEDIR=${DESTDIR}/$(exec_prefix)/share/hdf5_examples/c++
+# Note: no '/' after DESTDIR.  Explanation in commence.am
+EXAMPLEDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples/c++
 
 # How to build programs using h5c++
 $(EXTRA_PROG): $(H5CPP)

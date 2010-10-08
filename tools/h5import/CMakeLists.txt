@@ -44,6 +44,22 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
+  # Remove any output file left over from previous test run
+  ADD_TEST (
+      NAME H5IMPORT-clear-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          binfp64.bin
+          binin8.bin
+          binin8w.bin
+          binin16.bin
+          binin32.bin
+          binuin16.bin
+          binuin32.bin
+          txtin16.txt
+          txtin32.txt
+  )
+
   ADD_TEST (NAME h5importtest COMMAND $<TARGET_FILE:h5importtest>)
 ENDIF (BUILD_TESTING)
 
@@ -60,7 +76,7 @@ INSTALL (
     TARGETS
         h5import
     RUNTIME DESTINATION
-        bin/tools
+        ${HDF5_INSTALL_BIN_DIR}/tools
     COMPONENT
         toolsapplications
 )

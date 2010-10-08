@@ -153,7 +153,7 @@ uninstall-doc:
 #  be successfully built
 installcheck-local:
 	if test -n "${DESTDIR}"; then                                  \
-          (cd ${DESTDIR}/$(bindir) && pwd && ./h5redeploy -force);     \
+          (cd ${DESTDIR}$(bindir) && pwd && ./h5redeploy -force);     \
         fi
 	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 

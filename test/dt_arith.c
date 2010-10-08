@@ -5177,8 +5177,8 @@ run_int_fp_conv(const char *name)
 static int
 run_fp_int_conv(const char *name)
 {
-#ifdef H5_FP_TO_INTEGER_OVERFLOW_WORKS
     int		nerrors = 0;
+#ifdef H5_FP_TO_INTEGER_OVERFLOW_WORKS
     int         test_values;
 
 #ifdef H5_VMS

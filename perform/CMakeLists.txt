@@ -11,6 +11,21 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib )
 # Add Tests
 #-----------------------------------------------------------------------------
 
+# Remove any output file left over from previous test run
+ADD_TEST (
+    NAME h5perform-clear-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove 
+        chunk.h5
+        iopipe.h5
+        iopipe.raw
+        x-diag-rd.dat
+        x-diag-wr.dat
+        x-rowmaj-rd.dat
+        x-rowmaj-wr.dat
+        x-gnuplot
+)
+
 #-- Adding test for h5perf_serial
 SET (h5perf_serial_SRCS
     ${HDF5_PERFORM_SOURCE_DIR}/sio_timer.c

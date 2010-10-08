@@ -222,9 +222,9 @@ INCLUDE (${HDF5_RESOURCES_DIR}/ConfigureChecks.cmake)
 #-----------------------------------------------------------------------------
 # Option to use legacy naming for windows libs/programs, default is legacy
 #-----------------------------------------------------------------------------
-IF (WIN32)
+IF (WIN32 AND NOT CYGWIN)
   OPTION (H5_LEGACY_NAMING "Use Legacy Names for Libraries and Programs" ON)
-ENDIF (WIN32)
+ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Option to Build Shared/Static libs, default is static
@@ -276,6 +276,14 @@ IF (HDF5_ENABLE_COVERAGE)
 ENDIF (HDF5_ENABLE_COVERAGE)
 
 #-----------------------------------------------------------------------------
+# Option to indicate using a memory checker
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
+IF (HDF5_ENABLE_USING_MEMCHECKER)
+    SET (H5_USING_MEMCHECKER 1)   
+ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
+#-----------------------------------------------------------------------------
 # When building utility executables that generate other (source) files :
 # we make use of the following variables defined in the root CMakeLists.
 # Certain systems may add /Debug or /Release to output paths
@@ -284,8 +292,10 @@ ENDIF (HDF5_ENABLE_COVERAGE)
 SET (EXE_EXT "")
 IF (WIN32)
   SET (EXE_EXT ".exe")
-  ADD_DEFINITIONS (-DBIND_TO_CURRENT_VCLIBS_VERSION=1)
-  ADD_DEFINITIONS (-D_CRT_SECURE_NO_WARNINGS)
+  IF (NOT CYGWIN)
+    ADD_DEFINITIONS (-DBIND_TO_CURRENT_VCLIBS_VERSION=1)
+    ADD_DEFINITIONS (-D_CRT_SECURE_NO_WARNINGS)
+  ENDIF (NOT CYGWIN)
 ENDIF (WIN32)
 
 SET (MAKE_SYSTEM)
@@ -345,9 +355,9 @@ IF (HDF5_DISABLE_COMPILER_WARNINGS)
         CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
   ENDIF (MSVC)
-  IF (WIN32)
+  IF (WIN32 AND NOT CYGWIN)
     ADD_DEFINITIONS (-D_CRT_SECURE_NO_WARNINGS)
-  ENDIF (WIN32)
+  ENDIF (WIN32 AND NOT CYGWIN)
   # Borland uses -w- to suppress warnings.
   IF (BORLAND)
     SET (HDF5_WARNINGS_BLOCKED 1)
@@ -433,20 +443,57 @@ HDF5_SETUP_FILTERS (FLETCHER32)
 HDF5_SETUP_FILTERS (NBIT)
 HDF5_SETUP_FILTERS (SCALEOFFSET)
 
+INCLUDE (ExternalProject)
+OPTION (HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building" "NO")
+
 #-----------------------------------------------------------------------------
 # Option for ZLib support
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_Z_LIB_SUPPORT "Enable Zlib Filters" OFF)
 IF (HDF5_ENABLE_Z_LIB_SUPPORT)
   IF (NOT H5_ZLIB_HEADER)
-    FIND_PACKAGE (ZLIB REQUIRED)
+    FIND_PACKAGE (ZLIB)
     IF (ZLIB_FOUND)
       SET (H5_HAVE_FILTER_DEFLATE 1)
       SET (H5_HAVE_ZLIB_H 1)
       SET (H5_HAVE_LIBZ 1)
       SET (H5_ZLIB_HEADER "zlib.h")
     ELSE (ZLIB_FOUND)
-      MESSAGE (FATAL " ZLib is Required for ZLib support in HDF5")
+      IF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
+        EXTERNALPROJECT_ADD (ZLIB
+            SVN_REPOSITORY http://svn.hdfgroup.uiuc.edu/zlib/trunk
+            # [SVN_REVISION rev] 
+            INSTALL_COMMAND ""
+            CMAKE_ARGS
+                -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
+        ) 
+        EXTERNALPROJECT_GET_PROPERTY (ZLIB BINARY_DIR SOURCE_DIR) 
+
+        IF (BUILD_SHARED_LIBS)
+          SET (ZLIB_LIBRARY
+              "${BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/${CMAKE_IMPORT_LIBRARY_PREFIX}zlib1${CMAKE_IMPORT_LIBRARY_SUFFIX}"
+          )
+        ELSE (BUILD_SHARED_LIBS)
+          SET (ZLIB_LIBRARY
+              "${BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/libzlib${CMAKE_STATIC_LIBRARY_SUFFIX}"
+          )
+        ENDIF (BUILD_SHARED_LIBS)
+        SET (ZLIB_INCLUDE_DIR_GEN
+            "${BINARY_DIR}"
+        )
+        SET (ZLIB_INCLUDE_DIR
+            "${SOURCE_DIR}/src"
+        )
+      
+        SET (ZLIB_FOUND 1)
+        SET (ZLIB_LIBRARIES ${ZLIB_LIBRARY})
+        SET (ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDE_DIR_GEN} ${ZLIB_INCLUDE_DIR})
+        SET (H5_HAVE_FILTER_DEFLATE 1)
+        SET (H5_HAVE_ZLIB_H 1)
+        SET (H5_HAVE_LIBZ 1)
+      ELSE (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
+        MESSAGE (FATAL " ZLib is Required for ZLib support in HDF5")
+      ENDIF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
     ENDIF (ZLIB_FOUND)
   ELSE (NOT H5_ZLIB_HEADER)
     # This project is being called from within another and ZLib is already configured
@@ -465,29 +512,63 @@ ENDIF (HDF5_ENABLE_Z_LIB_SUPPORT)
 SET (CMAKE_MODULE_PATH ${HDF5_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
 OPTION (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" OFF)
 IF (HDF5_ENABLE_SZIP_SUPPORT)
-  FIND_PACKAGE (SZIP REQUIRED)
+  OPTION (HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding" OFF)
+  FIND_PACKAGE (SZIP)
   IF (SZIP_FOUND)
     SET (H5_HAVE_FILTER_SZIP 1)
     SET (H5_HAVE_SZLIB_H 1)
     SET (H5_HAVE_LIBSZ 1)
-    SET (LINK_LIBS ${LINK_LIBS} ${SZIP_LIBRARIES})
-    INCLUDE_DIRECTORIES (${SZIP_INCLUDE_DIRS})
-#      MESSAGE (STATUS "SZIP_INCLUDE_DIRS: ${SZIP_INCLUDE_DIRS}")
-#      MESSAGE (STATUS "SZIP_INCLUDE_DIR: ${SZIP_INCLUDE_DIR}")
-    MESSAGE (STATUS "Filter SZIP is ON")
-    OPTION (HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding" OFF)
-    IF (HDF5_ENABLE_SZIP_ENCODING)
-      SET (H5_HAVE_SZIP_ENCODER 1)
-    ENDIF (HDF5_ENABLE_SZIP_ENCODING)
   ELSE (SZIP_FOUND)
+    IF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
+      EXTERNALPROJECT_ADD (SZIP
+          SVN_REPOSITORY http://svn.hdfgroup.uiuc.edu/szip/trunk
+          # [SVN_REVISION rev] 
+          INSTALL_COMMAND ""
+          CMAKE_ARGS
+              -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
+              -DSZIP_ENABLE_ENCODING:BOOL=${HDF5_ENABLE_SZIP_ENCODING}
+      ) 
+      EXTERNALPROJECT_GET_PROPERTY (SZIP BINARY_DIR SOURCE_DIR) 
+
+
+      IF (BUILD_SHARED_LIBS)
+        SET (SZIP_LIBRARY
+           "${BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/${CMAKE_IMPORT_LIBRARY_PREFIX}szip${CMAKE_IMPORT_LIBRARY_SUFFIX}"
+        )
+      ELSE (BUILD_SHARED_LIBS)
+        SET (SZIP_LIBRARY
+           "${BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/libszip${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        )
+      ENDIF (BUILD_SHARED_LIBS)
+      SET (SZIP_INCLUDE_DIR_GEN
+          "${BINARY_DIR}"
+      )
+      SET (SZIP_INCLUDE_DIR
+          "${SOURCE_DIR}/src"
+      )
+      
+      SET (SZIP_FOUND 1)
+      SET (SZIP_LIBRARIES ${SZIP_LIBRARY})
+      SET (SZIP_INCLUDE_DIRS ${SZIP_INCLUDE_DIR_GEN} ${SZIP_INCLUDE_DIR})
+      SET (H5_HAVE_FILTER_SZIP 1)
+      SET (H5_HAVE_SZLIB_H 1)
+      SET (H5_HAVE_LIBSZ 1)
+    ELSE (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
       MESSAGE (FATAL_ERROR "SZIP is Required for SZIP support in HDF5")
+    ENDIF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
   ENDIF (SZIP_FOUND)
+  SET (LINK_LIBS ${LINK_LIBS} ${SZIP_LIBRARIES})
+  INCLUDE_DIRECTORIES (${SZIP_INCLUDE_DIRS})
+  MESSAGE (STATUS "Filter SZIP is ON")
+  IF (HDF5_ENABLE_SZIP_ENCODING)
+    SET (H5_HAVE_SZIP_ENCODER 1)
+  ENDIF (HDF5_ENABLE_SZIP_ENCODING)
 ENDIF (HDF5_ENABLE_SZIP_SUPPORT)
 
 #-----------------------------------------------------------------------------
 # Option for external libraries on windows
 #-----------------------------------------------------------------------------
-IF (WIN32)
+IF (WIN32 AND NOT CYGWIN)
   OPTION (HDF5_PACKAGE_EXTLIBS "CPACK - include external libraries" OFF)
   IF (BUILD_SHARED_LIBS)
     FILE (MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${BLDTYPE})
@@ -498,8 +579,8 @@ IF (WIN32)
       GET_FILENAME_COMPONENT(ZLIB_BIN_PATH ${ZLIB_LIBRARY} PATH)
       # MESSAGE (STATUS "ZLIB_BIN_PATH: ${ZLIB_BIN_PATH}")
       ADD_CUSTOM_TARGET (ZLIB-Release-Copy ALL
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZLIB_BIN_PATH}/${ZLIB_DLL_NAME}.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/
-          COMMENT "Copying ${ZLIB_BIN_PATH}/${ZLIB_DLL_NAME}.dll to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/"
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZLIB_BIN_PATH}/${ZLIB_DLL_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/
+          COMMENT "Copying ${ZLIB_BIN_PATH}/${ZLIB_DLL_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/"
       )
     ENDIF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
     
@@ -509,25 +590,25 @@ IF (WIN32)
       GET_FILENAME_COMPONENT(SZIP_BIN_PATH ${SZIP_LIBRARY} PATH)
       # MESSAGE (STATUS "SZIP_BIN_PATH: ${SZIP_BIN_PATH}")
       ADD_CUSTOM_TARGET (SZIP-Release-Copy ALL
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SZIP_BIN_PATH}/${SZIP_DLL_NAME}.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/
-          COMMENT "Copying ${SZIP_BIN_PATH}/${SZIP_DLL_NAME}.dll to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/"
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SZIP_BIN_PATH}/${SZIP_DLL_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/
+          COMMENT "Copying ${SZIP_BIN_PATH}/${SZIP_DLL_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/"
       )
     ENDIF (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
     
   ENDIF (BUILD_SHARED_LIBS)
-ENDIF (WIN32)
+ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Option to use threadsafe
 # Note: Currently CMake only allows configuring of threadsafe on WINDOWS.
 #-----------------------------------------------------------------------------
-IF (WIN32)
+IF (WIN32 AND NOT CYGWIN)
   OPTION (HDF5_ENABLE_THREADSAFE "Enable Threadsafety" OFF)
   IF (HDF5_ENABLE_THREADSAFE)
     SET (H5_HAVE_WIN_THREADS 1)
     SET (H5_HAVE_THREADSAFE 1)
   ENDIF (HDF5_ENABLE_THREADSAFE)
-ENDIF (WIN32)
+ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Option to use PACKED BITS SUPPORT
@@ -542,6 +623,15 @@ ENDIF (HDF5_USE_H5DUMP_PACKED_BITS)
 # Add the HDF5 Library Target to the build
 #-----------------------------------------------------------------------------
 ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
+
+IF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
+  IF (ZLIB_FOUND)
+    ADD_DEPENDENCIES (${HDF5_LIB_TARGET} ZLIB)
+  ENDIF (ZLIB_FOUND)
+  IF (SZIP_FOUND)
+    ADD_DEPENDENCIES (${HDF5_LIB_TARGET} SZIP)
+  ENDIF (SZIP_FOUND)
+ENDIF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
 
 #-----------------------------------------------------------------------------
 # Build utility to copy and strip X lines of file
@@ -577,6 +667,7 @@ IF (BUILD_TESTING)
     ENDIF (H5_HAVE_PARALLEL)
   ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
   INCLUDE (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
+  CONFIGURE_FILE (${HDF5_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
 ENDIF (BUILD_TESTING)
 
 #-----------------------------------------------------------------------------
@@ -664,7 +755,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   IF (HDF5_PACKAGE_EXTLIBS)
     IF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
       INSTALL (
-          FILES ${ZLIB_INCLUDE_DIR}/zconf.h ${ZLIB_INCLUDE_DIR}/zlib.h
+          FILES ${ZLIB_INCLUDE_DIR_GEN}/zconf.h ${ZLIB_INCLUDE_DIR}/zlib.h
           DESTINATION ${HDF5_INSTALL_INCLUDE_DIR}
           COMPONENT headers
       )
@@ -679,7 +770,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
         GET_FILENAME_COMPONENT(ZLIB_BIN_PATH ${ZLIB_LIBRARY} PATH)
         # message(STATUS "ZLIB_BIN_PATH: ${ZLIB_BIN_PATH}")
         INSTALL(
-            FILES ${ZLIB_BIN_PATH}/${ZLIB_DLL_NAME}.dll
+            FILES ${ZLIB_BIN_PATH}/${ZLIB_DLL_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}
             DESTINATION ${HDF5_INSTALL_BIN_DIR}
             COMPONENT libraries
         )
@@ -687,7 +778,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
     ENDIF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
     IF (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
       INSTALL (
-          FILES ${SZIP_INCLUDE_DIR}/SZconfig.h ${SZIP_INCLUDE_DIR}/szlib.h ${SZIP_INCLUDE_DIR}/szip_adpt.h ${SZIP_INCLUDE_DIR}/ricehdf.h
+          FILES ${SZIP_INCLUDE_DIR_GEN}/SZconfig.h ${SZIP_INCLUDE_DIR}/szlib.h ${SZIP_INCLUDE_DIR}/szip_adpt.h ${SZIP_INCLUDE_DIR}/ricehdf.h
           DESTINATION ${HDF5_INSTALL_INCLUDE_DIR}
           COMPONENT headers
       )
@@ -702,7 +793,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
         GET_FILENAME_COMPONENT(SZIP_BIN_PATH ${SZIP_LIBRARY} PATH)
         # message(STATUS "SZIP_BIN_PATH: ${ZLIB_BIN_PATH}")
         INSTALL(
-            FILES ${SZIP_BIN_PATH}/${SZIP_DLL_NAME}.dll
+            FILES ${SZIP_BIN_PATH}/${SZIP_DLL_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}
             DESTINATION ${HDF5_INSTALL_BIN_DIR}
             COMPONENT libraries
         )
@@ -717,7 +808,7 @@ ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   INSTALL (
       EXPORT ${HDF5_EXPORTED_TARGETS}
-      DESTINATION lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
+      DESTINATION ${HDF5_INSTALL_LIB_DIR}/cmake/hdf5-${HDF5_PACKAGE_VERSION}
       FILE hdf5-targets.cmake
   )
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
@@ -758,7 +849,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   )
   INSTALL (
       FILES ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config.cmake
-      DESTINATION lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
+      DESTINATION ${HDF5_INSTALL_LIB_DIR}/cmake/hdf5-${HDF5_PACKAGE_VERSION}
   )
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 
@@ -772,7 +863,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   )
   INSTALL (
       FILES ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config-version.cmake
-      DESTINATION lib/cmake/hdf5-${HDF5_PACKAGE_VERSION}
+      DESTINATION ${HDF5_INSTALL_LIB_DIR}/cmake/hdf5-${HDF5_PACKAGE_VERSION}
   )
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 

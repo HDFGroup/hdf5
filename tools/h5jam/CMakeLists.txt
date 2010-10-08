@@ -83,7 +83,7 @@ INSTALL (
     TARGETS
         h5jam h5unjam
     RUNTIME DESTINATION
-        bin/tools
+        ${HDF5_INSTALL_BIN_DIR}/tools
     COMPONENT
         toolsapplications
 )
