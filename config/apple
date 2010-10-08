@@ -62,6 +62,11 @@ case $CC in
             grep 'GCC' | sed 's/.*\((GCC) [-a-z0-9\. ]*.*\)/\1/'`
         ;;
 
+    *icc*)
+        cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
     *)
         echo "No match to get cc_version_info for $CC"
         ;;
@@ -72,6 +77,16 @@ case $FC in
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS --version 2>&1 |\
             grep 'GCC' | sed 's/\(.*(GCC) [-a-z0-9\. ]*\).*/\1/'`
         ;;
+
+    *ifc*|*ifort*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
+     *)
+        echo "No match to get fc_version_info for $FC"
+        ;;
+
 esac
 
 # get c++ version info
@@ -80,6 +95,12 @@ case $CXX in
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
             grep 'GCC' | sed 's/.*\((GCC) [-a-z0-9\. ]*.*\)/\1/'`
         ;;
+
+   *icpc*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
     *)
         echo "No match to get cxx_version_info for $CXX"
         ;;

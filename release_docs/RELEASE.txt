@@ -85,7 +85,8 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    - None
+    - Intel V11.1 uses now -O3 optimization in production mode (EIP - 2010/10/08)
+             
 
 
 Bug Fixes since HDF5-1.8.6
