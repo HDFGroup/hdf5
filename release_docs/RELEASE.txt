@@ -240,6 +240,7 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+    - Intel V11.1 uses now -O3 optimization in production mode (EIP - 2010/10/08)
     - PathScale compilers are recognized and can build the HDF5 library
       properly. AKC - 2009/7/28 -
 
