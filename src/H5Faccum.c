@@ -312,12 +312,6 @@ H5F_accum_adjust(H5F_meta_accum_t *accum, H5FD_t *lf, hid_t dxpl_id,
                         accum->dirty = FALSE;
                     } /* end if */
 
-                    /* Move remnant of accumulator down */
-                    HDmemmove(accum->buf, (accum->buf + shrink_size), remnant_size);
-
-                    /* Adjust accumulator's location */
-                    accum->loc += shrink_size;
-
                     /* Adjust dirty region tracking info */
                     accum->dirty_off -= shrink_size;
                 } /* end else */
@@ -325,6 +319,15 @@ H5F_accum_adjust(H5F_meta_accum_t *accum, H5FD_t *lf, hid_t dxpl_id,
 
             /* Trim the accumulator's use of its buffer */
             accum->size = remnant_size;
+
+            /* When appending, need to adjust location of accumulator */
+            if (H5F_ACCUM_APPEND == adjust) {
+                /* Move remnant of accumulator down */
+                HDmemmove(accum->buf, (accum->buf + shrink_size), remnant_size);
+
+                /* Adjust accumulator's location */
+                accum->loc += shrink_size;
+            } /* end if */
         } /* end if */
 
         /* Check for accumulator needing to be reallocated */
