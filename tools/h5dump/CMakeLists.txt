@@ -860,8 +860,10 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tchar1 0 -r tchar.h5)
 
   # test failure handling
-  # Missing file name
-  ADD_H5_TEST (tnofilename 1)
+  IF (NOT HDF5_USE_H5DUMP_PACKED_BITS)
+    # Missing file name
+    ADD_H5_TEST (tnofilename 1)
+  ENDIF (NOT HDF5_USE_H5DUMP_PACKED_BITS)
 
   # rev. 2004
 
