@@ -42,13 +42,312 @@ int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 #define DSET_NAME               "a_dataset"
 #define FAKE_ID                 -1
 
-herr_t custom_print_cb(int n, H5E_error1_t *err_desc, void* client_data);
+herr_t custom_print_cb1(int n, H5E_error1_t *err_desc, void* client_data);
+herr_t custom_print_cb2(int n, H5E_error2_t *err_desc, void* client_data);
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_error
+ * Function:	user_print1
  *
- * Purpose:	Test error API functions
+ * Purpose:	This function is a user-defined old-style printing function.
+ *              This is just a convenience function for H5Ewalk1() with a 
+ *              function that prints error messages.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              4 October 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+user_print1(FILE *stream)
+{
+    /* Customized way to print errors */
+    fprintf(stderr, "\n********* Print error stack in customized way *********\n");
+    if(H5Ewalk1(H5E_WALK_UPWARD, (H5E_walk1_t)custom_print_cb1, stream) < 0)
+        TEST_ERROR;
+
+    return 0;
+
+  error:
+    return -1;
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	user_print2
+ *
+ * Purpose:	This function is a user-defined new-style printing function.
+ *              This is just a convenience function for H5Ewalk2() with a 
+ *              function that prints error messages.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              4 October 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+user_print2(hid_t err_stack, FILE *stream)
+{
+    /* Customized way to print errors */
+    fprintf(stderr, "\n********* Print error stack in customized way *********\n");
+    if(H5Ewalk2(err_stack, H5E_WALK_UPWARD, (H5E_walk2_t)custom_print_cb2, stream) < 0)
+        TEST_ERROR;
+
+    return 0;
+
+  error:
+    return -1;
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    custom_print_cb1
+ *
+ * Purpose:	Callback function to print error stack in customized way
+ *              for H5Ewalk1.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *              4 October 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+custom_print_cb1(int n, H5E_error1_t *err_desc, void* client_data)
+{
+    FILE	*stream  = (FILE *)client_data;
+    char        *maj = NULL;
+    char        *min = NULL;
+    const int	 indent = 4;
+
+    if(NULL == (min = H5Eget_minor(err_desc->min_num)))
+        TEST_ERROR;
+
+    if(NULL == (maj = H5Eget_major(err_desc->maj_num)))
+        TEST_ERROR;
+
+    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
+	     indent, "", n, err_desc->file_name,
+	     err_desc->func_name, err_desc->line);
+    
+    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
+    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
+
+    HDfree(maj);
+    HDfree(min);
+
+    return 0;
+
+error:
+    if(maj)
+        HDfree(maj);
+    if(min)
+        HDfree(min);
+    
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    custom_print_cb2
+ *
+ * Purpose:	Callback function to print error stack in customized way
+ *              for H5Ewalk1.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *              4 October 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+custom_print_cb2(int n, H5E_error2_t *err_desc, void* client_data)
+{
+    FILE	*stream  = (FILE *)client_data;
+    char        *maj = NULL;
+    char        *min = NULL;
+    const int	 indent = 4;
+
+    if(NULL == (min = H5Eget_minor(err_desc->min_num)))
+        TEST_ERROR;
+
+    if(NULL == (maj = H5Eget_major(err_desc->maj_num)))
+        TEST_ERROR;
+
+    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
+	     indent, "", n, err_desc->file_name,
+	     err_desc->func_name, err_desc->line);
+    
+    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
+    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
+
+    HDfree(maj);
+    HDfree(min);
+
+    return 0;
+
+error:
+    if(maj)
+        HDfree(maj);
+    if(min)
+        HDfree(min);
+    
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_error1
+ *
+ * Purpose:	Test the backward compatibility of H5Eset/get_auto.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *		17 September 2010
+ *
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_error1(void)
+{
+    hid_t		dataset, space;
+    hsize_t		dims[2];
+    H5E_auto1_t         old_func1;
+    H5E_auto2_t         old_func2;
+    void                *old_data;
+    herr_t              ret;
+
+    TESTING("error API H5Eset/get_auto");
+    fprintf(stderr, "\n");
+
+    /* Create the data space */
+    dims[0] = DIM0;
+    dims[1] = DIM1;
+    if ((space = H5Screate_simple(2, dims, NULL))<0) TEST_ERROR;
+
+    /* Use H5Eget_auto2 to query the default printing function.  The library 
+     *should indicate H5Eprint2 as the default. */
+    if (H5Eget_auto2(H5E_DEFAULT, &old_func2, &old_data)<0)
+	TEST_ERROR;
+    if (old_data != NULL)
+	TEST_ERROR;
+    if (!old_func2 || (H5E_auto2_t)H5Eprint2 != old_func2)
+	TEST_ERROR;
+
+    /* This function sets the default printing function to be H5Eprint2. */
+    if(H5Eset_auto2(H5E_DEFAULT, old_func2, old_data)<0)
+        TEST_ERROR;
+
+    /* Try the printing function. Dataset creation should fail because the file 
+     * doesn't exist. */
+    dataset = H5Dcreate2(FAKE_ID, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT, 
+                             H5P_DEFAULT, H5P_DEFAULT);
+    if(dataset >= 0)    
+        TEST_ERROR;
+
+    /* This call should work.  It simply returns H5Eprint1. */
+    if((ret = H5Eget_auto1(&old_func1, &old_data))<0)
+        TEST_ERROR;
+    if (old_data != NULL)
+	TEST_ERROR;
+    if (!old_func1 || (H5E_auto1_t)H5Eprint1 != old_func1)
+	TEST_ERROR;
+
+    /* This function changes the old-style printing function to be user_print1. */
+    if(H5Eset_auto1((H5E_auto1_t)user_print1, stderr)<0)
+        TEST_ERROR;
+
+    /* Try the printing function. Dataset creation should fail because the file 
+     * doesn't exist. */
+    dataset = H5Dcreate2(FAKE_ID, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT, 
+                             H5P_DEFAULT, H5P_DEFAULT);
+    if(dataset >= 0)    
+        TEST_ERROR;
+
+    /* This call should fail because the test mixes H5Eget_auto2 with H5Eset_auto1. 
+     * Once the H5Eset_auto1 is called with a user-defined printing function, 
+     * a call to H5Eget_auto2 will fail. But keep in mind the printing function is 
+     * user_print1. */
+    if((ret = H5Eget_auto2(H5E_DEFAULT, &old_func2, &old_data))>=0)
+        TEST_ERROR;
+
+    /* This function changes the new-style printing function to be user_print2. */
+    if(H5Eset_auto2(H5E_DEFAULT, (H5E_auto2_t)user_print2, stderr)<0)
+        TEST_ERROR;
+
+    /* Try the printing function. Dataset creation should fail because the file 
+     * doesn't exist. */
+    dataset = H5Dcreate2(FAKE_ID, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT, 
+                             H5P_DEFAULT, H5P_DEFAULT);
+    if(dataset >= 0)    
+        TEST_ERROR;
+
+    /* This function changes the new-style printing function back to the default H5Eprint2. */
+    if(H5Eset_auto2(H5E_DEFAULT, (H5E_auto2_t)H5Eprint2, NULL)<0)
+        TEST_ERROR;
+
+    /* This call should work because the H5Eset_auto2 above restored the default printing 
+     * function H5Eprint2.  It simply returns user_print1. */
+    if((ret = H5Eget_auto1(&old_func1, &old_data))<0)
+        TEST_ERROR;
+    if (old_data != NULL)
+	TEST_ERROR;
+    if (!old_func1 || (H5E_auto1_t)user_print1 != old_func1)
+	TEST_ERROR;
+
+    /* This function changes the new-style printing function back to the default H5Eprint1. */
+    if(H5Eset_auto1((H5E_auto1_t)H5Eprint1, NULL)<0)
+        TEST_ERROR;
+
+    /* This call should work because the H5Eset_auto1 above restored the default printing 
+     * function H5Eprint1.  It simply returns H5Eprint2. */
+    if((ret = H5Eget_auto2(H5E_DEFAULT, &old_func2, &old_data))<0)
+        TEST_ERROR;
+    if (old_data != NULL)
+	TEST_ERROR;
+    if (!old_func2 || (H5E_auto2_t)H5Eprint2 != old_func2)
+	TEST_ERROR;
+
+    /* Try the printing function. Dataset creation should fail because the file 
+     * doesn't exist. */
+    dataset = H5Dcreate2(FAKE_ID, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT, 
+                             H5P_DEFAULT, H5P_DEFAULT);
+    if(dataset >= 0)    
+        TEST_ERROR;
+
+    return 0;
+
+  error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_error2
+ *
+ * Purpose:	Test error API functions, mainly on H5Epush1.
  *
  * Return:	Success:	0
  *
@@ -63,13 +362,11 @@ herr_t custom_print_cb(int n, H5E_error1_t *err_desc, void* client_data);
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_error(hid_t file)
+test_error2(hid_t file)
 {
     hid_t		dataset, space;
     hsize_t		dims[2];
-    const char          *FUNC_test_error="test_error";
-    H5E_auto1_t         old_func;
-    void                *old_data;
+    const char          *FUNC_test_error="test_error2";
 
     TESTING("error API based on data I/O");
     fprintf(stderr, "\n");
@@ -92,22 +389,12 @@ test_error(hid_t file)
         goto error;
     }
 
-    /* Test enabling and disabling default printing */
-    if (H5Eget_auto1(&old_func, &old_data)<0)
-	TEST_ERROR;
-    if (old_data != NULL)
-	TEST_ERROR;
-    if (!old_func)
-	TEST_ERROR;
-#ifdef H5_USE_16_API
-    if (old_func != (H5E_auto1_t)H5Eprint1)
-	TEST_ERROR;
-#else /* H5_USE_16_API */
-    if (old_func != (H5E_auto1_t)H5Eprint2)
-	TEST_ERROR;
-#endif /* H5_USE_16_API */
-
-    if(H5Eset_auto1(NULL, NULL)<0)
+    /* Disable the library's default printing function */
+#ifdef H5_USE_16_API_DEFAULT
+    if(H5Eset_auto(NULL, NULL)<0)
+#else
+    if(H5Eset_auto(H5E_DEFAULT, NULL, NULL)<0)
+#endif
         TEST_ERROR;
 
     /* Make H5Dwrite fail, verify default print is disabled */
@@ -116,9 +403,6 @@ test_error(hid_t file)
                 "H5Dwrite shouldn't succeed");
         goto error;
     }
-
-    if(H5Eset_auto1(old_func, old_data)<0)
-        TEST_ERROR;
 
     /* In case program comes to this point, close dataset */
     if(H5Dclose(dataset)<0) TEST_ERROR;
@@ -157,7 +441,7 @@ dump_error(void)
 
     /* Customized way to print errors */
     fprintf(stderr, "\n********* Print error stack in customized way *********\n");
-    if(H5Ewalk1(H5E_WALK_UPWARD, custom_print_cb, stderr) < 0)
+    if(H5Ewalk1(H5E_WALK_UPWARD, custom_print_cb1, stderr) < 0)
         TEST_ERROR;
 
     return 0;
@@ -166,57 +450,6 @@ dump_error(void)
     return -1;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    custom_print_cb
- *
- * Purpose:	Callback function to print error stack in customized way.
- *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Programmer:	Raymond Lu
- *		July 17, 2003
- *
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-custom_print_cb(int n, H5E_error1_t *err_desc, void* client_data)
-{
-    FILE	*stream  = (FILE *)client_data;
-    char        *maj = NULL;
-    char        *min = NULL;
-    const int	 indent = 4;
-
-    if(NULL == (min = H5Eget_minor(err_desc->min_num)))
-        TEST_ERROR;
-
-    if(NULL == (maj = H5Eget_major(err_desc->maj_num)))
-        TEST_ERROR;
-
-    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
-	     indent, "", n, err_desc->file_name,
-	     err_desc->func_name, err_desc->line);
-    
-    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
-    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
-
-    HDfree(maj);
-    HDfree(min);
-
-    return 0;
-
-error:
-    if(maj)
-        HDfree(maj);
-    if(min)
-        HDfree(min);
-    
-    return -1;
-}
 
 
 /*-------------------------------------------------------------------------
@@ -258,7 +491,9 @@ main(void)
     H5Eclear1();
 
     /* Test error API */
-    if(test_error(file) < 0) {
+    if(test_error1() < 0) TEST_ERROR ;
+
+    if(test_error2(file) < 0) {
         H5Epush1(__FILE__, FUNC_main, __LINE__, H5E_ERROR, H5E_BADMESG,
                 "Error test failed");
         H5Eprint1(stderr);
@@ -275,4 +510,3 @@ main(void)
     return 1;
 }
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-

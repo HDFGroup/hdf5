@@ -1011,18 +1011,20 @@ H5E_dump_api_stack(hbool_t is_api)
         H5E_t *estack = H5E_get_my_stack();
 
         HDassert(estack);
+
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+            if(estack->auto_op.func2)
+                (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
+#else /* H5_NO_DEPRECATED_SYMBOLS */ 
         if(estack->auto_op.vers == 1) {
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-            if(estack->auto_op.u.func1)
-                (void)((estack->auto_op.u.func1)(estack->auto_data));
-#else /* H5_NO_DEPRECATED_SYMBOLS */
-            HDassert(0 && "version 1 error stack dump without deprecated symbols!");
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+            if(estack->auto_op.func1)
+                (void)((estack->auto_op.func1)(estack->auto_data));
         } /* end if */
         else {
-            if(estack->auto_op.u.func2)
-                (void)((estack->auto_op.u.func2)(H5E_DEFAULT, estack->auto_data));
+            if(estack->auto_op.func2)
+                (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
         } /* end else */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     } /* end if */
 
 done:
