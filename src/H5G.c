@@ -353,6 +353,20 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
 done:
+    /* Release the group's object header, if it was created */
+    if(grp) {
+        H5O_loc_t *oloc;         /* Object location for group */
+
+        /* Get the new group's object location */
+        if(NULL == (oloc = H5G_oloc(grp)))
+            HDONE_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object location of group")
+
+        /* Decrement refcount on group's object header in memory */
+        if(H5O_dec_rc_by_loc(oloc, H5AC_dxpl_id) < 0)
+           HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
+    } /* end if */
+
+    /* Cleanup on failure */
     if(ret_value < 0)
         if(grp && H5G_close(grp) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
@@ -901,6 +915,8 @@ done:
     if(ret_value == NULL) {
         /* Check if we need to release the file-oriented symbol table info */
         if(oloc_init) {
+            if(H5O_dec_rc_by_loc(&(grp->oloc), dxpl_id) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "unable to decrement refcount on newly created object")
             if(H5O_close(&(grp->oloc)) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release object header")
             if(H5O_delete(file, dxpl_id, grp->oloc.addr) < 0)
