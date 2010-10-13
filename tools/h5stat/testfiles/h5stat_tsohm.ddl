@@ -30,7 +30,7 @@ File space information for file metadata (in bytes):
 	Shared Messages:
 		Header: 38
 		B-tree/List: 550
-		Heap: 1316
+		Heap: 1279
 Small groups:
 	# of groups of size 3: 1
 	Total # of small groups: 1
@@ -67,7 +67,7 @@ Dataset datatype information:
 	# of unique datatypes used by datasets: 1
 	Dataset datatype #0:
 		Count (total/named) = (3/0)
-		Size (desc./elmt) = (14/4)
+		Size (desc./elmt) = (14/8)
 	Total dataset datatype count: 3
 Small # of attributes:
 	Total # of objects with small # of attributes: 0
