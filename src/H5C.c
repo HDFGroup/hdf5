@@ -7792,7 +7792,7 @@ end_of_inner_loop:
 	    */
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-	                "Pinned entry count not decreasing.")
+                        "Pinned entry count not decreasing, cur_pel_len = %d, old_pel_len = %d", (int)cur_pel_len, (int)old_pel_len)
 
         } else if ( ( cur_pel_len == 0 ) && ( old_pel_len == 0 ) ) {
 
