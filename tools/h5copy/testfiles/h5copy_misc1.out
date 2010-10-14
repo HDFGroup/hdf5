@@ -1,0 +1,5 @@
+#############################
+ output for 'h5copy -i ../../../hdf5/tools/h5copy/testfiles/h5copytst.h5 -o ./testfiles/h5copytst.out.h5 -v -s /simple -d /g1/g2/simple'
+#############################
+Copying file <../../../hdf5/tools/h5copy/testfiles/h5copytst.h5> and object </simple> to file <./testfiles/h5copytst.out.h5> and object </g1/g2/simple>
+Error in copy...Exiting
