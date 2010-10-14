@@ -1064,7 +1064,7 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
             if(H5F_addr_defined(new_dset->oloc.addr)) {
                 if(H5O_dec_rc_by_loc(&(new_dset->oloc), dxpl_id) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement refcount on newly created object")
                 if(H5O_close(&(new_dset->oloc)) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release object header")
                 if(file) {
