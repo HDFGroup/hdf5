@@ -241,6 +241,7 @@ ADD_TEST (
 )
 
 SET (H5_TESTS
+    accum
     lheap
     ohdr
     stab
