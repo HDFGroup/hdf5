@@ -77,12 +77,12 @@ am_libh5test_la_OBJECTS = h5test.lo testframe.lo cache_common.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
 am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	stab$(EXEEXT) gheap$(EXEEXT) cache$(EXEEXT) cache_api$(EXEEXT) \
-	pool$(EXEEXT) hyperslab$(EXEEXT) istore$(EXEEXT) \
-	bittests$(EXEEXT) dt_arith$(EXEEXT) dtypes$(EXEEXT) \
-	dsets$(EXEEXT) cmpd_dset$(EXEEXT) filter_fail$(EXEEXT) \
-	extend$(EXEEXT) external$(EXEEXT) objcopy$(EXEEXT) \
-	links$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) \
-	fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
+	pool$(EXEEXT) accum$(EXEEXT) hyperslab$(EXEEXT) \
+	istore$(EXEEXT) bittests$(EXEEXT) dt_arith$(EXEEXT) \
+	dtypes$(EXEEXT) dsets$(EXEEXT) cmpd_dset$(EXEEXT) \
+	filter_fail$(EXEEXT) extend$(EXEEXT) external$(EXEEXT) \
+	objcopy$(EXEEXT) links$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) \
+	mtime$(EXEEXT) fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
 	flush2$(EXEEXT) app_ref$(EXEEXT) enum$(EXEEXT) \
 	set_extent$(EXEEXT) ttsafe$(EXEEXT) getname$(EXEEXT) \
 	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
@@ -96,6 +96,10 @@ am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_nullspace$(EXEEXT) gen_udlinks$(EXEEXT) \
 	space_overflow$(EXEEXT) gen_sizes_lheap$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
+accum_SOURCES = accum.c
+accum_OBJECTS = accum.$(OBJEXT)
+accum_LDADD = $(LDADD)
+accum_DEPENDENCIES = libh5test.la $(LIBHDF5)
 app_ref_SOURCES = app_ref.c
 app_ref_OBJECTS = app_ref.$(OBJEXT)
 app_ref_LDADD = $(LDADD)
@@ -367,20 +371,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c btree2.c \
-	cache.c cache_api.c cmpd_dset.c cross_read.c dangle.c dsets.c \
-	dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
-	error_test.c extend.c external.c fheap.c fillval.c \
-	filter_fail.c flush1.c flush2.c freespace.c gen_bad_ohdr.c \
-	gen_bogus.c gen_cross.c gen_deflate.c gen_filters.c gen_idx.c \
-	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
-	gen_new_super.c gen_noencoder.c gen_nullspace.c \
-	gen_sizes_lheap.c gen_udlinks.c getname.c gheap.c hyperslab.c \
-	istore.c lheap.c links.c mf.c mount.c mtime.c ntypes.c \
-	objcopy.c ohdr.c pool.c reserved.c set_extent.c \
-	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
-	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
-DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
+SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c bittests.c \
 	btree2.c cache.c cache_api.c cmpd_dset.c cross_read.c dangle.c \
 	dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
 	error_test.c extend.c external.c fheap.c fillval.c \
@@ -393,6 +384,20 @@ DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
 	objcopy.c ohdr.c pool.c reserved.c set_extent.c \
 	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
 	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+DIST_SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c \
+	bittests.c btree2.c cache.c cache_api.c cmpd_dset.c \
+	cross_read.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c \
+	enum.c err_compat.c error_test.c extend.c external.c fheap.c \
+	fillval.c filter_fail.c flush1.c flush2.c freespace.c \
+	gen_bad_ohdr.c gen_bogus.c gen_cross.c gen_deflate.c \
+	gen_filters.c gen_idx.c gen_new_array.c gen_new_fill.c \
+	gen_new_group.c gen_new_mtime.c gen_new_super.c \
+	gen_noencoder.c gen_nullspace.c gen_sizes_lheap.c \
+	gen_udlinks.c getname.c gheap.c hyperslab.c istore.c lheap.c \
+	links.c mf.c mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c \
+	reserved.c set_extent.c space_overflow.c stab.c \
+	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
+	$(ttsafe_SOURCES) unlink.c vfd.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -673,7 +678,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 # specifying a file prefix or low-level driver.  Changing the file
 # prefix or low-level driver with environment variables will influence
 # the temporary file name in ways that the makefile is not aware of.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog cmpd_dset.h5 \
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 	compact_dataset.h5 dataset.h5 dset_offset.h5 \
 	max_compact_dataset.h5 simple.h5 set_local.h5 random_chunks.h5 \
 	huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_expand.h5 \
@@ -711,7 +716,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 # the library yet. Move them to the end so that their failure do not block
 # other current library code tests.
 TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api \
-           pool hyperslab istore bittests dt_arith \
+           pool accum hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset filter_fail extend external objcopy links unlink \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe \
@@ -841,6 +846,9 @@ clean-noinstPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+accum$(EXEEXT): $(accum_OBJECTS) $(accum_DEPENDENCIES) 
+	@rm -f accum$(EXEEXT)
+	$(LINK) $(accum_OBJECTS) $(accum_LDADD) $(LIBS)
 app_ref$(EXEEXT): $(app_ref_OBJECTS) $(app_ref_DEPENDENCIES) 
 	@rm -f app_ref$(EXEEXT)
 	$(LINK) $(app_ref_OBJECTS) $(app_ref_LDADD) $(LIBS)
@@ -1034,6 +1042,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/accum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/app_ref.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/big.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bittests.Po@am__quote@

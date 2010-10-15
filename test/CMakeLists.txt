@@ -167,6 +167,7 @@ MACRO (ADD_H5_TEST file)
 ENDMACRO (ADD_H5_TEST file)
 
 SET (H5_TESTS
+    accum
     lheap
     ohdr
     stab

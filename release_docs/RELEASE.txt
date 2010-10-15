@@ -127,6 +127,11 @@ Bug Fixes since HDF5-1.8.5
       
     Library
     -------
+    - Modified metadata accumulator to better track accumulated dirty metadata
+      in an effort to reduce unnecessary I/O in certain situations, as well
+      as to fix some other corner cases which were prone to error. Additionally
+      added a new set of unit tests that get run during 'make check' to verify 
+      the behavior of the metadata accumulator. (MAM - 2010/10/15)
     - Modified library to always cache symbol table information.  Libraries
       from version 1.6.3 and earler have a bug which causes them to require 
       this information for some operations. (NAF - 2010/09/21 - Bug 1864)
@@ -395,6 +400,7 @@ Known Problems
   get_type_map was added. The public function H5FDrealloc was taken out in 
   1.8.  The problem only happens when users define their own driver for 1.6 
   and try to plug in a 1.8 library. This will be fixed in 1.10. SLU - 2010/2/2
+
 * MinGW has a missing libstdc++.dll.a library file and will not successfully link
   C++ applications/tests. Do not use the enable-cxx configure option. Read all of
   the INSTALL_MINGW.txt file for all restrictions. ADB - 2009/11/11

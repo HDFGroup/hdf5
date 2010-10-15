@@ -37,7 +37,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 # the library yet. Move them to the end so that their failure do not block
 # other current library code tests.
 TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
-           pool hyperslab istore bittests dt_arith \
+           pool accum hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset filter_fail extend external objcopy links unlink \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe \
@@ -103,7 +103,7 @@ flush2.chkexe_: flush1.chkexe_
 # specifying a file prefix or low-level driver.  Changing the file
 # prefix or low-level driver with environment variables will influence
 # the temporary file name in ways that the makefile is not aware of.
-CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
+CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
     max_compact_dataset.h5 simple.h5 set_local.h5 random_chunks.h5 \
     huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_expand.h5 \
     copy_dcpl_newfile.h5 extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
