@@ -1042,7 +1042,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         } /* end if */
 
         /* Destroy other components of the file */
-        if(H5F_accum_reset(f, dxpl_id) < 0)
+        if(H5F_accum_reset(f, dxpl_id, TRUE) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
         if(H5FO_dest(f) < 0)
