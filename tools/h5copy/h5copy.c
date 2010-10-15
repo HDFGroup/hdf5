@@ -215,8 +215,6 @@ main (int argc, const char *argv[])
  int          opt;
  int          li_ret;
  h5tool_link_info_t linkinfo;
- int          i, len;
- char         *str_prt=NULL;
 
  h5tools_setprogname(PROGRAMNAME);
  h5tools_setstatus(EXIT_SUCCESS);
@@ -408,23 +406,6 @@ main (int argc, const char *argv[])
         if(verbose)
             printf("%s: Creating parent groups\n", h5tools_getprogname());
     } /* end if */
-    else /* error, if parent groups doesn't already exist in destination file */
-    {
-        len = strlen(oname_dst);        
-        /* check if all the parents groups exist. skip root group */
-        for (i = 1; i < len-1; i++)
-        {
-            if ('/'==oname_dst[i])
-            {
-                str_prt = strndup(oname_dst, (size_t)i);
-                if (H5Lexists(fid_dst, str_prt, H5P_DEFAULT) <= 0)
-                {
-                    error_msg("group <%s> doesn't exist. Use -p to create parent groups.\n");
-                    goto error;
-                }
-            }
-        }
-    }
 
 /*-------------------------------------------------------------------------
  * do the copy
@@ -478,8 +459,6 @@ main (int argc, const char *argv[])
   free(oname_dst);
  if (oname_src)
   free(oname_src);
- if (str_prt)
-  free(str_prt);
 
  h5tools_close();
 
@@ -506,8 +485,6 @@ error:
   free(oname_dst);
  if (oname_src)
   free(oname_src);
- if (str_prt)
-  free(str_prt);
 
  h5tools_close();
 

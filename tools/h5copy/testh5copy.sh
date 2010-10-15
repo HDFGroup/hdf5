@@ -91,15 +91,6 @@ VERIFY_H5LS()
     echo "Verifying h5ls file structure $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
-# Print a line-line message left justified in a field of 70 characters
-# beginning with the word "Verifying".
-#
-VERIFY_OUTPUT() 
-{
-    SPACES="                                                               "
-    echo "Verifying output files $* $SPACES" | cut -c1-70 | tr -d '\012'
-}
-
 # Run a test and print PASS or *FAIL*. If h5copy can complete
 # with exit status 0, consider it pass. If a test fails then increment
 # the `nerrors' global variable.
@@ -152,70 +143,44 @@ TOOLTEST()
 }
 
 
-# Compare the two text files
-# PASS if same
-# FAIL if different, and show the diff
-#
-# Assumed arguments:
-# $1 is text file1 (expected output)
-# $2 is text file2 (actual output)
-CMP_OUTPUT()
-{
-    expectout=$1
-    actualout=$2
-
-    VERIFY_OUTPUT $@
-    if [ ! -f $expectout ]; then
-        # Create the expect file if it doesn't yet exist.
-        echo " CREATED"
-        cp $actualout $expectout
-    elif $CMP $expectout $actualout; then
-        echo " PASSED"
-    else
-        echo "*FAILED*"
-        echo "    Expected output differs from actual output"
-        nerrors="`expr $nerrors + 1`"
-        test yes = "$verbose" && $DIFF $expectout $actualout |sed 's/^/    /'
-    fi
-}
-
 TOOLTEST_FAIL() 
 {
-    expectout="$INDIR/$1"
-    actualout="$OUTDIR/$1.actual"
-    shift
-    if [ "$1" = -i ]; then
+     runh5diff=yes
+     if [ "$1" = -i ]; then
       inputfile=$2
-    fi
-    if [ "$3" = -o ]; then
+     else
+      runh5diff=no
+     fi
+     if [ "$3" = -o ]; then
       outputfile=$4
-    fi
-
+     else 
+      runh5diff=no
+     fi
+  
     TESTING $H5COPY $@
     (
     echo "#############################"
     echo " output for '$H5COPY $@'"
     echo "#############################"
     $RUNSERIAL $H5COPY_BIN $@
-    ) > $actualout 2> /dev/null
+    ) > output.out
     RET=$?
     if [ $RET != 0 ]; then
-        echo " PASSED"
-        # Verifying output text from h5copy
-        if [ "$expectout" != "SKIP" ]; then
-            CMP_OUTPUT $expectout $actualout
-        fi
-    else
         echo "*FAILED*"
         echo "failed result is:"
-        cat $actualout
+        cat output.out
         nerrors="`expr $nerrors + 1`"
+    else
+        echo " PASSED"
+
+        # Clean up output file
+        if test -z "$HDF5_NOCLEANUP"; then
+           rm -f output.out
+        fi
     fi
    
-
-    # Clean up output file
-    if test -z "$HDF5_NOCLEANUP"; then
-       rm -f $actualout
+    if [ $runh5diff != no ]; then
+     H5DIFFTEST_FAIL $inputfile $outputfile $7 $9
     fi
 }
 
@@ -424,28 +389,6 @@ COPY_EXT_LINKS()
     fi
 }
 
-# Test misc.
-#
-# Assumed arguments:
-# <none>
-TEST_MISC() 
-{
-    TESTFILE="$INDIR/$HDF_FILE1"
-    FILEOUT="$OUTDIR/`basename $HDF_FILE1 .h5`.out.h5"
-
-    # Remove any output file left over from previous test run
-    rm -f $FILEOUT
-
-    echo "Test copying object into group which doesn't exist, without -p"
-    TOOLTEST_FAIL h5copy_misc1.out  -i $TESTFILE -o $FILEOUT -v -s /simple  -d /g1/g2/simple
-
-    # Remove output file created, if the "no cleanup" environment variable is
-    #   not defined
-    if test -z "$HDF5_NOCLEANUP"; then
-        rm -f $FILEOUT
-    fi
-}
-
 ##############################################################################
 ###           T H E   T E S T S                                            ###
 ##############################################################################
@@ -453,7 +396,6 @@ TEST_MISC()
 COPY_OBJECTS 
 COPY_REFERENCES
 COPY_EXT_LINKS
-TEST_MISC
 
 
 if test $nerrors -eq 0 ; then
