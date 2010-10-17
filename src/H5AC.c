@@ -1824,6 +1824,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC_dump_cache
+ *
+ * Purpose:     Dumps a summary of the contents of the metadata cache
+ *              to stdout.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              Sunday, October 10, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_dump_cache(const H5F_t *f)
+{
+    herr_t              ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5AC_dump_cache, FAIL)
+
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if ( H5C_dump_cache(f->shared->cache, H5F_OPEN_NAME(f)) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_dump_cache() failed.")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_dump_cache() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC_get_cache_auto_resize_config
  *
  * Purpose:     Wrapper function for H5C_get_cache_auto_resize_config().

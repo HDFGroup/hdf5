@@ -5018,6 +5018,137 @@ H5C_stats__reset(H5C_t UNUSED * cache_ptr)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_dump_cache
+ *
+ * Purpose:     Print a summary of the contents of the metadata cache for
+ *              debugging purposes.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              10/10/10
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_dump_cache(H5C_t * cache_ptr,
+               const char *  cache_name)
+{
+    herr_t              ret_value = SUCCEED;   /* Return value */
+    int                 i;
+    H5C_cache_entry_t * entry_ptr = NULL;
+    H5SL_t *            slist_ptr = NULL;
+    H5SL_node_t *       node_ptr = NULL;
+
+    FUNC_ENTER_NOAPI(H5C_dump_cache, FAIL)
+
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_name != NULL );
+
+    /* First, create a skip list */
+    slist_ptr = H5SL_create(H5SL_TYPE_HADDR);
+
+    if ( slist_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create skip list.")
+    }
+
+    /* Next, scan the index, and insert all entries in the skip list.
+     * Do this, as we want to display cache entries in increasing address
+     * order.
+     */
+    for ( i = 0; i < H5C__HASH_TABLE_LEN; i++ ) {
+
+        entry_ptr = cache_ptr->index[i];
+
+        while ( entry_ptr != NULL ) {
+
+            HDassert( entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
+
+            if ( H5SL_insert(slist_ptr, entry_ptr, &(entry_ptr->addr)) < 0 ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, \
+                            "Can't insert entry in skip list")
+            }
+
+            entry_ptr = entry_ptr->ht_next;
+        }
+    }
+
+    /* If we get this far, all entries in the cache are listed in the
+     * skip list -- scan the skip list generating the desired output.
+     */
+
+    HDfprintf(stdout, "\n\nDump of metadata cache \"%s\".\n", cache_name);
+    HDfprintf(stdout,
+        "Num:   Addr:           Len:    Type:   Prot:   Pinned: Dirty:\n");
+
+    i = 0;
+
+    node_ptr = H5SL_first(slist_ptr);
+
+    if ( node_ptr != NULL ) {
+
+        entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+    } else {
+
+        entry_ptr = NULL;
+    }
+
+    while ( entry_ptr != NULL ) {
+
+        HDassert( entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
+
+        HDfprintf(stdout,
+            "%s%d       0x%08llx        0x%3llx %2d     %d      %d      %d\n",
+             cache_ptr->prefix, i,
+             (long long)(entry_ptr->addr),
+             (long long)(entry_ptr->size),
+             (int)(entry_ptr->type->id),
+             (int)(entry_ptr->is_protected),
+             (int)(entry_ptr->is_pinned),
+             (int)(entry_ptr->is_dirty));
+
+        /* increment node_ptr before we delete its target */
+        node_ptr = H5SL_next(node_ptr);
+
+        /* remove the first item in the skip list */
+        if ( H5SL_remove(slist_ptr, &(entry_ptr->addr)) != entry_ptr ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, \
+                        "Can't delete entry from skip list.")
+        }
+
+        if ( node_ptr != NULL ) {
+
+            entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+        } else {
+
+            entry_ptr = NULL;
+        }
+
+        i++;
+    }
+
+    HDfprintf(stdout, "\n\n");
+
+    /* Finally, discard the skip list */
+
+    HDassert( H5SL_count(slist_ptr) == 0 );
+
+    H5SL_close(slist_ptr);
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_dump_cache() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_unpin_entry_from_client()
  *
  * Purpose:	Internal routine to unpin a cache entry from a client action.
