@@ -339,6 +339,8 @@ H5_DLL herr_t H5AC_set_write_done_callback(H5C_t * cache_ptr,
                                            void (* write_done)(void));
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
 
+H5_DLL herr_t H5AC_dump_cache(const H5F_t *f);
+
 H5_DLL herr_t H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
                                                H5AC_cache_config_t *config_ptr);
 

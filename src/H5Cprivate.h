@@ -1121,6 +1121,9 @@ H5_DLL herr_t H5C_stats(H5C_t * cache_ptr,
 
 H5_DLL void H5C_stats__reset(H5C_t * cache_ptr);
 
+H5_DLL herr_t H5C_dump_cache(H5C_t * cache_ptr,
+                             const char *  cache_name);
+
 H5_DLL herr_t H5C_unpin_entry(void *thing);
 
 H5_DLL herr_t H5C_unprotect(H5F_t *             f,

@@ -1671,6 +1671,518 @@ void io_mode_confusion(void)
 
 #undef N
 
+/*
+ * At present, the object header code maintains an image of its on disk
+ * representation, which is updates as necessary instead of generating on
+ * request.  
+ *
+ * Prior to the fix that this test in designed to verify, the image of the
+ * on disk representation was only updated on flush -- not when the object
+ * header was marked clean.
+ *
+ * This worked perfectly well as long as all writes of a given object 
+ * header were written from a single process.  However, with the implementation
+ * of round robin metadata data writes in parallel HDF5, this is no longer
+ * the case -- it is possible for a given object header to be flushed from
+ * several different processes, with the object header simply being marked
+ * clean in all other processes on each flush.  This resulted in NULL or
+ * out of data object header information being written to disk.
+ *
+ * To repair this, I modified the object header code to update its 
+ * on disk image both on flush on when marked clean.  
+ *
+ * This test is directed at verifying that the fix performs as expected.
+ *
+ * The test functions by creating a HDF5 file with several small datasets,
+ * and then flushing the file.  This should result of at least one of 
+ * the associated object headers being flushed by a process other than 
+ * process 0.
+ *
+ * Then for each data set, add an attribute and flush the file again.
+ *
+ * Close the file and re-open it.
+ *
+ * Open the each of the data sets in turn.  If all opens are successful,
+ * the test passes.  Otherwise the test fails.
+ *
+ * Note that this test will probably become irrelevent shortly, when we 
+ * land the journaling modifications on the trunk -- at which point all
+ * cache clients will have to construct on disk images on demand.
+ *
+ *						JRM -- 10/13/10
+ *
+ * Changes:	None.
+ */
+
+#define NUM_DATA_SETS	4
+#define LOCAL_DATA_SIZE	4
+#define LARGE_ATTR_SIZE	256
+
+void rr_obj_hdr_flush_confusion(void)
+{
+    const char * dataset_name[NUM_DATA_SETS] = 
+        { 
+	    "dataset_0",
+	    "dataset_1",
+	    "dataset_2",
+	    "dataset_3"
+        };
+    const char * att_name[NUM_DATA_SETS] = 
+        { 
+	    "attribute_0",
+	    "attribute_1",
+	    "attribute_2",
+	    "attribute_3"
+        };
+    const char * lg_att_name[NUM_DATA_SETS] = 
+        { 
+	    "large_attribute_0",
+	    "large_attribute_1",
+	    "large_attribute_2",
+	    "large_attribute_3"
+        };
+    int i;
+    int j;
+    hid_t file_id = -1;
+    hid_t fapl_id = -1;
+    hid_t dxpl_id = -1;
+    hid_t att_id[NUM_DATA_SETS];
+    hid_t att_space[NUM_DATA_SETS];
+    hid_t lg_att_id[NUM_DATA_SETS];
+    hid_t lg_att_space[NUM_DATA_SETS];
+    hid_t disk_space[NUM_DATA_SETS];
+    hid_t mem_space[NUM_DATA_SETS];
+    hid_t dataset[NUM_DATA_SETS];
+    hsize_t att_size[1];
+    hsize_t lg_att_size[1];
+    hsize_t disk_count[1];
+    hsize_t disk_size[1];
+    hsize_t disk_start[1];
+    hsize_t mem_count[1];
+    hsize_t mem_size[1];
+    hsize_t mem_start[1];
+    herr_t err;
+    double data[LOCAL_DATA_SIZE];
+    double att[LOCAL_DATA_SIZE];
+    double lg_att[LARGE_ATTR_SIZE];
+
+    /* MPI variables */
+    int mpi_size;
+    int mpi_rank;
+
+    /* test bed related variables */
+    const char *		fcn_name = "rr_obj_hdr_flush_confusion";
+    const hbool_t		verbose = FALSE;
+    const H5Ptest_param_t *	pt;
+    char *			filename;
+
+    /*
+     * setup test bed related variables:
+     */
+
+    pt = GetTestParameters();
+    filename = pt->name;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    /*
+     * Set up file access property list with parallel I/O access
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: Setting up property list.\n",
+                  mpi_rank, fcn_name);
+
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id != -1), "H5Pcreate(H5P_FILE_ACCESS) failed");
+
+    err = H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
+    VRFY((err >= 0 ), "H5Pset_fapl_mpio() failed");
+
+
+    /*
+     * Create a new file collectively and release property list identifier.
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: Creating new file \"%s\".\n", 
+                  mpi_rank, fcn_name, filename);
+
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((file_id >= 0 ), "H5Fcreate() failed");
+
+    err = H5Pclose(fapl_id);
+    VRFY((err >= 0 ), "H5Pclose(fapl_id) failed");
+
+
+    /*
+     * create the data sets.
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: Creating the datasets.\n", 
+                  mpi_rank, fcn_name);
+
+    disk_size[0] = (hsize_t)(LOCAL_DATA_SIZE * mpi_size);
+    mem_size[0] = (hsize_t)(LOCAL_DATA_SIZE);
+
+    for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+
+        disk_space[i] = H5Screate_simple(1, disk_size, NULL);
+	VRFY((disk_space[i] >= 0), "H5Screate_simple(1) failed.\n");
+
+	dataset[i] = H5Dcreate(file_id, dataset_name[i], H5T_NATIVE_DOUBLE,
+                      disk_space[i], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        VRFY((dataset[i] >= 0), "H5Dcreate(1) failed.\n");
+    }
+
+
+    /* 
+     * setup data transfer property list
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: Setting up dxpl.\n", mpi_rank, fcn_name);
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id != -1), "H5Pcreate(H5P_DATASET_XFER) failed.\n");
+
+    err = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
+    VRFY((err >= 0), 
+         "H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) failed.\n");
+
+    /* 
+     * write data to the data sets 
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: Writing datasets.\n", mpi_rank, fcn_name);
+
+    disk_count[0] = (hsize_t)(LOCAL_DATA_SIZE);
+    disk_start[0] = (hsize_t)(LOCAL_DATA_SIZE * mpi_rank);
+    mem_count[0] = (hsize_t)(LOCAL_DATA_SIZE);
+    mem_start[0] = (hsize_t)(0);
+
+    for ( j = 0; j < LOCAL_DATA_SIZE; j++ ) {
+
+        data[j] = (double)(mpi_rank + 1);
+    }
+
+    for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+
+	err = H5Sselect_hyperslab(disk_space[i], H5S_SELECT_SET, disk_start,
+                            NULL, disk_count, NULL);
+        VRFY((err >= 0), "H5Sselect_hyperslab(1) failed.\n");
+
+        mem_space[i] = H5Screate_simple(1, mem_size, NULL);
+	VRFY((mem_space[i] >= 0), "H5Screate_simple(2) failed.\n");
+
+	err = H5Sselect_hyperslab(mem_space[i], H5S_SELECT_SET,
+                            mem_start, NULL, mem_count, NULL);
+        VRFY((err >= 0), "H5Sselect_hyperslab(2) failed.\n");
+
+	err = H5Dwrite(dataset[i], H5T_NATIVE_DOUBLE, mem_space[i], 
+                       disk_space[i], dxpl_id, data);
+        VRFY((err >= 0), "H5Dwrite(1) failed.\n");
+
+        for ( j = 0; j < LOCAL_DATA_SIZE; j++ ) data[j] *= 10.0;
+    }
+
+    /* 
+     * close the data spaces
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: closing dataspaces.\n", mpi_rank, fcn_name);
+
+    for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+
+        err = H5Sclose(disk_space[i]);
+        VRFY((err >= 0), "H5Sclose(disk_space[i]) failed.\n");
+
+        err = H5Sclose(mem_space[i]);
+        VRFY((err >= 0), "H5Sclose(mem_space[i]) failed.\n");
+    }
+
+    /* 
+     * flush the metadata cache
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: flushing metadata cache.\n", 
+                  mpi_rank, fcn_name);
+    err = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
+    VRFY((err >= 0), "H5Fflush(1) failed.\n");
+
+
+    /*
+     * write attributes to each dataset
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: writing attributes.\n", mpi_rank, fcn_name);
+
+    att_size[0] = (hsize_t)(LOCAL_DATA_SIZE);
+
+    for ( j = 0; j < LOCAL_DATA_SIZE; j++ ) {
+
+        att[j] = (double)(j + 1);
+    }
+
+    for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+
+        att_space[i] = H5Screate_simple(1, att_size, NULL);
+        VRFY((att_space[i] >= 0), "H5Screate_simple(3) failed.\n");
+
+	att_id[i] = H5Acreate(dataset[i], att_name[i], H5T_NATIVE_DOUBLE,
+                              att_space[i], H5P_DEFAULT, H5P_DEFAULT);
+        VRFY((att_id[i] >= 0), "H5Acreate(1) failed.\n");
+
+
+        err = H5Awrite(att_id[i], H5T_NATIVE_DOUBLE, att);
+        VRFY((err >= 0), "H5Awrite(1) failed.\n");
+
+        for ( j = 0; j < LOCAL_DATA_SIZE; j++ ) {
+
+            att[j] /= 10.0;
+        }
+    }
+
+    /*
+     * close attribute IDs and spaces 
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: closing attr ids and spaces .\n", 
+                  mpi_rank, fcn_name);
+
+    for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+
+        err = H5Sclose(att_space[i]);
+        VRFY((err >= 0), "H5Sclose(att_space[i]) failed.\n");
+
+        err = H5Aclose(att_id[i]);
+        VRFY((err >= 0), "H5Aclose(att_id[i]) failed.\n");
+    }
+
+    /* 
+     * flush the metadata cache again
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: flushing metadata cache.\n", 
+                  mpi_rank, fcn_name);
+    err = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
+    VRFY((err >= 0), "H5Fflush(2) failed.\n");
+
+
+    /*
+     * write large attributes to each dataset
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: writing large attributes.\n", 
+                  mpi_rank, fcn_name);
+
+    lg_att_size[0] = (hsize_t)(LARGE_ATTR_SIZE);
+
+    for ( j = 0; j < LARGE_ATTR_SIZE; j++ ) {
+
+        lg_att[j] = (double)(j + 1);
+    }
+
+    for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+
+        lg_att_space[i] = H5Screate_simple(1, lg_att_size, NULL);
+        VRFY((lg_att_space[i] >= 0), "H5Screate_simple(4) failed.\n");
+
+	lg_att_id[i] = H5Acreate(dataset[i], lg_att_name[i], H5T_NATIVE_DOUBLE,
+                                 lg_att_space[i], H5P_DEFAULT, H5P_DEFAULT);
+        VRFY((lg_att_id[i] >= 0), "H5Acreate(2) failed.\n");
+
+
+        err = H5Awrite(lg_att_id[i], H5T_NATIVE_DOUBLE, lg_att);
+        VRFY((err >= 0), "H5Awrite(2) failed.\n");
+
+        for ( j = 0; j < LARGE_ATTR_SIZE; j++ ) {
+
+            lg_att[j] /= 10.0;
+        }
+    }
+
+    /* 
+     * flush the metadata cache yet again to clean the object headers.
+     *
+     * This is an attempt to crate a situation where we have dirty
+     * object header continuation chunks, but clean opject headers
+     * to verify a speculative bug fix -- it doesn't seem to work,
+     * but I will leave the code in anyway, as the object header 
+     * code is going to change a lot in the near future.
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: flushing metadata cache.\n", 
+                  mpi_rank, fcn_name);
+    err = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
+    VRFY((err >= 0), "H5Fflush(3) failed.\n");
+
+
+    /*
+     * write different large attributes to each dataset
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: writing different large attributes.\n", 
+                  mpi_rank, fcn_name);
+
+    for ( j = 0; j < LARGE_ATTR_SIZE; j++ ) {
+
+        lg_att[j] = (double)(j + 2);
+    }
+
+    for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+
+        err = H5Awrite(lg_att_id[i], H5T_NATIVE_DOUBLE, lg_att);
+        VRFY((err >= 0), "H5Awrite(2) failed.\n");
+
+        for ( j = 0; j < LARGE_ATTR_SIZE; j++ ) {
+
+            lg_att[j] /= 10.0;
+        }
+    }
+
+
+    /*
+     * close large attribute IDs and spaces 
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: closing large attr ids and spaces .\n", 
+                  mpi_rank, fcn_name);
+
+    for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+
+        err = H5Sclose(lg_att_space[i]);
+        VRFY((err >= 0), "H5Sclose(lg_att_space[i]) failed.\n");
+
+        err = H5Aclose(lg_att_id[i]);
+        VRFY((err >= 0), "H5Aclose(lg_att_id[i]) failed.\n");
+    }
+
+
+    /* 
+     * close the data sets
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: closing datasets .\n", mpi_rank, fcn_name);
+
+    for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+
+        err = H5Dclose(dataset[i]);
+        VRFY((err >= 0), "H5Dclose(dataset[i])1 failed.\n");
+    }
+
+    /*
+     * close the data transfer property list.
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: closing dxpl .\n", mpi_rank, fcn_name);
+
+    err = H5Pclose(dxpl_id);
+    VRFY((err >= 0), "H5Pclose(dxpl_id) failed.\n");
+
+
+    /*
+     * Close file.
+     */
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: closing file.\n", mpi_rank, fcn_name);
+
+    err = H5Fclose(file_id);
+    VRFY((err >= 0 ), "H5Fclose(1) failed");
+
+    /*
+     * Must now open file and attempt to read data sets -- do this on process
+     * zero only.  Test passes if we are able to do this, and fails otherwise.
+     */
+    
+    if ( mpi_rank == 0 ) {
+
+        /*
+         * Re-open the file
+         */
+        if(verbose)
+            HDfprintf(stdout, "%0d:%s: re-opening file.\n", mpi_rank, fcn_name);
+        file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+        VRFY((file_id >= 0 ), "H5Fopen() failed");
+
+        /* 
+         * Attempt to open the data sets
+         */
+
+        if(verbose )
+            HDfprintf(stdout, "%0d:%s: opening datasets.\n", 
+                      mpi_rank, fcn_name);
+
+        for ( i = 0; i < NUM_DATA_SETS; i++ ) { 
+
+	    dataset[i] = -1;
+        }
+
+        for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+
+	    dataset[i] = H5Dopen1(file_id, dataset_name[i]);
+
+            if ( dataset[i] < 0 ) {
+
+		nerrors++;
+	    }
+        }
+
+        /* 
+         * Close the data sets
+         */
+
+        if(verbose )
+            HDfprintf(stdout, "%0d:%s: closing datasets again.\n", 
+                      mpi_rank, fcn_name);
+
+        for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+
+            if ( dataset[i] >= 0 ) {
+
+                err = H5Dclose(dataset[i]);
+                VRFY((err >= 0), "H5Dclose(dataset[i])1 failed.\n");
+	    }
+        }
+
+        /*
+         * Close the file 
+         */
+        if(verbose)
+            HDfprintf(stdout, "%0d:%s: closing file again.\n", 
+                      mpi_rank, fcn_name);
+        err = H5Fclose(file_id);
+        VRFY((err >= 0 ), "H5Fclose(1) failed");
+
+    }
+
+    if(verbose )
+        HDfprintf(stdout, "%0d:%s: Done.\n", mpi_rank, fcn_name);
+
+    return;
+
+} /* rr_obj_hdr_flush_confusion() */
+
+#undef NUM_DATA_SETS
+#undef LOCAL_DATA_SIZE
+#undef LARGE_ATTR_SIZE
+
 /*=============================================================================
  *                         End of t_mdset.c
  *===========================================================================*/
