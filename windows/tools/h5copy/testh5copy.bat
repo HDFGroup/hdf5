@@ -213,7 +213,7 @@ rem
         call :verify PASSED %*
     )
     
-    exit /btest_msg
+    exit /b
     
     
 rem Call the h5diff tool with a call that is expected to fail
