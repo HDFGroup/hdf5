@@ -55,11 +55,11 @@ unsigned test_random_write(void);
 void accum_printf(void);
 
 /* Private Test H5Faccum Function Wrappers */
-#define accum_write(a,s,b) H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5AC_dxpl_id, (b))
-#define accum_read(a,s,b)  H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5AC_dxpl_id, (b))
-#define accum_free(a,s)  H5F_accum_free(f, H5AC_dxpl_id, H5FD_MEM_DEFAULT, (haddr_t)(a), (hsize_t)(s))
-#define accum_flush()    H5F_accum_flush(f, H5AC_dxpl_id)
-#define accum_reset()    H5F_accum_reset(f, H5AC_dxpl_id, TRUE)
+#define accum_write(a,s,b) H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5P_DATASET_XFER_DEFAULT, (b))
+#define accum_read(a,s,b)  H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5P_DATASET_XFER_DEFAULT, (b))
+#define accum_free(a,s)  H5F_accum_free(f, H5P_DATASET_XFER_DEFAULT, H5FD_MEM_DEFAULT, (haddr_t)(a), (hsize_t)(s))
+#define accum_flush()    H5F_accum_flush(f, H5P_DATASET_XFER_DEFAULT)
+#define accum_reset()    H5F_accum_reset(f, H5P_DATASET_XFER_DEFAULT, TRUE)
 
 /* ================= */
 /* Main Test Routine */
@@ -1625,7 +1625,7 @@ error:
     HDfree(zbuf);
 
     return 1;
-} /* end test_random_write() */
+} /* end test_big() */
 
 
 /*-------------------------------------------------------------------------
