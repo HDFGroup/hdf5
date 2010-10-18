@@ -84,7 +84,7 @@ rem
     for %%a in (%*) do (
         if %%a neq PASSED (
         if %%a neq *FAILED* (
-            set verify_msg=!test_msg! %%~nxa
+            set verify_msg=!verify_msg! %%~nxa
         ) )
     )
     set verify_msg=%verify_msg%                                                                
@@ -100,7 +100,7 @@ rem
     for %%a in (%*) do (
         if %%a neq PASSED (
         if %%a neq *FAILED* (
-            set verifyh5ls_msg=!test_msg! %%~nxa
+            set verifyh5ls_msg=!verifyh5ls_msg! %%~nxa
         ) )
     )
     set verifyh5ls_msg=%verifyh5ls_msg%                                                                
@@ -213,7 +213,7 @@ rem
         call :verify PASSED %*
     )
     
-    exit /b
+    exit /btest_msg
     
     
 rem Call the h5diff tool with a call that is expected to fail
@@ -330,17 +330,17 @@ rem <none>
     call :tooltest -i %testfile% -o %fileout% -v -s /grp_dsets/simple  -d /grp_dsets/simple_group
 
     echo.Test copying ^& renaming group
-    call :tooltest_fail -i %testfile% -o %fileout% -v -s grp_dsets  -d grp_rename
+    call :tooltest -i %testfile% -o %fileout% -v -s grp_dsets  -d grp_rename
 
     echo.Test copying 'full' group hierarchy into group in destination file
-    call :tooltest_fail -i %testfile% -o %fileout% -v -s grp_dsets  -d /grp_rename/grp_dsets
+    call :tooltest -i %testfile% -o %fileout% -v -s grp_dsets  -d /grp_rename/grp_dsets
 
     echo.Test copying objects into group hier. that doesn't exist yet in destination file
     call :tooltest -i %testfile% -o %fileout% -vp -s simple    -d /A/B1/simple
     call :tooltest -i %testfile% -o %fileout% -vp -s simple    -d /A/B2/simple2
     call :tooltest -i %testfile% -o %fileout% -vp -s /grp_dsets/simple    -d /C/D/simple
-    call :tooltest_fail -i %testfile% -o %fileout% -vp -s /grp_dsets -d /E/F/grp_dsets
-    call :tooltest_fail -i %testfile% -o %fileout% -vp -s /grp_nested -d /G/H/grp_nested
+    call :tooltest -i %testfile% -o %fileout% -vp -s /grp_dsets -d /E/F/grp_dsets
+    call :tooltest -i %testfile% -o %fileout% -vp -s /grp_nested -d /G/H/grp_nested
 
     rem Verify that the file created above is correct
     call :h5lstest %fileout%
