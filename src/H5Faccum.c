@@ -231,7 +231,7 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
                     dirty_off = 0;
 
                     /* Check for read ending within dirty region */
-                    if(H5F_addr_le(addr + size, dirty_loc + f->shared->accum.dirty_len))
+                    if(H5F_addr_lt(addr + size, dirty_loc + f->shared->accum.dirty_len))
                         overlap_size = (size_t)((addr + size) - buf_off);
                     else        /* Access covers whole dirty region */
                         overlap_size = f->shared->accum.dirty_len;
