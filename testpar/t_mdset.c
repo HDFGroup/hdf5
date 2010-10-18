@@ -2136,7 +2136,7 @@ void rr_obj_hdr_flush_confusion(void)
 
         for ( i = 0; i < NUM_DATA_SETS; i++ ) {
 
-	    dataset[i] = H5Dopen1(file_id, dataset_name[i]);
+	    dataset[i] = H5Dopen2(file_id, dataset_name[i], H5P_DEFAULT);
 
             if ( dataset[i] < 0 ) {
 
