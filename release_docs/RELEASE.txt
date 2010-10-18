@@ -106,7 +106,8 @@ Bug Fixes since HDF5-1.8.6
 
     Tools
     -----
-    - None
+    - Fixed h5copy to fail gracefully when copying object to non-exist
+          group without -p option. Bug#2040 (JKM 2010/10/18)
 
     F90 API
     ------
