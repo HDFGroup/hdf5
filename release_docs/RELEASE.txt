@@ -474,6 +474,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5copy to fail gracefully when copying object to non-exist
+          group without -p option. Bug#2040 (JKM 2010/10/18)
         - Fixed to compare member objects and groups recursively when two 
           files or groups are specified to be compared. Bug#1975
           (JKM 2010/9/16)

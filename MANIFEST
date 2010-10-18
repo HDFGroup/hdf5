@@ -1718,6 +1718,7 @@
 ./tools/h5copy/testfiles/h5copy_extlinks_src.h5
 ./tools/h5copy/testfiles/h5copy_extlinks_trg.h5
 ./tools/h5copy/testfiles/h5copy_extlinks_src.out.ls
+./tools/h5copy/testfiles/h5copy_misc1.out
 
 # test files for h5mkgrp
 ./tools/testfiles/h5mkgrp_help.ls
