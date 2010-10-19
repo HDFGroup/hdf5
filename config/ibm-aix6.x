@@ -12,7 +12,7 @@
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
 
-# Configuration file for building on the IBM POWER AIX platforms.
+# Configuration file for building on the IBM AIX 6.X platforms.
 # This file is part of the HDF5 build script.  It is processed shortly
 # after configure starts and defines, among other things, flags for
 # the various compile modes.

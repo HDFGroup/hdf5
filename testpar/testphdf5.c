@@ -317,6 +317,7 @@ int main(int argc, char **argv)
     H5Ptest_param_t ndsets_params, ngroups_params;
     H5Ptest_param_t collngroups_params;
     H5Ptest_param_t io_mode_confusion_params;
+    H5Ptest_param_t rr_obj_flush_confusion_params;
 
     /* Un-buffer the stdout and stderr */
     setbuf(stderr, NULL);
@@ -471,6 +472,12 @@ int main(int argc, char **argv)
     AddTest("I/Omodeconf", io_mode_confusion, NULL,
 	    "I/O mode confusion test -- hangs quickly on failure",
             &io_mode_confusion_params);
+
+    rr_obj_flush_confusion_params.name = PARATESTFILE;
+    rr_obj_flush_confusion_params.count = 0; /* value not used */
+    AddTest("rrobjflushconf", rr_obj_hdr_flush_confusion, NULL,
+	    "round robin object header flush confusion test",
+            &rr_obj_flush_confusion_params);
 
     AddTest("tldsc",
             lower_dim_size_comp_test, NULL,

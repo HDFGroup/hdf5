@@ -148,6 +148,10 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
 	if(1 != H5O_link(root_loc.oloc, 1, dxpl_id))
 	    HGOTO_ERROR(H5E_SYM, H5E_LINKCOUNT, FAIL, "internal error (wrong link count)")
 
+        /* Decrement refcount on root group's object header in memory */
+        if(H5O_dec_rc_by_loc(root_loc.oloc, dxpl_id) < 0)
+           HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "unable to decrement refcount on root group's object header")
+
         /* Mark superblock dirty, so root group info is flushed */
         sblock_dirty = TRUE;
 

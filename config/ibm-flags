@@ -28,7 +28,7 @@
 #
 if test X = "X$cc_flags_set"; then
     # Verify this is an IBM XL compiler
-    cc_version="`$CC $CFLAGS -qversion 2>&1 | grep '^IBM XL C/C++'`"
+    cc_version="`$CC $CFLAGS -qversion 2>&1 | grep 'IBM XL C/C++'`"
     if test X != "X$cc_version"; then
         cc_vendor="XL"
 	cc_version="`$CC $CFLAGS -qversion 2>&1 | sed -n 's/Version: \([0-9\.]*\).*/\1/p'`"

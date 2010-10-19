@@ -601,7 +601,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
         } /* end if */
 
         /* Close superblock extension */
-	if(H5F_super_ext_close(f, &ext_loc) < 0)
+        if(H5F_super_ext_close(f, &ext_loc, dxpl_id, FALSE) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, NULL, "unable to close file's superblock extension")
     } /* end if */
 
@@ -800,7 +800,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "unable to update driver info header message")
 
                     /* Close the superblock extension object header */
-                    if(H5F_super_ext_close(f, &ext_loc) < 0)
+                    if(H5F_super_ext_close(f, &ext_loc, dxpl_id, FALSE) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close file's superblock extension")
                 } /* end if */
             } /* end if */

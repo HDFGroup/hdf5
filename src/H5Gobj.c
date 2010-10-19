@@ -160,8 +160,7 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, H5G_obj_create_t *gcrt_info,
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get group info")
 
     /* Call the "real" group creation routine now */
-    if(H5G_obj_create_real(f, dxpl_id, &ginfo, &linfo, &pline, gcrt_info, oloc)
-            < 0)
+    if(H5G_obj_create_real(f, dxpl_id, &ginfo, &linfo, &pline, gcrt_info, oloc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create group")
 
 done:
@@ -264,7 +263,7 @@ H5G_obj_create_real(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
      * since nothing refers to it yet.	The link count will be
      * incremented if the object is added to the group directed graph.
      */
-    if(H5O_create(f, dxpl_id, hdr_size, gcpl_id, oloc/*out*/) < 0)
+    if(H5O_create(f, dxpl_id, hdr_size, (size_t)1, gcpl_id, oloc/*out*/) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create header")
 
     /* Check for format of group to create */

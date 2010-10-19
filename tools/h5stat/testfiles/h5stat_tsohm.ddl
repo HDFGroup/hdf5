@@ -31,7 +31,7 @@ File space information for file metadata (in bytes):
 	Shared Messages:
 		Header: 38
 		B-tree/List: 550
-		Heap: 1316
+		Heap: 1279
 	Free-space managers:
 		Header: 0
 		Amount of free space: 0
@@ -71,7 +71,7 @@ Dataset datatype information:
 	# of unique datatypes used by datasets: 1
 	Dataset datatype #0:
 		Count (total/named) = (3/0)
-		Size (desc./elmt) = (14/4)
+		Size (desc./elmt) = (14/8)
 	Total dataset datatype count: 3
 Small # of attributes:
 	Total # of objects with small # of attributes: 0
@@ -85,8 +85,8 @@ Free-space section bins:
 	Total # of sections: 0
 File space management strategy: H5F_FILE_SPACE_ALL
 Summary of file space information:
-  File metadata: 3887 bytes
+  File metadata: 3850 bytes
   Raw data: 0 bytes
   Amount/Percent of tracked free space: 0 bytes/0.0%
   Unaccounted space: 0 bytes
-Total space: 3887 bytes
+Total space: 3850 bytes

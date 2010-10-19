@@ -146,7 +146,16 @@ Notes: This short instruction is written for users who want to quickly build
       3.1  If you wish to use the Visual Studio environment, open the solution 
            file in your build directory. Be sure to select either Debug or 
            Release and build the solution.
-      
+             
+      3.2  The external libraries (zlib, szip, and jpeg) can be configured
+           to allow building the libraries by downloading from a SVN repository.
+           The option is 'HDF5_ALLOW_EXTERNAL_SUPPORT'; by adding the following
+           configuration option:
+               -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="SVN"
+               
+           The options to control the SVN URL are by defualt:
+               ZLIB_SVN_URL:STRING="http://svn.hdfgroup.uiuc.edu/zlib/trunk"
+               SZIP_SVN_URL:STRING="http://svn.hdfgroup.uiuc.edu/szip/trunk"
 
    4. Test HDF5.
 
@@ -170,13 +179,13 @@ Notes: This short instruction is written for users who want to quickly build
       NOTE: We have just introduced the packaging capability and it has not been 
             extensively tested. Please send us comments on how it can be improved.
            
-   5. The files that support building HDF5 with CMake are all the files in the 
+   6. The files that support building HDF5 with CMake are all the files in the 
       config/cmake folder, the CMakeLists.txt files in each source folder, and 
       CTestConfig.cmake. CTestConfig.cmake is specific to the internal testing 
       performed by The HDF Group. It should be altered for the users 
       installation and needs.
 
-   6. More information about using CMake can be found at the KitWare site, 
+   7. More information about using CMake can be found at the KitWare site, 
       www.cmake.org.
 
 

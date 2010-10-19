@@ -96,6 +96,7 @@
 ./config/i686-pc-cygwin
 ./config/ia64-linux-gnu
 ./config/ibm-aix
+./config/ibm-aix6.x
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
@@ -810,6 +811,7 @@
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
 ./test/Makefile.in
+./test/accum.c
 ./test/app_ref.c
 ./test/be_data.h5
 ./test/be_extlink1.h5
@@ -1738,6 +1740,7 @@
 ./tools/h5copy/testfiles/h5copy_extlinks_src.h5
 ./tools/h5copy/testfiles/h5copy_extlinks_trg.h5
 ./tools/h5copy/testfiles/h5copy_extlinks_src.out.ls
+./tools/h5copy/testfiles/h5copy_misc1.out
 ./tools/h5copy/testfiles/h5copytst_new.h5
 ./tools/h5copy/testfiles/h5copytst_new.out.ls
 
