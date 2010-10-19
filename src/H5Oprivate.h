@@ -369,6 +369,7 @@ typedef struct H5O_storage_contig_t {
 } H5O_storage_contig_t;
 
 typedef struct H5O_storage_chunk_btree_t {
+    haddr_t     dset_ohdr_addr;         /* File address dataset's object header */
     H5RC_t     *shared;			/* Ref-counted shared info for B-tree nodes */
 } H5O_storage_chunk_btree_t;
 

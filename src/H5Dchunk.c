@@ -108,7 +108,7 @@ typedef struct H5D_chunk_it_ud1_t {
     const H5D_chk_idx_info_t *idx_info; /* Chunked index info */
     const H5D_io_info_t *io_info;       /* I/O info for dataset operation */
     const hsize_t	*space_dim;	/* New dataset dimensions	*/
-    const hbool_t       *shrunk_dim;   /* Dimensions which have been shrunk */
+    const hbool_t       *shrunk_dim;    /* Dimensions which have been shrunk */
     H5S_t               *chunk_space;   /* Dataspace for a chunk */
     uint32_t            elmts_per_chunk;/* Elements in chunk */
     hsize_t             *hyper_start;   /* Starting location of hyperslab */
@@ -649,7 +649,7 @@ H5D_chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
 #ifdef H5_HAVE_PARALLEL
             && !(io_info->using_mpi_vfd)
 #endif /* H5_HAVE_PARALLEL */
-        ) {
+            && H5S_SEL_ALL != H5S_GET_SELECT_TYPE(file_space)) {
         /* Initialize skip list for chunk selections */
         fm->sel_chunks = NULL;
         fm->use_single = TRUE;
@@ -2253,6 +2253,7 @@ H5D_chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *chunk_offset,
     udata->common.layout = &(dset->shared->layout.u.chunk);
     udata->common.storage = &(dset->shared->layout.storage.u.chunk);
     udata->common.offset = chunk_offset;
+    udata->common.rdcc = &(dset->shared->cache.chunk);
 
     /* Reset information about the chunk we are looking for */
     udata->nbytes = 0;
@@ -2265,7 +2266,8 @@ H5D_chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *chunk_offset,
         ent = dset->shared->cache.chunk.slot[udata->idx_hint];
 
         if(ent)
-            for(u = 0, found = TRUE; u < dset->shared->layout.u.chunk.ndims; u++)
+            for(u = 0, found = TRUE; u < dset->shared->layout.u.chunk.ndims - 1;
+                    u++)
                 if(chunk_offset[u] != ent->offset[u]) {
                     found = FALSE;
                     break;
@@ -2344,6 +2346,7 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
         udata.common.layout = &dset->shared->layout.u.chunk;
         udata.common.storage = &dset->shared->layout.storage.u.chunk;
         udata.common.offset = ent->offset;
+        udata.common.rdcc = &(dset->shared->cache.chunk);
         udata.filter_mask = 0;
         udata.nbytes = dset->shared->layout.u.chunk.size;
         udata.addr = ent->chunk_addr;
@@ -3282,7 +3285,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             chunk_offset[op_dim] = min_unalloc[op_dim];
 
             carry = FALSE;
-        } /* end if */
+        } /* end else */
 
         while(!carry) {
             size_t chunk_size = orig_chunk_size; /* Size of chunk in bytes, possibly filtered */
@@ -3360,6 +3363,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             udata.common.layout = &layout->u.chunk;
             udata.common.storage = &layout->storage.u.chunk;
             udata.common.offset = chunk_offset;
+            udata.common.rdcc = NULL;
             H5_ASSIGN_OVERFLOW(udata.nbytes, chunk_size, size_t, uint32_t);
             udata.filter_mask = filter_mask;
             udata.addr = HADDR_UNDEF;
@@ -3412,9 +3416,9 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             } /* end for */
         } /* end while(!carry) */
 
-        /* Adjust max_unalloc_dim_idx so we don't allocate the same chunk twice.
-         * Also check if this dimension started from 0 (and hence allocated all
-         * of the chunks. */
+        /* Adjust max_unalloc so we don't allocate the same chunk twice.  Also
+         * check if this dimension started from 0 (and hence allocated all of
+         * the chunks. */
         if(min_unalloc[op_dim] == 0)
             break;
         else
@@ -3764,6 +3768,7 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     HDmemset(&udata, 0, sizeof udata);
     udata.common.layout = &layout->u.chunk;
     udata.common.storage = &layout->storage.u.chunk;
+    udata.common.rdcc = rdcc;
     udata.io_info = &chk_io_info;
     udata.idx_info = &idx_info;
     udata.space_dim = space_dim;
@@ -4041,7 +4046,8 @@ H5D_chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[])
     HDmemset(&udata, 0, sizeof(udata));
     udata.common.layout = &dset->shared->layout.u.chunk;
     udata.common.storage = &dset->shared->layout.storage.u.chunk;
-    udata.chunk_addr  = chunk_addr;
+    udata.common.rdcc = &(dset->shared->cache.chunk);
+    udata.chunk_addr = chunk_addr;
 
     /* Compose chunked index info struct */
     idx_info.f = dset->oloc.file;
@@ -4365,6 +4371,7 @@ H5D_chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     udata_dst.common.layout = udata->idx_info_dst->layout;
     udata_dst.common.storage = udata->idx_info_dst->storage;
     udata_dst.common.offset = chunk_rec->offset;
+    udata_dst.common.rdcc = NULL;
     udata_dst.nbytes = chunk_rec->nbytes;
     udata_dst.filter_mask = chunk_rec->filter_mask;
     udata_dst.addr = HADDR_UNDEF;
@@ -4608,6 +4615,7 @@ H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
     HDmemset(&udata, 0, sizeof udata);
     udata.common.layout = layout_src;
     udata.common.storage = storage_src;
+    udata.common.rdcc = NULL;
     udata.file_src = f_src;
     udata.idx_info_dst = &idx_info_dst;
     udata.buf = buf;
