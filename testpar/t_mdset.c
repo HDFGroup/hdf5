@@ -1832,7 +1832,7 @@ void rr_obj_hdr_flush_confusion(void)
         disk_space[i] = H5Screate_simple(1, disk_size, NULL);
 	VRFY((disk_space[i] >= 0), "H5Screate_simple(1) failed.\n");
 
-	dataset[i] = H5Dcreate(file_id, dataset_name[i], H5T_NATIVE_DOUBLE,
+	dataset[i] = H5Dcreate2(file_id, dataset_name[i], H5T_NATIVE_DOUBLE,
                       disk_space[i], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
         VRFY((dataset[i] >= 0), "H5Dcreate(1) failed.\n");
@@ -1936,8 +1936,8 @@ void rr_obj_hdr_flush_confusion(void)
         att_space[i] = H5Screate_simple(1, att_size, NULL);
         VRFY((att_space[i] >= 0), "H5Screate_simple(3) failed.\n");
 
-	att_id[i] = H5Acreate(dataset[i], att_name[i], H5T_NATIVE_DOUBLE,
-                              att_space[i], H5P_DEFAULT, H5P_DEFAULT);
+	att_id[i] = H5Acreate2(dataset[i], att_name[i], H5T_NATIVE_DOUBLE,
+                               att_space[i], H5P_DEFAULT, H5P_DEFAULT);
         VRFY((att_id[i] >= 0), "H5Acreate(1) failed.\n");
 
 
@@ -1998,8 +1998,8 @@ void rr_obj_hdr_flush_confusion(void)
         lg_att_space[i] = H5Screate_simple(1, lg_att_size, NULL);
         VRFY((lg_att_space[i] >= 0), "H5Screate_simple(4) failed.\n");
 
-	lg_att_id[i] = H5Acreate(dataset[i], lg_att_name[i], H5T_NATIVE_DOUBLE,
-                                 lg_att_space[i], H5P_DEFAULT, H5P_DEFAULT);
+	lg_att_id[i] = H5Acreate2(dataset[i], lg_att_name[i], H5T_NATIVE_DOUBLE,
+                                  lg_att_space[i], H5P_DEFAULT, H5P_DEFAULT);
         VRFY((lg_att_id[i] >= 0), "H5Acreate(2) failed.\n");
 
 
