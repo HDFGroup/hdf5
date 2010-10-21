@@ -677,10 +677,6 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     if(H5AC_insert_entry(f, dxpl_id, H5AC_BT, addr, new_root_bt, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to add old B-tree root node to cache")
 
-#ifdef H5B_DEBUG
-    H5B_assert(f, dxpl_id, addr, type, udata);
-#endif
-
 done:
     if(ret_value < 0)
         if(new_root_bt && H5B_node_dest(new_root_bt) < 0)
@@ -693,6 +689,11 @@ done:
     if(split_bt_ud.bt)
         if(H5AC_unprotect(f, dxpl_id, H5AC_BT, split_bt_ud.addr, split_bt_ud.bt, split_bt_ud.cache_flags) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to unprotect new child")
+
+#ifdef H5B_DEBUG
+    if(ret_value >= 0)
+        H5B_assert(f, dxpl_id, addr, type, udata);
+#endif
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_insert() */
