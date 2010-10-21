@@ -989,7 +989,7 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsi
   c_space_id = *space_id;
   rank = H5Sget_simple_extent_ndims(c_space_id);
 
-  c_coord = malloc(sizeof(hsize_t)*rank*(*nelements));
+  c_coord = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank*(*nelements));
   if(!c_coord) return ret_value;
   for (i=0; i< *nelements; i++) {
       for (j = 0; j < rank; j++) {
@@ -1080,7 +1080,7 @@ nh5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
   /*
    * Allocate buffer
    */
-  if ((c_buf = HDmalloc(c_size)) == NULL)
+  if(NULL == (c_buf = (unsigned char *)HDmalloc(c_size)))
     return ret_value;
   /*
    * Call H5Sencode function.

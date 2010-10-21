@@ -974,16 +974,16 @@ nh5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
   int_f ret_value=0;          /* Return value */
 
   c_bufsize = (size_t)*bufsize+1;
+
   /*
    * Allocate buffer to hold name of an attribute
    */
-  if ((c_buf = HDmalloc(c_bufsize)) == NULL)
+  if(NULL == (c_buf = (char *)HDmalloc(c_bufsize)))
     HGOTO_DONE(FAIL);
 
   /*
    * Call H5Aget_name function
    */
-
   if ((ret_value = (int_f)H5Aget_name((hid_t)*attr_id, c_bufsize, c_buf)) < 0)
     HGOTO_DONE(FAIL);
 

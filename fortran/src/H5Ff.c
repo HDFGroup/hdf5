@@ -520,7 +520,7 @@ nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
      /*
       * Allocate buffer to hold name of an attribute
       */
-     if ((c_buf = HDmalloc((size_t)*buflen +1)) == NULL)
+     if(NULL == (c_buf = (char *)HDmalloc((size_t)*buflen + 1)))
          HGOTO_DONE(FAIL);
 
      /*

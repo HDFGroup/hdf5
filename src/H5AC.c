@@ -2500,7 +2500,9 @@ H5AC_open_trace_file(H5AC_t * cache_ptr,
 
 #else /* H5_HAVE_PARALLEL */
 
-    sprintf(file_name, "%s", trace_file_name);
+    HDsnprintf(file_name, 
+               (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 1), 
+               "%s", trace_file_name);
 
 #endif /* H5_HAVE_PARALLEL */
 
