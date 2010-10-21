@@ -4392,15 +4392,26 @@ done:
 herr_t
 H5C_set_prefix(H5C_t * cache_ptr, char * prefix)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C_set_prefix)
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    HDassert((cache_ptr) && (cache_ptr->magic == H5C__H5C_T_MAGIC));
-    HDassert(prefix);
-    HDassert(HDstrlen(prefix) < H5C__PREFIX_LEN);
+    FUNC_ENTER_NOAPI(H5C_set_prefix, FAIL)
 
-    HDstrcpy(&(cache_ptr->prefix[0]), prefix);
+    if ( ( cache_ptr == NULL ) ||
+         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
+         ( prefix == NULL ) ||
+         ( HDstrlen(prefix) >= H5C__PREFIX_LEN ) ) {
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry.")
+    }
+
+    HDstrncpy(&(cache_ptr->prefix[0]), prefix, (size_t)(H5C__PREFIX_LEN));
+
+    cache_ptr->prefix[H5C__PREFIX_LEN - 1] = '\0';
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
 } /* H5C_set_prefix() */
 
 
@@ -9263,7 +9274,7 @@ H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag)
     H5C_cache_entry_t *next_entry_ptr;  /* entry pointer */
     unsigned u;                         /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C_mark_tagged_entries)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C_mark_tagged_entries)
 
     /* Assertions */
     HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */

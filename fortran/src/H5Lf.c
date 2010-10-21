@@ -606,7 +606,7 @@ nh5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
     /*
      * Allocate buffer to hold name of an attribute
      */
-    if ((c_name = HDmalloc(c_size)) == NULL)
+    if(NULL == (c_name = (char *)HDmalloc(c_size)))
         HGOTO_DONE(FAIL)
 
     if((*size = (size_t)H5Lget_name_by_idx((hid_t)*loc_id, c_group_name, (H5_index_t)*index_field,
