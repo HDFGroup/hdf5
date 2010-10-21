@@ -68,12 +68,12 @@ test_cont(char *filename, hid_t fapl)
 
     TESTING("object header continuation block");
 
+    HDmemset(&oh_locA, 0, sizeof(oh_locA));
+    HDmemset(&oh_locB, 0, sizeof(oh_locB));
+
     /* Create the file to operate on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
     if(NULL == (f = (H5F_t *)H5I_object(file))) FAIL_STACK_ERROR
-
-    HDmemset(&oh_locA, 0, sizeof(oh_locA));
-    HDmemset(&oh_locB, 0, sizeof(oh_locB));
 
     if(H5O_create(f, H5P_DATASET_XFER_DEFAULT, (size_t)H5O_MIN_SIZE, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_locA/*out*/) < 0)
             FAIL_STACK_ERROR

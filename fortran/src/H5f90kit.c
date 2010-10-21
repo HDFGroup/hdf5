@@ -51,15 +51,15 @@ HD5f2cstring(_fcd fdesc, size_t len)
 
     /* Search for the end of the string */
     str = _fcdtocp(fdesc);
-    for(i=(int)len-1; i>=0 && !isgraph((int)str[i]); i--)
+    for(i = (int)len - 1; i >= 0 && !HDisgraph((int)str[i]); i--)
         /*EMPTY*/;
 
     /* Allocate C string */
-    if ((cstr = HDmalloc( (size_t)(i + 2))) == NULL)
+    if(NULL == (cstr = (char *)HDmalloc((size_t)(i + 2))))
         return NULL;
 
     /* Copy text from FORTRAN to C string */
-    HDmemcpy(cstr,str,(size_t)(i+1));
+    HDmemcpy(cstr, str, (size_t)(i + 1));
 
     /* Terminate C string */
     cstr[i + 1] = '\0';
