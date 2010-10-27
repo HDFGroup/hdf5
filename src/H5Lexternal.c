@@ -310,7 +310,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
      */
 
     /* Simplify intent flags for open calls */
-    intent = ((intent & H5F_ACC_RDWR) ? H5F_ACC_RDWR : H5F_ACC_RDONLY);
+    intent &= (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ);
 
     /* Copy the file name to use */
     if(NULL == (temp_file_name = H5MM_strdup(file_name)))

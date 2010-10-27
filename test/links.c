@@ -4106,6 +4106,75 @@ external_set_elink_acc_flags(hid_t fapl, hbool_t new_format)
     if(H5Gclose(group) < 0) TEST_ERROR
     if(H5Fclose(file1) < 0) TEST_ERROR
 
+
+    /* Reopen file1, with read-write and SWMR-write access */
+    if((file1 = H5Fopen(filename1, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Open a group through the external link using default gapl */
+    if((group = H5Gopen2(file1, "/ext_link/group", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Verify that the correct parameters have been set on file2 */
+    if((file2 = H5Iget_file_id(group)) < 0) FAIL_STACK_ERROR
+    if(H5Fget_intent(file2, &flags) < 0) FAIL_STACK_ERROR
+    if(flags != (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE)) TEST_ERROR
+
+    /* Close file2 and group */
+    if(H5Gclose(group) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file2) < 0) FAIL_STACK_ERROR
+
+    /* Set elink access flags on gapl to be H5F_ACC_RDWR (dropping SWMR_WRITE) */
+    if(H5Pset_elink_acc_flags(gapl, H5F_ACC_RDWR) < 0) FAIL_STACK_ERROR
+
+    /* Open a group through the external link using gapl */
+    if((group = H5Gopen2(file1, "/ext_link/group", gapl)) < 0) FAIL_STACK_ERROR
+
+    /* Verify that the correct parameters have been set on file2 */
+    if((file2 = H5Iget_file_id(group)) < 0) FAIL_STACK_ERROR
+    if(H5Fget_intent(file2, &flags) < 0) FAIL_STACK_ERROR
+    if(flags != H5F_ACC_RDWR) TEST_ERROR
+
+    /* Close file2 and group */
+    if(H5Gclose(group) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file2) < 0) FAIL_STACK_ERROR
+
+    /* Close file1 */
+    if(H5Fclose(file1) < 0) TEST_ERROR
+
+
+    /* Reopen file1, with read-only and SWMR-read access */
+    if((file1 = H5Fopen(filename1, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Open a group through the external link using default gapl */
+    if((group = H5Gopen2(file1, "/ext_link/group", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Verify that the correct parameters have been set on file2 */
+    if((file2 = H5Iget_file_id(group)) < 0) FAIL_STACK_ERROR
+    if(H5Fget_intent(file2, &flags) < 0) FAIL_STACK_ERROR
+    if(flags != (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ)) TEST_ERROR
+
+    /* Close file2 and group */
+    if(H5Gclose(group) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file2) < 0) FAIL_STACK_ERROR
+
+    /* Set elink access flags on gapl to be H5F_ACC_RDWR (dropping SWMR_WRITE) */
+    if(H5Pset_elink_acc_flags(gapl, H5F_ACC_RDONLY) < 0) FAIL_STACK_ERROR
+
+    /* Open a group through the external link using gapl */
+    if((group = H5Gopen2(file1, "/ext_link/group", gapl)) < 0) FAIL_STACK_ERROR
+
+    /* Verify that the correct parameters have been set on file2 */
+    if((file2 = H5Iget_file_id(group)) < 0) FAIL_STACK_ERROR
+    if(H5Fget_intent(file2, &flags) < 0) FAIL_STACK_ERROR
+    if(flags != H5F_ACC_RDONLY) TEST_ERROR
+
+    /* Close file2 and group */
+    if(H5Gclose(group) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file2) < 0) FAIL_STACK_ERROR
+
+    /* Close file1 */
+    if(H5Fclose(file1) < 0) TEST_ERROR
+
+
     /* Verify that H5Fcreate and H5Fopen reject H5F_ACC_DEFAULT */
     H5E_BEGIN_TRY {
         file1 = H5Fcreate(filename1, H5F_ACC_DEFAULT, H5P_DEFAULT, fapl);
