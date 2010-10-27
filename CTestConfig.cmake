@@ -13,3 +13,9 @@ set(CTEST_DROP_LOCATION "/cdash/submit.php?project=HDF5+Trunk")
 set(CTEST_DROP_SITE_CDASH TRUE)
 
 set(UPDATE_TYPE svn)
+
+set(VALGRIND_COMMAND "/usr/bin/valgrind")
+set(VALGRIND_COMMAND_OPTIONS "--tool=memcheck")
+set(CTEST_MEMORYCHECK_COMMAND "/usr/bin/valgrind")
+set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--tool=memcheck")
+set(CTEST_TESTING_TIMEOUT 3600)

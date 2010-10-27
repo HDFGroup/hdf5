@@ -89,12 +89,71 @@ IF (BUILD_TESTING)
         ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file} ${dest}
     )
   ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  
+  SET (HDF5_MKGRP_TEST_FILES
+      h5mkgrp_help
+      h5mkgrp_version
+      h5mkgrp_single
+      h5mkgrp_single_latest
+      h5mkgrp_several
+      h5mkgrp_several_latest
+      h5mkgrp_nested
+      h5mkgrp_nested_latest
+      h5mkgrp_nested_mult
+      h5mkgrp_nested_mult_latest
+  )
+
+  FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/../testfiles")
+  FOREACH (h5_mkgrp_file ${HDF5_MKGRP_TEST_FILES})
+    SET (dest "${PROJECT_BINARY_DIR}/${h5_mkgrp_file}")
+    #MESSAGE (STATUS " Copying ${h5_mkgrp_file}")
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5mkgrp
+        POST_BUILD
+        COMMAND    ${XLATE_UTILITY}
+        ARGS       ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_mkgrp_file}.ls ${dest}.ls -l3
+    )
+  ENDFOREACH (h5_mkgrp_file ${HDF5_MKGRP_TEST_FILES})
 
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
 ##############################################################################
 ##############################################################################
+
+  MACRO (ADD_H5_TEST resultfile resultcode resultoption)
+    ADD_TEST (
+        NAME H5MKGRP-clear-${resultfile}${resultoption}
+        COMMAND    ${CMAKE_COMMAND}
+            -E remove 
+                ${PROJECT_BINARY_DIR}/../testfiles/${resultfile}.h5 
+                ${PROJECT_BINARY_DIR}/${resultfile}.out
+                ${PROJECT_BINARY_DIR}/${resultfile}.out.err
+    )
+    IF (NOT ${resultoption} STREQUAL " ")
+      ADD_TEST (
+          NAME H5MKGRP-${resultfile}${resultoption}
+          COMMAND $<TARGET_FILE:h5mkgrp> ${resultoption} ${PROJECT_BINARY_DIR}/../testfiles/${resultfile}.h5 ${ARGN}
+      )
+    ELSE (NOT ${resultoption} STREQUAL " ")
+      ADD_TEST (
+          NAME H5MKGRP-${resultfile}${resultoption}
+          COMMAND $<TARGET_FILE:h5mkgrp> ${PROJECT_BINARY_DIR}/../testfiles/${resultfile}.h5 ${ARGN}
+      )
+    ENDIF (NOT ${resultoption} STREQUAL " ")
+    ADD_TEST (
+        NAME H5MKGRP-H5LS-${resultfile}${resultoption}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+            -D "TEST_ARGS:STRING=-v;-r;../testfiles/${resultfile}.h5"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+            -D "TEST_OUTPUT=${resultfile}.out"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_MASK_MOD=true"
+            -D "TEST_REFERENCE=${resultfile}.ls"
+            -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+    )
+  ENDMACRO (ADD_H5_TEST resultfile resultcode resultoption)
 
 ##############################################################################
 ##############################################################################
@@ -141,6 +200,28 @@ IF (BUILD_TESTING)
   SET (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
         h5repart_test
   )
+
+  # Check that help & version is displayed properly
+  ADD_H5_TEST (h5mkgrp_help 1 "-h")
+  ADD_H5_TEST (h5mkgrp_version 1 "-V")
+
+  # Create single group at root level
+  ADD_H5_TEST (h5mkgrp_single 0 " " single)
+  ADD_H5_TEST (h5mkgrp_single 0 "-v" single)
+  ADD_H5_TEST (h5mkgrp_single 0 "-p" single)
+  ADD_H5_TEST (h5mkgrp_single_latest 0 "-l" latest)
+
+  # Create several groups at root level
+  ADD_H5_TEST (h5mkgrp_several 0 " " one two)
+  ADD_H5_TEST (h5mkgrp_several 0 "-v" one two)
+  ADD_H5_TEST (h5mkgrp_several 0 "-p" one two)
+  ADD_H5_TEST (h5mkgrp_several_latest 0 "-l" one two)
+
+  # Create various nested groups 
+  ADD_H5_TEST (h5mkgrp_nested 0 "-p" /one/two)
+  ADD_H5_TEST (h5mkgrp_nested_latest 0 "-lp" /one/two)
+  ADD_H5_TEST (h5mkgrp_nested_mult 0 "-p" /one/two /three/four)
+  ADD_H5_TEST (h5mkgrp_nested_mult_latest 0 "-lp" /one/two /three/four)
 ENDIF (BUILD_TESTING)
 
 ##############################################################################
