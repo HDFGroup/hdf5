@@ -390,8 +390,7 @@ IF (HDF5_ENABLE_PARALLEL)
     SET (H5_HAVE_PARALLEL 1)
     # MPI checks, only do these if MPI_FOUND is true, otherwise they always fail
     # and once set, they are cached as false and not regenerated
-    SET (CMAKE_REQUIRED_INCLUDES "${MPI_INCLUDE_PATH}/mpi.h" )
-    SET (CMAKE_REQUIRED_LIBRARIES "${MPI_LIBRARY}" )
+    SET (CMAKE_REQUIRED_LIBRARIES "${MPI_LIBRARY};${MPI_EXTRA_LIBRARY}" )
     CHECK_FUNCTION_EXISTS (MPI_File_get_size H5_HAVE_MPI_GET_SIZE) 
     # Used by Fortran + MPI
     CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
