@@ -77,16 +77,6 @@ IF (BUILD_TESTING)
       family_file00015.h5
       family_file00016.h5
       family_file00017.h5
-      h5mkgrp_help.ls
-      h5mkgrp_version.ls
-      h5mkgrp_single.ls
-      h5mkgrp_single_latest.ls
-      h5mkgrp_several.ls
-      h5mkgrp_several_latest.ls
-      h5mkgrp_nested.ls
-      h5mkgrp_nested_latest.ls
-      h5mkgrp_nested_mult.ls
-      h5mkgrp_nested_mult_latest.ls
   )
 
   FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
