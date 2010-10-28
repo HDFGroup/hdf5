@@ -695,9 +695,9 @@ dnl			   the executable name to run the executable on
 dnl			   multiple processors. For the serial library the
 dnl			   value will normally be the empty string. For
 dnl			   parallel library it should be something like
-dnl			   `mpiexec -n $$NPROCS' where NPROCS will eventually
-dnl			   contain the number of processors on which to run
-dnl			   the executable (the double dollarsigns are to
+dnl			   "mpiexec -n \$\${NPROCS:=6}" where NPROCS will
+dnl			   eventually contain the number of processors on which
+dnl			   to run the executable (the double dollarsigns are to
 dnl			   protect the expansion until make executes the
 dnl			   command).  The value of this variable is
 dnl			   substituted in *.in files.
@@ -739,7 +739,7 @@ case "$CC_BASENAME" in
       RUNSERIAL="${RUNSERIAL:-none}"
 
       if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=3}"
+        RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=6}"
       fi
     else
       AC_MSG_RESULT([none])
@@ -793,7 +793,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
         RUNSERIAL="${RUNSERIAL:-none}"
 
         if test -z "$RUNPARALLEL"; then
-          RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=2}"
+          RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=6}"
         fi
       else
         AC_MSG_RESULT([none])
@@ -2589,7 +2589,7 @@ case "X-$enable_parallel" in
         dnl Find the path where aprun is located.
   	for path in `echo $PATH | ${TR} ":" " "`; do
   	  if test -x $path/aprun; then
-            RUNPARALLEL="aprun -q -n \$\${NPROCS:=3}"
+            RUNPARALLEL="aprun -q -n \$\${NPROCS:=6}"
   	    break;
   	  fi
 	done
@@ -2597,7 +2597,7 @@ case "X-$enable_parallel" in
 
     dnl Set RUNPARALLEL to mpiexec if not set yet.
     if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
-      RUNPARALLEL="mpiexec -n \$\${NPROCS:=3}"
+      RUNPARALLEL="mpiexec -n \$\${NPROCS:=6}"
     fi
     ;;
 
