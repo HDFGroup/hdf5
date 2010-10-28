@@ -275,8 +275,8 @@ The following platforms and compilers have been tested for this release.
                                   (Red Hat 4.1.2-46) and 4.4.2
 
 
-    Linux 2.6.16.60-0.42.5 #1     Intel(R) C++ Version 11.0.074
-    SGI Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 11.0.074
+    Linux 2.6.16.60-0.42.5 #1     Intel(R) C++ Version 10.1.017
+    SGI Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 10.1.017
     (cobalt)                      SGI MPI 1.38
 
     SunOS 5.10 32- and 64-bit     Sun C 5.9 Sun OS_sparc Patch 124867-16
