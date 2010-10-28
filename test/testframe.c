@@ -49,6 +49,8 @@ int TestVerbosity = VERBO_DEF;       /* Default Verbosity is Low */
 static int Summary = 0;		/* Show test summary. Default is no. */
 static int CleanUp = 1;		/* Do cleanup or not. Default is yes. */
 static int TestExpress = -1;	/* Do TestExpress or not. -1 means not set yet. */
+static H5E_auto_t	*PrintErrorStackFunc;
+static void		**PrintErrorStackData;
 static TestStruct Test[MAXNUMOFTESTS];
 static int    Index = 0;
 static const void *Test_parameters = NULL;
@@ -130,12 +132,14 @@ void TestInit(const char *ProgName, void (*private_usage)(void), int (*private_p
     setbuf(stdout, NULL);
 #endif
 
+    /* Save error printing settings */
+    H5Eget_auto2(H5E_DEFAULT, PrintErrorStackFunc, PrintErrorStackData);
     /*
      * Turn off automatic error reporting since we do it ourselves.  Besides,
      * half the functions this test calls are private, so automatic error
      * reporting wouldn't do much good since it's triggered at the API layer.
      */
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+    PrintErrorStackOff();
 
     /*
      * Record the program name and private routines if provided.
@@ -606,3 +610,19 @@ void TestAlarmOn(void)
     HDalarm((unsigned)alarm_sec);
 }
 
+
+/*
+ * Enable error stack printing when errors occur.
+ */
+void PrintErrorStackOn(void)
+{
+    H5Eset_auto2(H5E_DEFAULT, PrintErrorStackFunc, PrintErrorStackData);
+}
+
+/*
+ * Disable error stack printing when errors occur.
+ */
+void PrintErrorStackOff(void)
+{
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+}

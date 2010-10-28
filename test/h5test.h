@@ -192,6 +192,8 @@ H5TEST_DLL int  TestErrPrintf(const char *format, ...);
 H5TEST_DLL void SetTest(const char *testname, int action);
 H5TEST_DLL void TestAlarmOn(void);
 H5TEST_DLL void TestAlarmOff(void);
+H5TEST_DLL void PrintErrorStackOn(void);
+H5TEST_DLL void PrintErrorStackOff(void);
 
 #ifdef H5_HAVE_FILTER_SZIP
 H5TEST_DLL int h5_szip_can_encode(void);
