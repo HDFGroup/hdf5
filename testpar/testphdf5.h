@@ -238,6 +238,8 @@ void coll_irregular_complex_chunk_read(void);
 void coll_irregular_complex_chunk_write(void);
 void io_mode_confusion(void);
 void rr_obj_hdr_flush_confusion(void);
+void rr_obj_hdr_flush_confusion_reader(MPI_Comm comm);
+void rr_obj_hdr_flush_confusion_writer(MPI_Comm comm);
 void lower_dim_size_comp_test(void);
 void link_chunk_collective_io_test(void);
 void contig_hyperslab_dr_pio_test(void);

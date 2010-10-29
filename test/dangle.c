@@ -513,6 +513,132 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_dangle_force
+ *
+ * Purpose:	Shut down all danging IDs with generic file & ID routines,
+ *              instead of letting library shut then down.
+ *
+ * Return:	Success:	zero
+ *		Failure:	non-zero
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, October 29, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_dangle_force(void)
+{
+    char	filename[1024];
+    hid_t fid;  /* File ID */
+    hid_t gid, gid2;  /* Group IDs */
+    hid_t dsid, dsid2; /* Dataset IDs */
+    hid_t sid;  /* Dataspace ID */
+    hid_t aid, aid2;  /* Attribute IDs */
+    hid_t tid, tid2;  /* Named datatype IDs */
+    ssize_t count;  /* Count of open objects */
+    hid_t *objs = NULL;    /* Pointer to list of open objects */
+    size_t u;   /* Local index variable */
+
+    TESTING("force dangling IDs to close, from API routines");
+
+    h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a dataspace for the dataset & attribute to use */
+    if((sid = H5Screate(H5S_SCALAR)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a dataset */
+    if((dsid = H5Dcreate2(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Re-open the dataset */
+    if((dsid2 = H5Dopen2(fid, DSETNAME, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create an attribute on the dataset */
+    if((aid = H5Acreate2(dsid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Re-open the attribute */
+    if((aid2 = H5Aopen(dsid, ATTRNAME, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataspace ID */
+    if(H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open a group ID */
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open group again */
+    if((gid2 = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a named datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tcommit2(fid, TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR
+
+    /* Re-open the named datatype */
+    if((tid2 = H5Topen2(fid, TYPENAME, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Increment the ref count on all the "second" objects */
+    if(H5Iinc_ref(dsid2) < 0)
+        FAIL_STACK_ERROR
+    if(H5Iinc_ref(aid2) < 0)
+        FAIL_STACK_ERROR
+    if(H5Iinc_ref(gid2) < 0)
+        FAIL_STACK_ERROR
+    if(H5Iinc_ref(aid2) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the number of open objects */
+    if((count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL)) < 0)
+        FAIL_STACK_ERROR
+    if(0 == count)
+        TEST_ERROR;
+
+    /* Allocate the array of object IDs */
+    objs = (hid_t*)HDmalloc(sizeof(hid_t) * (size_t)count);
+
+    /* Get the list of open IDs */
+    if(H5Fget_obj_ids(H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)count, objs) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close all open IDs */
+    for(u = 0; u < (size_t)count; u++)
+        while(H5Iget_type(objs[u]) != H5I_BADID && H5Iget_ref(objs[u]) > 0)
+            H5Idec_ref(objs[u]);
+
+    /* Get the number of open objects */
+    if((count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL)) < 0)
+        FAIL_STACK_ERROR
+    if(0 != count)
+        TEST_ERROR;
+
+    /* Clean up temporary file */
+    HDremove(filename);
+
+    /* Release object ID array */
+    HDfree(objs);
+ 
+    PASSED();
+    return 0;
+
+error:
+    if(objs)
+        HDfree(objs);
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Executes dangling ID tests
@@ -555,6 +681,9 @@ main(void)
     nerrors += test_dangle_datatype1(H5F_CLOSE_STRONG);
     nerrors += test_dangle_datatype2(H5F_CLOSE_STRONG);
     nerrors += test_dangle_attribute(H5F_CLOSE_STRONG);
+
+    /* Close open IDs "the hard way" */
+    nerrors += test_dangle_force();
 
     /* Check for errors */
     if (nerrors)
