@@ -5107,9 +5107,25 @@ run_int_fp_conv(const char *name)
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_INT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UINT, H5T_NATIVE_LDOUBLE);
 #if H5_SIZEOF_LONG!=H5_SIZEOF_INT
+#ifndef H5_LONG_TO_LDOUBLE_SPECIAL
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LONG, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_LDOUBLE);
+#else
+        {
+            char		str[256];		/*string		*/
+
+            sprintf(str, "Testing %s %s -> %s conversions",
+                    name, "(unsigned) long", "long double");
+            printf("%-70s", str);
+            SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE!=0
+            HDputs("    Test skipped due to the special algorithm of hardware conversion.");
+#else
+            HDputs("    Test skipped due to disabled long double.");
 #endif
+        }
+#endif
+#endif /* H5_SIZEOF_LONG!=H5_SIZEOF_INT */
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
 #if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
@@ -5272,9 +5288,25 @@ run_fp_int_conv(const char *name)
         }
 #endif /*H5_LDOUBLE_TO_UINT_ACCURATE*/
 #if H5_SIZEOF_LONG!=H5_SIZEOF_INT && H5_SIZEOF_LONG_DOUBLE!=0
+#ifndef H5_LDOUBLE_TO_LONG_SPECIAL
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LONG);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULONG);
+#else
+        {
+            char		str[256];		/*string		*/
+
+            sprintf(str, "Testing %s %s -> %s conversions",
+                    name, "long double", "(unsigned) long");
+            printf("%-70s", str);
+            SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE!=0
+            HDputs("    Test skipped due to the special algorithm of hardware conversion.");
+#else
+            HDputs("    Test skipped due to disabled long double.");
 #endif
+        }
+#endif
+#endif /*H5_SIZEOF_LONG!=H5_SIZEOF_INT && H5_SIZEOF_LONG_DOUBLE!=0 */
 
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG && H5_SIZEOF_LONG_DOUBLE!=0
 #ifdef H5_LDOUBLE_TO_LLONG_ACCURATE
