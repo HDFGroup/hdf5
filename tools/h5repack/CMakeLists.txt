@@ -62,6 +62,42 @@ IF (BUILD_TESTING)
   TARGET_LINK_LIBRARIES (h5repacktest  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME h5repacktest COMMAND $<TARGET_FILE:h5repacktest>)
+
+  IF (HDF5_TEST_VFD)
+
+    SET (VFD_LIST
+        sec2
+        stdio
+        core
+        split
+        multi
+        family
+    )
+  
+    IF (DIRECT_VFD)
+      SET (VFD_LIST ${VFD_LIST} direct)
+    ENDIF (DIRECT_VFD)
+
+    MACRO (ADD_VFD_TEST vfdname resultcode)
+      ADD_TEST (
+        NAME VFD-${vfdname}-h5repacktest 
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5repacktest>"
+            -D "TEST_ARGS:STRING="
+            -D "TEST_VFD:STRING=${vfdname}"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_OUTPUT=h5repacktest"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+            -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
+      )
+    ENDMACRO (ADD_VFD_TEST)
+  
+    # Run test with different Virtual File Driver
+    FOREACH (vfd ${VFD_LIST})
+      ADD_VFD_TEST (${vfd} 0)
+    ENDFOREACH (vfd ${VFD_LIST})
+
+  ENDIF (HDF5_TEST_VFD)
     
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the test directory into the source directory
