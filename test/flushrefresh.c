@@ -290,7 +290,7 @@ herr_t test_flush(void)
 
     /* Create file, open root group */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
-    if ((rid = H5Gopen(fid, "/", H5P_DEFAULT)) < 0) TEST_ERROR;
+    if ((rid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create data space and types */
     if ((sid = H5Screate_simple(2, dims, dims)) < 0) TEST_ERROR;
@@ -299,13 +299,13 @@ herr_t test_flush(void)
     if ((tid3 = H5Tcopy(H5T_NATIVE_LONG)) < 0) TEST_ERROR;
 
     /* Create Group1 */
-    if ((gid = H5Gcreate(fid, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if ((gid = H5Gcreate2(fid, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create Group2 */
-    if ((gid2 = H5Gcreate(gid, "Group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if ((gid2 = H5Gcreate2(gid, "Group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create Group3 */
-    if ((gid3 = H5Gcreate(fid, "Group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if ((gid3 = H5Gcreate2(fid, "Group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create Dataset1 */
     if ((did = H5Dcreate2(fid, "Dataset1", tid1, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
@@ -627,13 +627,13 @@ herr_t test_refresh(void)
     if ((tid3 = H5Tcopy(H5T_NATIVE_LONG)) < 0) TEST_ERROR;
 
     /* Create Group1 */
-    if ((gid = H5Gcreate(fid, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if ((gid = H5Gcreate2(fid, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create Group2 */
-    if ((gid2 = H5Gcreate(gid, "Group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if ((gid2 = H5Gcreate2(gid, "Group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create Group3 */
-    if ((gid3 = H5Gcreate(fid, "Group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if ((gid3 = H5Gcreate2(fid, "Group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create Dataset1 */
     if ((did = H5Dcreate2(fid, "Dataset1", tid1, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) TEST_ERROR;
