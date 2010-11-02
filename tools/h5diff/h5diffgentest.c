@@ -70,6 +70,8 @@
 /* different structure and obj names */
 #define EXCLUDE_FILE2_1     "h5diff_exclude2-1.h5"
 #define EXCLUDE_FILE2_2     "h5diff_exclude2-2.h5"
+/* compound type with multiple vlen string types */
+#define COMP_VL_STRS_FILE   "h5diff_comp_vl_strs.h5"
 
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
@@ -118,6 +120,7 @@ static int test_group_recurse(const char *fname1, const char *fname2);
 static int test_group_recurse2();
 static int test_exclude_obj1(const char *fname1, const char *fname2);
 static int test_exclude_obj2(const char *fname1, const char *fname2);
+static int test_comp_vlen_strings(const char *fname1);
 
 /* called by test_attributes() and test_datasets() */
 static void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
@@ -182,6 +185,9 @@ int main(void)
 
     test_exclude_obj1(EXCLUDE_FILE1_1, EXCLUDE_FILE1_2);
     test_exclude_obj2(EXCLUDE_FILE2_1, EXCLUDE_FILE2_2);
+
+    /* diff various multiple vlen and fixlen string types in a compound dataset */
+    test_comp_vlen_strings(COMP_VL_STRS_FILE );
 
     return 0;
 }
@@ -3015,6 +3021,298 @@ out:
         H5Gclose(gid2);
     if(gid3)
         H5Gclose(gid3);
+
+    return status;
+}
+
+/*-------------------------------------------------------------------------
+*
+* Purpose: Create test files for multiple variable length string/string array
+*          along with fixed length string/string array types in 
+*          a compound type dataset.
+*
+* Programmer: Jonathan Kim (Oct, 26, 2010)
+*
+*-------------------------------------------------------------------------*/
+#define STR_RANK 1
+#define VLSTR1_DIM 1
+#define FLSTR2_SIZE 21
+#define FLSTR2_DIM 1
+#define VLSTRARRY3_DIM 3
+#define FLSTRARRY4_DIM 3
+#define FLSTRARRY4_SIZE 30
+#define COMP_RANK 1
+#define COMP_DIM 1
+static int test_comp_vlen_strings(const char *fname1)
+{
+    int i;
+
+    hid_t    fid1;      /* file id */
+
+    /* compound datatype */
+    typedef struct comp_t
+    {
+        char   *str1;  /* vlen string */
+        char   *str1_again;  /* vlen string */
+        char   str2[FLSTR2_SIZE];  /* fixed len string */
+        char   str2_again[FLSTR2_SIZE];  /* fixed len string */
+        char   *str3[VLSTRARRY3_DIM];  /* vlen string array */
+        char   *str3_again[VLSTRARRY3_DIM];  /* vlen string array */
+        char   str4[FLSTRARRY4_DIM][FLSTRARRY4_SIZE];  /* fixed len string array */
+        char   str4_again[FLSTRARRY4_DIM][FLSTRARRY4_SIZE];  /* fixed len string array */
+    } comp_t;
+
+    /* vlen string1 */
+    hid_t    sid_str1=0;      /* dataspace ID */
+    hid_t    tid_str1=0;      /* datatype ID */
+    hid_t    did_str1=0;      /* dataset ID */
+    const char vlstr1_buf[]= {
+        "Variable length string"
+        };
+    hsize_t dims_str1[]  = {VLSTR1_DIM};
+
+    /* fixlen string2 */
+    hid_t    sid_str2=0;      /* dataspace ID */
+    hid_t    tid_str2=0;      /* datatype ID */
+    hid_t    did_str2=0;      /* dataset ID */
+    const char flstr2_buf[FLSTR2_SIZE]= {
+        "Fixed length string"
+        };
+    hsize_t dims_str2[]  = {FLSTR2_DIM};
+
+    /* vlen string3 array */
+    hid_t    sid_str3=0;      /* dataspace ID */
+    hid_t    tid_str3=0;      /* datatype ID */
+    hid_t    tid_str3_array=0; /* datatype ID */
+    hid_t    did_str3=0;      /* dataset ID */
+    const char *vlstr3_buf[VLSTRARRY3_DIM]= {
+        "1 - Variable length string Array",
+        "2 - Testing variable length string array in compound type",
+        "3 - Four score and seven\n years ago our forefathers brought forth on this continent a new nation,"
+        };
+    hsize_t dims_str3[]  = {VLSTRARRY3_DIM};
+
+    /* fixlen string array 4 */
+    hid_t    sid_str4=0;      /* dataspace ID */
+    hid_t    tid_str4=0;      /* datatype ID */
+    hid_t    tid_str4_array=0; /* datatype ID */
+    hid_t    did_str4=0;      /* dataset ID */
+    const char *flstr4_buf[FLSTRARRY4_DIM]= {
+        "1 - Fixed length string Array",
+        "2 - Fixed length string Array",
+        "3 - Fixed length string Array"
+        };
+    hsize_t dims_str4[]  = {FLSTRARRY4_DIM};
+
+    /*------------------------------------------ 
+     * compound dataset 
+     *------------------------------------------*/
+    hid_t    sid_comp=0;      /* dataspace ID */
+    hid_t    tid_comp=0;      /* datatype ID */
+    hid_t    did_comp=0;      /* dataset ID */
+    hsize_t dims_comp[]  = {COMP_DIM};
+    herr_t  status = SUCCEED;
+
+    /* make compound strings data */
+    comp_t comp_buf;
+
+    /* copy string1 type to compound buffer */
+    comp_buf.str1 = comp_buf.str1_again = vlstr1_buf;
+    /* copy string2 type to compound buffer */
+    HDstrcpy(comp_buf.str2, flstr2_buf);
+    HDstrcpy(comp_buf.str2_again, flstr2_buf);
+    /* copy string3 type to compound buffer */
+    for (i=0; i < VLSTRARRY3_DIM; i++)
+        comp_buf.str3[i] = comp_buf.str3_again[i] = vlstr3_buf[i];
+    /* copy string4 type to compound buffer */
+    for (i=0; i < FLSTRARRY4_DIM; i++)
+    {
+        HDstrcpy(comp_buf.str4[i], flstr4_buf[i]);
+        HDstrcpy(comp_buf.str4_again[i], flstr4_buf[i]);
+    }
+
+    /*-----------------------------------------------------------------------
+    * Create file(s)
+    *------------------------------------------------------------------------*/
+    fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Variable length String1 - Create space and type
+    *------------------------------------------------------------------------*/
+    sid_str1 = H5Screate_simple(STR_RANK, dims_str1, NULL);
+    if (sid_str1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    tid_str1 = H5Tcopy(H5T_C_S1);
+    status = H5Tset_size(tid_str1, H5T_VARIABLE);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Fixed length String2 - Create space and type
+    *------------------------------------------------------------------------*/
+    sid_str2 = H5Screate_simple(STR_RANK, dims_str2, NULL);
+    if (sid_str2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    tid_str2 = H5Tcopy(H5T_C_S1);
+    status = H5Tset_size(tid_str2, FLSTR2_SIZE);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Fixed length String3 array - Create space and type
+    *------------------------------------------------------------------------*/
+    sid_str3 = H5Screate_simple(STR_RANK, dims_str3, NULL);
+    if (sid_str3 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    tid_str3 = H5Tcopy(H5T_C_S1);
+    status = H5Tset_size(tid_str3, H5T_VARIABLE);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+     /* Create the array data type for the string array                */
+    tid_str3_array = H5Tarray_create2(tid_str3, COMP_RANK, dims_str3);
+    if (tid_str3_array < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tarray_create2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Variable length String4 array - Create space and type
+    *------------------------------------------------------------------------*/
+    sid_str4 = H5Screate_simple(STR_RANK, dims_str4, NULL);
+    if (sid_str4 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    tid_str4 = H5Tcopy(H5T_C_S1);
+    status = H5Tset_size(tid_str4, FLSTRARRY4_SIZE);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+     /* Create the array data type for the string array                */
+    tid_str4_array = H5Tarray_create2(tid_str4, COMP_RANK, dims_str4);
+    if (tid_str4_array < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tarray_create2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+   /*-------------------------------------------------------------------------
+    * Compound dataset
+    *------------------------------------------------------------------------*/
+    sid_comp = H5Screate_simple(COMP_RANK, dims_comp, NULL);
+    if (sid_comp < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+    tid_comp = H5Tcreate (H5T_COMPOUND, sizeof(comp_t));
+    H5Tinsert(tid_comp, "VLEN_STR1", HOFFSET(comp_t, str1), tid_str1 );
+    H5Tinsert(tid_comp, "VLEN_STR2", HOFFSET(comp_t, str1_again), tid_str1 );
+    H5Tinsert(tid_comp, "FIXLEN_STR1", HOFFSET(comp_t, str2), tid_str2 );
+    H5Tinsert(tid_comp, "FIXLEN_STR2", HOFFSET(comp_t, str2_again), tid_str2 );
+    H5Tinsert(tid_comp, "VLEN_STR_ARRAY1", HOFFSET(comp_t, str3), tid_str3_array);
+    H5Tinsert(tid_comp, "VLEN_STR_ARRAY2", HOFFSET(comp_t, str3_again), tid_str3_array);
+    H5Tinsert(tid_comp, "FIXLEN_STR_ARRAY1", HOFFSET(comp_t, str4), tid_str4_array);
+    H5Tinsert(tid_comp, "FIXLEN_STR_ARRAY2", HOFFSET(comp_t, str4_again), tid_str4_array);
+
+    /* Write data to compound dataset buffer */
+    did_comp = H5Dcreate2(fid1, "Compound_dset", tid_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(did_comp, tid_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp_buf);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+out:
+   /*-----------------------------------------------------------------------
+    * Close
+    *-----------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    /* string1 */
+    if(tid_str1)
+        H5Tclose(tid_str1);
+    if(did_str1)
+        H5Dclose(did_str1);
+    if(sid_str1)
+        H5Sclose(sid_str1);
+    /* string2 */
+    if(tid_str2)
+        H5Tclose(tid_str2);
+    if(did_str2)
+        H5Dclose(did_str2);
+    if(sid_str2)
+        H5Sclose(sid_str2);
+    /* string3 */
+    if(tid_str3)
+        H5Tclose(tid_str3);
+    if(tid_str3_array)
+        H5Tclose(tid_str3_array);
+    if(did_str3)
+        H5Dclose(did_str3);
+    if(sid_str3)
+        H5Sclose(sid_str3);
+    /* string4 */
+    if(tid_str4)
+        H5Tclose(tid_str4);
+    if(tid_str4_array)
+        H5Tclose(tid_str4_array);
+    if(did_str4)
+        H5Dclose(did_str4);
+    if(sid_str4)
+        H5Sclose(sid_str4);
+    /* compound */
+    if(tid_comp)
+        H5Tclose(tid_comp);
+    if(did_comp)
+        H5Dclose(did_comp);
+    if(sid_comp)
+        H5Sclose(sid_comp);
 
     return status;
 }

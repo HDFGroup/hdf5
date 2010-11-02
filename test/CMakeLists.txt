@@ -293,11 +293,6 @@ FOREACH (test ${H5_TESTS})
     ADD_H5_TEST(${test})
 ENDFOREACH (test ${H5_TESTS})
 
-#-- Allow extra time for fheap to complete 30min
-IF (WIN32)
-  SET_TESTS_PROPERTIES (fheap PROPERTIES TIMEOUT 2500)
-ENDIF (WIN32)
-
 
 ##############################################################################
 ##############################################################################
@@ -352,13 +347,65 @@ IF (HDF5_TEST_VFD)
       multi
       family
   )
+
+  SET (H5_VFD_TESTS
+      testhdf5
+      accum
+      lheap
+      ohdr
+      stab
+      gheap
+      cache
+      cache_api
+      cache_tagging
+      pool
+      hyperslab
+      istore
+      bittests
+      dt_arith
+      dtypes
+      cmpd_dset
+      filter_fail
+      extend
+      external
+      objcopy
+      links
+      unlink
+      big
+      mtime
+      fillval
+      mount
+      flush1
+      flush2
+      app_ref
+      enum
+      set_extent
+      ttsafe
+      getname
+      vfd
+      ntypes
+      dangle
+      dtransform
+      reserved
+      cross_read
+      freespace
+      mf
+      farray
+      earray
+      btree2
+      #fheap
+      error_test
+      err_compat
+      tcheck_version
+      testmeta
+)
   
   IF (DIRECT_VFD)
     SET (VFD_LIST ${VFD_LIST} direct)
   ENDIF (DIRECT_VFD)
 
   MACRO (ADD_VFD_TEST vfdname resultcode)
-    FOREACH (test ${H5_TESTS})
+    FOREACH (test ${H5_VFD_TESTS})
       ADD_TEST (
         NAME VFD-${vfdname}-${test} 
         COMMAND "${CMAKE_COMMAND}"
@@ -366,10 +413,24 @@ IF (HDF5_TEST_VFD)
             -D "TEST_ARGS:STRING="
             -D "TEST_VFD:STRING=${vfdname}"
             -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_OUTPUT=${test}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
             -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
       )
-    ENDFOREACH (test ${H5_TESTS})
+    ENDFOREACH (test ${H5_VFD_TESTS})
+    IF (HDF5_TEST_FHEAP_VFD)
+      ADD_TEST (
+        NAME VFD-${vfdname}-fheap 
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:fheap>"
+            -D "TEST_ARGS:STRING="
+            -D "TEST_VFD:STRING=${vfdname}"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_OUTPUT=fheap"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+            -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
+      )
+    ENDIF (HDF5_TEST_FHEAP_VFD)
   ENDMACRO (ADD_VFD_TEST)
   
   # Run test with different Virtual File Driver
