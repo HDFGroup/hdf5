@@ -167,6 +167,8 @@ H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name,
     hbool_t follow_link, H5G_stat_t *statbuf/*out*/);
 H5_DLL ssize_t H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char* name,
     size_t size);
+H5_DLL herr_t H5Gflush(hid_t group_id);
+H5_DLL herr_t H5Grefresh(hid_t group_id);
 H5_DLL H5G_obj_t H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

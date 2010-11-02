@@ -884,6 +884,83 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5I_register_with_id
+ *
+ * Purpose:	Registers an OBJECT in a TYPE with the supplied ID for it.
+ *          This routine will check to ensure the supplied ID is not already
+ *          in use, and ensure that it is a valid ID for the given type, 
+ *          but will NOT check to ensure the OBJECT is not already
+ *          registered (thus, it is possible to register one object under
+ *          multiple IDs).
+ *
+ * Return:  Success:    0
+ *          Failure:    -1
+ *
+ * Programmer: Mike McGreevy
+ *             Wednesday, July 21, 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5I_register_with_id(H5I_type_t type, const void *object, hbool_t app_ref, hid_t id)
+{
+    H5I_id_type_t	*type_ptr;	/*ptr to the type		*/
+    H5I_id_info_t	*id_ptr;	/*ptr to the new ID information */
+    unsigned		hash_loc;	/*new item's hash table location*/
+    hid_t		ret_value = SUCCEED; /*return value		*/
+
+    FUNC_ENTER_NOAPI(H5I_register_with_id, FAIL)
+
+    /* Check arguments */
+
+    /* Make sure ID is not already in use */
+    if(NULL != (id_ptr = H5I_find_id(id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADRANGE, FAIL, "ID already in use?!")
+
+    /* Make sure type number is valid */
+    if(type <= H5I_BADID || type >= H5I_next_type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+
+    /* Get type pointer from list of types */
+    type_ptr = H5I_id_type_list_g[type];
+
+    if(NULL == type_ptr || type_ptr->count <= 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
+
+    /* Make sure requested ID belongs to object's type */
+    if(H5I_TYPE(id) != type)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADRANGE, FAIL, "invalid type for provided ID")
+
+    /* Allocate new structure to house this ID */
+    if(NULL == (id_ptr = H5FL_MALLOC(H5I_id_info_t)))
+        HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Create the struct & insert requested ID */
+    id_ptr->id = id;
+    id_ptr->count = 1; /*initial reference count*/
+    id_ptr->app_count = !!app_ref;
+    id_ptr->obj_ptr = object;
+    id_ptr->next = NULL;
+
+    /* determine hash bucket location to store id */
+    hash_loc = id % (unsigned)type_ptr->hash_size;
+
+    /* hash bucket already full, prepend to front of chain */
+    if(type_ptr->id_list[hash_loc] != NULL)
+        id_ptr->next = type_ptr->id_list[hash_loc];
+
+    /* Insert into the type */
+    type_ptr->id_list[hash_loc] = id_ptr;
+    type_ptr->ids++;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I_register_with_id() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5I_subst
  *
  * Purpose:	Substitute a new object pointer for the specified ID.

@@ -88,11 +88,19 @@
 
 #endif /* H5_HAVE_PARALLEL */
 
-
 /* Typedef for the main structure for the cache (defined in H5Cpkg.h) */
 
 typedef struct H5C_t H5C_t;
 
+/* Define metadata tag 'globality' values */
+#define H5C_GLOBALITY_NONE  0
+#define H5C_GLOBALITY_MINOR 1
+#define H5C_GLOBALITY_MAJOR 2
+
+/* Definitions for metadata tag 'globality' property */
+#define H5C_GLOBALITY_NAME "H5C_tag_globality"
+#define H5C_GLOBALITY_SIZE  sizeof(int)
+#define H5C_GLOBALITY_DEF   H5C_GLOBALITY_NONE
 
 /*
  * Class methods pertaining to caching.	 Each type of cached object will
@@ -579,6 +587,7 @@ typedef struct H5C_cache_entry_t
     size_t			size;
     const H5C_class_t *		type;
     haddr_t		    tag;
+    int	    	    globality;
     hbool_t			is_dirty;
     hbool_t			dirtied;
     hbool_t			is_protected;
@@ -1092,6 +1101,16 @@ H5_DLL herr_t H5C_flush_cache(H5F_t *  f,
                               hid_t    secondary_dxpl_id,
                               unsigned flags);
 
+H5_DLL herr_t H5C_flush_tagged_entries(H5F_t * f, 
+                                       hid_t primary_dxpl_id, 
+                                       hid_t secondary_dxpl_id, 
+                                       haddr_t tag);
+
+H5_DLL herr_t H5C_evict_tagged_entries(H5F_t * f, 
+                                       hid_t primary_dxpl_id, 
+                                       hid_t secondary_dxpl_id, 
+                                       haddr_t tag);
+
 H5_DLL herr_t H5C_flush_to_min_clean(H5F_t * f,
                                      hid_t   primary_dxpl_id,
                                      hid_t   secondary_dxpl_id);
@@ -1200,7 +1219,7 @@ H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr,
 
 H5_DLL herr_t H5C_ignore_tags(H5C_t * cache_ptr);
 
-H5_DLL void H5C_retag_copied_metadata(H5C_t * cache_ptr, haddr_t metadata_tag);
+H5_DLL void H5C_retag_metadata(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag);
 
 #endif /* !_H5Cprivate_H */
 

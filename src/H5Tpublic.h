@@ -511,6 +511,8 @@ H5_DLL hid_t H5Tget_create_plist(hid_t type_id);
 H5_DLL htri_t H5Tcommitted(hid_t type_id);
 H5_DLL herr_t H5Tencode(hid_t obj_id, void *buf, size_t *nalloc);
 H5_DLL hid_t H5Tdecode(const void *buf);
+H5_DLL herr_t H5Tflush(hid_t type_id);
+H5_DLL herr_t H5Trefresh(hid_t type_id);
 
 /* Operations defined on compound datatypes */
 H5_DLL herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset,

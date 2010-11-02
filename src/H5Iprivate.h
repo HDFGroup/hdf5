@@ -55,6 +55,7 @@ H5_DLL int H5I_nmembers(H5I_type_t type);
 H5_DLL herr_t H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref);
 H5_DLL int H5I_destroy_type(H5I_type_t type);
 H5_DLL hid_t H5I_register(H5I_type_t type, const void *object, hbool_t app_ref);
+H5_DLL herr_t H5I_register_with_id(H5I_type_t type, const void *object, hbool_t app_ref, hid_t id);
 H5_DLL void *H5I_subst(hid_t id, const void *new_object);
 H5_DLL void *H5I_object(hid_t id);
 H5_DLL void *H5I_object_verify(hid_t id, H5I_type_t id_type);

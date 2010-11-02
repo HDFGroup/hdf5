@@ -24,7 +24,7 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh testlibinfo.sh $(srcdir)/testswmr.sh testcheck_version.sh
+TEST_SCRIPT = testerror.sh testlibinfo.sh $(srcdir)/testswmr.sh testcheck_version.sh testflushrefresh.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 
@@ -52,7 +52,7 @@ bin_PROGRAMS=swmr_generator swmr_reader swmr_writer
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
-check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta
+check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta flushrefresh
 
 
 # These programs generate test files for the tests.  They don't need to be
@@ -129,7 +129,9 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
     objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5       \
-    earray.h5 swmr_data.h5
+    earray.h5 swmr_data.h5 flushrefresh.h5 flushrefresh_VERIFICATION_START \
+	flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \
+	flushrefresh_VERIFICATION_DONE
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
@@ -138,6 +140,6 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tvlstr.c tvltypes.c
 
 # Temporary files.
-DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh
+DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testflushrefresh.sh
 
 include $(top_srcdir)/config/conclude.am

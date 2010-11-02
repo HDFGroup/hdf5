@@ -163,23 +163,19 @@ static herr_t H5C_tag_entry(H5C_t * cache_ptr,
                             H5C_cache_entry_t * entry_ptr,
                             hid_t dxpl_id);
 
-static herr_t H5C_flush_tagged_entries(H5F_t * f, 
-                                       hid_t primary_dxpl_id, 
-                                       hid_t secondary_dxpl_id, 
-                                       H5C_t * cache_ptr, 
-                                       haddr_t tag);
-
 static herr_t H5C_mark_tagged_entries(H5C_t * cache_ptr, 
-                                      haddr_t tag);
+                                      haddr_t tag,
+                                      hbool_t mark_clean);
 
 static herr_t H5C_flush_marked_entries(H5F_t * f, 
                                        hid_t primary_dxpl_id, 
                                        hid_t secondary_dxpl_id, 
                                        H5C_t * cache_ptr);
 
-#if H5C_DO_TAGGING_SANITY_CHECKS
-static herr_t H5C_verify_tag(int id, haddr_t tag);
-#endif
+static herr_t H5C_evict_marked_entries(H5F_t * f, 
+                                       hid_t primary_dxpl_id, 
+                                       hid_t secondary_dxpl_id, 
+                                       H5C_t * cache_ptr);
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
 static herr_t H5C_validate_lru_list(H5C_t * cache_ptr);
@@ -3614,6 +3610,7 @@ H5C_protect(H5F_t *		f,
     void *		thing;
     H5C_cache_entry_t *	entry_ptr;
     haddr_t     tag = HADDR_UNDEF;
+    int         globality = -1;
     H5P_genplist_t *dxpl;    /* dataset transfer property list */
     void *		ret_value;      /* Return value */
 
@@ -3655,31 +3652,6 @@ H5C_protect(H5F_t *		f,
         if(entry_ptr->type != type)
             HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, NULL, "incorrect cache entry type")
 
-        #if H5C_DO_TAGGING_SANITY_CHECKS
-        /* The entry is already in the cache, but make sure that the tag value 
-           being passed in via dxpl is still legal. This will ensure that had
-           the entry NOT been in the cache, tagging was still set up correctly
-           and it would have received a legal tag value after getting loaded
-           from disk. */
-
-        /* Get the dataset transfer property list */
-        if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(primary_dxpl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
-
-        /* Get the tag from the DXPL */
-        if( (H5P_get(dxpl, "H5AC_metadata_tag", &tag)) < 0 )
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to query property value");
-    
-        /* Verify tag value */
-        if (cache_ptr->ignore_tags != TRUE) {
-
-            /* Verify legal tag value */
-            if ( (H5C_verify_tag(entry_ptr->type->id, tag)) < 0 )
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "tag verification failed");
-
-        } /* end if */
-        #endif
-	
         hit = TRUE;
         thing = (void *)entry_ptr;
 
@@ -9165,6 +9137,7 @@ H5C_tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
 {
     H5P_genplist_t *dxpl;       /* dataset transfer property list */
     haddr_t tag;                /* Tag address */
+    int globality;              /* Tag globality */
     hid_t ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_tag_entry, FAIL)
@@ -9182,26 +9155,15 @@ H5C_tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
     if((H5P_get(dxpl, "H5AC_metadata_tag", &tag)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value")
 
-    if(cache_ptr->ignore_tags != TRUE) {
-#if H5C_DO_TAGGING_SANITY_CHECKS
-        /* Perform some sanity checks to ensure that a correct tag is being applied */
-        if(H5C_verify_tag(entry_ptr->type->id, tag) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "tag verification failed")
-#endif
-    } else {
-        /* if we're ignoring tags, it's because we're running
-           tests on internal functions and may not have inserted a tag 
-           value into a given dxpl_id before creating some metadata. Thus,
-           in this case only, if a tag value has not been set, we can
-           arbitrarily set it to something for the sake of passing the tests. 
-           If the tag value is set, then we'll just let it get assigned without
-           additional checking for correctness. */
-        if(!tag)
-            tag = H5AC__IGNORE_TAG;
-    } /* end if */
+    /* Get globality from the DXPL */
+    if((H5P_get(dxpl, "H5C_tag_globality", &globality)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value")
 
     /* Apply the tag to the entry */
     entry_ptr->tag = tag;
+
+    /* Apply the tag globality to the entry */
+    entry_ptr->globality = globality;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9212,33 +9174,34 @@ done:
  *
  * Function:    H5C_flush_tagged_entries
  *
- * WARNING:     Not yet tested or used anywhere. (written awhile ago,
- *              will keep it around in anticipation of being used in
- *              subsequent changes to support flushing individual objects).
- *
  * Purpose:     Flushes all entries with the specified tag to disk.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
  * Programmer:  Mike McGreevy
- *              November 3, 2009
+ *              August 19, 2010
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5C_flush_tagged_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, H5C_t * cache_ptr, haddr_t tag)
+herr_t
+H5C_flush_tagged_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, haddr_t tag)
 {
+    /* Variable Declarations */
+    H5C_t      *cache_ptr = NULL;
+    herr_t      result;
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C_flush_tagged_entries, FAIL)
 
     /* Assertions */
-    HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
-    HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Get cache pointer */
+    cache_ptr = f->shared->cache;
 
     /* Mark all entries with specified tag */
-    if(H5C_mark_tagged_entries(cache_ptr, tag) < 0)
+    if ( (result = H5C_mark_tagged_entries(cache_ptr, tag, FALSE)) < 0 )
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
 
     /* Flush all marked entries */
@@ -9252,44 +9215,109 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_mark_tagged_entries
+ * Function:    H5C_evict_tagged_entries
  *
- * WARNING:     Not yet tested or used anywhere. (written awhile ago,
- *              will keep it around in anticipation of being used in
- *              subsequent changes to support flushing individual objects).
- *
- * Purpose:     Set the flush marker on entries in the cache that have
- *              the specified tag.
+ * Purpose:     Evicts all entries with the specified tag to disk.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
  * Programmer:  Mike McGreevy
- *              November 3, 2009
+ *              August 19, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_evict_tagged_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, haddr_t tag)
+{
+    /* Variables */
+    H5C_t      *cache_ptr = NULL;
+    herr_t      result;
+    herr_t ret_value = SUCCEED;
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI(H5C_evict_tagged_entries, FAIL)
+
+    /* Assertions */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Get cache pointer */
+    cache_ptr = f->shared->cache;
+
+    /* Mark all entries with specified tag */
+    if ( (result = H5C_mark_tagged_entries(cache_ptr, tag, TRUE)) < 0 )
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
+
+    /* Evict all marked entries */
+    if ( (result = H5C_evict_marked_entries(f,
+                                            primary_dxpl_id,
+                                            secondary_dxpl_id,
+                                            cache_ptr)) < 0 )
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't evict marked entries")
+
+done:
+ 
+    /* Function Leave Macro */
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_evict_tagged_entries */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_mark_tagged_entries
+ *
+ * Purpose:     Set the flush marker on dirty entries in the cache that have
+ *              the specified tag, as well as all globally tagged entries.
+ *              If mark_clean is set, this function will also mark all clean
+ *              entries, indicating they are to be evicted.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              September 9, 2010
  *
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag) 
+H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag, hbool_t mark_clean)
 {
-    H5C_cache_entry_t *next_entry_ptr;  /* entry pointer */
-    unsigned u;                         /* Local index variable */
+    /* Variable Declarations */
+    int u;                          /* Iterator */
+    herr_t result;                  /* Result */
+    H5C_cache_entry_t *entry_ptr = NULL; /* entry pointer */
+    herr_t ret_value = SUCCEED;     /* Return Value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C_mark_tagged_entries)
 
     /* Assertions */
-    HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
     HDassert(cache_ptr != NULL);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
-    /* Iterate through entries, marking those with specified tag. */
+    /* Iterate through entries, marking those with specified tag, as
+     * well as any major global entries which should always be flushed
+     * when flushing based on tag value */
     for(u = 0; u < H5C__HASH_TABLE_LEN; u++) {
 
-        next_entry_ptr = cache_ptr->index[u];
-        while(next_entry_ptr != NULL) {
-            if(next_entry_ptr->tag == tag)
-                next_entry_ptr->flush_marker = TRUE;
+        entry_ptr = cache_ptr->index[u];
 
-            next_entry_ptr = next_entry_ptr->ht_next;
+        while ( entry_ptr != NULL ) {
+
+            if (( entry_ptr->tag == tag ) || 
+                ( entry_ptr->globality == H5C_GLOBALITY_MAJOR)) {
+    
+                /* We only want to set the flush marker on entries that
+                 * actually need flushed (i.e., dirty ones), unless 
+                 * we've specified otherwise with the mark_clean flag */
+                if (entry_ptr->is_dirty || mark_clean) {  
+
+                    entry_ptr->flush_marker = TRUE;
+
+                } /* end if */
+
+            } /* end if */
+
+            entry_ptr = entry_ptr->ht_next;
         } /* end while */
     } /* for */
 
@@ -9301,16 +9329,12 @@ H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag)
  *
  * Function:    H5C_flush_marked_entries
  *
- * WARNING:     Not yet tested or used anywhere. (written awhile ago,
- *              will keep it around in anticipation of being used in
- *              subsequent changes to support flushing individual objects).
- *
  * Purpose:     Flushes all marked entries in the cache.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
  * Programmer:  Mike McGreevy
- *              November 3, 2009
+ *              November 3, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -9322,7 +9346,6 @@ H5C_flush_marked_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_
     FUNC_ENTER_NOAPI(H5C_flush_marked_entries, FAIL)
 
     /* Assertions */
-    HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
     HDassert(cache_ptr != NULL);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
@@ -9335,91 +9358,125 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_flush_marked_entries */
 
-#if H5C_DO_TAGGING_SANITY_CHECKS
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_verify_tag
+ * Function:    H5C_evict_marked_entries
  *
- * Purpose:     Performs sanity checking on an entrytype/tag pair.
+ * Purpose:     Evicts all marked entries in the cache. 
  *
- * Return:      SUCCEED or FAIL.
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
  * Programmer:  Mike McGreevy
- *              January 14, 2010
+ *              July 16, 2010
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_verify_tag(int id, haddr_t tag) 
-{
+H5C_evict_marked_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, H5C_t * cache_ptr)
+{ 
+    /* Variable Declarations */
+    herr_t status;
     herr_t ret_value = SUCCEED;
+    H5C_cache_entry_t * entry_ptr = NULL;
+    H5C_cache_entry_t * next_entry_ptr = NULL;
+    int i;
+    hbool_t evicted_entries_last_pass;
+    hbool_t pinned_entries_need_evicted;
+    hbool_t first_flush = TRUE;
 
-    FUNC_ENTER_NOAPI(H5C_verify_tag, FAIL)
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI(H5C_evict_marked_entries, FAIL)
 
-    /* Perform some sanity checks on tag value. Certain entry
-     * types require certain tag values, so check that these
-     * constraints are met. */
-    if(tag == H5AC__IGNORE_TAG)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "cannot ignore a tag while doing verification.")
-    else if(tag == H5AC__INVALID_TAG)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "no metadata tag provided")
-    else {
+    /* Assertions */
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
 
-        /* Perform some sanity checks on tag value. Certain entry
-         * types require certain tag values, so check that these
-         * constraints are met. */
+    /* Start evicting entries */
+    do {
 
-        /* Superblock */
-        if(id == H5AC_SUPERBLOCK_ID) {
-            if(tag != H5AC__SUPERBLOCK_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "superblock not tagged with H5AC__SUPERBLOCK_TAG")
-        }
-        else {
-            if(tag == H5AC__SUPERBLOCK_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__SUPERBLOCK_TAG applied to non-superblock entry")
-        }
+        /* Reset pinned/evicted trackers */
+        pinned_entries_need_evicted = FALSE;
+        evicted_entries_last_pass = FALSE;
+
+        /* Iterate through entries in the index. */
+        for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
+
+            next_entry_ptr = cache_ptr->index[i];
+
+            while ( next_entry_ptr != NULL ) {
+
+                entry_ptr = next_entry_ptr;
+                next_entry_ptr = entry_ptr->ht_next;
+
+                if ( entry_ptr->flush_marker == TRUE )  {
+
+                    /* This entry will need to be evicted */
+
+                    if ( entry_ptr->is_protected ) {
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot evict protected entry");
+                    } else if (entry_ptr->is_dirty) {
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot evict dirty entry");
+                    } else if (entry_ptr->is_pinned) {
+                        
+                        /* Can't evict at this time, but let's note that we hit a pinned
+                            entry and we'll loop back around again (as evicting other
+                            entries will hopefully unpin this entry) */
     
-        /* Free Space Manager */
-        if((id == H5AC_FSPACE_HDR_ID) || (id == H5AC_FSPACE_SINFO_ID)) {
-            if(tag != H5AC__FREESPACE_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "freespace entry not tagged with H5AC__FREESPACE_TAG")
-        }
-        else {
-            if(tag == H5AC__FREESPACE_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__FREESPACE_TAG applied to non-freespace entry")
-        }
-    
-        /* SOHM */
-        if((id == H5AC_SOHM_TABLE_ID) || (id == H5AC_SOHM_LIST_ID)) { 
-            if(tag != H5AC__SOHM_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "sohm entry not tagged with H5AC__SOHM_TAG")
-        }
-    
-        /* Global Heap */
-        if(id == H5AC_GHEAP_ID) {
-            if(tag != H5AC__GLOBALHEAP_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "global heap not tagged with H5AC__GLOBALHEAP_TAG")
-        }
-        else {
-            if(tag == H5AC__GLOBALHEAP_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__GLOBALHEAP_TAG applied to non-globalheap entry")
-        }
-    } /* end else */
+                        pinned_entries_need_evicted = TRUE;
+
+                    } else {
+
+                        /* Evict the Entry */
+
+                        status = H5C_flush_single_entry(f,
+                                                        primary_dxpl_id,
+                                                        secondary_dxpl_id,
+                                                        entry_ptr->type,
+                                                        entry_ptr->addr,
+                                                        H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
+                                                        &first_flush,
+                                                        TRUE);
+
+                        if ( status < 0 ) {
+
+                            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                                        "Entry eviction failed.")
+
+                        }
+
+                        evicted_entries_last_pass = TRUE;
+
+                    } /* end if */
+
+                } /* end if */
+
+            } /* end while */
+
+        } /* end for */
+
+    /* Keep doing this until we have stopped evicted entries */
+    } while ((evicted_entries_last_pass == TRUE));
+
+    /* If we stop evicting entries and pinned entries still need evicted, 
+       then we have a problem. */
+    if (pinned_entries_need_evicted) {
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Pinned entries still need evicted?!");
+    } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_verify_tag */
-#endif
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5C_evict_marked_entries */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_retag_copied_metadata
+ * Function:    H5C_retag_metadata
  *
  * Purpose:     Searches through cache index for all entries with the
- *              H5AC__COPIED_TAG, indicating that it was created as a 
- *              result of an object copy, and applies the provided tag.
+ *              value specified by src_tag and changes it to the value
+ *              specified by dest_tag.
  *
  * Return:      SUCCEED or FAIL.
  *
@@ -9429,29 +9486,26 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5C_retag_copied_metadata(H5C_t * cache_ptr, haddr_t metadata_tag) 
+H5C_retag_metadata(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag) 
 {
     unsigned u;         /* Local index variable */
+    H5C_cache_entry_t *entry_ptr = NULL; /* entry pointer */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5C_retag_copied_metadata)
+    FUNC_ENTER_NOAPI_NOFUNC(H5C_retag_metadata)
 
-    HDassert(cache_ptr);
-
-    /* Iterate through entries, retagging those with the H5AC__COPIED_TAG tag */
+    /* Iterate through entries, retagging those with the src_tag tag */
     for(u = 0; u < H5C__HASH_TABLE_LEN; u++) {
-        H5C_cache_entry_t *next_entry_ptr;      /* entry pointer */
-
-        next_entry_ptr = cache_ptr->index[u];
-        while(next_entry_ptr != NULL) {
+        entry_ptr = cache_ptr->index[u];
+        while(entry_ptr != NULL) {
             if(cache_ptr->index[u] != NULL) {
-                if((cache_ptr->index[u])->tag == H5AC__COPIED_TAG)
-                    (cache_ptr->index[u])->tag = metadata_tag;
+                if((cache_ptr->index[u])->tag == src_tag) {
+                    (cache_ptr->index[u])->tag = dest_tag;
+                }
             } /* end if */
-
-            next_entry_ptr = next_entry_ptr->ht_next;
+            entry_ptr = entry_ptr->ht_next;
         } /* end while */
     } /* end for */
 
     FUNC_LEAVE_NOAPI_VOID
-} /* H5C_retag_copied_metadata */
+} /* H5C_retag_metadata */
 

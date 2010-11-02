@@ -1902,4 +1902,72 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_visit() */
+ 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Gflush
+ *
+ * Purpose:     Flushes all buffers associated with a group to disk.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              May 19, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gflush(hid_t group_id)
+{
+    H5G_t *grp;        /* Dataset for this operation */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(H5Gflush, FAIL)
+    H5TRACE1("e", "i", group_id);
+    
+    /* Check args */
+    if(NULL == (grp = (H5G_t *)H5I_object_verify(group_id, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+    /* Call private function to flush group object */
+    if (H5O_flush_metadata(&grp->oloc, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFLUSH, FAIL, "unable to flush group")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Gflush */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Grefresh
+ *
+ * Purpose:     Refreshes all buffers associated with a dataset.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              July 21, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Grefresh(hid_t group_id)
+{
+    H5G_t * grp = NULL;
+    hid_t ret_value = SUCCEED; /* return value */
+    
+    FUNC_ENTER_API(H5Grefresh, FAIL)
+    H5TRACE1("e", "i", group_id);
+
+    /* Check args */
+    if(NULL == (grp = (H5G_t *)H5I_object_verify(group_id, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+    /* Call private function to refresh group object */
+    if ((H5O_refresh_metadata(group_id, grp->oloc, H5AC_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to refresh group")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Grefresh */
 

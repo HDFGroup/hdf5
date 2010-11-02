@@ -683,6 +683,7 @@
 ./src/H5Odtype.c
 ./src/H5Oefl.c
 ./src/H5Ofill.c
+./src/H5Oflush.c
 ./src/H5Ofsinfo.c
 ./src/H5Oginfo.c
 ./src/H5Olayout.c
@@ -855,6 +856,7 @@
 ./test/filter_fail.c
 ./test/flush1.c
 ./test/flush2.c
+./test/flushrefresh.c
 ./test/gen_bad_ohdr.c                   _DO_NOT_DISTRIBUTE_
 ./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_
@@ -918,6 +920,7 @@
 ./test/tcoords.c
 ./test/testcheck_version.sh.in
 ./test/testerror.sh.in
+./test/testflushrefresh.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
