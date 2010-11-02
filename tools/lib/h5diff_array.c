@@ -447,21 +447,43 @@ hsize_t diff_datum(void       *_mem1,
         {
             offset    = H5Tget_member_offset(m_type, (unsigned)j);
             memb_type = H5Tget_member_type(m_type, (unsigned)j);
-            nfound+=diff_datum(
-                mem1+offset,
-                mem2+offset,
-                memb_type,
-                i,
-                rank,
-                dims,
-                acc,
-                pos,
-                options,
-                obj1,
-                obj2,
-                container1_id,
-                container2_id,
-                ph);
+            /* if member type is vlen string */
+            if(H5Tis_variable_str(memb_type))
+            {
+                nfound+=diff_datum(
+                    ((unsigned char**)mem1)[j],
+                    ((unsigned char**)mem2)[j],
+                    memb_type,
+                    i,
+                    rank,
+                    dims,
+                    acc,
+                    pos,
+                    options,
+                    obj1,
+                    obj2,
+                    container1_id,
+                    container2_id,
+                    ph);
+            }
+            else
+            {
+                nfound+=diff_datum(
+                    mem1+offset,
+                    mem2+offset,
+                    memb_type,
+                    i,
+                    rank,
+                    dims,
+                    acc,
+                    pos,
+                    options,
+                    obj1,
+                    obj2,
+                    container1_id,
+                    container2_id,
+                    ph);
+            }
             H5Tclose(memb_type);
         }
         break;
@@ -631,21 +653,45 @@ hsize_t diff_datum(void       *_mem1,
             for (u = 0, nelmts = 1; u <ndims; u++)
                 nelmts *= adims[u];
             for (u = 0; u < nelmts; u++)
-                nfound+=diff_datum(
-                mem1 + u * size,
-                mem2 + u * size, /* offset */
-                memb_type,
-                i,               /* index position */
-                rank,
-                dims,
-                acc,
-                pos,
-                options,
-                obj1,
-                obj2,
-                container1_id,
-                container2_id,
-                ph);
+            {
+                /* if member type is vlen string */
+                if(H5Tis_variable_str(memb_type))
+                {
+                    nfound+=diff_datum(
+                    ((unsigned char**)mem1)[u],
+                    ((unsigned char**)mem2)[u],
+                    memb_type,
+                    i,               /* index position */
+                    rank,
+                    dims,
+                    acc,
+                    pos,
+                    options,
+                    obj1,
+                    obj2,
+                    container1_id,
+                    container2_id,
+                    ph);
+                }
+                else
+                {
+                    nfound+=diff_datum(
+                    mem1 + u * size,
+                    mem2 + u * size, /* offset */
+                    memb_type,
+                    i,               /* index position */
+                    rank,
+                    dims,
+                    acc,
+                    pos,
+                    options,
+                    obj1,
+                    obj2,
+                    container1_id,
+                    container2_id,
+                    ph);
+                }
+           }
             H5Tclose(memb_type);
         }
         break;
