@@ -1634,6 +1634,7 @@
 ./tools/h5diff/testfiles/h5diff_516.txt
 ./tools/h5diff/testfiles/h5diff_517.txt
 ./tools/h5diff/testfiles/h5diff_518.txt
+./tools/h5diff/testfiles/h5diff_530.txt
 
 ./tools/h5diff/testfiles/h5diff_attr1.h5
 ./tools/h5diff/testfiles/h5diff_attr2.h5
@@ -1665,6 +1666,7 @@
 ./tools/h5diff/testfiles/h5diff_exclude1-2.h5
 ./tools/h5diff/testfiles/h5diff_exclude2-1.h5
 ./tools/h5diff/testfiles/h5diff_exclude2-2.h5
+./tools/h5diff/testfiles/h5diff_comp_vl_strs.h5
 
 
 #test files for h5repack

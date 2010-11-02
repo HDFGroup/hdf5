@@ -1,0 +1,11 @@
+
+file1     file2
+---------------------------------------
+    x      x    /              
+    x      x    /Compound_dset 
+
+group  : </> and </>
+0 differences found
+dataset: </Compound_dset> and </Compound_dset>
+0 differences found
+EXIT CODE: 0

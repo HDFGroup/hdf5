@@ -147,6 +147,7 @@ IF (BUILD_TESTING)
       h5diff_516.txt
       h5diff_517.txt
       h5diff_518.txt
+      h5diff_530.txt
       h5diff_600.txt
       h5diff_601.txt
       h5diff_603.txt
@@ -209,6 +210,7 @@ IF (BUILD_TESTING)
       h5diff_exclude1-2.h5
       h5diff_exclude2-1.h5
       h5diff_exclude2-2.h5
+      h5diff_comp_vl_strs.h5
   )
 
   FOREACH (txt_file ${HDF5_REFERENCE_FILES})
@@ -326,6 +328,8 @@ IF (BUILD_TESTING)
   # different structure and obj names
   SET (EXCLUDE_FILE2_1 h5diff_exclude2-1.h5)
   SET (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
+  # compound type with multiple vlen string types
+  SET (COMP_VL_STRS_FILE h5diff_comp_vl_strs.h5)
 
   # Remove any output file left over from previous test run
   ADD_TEST (
@@ -540,6 +544,8 @@ IF (BUILD_TESTING)
           h5diff_517.out.err
           h5diff_518.out
           h5diff_518.out.err
+          h5diff_530.out
+          h5diff_530.out.err
           h5diff_600.out
           h5diff_600.out.err
           h5diff_601.out
@@ -1056,6 +1062,11 @@ ADD_H5_TEST (h5diff_483 1 -v --exclude-path "/group1" ${EXCLUDE_FILE2_1} ${EXCLU
 
 # Exclude from group compare
 ADD_H5_TEST (h5diff_484 0 -v --exclude-path "/dset3" ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2} /group1)
+
+# ##############################################################################
+# # diff various multiple vlen and fixed strings in a compound type dataset
+# ##############################################################################
+ADD_H5_TEST (h5diff_530 0 -v  ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE})
 
   
 ENDIF (BUILD_TESTING)
