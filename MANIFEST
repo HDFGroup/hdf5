@@ -1113,6 +1113,8 @@
 ./tools/misc/testh5mkgrp.sh
 ./tools/misc/testh5repart.sh.in
 ./tools/misc/talign.c
+./tools/misc/testfiles/h5mkgrp_help.txt
+./tools/misc/testfiles/h5mkgrp_version.txt.in
 
 # h5stat sources
 ./tools/h5stat/Makefile.am
