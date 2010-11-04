@@ -219,7 +219,7 @@ main(int argc, char *argv[])
 {
     hid_t	fid, fapl, dxpl;
     H5F_t       *f;
-    haddr_t     addr = 1, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
+    haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
     herr_t      status = SUCCEED;
