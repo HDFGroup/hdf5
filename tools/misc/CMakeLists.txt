@@ -91,8 +91,8 @@ IF (BUILD_TESTING)
   ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
   
   SET (HDF5_MKGRP_TEST_FILES
-      h5mkgrp_help
-      h5mkgrp_version
+      #h5mkgrp_help
+      #h5mkgrp_version
       h5mkgrp_single
       h5mkgrp_single_latest
       h5mkgrp_several
@@ -114,6 +114,14 @@ IF (BUILD_TESTING)
         ARGS       ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_mkgrp_file}.ls ${dest}.ls -l3
     )
   ENDFOREACH (h5_mkgrp_file ${HDF5_MKGRP_TEST_FILES})
+
+  ADD_CUSTOM_COMMAND (
+      TARGET     h5mkgrp
+      POST_BUILD
+      COMMAND    ${XLATE_UTILITY}
+      ARGS       ${PROJECT_SOURCE_DIR}/testfiles/h5mkgrp_help.txt ${PROJECT_BINARY_DIR}/h5mkgrp_help.txt -l0
+  )
+  CONFIGURE_FILE (${PROJECT_SOURCE_DIR}/testfiles/h5mkgrp_version.txt.in ${PROJECT_BINARY_DIR}/h5mkgrp_version.txt @ONLY)
 
 ##############################################################################
 ##############################################################################
@@ -154,6 +162,20 @@ IF (BUILD_TESTING)
             -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
     )
   ENDMACRO (ADD_H5_TEST resultfile resultcode resultoption)
+
+  MACRO (ADD_H5_CMP resultfile resultcode)
+    ADD_TEST (
+        NAME H5MKGRP-${resultfile}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5mkgrp>"
+            -D "TEST_ARGS:STRING=${ARGN}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+            -D "TEST_OUTPUT=${resultfile}.out"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_REFERENCE=${resultfile}.txt"
+            -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+    )
+  ENDMACRO (ADD_H5_CMP resultfile resultcode)
 
 ##############################################################################
 ##############################################################################
@@ -202,8 +224,8 @@ IF (BUILD_TESTING)
   )
 
   # Check that help & version is displayed properly
-  ADD_H5_TEST (h5mkgrp_help 1 "-h")
-  ADD_H5_TEST (h5mkgrp_version 1 "-V")
+  ADD_H5_CMP (h5mkgrp_help 0 "-h")
+  ADD_H5_CMP (h5mkgrp_version 0 "-V")
 
   # Create single group at root level
   ADD_H5_TEST (h5mkgrp_single 0 " " single)
