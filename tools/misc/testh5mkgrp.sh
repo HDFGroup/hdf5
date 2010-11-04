@@ -167,9 +167,9 @@ echo "FILEOUT=" $FILEOUT
 CMPTEST() 
 {
     FILEOUT=$OUTDIR/$1
-    expect="$srcdir/testfiles/`basename $1 .h5`.txt"
-    actual="./testfiles/`basename $1 .h5`.out"
-    actual_err="./testfiles/`basename $1 .h5`.err"
+    expect="$INDIR/`basename $1 .h5`.txt"
+    actual="$OUTDIR/`basename $1 .h5`.out"
+    actual_err="$OUTDIR/`basename $1 .h5`.err"
     shift
 
     # Stderr is included in stdout so that the diff can detect
