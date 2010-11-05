@@ -167,7 +167,7 @@ echo "FILEOUT=" $FILEOUT
 CMPTEST() 
 {
     FILEOUT=$OUTDIR/$1
-    expect="$INDIR/`basename $1 .h5`.txt"
+    expect="$srcdir/testfiles/`basename $1 .h5`.txt"
     actual="$OUTDIR/`basename $1 .h5`.out"
     actual_err="$OUTDIR/`basename $1 .h5`.err"
     shift
