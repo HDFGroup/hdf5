@@ -54,7 +54,7 @@ pid_main=$!
 # =================================================
 startsignal=flushrefresh_VERIFICATION_START
 endsignal=flushrefresh_VERIFICATION_DONE
-timeout_length=100
+timeout_length=300
 timedout=0
 verification_done=0
 
@@ -62,12 +62,11 @@ verification_done=0
 # Run flush verification on test program.
 # =======================================
 
-# start timer
-before=`date +%s`
 until [ $verification_done -eq 1 ]; do
    
   # Wait for signal from test program that verification routine can run.
-  until [ -f $startsignal ]; do
+  before=`date +%s`
+  until [ -s $startsignal ]; do
     after=`date +%s`
     timediff=`expr $after - $before`
     if [ $timediff -gt $timeout_length ]; then   
@@ -103,12 +102,11 @@ done
 # Run refresh verification on test program.
 # =========================================
 if [ $timedout -eq 0 ]; then
-  # start timer
-  before=`date +%s`
   until [ $verification_done -eq 2 ]; do
 
     # Wait for signal from test program that verification routine can run.
-    until [ -f $startsignal ]; do
+    before=`date +%s`
+    until [ -s $startsignal ]; do
       after=`date +%s`
       timediff=`expr $after - $before`
       if [ $timediff -gt $timeout_length ]; then   

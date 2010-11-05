@@ -44,7 +44,7 @@
 #define SIGNAL_FROM_SCRIPT "flushrefresh_VERIFICATION_DONE"
 
 /* Signal Timeout Length in Secs */
-#define SIGNAL_TIMEOUT 100
+#define SIGNAL_TIMEOUT 300
 
 /* Paths to Various Objects in the Testfile */
 #define RG "/"
