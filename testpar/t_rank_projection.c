@@ -249,50 +249,20 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     /* initialize the buffers */
 
     ptr_0 = small_ds_buf_0;
-    ptr_1 = small_ds_buf_1;
-    ptr_2 = small_ds_buf_2;
+    for(i = 0; i < (int)small_ds_size; i++)
+        *ptr_0++ = (uint32_t)i;
+    HDmemset(small_ds_buf_1, 0, sizeof(uint32_t) * small_ds_size);
+    HDmemset(small_ds_buf_2, 0, sizeof(uint32_t) * small_ds_size);
 
-    for ( i = 0; i < (int)small_ds_size; i++ ) {
-
-        *ptr_0 = (uint32_t)i;
-        *ptr_1 = 0;
-        *ptr_2 = 0;
-
-        ptr_0++;
-        ptr_1++;
-        ptr_2++;
-    }
-
-    ptr_0 = small_ds_slice_buf;
-
-    for ( i = 0; i < (int)small_ds_slice_size; i++ ) {
-
-	*ptr_0 = (uint32_t)0;
-        ptr_0++;
-    }
+    HDmemset(small_ds_slice_buf, 0, sizeof(uint32_t) * small_ds_slice_size);
 
     ptr_0 = large_ds_buf_0;
-    ptr_1 = large_ds_buf_1;
-    ptr_2 = large_ds_buf_2;
+    for(i = 0; i < (int)large_ds_size; i++)
+        *ptr_0++ = (uint32_t)i;
+    HDmemset(large_ds_buf_1, 0, sizeof(uint32_t) * large_ds_size);
+    HDmemset(large_ds_buf_2, 0, sizeof(uint32_t) * large_ds_size);
 
-    for ( i = 0; i < (int)large_ds_size; i++ ) {
-
-        *ptr_0 = (uint32_t)i;
-        *ptr_1 = 0;
-        *ptr_2 = 0;
-
-        ptr_0++;
-        ptr_1++;
-        ptr_2++;
-    }
-
-    ptr_0 = large_ds_slice_buf;
-
-    for ( i = 0; i < (int)large_ds_slice_size; i++ ) {
-
-	*ptr_0 = (uint32_t)0;
-        ptr_0++;
-    }
+    HDmemset(large_ds_slice_buf, 0, sizeof(uint32_t) * large_ds_slice_size);
 
     filename = (const char *)GetTestParameters();
     HDassert( filename != NULL );
@@ -397,28 +367,6 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
          "H5Screate_simple() large_ds_slice_sid succeeded");
 
 
-    /* Select the entire extent of the full small ds, and ds slice dataspaces */
-    ret = H5Sselect_all(full_mem_small_ds_sid);
-    VRFY((ret != FAIL), "H5Sselect_all(full_mem_small_ds_sid) succeeded");
-
-    ret = H5Sselect_all(full_file_small_ds_sid);
-    VRFY((ret != FAIL), "H5Sselect_all(full_file_small_ds_sid) succeeded");
-
-    ret = H5Sselect_all(small_ds_slice_sid);
-    VRFY((ret != FAIL), "H5Sselect_all(small_ds_slice_sid) succeeded");
-
-
-    /* Select the entire extent of the full large ds, and ds slice dataspaces */
-    ret = H5Sselect_all(full_mem_large_ds_sid);
-    VRFY((ret != FAIL), "H5Sselect_all(full_mem_large_ds_sid) succeeded");
-
-    ret = H5Sselect_all(full_file_large_ds_sid);
-    VRFY((ret != FAIL), "H5Sselect_all(full_file_large_ds_sid) succeeded");
-
-    ret = H5Sselect_all(large_ds_slice_sid);
-    VRFY((ret != FAIL), "H5Sselect_all(large_ds_slice_sid) succeeded");
-
-
     /* if chunk edge size is greater than zero, set up the small and
      * large data set creation property lists to specify chunked
      * datasets.
@@ -491,14 +439,9 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     xfer_plist = H5Pcreate(H5P_DATASET_XFER);
     VRFY((xfer_plist >= 0), "H5Pcreate(H5P_DATASET_XFER) succeeded");
 
-    ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
-    VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
-
-    if ( ! use_collective_io ) {
-
-        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,
-                                              H5FD_MPIO_INDIVIDUAL_IO);
-        VRFY((ret>= 0), "H5Pset_dxpl_mpio_collective_opt() suceeded");
+    if(use_collective_io) {
+        ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+        VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     }
 
     /* setup selection to write initial data to the small and large data sets */
@@ -735,13 +678,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     }
 
     /* zero out the buffer we will be reading into */
-    ptr_0 = small_ds_slice_buf;
-
-    for ( i = 0; i < (int)small_ds_slice_size; i++ ) {
-
-	*ptr_0 = (uint32_t)0;
-        ptr_0++;
-    }
+    HDmemset(small_ds_slice_buf, 0, sizeof(uint32_t) * small_ds_slice_size);
 
 #if CONTIG_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 
     HDfprintf(stdout, 
@@ -924,12 +861,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 #endif 
 
     /* zero out the in memory large ds */
-    ptr_1 = large_ds_buf_1;
-    for ( n = 0; n < (int)large_ds_size; n++ ) {
-
-        *ptr_1 = 0;
-        ptr_1++;
-    }
+    HDmemset(large_ds_buf_1, 0, sizeof(uint32_t) * large_ds_size);
 
     /* set up start, stride, count, and block -- note that we will
      * change start[] so as to read slices of the large cube.
@@ -1171,12 +1103,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     }
 
     /* zero out the in memory small ds */
-    ptr_1 = small_ds_buf_1;
-    for ( n = 0; n < (int)small_ds_size; n++ ) {
-
-        *ptr_1 = 0;
-        ptr_1++;
-    }
+    HDmemset(small_ds_buf_1, 0, sizeof(uint32_t) * small_ds_size);
 
 
 #if CONTIG_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 
@@ -1428,12 +1355,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     }
 
     /* zero out the in memory large ds */
-    ptr_1 = large_ds_buf_1;
-    for ( n = 0; n < (int)large_ds_size; n++ ) {
-
-        *ptr_1 = 0;
-        ptr_1++;
-    }
+    HDmemset(large_ds_buf_1, 0, sizeof(uint32_t) * large_ds_size);
 
 #if CONTIG_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 
     HDfprintf(stdout, 
@@ -1734,7 +1656,7 @@ contig_hyperslab_dr_pio_test(void)
     int		skip_counters[4] = {0, 0, 0, 0};
     int		tests_skiped[4] = {0, 0, 0, 0};
     int		mpi_result;
-    hid_t	dset_type = H5T_STD_U32LE;
+    hid_t	dset_type = H5T_NATIVE_UINT;
 #ifdef H5_HAVE_GETTIMEOFDAY
     hbool_t	time_tests = TRUE;
     hbool_t	display_skips = FALSE;
@@ -1759,6 +1681,8 @@ contig_hyperslab_dr_pio_test(void)
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif /* H5_HAVE_GETTIMEOFDAY */
+
+    HDcompile_assert(sizeof(uint32_t) == sizeof(unsigned));
 
     local_express_test = GetTestExpress();
 
@@ -2678,50 +2602,20 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     /* initialize the buffers */
 
     ptr_0 = small_ds_buf_0;
-    ptr_1 = small_ds_buf_1;
-    ptr_2 = small_ds_buf_2;
+    for(i = 0; i < (int)small_ds_size; i++)
+        *ptr_0++ = (uint32_t)i;
+    HDmemset(small_ds_buf_1, 0, sizeof(uint32_t) * small_ds_size);
+    HDmemset(small_ds_buf_2, 0, sizeof(uint32_t) * small_ds_size);
 
-    for ( i = 0; i < (int)small_ds_size; i++ ) {
-
-        *ptr_0 = (uint32_t)i;
-        *ptr_1 = 0;
-        *ptr_2 = 0;
-
-        ptr_0++;
-        ptr_1++;
-        ptr_2++;
-    }
-
-    ptr_0 = small_ds_slice_buf;
-
-    for ( i = 0; i < (int)small_ds_slice_size; i++ ) {
-
-	*ptr_0 = (uint32_t)i;
-        ptr_0++;
-    }
+    HDmemset(small_ds_slice_buf, 0, sizeof(uint32_t) * small_ds_slice_size);
 
     ptr_0 = large_ds_buf_0;
-    ptr_1 = large_ds_buf_1;
-    ptr_2 = large_ds_buf_2;
+    for(i = 0; i < (int)large_ds_size; i++)
+        *ptr_0++ = (uint32_t)i;
+    HDmemset(large_ds_buf_1, 0, sizeof(uint32_t) * large_ds_size);
+    HDmemset(large_ds_buf_2, 0, sizeof(uint32_t) * large_ds_size);
 
-    for ( i = 0; i < (int)large_ds_size; i++ ) {
-
-        *ptr_0 = (uint32_t)i;
-        *ptr_1 = 0;
-        *ptr_2 = 0;
-
-        ptr_0++;
-        ptr_1++;
-        ptr_2++;
-    }
-
-    ptr_0 = large_ds_slice_buf;
-
-    for ( i = 0; i < (int)large_ds_slice_size; i++ ) {
-
-	*ptr_0 = (uint32_t)0;
-        ptr_0++;
-    }
+    HDmemset(large_ds_slice_buf, 0, sizeof(uint32_t) * large_ds_slice_size);
 
     filename = (const char *)GetTestParameters();
     HDassert( filename != NULL );
@@ -2838,28 +2732,6 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
          "H5Screate_simple() large_ds_slice_sid succeeded");
 
 
-    /* Select the entire extent of the full small ds, and ds slice dataspaces */
-    ret = H5Sselect_all(full_mem_small_ds_sid);
-    VRFY((ret != FAIL), "H5Sselect_all(full_mem_small_ds_sid) succeeded");
-
-    ret = H5Sselect_all(full_file_small_ds_sid);
-    VRFY((ret != FAIL), "H5Sselect_all(full_file_small_ds_sid) succeeded");
-
-    ret = H5Sselect_all(small_ds_slice_sid);
-    VRFY((ret != FAIL), "H5Sselect_all(small_ds_slice_sid) succeeded");
-
-
-    /* Select the entire extent of the full large ds, and ds slice dataspaces */
-    ret = H5Sselect_all(full_mem_large_ds_sid);
-    VRFY((ret != FAIL), "H5Sselect_all(full_mem_large_ds_sid) succeeded");
-
-    ret = H5Sselect_all(full_file_large_ds_sid);
-    VRFY((ret != FAIL), "H5Sselect_all(full_file_large_ds_sid) succeeded");
-
-    ret = H5Sselect_all(large_ds_slice_sid);
-    VRFY((ret != FAIL), "H5Sselect_all(large_ds_slice_sid) succeeded");
-
-
     /* if chunk edge size is greater than zero, set up the small and
      * large data set creation property lists to specify chunked
      * datasets.
@@ -2933,14 +2805,9 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     xfer_plist = H5Pcreate(H5P_DATASET_XFER);
     VRFY((xfer_plist >= 0), "H5Pcreate(H5P_DATASET_XFER) succeeded");
 
-    ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
-    VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
-
-    if ( ! use_collective_io ) {
-
-        ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist,
-                                              H5FD_MPIO_INDIVIDUAL_IO);
-        VRFY((ret>= 0), "H5Pset_dxpl_mpio_collective_opt() suceeded");
+    if(use_collective_io) {
+        ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+        VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     }
 
     /* setup selection to write initial data to the small and large data sets */
@@ -3172,14 +3039,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                                                               sel_start);
 
     /* zero out the buffer we will be reading into */
-
-    ptr_0 = small_ds_slice_buf;
-
-    for ( i = 0; i < (int)small_ds_slice_size; i++ ) {
-
-	*ptr_0 = (uint32_t)0;
-        ptr_0++;
-    }
+    HDmemset(small_ds_slice_buf, 0, sizeof(uint32_t) * small_ds_slice_size);
 
 #if CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 
     HDfprintf(stdout, "%s:%d: initial small_ds_slice_buf = ",
@@ -3386,12 +3246,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 #endif 
 
     /* zero out the buffer we will be reading into */
-    ptr_0 = large_ds_buf_1;
-    for ( i = 0; i < (int)large_ds_size; i++ ) {
-
-	*ptr_0 = (uint32_t)0;
-        ptr_0++;
-    }
+    HDmemset(large_ds_buf_1, 0, sizeof(uint32_t) * large_ds_size);
 
     /* set up start, stride, count, and block -- note that we will
      * change start[] so as to read the slice of the small data set
@@ -3700,12 +3555,7 @@ int		m;
     }
 
     /* zero out the in memory small ds */
-    ptr_1 = small_ds_buf_1;
-    for ( n = 0; n < (int)small_ds_size; n++ ) {
-
-        *ptr_1 = 0;
-        ptr_1++;
-    }
+    HDmemset(small_ds_buf_1, 0, sizeof(uint32_t) * small_ds_size);
 
 
 #if CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 
@@ -3994,12 +3844,7 @@ int		m;
     }
 
     /* zero out the in memory large ds */
-    ptr_1 = large_ds_buf_1;
-    for ( n = 0; n < (int)large_ds_size; n++ ) {
-
-        *ptr_1 = 0;
-        ptr_1++;
-    }
+    HDmemset(large_ds_buf_1, 0, sizeof(uint32_t) * large_ds_size);
 
 #if CONTIG_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG
     HDfprintf(stdout, 
@@ -4324,7 +4169,7 @@ checker_board_hyperslab_dr_pio_test(void)
     int         skip_counters[4] = {0, 0, 0, 0};
     int         tests_skiped[4] = {0, 0, 0, 0};
     int		mpi_result;
-    hid_t	dset_type = H5T_STD_U32LE;
+    hid_t	dset_type = H5T_NATIVE_UINT;
 #ifdef H5_HAVE_GETTIMEOFDAY
     hbool_t     time_tests = TRUE;
     hbool_t	display_skips = FALSE;
@@ -4351,6 +4196,8 @@ checker_board_hyperslab_dr_pio_test(void)
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     local_express_test = GetTestExpress();
+
+    HDcompile_assert(sizeof(uint32_t) == sizeof(unsigned));
 
     mpi_result = MPI_Allreduce((void *)&local_express_test,
                                (void *)&express_test,
