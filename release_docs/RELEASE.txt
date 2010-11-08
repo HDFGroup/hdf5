@@ -391,6 +391,11 @@ Cray XT3 2.1.56                      n       n         n         n
 
 Known Problems
 ==============
+* The h5diff tool can display garbage values when variable length strings in 
+  a compound type dataset are compared. (also variable length string array 
+  in a compound type dataset.) (bug #1989) 
+  This will be fixed in the next release.  JKM - 2010/11/05
+
 * H5Eset_auto can cause a seg fault for a library API call if the application
   compiles with -DH5_USE_16_API (see bug 1707).  It will be fixed in the 
   next release. SLU - 2010/10/5
