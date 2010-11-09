@@ -127,10 +127,10 @@ Bug Fixes since HDF5-1.8.5
       
     Library
     -------
-    - Modified metadata accumulator to better track accumulated dirty metadata
-      in an effort to reduce unnecessary I/O in certain situations, as well
-      as to fix some other corner cases which were prone to error. Additionally
-      added a new set of unit tests that get run during 'make check' to verify 
+    - Modified metadata accumulator to better track accumulated dirty metadata 
+      in an effort to reduce unnecessary I/O in certain situations and to 
+      fix some other corner cases which were prone to error. (MAM - 2010/10/15)
+    - Added a new set of unit tests that are run during 'make check' to verify 
       the behavior of the metadata accumulator. (MAM - 2010/10/15)
     - Modified library to always cache symbol table information.  Libraries
       from version 1.6.3 and earler have a bug which causes them to require 
@@ -182,20 +182,18 @@ Bug Fixes since HDF5-1.8.5
       (JKM - 2010/09/15 - Bug 1896)
     - Changed h5ls to not interpret special characters in object or attribute
       names for output. (JKM - 2010/06/28 - Bug 1784)
-    - Revised the order of arguments for h5cc, h5fc, h5c++, h5pcc and h5pfc.
-      CPPFLAGS, CFLAGS, LDFLAGS and LIBS have been duplicated with an H5BLD_ 
+    - Revised the order of arguments for h5cc, h5fc, h5c++, h5pcc and h5pfc. 
+      CPPFLAGS, CFLAGS, LDFLAGS, and LIBS have been duplicated with an H5BLD_ 
       prefix to put the flags and paths from the hdf5 build in the correct 
       places and allow the script user to add entries in CPPFLAGS, CFLAGS, 
-      LDFLAGS and LIBS that will take precedence over those from the hdf5 build.  
-      The user can make these entries persistent by editing CFLAGSBASE, 
-      CPPFLAGSBASE, LDFLAGSBASE, and LIBSBASE near the top of the script or 
-      teporarily by setting HDF5_CFLAGS, HDF5_CPPFLAGS, HDF5_LDFLAGS, or 
-      HDF5_LIBS in the environment.  
-
-      The new order of arguments in these scripts is $CLINKER $H5BLD_CPPFLAGS 
-      $CPPFLAGS $H5BLD_CFLAGS $CFLAGS $LDFLAGS $clibpath $link_objs $LIBS 
-      $link_args $shared_link.
-      (LRK - 2010/10/25 - Bug 1973)
+      LDFLAGS, and LIBS that will take precedence over those from the hdf5 
+      build. The user can make these entries persistent by editing 
+      CFLAGSBASE, CPPFLAGSBASE, LDFLAGSBASE, and LIBSBASE near the top of 
+      the script or temporary by setting HDF5_CFLAGS, HDF5_CPPFLAGS, 
+      HDF5_LDFLAGS, or HDF5_LIBS in the environment. The new order of 
+      arguments in these scripts is $CLINKER $H5BLD_CPPFLAGS $CPPFLAGS 
+      $H5BLD_CFLAGS $CFLAGS $LDFLAGS $clibpath $link_objs $LIBS $link_args 
+      $shared_link. (LRK - 2010/10/25 - Bug 1973)
 
     F90 API
     ------
@@ -391,10 +389,10 @@ Cray XT3 2.1.56                      n       n         n         n
 
 Known Problems
 ==============
-* The h5diff tool can display garbage values when variable length strings in 
-  a compound type dataset are compared. (also variable length string array 
-  in a compound type dataset.) (bug #1989) 
-  This will be fixed in the next release.  JKM - 2010/11/05
+* The h5diff tool can display garbage values when variable-length strings in 
+  a compound type dataset are compared. This also occurs with variable-length 
+  string arrays in a compound type dataset. See bug #1989. This will be fixed 
+  in the next release. JKM - 2010/11/05
 
 * H5Eset_auto can cause a seg fault for a library API call if the application
   compiles with -DH5_USE_16_API (see bug 1707).  It will be fixed in the 
