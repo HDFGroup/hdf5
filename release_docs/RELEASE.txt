@@ -218,25 +218,27 @@ The following platforms and compilers have been tested for this release.
     SMP x86_64 GNU/Linux          applications running on Intel(R) 64, 
     (SNL Glory)                   Versions 11.1.
     
-    Windows XP                    Visual Studio 2008 w/ Intel Fortran 11.1
-                                  Visual Studio 2010
-                                  Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
-    
-    Windows XP                    Visual Studio 2008 w/ Intel Fortran 11.1
-                                  Visual Studio 2010
+    Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
+                                  Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 (cmake)
                                   Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
 
-    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 11.1
-                                  Visual Studio 2010
+    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
+                                  Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 (cmake)
                                   Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
 
-    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 11.1
+    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
+                                  Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
 
-    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 11.1
+    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
+                                  Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
 
-    Windows 7                     Visual Studio 2010
+    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 (cmake)
 
-    Windows 7 x64                 Visual Studio 2010
+    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 (cmake)
 
     MAC OS  10.5.6 (Intel)        i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
                                   GNU Fortran (GCC) 4.3.0 20070810
@@ -308,7 +310,7 @@ Cray XT3 2.1.56                      n       n         n         n
            (1) Fortran compiled with g95.
            (2) With PGI and Absoft compilers.
            (3) With PGI compiler for Fortran.
-           (4) Using Visual Studio 2008 (Cygwin shared libraries are not supported)
+           (4) Using Visual Studio 2008 w/ Intel Fortran 10.1 (Cygwin shared libraries are not supported)
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
