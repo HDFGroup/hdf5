@@ -35,6 +35,7 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Spkg.h"		/* Dataspaces 				*/
+#include "H5Vprivate.h"		/* Vector and array functions		*/
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -83,7 +84,7 @@ H5S_mpio_all_type(const H5S_t *space, size_t elmt_size,
     HDassert(space);
 
     /* Just treat the entire extent as a block of bytes */
-    if((snelmts = H5S_GET_EXTENT_NPOINTS(space)) < 0)
+    if((snelmts = (hssize_t)H5S_GET_EXTENT_NPOINTS(space)) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
     H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, hsize_t);
 
@@ -160,14 +161,15 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
         hsize_t count;
     } d[H5S_MAX_RANK];
 
-    int			i;
-    int			offset[H5S_MAX_RANK];
-    int			max_xtent[H5S_MAX_RANK];
+    hsize_t		offset[H5S_MAX_RANK];
+    hsize_t		max_xtent[H5S_MAX_RANK];
     H5S_hyper_dim_t	*diminfo;		/* [rank] */
-    int		rank;
+    unsigned		rank;
     int			block_length[3];
     MPI_Datatype	inner_type, outer_type, old_types[3];
     MPI_Aint            extent_len, displacement[3];
+    unsigned		u;			/* Local index variable */
+    int			i;			/* Local index variable */
     int                 mpi_code;               /* MPI return code */
     herr_t		ret_value = SUCCEED;
 
@@ -192,66 +194,68 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
     if(sel_iter.u.hyp.iter_rank != 0 && sel_iter.u.hyp.iter_rank < space->extent.rank) {
         /* Flattened selection */
         rank = sel_iter.u.hyp.iter_rank;
-        HDassert(rank >= 0 && rank <= H5S_MAX_RANK);	/* within array bounds */
+        HDassert(rank <= H5S_MAX_RANK);	/* within array bounds */
 #ifdef H5S_DEBUG
   if(H5DEBUG(S))
             HDfprintf(H5DEBUG(S), "%s: Flattened selection\n",FUNC);
 #endif
-        for(i = 0; i < rank; ++i) {
-            d[i].start = diminfo[i].start + sel_iter.u.hyp.sel_off[i];
-            d[i].strid = diminfo[i].stride;
-            d[i].block = diminfo[i].block;
-            d[i].count = diminfo[i].count;
-            d[i].xtent = sel_iter.u.hyp.size[i];
+        for(u = 0; u < rank; ++u) {
+            H5_CHECK_OVERFLOW(diminfo[u].start, hsize_t, hssize_t)
+            d[u].start = (hssize_t)diminfo[u].start + sel_iter.u.hyp.sel_off[u];
+            d[u].strid = diminfo[u].stride;
+            d[u].block = diminfo[u].block;
+            d[u].count = diminfo[u].count;
+            d[u].xtent = sel_iter.u.hyp.size[u];
 #ifdef H5S_DEBUG
        if(H5DEBUG(S)){
             HDfprintf(H5DEBUG(S), "%s: start=%Hd  stride=%Hu  count=%Hu  block=%Hu  xtent=%Hu",
-                FUNC, d[i].start, d[i].strid, d[i].count, d[i].block, d[i].xtent );
-            if (i==0)
-                HDfprintf(H5DEBUG(S), "  rank=%d\n", rank );
+                FUNC, d[u].start, d[u].strid, d[u].count, d[u].block, d[u].xtent );
+            if (u==0)
+                HDfprintf(H5DEBUG(S), "  rank=%u\n", rank );
             else
                 HDfprintf(H5DEBUG(S), "\n" );
       }
 #endif
-            if(0 == d[i].block)
+            if(0 == d[u].block)
                 goto empty;
-            if(0 == d[i].count)
+            if(0 == d[u].count)
                 goto empty;
-            if(0 == d[i].xtent)
+            if(0 == d[u].xtent)
                 goto empty;
         } /* end for */
     } /* end if */
     else {
         /* Non-flattened selection */
         rank = space->extent.rank;
-        HDassert(rank >= 0 && rank <= H5S_MAX_RANK);	/* within array bounds */
+        HDassert(rank <= H5S_MAX_RANK);	/* within array bounds */
         if(0 == rank)
             goto empty;
 #ifdef H5S_DEBUG
   if(H5DEBUG(S))
             HDfprintf(H5DEBUG(S),"%s: Non-flattened selection\n",FUNC);
 #endif
-        for(i = 0; i < rank; ++i) {
-            d[i].start = diminfo[i].start + space->select.offset[i];
-            d[i].strid = diminfo[i].stride;
-            d[i].block = diminfo[i].block;
-            d[i].count = diminfo[i].count;
-            d[i].xtent = space->extent.size[i];
+        for(u = 0; u < rank; ++u) {
+            H5_CHECK_OVERFLOW(diminfo[u].start, hsize_t, hssize_t)
+            d[u].start = (hssize_t)diminfo[u].start + space->select.offset[u];
+            d[u].strid = diminfo[u].stride;
+            d[u].block = diminfo[u].block;
+            d[u].count = diminfo[u].count;
+            d[u].xtent = space->extent.size[u];
 #ifdef H5S_DEBUG
   if(H5DEBUG(S)){
     HDfprintf(H5DEBUG(S), "%s: start=%Hd  stride=%Hu  count=%Hu  block=%Hu  xtent=%Hu",
-              FUNC, d[i].start, d[i].strid, d[i].count, d[i].block, d[i].xtent );
-    if (i==0)
-        HDfprintf(H5DEBUG(S), "  rank=%d\n", rank );
+              FUNC, d[u].start, d[u].strid, d[u].count, d[u].block, d[u].xtent );
+    if (u==0)
+        HDfprintf(H5DEBUG(S), "  rank=%u\n", rank );
     else
         HDfprintf(H5DEBUG(S), "\n" );
   }
 #endif
-            if(0 == d[i].block)
+            if(0 == d[u].block)
                 goto empty;
-            if(0 == d[i].count)
+            if(0 == d[u].count)
                 goto empty;
-            if(0 == d[i].xtent)
+            if(0 == d[u].xtent)
                 goto empty;
         } /* end for */
     } /* end else */
@@ -264,17 +268,17 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
     max_xtent[rank - 1] = d[rank - 1].xtent;
 #ifdef H5S_DEBUG
   if(H5DEBUG(S)) {
-     i=rank-1;
-     HDfprintf(H5DEBUG(S), " offset[%2d]=%d; max_xtent[%2d]=%d\n",
+     i = ((int)rank) - 1;
+     HDfprintf(H5DEBUG(S), " offset[%2d]=%Hu; max_xtent[%2d]=%Hu\n",
                           i, offset[i], i, max_xtent[i]);
   }
 #endif
-    for(i = rank - 2; i >= 0; --i) {
+    for(i = ((int)rank) - 2; i >= 0; --i) {
         offset[i] = offset[i + 1] * d[i + 1].xtent;
         max_xtent[i] = max_xtent[i + 1] * d[i].xtent;
 #ifdef H5S_DEBUG
   if(H5DEBUG(S))
-    HDfprintf(H5DEBUG(S), " offset[%2d]=%d; max_xtent[%2d]=%d\n",
+    HDfprintf(H5DEBUG(S), " offset[%2d]=%Hu; max_xtent[%2d]=%Hu\n",
                           i, offset[i], i, max_xtent[i]);
 #endif
     } /* end for */
@@ -290,7 +294,7 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
 #ifdef H5S_DEBUG
   if(H5DEBUG(S)) {
     HDfprintf(H5DEBUG(S), "%s: Making contig type %Zu MPI_BYTEs\n", FUNC, elmt_size);
-    for (i=rank-1; i>=0; --i)
+    for(i = ((int)rank) - 1; i >= 0; --i)
         HDfprintf(H5DEBUG(S), "d[%d].xtent=%Hu \n", i, d[i].xtent);
   }
 #endif
@@ -301,7 +305,7 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
 *  Construct the type by walking the hyperslab dims
 *  from the inside out:
 *******************************************************/
-    for(i = rank - 1; i >= 0; --i) {
+    for(i = ((int)rank) - 1; i >= 0; --i) {
 #ifdef H5S_DEBUG
   if(H5DEBUG(S))
     HDfprintf(H5DEBUG(S), "%s: Dimension i=%d \n"
@@ -538,7 +542,8 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
 
             /* Store displacement & block length */
             disp[outercount]      = (MPI_Aint)elmt_size * tspan->low;
-            blocklen[outercount]  = tspan->nelem;
+            H5_CHECK_OVERFLOW(tspan->nelem, hsize_t, int)
+            blocklen[outercount]  = (int)tspan->nelem;
 
             tspan                 = tspan->next;
             outercount++;
@@ -710,12 +715,15 @@ H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
                     } /* end else */
                     break;
 
+		case H5S_SEL_ERROR:
+		case H5S_SEL_N:
                 default:
                     HDassert("unknown selection type" && 0);
                     break;
             } /* end switch */
             break;
 
+        case H5S_NO_CLASS:
         default:
             HDassert("unknown data space type" && 0);
             break;
