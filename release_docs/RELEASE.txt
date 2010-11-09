@@ -295,21 +295,25 @@ The following platforms and compilers have been tested for this release.
     SMP x86_64 GNU/Linux          applications running on Intel(R) 64, 
     (SNL Glory)                   Versions 11.1.
     
-    Windows XP                    Visual Studio 2008 w/ Intel Fortran 11.1
-                                  Visual Studio 2010
+    Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
+                                  Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 (cmake)
                                   Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
 
-    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 11.1
-                                  Visual Studio 2010
+    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
+                                  Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 (cmake)
                                   Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
 
-    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 11.1
+    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
+                                  Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
 
-    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 11.1
+    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
+                                  Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
 
-    Windows 7                     Visual Studio 2010
+    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
 
-    Windows 7 x64                 Visual Studio 2010
+    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
 
     Mac OS X 10.6.3 (Intel 64-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1
     Darwin Kernel Version 10.3.1  GNU Fortran (GCC) 4.5.0 20090910  
@@ -317,6 +321,38 @@ The following platforms and compilers have been tested for this release.
 
     Mac OS X 10.6.4 (Intel 32-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1
     Darwin Kernel Version 10.4.0  GNU Fortran (GCC) 4.4.0 20090123
+
+    Debian5.06 2.6.26-2-686 #1 SMP i686 GNU/Linux
+                                  gcc (Debian 4.3.2-1.1) 4.3.2
+                                  GNU Fortran (Debian 4.3.2-1.1) 4.3.2
+
+    Debian5.06 2.6.26-2-amd64 #1 SMP x86_64 GNU/Linux
+                                  gcc (Debian 4.3.2-1.1) 4.3.2
+                                  GNU Fortran (Debian 4.3.2-1.1) 4.3.2
+
+    Fedora14 2.6.35.6-48.fc14.i686.PAE #1 SMP i686 i686 i386 GNU/Linux
+                                  gcc (GCC) 4.5.1 20100924 (Red Hat 4.5.1-4)
+                                  GNU Fortran (GCC) 4.5.1 20100924 (Red Hat 4.5.1-4)
+
+    Fedora14 2.6.35.6-48.fc14.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (GCC) 4.5.1 20100924 (Red Hat 4.5.1-4)
+                                  GNU Fortran (GCC) 4.5.1 20100924 (Red Hat 4.5.1-4)
+
+    SUSE 11.3 2.6.34-12-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
+                                  gcc (SUSE Linux) 4.5.0 20100604 [gcc-4_5-branch revision 160292]
+                                  GNU Fortran (SUSE Linux) 4.5.0 20100604 [gcc-4_5-branch revision 160292]
+
+    SUSE 11.3 2.6.34-12-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (SUSE Linux) 4.5.0 20100604 [gcc-4_5-branch revision 160292]
+                                  GNU Fortran (SUSE Linux) 4.5.0 20100604 [gcc-4_5-branch revision 160292]
+
+    Ubuntu 10.10 2.6.35-22-generic #34-Ubuntu SMP i686 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5
+                                  GNU Fortran (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5
+
+    Ubuntu 10.10 2.6.35-22-generic #34-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5
+                                  GNU Fortran (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5
 
 
 Supported Configuration Features Summary
@@ -381,7 +417,7 @@ Cray XT3 2.1.56                      n       n         n         n
            (1) Fortran compiled with g95.
            (2) With PGI and Absoft compilers.
            (3) With PGI compiler for Fortran.
-           (4) Using Visual Studio 2008 (Cygwin shared libraries are not supported)
+           (4) Using Visual Studio 2008 w/ Intel Fortran 10.1 (Cygwin shared libraries are not supported)
            (5) C shared libraries will be built only when Fortran is disabeld.
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
