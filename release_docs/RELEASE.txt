@@ -474,6 +474,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5ls to display nested compound type with curly bracket 
+          when -S (--simple) option is used with -l (--label), so it shows  
+          which member (in curly bracket) belong to which nested compound type 
+          and make the output make sense.  bug#1979 (JKM 2010/11/09)
         - Fixed h5diff to handle variable-length strings in a compound dataset 
           correctly. (also variable-length string array in a compound dataset)
           Garbage values were displayed when h5diff compared multiple 

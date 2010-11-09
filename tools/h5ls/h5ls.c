@@ -1263,8 +1263,16 @@ dump_dataset_values(hid_t dset)
         info.arr_suf = "";
         info.arr_sep = " ";
 
-        info.cmpd_pre = "";
-        info.cmpd_suf = "";
+        if (label_g)
+        {
+            info.cmpd_pre = "{";
+            info.cmpd_suf = "}";
+        }
+        else
+        {
+            info.cmpd_pre = "";
+            info.cmpd_suf = "";
+        }
         info.cmpd_sep = " ";
 
         if (label_g) info.cmpd_name = "%s=";

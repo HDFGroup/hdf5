@@ -1382,6 +1382,9 @@
 ./tools/testfiles/tgroup.ls
 ./tools/testfiles/tloop-1.ls
 ./tools/testfiles/tnestcomp-1.ls
+./tools/testfiles/tnestcomp-2.ls
+./tools/testfiles/tnestcomp-3.ls
+./tools/testfiles/tnestcomp-4.ls
 ./tools/testfiles/tsaf.ls
 ./tools/testfiles/tstr-1.ls
 ./tools/testfiles/tattr2.ls
