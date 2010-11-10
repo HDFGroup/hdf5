@@ -15,6 +15,7 @@ SET (CTEST_CUSTOM_WARNING_EXCEPTION
 SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     ${CTEST_CUSTOM_MEMCHECK_IGNORE}
     flush1
+    flush2
     h5test-clear-objects
     h5perform-clear-objects
     hl_test-clear-objects
