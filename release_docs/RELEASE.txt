@@ -94,8 +94,7 @@ Bug Fixes since HDF5-1.8.6
 
     Configuration
     -------------
-    - The default number of MPI processes for testing purpose is changed from
-      3 to 6.  (AKC - 2010/10/28)
+    - None
 
     Library
     -------
