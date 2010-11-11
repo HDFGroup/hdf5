@@ -107,6 +107,10 @@ Bug Fixes since HDF5-1.8.6
 
     Tools
     -----
+    - Improve h5diff performance. 1) use HDmemcmp() before comparing each 
+      elements. 2) replace expensive H5Tequals() calls 3) retrieve datatype
+      information at dataset level not each element level for compound 
+      datasets
     - Fixed h5ls to display nested compound type with curly bracket 
       when -S (--simple) option is used with -l (--label), so it shows  
       which member (in curly bracket) belong to which nested compound type 
