@@ -6079,6 +6079,8 @@ static void h5diff_print_char(char ch)
  */
 static void set_comp_members(hid_t tid, mcomp_t *members)
 {
+    int i;
+
     if (tid <=0 || !members)
         return;
 
@@ -6094,11 +6096,13 @@ static void set_comp_members(hid_t tid, mcomp_t *members)
     members->offsets = HDcalloc(members->n, sizeof(size_t));
     members->m = HDcalloc(members->n, sizeof(mcomp_t *));
    
-    for (int i=0; i< members->n; i++) {
+    for (i=0; i< members->n; i++) 
+    {
          members->ids[i] = H5Tget_member_type( tid, i );
          members->flags[i] = H5Tis_variable_str( members->ids[i] );
          members->offsets[i] = H5Tget_member_offset( tid, i );
-         if (H5Tget_class( members->ids[i])==H5T_COMPOUND) {
+         if (H5Tget_class( members->ids[i])==H5T_COMPOUND) 
+         {
               members->m[i] = (mcomp_t *)HDmalloc(sizeof(mcomp_t));
               set_comp_members(members->ids[i], members->m[i]);
          }
@@ -6112,11 +6116,15 @@ static void set_comp_members(hid_t tid, mcomp_t *members)
  */
 static void free_comp_members(mcomp_t *members) 
 {
+    int i;
+
     if (!members || members->n<=0 || !members->ids)
         return;
 
-    for (int i=0; i<members->n; i++) {
-        if (members->m[i]) {
+    for (i=0; i<members->n; i++) 
+    {
+        if (members->m[i]) 
+        {
             free_comp_members(members->m[i]);
             HDfree(members->m[i]);
         }
