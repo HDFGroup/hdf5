@@ -36,7 +36,7 @@ fi
 # Ask for more memory so that "make check" will pass. Not necessary for -q64
 # mode but it does no harm.
 if test "X-$enable_parallel" = "X-yes" -o X-$CC_BASENAME = X-mpcc_r; then
-    RUNPARALLEL=${RUNPARALLEL="env MP_PROCS=\$\${NPROCS:=3} MP_TASKS_PER_NODE=\$\${NPROCS:=3} poe"}
+    RUNPARALLEL=${RUNPARALLEL="env MP_PROCS=\$\${NPROCS:=6} MP_TASKS_PER_NODE=\$\${NPROCS:=6} poe"}
     RUNSERIAL=${RUNSERIAL="env LDR_CNTRL=MAXDATA=0x20000000@DSA MP_PROCS=1 MP_TASKS_PER_NODE=1 poe"}
 else
     RUNSERIAL=${RUNSERIAL="env LDR_CNTRL=MAXDATA=0x20000000@DSA"}

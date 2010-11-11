@@ -232,10 +232,10 @@ compiler is `mpicc' and the user hasn't specified values for RUNSERIAL and
 RUNPARALLEL then configure chooses `mpiexec' from the same directory as `mpicc':
 
     RUNSERIAL:    /usr/local/mpi/bin/mpiexec -np 1
-    RUNPARALLEL:  /usr/local/mpi/bin/mpiexec -np $${NPROCS:=3}
+    RUNPARALLEL:  /usr/local/mpi/bin/mpiexec -np $${NPROCS:=6}
 
-The `$${NPROCS:=3}' will be substituted with the value of the NPROCS
-environment variable at the time `make check' is run (or the value 3).
+The `$${NPROCS:=6}' will be substituted with the value of the NPROCS
+environment variable at the time `make check' is run (or the value 6).
 
 
 4. Parallel test suite
