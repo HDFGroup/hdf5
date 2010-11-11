@@ -182,6 +182,13 @@ typedef enum dtype_t
 
 static int my_isnan(dtype_t type, void *val);
 
+/*-------------------------------------------------------------------------
+ * XCAO, 11/10/2010
+ * added to improve performance for compound datasets
+ */
+static void set_comp_members(hid_t tid, mcomp_t *members);
+static void free_comp_members(mcomp_t *members);
+
 
 
 /*-------------------------------------------------------------------------
@@ -220,10 +227,15 @@ hsize_t diff_array( void *_mem1,
     int           ph=1;       /* print header  */
     hsize_t       i;
     int           j;
-
+    mcomp_t       members;
+    H5T_class_t   type_class;
 
     /* get the size. */
     size = H5Tget_size( m_type );
+    type_class = H5Tget_class(m_type);
+
+    if (type_class != H5T_REFERENCE && HDmemcmp(mem1, mem2, size*nelmts)==0)
+        return 0;
 
     if ( rank > 0 )
     {
@@ -255,7 +267,7 @@ hsize_t diff_array( void *_mem1,
                 name2,
                 container1_id,
                 container2_id,
-                &ph);
+                &ph, NULL);
             if (options->n && nfound>=options->count)
                 return nfound;
         } /* i */
@@ -263,7 +275,7 @@ hsize_t diff_array( void *_mem1,
 
     else
     {
-        switch (H5Tget_class(m_type))
+        switch (type_class)
         {
         default:
             assert(0);
@@ -324,7 +336,8 @@ hsize_t diff_array( void *_mem1,
         case H5T_ARRAY:
         case H5T_VLEN:
         case H5T_REFERENCE:
-
+            HDmemset(&members, 0, sizeof (mcomp_t));
+            set_comp_members(m_type, &members);
             for ( i = 0; i < nelmts; i++)
             {
                 nfound+=diff_datum(
@@ -341,10 +354,14 @@ hsize_t diff_array( void *_mem1,
                     name2,
                     container1_id,
                     container2_id,
-                    &ph);
+                    &ph, &members);
                 if (options->n && nfound>=options->count)
+                {
+                    free_comp_members(&members);
                     return nfound;
+                }
             } /* i */
+            free_comp_members(&members);
         } /* switch */
     } /* else */
 
@@ -388,7 +405,6 @@ hsize_t diff_array( void *_mem1,
  *  Dereference the object and compare the type (basic object type).
  *-------------------------------------------------------------------------
  */
-
 hsize_t diff_datum(void       *_mem1,
                    void       *_mem2,
                    hid_t      m_type,
@@ -402,13 +418,16 @@ hsize_t diff_datum(void       *_mem1,
                    const char *obj2,
                    hid_t      container1_id,
                    hid_t      container2_id, /*where the reference came from*/
-                   int        *ph)           /*print header */
+                   int        *ph,           /*print header */
+                   mcomp_t    *members)      /*compound members */
 {
     unsigned char *mem1 = (unsigned char*)_mem1;
     unsigned char *mem2 = (unsigned char*)_mem2;
     unsigned      u;
     hid_t         memb_type;
     size_t        type_size;
+    H5T_sign_t    type_sign;
+    H5T_class_t   type_class;
     size_t        offset;
     int           nmembs;
     int           j;
@@ -425,6 +444,10 @@ hsize_t diff_datum(void       *_mem1,
     int           both_zero;
 
     type_size = H5Tget_size( m_type );
+    type_class = H5Tget_class(m_type);
+
+    if (type_class!=H5T_REFERENCE && HDmemcmp(mem1, mem2, type_size)==0)
+        return 0;
 
     switch (H5Tget_class(m_type))
     {
@@ -441,14 +464,14 @@ hsize_t diff_datum(void       *_mem1,
     */
     case H5T_COMPOUND:
 
-        nmembs = H5Tget_nmembers(m_type);
+        nmembs = members->n;
 
         for (j = 0; j < nmembs; j++)
         {
-            offset    = H5Tget_member_offset(m_type, (unsigned)j);
-            memb_type = H5Tget_member_type(m_type, (unsigned)j);
+            offset    = members->offsets[j];
+            memb_type = members->ids[j];
             /* if member type is vlen string */
-            if(H5Tis_variable_str(memb_type))
+            if(members->flags[j])
             {
                 nfound+=diff_datum(
                     ((unsigned char**)mem1)[j],
@@ -464,7 +487,7 @@ hsize_t diff_datum(void       *_mem1,
                     obj2,
                     container1_id,
                     container2_id,
-                    ph);
+                    ph, NULL);
             }
             else
             {
@@ -482,9 +505,8 @@ hsize_t diff_datum(void       *_mem1,
                     obj2,
                     container1_id,
                     container2_id,
-                    ph);
+                    ph, members->m[j]);
             }
-            H5Tclose(memb_type);
         }
         break;
 
@@ -504,8 +526,11 @@ hsize_t diff_datum(void       *_mem1,
             /* check for NULL pointer for string */
             if(s!=NULL)
             {
-                if(H5Tis_variable_str(m_type))
+                if(H5Tis_variable_str(m_type)) {
                     size = HDstrlen(s);
+                    if (HDmemcmp(mem1, mem2, size)==0)
+                        break;
+                }
                 else
                     size = H5Tget_size(m_type);
 
@@ -671,7 +696,7 @@ hsize_t diff_datum(void       *_mem1,
                     obj2,
                     container1_id,
                     container2_id,
-                    ph);
+                    ph, NULL);
                 }
                 else
                 {
@@ -689,7 +714,7 @@ hsize_t diff_datum(void       *_mem1,
                     obj2,
                     container1_id,
                     container2_id,
-                    ph);
+                    ph, NULL);
                 }
            }
             H5Tclose(memb_type);
@@ -719,8 +744,7 @@ hsize_t diff_datum(void       *_mem1,
         * Dataset region reference
         *-------------------------------------------------------------------------
             */
-
-            if (H5Tequal(m_type, H5T_STD_REF_DSETREG))
+            if (type_size==H5R_DSET_REG_REF_BUF_SIZE)
             {
                 hid_t  region1_id;
                 hid_t  region2_id;
@@ -754,7 +778,7 @@ hsize_t diff_datum(void       *_mem1,
             * Object references. get the type and OID of the referenced object
             *-------------------------------------------------------------------------
             */
-            else if (H5Tequal(m_type, H5T_STD_REF_OBJ))
+            else if (type_size == H5R_OBJ_REF_BUF_SIZE)
             {
                 H5O_type_t     obj1_type;
                 H5O_type_t     obj2_type;
@@ -838,7 +862,7 @@ hsize_t diff_datum(void       *_mem1,
             obj2,
             container1_id,
             container2_id,
-            ph);
+            ph, NULL);
 
         H5Tclose(memb_type);
 
@@ -852,13 +876,13 @@ hsize_t diff_datum(void       *_mem1,
     */
 
     case H5T_INTEGER:
-
+        type_sign = H5Tget_sign(m_type);
 
        /*-------------------------------------------------------------------------
         * H5T_NATIVE_SCHAR
         *-------------------------------------------------------------------------
         */
-        if (H5Tequal(m_type, H5T_NATIVE_SCHAR))
+        if (type_size==1 && type_sign!=H5T_SGN_NONE)
         {
             char        temp1_char;
             char        temp2_char;
@@ -954,7 +978,7 @@ hsize_t diff_datum(void       *_mem1,
         * H5T_NATIVE_UCHAR
         *-------------------------------------------------------------------------
         */
-        else if (H5Tequal(m_type, H5T_NATIVE_UCHAR))
+        else if (type_size==1 && type_sign==H5T_SGN_NONE)
         {
             unsigned char      temp1_uchar;
             unsigned char      temp2_uchar;
@@ -1053,7 +1077,7 @@ hsize_t diff_datum(void       *_mem1,
         *-------------------------------------------------------------------------
         */
 
-        else if (H5Tequal(m_type, H5T_NATIVE_SHORT))
+        else if (type_size==2 && type_sign!=H5T_SGN_NONE)
         {
             short       temp1_short;
             short       temp2_short;
@@ -1152,7 +1176,7 @@ hsize_t diff_datum(void       *_mem1,
         *-------------------------------------------------------------------------
         */
 
-        else if (H5Tequal(m_type, H5T_NATIVE_USHORT))
+        else if (type_size==2 && type_sign==H5T_SGN_NONE)
         {
             unsigned short       temp1_ushort;
             unsigned short       temp2_ushort;
@@ -1252,7 +1276,7 @@ hsize_t diff_datum(void       *_mem1,
         *-------------------------------------------------------------------------
         */
 
-        else if (H5Tequal(m_type, H5T_NATIVE_INT))
+        else if (type_size==4 && type_sign!=H5T_SGN_NONE)
         {
             int         temp1_int;
             int         temp2_int;
@@ -1350,7 +1374,7 @@ hsize_t diff_datum(void       *_mem1,
         *-------------------------------------------------------------------------
         */
 
-        else if (H5Tequal(m_type, H5T_NATIVE_UINT))
+        else if (type_size==4 && type_sign==H5T_SGN_NONE)
         {
             unsigned int         temp1_uint;
             unsigned int         temp2_uint;
@@ -1448,7 +1472,7 @@ hsize_t diff_datum(void       *_mem1,
         *-------------------------------------------------------------------------
         */
 
-        else if (H5Tequal(m_type, H5T_NATIVE_LONG))
+        else if (type_size==8 && type_sign!=H5T_SGN_NONE)
         {
             long        temp1_long;
             long        temp2_long;
@@ -1548,7 +1572,7 @@ hsize_t diff_datum(void       *_mem1,
         *-------------------------------------------------------------------------
         */
 
-        else if (H5Tequal(m_type, H5T_NATIVE_ULONG))
+        else if (type_size==8 && type_sign==H5T_SGN_NONE)
         {
             unsigned long        temp1_ulong;
             unsigned long        temp2_ulong;
@@ -1647,7 +1671,7 @@ hsize_t diff_datum(void       *_mem1,
         *-------------------------------------------------------------------------
         */
 
-        else if (H5Tequal(m_type, H5T_NATIVE_LLONG))
+        else if (type_size==8 && type_sign!=H5T_SGN_NONE)
         {
             long long        temp1_llong;
             long long        temp2_llong;
@@ -1745,7 +1769,7 @@ hsize_t diff_datum(void       *_mem1,
         *-------------------------------------------------------------------------
         */
 
-        else if (H5Tequal(m_type, H5T_NATIVE_ULLONG))
+        else if (type_size==8 && type_sign==H5T_SGN_NONE)
         {
             unsigned long long        temp1_ullong;
             unsigned long long        temp2_ullong;
@@ -1862,7 +1886,7 @@ hsize_t diff_datum(void       *_mem1,
         * H5T_NATIVE_FLOAT
         *-------------------------------------------------------------------------
         */
-        if (H5Tequal(m_type, H5T_NATIVE_FLOAT))
+        if (type_size==4)
         {
             float temp1_float;
             float temp2_float;
@@ -2075,7 +2099,7 @@ hsize_t diff_datum(void       *_mem1,
         *-------------------------------------------------------------------------
         */
 
-        else if (H5Tequal(m_type, H5T_NATIVE_DOUBLE))
+        else if (type_size==8)
         {
             double temp1_double;
             double temp2_double;
@@ -2291,7 +2315,7 @@ hsize_t diff_datum(void       *_mem1,
         *-------------------------------------------------------------------------
         */
 
-        else if (H5Tequal(m_type, H5T_NATIVE_LDOUBLE))
+        else if (type_size==8)
         {
             long double temp1_double;
             long double temp2_double;
@@ -6046,3 +6070,62 @@ static void h5diff_print_char(char ch)
         break;
     }
 }
+
+
+/*-------------------------------------------------------------------------
+ * XCAO, 11/10/2010
+ * added to improve performance for compound datasets
+ * set up compound datatype structures.
+ */
+static void set_comp_members(hid_t tid, mcomp_t *members)
+{
+    if (tid <=0 || !members)
+        return;
+
+    if (H5Tget_class(tid) != H5T_COMPOUND)
+        return;
+
+    members->n = H5Tget_nmembers( tid );
+    if (members->n <=0)
+        return;
+
+    members->ids = HDcalloc(members->n, sizeof(hid_t));
+    members->flags = HDcalloc(members->n, sizeof(unsigned char));
+    members->offsets = HDcalloc(members->n, sizeof(size_t));
+    members->m = HDcalloc(members->n, sizeof(mcomp_t *));
+   
+    for (int i=0; i< members->n; i++) {
+         members->ids[i] = H5Tget_member_type( tid, i );
+         members->flags[i] = H5Tis_variable_str( members->ids[i] );
+         members->offsets[i] = H5Tget_member_offset( tid, i );
+         if (H5Tget_class( members->ids[i])==H5T_COMPOUND) {
+              members->m[i] = (mcomp_t *)HDmalloc(sizeof(mcomp_t));
+              set_comp_members(members->ids[i], members->m[i]);
+         }
+    }
+}
+
+/*-------------------------------------------------------------------------
+ * XCAO, 11/10/2010
+ * added to improve performance for compound datasets
+ * clean and close compound members.
+ */
+static void free_comp_members(mcomp_t *members) 
+{
+    if (!members || members->n<=0 || !members->ids)
+        return;
+
+    for (int i=0; i<members->n; i++) {
+        if (members->m[i]) {
+            free_comp_members(members->m[i]);
+            HDfree(members->m[i]);
+        }
+        H5Tclose(members->ids[i]);
+    }
+
+    HDfree (members->m);
+    HDfree (members->ids);
+    HDfree (members->flags);
+    HDfree (members->offsets);
+}
+

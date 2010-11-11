@@ -172,6 +172,18 @@ int         print_objname(diff_opt_t *options, hsize_t nfound);
 void        do_print_objname (const char *OBJ, const char *path1, const char *path2);
 
 
+/*-------------------------------------------------------------------------
+ * XCAO, 11/10/2010
+ * added to improve performance for compound datasets
+ */
+typedef struct mcomp_t
+{
+    int             n;      /* number of members */
+    hid_t           *ids;   /* member type id */
+    unsigned char   *flags; 
+    size_t          *offsets;   
+    struct mcomp_t  **m;     /* members */
+}mcomp_t;
 
 hsize_t diff_datum(void       *_mem1,
                    void       *_mem2,
@@ -186,7 +198,8 @@ hsize_t diff_datum(void       *_mem1,
                    const char *obj2,
                    hid_t      container1_id,
                    hid_t      container2_id, /*where the reference came from*/
-                   int        *ph);           /*print header */
+                   int        *ph,           /*print header */
+                   mcomp_t    *members);      /*compound members */
 
 
 
