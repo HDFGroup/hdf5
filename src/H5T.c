@@ -5298,6 +5298,8 @@ H5Tflush(hid_t type_id)
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(!H5T_is_named(dt))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
 
     /* Call private function to flush datatype object */
     if (H5O_flush_metadata(&dt->oloc, H5AC_dxpl_id) < 0)
@@ -5332,6 +5334,8 @@ H5Trefresh(hid_t type_id)
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(!H5T_is_named(dt))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
 
     /* Call private function to refresh datatype object */
     if ((H5O_refresh_metadata(type_id, dt->oloc, H5AC_dxpl_id)) < 0)

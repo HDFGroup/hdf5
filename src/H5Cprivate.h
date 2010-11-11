@@ -92,15 +92,23 @@
 
 typedef struct H5C_t H5C_t;
 
-/* Define metadata tag 'globality' values */
-#define H5C_GLOBALITY_NONE  0
-#define H5C_GLOBALITY_MINOR 1
-#define H5C_GLOBALITY_MAJOR 2
+/* Cache entry tag structure */
+typedef struct H5C_tag_t {
+    haddr_t value;
+    int globality;
+} H5C_tag_t;
 
-/* Definitions for metadata tag 'globality' property */
-#define H5C_GLOBALITY_NAME "H5C_tag_globality"
-#define H5C_GLOBALITY_SIZE  sizeof(int)
-#define H5C_GLOBALITY_DEF   H5C_GLOBALITY_NONE
+/* Define enum for cache entry tag 'globality' value */
+typedef enum {
+    H5C_GLOBALITY_NONE=0, /* Non-global tag */
+    H5C_GLOBALITY_MINOR,  /* global, not flushed during single object flush */
+    H5C_GLOBALITY_MAJOR   /* global, needs flushed during single obect flush */
+} H5C_tag_globality_t;
+
+/* Definitions for cache "tag" property */
+#define H5C_TAG_NAME           "H5C_tag"
+#define H5C_TAG_SIZE           sizeof(H5C_tag_t)
+#define H5C_TAG_DEF            {(haddr_t)0, H5C_GLOBALITY_NONE}
 
 /*
  * Class methods pertaining to caching.	 Each type of cached object will
@@ -1219,7 +1227,7 @@ H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr,
 
 H5_DLL herr_t H5C_ignore_tags(H5C_t * cache_ptr);
 
-H5_DLL void H5C_retag_metadata(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag);
+H5_DLL void H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag);
 
 #endif /* !_H5Cprivate_H */
 

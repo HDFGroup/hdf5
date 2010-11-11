@@ -195,8 +195,7 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
     hid_t def_vfl_id = H5D_XFER_VFL_ID_DEF;                     /* Default value for file driver ID */
     void *def_vfl_info = H5D_XFER_VFL_INFO_DEF;                 /* Default value for file driver info */
     size_t def_hyp_vec_size = H5D_XFER_HYPER_VECTOR_SIZE_DEF;   /* Default value for vector size */
-    haddr_t metadata_tag = H5AC_METADATA_TAG_DEF;               /* Default value for metadata tag */
-    int globality = H5C_GLOBALITY_DEF;                          /* Default value for metadata tag globality value */
+    H5C_tag_t tag = H5C_TAG_DEF;                                /* Default value for cache entry tag */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t def_io_xfer_mode = H5D_XFER_IO_XFER_MODE_DEF;      /* Default value for I/O transfer mode */
     H5FD_mpio_chunk_opt_t def_mpio_chunk_opt_mode = H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF;
@@ -216,12 +215,8 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5D_XFER_MAX_TEMP_BUF_NAME, H5D_XFER_MAX_TEMP_BUF_SIZE, &def_max_temp_buf, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the metadata tag property */
-    if(H5P_register_real(pclass, H5AC_METADATA_TAG_NAME, H5AC_METADATA_TAG_SIZE, &metadata_tag, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the tag globality property */
-    if(H5P_register_real(pclass, H5C_GLOBALITY_NAME, H5C_GLOBALITY_SIZE, &globality, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    /* Register the cache tag property */
+    if(H5P_register_real(pclass, H5C_TAG_NAME, H5C_TAG_SIZE, &tag, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the type conversion buffer property */

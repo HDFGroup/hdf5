@@ -2592,7 +2592,7 @@ H5C_insert_entry(H5F_t *             f,
  
     /* Apply tag to newly inserted entry */
     if(H5C_tag_entry(cache_ptr, entry_ptr, primary_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "Cannot tag metadata entry")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "Cannot tag entry")
 
     entry_ptr->is_protected = FALSE;
     entry_ptr->is_read_only = FALSE;
@@ -3609,9 +3609,6 @@ H5C_protect(H5F_t *		f,
     size_t		empty_space;
     void *		thing;
     H5C_cache_entry_t *	entry_ptr;
-    haddr_t     tag = HADDR_UNDEF;
-    int         globality = -1;
-    H5P_genplist_t *dxpl;    /* dataset transfer property list */
     void *		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_protect, NULL)
@@ -3672,7 +3669,7 @@ H5C_protect(H5F_t *		f,
 
         /* Apply tag to newly protected entry */
         if(H5C_tag_entry(cache_ptr, entry_ptr, primary_dxpl_id) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, NULL, "Cannot tag metadata entry")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, NULL, "Cannot tag entry")
 
         /* If the entry is very large, and we are configured to allow it,
          * we may wish to perform a flash cache size increase.
@@ -9081,7 +9078,7 @@ done:
  * Function:    H5C_ignore_tags
  *
  * Purpose:     Override all assertion frameworks associated with making
- *              sure proper tags are applied to metadata. 
+ *              sure proper tags are applied to cache entries. 
  *
  *              NOTE: This should really only be used in tests that need 
  *              to access internal functions without going through 
@@ -9089,7 +9086,7 @@ done:
  *              before coming into the cache, any external functions that
  *              use the internal library functions (i.e., tests) should
  *              use this function if they don't plan on setting up proper
- *              metadata tags.
+ *              tags.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
@@ -9136,8 +9133,7 @@ static herr_t
 H5C_tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
 {
     H5P_genplist_t *dxpl;       /* dataset transfer property list */
-    haddr_t tag;                /* Tag address */
-    int globality;              /* Tag globality */
+    H5C_tag_t tag;              /* Tag structure */
     hid_t ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_tag_entry, FAIL)
@@ -9152,18 +9148,14 @@ H5C_tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get the tag from the DXPL */
-    if((H5P_get(dxpl, "H5AC_metadata_tag", &tag)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value")
-
-    /* Get globality from the DXPL */
-    if((H5P_get(dxpl, "H5C_tag_globality", &globality)) < 0)
+    if((H5P_get(dxpl, "H5C_tag", &tag)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value")
 
     /* Apply the tag to the entry */
-    entry_ptr->tag = tag;
+    entry_ptr->tag = tag.value;
 
     /* Apply the tag globality to the entry */
-    entry_ptr->globality = globality;
+    entry_ptr->globality = tag.globality;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9284,9 +9276,7 @@ H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag, hbool_t mark_clean)
 {
     /* Variable Declarations */
     int u;                          /* Iterator */
-    herr_t result;                  /* Result */
     H5C_cache_entry_t *entry_ptr = NULL; /* entry pointer */
-    herr_t ret_value = SUCCEED;     /* Return Value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C_mark_tagged_entries)
 
@@ -9472,7 +9462,7 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_retag_metadata
+ * Function:    H5C_retag_entries
  *
  * Purpose:     Searches through cache index for all entries with the
  *              value specified by src_tag and changes it to the value
@@ -9486,12 +9476,12 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5C_retag_metadata(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag) 
+H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag) 
 {
     unsigned u;         /* Local index variable */
     H5C_cache_entry_t *entry_ptr = NULL; /* entry pointer */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5C_retag_metadata)
+    FUNC_ENTER_NOAPI_NOFUNC(H5C_retag_entries)
 
     /* Iterate through entries, retagging those with the src_tag tag */
     for(u = 0; u < H5C__HASH_TABLE_LEN; u++) {
@@ -9507,5 +9497,5 @@ H5C_retag_metadata(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag)
     } /* end for */
 
     FUNC_LEAVE_NOAPI_VOID
-} /* H5C_retag_metadata */
+} /* H5C_retag_entries */
 
