@@ -282,22 +282,21 @@ ENDIF (H5_HAVE_STDINT_H AND CMAKE_CXX_COMPILER_LOADED)
 #  Check for large file support
 #-----------------------------------------------------------------------------
 
+# The linux-lfs option is deprecated.
 SET (LINUX_LFS 0)
+
 SET (HDF5_EXTRA_FLAGS)
 IF (CMAKE_SYSTEM MATCHES "Linux-([3-9]\\.[0-9]|2\\.[4-9])\\.")
   # Linux Specific flags
-  ADD_DEFINITIONS (-D_POSIX_SOURCE -D_BSD_SOURCE)
+  SET (HDF5_EXTRA_FLAGS -D_POSIX_SOURCE -D_BSD_SOURCE)
   OPTION (HDF5_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
   IF (HDF5_ENABLE_LARGE_FILE)
     SET (LARGEFILE 1)
-    SET (HDF5_EXTRA_FLAGS -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
-    SET (CMAKE_REQUIRED_DEFINITIONS ${HDF5_EXTRA_FLAGS})
+    SET (HDF5_EXTRA_FLAGS ${HDF5_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
   ENDIF (HDF5_ENABLE_LARGE_FILE)
+  SET (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${HDF5_EXTRA_FLAGS})
 ENDIF (CMAKE_SYSTEM MATCHES "Linux-([3-9]\\.[0-9]|2\\.[4-9])\\.")
-IF (LINUX_LFS)
-  SET (HDF5_EXTRA_FLAGS -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
-  SET (CMAKE_REQUIRED_DEFINITIONS ${HDF5_EXTRA_FLAGS})
-ENDIF (LINUX_LFS)
+
 ADD_DEFINITIONS (${HDF5_EXTRA_FLAGS})
 
 #-----------------------------------------------------------------------------
@@ -419,6 +418,15 @@ CHECK_FUNCTION_EXISTS (fstat64           H5_HAVE_FSTAT64)
 CHECK_FUNCTION_EXISTS (stat64            H5_HAVE_STAT64)
 
 #-----------------------------------------------------------------------------
+# sigsetjmp is special; may actually be a macro
+IF (NOT H5_HAVE_SIGSETJMP)
+  IF (H5_HAVE_SETJMP_H)
+    CHECK_SYMBOL_EXISTS (sigsetjmp "setjmp.h" H5_HAVE_MACRO_SIGSETJMP)
+    IF (H5_HAVE_MACRO_SIGSETJMP)
+      SET (H5_HAVE_SIGSETJMP 1)
+    ENDIF (H5_HAVE_MACRO_SIGSETJMP)
+  ENDIF (H5_HAVE_SETJMP_H)
+ENDIF (NOT H5_HAVE_SIGSETJMP)
 
 #-----------------------------------------------------------------------------
 #  Since gettimeofday is not defined any where standard, lets look in all the
@@ -506,11 +514,11 @@ MACRO (HDF5_FUNCTION_TEST OTHER_TEST)
       ENDIF ("${def}")
     ENDFOREACH (def)
 
-    IF (LINUX_LFS)
+    IF (LARGEFILE)
       SET (MACRO_CHECK_FUNCTION_DEFINITIONS
           "${MACRO_CHECK_FUNCTION_DEFINITIONS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE"
       )
-    ENDIF (LINUX_LFS)
+    ENDIF (LARGEFILE)
 
     # (STATUS "Performing ${OTHER_TEST}")
     TRY_COMPILE (${OTHER_TEST}
