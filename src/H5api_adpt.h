@@ -284,7 +284,7 @@
 #else
 /* This is the original HDFGroup defined preprocessor code which should still work
  * with the VS projects that are maintained by "The HDF Group"
- * This will be removed after the next release.
+ * The Visual Studio project files will not be supported in the next major release of 1.10.
  */
 
 #if defined(_WIN32)
