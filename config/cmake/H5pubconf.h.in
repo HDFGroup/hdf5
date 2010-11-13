@@ -638,7 +638,7 @@
 #define H5_SIZEOF_OFF_T @H5_SIZEOF_OFF_T@
 
 /* The size of `ptrdiff_t', as computed by sizeof. */
-#define H5_SIZEOF_PTRDIFF_T @H5_SIZEOF_PTRDIFF_T@
+/* #define H5_SIZEOF_PTRDIFF_T @H5_SIZEOF_PTRDIFF_T@ */
 
 /* The size of `short', as computed by sizeof. */
 #define H5_SIZEOF_SHORT @H5_SIZEOF_SHORT@
