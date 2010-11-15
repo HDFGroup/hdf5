@@ -55,16 +55,17 @@ SET (HDF5_REFERENCE_FILES
     err_compat_2
     error_test_1
     error_test_2
+    links_env.out
 )
 
 FOREACH (ref_file ${HDF5_REFERENCE_FILES})
-  SET (dest "${PROJECT_BINARY_DIR}/testfiles/${ref_file}")
+  SET (dest "${PROJECT_BINARY_DIR}/${ref_file}")
   #MESSAGE (STATUS " Copying ${h5_file}")
   ADD_CUSTOM_COMMAND (
       TARGET     ${HDF5_TEST_LIB_TARGET}
       POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file} ${dest}
+      COMMAND    ${XLATE_UTILITY}
+      ARGS       ${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file} ${dest} -l3
   )
 ENDFOREACH (ref_file ${HDF5_REFERENCE_FILES})
 
@@ -287,7 +288,7 @@ SET (H5_TESTS
     err_compat
     tcheck_version
     testmeta
-    links_env
+    #links_env
 )
 
 FOREACH (test ${H5_TESTS})
@@ -337,6 +338,40 @@ TARGET_WIN_PROPERTIES (ttsafe)
 TARGET_LINK_LIBRARIES (ttsafe ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME ttsafe COMMAND $<TARGET_FILE:ttsafe>)
+
+#-- Adding test for error_test
+#ADD_EXECUTABLE (error_test ${HDF5_TEST_SOURCE_DIR}/error_test.c)
+#H5_NAMING (error_test)
+#TARGET_WIN_PROPERTIES (error_test)
+#TARGET_LINK_LIBRARIES (error_test ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+#
+#ADD_TEST (NAME error_test COMMAND "${CMAKE_COMMAND}"
+#    -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
+#    -D "TEST_ARGS:STRING="
+#    -D "TEST_EXPECT=0"
+#    -D "TEST_OUTPUT=error_test.txt"
+#    -D "TEST_REFERENCE=error_test1"
+#    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+#    -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+#)
+
+#-- Adding test for links_env
+ADD_EXECUTABLE (links_env ${HDF5_TEST_SOURCE_DIR}/links_env.c)
+H5_NAMING (links_env)
+TARGET_WIN_PROPERTIES (links_env)
+TARGET_LINK_LIBRARIES (links_env ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+ADD_TEST (NAME links_env COMMAND "${CMAKE_COMMAND}"
+    -D "TEST_PROGRAM=$<TARGET_FILE:links_env>"
+    -D "TEST_ARGS:STRING="
+    -D "TEST_ENV_VAR:STRING=HDF5_EXT_PREFIX"
+    -D "TEST_ENV_VALUE:STRING=.:tmp"
+    -D "TEST_EXPECT=0"
+    -D "TEST_OUTPUT=links_env.txt"
+    -D "TEST_REFERENCE=links_env.out"
+    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+    -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+)
 
 IF (HDF5_TEST_VFD)
 

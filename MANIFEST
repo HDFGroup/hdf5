@@ -954,6 +954,7 @@
 ./test/testfiles/err_compat_2
 ./test/testfiles/error_test_1
 ./test/testfiles/error_test_2
+./test/testfiles/links_env.out
 
 ./testpar/COPYING
 ./testpar/Makefile.am

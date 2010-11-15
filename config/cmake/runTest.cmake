@@ -28,6 +28,10 @@ SET (ERROR_APPEND 1)
 
 MESSAGE (STATUS "COMMAND: ${TEST_PROGRAM} ${TEST_ARGS}")
 
+IF (TEST_ENV_VAR)
+  SET (ENV{${TEST_ENV_VAR}} "${TEST_ENV_VALUE}") 
+ENDIF (TEST_ENV_VAR)
+
 # run the test program, capture the stdout/stderr and the result var
 EXECUTE_PROCESS (
     COMMAND ${TEST_PROGRAM} ${TEST_ARGS}
