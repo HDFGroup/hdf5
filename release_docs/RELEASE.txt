@@ -118,16 +118,16 @@ Bug Fixes since HDF5-1.8.5
 
     Configuration
     -------------
-    - The default number of MPI processes for testing purpose is changed from
-      3 to 6.  (AKC - 2010/11/11)
-    - Another patch for AIX config file to have
+    - The default number of MPI processes for testing purposes has been 
+      changed from 3 to 6.  (AKC - 2010/11/11)
+    - Use this patch in the AIX config file when --enable-parallel is requested:
         RUNSERIAL=${RUNSERIAL="env LDR_CNTRL=MAXDATA=0x20000000@DSA MP_PROCS=1
-	MP_TASKS_PER_NODE=1 poe"}
-      when --enable-parallel is requested. (AKC - 2010/10/7)
-    - Some tests in tools/h5repack may fail in AIX systems when -q32 mode is
-      used. The error is due to insufficient memory requested. A temporary
-      patch is applied to the AIX config file to have
-	 RUNSERIAL=${RUNSERIAL="env LDR_CNTRL=MAXDATA=0x20000000@DSA"}
+        MP_TASKS_PER_NODE=1 poe"}
+      (AKC - 2010/10/7)
+    - Some tests in tools/h5repack may fail in AIX systems when -q32 mode is 
+      used. The error is caused by not requesting enough memory. Use this 
+      patch in the AIX config file: 
+        RUNSERIAL=${RUNSERIAL="env LDR_CNTRL=MAXDATA=0x20000000@DSA"}
       (AKC - 2010/8/25)
     - Removed recognition of the parallel compilers of LAM(hcc) and
       ChMPIon(cmpicc) since we have no access to these two MPI implementations
@@ -168,8 +168,8 @@ Bug Fixes since HDF5-1.8.5
     - Fixed many memory issues that valgrind exposed.  (QAK - 2010/08/24)
     - Fixed the bug in the filter's public CAN_APPLY function.  The return
       value should be htri_t not herr_t. (SLU - 2010/08/05 - Bug 1239)
-    - Fixed the STDIO VFD to use fseeko64 (instead of fseek64) for 64bits
-      I/O support. (AKC - 2010/7/30)
+    - Fixed the STDIO VFD to use fseeko64 instead of fseek64 for 64-bit I/O 
+      support. (AKC - 2010/7/30)
     - Fixed a bug in the direct I/O driver that could render files with certain
       kinds of unaligned data unreadable or corrupt them. (NAF - 2010/07/28)
     - valgrind reported an error of copying data to itself when a new attribute 
@@ -434,12 +434,12 @@ Known Problems
   a compound type dataset are compared. This also occurs with variable-length 
   string arrays in a compound type dataset. See bug #1989. This will be fixed 
   in the next release. JKM - 2010/11/05
-
-* The AIX --enable-shared does not quite work. It can produce shared library
-  but there cannot be more than one shared libraries that interlinking with
-  each other. That means only C-API without High-level can work. Not very
-  usefule. We hope to have a solution in the next release. (AKC - 2010/10/15)
-
+* The AIX --enable-shared setting does not quite work. It can produce a shared 
+  library, but there cannot be more than one shared library that is 
+  interlinked. This means that the high level APIs will not work which is not 
+  very useful. We hope to have a solution in the next release. 
+  (AKC - 2010/10/15)
+  
 * H5Eset_auto can cause a seg fault for a library API call if the application
   compiles with -DH5_USE_16_API (see bug 1707).  It will be fixed in the 
   next release. SLU - 2010/10/5
