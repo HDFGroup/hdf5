@@ -834,6 +834,7 @@
 ./test/external.c
 ./test/error_test.c
 ./test/err_compat.c
+./test/links_env.c
 ./test/family_v16_00000.h5
 ./test/family_v16_00001.h5
 ./test/family_v16_00002.h5
@@ -905,6 +906,7 @@
 ./test/tcoords.c
 ./test/testcheck_version.sh.in
 ./test/testerror.sh.in
+./test/testlinks_env.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h

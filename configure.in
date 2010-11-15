@@ -4285,6 +4285,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testerror.sh
                  test/H5srcdir_str.h
                  test/testlibinfo.sh
+                 test/testlinks_env.sh
                  testpar/Makefile
                  testpar/testph5.sh
                  perform/Makefile

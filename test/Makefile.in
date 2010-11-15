@@ -55,10 +55,11 @@ host_triplet = @host@
 DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/testcheck_version.sh.in \
 	$(srcdir)/testerror.sh.in $(srcdir)/testlibinfo.sh.in \
-	$(top_srcdir)/config/commence.am \
+	$(srcdir)/testlinks_env.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
-	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT)
+	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT) \
+	links_env$(EXEEXT)
 @BUILD_ALL_CONDITIONAL_TRUE@noinst_PROGRAMS = $(am__EXEEXT_2)
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 subdir = test
@@ -69,7 +70,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testcheck_version.sh testerror.sh H5srcdir_str.h \
-	testlibinfo.sh
+	testlibinfo.sh testlinks_env.sh
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_la_LIBADD =
@@ -298,6 +299,10 @@ links_SOURCES = links.c
 links_OBJECTS = links.$(OBJEXT)
 links_LDADD = $(LDADD)
 links_DEPENDENCIES = libh5test.la $(LIBHDF5)
+links_env_SOURCES = links_env.c
+links_env_OBJECTS = links_env.$(OBJEXT)
+links_env_LDADD = $(LDADD)
+links_env_DEPENDENCIES = libh5test.la $(LIBHDF5)
 mf_SOURCES = mf.c
 mf_OBJECTS = mf.$(OBJEXT)
 mf_LDADD = $(LDADD)
@@ -399,8 +404,8 @@ SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c bittests.c \
 	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
 	gen_noencoder.c gen_nullspace.c gen_sizes_lheap.c \
 	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
-	istore.c lheap.c links.c mf.c mount.c mtime.c ntypes.c \
-	objcopy.c ohdr.c pool.c reserved.c set_extent.c \
+	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
+	ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c \
 	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
 	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c \
@@ -414,8 +419,8 @@ DIST_SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c \
 	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
 	gen_nullspace.c gen_sizes_lheap.c gen_specmetaread.c \
 	gen_udlinks.c getname.c gheap.c hyperslab.c istore.c lheap.c \
-	links.c mf.c mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c \
-	reserved.c set_extent.c space_overflow.c stab.c \
+	links.c links_env.c mf.c mount.c mtime.c ntypes.c objcopy.c \
+	ohdr.c pool.c reserved.c set_extent.c space_overflow.c stab.c \
 	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
 	$(ttsafe_SOURCES) unlink.c vfd.c
 ETAGS = etags
@@ -723,9 +728,9 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
@@ -778,7 +783,7 @@ testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 
 
 # Temporary files.
-DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh
+DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh testlinks.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -836,6 +841,8 @@ testerror.sh: $(top_builddir)/config.status $(srcdir)/testerror.sh.in
 H5srcdir_str.h: $(top_builddir)/config.status $(srcdir)/H5srcdir_str.h.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testlibinfo.sh: $(top_builddir)/config.status $(srcdir)/testlibinfo.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testlinks_env.sh: $(top_builddir)/config.status $(srcdir)/testlinks_env.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-noinstLTLIBRARIES:
@@ -1016,6 +1023,9 @@ lheap$(EXEEXT): $(lheap_OBJECTS) $(lheap_DEPENDENCIES)
 links$(EXEEXT): $(links_OBJECTS) $(links_DEPENDENCIES) 
 	@rm -f links$(EXEEXT)
 	$(LINK) $(links_OBJECTS) $(links_LDADD) $(LIBS)
+links_env$(EXEEXT): $(links_env_OBJECTS) $(links_env_DEPENDENCIES) 
+	@rm -f links_env$(EXEEXT)
+	$(LINK) $(links_env_OBJECTS) $(links_env_LDADD) $(LIBS)
 mf$(EXEEXT): $(mf_OBJECTS) $(mf_DEPENDENCIES) 
 	@rm -f mf$(EXEEXT)
 	$(LINK) $(mf_OBJECTS) $(mf_LDADD) $(LIBS)
@@ -1126,6 +1136,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/istore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/links.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/links_env.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mount.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtime.Po@am__quote@

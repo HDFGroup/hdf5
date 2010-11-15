@@ -287,6 +287,7 @@ SET (H5_TESTS
     err_compat
     tcheck_version
     testmeta
+    links_env
 )
 
 FOREACH (test ${H5_TESTS})
@@ -398,6 +399,7 @@ IF (HDF5_TEST_VFD)
       err_compat
       tcheck_version
       testmeta
+      links_env
 )
   
   IF (DIRECT_VFD)
