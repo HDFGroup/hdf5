@@ -30,7 +30,12 @@ fi
 
 # test for external links with HDF5_EXT_PREFIX
 echo "Testing external link with HDF5_EXT_PREFIX"
-env "HDF5_EXT_PREFIX=.:tmp" links_env
+TEST_NAME=links_env 		# The test name
+TEST_BIN=`pwd`/$TEST_NAME 	# The path of the test binary
+ENVCMD="env HDF5_EXT_PREFIX=.:tmp" 	# The environment variable & value
+#
+# Run the test
+$ENVCMD $TEST_BIN
 exitcode=$?
 if [ $exitcode -eq 0 ]; then
         echo "Test for HDF5_EXT_PREFIX PASSED"
