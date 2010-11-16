@@ -608,6 +608,12 @@ IF (BUILD_TESTING)
           h5diff_90.out.err
   )
 
+  # If using memchecker add tests without using scripts
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    ADD_TEST (NAME H5DIFF-help COMMAND h5diff -h)
+    ADD_TEST (NAME H5DIFF-normal-mode COMMAND h5diff ${FILE1} ${FILE2})
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
 # ############################################################################
 # # Common usage
 # ############################################################################

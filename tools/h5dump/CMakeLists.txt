@@ -692,6 +692,15 @@ IF (BUILD_TESTING)
           tvms.out.err
   )
 
+  # If using memchecker add tests without using scripts
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    ADD_TEST (NAME H5DUMP-tgroup COMMAND h5dump tgroup.h5)
+    ADD_TEST (NAME H5DUMP-tdset COMMAND h5dump tdset.h5)
+    ADD_TEST (NAME H5DUMP-tattr COMMAND h5dump tattr.h5)
+    ADD_TEST (NAME H5DUMP-tslink COMMAND h5dump tslink.h5)
+    ADD_TEST (NAME H5DUMP-thlink COMMAND h5dump thlink.h5)
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 tgroup.h5)
   # test for displaying the selected groups
@@ -1141,6 +1150,16 @@ IF (BUILD_TESTING)
   )
 
   ########## test XML
+
+  # If using memchecker add tests without using scripts
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    ADD_TEST (NAME H5DUMP-XML-tgroup COMMAND h5dump --xml tgroup.h5)
+    ADD_TEST (NAME H5DUMP-XML-tdset COMMAND h5dump --xml tdset.h5)
+    ADD_TEST (NAME H5DUMP-XML-tattr COMMAND h5dump --xml tattr.h5)
+    ADD_TEST (NAME H5DUMP-XML-tslink COMMAND h5dump --xml tslink.h5)
+    ADD_TEST (NAME H5DUMP-XML-thlink COMMAND h5dump --xml thlink.h5)
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
   ADD_XML_H5_TEST (tall.h5 0 tall.h5)
   ADD_XML_H5_TEST (tattr.h5 0 tattr.h5)
   ADD_XML_H5_TEST (tbitfields.h5 0 tbitfields.h5)

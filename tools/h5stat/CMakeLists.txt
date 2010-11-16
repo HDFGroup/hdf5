@@ -144,6 +144,12 @@ IF (BUILD_TESTING)
           h5stat_newgrat-UA.out.err
   )
 
+  # If using memchecker add tests without using scripts
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    ADD_TEST (NAME H5STAT-help COMMAND h5stat -h)
+    ADD_TEST (NAME H5STAT-filters COMMAND h5stat h5stat_filters.h5)
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
 # Test for help flag
   ADD_H5_TEST (h5stat_help1 0 -h)
   ADD_H5_TEST (h5stat_help2 0 --help)
