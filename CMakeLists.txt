@@ -271,9 +271,9 @@ ENDIF (BUILD_SHARED_LIBS)
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
 IF (HDF5_ENABLE_COVERAGE)
-    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-    SET (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")   
+  SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+  SET (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")   
 ENDIF (HDF5_ENABLE_COVERAGE)
 
 #-----------------------------------------------------------------------------
@@ -281,8 +281,18 @@ ENDIF (HDF5_ENABLE_COVERAGE)
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
 IF (HDF5_ENABLE_USING_MEMCHECKER)
-    SET (H5_USING_MEMCHECKER 1)   
+  SET (H5_USING_MEMCHECKER 1)   
 ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
+#-----------------------------------------------------------------------------
+# Option to use deprecated public API symbols
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols" ON)
+IF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
+  SET (H5_NO_DEPRECATED_SYMBOLS 0)   
+ELSE (HDF5_ENABLE_DEPRECATED_SYMBOLS)
+  SET (H5_NO_DEPRECATED_SYMBOLS 1)   
+ENDIF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
 
 #-----------------------------------------------------------------------------
 # When building utility executables that generate other (source) files :

@@ -284,8 +284,8 @@ SET (H5_TESTS
     earray
     btree2
     fheap
-    error_test
-    err_compat
+    #error_test
+    #err_compat
     tcheck_version
     testmeta
     #links_env
@@ -339,21 +339,41 @@ TARGET_LINK_LIBRARIES (ttsafe ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME ttsafe COMMAND $<TARGET_FILE:ttsafe>)
 
+#-- Adding test for err_compat
+IF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
+  ADD_EXECUTABLE (err_compat ${HDF5_TEST_SOURCE_DIR}/err_compat.c)
+  H5_NAMING (err_compat)
+  TARGET_WIN_PROPERTIES (err_compat)
+  TARGET_LINK_LIBRARIES (err_compat ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+  ADD_TEST (NAME err_compat COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:err_compat>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_MASK_ERROR=true"
+      -D "TEST_OUTPUT=err_compat.txt"
+      -D "TEST_REFERENCE=err_compat_1"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+      -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+  )
+ENDIF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
+
 #-- Adding test for error_test
-#ADD_EXECUTABLE (error_test ${HDF5_TEST_SOURCE_DIR}/error_test.c)
-#H5_NAMING (error_test)
-#TARGET_WIN_PROPERTIES (error_test)
-#TARGET_LINK_LIBRARIES (error_test ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-#
-#ADD_TEST (NAME error_test COMMAND "${CMAKE_COMMAND}"
-#    -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
-#    -D "TEST_ARGS:STRING="
-#    -D "TEST_EXPECT=0"
-#    -D "TEST_OUTPUT=error_test.txt"
-#    -D "TEST_REFERENCE=error_test1"
-#    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-#    -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
-#)
+ADD_EXECUTABLE (error_test ${HDF5_TEST_SOURCE_DIR}/error_test.c)
+H5_NAMING (error_test)
+TARGET_WIN_PROPERTIES (error_test)
+TARGET_LINK_LIBRARIES (error_test ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+ADD_TEST (NAME error_test COMMAND "${CMAKE_COMMAND}"
+    -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
+    -D "TEST_ARGS:STRING="
+    -D "TEST_EXPECT=0"
+    -D "TEST_MASK_ERROR=true"
+    -D "TEST_OUTPUT=error_test.txt"
+    -D "TEST_REFERENCE=error_test_1"
+    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+    -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+)
 
 #-- Adding test for links_env
 ADD_EXECUTABLE (links_env ${HDF5_TEST_SOURCE_DIR}/links_env.c)
