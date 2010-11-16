@@ -26,7 +26,7 @@ include $(top_srcdir)/config/commence.am
 TEST_PROG=ptExampleFL ptExampleVL
 
 # These are the example files to be installed
-INSTALL_FILES=ptExampleFL.cpp ptExampleVL.cpp
+INSTALL_FILES=ptExampleFL.cpp 
 INSTALL_SCRIPT_FILES = run-hlc++-ex.sh
 
 # Tell conclude.am that these are C++ tests.

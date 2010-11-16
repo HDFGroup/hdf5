@@ -26,14 +26,9 @@
 # use data files created by earlier test programs.  Any future additions should #
 # be placed accordingly.                                                        #
 #                                                                               #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-# Initializations
-EXIT_SUCCESS=0
-EXIT_FAILURE=1
 # Where the tool is installed.
 # Note: no '/' after DESTDIR.  Explanation in commence.am
-prefix="${prefix:-${DESTDIR}@prefix@}"
+prefix="${prefix:-../../../../}"
 AR="@AR@"
 RANLIB="@RANLIB@"
 H5TOOL="h5c++"                  # The tool name
@@ -62,8 +57,7 @@ RunTest()
 # Run tests
 if [ $? -eq 0 ]
 then
-    if (RunTest ptExampleFL &&\
-        RunTest ptExampleVL); then
+    if (RunTest ptExampleFL); then
         EXIT_VALUE=${EXIT_SUCCESS}
     else
         EXIT_VALUE=${EXIT_FAILURE}

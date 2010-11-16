@@ -627,42 +627,52 @@ uninstall-local:
 	@$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
 
 install-examples: $(EXAMPLEDIR) $(INSTALL_FILES) 
-	@for f in X $(INSTALL_FILES); do                                     \
-	  if test $$f != X; then                                             \
-	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
-	  fi;                                                                \
+	@for f in X $(INSTALL_FILES); do                                       \
+	  if test $$f != X; then                                               \
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);      \
+            chmod a-x $(EXAMPLEDIR)/$$f;                                       \
+	  fi;                                                                  \
 	done
-	@for f in X $(INSTALL_SCRIPT_FILES); do                                   \
-	  if test $$f != X; then                                             \
-	    (set -x; $(INSTALL) $$f $(EXAMPLEDIR)/. || exit 1);\
-	  fi;                                                                \
+	@for f in X $(INSTALL_SCRIPT_FILES); do                                \
+	  if test $$f != X; then                                               \
+	    (set -x; $(INSTALL) $$f $(EXAMPLEDIR)/. || exit 1);                \
+	  fi;                                                                  \
 	done
-	@for f in X $(INSTALL_TOP_SCRIPT_FILES); do                       \
-	  if test $$f != X; then                                             \
-	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLETOPDIR)/. || exit 1); \
-	  fi;                                                                \
+	@for f in X $(INSTALL_TOP_FILES); do                                   \
+	  if test $$f != X; then                                               \
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLETOPDIR)/. || exit 1);   \
+            chmod a-x $(EXAMPLETOPDIR)/$$f;\
+	  fi;                                                                  \
+	done
+	@for f in X $(INSTALL_TOP_SCRIPT_FILES); do                            \
+	  if test $$f != X; then                                               \
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLETOPDIR)/. || exit 1);   \
+	  fi;                                                                  \
 	done
 
 uninstall-examples:
-	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then             \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);                \
+	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then               \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);                  \
         fi
-	@if test -n "$(INSTALL_SCRIPT_FILES)" -a -d $(EXAMPLEDIR); then           \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_SCRIPT_FILES);              \
+	@if test -n "$(INSTALL_SCRIPT_FILES)" -a -d $(EXAMPLEDIR); then        \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_SCRIPT_FILES);           \
         fi
-	@if test -n "$(INSTALL_TOP_SCRIPT_FILES)" -a -d $(EXAMPLETOPDIR); then    \
-	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_SCRIPT_FILES);       \
+	@if test -n "$(INSTALL_TOP_FILES)" -a -d $(EXAMPLETOPDIR); then        \
+	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_FILES);           \
+        fi
+	@if test -n "$(INSTALL_TOP_SCRIPT_FILES)" -a -d $(EXAMPLETOPDIR); then \
+	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_SCRIPT_FILES);    \
         fi
 
 installcheck-local:
-	@if test "$(STATIC_SHARED)" = "static, shared"; then               \
-	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
-	  $(MAKE) $(AM_MAKEFLAGS) clean;                                   \
-	  H5CCFLAGS="" $(MAKE) $(AM_MAKEFLAGS) check;                      \
-	 elif test "$(STATIC_SHARED)" = "shared"; then                     \
-	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                \
-	 else                                                              \
-	  $(MAKE) $(AM_MAKEFLAGS) check;                                   \
+	@if test "$(STATIC_SHARED)" = "static, shared"; then                   \
+	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                    \
+	  $(MAKE) $(AM_MAKEFLAGS) clean;                                       \
+	  H5CCFLAGS="" $(MAKE) $(AM_MAKEFLAGS) check;                          \
+	 elif test "$(STATIC_SHARED)" = "shared"; then                         \
+	  H5CCFLAGS="-shlib" $(MAKE) $(AM_MAKEFLAGS) check;                    \
+	 else                                                                  \
+	  $(MAKE) $(AM_MAKEFLAGS) check;                                       \
 	 fi
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets

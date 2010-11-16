@@ -43,7 +43,7 @@ TEST_PROG = ex_lite1 ex_lite2 ex_lite3 ptExampleFL ptExampleVL \
 
 # Install files
 # List all file that should be installed in examples directory
-INSTALL_FILES = ex_lite1.c ex_lite2.c ex_lite3.c ptExampleFL.c ptExampleVL.c \
+INSTALL_FILES = ex_lite1.c ex_lite2.c ex_lite3.c ptExampleFL.c \
                 ex_image1.c ex_image2.c \
                 ex_table_01.c ex_table_02.c ex_table_03.c ex_table_04.c      \
                 ex_table_05.c ex_table_06.c ex_table_07.c ex_table_08.c      \

@@ -33,7 +33,7 @@ EXIT_FAILURE=1
 
 # Where the tool is installed.
 # Note: no '/' after DESTDIR.  Explanation in commence.am
-prefix="${prefix:-${DESTDIR}@prefix@}"
+prefix="${prefix:-../../../../}"
 PARALLEL=@PARALLEL@             # Am I in parallel mode?
 AR="@AR@"
 RANLIB="@RANLIB@"
@@ -71,7 +71,6 @@ then
         RunTest ex_lite2 &&\
         RunTest ex_lite3 &&\
         RunTest ptExampleFL &&\
-        RunTest ptExampleVL &&\
         RunTest ex_image1 &&\
         RunTest ex_image2 &&\
         RunTest ex_table_01 &&\

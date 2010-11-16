@@ -34,7 +34,7 @@ EXIT_FAILURE=1
 
 # Where the tool is installed.
 # Note: no '/' after DESTDIR.  Explanation in commence.am
-prefix="${prefix:-${DESTDIR}@prefix@}"
+prefix="${prefix:-../../../}"
 AR="@AR@"
 RANLIB="@RANLIB@"
 H5TOOL="h5c++"                  # The tool name
