@@ -55,23 +55,6 @@
  */
 #include "h5test.h"
 
-/* Define Large file, Extra Large file, Huge File */
-typedef enum fsizes_t { LFILE, XLFILE, HUGEFILE} fsizes_t;
-/* Lists of vfd to test */
-typedef enum vfd_t { SEC2_VFD, STDIO_VFD, FAMILY_VFD } vfd_t;
-fsizes_t file_size= HUGEFILE;
-
-const char *FILENAME[] = {
-    "big",
-    "sec2",
-    "stdio",
-    NULL
-};
-int	cflag=1;		/* check file system before test */
-int	sparse_support=0;	/* sparse file supported, default false */
-int	have_space=0;		/* enough space for huge file test, default false */
-hsize_t	family_size_def;	/* default family file size */
-
 #define DNAME		"big.data"
 
 #define WRT_N		50
@@ -87,6 +70,23 @@ hsize_t	family_size_def;	/* default family file size */
 #else
 #   define GB8LL	0	/*cannot do the test*/
 #endif
+
+/* Define Large file, Extra Large file, Huge File */
+typedef enum fsizes_t { LFILE, XLFILE, HUGEFILE} fsizes_t;
+/* Lists of vfd to test */
+typedef enum vfd_t { SEC2_VFD, STDIO_VFD, FAMILY_VFD } vfd_t;
+fsizes_t file_size= HUGEFILE;
+
+const char *FILENAME[] = {
+    "big",
+    "sec2",
+    "stdio",
+    NULL
+};
+int	cflag=1;		/* check file system before test */
+int	sparse_support=0;	/* sparse file supported, default false */
+int	have_space=0;		/* enough space for huge file test, default false */
+hsize_t	family_size_def=FAMILY_SIZE;	/* default family file size */
 
 /* Protocols */
 static void usage(void);
@@ -543,24 +543,13 @@ int testvfd(vfd_t vfd)
 
     switch(vfd){
     case FAMILY_VFD:
-	/* Why should I do h5_fileaccess to get fapl and prompty override it??*/
-	fapl = h5_fileaccess();
-
 	/* Test big file with the family driver */
 	puts("Testing big file with the Family Driver ");
-	if (H5FD_FAMILY!=H5Pget_driver(fapl)) {
-	    HDfprintf(stdout,
-	       "Changing file drivers to the family driver, %Hu bytes each\n",
-	       family_size_def);
-	    if (H5Pset_fapl_family(fapl, family_size_def, H5P_DEFAULT) < 0) goto error;
-	} else if (H5Pget_fapl_family(fapl, &family_size, NULL) < 0) {
+	if ((fapl=H5Pcreate(H5P_FILE_ACCESS)) < 0)
 	    goto error;
-	} else if (family_size!=family_size_def) {
-	    HDfprintf(stdout, "Changing family member size from %Hu to %Hu\n",
-		   family_size, family_size_def);
-	    if (H5Pset_fapl_family(fapl, family_size_def, H5P_DEFAULT) < 0)
+
+	if (H5Pset_fapl_family(fapl, family_size_def, H5P_DEFAULT) < 0)
 		goto error;
-	}
 
 	if (cflag){
 	    /*
@@ -610,10 +599,11 @@ int testvfd(vfd_t vfd)
 	/* Test big file with the SEC2 driver */
 	puts("Testing big file with the SEC2 Driver ");
 
-	fapl = h5_fileaccess();
+	if ((fapl=H5Pcreate(H5P_FILE_ACCESS)) < 0)
+	    goto error;
 	if(H5Pset_fapl_sec2(fapl) < 0)
+	    goto error;
 
-	HDmemset(filename, 0, sizeof(filename));
 	h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
 	if (writer(filename, fapl, WRT_N)) goto error;
@@ -638,10 +628,11 @@ int testvfd(vfd_t vfd)
 	 * enough to support big files. */
 	puts("\nTesting big file with the STDIO Driver ");
 
-	fapl = h5_fileaccess();
+	if ((fapl=H5Pcreate(H5P_FILE_ACCESS)) < 0)
+	    goto error;
 	if(H5Pset_fapl_stdio(fapl) < 0)
+	    goto error;
 
-	HDmemset(filename, 0, sizeof(filename));
 	h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
 	if (writer(filename, fapl, WRT_N)) goto error;
@@ -701,7 +692,6 @@ main (int ac, char **av)
     unsigned long seed = 0;             /* Random # seed */
 
     /* parameters setup */
-    family_size_def = FAMILY_SIZE;
 
     while (--ac > 0){
 	av++;
