@@ -114,12 +114,7 @@
 #define HDexecve(S,AV,E)        execve(S,AV,E)
 #define HDexecvp(S,AV)          execvp(S,AV)
 #define HDexit(N)               exit(N)
-#if defined __MWERKS__
-#include <abort_exit.h>
-#define HD_exit(N)              __exit(N)
-#else /* __MWERKS __ */
 #define HD_exit(N)              _exit(N)
-#endif /* __MWERKS __ */
 #define HDexp(X)                exp(X)
 #define HDfabs(X)               fabs(X)
 /* use ABS() because fabsf() fabsl() are not common yet. */
@@ -175,19 +170,11 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
  * xxx64 versions if available.
  */
 #ifdef _WIN32
-    #ifdef __MWERKS__
-    #define HDfstat(F,B)        fstat(F,B)
-    #define HDlstat(S,B)        lstat(S,B)
-    #define HDstat(S,B)         stat(S,B)
-    typedef struct stat         h5_stat_t;
-    typedef off_t               h5_stat_size_t;
-    #else /*MSVC*/
     #define HDfstat(F,B)        _fstati64(F,B)
     #define HDlstat(S,B)        _lstati64(S,B)
     #define HDstat(S,B)         _stati64(S,B)
     typedef struct _stati64     h5_stat_t;
     typedef __int64             h5_stat_size_t;
-    #endif
 #elif H5_SIZEOF_OFF_T!=8 && H5_SIZEOF_OFF64_T==8 && defined(H5_HAVE_STAT64)
     #define HDfstat(F,B)        fstat64(F,B)
     #define HDlstat(S,B)        lstat64(S,B)
@@ -249,17 +236,13 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDlog10(X)              log10(X)
 #define HDlongjmp(J,N)          longjmp(J,N)
 #ifdef _WIN32
-     #ifdef __MWERKS__
-        #define HDlseek(F,O,W)  lseek(F,O,W)
-     #else /*MSVS */
-        #define HDlseek(F,O,W)  _lseeki64(F,O,W)
-     #endif
+    #define HDlseek(F,O,W)  _lseeki64(F,O,W)
 #else
-     #ifdef H5_HAVE_LSEEK64
+    #ifdef H5_HAVE_LSEEK64
         #define HDlseek(F,O,W)  lseek64(F,O,W)
-     #else
+    #else
         #define HDlseek(F,O,W)  lseek(F,O,W)
-     #endif
+    #endif
 #endif
 #define HDmalloc(Z)             malloc(Z)
 #define HDposix_memalign(P,A,Z) posix_memalign(P,A,Z)
@@ -454,15 +437,7 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDwaitpid(P,W,O)        waitpid(P,W,O)
 #define HDwcstombs(S,P,Z)       wcstombs(S,P,Z)
 #define HDwctomb(S,C)           wctomb(S,C)
-
-#if defined (__MWERKS__)
-/* workaround for a bug in the Metrowerks version 6.0 header file for write
- which is not defined as const void*
- */
-#define HDwrite(F,M,Z)          write(F,(void*)M,Z)
-#else
 #define HDwrite(F,M,Z)          write(F,M,Z)
-#endif
 
 /*
  * And now for a couple non-Posix functions...  Watch out for systems that
