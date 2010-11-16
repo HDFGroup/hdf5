@@ -58,13 +58,13 @@ SET (HDF5_REFERENCE_FILES
 )
 
 FOREACH (ref_file ${HDF5_REFERENCE_FILES})
-  SET (dest "${PROJECT_BINARY_DIR}/testfiles/${ref_file}")
+  SET (dest "${PROJECT_BINARY_DIR}/${ref_file}")
   #MESSAGE (STATUS " Copying ${h5_file}")
   ADD_CUSTOM_COMMAND (
       TARGET     ${HDF5_TEST_LIB_TARGET}
       POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file} ${dest}
+      COMMAND    ${XLATE_UTILITY}
+      ARGS       ${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file} ${dest} -l3
   )
 ENDFOREACH (ref_file ${HDF5_REFERENCE_FILES})
 
@@ -279,8 +279,8 @@ SET (H5_TESTS
     mf
     btree2
     fheap
-    error_test
-    err_compat
+    #error_test
+    #err_compat
     tcheck_version
     testmeta
 )
@@ -325,6 +325,42 @@ TARGET_WIN_PROPERTIES (ttsafe)
 TARGET_LINK_LIBRARIES (ttsafe ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME ttsafe COMMAND $<TARGET_FILE:ttsafe>)
+
+#-- Adding test for err_compat
+IF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
+  ADD_EXECUTABLE (err_compat ${HDF5_TEST_SOURCE_DIR}/err_compat.c)
+  H5_NAMING (err_compat)
+  TARGET_WIN_PROPERTIES (err_compat)
+  TARGET_LINK_LIBRARIES (err_compat ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+  ADD_TEST (NAME err_compat COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:err_compat>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_MASK_ERROR=true"
+      -D "TEST_OUTPUT=err_compat.txt"
+      -D "TEST_REFERENCE=err_compat_1"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+      -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+  )
+ENDIF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
+
+#-- Adding test for error_test
+ADD_EXECUTABLE (error_test ${HDF5_TEST_SOURCE_DIR}/error_test.c)
+H5_NAMING (error_test)
+TARGET_WIN_PROPERTIES (error_test)
+TARGET_LINK_LIBRARIES (error_test ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+ADD_TEST (NAME error_test COMMAND "${CMAKE_COMMAND}"
+    -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
+    -D "TEST_ARGS:STRING="
+    -D "TEST_EXPECT=0"
+    -D "TEST_MASK_ERROR=true"
+    -D "TEST_OUTPUT=error_test.txt"
+    -D "TEST_REFERENCE=error_test_1"
+    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+    -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+)
 
 IF (HDF5_TEST_VFD)
 
