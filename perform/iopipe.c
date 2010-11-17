@@ -21,15 +21,6 @@
 /* See H5private.h for how to include headers */
 #include "hdf5.h"
 
-#if defined (__MWERKS__)
-#ifdef H5_HAVE_SYS_TIMEB
-#undef H5_HAVE_SYS_TIMEB
-#endif
-#ifdef H5_HAVE_SYSTEM
-#undef H5_HAVE_SYSTEM
-#endif
-#endif /* __MWERKS__*/
-
 #include "H5private.h"
 
 #ifdef H5_HAVE_SYS_TIMEB

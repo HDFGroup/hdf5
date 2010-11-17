@@ -135,13 +135,9 @@ typedef struct H5FD_log_t {
 #   define file_offset_t	off64_t
 #   define file_seek		lseek64
 #elif defined (_WIN32)
-#   ifdef __MWERKS__
-#       define file_offset_t off_t
-#       define file_seek lseek
-#   else /*MSVC*/
-#       define file_offset_t __int64
-#       define file_seek _lseeki64
-#   endif
+#   /*MSVC*/
+#   define file_offset_t __int64
+#   define file_seek _lseeki64
 #else
 #   define file_offset_t	off_t
 #   define file_seek		lseek

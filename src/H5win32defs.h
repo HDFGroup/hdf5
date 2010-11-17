@@ -56,12 +56,7 @@ typedef __int64             h5_stat_size_t;
 #endif /* H5_HAVE_GETTIMEOFDAY */
 #define HDgetdrive()        _getdrive()
 #define HDlseek(F,O,W)      _lseeki64(F,O,W)
-#if !defined(__MWERKS__)
-# /*MSVC*/
-#   define HDoff_t        __int64
-#else
-#   define HDoff_t	off_t
-#endif
+#define HDoff_t             __int64
 #define HDmemset(X,C,Z)     memset((void*)(X),C,Z)
 #define HDmkdir(S,M)        _mkdir(S)
 #define HDopen(S,F,M)       _open(S,F|_O_BINARY,M)
