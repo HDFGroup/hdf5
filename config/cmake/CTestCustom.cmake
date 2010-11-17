@@ -19,6 +19,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     flush2           #designed to need flush1
     error_test       #uses runTest.cmake
     err_compat       #uses runTest.cmake
+    links_env        #uses runTest.cmake
     h5test-clear-objects
     h5perform-clear-objects
     hl_test-clear-objects
@@ -27,9 +28,18 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5COPY-clearall-objects
     H5COPY-H5LS_h5copytst-basic       #uses runTest.cmake
     H5COPY-clear-refs
-    H5COPY-H5LS_h5copy_ref-basic      #uses runTest.cmake
+    H5COPY-region_ref                 #needs clear-refs
+    H5COPY-H5LS_h5copy_ref-refs       #uses runTest.cmake
     H5COPY-clear-ext-links
-    H5COPY-H5LS_h5copy_extlinks_src-basic      #uses runTest.cmake
+    H5COPY-ext_link                   #needs clear-ext-links
+    H5COPY-ext_link_f                 #needs clear-ext-links
+    H5COPY-ext_dangle_noobj           #needs clear-ext-links
+    H5COPY-ext_dangle_noobj_f         #needs clear-ext-links
+    H5COPY-ext_dangle_nofile          #needs clear-ext-links
+    H5COPY-ext_dangle_nofile_f        #needs clear-ext-links
+    H5COPY-ext_link_group             #needs clear-ext-links
+    H5COPY-ext_link_group_f           #needs clear-ext-links
+    H5COPY-H5LS_h5copy_extlinks_src-links    #uses runTest.cmake
     H5COPY-clear-misc
     H5COPY-CMP-h5copy_misc1           #uses runTest.cmake
     ######### tools/h5diff #########
@@ -166,6 +176,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DIFF-h5diff_482     #uses runTest.cmake
     H5DIFF-h5diff_483     #uses runTest.cmake
     H5DIFF-h5diff_484     #uses runTest.cmake
+    H5DIFF-h5diff_530     #uses runTest.cmake
     ######### tools/h5dump #########
     H5DUMP-clearall-objects
     H5DUMP-tgroup-1        #uses runTest.cmake
@@ -222,7 +233,8 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP-tall-5s         #uses runTest.cmake
     H5DUMP-tdset-3s        #uses runTest.cmake
     H5DUMP-tchar1          #uses runTest.cmake
-    H5DUMP-tboot1          #uses runTest.cmake
+    H5DUMP-tchar1          #uses runTest.cmake
+    H5DUMP-tnofilename     #uses runTest.cmake
     H5DUMP-tboot2          #uses runTest.cmake
     H5DUMP-tperror         #uses runTest.cmake
     H5DUMP-tcontents       #uses runTest.cmake
@@ -405,6 +417,9 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5LS-thlink-1                   #uses runTest.cmake
     H5LS-tcomp-1                    #uses runTest.cmake
     H5LS-tnestcomp-1                #uses runTest.cmake
+    H5LS-tnestcomp-2                #uses runTest.cmake
+    H5LS-tnestcomp-3                #uses runTest.cmake
+    H5LS-tnestcomp-4                #uses runTest.cmake
     H5LS-tloop-1                    #uses runTest.cmake
     H5LS-tstr-1                     #uses runTest.cmake
     H5LS-tsaf                       #uses runTest.cmake
@@ -460,39 +475,39 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5MKGRP-h5mkgrp_help                                #uses runTest.cmake
     H5MKGRP-h5mkgrp_version                             #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_single
-    #H5MKGRP-h5mkgrp_single
+    H5MKGRP-h5mkgrp_single                              #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_single                         #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_single-v
-    #H5MKGRP-h5mkgrp_single-v
+    H5MKGRP-h5mkgrp_single-v                            #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_single-v                       #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_single-p
-    #H5MKGRP-h5mkgrp_single-p
+    H5MKGRP-h5mkgrp_single-p                            #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_single-p                       #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_single_latest-l
-    #H5MKGRP-h5mkgrp_single_latest-l
+    H5MKGRP-h5mkgrp_single_latest-l                     #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_single_latest-l                #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_several
-    #H5MKGRP-h5mkgrp_several
+    H5MKGRP-h5mkgrp_several                             #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_several                        #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_several-v
-    #H5MKGRP-h5mkgrp_several-v
+    H5MKGRP-h5mkgrp_several-v                           #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_several-v                      #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_several-p
-    #H5MKGRP-h5mkgrp_several-p
+    H5MKGRP-h5mkgrp_several-p                           #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_several-p                      #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_several_latest-l
-    #H5MKGRP-h5mkgrp_several_latest-l
+    H5MKGRP-h5mkgrp_several_latest-l                    #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_several_latest-l               #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_nested-p
-    #H5MKGRP-h5mkgrp_nested-p
+    H5MKGRP-h5mkgrp_nested-p                            #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_nested-p                       #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_nested_latest-lp
-    #H5MKGRP-h5mkgrp_nested_latest-lp
+    H5MKGRP-h5mkgrp_nested_latest-lp                    #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_nested_latest-lp               #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_nested_mult-p
-    #H5MKGRP-h5mkgrp_nested_mult-p
+    H5MKGRP-h5mkgrp_nested_mult-p                       #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_nested_mult-p                  #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_nested_mult_latest-lp
-    #H5MKGRP-h5mkgrp_nested_mult_latest-lp
+    H5MKGRP-h5mkgrp_nested_mult_latest-lp               #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_nested_mult_latest-lp          #uses runTest.cmake
 )

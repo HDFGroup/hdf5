@@ -223,6 +223,12 @@ IF (BUILD_TESTING)
         h5repart_test
   )
 
+  # If using memchecker add tests without using scripts
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    ADD_TEST (NAME H5MKGRP-help COMMAND h5mkgrp -h)
+    ADD_TEST (NAME H5MKGRP-version COMMAND h5mkgrp -V)
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
   # Check that help & version is displayed properly
   ADD_H5_CMP (h5mkgrp_help 0 "-h")
   ADD_H5_CMP (h5mkgrp_version 0 "-V")
