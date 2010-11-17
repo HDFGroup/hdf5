@@ -345,6 +345,28 @@ dnl
 AC_PROG_CC
 CC_BASENAME="`echo $CC | cut -f1 -d' ' | xargs basename 2>/dev/null`"
 
+dnl ----------------------------------------------------------------------------
+dnl Configure disallows unsupported combinations of options. However, users
+dnl may want to override and build with unsupported combinations for their
+dnl own use. They can use the --enable-unsupported configure flag, which
+dnl ignores any errors from configure due to incompatible flags.
+AC_MSG_CHECKING([if unsupported combinations of configure options are allowed])
+AC_ARG_ENABLE([unsupported],
+              [AC_HELP_STRING([--enable-unsupported],
+                              [Allow unsupported combinations of configure options])],
+              [ALLOW_UNSUPPORTED=$enableval])
+
+case "X-$ALLOW_UNSUPPORTED" in 
+  X-|X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  X-yes)
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    ;;
+esac
+
 dnl ----------------------------------------------------------------------
 dnl Check if they would like the Fortran interface compiled
 dnl
@@ -908,16 +930,20 @@ if (${CC-cc} -V 2>&1 | grep '^pgcc 6.0') > /dev/null && test "X$enable_productio
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Shared libraries are not currently supported under Cygwin.
-case "`uname`" in
-  CYGWIN*)
-    if test "X${enable_shared}" = "Xyes"; then
-      echo '    warning: shared libraries are not supported on Cygwin!'
-      echo '    disabling shared libraries'
-    fi
-    enable_shared="no"
-    ;;
-esac
+dnl Shared libraries are not currently supported under Cygwin, so configure
+dnl disables them unless --enable-unsupported has been supplied by the user.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  case "`uname`" in
+    CYGWIN*)
+      if test "X${enable_shared}" = "Xyes"; then
+        echo '    warning: shared libraries are not supported on Cygwin!'
+        echo '    disabling shared libraries'
+        echo '    use --enable-unsupported to override this warning and keep shared libraries enabled'
+      fi
+      enable_shared="no"
+      ;;
+  esac
+fi
 
 dnl ----------------------------------------------------------------------
 dnl Create libtool.  If shared/static libraries are going to be enabled
@@ -2460,24 +2486,33 @@ AC_ARG_ENABLE([parallel],
                               [Search for MPI-IO and MPI support files])])
 
 dnl The --enable-parallel flag is not compatible with --enable-cxx.
-dnl If the user tried to specify both flags, throw an error.
-if test "X${HDF_CXX}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
-  AC_MSG_ERROR([--enable-cxx and --enable-parallel flags are incompatible])
+dnl If the user tried to specify both flags, throw an error, unless
+dnl they also provided the --enable-unsupported flag.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_CXX}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-cxx and --enable-parallel flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
 fi
 
-dnl --enable-parallel is also incompatible with --enable-threadsafe.
-if test "X${THREADSAFE}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
-  AC_MSG_ERROR([--enable-threadsafe and --enable-parallel flags are incompatible])
+dnl --enable-parallel is also incompatible with --enable-threadsafe, unless
+dnl --enable-unsupported has been specified on the configure line.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${THREADSAFE}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-threadsafe and --enable-parallel flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
 fi
 
 dnl It's possible to build in parallel by specifying a parallel compiler
 dnl without using the --enable-parallel flag.  This isn't allowed with
-dnl C++ or threadsafe, either.
-if test "X${PARALLEL}" != "X" -a "X${enable_cxx}" = "Xyes" ; then
-  AC_MSG_ERROR([An MPI compiler is being used; --enable-cxx is not allowed])
-fi
-if test "X${PARALLEL}" != "X" -a "X${THREADSAFE}" = "Xyes"; then
-  AC_MSG_ERROR([An MPI compiler is being used; --enable-threadsafe is not allowed])
+dnl C++ or threadsafe, either, unless the --enable-unsupported flag 
+dnl has also been specified.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${PARALLEL}" != "X" -a "X${enable_cxx}" = "Xyes" ; then
+    AC_MSG_ERROR([An MPI compiler is being used; --enable-cxx is not allowed. Use --enable-unsupported to override this error.])
+  fi
+  if test "X${PARALLEL}" != "X" -a "X${THREADSAFE}" = "Xyes"; then
+    AC_MSG_ERROR([An MPI compiler is being used; --enable-threadsafe is not allowed. Use --enable-unsupported to override this error.])
+  fi
 fi
 
 AC_MSG_CHECKING([for parallel support files])
@@ -4106,11 +4141,14 @@ else
 fi
 
 dnl It's an error to try to disable deprecated public API symbols while
-dnl choosing an older version of the public API as the default.
-if test "X${DEFAULT_API_VERSION}" != "Xv110" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
-  AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols])
+dnl choosing an older version of the public API as the default. However,
+dnl if the user insists on doing this via the --enable-unsupported configure
+dnl flag, we'll let them.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${DEFAULT_API_VERSION}" != "Xv110" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
+    AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols. Use --enable-unsupported to override this error.])
+  fi
 fi
-
 
 dnl ----------------------------------------------------------------------
 dnl Enable strict file format checks

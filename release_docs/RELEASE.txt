@@ -39,6 +39,12 @@ New Features
 
     Configuration:
     -------------
+    - Added a new configure option, "--enable-unsupported", which can
+      be used to stop configure from preventing the use of unsupported
+      configure option combinations, such as c++ in parallel or parallel
+      HDF5 with threadsafe. Use at your own risk, as it may result in a 
+      library that won't compile or run as expected! 
+      (MAM - 2010/11/17 - Bug 2061)
     - PHDF5 changed to use "mpiexec", instead of mpirun, as the default MPI
       applications startup command as defined in the MPI-2 definition, section
       4.1. (AKC - 2010/6/11 - Bug 1921)
