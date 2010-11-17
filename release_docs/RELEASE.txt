@@ -56,7 +56,12 @@ New Features
 
     Configuration
     -------------
-    - None
+    - Added a new configure option, "--enable-unsupported", which can
+      be used to stop configure from preventing the use of unsupported
+      configure option combinations, such as c++ in parallel or fortran
+      with threadsafe. Use at your own risk, as it may result in a 
+      library that won't compile or run as expected!
+      (MAM - 2010/11/17 - Bug 2061)
 
     Library
     -------
