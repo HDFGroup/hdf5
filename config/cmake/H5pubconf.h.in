@@ -292,7 +292,7 @@
 #cmakedefine H5_HAVE_RAND_R @H5_HAVE_RAND_R@
 
 /* Define to 1 if you have the `sigsetjmp' function. */
-#cmakedefine H5_HAVE_SETJMP_H @H5_HAVE_SETJMP@
+#cmakedefine H5_HAVE_SETJMP @H5_HAVE_SETJMP@
 
 /* Define to 1 if you have the <setjmp.h> header file. */
 #cmakedefine H5_HAVE_SETJMP_H @H5_HAVE_SETJMP_H@
