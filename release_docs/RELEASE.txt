@@ -249,6 +249,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Retrieving a link's name by index in the case where the link is
+            external and the file that the link refers to doesn't exist will 
+            now fail gracefully rather than cause a segmentation fault. 
+            (MAM - 2010/11/17)
       - Modified library to always cache symbol table information.  Libraries
             version 1.6.3 have a bug which causes them to require this
             information for some operations. (NAF - 2010/09/21 - 1864)
