@@ -2640,6 +2640,8 @@ external_link_dangling(hid_t fapl, hbool_t new_format)
 {
     hid_t	fid = (-1);     		/* File ID */
     hid_t	gid = (-1);	                /* Group IDs */
+    hid_t   rid = (-1);             /* Root Group ID */
+    hid_t   status = (-1);          /* Status */
     char	filename1[NAME_BUF_SIZE],
     		filename2[NAME_BUF_SIZE];       /* Names of files to externally link across */
 
@@ -2672,6 +2674,9 @@ external_link_dangling(hid_t fapl, hbool_t new_format)
     /* Open first file */
     if((fid=H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
 
+    /* Get root group ID */
+    if((rid=H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) TEST_ERROR;
+
     /* Open object through dangling file external link */
     H5E_BEGIN_TRY {
         gid = H5Gopen2(fid, "no_file", H5P_DEFAULT);
@@ -2691,6 +2696,18 @@ external_link_dangling(hid_t fapl, hbool_t new_format)
 	puts("    Should have failed for sequence of too many nested links.");
 	goto error;
     }
+
+    /* Try to get name of object by index through dangling file external link */
+    H5E_BEGIN_TRY {
+        status = H5Lget_name_by_idx(rid, "no_file", H5_INDEX_NAME, H5_ITER_INC, 0, NULL, 0, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if (status >= 0) {
+        H5_FAILED();
+        puts("    Retreiving name of object by index through dangling file external link should have failed.");
+    } /* end if */
+
+    /* Close root group */
+    if(H5Gclose(rid) < 0) TEST_ERROR
 
     /* Close first file */
     if(H5Fclose(fid) < 0) TEST_ERROR

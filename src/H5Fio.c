@@ -102,6 +102,7 @@ H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     HDassert(f);
     HDassert(f->shared);
     HDassert(buf);
+    HDassert(H5F_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
     if(H5F_addr_le(f->shared->tmp_addr, (addr + size)))
@@ -146,6 +147,7 @@ HDfprintf(stderr, "%s: write to addr = %a, size = %Zu\n", FUNC, addr, size);
     HDassert(f->shared);
     HDassert(f->intent & H5F_ACC_RDWR);
     HDassert(buf);
+    HDassert(H5F_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
     if(H5F_addr_le(f->shared->tmp_addr, (addr + size)))
