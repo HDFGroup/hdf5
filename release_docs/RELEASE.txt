@@ -259,32 +259,31 @@ The following platforms and compilers have been tested for this release.
     Linux 2.6.18-194.3.1.el5PAE   gcc (GCC) 4.1.2 and 4.4.2
     #1 SMP i686 i686 i386         G95 (GCC 4.0.3 (g95 0.93!) Apr 21 2010)
     (jam)                         GNU Fortran (GCC) 4.1.2 20080704 
-                                  (Red Hat 4.1.2-48) and 4.4.2
+                                      (Red Hat 4.1.2-48) and 4.4.2
                                   PGI C, Fortran, C++ 10.4-0 32-bit
                                   PGI C, Fortran, C++ 10.6-0 32-bit
                                   Intel(R) C Compiler for 32-bit
-                                      applications, Versions 11.1 
+                                      applications, Version 11.1 
                                   Intel(R) C++ Compiler for 32-bit
                                       applications, Version 11.1
                                   Intel(R) Fortran Compiler for 32-bit
                                       applications, Version 11.1
                                   Absoft 32-bit Fortran 95 10.0.7
                                   MPICH mpich2-1.3a2 compiled with
-                                  gcc 4.1.2 and PGI Fortran 10.4-0
+                                      gcc 4.1.2 and PGI Fortran 10.4-0
 
     Linux 2.6.18-194.17.1.el5     gcc 4.1.2 and 4.4.2
-    #1 SMP x86_64 GNU/Linux       G95 (GCC 4.0.3 (g95 0.92!) Jun 24 2009)
-    (amani)                       tested for both 32- and 64-bit binaries
-                                  Intel(R) C, C++, Fortran Compilers for 
-                                  applications running on Intel(R) 64, 
-                                  Versions 11.1.
-                                  PGI C, Fortran, C++ Version 9.0-4
-                                         for 64-bit target on x86-64
-                                  gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
-                                  MPICH mpich2-1.0.8 compiled with
-                                  gcc 4.1.2 and G95 (GCC 4.0.3 (g95 0.92!)
+    #1 SMP x86_64 GNU/Linux       G95 (GCC 4.0.3 (g95 0.93!) Apr 21 2010)
+    (amani)                           tested for both 32- and 64-bit binaries
                                   GNU Fortran (GCC) 4.1.2 20080704
-                                  (Red Hat 4.1.2-46) and 4.4.2
+                                      (Red Hat 4.1.2-46) and 4.4.2
+                                  Intel(R) C, C++, Fortran Compilers for 
+                                      applications running on Intel(R) 64, 
+                                      Version 11.1.
+                                  PGI C, Fortran, C++ Version 9.0-4
+                                      for 64-bit target on x86-64
+                                  MPICH mpich2-1.0.8 compiled with
+                                      gcc 4.1.2 and G95 PGI Fortran 10.4-0
 
 
     Linux 2.6.16.60-0.42.5 #1     Intel(R) C++ Version 10.1.017
@@ -303,7 +302,7 @@ The following platforms and compilers have been tested for this release.
     perfctr #2 SMP                Intel(R) Fortran Compiler Version 10.1.017
     (abe)                         Open MPI 1.2.2
                                   MVAPICH2-0.9.8p28p2patched-intel-ofed-1.2
-                                  compiled with icc v10.0.026 and ifort 10.1.017
+                                      compiled with icc v10.0.026 and ifort 10.1.017
 
     Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
                                   Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
