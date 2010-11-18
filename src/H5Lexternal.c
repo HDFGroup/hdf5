@@ -188,6 +188,9 @@ done:
  *		Otherwise, the file access property retrieved from H5Pget_elink_fapl()
  *		is used to H5F_open() the target file.
  *
+ *              Vailin Choi; Nov 2010
+ *              Free memory pointed to by tmp_env_prefix for HDF5_EXT_PREFIX case.
+ *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -343,9 +346,9 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
         char *env_prefix;
 
         if(NULL != (env_prefix = HDgetenv("HDF5_EXT_PREFIX"))) {
-            char *tmp_env_prefix;
+            char *tmp_env_prefix, *saved_env;
 
-            if(NULL == (tmp_env_prefix = H5MM_strdup(env_prefix)))
+            if(NULL == (saved_env = tmp_env_prefix = H5MM_strdup(env_prefix)))
                 HGOTO_ERROR(H5E_LINK, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             while((tmp_env_prefix) && (*tmp_env_prefix)) {
@@ -353,8 +356,10 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
 
                 out_prefix_name = H5L_getenv_prefix_name(&tmp_env_prefix/*in,out*/);
                 if(out_prefix_name && (*out_prefix_name)) {
-                    if(H5L_build_name(out_prefix_name, temp_file_name, &full_name/*out*/) < 0)
+                    if(H5L_build_name(out_prefix_name, temp_file_name, &full_name/*out*/) < 0) {
+			saved_env = (char *)H5MM_xfree(saved_env);
                         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
+		    }
 
                     ext_file = H5F_open(full_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id);
                     full_name = (char *)H5MM_xfree(full_name);
@@ -363,6 +368,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
                     H5E_clear_stack(NULL);
                 } /* end if */
             } /* end while */
+	    saved_env = (char *)H5MM_xfree(saved_env);
         } /* end if */
     } /* end if */
 

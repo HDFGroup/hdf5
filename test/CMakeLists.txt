@@ -55,6 +55,7 @@ SET (HDF5_REFERENCE_FILES
     err_compat_2
     error_test_1
     error_test_2
+    links_env.out
 )
 
 FOREACH (ref_file ${HDF5_REFERENCE_FILES})
@@ -283,6 +284,7 @@ SET (H5_TESTS
     #err_compat
     tcheck_version
     testmeta
+    #links_env
 )
 
 FOREACH (test ${H5_TESTS})
@@ -362,6 +364,24 @@ ADD_TEST (NAME error_test COMMAND "${CMAKE_COMMAND}"
     -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
 )
 
+#-- Adding test for links_env
+ADD_EXECUTABLE (links_env ${HDF5_TEST_SOURCE_DIR}/links_env.c)
+H5_NAMING (links_env)
+TARGET_WIN_PROPERTIES (links_env)
+TARGET_LINK_LIBRARIES (links_env ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+ADD_TEST (NAME links_env COMMAND "${CMAKE_COMMAND}"
+    -D "TEST_PROGRAM=$<TARGET_FILE:links_env>"
+    -D "TEST_ARGS:STRING="
+    -D "TEST_ENV_VAR:STRING=HDF5_EXT_PREFIX"
+    -D "TEST_ENV_VALUE:STRING=.:tmp"
+    -D "TEST_EXPECT=0"
+    -D "TEST_OUTPUT=links_env.txt"
+    -D "TEST_REFERENCE=links_env.out"
+    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+    -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+)
+
 IF (HDF5_TEST_VFD)
 
   SET (VFD_LIST
@@ -421,6 +441,7 @@ IF (HDF5_TEST_VFD)
       err_compat
       tcheck_version
       testmeta
+      links_env
 )
   
   IF (DIRECT_VFD)
