@@ -505,9 +505,11 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
 
     /* sync with the other processes before checking data */
-    mrc = MPI_Barrier(MPI_COMM_WORLD);
-    VRFY((mrc==MPI_SUCCESS), "Sync after small dataset writes");
+    if ( ! use_collective_io ) {
 
+        mrc = MPI_Barrier(MPI_COMM_WORLD);
+        VRFY((mrc==MPI_SUCCESS), "Sync after small dataset writes");
+    }
 
     /* read the small data set back to verify that it contains the 
      * expected data.  Note that each process reads in the entire 
@@ -611,8 +613,11 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
 
     /* sync with the other processes before checking data */
-    mrc = MPI_Barrier(MPI_COMM_WORLD);
-    VRFY((mrc==MPI_SUCCESS), "Sync after large dataset writes");
+    if ( ! use_collective_io ) {
+
+        mrc = MPI_Barrier(MPI_COMM_WORLD);
+        VRFY((mrc==MPI_SUCCESS), "Sync after large dataset writes");
+    }
 
 
     /* read the small data set back to verify that it contains the 
@@ -628,7 +633,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     VRFY((ret >= 0), "H5Dread() large_dataset initial read succeeded");
 
 
-    /* verify that the correct data was written to the small data set */
+    /* verify that the correct data was written to the large data set */
     expected_value = 0;
     mis_match = FALSE;
     ptr_1 = large_ds_buf_1;
@@ -644,6 +649,15 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
         expected_value++;
     }
     VRFY( (mis_match == FALSE), "large ds init data good.");
+
+
+    /* sync with the other processes before changing data */
+
+    if ( ! use_collective_io ) {
+
+        mrc = MPI_Barrier(MPI_COMM_WORLD);
+        VRFY((mrc==MPI_SUCCESS), "Sync initial values check");
+    }
 
 
     /* first, verify that we can read from disk correctly using selections
@@ -2800,7 +2814,6 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     VRFY((ret != FAIL), "H5Dcreate2() large_dataset succeeded");
 
 
-
     /* setup xfer property list */
     xfer_plist = H5Pcreate(H5P_DATASET_XFER);
     VRFY((xfer_plist >= 0), "H5Pcreate(H5P_DATASET_XFER) succeeded");
@@ -2809,6 +2822,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
         ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     }
+
 
     /* setup selection to write initial data to the small and large data sets */
     start[0] = mpi_rank;
@@ -2870,9 +2884,11 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
 
     /* sync with the other processes before checking data */
-    mrc = MPI_Barrier(MPI_COMM_WORLD);
-    VRFY((mrc==MPI_SUCCESS), "Sync after small dataset writes");
+    if ( ! use_collective_io ) {
 
+        mrc = MPI_Barrier(MPI_COMM_WORLD);
+        VRFY((mrc==MPI_SUCCESS), "Sync after small dataset writes");
+    }
 
     /* read the small data set back to verify that it contains the 
      * expected data.  Note that each process reads in the entire 
@@ -2976,8 +2992,11 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
 
     /* sync with the other processes before checking data */
-    mrc = MPI_Barrier(MPI_COMM_WORLD);
-    VRFY((mrc==MPI_SUCCESS), "Sync after large dataset writes");
+    if ( ! use_collective_io ) {
+
+        mrc = MPI_Barrier(MPI_COMM_WORLD);
+        VRFY((mrc==MPI_SUCCESS), "Sync after large dataset writes");
+    }
 
 
     /* read the small data set back to verify that it contains the 
@@ -3009,6 +3028,15 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
         expected_value++;
     }
     VRFY( (mis_match == FALSE), "large ds init data good.");
+ 
+    /* sync with the other processes before changing data */
+
+    if ( ! use_collective_io ) {
+
+        mrc = MPI_Barrier(MPI_COMM_WORLD);
+        VRFY((mrc==MPI_SUCCESS), "Sync after initial values check");
+    }
+
 
     /***********************************/
     /***** INITIALIZATION COMPLETE *****/
