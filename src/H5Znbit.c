@@ -1365,17 +1365,17 @@ static void H5Z_nbit_compress_one_compound(unsigned char *data, size_t data_offs
 static void H5Z_nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
                               size_t *buffer_size, const unsigned parms[])
 {
-   /* i: index of data, j: index of buffer,
+   /* i: index of data, new_size: index of buffer,
       buf_len: number of bits to be filled in current byte */
-   size_t i, j, size;
+   size_t i, size;
+   size_t new_size = 0;
    int buf_len;
    parms_atomic p;
 
    /* must initialize buffer to be zeros */
-   for(j = 0; j < *buffer_size; j++) buffer[j] = 0;
+   HDmemset(buffer, 0, *buffer_size);
 
    /* initialization before the loop */
-   j = 0;
    buf_len = sizeof(unsigned char) * 8;
 
    switch(parms[3]) {
@@ -1387,14 +1387,14 @@ static void H5Z_nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned c
            p.offset = parms[7];
 
            for(i = 0; i < d_nelmts; i++) {
-              H5Z_nbit_compress_one_atomic(data, i*p.size, buffer, &j, &buf_len, p);
+              H5Z_nbit_compress_one_atomic(data, i*p.size, buffer, &new_size, &buf_len, p);
            }
            break;
       case H5Z_NBIT_ARRAY:
            size = parms[4];
            parms_index = 4;
            for(i = 0; i < d_nelmts; i++) {
-              H5Z_nbit_compress_one_array(data, i*size, buffer, &j, &buf_len, parms);
+              H5Z_nbit_compress_one_array(data, i*size, buffer, &new_size, &buf_len, parms);
               parms_index = 4;
            }
            break;
@@ -1402,10 +1402,14 @@ static void H5Z_nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned c
            size = parms[4];
            parms_index = 4;
            for(i = 0; i < d_nelmts; i++) {
-              H5Z_nbit_compress_one_compound(data, i*size, buffer, &j, &buf_len, parms);
+              H5Z_nbit_compress_one_compound(data, i*size, buffer, &new_size, &buf_len, parms);
               parms_index = 4;
            }
            break;
    } /* end switch */
+
+   /* Update the size to the new value after compression.  If there are any bits hanging over in
+    * the last byte, increment the value by 1. */
+   *buffer_size = new_size + 1;
 }
 #endif /* H5_HAVE_FILTER_NBIT */
