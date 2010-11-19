@@ -235,7 +235,7 @@
   #define H5_FCDLLVAR extern
 #endif /* H5_FCDLL */
 
-#if defined(hdf5_f90Ctest_EXPORTS)
+#if defined(hdf5_test_f90cstub_EXPORTS)
   #if defined (_MSC_VER)  /* MSVC Compiler Case */
     #define H5_FCTESTDLL __declspec(dllexport)
     #define H5_FCTESTDLLVAR extern __declspec(dllexport)
