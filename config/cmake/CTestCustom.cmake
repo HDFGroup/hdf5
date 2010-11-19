@@ -8,7 +8,7 @@ SET (CTEST_CUSTOM_WARNING_EXCEPTION
     "H5Tconv.c[0-9 \t:]*warning:[ \t]*comparison is always false due to limited range of data type"
     "testhdf5.h.[0-9]+.[ \t]*:[ \t]*warning C4005"
     "H5Ztrans.c.[0-9]+.[ \t]*:[ \t]*warning C4244"
-    "SZIP.src.[0-9a-zA-Z]*[ \t]*:[ \t]*warning"
+    "SZIP.src.*:[ \t]*warning"
     "POSIX name for this item is deprecated"
     "disabling jobserver mode"
 )
