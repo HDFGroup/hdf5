@@ -474,6 +474,7 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
 DIRECT_VFD = @DIRECT_VFD@
+DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 DYNAMIC_DIRS = @DYNAMIC_DIRS@
@@ -535,6 +536,7 @@ LTLIBOBJS = @LTLIBOBJS@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 MPI_GET_SIZE = @MPI_GET_SIZE@
@@ -591,6 +593,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -783,7 +786,7 @@ testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 
 
 # Temporary files.
-DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh testlinks.sh
+DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
