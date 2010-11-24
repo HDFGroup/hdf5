@@ -6338,8 +6338,8 @@ test_zero_dims(hid_t file)
 {
     hid_t       s = -1, d = -1, dcpl = -1;
     hid_t       s2 = -1, d2 = -1, dcpl2 = -1;
-    hsize_t     dsize = 0, dmax = H5S_UNLIMITED, csize = 5;
-    hsize_t     dsize2[2] = {0, 0};
+    hsize_t     dzero = 0, dmax = H5S_UNLIMITED, csize = 5;
+    hsize_t     dzero2[2] = {0, 0};
     hsize_t 	dmax2[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; 
     hsize_t	csize2[2] = {5, 5};
     hid_t	fapl;		/* File access property list */
@@ -6358,7 +6358,7 @@ test_zero_dims(hid_t file)
     /* 
      * One-dimensional dataset 
      */
-    if((s = H5Screate_simple(1, &dsize, &dmax)) < 0) FAIL_STACK_ERROR
+    if((s = H5Screate_simple(1, &dzero, &dmax)) < 0) FAIL_STACK_ERROR
 
     /* Try creating chunked dataset with undefined chunk dimensions */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
@@ -6374,7 +6374,7 @@ test_zero_dims(hid_t file)
 
     /* Try creating chunked dataset with zero-sized chunk dimensions */
     H5E_BEGIN_TRY {
-        ret = H5Pset_chunk(dcpl, 1, &dsize);
+        ret = H5Pset_chunk(dcpl, 1, &dzero);
     } H5E_END_TRY;
     if(ret > 0)
         FAIL_PUTS_ERROR("set zero-sized chunk dimensions")
@@ -6406,7 +6406,7 @@ test_zero_dims(hid_t file)
     /* 
      * Two-dimensional dataset 
      */
-    if((s2 = H5Screate_simple(2, dsize2, dmax2)) < 0) FAIL_STACK_ERROR
+    if((s2 = H5Screate_simple(2, dzero2, dmax2)) < 0) FAIL_STACK_ERROR
 
     /* Try creating chunked dataset with undefined chunk dimensions */
     if((dcpl2 = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
@@ -6422,7 +6422,7 @@ test_zero_dims(hid_t file)
 
     /* Try creating chunked dataset with zero-sized chunk dimensions */
     H5E_BEGIN_TRY {
-        ret = H5Pset_chunk(dcpl2, 2, dsize2);
+        ret = H5Pset_chunk(dcpl2, 2, dzero2);
     } H5E_END_TRY;
     if(ret > 0)
         FAIL_PUTS_ERROR("set zero-sized chunk dimensions")
@@ -6488,8 +6488,9 @@ error:
 static herr_t
 test_missing_chunk(hid_t file)
 {
-    hid_t       d = -1, did2 = -1, dcpl=-1, dcpl2 = -1;	/* Dataset & dataset creation property IDs */
-    hid_t       s = -1, sid2 = -1; 			/* Dataspace ID */
+    hid_t       d = -1, did2 = -1;		/* Dataset IDs */
+    hid_t	dcpl = -1, dcpl2 = -1;		/* Dataset creation property IDs */
+    hid_t       s = -1, sid2 = -1; 		/* Dataspace ID */
     hsize_t	hs_start[1], hs_stride[1], hs_count[1], hs_block[1];	/* Hyperslab setting */
     hsize_t	hs_start2[2], hs_stride2[2], hs_count2[2], hs_block2[2];/* Hyperslab setting */
 
@@ -6657,11 +6658,9 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function: test_random_chunks
+ * Function: test_random_chunks_real
  *
- * Purpose: Tests that write/read on randomly selected chunks in 2 datasets.
- *              One dataset has fixed dimensions, and the other has unlimited
- *              dimensions which are extended before write/read operations.
+ * Purpose: Tests that write/read on randomly selected chunks 
  *
  *
  * Return: Success: 0
@@ -6673,7 +6672,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_random_chunks(hid_t fapl)
+test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
 {
     char        filename[FILENAME_BUF_SIZE];
     hid_t       s=-1, m=-1, d=-1, dcpl=-1, file=-1;
@@ -6682,6 +6681,7 @@ test_random_chunks(hid_t fapl)
                 check2[20][20];
     hsize_t     coord[NPOINTS][2];
     hsize_t     dsize[2]={100,100}, dmax[2]={H5S_UNLIMITED, H5S_UNLIMITED}, csize[2]={10,10}, nsize[2]={200,200};
+    hsize_t	fixed_dmax[2] = {1000, 1000};
     hsize_t     msize[1]={NPOINTS};
     const char  dname[]="dataset";
     int         chunk_row, chunk_col;
@@ -6690,11 +6690,13 @@ test_random_chunks(hid_t fapl)
     H5F_libver_t low;           /* File format low bound */
 
 
-    TESTING("Write/read on randomly selected chunks");
+    TESTING(testname);
 
     assert(NPOINTS < 100);
 
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
+
+    if(H5Pget_libver_bounds(fapl, &low, NULL) < 0) TEST_ERROR;
 
     /* Create file for first test */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
@@ -6708,8 +6710,9 @@ test_random_chunks(hid_t fapl)
     /* Set chunked layout */
     if(H5Pset_chunk(dcpl, 2, csize) < 0) TEST_ERROR;
 
-    /* Set early allocation time */
-    if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0) TEST_ERROR;
+    /* Set early allocation time for one dataset; the other dataset is using default alloc time */
+    if(early_alloc)
+        if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0) TEST_ERROR;
 
     /* Create dataset */
     if((d = H5Dcreate2(file, dname, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) TEST_ERROR;
@@ -6747,11 +6750,27 @@ test_random_chunks(hid_t fapl)
     if(H5Dclose(d) < 0) TEST_ERROR;
     if(H5Fclose(file) < 0) TEST_ERROR;
 
-    /* Open file again */
+    /* Open first file again */
     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR;
 
     /* Open dataset */
     if((d = H5Dopen2(file, dname, H5P_DEFAULT)) < 0) TEST_ERROR;
+
+    /* Get the chunk index type */
+    if(H5D_layout_idx_type_test(d, &idx_type) < 0) TEST_ERROR;
+
+    /* Verify index type */
+    if(low == H5F_LIBVER_LATEST) {
+        if(early_alloc) {
+            if(idx_type != H5D_CHUNK_IDX_NONE)
+                FAIL_PUTS_ERROR("should be using Non-Index as index");
+        } /* end if */
+        else {
+            if(idx_type != H5D_CHUNK_IDX_FARRAY)
+                FAIL_PUTS_ERROR("should be using Fixed Array as index");
+        } /* end else */
+    } else if(idx_type != H5D_CHUNK_IDX_BTREE) 
+	FAIL_PUTS_ERROR("should be using v1 B-tree as index");
 
     /* Get dataset dataspace */
     if((s = H5Dget_space(d)) < 0) TEST_ERROR;
@@ -6780,9 +6799,7 @@ test_random_chunks(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR;
 
 
-    /* Create file for second test */
-    if(H5Pget_libver_bounds(fapl, &low, NULL) < 0) TEST_ERROR;
-
+    /* Create second file */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
 
     /* Create dataspace with unlimited maximum dimensions */
@@ -6794,8 +6811,9 @@ test_random_chunks(hid_t fapl)
     /* Set chunked layout */
     if(H5Pset_chunk(dcpl, 2, csize) < 0) TEST_ERROR;
 
-    /* Set allocation time to early */
-    if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0) TEST_ERROR;
+    /* Set early allocation time for one dataset; the other dataset is using default alloc time */
+    if(early_alloc)
+        if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0) TEST_ERROR;
 
     /* Create dataset */
     if((d = H5Dcreate2(file, dname, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) TEST_ERROR;
@@ -6849,8 +6867,114 @@ test_random_chunks(hid_t fapl)
     if(H5Dclose(d) < 0) TEST_ERROR;
     if(H5Fclose(file) < 0) TEST_ERROR;
 
-    /* Open file again */
+    /* Open second file again */
     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR;
+
+    /* Open dataset */
+    if((d = H5Dopen2(file, dname, H5P_DEFAULT)) < 0) TEST_ERROR;
+
+    /* Get dataset dataspace */
+    if((s = H5Dget_space(d)) < 0) TEST_ERROR;
+
+    /* Create dataspace for read buffer */
+    if((m = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
+
+    /* Select the random points for reading */
+    if(H5Sselect_elements (s, H5S_SELECT_SET, (size_t)NPOINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
+
+    /* Read from dataset */
+    if(H5Dread(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, rbuf) < 0) TEST_ERROR;
+
+    /* Verify that written and read data are the same */
+    for(i = 0; i < NPOINTS; i++)
+        if(rbuf[i] != wbuf[i]){
+            printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n",__LINE__,(unsigned)i,wbuf[i],(unsigned)i,rbuf[i]);
+                TEST_ERROR;
+        } /* end if */
+
+    /* Close resources */
+    if(H5Sclose(s) < 0) TEST_ERROR;
+    if(H5Sclose(m) < 0) TEST_ERROR;
+    if(H5Dclose(d) < 0) TEST_ERROR;
+    if(H5Fclose(file) < 0) TEST_ERROR;
+
+
+    /* Create third file */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
+
+    /* Create dataspace with fixed maximum dimensions */
+    if((s = H5Screate_simple(2, dsize, fixed_dmax)) < 0) TEST_ERROR;
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+
+    /* Set chunked layout */
+    if(H5Pset_chunk(dcpl, 2, csize) < 0) TEST_ERROR;
+
+    /* Set early allocation time for one dataset; the other dataset is using default alloc time */
+    if(early_alloc)
+        if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0) TEST_ERROR;
+
+    /* Create dataset */
+    if((d = H5Dcreate2(file, dname, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) TEST_ERROR;
+
+    /* Get the chunk index type */
+    if(H5D_layout_idx_type_test(d, &idx_type) < 0) TEST_ERROR;
+
+    /* Verify index type */
+    if(low == H5F_LIBVER_LATEST) {
+        if(early_alloc) {
+            if(idx_type != H5D_CHUNK_IDX_NONE)
+                FAIL_PUTS_ERROR("should be using Non-Index as index");
+        } /* end if */
+        else {
+            if(idx_type != H5D_CHUNK_IDX_FARRAY)
+                FAIL_PUTS_ERROR("should be using Fixed Array as index");
+        } /* end else */
+    } else if(idx_type != H5D_CHUNK_IDX_BTREE) 
+	FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+
+    /* Extend both dimensions of the dataset */
+    if(H5Dset_extent(d, nsize) < 0) TEST_ERROR;
+
+    /* Reset the dataset dataspace to new dimensions */
+    if(H5Sset_extent_simple(s, 2, nsize, dmax) < 0) TEST_ERROR;
+
+    /* Initialize check buffer for repeated coordinates */
+    for(i = 0; i < nsize[0]/csize[0]; i++)
+        for(j = 0; j < nsize[1] / csize[1]; j++)
+            check2[i][j] = 0;
+
+    /* Generate random point coordinates. Only one point is selected per chunk */
+    for(i = 0; i < NPOINTS; i++){
+        do {
+            chunk_row = (int)HDrandom() % (int)(nsize[0] / csize[0]);
+            chunk_col = (int)HDrandom() % (int)(nsize[1] / csize[1]);
+        } while (check2[chunk_row][chunk_col]);
+
+        wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
+        coord[i][0] = (hsize_t)chunk_row * csize[0];
+        coord[i][1] = (hsize_t)chunk_col * csize[1];
+    }
+
+    /* Create dataspace for write buffer */
+    if((m = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
+
+    /* Select the random points for writing */
+    if(H5Sselect_elements(s, H5S_SELECT_SET, (size_t)NPOINTS, (const hsize_t *)coord) < 0) TEST_ERROR;
+
+    /* Write into dataset */
+    if(H5Dwrite(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, wbuf) < 0) TEST_ERROR;
+
+    /* Close resources */
+    if(H5Sclose(s) < 0) TEST_ERROR;
+    if(H5Sclose(m) < 0) TEST_ERROR;
+    if(H5Pclose(dcpl) < 0) TEST_ERROR;
+    if(H5Dclose(d) < 0) TEST_ERROR;
+    if(H5Fclose(file) < 0) TEST_ERROR;
+
+    /* Open third file again */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Open dataset */
     if((d = H5Dopen2(file, dname, H5P_DEFAULT)) < 0) TEST_ERROR;
@@ -6892,6 +7016,43 @@ error:
         H5Fclose(file);
     } H5E_END_TRY;
     return -1;
+} /* end test_random_chunks_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_random_chunks
+ *
+ * Purpose: Tests that write/read on randomly selected chunks 
+ *          First file:
+ *              One dataset has fixed dimensions without max. dims & H5D_ALLOC_TIME_EARLY
+ *              One dataset has fixed dimensions without max. dims & default alloc time
+ * 	    Second file:
+ *		One extendible dataset with unlimited max. dims & H5D_ALLOC_TIME_EARLY
+ *		One extendible dataset with unlimited max. dims & default alloc time
+ *	    third file:
+ *		one extendible dataset with fixed max. dims & H5D_ALLOC_TIME_EARLY
+ *		one extendible dataset with fixed max. dims & default alloc time
+ *
+ *          All the datasets in second & third files are extended before write/read operations
+ *
+ *
+ * Return: Success: 0
+ *  Failure: -1
+ *
+ * Programmer: Christian Chilan
+ *             Monday, March 26, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_random_chunks(hid_t fapl)
+{
+    int         nerrors = 0;    /* Errors in sub-tests */
+
+    nerrors += test_random_chunks_real("Write/read on randomly selected chunks w/non-implicit index", FALSE, fapl);
+    nerrors += test_random_chunks_real("Write/read on randomly selected chunks w/implicit index", TRUE, fapl);
+
+    return nerrors;;
 } /* end test_random_chunks() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -8624,20 +8785,25 @@ error:
 /*-------------------------------------------------------------------------
  * Function: test_fixed_array
  *
- * Purpose: Tests support for Fixed Array Indexing
+ * Purpose: Tests support for Fixed Array and Non-Index Indexing 
+ *
+ *	Create the following 3 datasets:
+ *	1) extendible chunked dataset with fixed max. dims
+ *	2) extendible chunked dataset with NULL max. dims
+ *	3) extendible chunked dataset with same max. dims 
+ *         (Note that the third dataset is created with bigger size for curr & max. dims 
+ *	    so that Fixed Array Indexing with paging is exercised)
+ *
  *      Repeat the following test with/without compression filter
  *              Repeat the following test with H5D_ALLOC_TIME_EARLY/H5D_ALLOC_TIME_LATE/H5D_ALLOC_TIME_INCR
- *                      For the old format, verify that v1 btree indexing type is used for all
- *                              following datasets
- *                      For the new format, verify that Fixed Array indexing type is used when
- *                              the dataset is created with the following dimension setting:
- *                                      (cur dim, max dim) (but not H5S_UNLIMITED)
- *                                      (cur dim, max dim = NULL)
- *                                      (cur dim, max dim = curr dim)
- *                      Write elements to each dataset
- *                      Read from the dataset and verify the elements read are correct
- *                      Note that the third dataset is created with fixed dimensions but with bigger size
- *                              so that Fixed Array Indexing with paging is involved
+ *                      For the old format, 
+ *				verify that v1 btree indexing type is used for 
+ *				    all 3 datasets with all settings
+ *                      For the new format:
+ *				Verify that Non-Index type is used for
+ *				    all 3 datasets when ALLOC_TIME_EARLY and compression are true
+ *				Verify Fixed Array indexing type is used for
+ *				    all 3 datasets with the other settings
  *
  * Return:      Success: 0
  *              Failure: -1
@@ -8773,7 +8939,10 @@ test_fixed_array(hid_t fapl)
 
 	    /* Chunk index type depends on whether we are using the latest version of the format */
 	    if(low == H5F_LIBVER_LATEST) {
-		if(idx_type != H5D_CHUNK_IDX_FARRAY)
+		if(alloc_time == H5D_ALLOC_TIME_EARLY && !compress) {
+		    if(idx_type != H5D_CHUNK_IDX_NONE)
+			FAIL_PUTS_ERROR("should be using Non Index as index");
+		} else if (idx_type != H5D_CHUNK_IDX_FARRAY)
 		    FAIL_PUTS_ERROR("should be using Fixed Array as index");
 	    } /* end if */
 	    else {
@@ -8808,7 +8977,10 @@ test_fixed_array(hid_t fapl)
 
 	    /* Chunk index type depends on whether we are using the latest version of the format */
 	    if(low == H5F_LIBVER_LATEST) {
-		if(idx_type != H5D_CHUNK_IDX_FARRAY)
+		if(alloc_time == H5D_ALLOC_TIME_EARLY && !compress) {
+		    if(idx_type != H5D_CHUNK_IDX_NONE)
+			FAIL_PUTS_ERROR("should be using Non Index as index");
+		} else if(idx_type != H5D_CHUNK_IDX_FARRAY)
 		    FAIL_PUTS_ERROR("should be using Fixed Array as index");
 	    } else {
 		if(idx_type != H5D_CHUNK_IDX_BTREE)
@@ -8841,7 +9013,10 @@ test_fixed_array(hid_t fapl)
 
 	    /* Chunk index type depends on whether we are using the latest version of the format */
 	    if(low == H5F_LIBVER_LATEST) {
-		if(idx_type != H5D_CHUNK_IDX_FARRAY)
+		if(alloc_time == H5D_ALLOC_TIME_EARLY && !compress) {
+		    if(idx_type != H5D_CHUNK_IDX_NONE)
+			FAIL_PUTS_ERROR("should be using Non Index as index");
+		} else if(idx_type != H5D_CHUNK_IDX_FARRAY)
 		    FAIL_PUTS_ERROR("should be using Fixed Array as index");
 	    } /* end if */
 	    else {

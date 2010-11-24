@@ -170,9 +170,14 @@ H5O_storage_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 
                 /* Check for chunk index */
                 if(flags & H5O_STORAGE_CHUNK_HAVE_CHUNK_INDEX) {
-                    /* Chunk index type */
-                    mesg->u.chunk.idx_type = (H5D_chunk_index_t)*p++;
+		    /* Chunk index type */
+		    mesg->u.chunk.idx_type = (H5D_chunk_index_t)*p++;
                     switch(mesg->u.chunk.idx_type) {
+                        case H5D_CHUNK_IDX_NONE:
+                            /* Set the chunk operations */
+			    mesg->u.chunk.ops = H5D_COPS_NONE;
+                            break;
+
                         case H5D_CHUNK_IDX_FARRAY:
                             /* Set the chunk operations */
                             mesg->u.chunk.ops = H5D_COPS_FARRAY;
@@ -272,11 +277,11 @@ H5O_storage_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p,
 
         case H5D_CHUNKED:
             {
-                /* Chunk feature flags */
-                *p++ = (uint8_t)H5O_STORAGE_CHUNK_HAVE_CHUNK_INDEX;
+		/* Chunk feature flags */
+		*p++ = (uint8_t)H5O_STORAGE_CHUNK_HAVE_CHUNK_INDEX;
 
-                /* Chunk index type */
-                *p++ = (uint8_t)mesg->u.chunk.idx_type;
+		/* Chunk index type */
+		*p++ = (uint8_t)mesg->u.chunk.idx_type;
 
                 /* Chunk index address */
                 H5F_addr_encode(f, &p, mesg->u.chunk.idx_addr);
@@ -634,6 +639,11 @@ H5O_storage_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                               "Index Type:", "v1 B-tree");
                     break;
 
+                case H5D_CHUNK_IDX_NONE:
+                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                              "Index Type:", "None");
+                    break;
+
                 case H5D_CHUNK_IDX_FARRAY:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "Fixed Array");
@@ -730,7 +740,7 @@ H5O_storage_meta_size(const H5F_t *f, const H5O_storage_t *storage,
         case H5D_CHUNKED:
             ret_value += 1 +                    /* Chunk feature flags */
                          1;                     /* Chunk index type */
-            ret_value += H5F_SIZEOF_ADDR(f);    /* Chunk index address */
+            ret_value += H5F_SIZEOF_ADDR(f);    /* Chunk index address or data address */
             break;
 
         default:

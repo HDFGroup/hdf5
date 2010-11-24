@@ -306,6 +306,9 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                     mesg->storage.u.chunk.idx_type = mesg->u.chunk.idx_type;
 
                     switch(mesg->u.chunk.idx_type) {
+			case H5D_CHUNK_IDX_NONE:       /* Non Index */
+			    break;
+
                         case H5D_CHUNK_IDX_FARRAY:
                             /* Fixed array creation parameters */
                             mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits = *p++;
@@ -482,6 +485,9 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
                 *p++ = (uint8_t)mesg->u.chunk.idx_type;
 
                 switch(mesg->u.chunk.idx_type) {
+		    case H5D_CHUNK_IDX_NONE:       /* Non Index */
+                        break;
+
                     case H5D_CHUNK_IDX_FARRAY:
                         /* Fixed array creation parameters */
                         *p++ = mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits;
@@ -929,6 +935,11 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                 case H5D_CHUNK_IDX_BTREE:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "v1 B-tree");
+                    break;
+
+                case H5D_CHUNK_IDX_NONE:
+                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                              "Index Type:", "None");
                     break;
 
                 case H5D_CHUNK_IDX_FARRAY:

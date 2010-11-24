@@ -564,6 +564,7 @@ H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_CHUNK[1];
 
 /* Chunked layout operations */
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_NONE[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_EARRAY[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_FARRAY[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BT2[1];
@@ -623,9 +624,9 @@ H5_DLL herr_t H5D_layout_set_io_ops(const H5D_t *dataset);
 H5_DLL size_t H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout,
     hbool_t include_compact_data);
 H5_DLL herr_t H5D_layout_set_latest_version(H5O_layout_t *layout,
-    const H5S_t *space);
+    const H5S_t *space, const H5D_dcpl_cache_t *dcpl_cache);
 H5_DLL herr_t H5D_layout_set_latest_indexing(H5O_layout_t *layout,
-    const H5S_t *space);
+    const H5S_t *space, const H5D_dcpl_cache_t *dcpl_cache);
 H5_DLL herr_t H5D_layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh,
     H5D_t *dset, hid_t dapl_id);
 H5_DLL herr_t H5D_layout_oh_read(H5D_t *dset, hid_t dxpl_id, hid_t dapl_id,

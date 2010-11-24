@@ -101,6 +101,10 @@ H5D_layout_set_io_ops(const H5D_t *dataset)
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_BTREE;
                     break;
 
+                case H5D_CHUNK_IDX_NONE:
+                    dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_NONE;
+                    break;
+
                 case H5D_CHUNK_IDX_FARRAY:
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_FARRAY;
                     break;
@@ -213,6 +217,10 @@ H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include
                 ret_value++;
 
                 switch(layout->u.chunk.idx_type) {
+                    case H5D_CHUNK_IDX_NONE:
+			/* nothing */
+			break;
+
                     case H5D_CHUNK_IDX_FARRAY:
                         /* Fixed array creation parameters */
                         ret_value += H5D_FARRAY_CREATE_PARAM_SIZE;
@@ -260,7 +268,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
+H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space, 
+    const H5D_dcpl_cache_t *dcpl_cache)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -268,12 +277,14 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
 
     /* Sanity check */
     HDassert(layout);
+    HDassert(space);
+    HDassert(dcpl_cache);
 
     /* Set encoding of layout to latest version */
     layout->version = H5O_LAYOUT_VERSION_LATEST;
 
     /* Set the latest indexing type for the layout message */
-    if(H5D_layout_set_latest_indexing(layout, space) < 0)
+    if(H5D_layout_set_latest_indexing(layout, space, dcpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest indexing type")
 
 done:
@@ -295,7 +306,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space)
+H5D_layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, 
+    const H5D_dcpl_cache_t *dcpl_cache)
 {
     int sndims;                         /* Rank of dataspace */
     unsigned ndims;                     /* Rank of dataspace */
@@ -305,6 +317,8 @@ H5D_layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space)
 
     /* Sanity check */
     HDassert(layout);
+    HDassert(space);
+    HDassert(dcpl_cache);
 
     /* Query the dimensionality of the dataspace */
     if((sndims = H5S_GET_EXTENT_NDIMS(space)) < 0)
@@ -347,7 +361,8 @@ H5D_layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space)
 		layout->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs = H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS;
 		layout->u.chunk.u.earray.cparam.data_blk_min_elmts = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
 		layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits = H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
-	    } else { /* Chunked dataset with > 1 unlimited dimensions */
+	    } /* end if */
+            else { /* Chunked dataset with > 1 unlimited dimensions */
                 /* Set the chunk index type to v2 B-tree */
                 layout->u.chunk.idx_type = H5D_CHUNK_IDX_BT2;
                 layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BT2;
@@ -357,20 +372,33 @@ H5D_layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space)
 		layout->u.chunk.u.btree2.cparam.node_size = H5D_BT2_NODE_SIZE;
 		layout->u.chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
 		layout->u.chunk.u.btree2.cparam.merge_percent =  H5D_BT2_MERGE_PERC;
-            }
-        } else if(layout->type == H5D_CHUNKED) {
-	    /* Chunked dataset with fixed dimensions (with or without max. dimension setting)  */
-            /* Set the chunk index type to Fixed Array */
-            layout->u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
-            layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
-            layout->storage.u.chunk.ops = H5D_COPS_FARRAY;
+            } /* end else */
+        } /* end if */
+        else
+            /* Chunked dataset with fixed dimensions */
+            if(layout->type == H5D_CHUNKED) {
+                /* Check for correct condition for using "implicit" chunk index */
+                if(!dcpl_cache->pline.nused && 
+                        dcpl_cache->fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
 
-            /* Set the fixed array creation parameters */
-            /* (use hard-coded defaults for now, until we give applications
-             *          control over this with a property list - QAK)
-             */
-            layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits = H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
-	} /* end if */
+                    /* Set the chunk index type to Non Index */
+                    layout->u.chunk.idx_type = H5D_CHUNK_IDX_NONE;
+                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_NONE;
+                    layout->storage.u.chunk.ops = H5D_COPS_NONE;
+                } /* end if */
+                else { /* Used Fixed Array */
+                    /* Set the chunk index type to Fixed Array */
+                    layout->u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
+                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
+                    layout->storage.u.chunk.ops = H5D_COPS_FARRAY;
+
+                    /* Set the fixed array creation parameters */
+                    /* (use hard-coded defaults for now, until we give applications
+                     *          control over this with a property list - QAK)
+                     */
+                    layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits = H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
+                } /* end else */
+            } /* end if */
     } /* end if */
 
 done:

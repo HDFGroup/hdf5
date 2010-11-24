@@ -104,29 +104,30 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Dcontig.lo H5Ddbg.lo H5Ddeprec.lo H5Dearray.lo H5Defl.lo \
 	H5Dfarray.lo H5Dfill.lo H5Dint.lo H5Dio.lo H5Dlayout.lo \
 	H5Dmpio.lo H5Doh.lo H5Dproxy.lo H5Dscatgath.lo H5Dselect.lo \
-	H5Dtest.lo H5E.lo H5Edeprec.lo H5Eint.lo H5EA.lo H5EAcache.lo \
-	H5EAdbg.lo H5EAdblkpage.lo H5EAdblock.lo H5EAhdr.lo \
-	H5EAiblock.lo H5EAint.lo H5EAsblock.lo H5EAstat.lo H5EAtest.lo \
-	H5F.lo H5Faccum.lo H5Fdbg.lo H5Fdeprec.lo H5Ffake.lo H5Fio.lo \
-	H5Fmount.lo H5Fmpi.lo H5Fquery.lo H5Fsfile.lo H5Fsuper.lo \
-	H5Fsuper_cache.lo H5Ftest.lo H5FA.lo H5FAcache.lo H5FAdbg.lo \
-	H5FAdblock.lo H5FAdblkpage.lo H5FAhdr.lo H5FAstat.lo \
-	H5FAtest.lo H5FD.lo H5FDcore.lo H5FDdirect.lo H5FDfamily.lo \
-	H5FDint.lo H5FDlog.lo H5FDmpi.lo H5FDmpio.lo H5FDmpiposix.lo \
-	H5FDmulti.lo H5FDsec2.lo H5FDspace.lo H5FDstdio.lo H5FL.lo \
-	H5FO.lo H5FS.lo H5FScache.lo H5FSdbg.lo H5FSsection.lo \
-	H5FSstat.lo H5FStest.lo H5G.lo H5Gbtree2.lo H5Gcache.lo \
-	H5Gcompact.lo H5Gdense.lo H5Gdeprec.lo H5Gent.lo H5Gint.lo \
-	H5Glink.lo H5Gloc.lo H5Gname.lo H5Gnode.lo H5Gobj.lo H5Goh.lo \
-	H5Groot.lo H5Gstab.lo H5Gtest.lo H5Gtraverse.lo H5HF.lo \
-	H5HFbtree2.lo H5HFcache.lo H5HFdbg.lo H5HFdblock.lo \
-	H5HFdtable.lo H5HFhdr.lo H5HFhuge.lo H5HFiblock.lo H5HFiter.lo \
-	H5HFman.lo H5HFsection.lo H5HFspace.lo H5HFstat.lo H5HFtest.lo \
-	H5HFtiny.lo H5HG.lo H5HGcache.lo H5HGdbg.lo H5HL.lo \
-	H5HLcache.lo H5HLdbg.lo H5HLint.lo H5HP.lo H5I.lo H5Itest.lo \
-	H5L.lo H5Lexternal.lo H5lib_settings.lo H5MF.lo H5MFaggr.lo \
-	H5MFdbg.lo H5MFsection.lo H5MM.lo H5MP.lo H5MPtest.lo H5O.lo \
-	H5Oainfo.lo H5Oalloc.lo H5Oattr.lo H5Oattribute.lo H5Obogus.lo \
+	H5Dtest.lo H5Dnone.lo H5E.lo H5Edeprec.lo H5Eint.lo H5EA.lo \
+	H5EAcache.lo H5EAdbg.lo H5EAdblkpage.lo H5EAdblock.lo \
+	H5EAhdr.lo H5EAiblock.lo H5EAint.lo H5EAsblock.lo H5EAstat.lo \
+	H5EAtest.lo H5F.lo H5Faccum.lo H5Fdbg.lo H5Fdeprec.lo \
+	H5Ffake.lo H5Fio.lo H5Fmount.lo H5Fmpi.lo H5Fquery.lo \
+	H5Fsfile.lo H5Fsuper.lo H5Fsuper_cache.lo H5Ftest.lo H5FA.lo \
+	H5FAcache.lo H5FAdbg.lo H5FAdblock.lo H5FAdblkpage.lo \
+	H5FAhdr.lo H5FAstat.lo H5FAtest.lo H5FD.lo H5FDcore.lo \
+	H5FDdirect.lo H5FDfamily.lo H5FDint.lo H5FDlog.lo H5FDmpi.lo \
+	H5FDmpio.lo H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo \
+	H5FDspace.lo H5FDstdio.lo H5FL.lo H5FO.lo H5FS.lo H5FScache.lo \
+	H5FSdbg.lo H5FSsection.lo H5FSstat.lo H5FStest.lo H5G.lo \
+	H5Gbtree2.lo H5Gcache.lo H5Gcompact.lo H5Gdense.lo \
+	H5Gdeprec.lo H5Gent.lo H5Gint.lo H5Glink.lo H5Gloc.lo \
+	H5Gname.lo H5Gnode.lo H5Gobj.lo H5Goh.lo H5Groot.lo H5Gstab.lo \
+	H5Gtest.lo H5Gtraverse.lo H5HF.lo H5HFbtree2.lo H5HFcache.lo \
+	H5HFdbg.lo H5HFdblock.lo H5HFdtable.lo H5HFhdr.lo H5HFhuge.lo \
+	H5HFiblock.lo H5HFiter.lo H5HFman.lo H5HFsection.lo \
+	H5HFspace.lo H5HFstat.lo H5HFtest.lo H5HFtiny.lo H5HG.lo \
+	H5HGcache.lo H5HGdbg.lo H5HL.lo H5HLcache.lo H5HLdbg.lo \
+	H5HLint.lo H5HP.lo H5I.lo H5Itest.lo H5L.lo H5Lexternal.lo \
+	H5lib_settings.lo H5MF.lo H5MFaggr.lo H5MFdbg.lo \
+	H5MFsection.lo H5MM.lo H5MP.lo H5MPtest.lo H5O.lo H5Oainfo.lo \
+	H5Oalloc.lo H5Oattr.lo H5Oattribute.lo H5Obogus.lo \
 	H5Obtreek.lo H5Ocache.lo H5Ochunk.lo H5Ocont.lo H5Ocopy.lo \
 	H5Odbg.lo H5Odrvinfo.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo \
 	H5Oflush.lo H5Ofsinfo.lo H5Oginfo.lo H5Olayout.lo H5Olinfo.lo \
@@ -481,7 +482,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5D.c H5Dbtree.c H5Dbtree2.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
         H5Ddeprec.c H5Dearray.c H5Defl.c H5Dfarray.c H5Dfill.c H5Dint.c \
         H5Dio.c H5Dlayout.c H5Dmpio.c H5Doh.c H5Dproxy.c H5Dscatgath.c \
-        H5Dselect.c H5Dtest.c \
+        H5Dselect.c H5Dtest.c H5Dnone.c \
         H5E.c H5Edeprec.c H5Eint.c \
         H5EA.c H5EAcache.c H5EAdbg.c H5EAdblkpage.c H5EAdblock.c H5EAhdr.c \
         H5EAiblock.c H5EAint.c H5EAsblock.c H5EAstat.c H5EAtest.c \
@@ -718,6 +719,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dlayout.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dmpio.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dnone.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Doh.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dproxy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dscatgath.Plo@am__quote@
