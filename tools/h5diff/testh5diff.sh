@@ -176,6 +176,13 @@ STDOUT_FILTER() {
 #    LA-MPI: *** Copyright 2001-2004, ACL, Los Alamos National Laboratory
 # 3. h5diff debug output:
 #    Debug output all have prefix "h5diff debug: ".
+# 4. AIX system prints messages like these when it is aborting:
+#    ERROR: 0031-300  Forcing all remote tasks to exit due to exit code 1 in task 0
+#    ERROR: 0031-250  task 4: Terminated
+#    ERROR: 0031-250  task 3: Terminated
+#    ERROR: 0031-250  task 2: Terminated
+#    ERROR: 0031-250  task 1: Terminated
+
 STDERR_FILTER() {
     result_file=$1
     tmp_file=/tmp/h5test_tmp_$$
@@ -187,9 +194,10 @@ STDERR_FILTER() {
     fi
     # Filter LANL MPI messages
     # and LLNL srun messages
+    # and AIX error messages
     if test -n "$pmode"; then
 	cp $result_file $tmp_file
-	sed -e '/^LA-MPI:/d' -e '/^srun:/d' \
+	sed -e '/^LA-MPI:/d' -e '/^srun:/d' -e '/^ERROR:/d' \
 	    < $tmp_file > $result_file
     fi
     # Filter h5diff debug output
