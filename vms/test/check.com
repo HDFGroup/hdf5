@@ -26,6 +26,11 @@ $ run  testhdf5
 $ type sys$input
 
 $ type sys$input
+-------			Running accum     	-------
+$ run  accum
+$ type sys$input
+
+$ type sys$input
 -------			Running app_ref    	-------
 $ run  app_ref 
 $ type sys$input
@@ -36,7 +41,7 @@ $ run  big
 $ type sys$input
 
 $ type sys$input
--------			Running bittest    	-------
+-------			Running bittests    	-------
 $ run  bittests
 $ type sys$input
 

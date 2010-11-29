@@ -41,6 +41,13 @@ $ link     testhdf5,tarray,tattr,tcheck_version,tchecksum,tconfig, -
            tselect,tskiplist,tsohm,ttime,ttst,tunicode,tvlstr,tvltypes, -
            libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $
+$! a new test
+$ type sys$input
+       Creating accum test
+$ ccc  accum
+$ link accum, -
+       libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$!
 $ type sys$input
        Creating app_ref test
 $ ccc  app_ref
