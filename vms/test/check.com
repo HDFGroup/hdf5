@@ -116,6 +116,11 @@ $ run  fillval
 $ type sys$input
 
 $ type sys$input
+-------			Running filter_fail    	-------
+$ run  filter_fail
+$ type sys$input
+
+$ type sys$input
 -------			Running flush1     	-------
 $ run  flush1
 $ type sys$input
@@ -158,6 +163,11 @@ $ type sys$input
 $ type sys$input
 -------			Running links    	-------
 $ run  links
+$ type sys$input
+
+$ type sys$input
+-------			Running links_env    	-------
+$ run  links_env
 $ type sys$input
 
 $ type sys$input
@@ -206,8 +216,18 @@ $ run  set_extent
 $ type sys$input
 
 $ type sys$input
+-------			Running space_overflow 	-------
+$ run  space_overflow
+$ type sys$input
+
+$ type sys$input
 -------			Running stab    	-------
 $ run  stab
+$ type sys$input
+
+$ type sys$input
+-------			Running testmeta    	-------
+$ run  testmeta
 $ type sys$input
 
 $ type sys$input
