@@ -26,6 +26,8 @@ FOREACH (example ${examples})
   TARGET_WIN_PROPERTIES (cpp_ex_${example})
   TARGET_LINK_LIBRARIES (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
 
-  ADD_TEST (NAME cpp_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
+  IF (BUILD_TESTING)
+    ADD_TEST (NAME cpp_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
+  ENDIF (BUILD_TESTING)
 
 ENDFOREACH (example ${examples})
