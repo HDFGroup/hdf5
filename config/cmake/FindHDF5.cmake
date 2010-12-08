@@ -63,7 +63,8 @@ FIND_PATH (HDF5_ROOT_DIR "hdf5-config.cmake"
     HINTS ${_HDF5_HINTS}
     PATHS ${_HDF5_PATHS}
     PATH_SUFFIXES
-        lib/cmake/hdf5-1.8.6
+        lib/cmake/hdf5-1.9
+        share/cmake/hdf5-1.9
 )
 
 FIND_PATH (HDF5_INCLUDE_DIRS "H5public.h"

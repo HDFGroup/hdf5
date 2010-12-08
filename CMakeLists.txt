@@ -33,8 +33,8 @@ PROJECT (HDF5 C CXX)
 #   name conflicts with system versions, then a prefix may be added
 #   to ensure that the correct versions configured are used.
 #
-# HDF5_INSTALL_BIN_DIR, HDF5_INSTALL_LIB_DIR, HDF5_INSTALL_INCLUDE_DIR :
-#   Customize the 'bin', 'lib', and 'include' installation directories.
+# HDF5_INSTALL_BIN_DIR, HDF5_INSTALL_LIB_DIR, HDF5_INSTALL_INCLUDE_DIR, HDF5_INSTALL_DATA_DIR :
+#   Customize the 'bin', 'lib', 'include', and 'share' installation directories.
 #
 # HDF5_INSTALL_NO_DEVELOPMENT :
 #   Set to true to skip installation of headers and CMake package files.
@@ -133,9 +133,9 @@ SET (HDF5_PERFORM_SRC_DIR    ${HDF5_SOURCE_DIR}/perform)
 SET (HDF5_F90_SRC_DIR        ${HDF5_SOURCE_DIR}/fortran)
 
 # set default prefix location
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  SET(CMAKE_INSTALL_PREFIX "hdf5" CACHE PATH "Install path prefix, prepended onto install directories" FORCE)
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+#IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+#  SET(CMAKE_INSTALL_PREFIX "hdf5" CACHE PATH "Install path prefix, prepended onto install directories" FORCE)
+#ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 IF (NOT HDF5_INSTALL_BIN_DIR)
   SET (HDF5_INSTALL_BIN_DIR bin)
@@ -146,6 +146,9 @@ ENDIF (NOT HDF5_INSTALL_LIB_DIR)
 IF (NOT HDF5_INSTALL_INCLUDE_DIR)
   SET (HDF5_INSTALL_INCLUDE_DIR include)
 ENDIF (NOT HDF5_INSTALL_INCLUDE_DIR)
+IF (NOT HDF5_INSTALL_DATA_DIR)
+  SET (HDF5_INSTALL_DATA_DIR share)
+ENDIF (NOT HDF5_INSTALL_DATA_DIR)
 
 #-----------------------------------------------------------------------------
 # parse the full version number from H5public.h and include in H5_VERS_INFO
@@ -929,7 +932,7 @@ ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   INSTALL (
       EXPORT ${HDF5_EXPORTED_TARGETS}
-      DESTINATION ${HDF5_INSTALL_LIB_DIR}/cmake/hdf5-${HDF5_PACKAGE_VERSION}
+      DESTINATION ${HDF5_INSTALL_DATA_DIR}/cmake/hdf5-${HDF5_PACKAGE_VERSION}
       FILE hdf5-targets.cmake
   )
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
@@ -970,7 +973,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   )
   INSTALL (
       FILES ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config.cmake
-      DESTINATION ${HDF5_INSTALL_LIB_DIR}/cmake/hdf5-${HDF5_PACKAGE_VERSION}
+      DESTINATION ${HDF5_INSTALL_DATA_DIR}/cmake/hdf5-${HDF5_PACKAGE_VERSION}
   )
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 
@@ -984,8 +987,53 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   )
   INSTALL (
       FILES ${HDF5_BINARY_DIR}/CMakeFiles/hdf5-config-version.cmake
-      DESTINATION ${HDF5_INSTALL_LIB_DIR}/cmake/hdf5-${HDF5_PACKAGE_VERSION}
+      DESTINATION ${HDF5_INSTALL_DATA_DIR}/cmake/hdf5-${HDF5_PACKAGE_VERSION}
   )
+ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
+
+#-----------------------------------------------------------------------------
+# Add Document File(s) to CMake Install
+#-----------------------------------------------------------------------------
+IF (NOT HDF5_EXTERNALLY_CONFIGURED)
+  INSTALL (
+      FILES
+          ${HDF5_SOURCE_DIR}/ACKNOWLEDGMENTS
+          ${HDF5_SOURCE_DIR}/COPYING
+          ${HDF5_SOURCE_DIR}/README.txt
+      DESTINATION ${HDF5_INSTALL_DATA_DIR}
+  )
+  IF (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
+    SET (release_files
+        ${HDF5_SOURCE_DIR}/release_docs/CMake.txt
+        ${HDF5_SOURCE_DIR}/release_docs/COPYING
+        ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_8.txt
+        ${HDF5_SOURCE_DIR}/release_docs/INSTALL
+        ${HDF5_SOURCE_DIR}/release_docs/RELEASE.txt
+    )
+    IF (WIN32 AND NOT CYGWIN)
+      SET (release_files
+          ${release_files}
+          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.txt
+      )
+    ELSE (WIN32 AND NOT CYGWIN)
+      SET (release_files
+          ${release_files}
+          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_cygwin.txt
+          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_MinGW.txt
+          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_VMS.txt
+      )
+    ENDIF (WIN32 AND NOT CYGWIN)
+    IF (HDF5_ENABLE_PARALLEL)
+      SET (release_files
+          ${release_files}
+          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_parallel.txt
+      )
+    ENDIF (HDF5_ENABLE_PARALLEL)
+    INSTALL (
+        FILES ${release_files}
+        DESTINATION ${HDF5_INSTALL_DATA_DIR}/release_docs
+    )
+  ENDIF (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 
 #-----------------------------------------------------------------------------
@@ -994,6 +1042,7 @@ ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   SET (CPACK_PACKAGE_VENDOR "The HDF Group")
   SET (CPACK_PACKAGE_NAME "${HDF5_PACKAGE_NAME}")
+  SET (CPACK_PACKAGE_INSTALL_DIRECTORY "${HDF5_PACKAGE_NAME}")
   SET (CPACK_PACKAGE_VERSION "${HDF5_PACKAGE_VERSION}")
   SET (CPACK_PACKAGE_VERSION_MAJOR "${HDF5_PACKAGE_VERSION_MAJOR}")
   SET (CPACK_PACKAGE_VERSION_MINOR "${HDF5_PACKAGE_VERSION_MINOR}")
@@ -1003,6 +1052,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   ENDIF (EXISTS "${HDF5_SOURCE_DIR}/release_docs")
   
   IF (WIN32)
+    SET (CPACK_NSIS_MODIFY_PATH ON)
     SET (CPACK_NSIS_PACKAGE_NAME "HDF5 ${HDF5_PACKAGE_VERSION}")
   ENDIF (WIN32)
   
