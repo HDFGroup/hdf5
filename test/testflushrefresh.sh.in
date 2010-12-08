@@ -33,7 +33,27 @@
 ## test variables
 ###############################################################################
 
+# Number of errors encountered during test run.
 nerrors=0
+
+# Set up a function to check the current time since the epoch - ideally, we'd
+# like to use Perl. If it wasn't detected by configure, then use date, though
+# this is less portable and might cause problems on machines that don't
+# recognize the +%s option (like Solaris).
+PERL=@PERL@
+if test -n "$PERL"; then
+    TimeStamp()
+    {
+        time=`${PERL} -e 'print int(time)'`
+        echo "$time"
+    }
+else
+    TimeStamp()
+    {
+        time=`date +%s`
+        echo "$time"
+    }
+fi
 
 ###############################################################################
 ## Main
@@ -65,9 +85,9 @@ verification_done=0
 until [ $verification_done -eq 1 ]; do
    
   # Wait for signal from test program that verification routine can run.
-  before=`date +%s`
+  before=`TimeStamp`
   until [ -s $startsignal ]; do
-    after=`date +%s`
+    after=`TimeStamp`
     timediff=`expr $after - $before`
     if [ $timediff -gt $timeout_length ]; then   
         nerrors=`expr $nerrors + 1`
@@ -83,8 +103,8 @@ until [ $verification_done -eq 1 ]; do
   fi
 
   # Read in test routine parameters from signal file, then delete signal file.
-  param1=`head -n 1 $startsignal`
-  param2=`tail -n 1 $startsignal`
+  param1=`head -1 $startsignal`
+  param2=`tail -1 $startsignal`
   rm $startsignal
 
   # Check if we're done with verifications, otherwise run the specified verification.
@@ -105,9 +125,9 @@ if [ $timedout -eq 0 ]; then
   until [ $verification_done -eq 2 ]; do
 
     # Wait for signal from test program that verification routine can run.
-    before=`date +%s`
+    before=`TimeStamp`
     until [ -s $startsignal ]; do
-      after=`date +%s`
+      after=`TimeStamp`
       timediff=`expr $after - $before`
       if [ $timediff -gt $timeout_length ]; then   
           nerrors=`expr $nerrors + 1`

@@ -1174,11 +1174,26 @@ error:
  */
 void send_signal(const char * send, const char * arg1, const char * arg2)
 {
-    FILE *signalfile;
+
+    FILE *signalfile = NULL;
 
     /* Create signal file (which will send signal to some other process) */
     signalfile = fopen(send, "w+");
-    HDfprintf(signalfile, "%s\n%s\n", arg1, arg2);
+
+    /* Write messages to signal file, if provided */
+    if (arg2 != NULL) {
+        HDassert(arg1);
+        HDfprintf(signalfile, "%s\n%s\n", arg1, arg2);
+    } /* end if */
+    else if (arg1 != NULL) {
+        HDassert(arg2 == NULL);
+        HDfprintf(signalfile, "%s\n", arg1);
+    } /* end if */ 
+    else {
+        HDassert(arg1 == NULL);
+        HDassert(arg2 == NULL);
+    }/* end else */
+
     HDfflush(signalfile);
     HDfclose(signalfile);
 

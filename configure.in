@@ -610,13 +610,8 @@ dnl Change back to the C language
 AC_LANG_POP(C++)
 
 dnl ----------------------------------------------------------------------
-dnl Check if they have Perl installed on their system. We only need Perl
-dnl if they're using a GNU compiler.
-dnl
-AC_SUBST([PERL]) PERL=""
-if test "X$GCC" = "Xyes"; then
-  AC_CHECK_PROGS([PERL], [perl],, [$PATH])
-fi
+dnl Check if they have Perl installed on their system.
+AC_CHECK_PROGS([PERL], [perl],, [$PATH])
 
 
 dnl ----------------------------------------------------------------------
