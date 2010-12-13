@@ -1006,7 +1006,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
     SET (release_files
         ${HDF5_SOURCE_DIR}/release_docs/CMake.txt
         ${HDF5_SOURCE_DIR}/release_docs/COPYING
-        ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_8.txt
+        ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_9.txt
         ${HDF5_SOURCE_DIR}/release_docs/INSTALL
         ${HDF5_SOURCE_DIR}/release_docs/RELEASE.txt
     )
