@@ -188,7 +188,7 @@
 /* Define to 1 if you have the `gettimeofday' function declared in time.h . */
 #cmakedefine H5_HAVE_TIME_GETTIMEOFDAY @H5_HAVE_TIME_GETTIMEOFDAY@
 
-/* Define to 1 if you have the `gettimeofday' function declared in time.h . */
+/* Define to 1 if you have the `gettimeofday' function declared in sys/time.h . */
 #cmakedefine H5_HAVE_SYS_TIME_GETTIMEOFDAY @H5_HAVE_SYS_TIME_GETTIMEOFDAY@
 
 /* Define to 1 if you have the `get_fpc_csr' function. */
