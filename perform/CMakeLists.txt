@@ -39,6 +39,24 @@ TARGET_LINK_LIBRARIES (h5perf_serial ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET}
 
 ADD_TEST (NAME h5perf_serial COMMAND $<TARGET_FILE:h5perf_serial>)
 
+IF (HDF5_BUILD_PERFORM_STANDALONE)
+  #-- Adding test for h5perf_serial_alone
+  SET (h5perf_serial_alone_SRCS
+      ${HDF5_PERFORM_SOURCE_DIR}/sio_timer.c
+      ${HDF5_PERFORM_SOURCE_DIR}/sio_perf.c
+      ${HDF5_PERFORM_SOURCE_DIR}/sio_engine.c
+  )
+  ADD_EXECUTABLE (h5perf_serial_alone ${h5perf_serial_alone_SRCS})
+  SET_PROPERTY (TARGET h5perf_serial_alone 
+      APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE
+  )
+  H5_NAMING (h5perf_serial_alone)
+  TARGET_WIN_PROPERTIES (h5perf_serial_alone)
+  TARGET_LINK_LIBRARIES (h5perf_serial_alone ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+
+  ADD_TEST (NAME h5perf_serial_alone COMMAND $<TARGET_FILE:h5perf_serial_alone>)
+ENDIF (HDF5_BUILD_PERFORM_STANDALONE)
+
 #-- Adding test for chunk
 SET (chunk_SRCS
     ${HDF5_PERFORM_SOURCE_DIR}/chunk.c
@@ -107,6 +125,24 @@ IF (H5_HAVE_PARALLEL)
   TARGET_LINK_LIBRARIES (h5perf ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME h5perf COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:h5perf>)
+
+  IF (HDF5_BUILD_PERFORM_STANDALONE)
+    #-- Adding test for h5perf
+    SET (h5perf_alone_SRCS
+        ${HDF5_PERFORM_SOURCE_DIR}/pio_timer.c
+        ${HDF5_PERFORM_SOURCE_DIR}/pio_perf.c
+        ${HDF5_PERFORM_SOURCE_DIR}/pio_engine.c
+    )
+    ADD_EXECUTABLE (h5perf_alone ${h5perf_alone_SRCS})
+    SET_PROPERTY (TARGET h5perf_alone 
+        APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE
+    )
+    H5_NAMING (h5perf_alone)
+    TARGET_WIN_PROPERTIES (h5perf_alone)
+    TARGET_LINK_LIBRARIES (h5perf_alone ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+    ADD_TEST (NAME h5perf_alone COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:h5perf_alone>)
+  ENDIF (HDF5_BUILD_PERFORM_STANDALONE)
 
   #-- Adding test for benchpar
   SET (benchpar_SRCS
