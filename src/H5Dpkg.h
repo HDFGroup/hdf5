@@ -94,6 +94,16 @@ typedef struct H5D_type_info_t {
     hbool_t bkg_buf_allocated;          /* Whether the background buffer was allocated */
 } H5D_type_info_t;
 
+/* Typedef for udata struct shared between functions when comparing datasets */
+typedef struct H5D_cmp_ud_t {
+    hbool_t fill_identical;     /* Whether the fill values are identical */
+    const H5O_pline_t *pline1;  /* Pipeline for dataset "1" */
+    const H5O_pline_t *pline2;  /* Pipeline for dataset "2" */
+    H5S_t *space;               /* Dataspace (must be the same for datasets 1 and 2) */
+    haddr_t addr1;              /* Address for dataset 1 */
+    haddr_t addr2;              /* Address for dataset 2 */
+} H5D_cmp_ud_t;
+
 /* Forward declaration of structs used below */
 struct H5D_io_info_t;
 struct H5D_chunk_map_t;
@@ -121,6 +131,9 @@ typedef ssize_t (*H5D_layout_writevv_func_t)(const struct H5D_io_info_t *io_info
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 typedef herr_t (*H5D_layout_flush_func_t)(H5D_t *dataset, hid_t dxpl_id);
 typedef herr_t (*H5D_layout_io_term_func_t)(const struct H5D_chunk_map_t *cm);
+typedef htri_t (*H5D_layout_compare_func_t)(const H5F_t *f1, const H5F_t *f2,
+    const H5O_layout_t *layout1, const H5O_layout_t *layout2,
+    hid_t dxpl1_id, hid_t dxpl2_id, H5D_cmp_ud_t *udata);
 
 /* Typedef for grouping layout I/O routines */
 typedef struct H5D_layout_ops_t {
@@ -138,6 +151,7 @@ typedef struct H5D_layout_ops_t {
     H5D_layout_writevv_func_t writevv;  /* Low-level I/O routine for writing data */
     H5D_layout_flush_func_t flush;      /* Low-level I/O routine for flushing raw data */
     H5D_layout_io_term_func_t io_term;  /* I/O shutdown routine */
+    H5D_layout_compare_func_t compare;  /* Data comparison routine */
 } H5D_layout_ops_t;
 
 /* Function pointers for either multiple or single block I/O access */

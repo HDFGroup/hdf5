@@ -1063,6 +1063,54 @@ done:
 } /* end H5S_read() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:    H5S_read_oh
+ *
+ * Purpose:     Reads the dataspace from an object header.
+ *
+ * Return:      Success:        Pointer to a new dataspace.
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Robb Matzke
+ *              Tuesday, December  9, 1997
+ *
+ *-------------------------------------------------------------------------
+ */
+H5S_t *
+H5S_read_oh(const H5F_t *f, const H5O_t *oh, hid_t dxpl_id)
+{
+    H5S_t          *ds = NULL;          /* Dataspace to return */
+    H5S_t          *ret_value;          /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_read_oh, NULL)
+
+    /* check args */
+    HDassert(oh);
+
+    if(NULL == (ds = H5FL_CALLOC(H5S_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    if(H5O_msg_read_oh(f, dxpl_id, oh, H5O_SDSPACE_ID, &(ds->extent)) == NULL)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header")
+
+    /* Default to entire dataspace being selected */
+    if(H5S_select_all(ds, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
+
+    /* Set the value for successful return */
+    ret_value = ds;
+
+done:
+    if(ret_value == NULL) {
+        if(ds != NULL)
+            ds = H5FL_FREE(H5S_t, ds);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_read_oh() */
+
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_is_simple

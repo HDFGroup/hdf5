@@ -186,6 +186,9 @@ static herr_t H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *typ
     H5D_chunk_map_t *fm);
 static herr_t H5D_chunk_flush(H5D_t *dset, hid_t dxpl_id);
 static herr_t H5D_chunk_io_term(const H5D_chunk_map_t *fm);
+static htri_t H5D_chunk_compare(const H5F_t *f1, const H5F_t *f2,
+    const H5O_layout_t *layout1, const H5O_layout_t *layout2, hid_t dxpl1_id,
+    hid_t dxpl2_id, H5D_cmp_ud_t *udata);
 
 /* "Nonexistent" layout operation callback */
 static ssize_t
@@ -237,7 +240,8 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     NULL,
     NULL,
     H5D_chunk_flush,
-    H5D_chunk_io_term
+    H5D_chunk_io_term,
+    H5D_chunk_compare
 }};
 
 
@@ -258,6 +262,7 @@ const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {{
     NULL,
 #endif /* H5_HAVE_PARALLEL */
     H5D_nonexistent_readvv,
+    NULL,
     NULL,
     NULL,
     NULL
@@ -5044,4 +5049,195 @@ H5D_nonexistent_readvv(const H5D_io_info_t *io_info,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_nonexistent_readvv() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_chunk_compare
+ *
+ * Purpose:     fnord
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, December 3, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5D_chunk_compare(const H5F_t *f1, const H5F_t *f2,
+    const H5O_layout_t *layout1, const H5O_layout_t *layout2, hid_t dxpl1_id,
+    hid_t dxpl2_id, H5D_cmp_ud_t *udata)
+{
+    void        *buf1 = NULL;
+    void        *buf2 = NULL;
+    size_t      buf_size = 0;
+    H5D_chk_idx_info_t idx_info1;       /* Chunked index info */
+    H5D_chk_idx_info_t idx_info2;       /* Chunked index info */
+    hbool_t     idx_info1_init = FALSE;
+    hbool_t     idx_info2_init = FALSE;
+    H5D_chunk_ud_t chk_udata1;
+    H5D_chunk_ud_t chk_udata2;
+    int         space_ndims;            /* Dataset's space rank */
+    hsize_t     space_dim[H5O_LAYOUT_NDIMS]; /* Current dataspace dimensions */
+    hsize_t     chunk_offset[H5O_LAYOUT_NDIMS]; /* Offset of current chunk */
+    hbool_t     carry = FALSE;          /* Flag to indicate that chunk increment carries to higher dimension (sorta) */
+    int         i;
+    htri_t      ret_value = FALSE;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_chunk_compare, FAIL)
+
+    /* Sanity check */
+    HDassert(f1);
+    HDassert(f2);
+    HDassert(layout1);
+    HDassert(layout2);
+    HDassert(udata);
+
+    if(H5F_addr_defined(layout1->storage.u.chunk.idx_addr)) {
+        if(H5F_addr_defined(layout2->storage.u.chunk.idx_addr)) {
+            /* Both have space allocated.  Read both datasets into memory and
+             * compare, chunk by chunk. */
+            /* Go get the rank & dimensions */
+            if((space_ndims = H5S_get_simple_extent_dims(udata->space,
+                    space_dim, NULL)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
+
+            /* Create index info structs */
+            idx_info1.f = f1;
+            idx_info1.dxpl_id = dxpl1_id;
+            idx_info1.pline = udata->pline1;
+            idx_info1.layout = &layout1->u.chunk;
+            idx_info1.storage = &layout1->storage.u.chunk;
+            if((layout1->storage.u.chunk.ops->init)(&idx_info1, udata->space,
+                    udata->addr1) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't init index info")
+            idx_info1_init = TRUE;
+
+            idx_info2.f = f2;
+            idx_info2.dxpl_id = dxpl2_id;
+            idx_info2.pline = udata->pline2;
+            idx_info2.layout = &layout2->u.chunk;
+            idx_info2.storage = &(layout2->storage.u.chunk);
+            if((layout2->storage.u.chunk.ops->init)(&idx_info2, udata->space,
+                    udata->addr2) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't init index info")
+            idx_info2_init = TRUE;
+
+            /* Initialize chunk udatas */
+            chk_udata1.common.layout = &(layout1->u.chunk);
+            chk_udata1.common.storage = &(layout1->storage.u.chunk);
+            chk_udata1.common.offset = chunk_offset;
+            chk_udata1.common.rdcc = NULL;
+            chk_udata1.idx_hint = UINT_MAX;
+
+            chk_udata2.common.layout = &(layout2->u.chunk);
+            chk_udata2.common.storage = &(layout2->storage.u.chunk);
+            chk_udata2.common.offset = chunk_offset;
+            chk_udata2.common.rdcc = NULL;
+            chk_udata2.idx_hint = UINT_MAX;
+
+            /* Loop over all chunks logically according to offset */
+            HDmemset(chunk_offset, 0, sizeof(chunk_offset));
+            while(!carry) {
+                /* Lookup chunk 1 */
+                chk_udata1.nbytes = 0;
+                chk_udata1.filter_mask = 0;
+                chk_udata1.addr = HADDR_UNDEF;
+                if((layout1->storage.u.chunk.ops->get_addr)(&idx_info1,
+                        &chk_udata1) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address")
+
+                /* Lookup chunk 2 */
+                chk_udata2.nbytes = 0;
+                chk_udata2.filter_mask = 0;
+                chk_udata2.addr = HADDR_UNDEF;
+                if((layout2->storage.u.chunk.ops->get_addr)(&idx_info2,
+                        &chk_udata2) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address")
+
+                if(H5F_addr_defined(chk_udata1.addr)) {
+                    if(H5F_addr_defined(chk_udata2.addr)) {
+                        /* Both chunks exist, read from disk and compare */
+                        /* Check that the sizes are identical */
+                        if(chk_udata1.nbytes != chk_udata2.nbytes)
+                            HGOTO_DONE(TRUE)
+
+                        /* Allocate new buffer, if necessary */
+                        if(chk_udata1.nbytes > buf_size) {
+                            buf_size = chk_udata1.nbytes;
+                            if(NULL == (buf1 = H5MM_realloc(buf1, buf_size)))
+                                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory")
+                            if(NULL == (buf2 = H5MM_realloc(buf2, buf_size)))
+                                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory")
+                        } /* end if */
+
+                        /* Read chunks */
+                        if(H5F_block_read(f1, H5FD_MEM_DRAW, chk_udata1.addr,
+                                chk_udata1.nbytes, dxpl1_id, buf1) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "block read failed")
+                        if(H5F_block_read(f2, H5FD_MEM_DRAW, chk_udata2.addr,
+                                chk_udata1.nbytes, dxpl2_id, buf2) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "block read failed")
+
+                        /* Compare */
+                        if(HDmemcmp(buf1, buf2, chk_udata1.nbytes))
+                            HGOTO_DONE(TRUE)
+                    } /* end if */
+                    else
+                        /* One chunk exists and the other doesn't.  Assume they
+                         * are different.  Eventually should check data in 1
+                         * against fill value in 2. */
+                        HGOTO_DONE(TRUE)
+                } /* end if */
+                else
+                    if(H5F_addr_defined(chk_udata2.addr))
+                        /* One chunk exists and the other doesn't.  Assume they
+                         * are different.  Eventually should check data in 2
+                         * against fill value in 1. */
+                        HGOTO_DONE(TRUE)
+                    else
+                        /* Neither chunk exists.  If their fill values are not
+                         * identical, they are different. */
+                        if(!udata->fill_identical)
+                            HGOTO_DONE(TRUE)
+
+                /* Increment indices */
+                carry = TRUE;
+                for(i = space_ndims - 1; i >= 0; --i) {
+                    chunk_offset[i] += layout1->u.chunk.dim[i];
+                    if(chunk_offset[i] >= space_dim[i])
+                        chunk_offset[i] = 0;
+                    else {
+                        carry = FALSE;
+                        break;
+                    } /* end else */
+                } /* end for */
+            } /* end while */
+        } /* end if */
+        else
+            /* One has space allocated and the other doesn't.  Assume they are
+             * different.  Eventually should check data in 1 against fill value
+             * in 2. */
+            HGOTO_DONE(TRUE)
+    } /* end if */
+    else
+        if(H5F_addr_defined(layout2->storage.u.chunk.idx_addr))
+            /* One has space allocated and the other doesn't.  Assume they are
+             * different.  Eventually should check data in 2 against fill value
+             * in 1. */
+            HGOTO_DONE(TRUE)
+        else
+            /* Neither has space allocated.  If their fill values are not
+             * identical, they are different. */
+            if(!udata->fill_identical)
+                HGOTO_DONE(TRUE)
+
+done:
+    if(idx_info1_init && (layout1->storage.u.chunk.ops->dest)(&idx_info1) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't destroy index info")
+    if(idx_info2_init && (layout2->storage.u.chunk.ops->dest)(&idx_info2) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't destroy index info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_chunk_compare() */
 

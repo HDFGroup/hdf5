@@ -41,6 +41,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
@@ -106,6 +107,9 @@ static ssize_t H5D_contig_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 static herr_t H5D_contig_flush(H5D_t *dset, hid_t dxpl_id);
+static htri_t H5D_contig_compare(const H5F_t *f1, const H5F_t *f2,
+    const H5O_layout_t *layout1, const H5O_layout_t *layout2, hid_t dxpl1_id,
+    hid_t dxpl2_id, H5D_cmp_ud_t *udata);
 
 /* Helper routines */
 static herr_t H5D_contig_write_one(H5D_io_info_t *io_info, hsize_t offset,
@@ -131,7 +135,8 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     H5D_contig_readvv,
     H5D_contig_writevv,
     H5D_contig_flush,
-    NULL
+    NULL,
+    H5D_contig_compare
 }};
 
 
@@ -1524,4 +1529,82 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_contig_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_contig_compare
+ *
+ * Purpose:     fnord
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, November 30, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5D_contig_compare(const H5F_t *f1, const H5F_t *f2,
+    const H5O_layout_t *layout1, const H5O_layout_t *layout2, hid_t dxpl1_id,
+    hid_t dxpl2_id, H5D_cmp_ud_t *udata)
+{
+    void *buf1 = NULL;
+    void *buf2 = NULL;
+    htri_t ret_value = FALSE;           /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_contig_compare, FAIL)
+
+    /* Sanity check */
+    HDassert(f1);
+    HDassert(f2);
+    HDassert(layout1);
+    HDassert(layout2);
+    HDassert(udata);
+
+    if(H5F_addr_defined(layout1->storage.u.contig.addr)) {
+        if(H5F_addr_defined(layout2->storage.u.contig.addr)) {
+            /* Both have space allocated.  Read both datasets into memory and
+             * compare.  Will eventually want to use a buffer with a
+             * user-configurable size so we don't alloc something too big. */
+            HDassert(layout1->storage.u.contig.size
+                    == layout2->storage.u.contig.size);
+            if(NULL == (buf1 = H5MM_malloc(layout1->storage.u.contig.size)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory")
+            if(NULL == (buf2 = H5MM_malloc(layout1->storage.u.contig.size)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory")
+
+            if(H5F_block_read(f1, H5FD_MEM_DRAW, layout1->storage.u.contig.addr,
+                    layout1->storage.u.contig.size, dxpl1_id, buf1) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "block read failed")
+            if(H5F_block_read(f2, H5FD_MEM_DRAW, layout2->storage.u.contig.addr,
+                    layout1->storage.u.contig.size, dxpl2_id, buf2) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "block read failed")
+
+            if(HDmemcmp(buf1, buf2, layout1->storage.u.contig.size))
+                HGOTO_DONE(TRUE)
+        } /* end if */
+        else
+            /* One has space allocated and the other doesn't.  Assume they are
+             * different.  Eventually should check data in 1 against fill value
+             * in 2. */
+            HGOTO_DONE(TRUE)
+    } /* end if */
+    else
+        if(H5F_addr_defined(layout2->storage.u.contig.addr))
+            /* One has space allocated and the other doesn't.  Assume they are
+             * different.  Eventually should check data in 2 against fill value
+             * in 1. */
+            HGOTO_DONE(TRUE)
+        else
+            /* Neither has space allocated.  If their fill values are not
+             * identical, they are different. */
+            if(!udata->fill_identical)
+                HGOTO_DONE(TRUE)
+
+done:
+    buf1 = H5MM_xfree(buf1);
+    buf2 = H5MM_xfree(buf2);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_contig_compare() */
 

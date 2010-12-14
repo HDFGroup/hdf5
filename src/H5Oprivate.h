@@ -145,6 +145,10 @@ typedef struct H5O_copy_t {
     H5O_t   *oh_dst;                    /* The destination object header */
 } H5O_copy_t;
 
+/* Settings/flags for comparing objects */
+/* Empty for now */
+typedef void H5O_cmp_t;
+
 /* Header message IDs */
 #define H5O_NULL_ID	0x0000          /* Null Message.  */
 #define H5O_SDSPACE_ID	0x0001          /* Dataspace Message. */

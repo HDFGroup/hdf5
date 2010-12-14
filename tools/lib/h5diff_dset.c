@@ -44,7 +44,16 @@ hsize_t diff_dataset( hid_t file1_id,
     hid_t   dcpl1 = -1;
     hid_t   dcpl2 = -1;
     hsize_t nfound = 0;
+    htri_t  tri_ret;
 
+    /* Do the comparison */
+    if((tri_ret = H5Ocompare(file1_id, obj1_name, file2_id, obj2_name, H5P_DEFAULT)) < 0)
+        goto error;
+
+    if(tri_ret)
+        nfound = 1;
+
+#if 0
     /*-------------------------------------------------------------------------
     * open the handles
     *-------------------------------------------------------------------------
@@ -102,12 +111,14 @@ hsize_t diff_dataset( hid_t file1_id,
         H5Dclose(did2);
         /* enable error reporting */
     } H5E_END_TRY;
+#endif
 
 
     return nfound;
 
 error:
     options->err_stat=1;
+#if 0
     /* disable error reporting */
     H5E_BEGIN_TRY {
         H5Pclose(dcpl1);
@@ -116,6 +127,7 @@ error:
         H5Dclose(did2);
         /* enable error reporting */
     } H5E_END_TRY;
+#endif
 
     return nfound;
 }

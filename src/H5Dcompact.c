@@ -70,6 +70,9 @@ static ssize_t H5D_compact_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
 static herr_t H5D_compact_flush(H5D_t *dset, hid_t dxpl_id);
+static htri_t H5D_compact_compare(const H5F_t *f1, const H5F_t *f2,
+    const H5O_layout_t *layout1, const H5O_layout_t *layout2, hid_t dxpl1_id,
+    hid_t dxpl2_id, H5D_cmp_ud_t *udata);
 
 
 /*********************/
@@ -91,7 +94,8 @@ const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {{
     H5D_compact_readvv,
     H5D_compact_writevv,
     H5D_compact_flush,
-    NULL
+    NULL,
+    H5D_compact_compare
 }};
 
 
@@ -575,4 +579,45 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_compact_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_compact_compare
+ *
+ * Purpose:     fnord
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, November 30, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5D_compact_compare(const H5F_t UNUSED *f1, const H5F_t UNUSED *f2,
+    const H5O_layout_t *layout1, const H5O_layout_t *layout2,
+    hid_t UNUSED dxpl1_id, hid_t UNUSED dxpl2_id, H5D_cmp_ud_t UNUSED *udata)
+{
+    htri_t ret_value = FALSE;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOFUNC(H5D_compact_compare)
+
+    /* Sanity check */
+    HDassert(f1);
+    HDassert(f2);
+    HDassert(layout1);
+    HDassert(layout2);
+    HDassert(layout1->storage.u.compact.buf);
+    HDassert(layout2->storage.u.compact.buf);
+    HDassert(layout1->storage.u.compact.size
+            == layout2->storage.u.compact.size);
+
+    /* Compare the two datasets */
+    if(HDmemcmp(layout1->storage.u.compact.buf, layout2->storage.u.compact.buf,
+            layout1->storage.u.compact.size))
+        HGOTO_DONE(TRUE)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_compact_compare() */
 

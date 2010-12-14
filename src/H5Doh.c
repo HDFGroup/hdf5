@@ -55,6 +55,9 @@ static void *H5O_dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc,
 static H5O_loc_t *H5O_dset_get_oloc(hid_t obj_id);
 static herr_t H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5_ih_info_t *bh_info);
+static htri_t H5O_dset_compare(const H5F_t *f1, const H5F_t *f2,
+    const H5O_t *oh1, const H5O_t *oh2, haddr_t addr1, haddr_t addr2,
+    hid_t dxpl1_id, hid_t dxpl2_id, H5O_cmp_t *cmp_info);
 
 
 /*********************/
@@ -81,7 +84,8 @@ const H5O_obj_class_t H5O_OBJ_DATASET[1] = {{
     H5O_dset_open, 		/* open an object of this class */
     H5O_dset_create, 		/* create an object of this class */
     H5O_dset_get_oloc, 		/* get an object header location for an object */
-    H5O_dset_bh_info 		/* get the index & heap info for an object */
+    H5O_dset_bh_info,		/* get the index & heap info for an object */
+    H5O_dset_compare            /* compare two datasets */
 }};
 
 /* Declare a free list to manage the H5D_copy_file_ud_t struct */
@@ -430,4 +434,301 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dset_bh_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_dset_compare
+ *
+ * Purpose:     fnord
+ *
+ * Return:      Success:        0 (equal) or 1 (not equal)
+ *              Failure:        negative
+ *
+ * Programmer:  Neil Fortner
+ *              October 27, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5O_dset_compare(const H5F_t *f1, const H5F_t *f2, const H5O_t *oh1,
+    const H5O_t *oh2, haddr_t addr1, haddr_t addr2, hid_t dxpl1_id,
+    hid_t dxpl2_id, H5O_cmp_t UNUSED *cmp_info)
+{
+    H5S_t               *space1;                /* Dataspace message */
+    H5S_t               *space2;                /* Dataspace message */
+    H5O_layout_t        layout1;                /* Data storage layout message */
+    H5O_layout_t        layout2;                /* Data storage layout message */
+    H5O_pline_t         pline1 = H5O_CRT_PIPELINE_DEF; /* I/O pipeline message */
+    H5O_pline_t         pline2 = H5O_CRT_PIPELINE_DEF; /* I/O pipeline message */
+    H5T_t               *dtype1;                /* Datatype message */
+    H5T_t               *dtype2;                /* Datatype message */
+    H5O_fill_t          fill1;                  /* Fill value message */
+    H5O_fill_t          fill2;                  /* Fill value message */
+    hbool_t             space_read = FALSE;     /* Whether the dataspace messages were read */
+    hbool_t             layout_read = FALSE;    /* Whether the layout messages were read */
+    hbool_t             pline_read = FALSE;     /* Whether the I/O pipeline messages were read */
+    hbool_t             dtype_read = FALSE;     /* Whether the datatype messages were read */
+    hbool_t             fill1_read = FALSE;     /* Whether the fill value message was read */
+    hbool_t             fill2_read = FALSE;     /* Whether the fill value message was read */
+    int                 ndims1;
+    int                 ndims2;
+    hsize_t             dims1[H5O_LAYOUT_NDIMS];
+    hsize_t             dims2[H5O_LAYOUT_NDIMS];
+    H5D_cmp_ud_t        udata;
+    htri_t              tri_ret;                /* htri_t return value */
+    unsigned            i;
+    htri_t              ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_dset_compare, FAIL)
+
+    /* Sanity check */
+    HDassert(f1);
+    HDassert(f2);
+    HDassert(oh1);
+    HDassert(oh2);
+
+    /* Save the dset oh addresses in udata */
+    udata.addr1 = addr1;
+    udata.addr2 = addr2;
+
+    /* Get the dataspace messages */
+    if(NULL == (space1 = H5S_read_oh(f1, oh1, dxpl1_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't read dataspace message")
+    if(NULL == (space2 = H5S_read_oh(f2, oh2, dxpl2_id))) {
+        if(H5S_close(space1) < 0)
+            HERROR(H5E_DATASET, H5E_CANTFREE, "can't close dataspace");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't read dataspace message")
+    } /* end if */
+    space_read = TRUE;
+
+    /* Check if the dataspace extents are identical */
+    if((ndims1 = H5S_get_simple_extent_dims(space1, dims1, NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
+    if((ndims2 = H5S_get_simple_extent_dims(space2, dims2, NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
+    if(ndims1 != ndims2 || HDmemcmp(dims1, dims2, (size_t)ndims1 * sizeof(dims1[0])))
+        HGOTO_DONE(TRUE)
+
+    /* Save the dataspace in udata */
+    udata.space = space1;
+
+    /* Get the layout messages */
+    if(NULL == H5O_msg_read_oh(f1, dxpl1_id, oh1, H5O_LAYOUT_ID, &layout1))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find layout message")
+    if(NULL == H5O_msg_read_oh(f2, dxpl2_id, oh2, H5O_LAYOUT_ID, &layout2)) {
+        if(H5O_msg_reset(H5O_LAYOUT_ID, &layout1) < 0)
+            HERROR(H5E_DATASET, H5E_CANTRESET, "unable to reset data storage layout message");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find layout message")
+    } /* end if */
+    layout_read = TRUE;
+
+    /* Check if the layout messages are identical */
+    /* Will eventually want to check if they are compatible, even if not
+     * identical -NAF */
+    /*FIXME fnord Note we do not handle external datasets! */
+    if(layout1.type != layout2.type)
+        HGOTO_DONE(TRUE)
+    else if(layout1.type == H5D_CHUNKED) {
+        if(layout1.u.chunk.ndims != layout2.u.chunk.ndims ||
+                HDmemcmp(layout1.u.chunk.dim, layout2.u.chunk.dim,
+                layout1.u.chunk.ndims * sizeof(layout1.u.chunk.dim[0])))
+            HGOTO_DONE(TRUE)
+        HDassert(layout1.u.chunk.size == layout2.u.chunk.size);
+        HDassert(layout1.u.chunk.nchunks == layout2.u.chunk.nchunks);
+        HDassert(!HDmemcmp(layout1.u.chunk.chunks, layout2.u.chunk.chunks,
+                layout1.u.chunk.ndims * sizeof(layout1.u.chunk.dim[0])));
+        HDassert(!HDmemcmp(layout1.u.chunk.down_chunks,
+                layout2.u.chunk.down_chunks, layout1.u.chunk.ndims
+                * sizeof(layout1.u.chunk.dim[0])));
+    } /* end if */
+
+    /* Get the pipeline messages */
+    if((tri_ret = H5O_msg_exists_oh(oh1, H5O_PLINE_ID)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(tri_ret) {
+        /* Make sure both objects have a pipeline - mix/match not supported yet
+         */
+        if((tri_ret = H5O_msg_exists_oh(oh2 , H5O_PLINE_ID)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+        if(!tri_ret)
+            HGOTO_DONE(TRUE)
+
+        if(NULL == H5O_msg_read_oh(f1, dxpl1_id, oh1, H5O_PLINE_ID, &pline1))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find pipeline message")
+        if(NULL == H5O_msg_read_oh(f2, dxpl2_id, oh2, H5O_PLINE_ID, &pline2)) {
+            if(H5O_msg_reset(H5O_PLINE_ID, &pline1) < 0)
+                HERROR(H5E_DATASET, H5E_CANTRESET, "unable to reset pipeline message");
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find pipeline message")
+        } /* end if */
+        pline_read = TRUE;
+
+        /* Check if the pipeline messages are identical */
+        /* Will eventually want to handle different pipelines */
+        if(pline1.nused != pline2.nused)
+            HGOTO_DONE(TRUE)
+        else
+            for(i=0; i<pline1.nused; i++)
+                if(pline1.filter[i].id != pline2.filter[i].id
+                        || pline1.filter[i].cd_nelmts != pline2.filter[i].cd_nelmts
+                        || HDmemcmp(pline1.filter[i].cd_values,
+                        pline2.filter[i].cd_values, pline1.filter[i].cd_nelmts
+                        * sizeof(pline1.filter[i].cd_values[0])))
+                    HGOTO_DONE(TRUE)
+    } /* end if */
+    else {
+        /* Make sure object 2 doesn't have a pipeline */
+        if((tri_ret = H5O_msg_exists_oh(oh2 , H5O_PLINE_ID)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+        if(tri_ret)
+            HGOTO_DONE(TRUE)
+    } /* end else */
+
+    /* Save the plines in udata */
+    udata.pline1 = &pline1;
+    udata.pline2 = &pline2;
+
+    /* Get the datatype messages */
+    if(NULL == (dtype1 = (H5T_t *)H5O_msg_read_oh(f1, dxpl1_id, oh1,
+            H5O_DTYPE_ID, NULL)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find datatype message")
+    if(NULL == (dtype2 = (H5T_t *)H5O_msg_read_oh(f2, dxpl2_id, oh2,
+            H5O_DTYPE_ID, NULL)))
+            {
+        (void)H5O_msg_free(H5O_DTYPE_ID, dtype1);
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find datatype message")
+    } /* end if */
+    dtype_read = TRUE;
+
+    /* Check if the datatypes are identical */
+    if(H5T_cmp(dtype1, dtype2, FALSE))
+        HGOTO_DONE(TRUE)
+
+    /* Check for vlen or reference types - not supported currently */
+    if(H5T_detect_class(dtype1, H5T_VLEN, FALSE))
+        HGOTO_DONE(TRUE)
+    if(H5T_detect_class(dtype1, H5T_REFERENCE, FALSE))
+        HGOTO_DONE(TRUE)
+
+    /* Get the fill value messages */
+    if((tri_ret = H5O_msg_exists_oh(oh1, H5O_FILL_NEW_ID)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(tri_ret) {
+        if(NULL == H5O_msg_read_oh(f1, dxpl1_id, oh1, H5O_FILL_NEW_ID, &fill1))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read fill message")
+        fill1_read = TRUE;
+    } /* end if */
+    else {
+        if((tri_ret = H5O_msg_exists_oh(oh1, H5O_FILL_ID)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+        if(tri_ret) {
+            if(NULL == H5O_msg_read_oh(f1, dxpl1_id, oh1, H5O_FILL_ID, &fill1))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read fill message")
+            fill1_read = TRUE;
+        } else {
+            fill1.fill_time = H5D_FILL_TIME_NEVER;
+            fill1.fill_defined = FALSE;
+        } /* end else */
+    } /* end else */
+    if((tri_ret = H5O_msg_exists_oh(oh2, H5O_FILL_NEW_ID)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(tri_ret) {
+        if(NULL == H5O_msg_read_oh(f2, dxpl2_id, oh2, H5O_FILL_NEW_ID, &fill2))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read fill message")
+        fill2_read = TRUE;
+    } /* end if */
+    else {
+        if((tri_ret = H5O_msg_exists_oh(oh2, H5O_FILL_ID)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+        if(tri_ret) {
+            if(NULL == H5O_msg_read_oh(f2, dxpl2_id, oh2, H5O_FILL_ID, &fill2))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read fill message")
+            fill2_read = TRUE;
+        } else {
+            fill2.fill_time = H5D_FILL_TIME_NEVER;
+            fill2.fill_defined = FALSE;
+        } /* end else */
+    } /* end else */
+
+    /* Check if fill values are identical */
+    if(fill1.fill_defined && (fill1.fill_time == H5D_FILL_TIME_IFSET
+            || fill1.fill_time == H5D_FILL_TIME_ALLOC)) {
+        if(fill2.fill_defined && (fill2.fill_time == H5D_FILL_TIME_IFSET
+                || fill2.fill_time == H5D_FILL_TIME_ALLOC)) {
+            /* Both fill values are defined */
+            HDassert(fill1.size == fill2.size);
+            if(HDmemcmp(fill1.buf, fill2.buf, (size_t)fill1.size))
+                udata.fill_identical = FALSE;
+            else
+                udata.fill_identical = TRUE;
+        } /* end if */
+        else {
+            /* fill1 is defined but fill2 isn't */
+            /* Check for a non-zero character in fill1 (is there an ISO C
+             * function that does this?) */
+            udata.fill_identical = TRUE;
+            for(i=0; i<fill1.size; i++)
+                if(((uint8_t *)fill1.buf)[i] != (uint8_t)0) {
+                    udata.fill_identical = FALSE;
+                    break;
+                } /* end if */
+        } /* end else */
+    } /* end if */
+    else {
+        if(fill2.fill_defined && (fill2.fill_time == H5D_FILL_TIME_IFSET
+                || fill2.fill_time == H5D_FILL_TIME_ALLOC)) {
+            /* fill2 is defined but fill1 isn't */
+            /* Check for a non-zero character in fill2 (is there an ISO C
+             * function that does this?) */
+            udata.fill_identical = TRUE;
+            for(i=0; i<fill2.size; i++)
+                if(((uint8_t *)fill2.buf)[i] != (uint8_t)0) {
+                    udata.fill_identical = FALSE;
+                    break;
+                } /* end if */
+        } /* end if */
+        else
+            /* Both fill1 and fill2 are undefined */
+            udata.fill_identical = TRUE;
+    } /* end else */
+
+    /* Perform the comparison */
+    HDassert(layout1.ops->compare);
+    if((ret_value = layout1.ops->compare(f1, f2, &layout1, &layout2, dxpl1_id,
+            dxpl2_id, &udata)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOMPARE, FAIL, "unable to compare datasets")
+
+done:
+    /* Free messages, if they've been read in */
+    if(space_read) {
+        if(H5S_close(space1) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close dataspace")
+        if(H5S_close(space2) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close dataspace")
+    } /* end if */
+    if(layout_read) {
+        if(H5O_msg_reset(H5O_LAYOUT_ID, &layout1) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset data storage layout message")
+        if(H5O_msg_reset(H5O_LAYOUT_ID, &layout2) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset data storage layout message")
+    } /* end if */
+    if(pline_read) {
+        if(H5O_msg_reset(H5O_PLINE_ID, &pline1) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset I/O pipeline message")
+        if(H5O_msg_reset(H5O_PLINE_ID, &pline2) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset I/O pipeline message")
+    } /* end if */
+    if(dtype_read) {
+        (void)H5O_msg_free(H5O_DTYPE_ID, dtype1);
+        (void)H5O_msg_free(H5O_DTYPE_ID, dtype2);
+    } /* end if */
+    /* Note that we take advantage of the fact that both versions of the fill
+     * message use the same reset routine.  If this changes, we will have to
+     * change this to pass the correct message ID. */
+    if(fill1_read)
+        (void)H5O_msg_reset(H5O_FILL_NEW_ID, &fill1);
+    if(fill2_read)
+        (void)H5O_msg_reset(H5O_FILL_NEW_ID, &fill2);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_dset_compare() */
 
