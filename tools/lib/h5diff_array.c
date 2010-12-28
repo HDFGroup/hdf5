@@ -234,7 +234,15 @@ hsize_t diff_array( void *_mem1,
     size = H5Tget_size( m_type );
     type_class = H5Tget_class(m_type);
 
-    if (type_class != H5T_REFERENCE && HDmemcmp(mem1, mem2, size*nelmts)==0)
+    /* Fast comparison first for atomic type by memcmp(). 
+     * It is OK not to list non-atomic type here because it will not be caught
+     * by the confition, but it gives more clarity for code planning 
+     */
+    if (type_class != H5T_REFERENCE && 
+        type_class != H5T_COMPOUND &&
+        type_class != H5T_STRING &&
+        type_class != H5T_VLEN &&
+        HDmemcmp(mem1, mem2, size*nelmts)==0)
         return 0;
 
     if ( rank > 0 )
@@ -249,13 +257,74 @@ hsize_t diff_array( void *_mem1,
             pos[j]=0;
     }
 
-    if(H5Tis_variable_str(m_type))
+    switch (type_class)
     {
+    default:
+        assert(0);
+        break;
+
+   /*-------------------------------------------------------------------------
+    * float and integer atomic types
+    *-------------------------------------------------------------------------
+    */
+
+    case H5T_FLOAT:
+
+        if (H5Tequal(m_type, H5T_NATIVE_FLOAT))
+            nfound=diff_float(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+        else if (H5Tequal(m_type, H5T_NATIVE_DOUBLE))
+            nfound=diff_double(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+#if H5_SIZEOF_LONG_DOUBLE !=0
+        else if (H5Tequal(m_type, H5T_NATIVE_LDOUBLE))
+            nfound=diff_ldouble(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+#endif
+        break;
+
+    case H5T_INTEGER:
+
+        if (H5Tequal(m_type, H5T_NATIVE_SCHAR))
+            nfound=diff_schar(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+        else if (H5Tequal(m_type, H5T_NATIVE_UCHAR))
+            nfound=diff_uchar(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+        else if (H5Tequal(m_type, H5T_NATIVE_SHORT))
+            nfound=diff_short(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+        else if (H5Tequal(m_type, H5T_NATIVE_USHORT))
+            nfound=diff_ushort(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+        else if (H5Tequal(m_type, H5T_NATIVE_INT))
+            nfound=diff_int(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+        else if (H5Tequal(m_type, H5T_NATIVE_UINT))
+            nfound=diff_uint(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+        else if (H5Tequal(m_type, H5T_NATIVE_LONG))
+            nfound=diff_long(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+        else if (H5Tequal(m_type, H5T_NATIVE_ULONG))
+            nfound=diff_ulong(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+        else if (H5Tequal(m_type, H5T_NATIVE_LLONG))
+            nfound=diff_llong(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+        else if (H5Tequal(m_type, H5T_NATIVE_ULLONG))
+            nfound=diff_ullong(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+
+        break;
+
+    /*-------------------------------------------------------------------------
+     * Other types than float and integer
+     *-------------------------------------------------------------------------
+     */
+
+    case H5T_COMPOUND:
+    case H5T_STRING:
+    case H5T_BITFIELD:
+    case H5T_OPAQUE:
+    case H5T_ENUM:
+    case H5T_ARRAY:
+    case H5T_VLEN:
+    case H5T_REFERENCE:
+        HDmemset(&members, 0, sizeof (mcomp_t));
+        set_comp_members(m_type, &members);
         for ( i = 0; i < nelmts; i++)
         {
             nfound+=diff_datum(
-                ((unsigned char**)mem1)[(size_t)i],
-                ((unsigned char**)mem2)[(size_t)i],
+                mem1 + i * size,
+                mem2 + i * size, /* offset */
                 m_type,
                 i,
                 rank,
@@ -267,103 +336,15 @@ hsize_t diff_array( void *_mem1,
                 name2,
                 container1_id,
                 container2_id,
-                &ph, NULL);
+                &ph, &members);
             if (options->n && nfound>=options->count)
-                return nfound;
-        } /* i */
-    }
-
-    else
-    {
-        switch (type_class)
-        {
-        default:
-            assert(0);
-            break;
-
-       /*-------------------------------------------------------------------------
-        * float and integer atomic types
-        *-------------------------------------------------------------------------
-        */
-
-        case H5T_FLOAT:
-
-            if (H5Tequal(m_type, H5T_NATIVE_FLOAT))
-                nfound=diff_float(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-            else if (H5Tequal(m_type, H5T_NATIVE_DOUBLE))
-                nfound=diff_double(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-#if H5_SIZEOF_LONG_DOUBLE !=0
-            else if (H5Tequal(m_type, H5T_NATIVE_LDOUBLE))
-                nfound=diff_ldouble(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-#endif
-            break;
-
-        case H5T_INTEGER:
-
-            if (H5Tequal(m_type, H5T_NATIVE_SCHAR))
-                nfound=diff_schar(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-            else if (H5Tequal(m_type, H5T_NATIVE_UCHAR))
-                nfound=diff_uchar(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-            else if (H5Tequal(m_type, H5T_NATIVE_SHORT))
-                nfound=diff_short(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-            else if (H5Tequal(m_type, H5T_NATIVE_USHORT))
-                nfound=diff_ushort(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-            else if (H5Tequal(m_type, H5T_NATIVE_INT))
-                nfound=diff_int(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-            else if (H5Tequal(m_type, H5T_NATIVE_UINT))
-                nfound=diff_uint(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-            else if (H5Tequal(m_type, H5T_NATIVE_LONG))
-                nfound=diff_long(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-            else if (H5Tequal(m_type, H5T_NATIVE_ULONG))
-                nfound=diff_ulong(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-            else if (H5Tequal(m_type, H5T_NATIVE_LLONG))
-                nfound=diff_llong(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-            else if (H5Tequal(m_type, H5T_NATIVE_ULLONG))
-                nfound=diff_ullong(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-
-            break;
-
-        /*-------------------------------------------------------------------------
-         * Other types than float and integer
-         *-------------------------------------------------------------------------
-         */
-
-        case H5T_COMPOUND:
-        case H5T_STRING:
-        case H5T_BITFIELD:
-        case H5T_OPAQUE:
-        case H5T_ENUM:
-        case H5T_ARRAY:
-        case H5T_VLEN:
-        case H5T_REFERENCE:
-            HDmemset(&members, 0, sizeof (mcomp_t));
-            set_comp_members(m_type, &members);
-            for ( i = 0; i < nelmts; i++)
             {
-                nfound+=diff_datum(
-                    mem1 + i * size,
-                    mem2 + i * size, /* offset */
-                    m_type,
-                    i,
-                    rank,
-                    dims,
-                    acc,
-                    pos,
-                    options,
-                    name1,
-                    name2,
-                    container1_id,
-                    container2_id,
-                    &ph, &members);
-                if (options->n && nfound>=options->count)
-                {
-                    free_comp_members(&members);
-                    return nfound;
-                }
-            } /* i */
-            free_comp_members(&members);
-        } /* switch */
-    } /* else */
+                free_comp_members(&members);
+                return nfound;
+            }
+        } /* i */
+        free_comp_members(&members);
+    } /* switch */
 
     return nfound;
 }
@@ -446,7 +427,15 @@ hsize_t diff_datum(void       *_mem1,
     type_size = H5Tget_size( m_type );
     type_class = H5Tget_class(m_type);
 
-    if (type_class!=H5T_REFERENCE && HDmemcmp(mem1, mem2, type_size)==0)
+    /* Fast comparison first for atomic type by memcmp(). 
+     * It is OK not to list non-atomic type here because it will not be caught
+     * by the confition, but it gives more clarity for code planning 
+     */
+    if (type_class != H5T_REFERENCE && 
+        type_class != H5T_COMPOUND &&
+        type_class != H5T_STRING &&
+        type_class != H5T_VLEN &&
+        HDmemcmp(mem1, mem2, type_size)==0)
         return 0;
 
     switch (H5Tget_class(m_type))
@@ -466,47 +455,27 @@ hsize_t diff_datum(void       *_mem1,
 
         nmembs = members->n;
 
+
         for (j = 0; j < nmembs; j++)
         {
             offset    = members->offsets[j];
             memb_type = members->ids[j];
-            /* if member type is vlen string */
-            if(members->flags[j])
-            {
-                nfound+=diff_datum(
-                    ((unsigned char**)mem1)[j],
-                    ((unsigned char**)mem2)[j],
-                    memb_type,
-                    i,
-                    rank,
-                    dims,
-                    acc,
-                    pos,
-                    options,
-                    obj1,
-                    obj2,
-                    container1_id,
-                    container2_id,
-                    ph, NULL);
-            }
-            else
-            {
-                nfound+=diff_datum(
-                    mem1+offset,
-                    mem2+offset,
-                    memb_type,
-                    i,
-                    rank,
-                    dims,
-                    acc,
-                    pos,
-                    options,
-                    obj1,
-                    obj2,
-                    container1_id,
-                    container2_id,
-                    ph, members->m[j]);
-            }
+
+            nfound+=diff_datum(
+                mem1+offset,
+                mem2+offset,
+                memb_type,
+                i,
+                rank,
+                dims,
+                acc,
+                pos,
+                options,
+                obj1,
+                obj2,
+                container1_id,
+                container2_id,
+                ph, members->m[j]);
         }
         break;
 
@@ -519,27 +488,61 @@ hsize_t diff_datum(void       *_mem1,
         {
             H5T_str_t pad;
             char      *s;
+            char *s1;
+            char *s2;
+            size_t size1;
+            size_t size2;
 
-            /* Get pointer to first string to compare */
-            s = (char *)mem1;
+            /* if variable length string */
+            if(H5Tis_variable_str(m_type))
+            {
+                /* Get pointer to first string */
+                s1 = *(char**) mem1;
+                size1 = HDstrlen(s1);
+                /* Get pointer to second string */
+                s2 = *(char**) mem2;
+                size2 = HDstrlen(s2);
+            }
+            else
+            {
+                /* Get pointer to first string */
+                s1 = mem1;
+                size1 = H5Tget_size(m_type);
+                /* Get pointer to second string */
+                s2 = mem2;
+                size2 = H5Tget_size(m_type);
+            }
+
+            /* 
+             * compare for shorter string
+             * TODO: this code need to be improved to handle the difference 
+             *       of length of strings. 
+             *       For now mimic the previous way.
+             */
+            if(size1 < size2)
+            {
+                size = size1;
+                s = s1;
+            }
+            else
+            {
+                size = size2;
+                s = s2;
+            }
 
             /* check for NULL pointer for string */
             if(s!=NULL)
             {
-                if(H5Tis_variable_str(m_type)) {
-                    size = HDstrlen(s);
-                    if (HDmemcmp(mem1, mem2, size)==0)
-                        break;
-                }
-                else
-                    size = H5Tget_size(m_type);
+                /* try fast compare first */
+                if (HDmemcmp(s1, s2, size)==0)
+                    break;
 
                 pad = H5Tget_strpad(m_type);
 
                 for (u=0; u<size && (s[u] || pad!=H5T_STR_NULLTERM); u++)
                     nfound+=character_compare(
-                        mem1 + u,
-                        mem2 + u, /* offset */
+                        s1 + u,
+                        s2 + u, /* offset */
                         i,        /* index position */
                         u,        /* string character position */
                         rank,
@@ -679,43 +682,21 @@ hsize_t diff_datum(void       *_mem1,
                 nelmts *= adims[u];
             for (u = 0; u < nelmts; u++)
             {
-                /* if member type is vlen string */
-                if(H5Tis_variable_str(memb_type))
-                {
-                    nfound+=diff_datum(
-                    ((unsigned char**)mem1)[u],
-                    ((unsigned char**)mem2)[u],
-                    memb_type,
-                    i,               /* index position */
-                    rank,
-                    dims,
-                    acc,
-                    pos,
-                    options,
-                    obj1,
-                    obj2,
-                    container1_id,
-                    container2_id,
-                    ph, NULL);
-                }
-                else
-                {
-                    nfound+=diff_datum(
-                    mem1 + u * size,
-                    mem2 + u * size, /* offset */
-                    memb_type,
-                    i,               /* index position */
-                    rank,
-                    dims,
-                    acc,
-                    pos,
-                    options,
-                    obj1,
-                    obj2,
-                    container1_id,
-                    container2_id,
-                    ph, NULL);
-                }
+               nfound+=diff_datum(
+                   mem1 + u * size,
+                   mem2 + u * size, /* offset */
+                   memb_type,
+                   i,               /* index position */
+                   rank,
+                   dims,
+                   acc,
+                   pos,
+                   options,
+                   obj1,
+                   obj2,
+                   container1_id,
+                   container2_id,
+                   ph, NULL);
            }
             H5Tclose(memb_type);
         }

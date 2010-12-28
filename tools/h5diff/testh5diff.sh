@@ -68,6 +68,8 @@ EXCLUDE_FILE1_2=h5diff_exclude1-2.h5
 # different structure and obj names
 EXCLUDE_FILE2_1=h5diff_exclude2-1.h5
 EXCLUDE_FILE2_2=h5diff_exclude2-2.h5
+# compound type with multiple vlen string types
+COMP_VL_STRS_FILE=h5diff_comp_vl_strs.h5
 
 TESTNAME=h5diff
 EXIT_SUCCESS=0
@@ -779,8 +781,12 @@ TOOLTEST h5diff_482.txt -v --exclude-path "/group1" --exclude-path "/dset1" $EXC
 TOOLTEST h5diff_483.txt -v --exclude-path "/group1" $EXCLUDE_FILE2_1 $EXCLUDE_FILE2_2
 
 # Exclude from group compare
-TOOLTEST h5diff_484.txt -v --exclude-path "/dset3" h5diff_exclude1-1.h5 h5diff_exclude1-2.h5 /group1
+TOOLTEST h5diff_484.txt -v --exclude-path "/dset3" $EXCLUDE_FILE1_1 $EXCLUDE_FILE1_2 /group1
 
+# ##############################################################################
+# # diff various multiple vlen and fixed strings in a compound type dataset
+# ##############################################################################
+TOOLTEST h5diff_530.txt -v  $COMP_VL_STRS_FILE $COMP_VL_STRS_FILE
 
 # ##############################################################################
 # # END

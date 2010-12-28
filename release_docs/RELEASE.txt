@@ -486,6 +486,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5diff for the segfault when compares compound datasets
+          with combination of fixed length string types and vlen string types 
+          in certain orders. bug#2089 (JKM 2010/12/28)
         - Improve h5diff performance. 1) use HDmemcmp() before comparing each 
           elements. 2) replace expensive H5Tequals() calls 3) retrieve datatype
           information at dataset level not each element level for compound 
