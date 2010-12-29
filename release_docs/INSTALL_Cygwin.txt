@@ -5,7 +5,7 @@
 Preconditions:
 --------------
 
-1. Installed Cygwin 1.7.5 or higher
+1. Installed Cygwin 1.7.7 or higher
 
    To install the Cygwin net release, go to http://www.cygwin.com and 
    click on "Install or update now!" icon. This will download a GUI 
@@ -19,7 +19,7 @@ Preconditions:
    Cygwin packages.
 
    To build HDF5 on Cygwin, Devel package (including gcc,gcc-g++,
-   gcc-g77, and gcc-java compiles, and gdb tool) should be installed.
+   gcc-gfortran, and gcc-java compiles, and gdb tool) should be installed.
 
 2. Compilers Installed
 
@@ -51,7 +51,7 @@ Preconditions:
 
    3.1 Zlib
 
-       zlib-1.2.2 or later is supported and tested on Cygwin.
+       zlib-1.2.3 or later is supported and tested on Cygwin.
 
    3.2 Szip
        The HDF5 library has a predefined compression filter that uses
@@ -61,8 +61,7 @@ Preconditions:
        http://hdfgroup.org/HDF5/doc_resource/SZIP/index.html.
       
        The latest supported public release of SZIP is available from
-       ftp://ftp.hdfgroup.org/lib-external/szip/2.0. Binary distribution can be 
-       found under ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/cygwin
+       ftp://ftp.hdfgroup.org/lib-external/szip/2.1.
 
 
 Install HDF5 on Cygwin
@@ -76,19 +75,19 @@ Install HDF5 on Cygwin
 
    The HDF5 source code is distributed in a variety of formats which
    can be unpacked with the following commands, each of which creates 
-   an `hdf5-1.8.5' directory.
+   an `hdf5-1.8.6' directory.
 
    2.1 Non-compressed tar archive (*.tar)
 
-            $ tar xf hdf5-1.8.5.tar
+            $ tar xf hdf5-1.8.6.tar
 
    2.2 Gzip'd tar archive (*.tar.gz)
 
-            $ gunzip < hdf5-1.8.5.tar.gz | tar xf -
+            $ gunzip < hdf5-1.8.6.tar.gz | tar xf -
 
    2.3 Bzip'd tar archive (*.tar.bz2)
 
-            $ bunzip2 < hdf5-1.8.5.tar.bz2 | tar xf - 
+            $ bunzip2 < hdf5-1.8.6.tar.bz2 | tar xf - 
 
 2. Setup Environment
 
