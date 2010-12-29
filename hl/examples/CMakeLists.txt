@@ -44,7 +44,6 @@ SET (examples
 FOREACH (example ${examples})
   ADD_EXECUTABLE (hl_ex_${example} ${HDF5_HL_EXAMPLES_SOURCE_DIR}/${example}.c)
   H5_NAMING (hl_ex_${example})
-  TARGET_WIN_PROPERTIES (hl_ex_${example})
   TARGET_LINK_LIBRARIES (hl_ex_${example} ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
 
   IF (BUILD_TESTING)
