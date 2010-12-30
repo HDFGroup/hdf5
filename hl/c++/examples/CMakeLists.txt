@@ -12,7 +12,6 @@ INCLUDE_DIRECTORIES (${HDF5_HL_CPP_SRC_DIR}/src)
 # --------------------------------------------------------------------
 ADD_EXECUTABLE (ptExampleFL ${HDF5_HL_CPP_EXAMPLES_SOURCE_DIR}/ptExampleFL.cpp)
 H5_NAMING (ptExampleFL)
-TARGET_WIN_PROPERTIES (ptExampleFL)
 TARGET_LINK_LIBRARIES (
     ptExampleFL
     ${HDF5_HL_CPP_LIB_TARGET}
@@ -22,7 +21,6 @@ TARGET_LINK_LIBRARIES (
 
 ADD_EXECUTABLE (ptExampleVL ${HDF5_HL_CPP_EXAMPLES_SOURCE_DIR}/ptExampleVL.cpp)
 H5_NAMING (ptExampleVL)
-TARGET_WIN_PROPERTIES (ptExampleVL)
 TARGET_LINK_LIBRARIES (
     ptExampleVL
     ${HDF5_HL_CPP_LIB_TARGET}

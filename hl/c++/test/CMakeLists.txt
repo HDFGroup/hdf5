@@ -18,7 +18,6 @@ IF (BUILD_TESTING)
 
   ADD_EXECUTABLE (hl_ptableTest ${HDF5_HL_CPP_TEST_SOURCE_DIR}/ptableTest.cpp)
   H5_NAMING (hl_ptableTest)
-  TARGET_WIN_PROPERTIES (hl_ptableTest)
   TARGET_LINK_LIBRARIES (
       hl_ptableTest
       ${HDF5_LIB_TARGET}

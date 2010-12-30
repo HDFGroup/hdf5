@@ -16,11 +16,20 @@
 /* Defined if HDF5 was built with CMake AND build as a shared library */
 #cmakedefine H5_BUILT_AS_DYNAMIC_LIB @H5_BUILT_AS_DYNAMIC_LIB@
 
+/* Defined if HDF5 was built with CMake AND build as a static library */
+#cmakedefine H5_BUILT_AS_STATIC_LIB @H5_BUILT_AS_STATIC_LIB@
+
 /* Defined if HDF5 CPP  was built with CMake AND build as a shared library  */
 #cmakedefine H5_CPP_BUILT_AS_DYNAMIC_LIB @H5_CPP_BUILT_AS_DYNAMIC_LIB@
 
+/* Defined if HDF5 CPP  was built with CMake AND build as a static library  */
+#cmakedefine H5_CPP_BUILT_AS_STATIC_LIB @H5_CPP_BUILT_AS_STATIC_LIB@
+
 /* Defined if HDF5 HL was built with CMake AND build as a shared library */
 #cmakedefine H5_HL_BUILT_AS_DYNAMIC_LIB @H5_HL_BUILT_AS_DYNAMIC_LIB@
+
+/* Defined if HDF5 HL was built with CMake AND build as a static library */
+#cmakedefine H5_HL_BUILT_AS_STATIC_LIB @H5_HL_BUILT_AS_STATIC_LIB@
 
 /* Define if building universal (internal helper macro) */
 #cmakedefine H5_AC_APPLE_UNIVERSAL_BUILD @H5_AC_APPLE_UNIVERSAL_BUILD@

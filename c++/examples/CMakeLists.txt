@@ -23,7 +23,6 @@ SET (examples
 FOREACH (example ${examples})
   ADD_EXECUTABLE (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
   H5_NAMING (cpp_ex_${example})
-  TARGET_WIN_PROPERTIES (cpp_ex_${example})
   TARGET_LINK_LIBRARIES (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
 
   IF (BUILD_TESTING)
