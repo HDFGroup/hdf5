@@ -589,14 +589,52 @@ else
 fi
 # Limits:
 # Maximum number of packed bits is 8 (for now).
-# Maximum integer size is 8 (for now).
-# Maximun Offset is 7 (Maximum size - 1).
-# Maximum Offset+Length is 8 (Maximum size).
+# Maximum integer size is 64 (for now).
+# Maximun Offset is 63 (Maximum size - 1).
+# Maximum Offset+Length is 64 (Maximum size).
 # Tests:
 # Normal operation on both signed and unsigned int datasets.
+# Sanity check
 # Their rawdata output should be the same.
-$xCMD tpbitsSigned.ddl -d /DS08BITS -M 0,2,2,6 packedbits.h5
-$xCMD tpbitsUnsigned.ddl -d /DU08BITS -M 0,2,2,6 packedbits.h5
+$xCMD tpbitsSignedWhole -d /DS08BITS -M 0,8 packedbits.h5
+$xCMD tpbitsUnsignedWhole -d /DU08BITS -M 0,8 packedbits.h5
+$xCMD tpbitsSignedIntWhole -d /DS16BITS -M 0,16 packedbits.h5
+$xCMD tpbitsUnsignedIntWhole -d /DU16BITS -M 0,16 packedbits.h5
+$xCMD tpbitsSignedLongWhole -d /DS32BITS -M 0,32 packedbits.h5
+$xCMD tpbitsUnsignedLongWhole -d /DU32BITS -M 0,32 packedbits.h5
+$xCMD tpbitsSignedLongLongWhole -d /DS64BITS -M 0,64 packedbits.h5
+$xCMD tpbitsUnsignedLongLongWhole -d /DU64BITS -M 0,64 packedbits.h5
+$xCMD tpbitsSignedLongLongWhole63 -d /DS64BITS -M 0,63 packedbits.h5
+$xCMD tpbitsUnsignedLongLongWhole63 -d /DU64BITS -M 0,63 packedbits.h5
+$xCMD tpbitsSignedLongLongWhole1 -d /DS64BITS -M 1,63 packedbits.h5
+$xCMD tpbitsUnsignedLongLongWhole1 -d /DU64BITS -M 1,63 packedbits.h5
+# Half sections
+$xCMD tpbitsSigned4 -d /DS08BITS -M 0,4,4,4 packedbits.h5
+$xCMD tpbitsUnsigned4 -d /DU08BITS -M 0,4,4,4 packedbits.h5
+$xCMD tpbitsSignedInt8 -d /DS16BITS -M 0,8,8,8 packedbits.h5
+$xCMD tpbitsUnsignedInt8 -d /DU16BITS -M 0,8,8,8 packedbits.h5
+$xCMD tpbitsSignedLong16 -d /DS32BITS -M 0,16,16,16 packedbits.h5
+$xCMD tpbitsUnsignedLong16 -d /DU32BITS -M 0,16,16,16 packedbits.h5
+$xCMD tpbitsSignedLongLong32 -d /DS64BITS -M 0,32,32,32 packedbits.h5
+$xCMD tpbitsUnsignedLongLong32 -d /DU64BITS -M 0,32,32,32 packedbits.h5
+# Quarter sections
+$xCMD tpbitsSigned2 -d /DS08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5
+$xCMD tpbitsUnsigned2 -d /DU08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5
+$xCMD tpbitsSignedInt4 -d /DS16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5
+$xCMD tpbitsUnsignedInt4 -d /DU16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5
+$xCMD tpbitsSignedLong8 -d /DS32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5
+$xCMD tpbitsUnsignedLong8 -d /DU32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5
+$xCMD tpbitsSignedLongLong16 -d /DS64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5
+$xCMD tpbitsUnsignedLongLong16 -d /DU64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5
+# Begin and End
+$xCMD tpbitsSigned -d /DS08BITS -M 0,2,2,6 packedbits.h5
+$xCMD tpbitsUnsigned -d /DU08BITS -M 0,2,2,6 packedbits.h5
+$xCMD tpbitsSignedInt -d /DS16BITS -M 0,2,10,6 packedbits.h5
+$xCMD tpbitsUnsignedInt -d /DU16BITS -M 0,2,10,6 packedbits.h5
+$xCMD tpbitsSignedLong -d /DS32BITS -M 0,2,26,6 packedbits.h5
+$xCMD tpbitsUnsignedLong -d /DU32BITS -M 0,2,26,6 packedbits.h5
+$xCMD tpbitsSignedLongLong -d /DS64BITS -M 0,2,58,6 packedbits.h5
+$xCMD tpbitsUnsignedLongLong -d /DU64BITS -M 0,2,58,6 packedbits.h5
 # Overlapped packed bits.
 $xCMD tpbitsOverlapped.ddl -d /DS08BITS -M 0,1,1,1,2,1,0,3 packedbits.h5
 # Maximum number of packed bits.
@@ -609,13 +647,19 @@ $xCMD tpbitsArray.ddl -d /Dataset1 -M 0,1,1,1 tarray1.h5
 # Too many packed bits requested. Max is 8 for now.
 $xCMD tpbitsMaxExceeded.ddl -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
 # Offset too large. Max is 7 (8-1) for now.
-$xCMD tpbitsOffsetExceeded.ddl -d /DS08BITS -M 8,1 packedbits.h5
+$xCMD tpbitsOffsetExceeded.ddl -d /DS08BITS -M 64,1 packedbits.h5
+$xCMD tpbitsCharOffsetExceeded.ddl -d /DS08BITS -M 8,1 packedbits.h5
+$xCMD tpbitsIntOffsetExceeded.ddl -d /DS16BITS -M 16,1 packedbits.h5
+$xCMD tpbitsLongOffsetExceeded.ddl -d /DS32BITS -M 32,1 packedbits.h5
 # Bad offset, must not be negative.
 $xCMD tpbitsOffsetNegative.ddl -d /DS08BITS -M -1,1 packedbits.h5
 # Bad length, must not be positive.
 $xCMD tpbitsLengthPositive.ddl -d /DS08BITS -M 4,0 packedbits.h5
 # Offset+Length is too large. Max is 8 for now.
-$xCMD tpbitsLengthExceeded.ddl -d /DS08BITS -M 2,7 packedbits.h5
+$xCMD tpbitsLengthExceeded.ddl -d /DS08BITS -M 37,28 packedbits.h5
+$xCMD tpbitsCharLengthExceeded.ddl -d /DS08BITS -M 2,7 packedbits.h5
+$xCMD tpbitsIntLengthExceeded.ddl -d /DS16BITS -M 10,7 packedbits.h5
+$xCMD tpbitsLongLengthExceeded.ddl -d /DS32BITS -M 26,7 packedbits.h5
 # Incomplete pair of packed bits request.
 $xCMD tpbitsIncomplete.ddl -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5
 

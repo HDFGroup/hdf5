@@ -255,6 +255,9 @@ typedef struct s1_t {
 #define F66_DATASETU32       "DU32BITS"
 #define F66_DATASETS32       "DS32BITS"
 #define F66_YDIM32	    32
+#define F66_DATASETU64       "DU64BITS"
+#define F66_DATASETS64       "DS64BITS"
+#define F66_YDIM64      64
 #define F66_DUMMYDBL	    "DummyDBL"
 
 static void
@@ -6771,9 +6774,11 @@ gent_packedbits(void)
     uint8_t  dsetu8[F66_XDIM][F66_YDIM8],   valu8bits;
     uint16_t dsetu16[F66_XDIM][F66_YDIM16], valu16bits;
     uint32_t dsetu32[F66_XDIM][F66_YDIM32], valu32bits;
+    uint64_t dsetu64[F66_XDIM][F66_YDIM64], valu64bits;
     int8_t  dset8[F66_XDIM][F66_YDIM8],   val8bits;
     int16_t dset16[F66_XDIM][F66_YDIM16], val16bits;
     int32_t dset32[F66_XDIM][F66_YDIM32], val32bits;
+    int64_t dset64[F66_XDIM][F66_YDIM64], val64bits;
     double  dsetdbl[F66_XDIM][F66_YDIM8];
     unsigned int i, j;
 
@@ -6833,6 +6838,24 @@ gent_packedbits(void)
     H5Sclose(space);
     H5Dclose(dataset);
 
+    /* Dataset of 64 bits unsigned int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM64;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETU64, H5T_STD_U64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    valu64bits = (uint64_t) ~0Lu;    /* all 1s */
+    for(i = 0; i < dims[0]; i++){
+    dsetu64[i][0] = valu64bits;
+    for(j = 1; j < dims[1]; j++) {
+              dsetu64[i][j] = dsetu64[i][j-1] << 1;
+    }
+    valu64bits <<= 1;
+    }
+
+    H5Dwrite(dataset, H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetu64);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
     /* Dataset of 8 bits signed int */
     dims[0] = F66_XDIM; dims[1] = F66_YDIM8;
     space = H5Screate_simple(2, dims, NULL);
@@ -6884,6 +6907,24 @@ gent_packedbits(void)
     }
 
     H5Dwrite(dataset, H5T_NATIVE_INT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset32);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 64 bits signed int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM64;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETS64, H5T_STD_I64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    val64bits = (int64_t) ~0L;   /* all 1s */
+    for(i = 0; i < dims[0]; i++){
+    dset64[i][0] = val64bits;
+    for(j = 1; j < dims[1]; j++) {
+              dset64[i][j] = dset64[i][j-1] << 1;
+    }
+    val64bits <<= 1;
+    }
+
+    H5Dwrite(dataset, H5T_NATIVE_INT64, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset64);
     H5Sclose(space);
     H5Dclose(dataset);
 
