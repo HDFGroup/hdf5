@@ -3649,6 +3649,7 @@ parse_mask_list(const char *h_list)
 {
     const char     *ptr;
     int             offset_value, length_value;
+    unsigned long long temp_mask;
 
     /* sanity check */
     HDassert(h_list);
@@ -3713,10 +3714,9 @@ parse_mask_list(const char *h_list)
 	/* create the bit mask by left shift 1's by length, then negate it. */
 	/* After packed_mask is calculated, packed_length is not needed but  */
 	/* keep it for debug purpose. */
-	if(length_value<8*sizeof(unsigned long long))
-	    packed_mask[packed_bits_num] = ~(~0L<<length_value);
-	else
-        packed_mask[packed_bits_num] = ~0L;
+	temp_mask = ~0L;
+	temp_mask = temp_mask << length_value;
+    packed_mask[packed_bits_num] = ~temp_mask;
 	packed_bits_num++;
 
 	/* skip a possible comma separator */
