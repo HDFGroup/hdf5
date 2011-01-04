@@ -24,7 +24,7 @@ SET (examples
 
 FOREACH (example ${examples})
   ADD_EXECUTABLE (${example} ${HDF5_EXAMPLES_SOURCE_DIR}/${example}.c)
-  H5_NAMING (${example})
+  H5_NAMING (${example} ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (${example} ${HDF5_LIB_TARGET})
 
   IF (BUILD_TESTING)
@@ -38,7 +38,7 @@ ENDIF (BUILD_TESTING)
 
 IF (H5_HAVE_PARALLEL)
   ADD_EXECUTABLE (ph5example ${HDF5_EXAMPLES_SOURCE_DIR}/ph5example.c)
-  H5_NAMING (ph5example)
+  H5_NAMING (ph5example ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (ph5example ${HDF5_LIB_TARGET})
 
   IF (BUILD_TESTING)
