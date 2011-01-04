@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5dump -d /DU16BITS -M 0,2,8,6 packedbits.h5'
+Expected output for 'h5dump -d /DU16BITS -M 0,2,10,6 packedbits.h5'
 #############################
 HDF5 "packedbits.h5" {
 DATASET "/DU16BITS" {
