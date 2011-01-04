@@ -3715,8 +3715,12 @@ parse_mask_list(const char *h_list)
 	/* After packed_mask is calculated, packed_length is not needed but  */
 	/* keep it for debug purpose. */
 	temp_mask = ~0L;
-	temp_mask = temp_mask << length_value;
-    packed_mask[packed_bits_num] = ~temp_mask;
+	if(length_value<8*sizeof(unsigned long long)) {
+	    temp_mask = temp_mask << length_value;
+	    packed_mask[packed_bits_num] = ~temp_mask;
+    }
+	else
+        packed_mask[packed_bits_num] = temp_mask;
 	packed_bits_num++;
 
 	/* skip a possible comma separator */
