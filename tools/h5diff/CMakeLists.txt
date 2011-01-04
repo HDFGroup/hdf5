@@ -14,7 +14,7 @@ ADD_EXECUTABLE (h5diff
     ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.c
     ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_main.c
 )
-H5_NAMING (h5diff)
+H5_NAMING (h5diff ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5diff)
@@ -31,7 +31,7 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5diffgentest ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diffgentest.c)
-    H5_NAMING (h5diffgentest)
+    H5_NAMING (h5diffgentest ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5diffgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     
     #ADD_TEST (NAME h5diffgentest COMMAND $<TARGET_FILE:h5diffgentest>)

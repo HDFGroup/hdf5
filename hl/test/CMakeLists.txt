@@ -22,7 +22,7 @@ INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
 # --------------------------------------------------------------------
 MACRO (HL_ADD_TEST hl_name files)
   ADD_EXECUTABLE (hl_${hl_name} ${hl_name}.c)
-  H5_NAMING (hl_${hl_name})
+  H5_NAMING (hl_${hl_name} ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (hl_${hl_name}
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_LIB_TARGET}
@@ -86,7 +86,7 @@ HL_ADD_TEST (test_table "test_table_be.hdf5;test_table_cray.hdf5;test_table_le.h
 # --------------------------------------------------------------------
 IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
   ADD_EXECUTABLE (hl_gen_test_ds gen_test_ds.c)
-  H5_NAMING (hl_gen_test_ds)
+  H5_NAMING (hl_gen_test_ds ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (hl_gen_test_ds
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_LIB_TARGET}
