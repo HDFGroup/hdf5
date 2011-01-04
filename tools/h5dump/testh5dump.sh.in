@@ -596,45 +596,45 @@ fi
 # Normal operation on both signed and unsigned int datasets.
 # Sanity check
 # Their rawdata output should be the same.
-$xCMD tpbitsSignedWhole -d /DS08BITS -M 0,8 packedbits.h5
-$xCMD tpbitsUnsignedWhole -d /DU08BITS -M 0,8 packedbits.h5
-$xCMD tpbitsSignedIntWhole -d /DS16BITS -M 0,16 packedbits.h5
-$xCMD tpbitsUnsignedIntWhole -d /DU16BITS -M 0,16 packedbits.h5
-$xCMD tpbitsSignedLongWhole -d /DS32BITS -M 0,32 packedbits.h5
-$xCMD tpbitsUnsignedLongWhole -d /DU32BITS -M 0,32 packedbits.h5
-$xCMD tpbitsSignedLongLongWhole -d /DS64BITS -M 0,64 packedbits.h5
-$xCMD tpbitsUnsignedLongLongWhole -d /DU64BITS -M 0,64 packedbits.h5
-$xCMD tpbitsSignedLongLongWhole63 -d /DS64BITS -M 0,63 packedbits.h5
-$xCMD tpbitsUnsignedLongLongWhole63 -d /DU64BITS -M 0,63 packedbits.h5
-$xCMD tpbitsSignedLongLongWhole1 -d /DS64BITS -M 1,63 packedbits.h5
-$xCMD tpbitsUnsignedLongLongWhole1 -d /DU64BITS -M 1,63 packedbits.h5
+$xCMD tpbitsSignedWhole.ddl -d /DS08BITS -M 0,8 packedbits.h5
+$xCMD tpbitsUnsignedWhole.ddl -d /DU08BITS -M 0,8 packedbits.h5
+$xCMD tpbitsSignedIntWhole.ddl -d /DS16BITS -M 0,16 packedbits.h5
+$xCMD tpbitsUnsignedIntWhole.ddl -d /DU16BITS -M 0,16 packedbits.h5
+$xCMD tpbitsSignedLongWhole.ddl -d /DS32BITS -M 0,32 packedbits.h5
+$xCMD tpbitsUnsignedLongWhole.ddl -d /DU32BITS -M 0,32 packedbits.h5
+$xCMD tpbitsSignedLongLongWhole.ddl -d /DS64BITS -M 0,64 packedbits.h5
+$xCMD tpbitsUnsignedLongLongWhole.ddl -d /DU64BITS -M 0,64 packedbits.h5
+$xCMD tpbitsSignedLongLongWhole63.ddl -d /DS64BITS -M 0,63 packedbits.h5
+$xCMD tpbitsUnsignedLongLongWhole63.ddl -d /DU64BITS -M 0,63 packedbits.h5
+$xCMD tpbitsSignedLongLongWhole1.ddl -d /DS64BITS -M 1,63 packedbits.h5
+$xCMD tpbitsUnsignedLongLongWhole1.ddl -d /DU64BITS -M 1,63 packedbits.h5
 # Half sections
-$xCMD tpbitsSigned4 -d /DS08BITS -M 0,4,4,4 packedbits.h5
-$xCMD tpbitsUnsigned4 -d /DU08BITS -M 0,4,4,4 packedbits.h5
-$xCMD tpbitsSignedInt8 -d /DS16BITS -M 0,8,8,8 packedbits.h5
-$xCMD tpbitsUnsignedInt8 -d /DU16BITS -M 0,8,8,8 packedbits.h5
-$xCMD tpbitsSignedLong16 -d /DS32BITS -M 0,16,16,16 packedbits.h5
-$xCMD tpbitsUnsignedLong16 -d /DU32BITS -M 0,16,16,16 packedbits.h5
-$xCMD tpbitsSignedLongLong32 -d /DS64BITS -M 0,32,32,32 packedbits.h5
-$xCMD tpbitsUnsignedLongLong32 -d /DU64BITS -M 0,32,32,32 packedbits.h5
+$xCMD tpbitsSigned4.ddl -d /DS08BITS -M 0,4,4,4 packedbits.h5
+$xCMD tpbitsUnsigned4.ddl -d /DU08BITS -M 0,4,4,4 packedbits.h5
+$xCMD tpbitsSignedInt8.ddl -d /DS16BITS -M 0,8,8,8 packedbits.h5
+$xCMD tpbitsUnsignedInt8.ddl -d /DU16BITS -M 0,8,8,8 packedbits.h5
+$xCMD tpbitsSignedLong16.ddl -d /DS32BITS -M 0,16,16,16 packedbits.h5
+$xCMD tpbitsUnsignedLong16.ddl -d /DU32BITS -M 0,16,16,16 packedbits.h5
+$xCMD tpbitsSignedLongLong32.ddl -d /DS64BITS -M 0,32,32,32 packedbits.h5
+$xCMD tpbitsUnsignedLongLong32.ddl -d /DU64BITS -M 0,32,32,32 packedbits.h5
 # Quarter sections
-$xCMD tpbitsSigned2 -d /DS08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5
-$xCMD tpbitsUnsigned2 -d /DU08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5
-$xCMD tpbitsSignedInt4 -d /DS16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5
-$xCMD tpbitsUnsignedInt4 -d /DU16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5
-$xCMD tpbitsSignedLong8 -d /DS32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5
-$xCMD tpbitsUnsignedLong8 -d /DU32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5
-$xCMD tpbitsSignedLongLong16 -d /DS64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5
-$xCMD tpbitsUnsignedLongLong16 -d /DU64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5
+$xCMD tpbitsSigned2.ddl -d /DS08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5
+$xCMD tpbitsUnsigned2.ddl -d /DU08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5
+$xCMD tpbitsSignedInt4.ddl -d /DS16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5
+$xCMD tpbitsUnsignedInt4.ddl -d /DU16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5
+$xCMD tpbitsSignedLong8.ddl -d /DS32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5
+$xCMD tpbitsUnsignedLong8.ddl -d /DU32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5
+$xCMD tpbitsSignedLongLong16.ddl -d /DS64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5
+$xCMD tpbitsUnsignedLongLong16.ddl -d /DU64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5
 # Begin and End
-$xCMD tpbitsSigned -d /DS08BITS -M 0,2,2,6 packedbits.h5
-$xCMD tpbitsUnsigned -d /DU08BITS -M 0,2,2,6 packedbits.h5
-$xCMD tpbitsSignedInt -d /DS16BITS -M 0,2,10,6 packedbits.h5
-$xCMD tpbitsUnsignedInt -d /DU16BITS -M 0,2,10,6 packedbits.h5
-$xCMD tpbitsSignedLong -d /DS32BITS -M 0,2,26,6 packedbits.h5
-$xCMD tpbitsUnsignedLong -d /DU32BITS -M 0,2,26,6 packedbits.h5
-$xCMD tpbitsSignedLongLong -d /DS64BITS -M 0,2,58,6 packedbits.h5
-$xCMD tpbitsUnsignedLongLong -d /DU64BITS -M 0,2,58,6 packedbits.h5
+$xCMD tpbitsSigned.ddl -d /DS08BITS -M 0,2,2,6 packedbits.h5
+$xCMD tpbitsUnsigned.ddl -d /DU08BITS -M 0,2,2,6 packedbits.h5
+$xCMD tpbitsSignedInt.ddl -d /DS16BITS -M 0,2,10,6 packedbits.h5
+$xCMD tpbitsUnsignedInt.ddl -d /DU16BITS -M 0,2,10,6 packedbits.h5
+$xCMD tpbitsSignedLong.ddl -d /DS32BITS -M 0,2,26,6 packedbits.h5
+$xCMD tpbitsUnsignedLong.ddl -d /DU32BITS -M 0,2,26,6 packedbits.h5
+$xCMD tpbitsSignedLongLong.ddl -d /DS64BITS -M 0,2,58,6 packedbits.h5
+$xCMD tpbitsUnsignedLongLong.ddl -d /DU64BITS -M 0,2,58,6 packedbits.h5
 # Overlapped packed bits.
 $xCMD tpbitsOverlapped.ddl -d /DS08BITS -M 0,1,1,1,2,1,0,3 packedbits.h5
 # Maximum number of packed bits.
