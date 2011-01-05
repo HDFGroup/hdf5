@@ -54,7 +54,7 @@ static h5tool_format_t h5tools_dataformat = {
 "", /*fmt_raw */
 "%d", /*fmt_int */
 "%u", /*fmt_uint */
-"%d", /*fmt_schar */
+"%hhd", /*fmt_schar */
 "%u", /*fmt_uchar */
 "%d", /*fmt_short */
 "%u", /*fmt_ushort */

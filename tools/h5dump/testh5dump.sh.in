@@ -273,6 +273,8 @@ IMPORTTEST()
 ##############################################################################
 ##############################################################################
 
+# test for signed/unsigned datasets
+TOOLTEST packedbits.ddl packedbits.h5
 # test for displaying groups
 TOOLTEST tgroup-1.ddl tgroup.h5
 # test for displaying the selected groups

@@ -38,6 +38,7 @@ IF (BUILD_TESTING)
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
   SET (HDF5_REFERENCE_FILES
+      packedbits.ddl
       tall-1.ddl
       tall-2.ddl
       tall-2A.ddl
@@ -217,6 +218,7 @@ IF (BUILD_TESTING)
       tbin3.ddl
       tbin4.ddl
       out3.h5import
+      packedbits.h5
       taindices.h5
       tall.h5
       tarray1.h5
@@ -442,9 +444,6 @@ IF (BUILD_TESTING)
         tpbitsSignedLongLong16.ddl
         tpbitsUnsignedLongLong16.ddl
     )
-    SET (HDF5_REFERENCE_TEST_PBITS
-        packedbits.h5
-    )
 
     FOREACH (ddl_pbits ${HDF5_REFERENCE_PBITS})
       SET (ddldest "${PROJECT_BINARY_DIR}/${ddl_pbits}")
@@ -456,17 +455,6 @@ IF (BUILD_TESTING)
           ARGS       ${HDF5_TOOLS_SRC_DIR}/testfiles/${ddl_pbits} ${ddldest} -l3
       )
     ENDFOREACH (ddl_pbits ${HDF5_REFERENCE_PBITS})
-
-    FOREACH (h5_pbits ${HDF5_REFERENCE_TEST_PBITS})
-      SET (dest "${PROJECT_BINARY_DIR}/${h5_pbits}")
-      #MESSAGE (STATUS " Copying ${h5_pbits}")
-      ADD_CUSTOM_COMMAND (
-          TARGET     h5dump
-          POST_BUILD
-          COMMAND    ${CMAKE_COMMAND}
-          ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_pbits} ${dest}
-      )
-    ENDFOREACH (h5_pbits ${HDF5_REFERENCE_TEST_PBITS})
 
   ENDIF (HDF5_USE_H5DUMP_PACKED_BITS)
   
@@ -575,6 +563,8 @@ IF (BUILD_TESTING)
       NAME H5DUMP-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
+          packedbits.out
+          packedbits.out.err
           tall-1.out
           tall-1.out.err
           tall-2.out
@@ -798,6 +788,8 @@ IF (BUILD_TESTING)
     ADD_TEST (NAME H5DUMP-thlink COMMAND h5dump thlink.h5)
   ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
+  # test for signed/unsigned datasets
+  ADD_H5_TEST (packedbits 0 packedbits.h5)
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 tgroup.h5)
   # test for displaying the selected groups
