@@ -184,7 +184,7 @@ ENDIF (H5_HAVE_PARALLEL)
 # Add Main fortran library
 #-----------------------------------------------------------------------------
 ADD_LIBRARY (${HDF5_F90_LIB_TARGET} ${LIB_TYPE} ${f90_F_SRCS})
-SET (SHARED_LINK_FLAGS "")
+SET (SHARED_LINK_FLAGS " ")
 IF (WIN32 AND NOT CYGWIN)
   IF (BUILD_SHARED_LIBS)
     SET_PROPERTY (TARGET ${HDF5_F90_LIB_TARGET}
