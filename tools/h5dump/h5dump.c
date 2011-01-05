@@ -2702,35 +2702,36 @@ static void
 dump_packed_bits(unsigned int packed_index, hid_t type)
 {
     int packed_bits_size = 0;
-    if(H5Tget_class(type)==H5T_INTEGER) {
-        if(H5Tequal(type, H5T_NATIVE_SCHAR) == TRUE) {
+    hid_t n_type = h5tools_get_native_type(type);
+    if(H5Tget_class(n_type)==H5T_INTEGER) {
+        if(H5Tequal(n_type, H5T_NATIVE_SCHAR) == TRUE) {
             packed_bits_size = 8 * sizeof(char);
         } 
-        else if(H5Tequal(type, H5T_NATIVE_UCHAR) == TRUE) {
+        else if(H5Tequal(n_type, H5T_NATIVE_UCHAR) == TRUE) {
             packed_bits_size = 8 * sizeof(unsigned char);
         } 
-        else if(H5Tequal(type, H5T_NATIVE_SHORT) == TRUE) {
+        else if(H5Tequal(n_type, H5T_NATIVE_SHORT) == TRUE) {
             packed_bits_size = 8 * sizeof(short);
         } 
-        else if(H5Tequal(type, H5T_NATIVE_USHORT) == TRUE) {
+        else if(H5Tequal(n_type, H5T_NATIVE_USHORT) == TRUE) {
             packed_bits_size = 8 * sizeof(unsigned short);
         } 
-        else if(H5Tequal(type, H5T_NATIVE_INT) == TRUE) {
+        else if(H5Tequal(n_type, H5T_NATIVE_INT) == TRUE) {
             packed_bits_size = 8 * sizeof(int);
         } 
-        else if(H5Tequal(type, H5T_NATIVE_UINT) == TRUE) {
+        else if(H5Tequal(n_type, H5T_NATIVE_UINT) == TRUE) {
             packed_bits_size = 8 * sizeof(unsigned int);
         } 
-        else if(H5Tequal(type, H5T_NATIVE_LONG) == TRUE) {
+        else if(H5Tequal(n_type, H5T_NATIVE_LONG) == TRUE) {
             packed_bits_size = 8 * sizeof(long);
         } 
-        else if(H5Tequal(type, H5T_NATIVE_ULONG) == TRUE) {
+        else if(H5Tequal(n_type, H5T_NATIVE_ULONG) == TRUE) {
             packed_bits_size = 8 * sizeof(unsigned long);
         } 
-        else if(H5Tequal(type, H5T_NATIVE_LLONG) == TRUE) {
+        else if(H5Tequal(n_type, H5T_NATIVE_LLONG) == TRUE) {
             packed_bits_size = 8 * sizeof(long long);
         } 
-        else if(H5Tequal(type, H5T_NATIVE_ULLONG) == TRUE) {
+        else if(H5Tequal(n_type, H5T_NATIVE_ULLONG) == TRUE) {
             packed_bits_size = 8 * sizeof(unsigned long long);
         }
         else
