@@ -281,7 +281,7 @@
   #define HDF5_HL_F90CSTUBDLLVAR extern
 #endif /* HDF5_HL_F90CSTUBDLL */
 
-#elif (H5_BUILT_AS_STATIC_LIB)
+#elif defined(H5_BUILT_AS_STATIC_LIB)
   #define H5_DLL
   #define H5_HLDLL
   #define H5_HLCPPDLL
