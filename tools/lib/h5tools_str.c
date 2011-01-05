@@ -789,7 +789,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
     }
     else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-        h5tools_str_append(str, OPT(info->fmt_schar, "%d"), *cp_vp);
+        h5tools_str_append(str, OPT(info->fmt_schar, "%hhd"), *cp_vp);
     }
     else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
         h5tools_str_append(str, OPT(info->fmt_uchar, "%u"), *ucp_vp);

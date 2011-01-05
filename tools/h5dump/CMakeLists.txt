@@ -38,6 +38,7 @@ IF (BUILD_TESTING)
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
   SET (HDF5_REFERENCE_FILES
+      packedbits.ddl
       tall-1.ddl
       tall-2.ddl
       tall-2A.ddl
@@ -217,6 +218,7 @@ IF (BUILD_TESTING)
       tbin3.ddl
       tbin4.ddl
       out3.h5import
+      packedbits.h5
       taindices.h5
       tall.h5
       tarray1.h5
@@ -476,6 +478,8 @@ IF (BUILD_TESTING)
       NAME H5DUMP-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
+          packedbits.out
+          packedbits.out.err
           tall-1.out
           tall-1.out.err
           tall-2.out
@@ -699,6 +703,8 @@ IF (BUILD_TESTING)
     ADD_TEST (NAME H5DUMP-thlink COMMAND h5dump thlink.h5)
   ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
+  # test for signed/unsigned datasets
+  ADD_H5_TEST (packedbits 0 packedbits.h5)
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 tgroup.h5)
   # test for displaying the selected groups

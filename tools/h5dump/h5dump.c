@@ -132,7 +132,7 @@ static h5tool_format_t         dataformat = {
     "",             /*fmt_raw */
     "%d",           /*fmt_int */
     "%u",           /*fmt_uint */
-    "%d",           /*fmt_schar */
+    "%hhd",           /*fmt_schar */
     "%u",           /*fmt_uchar */
     "%d",           /*fmt_short */
     "%u",           /*fmt_ushort */
@@ -216,7 +216,7 @@ static h5tool_format_t         xml_dataformat = {
     "",             /*fmt_raw */
     "%d",           /*fmt_int */
     "%u",           /*fmt_uint */
-    "%d",           /*fmt_schar */
+    "%hhd",           /*fmt_schar */
     "%u",           /*fmt_uchar */
     "%d",           /*fmt_short */
     "%u",           /*fmt_ushort */
@@ -3988,7 +3988,7 @@ parse_start:
             leave(EXIT_SUCCESS);
             break;
         case 'w':
-            nCols = atoi(opt_arg);
+            nCols = HDatoi(opt_arg);
             last_was_dset = FALSE;
             break;
         case 'a':
