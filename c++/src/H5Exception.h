@@ -17,6 +17,7 @@
 #ifndef _H5Exception_H
 #define _H5Exception_H
 
+#pragma warning (disable : 4251)
 #include <string>
 
 #ifndef H5_NO_NAMESPACE
@@ -84,7 +85,7 @@ class H5_DLLCPP Exception {
 
    protected:
         // Default value for detail_message
-        static const H5std_string DEFAULT_MSG;
+        static const char DEFAULT_MSG[];
 };
 
 class H5_DLLCPP FileIException : public Exception {
