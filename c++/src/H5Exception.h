@@ -17,6 +17,7 @@
 #ifndef _H5Exception_H
 #define _H5Exception_H
 
+#pragma warning (disable : 4251)
 #include <string>
 
 #ifndef H5_NO_NAMESPACE
