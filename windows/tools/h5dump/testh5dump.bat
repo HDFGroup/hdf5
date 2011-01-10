@@ -632,37 +632,81 @@ rem ############################################################################
 	if "%Have_Packed_Bits%"=="yes" (
 		rem test for dataset packed bits 
 		rem Set up xCMD to test or skip.
-		rem Limits:
-		rem Maximum number of packed bits is 8 (for now).
-		rem Maximum integer size is 8 (for now).
-		rem Maximun Offset is 7 (Maximum size - 1).
-		rem Maximum Offset+Length is 8 (Maximum size).
-		rem Tests:
-		rem Normal operation on both signed and unsigned int datasets.
-		rem Their rawdata output should be the same.
-		call :tooltest tpbitsSigned.ddl -d /DS08BITS -M 0,2,2,6 packedbits.h5
-		call :tooltest tpbitsUnsigned.ddl -d /DU08BITS -M 0,2,2,6 packedbits.h5
-		rem Overlapped packed bits.
-		call :tooltest tpbitsOverlapped.ddl -d /DS08BITS -M 0,1,1,1,2,1,0,3 packedbits.h5
-		rem Maximum number of packed bits.
-		call :tooltest tpbitsMax.ddl -d /DS08BITS -M 0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
-		rem Compound type.
-		call :tooltest tpbitsCompound.ddl -d /dset1 -M 0,1,1,1 tcompound.h5
-		rem Array type.
-		call :tooltest tpbitsArray.ddl -d /Dataset1 -M 0,1,1,1 tarray1.h5
-		rem Test Error handling.
-		rem Too many packed bits requested. Max is 8 for now.
-		call :tooltest tpbitsMaxExceeded.ddl -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
-		rem Offset too large. Max is 7 (8-1) for now.
-		call :tooltest tpbitsOffsetExceeded.ddl -d /DS08BITS -M 8,1 packedbits.h5
-		rem Bad offset, must not be negative.
-		call :tooltest tpbitsOffsetNegative.ddl -d /DS08BITS -M -1,1 packedbits.h5
-		rem Bad length, must not be positive.
-		call :tooltest tpbitsLengthPositive.ddl -d /DS08BITS -M 4,0 packedbits.h5
-		rem Offset+Length is too large. Max is 8 for now.
-		call :tooltest tpbitsLengthExceeded.ddl -d /DS08BITS -M 2,7 packedbits.h5
-		rem Incomplete pair of packed bits request.
-		call :tooltest tpbitsIncomplete.ddl -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5
+        rem Limits:
+        rem Maximum number of packed bits is 8 (for now).
+        rem Maximum integer size is 64 (for now).
+        rem Maximun Offset is 63 (Maximum size - 1).
+        rem Maximum Offset+Length is 64 (Maximum size).
+        rem Tests:
+        rem Normal operation on both signed and unsigned int datasets.
+        rem Sanity check
+        rem Their rawdata output should be the same.
+        call :tooltest tpbitsSignedWhole.ddl -d /DS08BITS -M 0,8 packedbits.h5
+        call :tooltest tpbitsUnsignedWhole.ddl -d /DU08BITS -M 0,8 packedbits.h5
+        call :tooltest tpbitsSignedIntWhole.ddl -d /DS16BITS -M 0,16 packedbits.h5
+        call :tooltest tpbitsUnsignedIntWhole.ddl -d /DU16BITS -M 0,16 packedbits.h5
+        call :tooltest tpbitsSignedLongWhole.ddl -d /DS32BITS -M 0,32 packedbits.h5
+        call :tooltest tpbitsUnsignedLongWhole.ddl -d /DU32BITS -M 0,32 packedbits.h5
+        call :tooltest tpbitsSignedLongLongWhole.ddl -d /DS64BITS -M 0,64 packedbits.h5
+        call :tooltest tpbitsUnsignedLongLongWhole.ddl -d /DU64BITS -M 0,64 packedbits.h5
+        call :tooltest tpbitsSignedLongLongWhole63.ddl -d /DS64BITS -M 0,63 packedbits.h5
+        call :tooltest tpbitsUnsignedLongLongWhole63.ddl -d /DU64BITS -M 0,63 packedbits.h5
+        call :tooltest tpbitsSignedLongLongWhole1.ddl -d /DS64BITS -M 1,63 packedbits.h5
+        call :tooltest tpbitsUnsignedLongLongWhole1.ddl -d /DU64BITS -M 1,63 packedbits.h5
+        rem Half sections
+        call :tooltest tpbitsSigned4.ddl -d /DS08BITS -M 0,4,4,4 packedbits.h5
+        call :tooltest tpbitsUnsigned4.ddl -d /DU08BITS -M 0,4,4,4 packedbits.h5
+        call :tooltest tpbitsSignedInt8.ddl -d /DS16BITS -M 0,8,8,8 packedbits.h5
+        call :tooltest tpbitsUnsignedInt8.ddl -d /DU16BITS -M 0,8,8,8 packedbits.h5
+        call :tooltest tpbitsSignedLong16.ddl -d /DS32BITS -M 0,16,16,16 packedbits.h5
+        call :tooltest tpbitsUnsignedLong16.ddl -d /DU32BITS -M 0,16,16,16 packedbits.h5
+        call :tooltest tpbitsSignedLongLong32.ddl -d /DS64BITS -M 0,32,32,32 packedbits.h5
+        call :tooltest tpbitsUnsignedLongLong32.ddl -d /DU64BITS -M 0,32,32,32 packedbits.h5
+        rem Quarter sections
+        call :tooltest tpbitsSigned2.ddl -d /DS08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5
+        call :tooltest tpbitsUnsigned2.ddl -d /DU08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5
+        call :tooltest tpbitsSignedInt4.ddl -d /DS16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5
+        call :tooltest tpbitsUnsignedInt4.ddl -d /DU16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5
+        call :tooltest tpbitsSignedLong8.ddl -d /DS32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5
+        call :tooltest tpbitsUnsignedLong8.ddl -d /DU32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5
+        call :tooltest tpbitsSignedLongLong16.ddl -d /DS64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5
+        call :tooltest tpbitsUnsignedLongLong16.ddl -d /DU64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5
+        rem Begin and End
+        call :tooltest tpbitsSigned.ddl -d /DS08BITS -M 0,2,2,6 packedbits.h5
+        call :tooltest tpbitsUnsigned.ddl -d /DU08BITS -M 0,2,2,6 packedbits.h5
+        call :tooltest tpbitsSignedInt.ddl -d /DS16BITS -M 0,2,10,6 packedbits.h5
+        call :tooltest tpbitsUnsignedInt.ddl -d /DU16BITS -M 0,2,10,6 packedbits.h5
+        call :tooltest tpbitsSignedLong.ddl -d /DS32BITS -M 0,2,26,6 packedbits.h5
+        call :tooltest tpbitsUnsignedLong.ddl -d /DU32BITS -M 0,2,26,6 packedbits.h5
+        call :tooltest tpbitsSignedLongLong.ddl -d /DS64BITS -M 0,2,58,6 packedbits.h5
+        call :tooltest tpbitsUnsignedLongLong.ddl -d /DU64BITS -M 0,2,58,6 packedbits.h5
+        rem Overlapped packed bits.
+        call :tooltest tpbitsOverlapped.ddl -d /DS08BITS -M 0,1,1,1,2,1,0,3 packedbits.h5
+        rem Maximum number of packed bits.
+        call :tooltest tpbitsMax.ddl -d /DS08BITS -M 0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
+        rem Compound type.
+        call :tooltest tpbitsCompound.ddl -d /dset1 -M 0,1,1,1 tcompound.h5
+        rem Array type.
+        call :tooltest tpbitsArray.ddl -d /Dataset1 -M 0,1,1,1 tarray1.h5
+        rem Test Error handling.
+        rem Too many packed bits requested. Max is 8 for now.
+        call :tooltest tpbitsMaxExceeded.ddl -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
+        rem Offset too large. Max is 7 (8-1) for now.
+        call :tooltest tpbitsOffsetExceeded.ddl -d /DS08BITS -M 64,1 packedbits.h5
+        call :tooltest tpbitsCharOffsetExceeded.ddl -d /DS08BITS -M 8,1 packedbits.h5
+        call :tooltest tpbitsIntOffsetExceeded.ddl -d /DS16BITS -M 16,1 packedbits.h5
+        call :tooltest tpbitsLongOffsetExceeded.ddl -d /DS32BITS -M 32,1 packedbits.h5
+        rem Bad offset, must not be negative.
+        call :tooltest tpbitsOffsetNegative.ddl -d /DS08BITS -M -1,1 packedbits.h5
+        rem Bad length, must not be positive.
+        call :tooltest tpbitsLengthPositive.ddl -d /DS08BITS -M 4,0 packedbits.h5
+        rem Offset+Length is too large. Max is 8 for now.
+        call :tooltest tpbitsLengthExceeded.ddl -d /DS08BITS -M 37,28 packedbits.h5
+        call :tooltest tpbitsCharLengthExceeded.ddl -d /DS08BITS -M 2,7 packedbits.h5
+        call :tooltest tpbitsIntLengthExceeded.ddl -d /DS16BITS -M 10,7 packedbits.h5
+        call :tooltest tpbitsLongLengthExceeded.ddl -d /DS32BITS -M 26,7 packedbits.h5
+        rem Incomplete pair of packed bits request.
+        call :tooltest tpbitsIncomplete.ddl -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5
 	)
     
     if %nerrors% equ 0 (
