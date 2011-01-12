@@ -941,8 +941,9 @@
 ./testpar/t_chunk_alloc.c
 ./testpar/t_coll_chunk.c
 ./testpar/t_filter_read.c
-./testpar/t_span_tree.c
 ./testpar/t_posix_compliant.c
+./testpar/t_shapesame.c
+./testpar/t_span_tree.c
 ./testpar/t_rank_projection.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
