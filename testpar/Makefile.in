@@ -66,7 +66,7 @@ CONFIG_CLEAN_FILES = testph5.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = t_mpi$(EXEEXT) t_posix_compliant$(EXEEXT) \
 	testphdf5$(EXEEXT) t_cache$(EXEEXT) t_pflush1$(EXEEXT) \
-	t_pflush2$(EXEEXT)
+	t_pflush2$(EXEEXT) t_shapesame$(EXEEXT)
 t_cache_SOURCES = t_cache.c
 t_cache_OBJECTS = t_cache.$(OBJEXT)
 t_cache_LDADD = $(LDADD)
@@ -87,11 +87,14 @@ t_posix_compliant_SOURCES = t_posix_compliant.c
 t_posix_compliant_OBJECTS = t_posix_compliant.$(OBJEXT)
 t_posix_compliant_LDADD = $(LDADD)
 t_posix_compliant_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+t_shapesame_SOURCES = t_shapesame.c
+t_shapesame_OBJECTS = t_shapesame.$(OBJEXT)
+t_shapesame_LDADD = $(LDADD)
+t_shapesame_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 am_testphdf5_OBJECTS = testphdf5.$(OBJEXT) t_dset.$(OBJEXT) \
 	t_file.$(OBJEXT) t_mdset.$(OBJEXT) t_ph5basic.$(OBJEXT) \
 	t_coll_chunk.$(OBJEXT) t_span_tree.$(OBJEXT) \
-	t_chunk_alloc.$(OBJEXT) t_filter_read.$(OBJEXT) \
-	t_rank_projection.$(OBJEXT)
+	t_chunk_alloc.$(OBJEXT) t_filter_read.$(OBJEXT)
 testphdf5_OBJECTS = $(am_testphdf5_OBJECTS)
 testphdf5_LDADD = $(LDADD)
 testphdf5_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
@@ -109,9 +112,9 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c \
-	t_posix_compliant.c $(testphdf5_SOURCES)
+	t_posix_compliant.c t_shapesame.c $(testphdf5_SOURCES)
 DIST_SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c \
-	t_posix_compliant.c $(testphdf5_SOURCES)
+	t_posix_compliant.c t_shapesame.c $(testphdf5_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -398,12 +401,11 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #
-TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2
+TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2 t_shapesame
 TEST_SCRIPT_PARA = testph5.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c \
-        t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c \
-	t_rank_projection.c
+        t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c
 
 
 # The tests all depend on the hdf5 library and the test library
@@ -485,6 +487,9 @@ t_pflush2$(EXEEXT): $(t_pflush2_OBJECTS) $(t_pflush2_DEPENDENCIES)
 t_posix_compliant$(EXEEXT): $(t_posix_compliant_OBJECTS) $(t_posix_compliant_DEPENDENCIES) 
 	@rm -f t_posix_compliant$(EXEEXT)
 	$(LINK) $(t_posix_compliant_OBJECTS) $(t_posix_compliant_LDADD) $(LIBS)
+t_shapesame$(EXEEXT): $(t_shapesame_OBJECTS) $(t_shapesame_DEPENDENCIES) 
+	@rm -f t_shapesame$(EXEEXT)
+	$(LINK) $(t_shapesame_OBJECTS) $(t_shapesame_LDADD) $(LIBS)
 testphdf5$(EXEEXT): $(testphdf5_OBJECTS) $(testphdf5_DEPENDENCIES) 
 	@rm -f testphdf5$(EXEEXT)
 	$(LINK) $(testphdf5_OBJECTS) $(testphdf5_LDADD) $(LIBS)
@@ -507,7 +512,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pflush2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_ph5basic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_posix_compliant.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_rank_projection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_shapesame.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_span_tree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testphdf5.Po@am__quote@
 
