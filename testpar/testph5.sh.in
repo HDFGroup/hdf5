@@ -62,9 +62,8 @@ TOOLTEST -p
 
 # Temporary patch:
 # Run t_shapesame this way. Need more permanent solution.
-TEST_APP_BIN=t_shapesame
-echo $RUNPARALLEL t_shapesame -p
-eval $RUNPARALLEL t_shapesame -p
+echo $RUNPARALLEL ./t_shapesame -p
+eval $RUNPARALLEL ./t_shapesame -p
 
 # Check if the command failed and increment nerrors if so.
 if test $? -ne 0 ; then
