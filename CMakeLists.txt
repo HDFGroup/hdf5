@@ -979,7 +979,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
           ${HDF5_SOURCE_DIR}/COPYING
           ${HDF5_SOURCE_DIR}/README.txt
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
-      COMPONENT documents
+      COMPONENT hdfdocuments
   )
   IF (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
     SET (release_files
@@ -1011,7 +1011,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
     INSTALL (
         FILES ${release_files}
         DESTINATION ${HDF5_INSTALL_DATA_DIR}/release_docs
-        COMPONENT documents
+        COMPONENT hdfdocuments
     )
   ENDIF (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
@@ -1061,7 +1061,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
       DEPENDS libraries
       GROUP Development
   )
-  CPACK_ADD_COMPONENT (documents 
+  CPACK_ADD_COMPONENT (hdfdocuments 
       DISPLAY_NAME "HDF5 Documents"
       GROUP Documents
   )
