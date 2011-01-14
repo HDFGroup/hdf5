@@ -938,7 +938,6 @@
 ./testpar/t_coll_chunk.c
 ./testpar/t_filter_read.c
 ./testpar/t_posix_compliant.c
-./testpar/t_rank_projection.c
 ./testpar/t_shapesame.c
 ./testpar/t_span_tree.c
 ./testpar/testpar.h
