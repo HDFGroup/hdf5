@@ -186,6 +186,14 @@ typedef struct H5Ptest_param_t  /* holds extra test parameters */
 /* Dataset data type.  Int's can be easily octo dumped. */
 typedef int DATATYPE;
 
+/* Shape Same Tests Definitions */
+typedef enum {
+    IND_CONTIG,		/* Independent IO on contigous datasets */
+    COL_CONTIG,		/* Collective IO on contigous datasets */
+    IND_CHUNKED,	/* Independent IO on chunked datasets */
+    COL_CHUNKED		/* Collective IO on chunked datasets */
+} ShapeSameTestMethods;
+
 /* Shared global variables */
 extern int dim0, dim1;				/*Dataset dimensions */
 extern int chunkdim0, chunkdim1;		/*Chunk dimensions */
@@ -242,8 +250,8 @@ void rr_obj_hdr_flush_confusion_reader(MPI_Comm comm);
 void rr_obj_hdr_flush_confusion_writer(MPI_Comm comm);
 void lower_dim_size_comp_test(void);
 void link_chunk_collective_io_test(void);
-void contig_hyperslab_dr_pio_test(void);
-void checker_board_hyperslab_dr_pio_test(void);
+void contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type);
+void checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type);
 #ifdef H5_HAVE_FILTER_DEFLATE
 void compress_readAll(void);
 #endif /* H5_HAVE_FILTER_DEFLATE */
