@@ -1633,7 +1633,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
 
 /*-------------------------------------------------------------------------
- * Function:	contig_hyperslab_dr_pio_test()
+ * Function:	contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
  *
  * Purpose:	Test I/O to/from hyperslab selections of different rank in
  *		the parallel case.
@@ -1652,12 +1652,15 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
  *		if two or more processes are banging on the same 
  *		block of memory.
  *						JRM -- 9/10/10
+ *              Break this one big test into 4 smaller tests according
+ *              to {independent,collective}x{contigous,chunked} datasets.
+ *		AKC -- 2010/01/14
  *
  *-------------------------------------------------------------------------
  */
 
 void
-contig_hyperslab_dr_pio_test(void)
+contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 {
     int	        test_num = 0;
     int		edge_size = 10;
@@ -1689,9 +1692,6 @@ contig_hyperslab_dr_pio_test(void)
     long long	sample_times[4] = {0, 0, 0, 0};
     struct timeval timeval_a;
     struct timeval timeval_b;
-
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     HDcompile_assert(sizeof(uint32_t) == sizeof(unsigned));
@@ -1710,10 +1710,10 @@ contig_hyperslab_dr_pio_test(void)
     for ( large_rank = 3; large_rank <= PAR_SS_DR_MAX_RANK; large_rank++ ) {
 
         for ( small_rank = 2; small_rank < large_rank; small_rank++ ) {
-
-            chunk_edge_size = 0;
-
+	  switch(sstest_type){
+	  case IND_CONTIG:
 	    /* contiguous data set, independent I/O */
+            chunk_edge_size = 0;
             if ( skip_counters[ind_contig_idx] < skips[ind_contig_idx] ) {
 
                 skip_counters[ind_contig_idx]++;
@@ -1735,8 +1735,12 @@ contig_hyperslab_dr_pio_test(void)
                                       sample_times[col_contig_idx]);
             }
             test_num++;
+	    break;
+	    /* end of case IND_CONTIG */
 
+	  case COL_CONTIG:
 	    /* contiguous data set, collective I/O */
+            chunk_edge_size = 0;
             if ( skip_counters[col_contig_idx] < skips[col_contig_idx] ) {
 
                 skip_counters[col_contig_idx]++;
@@ -1758,10 +1762,12 @@ contig_hyperslab_dr_pio_test(void)
                                       sample_times[ind_contig_idx]);
             }
             test_num++;
+	    break;
+	    /* end of case COL_CONTIG */
 
-            chunk_edge_size = 5;
-
+	  case IND_CHUNKED:
 	    /* chunked data set, independent I/O */
+            chunk_edge_size = 5;
             if ( skip_counters[ind_chunked_idx] < skips[ind_chunked_idx] ) {
 
                 skip_counters[ind_chunked_idx]++;
@@ -1783,8 +1789,12 @@ contig_hyperslab_dr_pio_test(void)
                                       sample_times[col_chunked_idx]);
             }
             test_num++;
+	    break;
+	    /* end of case IND_CHUNKED */
 
+	  case COL_CHUNKED:
 	    /* chunked data set, collective I/O */
+            chunk_edge_size = 5;
             if ( skip_counters[col_chunked_idx] < skips[col_chunked_idx] ) {
 
                 skip_counters[col_chunked_idx]++;
@@ -1806,6 +1816,9 @@ contig_hyperslab_dr_pio_test(void)
                                       sample_times[ind_chunked_idx]);
             }
             test_num++;
+	    break;
+	    /* end of case COL_CHUNKED */
+	  } /* end of switch(sstest_type) */
 
 #ifdef H5_HAVE_GETTIMEOFDAY
             if ( time_tests ) {
@@ -4183,7 +4196,7 @@ int		m;
  */
 
 void
-checker_board_hyperslab_dr_pio_test(void)
+checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 {
     int	        test_num = 0;
     int		edge_size = 10;
@@ -4466,7 +4479,7 @@ void *old_client_data;			/* previous error handler arg.*/
 #define NFILENAME 2
 #define PARATESTFILE filenames[0]
 const char *FILENAME[NFILENAME]={
-	    "ParaTest",
+	    "ShapeSameTest",
 	    NULL};
 char	filenames[NFILENAME][PATH_MAX];
 hid_t	fapl;				/* file access property list */
@@ -4729,6 +4742,35 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
 }
 
 
+/* Shape Same test using contigous hyperslab using independent IO on contigous datasets */
+static void
+sscontig1(void)
+{
+    contig_hyperslab_dr_pio_test(IND_CONTIG);
+}
+
+/* Shape Same test using contigous hyperslab using collective IO on contigous datasets */
+static void
+sscontig2(void)
+{
+    contig_hyperslab_dr_pio_test(COL_CONTIG);
+}
+
+/* Shape Same test using contigous hyperslab using independent IO on chunked datasets */
+static void
+sscontig3(void)
+{
+    contig_hyperslab_dr_pio_test(IND_CHUNKED);
+}
+
+/* Shape Same test using contigous hyperslab using collective IO on chunked datasets */
+static void
+sscontig4(void)
+{
+    contig_hyperslab_dr_pio_test(COL_CHUNKED);
+}
+
+
 int main(int argc, char **argv)
 {
     int mpi_size, mpi_rank;				/* mpi variables */
@@ -4750,7 +4792,7 @@ int main(int argc, char **argv)
 
     if (MAINPROCESS){
 	printf("===================================\n");
-	printf("PHDF5 TESTS START\n");
+	printf("Shape Same Tests Start\n");
 	printf("===================================\n");
     }
 
@@ -4768,12 +4810,17 @@ int main(int argc, char **argv)
     /* Initialize testing framework */
     TestInit(argv[0], usage, parse_options);
 
-    /* rank projections / shape same tests */
+    /* Shape Same tests using contigous hyperslab */
+    AddTest("sscontig1", sscontig1, NULL,
+	"Shape Same test, contigous hyperslab, ind IO, contig datasets", PARATESTFILE);
+    AddTest("sscontig2", sscontig2, NULL,
+	"Shape Same test, contigous hyperslab, col IO, contig datasets", PARATESTFILE);
+    AddTest("sscontig3", sscontig3, NULL,
+	"Shape Same test, contigous hyperslab, ind IO, chunked datasets", PARATESTFILE);
+    AddTest("sscontig4", sscontig4, NULL,
+	"Shape Same test, contigous hyperslab, col IO, chunked datasets", PARATESTFILE);
 
-    AddTest("chsssdrpio",
-	contig_hyperslab_dr_pio_test, NULL,
-	"contiguous hyperslab shape same different rank PIO",PARATESTFILE);
-
+    /* Shape Same tests using checker board hyperslab */
     AddTest("cbhsssdrpio",
 	checker_board_hyperslab_dr_pio_test, NULL,
 	"checker board hyperslab shape same different rank PIO",PARATESTFILE);
