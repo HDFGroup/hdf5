@@ -4258,10 +4258,10 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
     for ( large_rank = 3; large_rank <= PAR_SS_DR_MAX_RANK; large_rank++ ) {
 
         for ( small_rank = 2; small_rank < large_rank; small_rank++ ) {
-
-            chunk_edge_size = 0;
-
+	  switch(sstest_type){
+	  case IND_CONTIG:
             /* contiguous data set, independent I/O */
+            chunk_edge_size = 0;
             if ( skip_counters[ind_contig_idx] < skips[ind_contig_idx] ) {
 
                 skip_counters[ind_contig_idx]++;
@@ -4286,8 +4286,12 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
             }
             test_num++;
+	    break;
+	    /* end of case IND_CONTIG */
 
+	  case COL_CONTIG:
             /* contiguous data set, collective I/O */
+            chunk_edge_size = 0;
             if ( skip_counters[col_contig_idx] < skips[col_contig_idx] ) {
 
                 skip_counters[col_contig_idx]++;
@@ -4312,10 +4316,12 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
             }
             test_num++;
+	    break;
+	    /* end of case COL_CONTIG */
 
-            chunk_edge_size = 5;
-
+	  case IND_CHUNKED:
             /* chunked data set, independent I/O */
+            chunk_edge_size = 5;
             if ( skip_counters[ind_chunked_idx] < skips[ind_chunked_idx] ) {
 
                 skip_counters[ind_chunked_idx]++;
@@ -4340,9 +4346,12 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
             }
             test_num++;
+	    break;
+	    /* end of case IND_CHUNKED */
 
-
+	  case COL_CHUNKED:
             /* chunked data set, collective I/O */
+            chunk_edge_size = 5;
             if ( skip_counters[col_chunked_idx] < skips[col_chunked_idx] ) {
 
                 skip_counters[col_chunked_idx]++;
@@ -4367,6 +4376,9 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
             }
             test_num++;
+	    break;
+	    /* end of case COL_CHUNKED */
+	  } /* end of switch(sstest_type) */
 
 #ifdef H5_HAVE_GETTIMEOFDAY
             if ( time_tests ) {
@@ -4771,6 +4783,35 @@ sscontig4(void)
 }
 
 
+/* Shape Same test using checker hyperslab using independent IO on contigous datasets */
+static void
+sschecker1(void)
+{
+    checker_board_hyperslab_dr_pio_test(IND_CONTIG);
+}
+
+/* Shape Same test using checker hyperslab using collective IO on contigous datasets */
+static void
+sschecker2(void)
+{
+    checker_board_hyperslab_dr_pio_test(COL_CONTIG);
+}
+
+/* Shape Same test using checker hyperslab using independent IO on chunked datasets */
+static void
+sschecker3(void)
+{
+    checker_board_hyperslab_dr_pio_test(IND_CHUNKED);
+}
+
+/* Shape Same test using checker hyperslab using collective IO on chunked datasets */
+static void
+sschecker4(void)
+{
+    checker_board_hyperslab_dr_pio_test(COL_CHUNKED);
+}
+
+
 int main(int argc, char **argv)
 {
     int mpi_size, mpi_rank;				/* mpi variables */
@@ -4812,18 +4853,23 @@ int main(int argc, char **argv)
 
     /* Shape Same tests using contigous hyperslab */
     AddTest("sscontig1", sscontig1, NULL,
-	"Shape Same test, contigous hyperslab, ind IO, contig datasets", PARATESTFILE);
+	"Shape Same, contigous hyperslab, ind IO, contig datasets", PARATESTFILE);
     AddTest("sscontig2", sscontig2, NULL,
-	"Shape Same test, contigous hyperslab, col IO, contig datasets", PARATESTFILE);
+	"Shape Same, contigous hyperslab, col IO, contig datasets", PARATESTFILE);
     AddTest("sscontig3", sscontig3, NULL,
-	"Shape Same test, contigous hyperslab, ind IO, chunked datasets", PARATESTFILE);
+	"Shape Same, contigous hyperslab, ind IO, chunked datasets", PARATESTFILE);
     AddTest("sscontig4", sscontig4, NULL,
-	"Shape Same test, contigous hyperslab, col IO, chunked datasets", PARATESTFILE);
+	"Shape Same, contigous hyperslab, col IO, chunked datasets", PARATESTFILE);
 
     /* Shape Same tests using checker board hyperslab */
-    AddTest("cbhsssdrpio",
-	checker_board_hyperslab_dr_pio_test, NULL,
-	"checker board hyperslab shape same different rank PIO",PARATESTFILE);
+    AddTest("sschecker1", sschecker1, NULL,
+	"Shape Same, checker hyperslab, ind IO, contig datasets", PARATESTFILE);
+    AddTest("sschecker2", sschecker2, NULL,
+	"Shape Same, checker hyperslab, col IO, contig datasets", PARATESTFILE);
+    AddTest("sschecker3", sschecker3, NULL,
+	"Shape Same, checker hyperslab, ind IO, chunked datasets", PARATESTFILE);
+    AddTest("sschecker4", sschecker4, NULL,
+	"Shape Same, checker hyperslab, col IO, chunked datasets", PARATESTFILE);
 
     /* Display testing information */
     TestInfo(argv[0]);
@@ -4889,4 +4935,3 @@ int main(int argc, char **argv)
     /* cannot just return (nerrors) because exit code is limited to 1byte */
     return(nerrors!=0);
 }
-
