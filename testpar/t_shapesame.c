@@ -1692,6 +1692,10 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
     long long	sample_times[4] = {0, 0, 0, 0};
     struct timeval timeval_a;
     struct timeval timeval_b;
+
+    /* need these for macro MAINPROCESS to work */
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     HDcompile_assert(sizeof(uint32_t) == sizeof(unsigned));
@@ -1706,6 +1710,9 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
                                MPI_COMM_WORLD);
 
     VRFY((mpi_result == MPI_SUCCESS ), "MPI_Allreduce(0) succeeded");
+    if (express_test > 1){
+	printf("***Express test mode on.  Some tests may be skipped\n");
+    }
 
     for ( large_rank = 3; large_rank <= PAR_SS_DR_MAX_RANK; large_rank++ ) {
 
@@ -1718,7 +1725,7 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[ind_contig_idx]++;
                 tests_skiped[ind_contig_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[ind_contig_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(0) succeeds.");
@@ -1745,7 +1752,7 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[col_contig_idx]++;
                 tests_skiped[col_contig_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[col_contig_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(2) succeeds.");
@@ -1772,7 +1779,7 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[ind_chunked_idx]++;
                 tests_skiped[ind_chunked_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[ind_chunked_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(4) succeeds.");
@@ -1799,7 +1806,7 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[col_chunked_idx]++;
                 tests_skiped[col_chunked_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[col_chunked_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(6) succeeds.");
@@ -1859,6 +1866,12 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
                          "MPI_Allreduce(1) succeeded");
                 }
             }
+	    /* Temp patch: Suppress skip if express_test is NOT > 1 */
+	    if (express_test <=1){
+		for (i=0;i<test_types; i++){
+		    skips[i] = 0;
+		}
+	    }
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
         }
@@ -4191,6 +4204,9 @@ int		m;
  *		if two or more processes are banging on the same 
  *		block of memory.
  *						JRM -- 9/10/10
+ *      	Break this one big test into 4 smaller tests according
+ *      	to {independent,collective}x{contigous,chunked} datasets.
+ *		AKC -- 2010/01/17
  *
  *-------------------------------------------------------------------------
  */
@@ -4230,6 +4246,7 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
     struct timeval timeval_a;
     struct timeval timeval_b;
 
+    /* need these for macro MAINPROCESS to work */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif /* H5_HAVE_GETTIMEOFDAY */
@@ -4246,6 +4263,9 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
                                MPI_COMM_WORLD);
 
     VRFY((mpi_result == MPI_SUCCESS ), "MPI_Allreduce(0) succeeded");
+    if (express_test > 1){
+	printf("***Express test mode on.  Some tests may be skipped\n");
+    }
 
 #if 0 
     {
@@ -4266,7 +4286,7 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[ind_contig_idx]++;
                 tests_skiped[ind_contig_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[ind_contig_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(0) succeeds.");
@@ -4296,7 +4316,7 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[col_contig_idx]++;
                 tests_skiped[col_contig_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[col_contig_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(2) succeeds.");
@@ -4326,7 +4346,7 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[ind_chunked_idx]++;
                 tests_skiped[ind_chunked_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[ind_chunked_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(4) succeeds.");
@@ -4356,7 +4376,7 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[col_chunked_idx]++;
                 tests_skiped[col_chunked_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[col_chunked_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(6) succeeds.");
@@ -4418,6 +4438,12 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
                     VRFY((result == MPI_SUCCESS ), "MPI_Allreduce() succeeded");
                 }
             }
+	    /* Temp patch: Suppress skip if express_test is NOT > 1 */
+	    if (express_test <=1){
+		for (i=0;i<test_types; i++){
+		    skips[i] = 0;
+		}
+	    }
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
         }
@@ -4843,7 +4869,8 @@ int main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-	printf("Failed to turn off atexit processing. Continue.\n", mpi_rank);
+	printf("Proc %d: Failed to turn off atexit processing. Continue.\n",
+	    mpi_rank);
     };
     H5open();
     h5_show_hostname();
