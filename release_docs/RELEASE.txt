@@ -326,6 +326,18 @@ SuSe Linux 2.4.21 ia64 Intel      C  y       y         y         n
 
 Known Problems
 ==============
+* While working on the 1.8.6 release of HDF5, a bug was discovered that can
+  occur when reading from a dataset in parallel shortly after it has been
+  written to collectively. The issue was exposed by a new test in the parallel
+  HDF5 test suite, but had existed before that. We believe the problem lies with
+  certain MPI implementations and/or filesystems.
+
+  We have provided a pure MPI test program, as well as a standalone HDF5
+  program, that can be used to determine if this is an issue on your system.
+  They should be run across multiple nodes with a varying number of processes.
+  These programs can be found at:
+  http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
+
 * The AIX --enable-shared does not quite work. It can produce shared library
   but there cannot be more than one shared libraries that interlinking with
   each other. That means only C-API without High-level can work. Not very
