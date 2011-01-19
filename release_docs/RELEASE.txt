@@ -776,6 +776,18 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* While working on the 1.8.6 release of HDF5, a bug was discovered that can
+  occur when reading from a dataset in parallel shortly after it has been
+  written to collectively. The issue was exposed by a new test in the parallel
+  HDF5 test suite, but had existed before that. We believe the problem lies with
+  certain MPI implementations and/or filesystems.
+
+  We have provided a pure MPI test program, as well as a standalone HDF5
+  program, that can be used to determine if this is an issue on your system.
+  They should be run across multiple nodes with a varying number of processes.
+  These programs can be found at:
+  http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
+
 * Parallel mode in AIX will fail some of the testcheck_version.sh tests where
   it treats "exit(134) the same as if process 0 had received an abort signal.
   This is fixed and will be available in the next release. AKC - 2009/11/3
