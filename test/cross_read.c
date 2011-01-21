@@ -17,8 +17,8 @@
  * Programmer:  Raymond Lu <slu@ncsa.uiuc.edu>
  *              Thursday, March 23, 2006
  *
- * Purpose:     Check if floating-point data created on OpenVMS (VAX type), Solaris,
- *              and Linux machines can be read on the machine running this test.
+ * Purpose:     Check if floating-point data created on OpenVMS, big-endian, and
+ *              little-endian machines can be read on the machine running this test.
  */
 
 #include "h5test.h"
@@ -31,12 +31,28 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define DATASETNAME 	"Array"
-#define DATASETNAME2	"Scale_offset_data"
+#define DATASETNAME        "Array"
+#define DATASETNAME2       "Scale_offset_double_data"
+#define DATASETNAME3       "Scale_offset_int_data"
 #define NX 		6         
 #define NY 		6
-#define RANK         	2
 
+
+/*-------------------------------------------------------------------------
+ * Function:    read_data
+ *
+ * Purpose:     Read data from a data file.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Raymond Lu
+ *              21 January 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static int read_data(char *fname)
 {
     const char *pathname = H5_get_srcdir_filename(fname); /* Corrected test file name */
@@ -45,10 +61,12 @@ static int read_data(char *fname)
     hid_t	dt;
     double      data_in[NX][NY]; /* input buffer */
     double      data_out[NX][NY]; /* output buffer */
+    int         int_data_in[NX][NY]; /* input buffer */
+    int         int_data_out[NX][NY]; /* output buffer */
     int         i, j;
     unsigned 	nerrors = 0;
     const char  *not_supported= "    Scaleoffset filter is not enabled.";
-    /*const char  *not_fixed= "    Scaleoffset filter bug (2131) is not fixed yet.";*/
+    const char  *not_fixed= "    Scaleoffset filter bug (2131) is not fixed yet.";
 
     /*
      * Open the file.
@@ -127,8 +145,8 @@ static int read_data(char *fname)
 
     PASSED();
 
-    TESTING("	dataset with scale-offset filter");
-
+    TESTING("	dataset of DOUBLE with scale-offset filter");
+#ifdef TMP
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* 
      * Open the dataset with scale-offset filter.
@@ -165,7 +183,6 @@ static int read_data(char *fname)
     /* Check results */
     for (j=0; j<NX; j++) {
         for (i=0; i<NY; i++) {
-            /* if (data_out[j][i] != data_in[j][i]) { */
             if (!DBL_REL_EQUAL(data_out[j][i], data_in[j][i], 0.001)) {
                 if (!nerrors++) {
                     H5_FAILED();
@@ -190,6 +207,78 @@ static int read_data(char *fname)
     }
 
     PASSED();
+#else /*H5_HAVE_FILTER_SCALEOFFSET*/
+    SKIPPED();
+    puts(not_supported);
+#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
+#else /*TMP*/
+    SKIPPED();
+    puts(not_fixed);
+#endif /*TMP*/
+
+    TESTING("	dataset of INT with scale-offset filter");
+
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    /* 
+     * Open the dataset with scale-offset filter.
+     */
+    if((dataset = H5Dopen2(file, DATASETNAME3, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /*
+     * Data and output buffer initialization.
+     */
+    for (j = 0; j < NX; j++) {
+	for (i = 0; i < NY; i++) {
+	    int_data_in[j][i] = i + j;
+	    int_data_out[j][i] = 0;
+        }
+    }
+
+    /*
+     * Get datatype and dataspace handles and then query
+     * dataset class, order, size, rank and dimensions.
+     */
+    if((dt = H5Dget_type(dataset)) < 0)     /* datatype handle */
+        TEST_ERROR;
+    if((datatype = H5Tget_native_type(dt, H5T_DIR_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /*
+     * Read data from hyperslab in the file into the hyperslab in
+     * memory and display.
+     */
+    if(H5Dread(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, int_data_out) < 0)
+        TEST_ERROR;
+
+    /* Check results */
+    for (j=0; j<NX; j++) {
+        for (i=0; i<NY; i++) {
+            if (int_data_out[j][i] != int_data_in[j][i]) {
+                if (!nerrors++) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %d but should have been %d\n",
+                           j, i, int_data_out[j][i], int_data_in[j][i]);
+                }
+            }
+        }
+    }
+
+    /*
+     * Close/release resources.
+     */
+    H5Tclose(dt);
+    H5Tclose(datatype);
+    H5Dclose(dataset);
+
+    /* Failure */
+    if (nerrors) {
+        printf("total of %d errors out of %d elements\n", nerrors, NX*NY);
+        return 1;
+    }
+
+    PASSED();
+
 #else /*H5_HAVE_FILTER_SCALEOFFSET*/
     SKIPPED();
     puts(not_supported);

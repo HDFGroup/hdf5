@@ -28,15 +28,17 @@
 
 #define H5FILE_NAME        "data.h5"
 #define DATASETNAME        "Array"
-#define DATASETNAME2       "Scale_offset_data"
+#define DATASETNAME2       "Scale_offset_double_data"
+#define DATASETNAME3       "Scale_offset_int_data"
 #define NX                 6
 #define NY                 6
 #define RANK               2
 #define CHUNK0             3
 #define CHUNK1             3
 
-int create_normal_dset(hid_t fid, hid_t sid, hid_t tid);
-int create_scale_offset_dset(hid_t fid, hid_t sid, hid_t tid);
+int create_normal_dset(hid_t fid, hid_t sid);
+int create_scale_offset_dset_double(hid_t fid, hid_t sid);
+int create_scale_offset_dset_int(hid_t fid, hid_t sid);
 
 
 /*-------------------------------------------------------------------------
@@ -55,7 +57,7 @@ int create_scale_offset_dset(hid_t fid, hid_t sid, hid_t tid);
  *-------------------------------------------------------------------------
  */
 int
-create_normal_dset(hid_t fid, hid_t sid, hid_t tid)
+create_normal_dset(hid_t fid, hid_t sid)
 {
     hid_t       dataset;         /* file and dataset handles */
     herr_t      status;
@@ -82,7 +84,7 @@ create_normal_dset(hid_t fid, hid_t sid, hid_t tid)
      * Create a new dataset within the file using defined dataspace and
      * datatype and default dataset creation properties.
      */
-    dataset = H5Dcreate2(fid, DATASETNAME, tid, sid,
+    dataset = H5Dcreate2(fid, DATASETNAME, H5T_NATIVE_DOUBLE, sid,
 			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
@@ -101,7 +103,7 @@ create_normal_dset(hid_t fid, hid_t sid, hid_t tid)
 
 
 /*-------------------------------------------------------------------------
- * Function:    create_scale_offset_dset
+ * Function:    create_scale_offset_dset_double
  *
  * Purpose:     Create a dataset of DOUBLE datatype with scale-offset filter
  *
@@ -116,10 +118,10 @@ create_normal_dset(hid_t fid, hid_t sid, hid_t tid)
  *-------------------------------------------------------------------------
  */
 int
-create_scale_offset_dset(hid_t fid, hid_t sid, hid_t tid)
+create_scale_offset_dset_double(hid_t fid, hid_t sid)
 {
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
-    hid_t       dataset;         /* file and dataset handles */
+    hid_t       dataset;         /* dataset handles */
     hid_t       dcpl;
     herr_t      status;
     float       data[NX][NY];          /* data to write */
@@ -146,13 +148,92 @@ create_scale_offset_dset(hid_t fid, hid_t sid, hid_t tid)
      * Create a new dataset within the file using defined dataspace and
      * datatype and default dataset creation properties.
      */
-    dataset = H5Dcreate2(fid, DATASETNAME2, tid, sid,
+    dataset = H5Dcreate2(fid, DATASETNAME2, H5T_NATIVE_DOUBLE, sid,
 			H5P_DEFAULT, dcpl, H5P_DEFAULT);
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
+		      H5P_DEFAULT, data);
+
+    /*
+     * Close/release resources.
+     */
+    H5Pclose(dcpl);
+    H5Dclose(dataset);
+
+#else /* H5_HAVE_FILTER_SCALEOFFSET */
+    const char          *not_supported= "Scaleoffset filter is not enabled. Can't create the dataset.";
+
+    puts(not_supported);
+#endif /* H5_HAVE_FILTER_SCALEOFFSET */
+
+    return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    create_scale_offset_dset_int
+ *
+ * Purpose:     Create a dataset of INT datatype with scale-offset filter
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Raymond Lu
+ *              21 January 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+create_scale_offset_dset_int(hid_t fid, hid_t sid)
+{
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    hid_t       dataset;         /* dataset handles */
+    hid_t       dcpl;
+    herr_t      status;
+    int         data[NX][NY];          /* data to write */
+    hsize_t     chunk[RANK] = {CHUNK0, CHUNK1};
+    int         i, j;
+
+    /*
+     * Data and output buffer initialization.
+     */
+    for (j = 0; j < NX; j++) {
+	for (i = 0; i < NY; i++)
+	    data[j][i] = i + j;
+    }
+    /*
+     * 0 1 2 3 4 5
+     * 1 2 3 4 5 6
+     * 2 3 4 5 6 7
+     * 3 4 5 6 7 8
+     * 4 5 6 7 8 9
+     * 5 6 7 8 9 10
+     */
+
+    /*
+     * Create the dataset creation property list, add the Scale-Offset
+     * filter and set the chunk size.
+     */
+    dcpl = H5Pcreate (H5P_DATASET_CREATE);
+    status = H5Pset_scaleoffset (dcpl, H5Z_SO_INT, H5Z_SO_INT_MINBITS_DEFAULT);
+    status = H5Pset_chunk (dcpl, RANK, chunk);
+
+    /*
+     * Create a new dataset within the file using defined dataspace and
+     * datatype and default dataset creation properties.
+     */
+    dataset = H5Dcreate2(fid, DATASETNAME3, H5T_NATIVE_INT, sid,
+			H5P_DEFAULT, dcpl, H5P_DEFAULT);
+
+    /*
+     * Write the data to the dataset using default transfer properties.
+     */
+    status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 		      H5P_DEFAULT, data);
 
     /*
@@ -188,7 +269,7 @@ int
 main (void)
 {
     hid_t       file;         /* file and dataset handles */
-    hid_t       dataspace, datatype;
+    hid_t       dataspace;
     hsize_t     dimsf[RANK];
 
     /*
@@ -206,23 +287,19 @@ main (void)
     dimsf[1] = NY;
     dataspace = H5Screate_simple(RANK, dimsf, NULL);
 
-    /*
-     * Define datatype for the data in the file.
-     * We will store little endian INT numbers.
-     */
-    datatype = H5Tcopy(H5T_NATIVE_DOUBLE);
-
     /* Create a regular dataset */
-    create_normal_dset(file, dataspace, datatype);
+    create_normal_dset(file, dataspace);
 
-    /* Create a dataset with scale-offset filter */
-    create_scale_offset_dset(file, dataspace, datatype);
+    /* Create a dataset of DOUBLE with scale-offset filter */
+    create_scale_offset_dset_double(file, dataspace);
+
+    /* Create a dataset of INT with scale-offset filter */
+    create_scale_offset_dset_int(file, dataspace);
 
     /*
      * Close/release resources.
      */
     H5Sclose(dataspace);
-    H5Tclose(datatype);
     H5Fclose(file);
 
     return 0;
