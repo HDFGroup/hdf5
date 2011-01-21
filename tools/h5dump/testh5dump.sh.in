@@ -576,6 +576,9 @@ TOOLTEST tfpformat.ddl -m %.7f tfpformat.h5
 TOOLTEST textlinksrc.ddl textlinksrc.h5
 TOOLTEST textlinkfar.ddl textlinkfar.h5
 
+# test for dangling external links
+TOOLTEST textlink.ddl textlink.h5
+
 
 # Report test results and exit
 if test $nerrors -eq 0 ; then
