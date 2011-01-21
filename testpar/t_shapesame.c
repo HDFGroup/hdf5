@@ -1718,7 +1718,7 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[ind_contig_idx]++;
                 tests_skiped[ind_contig_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[ind_contig_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(0) succeeds.");
@@ -1745,7 +1745,7 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[col_contig_idx]++;
                 tests_skiped[col_contig_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[col_contig_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(2) succeeds.");
@@ -1772,7 +1772,7 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[ind_chunked_idx]++;
                 tests_skiped[ind_chunked_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[ind_chunked_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(4) succeeds.");
@@ -1799,7 +1799,7 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[col_chunked_idx]++;
                 tests_skiped[col_chunked_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[col_chunked_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(6) succeeds.");
@@ -4191,6 +4191,9 @@ int		m;
  *		if two or more processes are banging on the same 
  *		block of memory.
  *						JRM -- 9/10/10
+ *      	Break this one big test into 4 smaller tests according
+ *      	to {independent,collective}x{contigous,chunked} datasets.
+ *		AKC -- 2010/01/17
  *
  *-------------------------------------------------------------------------
  */
@@ -4266,7 +4269,7 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[ind_contig_idx]++;
                 tests_skiped[ind_contig_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[ind_contig_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(0) succeeds.");
@@ -4296,7 +4299,7 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[col_contig_idx]++;
                 tests_skiped[col_contig_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[col_contig_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(2) succeeds.");
@@ -4326,7 +4329,7 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[ind_chunked_idx]++;
                 tests_skiped[ind_chunked_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[ind_chunked_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(4) succeeds.");
@@ -4356,7 +4359,7 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
                 skip_counters[col_chunked_idx]++;
                 tests_skiped[col_chunked_idx]++;
-
+		printf("Test skipped\n");
             } else {
                 skip_counters[col_chunked_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(6) succeeds.");
