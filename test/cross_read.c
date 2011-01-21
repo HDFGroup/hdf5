@@ -31,10 +31,11 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define DATASETNAME "Array"
-#define NX 5           /* output buffer dimensions */
-#define NY 6
-#define RANK         2
+#define DATASETNAME 	"Array"
+#define DATASETNAME2	"Scale_offset_data"
+#define NX 		6         
+#define NY 		6
+#define RANK         	2
 
 static int read_data(char *fname)
 {
@@ -46,6 +47,22 @@ static int read_data(char *fname)
     double      data_out[NX][NY]; /* output buffer */
     int         i, j;
     unsigned 	nerrors = 0;
+    const char  *not_supported= "    Scaleoffset filter is not enabled.";
+    /*const char  *not_fixed= "    Scaleoffset filter bug (2131) is not fixed yet.";*/
+
+    /*
+     * Open the file.
+     */
+    if((file = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    TESTING("	regular dataset");
+    
+    /* 
+     * Open the regular dataset.
+     */
+    if((dataset = H5Dopen2(file, DATASETNAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
     /*
      * Data and output buffer initialization.
@@ -62,15 +79,8 @@ static int read_data(char *fname)
      * 2 3 4 5 6 7
      * 3 4 5 6 7 8
      * 4 5 6 7 8 9
+     * 5 6 7 8 9 10
      */
-
-    /*
-     * Open the file and the dataset.
-     */
-    if((file = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-    if((dataset = H5Dopen2(file, DATASETNAME, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
 
     /*
      * Get datatype and dataspace handles and then query
@@ -91,7 +101,8 @@ static int read_data(char *fname)
     /* Check results */
     for (j=0; j<NX; j++) {
         for (i=0; i<NY; i++) {
-            if (data_out[j][i] != data_in[j][i]) {
+            /* if (data_out[j][i] != data_in[j][i]) { */
+            if (!DBL_ABS_EQUAL(data_out[j][i], data_in[j][i])) {
                 if (!nerrors++) {
                     H5_FAILED();
                     printf("element [%d][%d] is %g but should have been %g\n",
@@ -107,7 +118,6 @@ static int read_data(char *fname)
     H5Tclose(dt);
     H5Tclose(datatype);
     H5Dclose(dataset);
-    H5Fclose(file);
 
     /* Failure */
     if (nerrors) {
@@ -116,6 +126,76 @@ static int read_data(char *fname)
     }
 
     PASSED();
+
+    TESTING("	dataset with scale-offset filter");
+
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    /* 
+     * Open the dataset with scale-offset filter.
+     */
+    if((dataset = H5Dopen2(file, DATASETNAME2, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /*
+     * Data and output buffer initialization.
+     */
+    for (j = 0; j < NX; j++) {
+	for (i = 0; i < NY; i++) {
+	    data_in[j][i] = ((double)(i + j + 1))/3;
+	    data_out[j][i] = 0;
+        }
+    }
+
+    /*
+     * Get datatype and dataspace handles and then query
+     * dataset class, order, size, rank and dimensions.
+     */
+    if((dt = H5Dget_type(dataset)) < 0)     /* datatype handle */
+        TEST_ERROR;
+    if((datatype = H5Tget_native_type(dt, H5T_DIR_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /*
+     * Read data from hyperslab in the file into the hyperslab in
+     * memory and display.
+     */
+    if(H5Dread(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_out) < 0)
+        TEST_ERROR;
+
+    /* Check results */
+    for (j=0; j<NX; j++) {
+        for (i=0; i<NY; i++) {
+            /* if (data_out[j][i] != data_in[j][i]) { */
+            if (!DBL_REL_EQUAL(data_out[j][i], data_in[j][i], 0.001)) {
+                if (!nerrors++) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %g but should have been %g\n",
+                           j, i, data_out[j][i], data_in[j][i]);
+                }
+            }
+        }
+    }
+
+    /*
+     * Close/release resources.
+     */
+    H5Tclose(dt);
+    H5Tclose(datatype);
+    H5Dclose(dataset);
+
+    /* Failure */
+    if (nerrors) {
+        printf("total of %d errors out of %d elements\n", nerrors, NX*NY);
+        return 1;
+    }
+
+    PASSED();
+#else /*H5_HAVE_FILTER_SCALEOFFSET*/
+    SKIPPED();
+    puts(not_supported);
+#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
+
+    H5Fclose(file);
     return 0;
 
 error:
@@ -125,6 +205,20 @@ error:
     return 1;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    main
+ *
+ * Purpose:     Tests the basic features of Virtual File Drivers
+ *
+ * Return:      Success:        exit(0)
+ *              Failure:        exit(1)
+ *
+ * Programmer:  Raymond Lu
+ *              Tuesday, Sept 24, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
 int main(void)
 {
     char        filename[1024];
@@ -132,15 +226,15 @@ int main(void)
 
     h5_reset();
 
-    TESTING("reading data created on OpenVMS");
+    puts("Testing reading data created on OpenVMS");
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
     nerrors += read_data(filename);
 
-    TESTING("reading data created on Linux");
+    puts("Testing reading data created on Linux");
     h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof filename);
     nerrors += read_data(filename);
 
-    TESTING("reading data created on Solaris");
+    puts("Testing reading data created on Solaris");
     h5_fixname(FILENAME[2], H5P_DEFAULT, filename, sizeof filename);
     nerrors += read_data(filename);
 
