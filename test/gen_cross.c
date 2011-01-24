@@ -28,7 +28,7 @@
 
 #define H5FILE_NAME        "data.h5"
 #define DATASETNAME        "Array"
-#define DATASETNAME2       "Scale_offset_double_data"
+#define DATASETNAME2       "Scale_offset_float_data"
 #define DATASETNAME3       "Scale_offset_int_data"
 #define NX                 6
 #define NY                 6
@@ -37,14 +37,14 @@
 #define CHUNK1             3
 
 int create_normal_dset(hid_t fid, hid_t sid);
-int create_scale_offset_dset_double(hid_t fid, hid_t sid);
+int create_scale_offset_dset_float(hid_t fid, hid_t sid);
 int create_scale_offset_dset_int(hid_t fid, hid_t sid);
 
 
 /*-------------------------------------------------------------------------
  * Function:    create_normal_dset
  *
- * Purpose:     Create a regular dataset of DOUBLE datatype.
+ * Purpose:     Create a regular dataset of FLOAT datatype.
  *
  * Return:      Success:        0
  *              Failure:        -1
@@ -84,7 +84,7 @@ create_normal_dset(hid_t fid, hid_t sid)
      * Create a new dataset within the file using defined dataspace and
      * datatype and default dataset creation properties.
      */
-    dataset = H5Dcreate2(fid, DATASETNAME, H5T_NATIVE_DOUBLE, sid,
+    dataset = H5Dcreate2(fid, DATASETNAME, H5T_NATIVE_FLOAT, sid,
 			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
@@ -103,9 +103,9 @@ create_normal_dset(hid_t fid, hid_t sid)
 
 
 /*-------------------------------------------------------------------------
- * Function:    create_scale_offset_dset_double
+ * Function:    create_scale_offset_dset_float
  *
- * Purpose:     Create a dataset of DOUBLE datatype with scale-offset filter
+ * Purpose:     Create a dataset of FLOAT datatype with scale-offset filter
  *
  * Return:      Success:        0
  *              Failure:        -1
@@ -118,7 +118,7 @@ create_normal_dset(hid_t fid, hid_t sid)
  *-------------------------------------------------------------------------
  */
 int
-create_scale_offset_dset_double(hid_t fid, hid_t sid)
+create_scale_offset_dset_float(hid_t fid, hid_t sid)
 {
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
     hid_t       dataset;         /* dataset handles */
@@ -148,7 +148,7 @@ create_scale_offset_dset_double(hid_t fid, hid_t sid)
      * Create a new dataset within the file using defined dataspace and
      * datatype and default dataset creation properties.
      */
-    dataset = H5Dcreate2(fid, DATASETNAME2, H5T_NATIVE_DOUBLE, sid,
+    dataset = H5Dcreate2(fid, DATASETNAME2, H5T_NATIVE_FLOAT, sid,
 			H5P_DEFAULT, dcpl, H5P_DEFAULT);
 
     /*
@@ -290,8 +290,8 @@ main (void)
     /* Create a regular dataset */
     create_normal_dset(file, dataspace);
 
-    /* Create a dataset of DOUBLE with scale-offset filter */
-    create_scale_offset_dset_double(file, dataspace);
+    /* Create a dataset of FLOAT with scale-offset filter */
+    create_scale_offset_dset_float(file, dataspace);
 
     /* Create a dataset of INT with scale-offset filter */
     create_scale_offset_dset_int(file, dataspace);
