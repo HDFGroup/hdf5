@@ -50,6 +50,6 @@ SET (ZLIB_SVN_URL "http://svn.hdfgroup.uiuc.edu/zlib/trunk" CACHE STRING "Use ZL
 
 SET (SZIP_SVN_URL "http://svn.hdfgroup.uiuc.edu/szip/trunk" CACHE STRING "Use SZip from HDF repository" FORCE)
 
-SET (ZLIB_TGZ_URL "${HDF5_SOURCE_DIR}/ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
+SET (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
 
-SET (SZIP_TGZ_URL "${HDF5_SOURCE_DIR}/SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)
+SET (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)

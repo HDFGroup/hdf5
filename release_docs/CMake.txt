@@ -52,8 +52,9 @@ Notes: This short instruction is written for users who want to quickly build
       C. Use source packages from a compressed file by adding the following CMake 
          options:
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
-            ZLIB_TGZ_URL:STRING="some_location/zlib_src.ext"
-            SZIP_TGZ_URL:STRING="some_location/szip_src.ext"
+            ZLIB_TGZ_NAME:STRING="zlib_src.ext"
+            SZIP_TGZ_NAME:STRING="szip_src.ext"
+            TGZ_PATH:STRING="some_location"
          where "some_location" is the URL or full path to the compressed file and 
          ext is the type of compression file.
                                     
@@ -186,8 +187,9 @@ Notes: This short instruction is written for users who want to quickly build
                -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
                
            The options to control the SVN URL (config/cmake/cacheinit.cmake file):
-               ZLIB_TGZ_URL:STRING="some_location/zlib_src.ext"
-               SZIP_TGZ_URL:STRING="some_location/szip_src.ext"
+               ZLIB_TGZ_NAME:STRING="zlib_src.ext"
+               SZIP_TGZ_NAME:STRING="szip_src.ext"
+               TGZ_PATH:STRING="some_location"
             where "some_location/xxxx_src.ext" is the URL or full path to the 
             compressed file and where ext is the type of the compression file like:
                .bz2, .tar, .tar.gz, .tgz, .zip
