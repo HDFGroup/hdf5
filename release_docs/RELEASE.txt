@@ -326,6 +326,12 @@ SuSe Linux 2.4.21 ia64 Intel      C  y       y         y         n
 
 Known Problems
 ==============
+* If parallel gmake (e.g., gmake -j 4) is used, the "gmake clean" command
+  sometimes fails in the perform directory due to the attempt to remove the
+  executable of h5perf or h5perf_serial by two "parallel" commands. This error
+  has no consequence on the functionality of the HDF5 library or install. It
+  is fixed in the next release. AKC - 2011/01/25
+
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can
   occur when reading from a dataset in parallel shortly after it has been
   written to collectively. The issue was exposed by a new test in the parallel
@@ -361,13 +367,6 @@ Known Problems
   C++ applications/tests. Do not use the enable-cxx configure option. Read all of
   the INSTALL_MINGW.txt file for all restrictions. ADB - 2009/11/11
   
-* Some tests in tools/h5repack may fail in AIX systems when -q32 mode is used.
-  The error is due to insufficient memory requested. Request a large amount
-  of runtime memory by setting the following environment variable for more
-  memory.
-     LDR_CNTRL=MAXDATA=0x20000000@DSA
-  AKC - 2009/10/31
-
 * The PathScale MPI implementation, accessing a Panasas file system, would
   cause H5Fcreate() with H5F_ACC_EXCL to fail even when the file is not
   existing. This is due to the MPI_File_open() call failing if the amode has
