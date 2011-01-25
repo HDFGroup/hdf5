@@ -83,6 +83,7 @@ IF (BUILD_TESTING)
       texternal.ddl
       textlinksrc.ddl
       textlinkfar.ddl
+      textlink.ddl
       tfamily.ddl
       tfill.ddl
       tfletcher32.ddl
@@ -243,6 +244,7 @@ IF (BUILD_TESTING)
       textlinkfar.h5
       textlinksrc.h5
       textlinktar.h5
+      textlink.h5
       tfamily00000.h5
       tfamily00001.h5
       tfamily00002.h5
@@ -653,6 +655,8 @@ IF (BUILD_TESTING)
           textlinksrc.out.err
           textlinkfar.out
           textlinkfar.out.err
+          textlink.out
+          textlink.out.err
           tfamily.out
           tfamily.out.err
           tfill.out
@@ -1088,6 +1092,9 @@ IF (BUILD_TESTING)
   # tests for traversal of external links
   ADD_H5_TEST (textlinksrc 0 textlinksrc.h5)
   ADD_H5_TEST (textlinkfar 0 textlinkfar.h5)
+
+  # test for dangling external links
+  ADD_H5_TEST (textlink 0 textlink.h5)
 
   ####### test for dataset packed bits ######
   IF (HDF5_USE_H5DUMP_PACKED_BITS)

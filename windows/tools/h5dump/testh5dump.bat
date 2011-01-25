@@ -624,6 +624,9 @@ rem ############################################################################
     rem tests for traversal of external links
     call :tooltest textlinksrc.ddl textlinksrc.h5
     call :tooltest textlinkfar.ddl textlinkfar.h5
+
+    rem test for dangling external links
+    call :tooltest textlink.ddl textlink.h5
     
     rem tests for traversal of external links
     call :tooltest textlinksrc.ddl textlinksrc.h5
