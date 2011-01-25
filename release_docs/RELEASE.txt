@@ -65,6 +65,7 @@ New Features
 
     Library
     -------
+    - Finished implementing all options for 'log' VFD.  (QAK - 2011/1/25)
     - Removed all old code for Metraowerks compilers, bracketed by
       __MWERKS__). Metraowerks compiler is long gone. (AKC - 2010/11/17) 
 
