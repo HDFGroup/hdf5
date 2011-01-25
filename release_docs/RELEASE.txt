@@ -120,15 +120,11 @@ Bug Fixes since HDF5-1.8.5
     -------------
     - The default number of MPI processes for testing purposes has been 
       changed from 3 to 6.  (AKC - 2010/11/11)
-    - Use this patch in the AIX config file when --enable-parallel is requested:
-        RUNSERIAL=${RUNSERIAL="env LDR_CNTRL=MAXDATA=0x20000000@DSA MP_PROCS=1
-        MP_TASKS_PER_NODE=1 poe"}
-      (AKC - 2010/10/7)
     - Some tests in tools/h5repack may fail in AIX systems when -q32 mode is 
-      used. The error is caused by not requesting enough memory. Use this 
-      patch in the AIX config file: 
-        RUNSERIAL=${RUNSERIAL="env LDR_CNTRL=MAXDATA=0x20000000@DSA"}
-      (AKC - 2010/8/25)
+      used. The error is caused by not requesting enough memory in default.
+      Added "env LDR_CNTRL=MAXDATA=0x20000000@DSA" into the $RUNSERIAL and
+      $RUNPARALLE in the AIX config file so that executables are tested with
+      more memory.  (AKC - 2010/11/11)
     - Removed recognition of the parallel compilers of LAM(hcc) and
       ChMPIon(cmpicc) since we have no access to these two MPI implementations
       and cannot verify their correctness. (AKC - 2010/07/14 - Bug 1921)
@@ -432,6 +428,12 @@ SuSe Linux 2.4.21 ia64 Intel      C  y       y         y         n
 
 Known Problems
 ==============
+* If parallel gmake (e.g., gmake -j 4) is used, the "gmake clean" command
+  sometimes fails in the perform directory due to the attempt to remove the
+  executable of h5perf or h5perf_serial by two "parallel" commands. This error
+  has no consequence on the functionality of the HDF5 library or install. It
+  is fixed in the next release. AKC - 2011/01/25
+
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can
   occur when reading from a dataset in parallel shortly after it has been
   written to collectively. The issue was exposed by a new test in the parallel
@@ -448,6 +450,7 @@ Known Problems
   a compound type dataset are compared. This also occurs with variable-length 
   string arrays in a compound type dataset. See bug #1989. This will be fixed 
   in the next release. JKM - 2010/11/05
+
 * The AIX --enable-shared setting does not quite work. It can produce a shared 
   library, but there cannot be more than one shared library that is 
   interlinked. This means that the high level APIs will not work which is not 
@@ -475,13 +478,6 @@ Known Problems
   C++ applications/tests. Do not use the enable-cxx configure option. Read all of
   the INSTALL_MINGW.txt file for all restrictions. ADB - 2009/11/11
   
-* Some tests in tools/h5repack may fail in AIX systems when -q32 mode is used.
-  The error is due to insufficient memory requested. Request a large amount
-  of runtime memory by setting the following environment variable for more
-  memory.
-     LDR_CNTRL=MAXDATA=0x20000000@DSA
-  AKC - 2009/10/31
-
 * The PathScale MPI implementation, accessing a Panasas file system, would 
   cause H5Fcreate() with H5F_ACC_EXCL to fail even when the file does not 
   exist. This is due to the MPI_File_open() call failing if the amode has 
