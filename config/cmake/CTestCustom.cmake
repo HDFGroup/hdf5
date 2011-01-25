@@ -179,6 +179,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DIFF-h5diff_530     #uses runTest.cmake
     ######### tools/h5dump #########
     H5DUMP-clearall-objects
+    H5DUMP-packedbits      #uses runTest.cmake
     H5DUMP-tgroup-1        #uses runTest.cmake
     H5DUMP-tgroup-2        #uses runTest.cmake
     H5DUMP-tdset-1         #uses runTest.cmake
@@ -235,6 +236,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP-tchar1          #uses runTest.cmake
     H5DUMP-tchar1          #uses runTest.cmake
     H5DUMP-tnofilename     #uses runTest.cmake
+    H5DUMP-tboot1          #uses runTest.cmake
     H5DUMP-tboot2          #uses runTest.cmake
     H5DUMP-tperror         #uses runTest.cmake
     H5DUMP-tcontents       #uses runTest.cmake
@@ -296,6 +298,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP-tfpformat                 #uses runTest.cmake
     H5DUMP-textlinksrc               #uses runTest.cmake
     H5DUMP-textlinkfar               #uses runTest.cmake
+    H5DUMP-textlink                  #uses runTest.cmake
     H5DUMP_PACKED_BITS-clearall-objects
     H5DUMP-tpackedbits               #uses runTest.cmake
     H5DUMP-tpackedbits2              #uses runTest.cmake
