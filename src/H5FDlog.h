@@ -44,11 +44,11 @@
 #define H5FD_LOG_NUM_SEEK   0x0100
 #define H5FD_LOG_NUM_IO     (H5FD_LOG_NUM_READ|H5FD_LOG_NUM_WRITE|H5FD_LOG_NUM_SEEK)
 /* Flags for tracking time spent in open/read/write/seek/close */
-#define H5FD_LOG_TIME_OPEN  0x0200      /* Not implemented yet */
-#define H5FD_LOG_TIME_READ  0x0400      /* Not implemented yet */
-#define H5FD_LOG_TIME_WRITE 0x0800      /* Partially implemented (need to track total time) */
-#define H5FD_LOG_TIME_SEEK  0x1000      /* Partially implemented (need to track total time & track time for seeks during reading) */
-#define H5FD_LOG_TIME_CLOSE 0x2000      /* Fully implemented */
+#define H5FD_LOG_TIME_OPEN  0x0200
+#define H5FD_LOG_TIME_READ  0x0400
+#define H5FD_LOG_TIME_WRITE 0x0800
+#define H5FD_LOG_TIME_SEEK  0x1000
+#define H5FD_LOG_TIME_CLOSE 0x2000
 #define H5FD_LOG_TIME_IO    (H5FD_LOG_TIME_OPEN|H5FD_LOG_TIME_READ|H5FD_LOG_TIME_WRITE|H5FD_LOG_TIME_SEEK|H5FD_LOG_TIME_CLOSE)
 /* Flag for tracking allocation of space in file */
 #define H5FD_LOG_ALLOC      0x4000
