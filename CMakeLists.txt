@@ -69,6 +69,9 @@ PROJECT (HDF5 C CXX)
 #   # Add the sub project
 #   ADD_SUBDIRECTORY(Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
+IF (SITE_NAME_VAR)
+  SET (SITE ${SITE_NAME_VAR})
+ENDIF (SITE_NAME_VAR)
 
 #-----------------------------------------------------------------------------
 # Set the core names of all the libraries
