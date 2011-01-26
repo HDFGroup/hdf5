@@ -358,7 +358,10 @@ The following platforms and compilers have been tested for this release.
     Ubuntu 10.10 2.6.35-22-generic #34-Ubuntu SMP x86_64 GNU/Linux
                                   gcc (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5
                                   GNU Fortran (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5
-
+    
+    OpenVMS Alpha 8.3             HP C V7.3-009
+                                  HP Fortran V8.2-104679-48H9K
+                                  HP C++ V7.3-009
 
 Supported Configuration Features Summary
 ========================================
@@ -381,6 +384,7 @@ Windows XP                           n        y(4)   n(4)     y     y     y
 Windows XP x64                       n        y(4)   n(4)     y     y     y
 Windows Vista                        n        y(4)   n(4)     y     y     y
 Windows Vista x64                    n        y(4)   n(4)     y     y     y
+OpenVMS Alpha                        n        y      n        y     y     n
 Mac OS X 10.6 Intel                  n        y      n        y     y     y
 AIX 5.3 32- and 64-bit               n        y      n        y     y     n
 AIX 6.1 32- and 64-bit               n        y      n        y     y     n
@@ -401,8 +405,9 @@ Solaris2.10 32-bit                   y       y         y         y
 Solaris2.10 64-bit                   y       y         y         y        
 Windows XP                           y       y(4)      y         n        
 Windows XP x64                       y       y(4)      y         n        
-Windows Vista                        y       y(4)      y         y        
-Windows Vista x64                    y       y(4)      y         y        
+Windows Vista                        y       y(4)      y         y
+Windows Vista x64                    y       y(4)      y         y
+OpenVMS Alpha                        n       n         n         n
 Mac OS X 10.6                        y(5)    n         y         n        
 AIX 5.3 32- and 64-bit               n       n         n         n        
 AIX 6.1 32- and 64-bit               n       n         n         n        
@@ -428,6 +433,14 @@ SuSe Linux 2.4.21 ia64 Intel      C  y       y         y         n
 
 Known Problems
 ==============
+* Although OpenVMS Alpha is supported, there are several problems with the C
+  test suite - getname.c, lheap.c, lheap.c, mtime.c, and stab.c.  The test
+  suite for h5diff also fails.  These failures are from the tests, not the
+  library.  We have fixed these failures.  But it's too late to put the fixes
+  into this release.  If you install the 1.8.6 library, it should still work
+  despite of these test failures.  If you want the working copy without any
+  test failure, you can request it from us.  SLU - 2011/01/26 
+ 
 * If parallel gmake (e.g., gmake -j 4) is used, the "gmake clean" command
   sometimes fails in the perform directory due to the attempt to remove the
   executable of h5perf or h5perf_serial by two "parallel" commands. This error
