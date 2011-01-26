@@ -32,7 +32,7 @@ const char *FILENAME[] = {
 };
 
 #define DATASETNAME        "Array"
-#define DATASETNAME2       "Scale_offset_float_data"
+#define DATASETNAME2       "Scale_offset_double_data"
 #define DATASETNAME3       "Scale_offset_int_data"
 #define NX 		6         
 #define NY 		6
@@ -62,6 +62,8 @@ static int read_data(char *fname)
     hid_t	dt;
     float       data_in[NX][NY]; /* input buffer */
     float       data_out[NX][NY]; /* output buffer */
+    double      double_data_in[NX][NY]; /* input buffer */
+    double      double_data_out[NX][NY]; /* output buffer */
     int         int_data_in[NX][NY]; /* input buffer */
     int         int_data_out[NX][NY]; /* output buffer */
     int         i, j;
@@ -154,7 +156,7 @@ static int read_data(char *fname)
 
     PASSED();
 
-    TESTING("	dataset of FLOAT with scale-offset filter");
+    TESTING("	dataset of DOUBLE with scale-offset filter");
 #ifdef TMP
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* 
@@ -168,8 +170,8 @@ static int read_data(char *fname)
      */
     for (j = 0; j < NX; j++) {
 	for (i = 0; i < NY; i++) {
-	    data_in[j][i] = ((float)(i + j + 1))/3;
-	    data_out[j][i] = 0;
+	    double_data_in[j][i] = ((double)(i + j + 1))/3;
+	    double_data_out[j][i] = 0;
         }
     }
 
@@ -186,17 +188,17 @@ static int read_data(char *fname)
      * Read data from hyperslab in the file into the hyperslab in
      * memory and display.
      */
-    if(H5Dread(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_out) < 0)
+    if(H5Dread(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, double_data_out) < 0)
         TEST_ERROR;
 
     /* Check results */
     for (j=0; j<NX; j++) {
         for (i=0; i<NY; i++) {
-            if (!DBL_REL_EQUAL(data_out[j][i], data_in[j][i], 0.001)) {
+            if (!DBL_REL_EQUAL(double_data_out[j][i], double_data_in[j][i], 0.001)) {
                 if (!nerrors++) {
                     H5_FAILED();
                     printf("element [%d][%d] is %g but should have been %g\n",
-                           j, i, data_out[j][i], data_in[j][i]);
+                           j, i, double_data_out[j][i], double_data_in[j][i]);
                 }
             }
         }
