@@ -169,7 +169,7 @@ Notes: This short instruction is written for users who want to quickly build
            file in your build directory. Be sure to select either Debug or 
            Release and build the solution.
              
-      3.2.1  The external libraries (zlib, szip, and jpeg) can be configured
+      3.2.1  The external libraries (zlib and szip) can be configured
            to allow building the libraries by downloading from a SVN repository.
            The option is 'HDF5_ALLOW_EXTERNAL_SUPPORT'; by adding the following
            configuration option:
@@ -180,7 +180,7 @@ Notes: This short instruction is written for users who want to quickly build
                SZIP_SVN_URL:STRING="http://svn.hdfgroup.uiuc.edu/szip/trunk"
            These should be changed to your location.
            
-      3.2.2  Or the external libraries (zlib, szip, and jpeg) can be configured
+      3.2.2  Or the external libraries (zlib and szip) can be configured
            to allow building the libraries by using a compressed file.
            The option is 'HDF5_ALLOW_EXTERNAL_SUPPORT'; by adding the following
            configuration option:
