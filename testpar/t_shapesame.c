@@ -4948,9 +4948,9 @@ int main(int argc, char **argv)
     if (MAINPROCESS){		/* only process 0 reports */
 	printf("===================================\n");
 	if (nerrors)
-	    printf("***PHDF5 tests detected %d errors***\n", nerrors);
+	    printf("***Shape Same tests detected %d errors***\n", nerrors);
 	else
-	    printf("PHDF5 tests finished with no errors\n");
+	    printf("Shape Same tests finished with no errors\n");
 	printf("===================================\n");
     }
     /* close HDF5 library */
