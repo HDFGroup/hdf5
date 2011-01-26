@@ -44,7 +44,7 @@ int create_scale_offset_dset_int(hid_t fid, hid_t sid);
 /*-------------------------------------------------------------------------
  * Function:    create_normal_dset
  *
- * Purpose:     Create a regular dataset of DOUBLE datatype.
+ * Purpose:     Create a regular dataset of FLOAT datatype.
  *
  * Return:      Success:        0
  *              Failure:        -1
