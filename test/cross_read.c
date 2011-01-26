@@ -32,7 +32,7 @@ const char *FILENAME[] = {
 };
 
 #define DATASETNAME        "Array"
-#define DATASETNAME2       "Scale_offset_float_data"
+#define DATASETNAME2       "Scale_offset_double_data"
 #define DATASETNAME3       "Scale_offset_int_data"
 #define NX 		6         
 #define NY 		6
@@ -145,7 +145,7 @@ static int read_data(char *fname)
 
     PASSED();
 
-    TESTING("	dataset of FLOAT with scale-offset filter");
+    TESTING("	dataset of DOUBLE with scale-offset filter");
 #ifdef TMP
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* 
@@ -159,7 +159,7 @@ static int read_data(char *fname)
      */
     for (j = 0; j < NX; j++) {
 	for (i = 0; i < NY; i++) {
-	    data_in[j][i] = ((float)(i + j + 1))/3;
+	    data_in[j][i] = ((double)(i + j + 1))/3;
 	    data_out[j][i] = 0;
         }
     }
