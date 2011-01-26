@@ -14,9 +14,16 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5repack.h"
-#include "h5test.h"
 #include "h5tools.h"
 
+/* number of members in an array */
+#ifndef NELMTS
+#    define NELMTS(X)		(sizeof(X)/sizeof(X[0]))
+#endif
+
+/* minimum of two values */
+#undef MIN
+#define MIN(a,b)		(((a)<(b)) ? (a) : (b))
 
 /*-------------------------------------------------------------------------
  * Function: aux_find_obj
