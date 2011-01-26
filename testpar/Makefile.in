@@ -53,7 +53,7 @@ host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/testph5.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
-check_PROGRAMS = $(am__EXEEXT_1)
+check_PROGRAMS = $(am__EXEEXT_1) t_shapesame$(EXEEXT)
 TESTS = $(check_PROGRAMS) $(am__EXEEXT_2)
 subdir = testpar
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -66,7 +66,7 @@ CONFIG_CLEAN_FILES = testph5.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = t_mpi$(EXEEXT) t_posix_compliant$(EXEEXT) \
 	testphdf5$(EXEEXT) t_cache$(EXEEXT) t_pflush1$(EXEEXT) \
-	t_pflush2$(EXEEXT) t_shapesame$(EXEEXT)
+	t_pflush2$(EXEEXT)
 t_cache_SOURCES = t_cache.c
 t_cache_OBJECTS = t_cache.$(OBJEXT)
 t_cache_LDADD = $(LDADD)
@@ -401,7 +401,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #
-TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2 t_shapesame
+TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2
 TEST_SCRIPT_PARA = testph5.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c \
