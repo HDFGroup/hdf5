@@ -444,7 +444,7 @@ int copy_attr(hid_t loc_in,
         /* Check if the datatype is committed */
         if((is_named = H5Tcommitted(ftype_id)) < 0)
             goto error;
-        if(is_named) 
+        if(is_named && travt) 
         {
             hid_t fidout;
 
