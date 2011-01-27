@@ -69,9 +69,11 @@ PROJECT (HDF5 C CXX)
 #   # Add the sub project
 #   ADD_SUBDIRECTORY(Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
-IF (SITE_NAME_VAR)
-  SET (SITE ${SITE_NAME_VAR})
-ENDIF (SITE_NAME_VAR)
+IF (BUILD_SHARED_LIBS)
+  SET (BUILD_NAME_EXT "SHARED")
+ELSE (BUILD_SHARED_LIBS)
+  SET (BUILD_NAME_EXT "STATIC")
+ENDIF (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
 # Set the core names of all the libraries
