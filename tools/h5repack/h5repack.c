@@ -441,7 +441,7 @@ int copy_attr(hid_t loc_in,
         /* Check if the datatype is committed */
         if((is_named = H5Tcommitted(ftype_id)) < 0)
             goto error;
-        if(is_named) 
+        if(is_named && travt) 
         {
             hid_t fidout;
 
@@ -459,6 +459,13 @@ int copy_attr(hid_t loc_in,
 
             if(H5Fclose(fidout) < 0)
                 goto error;
+        } 
+        else  
+        {
+            if (options->use_native==1)
+                wtype_id = h5tools_get_native_type(ftype_id);
+            else
+                wtype_id = H5Tcopy(ftype_id);
         } /* end if */
 
         /* get the dataspace handle  */
@@ -472,15 +479,6 @@ int copy_attr(hid_t loc_in,
         nelmts=1;
         for (j=0; j<rank; j++)
             nelmts*=dims[j];
-
-        /* wtype_id will have already been set if using a named dtype */
-        if(!is_named) 
-        {
-            if (options->use_native==1)
-                wtype_id = h5tools_get_native_type(ftype_id);
-            else
-                wtype_id = H5Tcopy(ftype_id);
-        } /* end if */
 
         if ((msize=H5Tget_size(wtype_id))==0)
             goto error;
