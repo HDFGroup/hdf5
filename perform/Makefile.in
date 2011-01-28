@@ -56,8 +56,12 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/conclude.am COPYING
 @BUILD_PARALLEL_CONDITIONAL_FALSE@bin_PROGRAMS =  \
 @BUILD_PARALLEL_CONDITIONAL_FALSE@	h5perf_serial$(EXEEXT)
-@BUILD_PARALLEL_CONDITIONAL_TRUE@bin_PROGRAMS = h5perf$(EXEEXT)
-check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_4)
+@BUILD_PARALLEL_CONDITIONAL_TRUE@bin_PROGRAMS =  \
+@BUILD_PARALLEL_CONDITIONAL_TRUE@	h5perf_serial$(EXEEXT) \
+@BUILD_PARALLEL_CONDITIONAL_TRUE@	h5perf$(EXEEXT)
+check_PROGRAMS = iopipe$(EXEEXT) chunk$(EXEEXT) overhead$(EXEEXT) \
+	zip_perf$(EXEEXT) perf_meta$(EXEEXT) $(am__EXEEXT_2) \
+	perf$(EXEEXT)
 TESTS = $(check_PROGRAMS)
 subdir = perform
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -69,14 +73,9 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
-@BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = h5perf$(EXEEXT) \
-@BUILD_PARALLEL_CONDITIONAL_TRUE@	perf$(EXEEXT)
-@BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_2 = benchpar$(EXEEXT) \
+@BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = benchpar$(EXEEXT) \
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	mpi-perf$(EXEEXT)
-@BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_3 = $(am__EXEEXT_2)
-am__EXEEXT_4 = iopipe$(EXEEXT) chunk$(EXEEXT) overhead$(EXEEXT) \
-	zip_perf$(EXEEXT) perf_meta$(EXEEXT) h5perf_serial$(EXEEXT) \
-	$(am__EXEEXT_3)
+@BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
 PROGRAMS = $(bin_PROGRAMS)
 benchpar_SOURCES = benchpar.c
 benchpar_OBJECTS = benchpar.$(OBJEXT)
@@ -417,7 +416,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
-@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = h5perf perf
 
 # Add h5perf and h5perf_serial specific linker flags here
 h5perf_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
@@ -429,8 +427,11 @@ h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@PARA_BUILD_ALL = benchpar mpi-perf
 @BUILD_ALL_CONDITIONAL_TRUE@BUILD_ALL_PROGS = $(PARA_BUILD_ALL)
 
-# These are the programs that `make all' or `make tests' will build and which
-# `make check' will run. List them in the order they should be run.
+# Define programs that will be run in 'make check'
+# List them in the order they should be run.
+# Parallel test programs.
+@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = h5perf perf
+# Serial test programs.
 TEST_PROG = iopipe chunk overhead zip_perf perf_meta h5perf_serial $(BUILD_ALL_PROGS)
 h5perf_SOURCES = pio_perf.c pio_engine.c pio_timer.c
 h5perf_serial_SOURCES = sio_perf.c sio_engine.c sio_timer.c
