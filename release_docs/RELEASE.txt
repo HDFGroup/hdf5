@@ -228,12 +228,6 @@ Platforms Tested
 ================
 The following platforms and compilers have been tested for this release.
 
-    AIX 5.3                       xlc 7.0.0.9, 8.0.0.20, 9.0.0.4
-    (LLNL Up)                     xlC 7.0.0.9, 8.0.0.20, 9.0.0.4
-                                  xlf 9.1.0.8, 10.1.0.9, 11.1.0.7
-                                  mpcc_r 7.0.0.9
-                                  mpxlf_r 9.1.0.8
-
     AIX 6.1                       xlc 11.1.0.3
     (NCSA BP)                     xlC 11.1.0.3
                                   xlf 13.1.0.3
@@ -386,7 +380,6 @@ Windows Vista                        n        y(4)   n(4)     y     y     y
 Windows Vista x64                    n        y(4)   n(4)     y     y     y
 OpenVMS Alpha                        n        y      n        y     y     n
 Mac OS X 10.6 Intel                  n        y      n        y     y     y
-AIX 5.3 32- and 64-bit               n        y      n        y     y     n
 AIX 6.1 32- and 64-bit               n        y      n        y     y     n
 FreeBSD 6.3-STABLE 32&64 bit         n        y      n        y     y     y
 RedHat EL5 2.6.18-194 i686 GNU (1)W  y        y(2)   y        y     y     y
@@ -409,7 +402,6 @@ Windows Vista                        y       y(4)      y         y
 Windows Vista x64                    y       y(4)      y         y
 OpenVMS Alpha                        n       n         n         n
 Mac OS X 10.6                        y(5)    n         y         n        
-AIX 5.3 32- and 64-bit               n       n         n         n        
 AIX 6.1 32- and 64-bit               n       n         n         n        
 FreeBSD 6.3-STABLE 32&64 bit         y       n         y         y        
 RedHat EL5 2.6.18-128 i686 GNU (1)W  y       y(2)      y         y        
@@ -433,6 +425,11 @@ SuSe Linux 2.4.21 ia64 Intel      C  y       y         y         n
 
 Known Problems
 ==============
+* Parallel test, t_shapesame in testpar, is rather unstable as it continues to
+  have occasional errors in AIX and quite often in NCSA Abe, it is being built
+  but is not run automatically in the "make check" command. One would have to
+  run it by hand to see if it works in a particular machine. AKC - 2011/01/28
+
 * Although OpenVMS Alpha is supported, there are several problems with the C
   test suite - getname.c, lheap.c, lheap.c, mtime.c, and stab.c.  The test
   suite for h5diff also fails.  These failures are from the tests, not the
