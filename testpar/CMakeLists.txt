@@ -17,7 +17,6 @@ SET (testphdf5_SRCS
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_span_tree.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_chunk_alloc.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_filter_read.c
-    ${HDF5_TEST_PAR_SOURCE_DIR}/t_rank_projection.c
 )
 
 #-- Adding test for testhdf5
@@ -43,6 +42,7 @@ SET (H5P_TESTS
     t_cache
     t_pflush1
     t_pflush2
+#    t_shapesame
 )
 
 FOREACH (testp ${H5P_TESTS})
