@@ -17,7 +17,6 @@ SET (testphdf5_SRCS
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_span_tree.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_chunk_alloc.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_filter_read.c
-    ${HDF5_TEST_PAR_SOURCE_DIR}/t_rank_projection.c
 )
 
 #-- Adding test for testhdf5
@@ -32,7 +31,7 @@ MACRO (ADD_H5P_TEST file)
   H5_NAMING (${file} ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 
-  ADD_TEST (NAME ${file} COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:${file}>)
+  ADD_TEST (NAME ${file} COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:${file}> -p)
 ENDMACRO (ADD_H5P_TEST file)
 
 SET (H5P_TESTS
@@ -41,6 +40,7 @@ SET (H5P_TESTS
     t_cache
     t_pflush1
     t_pflush2
+    t_shapesame
 )
 
 FOREACH (testp ${H5P_TESTS})
