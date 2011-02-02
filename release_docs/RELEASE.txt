@@ -260,7 +260,7 @@ Bug Fixes since HDF5-1.8.0 release
       - Fixed a bug that caused big endian machines to generate corrupt files
             when using the scale-offset filter with floating point data or
             fill values.  Note that such datasets will no longer be readable
-            by any machine after this patch.  (NAF - 2010/02/02)
+            by any machine after this patch.  (NAF - 2010/02/02 - Bug 2131)
       - Retrieving a link's name by index in the case where the link is
             external and the file that the link refers to doesn't exist will 
             now fail gracefully rather than cause a segmentation fault. 
