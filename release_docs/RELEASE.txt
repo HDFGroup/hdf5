@@ -279,10 +279,11 @@ The following platforms and compilers have been tested for this release.
                                   MPICH mpich2-1.0.8 compiled with
                                       gcc 4.1.2 and G95 PGI Fortran 10.4-0
 
-
-    Linux 2.6.16.60-0.42.5 #1     Intel(R) C++ Version 10.1.017
-    SGI Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 10.1.017
-    (cobalt)                      SGI MPI 1.38
+    SGI ProPack 7 Linux           Intel(R) C++ Version 11.1 20100806
+    2.6.32.19-0.3.1.1982.0.PTF-   Intel(R) Fortran Version 11.1 20100806
+    default #1 SMP                SGI MPT 2.01
+    SGI Altix UV
+    (NCSA ember)
 
     SunOS 5.10 32- and 64-bit     Sun C 5.9 Sun OS_sparc Patch 124867-16
     (linew)                       Sun Fortran 95 8.3 Sun OS_sparc Patch 127000-07
@@ -291,12 +292,11 @@ The following platforms and compilers have been tested for this release.
                                   Sun Fortran 95 8.4 SunOS_sparc Patch 128231-05
                                   Sun C++ 5.10 SunOS_sparc 128228-10
 
-    Intel Xeon Linux 2.6.18-      gcc 3.4.6 20060404
+    Intel Xeon Linux 2.6.18-      gcc 4.2.4
     92.1.10.el5_lustre.1.6.6smp-  Intel(R) C++ Version 10.1.017
-    perfctr #2 SMP                Intel(R) Fortran Compiler Version 10.1.017
-    (abe)                         Open MPI 1.2.2
-                                  MVAPICH2-0.9.8p28p2patched-intel-ofed-1.2
-                                      compiled with icc v10.0.026 and ifort 10.1.017
+    perfctr #8 SMP                Intel(R) Fortran Compiler Version 10.1.017
+    (NCSA abe)                    Open MPI 1.3.2
+                                  MVAPICH2-1.5.1_pgi-10.8
 
     Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
                                   Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
