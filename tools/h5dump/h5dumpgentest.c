@@ -3390,6 +3390,11 @@ gent_group_comments(void)
     H5Oset_comment_by_name(group, "/g2/g2.1/g2.1.3", "Comment for group /g2/g2.1/g2.1.3", H5P_DEFAULT);
     H5Gclose(group);
 
+    /* /glongcomment */
+    group = H5Gcreate2(fid, "/glongcomment", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Oset_comment_by_name(group, "/glongcomment", "Comment for group /glongcomment with a really, really, really long, long, long comment", H5P_DEFAULT);
+    H5Gclose(group);
+
     H5Fclose(fid);
 }
 

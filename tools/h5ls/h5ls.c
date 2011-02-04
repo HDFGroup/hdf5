@@ -1785,7 +1785,9 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
         /* Show detailed information about the object, beginning with information
          * which is common to all objects. */
         if(verbose_g > 0) {
-            char comment[50];
+            size_t buf_size = 0;
+            char* comment = NULL;
+            ssize_t cmt_bufsize = -1;
 
             /* Display attributes */
             if(obj_type >= 0)
@@ -1811,14 +1813,24 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
             } /* end if */
 
             /* Object comment */
-            comment[0] = '\0';
-            H5Oget_comment(obj, comment, sizeof(comment));
-            HDstrcpy(comment + sizeof(comment) - 4, "...");
-            if(comment[0]) {
+            cmt_bufsize = H5Oget_comment(obj, comment, buf_size);
+
+            // if the actual length of the comment is longer than cmt_bufsize, then call
+            // H5Oget_comment again with the correct value.
+            // If the call to H5Oget_comment returned an error, skip this block
+            if (cmt_bufsize >= 0) {
+                comment = (char *)HDmalloc((size_t)cmt_bufsize++); // new_size including null terminator
+                if(comment)
+                    cmt_bufsize = H5Oget_comment(obj, comment, cmt_bufsize);
+            }
+            if(cmt_bufsize > 0) {
+                comment[cmt_bufsize] = '\0';
                 printf("    %-10s \"", "Comment:");
                 display_string(stdout, comment, FALSE);
                 puts("\"");
             } /* end if */
+            if(comment)
+               HDfree(comment);
         } /* end if */
 
         /* Detailed list for object */

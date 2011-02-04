@@ -62,6 +62,7 @@ IF (BUILD_TESTING)
       tsoftlinks-5.ls
       textlinksrc-nodangle-1.ls
       textlinksrc-nodangle-2.ls
+      tgrp_comments.ls
       tsoftlinks-nodangle-1.ls
       thlinks-nodangle-1.ls
       tgroup.ls
@@ -94,6 +95,7 @@ IF (BUILD_TESTING)
       textlinksrc.h5
       textlinktar.h5
       tgroup.h5
+      tgrp_comments.h5
       thlink.h5
       tloop.h5
       tnestedcomp.h5
@@ -210,6 +212,8 @@ IF (BUILD_TESTING)
           textlinksrc-6-old.out.err
           textlinksrc-7-old.out
           textlinksrc-7-old.out.err
+          tgrp_comments.out
+          tgrp_comments.out.err
           tsoftlinks-1.out
           tsoftlinks-1.out.err
           tsoftlinks-2.out
@@ -287,6 +291,9 @@ IF (BUILD_TESTING)
   # and return value 1
   ADD_H5_TEST (tgroup-1 1 -w80 -r -g tgroup.h5)
   ADD_H5_TEST (tgroup-2 0 -w80 -g tgroup.h5/g1)
+
+  # test for files with groups that have long comments
+  ADD_H5_TEST (tgrp_comments 0 -w80 -v -g tgrp_comments.h5/glongcomment)
 
   # test for displaying simple space datasets
   ADD_H5_TEST (tdset-1 0 -w80 -r -d tdset.h5)
