@@ -251,6 +251,17 @@ ELSE (BUILD_SHARED_LIBS)
 ENDIF (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
+# Option to Build Static executables
+#-----------------------------------------------------------------------------
+OPTION (BUILD_STATIC_EXECS "Build Static Executabless" OFF)
+IF (BUILD_STATIC_EXECS)
+  IF (NOT WIN32)
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+  ENDIF (NOT WIN32)
+ENDIF (BUILD_STATIC_EXECS)
+
+#-----------------------------------------------------------------------------
 # Option to use code coverage
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
