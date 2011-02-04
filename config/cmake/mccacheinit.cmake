@@ -44,7 +44,7 @@ SET (HDF5_ENABLE_THREADSAFE OFF CACHE BOOL "(WINDOWS)Enable Threadsafety" FORCE)
 
 SET (HDF5_PACKAGE_EXTLIBS OFF CACHE BOOL "(WINDOWS)CPACK - include external libraries" FORCE)
 
-SET (HDF5_ALLOW_EXTERNAL_SUPPORT "SVN" CACHE STRING "Allow External Library Building" FORCE)
+SET (HDF5_ALLOW_EXTERNAL_SUPPORT "OFF" CACHE STRING "Allow External Library Building" FORCE)
 
 SET (ZLIB_SVN_URL "http://svn.hdfgroup.uiuc.edu/zlib/trunk" CACHE STRING "Use ZLib from HDF repository" FORCE)
 
