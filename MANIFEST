@@ -1249,6 +1249,7 @@
 ./tools/testfiles/tgroup-1.ddl
 ./tools/testfiles/tgroup-2.ddl
 ./tools/testfiles/tgroup.h5
+./tools/testfiles/tgrp_comments.ls
 ./tools/testfiles/tgrp_comments.ddl
 ./tools/testfiles/tgrp_comments.h5
 ./tools/testfiles/thlink-1.ddl

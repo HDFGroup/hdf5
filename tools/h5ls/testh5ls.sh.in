@@ -135,6 +135,9 @@ TOOLTEST tgroup-3.ls 0 -w80 tgroup.h5/g1
 TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
 TOOLTEST tgroup-2.ls 0 -w80 -g tgroup.h5/g1
 
+# test for files with groups that have long comments
+TOOLTEST tgrp_comments.ls 0 -w80 -v -g tgrp_comments.h5/glongcomment
+
 # test for displaying simple space datasets
 TOOLTEST tdset-1.ls 0 -w80 -r -d tdset.h5
 
