@@ -98,7 +98,7 @@ static herr_t do_write(results *res, file_descr *fd, parameters *parms, void *bu
 static herr_t do_read(results *res, file_descr *fd, parameters *parms, void *buffer);
 static herr_t dset_write(int local_dim, file_descr *fd, parameters *parms, void *buffer);
 static herr_t posix_buffer_write(int local_dim, file_descr *fd, parameters *parms, void *buffer);
-static herr_t dset_read(int localrank, file_descr *fd, parameters *parms, void *buffer);
+static herr_t dset_read(int localrank, file_descr *fd, parameters *parms, void *buffer, const char *buffer2);
 static herr_t posix_buffer_read(int local_dim, file_descr *fd, parameters *parms, void *buffer);
 static herr_t do_fopen(parameters *param, char *fname, file_descr *fd /*out*/,
     int flags);
@@ -130,7 +130,6 @@ static size_t      cont_size;      /* size of contiguous POSIX access */
 static hid_t       fapl;           /* file access list */
 static unsigned char *buf_p;       /* buffer pointer */
 static const char *multi_letters = "msbrglo"; /* string for multi driver */
-static char *buffer2=NULL;         /* buffer for data verification */
 
 /* HDF5 global variables */
 static hsize_t     h5count[MAX_DIMS];      /*selection count               */
@@ -212,10 +211,8 @@ do_sio(parameters param)
     }
 
     /* Allocate transfer buffer */
-    buffer2 = malloc(linear_buf_size);
     if ((buffer = malloc(linear_buf_size)) == NULL){
-        HDfprintf(stderr, "malloc for transfer buffer size (%Hd) failed\n",
-        (long long)(linear_buf_size));
+        HDfprintf(stderr, "malloc for transfer buffer size (%Hd) failed\n", (long long)(linear_buf_size));
         GOTOERROR(FAIL);
     }
 
@@ -404,10 +401,10 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
 
     /* Remove any double slashes in the filename */
     for (ptr = fullname, i = j = 0; ptr && (i < size); i++, ptr++) {
-    if (*ptr != '/' || last != '/')
-        fullname[j++] = *ptr;
+        if (*ptr != '/' || last != '/')
+            fullname[j++] = *ptr;
 
-    last = *ptr;
+        last = *ptr;
     }
 
     return fullname;
@@ -766,6 +763,7 @@ done:
 static herr_t
 do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
 {
+    char        *buffer2 = NULL;       /* Buffer for data verification */
     int         ret_code = SUCCESS;
     char        dname[64];
     long        i;
@@ -777,14 +775,19 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
     hsize_t     h5start[MAX_DIMS];      /*selection start               */
     int         rank;
 
-        /* Prepare buffer for verifying data */
-        for (i=0; i < linear_buf_size; i++)
-            buffer2[i]=i%128;
+    /* Allocate data verification buffer */
+    if(NULL == (buffer2 = (char *)malloc(linear_buf_size))) {
+        HDfprintf(stderr, "malloc for data verification buffer size (%Zu) failed\n", linear_buf_size);
+        GOTOERROR(FAIL);
+    } /* end if */
+
+    /* Prepare buffer for verifying data */
+    for(i = 0; i < linear_buf_size; i++)
+        buffer2[i] = i % 128;
 
     rank = parms->rank;
-    for (i=0; i<rank; i++) {
+    for(i = 0; i < rank; i++)
         h5offset[i] = offset[i] = 0;
-    }
 
     /* I/O Access specific setup */
     switch (parms->io_type) {
@@ -853,7 +856,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
 
     /* Start "raw data" read timer */
     set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, START);
-    hrc = dset_read(rank-1, fd, parms, buffer);
+    hrc = dset_read(rank-1, fd, parms, buffer, buffer2);
 
     if (hrc < 0) {
         fprintf(stderr, "Error in dataset read\n");
@@ -910,6 +913,10 @@ done:
     }
     }
 
+    /* release generic resources */
+    if(buffer2)
+        free(buffer2);
+
     return ret_code;
 }
 
@@ -921,7 +928,8 @@ done:
  * Modifications:
  */
 
-static herr_t dset_read(int local_dim, file_descr *fd, parameters *parms, void *buffer)
+static herr_t dset_read(int local_dim, file_descr *fd, parameters *parms,
+    void *buffer, const char *buffer2)
 {
     int cur_dim = order[local_dim]-1;
     int         ret_code = SUCCESS;
@@ -936,7 +944,7 @@ static herr_t dset_read(int local_dim, file_descr *fd, parameters *parms, void *
         /* if traverse in order array is incomplete, recurse */
         if (local_dim > 0){
 
-            ret_code = dset_read(local_dim-1, fd, parms, buffer);
+            ret_code = dset_read(local_dim-1, fd, parms, buffer, buffer2);
 
         /* otherwise, write buffer into dataset */
         }else{
