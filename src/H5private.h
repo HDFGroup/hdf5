@@ -400,11 +400,6 @@
 #   error "nothing appropriate for int32_t"
 #endif
 
-/* Definition of uint32_t was moved to H5public.h */
-
-/* Definition of int64_t was moved to H5public.h */
-/* Definition of uint64_t was moved to H5public.h */
-
 /*
  * Maximum and minimum values.	These should be defined in <limits.h> for the
  * most part.
