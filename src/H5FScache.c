@@ -555,7 +555,7 @@ H5FS_cache_hdr_size(const H5F_t UNUSED *f, const H5FS_t *fspace, size_t *size_pt
  *-------------------------------------------------------------------------
  */
 static H5FS_sinfo_t *
-H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
+H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
 {
     H5FS_sinfo_t	*sinfo = NULL;  /* Free space section info */
     H5FS_sinfo_cache_ud_t *udata = (H5FS_sinfo_cache_ud_t *)_udata; /* user data for callback */
