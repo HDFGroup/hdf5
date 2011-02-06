@@ -326,6 +326,9 @@ static void test_reference_obj(void)
     catch (Exception E) {
 	issue_fail_msg("test_reference_obj()", __LINE__, __FILE__, E.getCDetailMsg());
     }
+
+    if(file1)
+        delete file1;
 }   // test_reference_obj()
 
 /****************************************************************
