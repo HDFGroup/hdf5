@@ -2211,7 +2211,6 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     unsigned    attr_crt_order_flags;
     hid_t       dcpl_id;  /* dataset creation property list ID */
 
-
     if ((dcpl_id = H5Dget_create_plist(did)) < 0)
     {
         error_msg("error in getting creation property list ID\n");
@@ -2652,22 +2651,21 @@ dump_comment(hid_t obj_id)
 
     cmt_bufsize = H5Oget_comment(obj_id, comment, buf_size);
 
-    // if the actual length of the comment is longer than cmt_bufsize, then call
-    // H5Oget_comment again with the correct value.
-    // If the call to H5Oget_comment returned an error, skip this block
-    if (cmt_bufsize >= 0) {
-        comment = (char *)HDmalloc((size_t)cmt_bufsize++); // new_size including null terminator
-        if(comment)
+    /* if the actual length of the comment is longer than cmt_bufsize, then call
+     * H5Oget_comment again with the correct value.
+     * If the call to H5Oget_comment returned an error, skip this block */
+    if (cmt_bufsize > 0) {
+        comment = (char *)HDmalloc((size_t)cmt_bufsize); /* new_size including null terminator */
+        if(comment) {
             cmt_bufsize = H5Oget_comment(obj_id, comment, cmt_bufsize);
+            if(cmt_bufsize > 0) {
+                indentation(indent);
+                printf("COMMENT \"%s\"\n", comment);
+            } /* end if */
+            HDfree(comment);
+        }
     }
 
-    if(cmt_bufsize > 0) {
-        comment[cmt_bufsize] = '\0';
-        indentation(indent);
-        printf("COMMENT \"%s\"\n", comment);
-    } /* end if */
-    if(comment)
-        HDfree(comment);
 } /* end dump_comment() */
 
 
