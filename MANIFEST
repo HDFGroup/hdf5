@@ -1959,6 +1959,7 @@
 ./config/cmake/hdf5-config-version.cmake.in
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/libhdf5.settings.cmake.in
+./config/cmake/mccacheinit.cmake
 ./config/cmake/cacheinit.cmake
 ./config/cmake/CTest.cmake
 ./config/cmake/grepTest.cmake
