@@ -130,14 +130,8 @@ typedef struct H5FD_stdio_t {
 
 /* Use file_xxx to indicate these are local macros, avoiding confusing 
  * with the global HD_xxx macros. 
- * Need fseeko, off_t, ftell and ftruncate are all of the same 32 or 64 
- * versions. 
  * Assume fseeko, which is POSIX standard, is always supported; 
  * but prefer to use fseeko64 if supported. 
- * [Note: the ifndef H5_HAVE_FSEEKO condition to determine BIG FILE not
- * supported was old code. This condition is not supposed to be true in Unix
- * like systems but may happen in non-Unix systems like Windows. They are left
- * in for now and will be cleaned later. -AKC-]
  */
 #ifndef file_fseek
     #ifdef H5_HAVE_FSEEKO64
@@ -174,11 +168,6 @@ typedef struct H5FD_stdio_t {
 #define SIZE_OVERFLOW(Z)	((Z) & ~(hsize_t)MAXADDR)
 #define REGION_OVERFLOW(A,Z)	(ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || \
     HADDR_UNDEF==(A)+(Z) || (file_offset_t)((A)+(Z))<(file_offset_t)(A))
-
-#ifndef H5_HAVE_FSEEKO
-/* Define big file as 2GB */
-#define BIG_FILE 0x80000000UL
-#endif
 
 /* Prototypes */
 static H5FD_t *H5FD_stdio_open(const char *name, unsigned flags,
@@ -587,9 +576,6 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
 {
     H5FD_stdio_t	*file = (H5FD_stdio_t*)_file;
     haddr_t		addr;
-#ifndef H5_HAVE_FSEEKO
-    static const char   *func = "H5FD_stdio_alloc";  /* Function Name for error reporting */
-#endif
     haddr_t ret_value;          /* Return value */
 
     /* Shut compiler up */
@@ -608,12 +594,6 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
         if((addr % file->pub.alignment) != 0)
             addr = ((addr / file->pub.alignment) + 1) * file->pub.alignment;
     } /* end if */
-
-#ifndef H5_HAVE_FSEEKO
-    /* If fseeko isn't available, big files (>2GB) won't be supported. */
-    if((addr + size) > BIG_FILE)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "can't write file bigger than 2GB because fseeko isn't available", HADDR_UNDEF)
-#endif
 
     file->eoa = addr + size;
 

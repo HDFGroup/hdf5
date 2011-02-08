@@ -1301,7 +1301,7 @@ H5D_contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
     void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
     H5S_t      *buf_space = NULL;       /* Dataspace describing buffer */
     hid_t       buf_sid = -1;           /* ID for buffer dataspace */
-    hsize_t     buf_dim;                /* Dimension for buffer */
+    hsize_t     buf_dim[1] = {0};       /* Dimension for buffer */
     hbool_t     is_vlen = FALSE;        /* Flag to indicate that VL type conversion should occur */
     hbool_t     fix_ref = FALSE;        /* Flag to indicate that ref values should be fixed */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -1382,10 +1382,10 @@ H5D_contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
         buf_size = nelmts * max_dt_size;
 
         /* Create dataspace for number of elements in buffer */
-        buf_dim = nelmts;
+        buf_dim[0] = nelmts;
 
         /* Create the space and set the initial extent */
-        if(NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
+        if(NULL == (buf_space = H5S_create_simple((unsigned)1, buf_dim, NULL)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
         /* Atomize */
@@ -1441,10 +1441,10 @@ H5D_contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
                 mem_nbytes = nelmts * mem_dt_size;
 
                 /* Adjust size of buffer's dataspace dimension */
-                buf_dim = nelmts;
+                buf_dim[0] = nelmts;
 
                 /* Adjust size of buffer's dataspace */
-                if(H5S_set_extent_real(buf_space, &buf_dim) < 0)
+                if(H5S_set_extent_real(buf_space, buf_dim) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to change buffer dataspace size")
             } /* end if */
             else

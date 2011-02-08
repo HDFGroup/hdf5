@@ -55,10 +55,11 @@ host_triplet = @host@
 DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/testcheck_version.sh.in \
 	$(srcdir)/testerror.sh.in $(srcdir)/testlibinfo.sh.in \
-	$(top_srcdir)/config/commence.am \
+	$(srcdir)/testlinks_env.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
-	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT)
+	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT) \
+	links_env$(EXEEXT)
 @BUILD_ALL_CONDITIONAL_TRUE@noinst_PROGRAMS = $(am__EXEEXT_2)
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 subdir = test
@@ -69,7 +70,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testcheck_version.sh testerror.sh H5srcdir_str.h \
-	testlibinfo.sh
+	testlibinfo.sh testlinks_env.sh
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_la_LIBADD =
@@ -77,18 +78,18 @@ am_libh5test_la_OBJECTS = h5test.lo testframe.lo cache_common.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
 am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	stab$(EXEEXT) gheap$(EXEEXT) cache$(EXEEXT) cache_api$(EXEEXT) \
-	cache_tagging$(EXEEXT) pool$(EXEEXT) hyperslab$(EXEEXT) \
-	istore$(EXEEXT) bittests$(EXEEXT) dt_arith$(EXEEXT) \
-	dtypes$(EXEEXT) dsets$(EXEEXT) cmpd_dset$(EXEEXT) \
-	filter_fail$(EXEEXT) extend$(EXEEXT) external$(EXEEXT) \
-	objcopy$(EXEEXT) links$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) \
-	mtime$(EXEEXT) fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
-	flush2$(EXEEXT) app_ref$(EXEEXT) enum$(EXEEXT) \
-	set_extent$(EXEEXT) ttsafe$(EXEEXT) getname$(EXEEXT) \
-	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
-	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
-	freespace$(EXEEXT) mf$(EXEEXT) farray$(EXEEXT) earray$(EXEEXT) \
-	btree2$(EXEEXT) fheap$(EXEEXT)
+	cache_tagging$(EXEEXT) pool$(EXEEXT) accum$(EXEEXT) \
+	hyperslab$(EXEEXT) istore$(EXEEXT) bittests$(EXEEXT) \
+	dt_arith$(EXEEXT) dtypes$(EXEEXT) dsets$(EXEEXT) \
+	cmpd_dset$(EXEEXT) filter_fail$(EXEEXT) extend$(EXEEXT) \
+	external$(EXEEXT) objcopy$(EXEEXT) links$(EXEEXT) \
+	unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) fillval$(EXEEXT) \
+	mount$(EXEEXT) flush1$(EXEEXT) flush2$(EXEEXT) \
+	app_ref$(EXEEXT) enum$(EXEEXT) set_extent$(EXEEXT) \
+	ttsafe$(EXEEXT) getname$(EXEEXT) vfd$(EXEEXT) ntypes$(EXEEXT) \
+	dangle$(EXEEXT) dtransform$(EXEEXT) reserved$(EXEEXT) \
+	cross_read$(EXEEXT) freespace$(EXEEXT) mf$(EXEEXT) \
+	farray$(EXEEXT) earray$(EXEEXT) btree2$(EXEEXT) fheap$(EXEEXT)
 am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
 	gen_new_array$(EXEEXT) gen_new_fill$(EXEEXT) \
@@ -98,6 +99,10 @@ am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	space_overflow$(EXEEXT) gen_filespace$(EXEEXT) \
 	gen_specmetaread$(EXEEXT) gen_sizes_lheap$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
+accum_SOURCES = accum.c
+accum_OBJECTS = accum.$(OBJEXT)
+accum_LDADD = $(LDADD)
+accum_DEPENDENCIES = libh5test.la $(LIBHDF5)
 app_ref_SOURCES = app_ref.c
 app_ref_OBJECTS = app_ref.$(OBJEXT)
 app_ref_LDADD = $(LDADD)
@@ -294,6 +299,10 @@ links_SOURCES = links.c
 links_OBJECTS = links.$(OBJEXT)
 links_LDADD = $(LDADD)
 links_DEPENDENCIES = libh5test.la $(LIBHDF5)
+links_env_SOURCES = links_env.c
+links_env_OBJECTS = links_env.$(OBJEXT)
+links_env_LDADD = $(LDADD)
+links_env_DEPENDENCIES = libh5test.la $(LIBHDF5)
 mf_SOURCES = mf.c
 mf_OBJECTS = mf.$(OBJEXT)
 mf_LDADD = $(LDADD)
@@ -385,21 +394,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c btree2.c \
-	cache.c cache_api.c cache_tagging.c cmpd_dset.c cross_read.c \
-	dangle.c dsets.c dt_arith.c dtransform.c dtypes.c earray.c \
-	enum.c err_compat.c error_test.c extend.c external.c farray.c \
-	fheap.c fillval.c filter_fail.c flush1.c flush2.c freespace.c \
-	gen_bad_ohdr.c gen_bogus.c gen_cross.c gen_deflate.c \
-	gen_filespace.c gen_filters.c gen_new_array.c gen_new_fill.c \
-	gen_new_group.c gen_new_mtime.c gen_new_super.c \
-	gen_noencoder.c gen_nullspace.c gen_sizes_lheap.c \
-	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
-	istore.c lheap.c links.c mf.c mount.c mtime.c ntypes.c \
-	objcopy.c ohdr.c pool.c reserved.c set_extent.c \
-	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
-	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
-DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
+SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c bittests.c \
 	btree2.c cache.c cache_api.c cache_tagging.c cmpd_dset.c \
 	cross_read.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c \
 	earray.c enum.c err_compat.c error_test.c extend.c external.c \
@@ -409,10 +404,25 @@ DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
 	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
 	gen_noencoder.c gen_nullspace.c gen_sizes_lheap.c \
 	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
-	istore.c lheap.c links.c mf.c mount.c mtime.c ntypes.c \
-	objcopy.c ohdr.c pool.c reserved.c set_extent.c \
+	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
+	ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c \
 	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
 	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+DIST_SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c \
+	bittests.c btree2.c cache.c cache_api.c cache_tagging.c \
+	cmpd_dset.c cross_read.c dangle.c dsets.c dt_arith.c \
+	dtransform.c dtypes.c earray.c enum.c err_compat.c \
+	error_test.c extend.c external.c farray.c fheap.c fillval.c \
+	filter_fail.c flush1.c flush2.c freespace.c gen_bad_ohdr.c \
+	gen_bogus.c gen_cross.c gen_deflate.c gen_filespace.c \
+	gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c \
+	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
+	gen_nullspace.c gen_sizes_lheap.c gen_specmetaread.c \
+	gen_udlinks.c getname.c gheap.c hyperslab.c istore.c lheap.c \
+	links.c links_env.c mf.c mount.c mtime.c ntypes.c objcopy.c \
+	ohdr.c pool.c reserved.c set_extent.c space_overflow.c stab.c \
+	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
+	$(ttsafe_SOURCES) unlink.c vfd.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -464,6 +474,7 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
 DIRECT_VFD = @DIRECT_VFD@
+DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 DYNAMIC_DIRS = @DYNAMIC_DIRS@
@@ -525,6 +536,7 @@ LTLIBOBJS = @LTLIBOBJS@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 MPI_GET_SIZE = @MPI_GET_SIZE@
@@ -581,6 +593,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -692,7 +705,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 # specifying a file prefix or low-level driver.  Changing the file
 # prefix or low-level driver with environment variables will influence
 # the temporary file name in ways that the makefile is not aware of.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog cmpd_dset.h5 \
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 	compact_dataset.h5 dataset.h5 dset_offset.h5 \
 	max_compact_dataset.h5 simple.h5 set_local.h5 random_chunks.h5 \
 	huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_expand.h5 \
@@ -718,9 +731,9 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog cmpd_dset.h5 \
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
@@ -730,7 +743,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 # the library yet. Move them to the end so that their failure do not block
 # other current library code tests.
 TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
-           pool hyperslab istore bittests dt_arith \
+           pool accum hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset filter_fail extend external objcopy links unlink \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe \
@@ -773,7 +786,7 @@ testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 
 
 # Temporary files.
-DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh
+DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -832,6 +845,8 @@ H5srcdir_str.h: $(top_builddir)/config.status $(srcdir)/H5srcdir_str.h.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testlibinfo.sh: $(top_builddir)/config.status $(srcdir)/testlibinfo.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testlinks_env.sh: $(top_builddir)/config.status $(srcdir)/testlinks_env.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-noinstLTLIBRARIES:
 	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
@@ -861,6 +876,9 @@ clean-noinstPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+accum$(EXEEXT): $(accum_OBJECTS) $(accum_DEPENDENCIES) 
+	@rm -f accum$(EXEEXT)
+	$(LINK) $(accum_OBJECTS) $(accum_LDADD) $(LIBS)
 app_ref$(EXEEXT): $(app_ref_OBJECTS) $(app_ref_DEPENDENCIES) 
 	@rm -f app_ref$(EXEEXT)
 	$(LINK) $(app_ref_OBJECTS) $(app_ref_LDADD) $(LIBS)
@@ -1008,6 +1026,9 @@ lheap$(EXEEXT): $(lheap_OBJECTS) $(lheap_DEPENDENCIES)
 links$(EXEEXT): $(links_OBJECTS) $(links_DEPENDENCIES) 
 	@rm -f links$(EXEEXT)
 	$(LINK) $(links_OBJECTS) $(links_LDADD) $(LIBS)
+links_env$(EXEEXT): $(links_env_OBJECTS) $(links_env_DEPENDENCIES) 
+	@rm -f links_env$(EXEEXT)
+	$(LINK) $(links_env_OBJECTS) $(links_env_LDADD) $(LIBS)
 mf$(EXEEXT): $(mf_OBJECTS) $(mf_DEPENDENCIES) 
 	@rm -f mf$(EXEEXT)
 	$(LINK) $(mf_OBJECTS) $(mf_LDADD) $(LIBS)
@@ -1066,6 +1087,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/accum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/app_ref.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/big.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bittests.Po@am__quote@
@@ -1117,6 +1139,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/istore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/links.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/links_env.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mount.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtime.Po@am__quote@

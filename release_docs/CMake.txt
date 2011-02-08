@@ -14,15 +14,21 @@ Notes: This short instruction is written for users who want to quickly build
        all the operating systems supported by CMake.
        
        NOTES:
-         1. CMake use is still experimental. While we have attempted to 
-            provide error-free files, please understand that development
-            with CMake has just began. The CMake specific files may change
+         1. Using CMake for building and using HDF5 is under active development. 
+            While we have attempted to provide error-free files, please 
+            understand that development with CMake has not been extensively 
+            tested outside of HDF. The CMake specific files may change
             before the next release.
             
-         2. CMake has been introduced to support development on Windows, however
-            it should be usuable on any system where CMake is supported. Please
-            send us any comments on how CMake support can be improved on any
-            system.
+         2. CMake was originally introduced to support development on Windows, 
+            however it should be usable on any system where CMake is supported. 
+            Please send us any comments on how CMake support can be improved on 
+            any system. Visit the KitWare site for more information about CMake.
+            
+         3. Build and test results can be submitted to our CDash server at:
+            www.cdash.hdfgroup.org. 
+            Please read the HDF and CDash document at:
+            www.hdfgroup.org/CDash/HowToSubmit. 
             
 
 ========================================================================
@@ -32,10 +38,26 @@ Notes: This short instruction is written for users who want to quickly build
    1. We suggest you obtain the latest CMake for windows from the Kitware
       web site. The HDF5 1.8.x product requires CMake version 2.8.2.                     
                                                                          
-   2. If you plan to use Zlib or Szip, download the packages and install them
-      in a central location. For example on Windows, create a folder extlibs 
-      and install the packages there. Windows users should also read Section V
-      in INSTALL_Windows.txt.                           
+   2. If you plan to use Zlib or Szip;
+      A. Download the packages and install them
+         in a central location. For example on Windows, create a folder extlibs 
+         and install the packages there. Windows users should also read Section V
+         in INSTALL_Windows.txt.
+      B. Use source packages from a SVN server by adding the following CMake 
+         options:
+            HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="SVN"
+            ZLIB_SVN_URL:STRING="http://some_location/zlib/trunk"
+            SZIP_SVN_URL:STRING="http://some_location/szip/trunk"
+         where "some_location" is the URL to the SVN repository.
+      C. Use source packages from a compressed file by adding the following CMake 
+         options:
+            HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
+            ZLIB_TGZ_NAME:STRING="zlib_src.ext"
+            SZIP_TGZ_NAME:STRING="szip_src.ext"
+            TGZ_PATH:STRING="some_location"
+         where "some_location" is the URL or full path to the compressed file and 
+         ext is the type of compression file.
+                                    
                                                                          
 ========================================================================
           Building HDF5 C/C++ Libraries with CMake
@@ -146,7 +168,31 @@ Notes: This short instruction is written for users who want to quickly build
       3.1  If you wish to use the Visual Studio environment, open the solution 
            file in your build directory. Be sure to select either Debug or 
            Release and build the solution.
-      
+             
+      3.2.1  The external libraries (zlib and szip) can be configured
+           to allow building the libraries by downloading from a SVN repository.
+           The option is 'HDF5_ALLOW_EXTERNAL_SUPPORT'; by adding the following
+           configuration option:
+               -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="SVN"
+               
+           The options to control the SVN URL (config/cmake/cacheinit.cmake file):
+               ZLIB_SVN_URL:STRING="http://svn.hdfgroup.uiuc.edu/zlib/trunk"
+               SZIP_SVN_URL:STRING="http://svn.hdfgroup.uiuc.edu/szip/trunk"
+           These should be changed to your location.
+           
+      3.2.2  Or the external libraries (zlib and szip) can be configured
+           to allow building the libraries by using a compressed file.
+           The option is 'HDF5_ALLOW_EXTERNAL_SUPPORT'; by adding the following
+           configuration option:
+               -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
+               
+           The options to control the SVN URL (config/cmake/cacheinit.cmake file):
+               ZLIB_TGZ_NAME:STRING="zlib_src.ext"
+               SZIP_TGZ_NAME:STRING="szip_src.ext"
+               TGZ_PATH:STRING="some_location"
+            where "some_location/xxxx_src.ext" is the URL or full path to the 
+            compressed file and where ext is the type of the compression file like:
+               .bz2, .tar, .tar.gz, .tgz, .zip
 
    4. Test HDF5.
 
@@ -163,20 +209,20 @@ Notes: This short instruction is written for users who want to quickly build
       To package the build into a simple installer using the NullSoft installer NSIS
       on Windows, or into compressed files (.tar.gz, .sh, .zip), use the CPack tool.
 
-      To pacakage the build, navigate to your build directory and execute;
+      To package the build, navigate to your build directory and execute;
       
               cpack -C {Debug | Release} CPackConfig.cmake
       
       NOTE: We have just introduced the packaging capability and it has not been 
             extensively tested. Please send us comments on how it can be improved.
            
-   5. The files that support building HDF5 with CMake are all the files in the 
+   6. The files that support building HDF5 with CMake are all the files in the 
       config/cmake folder, the CMakeLists.txt files in each source folder, and 
       CTestConfig.cmake. CTestConfig.cmake is specific to the internal testing 
       performed by The HDF Group. It should be altered for the users 
       installation and needs.
 
-   6. More information about using CMake can be found at the KitWare site, 
+   7. More information about using CMake can be found at the KitWare site, 
       www.cmake.org.
 
 

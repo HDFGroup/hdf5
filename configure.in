@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.9.76], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.80], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -344,6 +344,28 @@ dnl Check for programs.
 dnl
 AC_PROG_CC
 CC_BASENAME="`echo $CC | cut -f1 -d' ' | xargs basename 2>/dev/null`"
+
+dnl ----------------------------------------------------------------------------
+dnl Configure disallows unsupported combinations of options. However, users
+dnl may want to override and build with unsupported combinations for their
+dnl own use. They can use the --enable-unsupported configure flag, which
+dnl ignores any errors from configure due to incompatible flags.
+AC_MSG_CHECKING([if unsupported combinations of configure options are allowed])
+AC_ARG_ENABLE([unsupported],
+              [AC_HELP_STRING([--enable-unsupported],
+                              [Allow unsupported combinations of configure options])],
+              [ALLOW_UNSUPPORTED=$enableval])
+
+case "X-$ALLOW_UNSUPPORTED" in 
+  X-|X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  X-yes)
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    ;;
+esac
 
 dnl ----------------------------------------------------------------------
 dnl Check if they would like the Fortran interface compiled
@@ -694,9 +716,9 @@ dnl			   the executable name to run the executable on
 dnl			   multiple processors. For the serial library the
 dnl			   value will normally be the empty string. For
 dnl			   parallel library it should be something like
-dnl			   `mpi -np $$NPROCS' where NPROCS will eventually
-dnl			   contain the number of processors on which to run
-dnl			   the executable (the double dollarsigns are to
+dnl			   "mpiexec -n \$\${NPROCS:=6}" where NPROCS will
+dnl			   eventually contain the number of processors on which
+dnl			   to run the executable (the double dollarsigns are to
 dnl			   protect the expansion until make executes the
 dnl			   command).  The value of this variable is
 dnl			   substituted in *.in files.
@@ -738,7 +760,7 @@ case "$CC_BASENAME" in
       RUNSERIAL="${RUNSERIAL:-none}"
 
       if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=3}"
+        RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=6}"
       fi
     else
       AC_MSG_RESULT([none])
@@ -792,7 +814,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
         RUNSERIAL="${RUNSERIAL:-none}"
 
         if test -z "$RUNPARALLEL"; then
-          RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=2}"
+          RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=6}"
         fi
       else
         AC_MSG_RESULT([none])
@@ -908,16 +930,20 @@ if (${CC-cc} -V 2>&1 | grep '^pgcc 6.0') > /dev/null && test "X$enable_productio
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Shared libraries are not currently supported under Cygwin.
-case "`uname`" in
-  CYGWIN*)
-    if test "X${enable_shared}" = "Xyes"; then
-      echo '    warning: shared libraries are not supported on Cygwin!'
-      echo '    disabling shared libraries'
-    fi
-    enable_shared="no"
-    ;;
-esac
+dnl Shared libraries are not currently supported under Cygwin, so configure
+dnl disables them unless --enable-unsupported has been supplied by the user.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  case "`uname`" in
+    CYGWIN*)
+      if test "X${enable_shared}" = "Xyes"; then
+        echo '    warning: shared libraries are not supported on Cygwin!'
+        echo '    disabling shared libraries'
+        echo '    use --enable-unsupported to override this warning and keep shared libraries enabled'
+      fi
+      enable_shared="no"
+      ;;
+  esac
+fi
 
 dnl ----------------------------------------------------------------------
 dnl Create libtool.  If shared/static libraries are going to be enabled
@@ -2460,24 +2486,33 @@ AC_ARG_ENABLE([parallel],
                               [Search for MPI-IO and MPI support files])])
 
 dnl The --enable-parallel flag is not compatible with --enable-cxx.
-dnl If the user tried to specify both flags, throw an error.
-if test "X${HDF_CXX}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
-  AC_MSG_ERROR([--enable-cxx and --enable-parallel flags are incompatible])
+dnl If the user tried to specify both flags, throw an error, unless
+dnl they also provided the --enable-unsupported flag.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_CXX}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-cxx and --enable-parallel flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
 fi
 
-dnl --enable-parallel is also incompatible with --enable-threadsafe.
-if test "X${THREADSAFE}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
-  AC_MSG_ERROR([--enable-threadsafe and --enable-parallel flags are incompatible])
+dnl --enable-parallel is also incompatible with --enable-threadsafe, unless
+dnl --enable-unsupported has been specified on the configure line.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${THREADSAFE}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-threadsafe and --enable-parallel flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
 fi
 
 dnl It's possible to build in parallel by specifying a parallel compiler
 dnl without using the --enable-parallel flag.  This isn't allowed with
-dnl C++ or threadsafe, either.
-if test "X${PARALLEL}" != "X" -a "X${enable_cxx}" = "Xyes" ; then
-  AC_MSG_ERROR([An MPI compiler is being used; --enable-cxx is not allowed])
-fi
-if test "X${PARALLEL}" != "X" -a "X${THREADSAFE}" = "Xyes"; then
-  AC_MSG_ERROR([An MPI compiler is being used; --enable-threadsafe is not allowed])
+dnl C++ or threadsafe, either, unless the --enable-unsupported flag 
+dnl has also been specified.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${PARALLEL}" != "X" -a "X${enable_cxx}" = "Xyes" ; then
+    AC_MSG_ERROR([An MPI compiler is being used; --enable-cxx is not allowed. Use --enable-unsupported to override this error.])
+  fi
+  if test "X${PARALLEL}" != "X" -a "X${THREADSAFE}" = "Xyes"; then
+    AC_MSG_ERROR([An MPI compiler is being used; --enable-threadsafe is not allowed. Use --enable-unsupported to override this error.])
+  fi
 fi
 
 AC_MSG_CHECKING([for parallel support files])
@@ -2550,7 +2585,7 @@ case "X-$enable_parallel" in
         dnl Find the path where aprun is located.
   	for path in `echo $PATH | ${TR} ":" " "`; do
   	  if test -x $path/aprun; then
-            RUNPARALLEL="aprun -q -n \$\${NPROCS:=3}"
+            RUNPARALLEL="aprun -q -n \$\${NPROCS:=6}"
   	    break;
   	  fi
 	done
@@ -2558,7 +2593,7 @@ case "X-$enable_parallel" in
 
     dnl Set RUNPARALLEL to mpiexec if not set yet.
     if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
-      RUNPARALLEL="mpiexec -n \$\${NPROCS:=3}"
+      RUNPARALLEL="mpiexec -n \$\${NPROCS:=6}"
     fi
     ;;
 
@@ -3548,6 +3583,167 @@ else
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Set the flag to indicate that the machine is using a special algorithm to convert
+dnl 'long double' to '(unsigned) long' values.  (This flag should only be set for 
+dnl the IBM Power6 Linux.  When the bit sequence of long double is 
+dnl 0x4351ccf385ebc8a0bfcc2a3c3d855620, the converted value of (unsigned)long 
+dnl is 0x004733ce17af227f, not the same as the library's conversion to 0x004733ce17af2282.
+dnl The machine's conversion gets the correct value.  We define the macro and disable
+dnl this kind of test until we figure out what algorithm they use.
+dnl
+AC_MSG_CHECKING([if using special algorithm to convert long double to (unsigned) long values])
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_ldouble_to_long_special=${hdf5_cv_ldouble_to_long_special=no}
+else
+   AC_CACHE_VAL([hdf5_cv_ldouble_to_long_special],
+        [AC_TRY_RUN([
+        int main(void)
+        {
+            long double         ld = 20041683600089727.779961L;
+            long                ll;
+            unsigned long       ull;
+            unsigned char       s[16];
+            unsigned char       s2[8];
+            int                 ret = 1;
+            
+            if(sizeof(long double) == 16 && sizeof(long) == 8) {
+                /*make sure the long double type has 16 bytes in size and 
+                 * 11 bits of exponent.  If it is,
+                 *the bit sequence should be like below.  It's not 
+                 *a decent way to check but this info isn't available. */   
+                memcpy(s, &ld, 16);
+                if(s[0]==0x43 && s[1]==0x51 && s[2]==0xcc && s[3]==0xf3 &&
+                    s[4]==0x85 && s[5]==0xeb && s[6]==0xc8 && s[7]==0xa0 &&
+                    s[8]==0xbf && s[9]==0xcc && s[10]==0x2a && s[11]==0x3c) {
+
+                    /* Assign the hexadecimal value of long double type. */
+                    s[0]=0x43; s[1]=0x51; s[2]=0xcc; s[3]=0xf3;
+                    s[4]=0x85; s[5]=0xeb; s[6]=0xc8; s[7]=0xa0;
+                    s[8]=0xbf; s[9]=0xcc; s[10]=0x2a; s[11]=0x3c;
+                    s[12]=0x3d; s[13]=0x85; s[14]=0x56; s[15]=0x20;
+
+                    memcpy(&ld, s, 16);
+
+                    ll = (long)ld;
+                    memcpy(s2, &ll, 8);
+
+                    /* The library's algorithm converts it to 0x 00 47 33 ce 17 af 22 82
+                     * and gets wrong value 20041683600089730 on the IBM Power6 Linux.
+                     * But the IBM Power6 Linux converts it to 0x00 47 33 ce 17 af 22 7f
+                     * and gets the correct value 20041683600089727.  It uses some special
+                     * algorithm.  We're going to define the macro and skip the test until
+                     * we can figure out how they do it. */
+                    if(s2[0]==0x00 && s2[1]==0x47 && s2[2]==0x33 && s2[3]==0xce &&
+                       s2[4]==0x17 && s2[5]==0xaf && s2[6]==0x22 && s2[7]==0x7f)
+                        ret = 0;
+
+                    ull = (unsigned long)ld;
+                    memcpy(s2, &ull, 8);
+
+                    /* The unsigned long is the same as signed long. */
+                    if(s2[0]==0x00 && s2[1]==0x47 && s2[2]==0x33 && s2[3]==0xce &&
+                       s2[4]==0x17 && s2[5]==0xaf && s2[6]==0x22 && s2[7]==0x7f)
+                        ret = 0;
+                }    
+            }   
+            
+    done:
+            exit(ret);
+        }
+        ], [hdf5_cv_ldouble_to_long_special=yes], [hdf5_cv_ldouble_to_long_special=no],)])
+fi
+
+if test ${hdf5_cv_ldouble_to_long_special} = "yes"; then
+  AC_DEFINE([LDOUBLE_TO_LONG_SPECIAL], [1],
+            [Define if your system converts long double to (unsigned) long values with special algorithm.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Set the flag to indicate that the machine is using a special algorithm
+dnl to convert some values of '(unsigned) long' to 'long double' values.  
+dnl (This flag should be off for all machines, except for IBM Power6 Linux, 
+dnl when the bit sequences are 003fff..., 007fff..., 00ffff..., 01ffff..., 
+dnl ..., 7fffff..., the compiler uses a unknown algorithm.  We define a 
+dnl macro and skip the test for now until we know about the algorithm.
+dnl
+AC_MSG_CHECKING([if using special algorithm to convert (unsigned) long to long double values])
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_long_to_ldouble_special=${hdf5_cv_long_to_ldouble_special=no}
+else
+   AC_CACHE_VAL([hdf5_cv_long_to_ldouble_special],
+        [AC_TRY_RUN([
+        int main(void)
+        {
+            long double         ld;
+            long                ll;
+            unsigned long       ull;
+            unsigned char       s[16];
+            int                 flag=0, ret=1;
+        
+            /*Determine if long double has 16 byte in size, 11 bit exponent, and
+             *the bias is 0x3ff */ 
+            if(sizeof(long double) == 16) { 
+                ld = 1.0L;
+                memcpy(s, &ld, 16);
+                if(s[0]==0x3f && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
+                    s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00) 
+                    flag = 1; 
+            }
+             
+            if(flag==1 && sizeof(long)==8) {
+                ll = 0x003fffffffffffffL;
+                ld = (long double)ll;
+                memcpy(s, &ld, 16);
+                /* The library converts the value to 0x434fffffffffffff8000000000000000.
+                 * In decimal it is 18014398509481982.000000, one value short of the original.
+                 * The IBM Power6 Linux converts it to 0x4350000000000000bff0000000000000.
+                 * The value is correct in decimal. It uses some special
+                 * algorithm.  We're going to define the macro and skip the test until
+                 * we can figure out how they do it. */
+                if(s[0]==0x43 && s[1]==0x50 && s[2]==0x00 && s[3]==0x00 &&
+                    s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00 &&
+                    s[8]==0xbf && s[9]==0xf0 && s[10]==0x00 && s[11]==0x00 &&
+                    s[12]==0x00 && s[13]==0x00 && s[14]==0x00 && s[15]==0x00)
+                    ret = 0;
+            }        
+            if(flag==1 && sizeof(unsigned long)==8) {
+                ull = 0xffffffffffffffffUL;
+                ld = (long double)ull;
+                memcpy(s, &ld, 16);
+                /* Use a different value from signed long to test. The problem is the same
+                 * for both long and unsigned long. The value is 18446744073709551615.
+                 * The library converts the value to 0x43effffffffffffffe000000000000000.
+                 * In decimal it's 18446744073709548544.000000, very different from the original.
+                 * The IBM Power6 Linux converts it to 0x43f0000000000000bff0000000000000.
+                 * The value is correct in decimal. It uses some special
+                 * algorithm.  We're going to define the macro and skip the test until
+                 * we can figure out how they do it. */
+                if(s[0]==0x43 && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
+                    s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00 &&
+                    s[8]==0xbf && s[9]==0xf0 && s[10]==0x00 && s[11]==0x00 &&
+                    s[12]==0x00 && s[13]==0x00 && s[14]==0x00 && s[15]==0x00)
+                    ret = 0;
+            }        
+    done:
+            exit(ret);
+        }
+        ], [hdf5_cv_long_to_ldouble_special=yes], [hdf5_cv_long_to_ldouble_special=no],)])
+fi
+
+if test ${hdf5_cv_long_to_ldouble_special} = "yes"; then
+  AC_DEFINE([LONG_TO_LDOUBLE_SPECIAL], [1],
+            [Define if your system can convert (unsigned) long to long double values with special algorithm.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl ----------------------------------------------------------------------
 dnl Set the flag to indicate that the machine can accurately convert
 dnl 'long double' to '(unsigned) long long' values.  (This flag should be set for 
 dnl all machines, except for Mac OS 10.4 and SGI IRIX64 6.5.  When the bit sequence
@@ -3609,6 +3805,7 @@ if test ${hdf5_cv_ldouble_to_llong_accurate} = "yes"; then
 else
   AC_MSG_RESULT([no])
 fi
+
 
 dnl ----------------------------------------------------------------------
 dnl Set the flag to indicate that the machine can accurately convert
@@ -3944,11 +4141,14 @@ else
 fi
 
 dnl It's an error to try to disable deprecated public API symbols while
-dnl choosing an older version of the public API as the default.
-if test "X${DEFAULT_API_VERSION}" != "Xv110" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
-  AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols])
+dnl choosing an older version of the public API as the default. However,
+dnl if the user insists on doing this via the --enable-unsupported configure
+dnl flag, we'll let them.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${DEFAULT_API_VERSION}" != "Xv110" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
+    AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols. Use --enable-unsupported to override this error.])
+  fi
 fi
-
 
 dnl ----------------------------------------------------------------------
 dnl Enable strict file format checks
@@ -4123,6 +4323,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testerror.sh
                  test/H5srcdir_str.h
                  test/testlibinfo.sh
+                 test/testlinks_env.sh
                  testpar/Makefile
                  testpar/testph5.sh
                  perform/Makefile

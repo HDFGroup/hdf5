@@ -6,6 +6,8 @@ PROJECT (HDF5_HL)
 #-----------------------------------------------------------------------------
 IF (BUILD_SHARED_LIBS)
   SET (HL_BUILT_AS_DYNAMIC_LIB 1)
+ELSE (BUILD_SHARED_LIBS)
+  SET (HL_BUILT_AS_STATIC_LIB 1)
 ENDIF (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------

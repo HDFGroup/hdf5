@@ -1664,8 +1664,9 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
     H5G_t *grp = NULL;              /* H5G_t for this group, opened to pass to user callback */
     hid_t grp_id = FAIL;            /* Id for this group (passed to user callback */
     H5G_loc_t temp_loc;             /* For UD callback */
-    hbool_t temp_loc_init = FALSE;
-    herr_t ret_value = SUCCEED;              /* Return value */
+    hbool_t temp_loc_init = FALSE;  /* Temporary location for UD callback (temp_loc) has been initialized */
+    hbool_t obj_created = FALSE;    /* Whether an object was created (through a hard link) */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_link_cb)
 
@@ -1690,6 +1691,9 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
 
             /* Set object path to use for setting object name (below) */
             udata->path = new_loc.path;
+
+            /* Indicate that an object was created */
+            obj_created = TRUE;
         } /* end if */
         else {
             /* Check that both objects are in same file */
@@ -1763,6 +1767,20 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
     } /* end if */
 
 done:
+    /* Check if an object was created */
+    if(obj_created) {
+        H5O_loc_t oloc;         /* Object location for created object */
+
+        /* Set up object location */
+        HDmemset(&oloc, 0, sizeof(oloc));
+        oloc.file = grp_loc->oloc->file;
+        oloc.addr = udata->lnk->u.hard.addr;
+
+        /* Decrement refcount on superblock extension's object header in memory */
+        if(H5O_dec_rc_by_loc(&oloc, udata->dxpl_id) < 0)
+           HDONE_ERROR(H5E_LINK, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
+    } /* end if */
+
     /* Close the location given to the user callback if it was created */
     if(grp_id >= 0) {
         if(H5I_dec_app_ref(grp_id) < 0)
@@ -2396,8 +2414,8 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_mv2_t *udata = (H5L_trav_mv2_t *)_udata;   /* User data passed in */
-    H5G_t *grp=NULL;                    /* H5G_t for this group, opened to pass to user callback */
-    hid_t grp_id = FAIL;                /* Id for this group (passed to user callback */
+    H5G_t *grp = NULL;                  /* H5G_t for this group, opened to pass to user callback */
+    hid_t grp_id = FAIL;                /* ID for this group (passed to user callback */
     H5G_loc_t temp_loc;                 /* For UD callback */
     hbool_t temp_loc_init = FALSE;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2482,6 +2500,10 @@ done:
      * location for the object */
     *own_loc = H5G_OWN_NONE;
 
+    /* Reset the "name" field in udata->lnk because it is owned by traverse()
+     * and must not be manipulated after traverse closes */
+    udata->lnk->name = NULL;
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_move_dest_cb() */
 
@@ -2521,7 +2543,7 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "the name of a link must be supplied to move or copy")
 
     /* Set up user data for move_dest_cb */
-    if((udata_out.lnk = (H5O_link_t *)H5O_msg_copy(H5O_LINK_ID, lnk, NULL)) == NULL)
+    if(NULL == (udata_out.lnk = (H5O_link_t *)H5O_msg_copy(H5O_LINK_ID, lnk, NULL)))
         HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy link to be moved")
 
     /* In this special case, the link's name is going to be replaced at its
@@ -2582,16 +2604,11 @@ done:
         H5MM_xfree(orig_name);
 
     /* If udata_out.lnk was copied, free any memory allocated
-     * In this special case, the H5L_move_dest_cb callback frees the name
-     * if it succeeds
+     * In this special case, the H5L_move_dest_cb callback resets the name
+     * so H5O_msg_free shouldn't try to free it
      */
-    if(link_copied) {
-        if(udata_out.lnk->type == H5L_TYPE_SOFT)
-            udata_out.lnk->u.soft.name = (char *)H5MM_xfree(udata_out.lnk->u.soft.name);
-        else if(udata_out.lnk->type >= H5L_TYPE_UD_MIN && udata_out.lnk->u.ud.size > 0)
-            udata_out.lnk->u.ud.udata = H5MM_xfree(udata_out.lnk->u.ud.udata);
-        H5MM_xfree(udata_out.lnk);
-    } /* end if */
+    if(link_copied)
+        H5O_msg_free(H5O_LINK_ID, udata_out.lnk);
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */

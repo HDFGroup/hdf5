@@ -34,16 +34,16 @@ MACRO (IDE_SOURCE_PROPERTIES SOURCE_PATH HEADERS SOURCES)
 ENDMACRO (IDE_SOURCE_PROPERTIES)
 
 #-------------------------------------------------------------------------------
-MACRO (H5_NAMING target)
+MACRO (H5_NAMING target libtype)
   IF (WIN32 AND NOT MINGW)
-    IF (BUILD_SHARED_LIBS)
+    IF (${libtype} MATCHES "SHARED")
       IF (H5_LEGACY_NAMING)
         SET_TARGET_PROPERTIES (${target} PROPERTIES OUTPUT_NAME "dll")
         SET_TARGET_PROPERTIES (${target} PROPERTIES PREFIX "${target}")
       ELSE (H5_LEGACY_NAMING)
         SET_TARGET_PROPERTIES (${target} PROPERTIES OUTPUT_NAME "${target}dll")
       ENDIF (H5_LEGACY_NAMING)
-    ENDIF (BUILD_SHARED_LIBS)
+    ENDIF (${libtype} MATCHES "SHARED")
   ENDIF (WIN32 AND NOT MINGW)
 ENDMACRO (H5_NAMING)
 
@@ -73,8 +73,14 @@ MACRO (H5_SET_LIB_OPTIONS libtarget libname libtype)
         SET (LIB_DEBUG_NAME "lib${libname}_D")
       ENDIF (H5_LEGACY_NAMING)
     ELSE (WIN32 AND NOT MINGW)
-      SET (LIB_RELEASE_NAME "lib${libname}")
-      SET (LIB_DEBUG_NAME "lib${libname}_debug")
+      # if the generator supports configuration types or if the CMAKE_BUILD_TYPE has a value
+      IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+        SET (LIB_RELEASE_NAME "${libname}")
+        SET (LIB_DEBUG_NAME "${libname}_debug")
+      ELSE (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+        SET (LIB_RELEASE_NAME "lib${libname}")
+        SET (LIB_DEBUG_NAME "lib${libname}_debug")
+      ENDIF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
     ENDIF (WIN32 AND NOT MINGW)
   ENDIF (${libtype} MATCHES "SHARED")
   
@@ -87,16 +93,16 @@ MACRO (H5_SET_LIB_OPTIONS libtarget libname libtype)
   )
   
   #----- Use MSVC Naming conventions for Shared Libraries
-  IF (MINGW AND BUILD_SHARED_LIBS)
+  IF (MINGW AND ${libtype} MATCHES "SHARED")
     SET_TARGET_PROPERTIES (${libtarget}
         PROPERTIES
         IMPORT_SUFFIX ".lib"
         IMPORT_PREFIX ""
         PREFIX ""
     )
-  ENDIF (MINGW AND BUILD_SHARED_LIBS)
+  ENDIF (MINGW AND ${libtype} MATCHES "SHARED")
 
-  IF (BUILD_SHARED_LIBS)
+  IF (${libtype} MATCHES "SHARED")
     IF (WIN32)
       SET (LIBHDF_VERSION ${HDF5_PACKAGE_VERSION_MAJOR})
     ELSE (WIN32)
@@ -104,7 +110,7 @@ MACRO (H5_SET_LIB_OPTIONS libtarget libname libtype)
     ENDIF (WIN32)
     SET_TARGET_PROPERTIES (${libtarget} PROPERTIES VERSION ${LIBHDF_VERSION})
     SET_TARGET_PROPERTIES (${libtarget} PROPERTIES SOVERSION ${LIBHDF_VERSION})
-  ENDIF (BUILD_SHARED_LIBS)
+  ENDIF (${libtype} MATCHES "SHARED")
 
   #-- Apple Specific install_name for libraries
   IF (APPLE)
@@ -121,38 +127,15 @@ MACRO (H5_SET_LIB_OPTIONS libtarget libname libtype)
 ENDMACRO (H5_SET_LIB_OPTIONS)
 
 #-------------------------------------------------------------------------------
-MACRO (TARGET_WIN_PROPERTIES target)
+MACRO (TARGET_FORTRAN_WIN_PROPERTIES target addlinkflags)
   IF (WIN32)
     IF (MSVC)
-      IF (NOT BUILD_SHARED_LIBS)
-        SET_TARGET_PROPERTIES (${target}
-            PROPERTIES
-                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
-        ) 
-      ENDIF (NOT BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (${target}
+          PROPERTIES
+              COMPILE_FLAGS "/dll"
+              LINK_FLAGS "/SUBSYSTEM:CONSOLE ${addlinkflags}"
+      ) 
     ENDIF (MSVC)
-  ENDIF (WIN32)
-ENDMACRO (TARGET_WIN_PROPERTIES)
-
-#-------------------------------------------------------------------------------
-MACRO (TARGET_FORTRAN_WIN_PROPERTIES target)
-  IF (WIN32)
-    IF (BUILD_SHARED_LIBS)
-      IF (MSVC)
-        SET_TARGET_PROPERTIES (${target}
-            PROPERTIES
-                COMPILE_FLAGS "/dll"
-                LINK_FLAGS "/SUBSYSTEM:CONSOLE"
-        ) 
-      ENDIF (MSVC)
-    ELSE (BUILD_SHARED_LIBS)
-      IF (MSVC)
-        SET_TARGET_PROPERTIES (${target}
-            PROPERTIES
-                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
-        ) 
-      ENDIF (MSVC)
-    ENDIF (BUILD_SHARED_LIBS)
   ENDIF (WIN32)
 ENDMACRO (TARGET_FORTRAN_WIN_PROPERTIES)
 

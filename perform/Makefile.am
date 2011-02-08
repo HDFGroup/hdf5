@@ -23,11 +23,11 @@ include $(top_srcdir)/config/commence.am
 
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
+# bin_PROGRAMS will be installed.
 if BUILD_PARALLEL_CONDITIONAL
-  bin_PROGRAMS=h5perf
-  TEST_PROG_PARA=h5perf perf
+    bin_PROGRAMS=h5perf_serial h5perf
 else
-  bin_PROGRAMS=h5perf_serial
+    bin_PROGRAMS=h5perf_serial
 endif
 
 # Add h5perf and h5perf_serial specific linker flags here
@@ -38,16 +38,25 @@ h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 # specifying --enable-build-all at configure time.
 # Also, some of these programs should only be built in parallel.
 if BUILD_PARALLEL_CONDITIONAL
-  PARA_BUILD_ALL=benchpar mpi-perf
+    PARA_BUILD_ALL=benchpar mpi-perf
 endif
 if BUILD_ALL_CONDITIONAL
-  BUILD_ALL_PROGS=$(PARA_BUILD_ALL)
+    BUILD_ALL_PROGS=$(PARA_BUILD_ALL)
 endif
 
-# These are the programs that `make all' or `make tests' will build and which
-# `make check' will run. List them in the order they should be run.
+# Define programs that will be run in 'make check'
+# List them in the order they should be run.
+# Parallel test programs.
+if BUILD_PARALLEL_CONDITIONAL
+    TEST_PROG_PARA=h5perf perf
+endif
+# Serial test programs.
 TEST_PROG = iopipe chunk overhead zip_perf perf_meta h5perf_serial $(BUILD_ALL_PROGS)
-check_PROGRAMS=$(TEST_PROG_PARA) $(TEST_PROG)
+
+# check_PROGRAMS will be built but not installed.  Do not any executable
+# that is in bin_PROGRAMS already. Otherwise, it will be removed twice in
+# "make clean" and some systems, e.g., AIX, do not like it.
+check_PROGRAMS= iopipe chunk overhead zip_perf perf_meta $(BUILD_ALL_PROGS) perf
 
 h5perf_SOURCES=pio_perf.c pio_engine.c pio_timer.c
 h5perf_serial_SOURCES=sio_perf.c sio_engine.c sio_timer.c

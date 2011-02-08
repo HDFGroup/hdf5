@@ -161,8 +161,6 @@ ELSE (WINDOWS)
   SET (H5_DEFAULT_VFD H5FD_SEC2)
 ENDIF (WINDOWS)
 
-#-----------------------------------------------------------------------------
-# Check for some functions that are used
 IF (WINDOWS)
   SET (H5_HAVE_IO_H 1)
   SET (H5_HAVE_SETJMP_H 1)
@@ -204,16 +202,15 @@ ENDIF (CYGWIN)
 #  Check for the math library "m"
 #-----------------------------------------------------------------------------
 IF (NOT WINDOWS)
-  CHECK_LIBRARY_EXISTS_CONCAT ("m" printf     H5_HAVE_LIBM)
+  CHECK_LIBRARY_EXISTS_CONCAT ("m" random     H5_HAVE_LIBM)
 ENDIF (NOT WINDOWS)
 
-CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" printf  H5_HAVE_LIBWS2_32)
-CHECK_LIBRARY_EXISTS_CONCAT ("wsock32" printf H5_HAVE_LIBWSOCK32)
+CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" WSAStartup  H5_HAVE_LIBWS2_32)
+CHECK_LIBRARY_EXISTS_CONCAT ("wsock32" gethostbyname H5_HAVE_LIBWSOCK32)
 #CHECK_LIBRARY_EXISTS_CONCAT ("dl"     dlopen       H5_HAVE_LIBDL)
 CHECK_LIBRARY_EXISTS_CONCAT ("ucb"    gethostname  H5_HAVE_LIBUCB)
 CHECK_LIBRARY_EXISTS_CONCAT ("socket" connect      H5_HAVE_LIBSOCKET)
 CHECK_LIBRARY_EXISTS ("c" gethostbyname "" NOT_NEED_LIBNSL)
-
 
 IF (NOT NOT_NEED_LIBNSL)
   CHECK_LIBRARY_EXISTS_CONCAT ("nsl"    gethostbyname  H5_HAVE_LIBNSL)
@@ -285,22 +282,21 @@ ENDIF (H5_HAVE_STDINT_H AND CMAKE_CXX_COMPILER_LOADED)
 #  Check for large file support
 #-----------------------------------------------------------------------------
 
+# The linux-lfs option is deprecated.
 SET (LINUX_LFS 0)
+
 SET (HDF5_EXTRA_FLAGS)
 IF (CMAKE_SYSTEM MATCHES "Linux-([3-9]\\.[0-9]|2\\.[4-9])\\.")
   # Linux Specific flags
-  ADD_DEFINITIONS (-D_POSIX_SOURCE -D_BSD_SOURCE)
+  SET (HDF5_EXTRA_FLAGS -D_POSIX_SOURCE -D_BSD_SOURCE)
   OPTION (HDF5_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
   IF (HDF5_ENABLE_LARGE_FILE)
     SET (LARGEFILE 1)
-    SET (HDF5_EXTRA_FLAGS -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
-    SET (CMAKE_REQUIRED_DEFINITIONS ${HDF5_EXTRA_FLAGS})
+    SET (HDF5_EXTRA_FLAGS ${HDF5_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
   ENDIF (HDF5_ENABLE_LARGE_FILE)
+  SET (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${HDF5_EXTRA_FLAGS})
 ENDIF (CMAKE_SYSTEM MATCHES "Linux-([3-9]\\.[0-9]|2\\.[4-9])\\.")
-IF (LINUX_LFS)
-  SET (HDF5_EXTRA_FLAGS -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
-  SET (CMAKE_REQUIRED_DEFINITIONS ${HDF5_EXTRA_FLAGS})
-ENDIF (LINUX_LFS)
+
 ADD_DEFINITIONS (${HDF5_EXTRA_FLAGS})
 
 #-----------------------------------------------------------------------------
@@ -422,6 +418,15 @@ CHECK_FUNCTION_EXISTS (fstat64           H5_HAVE_FSTAT64)
 CHECK_FUNCTION_EXISTS (stat64            H5_HAVE_STAT64)
 
 #-----------------------------------------------------------------------------
+# sigsetjmp is special; may actually be a macro
+IF (NOT H5_HAVE_SIGSETJMP)
+  IF (H5_HAVE_SETJMP_H)
+    CHECK_SYMBOL_EXISTS (sigsetjmp "setjmp.h" H5_HAVE_MACRO_SIGSETJMP)
+    IF (H5_HAVE_MACRO_SIGSETJMP)
+      SET (H5_HAVE_SIGSETJMP 1)
+    ENDIF (H5_HAVE_MACRO_SIGSETJMP)
+  ENDIF (H5_HAVE_SETJMP_H)
+ENDIF (NOT H5_HAVE_SIGSETJMP)
 
 #-----------------------------------------------------------------------------
 #  Since gettimeofday is not defined any where standard, lets look in all the
@@ -437,6 +442,7 @@ IF (NOT MSVC)
     )
     IF (HAVE_TIME_GETTIMEOFDAY STREQUAL "TRUE")
       SET (H5_HAVE_TIME_GETTIMEOFDAY "1" CACHE INTERNAL "H5_HAVE_TIME_GETTIMEOFDAY")
+      SET (H5_HAVE_GETTIMEOFDAY "1" CACHE INTERNAL "H5_HAVE_GETTIMEOFDAY")
     ENDIF (HAVE_TIME_GETTIMEOFDAY STREQUAL "TRUE")
   ENDIF ("H5_HAVE_TIME_GETTIMEOFDAY" MATCHES "^H5_HAVE_TIME_GETTIMEOFDAY$")
 
@@ -449,19 +455,19 @@ IF (NOT MSVC)
     )
     IF (HAVE_SYS_TIME_GETTIMEOFDAY STREQUAL "TRUE")
       SET (H5_HAVE_SYS_TIME_GETTIMEOFDAY "1" CACHE INTERNAL "H5_HAVE_SYS_TIME_GETTIMEOFDAY")
+      SET (H5_HAVE_GETTIMEOFDAY "1" CACHE INTERNAL "H5_HAVE_GETTIMEOFDAY")
     ENDIF (HAVE_SYS_TIME_GETTIMEOFDAY STREQUAL "TRUE")
   ENDIF ("H5_HAVE_SYS_TIME_GETTIMEOFDAY" MATCHES "^H5_HAVE_SYS_TIME_GETTIMEOFDAY$")
+
+  IF (NOT HAVE_SYS_TIME_GETTIMEOFDAY AND NOT H5_HAVE_GETTIMEOFDAY)
+    MESSAGE (STATUS "---------------------------------------------------------------")
+    MESSAGE (STATUS "Function 'gettimeofday()' was not found. HDF5 will use its")
+    MESSAGE (STATUS "  own implementation.. This can happen on older versions of")
+    MESSAGE (STATUS "  MinGW on Windows. Consider upgrading your MinGW installation")
+    MESSAGE (STATUS "  to a newer version such as MinGW 3.12")
+    MESSAGE (STATUS "---------------------------------------------------------------")
+  ENDIF (NOT HAVE_SYS_TIME_GETTIMEOFDAY AND NOT H5_HAVE_GETTIMEOFDAY)
 ENDIF (NOT MSVC)
-
-IF (NOT HAVE_SYS_TIME_GETTIMEOFDAY AND NOT H5_HAVE_GETTIMEOFDAY AND NOT MSVC)
-  MESSAGE (STATUS "---------------------------------------------------------------")
-  MESSAGE (STATUS "Function 'gettimeofday()' was not found. HDF5 will use its")
-  MESSAGE (STATUS "  own implementation.. This can happen on older versions of")
-  MESSAGE (STATUS "  MinGW on Windows. Consider upgrading your MinGW installation")
-  MESSAGE (STATUS "  to a newer version such as MinGW 3.12")
-  MESSAGE (STATUS "---------------------------------------------------------------")
-ENDIF (NOT HAVE_SYS_TIME_GETTIMEOFDAY AND NOT H5_HAVE_GETTIMEOFDAY AND NOT MSVC)
-
 
 # Check for Symbols
 CHECK_SYMBOL_EXISTS (tzname "time.h" H5_HAVE_DECL_TZNAME)
@@ -509,11 +515,11 @@ MACRO (HDF5_FUNCTION_TEST OTHER_TEST)
       ENDIF ("${def}")
     ENDFOREACH (def)
 
-    IF (LINUX_LFS)
+    IF (LARGEFILE)
       SET (MACRO_CHECK_FUNCTION_DEFINITIONS
           "${MACRO_CHECK_FUNCTION_DEFINITIONS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE"
       )
-    ENDIF (LINUX_LFS)
+    ENDIF (LARGEFILE)
 
     # (STATUS "Performing ${OTHER_TEST}")
     TRY_COMPILE (${OTHER_TEST}
@@ -617,41 +623,41 @@ ENDIF (INLINE_TEST___inline__)
 # Check how to print a Long Long integer
 #-----------------------------------------------------------------------------
 IF (NOT H5_PRINTF_LL_WIDTH OR H5_PRINTF_LL_WIDTH MATCHES "unknown")
-    SET (PRINT_LL_FOUND 0)
-    MESSAGE (STATUS "Checking for appropriate format for 64 bit long:")
-    FOREACH (HDF5_PRINTF_LL l64 l L q I64 ll)
-      SET (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH=${HDF5_PRINTF_LL}")
-      IF (H5_SIZEOF_LONG_LONG)
-        SET (CURRENT_TEST_DEFINITIONS "${CURRENT_TEST_DEFINITIONS} -DHAVE_LONG_LONG")
-      ENDIF (H5_SIZEOF_LONG_LONG)
-      TRY_RUN (HDF5_PRINTF_LL_TEST_RUN   HDF5_PRINTF_LL_TEST_COMPILE
-          ${HDF5_BINARY_DIR}/CMake
-          ${HDF5_RESOURCES_DIR}/HDF5Tests.c
-          CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CURRENT_TEST_DEFINITIONS}
-          OUTPUT_VARIABLE OUTPUT
+  SET (PRINT_LL_FOUND 0)
+  MESSAGE (STATUS "Checking for appropriate format for 64 bit long:")
+  FOREACH (HDF5_PRINTF_LL l64 l L q I64 ll)
+    SET (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH=${HDF5_PRINTF_LL}")
+    IF (H5_SIZEOF_LONG_LONG)
+      SET (CURRENT_TEST_DEFINITIONS "${CURRENT_TEST_DEFINITIONS} -DHAVE_LONG_LONG")
+    ENDIF (H5_SIZEOF_LONG_LONG)
+    TRY_RUN (HDF5_PRINTF_LL_TEST_RUN   HDF5_PRINTF_LL_TEST_COMPILE
+        ${HDF5_BINARY_DIR}/CMake
+        ${HDF5_RESOURCES_DIR}/HDF5Tests.c
+        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CURRENT_TEST_DEFINITIONS}
+        OUTPUT_VARIABLE OUTPUT
+    )
+    IF (HDF5_PRINTF_LL_TEST_COMPILE)
+      IF (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
+        SET (H5_PRINTF_LL_WIDTH "\"${HDF5_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
+        SET (PRINT_LL_FOUND 1)
+      ELSE (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
+        MESSAGE ("Width with ${HDF5_PRINTF_LL} failed with result: ${HDF5_PRINTF_LL_TEST_RUN}")
+      ENDIF (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
+    ELSE (HDF5_PRINTF_LL_TEST_COMPILE)
+      FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+          "Test H5_PRINTF_LL_WIDTH for ${HDF5_PRINTF_LL} failed with the following output:\n ${OUTPUT}\n"
       )
-      IF (HDF5_PRINTF_LL_TEST_COMPILE)
-        IF (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
-          SET (H5_PRINTF_LL_WIDTH "\"${HDF5_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
-          SET (PRINT_LL_FOUND 1)
-        ELSE (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
-          MESSAGE ("Width with ${HDF5_PRINTF_LL} failed with result: ${HDF5_PRINTF_LL_TEST_RUN}")
-        ENDIF (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
-      ELSE (HDF5_PRINTF_LL_TEST_COMPILE)
-        FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-            "Test H5_PRINTF_LL_WIDTH for ${HDF5_PRINTF_LL} failed with the following output:\n ${OUTPUT}\n"
-        )
-      ENDIF (HDF5_PRINTF_LL_TEST_COMPILE)
-    ENDFOREACH (HDF5_PRINTF_LL)
+    ENDIF (HDF5_PRINTF_LL_TEST_COMPILE)
+  ENDFOREACH (HDF5_PRINTF_LL)
 
-    IF (PRINT_LL_FOUND)
-      MESSAGE (STATUS "Checking for apropriate format for 64 bit long: found ${H5_PRINTF_LL_WIDTH}")
-    ELSE (PRINT_LL_FOUND)
-      MESSAGE (STATUS "Checking for apropriate format for 64 bit long: not found")
-      SET (H5_PRINTF_LL_WIDTH "\"unknown\"" CACHE INTERNAL
-          "Width for printf for type `long long' or `__int64', us. `ll"
-      )
-    ENDIF (PRINT_LL_FOUND)
+  IF (PRINT_LL_FOUND)
+    MESSAGE (STATUS "Checking for apropriate format for 64 bit long: found ${H5_PRINTF_LL_WIDTH}")
+  ELSE (PRINT_LL_FOUND)
+    MESSAGE (STATUS "Checking for apropriate format for 64 bit long: not found")
+    SET (H5_PRINTF_LL_WIDTH "\"unknown\"" CACHE INTERNAL
+        "Width for printf for type `long long' or `__int64', us. `ll"
+    )
+  ENDIF (PRINT_LL_FOUND)
 ENDIF (NOT H5_PRINTF_LL_WIDTH OR H5_PRINTF_LL_WIDTH MATCHES "unknown")
 
 # ----------------------------------------------------------------------
@@ -684,7 +690,7 @@ MACRO (H5ConversionTests TEST msg)
     IF (${TEST}_COMPILE)
       IF (${TEST}_RUN  MATCHES 0)
         SET (${TEST} 1 CACHE INTERNAL ${msg})
-        MESSAGE(STATUS "${msg}... yes")
+        MESSAGE (STATUS "${msg}... yes")
       ELSE (${TEST}_RUN  MATCHES 0)
         SET (${TEST} "" CACHE INTERNAL ${msg})
         MESSAGE (STATUS "${msg}... no")

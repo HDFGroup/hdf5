@@ -253,6 +253,9 @@ typedef struct H5D_chunk_common_ud_t {
     const H5O_layout_chunk_t *layout;           /* Chunk layout description */
     const H5O_storage_chunk_t *storage;         /* Chunk storage description */
     const hsize_t *offset;	                /* Logical offset of chunk */
+    const struct H5D_rdcc_t *rdcc;              /* Chunk cache.  Only necessary if the index may
+                                                 * be modified, and if any chunks in the dset
+                                                 * may be cached */
 } H5D_chunk_common_ud_t;
 
 /* B-tree callback info for various operations */

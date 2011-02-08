@@ -11,8 +11,7 @@ INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 # Add the h5stat executables
 # --------------------------------------------------------------------
 ADD_EXECUTABLE (h5stat ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat.c)
-H5_NAMING (h5stat)
-TARGET_WIN_PROPERTIES (h5stat)
+H5_NAMING (h5stat ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5stat)
@@ -29,8 +28,7 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5stat_gentest ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat_gentest.c)
-    H5_NAMING (h5stat_gentest)
-    TARGET_WIN_PROPERTIES (h5stat_gentest)
+    H5_NAMING (h5stat_gentest ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5stat_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     
     #ADD_TEST (NAME h5stat_gentest COMMAND $<TARGET_FILE:h5stat_gentest>)
@@ -108,6 +106,47 @@ IF (BUILD_TESTING)
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
+
+  # Remove any output file left over from previous test run
+  ADD_TEST (
+      NAME H5STAT-clearall-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          h5stat_help1.out
+          h5stat_help1.out.err
+          h5stat_help2.out
+          h5stat_help2.out.err
+          h5stat_filters.out
+          h5stat_filters.out.err
+          h5stat_filters-file.out
+          h5stat_filters-file.out.err
+          h5stat_filters-F.out
+          h5stat_filters-F.out.err
+          h5stat_filters-d.out
+          h5stat_filters-d.out.err
+          h5stat_filters-g.out
+          h5stat_filters-g.out.err
+          h5stat_filters-dT.out
+          h5stat_filters-dT.out.err
+          h5stat_filters-UD.out
+          h5stat_filters-UD.out.err
+          h5stat_filters-UT.out
+          h5stat_filters-UT.out.err
+          h5stat_tsohm.out
+          h5stat_tsohm.out.err
+          h5stat_newgrat.out
+          h5stat_newgrat.out.err
+          h5stat_newgrat-UG.out
+          h5stat_newgrat-UG.out.err
+          h5stat_newgrat-UA.out
+          h5stat_newgrat-UA.out.err
+  )
+
+  # If using memchecker add tests without using scripts
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    ADD_TEST (NAME H5STAT-help COMMAND h5stat -h)
+    ADD_TEST (NAME H5STAT-filters COMMAND h5stat h5stat_filters.h5)
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
 # Test for help flag
   ADD_H5_TEST (h5stat_help1 0 -h)

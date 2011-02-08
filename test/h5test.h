@@ -83,7 +83,7 @@
  * This contains the filename prefix specificied as command line option for
  * the parallel test files.
  */
-H5_DLLVAR char *paraprefix;
+H5TEST_DLLVAR char *paraprefix;
 #ifdef H5_HAVE_PARALLEL
 extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #endif

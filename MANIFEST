@@ -96,6 +96,7 @@
 ./config/i686-pc-cygwin
 ./config/ia64-linux-gnu
 ./config/ibm-aix
+./config/ibm-aix6.x
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
@@ -409,6 +410,7 @@
 ./release_docs/INSTALL_Cygwin.txt
 ./release_docs/INSTALL_VMS.txt
 ./release_docs/INSTALL_Windows.txt
+./release_docs/USING_Windows.txt
 ./release_docs/CMake.txt
 ./release_docs/INSTALL_Windows_From_Command_Line.txt
 ./release_docs/INSTALL_Windows_Short_NET.TXT
@@ -805,6 +807,7 @@
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
 ./test/Makefile.in
+./test/accum.c
 ./test/app_ref.c
 ./test/be_data.h5
 ./test/be_extlink1.h5
@@ -832,6 +835,7 @@
 ./test/external.c
 ./test/error_test.c
 ./test/err_compat.c
+./test/links_env.c
 ./test/family_v16_00000.h5
 ./test/family_v16_00001.h5
 ./test/family_v16_00002.h5
@@ -903,6 +907,7 @@
 ./test/tcoords.c
 ./test/testcheck_version.sh.in
 ./test/testerror.sh.in
+./test/testlinks_env.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
@@ -950,6 +955,7 @@
 ./test/testfiles/err_compat_2
 ./test/testfiles/error_test_1
 ./test/testfiles/error_test_2
+./test/testfiles/links_env.out
 
 ./testpar/COPYING
 ./testpar/Makefile.am
@@ -965,9 +971,9 @@
 ./testpar/t_chunk_alloc.c
 ./testpar/t_coll_chunk.c
 ./testpar/t_filter_read.c
-./testpar/t_span_tree.c
 ./testpar/t_posix_compliant.c
-./testpar/t_rank_projection.c
+./testpar/t_shapesame.c
+./testpar/t_span_tree.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
@@ -1111,6 +1117,8 @@
 ./tools/misc/testh5mkgrp.sh
 ./tools/misc/testh5repart.sh.in
 ./tools/misc/talign.c
+./tools/misc/testfiles/h5mkgrp_help.txt
+./tools/misc/testfiles/h5mkgrp_version.txt.in
 
 # h5stat sources
 ./tools/h5stat/Makefile.am
@@ -1157,6 +1165,8 @@
 ./tools/testfiles/family_file00015.h5
 ./tools/testfiles/family_file00016.h5
 ./tools/testfiles/family_file00017.h5
+./tools/testfiles/packedbits.h5
+./tools/testfiles/packedbits.ddl
 ./tools/testfiles/file_space.h5
 ./tools/testfiles/file_space.ddl
 ./tools/testfiles/tall-1.ddl
@@ -1217,6 +1227,7 @@
 ./tools/testfiles/texceedsubstride.ddl
 ./tools/testfiles/textlink.h5
 ./tools/testfiles/textlink.h5.xml
+./tools/testfiles/textlink.ddl
 ./tools/testfiles/textlinkfar.ddl
 ./tools/testfiles/textlinkfar.h5
 ./tools/testfiles/textlinksrc.ddl
@@ -1238,6 +1249,7 @@
 ./tools/testfiles/tgroup-1.ddl
 ./tools/testfiles/tgroup-2.ddl
 ./tools/testfiles/tgroup.h5
+./tools/testfiles/tgrp_comments.ls
 ./tools/testfiles/tgrp_comments.ddl
 ./tools/testfiles/tgrp_comments.h5
 ./tools/testfiles/thlink-1.ddl
@@ -1378,6 +1390,9 @@
 ./tools/testfiles/tgroup.ls
 ./tools/testfiles/tloop-1.ls
 ./tools/testfiles/tnestcomp-1.ls
+./tools/testfiles/tnestcomp-2.ls
+./tools/testfiles/tnestcomp-3.ls
+./tools/testfiles/tnestcomp-4.ls
 ./tools/testfiles/tsaf.ls
 ./tools/testfiles/tstr-1.ls
 ./tools/testfiles/tattr2.ls
@@ -1632,6 +1647,7 @@
 ./tools/h5diff/testfiles/h5diff_516.txt
 ./tools/h5diff/testfiles/h5diff_517.txt
 ./tools/h5diff/testfiles/h5diff_518.txt
+./tools/h5diff/testfiles/h5diff_530.txt
 
 ./tools/h5diff/testfiles/h5diff_attr1.h5
 ./tools/h5diff/testfiles/h5diff_attr2.h5
@@ -1663,6 +1679,7 @@
 ./tools/h5diff/testfiles/h5diff_exclude1-2.h5
 ./tools/h5diff/testfiles/h5diff_exclude2-1.h5
 ./tools/h5diff/testfiles/h5diff_exclude2-2.h5
+./tools/h5diff/testfiles/h5diff_comp_vl_strs.h5
 
 
 #test files for h5repack
@@ -1716,6 +1733,7 @@
 ./tools/h5copy/testfiles/h5copy_extlinks_src.h5
 ./tools/h5copy/testfiles/h5copy_extlinks_trg.h5
 ./tools/h5copy/testfiles/h5copy_extlinks_src.out.ls
+./tools/h5copy/testfiles/h5copy_misc1.out
 
 # test files for h5mkgrp
 ./tools/testfiles/h5mkgrp_help.ls
@@ -1941,11 +1959,13 @@
 ./config/cmake/hdf5-config-version.cmake.in
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/libhdf5.settings.cmake.in
+./config/cmake/mccacheinit.cmake
 ./config/cmake/cacheinit.cmake
+./config/cmake/CTest.cmake
 ./config/cmake/grepTest.cmake
 ./config/cmake/runTest.cmake
 ./config/cmake/vfdTest.cmake
-./config/cmake/CTestCustom.ctest
+./config/cmake/CTestCustom.cmake
 ./config/cmake/ConfigureChecks.cmake
 ./CMakeLists.txt
 ./CTestConfig.cmake

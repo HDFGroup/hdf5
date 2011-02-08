@@ -435,6 +435,10 @@
    values correctly. */
 #undef LDOUBLE_TO_LLONG_ACCURATE
 
+/* Define if your system converts long double to (unsigned) long values with
+   special algorithm. */
+#undef LDOUBLE_TO_LONG_SPECIAL
+
 /* Define if your system can convert long double to unsigned int values
    correctly. */
 #undef LDOUBLE_TO_UINT_ACCURATE
@@ -445,6 +449,10 @@
 /* Define if your system can convert (unsigned) long long to long double
    values correctly. */
 #undef LLONG_TO_LDOUBLE_CORRECT
+
+/* Define if your system can convert (unsigned) long to long double values
+   with special algorithm. */
+#undef LONG_TO_LDOUBLE_SPECIAL
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */

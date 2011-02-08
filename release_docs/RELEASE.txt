@@ -1,4 +1,4 @@
-HDF5 version 1.9.76 currently under development
+HDF5 version 1.9.80 currently under development
 ================================================================================
 
 
@@ -39,6 +39,12 @@ New Features
 
     Configuration:
     -------------
+    - Added a new configure option, "--enable-unsupported", which can
+      be used to stop configure from preventing the use of unsupported
+      configure option combinations, such as c++ in parallel or parallel
+      HDF5 with threadsafe. Use at your own risk, as it may result in a 
+      library that won't compile or run as expected! 
+      (MAM - 2010/11/17 - Bug 2061)
     - PHDF5 changed to use "mpiexec", instead of mpirun, as the default MPI
       applications startup command as defined in the MPI-2 definition, section
       4.1. (AKC - 2010/6/11 - Bug 1921)
@@ -76,6 +82,8 @@ New Features
 
     Library:
     --------
+    - Removed all old code for Metraowerks compilers, bracketed by
+      __MWERKS__). Metraowerks compiler is long gone. (AKC - 2010/11/17) 
     - Added support for threadsafety on windows using the windows threads
       library. Use the HDF5_ENABLE_THREADSAFE option in CMake while on a 
       windows platform to enable this functionality. This is supported on 
@@ -240,6 +248,7 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+    - Intel V11.1 uses now -O3 optimization in production mode (EIP - 2010/10/08)
     - PathScale compilers are recognized and can build the HDF5 library
       properly. AKC - 2009/7/28 -
 
@@ -248,6 +257,14 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a bug that caused big endian machines to generate corrupt files
+            when using the scale-offset filter with floating point data or
+            fill values.  Note that such datasets will no longer be readable
+            by any machine after this patch.  (NAF - 2010/02/02 - Bug 2131)
+      - Retrieving a link's name by index in the case where the link is
+            external and the file that the link refers to doesn't exist will 
+            now fail gracefully rather than cause a segmentation fault. 
+            (MAM - 2010/11/17)
       - Modified library to always cache symbol table information.  Libraries
             version 1.6.3 have a bug which causes them to require this
             information for some operations. (NAF - 2010/09/21 - 1864)
@@ -473,6 +490,24 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5diff for the segfault when compares compound datasets
+          with combination of fixed length string types and vlen string types 
+          in certain orders. bug#2089 (JKM 2010/12/28)
+        - Improve h5diff performance. 1) use HDmemcmp() before comparing each 
+          elements. 2) replace expensive H5Tequals() calls 3) retrieve datatype
+          information at dataset level not each element level for compound 
+          datasets
+        - Fixed h5ls to display nested compound type with curly bracket 
+          when -S (--simple) option is used with -l (--label), so it shows  
+          which member (in curly bracket) belong to which nested compound type 
+          and make the output make sense.  bug#1979 (JKM 2010/11/09)
+        - Fixed h5diff to handle variable-length strings in a compound dataset 
+          correctly. (also variable-length string array in a compound dataset)
+          Garbage values were displayed when h5diff compared multiple 
+          variable-length strings in a compound type dataset. 
+          Bug#1989 (JKM 2010/10/28)
+        - Fixed h5copy to fail gracefully when copying object to non-exist
+          group without -p option. Bug#2040 (JKM 2010/10/18)
         - Fixed to compare member objects and groups recursively when two 
           files or groups are specified to be compared. Bug#1975
           (JKM 2010/9/16)
@@ -640,15 +675,22 @@ Platforms Tested
                                   Intel(R) C++ Version 8.1
                                   Intel(R) Fortran Compiler Version 8.1
 				  mpich-gm-1.2.5..10-intel-r2
+    
+    Windows XP                    Visual Studio 2008 w/ Intel Fortran 11.1
+                                  Visual Studio 2010
+                                  Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
 				  
-    Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1
-                                  Cygwin(1.7.5 native gcc compiler and gfortran)
+    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 11.1
+                                  Visual Studio 2010
+                                  Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
 
-    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1
+    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 11.1
 
-    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 10.1
+    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 11.1
 
-    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 10.1
+    Windows 7                     Visual Studio 2010
+
+    Windows 7 x64                 Visual Studio 2010
 
     MAC OS  10.5 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
@@ -708,8 +750,8 @@ Cray XT3 (not tested
           for this release)         n        n         n         x        n
 Windows XP                          y        y(3)      y         y        n
 Windows XP x64                      y        y(3)      y         y        n
-Windows Vista                       y        y(3)      y         y        n
-Windows Vista x64                   y        y(3)      y         y        n
+Windows Vista                       y        y(3)      y         y        y
+Windows Vista x64                   y        y(3)      y         y        y
 Mac OS X 10.5 Intel                 y        y         y         x        n
 FreeBSD 6.2 32-bit                  y        y         y         x        n
 FreeBSD 6.2 64-bit                  y        y         y         x        n
@@ -738,6 +780,18 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* While working on the 1.8.6 release of HDF5, a bug was discovered that can
+  occur when reading from a dataset in parallel shortly after it has been
+  written to collectively. The issue was exposed by a new test in the parallel
+  HDF5 test suite, but had existed before that. We believe the problem lies with
+  certain MPI implementations and/or filesystems.
+
+  We have provided a pure MPI test program, as well as a standalone HDF5
+  program, that can be used to determine if this is an issue on your system.
+  They should be run across multiple nodes with a varying number of processes.
+  These programs can be found at:
+  http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
+
 * Parallel mode in AIX will fail some of the testcheck_version.sh tests where
   it treats "exit(134) the same as if process 0 had received an abort signal.
   This is fixed and will be available in the next release. AKC - 2009/11/3

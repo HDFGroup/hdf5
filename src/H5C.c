@@ -4392,15 +4392,26 @@ done:
 herr_t
 H5C_set_prefix(H5C_t * cache_ptr, char * prefix)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C_set_prefix)
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    HDassert((cache_ptr) && (cache_ptr->magic == H5C__H5C_T_MAGIC));
-    HDassert(prefix);
-    HDassert(HDstrlen(prefix) < H5C__PREFIX_LEN);
+    FUNC_ENTER_NOAPI(H5C_set_prefix, FAIL)
 
-    HDstrcpy(&(cache_ptr->prefix[0]), prefix);
+    if ( ( cache_ptr == NULL ) ||
+         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
+         ( prefix == NULL ) ||
+         ( HDstrlen(prefix) >= H5C__PREFIX_LEN ) ) {
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry.")
+    }
+
+    HDstrncpy(&(cache_ptr->prefix[0]), prefix, (size_t)(H5C__PREFIX_LEN));
+
+    cache_ptr->prefix[H5C__PREFIX_LEN - 1] = '\0';
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
 } /* H5C_set_prefix() */
 
 
@@ -5015,6 +5026,137 @@ H5C_stats__reset(H5C_t UNUSED * cache_ptr)
     return;
 
 } /* H5C_stats__reset() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_dump_cache
+ *
+ * Purpose:     Print a summary of the contents of the metadata cache for
+ *              debugging purposes.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              10/10/10
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_dump_cache(H5C_t * cache_ptr,
+               const char *  cache_name)
+{
+    herr_t              ret_value = SUCCEED;   /* Return value */
+    int                 i;
+    H5C_cache_entry_t * entry_ptr = NULL;
+    H5SL_t *            slist_ptr = NULL;
+    H5SL_node_t *       node_ptr = NULL;
+
+    FUNC_ENTER_NOAPI(H5C_dump_cache, FAIL)
+
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_name != NULL );
+
+    /* First, create a skip list */
+    slist_ptr = H5SL_create(H5SL_TYPE_HADDR);
+
+    if ( slist_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create skip list.")
+    }
+
+    /* Next, scan the index, and insert all entries in the skip list.
+     * Do this, as we want to display cache entries in increasing address
+     * order.
+     */
+    for ( i = 0; i < H5C__HASH_TABLE_LEN; i++ ) {
+
+        entry_ptr = cache_ptr->index[i];
+
+        while ( entry_ptr != NULL ) {
+
+            HDassert( entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
+
+            if ( H5SL_insert(slist_ptr, entry_ptr, &(entry_ptr->addr)) < 0 ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, \
+                            "Can't insert entry in skip list")
+            }
+
+            entry_ptr = entry_ptr->ht_next;
+        }
+    }
+
+    /* If we get this far, all entries in the cache are listed in the
+     * skip list -- scan the skip list generating the desired output.
+     */
+
+    HDfprintf(stdout, "\n\nDump of metadata cache \"%s\".\n", cache_name);
+    HDfprintf(stdout,
+        "Num:   Addr:           Len:    Type:   Prot:   Pinned: Dirty:\n");
+
+    i = 0;
+
+    node_ptr = H5SL_first(slist_ptr);
+
+    if ( node_ptr != NULL ) {
+
+        entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+    } else {
+
+        entry_ptr = NULL;
+    }
+
+    while ( entry_ptr != NULL ) {
+
+        HDassert( entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
+
+        HDfprintf(stdout,
+            "%s%d       0x%08llx        0x%3llx %2d     %d      %d      %d\n",
+             cache_ptr->prefix, i,
+             (long long)(entry_ptr->addr),
+             (long long)(entry_ptr->size),
+             (int)(entry_ptr->type->id),
+             (int)(entry_ptr->is_protected),
+             (int)(entry_ptr->is_pinned),
+             (int)(entry_ptr->is_dirty));
+
+        /* increment node_ptr before we delete its target */
+        node_ptr = H5SL_next(node_ptr);
+
+        /* remove the first item in the skip list */
+        if ( H5SL_remove(slist_ptr, &(entry_ptr->addr)) != entry_ptr ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, \
+                        "Can't delete entry from skip list.")
+        }
+
+        if ( node_ptr != NULL ) {
+
+            entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+        } else {
+
+            entry_ptr = NULL;
+        }
+
+        i++;
+    }
+
+    HDfprintf(stdout, "\n\n");
+
+    /* Finally, discard the skip list */
+
+    HDassert( H5SL_count(slist_ptr) == 0 );
+
+    H5SL_close(slist_ptr);
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_dump_cache() */
 
 
 /*-------------------------------------------------------------------------
@@ -7792,7 +7934,7 @@ end_of_inner_loop:
 	    */
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-	                "Pinned entry count not decreasing.")
+                        "Pinned entry count not decreasing, cur_pel_len = %d, old_pel_len = %d", (int)cur_pel_len, (int)old_pel_len)
 
         } else if ( ( cur_pel_len == 0 ) && ( old_pel_len == 0 ) ) {
 
@@ -8713,7 +8855,7 @@ H5C_make_space_in_cache(H5F_t *	f,
 #endif /* H5C_COLLECT_CACHE_STATS */
 
 	HDassert( ( entries_examined > (2 * initial_list_len) ) ||
-		  ( (cache_ptr->pl_size + cache_ptr->min_clean_size) >
+		  ( (cache_ptr->pl_size + cache_ptr->pel_size + cache_ptr->min_clean_size) >
 		    cache_ptr->max_cache_size ) ||
 		  ( ( cache_ptr->clean_index_size + empty_space )
 		    >= cache_ptr->min_clean_size ) );
@@ -9132,7 +9274,7 @@ H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag)
     H5C_cache_entry_t *next_entry_ptr;  /* entry pointer */
     unsigned u;                         /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C_mark_tagged_entries)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C_mark_tagged_entries)
 
     /* Assertions */
     HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */

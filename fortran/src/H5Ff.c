@@ -47,37 +47,36 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
       * Define access flags
       */
      c_access_flags = (unsigned) *access_flags;
+
      /*
       * Define creation property
       */
      c_crt_prp = *crt_prp;
-/*
-     if ( H5P_DEFAULT_F == c_crt_prp ) c_crt_prp = H5P_DEFAULT;
-*/
+
      /*
       * Define access property
       */
      c_acc_prp = *acc_prp;
-/*
-     if ( H5P_DEFAULT_F == c_acc_prp ) c_acc_prp = H5P_DEFAULT;
 
-*/
      /*
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
      c_name = (char *)HD5f2cstring(name, (size_t)c_namelen);
-     if (c_name == NULL) return ret_value;
+     if(c_name == NULL)
+         return ret_value;
 
      /*
       * Call H5Fcreate function.
       */
      c_file_id = H5Fcreate(c_name, c_access_flags, c_crt_prp, c_acc_prp);
 
-     if (c_file_id < 0) return ret_value;
-     *file_id = c_file_id;
+     if (c_file_id >= 0) {
+         ret_value = 0;
+         *file_id = c_file_id;
+     }
+
      HDfree(c_name);
-     ret_value = 0;
      return ret_value;
 }
 
@@ -238,31 +237,31 @@ nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hi
       * Define access flags
       */
      c_access_flags = (unsigned) *access_flags;
+
      /*
       * Define access property
       */
      c_acc_prp = *acc_prp;
-/*
-     if ( H5P_DEFAULT_F == c_acc_prp ) c_acc_prp = H5P_DEFAULT;
-*/
 
      /*
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
      c_name = (char *)HD5f2cstring(name, (size_t)c_namelen);
-     if (c_name == NULL) return ret_value;
+     if(c_name == NULL)
+         return ret_value;
 
      /*
       * Call H5Fopen function.
       */
      c_file_id = H5Fopen(c_name, c_access_flags, c_acc_prp);
 
-     if (c_file_id < 0) return ret_value;
-     *file_id = (hid_t_f)c_file_id;
+     if(c_file_id >= 0) {
+         ret_value = 0;
+         *file_id = (hid_t_f)c_file_id;
+     } /* end if */
 
      HDfree(c_name);
-     ret_value = 0;
      return ret_value;
 }
 
@@ -520,7 +519,7 @@ nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
      /*
       * Allocate buffer to hold name of an attribute
       */
-     if ((c_buf = HDmalloc((size_t)*buflen +1)) == NULL)
+     if(NULL == (c_buf = (char *)HDmalloc((size_t)*buflen + 1)))
          HGOTO_DONE(FAIL);
 
      /*

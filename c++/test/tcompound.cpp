@@ -115,7 +115,8 @@ static void test_compound_2()
     const int	   nelmts = NTESTELEM;
     const hsize_t  four = 4;
     int		   i;
-    unsigned char *buf=NULL, *orig=NULL, *bkg=NULL;
+    unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
+    ArrayType *array_dt = NULL;
 
     // Output message about test being performed
     SUBTEST("Compound Element Reordering");
@@ -138,7 +139,7 @@ static void test_compound_2()
 	memcpy(buf, orig, nelmts*sizeof(src_typ_t));
 
 	// Build hdf5 datatypes
-	ArrayType* array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
+	array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
 
 	// Create an empty compound datatype
 	CompType st(sizeof(src_typ_t));
@@ -148,6 +149,7 @@ static void test_compound_2()
 	st.insertMember("d", HOFFSET(src_typ_t, d), PredType::NATIVE_INT);
 	st.insertMember("e", HOFFSET(src_typ_t, e), PredType::NATIVE_INT);
 	array_dt->close();
+        delete array_dt;
 
 	array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
 
@@ -202,6 +204,9 @@ static void test_compound_2()
 cerr << "test_compound_2 in catch" << endl;
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
+
+    if(array_dt)
+        delete array_dt;
 }   // test_compound_2()
 
 
@@ -235,7 +240,8 @@ static void test_compound_3()
     int		   i;
     const int	   nelmts = NTESTELEM;
     const hsize_t  four = 4;
-    unsigned char *buf=NULL, *orig=NULL, *bkg=NULL;
+    unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
+    ArrayType* array_dt = NULL;
 
     // Output message about test being performed
     SUBTEST("Compound Datatype Subset Conversions");
@@ -258,7 +264,7 @@ static void test_compound_3()
 	memcpy(buf, orig, nelmts*sizeof(src_typ_t));
 
 	/* Build hdf5 datatypes */
-	ArrayType* array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
+	array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
 
 	// Create an empty compound datatype
 	CompType st(sizeof(src_typ_t));
@@ -268,6 +274,7 @@ static void test_compound_3()
 	st.insertMember("d", HOFFSET(src_typ_t, d), PredType::NATIVE_INT);
 	st.insertMember("e", HOFFSET(src_typ_t, e), PredType::NATIVE_INT);
 	array_dt->close();
+        delete array_dt;
 
 	array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
 
@@ -319,6 +326,9 @@ static void test_compound_3()
 cerr << "test_compound_3 in catch" << endl;
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
+
+    if(array_dt)
+        delete array_dt;
 }   // test_compound_3()
 
 
@@ -357,7 +367,8 @@ static void test_compound_4()
     int		   i;
     const int	   nelmts = NTESTELEM;
     const hsize_t  four = 4;
-    unsigned char *buf=NULL, *orig=NULL, *bkg=NULL;
+    unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
+    ArrayType* array_dt = NULL;
 
     // Output message about test being performed
     SUBTEST("Compound Element Shrinking & Reordering");
@@ -380,7 +391,7 @@ static void test_compound_4()
 	memcpy(buf, orig, nelmts*sizeof(src_typ_t));
 
 	/* Build hdf5 datatypes */
-	ArrayType* array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
+	array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
 
 	// Create an empty compound datatype
 	CompType st(sizeof(src_typ_t));
@@ -390,6 +401,7 @@ static void test_compound_4()
 	st.insertMember("d", HOFFSET(src_typ_t, d), PredType::NATIVE_INT);
 	st.insertMember("e", HOFFSET(src_typ_t, e), PredType::NATIVE_INT);
 	array_dt->close();
+        delete array_dt;
 
 	array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
 
@@ -446,6 +458,9 @@ static void test_compound_4()
 cerr << "test_compound_4 in catch" << endl;
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
+
+    if(array_dt)
+        delete array_dt;
 }   // test_compound_4()
 
 
@@ -486,16 +501,18 @@ static void test_compound_5()
     dst_typ_t  *dst;
     void        *buf = calloc(2, sizeof(dst_typ_t));
     void        *bkg = calloc(2, sizeof(dst_typ_t));
+    ArrayType* array_dt = NULL;
 
     // Output message about test being performed
     SUBTEST("Optimized Struct Converter");
     try {
 
 	/* Build datatypes */
-	ArrayType* array_dt = new ArrayType(PredType::NATIVE_SHORT, 1, dims);
+	array_dt = new ArrayType(PredType::NATIVE_SHORT, 1, dims);
 	CompType short_array(4*sizeof(short));
 	short_array.insertMember("_", 0, *array_dt);
 	array_dt->close();
+        delete array_dt;
 
 	CompType int_array(4*sizeof(int));
 	array_dt = new ArrayType(PredType::NATIVE_INT, 1, dims);
@@ -545,6 +562,9 @@ static void test_compound_5()
 cerr << "test_compound_5 in catch" << endl;
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
+
+    if(array_dt)
+        delete array_dt;
 }   // test_compound_5()
 
 

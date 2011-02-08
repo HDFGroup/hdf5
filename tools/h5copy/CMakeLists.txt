@@ -11,8 +11,7 @@ INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 # Add the h5copy and test executables
 # --------------------------------------------------------------------
 ADD_EXECUTABLE (h5copy ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copy.c)
-H5_NAMING (h5copy)
-TARGET_WIN_PROPERTIES (h5copy)
+H5_NAMING (h5copy ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5copy  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5copy)
@@ -26,8 +25,7 @@ SET (H5_DEP_EXECUTABLES h5copy)
 IF (BUILD_TESTING)
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5copygentest ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copygentest.c)
-    H5_NAMING (h5copygentest)
-    TARGET_WIN_PROPERTIES (h5copygentest)
+    H5_NAMING (h5copygentest ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5copygentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 
     #ADD_TEST (NAME h5copygentest COMMAND $<TARGET_FILE:h5copygentest>)
@@ -46,6 +44,7 @@ IF (BUILD_TESTING)
       h5copy_extlinks_trg.h5
       h5copy_ref.h5
       h5copytst.h5
+      h5copy_misc1.out
   )
 
   FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
@@ -101,10 +100,9 @@ IF (BUILD_TESTING)
     ENDIF (NOT ${resultcode} STREQUAL "2")
   ENDMACRO (ADD_H5_TEST testname resultcode testfile vparam srcname dstname)
 
-
-  MACRO (ADD_H5LS_TEST file)
+  MACRO (ADD_H5LS_TEST file filetest)
     ADD_TEST (
-        NAME H5COPY-H5LS_${file}
+        NAME H5COPY-H5LS_${file}-${filetest}
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
             -D "TEST_ARGS=-Svr;./testfiles/${file}.out.h5"
@@ -115,7 +113,22 @@ IF (BUILD_TESTING)
             -D "TEST_MASK=true"
             -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
     )
-  ENDMACRO (ADD_H5LS_TEST file)
+  ENDMACRO (ADD_H5LS_TEST file filetest)
+
+  MACRO (ADD_H5_CMP_TEST testname resultcode testfile vparam srcname dstname)
+    ADD_TEST (
+        NAME H5COPY-CMP-${testname}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
+            -D "TEST_ARGS=-i;${testfile}.h5;-o;./testfiles/${testfile}.out.h5;-${vparam};-s;${srcname};-d;${dstname}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+            -D "TEST_OUTPUT=./testfiles/${testname}.out.out"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_REFERENCE=./testfiles/${testname}.out"
+            -D "TEST_MASK=true"
+            -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+    )
+  ENDMACRO (ADD_H5_CMP_TEST testname resultcode testfile vparam srcname dstname)
 
 ##############################################################################
 ##############################################################################
@@ -131,15 +144,20 @@ IF (BUILD_TESTING)
   SET (HDF_EXT_SRC_FILE h5copy_extlinks_src)
   SET (HDF_EXT_TRG_FILE h5copy_extlinks_trg)
 
-############# COPY OBJECTS ##############
-
   # Remove any output file left over from previous test run
   ADD_TEST (
-      NAME H5COPY-clear-objects
+      NAME H5COPY-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
           ./testfiles/${HDF_FILE1}.out.h5
           ./testfiles/${HDF_FILE1}.out.out
+          ./testfiles/${HDF_FILE1}.out.out.err
+          ./testfiles/${HDF_FILE2}.out.h5
+          ./testfiles/${HDF_FILE2}.out.out
+          ./testfiles/${HDF_FILE2}.out.out.err
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.h5
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.out
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.out.err
   )
   
   # "Test copying various forms of datasets"
@@ -179,7 +197,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (G_H_grp_nested 0 ${HDF_FILE1} vp /grp_nested /G/H/grp_nested)
 
   # Verify that the file created above is correct
-  ADD_H5LS_TEST (${HDF_FILE1})
+  ADD_H5LS_TEST (${HDF_FILE1} basic)
   
 ############# COPY REFERENCES ##############
 
@@ -190,13 +208,14 @@ IF (BUILD_TESTING)
           -E remove 
           ./testfiles/${HDF_FILE2}.out.h5
           ./testfiles/${HDF_FILE2}.out.out
+          ./testfiles/${HDF_FILE2}.out.out.err
   )
 
   # "Test copying object and region references"
   ADD_H5_TEST (region_ref 2 ${HDF_FILE2} v / /COPY ref)
 
   # Verify that the file created above is correct
-  ADD_H5LS_TEST (${HDF_FILE2})
+  ADD_H5LS_TEST (${HDF_FILE2} refs)
 
 ############# COPY EXT LINKS ############## 
 
@@ -207,6 +226,7 @@ IF (BUILD_TESTING)
           -E remove 
           ./testfiles/${HDF_EXT_SRC_FILE}.out.h5
           ./testfiles/${HDF_EXT_SRC_FILE}.out.out
+          ./testfiles/${HDF_EXT_SRC_FILE}.out.out.err
   )
 
   # "Test copying external link directly without -f ext"
@@ -234,7 +254,29 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (ext_link_group_f 2 ${HDF_EXT_SRC_FILE} v /group_ext /copy2_group ext) 
 
   # Verify that the file created above is correct
-  ADD_H5LS_TEST (${HDF_EXT_SRC_FILE})
+  ADD_H5LS_TEST (${HDF_EXT_SRC_FILE} links)
+
+############# Test misc. ############## 
+
+  ADD_CUSTOM_COMMAND (
+      TARGET     h5copy
+      POST_BUILD
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copytst.h5 ${PROJECT_BINARY_DIR}/h5copytst.h5
+  )
+
+  # Remove any output file left over from previous test run
+  ADD_TEST (
+      NAME H5COPY-clear-misc
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          ./testfiles/${HDF_FILE1}.out.h5
+          ./testfiles/${HDF_FILE1}.out.out
+          ./testfiles/${HDF_FILE1}.out.out.err
+  )
+
+  # "Test copying object into group which doesn't exist, without -p"
+  ADD_H5_CMP_TEST (h5copy_misc1 1 ${HDF_FILE1} v /simple /g1/g2/simple)
   
 ENDIF (BUILD_TESTING)
 

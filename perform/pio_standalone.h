@@ -60,62 +60,41 @@ extern char *strdup(const char *s);
 #endif /* _WIN32 */
 
 H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
-#define HDstrcmp(S,T)		  strcmp(S,T)
-#define HDstrlen(S)		  strlen(S)
-#define HDstrncmp(S,T,L)	  strncmp(S,T,L)
-#define HDstrncpy(X,Y,Z)	  strncpy(X,Y,Z)
-#define HDstrchr(S,C)		  strchr(S,C)
-#define HDfree(M)		  free(M)
+#define HDstrcmp(S,T)		strcmp(S,T)
+#define HDstrlen(S)		strlen(S)
+#define HDstrncmp(S,T,L)	strncmp(S,T,L)
+#define HDstrncpy(X,Y,Z)	strncpy(X,Y,Z)
+#define HDstrchr(S,C)		strchr(S,C)
+#define HDfree(M)		free(M)
 
 
 #ifdef _O_BINARY
-#define HDopen(S,F,M)		  open(S,F|_O_BINARY,M)
+#define HDopen(S,F,M)		open(S,F|_O_BINARY,M)
 #else
-#define HDopen(S,F,M)		  open(S,F,M)
+#define HDopen(S,F,M)		open(S,F,M)
 #endif
-#define HDclose(F)		  close(F)
+#define HDclose(F)		close(F)
 
 #ifdef _WIN32
-     #ifdef __MWERKS__
-        #define HDlseek(F,O,W)  lseek(F,O,W)
-     #else /*MSVS */
-        #define HDlseek(F,O,W)  _lseeki64(F,O,W)
-     #endif
+#define HDlseek(F,O,W)  	_lseeki64(F,O,W)
 #else
-#define HDlseek(F,O,W)		 lseek(F,O,W)
+#define HDlseek(F,O,W)		lseek(F,O,W)
 #endif
 
-#if defined (__MWERKS__)
-/* workaround for a bug in the Metrowerks version 6.0 header file for write
- which is not defined as const void*
- */
-#define HDwrite(F,M,Z)		write(F,(void*)M,Z)
-#else
 #define HDwrite(F,M,Z)		write(F,M,Z)
-#endif
 
 #define HDread(F,M,Z)		read(F,M,Z)
 
 #ifdef _WIN32
-     #ifdef __MWERKS__
-     #define HDstat(S,B)   	stat(S,B)
-     #else /*MSVC*/
      #define HDstat(S,B)	_stati64(S,B)
-     #endif
 #else
 #define HDstat(S,B)  stat(S,B)
 #endif
 
 #ifdef _WIN32
-     #ifdef __MWERKS__
-     #define HDfstat(F,B)       fstat(F,B)
-     typedef struct stat	h5_stat_t;
-     typedef off_t              h5_stat_size_t;
-     #else /*MSVC*/
-     #define HDfstat(F,B)	_fstati64(F,B)
-     typedef struct _stati64	h5_stat_t;
-     typedef __int64            h5_stat_size_t;
-     #endif
+#define HDfstat(F,B)		_fstati64(F,B)
+typedef struct _stati64		h5_stat_t;
+typedef __int64            	h5_stat_size_t;
 #else
 #define HDfstat(F,B)            fstat(F,B)
 typedef struct stat		h5_stat_t;

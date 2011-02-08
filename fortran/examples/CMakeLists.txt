@@ -37,8 +37,8 @@ SET (examples
 
 FOREACH (example ${examples})
   ADD_EXECUTABLE (f90_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
-  H5_NAMING (f90_ex_${example})
-  TARGET_FORTRAN_WIN_PROPERTIES (f90_ex_${example})
+  H5_NAMING (f90_ex_${example} ${LIB_TYPE})
+  TARGET_FORTRAN_WIN_PROPERTIES (f90_ex_${example} "")
   IF (WIN32 AND NOT CYGWIN)
     SET_PROPERTY (TARGET f90_ex_${example} 
         APPEND PROPERTY COMPILE_DEFINITIONS 
@@ -50,12 +50,17 @@ FOREACH (example ${examples})
       ${HDF5_LIB_TARGET}
   )
   SET_TARGET_PROPERTIES (f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
+
+  IF (BUILD_TESTING)
+    ADD_TEST (NAME f90_ex_${example} COMMAND $<TARGET_FILE:f90_ex_${example}>)
+  ENDIF (BUILD_TESTING)
+
 ENDFOREACH (example ${examples})
 
 IF (H5_HAVE_PARALLEL)
   ADD_EXECUTABLE (f90_ex_ph5example ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
-  H5_NAMING (f90_ex_ph5example)
-  TARGET_FORTRAN_WIN_PROPERTIES (f90_ex_ph5example)
+  H5_NAMING (f90_ex_ph5example ${LIB_TYPE})
+  TARGET_FORTRAN_WIN_PROPERTIES (f90_ex_ph5example "")
   IF (WIN32 AND NOT CYGWIN)
     SET_PROPERTY (TARGET f90_ex_ph5example 
         APPEND PROPERTY COMPILE_DEFINITIONS 
@@ -67,4 +72,9 @@ IF (H5_HAVE_PARALLEL)
       ${HDF5_LIB_TARGET}
   )
   SET_TARGET_PROPERTIES (f90_ex_ph5example PROPERTIES LINKER_LANGUAGE Fortran)
+
+  IF (BUILD_TESTING)
+    ADD_TEST (NAME f90_ex_ph5example COMMAND $<TARGET_FILE:f90_ex_ph5example>)
+  ENDIF (BUILD_TESTING)
+
 ENDIF (H5_HAVE_PARALLEL)

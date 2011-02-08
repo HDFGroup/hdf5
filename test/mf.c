@@ -178,7 +178,7 @@ static unsigned
 test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
-    hid_t		fapl_new;		/* copy of fapl */
+    hid_t		fapl_new = -1;		/* copy of fapl */
     char		filename[FILENAME_LEN]; /* Filename to use */
     H5F_t		*f = NULL;              /* Internal file object pointer */
     h5_stat_size_t      file_size, new_file_size;      /* file size */
@@ -277,8 +277,11 @@ test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Verify the file is the correct size */
-        if (new_file_size != file_size)
+        if(new_file_size != file_size)
             TEST_ERROR
+
+        if(H5Pclose(fapl_new) < 0)
+            FAIL_STACK_ERROR
 
         PASSED()
     } /* end if */
@@ -291,6 +294,7 @@ test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(fapl_new);
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
@@ -317,7 +321,7 @@ static unsigned
 test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
-    hid_t		fapl_new;		/* copy of fapl */
+    hid_t		fapl_new = -1;		/* copy of fapl */
     char		filename[FILENAME_LEN]; /* Filename to use */
     H5F_t		*f = NULL;              /* Internal file object pointer */
     h5_stat_size_t      file_size, new_file_size; /* file size */
@@ -403,8 +407,10 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
 
         /* nothing should be changed in meta_aggr */
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
-        if (new_ma_addr != ma_addr) TEST_ERROR
-        if (new_ma_size != ma_size) TEST_ERROR
+        if(new_ma_addr != ma_addr)
+            TEST_ERROR
+        if(new_ma_size != ma_size)
+            TEST_ERROR
 
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
@@ -414,7 +420,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Verify the file is the correct size */
-        if (new_file_size != file_size)
+        if(new_file_size != file_size)
             TEST_ERROR
 
         PASSED()
@@ -462,7 +468,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Verify the file is the correct size */
-        if (new_file_size != (file_size+TEST_BLOCK_SIZE30))
+        if(new_file_size != (file_size + TEST_BLOCK_SIZE30))
             TEST_ERROR
 
         PASSED()
@@ -506,7 +512,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Verify the file is the correct size */
-        if (new_file_size != (file_size+TEST_BLOCK_SIZE30))
+        if(new_file_size != (file_size + TEST_BLOCK_SIZE30))
             TEST_ERROR
 
         PASSED()
@@ -538,8 +544,10 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
 
         /* nothing should be changed in meta_aggr */
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
-        if (new_ma_addr != ma_addr) TEST_ERROR
-        if (new_ma_size != ma_size) TEST_ERROR
+        if(new_ma_addr != ma_addr)
+            TEST_ERROR
+        if(new_ma_size != ma_size)
+            TEST_ERROR
 
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
@@ -549,8 +557,11 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Verify the file is the correct size */
-        if (new_file_size != (file_size+10))
+        if(new_file_size != (file_size + 10))
             TEST_ERROR
+
+        if(H5Pclose(fapl_new) < 0)
+            FAIL_STACK_ERROR
 
         PASSED()
     } /* end if */
@@ -563,6 +574,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(fapl_new);
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
@@ -585,7 +597,7 @@ static unsigned
 test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t		file = -1;              	/* File ID */
-    hid_t		fapl_new;			/* copy of fapl */
+    hid_t		fapl_new = -1;			/* copy of fapl */
     char		filename[FILENAME_LEN]; 	/* Filename to use */
     H5F_t		*f = NULL;              	/* Internal file object pointer */
     h5_stat_size_t      file_size, new_file_size;  	/* File size */
@@ -621,8 +633,10 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Turn off using meta/small data aggregator */
-        H5Pset_meta_block_size(fapl_new, (hsize_t)0);
-        H5Pset_small_data_block_size(fapl_new, (hsize_t)0);
+        if(H5Pset_meta_block_size(fapl_new, (hsize_t)0) < 0)
+            FAIL_STACK_ERROR
+        if(H5Pset_small_data_block_size(fapl_new, (hsize_t)0) < 0)
+            FAIL_STACK_ERROR
 
         /* Re-open the file with meta/small data setting */
         if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
@@ -652,7 +666,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Verify the file is the correct size */
-        if (new_file_size != (file_size+TEST_BLOCK_SIZE30))
+        if(new_file_size != (file_size + TEST_BLOCK_SIZE30))
             TEST_ERROR
 
         /* Re-open the file */
@@ -682,7 +696,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Verify the file is the correct size */
-        if (new_file_size != (file_size+TEST_BLOCK_SIZE30+TEST_BLOCK_SIZE50))
+        if(new_file_size != (file_size + TEST_BLOCK_SIZE30 + TEST_BLOCK_SIZE50))
             TEST_ERROR
 
         PASSED()
@@ -715,12 +729,12 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
         type = H5FD_MEM_SUPER;
         addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
-        if (addr < (haddr_t)file_size)
+        if(addr < (haddr_t)file_size)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
-        if (new_ma_addr != ma_addr)
+        if(new_ma_addr != ma_addr)
             TEST_ERROR
 
         extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)addr, (hsize_t)(TEST_BLOCK_SIZE30-10), (hsize_t)(TEST_BLOCK_SIZE50));
@@ -742,8 +756,11 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* Verify the file is the correct size */
-        if (new_file_size != file_size+TEST_BLOCK_SIZE30)
+        if(new_file_size != file_size + TEST_BLOCK_SIZE30)
             TEST_ERROR
+
+        if(H5Pclose(fapl_new) < 0)
+            FAIL_STACK_ERROR
 
         PASSED()
     } /* end if */
@@ -756,6 +773,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(fapl_new);
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
@@ -947,7 +965,7 @@ static unsigned
 test_mf_fs_start(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
-    hid_t		fapl_new;		/* copy of fapl */
+    hid_t		fapl_new = -1;		/* copy of fapl */
     char		filename[FILENAME_LEN]; /* Filename to use */
     H5F_t		*f = NULL;              /* Internal file object pointer */
     h5_stat_size_t      file_size, new_file_size; /* file size */
@@ -1010,8 +1028,11 @@ test_mf_fs_start(hid_t fapl)
         TEST_ERROR
 
     /* Verify the file is the correct size */
-    if (new_file_size != file_size)
+    if(new_file_size != file_size)
 	TEST_ERROR
+
+    if(H5Pclose(fapl_new) < 0)
+        FAIL_STACK_ERROR
 
     PASSED()
 
@@ -1019,6 +1040,7 @@ test_mf_fs_start(hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(fapl_new);
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
@@ -1054,7 +1076,7 @@ static unsigned
 test_mf_fs_alloc_free(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
-    hid_t		fapl_new;		/* copy of fapl */
+    hid_t		fapl_new = -1;		/* copy of fapl */
     char		filename[FILENAME_LEN]; /* Filename to use */
     H5F_t		*f = NULL;              /* Internal file object pointer */
     h5_stat_size_t      file_size, new_file_size; 	/* file size */
@@ -1343,8 +1365,11 @@ test_mf_fs_alloc_free(hid_t fapl)
         TEST_ERROR
 
     /* Verify the file is the correct size */
-    if (new_file_size != file_size)
+    if(new_file_size != file_size)
 	TEST_ERROR
+
+    if(H5Pclose(fapl_new) < 0)
+        FAIL_STACK_ERROR
 
     PASSED()
 
@@ -1352,6 +1377,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(fapl_new);
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
@@ -1399,7 +1425,7 @@ static unsigned
 test_mf_fs_extend(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
-    hid_t		fapl_new;		/* copy of fapl */
+    hid_t		fapl_new = -1;		/* copy of fapl */
     char		filename[FILENAME_LEN]; /* Filename to use */
     H5F_t		*f = NULL;              /* Internal file object pointer */
     h5_stat_size_t      file_size, new_file_size; /* file size */
@@ -1889,8 +1915,11 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Verify the file is the correct size */
-    if (new_file_size != file_size)
+    if(new_file_size != file_size)
 	TEST_ERROR
+
+    if(H5Pclose(fapl_new) < 0)
+        FAIL_STACK_ERROR
 
     PASSED()
 
@@ -1898,6 +1927,7 @@ test_mf_fs_extend(hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(fapl_new);
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
@@ -6635,7 +6665,7 @@ error:
     HDmemset(memb_name, 0, sizeof memb_name);					\
     HDmemset(memb_addr, 0, sizeof memb_addr);					\
     HDmemset(sv, 0, sizeof sv);							\
-    for (mt = 0; mt < H5FD_MEM_NTYPES; mt++) {					\
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) { \
 	memb_map[mt] = H5FD_MEM_SUPER;						\
 	memb_fapl[mt] = H5P_DEFAULT;						\
     }										\
@@ -6670,20 +6700,21 @@ error:
 static unsigned
 test_mf_fs_drivers(hid_t fapl)
 {
-    hid_t	fcpl;		/* file creation property list */
-    hid_t	fapl_new;	/* copy of file access property list */
-    hid_t	fapl2;		/* copy of file access property list */
+    hid_t	fcpl = -1;	/* file creation property list */
+    hid_t	fapl_new = -1;	/* copy of file access property list */
+    hid_t	fapl2 = -1;	/* copy of file access property list */
     hbool_t	new_format;	/* To use new library format or not */
     unsigned 	ret = 0;	/* return value */
 
     H5FD_mem_t	memb_map[H5FD_MEM_NTYPES];	/* Memory usage map */
     hid_t	memb_fapl[H5FD_MEM_NTYPES];	/* Member access properties */
-    char        sv[H5FD_MEM_NTYPES][500];	/* Name generators */
+    char        sv[H5FD_MEM_NTYPES][64];	/* Name generators */
     const	char *memb_name[H5FD_MEM_NTYPES];	/* Name generators */
     haddr_t	memb_addr[H5FD_MEM_NTYPES];	/* Member starting address */
 
     /* Create a non-standard file-creation template */
-    fcpl = H5Pcreate(H5P_FILE_CREATE);
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        FAIL_STACK_ERROR
     if(H5Pset_file_space(fcpl, H5F_FILE_SPACE_ALL_PERSIST, (hsize_t)0) < 0)
 	TEST_ERROR
 
@@ -6784,14 +6815,19 @@ test_mf_fs_drivers(hid_t fapl)
 
     } /* end for new_format */
 
-    if (H5Pclose(fcpl) < 0)
+    if(H5Pclose(fcpl) < 0)
         FAIL_STACK_ERROR
-    if (H5Pclose(fapl2) < 0)
+    if(H5Pclose(fapl2) < 0)
         FAIL_STACK_ERROR
 
     return(ret);
 
 error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fcpl);
+        H5Pclose(fapl2);
+        H5Pclose(fapl_new);
+    } H5E_END_TRY;
     return(1);
 } /* test_mf_fs_drivers() */
 
@@ -6804,7 +6840,7 @@ static unsigned
 test_filespace_strategy_threshold(hid_t fapl_new)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t	fcpl;			/* File creation property list template */
+    hid_t	fcpl = -1;		/* File creation property list template */
     char	filename[FILENAME_LEN]; /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5FD_mem_t 	type;			/* File allocation type */
@@ -6922,7 +6958,10 @@ test_filespace_strategy_threshold(hid_t fapl_new)
 			TEST_ERROR
 		    break;
 
+		case H5F_FILE_SPACE_DEFAULT:
+		case H5F_FILE_SPACE_NTYPES:
 		default:
+                    TEST_ERROR
 		    break;
 	    } /* end switch */
 
@@ -6941,6 +6980,7 @@ test_filespace_strategy_threshold(hid_t fapl_new)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(fcpl);
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
@@ -6954,7 +6994,7 @@ static unsigned
 test_filespace_gone(hid_t fapl_new)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t	fcpl;			/* File creation propertly list template */
+    hid_t	fcpl = -1;		/* File creation propertly list template */
     char	filename[FILENAME_LEN]; /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5FD_mem_t 	type;			/* File allocation type */
@@ -7074,6 +7114,7 @@ test_filespace_gone(hid_t fapl_new)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(fcpl);
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
@@ -7085,14 +7126,14 @@ error:
 static unsigned
 test_filespace_drivers(hid_t fapl)
 {
-    hid_t	fapl_new;		/* copy of file access property list */
-    hid_t	fapl2;			/* copy of file access property list */
+    hid_t	fapl_new = -1;		/* copy of file access property list */
+    hid_t	fapl2 = -1;		/* copy of file access property list */
     hbool_t	new_format;		/* Using library new format or not */
     unsigned 	ret = 0;		/* return value */
 
     H5FD_mem_t	memb_map[H5FD_MEM_NTYPES];	/* Memory usage map */
     hid_t	memb_fapl[H5FD_MEM_NTYPES];	/* Member access properties */
-    char        sv[H5FD_MEM_NTYPES][500];	/* Name generators */
+    char        sv[H5FD_MEM_NTYPES][64];	/* Name generators */
     const	char *memb_name[H5FD_MEM_NTYPES];	/* Name generators */
     haddr_t	memb_addr[H5FD_MEM_NTYPES];	/* Member starting address */
 
@@ -7201,6 +7242,10 @@ test_filespace_drivers(hid_t fapl)
     return(ret);
 
 error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_new);
+        H5Pclose(fapl2);
+    } H5E_END_TRY;
     return(1);
 } /* test_filespace_drivers() */
 
@@ -7259,10 +7304,9 @@ main(void)
     nerrors += test_mf_aggr_absorb(env_h5_drvr, fapl);
 
     /* Tests for alignment */
-    for(curr_test = TEST_NORMAL; curr_test < TEST_NTESTS; curr_test++) {
+    for(curr_test = TEST_NORMAL; curr_test < TEST_NTESTS; H5_INC_ENUM(test_type_t, curr_test)) {
 
 	switch(curr_test) {
-
             case TEST_NORMAL: /* set alignment = 1024 */
 		if(H5Pset_alignment(new_fapl, (hsize_t)0, (hsize_t)TEST_ALIGN1024) < 0)
 		    TEST_ERROR
@@ -7273,6 +7317,7 @@ main(void)
 		    TEST_ERROR
                 break;
 
+            case TEST_NTESTS:
             default:
                 TEST_ERROR;
 		break;
@@ -7294,7 +7339,7 @@ main(void)
     /* tests for file space management */
     nerrors += test_filespace_drivers(fapl);
 
-    if (H5Pclose(new_fapl) < 0)
+    if(H5Pclose(new_fapl) < 0)
         FAIL_STACK_ERROR
     h5_cleanup(FILENAME, fapl);
 
@@ -7302,13 +7347,14 @@ main(void)
         goto error;
     puts("All free-space manager tests for file memory passed.");
 
-    return (0);
+    return(0);
 
 error:
     puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
         H5Pclose(fapl);
+        H5Pclose(new_fapl);
     } H5E_END_TRY;
-    return (1);
+    return(1);
 } /* main() */
 

@@ -21,8 +21,7 @@ SET (REPACK_COMMON_SRCS
 )
 
 ADD_EXECUTABLE (h5repack ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
-H5_NAMING (h5repack)
-TARGET_WIN_PROPERTIES (h5repack)
+H5_NAMING (h5repack ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5repack  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5repack)
@@ -38,8 +37,7 @@ IF (BUILD_TESTING)
   # Add h5Repack test executables
   # --------------------------------------------------------------------
   ADD_EXECUTABLE (testh5repack_detect_szip ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testh5repack_detect_szip.c)
-  H5_NAMING (testh5repack_detect_szip)
-  TARGET_WIN_PROPERTIES (testh5repack_detect_szip)
+  H5_NAMING (testh5repack_detect_szip ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (testh5repack_detect_szip ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME testh5repack_detect_szip COMMAND $<TARGET_FILE:testh5repack_detect_szip>)
@@ -57,11 +55,46 @@ IF (BUILD_TESTING)
   ENDIF (HDF5_ENABLE_SZIP_SUPPORT)
 
   ADD_EXECUTABLE (h5repacktest ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repacktst.c)
-  H5_NAMING (h5repacktest)
-  TARGET_WIN_PROPERTIES (h5repacktest)
+  H5_NAMING (h5repacktest ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (h5repacktest  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME h5repacktest COMMAND $<TARGET_FILE:h5repacktest>)
+
+  IF (HDF5_TEST_VFD)
+
+    SET (VFD_LIST
+        sec2
+        stdio
+        core
+        split
+        multi
+        family
+    )
+  
+    IF (DIRECT_VFD)
+      SET (VFD_LIST ${VFD_LIST} direct)
+    ENDIF (DIRECT_VFD)
+
+    MACRO (ADD_VFD_TEST vfdname resultcode)
+      ADD_TEST (
+        NAME VFD-${vfdname}-h5repacktest 
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5repacktest>"
+            -D "TEST_ARGS:STRING="
+            -D "TEST_VFD:STRING=${vfdname}"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_OUTPUT=h5repacktest"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+            -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
+      )
+    ENDMACRO (ADD_VFD_TEST)
+  
+    # Run test with different Virtual File Driver
+    FOREACH (vfd ${VFD_LIST})
+      ADD_VFD_TEST (${vfd} 0)
+    ENDFOREACH (vfd ${VFD_LIST})
+
+  ENDIF (HDF5_TEST_VFD)
     
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the test directory into the source directory
@@ -224,6 +257,72 @@ IF (BUILD_TESTING)
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
+
+  # Remove any output file left over from previous test run
+  ADD_TEST (
+      NAME H5REPACK-clearall-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          h5repack_attr.h5.out
+          h5repack_attr.h5.out.err
+          h5repack_deflate.h5.out
+          h5repack_deflate.h5.out.err
+          h5repack_early.h5.out
+          h5repack_early.h5.out.err
+          h5repack_ext.h5.out
+          h5repack_ext.h5.out.err
+          h5repack_fill.h5.out
+          h5repack_fill.h5.out.err
+          h5repack_filters.h5.out
+          h5repack_filters.h5.out.err
+          h5repack_fletcher.h5.out
+          h5repack_fletcher.h5.out.err
+          h5repack_hlink.h5.out
+          h5repack_hlink.h5.out.err
+          h5repack_layout.h5.out
+          h5repack_layout.h5.out.err
+          h5repack_layout.h5-v.out
+          h5repack_layout.h5-v.out.err
+          h5repack_layouto.h5.out
+          h5repack_layouto.h5.out.err
+          h5repack_layout2.h5-v.out
+          h5repack_layout2.h5-v.out.err
+          h5repack_named_dtypes.h5.out
+          h5repack_named_dtypes.h5.out.err
+          h5repack_nbit.h5.out
+          h5repack_nbit.h5.out.err
+          h5repack_objs.h5.out
+          h5repack_objs.h5.out.err
+          h5repack_refs.h5.out
+          h5repack_refs.h5.out.err
+          h5repack_shuffle.h5.out
+          h5repack_shuffle.h5.out.err
+          h5repack_soffset.h5.out
+          h5repack_soffset.h5.out.err
+          h5repack_szip.h5.out
+          h5repack_szip.h5.out.err
+          h5repack_attr_out.h5
+          h5repack_deflate_out.h5
+          h5repack_early_out.h5
+          h5repack_ext_out.h5
+          h5repack_fill_out.h5
+          h5repack_filters_out.h5
+          h5repack_fletcher_out.h5
+          h5repack_hlink_out.h5
+          h5repack_layout_out.h5
+          h5repack_layouto_out.h5
+          h5repack_layout2_out.h5
+          h5repack_named_dtypes_out.h5
+          h5repack_nbit_out.h5
+          h5repack_objs_out.h5
+          h5repack_refs_out.h5
+          h5repack_shuffle_out.h5
+          h5repack_soffset_out.h5
+          h5repack_szip_out.h5
+          h5repack_ub.h5
+          h5repack_ub_out.h5
+          h5repack_attr_refs_out.h5
+  )
 
   # --------------------------------------------------------------------
   # test file names 

@@ -317,6 +317,7 @@ int main(int argc, char **argv)
     H5Ptest_param_t ndsets_params, ngroups_params;
     H5Ptest_param_t collngroups_params;
     H5Ptest_param_t io_mode_confusion_params;
+    H5Ptest_param_t rr_obj_flush_confusion_params;
 
     /* Un-buffer the stdout and stderr */
     setbuf(stderr, NULL);
@@ -334,6 +335,15 @@ int main(int argc, char **argv)
 	printf("PHDF5 TESTS START\n");
 	printf("===================================\n");
     }
+
+    /* Attempt to turn off atexit post processing so that in case errors
+     * happen during the test and the process is aborted, it will not get
+     * hang in the atexit post processing in which it may try to make MPI
+     * calls.  By then, MPI calls may not work.
+     */
+    if (H5dont_atexit() < 0){
+	printf("Failed to turn off atexit processing. Continue.\n", mpi_rank);
+    };
     H5open();
     h5_show_hostname();
 
@@ -472,6 +482,12 @@ int main(int argc, char **argv)
 	    "I/O mode confusion test -- hangs quickly on failure",
             &io_mode_confusion_params);
 
+    rr_obj_flush_confusion_params.name = PARATESTFILE;
+    rr_obj_flush_confusion_params.count = 0; /* value not used */
+    AddTest("rrobjflushconf", rr_obj_hdr_flush_confusion, NULL,
+	    "round robin object header flush confusion test",
+            &rr_obj_flush_confusion_params);
+
     AddTest("tldsc",
             lower_dim_size_comp_test, NULL,
             "test lower dim size comp in span tree to mpi derived type", 
@@ -482,15 +498,6 @@ int main(int argc, char **argv)
             "test mpi derived type management", 
             PARATESTFILE);
 
-    /* rank projections / shape same tests */
-
-    AddTest("chsssdrpio",
-	contig_hyperslab_dr_pio_test, NULL,
-	"contiguous hyperslab shape same different rank PIO",PARATESTFILE);
-
-    AddTest("cbhsssdrpio",
-	checker_board_hyperslab_dr_pio_test, NULL,
-	"checker board hyperslab shape same different rank PIO",PARATESTFILE);
 
     /* Display testing information */
     TestInfo(argv[0]);

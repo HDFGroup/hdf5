@@ -2616,10 +2616,11 @@ lower_dim_size_comp_test(void)
     /* const char *fcnName = "lower_dim_size_comp_test()"; */
     int		chunk_edge_size = 0;
     int  	use_collective_io = 1;
-    hid_t	dset_type = H5T_STD_U32LE;
+    hid_t	dset_type = H5T_NATIVE_UINT;
 #if 0
    sleep(60);
 #endif
+    HDcompile_assert(sizeof(uint32_t) == sizeof(unsigned));
     for ( use_collective_io = (hbool_t)0; 
           (int)use_collective_io <= 1; 
           (hbool_t)(use_collective_io++) ) {

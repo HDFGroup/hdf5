@@ -270,6 +270,8 @@ IMPORTTEST()
 ##############################################################################
 ##############################################################################
 
+# test for signed/unsigned datasets
+TOOLTEST packedbits.ddl packedbits.h5
 # test for displaying groups
 TOOLTEST tgroup-1.ddl tgroup.h5
 # test for displaying the selected groups
@@ -573,6 +575,9 @@ TOOLTEST tfpformat.ddl -m %.7f tfpformat.h5
 # tests for traversal of external links
 TOOLTEST textlinksrc.ddl textlinksrc.h5
 TOOLTEST textlinkfar.ddl textlinkfar.h5
+
+# test for dangling external links
+TOOLTEST textlink.ddl textlink.h5
 
 
 # Report test results and exit

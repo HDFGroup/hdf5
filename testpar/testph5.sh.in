@@ -60,6 +60,17 @@ TOOLTEST() {
 # testphdf5 test using the MPI-POSIX VFL driver
 TOOLTEST -p
 
+# Temporary patch:
+# Run t_shapesame this way. Need more permanent solution.
+echo $RUNPARALLEL ./t_shapesame -p
+eval $RUNPARALLEL ./t_shapesame -p
+
+# Check if the command failed and increment nerrors if so.
+if test $? -ne 0 ; then
+    nerrors="`expr $nerrors + 1`"
+fi
+# Temporary patch ended.
+
 # Emit message about testing status
 if test $nerrors -eq 0 ; then
    echo "All $TEST_APP tests passed."

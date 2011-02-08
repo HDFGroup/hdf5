@@ -58,6 +58,7 @@ set srcexclude1_1=h5diff_exclude1-1.h5
 set srcexclude1_2=h5diff_exclude1-2.h5
 set srcexclude2_1=h5diff_exclude2-1.h5
 set srcexclude2_2=h5diff_exclude2-2.h5
+set src_comp_vl_strs=h5diff_comp_vl_strs.h5
 
 set file1=%indir%\h5diff_basic1.h5
 set file2=%indir%\h5diff_basic2.h5
@@ -89,6 +90,7 @@ set exclude1_1=%indir%\h5diff_exclude1-1.h5
 set exclude1_2=%indir%\h5diff_exclude1-2.h5
 set exclude2_1=%indir%\h5diff_exclude2-1.h5
 set exclude2_2=%indir%\h5diff_exclude2-2.h5
+set comp_vl_strs=%indir%\h5diff_comp_vl_strs.h5
 
 
 rem The tool name
@@ -852,6 +854,12 @@ rem ############################################################################
     rem Exclude from group compare
     call :testing %h5diff% -v --exclude-path "/dset3" %srcexclude1_1% %srcexclude1_2% /group1
     call :tooltest h5diff_484.txt -v --exclude-path "/dset3"  %exclude1_1% %exclude1_2% /group1
+
+    rem ##############################################################################
+    rem # diff various multiple vlen and fixed strings in a compound type dataset
+    rem ##############################################################################
+    call :testing %h5diff% -v %src_comp_vl_strs% %src_comp_vl_strs%
+    call :tooltest h5diff_530.txt -v  %comp_vl_strs% %comp_vl_strs%
 
 	
     rem #######################################################################

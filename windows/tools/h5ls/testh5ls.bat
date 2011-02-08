@@ -218,6 +218,9 @@ rem ############################################################################
 
     rem test for the nested compound type
     call :tooltest tnestcomp-1.ls 0 -w80 -r -d tnestedcomp.h5
+    call :tooltest tnestcomp-2.ls 0 -w80 -r -d -S tnestedcomp.h5
+    call :tooltest tnestcomp-3.ls 0 -w80 -r -d -l tnestedcomp.h5
+    call :tooltest tnestcomp-4.ls 0 -w80 -r -d -l -S tnestedcomp.h5
 
     rem test for loop detection
     call :tooltest tloop-1.ls 0 -w80 -r -d tloop.h5

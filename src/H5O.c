@@ -1106,14 +1106,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
-    H5O_loc_t *loc/*out*/)
+H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
+    hid_t ocpl_id, H5O_loc_t *loc/*out*/)
 {
     H5P_genplist_t  *oc_plist;          /* Object creation property list */
     H5O_t      *oh = NULL;              /* Object header created */
     haddr_t     oh_addr;                /* Address of initial object header */
     size_t      oh_size;                /* Size of initial object header */
     uint8_t	oh_flags;		/* Object header's initial status flags */
+    unsigned    insert_flags = H5AC__NO_FLAGS_SET; /* Flags for inserting object header into cache */
     hbool_t     store_msg_crt_idx;      /* Whether to always store message creation indices for this file */
     herr_t      ret_value = SUCCEED;    /* return value */
 
@@ -1243,11 +1244,18 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
     oh->mesg[0].raw_size = size_hint - (size_t)H5O_SIZEOF_MSGHDR_OH(oh);
     oh->mesg[0].chunkno = 0;
 
+    /* Check for non-zero initial refcount on the object header */
+    if(initial_rc > 0) {
+        /* Set the initial refcount & pin the header when its inserted */
+        oh->rc = initial_rc;
+        insert_flags |= H5AC__PIN_ENTRY_FLAG;
+    } /* end if */
+
     /* Set metadata tag in dxpl_id */
     H5_BEGIN_TAG(dxpl_id, oh_addr, FAIL);
 
     /* Cache object header */
-    if(H5AC_insert_entry(f, dxpl_id, H5AC_OHDR, oh_addr, oh, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_insert_entry(f, dxpl_id, H5AC_OHDR, oh_addr, oh, insert_flags) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
     oh = NULL;
 
@@ -1654,7 +1662,10 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
     /* check args */
     HDassert(loc);
     HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
+
+    /* Check for valid address */
+    if(!H5F_addr_defined(loc->addr))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "address undefined")
 
     /* Check for write access on the file */
     file_intent = H5F_INTENT(loc->file);
@@ -3419,6 +3430,49 @@ H5O_dec_rc(H5O_t *oh)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dec_rc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:   H5O_dec_rc_by_loc
+ *
+ * Purpose:    Decrement the refcount of an object header, using its
+ *              object location information.
+ *
+ * Return:     Non-negative on success/Negative on failure
+ *
+ * Programmer: Quincey Koziol
+ *             koziol@hdfgroup.org
+ *             Oct 08 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_dec_rc_by_loc(const H5O_loc_t *loc, hid_t dxpl_id)
+{
+    H5O_t       *oh = NULL;             /* Object header */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_dec_rc_by_loc, FAIL)
+
+    /* check args */
+    HDassert(loc);
+
+    /* Get header */
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
+       HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header")
+
+    /* Decrement the reference count on the object header */
+    /* (which will unpin it, if appropriate) */
+    if(H5O_dec_rc(oh) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement reference count on object header")
+
+done:
+    /* Release the object header from the cache */
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_dec_rc_by_loc() */
 
 
 /*-------------------------------------------------------------------------
