@@ -38,13 +38,13 @@
 #define H5FD_LOG_FILE_IO    (H5FD_LOG_FILE_READ|H5FD_LOG_FILE_WRITE)
 /* Flag for tracking "flavor" (type) of information stored at each byte */
 #define H5FD_LOG_FLAVOR     0x00000020
-/* Flags for tracking total number of reads/writes/seeks */
+/* Flags for tracking total number of reads/writes/seeks/truncates */
 #define H5FD_LOG_NUM_READ   0x00000040
 #define H5FD_LOG_NUM_WRITE  0x00000080
 #define H5FD_LOG_NUM_SEEK   0x00000100
 #define H5FD_LOG_NUM_TRUNCATE 0x00000200
 #define H5FD_LOG_NUM_IO     (H5FD_LOG_NUM_READ|H5FD_LOG_NUM_WRITE|H5FD_LOG_NUM_SEEK|H5FD_LOG_NUM_TRUNCATE)
-/* Flags for tracking time spent in open/read/write/seek/close */
+/* Flags for tracking time spent in open/stat/read/write/seek/close */
 #define H5FD_LOG_TIME_OPEN  0x00000400
 #define H5FD_LOG_TIME_STAT  0x00000800
 #define H5FD_LOG_TIME_READ  0x00001000

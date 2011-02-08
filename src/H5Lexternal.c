@@ -359,7 +359,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
                     if(H5L_build_name(out_prefix_name, temp_file_name, &full_name/*out*/) < 0) {
 			saved_env = (char *)H5MM_xfree(saved_env);
                         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
-		    }
+		    } /* end if */
 
                     ext_file = H5F_open(full_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id);
                     full_name = (char *)H5MM_xfree(full_name);
