@@ -71,7 +71,7 @@ if test "X-icc" = "X-$cc_vendor"; then
     H5_CFLAGS="${H5_CFLAGS:--std=c99 $arch}"
 
     # Production is set to default; see settings for specific version further down
-    PROD_CFLAGS= "-O"
+    PROD_CFLAGS="-O" 
     PROD_CPPFLAGS=
 
     # Debug
