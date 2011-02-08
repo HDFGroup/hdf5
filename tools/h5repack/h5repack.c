@@ -404,7 +404,7 @@ int copy_attr(hid_t loc_in,
     hid_t      ftype_id=-1;       /* file type ID */
     hid_t      wtype_id=-1;       /* read/write type ID */
     size_t     msize;             /* size of type */
-    void       *buf=NULL;         /* data buffer */
+    void       *buf = NULL;       /* data buffer */
     hsize_t    nelmts;            /* number of elements in dataset */
     int        rank;              /* rank of dataset */
     htri_t     is_named;          /* Whether the datatype is named */
@@ -421,28 +421,23 @@ int copy_attr(hid_t loc_in,
     * copy all attributes
     *-------------------------------------------------------------------------
     */
-
-    for ( u = 0; u < (unsigned)oinfo.num_attrs; u++)
-    {
-        buf=NULL;
-
+    for(u = 0; u < (unsigned)oinfo.num_attrs; u++) {
         /* open attribute */
         if((attr_id = H5Aopen_by_idx(loc_in, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
 
         /* get name */
-        if (H5Aget_name( attr_id, (size_t)255, name ) < 0)
+        if(H5Aget_name(attr_id, (size_t)255, name) < 0)
             goto error;
 
         /* get the file datatype  */
-        if ((ftype_id = H5Aget_type( attr_id )) < 0 )
+        if((ftype_id = H5Aget_type(attr_id)) < 0 )
             goto error;
 
         /* Check if the datatype is committed */
         if((is_named = H5Tcommitted(ftype_id)) < 0)
             goto error;
-        if(is_named) 
-        {
+        if(is_named && travt) {
             hid_t fidout;
 
             /* Create out file id */
@@ -460,29 +455,26 @@ int copy_attr(hid_t loc_in,
             if(H5Fclose(fidout) < 0)
                 goto error;
         } /* end if */
-
-        /* get the dataspace handle  */
-        if ((space_id = H5Aget_space( attr_id )) < 0 )
-            goto error;
-
-        /* get dimensions  */
-        if ( (rank = H5Sget_simple_extent_dims(space_id, dims, NULL)) < 0 )
-            goto error;
-
-        nelmts=1;
-        for (j=0; j<rank; j++)
-            nelmts*=dims[j];
-
-        /* wtype_id will have already been set if using a named dtype */
-        if(!is_named) 
-        {
-            if (options->use_native==1)
+        else {
+            if(options->use_native == 1)
                 wtype_id = h5tools_get_native_type(ftype_id);
             else
                 wtype_id = H5Tcopy(ftype_id);
-        } /* end if */
+        } /* end else */
 
-        if ((msize=H5Tget_size(wtype_id))==0)
+        /* get the dataspace handle  */
+        if((space_id = H5Aget_space(attr_id)) < 0)
+            goto error;
+
+        /* get dimensions  */
+        if((rank = H5Sget_simple_extent_dims(space_id, dims, NULL)) < 0)
+            goto error;
+
+        nelmts = 1;
+        for(j = 0; j < rank; j++)
+            nelmts *= dims[j];
+
+        if((msize = H5Tget_size(wtype_id)) == 0)
             goto error;
 
         /*-------------------------------------------------------------------------
@@ -493,23 +485,20 @@ int copy_attr(hid_t loc_in,
         *-------------------------------------------------------------------------
         */
 
-        if (H5T_REFERENCE==H5Tget_class(wtype_id))
-        {
+        if(H5T_REFERENCE == H5Tget_class(wtype_id)) {
             ;
         }
-        else
-        {
+        else {
             /*-------------------------------------------------------------------------
             * read to memory
             *-------------------------------------------------------------------------
             */
 
             buf = (void *)HDmalloc((size_t)(nelmts * msize));
-            if(buf == NULL) 
-            {
+            if(buf == NULL) {
                 error_msg("h5repack", "cannot read into memory\n" );
                 goto error;
-            }
+            } /* end if */
             if(H5Aread(attr_id, wtype_id, buf) < 0)
                 goto error;
 
@@ -527,10 +516,12 @@ int copy_attr(hid_t loc_in,
             if(H5Aclose(attr_out) < 0)
                 goto error;
 
-
-            if(buf)
-                free(buf);
-
+            /* Check if we have VL data in the attribute's  datatype that must
+             * be reclaimed */
+            if(TRUE == H5Tdetect_class(wtype_id, H5T_VLEN))
+                H5Dvlen_reclaim(wtype_id, space_id, H5P_DEFAULT, buf);
+            HDfree(buf);
+            buf = NULL;
         } /*H5T_REFERENCE*/
 
 
@@ -542,28 +533,39 @@ int copy_attr(hid_t loc_in,
         *-------------------------------------------------------------------------
         */
 
-        if (H5Tclose(ftype_id) < 0) goto error;
-        if (H5Tclose(wtype_id) < 0) goto error;
-        if (H5Sclose(space_id) < 0) goto error;
-        if (H5Aclose(attr_id) < 0) goto error;
-
+        if(H5Tclose(ftype_id) < 0)
+            goto error;
+        if(H5Tclose(wtype_id) < 0)
+            goto error;
+        if(H5Sclose(space_id) < 0)
+            goto error;
+        if(H5Aclose(attr_id) < 0)
+            goto error;
     } /* u */
-
 
     return 0;
 
 error:
     H5E_BEGIN_TRY {
+        if(buf) {
+            /* Check if we have VL data in the attribute's  datatype that must
+             * be reclaimed */
+            if(TRUE == H5Tdetect_class(wtype_id, H5T_VLEN))
+                H5Dvlen_reclaim(wtype_id, space_id, H5P_DEFAULT, buf);
+
+            /* Free buf */
+            free(buf);
+        } /* end if */
+
         H5Tclose(ftype_id);
         H5Tclose(wtype_id);
         H5Sclose(space_id);
         H5Aclose(attr_id);
         H5Aclose(attr_out);
-        if (buf)
-            free(buf);
     } H5E_END_TRY;
+
     return -1;
-}
+} /* end copy_attr() */
 
 /*-------------------------------------------------------------------------
 * Function: check_options

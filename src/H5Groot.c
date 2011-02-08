@@ -15,7 +15,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Gobj.c
+ * Created:		H5Groot.c
  *			Apr  8 2009
  *			Neil Fortner <nfortne2@hdfgroup.org>
  *
