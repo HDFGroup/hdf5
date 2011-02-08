@@ -292,6 +292,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     H5P_genplist_t *new_plist;              /* New property list */
     H5P_genplist_t *old_plist;              /* Old property list */
     void		*driver_info=NULL;
+    unsigned            efc_size = 0;
     hid_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5F_get_access_plist, FAIL)
@@ -330,6 +331,10 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' cache size")
     if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
+    if(f->shared->efc)
+        efc_size = H5F_efc_max_nfiles(f->shared->efc);
+    if(H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set elink file cache size")
 
     /*
      * Since we're resetting the driver ID and info, close them if they
@@ -840,6 +845,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
     } /* end if */
     else {
         H5P_genplist_t *plist;          /* Property list */
+        unsigned        efc_size;       /* External file cache size */
         size_t u;                       /* Local index variable */
 
         HDassert(lf != NULL);
@@ -902,6 +908,11 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         if(H5P_get(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(f->shared->sdata_aggr.alloc_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'small data' cache size")
         f->shared->sdata_aggr.feature_flag = H5FD_FEAT_AGGREGATE_SMALLDATA;
+        if(H5P_get(plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get elink file cache size")
+        if(efc_size > 0)
+            if(NULL == (f->shared->efc = H5F_efc_create(efc_size)))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create external file cache")
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
@@ -997,6 +1008,13 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         if((f->shared->flags & H5F_ACC_RDWR) && flush)
             if(H5F_flush(f, dxpl_id) < 0)
                 HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+
+        /* Release the external file cache */
+        if(f->shared->efc) {
+            if(H5F_efc_destroy(f->shared->efc) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't destroy external file cache")
+            f->shared->efc = NULL;
+        } /* end if */
 
         /* Release objects that depend on the superblock being initialized */
         if(f->shared->sblock) {
@@ -1902,6 +1920,13 @@ H5F_try_close(H5F_t *f)
     /* Unmount and close each child before closing the current file. */
     if(H5F_close_mounts(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't unmount child files")
+
+    /* If there is more than one reference to the shared file struct and the
+     * file has an external file cache, we should see if it can be closed.  This
+     * can happen if a cycle is formed with external file caches */
+    if(f->shared->efc && (f->shared->nrefs > 1))
+        if(H5F_efc_try_close(f) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't attempt to close EFC")
 
     /* Delay flush until the shared file struct is closed, in H5F_dest.  If the
      * application called H5Fclose, it would have been flushed in that function
@@ -2928,4 +2953,41 @@ H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_free_sections() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Frelease_file_cache
+ *
+ * Purpose:     Releases the external file cache associated with the
+ *              provided file, potentially closing any cached files
+ *              unless they are held open from somewhere\ else.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *
+ * Programmer:  Neil Fortner; December 30, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Frelease_file_cache(hid_t file_id)
+{
+    H5F_t         *file;        /* File */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(H5Frelease_file_cache, FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    /* Check args */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+
+    /* Release the EFC */
+    if(file->shared->efc)
+        if(H5F_efc_release(file->shared->efc) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Frelease_file_cache() */
 
