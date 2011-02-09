@@ -5,8 +5,8 @@ INTRODUCTION
 ============
 
 This document describes the differences between HDF5-1.8.5 and 
-HDF5 1.8.6-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.6-*. 
+HDF5 1.8.6, and contains information on the platforms tested and 
+known problems in HDF5-1.8.6. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
@@ -111,6 +111,7 @@ New Features
 Support for New Platforms, Languages, and Compilers
 ===================================================
     - Sun C and C++ 5.10 and Sun Fortran 95 8.4.
+    - Mac OS X 10.6.4 with gcc 4.2.1 and gfortran 4.6
 
 
 Bug Fixes since HDF5-1.8.5
@@ -323,7 +324,8 @@ The following platforms and compilers have been tested for this release.
                                   Intel C, C++ and Fortran compilers 11.1 20100806
 
     Mac OS X 10.6.4 (Intel 32-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1
-    Darwin Kernel Version 10.4.0  GNU Fortran (GCC) 4.4.0 20090123
+    Darwin Kernel Version 10.4.0  GNU Fortran (GCC) 4.6.0 20101106
+                                  Intel C, C++ and Fortran compilers 12.0.0 20101110
 
     Debian5.06 2.6.26-2-686 #1 SMP i686 GNU/Linux
                                   gcc (Debian 4.3.2-1.1) 4.3.2
@@ -422,7 +424,7 @@ SuSe Linux 2.4.21 ia64 Intel      C  y       y         y         n
            (2) With PGI and Absoft compilers.
            (3) With PGI compiler for Fortran.
            (4) Using Visual Studio 2008 w/ Intel Fortran 10.1 (Cygwin shared libraries are not supported)
-           (5) C shared libraries will be built only when Fortran is disabeld.
+           (5) C and C++ shared libraries will not be built when Fortran is enabled.
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
