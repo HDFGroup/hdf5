@@ -56,6 +56,9 @@ New Features
 
     Configuration
     -------------
+    - Added mpicc and mpif90 as the default C and Fortran compilers for Linux
+      systems when --enable-parallel is specified but no $CC or $FC is defined.
+      (AKC - 2011/2/7)
     - Added a new configure option, "--enable-unsupported", which can
       be used to stop configure from preventing the use of unsupported
       configure option combinations, such as c++ in parallel or fortran
