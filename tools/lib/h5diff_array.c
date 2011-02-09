@@ -14,8 +14,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <math.h>
-#include <sys/timeb.h>
 #include <time.h>
+#include <sys/timeb.h>
 
 #include "H5private.h"
 #include "h5tools.h"
