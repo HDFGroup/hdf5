@@ -193,28 +193,21 @@ The following platforms and compilers have been tested for this release.
                                   Intel(R) Fortran Compiler for 32-bit
                                       applications, Version 10.1, 11.0
                                   Absoft 32-bit Fortran 95 10.0.7
-                                  MPICH mpich2-1.0.8 compiled with
-                                  gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
-
-    Linux 2.6.9-42.0.10.ELsmp #1  gcc (GCC) 3.4.6
-    SMP i686 i686 i386            G95 (GCC 4.0.3 (g95 0.92!) Feb 4 2009)
-    (kagiso)                      MPICH mpich2-1.0.8 compiled with
-                                  gcc 3.4.6 and G95  (GCC 4.0.3 (g95 0.92!)
+                                  MPICH mpich2-1.3.1 compiled with
+                                      gcc 4.1.2 and gfortran 4.1.2
 
     Linux 2.6.18-164.el5 #1 SMP   gcc 4.1.2 20080704
     x86_64 GNU/Linux              G95 (GCC 4.0.3 (g95 0.92!) Jun 24 2009)
-    (amani)                       tested for both 32- and 64-bit binaries
-                                  Intel(R) C, C++, Fortran Compilers for 
-                                  applications running on Intel(R) 64, 
-                                  Versions 11.1.
-                                  PGI C, Fortran, C++ Version 9.0-4
-                                         for 64-bit target on x86-64
-                                  gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
-                                  MPICH mpich2-1.0.8 compiled with
-                                  gcc 4.1.2 and G95 (GCC 4.0.3 (g95 0.92!)
+    (amani)                           tested for both 32- and 64-bit binaries
                                   GNU Fortran (GCC) 4.1.2 20080704
-                                  (Red Hat 4.1.2-46)
-
+                                      (Red Hat 4.1.2-46)
+                                  Intel(R) C, C++, Fortran Compilers for 
+                                      applications running on Intel(R) 64, 
+                                      Versions 11.1.
+                                  PGI C, Fortran, C++ Version 9.0-4
+                                      for 64-bit target on x86-64
+                                  MPICH mpich2-1.3.1 compiled with
+                                      gcc 4.1.2 and gfortran 4.1.2
 
     Linux 2.6.16.54-0.2.5 #1      Intel(R) C++ Version 11.0.074
     SGI Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 11.0.074
