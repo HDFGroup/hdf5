@@ -74,6 +74,7 @@ ADD_CUSTOM_COMMAND (
     DEPENDS H5fortran_detect
 )
 
+INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR})
 #-----------------------------------------------------------------------------
 ADD_EXECUTABLE (H5match_types
     ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h

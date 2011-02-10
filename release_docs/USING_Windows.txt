@@ -125,8 +125,34 @@ Notes:
       HDF5 tool export library for DLL:
            release version
 
-   2. Examples (Not included in the binary distribution)
+   2. Examples (Included in the binary distribution as a zip file)
 
+      Unpack the examples into a folder (c:\MyHDFstuff\hdf5examples).
+      The resulting structure under this folder should be:
+      c++
+      c++/examples
+      examples
+      fortran
+      fortran/examples
+      hl
+      hl/c++
+      hl/c++/examples
+      hl/examples
+      hl/fortran
+      hl/fortran/examples
+      windows
+      windows/c++
+      windows/c++/examples
+      windows/examples
+      windows/fortran
+      windows/fortran/examples
+      windows/hl
+      windows/hl/examples
+      windows/hl/fortran
+      windows/hl/fortran/examples
+      hdf5build_examples.bat
+      InstallExamples.bat            
+      
       HDF5 examples:
            Simple HDF5 C/C++/Fortran and High level C/Fortran examples
 
@@ -156,7 +182,7 @@ To build and test HDF5 C examples:
       Solution" option.
 
       Then open the solution
-      c:\MyHDFstuff\hdf5\windows\examples\allexamples\allexamples.sln.
+      c:\MyHDFstuff\hdf5examples\windows\examples\allexamples\allexamples.sln.
 
    2. Select "Build", and "Configuration Manager".
 
@@ -172,8 +198,8 @@ To build and test HDF5 C examples:
           Select "Build" -> "Build Solution" or "Rebuild Solution" to build 
           release version of project "allexamples".
 
-      When the debug and release build is done, there should be the following 
-      subdirectories in c:\MyHDFstuff\hdf5\examples\
+      When the debug or release build is done, there should be the following 
+      subdirectories in c:\MyHDFstuff\hdf5examples\examples\
 
           attributetest
           attributetestdll
@@ -193,11 +219,12 @@ To build and test HDF5 C examples:
           writetestdll
 
    3. Invoke a command prompt window and run the batch file InstallExamples.bat 
-      which resides in the top level directory (c:\MyHDFstuff\hdf5).  This file 
+      which resides in the top level directory (c:\MyHDFstuff\hdf5examples).  This file 
       creates 4 new directories, examplesREL, examplesRELDLL, examplesDBG, and 
-      examplesDBGDLL, in the c:\MyHDFstuff\hdf5\examples directory and places 
-      all the executables in it.  Both the release and debug versions of the
-      examples should be built before this step is done.
+      examplesDBGDLL, in the c:\MyHDFstuff\hdf5examples\examples directory and places 
+      all the executables in it.  If one of the release or debug versions of the examples is not 
+      built before this step is done, messages about files not found can be
+      ignored.
 
    4. We provide a batch file named testExamples.bat and an expected examples 
       tests output file named testExamples_exp_output.txt in 
@@ -225,24 +252,24 @@ To build and test HDF5 C++ examples:
       Solution" option.
 
       Then open the solution
-      c:\MyHDFstuff\hdf5\windows\examples\allexamples\allcppexamples.sln.
+      c:\MyHDFstuff\hdf5examples\windows\examples\allexamples\allcppexamples.sln.
 
    2. Select "Build", and "Configuration Manager".
 
-       2.1 To build debug versions of C examples:
-       
-          In "Active Solution Configuration", select "Debug". Select "Close". 
-          Select "Build" -> "Build Solution" or "Rebuild Solution" to build 
-          debug version of project "allcppexamples".
-
-       2.2 To build release versions of C examples.
+       2.1 To build release versions of C examples.
        
           In "Active Solution Configuration", select "Release". Select "Close". 
           Select "Build" -> "Build Solution" or "Rebuild Solution" to build 
           release version of project "allcppexamples".
 
+       2.2 To build debug versions of C examples:
+       
+          In "Active Solution Configuration", select "Debug". Select "Close". 
+          Select "Build" -> "Build Solution" or "Rebuild Solution" to build 
+          debug version of project "allcppexamples".
+
    When the debug build or release build is done, there should be the following 
-   subdirectories in c:\MyHDFstuff\hdf5\c++\examples\
+   subdirectories in c:\MyHDFstuff\hdf5examples\c++\examples\
 
           chunks
           chunksdll
@@ -261,14 +288,15 @@ To build and test HDF5 C++ examples:
 
    3. Invoke a command prompt window and run the batch file 
       InstallcppExamples.bat which resides in the top level directory
-      (c:\MyHDFstuff\hdf5).  This file creates 4 new directories,
+      (c:\MyHDFstuff\hdf5examples).  This file creates 4 new directories,
       cppexamplesREL, cppexamplesRELDLL, cppexamplesDBG, and cppexamplesDBGDLL, 
-      in the c:\MyHDFstuff\c++\examples directory and places all the executables
-      in it.  Both the release and debug versions of the examples should be 
-      built before this step is done.
+      in the c:\MyHDFstuff\hdf5examples\c++\examples directory and places all 
+      the executables in it.  If one of the release or debug versions of the 
+      examples is not built before this step is done, messages about files not 
+      found can be ignored.
 
    4. We provide a batch file named testcppExamples.bat in
-      c:\MyHDFstuff\hdf5\c++\examples directory for you to test HDF5 C++ 
+      c:\MyHDFstuff\hdf5examples\c++\examples directory for you to test HDF5 C++ 
       examples.
 
       testcppExamples.bat batch file has 4 options:
@@ -294,7 +322,7 @@ To build and test HDF5 High Level C examples:
       Solution" option.
 
       Then open the solution
-      c:\MyHDFstuff\hdf5\windows\hl\examples\allhlcexamples\allhlcexamples.sln
+      c:\MyHDFstuff\hdf5examples\windows\hl\examples\allhlcexamples\allhlcexamples.sln
 
    2. Select "Build", and "Configuration Manager".
 
@@ -310,7 +338,7 @@ To build and test HDF5 High Level C examples:
           Select "Build" -> "Build Solution" or "Rebuild Solution" to build 
           release version of project "allhlcexamples".
 
-      When the debug and release build is done, binaries will be built in the
+      When the debug or release build is done, binaries will be built in the
       following subdirectories of c:\MyHDFstuff\hdf5\examples\
 
           ex_image[1-2](dll)
@@ -320,15 +348,16 @@ To build and test HDF5 High Level C examples:
           ptExample[FL+VL](dll)
 
    3. Invoke a command prompt and run the batch file Install_hlcexamples.bat 
-      which resides in the top level directory (c:\MyHDFstuff\hdf5).  This file 
+      which resides in the top level directory (c:\MyHDFstuff\hdf5examples).  This file 
       creates 4 new directories, HLCexamplesRELEASE, HLCexamplesRELEASEDLL, 
       HLCexamplesDEBUG, and HLCexamplesDEBUGDLL, in the 
-      c:\MyHDFstuff\hdf5\hl\examples directory and places all the executables in
-      it. Both the release and debug versions of the examples should be built 
-      before this step is done.
+      c:\MyHDFstuff\hdf5examples\hl\examples directory and places all the executables in
+      it. If one of the release or debug versions of the examples is not 
+      built before this step is done, messages about files not found can be
+      ignored.
 
    4. We provide a batch file named test_hl_cexamples.bat in 
-      c:\MyHDFstuff\hdf5\hl\examples directory for you to test HDF5 high level C
+      c:\MyHDFstuff\hdf5examples\hl\examples directory for you to test HDF5 high level C
       examples.
 
       test_hl_cexamples.bat batch file has 4 options:
@@ -597,7 +626,7 @@ using the Visual C++ Development Environment.
     1.1 Project name and location issues:
 
     It is recommended that you use the given directory structure for building
-    HDF5.  However, it is possible to create your own structure.  If you must 
+    HDF5 Examples.  However, it is possible to create your own structure.  If you must 
     install all.sln and all.vcproj in another directory, relative to hdf5 
     directory, you will be asked to locate the sub-project files, when you open 
     the project all.sln.
