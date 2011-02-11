@@ -323,6 +323,8 @@ SuSe Linux 2.4.21 ia64 Intel      C  y       y         y         n
 
 Known Problems
 ==============
+* examples/run-all-ex.sh does not work on Cygwin. (NAF - 2011/02/11)
+
 * If parallel gmake (e.g., gmake -j 4) is used, the "gmake clean" command
   sometimes fails in the perform directory due to the attempt to remove the
   executable of h5perf or h5perf_serial by two "parallel" commands. This error
