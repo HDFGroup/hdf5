@@ -30,8 +30,6 @@ rem Simply create the needed directories
 :makedirs
     mkdir %exdir%\HLCexamplesRELEASE
     mkdir %exdir%\HLCexamplesRELEASEDLL
-    mkdir %exdir%\HLCexamplesDEBUG
-    mkdir %exdir%\HLCexamplesDEBUGDLL
     exit /b
 
 rem This function actally copies the file over, first making sure it exists.  If not, we increment nerrors
@@ -61,7 +59,7 @@ rem     %2 - destination to copy to
     call :makedirs
     
     rem copy the files
-    for %%a in (DEBUG RELEASE) do (
+    for %%a in (RELEASE) do (
         for %%b in (DLL static) do (
             set ver=%%b
             set ver=!ver:static=!

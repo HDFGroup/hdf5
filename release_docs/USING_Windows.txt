@@ -67,26 +67,61 @@ Preconditions:
 
       Szip compression feature inside HDF5 is enabled by default.
 
-   8. Set up path for libraries and headers
+   8. Define the following environment variables:
+
+        HDF5_EXT_ZLIB
+        HDF5_EXT_SZIP
+
+      In this section, Zlib and Szip compression packages are assumed to be 
+      used.  Please read Section V as well as this section if you do not want 
+      to use compression feature inside HDF5.
+
+      To define these environment variables:
+
+      Click "Start", click "Control Panel", and then double-click "System".  
+      On the "Advanced" tab, click "Environment Variables".
+
+      If you are logged on as administrator to the local computer AND want to 
+      let all other users use these two environment variables, click "New" 
+      under "System Variables" box; otherwise, click "New" under "User 
+      Variables" box.
+
+      In the New Variable window, set "Variable name" as HDF5_EXT_ZLIB and 
+      "Variable value" as zlib1.lib, then click OK.
+
+      Similarly, you can set:
+
+      HDF5_EXT_SZIP environment variable as szip.lib
+
+      Notes:
+
+         a. You will have to close and reopen running programs for the new 
+            environment variable settings to take effect.
+
+         b. c:\zlib\zlib1.dll and c:\szip\dll\szip.dll should be copied 
+            into a location that the application can find.
+
+   9. Set up path for libraries and headers
 
       Invoke Microsoft Visual Studio and go to "Tools" and select "Options", 
       find "Projects", and then "VC++ Directories".
       
-      8.1 If you are building on 64-bit Windows, find the "Platform" dropdown
+      9.1 If you are building on 64-bit Windows, find the "Platform" dropdown
           and select "x64".
 
-      8.2 Find the box "Show directories for", choose "Include files", if you 
+      9.2 Find the box "Show directories for", choose "Include files", if you 
           can not find your HDF5 header path (for example, 
           c:\MyHDFstuff\include) from the directory list, add the 
           header path (c:\MyHDFstuff\include) to the included 
           directories.
 
-      8.3 Find the box "Show directories for", choose "Library files".  If you 
+      9.3 Find the box "Show directories for", choose "Library files".  If you 
           cannot find your HDF5 library path (for example, 
-          c:\MyHDFstuff\dll) from the directory list, add the library 
-          path (c:\MyHDFstuff\dll) to the library directories.
+          c:\MyHDFstuff\dll for dynamic-shared and c:\MyHDFstuff\lib for static) 
+          from the directory list, add the library 
+          path (c:\MyHDFstuff\dll or c:\MyHDFstuff\lib) to the library directories.
           
-      8.4 If building Fortran applications, you will also need to setup the path
+      9.4 If building Fortran applications, you will also need to setup the path
           for the Intel Fortran compiler.  Please see Section VI.
 
 Notes:
@@ -98,6 +133,8 @@ Notes:
    2. For Fortran users, Intel Fortran Compiler 10.1 is currently supported
       -- please see Section VI. Intel Compiler 11.1 can be used but the project files
       must be upgraded within the Visual Studio IDE. 
+      
+   3. The szip and zlib dlls must be in the PATH for using the tools (including static).
      
 
 ========================================================================
@@ -186,19 +223,13 @@ To build and test HDF5 C examples:
 
    2. Select "Build", and "Configuration Manager".
 
-       2.1 To build debug versions of C examples:
-       
-          In "Active Solution Configuration", select "Debug". Select "Close". 
-          Select "Build" -> "Build Solution" or "Rebuild Solution" to build 
-          debug version of project "allexamples".
-
-       2.2 To build release versions of C examples.
+      To build release versions of C examples.
        
           In "Active Solution Configuration", select "Release". Select "Close". 
           Select "Build" -> "Build Solution" or "Rebuild Solution" to build 
           release version of project "allexamples".
 
-      When the debug or release build is done, there should be the following 
+      When the release build is done, there should be the following 
       subdirectories in c:\MyHDFstuff\hdf5examples\examples\
 
           attributetest
@@ -220,25 +251,19 @@ To build and test HDF5 C examples:
 
    3. Invoke a command prompt window and run the batch file InstallExamples.bat 
       which resides in the top level directory (c:\MyHDFstuff\hdf5examples).  This file 
-      creates 4 new directories, examplesREL, examplesRELDLL, examplesDBG, and 
-      examplesDBGDLL, in the c:\MyHDFstuff\hdf5examples\examples directory and places 
-      all the executables in it.  If one of the release or debug versions of the examples is not 
-      built before this step is done, messages about files not found can be
-      ignored.
+      creates new directories, examplesREL, examplesRELDLL in the 
+      c:\MyHDFstuff\hdf5examples\examples directory and places 
+      all the executables in it.
 
    4. We provide a batch file named testExamples.bat and an expected examples 
       tests output file named testExamples_exp_output.txt in 
       c:\MyHDFstuff\hdf5\examples directory for you to test HDF5 C examples.
 
-      testExamples.bat batch file has 4 options:
+      testExamples.bat batch file has options:
 
          testExamples release     -- for release version
 
          testExamples release dll -- for release DLL version
-
-         testExamples debug       -- for debug version
-
-         testExamples debug dll   -- for debug DLL version
 
       Invoke a command prompt and run testExamples.bat with appropriate options.
       You should get "All HDF5 C examples tests passed." when the C examples are
@@ -256,19 +281,13 @@ To build and test HDF5 C++ examples:
 
    2. Select "Build", and "Configuration Manager".
 
-       2.1 To build release versions of C examples.
+       To build release versions of C examples.
        
           In "Active Solution Configuration", select "Release". Select "Close". 
           Select "Build" -> "Build Solution" or "Rebuild Solution" to build 
           release version of project "allcppexamples".
 
-       2.2 To build debug versions of C examples:
-       
-          In "Active Solution Configuration", select "Debug". Select "Close". 
-          Select "Build" -> "Build Solution" or "Rebuild Solution" to build 
-          debug version of project "allcppexamples".
-
-   When the debug build or release build is done, there should be the following 
+   When the release build is done, there should be the following 
    subdirectories in c:\MyHDFstuff\hdf5examples\c++\examples\
 
           chunks
@@ -288,26 +307,20 @@ To build and test HDF5 C++ examples:
 
    3. Invoke a command prompt window and run the batch file 
       InstallcppExamples.bat which resides in the top level directory
-      (c:\MyHDFstuff\hdf5examples).  This file creates 4 new directories,
-      cppexamplesREL, cppexamplesRELDLL, cppexamplesDBG, and cppexamplesDBGDLL, 
-      in the c:\MyHDFstuff\hdf5examples\c++\examples directory and places all 
-      the executables in it.  If one of the release or debug versions of the 
-      examples is not built before this step is done, messages about files not 
-      found can be ignored.
+      (c:\MyHDFstuff\hdf5examples).  This file creates new directories,
+      cppexamplesREL, cppexamplesRELDLL in the 
+      c:\MyHDFstuff\hdf5examples\c++\examples directory and places all 
+      the executables in it.
 
    4. We provide a batch file named testcppExamples.bat in
       c:\MyHDFstuff\hdf5examples\c++\examples directory for you to test HDF5 C++ 
       examples.
 
-      testcppExamples.bat batch file has 4 options:
+      testcppExamples.bat batch file has options:
 
          testcppExamples release     -- for release version
 
          testcppExamples release dll -- for release DLL version
-
-         testcppExamples debug       -- for debug version
-
-         testcppExamples debug dll   -- for debug DLL version
 
       Invoke a command prompt and run testcppExamples.bat with appropriate 
       options.  You should get "All HDF5 C++ examples tests passed." when the 
@@ -326,19 +339,13 @@ To build and test HDF5 High Level C examples:
 
    2. Select "Build", and "Configuration Manager".
 
-       2.1 To build debug versions of C examples:
-       
-          In "Active Solution Configuration", select "Debug". Select "Close". 
-          Select "Build" -> "Build Solution" or "Rebuild Solution" to build 
-          debug version of project "allhlcexamples".
-
-       2.2 To build release versions of C examples.
+       To build release versions of C examples.
        
           In "Active Solution Configuration", select "Release". Select "Close". 
           Select "Build" -> "Build Solution" or "Rebuild Solution" to build 
           release version of project "allhlcexamples".
 
-      When the debug or release build is done, binaries will be built in the
+      When the release build is done, binaries will be built in the
       following subdirectories of c:\MyHDFstuff\hdf5\examples\
 
           ex_image[1-2](dll)
@@ -349,28 +356,21 @@ To build and test HDF5 High Level C examples:
 
    3. Invoke a command prompt and run the batch file Install_hlcexamples.bat 
       which resides in the top level directory (c:\MyHDFstuff\hdf5examples).  This file 
-      creates 4 new directories, HLCexamplesRELEASE, HLCexamplesRELEASEDLL, 
-      HLCexamplesDEBUG, and HLCexamplesDEBUGDLL, in the 
+      creates new directories, HLCexamplesRELEASE, HLCexamplesRELEASEDLL in the 
       c:\MyHDFstuff\hdf5examples\hl\examples directory and places all the executables in
-      it. If one of the release or debug versions of the examples is not 
-      built before this step is done, messages about files not found can be
-      ignored.
+      it.
 
    4. We provide a batch file named test_hl_cexamples.bat in 
       c:\MyHDFstuff\hdf5examples\hl\examples directory for you to test HDF5 high level C
       examples.
 
-      test_hl_cexamples.bat batch file has 4 options:
+      test_hl_cexamples.bat batch file has options:
 
          Options                        purpose
 
          test_hl_cexamples release      -- for release version
 
          test_hl_cexamples release dll  -- for release DLL version
-
-         test_hl_cexamples debug        -- for debug version
-
-         test_hl_cexamples debug dll    -- for debug DLL version
 
       Invoke a command prompt window and run test_hl_cexamples with
       appropriate options.
