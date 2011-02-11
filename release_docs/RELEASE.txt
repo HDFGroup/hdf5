@@ -783,6 +783,8 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* examples/run-all-ex.sh does not work on Cygwin. (NAF - 2011/02/11)
+
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can
   occur when reading from a dataset in parallel shortly after it has been
   written to collectively. The issue was exposed by a new test in the parallel
