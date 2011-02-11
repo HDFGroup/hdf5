@@ -440,6 +440,8 @@ SGI Linux 2.6.32.19                        y       y         y         y
 
 Known Problems
 ==============
+* examples/run-all-ex.sh does not work on Cygwin. (NAF - 2011/02/11)
+
 * Parallel test, t_shapesame in testpar, is rather unstable as it continues to
   have occasional errors in AIX and quite often in NCSA Abe. It is being built
   but it is not run automatically in the "make check" command. One would have to
@@ -452,7 +454,7 @@ Known Problems
   into this release.  If you install the 1.8.6 library, it should still work
   despite of these test failures.  If you want the working copy without any
   test failure, you can request it from us.  SLU - 2011/01/26 
- 
+
 * If parallel gmake (e.g., gmake -j 4) is used, the "gmake clean" command
   sometimes fails in the perform directory due to the attempt to remove the
   executable of h5perf or h5perf_serial by two "parallel" commands. This error
