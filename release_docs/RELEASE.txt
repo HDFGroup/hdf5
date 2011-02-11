@@ -327,6 +327,10 @@ The following platforms and compilers have been tested for this release.
     Darwin Kernel Version 10.4.0  GNU Fortran (GCC) 4.6.0 20101106
                                   Intel C, C++ and Fortran compilers 12.0.0 20101110
 
+    Mac OS X 10.6.4 (Intel 64-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (Apple Inc. build 5659)
+    Darwin Kernel Version 10.6.0   GNU Fortran (GCC) 4.5.0 20090910 
+                                   Intel C, C++ and Fortran compilers 11.1 20100806
+
     Debian5.06 2.6.26-2-686 #1 SMP i686 GNU/Linux
                                   gcc (Debian 4.3.2-1.1) 4.3.2
                                   GNU Fortran (Debian 4.3.2-1.1) 4.3.2
