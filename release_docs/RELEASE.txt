@@ -604,4 +604,11 @@ Known Problems
   -O1 or below resolves the issue. Using a newer version of the compiler 
   (11.0) avoids the issue. MAM - 2010/06/01
   
-  
+* On solaris systems, when running the examples with the scripts installed in
+  .../share/hdf5_examples, two of the c tests, h5_extlink and h5_elink_unix2win 
+  may fail or generate HDF5 errors because the script commands in c/run-c-ex.sh 
+  fail to create test directories red, blue, and u2w.  Moving the '!' in lines 
+  67, 70, 73 of run-c-ex.sh will fix the problem.  For example the script command 
+  "if ! test -d red; then" will work on solaris if changed to 
+  "if test ! -d red; then".
+
