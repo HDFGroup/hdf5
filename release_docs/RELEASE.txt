@@ -351,19 +351,19 @@ The following platforms and compilers have been tested for this release.
                                   gcc (GCC) 4.5.1 20100924 (Red Hat 4.5.1-4)
                                   GNU Fortran (GCC) 4.5.1 20100924 (Red Hat 4.5.1-4)
 
-    SUSE 11.3 2.6.34-12-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
+    SUSE 11.3 2.6.34.7-0.7-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
                                   gcc (SUSE Linux) 4.5.0 20100604 [gcc-4_5-branch revision 160292]
                                   GNU Fortran (SUSE Linux) 4.5.0 20100604 [gcc-4_5-branch revision 160292]
 
-    SUSE 11.3 2.6.34-12-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
+    SUSE 11.3 2.6.34.7-0.7-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
                                   gcc (SUSE Linux) 4.5.0 20100604 [gcc-4_5-branch revision 160292]
                                   GNU Fortran (SUSE Linux) 4.5.0 20100604 [gcc-4_5-branch revision 160292]
 
-    Ubuntu 10.10 2.6.35-22-generic #34-Ubuntu SMP i686 GNU/Linux
+    Ubuntu 10.10 2.6.35-25-generic #44-Ubuntu SMP i686 GNU/Linux
                                   gcc (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5
                                   GNU Fortran (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5
 
-    Ubuntu 10.10 2.6.35-22-generic #34-Ubuntu SMP x86_64 GNU/Linux
+    Ubuntu 10.10 2.6.35-25-generic #44-Ubuntu SMP x86_64 GNU/Linux
                                   gcc (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5
                                   GNU Fortran (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5
     
