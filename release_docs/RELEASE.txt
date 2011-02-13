@@ -156,12 +156,6 @@ Platforms Tested
 ================
 The following platforms and compilers have been tested for this release.
 
-    AIX 5.3                       xlc 7.0.0.9, 8.0.0.20, 9.0.0.4
-    (LLNL Up)                     xlC 7.0.0.9, 8.0.0.20, 9.0.0.4
-                                  xlf 9.1.0.8, 10.1.0.9, 11.1.0.7
-                                  mpcc_r 7.0.0.9
-                                  mpxlf_r 9.1.0.8
-
     AIX 6.1                       xlc 11.1.0.3
     (NCSA BP)                     xlC 11.1.0.3
                                   xlf 13.1.0.3
@@ -276,8 +270,7 @@ Windows XP x64                       n        y(4)   n(4)     y     y     y
 Windows Vista                        n        y(4)   n(4)     y     y     y
 Windows Vista x64                    n        y(4)   n(4)     y     y     y
 Mac OS X 10.5 Intel                  n        y      n        y     y     y
-AIX 5.3 32- and 64-bit               n        y      n        y     y     n
-AIX 6.1 32- and 64-bit               n        y      n        y     y     n
+AIX 6.1 32- and 64-bit               n        y      n        y     y     y
 FreeBSD 6.3-STABLE 32&64 bit         n        y      n        y     y     y
 RedHat EL4 2.6.9-42 i686 GNU (1)  W  y        y      y        y     y     y
 RedHat EL5 2.6.18-128 i686 GNU (1)W  y        y(2)   y        y     y     y
@@ -299,8 +292,7 @@ Windows XP x64                       y       y(4)      y         n
 Windows Vista                        y       y(4)      y         y        
 Windows Vista x64                    y       y(4)      y         y        
 Mac OS X 10.5                        y       n         y         n        
-AIX 5.3 32- and 64-bit               n       n         n         n        
-AIX 6.1 32- and 64-bit               n       n         n         n        
+AIX 6.1 32- and 64-bit               n       n         n         y        
 FreeBSD 6.3-STABLE 32&64 bit         y       n         y         y        
 RedHat EL4 2.6.9-42 i686 GNU (1)  W  y       y         y         y        
 RedHat EL5 2.6.18-128 i686 GNU (1)W  y       y(2)      y         y        
@@ -375,13 +367,6 @@ Known Problems
   / dataset_readAll. Parallel tests also failed with 32 and 64 processes with
   collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
   with MPI IO. CMC - 2009/04/28
-
-* For gcc v4.3 and v4.4, with production mode, if -O3 is used, H5Tinit.c
-  would fail to compile. Actually bad H5Tinit.c is produced.  If -O (same
-  as -O1) is used, H5Tinit.c compiled okay but test/dt_arith would fail.
-  When -O0 (no optimizatio) is used, H5Tinit.c compilete okay and all
-  tests passed. Therefore, -O0 is imposed for v4.3 and v4.4 of gcc.
-  AKC - 2009/04/20
 
 * For Red Storm, a Cray XT3 system, the tools/h5ls/testh5ls.sh and
   tools/h5copy/testh5copy.sh will fail some of its sub-tests. These sub-tests
