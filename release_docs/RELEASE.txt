@@ -388,10 +388,10 @@ Platform                                 C        F90    F90      C++   zlib  SZ
                                          parallel        parallel
 Solaris2.10 32-bit                         n        y      n        y     y     y
 Solaris2.10 64-bit                         n        y      n        y     y     y
-Windows XP                                 n        y(4)   n(4)     y     y     y
-Windows XP x64                             n        y(4)   n(4)     y     y     y
-Windows Vista                              n        y(4)   n(4)     y     y     y
-Windows Vista x64                          n        y(4)   n(4)     y     y     y
+Windows XP                                 n        y(4)   n        y     y     y
+Windows XP x64                             n        y(4)   n        y     y     y
+Windows Vista                              n        y(4)   n        y     y     y
+Windows Vista x64                          n        y(4)   n        y     y     y
 OpenVMS Alpha                              n        y      n        y     y     n
 Mac OS X 10.6 Intel                        n        y      n        y     y     y
 AIX 6.1 32- and 64-bit                     y        y      y        y     y     y
