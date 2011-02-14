@@ -394,7 +394,7 @@ Windows Vista                              n        y(4)   n(4)     y     y     
 Windows Vista x64                          n        y(4)   n(4)     y     y     y
 OpenVMS Alpha                              n        y      n        y     y     n
 Mac OS X 10.6 Intel                        n        y      n        y     y     y
-AIX 6.1 32- and 64-bit                     n        y      n        y     y     y
+AIX 6.1 32- and 64-bit                     y        y      y        y     y     y
 FreeBSD 6.3-STABLE 32&64 bit               n        y      n        y     y     y
 CentOS 5.5 Linux 2.6.18-194 i686 GNU (1)W  y        y(2)   y        y     y     y
 CentOS 5.5 Linux 2.6.18-194 i686 Intel  W  n        y      n        y     y     n
