@@ -164,7 +164,8 @@ Notes:
 
    2. Examples (Included in the binary distribution as a zip file)
 
-      Unpack the examples into a folder (c:\MyHDFstuff\hdf5examples).
+      Unpack the examples, hdf5-examples.zip, into your "hdf5" folder 
+      (c:\MyHDFstuff\hdf5).
       The resulting structure under this folder should be:
       c++
       c++/examples
