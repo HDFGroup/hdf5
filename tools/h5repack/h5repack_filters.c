@@ -44,13 +44,13 @@ int aux_find_obj(const char* name,          /* object name from traverse list */
 
  for ( i=0; i<options->op_tbl->nelems; i++)
  {
-     if (strcmp(options->op_tbl->objs[i].path,name)==0)
+     if (HDstrcmp(options->op_tbl->objs[i].path,name)==0)
      {
          *obj =  options->op_tbl->objs[i];
          return i;
      }
 
-     pdest  = strstr(name,options->op_tbl->objs[i].path);
+     pdest  = HDstrstr(name,options->op_tbl->objs[i].path);
      result = (int)(pdest - name);
 
      /* found at position 1, meaning without '/' */
