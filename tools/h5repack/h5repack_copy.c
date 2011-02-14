@@ -13,11 +13,7 @@
 * access to either file, you may request a copy from help@hdfgroup.org.     *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
 #include "h5repack.h"
-#include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
@@ -645,7 +641,7 @@ int do_copy_objects(hid_t fidin,
             /* check if filters were requested for individual objects */
             for (u = 0; u < options->op_tbl->nelems; u++) {
 
-                if (strcmp(travt->objs[i].name, options->op_tbl->objs[u].path) == 0) {
+                if (HDstrcmp(travt->objs[i].name, options->op_tbl->objs[u].path) == 0) {
                         if (options->op_tbl->objs[u].filter->filtn > 0) {
                             req_filter = 1;
                         }
@@ -1177,7 +1173,7 @@ static void print_dataset_info(hid_t dcpl_id,
     int          i;
 
 
-    strcpy(strfilter,"\0");
+    HDstrcpy(strfilter,"\0");
 
     /* get information about input filters */
     if((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
@@ -1194,51 +1190,51 @@ static void print_dataset_info(hid_t dcpl_id,
             break;
 
         case H5Z_FILTER_DEFLATE:
-            strcat(strfilter,"GZIP ");
+            HDstrcat(strfilter,"GZIP ");
 
 #if defined (PRINT_DEBUG)
             {
                 unsigned level=cd_values[0];
                 sprintf(temp,"(%d)",level);
-                strcat(strfilter,temp);
+                HDstrcat(strfilter,temp);
             }
 #endif
             break;
 
         case H5Z_FILTER_SZIP:
-            strcat(strfilter,"SZIP ");
+            HDstrcat(strfilter,"SZIP ");
 
 #if defined (PRINT_DEBUG)
             {
                 unsigned options_mask=cd_values[0]; /* from dcpl, not filt*/
                 unsigned ppb=cd_values[1];
                 sprintf(temp,"(%d,",ppb);
-                strcat(strfilter,temp);
+                HDstrcat(strfilter,temp);
                 if (options_mask & H5_SZIP_EC_OPTION_MASK)
-                    strcpy(temp,"EC) ");
+                    HDstrcpy(temp,"EC) ");
                 else if (options_mask & H5_SZIP_NN_OPTION_MASK)
-                    strcpy(temp,"NN) ");
+                    HDstrcpy(temp,"NN) ");
             }
-            strcat(strfilter,temp);
+            HDstrcat(strfilter,temp);
 
 #endif
 
             break;
 
         case H5Z_FILTER_SHUFFLE:
-            strcat(strfilter,"SHUF ");
+            HDstrcat(strfilter,"SHUF ");
             break;
 
         case H5Z_FILTER_FLETCHER32:
-            strcat(strfilter,"FLET ");
+            HDstrcat(strfilter,"FLET ");
             break;
 
         case H5Z_FILTER_NBIT:
-            strcat(strfilter,"NBIT ");
+            HDstrcat(strfilter,"NBIT ");
             break;
 
         case H5Z_FILTER_SCALEOFFSET:
-            strcat(strfilter,"SCALEOFFSET ");
+            HDstrcat(strfilter,"SCALEOFFSET ");
             break;
         } /* switch */
     }/*i*/
@@ -1248,10 +1244,10 @@ static void print_dataset_info(hid_t dcpl_id,
     else
     {
         char str[255], temp[20];
-        strcpy(str,"dset     ");
-        strcat(str,strfilter);
+        HDstrcpy(str,"dset     ");
+        HDstrcat(str,strfilter);
         sprintf(temp,"  (%.3f:1)",ratio);
-        strcat(str,temp);
+        HDstrcat(str,temp);
         printf(FORMAT_OBJ,str,objname);
     }
 }
