@@ -493,6 +493,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5dump for skipping array indices every certain number
+          when the array type dataset is relatively big. The certain number
+          varies according to the size of array. Bug#2092 (JKM 2011/2/15).
         - Fixed h5diff for the segfault when compares compound datasets
           with combination of fixed length string types and vlen string types 
           in certain orders. bug#2089 (JKM 2010/12/28)

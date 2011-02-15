@@ -887,8 +887,6 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
          */
         curr_pos = ctx->sm_pos;
 
-        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
-
         for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
             void* memref = mem + i * size;
             if (region_output && H5Tequal(type, H5T_STD_REF_DSETREG)) {
@@ -1081,14 +1079,11 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
          */
 
         /*
-         * Added the info->skip_first because the dumper does not want
-         * this check to happen for the first line
+         * check for displaying prefix for each section
          */
-        if ((!info->skip_first || local_elmt_counter) &&
-                (ctx->cur_column +
-                strlen(section) +
-                strlen(OPT(info->elmt_suf2, " ")) +
-                strlen(OPT(info->line_suf, ""))) > ncols)
+        if ( (ctx->cur_column + strlen(section) +
+              strlen(OPT(info->elmt_suf2, " ")) +
+              strlen(OPT(info->line_suf, ""))) > ncols)
             ctx->need_prefix = 1;
 
         /*

@@ -54,6 +54,7 @@
 #define FILE23 "tvldtypes3.h5"
 #define FILE24 "tvldtypes4.h5"
 #define FILE25 "tarray1.h5"
+#define FILE25_BIG "tarray1_big.h5"
 #define FILE26 "tarray2.h5"
 #define FILE27 "tarray3.h5"
 #define FILE28 "tarray4.h5"
@@ -2810,6 +2811,99 @@ static void gent_vldatatypes5(void)
     assert(ret >= 0);
 
     ret = H5Fclose (fid1);
+    assert(ret >= 0);
+}
+
+/* This is big enough to make h5dump to use hyperslap to read
+   from file and display portion by portion. This also prints out array indices 
+   via region reference for testing refion reference output.
+   Note: this was added originally prepared for bug2092. before the fix h5dump didn't 
+         display array indices every 262 x N (N > 0) based on 2000x1000 dims.
+*/
+#define SPACE_ARRAY1BIG_DIM 2000
+#define ARRAY1BIG_DIM 1000
+
+static void gent_array1_big(void)
+{
+    int wdata[SPACE_ARRAY1BIG_DIM][ARRAY1BIG_DIM];   /* Information to write */
+    hid_t  fid1;  /* HDF5 File IDs  */
+    hid_t  dataset; /* Dataset ID   */
+    hid_t  sid1;       /* Dataspace ID   */
+    hid_t  tid1;       /* Datatype ID   */
+    hsize_t  sdims1[] = {SPACE_ARRAY1BIG_DIM};
+    hsize_t  tdims1[] = {ARRAY1BIG_DIM};
+    int        i,j;        /* counting variables */
+    herr_t  ret;  /* Generic return value  */
+
+    
+    /* for region reference dataset */
+    hid_t  dset2;
+    hid_t  sid2;
+    hsize_t  dims2[] = {SPACE1_DIM1};
+    hsize_t  start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t  stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t  count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t  block[SPACE1_RANK];     /* Block size of hyperslab */
+    start[0]=0;
+    stride[0]=1;
+    count[0]=600;
+    block[0]=1;
+    hdset_reg_ref_t   *wbuf;    /* buffer to write to disk */
+    /* Allocate write & read buffers */
+    wbuf = (hdset_reg_ref_t*) calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+
+    /* Allocate and initialize array data to write */
+    for(i=0; i<SPACE_ARRAY1BIG_DIM; i++)
+        for(j=0; j<ARRAY1BIG_DIM; j++)
+            wdata[i][j]=i*1;
+
+    /* Create file */
+    fid1 = H5Fcreate(FILE25_BIG, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*-------------------------
+     * Array type dataset 
+     *
+    /* Create dataspace for datasets */
+    sid1 = H5Screate_simple(SPACE1_RANK, sdims1, NULL);
+
+    /* Create a datatype to refer to */
+    tid1 = H5Tarray_create2(H5T_NATIVE_INT, ARRAY1_RANK, tdims1);
+
+    /* Create a dataset */
+    dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Write dataset to disk */
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    assert(ret >= 0);
+
+    /*---------------------------
+     * Region Reference dataset 
+     */
+    /* Create dataspace for the reference dataset */
+    sid2 = H5Screate_simple(SPACE1_RANK, dims2, NULL);
+
+    /* Create a dataset */
+    dset2 = H5Dcreate2(fid1, "Dataset2", H5T_STD_REF_DSETREG, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Create references */
+    H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block);
+
+    H5Sget_select_npoints(sid1);
+
+    /* Create Dataset1 region */
+    H5Rcreate(&wbuf[0], fid1, "/Dataset1", H5R_DATASET_REGION, sid1);
+
+    /* Write selection to disk */
+    H5Dwrite(dset2,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    assert(ret >= 0);
+    ret = H5Tclose(tid1);
+    assert(ret >= 0);
+    ret = H5Sclose(sid1);
+    assert(ret >= 0);
+    ret = H5Fclose(fid1);
     assert(ret >= 0);
 }
 
@@ -7023,6 +7117,7 @@ int main(void)
     gent_vldatatypes3();
     gent_vldatatypes4();
     gent_vldatatypes5();
+    gent_array1_big();
     gent_array1();
     gent_array2();
     gent_array3();
