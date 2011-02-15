@@ -37,8 +37,28 @@
 #define DSET1_NAME	"dset1"
 #define DSET1_DIM1      1024
 #define DSET1_DIM2      32
+#define CHUNK_DIM1      200
+#define CHUNK_DIM2      10
 #define DSET2_NAME	"dset2"
 #define DSET2_DIM       4
+#define DSET3_NAME     "dset3"
+
+#define NCHUNKS         4
+#define CONFIG_COMPRESS         0x0001u
+#define CONFIG_CACHE            0x0002u
+#define CONFIG_EARLY_ALLOC      0x0004u
+#define CONFIG_CHUNK            0x0008u
+#define CONFIG_TCONV            0x0010u
+#define CONFIG_ALIGN_FILE       0x0020u
+#define CONFIG_BLOCK_FILE       0x0040u
+#define CONFIG_ALIGN_BUF        0x0080u
+#define CONFIG_PAD_BUF          0x0100u
+#define CONFIG_BY_CHUNK         0x0200u
+#define CONFIG_ALL              (CONFIG_COMPRESS + CONFIG_CACHE                \
+                                + CONFIG_EARLY_ALLOC + CONFIG_CHUNK            \
+                                + CONFIG_TCONV + CONFIG_ALIGN_FILE             \
+                                + CONFIG_BLOCK_FILE + CONFIG_ALIGN_BUF         \
+                                + CONFIG_PAD_BUF + CONFIG_BY_CHUNK)
 
 const char *FILENAME[] = {
     "sec2_file",
@@ -148,11 +168,14 @@ test_direct(void)
 {
 #ifdef H5_HAVE_DIRECT
     hid_t       file=(-1), fapl, access_fapl = -1;
-    hid_t	dset1=-1, dset2=-1, space1=-1, space2=-1;
+    hid_t       dcpl_id, dxpl_id;
+    hid_t      dset1=-1, dset2=-1, dset3=-1;
+    hid_t       space1=-1, space2=-1;
     char        filename[1024];
     int         *fhandle=NULL;
     hsize_t     file_size;
     hsize_t	dims1[2], dims2[1];
+    hsize_t     chunk_size[2] = {CHUNK_DIM1, CHUNK_DIM2};  /* Chunk dimensions */
     size_t	mbound;
     size_t	fbsize;
     size_t	cbsize;
@@ -184,6 +207,12 @@ test_direct(void)
 
     if(H5Pset_alignment(fapl, (hsize_t)THRESHOLD, (hsize_t)FBSIZE) < 0)
 	TEST_ERROR;
+
+    /* Turn off the sieve buffer.  Chunked dataset doesn't use it.  Just
+     * make sure it is OK. */
+    if(H5Pset_sieve_buf_size(fapl, 0) < 0)
+        TEST_ERROR;
+
 
     H5E_BEGIN_TRY {
         file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -222,10 +251,10 @@ test_direct(void)
 
     /* Allocate aligned memory for data set 1. For data set 1, everything is aligned including
      * memory address, size of data, and file address. */
-    if(posix_memalign(&points, (size_t)FBSIZE, (size_t)(DSET1_DIM1*DSET1_DIM2*sizeof(int)))!=0)
+    if(posix_memalign((void**)&points, (size_t)FBSIZE, (size_t)(DSET1_DIM1*DSET1_DIM2*sizeof(int)))!=0)
         TEST_ERROR;
 
-    if(posix_memalign(&check, (size_t)FBSIZE, (size_t)(DSET1_DIM1*DSET1_DIM2*sizeof(int)))!=0)
+    if(posix_memalign((void **)&check, (size_t)FBSIZE, (size_t)(DSET1_DIM1*DSET1_DIM2*sizeof(int)))!=0)
         TEST_ERROR;
 
     /* Initialize the dset1 */
@@ -302,6 +331,51 @@ test_direct(void)
             TEST_ERROR;
 	} /* end if */
 
+    /* Create the dset3 with Fletcher32 checksum enabled, to test Direct IO with filter. */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+       TEST_ERROR;
+
+    if(H5Pset_chunk (dcpl_id, 2, chunk_size) < 0)
+        TEST_ERROR;
+
+    if(H5Pset_fletcher32(dcpl_id) < 0)
+        TEST_ERROR;
+
+    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        TEST_ERROR;
+
+    if(H5Pset_buffer(dxpl_id, 1000000, NULL, NULL) < 0)
+        TEST_ERROR;
+
+    if((dset3 = H5Dcreate2(file, DSET3_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write the data to the dset3 */
+    if(H5Dwrite(dset3, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, points) < 0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset3) < 0)
+        TEST_ERROR;
+
+    if((dset3 = H5Dopen2(file, DSET3_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Read the data back from dset1 */
+    if(H5Dread(dset3, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, check) < 0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    p1 = points;
+    p2 = check;
+    for(i = 0; i < DSET1_DIM1; i++)
+       for(j = 0; j < DSET1_DIM2; j++)
+           if(*p1++ != *p2++) {
+               H5_FAILED();
+               printf("    Read different values than written in data set 1.\n");
+               printf("    At index %d,%d\n", i, j);
+               TEST_ERROR;
+           } /* end if */
+
     if(H5Sclose(space1) < 0)
         TEST_ERROR;
     if(H5Dclose(dset1) < 0)
@@ -333,6 +407,257 @@ error:
     return -1;
 #endif /*H5_HAVE_DIRECT*/
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_direct2
+ *
+ * Purpose:     More tests for the direct driver.  Tries to enumerate all
+ *              of the relevant situations to the direct driver when
+ *              dealing with dataset I/O.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, November 16, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static int test_direct2(void )
+{
+#ifdef H5_HAVE_DIRECT
+    hid_t       file = -1;
+    hid_t       dset = -1;
+    hid_t       space = -1;
+    hid_t       mspace = -1;
+    hid_t       fapl = -1;
+    hid_t       dcpl = -1;
+    hid_t       dxpl = -1;
+    hsize_t     dims[1];                        /* Dataset's dimensions */
+    hsize_t     cdims[1];                       /* Chunk dimensions */
+    hsize_t     start[1];                       /* Hyperslab start */
+    int         *rbuf;                          /* Read buffer */
+    int         *wbuf;                          /* Write buffer */
+    hsize_t     buf_used_elems;                 /* Number of valid elements in the buffer */
+    size_t      buf_alloc_size;                 /* Buffer allocated size */
+    hbool_t     aligned_mem;                    /* Whether the buffer is aligned */
+    unsigned    config;                         /* Test configuration (bit flags) */
+    unsigned    i;                              /* Local index */
+    char        err_msg[1024];
+    char        filename[1024];
+#endif /*H5_HAVE_DIRECT*/
+
+    TESTING("Direct I/O file driver (exhaustive)");
+
+#ifndef H5_HAVE_DIRECT
+    SKIPPED();
+    return 0;
+#else /*H5_HAVE_DIRECT*/
+
+    /* Set property list and file name for Direct driver.  Set memory alignment
+     * boundary and file block size to 512 which is the minimum for Linux 2.6.
+     */
+    fapl = h5_fileaccess();
+    if(H5Pset_fapl_direct(fapl, MBOUNDARY, FBSIZE, CBSIZE) < 0)
+        TEST_ERROR;
+    h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
+
+    for(config = 0; config < CONFIG_ALL; config++) {
+        /* Test for incompatible configurations */
+        if(!(config & CONFIG_CHUNK) && (config & CONFIG_COMPRESS
+                || config & CONFIG_BY_CHUNK))
+            continue;
+
+        /* Generate error message */
+        (void)sprintf(err_msg, "Config: %X", config);
+
+        /* Set alignment value */
+        if(H5Pset_alignment(fapl, 1, (config & CONFIG_ALIGN_FILE) ? FBSIZE : 1)
+                < 0)
+            FAIL_PUTS_ERROR(err_msg);
+
+        /* Set cache */
+        if(config & CONFIG_CACHE) {
+            if(H5Pset_cache(fapl, 0, 521, 1024 * 1024, 0.75) < 0)
+                FAIL_PUTS_ERROR(err_msg);
+        } /* end if */
+        else
+            if(H5Pset_cache(fapl, 0, 0, 0, 0.75) < 0)
+                FAIL_PUTS_ERROR(err_msg);
+
+        /* Create file */
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+
+        /* Create property lists */
+        if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+        if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+
+        /* Determine dataset size, and if it's chunked */
+        if(config & CONFIG_BLOCK_FILE)
+            cdims[0] = 4 * FBSIZE;
+        else
+            cdims[0] = 3 * FBSIZE + (FBSIZE / 3);
+        if(config & CONFIG_CHUNK) {
+            if(H5Pset_chunk(dcpl, 1, cdims) < 0)
+                FAIL_PUTS_ERROR(err_msg);
+            dims[0] = cdims[0] * NCHUNKS;
+        } /* end if */
+        else
+            dims[0] = cdims[0];
+
+        /* Set allocation time */
+        if(config & CONFIG_EARLY_ALLOC)
+            if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+                FAIL_PUTS_ERROR(err_msg);
+
+        /* Set compression */
+        if(config & CONFIG_COMPRESS)
+            if(H5Pset_deflate(dcpl, 5) < 0)
+                FAIL_PUTS_ERROR(err_msg);
+
+        /* Create dataset */
+        if((space = H5Screate_simple(1, dims, NULL)) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+        if((dset = H5Dcreate2(file, "dset", (config & CONFIG_TCONV)
+                ? H5T_NATIVE_UCHAR : H5T_NATIVE_INT, space, H5P_DEFAULT,
+                dcpl, H5P_DEFAULT)) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+
+        /* Determine buffer size */
+        if(config & CONFIG_BY_CHUNK) {
+            buf_used_elems = cdims[0];
+            if((mspace = H5Screate_simple(1, cdims, NULL)) < 0)
+                FAIL_PUTS_ERROR(err_msg);
+        } /* end else */
+        else
+            buf_used_elems = dims[0];
+        if(config & CONFIG_PAD_BUF)
+            buf_alloc_size = (((buf_used_elems * sizeof(int) - 1) / FBSIZE) + 1)
+                    * FBSIZE;
+        else
+            buf_alloc_size = buf_used_elems * sizeof(int);
+
+        /* Allocate buffers */
+        if(config & CONFIG_ALIGN_BUF) {
+            if(0 != HDposix_memalign((void **)&wbuf, MBOUNDARY, buf_alloc_size))
+                FAIL_PUTS_ERROR(err_msg);
+            if(0 != HDposix_memalign((void **)&rbuf, MBOUNDARY, buf_alloc_size))
+                FAIL_PUTS_ERROR(err_msg);
+
+            /* If the buffer is aligned and padded, we can mark it as aligned
+             * for direct use by the direct I/O driver */
+            if(config & CONFIG_PAD_BUF)
+                if(H5Pset_aligned_mem(dxpl, TRUE) < 0)
+                    FAIL_PUTS_ERROR(err_msg);
+        } /* end if */
+        else {
+            if(NULL == (wbuf = (int *)HDmalloc(buf_alloc_size)))
+                FAIL_PUTS_ERROR(err_msg);
+            if(NULL == (rbuf = (int *)HDmalloc(buf_alloc_size)))
+                FAIL_PUTS_ERROR(err_msg);
+        } /* end else */
+
+        /* Generate random write buffer */
+        for(i=0; i<buf_used_elems; i++)
+            wbuf[i] = HDrandom() % 256;
+
+        /* Write data */
+        if(config & CONFIG_BY_CHUNK)
+            for(i=0; i<NCHUNKS; i++) {
+                /* Select chunk i */
+                start[0] = i * cdims[0];
+                if(H5Sselect_hyperslab(space, H5S_SELECT_SET, start, NULL,
+                        cdims, NULL) < 0)
+                    FAIL_PUTS_ERROR(err_msg);
+
+                /* Write */
+                if(H5Dwrite(dset, H5T_NATIVE_INT, mspace, space, dxpl, wbuf)
+                        < 0)
+                    FAIL_PUTS_ERROR(err_msg);
+            } /* end for */
+        else
+            if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
+                FAIL_PUTS_ERROR(err_msg);
+
+        /* Flush file */
+        if(H5Fflush(file, H5F_SCOPE_LOCAL) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+
+        /* Read and verify data */
+        if(config & CONFIG_BY_CHUNK)
+            for(i=0; i<NCHUNKS; i++) {
+                /* Select chunk i */
+                start[0] = i * cdims[0];
+                if(H5Sselect_hyperslab(space, H5S_SELECT_SET, start, NULL,
+                        cdims, NULL) < 0)
+                    FAIL_PUTS_ERROR(err_msg);
+
+                /* Read data */
+                if(H5Dread(dset, H5T_NATIVE_INT, mspace, space, dxpl, rbuf)
+                        < 0)
+                    FAIL_PUTS_ERROR(err_msg);
+
+                /* Verify correctness of read data */
+                for(i=0; i<buf_used_elems; i++)
+                    if(wbuf[i] != rbuf[i])
+                        FAIL_PUTS_ERROR(err_msg);
+            } /* end for */
+        else {
+            /* Read data */
+            if(H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
+                FAIL_PUTS_ERROR(err_msg);
+
+            /* Verify correctness of read data */
+            for(i=0; i<dims[0]; i++)
+                if(wbuf[i] != rbuf[i])
+                    FAIL_PUTS_ERROR(err_msg);
+        } /* end else */
+
+        /* Verify that the dxpl still contains the original aligned_mem setting
+         */
+        if(H5Pget_aligned_mem(dxpl, &aligned_mem) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+        if(config & CONFIG_ALIGN_BUF && config & CONFIG_PAD_BUF) {
+            if(!aligned_mem)
+                FAIL_PUTS_ERROR(err_msg);
+        } /* end if */
+        else
+            if(aligned_mem)
+                FAIL_PUTS_ERROR(err_msg);
+
+        /* Close */
+        HDfree(wbuf);
+        HDfree(rbuf);
+        if(H5Pclose(dxpl) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+        if(H5Pclose(dcpl) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+        if(H5Sclose(space) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+        if(config & CONFIG_BY_CHUNK)
+            if(H5Sclose(mspace) < 0)
+                FAIL_PUTS_ERROR(err_msg);
+        if(H5Dclose(dset) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+        if(H5Fclose(file) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+    } /* end for */
+
+    h5_cleanup(FILENAME, fapl);
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+    } H5E_END_TRY
+    return -1;
+#endif /*H5_HAVE_DIRECT*/
+} /* end test_direct2 */
 
 
 /*-------------------------------------------------------------------------
@@ -1149,7 +1474,8 @@ main(void)
     nerrors += test_family() < 0    ? 1 : 0;
     nerrors += test_family_compat() < 0    ? 1 : 0;
     nerrors += test_multi() < 0     ? 1 : 0;
-    nerrors += test_direct() < 0      ? 1 : 0;
+    nerrors += test_direct() < 0    ? 1 : 0;
+    nerrors += test_direct2() < 0   ? 1 : 0;
 
     if(nerrors) {
 	printf("***** %d Virtual File Driver TEST%s FAILED! *****\n",

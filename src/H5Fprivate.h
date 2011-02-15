@@ -254,6 +254,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_EXTPATH(F)          ((F)->extpath)
 #define H5F_GET_FC_DEGREE(F)    ((F)->shared->fc_degree)
 #define H5F_STORE_MSG_CRT_IDX(F)    ((F)->shared->store_msg_crt_idx)
+#define H5F_LF(F)               ((F)->shared->lf)
 #define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags & (FL))
 #define H5F_DRIVER_ID(F)        ((F)->shared->lf->driver_id)
 #define H5F_GET_FILENO(F,FILENUM) ((FILENUM) = (F)->shared->lf->fileno)
@@ -279,6 +280,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_EXTPATH(F)          (H5F_get_extpath(F))
 #define H5F_GET_FC_DEGREE(F)    (H5F_get_fc_degree(F))
 #define H5F_STORE_MSG_CRT_IDX(F) (H5F_store_msg_crt_idx(F))
+#define H5F_LF(F)               (H5F_lf(F))
 #define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
 #define H5F_DRIVER_ID(F)        (H5F_get_driver_id(F))
 #define H5F_GET_FILENO(F,FILENUM) (H5F_get_fileno((F), &(FILENUM)))
@@ -507,6 +509,7 @@ H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
 H5_DLL hbool_t H5F_use_tmp_space(const H5F_t *f);
 
 /* Functions that retrieve values from VFD layer */
+H5_DLL H5FD_t *H5F_lf(const H5F_t *f);
 H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
 H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);

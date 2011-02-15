@@ -355,6 +355,8 @@ H5_DLL herr_t H5Pset_hyper_vector_size(hid_t fapl_id, size_t size);
 H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size/*out*/);
 H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void* operate_data);
 H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void** operate_data);
+H5_DLL herr_t H5Pset_aligned_mem(hid_t plist_id, hbool_t aligned_mem);
+H5_DLL herr_t H5Pget_aligned_mem(hid_t plist_id, hbool_t *aligned_mem/*out*/);
 
 /* Link creation property list (LCPL) routines */
 H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd);

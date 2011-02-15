@@ -106,5 +106,10 @@ H5_DLL herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle);
 H5_DLL herr_t H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
 H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 
+/* Private driver specific prototypes */
+#ifdef H5_HAVE_DIRECT
+H5_DLL void *H5FD_direct_malloc(const H5FD_t *_file, hid_t dxpl_id, size_t size);
+#endif /* H5_HAVE_DIRECT */
+
 #endif /* !_H5FDprivate_H */
 

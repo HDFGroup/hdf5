@@ -359,7 +359,7 @@ HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
         /* Push direct block data through I/O filter pipeline */
         nbytes = write_size;
         if(H5Z_pipeline(&(hdr->pline), 0, &filter_mask, H5Z_NO_EDC,
-                 filter_cb, &nbytes, &write_size, &write_buf) < 0)
+                 filter_cb, &nbytes, &write_size, &write_buf, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed")
 #ifdef QAK
 HDfprintf(stderr, "%s: nbytes = %Zu, write_size = %Zu, write_buf = %p\n", FUNC, nbytes, write_size, write_buf);
@@ -694,7 +694,7 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 
         /* De-filter the object */
         read_size = nbytes = obj_size;
-        if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &read_size, &read_buf) < 0)
+        if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &read_size, &read_buf, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "input filter failed")
         obj_size = nbytes;
     } /* end if */

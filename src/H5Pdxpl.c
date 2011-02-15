@@ -88,6 +88,11 @@
  */
 #define H5D_XFER_HYPER_VECTOR_SIZE_SIZE       sizeof(size_t)
 #define H5D_XFER_HYPER_VECTOR_SIZE_DEF        H5D_IO_VECTOR_SIZE
+/* Definitions for aligned memory property */
+#define H5D_XFER_ALIGNED_MEM_SIZE       sizeof(hbool_t)
+#define H5D_XFER_ALIGNED_MEM_DEF        FALSE
+/* Definitions for aligned memory property (default in H5Dprivate.h) */
+#define H5D_XFER_ALIGNED_MEM_BUF_SIZE       sizeof(H5D_aligned_mem_buf_t)
 /* Definitions for I/O transfer mode property */
 #define H5D_XFER_IO_XFER_MODE_SIZE       sizeof(H5FD_mpio_xfer_t)
 #define H5D_XFER_IO_XFER_MODE_DEF        H5FD_MPIO_INDEPENDENT
@@ -98,7 +103,7 @@
 #define H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF        H5FD_MPIO_CHUNK_DEFAULT
 #define H5D_XFER_MPIO_CHUNK_OPT_NUM_SIZE        sizeof(unsigned)
 #define H5D_XFER_MPIO_CHUNK_OPT_NUM_DEF         H5D_ONE_LINK_CHUNK_IO_THRESHOLD
-#define H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE       sizeof(unsigned)
+#define H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE      sizeof(unsigned)
 #define H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEF       H5D_MULTI_CHUNK_IO_COL_THRESHOLD
 /* Definitions for EDC property */
 #define H5D_XFER_EDC_SIZE       sizeof(H5Z_EDC_t)
@@ -195,6 +200,8 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
     hid_t def_vfl_id = H5D_XFER_VFL_ID_DEF;                     /* Default value for file driver ID */
     void *def_vfl_info = H5D_XFER_VFL_INFO_DEF;                 /* Default value for file driver info */
     size_t def_hyp_vec_size = H5D_XFER_HYPER_VECTOR_SIZE_DEF;   /* Default value for vector size */
+    hbool_t def_aligned_mem = H5D_XFER_ALIGNED_MEM_DEF;         /* Default value for aligned memory */
+    H5D_aligned_mem_buf_t def_aligned_mem_buf = H5D_XFER_ALIGNED_MEM_BUF_DEF; /* Default value for aligned memory buffer */
     haddr_t metadata_tag = H5AC_METADATA_TAG_DEF;              /* Default value for metadata tag */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t def_io_xfer_mode = H5D_XFER_IO_XFER_MODE_DEF;      /* Default value for I/O transfer mode */
@@ -261,6 +268,14 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the vector size property */
     if(H5P_register_real(pclass, H5D_XFER_HYPER_VECTOR_SIZE_NAME, H5D_XFER_HYPER_VECTOR_SIZE_SIZE, &def_hyp_vec_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the aligned memory property */
+    if(H5P_register_real(pclass, H5D_XFER_ALIGNED_MEM_NAME, H5D_XFER_ALIGNED_MEM_SIZE, &def_aligned_mem, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the aligned memory buffer property */
+    if(H5P_register_real(pclass, H5D_XFER_ALIGNED_MEM_BUF_NAME, H5D_XFER_ALIGNED_MEM_BUF_SIZE, &def_aligned_mem_buf, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 #ifdef H5_HAVE_PARALLEL
@@ -1397,4 +1412,82 @@ H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size/*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_hyper_vector_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_aligned_mem
+ *
+ * Purpose:     Notifies the library that the buffer passed to a call to
+ *              H5Dread or H5Dwrite has been allocated in an aligned
+ *              manner.  Currently only used with the direct file driver.
+ *              Specifically, the buffer should be allocated using
+ *              posix_memalign with "alignment" equal to the "alignment"
+ *              from H5Pset_fapl_direct, and the allocated size should
+ *              be a multiple of the "block_size" from H5Pset_fapl_direct.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, October 4, 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_aligned_mem(hid_t plist_id, hbool_t aligned_mem)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pset_aligned_mem, FAIL)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Update property list */
+    if(H5P_set(plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_aligned_mem() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_aligned_mem
+ *
+ * Purpose:     Retrieves the aligned memory property from plist_id.  See
+ *              H5Pset_aligned_mem for more information.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, October 4, 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_aligned_mem(hid_t plist_id, hbool_t *aligned_mem/*out*/)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pget_aligned_mem, FAIL)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Return values */
+    if(aligned_mem)
+        if(H5P_get(plist, H5D_XFER_ALIGNED_MEM_NAME, aligned_mem)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_aligned_mem() */
 

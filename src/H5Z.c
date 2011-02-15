@@ -1060,7 +1060,7 @@ herr_t
 H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
  	     unsigned *filter_mask/*in,out*/, H5Z_EDC_t edc_read,
              H5Z_cb_t cb_struct, size_t *nbytes/*in,out*/,
-             size_t *buf_size/*in,out*/, void **buf/*in,out*/)
+             size_t *buf_size/*in,out*/, void **buf/*in,out*/, hid_t dxpl_id)
 {
     size_t	i, idx, new_nbytes;
     int fclass_idx;             /* Index of filter class in global table */
@@ -1071,6 +1071,12 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 #endif
     unsigned	failed = 0;
     unsigned	tmp_flags;
+#ifdef H5_HAVE_DIRECT
+    H5P_genplist_t *dx_plist = NULL;    /* Data transer property list */
+    hbool_t     aligned_mem;            /* Whether the buffer is aligned */
+    void        *prev_buf;              /* Previous value of *buf */
+    size_t      prev_buf_size;          /* Previous value of *buf_size */
+#endif /* H5_HAVE_DIRECT */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_pipeline, FAIL)
@@ -1122,6 +1128,16 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
             }
 	}
     } else if (pline) { /* Write */
+#ifdef H5_HAVE_DIRECT
+        /* Get the dataset transfer property list */
+        if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, FAIL, "not a dataset creation property list")
+
+        /* Check the aligned memory property */
+        if(H5P_get(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_WRITEERROR, FAIL, "unable to get value")
+#endif /* H5_HAVE_DIRECT */
+
 	for (idx=0; idx<pline->nused; idx++) {
 	    if (*filter_mask & ((unsigned)1<<idx)) {
 		failed |= (unsigned)1 << idx;
@@ -1137,10 +1153,22 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 		continue; /*filter excluded*/
 	    }
             fclass=&H5Z_table_g[fclass_idx];
+
+#ifdef H5_HAVE_DIRECT
+            /* Keep track of the values of buf and buf_size before and after
+             * the callback, to see if the filter reallocated the buffer.  If
+             * it did, mark the buffer as unaligned on the dxpl. */
+            if(aligned_mem) {
+                prev_buf = *buf;
+                prev_buf_size = *buf_size;
+            } /* end if */
+#endif /* H5_HAVE_DIRECT */
+
 #ifdef H5Z_DEBUG
             fstats=&H5Z_stat_table_g[fclass_idx];
 	    H5_timer_begin(&timer);
 #endif
+
 	    new_nbytes = (fclass->filter)(flags|(pline->filter[idx].flags), pline->filter[idx].cd_nelmts,
 					pline->filter[idx].cd_values, *nbytes, buf_size, buf);
 #ifdef H5Z_DEBUG
@@ -1148,6 +1176,18 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 	    fstats->stats[0].total += MAX(*nbytes, new_nbytes);
 	    if (0==new_nbytes) fstats->stats[0].errors += *nbytes;
 #endif
+
+#ifdef H5_HAVE_DIRECT
+            if(aligned_mem && (prev_buf != *buf || prev_buf_size != *buf_size))
+                    {
+                /* Buffer changed, may no longer be aligned */
+                aligned_mem = FALSE;
+                if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem)
+                        < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+            } /* end if */
+#endif /* H5_HAVE_DIRECT */
+
             if(0==new_nbytes) {
                 if (0==(pline->filter[idx].flags & H5Z_FLAG_OPTIONAL)) {
                     if((cb_struct.func && (H5Z_CB_FAIL==cb_struct.func(pline->filter[idx].id, *buf, *nbytes, cb_struct.op_data)))

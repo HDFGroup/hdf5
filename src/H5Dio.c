@@ -26,6 +26,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FDdirect.h"         /* Linux direct I/O                     */
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 
@@ -313,6 +314,11 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+#ifdef H5_HAVE_DIRECT
+    H5P_genplist_t *dx_plist = NULL;    /* Data transer property list */
+    hbool_t     aligned_mem;            /* Aligned memory property */
+    hbool_t     aligned_mem_set = FALSE; /* Whether aligned_mem has been set */
+#endif /* H5_HAVE_DIRECT */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_read, dxpl_id, dataset->oloc.addr, FAIL)
@@ -331,6 +337,38 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Fill the DXPL cache values for later use */
     if(H5D_get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+
+#ifdef H5_HAVE_DIRECT
+    /* If using the direct I/O driver, check if the aligned memory property is
+     * set */
+    if(H5F_DRIVER_ID(dataset->oloc.file) == H5FD_DIRECT) {
+        H5D_aligned_mem_buf_t   aligned_mem_buf; /* Aligned memory buffer */
+        H5T_t                   *mem_type;      /* Memory datatype */
+
+        /* Get the dataset transfer property list */
+        if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+
+        /* Check the property */
+        if(H5P_get(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+        aligned_mem_set = TRUE;
+
+        /* Remember the buffer passed to this function */
+        if(aligned_mem) {
+            aligned_mem_buf.buf = buf;
+
+            if(NULL == (mem_type = (H5T_t *)H5I_object_verify(mem_type_id,
+                    H5I_DATATYPE)))
+            aligned_mem_buf.size = (size_t)H5S_GET_EXTENT_NPOINTS(mem_space)
+                    * H5T_GET_SIZE(mem_type);
+
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_BUF_NAME,
+                    &aligned_mem_buf) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        } /* end if */
+    } /* end if */
+#endif /* H5_HAVE_DIRECT */
 
     /* Set up datatype info for operation */
     if(H5D_typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, FALSE, &type_info) < 0)
@@ -466,6 +504,29 @@ done:
         if(H5S_close(projected_mem_space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
 
+#ifdef H5_HAVE_DIRECT
+    /* Reset aligned memory properties that may have been changed by the
+     * library, so we don't change them out from under the user or cause
+     * H5P_equal() to fail */
+    if(aligned_mem_set) {
+        HDassert(dx_plist);
+
+        /* Reset aligned_mem to the value it had at the start of the call */
+        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem))
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+        /* Reset aligned_mem_buf to the default value (only necessary if
+         * aligned_mem is true) */
+        if(aligned_mem) {
+            H5D_aligned_mem_buf_t def_aligned_mem_buf = H5D_XFER_ALIGNED_MEM_BUF_DEF;
+
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_BUF_NAME,
+                    &def_aligned_mem_buf) < 0)
+                HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        } /* end if */
+    } /* end if */
+#endif /* H5_HAVE_DIRECT */
+
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D_read() */
 
@@ -513,6 +574,11 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+#ifdef H5_HAVE_DIRECT
+    H5P_genplist_t *dx_plist = NULL;    /* Data transer property list */
+    hbool_t     aligned_mem;            /* Aligned memory property */
+    hbool_t     aligned_mem_set = FALSE; /* Whether aligned_mem has been set */
+#endif /* H5_HAVE_DIRECT */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_write, dxpl_id, dataset->oloc.addr, FAIL)
@@ -535,6 +601,38 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Fill the DXPL cache values for later use */
     if(H5D_get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+
+#ifdef H5_HAVE_DIRECT
+    /* If using the direct I/O driver, check if the aligned memory property is
+     * set */
+    if(H5F_DRIVER_ID(dataset->oloc.file) == H5FD_DIRECT) {
+        H5D_aligned_mem_buf_t   aligned_mem_buf; /* Aligned memory buffer */
+        H5T_t                   *mem_type;      /* Memory datatype */
+
+        /* Get the dataset transfer property list */
+        if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+
+        /* Check the property */
+        if(H5P_get(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+        aligned_mem_set = TRUE;
+
+        /* Remember the buffer passed to this function */
+        if(aligned_mem) {
+            aligned_mem_buf.buf = buf;
+
+            if(NULL == (mem_type = (H5T_t *)H5I_object_verify(mem_type_id,
+                    H5I_DATATYPE)))
+            aligned_mem_buf.size = (size_t)H5S_GET_EXTENT_NPOINTS(mem_space)
+                    * H5T_GET_SIZE(mem_type);
+
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_BUF_NAME,
+                    &aligned_mem_buf) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        } /* end if */
+    } /* end if */
+#endif /* H5_HAVE_DIRECT */
 
     /* Set up datatype info for operation */
     if(H5D_typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, TRUE, &type_info) < 0)
@@ -602,7 +700,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
         HDassert(projected_mem_space);
         HDassert(adj_buf);
-            
+
         /* Switch to using projected memory dataspace & adjusted buffer */
         mem_space = projected_mem_space;
         buf = adj_buf;
@@ -705,6 +803,29 @@ done:
     if(NULL != projected_mem_space)
         if(H5S_close(projected_mem_space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
+
+#ifdef H5_HAVE_DIRECT
+    /* Reset aligned memory properties that may have been changed by the
+     * library, so we don't change them out from under the user or cause
+     * H5P_equal() to fail */
+    if(aligned_mem_set) {
+        HDassert(dx_plist);
+
+        /* Reset aligned_mem to the value it had at the start of the call */
+        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem))
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+        /* Reset aligned_mem_buf to the default value (only necessary if
+         * aligned_mem is true) */
+        if(aligned_mem) {
+            H5D_aligned_mem_buf_t def_aligned_mem_buf = H5D_XFER_ALIGNED_MEM_BUF_DEF;
+
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_BUF_NAME,
+                    &def_aligned_mem_buf) < 0)
+                HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        } /* end if */
+    } /* end if */
+#endif /* H5_HAVE_DIRECT */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D_write() */

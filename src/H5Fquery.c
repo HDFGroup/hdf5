@@ -627,6 +627,32 @@ H5F_store_msg_crt_idx(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_lf
+ *
+ * Purpose:     Return a pointer to the low-level file pointer (H5FD_t)
+ *
+ * Return:      Success:        Non-negative - TRUE or FALSE
+ *              Failure:        Negative (should not happen)
+ *
+ * Programmer:  Neil Fortner
+ *              November 1 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+H5FD_t *
+H5F_lf(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_lf)
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->lf)
+} /* end H5F_lf() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_has_feature
  *
  * Purpose:	Check if a file has a particular feature enabled

@@ -55,6 +55,7 @@
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #endif /* H5_HAVE_PARALLEL */
 #include "H5Dpkg.h"		/* Dataset functions			*/
+#include "H5FDdirect.h"         /* Linux direct I/O                     */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -168,6 +169,13 @@ typedef struct H5D_chunk_readvv_ud_t {
     hid_t dxpl_id;              /* DXPL for operation */
 } H5D_chunk_readvv_ud_t;
 
+/* Information passed to the H5D_chunk_alloc function */
+typedef struct H5D_chunk_alloc_ud_t {
+    const H5O_pline_t   *pline;         /* I/O pipeline */
+    const H5F_t         *f;             /* File */
+    hid_t               dxpl_id;        /* Dataset transfer property list */
+} H5D_chunk_alloc_ud_t;
+
 
 /********************/
 /* Local Prototypes */
@@ -196,10 +204,10 @@ H5D_nonexistent_readvv(const H5D_io_info_t *io_info,
 /* Helper routines */
 static herr_t H5D_chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
     const hsize_t *curr_dims);
-static void *H5D_chunk_alloc(size_t size, const H5O_pline_t *pline);
-static void *H5D_chunk_xfree(void *chk, const H5O_pline_t *pline);
-static void *H5D_chunk_realloc(void *chk, size_t size,
-    const H5O_pline_t *pline);
+static void *H5D_chunk_alloc(size_t size, const H5D_chunk_alloc_ud_t *udata);
+static void *H5D_chunk_xfree(void *chk, const H5D_chunk_alloc_ud_t *udata);
+static void *H5D_chunk_realloc(void *chk, size_t old_size, size_t new_size,
+    const H5D_chunk_alloc_ud_t *udata);
 static herr_t H5D_chunk_cinfo_cache_update(H5D_chunk_cached_t *last,
     const H5D_chunk_ud_t *udata);
 static herr_t H5D_free_chunk_info(void *item, void *key, void *opdata);
@@ -856,19 +864,27 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5D_chunk_alloc(size_t size, const H5O_pline_t *pline)
+H5D_chunk_alloc(size_t size, const H5D_chunk_alloc_ud_t *udata)
 {
     void *ret_value = NULL;		/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_alloc)
 
     HDassert(size);
-    HDassert(pline);
+    HDassert(udata);
+    HDassert(udata->pline);
+    HDassert(udata->f);
 
-    if(pline->nused > 0)
-        ret_value = H5MM_malloc(size);
+#ifdef H5_HAVE_DIRECT
+    if(H5F_DRIVER_ID(udata->f) == H5FD_DIRECT)
+        /* Add support for free lists of aligned blocks? -NAF */
+        ret_value = H5FD_direct_malloc(H5F_LF(udata->f), udata->dxpl_id, size);
     else
-        ret_value = H5FL_BLK_MALLOC(chunk, size);
+#endif /* H5_HAVE_DIRECT */
+        if(udata->pline->nused > 0)
+            ret_value = H5MM_malloc(size);
+        else
+            ret_value = H5FL_BLK_MALLOC(chunk, size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_chunk_alloc() */
@@ -889,14 +905,20 @@ H5D_chunk_alloc(size_t size, const H5O_pline_t *pline)
  *-------------------------------------------------------------------------
  */
 static void *
-H5D_chunk_xfree(void *chk, const H5O_pline_t *pline)
+H5D_chunk_xfree(void *chk, const H5D_chunk_alloc_ud_t *udata)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_xfree)
 
-    HDassert(pline);
+    HDassert(udata);
+    HDassert(udata->pline);
+    HDassert(udata->f);
 
     if(chk) {
-        if(pline->nused > 0)
+        if(udata->pline->nused > 0
+#ifdef H5_HAVE_DIRECT
+                || H5F_DRIVER_ID(udata->f) == H5FD_DIRECT
+#endif /* H5_HAVE_DIRECT */
+                )
             H5MM_xfree(chk);
         else
             chk = H5FL_BLK_FREE(chunk, chk);
@@ -921,19 +943,32 @@ H5D_chunk_xfree(void *chk, const H5O_pline_t *pline)
  *-------------------------------------------------------------------------
  */
 static void *
-H5D_chunk_realloc(void *chk, size_t size, const H5O_pline_t *pline)
+H5D_chunk_realloc(void *chk, size_t old_size, size_t new_size,
+        const H5D_chunk_alloc_ud_t *udata)
 {
     void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_realloc)
 
-    HDassert(size);
-    HDassert(pline);
+    HDassert(new_size);
+    HDassert(udata);
+    HDassert(udata->pline);
+    HDassert(udata->f);
 
-    if(pline->nused > 0)
-        ret_value = H5MM_realloc(chk, size);
+#ifdef H5_HAVE_DIRECT
+    if(H5F_DRIVER_ID(udata->f) == H5FD_DIRECT) {
+        /* Make this smarter? avoid realloc if old_size and new_size are in the
+         * same fbsize block? -NAF */
+        ret_value = H5FD_direct_malloc(H5F_LF(udata->f), udata->dxpl_id, new_size);
+        HDmemcpy(ret_value, chk, old_size);
+        H5MM_free(chk);
+    } /* end if */
     else
-        ret_value = H5FL_BLK_REALLOC(chunk, chk, size);
+#endif /* H5_HAVE_DIRECT */
+        if(udata->pline->nused > 0)
+            ret_value = H5MM_realloc(chk, new_size);
+        else
+            ret_value = H5FL_BLK_REALLOC(chunk, chk, new_size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_chunk_realloc() */
@@ -2327,6 +2362,7 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
 {
     void	*buf = NULL;	        /* Temporary buffer		*/
     hbool_t	point_of_no_return = FALSE;
+    H5D_chunk_alloc_ud_t alloc_ud;      /* Information for H5D_chunk_alloc/xfree */
     herr_t	ret_value = SUCCEED;	/* Return value			*/
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_chunk_flush_entry, dxpl_id, dset->oloc.addr, FAIL)
@@ -2336,6 +2372,11 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     HDassert(dxpl_cache);
     HDassert(ent);
     HDassert(!ent->locked);
+
+    /* Build alloc_ud */
+    alloc_ud.pline = &(dset->shared->dcpl_cache.pline);
+    alloc_ud.f = dset->oloc.file;
+    alloc_ud.dxpl_id = dxpl_id;
 
     buf = ent->chunk;
     if(ent->dirty && !ent->deleted) {
@@ -2363,7 +2404,7 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
                  * for later.
                  */
                 H5_ASSIGN_OVERFLOW(alloc, udata.nbytes, uint32_t, size_t);
-                if(NULL == (buf = H5MM_malloc(alloc)))
+                if(NULL == (buf = H5D_chunk_alloc(alloc, &alloc_ud)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for pipeline")
                 HDmemcpy(buf, ent->chunk, udata.nbytes);
             } /* end if */
@@ -2380,7 +2421,7 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
             } /* end else */
             H5_ASSIGN_OVERFLOW(nbytes, udata.nbytes, uint32_t, size_t);
             if(H5Z_pipeline(&(dset->shared->dcpl_cache.pline), 0, &(udata.filter_mask), dxpl_cache->err_detect,
-                     dxpl_cache->filter_cb, &nbytes, &alloc, &buf) < 0)
+                     dxpl_cache->filter_cb, &nbytes, &alloc, &buf, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
 #if H5_SIZEOF_SIZE_T > 4
             /* Check for the chunk expanding too much to encode in a 32-bit value */
@@ -2440,13 +2481,13 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
         if(buf == ent->chunk)
             buf = NULL;
         if(ent->chunk != NULL)
-            ent->chunk = (uint8_t *)H5D_chunk_xfree(ent->chunk, &(dset->shared->dcpl_cache.pline));
+            ent->chunk = (uint8_t *)H5D_chunk_xfree(ent->chunk, &alloc_ud);
     } /* end if */
 
 done:
     /* Free the temp buffer only if it's different than the entry chunk */
-    if(buf != ent->chunk)
-        H5MM_xfree(buf);
+    if(buf && buf != ent->chunk)
+        (void)H5D_chunk_xfree(buf, &alloc_ud);
 
     /*
      * If we reached the point of no return then we have no choice but to
@@ -2456,7 +2497,7 @@ done:
      */
     if(ret_value < 0 && point_of_no_return) {
         if(ent->chunk)
-            ent->chunk = (uint8_t *)H5D_chunk_xfree(ent->chunk, &(dset->shared->dcpl_cache.pline));
+            ent->chunk = (uint8_t *)H5D_chunk_xfree(ent->chunk, &alloc_ud);
     } /* end if */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
@@ -2481,6 +2522,7 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     H5D_rdcc_ent_t *ent, hbool_t flush)
 {
     H5D_rdcc_t *rdcc = &(dset->shared->cache.chunk);
+    H5D_chunk_alloc_ud_t alloc_ud;         /* Information for H5D_chunk_alloc/xfree */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_cache_evict)
@@ -2491,6 +2533,11 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     HDassert(!ent->locked);
     HDassert(ent->idx < rdcc->nslots);
 
+    /* Build alloc_ud */
+    alloc_ud.pline = &(dset->shared->dcpl_cache.pline);
+    alloc_ud.f = dset->oloc.file;
+    alloc_ud.dxpl_id = dxpl_id;
+
     if(flush) {
 	/* Flush */
 	if(H5D_chunk_flush_entry(dset, dxpl_id, dxpl_cache, ent, TRUE) < 0)
@@ -2499,7 +2546,7 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     else {
         /* Don't flush, just free chunk */
 	if(ent->chunk != NULL)
-	    ent->chunk = (uint8_t *)H5D_chunk_xfree(ent->chunk, &(dset->shared->dcpl_cache.pline));
+	    ent->chunk = (uint8_t *)H5D_chunk_xfree(ent->chunk, &alloc_ud);
     } /* end else */
 
     /* Unlink from list */
@@ -2666,7 +2713,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     hbool_t relax)
 {
     H5D_t *dset = io_info->dset;                /* Local pointer to the dataset info */
-    const H5O_pline_t   *pline = &(dset->shared->dcpl_cache.pline); /* I/O pipeline info - always equal to the pline passed to H5D_chunk_alloc */
+    H5D_chunk_alloc_ud_t alloc_ud;              /* Information for H5D_chunk_alloc/xfree */
     const H5O_layout_t  *layout = &(dset->shared->layout); /* Dataset layout */
     const H5O_fill_t    *fill = &(dset->shared->dcpl_cache.fill); /* Fill value info */
     H5D_fill_buf_info_t fb_info;                /* Dataset's fill buffer info */
@@ -2688,6 +2735,11 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     HDassert(dset);
     HDassert(TRUE == H5P_isa_class(io_info->dxpl_id, H5P_DATASET_XFER));
 
+    /* Build alloc_ud */
+    alloc_ud.pline = &(dset->shared->dcpl_cache.pline);
+    alloc_ud.f = dset->oloc.file;
+    alloc_ud.dxpl_id = io_info->dxpl_id;
+
     /* Get the chunk's size */
     HDassert(layout->u.chunk.size > 0);
     H5_ASSIGN_OVERFLOW(chunk_size, layout->u.chunk.size, uint32_t, size_t);
@@ -2707,6 +2759,30 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
             HDassert(io_info->store->chunk.offset[u] == ent->offset[u]);
 #endif /* NDEBUG */
 
+#ifdef H5_HAVE_DIRECT
+        /* If using the direct I/O driver, set the aligned memory property */
+        if(H5F_DRIVER_ID(alloc_ud.f) == H5FD_DIRECT) {
+            H5P_genplist_t          *dx_plist = NULL;   /* Data transer property list */
+            hbool_t                 aligned_mem = TRUE; /* Aligned memory */
+            H5D_aligned_mem_buf_t   aligned_mem_buf;    /* Aligned memory buffer */
+
+            /* Get the dataset transfer property list */
+            if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(alloc_ud.dxpl_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataset creation property list")
+
+            /* Set the aligned memory property */
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
+
+            /* Set the aligned memory buffer property */
+            aligned_mem_buf.buf = ent->chunk;
+            aligned_mem_buf.size = chunk_size;
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_BUF_NAME,
+                    &aligned_mem_buf) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
+        } /* end if */
+#endif /* H5_HAVE_DIRECT */
+
         /*
          * Already in the cache.  Count a hit.
          */
@@ -2724,7 +2800,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
         /* Still save the chunk address so the cache stays consistent */
         chunk_addr = udata->addr;
 
-        if(NULL == (chunk = H5D_chunk_alloc(chunk_size, pline)))
+        if(NULL == (chunk = H5D_chunk_alloc(chunk_size, &alloc_ud)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
 
         /* In the case that some dataset functions look through this data,
@@ -2747,14 +2823,14 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
             H5_ASSIGN_OVERFLOW(chunk_alloc, udata->nbytes, uint32_t, size_t);
-            if(NULL == (chunk = H5D_chunk_alloc(chunk_alloc, pline)))
+            if(NULL == (chunk = H5D_chunk_alloc(chunk_alloc, &alloc_ud)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
             if(H5F_block_read(dset->oloc.file, H5FD_MEM_DRAW, chunk_addr, chunk_alloc, io_info->dxpl_id, chunk) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk")
 
-            if(pline->nused) {
-                if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->filter_mask), io_info->dxpl_cache->err_detect,
-                        io_info->dxpl_cache->filter_cb, &chunk_alloc, &chunk_alloc, &chunk) < 0)
+            if(alloc_ud.pline->nused) {
+                if(H5Z_pipeline(alloc_ud.pline, H5Z_FLAG_REVERSE, &(udata->filter_mask), io_info->dxpl_cache->err_detect,
+                        io_info->dxpl_cache->filter_cb, &chunk_alloc, &chunk_alloc, &chunk, io_info->dxpl_id) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, NULL, "data pipeline read failed")
                 H5_ASSIGN_OVERFLOW(udata->nbytes, chunk_alloc, size_t, uint32_t);
             } /* end if */
@@ -2770,7 +2846,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
 
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
-            if(NULL == (chunk = H5D_chunk_alloc(chunk_size, pline)))
+            if(NULL == (chunk = H5D_chunk_alloc(chunk_size, &alloc_ud)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
 
             if(H5P_is_fill_value_defined(fill, &fill_status) < 0)
@@ -2907,7 +2983,7 @@ done:
     /* Release the chunk allocated, on error */
     if(!ret_value)
         if(chunk)
-            chunk = H5D_chunk_xfree(chunk, pline);
+            chunk = H5D_chunk_xfree(chunk, &alloc_ud);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_lock() */
@@ -2941,12 +3017,18 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
 {
     const H5O_layout_t *layout = &(io_info->dset->shared->layout); /* Dataset layout */
     const H5D_rdcc_t	*rdcc = &(io_info->dset->shared->cache.chunk);
+    H5D_chunk_alloc_ud_t alloc_ud;                /* Information for H5D_chunk_alloc/xfree */
     herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_unlock)
 
     HDassert(io_info);
     HDassert(udata);
+
+    /* Build alloc_ud */
+    alloc_ud.pline = &(io_info->dset->shared->dcpl_cache.pline);
+    alloc_ud.f = io_info->dset->oloc.file;
+    alloc_ud.dxpl_id = io_info->dxpl_id;
 
     if(UINT_MAX == udata->idx_hint) {
         /*
@@ -2970,7 +3052,7 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
         } /* end if */
         else {
             if(chunk)
-                chunk = H5D_chunk_xfree(chunk, &(io_info->dset->shared->dcpl_cache.pline));
+                chunk = H5D_chunk_xfree(chunk, &alloc_ud);
         } /* end else */
     } /* end if */
     else {
@@ -3112,6 +3194,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
     hsize_t	chunk_offset[H5O_LAYOUT_NDIMS]; /* Offset of current chunk */
     size_t	orig_chunk_size; /* Original size of chunk in bytes */
     unsigned    filter_mask = 0; /* Filter mask for chunks that have them */
+    H5D_chunk_alloc_ud_t alloc_ud;      /* Information for H5D_chunk_alloc/xfree */
     const H5O_layout_t *layout = &(dset->shared->layout);       /* Dataset layout */
     const H5O_pline_t *pline = &(dset->shared->dcpl_cache.pline);    /* I/O pipeline info */
     const H5O_fill_t *fill = &(dset->shared->dcpl_cache.fill);    /* Fill value info */
@@ -3174,7 +3257,10 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
         /* Set the MPI-capable file driver flag */
         using_mpi = TRUE;
 
-        /* Use the internal "independent" DXPL */
+        /* Use the internal "independent" DXPL.  If we ever enable aligned
+         * allocations in parallel, we should either copy the internal DXPL here
+         * or cache its values for the aligned mem properties and restore
+         * afterwards. */
         data_dxpl_id = H5AC_ind_dxpl_id;
     } /* end if */
     else {
@@ -3184,6 +3270,11 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
 #ifdef H5_HAVE_PARALLEL
     } /* end else */
 #endif  /* H5_HAVE_PARALLEL */
+
+    /* Build alloc_ud */
+    alloc_ud.pline = pline;
+    alloc_ud.f = dset->oloc.file;
+    alloc_ud.dxpl_id = data_dxpl_id;
 
     /* Fill the DXPL cache values for later use */
     if(H5D_get_dxpl_cache(data_dxpl_id, &dxpl_cache) < 0)
@@ -3212,9 +3303,10 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
         /* (delay allocating fill buffer for VL datatypes until refilling) */
         /* (casting away const OK - QAK) */
         if(H5D_fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D_chunk_alloc,
-                (void *)pline, (H5MM_free_t)H5D_chunk_xfree, (void *)pline,
-                &dset->shared->dcpl_cache.fill, dset->shared->type,
-                dset->shared->type_id, (size_t)0, orig_chunk_size, data_dxpl_id) < 0)
+                (void *)&alloc_ud, (H5MM_free_t)H5D_chunk_xfree,
+                (void *)&alloc_ud, &dset->shared->dcpl_cache.fill,
+                dset->shared->type, dset->shared->type_id, (size_t)0,
+                orig_chunk_size, data_dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
         fb_info_init = TRUE;
 
@@ -3226,7 +3318,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             size_t buf_size = orig_chunk_size;
 
             /* Push the chunk through the filters */
-            if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &orig_chunk_size, &buf_size, &fb_info.fill_buf) < 0)
+            if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &orig_chunk_size, &buf_size, &fb_info.fill_buf, data_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
 #if H5_SIZEOF_SIZE_T > 4
             /* Check for the chunk expanding too much to encode in a 32-bit value */
@@ -3331,7 +3423,8 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                  * buffer. */
                 if(fb_info.fill_buf_size < orig_chunk_size) {
                     if(NULL == (fb_info.fill_buf = H5D_chunk_realloc(
-                            fb_info.fill_buf, orig_chunk_size, pline)))
+                            fb_info.fill_buf, fb_info.fill_buf_size,
+                            orig_chunk_size, &alloc_ud)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory reallocation failed for raw data chunk")
                     fb_info.fill_buf_size = orig_chunk_size;
                 } /* end if */
@@ -3345,7 +3438,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                     size_t nbytes = orig_chunk_size;
 
                     /* Push the chunk through the filters */
-                    if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &nbytes, &fb_info.fill_buf_size, &fb_info.fill_buf) < 0)
+                    if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &nbytes, &fb_info.fill_buf_size, &fb_info.fill_buf, data_dxpl_id) < 0)
                         HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
 
 #if H5_SIZEOF_SIZE_T > 4
@@ -4315,7 +4408,7 @@ H5D_chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     if(has_filters && (is_vlen || fix_ref)) {
         unsigned filter_mask = chunk_rec->filter_mask;
 
-        if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, cb_struct, &nbytes, &buf_size, &buf) < 0)
+        if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, cb_struct, &nbytes, &buf_size, &buf, udata->idx_info_dst->dxpl_id) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "data pipeline read failed")
     } /* end if */
 
@@ -4378,7 +4471,7 @@ H5D_chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     /* Need to compress variable-length & reference data elements before writing to file */
     if(has_filters && (is_vlen || fix_ref) ) {
-        if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), H5Z_NO_EDC, cb_struct, &nbytes, &buf_size, &buf) < 0)
+        if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), H5Z_NO_EDC, cb_struct, &nbytes, &buf_size, &buf, udata->idx_info_dst->dxpl_id) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
 #if H5_SIZEOF_SIZE_T > 4
         /* Check for the chunk expanding too much to encode in a 32-bit value */

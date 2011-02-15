@@ -30,6 +30,7 @@
 /* #define _XOPEN_SOURCE 600 */
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
@@ -77,6 +78,7 @@ typedef struct H5FD_direct_t {
     haddr_t	pos;			/*current file I/O position	*/
     int		op;			/*last operation		*/
     H5FD_direct_fapl_t	fa;		/*file access properties	*/
+    void        *block_buf;             /*single fbsize size buffer     */
 #ifndef _WIN32
     /*
      * On most systems the combination of device and i-node number uniquely
@@ -381,7 +383,7 @@ H5Pget_fapl_direct(hid_t fapl_id, size_t *boundary/*out*/, size_t *block_size/*o
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
     if (H5FD_DIRECT!=H5P_get_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
-    if (NULL==(fa=H5P_get_driver_info(plist)))
+    if (NULL==(fa=(H5FD_direct_fapl_t *)H5P_get_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
     if (boundary)
         *boundary = fa->mboundary;
@@ -450,7 +452,7 @@ static void *
 H5FD_direct_fapl_copy(const void *_old_fa)
 {
     const H5FD_direct_fapl_t *old_fa = (const H5FD_direct_fapl_t*)_old_fa;
-    H5FD_direct_fapl_t *new_fa = H5MM_malloc(sizeof(H5FD_direct_fapl_t));
+    H5FD_direct_fapl_t *new_fa = (H5FD_direct_fapl_t *)H5MM_malloc(sizeof(H5FD_direct_fapl_t));
     void *ret_value;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_direct_fapl_copy, NULL)
@@ -538,7 +540,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     /* Get the driver specific information */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    fa = H5P_get_driver_info(plist);
+    fa = (H5FD_direct_fapl_t *)H5P_get_driver_info(plist);
 
     file->fd = fd;
     H5_ASSIGN_OVERFLOW(file->eof,sb.st_size,h5_stat_size_t,haddr_t);
@@ -568,7 +570,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
      * than the one where the program is running.
      */
     buf1 = (int*)HDmalloc(sizeof(int));
-    if (HDposix_memalign(&buf2, file->fa.mboundary, file->fa.fbsize) != 0)
+    if (HDposix_memalign((void **)&buf2, file->fa.mboundary, file->fa.fbsize) != 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "HDposix_memalign failed")
 
     if(o_flags & O_CREAT) {
@@ -642,10 +644,12 @@ H5FD_direct_close(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI(H5FD_direct_close, FAIL)
 
+    file->block_buf = H5MM_xfree(file->block_buf);
+
     if (HDclose(file->fd)<0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
-    H5FL_FREE(H5FD_direct_t,file);
+    file = H5FL_FREE(H5FD_direct_t,file);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -912,10 +916,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
-	       size_t size, void *buf/*out*/)
+H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id,
+        haddr_t addr, size_t size, void *buf/*out*/)
 {
     H5FD_direct_t	*file = (H5FD_direct_t*)_file;
+    H5P_genplist_t      *plist;                 /* Property list pointer */
+    hbool_t             aligned_read = FALSE;   /* Whether we can use the simpler aligned read algorithm */
+    H5D_aligned_mem_buf_t aligned_mem_buf;      /* Last aligned memory buffer allocated */
     ssize_t		nbytes;
     hbool_t		_must_align = TRUE;
     herr_t      	ret_value=SUCCEED;       /* Return value */
@@ -924,7 +931,7 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, ha
     size_t		_boundary;
     size_t		_fbsize;
     size_t		_cbsize;
-    haddr_t		read_size;              /* Size to read into copy buffer */
+    hsize_t		read_size = size;       /* Size to read into copy buffer */
     size_t		copy_size = size;       /* Size remaining to read when using copy buffer */
     size_t              copy_offset;            /* Offset into copy buffer of the requested data */
 
@@ -953,112 +960,151 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, ha
     _fbsize = file->fa.fbsize;
     _cbsize = file->fa.cbsize;
 
+    /* Determine whether we can use the simpler "aligned read" algorithm which
+     * reads directly from the file.  Otherwise, we must allocate a temporary
+     * copy buffer for the read */
+    if(!_must_align)
+        /* No need to align data, can use direct algorithm */
+        aligned_read = TRUE;
+    else if((addr % _fbsize == 0) && ((size_t)buf % _boundary == 0)) {
+        if(size % _fbsize == 0)
+            /* Data is completely aligned on disk and in memory, can use direct
+             * algorithm */
+            aligned_read = TRUE;
+        else {
+            /* Check if the buffer was allocated in an aligned manner.  This
+             * implies that the size is a multiple of _fbsize and that the data
+             * between the end of the read and the end of the buffer can be
+             * overwritten. */
+            if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+            if(H5P_get(plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_read) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+            /* Make sure that the buffer is really aligned - compare the
+             * address and size of the buffer to the last aligned buffer
+             * allocated. */
+            if(aligned_read) {
+                if(H5P_get(plist, H5D_XFER_ALIGNED_MEM_BUF_NAME,
+                        &aligned_mem_buf) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+                if(buf != aligned_mem_buf.buf || size != aligned_mem_buf.size)
+                    aligned_read = FALSE;
+                else
+                    /* Read a multiple of the block size */
+                    read_size = (((size - 1) / _fbsize) + 1) * _fbsize;
+            } /* end if */
+        } /* end else */
+    } /* end if */
+
     /* if the data is aligned or the system doesn't require data to be aligned,
      * read it directly from the file.  If not, read a bigger
      * and aligned data first, then copy the data into memory buffer.
      */
-    if(!_must_align || ((addr%_fbsize==0) && (size%_fbsize==0) && ((size_t)buf%_boundary==0))) {
-	    /* Seek to the correct location */
-	    if ((addr!=file->pos || OP_READ!=file->op) &&
-		    file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
-		HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
- 	    /* Read the aligned data in file first, being careful of interrupted
-	     * system calls and partial results. */
-	    while (size>0) {
-		do {
-		    nbytes = HDread(file->fd, buf, size);
-		} while (-1==nbytes && EINTR==errno);
-		if (-1==nbytes) /* error */
-		    HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
-		if (0==nbytes) {
-		    /* end of file but not end of format address space */
-		    HDmemset(buf, 0, size);
-		    break;
-		}
-		assert(nbytes>=0);
-		assert((size_t)nbytes<=size);
-		H5_CHECK_OVERFLOW(nbytes,ssize_t,size_t);
-		size -= (size_t)nbytes;
-		H5_CHECK_OVERFLOW(nbytes,ssize_t,haddr_t);
-		addr += (haddr_t)nbytes;
-		buf = (char*)buf + nbytes;
-	    }
-    } else {
-            /* Calculate where we will begin copying from the copy buffer */
-            copy_offset = (size_t)(addr % _fbsize);
-
-	    /* allocate memory needed for the Direct IO option up to the maximal
-	     * copy buffer size. Make a bigger buffer for aligned I/O if size is
-	     * smaller than maximal copy buffer. */
-	    alloc_size = ((copy_offset + size - 1) / _fbsize + 1) * _fbsize;
-	    if(alloc_size > _cbsize)
-	    	alloc_size = _cbsize;
-	    HDassert(!(alloc_size % _fbsize));
-	    if (HDposix_memalign(&copy_buf, _boundary, alloc_size) != 0)
-		HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "HDposix_memalign failed")
-
-            /* look for the aligned position for reading the data */
-            HDassert(!(((addr / _fbsize) * _fbsize) % _fbsize));
-            if(file_seek(file->fd, (file_offset_t)((addr / _fbsize) * _fbsize),
-                    SEEK_SET) < 0)
-                HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
-
-	    /*
-	     * Read the aligned data in file into aligned buffer first, then copy the data
-	     * into the final buffer.  If the data size is bigger than maximal copy buffer
-	     * size, do the reading by segment (the outer while loop).  If not, do one step
-	     * reading.
-	     */
-	    do {
- 	    	/* Read the aligned data in file first.  Not able to handle interrupted
-		 * system calls and partial results like sec2 driver does because the
-		 * data may no longer be aligned. It's expecially true when the data in
-		 * file is smaller than ALLOC_SIZE. */
-	    	HDmemset(copy_buf, 0, alloc_size);
-
-                /* Calculate how much data we have to read in this iteration
-                 * (including unused parts of blocks) */
-                if((copy_size + copy_offset) < alloc_size)
-                    read_size = ((copy_size + copy_offset - 1) / _fbsize + 1)
-                            * _fbsize;
-                else
-                    read_size = alloc_size;
-
-                HDassert(!(read_size % _fbsize));
-	    	do {
-		    nbytes = HDread(file->fd, copy_buf, read_size);
-	    	} while(-1==nbytes && EINTR==errno);
-
-	    	if (-1==nbytes) /* error */
-		    HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
-
-	    	/* Copy the needed data from the copy buffer to the output
-	    	 * buffer, and update copy_size.  If the copy buffer does not
-                 * contain the rest of the data, just copy what's in the copy
-                 * buffer and also update read_addr and copy_offset to read the
-                 * next section of data. */
-	    	p2 = (unsigned char*)copy_buf + copy_offset;
-	    	if((copy_size + copy_offset) <= alloc_size) {
-	    	    HDmemcpy(buf, p2, copy_size);
-	    	    buf = (unsigned char *)buf + copy_size;
-	    	    copy_size = 0;
-                } /* end if */
-                else {
-                    HDmemcpy(buf, p2, alloc_size - copy_offset);
-                    buf = (unsigned char*)buf + alloc_size - copy_offset;
-                    copy_size -= alloc_size - copy_offset;
-                    copy_offset = 0;
-                } /* end else */
-	    } while (copy_size > 0);
-
-	    /*Final step: update address*/
-	    addr = (haddr_t)(((addr + size - 1) / _fbsize + 1) * _fbsize);
-
-	    if(copy_buf) {
-                HDfree(copy_buf);
-                copy_buf = NULL;
+    if(aligned_read) {
+        /* Seek to the correct location */
+        if ((addr!=file->pos || OP_READ!=file->op) &&
+                file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
+            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+        /* Read the aligned data in file first, being careful of interrupted
+            * system calls and partial results. */
+        while (read_size>0) {
+            do {
+                nbytes = HDread(file->fd, buf, read_size);
+            } while (-1==nbytes && EINTR==errno);
+            if (-1==nbytes) /* error */
+                HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+            if (0==nbytes) {
+                /* end of file but not end of format address space */
+                HDmemset(buf, 0, read_size);
+                break;
             } /* end if */
-    }
+            HDassert(nbytes>=0);
+            HDassert((size_t)nbytes<=read_size);
+            H5_CHECK_OVERFLOW(nbytes,ssize_t,size_t);
+            read_size -= (size_t)nbytes;
+            H5_CHECK_OVERFLOW(nbytes,ssize_t,haddr_t);
+            addr += (haddr_t)nbytes;
+            buf = (char*)buf + nbytes;
+        } /* end while */
+    } else {
+        /* Calculate where we will begin copying from the copy buffer */
+        copy_offset = (size_t)(addr % _fbsize);
+
+        /* allocate memory needed for the Direct IO option up to the maximal
+            * copy buffer size. Make a bigger buffer for aligned I/O if size is
+            * smaller than maximal copy buffer. */
+        alloc_size = ((copy_offset + size - 1) / _fbsize + 1) * _fbsize;
+        if(alloc_size > _cbsize)
+            alloc_size = _cbsize;
+        HDassert(!(alloc_size % _fbsize));
+        if(HDposix_memalign(&copy_buf, _boundary, alloc_size) != 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "HDposix_memalign failed")
+
+        /* look for the aligned position for reading the data */
+        HDassert(!(((addr / _fbsize) * _fbsize) % _fbsize));
+        if(file_seek(file->fd, (file_offset_t)((addr / _fbsize) * _fbsize),
+                SEEK_SET) < 0)
+            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+
+        /*
+         * Read the aligned data in file into aligned buffer first, then copy the data
+         * into the final buffer.  If the data size is bigger than maximal copy buffer
+         * size, do the reading by segment (the outer while loop).  If not, do one step
+         * reading.
+         */
+        do {
+            /* Read the aligned data in file first.  Not able to handle interrupted
+             * system calls and partial results like sec2 driver does because the
+             * data may no longer be aligned. It's expecially true when the data in
+             * file is smaller than ALLOC_SIZE. */
+            HDmemset(copy_buf, 0, alloc_size);
+
+            /* Calculate how much data we have to read in this iteration
+                * (including unused parts of blocks) */
+            if((copy_size + copy_offset) < alloc_size)
+                read_size = ((copy_size + copy_offset - 1) / _fbsize + 1)
+                        * _fbsize;
+            else
+                read_size = alloc_size;
+
+            HDassert(!(read_size % _fbsize));
+            do {
+                nbytes = HDread(file->fd, copy_buf, read_size);
+            } while(-1==nbytes && EINTR==errno);
+
+            if(-1==nbytes) /* error */
+                HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+
+            /* Copy the needed data from the copy buffer to the output
+             * buffer, and update copy_size.  If the copy buffer does not
+             * contain the rest of the data, just copy what's in the copy
+             * buffer and also update read_addr and copy_offset to read the
+             * next section of data. */
+            p2 = (unsigned char*)copy_buf + copy_offset;
+            if((copy_size + copy_offset) <= alloc_size) {
+                HDmemcpy(buf, p2, copy_size);
+                buf = (unsigned char *)buf + copy_size;
+                copy_size = 0;
+            } /* end if */
+            else {
+                HDmemcpy(buf, p2, alloc_size - copy_offset);
+                buf = (unsigned char*)buf + alloc_size - copy_offset;
+                copy_size -= alloc_size - copy_offset;
+                copy_offset = 0;
+            } /* end else */
+        } while (copy_size > 0);
+
+        /*Final step: update address*/
+        addr = (haddr_t)(((addr + size - 1) / _fbsize + 1) * _fbsize);
+
+        if(copy_buf) {
+            HDfree(copy_buf);
+            copy_buf = NULL;
+        } /* end if */
+    } /* end else */
 
     /* Update current position */
     file->pos = addr;
@@ -1101,9 +1147,13 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
 		size_t size, const void *buf)
 {
     H5FD_direct_t	*file = (H5FD_direct_t*)_file;
+    H5P_genplist_t      *plist;                 /* Property list pointer */
     ssize_t		nbytes;
     hbool_t		_must_align = TRUE;
-    herr_t      	ret_value=SUCCEED;       /* Return value */
+    int                 method = -1;            /* Which write algorithm to use */
+    hbool_t             aligned_mem;            /* Aligned memory property on dxpl */
+    H5D_aligned_mem_buf_t aligned_mem_buf;      /* Last aligned memory buffer allocated */
+    herr_t      	ret_value=SUCCEED;      /* Return value */
     size_t		alloc_size;
     void		*copy_buf = NULL, *p1;
     const void		*p3;
@@ -1112,6 +1162,7 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
     size_t		_cbsize;
     haddr_t             write_addr;             /* Address to write copy buffer */
     haddr_t             write_size;             /* Size to write from copy buffer */
+    haddr_t             read_addr;              /* Address to read to copy buffer */
     haddr_t             read_size;              /* Size to read into copy buffer */
     size_t              copy_size = size;       /* Size remaining to write when using copy buffer */
     size_t              copy_offset;            /* Offset into copy buffer of the data to write */
@@ -1141,54 +1192,161 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
     _fbsize = file->fa.fbsize;
     _cbsize = file->fa.cbsize;
 
+    /* Determine which algorithm we should use to write the data.
+     * Method 0: Write the buffer directly to the file.
+     * Method 1: Read the unused part of the buffer from the file, then write to
+     *           the file, as a multiple of _fbsize.
+     * Method 2: Allocate a copy buffer, and read/write to/from the copy buffer,
+     *           provided buffer, and file as appropriate. */
+    if(!_must_align)
+        /* No need to align data, can use direct algorithm */
+        method = 0;
+    else if((addr % _fbsize == 0) && ((size_t)buf % _boundary == 0)) {
+        if(size % _fbsize == 0)
+            /* Data is completely aligned on disk and in memory, can use direct
+             * algorithm */
+            method = 0;
+        else {
+            /* Check if the buffer was allocated in an aligned manner.  This
+             * implies that the size is a multiple of _fbsize and that the data
+             * between the end of the read and the end of the buffer can be
+             * overwritten. */
+            if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+            if(H5P_get(plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+            if(aligned_mem) {
+                /* Make sure that the buffer is really aligned - compare the
+                 * address and size of the buffer to the last aligned buffer
+                 * allocated. */
+                if(H5P_get(plist, H5D_XFER_ALIGNED_MEM_BUF_NAME,
+                        &aligned_mem_buf) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+                if(buf == aligned_mem_buf.buf && size == aligned_mem_buf.size)
+                    method = 1;
+                else
+                    method = 2;
+            } /* end if */
+            else
+                method = 2;
+        } /* end else */
+    } /* end if */
+    else
+        /* Start of data is unaligned either on disk or in memory.  Use safe
+         * algorithm */
+        method = 2;
+
     /* if the data is aligned or the system doesn't require data to be aligned,
      * write it directly to the file.  If not, read a bigger and aligned data
      * first, update buffer with user data, then write the data out.
      */
-    if(!_must_align || ((addr%_fbsize==0) && (size%_fbsize==0) && ((size_t)buf%_boundary==0))) {
-	    /* Seek to the correct location */
-	    if ((addr!=file->pos || OP_WRITE!=file->op) &&
-		    file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
-		HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+    switch(method) {
+        case 0:
+            /* Seek to the correct location */
+            if((addr!=file->pos || OP_WRITE!=file->op) &&
+                    file_seek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
+                HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
 
-	    while (size>0) {
-		do {
-		    nbytes = HDwrite(file->fd, buf, size);
-		} while (-1==nbytes && EINTR==errno);
-		if (-1==nbytes) /* error */
-		    HSYS_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
-		assert(nbytes>0);
-		assert((size_t)nbytes<=size);
-		H5_CHECK_OVERFLOW(nbytes,ssize_t,size_t);
-		size -= (size_t)nbytes;
-		H5_CHECK_OVERFLOW(nbytes,ssize_t,haddr_t);
-		addr += (haddr_t)nbytes;
-		buf = (const char*)buf + nbytes;
-	    }
-    } else {
+            while(size > 0) {
+                do {
+                    nbytes = HDwrite(file->fd, buf, size);
+                } while (-1 == nbytes && EINTR == errno);
+                if (-1 == nbytes) /* error */
+                    HSYS_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+                HDassert(nbytes>0);
+                HDassert((size_t)nbytes<=size);
+                H5_CHECK_OVERFLOW(nbytes,ssize_t,size_t);
+                size -= (size_t)nbytes;
+                H5_CHECK_OVERFLOW(nbytes,ssize_t,haddr_t);
+                addr += (haddr_t)nbytes;
+                buf = (const char*)buf + nbytes;
+            } /* end while */
+            break;
+        case 1:
+            /* Determine where we will be reading from (size will be _fbsize)
+             * and what size we will be writing (address will be addr) */
+            write_size = ((size / _fbsize) + 1) * _fbsize;
+            read_addr = addr + write_size - _fbsize;
+
+            /* Allocate block for reading, or use saved block */
+            if(!(file->block_buf))
+                if(0 != HDposix_memalign(&(file->block_buf), _boundary, _fbsize))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+            /* Seek to the correct location for reading */
+            if((read_addr!=file->pos || OP_WRITE!=file->op) &&
+                    file_seek(file->fd, (file_offset_t)read_addr, SEEK_SET) < 0)
+                HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+
+            /* Read the last block into the block buffer. */
+            do {
+                nbytes = HDread(file->fd, file->block_buf, _fbsize);
+            } while (-1 == nbytes && EINTR == errno);
+            if(-1 == nbytes) /* error */
+                HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+
+            /* Zero out the unread portion of the buffer.  Do not attempt to
+             * re-read as it would not be aligned. */
+            HDassert(nbytes >= 0);
+            if((size_t)nbytes < _fbsize)
+                HDmemset((char *)(file->block_buf) + (int)nbytes, 0,
+                        _fbsize - (size_t)nbytes);
+
+            /* Copy the part of fb_buf that will not be written to to the user's
+             * buffer */
+            /* Casting away const OK - this behavior must be stated clearly in
+             * the reference manual entry for H5Pset_aligned_mem */
+            HDmemcpy((unsigned char *)buf + size,
+                    (unsigned char *)file->block_buf + (size % _fbsize),
+                    _fbsize - (size % _fbsize));
+
+            /* Seek to the correct location for writing */
+            if(file_seek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
+                HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+
+            /* Write the buffer to disk */
+            while(write_size > 0) {
+                do {
+                    nbytes = HDwrite(file->fd, buf, write_size);
+                } while (-1 == nbytes && EINTR == errno);
+                if (-1 == nbytes) /* error */
+                    HSYS_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+                HDassert(nbytes > 0);
+                HDassert((size_t)nbytes <= write_size);
+                H5_CHECK_OVERFLOW(nbytes, ssize_t, size_t);
+                write_size -= (size_t)nbytes;
+                H5_CHECK_OVERFLOW(nbytes, ssize_t, haddr_t);
+                addr += (haddr_t)nbytes;
+                buf = (const char *)buf + nbytes;
+            } /* end while */
+            break;
+        case 2:
             /* Calculate where we will begin reading from (on disk) and where we
              * will begin copying from the copy buffer */
             write_addr = (addr / _fbsize) * _fbsize;
             copy_offset = (size_t)(addr % _fbsize);
 
-	    /* allocate memory needed for the Direct IO option up to the maximal
-	     * copy buffer size. Make a bigger buffer for aligned I/O if size is
-	     * smaller than maximal copy buffer.
-	     */
-	    alloc_size = ((copy_offset + size - 1) / _fbsize + 1) * _fbsize;
+            /* allocate memory needed for the Direct IO option up to the maximal
+             * copy buffer size. Make a bigger buffer for aligned I/O if size is
+             * smaller than maximal copy buffer.
+             */
+            alloc_size = ((copy_offset + size - 1) / _fbsize + 1) * _fbsize;
             if(alloc_size > _cbsize)
                 alloc_size = _cbsize;
             HDassert(!(alloc_size % _fbsize));
 
-	    if (HDposix_memalign(&copy_buf, _boundary, alloc_size) != 0)
-		HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "HDposix_memalign failed")
+            if(HDposix_memalign(&copy_buf, _boundary, alloc_size) != 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "HDposix_memalign failed")
 
             /* look for the right position for reading or writing the data */
             if(file_seek(file->fd, (file_offset_t)write_addr, SEEK_SET) < 0)
                 HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
 
-	    p3 = buf;
-	    do {
+            p3 = buf;
+            do {
                 /* Calculate how much data we have to write in this iteration
                  * (including unused parts of blocks) */
                 if((copy_size + copy_offset) < alloc_size)
@@ -1197,16 +1355,16 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
                 else
                     write_size = alloc_size;
 
-	    	/*
-	     	 * Read the aligned data first if the aligned region doesn't fall
-	    	 * entirely in the range to be writen.  Not able to handle interrupted
-		 * system calls and partial results like sec2 driver does because the
-		 * data may no longer be aligned. It's expecially true when the data in
-		 * file is smaller than ALLOC_SIZE.  Only read the entire section if
+                /*
+                 * Read the aligned data first if the aligned region doesn't fall
+                 * entirely in the range to be writen.  Not able to handle interrupted
+                 * system calls and partial results like sec2 driver does because the
+                 * data may no longer be aligned. It's expecially true when the data in
+                 * file is smaller than ALLOC_SIZE.  Only read the entire section if
                  * both ends are misaligned, otherwise only read the block on the
                  * misaligned end.
-	    	 */
-	    	HDmemset(copy_buf, 0, _fbsize);
+                 */
+                HDmemset(copy_buf, 0, _fbsize);
 
                 if(copy_offset > 0) {
                     if((write_addr + write_size) > (addr + size)) {
@@ -1236,22 +1394,34 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
 
                 if(p1) {
                     HDassert(!(read_size % _fbsize));
-                    do {
-                        nbytes = read(file->fd, p1, read_size);
-                    } while (-1==nbytes && EINTR==errno);
-
-                    if (-1==nbytes) /* error */
-                        HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+                    while(read_size > 0) {
+                        do {
+                            nbytes = read(file->fd, p1, read_size);
+                        } while (-1 == nbytes && EINTR == errno);
+                        if (-1 == nbytes) /* error */
+                            HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+                        if (0 == nbytes) {
+                            /* End of file but not end of format address space
+                             */
+                            HDmemset(p1, 0, read_size);
+                            break;
+                        } /* end if */
+                        HDassert(nbytes > 0);
+                        HDassert((size_t)nbytes <= read_size);
+                        H5_CHECK_OVERFLOW(nbytes, ssize_t, size_t);
+                        read_size -= (size_t)nbytes;
+                        p1 = (char *)p1 + nbytes;
+                    } /* end while */
                 } /* end if */
 
-	    	/* look for the right position and append or copy the data to be written to
-	     	 * the aligned buffer.
-            	 * Consider all possible situations here: file address is not aligned on
-            	 * file block size; the end of data address is not aligned; the end of data
-            	 * address is aligned; data size is smaller or bigger than maximal copy size.
-	    	 */
-	    	p1 = (unsigned char *)copy_buf + copy_offset;
-	    	if((copy_size + copy_offset) <= alloc_size) {
+                /* look for the right position and append or copy the data to be written to
+                 * the aligned buffer.
+                 * Consider all possible situations here: file address is not aligned on
+                 * file block size; the end of data address is not aligned; the end of data
+                 * address is aligned; data size is smaller or bigger than maximal copy size.
+                 */
+                p1 = (unsigned char *)copy_buf + copy_offset;
+                if((copy_size + copy_offset) <= alloc_size) {
                     HDmemcpy(p1, p3, copy_size);
                     copy_size = 0;
                 } /* end if */
@@ -1262,36 +1432,39 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
                     copy_offset = 0;
                 } /* end else */
 
-	    	/*look for the aligned position for writing the data*/
-	    	HDassert(!(write_addr % _fbsize));
-	    	if(file_seek(file->fd, (file_offset_t)write_addr, SEEK_SET) < 0)
-		    HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+                /* Look for the aligned position for writing the data */
+                HDassert(!(write_addr % _fbsize));
+                if(file_seek(file->fd, (file_offset_t)write_addr, SEEK_SET) < 0)
+                    HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
 
-	    	/*
-	     	 * Write the data. It doesn't truncate the extra data introduced by
-		 * alignment because that step is done in H5FD_direct_flush.
-	    	 */
-	    	HDassert(!(write_size % _fbsize));
-		do {
-		    nbytes = HDwrite(file->fd, copy_buf, write_size);
-		} while (-1==nbytes && EINTR==errno);
+                /*
+                 * Write the data. It doesn't truncate the extra data introduced by
+                 * alignment because that step is done in H5FD_direct_flush.
+                 */
+                HDassert(!(write_size % _fbsize));
+                do {
+                    nbytes = HDwrite(file->fd, copy_buf, write_size);
+                } while (-1==nbytes && EINTR==errno);
 
-		if (-1==nbytes) /* error */
-		    HSYS_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+                if(-1==nbytes) /* error */
+                    HSYS_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
 
-            	/* update the write address */
-            	write_addr += write_size;
-	} while (copy_size > 0);
+                /* update the write address */
+                write_addr += write_size;
+            } while (copy_size > 0);
 
-	/*Update the address and size*/
-	addr = write_addr;
-	buf = (const char*)buf + size;
+            /* Update the address and size*/
+            addr = write_addr;
+            buf = (const char*)buf + size;
 
-	if(copy_buf) {
-	    HDfree(copy_buf);
-	    copy_buf = NULL;
-        } /* end if */
-    }
+            if(copy_buf) {
+                HDfree(copy_buf);
+                copy_buf = NULL;
+            } /* end if */
+            break;
+        default:
+            HDassert(0 && "Unknown write method");
+    } /* end switch */
 
     /* Update current position and eof */
     file->pos = addr;
@@ -1376,5 +1549,73 @@ H5FD_direct_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_direct_truncate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_direct_malloc
+ *
+ * Purpose:     Allocates a buffer in such a way that will maximize the
+ *              performance of a subsequent direct read or write call
+ *              using this buffer.  Marks on dxpl_id that the buffer has
+ *              been allocated in this manner.
+ *
+ * Return:      Success:        Pointer to allocated space.
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, 1 November 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5FD_direct_malloc(const H5FD_t *_file, hid_t dxpl_id, size_t size)
+{
+    const H5FD_direct_t *file = (const H5FD_direct_t*)_file;
+    void *ret_value;  /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_direct_malloc, NULL)
+
+    HDassert(size);
+
+    /* Check if we actually have to align the memory */
+    if(file->fa.must_align) {
+        H5P_genplist_t          *dx_plist = NULL; /* Data transer property list */
+        hbool_t                 aligned_mem = TRUE; /* Aligned memory property */
+        H5D_aligned_mem_buf_t   aligned_mem_buf; /* Aligned memory buffer */
+
+        /* Allocate the memory block */
+        if(0 != HDposix_memalign(&ret_value, file->fa.mboundary,
+                (((size - 1) / file->fa.fbsize) + 1) * file->fa.fbsize))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+        /* Get the dataset transfer property list */
+        if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id))) {
+            H5MM_free(ret_value);
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataset creation property list")
+        } /* end if */
+
+        /* Mark on the DXPL that the memory buffer is aligned */
+        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0) {
+            H5MM_free(ret_value);
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to wet value")
+        } /* end if */
+        aligned_mem_buf.buf = ret_value;
+        aligned_mem_buf.size = size;
+        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_BUF_NAME, &aligned_mem_buf)
+                < 0) {
+            H5MM_free(ret_value);
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
+        } /* end if */
+    } /* end if */
+    else
+        if(NULL == (ret_value = H5MM_malloc(size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_direct_malloc */
 #endif /* H5_HAVE_DIRECT */
 
