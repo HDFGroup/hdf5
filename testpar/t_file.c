@@ -44,7 +44,7 @@ test_split_comm_access(void)
     herr_t ret;			/* generic return value */
     const char *filename;
 
-    filename = GetTestParameters();
+    filename = (const char *)GetTestParameters();
     if (VERBOSE_MED)
 	printf("Split Communicator access test on file %s\n",
 	    filename);
@@ -53,7 +53,7 @@ test_split_comm_access(void)
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
     is_old = mpi_rank%2;
-    mrc = MPI_Comm_split (MPI_COMM_WORLD, is_old, mpi_rank, &comm);
+    mrc = MPI_Comm_split(MPI_COMM_WORLD, is_old, mpi_rank, &comm);
     VRFY((mrc==MPI_SUCCESS), "");
     MPI_Comm_size(comm,&newprocs);
     MPI_Comm_rank(comm,&newrank);
@@ -89,6 +89,8 @@ test_split_comm_access(void)
 	    /*VRFY((mrc==MPI_SUCCESS), ""); */
 	}
     }
+    mrc = MPI_Comm_free(&comm);
+    VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free succeeded");
     mrc = MPI_Barrier(MPI_COMM_WORLD);
     VRFY((mrc==MPI_SUCCESS), "final MPI_Barrier succeeded");
 }
