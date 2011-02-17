@@ -85,6 +85,10 @@ New Features
 
     Library:
     --------
+    - Added ability to cache files opened through external links.  Added new
+      public functions H5Pset_elink_file_cache_size(),
+      H5Pget_elink_file_cache_size(), and H5Frelease_file_cache().
+      (NAF - 2011/02/17)
     - Removed all old code for Metraowerks compilers, bracketed by
       __MWERKS__). Metraowerks compiler is long gone. (AKC - 2010/11/17) 
     - Added support for threadsafety on windows using the windows threads
