@@ -215,6 +215,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP-tvldtypes5      #uses runTest.cmake
     H5DUMP-tvlstr          #uses runTest.cmake
     H5DUMP-tarray1         #uses runTest.cmake
+    H5DUMP-tarray1_big     #uses runTest.cmake
     H5DUMP-tarray2         #uses runTest.cmake
     H5DUMP-tarray3         #uses runTest.cmake
     H5DUMP-tarray4         #uses runTest.cmake
@@ -433,6 +434,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5LS-tgroup-3                   #uses runTest.cmake
     H5LS-tgroup-1                   #uses runTest.cmake
     H5LS-tgroup-2                   #uses runTest.cmake
+    H5LS-tgrp_comments              #uses runTest.cmake
     H5LS-tdset-1                    #uses runTest.cmake
     H5LS-tslink-1                   #uses runTest.cmake
     H5LS-tsoftlinks-1               #uses runTest.cmake
