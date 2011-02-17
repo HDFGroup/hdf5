@@ -173,6 +173,7 @@ H5_DLL herr_t H5Fget_mdc_size(hid_t file_id,
 H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
 H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 H5_DLL herr_t H5Fget_info(hid_t obj_id, H5F_info_t *bh_info);
+H5_DLL herr_t H5Frelease_file_cache(hid_t file_id);
 
 #ifdef __cplusplus
 }

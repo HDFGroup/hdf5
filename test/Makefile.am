@@ -38,7 +38,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
 # other current library code tests.
 TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
            pool accum hyperslab istore bittests dt_arith \
-           dtypes dsets cmpd_dset filter_fail extend external objcopy links unlink \
+           dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe \
            getname vfd ntypes dangle dtransform reserved cross_read \
@@ -124,7 +124,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
     objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 tcheck_version_*.out \
-    tcheck_version_*.err
+    tcheck_version_*.err efc[0-5].h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

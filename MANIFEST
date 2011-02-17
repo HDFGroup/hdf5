@@ -510,6 +510,7 @@
 ./src/H5F.c
 ./src/H5Faccum.c
 ./src/H5Fdbg.c
+./src/H5Fefc.c
 ./src/H5Ffake.c
 ./src/H5Fio.c
 ./src/H5Fmount.c
@@ -804,6 +805,7 @@
 ./test/dt_arith.c
 ./test/dtypes.c
 ./test/dtransform.c
+./test/efc.c
 ./test/enum.c
 ./test/extend.c
 ./test/external.c
