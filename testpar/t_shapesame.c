@@ -121,12 +121,13 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     const char *filename;
     hbool_t	use_gpfs = FALSE;   /* Use GPFS hints */
     hbool_t	mis_match = FALSE;
-    int		i, j, k, l, n;
+    int		i, j, k, l;
+    size_t	n;
     int         mrc;
     int		mpi_size = -1;
     int         mpi_rank = -1;
-    int         start_index;
-    int         stop_index;
+    size_t      start_index;
+    size_t      stop_index;
     const int   test_max_rank = 5;  /* must update code if this changes */
     uint32_t	expected_value;
     uint32_t  * small_ds_buf_0 = NULL;
@@ -139,7 +140,6 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     uint32_t  * large_ds_slice_buf = NULL;
     uint32_t  * ptr_0;
     uint32_t  * ptr_1;
-    uint32_t  * ptr_2;
     MPI_Comm    mpi_comm = MPI_COMM_NULL;
     MPI_Info	mpi_info = MPI_INFO_NULL;
     hid_t       fid;			/* HDF5 file ID */
@@ -308,8 +308,8 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
 
     /* setup dims: */
-    dims[0] = (int)(mpi_size + 1);
-    dims[1] = dims[2] = dims[3] = dims[4] = edge_size;
+    dims[0] = (hsize_t)(mpi_size + 1);
+    dims[1] = dims[2] = dims[3] = dims[4] = (hsize_t)edge_size;
 
 
     /* Create small ds dataspaces */
@@ -397,7 +397,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
             chunk_dims[0] = 1;
         }
         chunk_dims[1] = chunk_dims[2] = 
-                        chunk_dims[3] = chunk_dims[4] = chunk_edge_size;
+                        chunk_dims[3] = chunk_dims[4] = (hsize_t)chunk_edge_size;
 
         small_ds_dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
         VRFY((ret != FAIL), "H5Pcreate() small_ds_dcpl_id succeeded");
@@ -443,17 +443,17 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     }
 
     /* setup selection to write initial data to the small and large data sets */
-    start[0] = mpi_rank;
-    stride[0] = 2 * (mpi_size + 1);
+    start[0] = (hsize_t)mpi_rank;
+    stride[0] = (hsize_t)(2 * (mpi_size + 1));
     count[0] = 1;
     block[0] = 1;
 
     for ( i = 1; i < large_rank; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
-        block[i] = edge_size;
+        block[i] = (hsize_t)edge_size;
     }
 
     /* setup selections for writing initial data to the small data set */
@@ -475,7 +475,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
     if ( MAINPROCESS ) { /* add an additional slice to the selections */
 
-        start[0] = mpi_size;
+        start[0] = (hsize_t)mpi_size;
 
         ret = H5Sselect_hyperslab(mem_small_ds_sid,
                                   H5S_SELECT_OR,
@@ -543,7 +543,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
     /* setup selections for writing initial data to the large data set */
 
-    start[0] = mpi_rank;
+    start[0] = (hsize_t)mpi_rank;
 
     ret = H5Sselect_hyperslab(mem_large_ds_sid,
                               H5S_SELECT_SET,
@@ -583,7 +583,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
     if ( MAINPROCESS ) { /* add an additional slice to the selections */
 
-        start[0] = mpi_size;
+        start[0] = (hsize_t)mpi_size;
 
         ret = H5Sselect_hyperslab(mem_large_ds_sid,
                                   H5S_SELECT_OR,
@@ -677,7 +677,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     for ( i = 0; i < PAR_SS_DR_MAX_RANK; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
         if ( (PAR_SS_DR_MAX_RANK - i) > (small_rank - 1) ) {
 
@@ -685,7 +685,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
         } else {
 
-            block[i] = edge_size;
+            block[i] = (hsize_t)edge_size;
         }
     }
 
@@ -755,10 +755,10 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                  * large_rank > small_rank by the assertions at the head 
                  * of this function.  Thus no need for another inner loop.
                  */
-                start[0] = i;
-                start[1] = j;
-                start[2] = k;
-                start[3] = l;
+                start[0] = (hsize_t)i;
+                start[1] = (hsize_t)j;
+                start[2] = (hsize_t)k;
+                start[3] = (hsize_t)l;
                 start[4] = 0;
 
                 ret = H5Sselect_hyperslab(file_large_ds_sid,
@@ -796,20 +796,20 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                               file_large_ds_sid,
                               xfer_plist,
                               small_ds_slice_buf);
-                VRFY((ret >= 0), "H5Sread() slice from large ds succeeded.");
+                VRFY((ret >= 0), "H5Dread() slice from large ds succeeded.");
 
 
                 /* verify that expected data is retrieved */
 
                 mis_match = FALSE;
                 ptr_1 = small_ds_slice_buf;
-                expected_value = 
+                expected_value = (uint32_t)(
 			(i * edge_size * edge_size * edge_size * edge_size) +
                         (j * edge_size * edge_size * edge_size) +
                         (k * edge_size * edge_size) +
-                        (l * edge_size);
+                        (l * edge_size));
 
-                for ( n = 0; n < (int)small_ds_slice_size; n++ ) {
+                for ( n = 0; n < small_ds_slice_size; n++ ) {
 
                     if ( *ptr_1 != expected_value ) {
 
@@ -844,17 +844,17 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
      * data (and only the correct data) is read.
      */
 
-    start[0] = mpi_rank;
-    stride[0] = 2 * (mpi_size + 1);
+    start[0] = (hsize_t)mpi_rank;
+    stride[0] = (hsize_t)(2 * (mpi_size + 1));
     count[0] = 1;
     block[0] = 1;
 
     for ( i = 1; i < large_rank; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
-        block[i] = edge_size;
+        block[i] = (hsize_t)edge_size;
     }
 
     ret = H5Sselect_hyperslab(file_small_ds_sid,
@@ -881,7 +881,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     for ( i = 0; i < PAR_SS_DR_MAX_RANK; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
         if ( (PAR_SS_DR_MAX_RANK - i) > (small_rank - 1) ) {
 
@@ -889,7 +889,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
         } else {
 
-            block[i] = edge_size;
+            block[i] = (hsize_t)edge_size;
         }
     }
 
@@ -955,10 +955,10 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                  * by the assertions at the head of this function.  Thus no
                  * need for another inner loop.
                  */
-                start[0] = i;
-                start[1] = j;
-                start[2] = k;
-                start[3] = l;
+                start[0] = (hsize_t)i;
+                start[1] = (hsize_t)j;
+                start[2] = (hsize_t)k;
+                start[3] = (hsize_t)l;
                 start[4] = 0;
 
                 ret = H5Sselect_hyperslab(mem_large_ds_sid,
@@ -996,25 +996,24 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                               file_small_ds_sid,
                               xfer_plist,
                               large_ds_buf_1);
-                VRFY((ret >= 0), "H5Sread() slice from small ds succeeded.");
+                VRFY((ret >= 0), "H5Dread() slice from small ds succeeded.");
 
                 /* verify that the expected data and only the
                  * expected data was read.
                  */
                 ptr_1 = large_ds_buf_1;
-                expected_value = mpi_rank * small_ds_slice_size;
-                start_index = 
+                expected_value = (uint32_t)((size_t)mpi_rank * small_ds_slice_size);
+                start_index = (size_t)(
                         (i * edge_size * edge_size * edge_size * edge_size) +
                         (j * edge_size * edge_size * edge_size) +
                         (k * edge_size * edge_size) +
-                        (l * edge_size);
-                stop_index = start_index + (int)small_ds_slice_size - 1;
+                        (l * edge_size));
+                stop_index = start_index + small_ds_slice_size - 1;
 
-                HDassert( 0 <= start_index );
                 HDassert( start_index < stop_index );
-                HDassert( stop_index <= (int)large_ds_size );
+                HDassert( stop_index <= large_ds_size );
 
-                for ( n = 0; n < (int)large_ds_size; n++ ) {
+                for ( n = 0; n < large_ds_size; n++ ) {
 
                     if ( ( n >= start_index ) && ( n <= stop_index ) ) {
 
@@ -1066,17 +1065,17 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
      * the memory and file selections.
      */
 
-    start[0] = mpi_rank;
-    stride[0] = 2 * (mpi_size + 1);
+    start[0] = (hsize_t)mpi_rank;
+    stride[0] = (hsize_t)(2 * (mpi_size + 1));
     count[0] = 1;
     block[0] = 1;
 
     for ( i = 1; i < large_rank; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
-        block[i] = edge_size;
+        block[i] = (hsize_t)edge_size;
     }
 
     ret = H5Sselect_hyperslab(file_small_ds_sid,
@@ -1102,7 +1101,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     for ( i = 0; i < PAR_SS_DR_MAX_RANK; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
         if ( (PAR_SS_DR_MAX_RANK - i) > (small_rank - 1) ) {
 
@@ -1110,7 +1109,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
         } else {
 
-            block[i] = edge_size;
+            block[i] = (hsize_t)edge_size;
         }
     }
 
@@ -1199,10 +1198,10 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                 /* select the portion of the in memory large cube from which we
                  * are going to write data.
                  */
-                start[0] = i;
-                start[1] = j;
-                start[2] = k;
-                start[3] = l;
+                start[0] = (hsize_t)i;
+                start[1] = (hsize_t)j;
+                start[2] = (hsize_t)k;
+                start[3] = (hsize_t)l;
                 start[4] = 0;
 
                 ret = H5Sselect_hyperslab(mem_large_ds_sid,
@@ -1260,20 +1259,19 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                 mis_match = FALSE;
                 ptr_1 = small_ds_buf_1;
 
-                expected_value = 
+                expected_value = (uint32_t)(
 			(i * edge_size * edge_size * edge_size * edge_size) +
                         (j * edge_size * edge_size * edge_size) +
                         (k * edge_size * edge_size) +
-                        (l * edge_size);
+                        (l * edge_size));
 
-                start_index = mpi_rank * small_ds_slice_size;
+                start_index = (size_t)mpi_rank * small_ds_slice_size;
                 stop_index = start_index + small_ds_slice_size - 1;
 
-                HDassert( 0 <= start_index );
                 HDassert( start_index < stop_index );
-                HDassert( stop_index <= (int)small_ds_size );
+                HDassert( stop_index <= small_ds_size );
 
-                for ( n = 0; n < (int)small_ds_size; n++ ) {
+                for ( n = 0; n < small_ds_size; n++ ) {
 
                     if ( ( n >= start_index ) && ( n <= stop_index ) ) {
 
@@ -1325,17 +1323,17 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     /* select the slice of the in memory small data set associated with 
      * the process's mpi rank.
      */
-    start[0] = mpi_rank;
-    stride[0] = 2 * (mpi_size + 1);
+    start[0] = (hsize_t)mpi_rank;
+    stride[0] = (hsize_t)(2 * (mpi_size + 1));
     count[0] = 1;
     block[0] = 1;
 
     for ( i = 1; i < large_rank; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
-        block[i] = edge_size;
+        block[i] = (hsize_t)edge_size;
     }
 
     ret = H5Sselect_hyperslab(mem_small_ds_sid,
@@ -1354,7 +1352,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     for ( i = 0; i < PAR_SS_DR_MAX_RANK; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
         if ( (PAR_SS_DR_MAX_RANK - i) > (small_rank - 1) ) {
 
@@ -1362,7 +1360,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
         } else {
 
-            block[i] = edge_size;
+            block[i] = (hsize_t)edge_size;
         }
     }
 
@@ -1443,10 +1441,10 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                 /* select the portion of the in memory large cube to which we
                  * are going to write data.
                  */
-                start[0] = i;
-                start[1] = j;
-                start[2] = k;
-                start[3] = l;
+                start[0] = (hsize_t)i;
+                start[1] = (hsize_t)j;
+                start[2] = (hsize_t)k;
+                start[3] = (hsize_t)l;
                 start[4] = 0;
 
                 ret = H5Sselect_hyperslab(file_large_ds_sid,
@@ -1510,20 +1508,18 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                  * expected data was read.
                  */
                 ptr_1 = large_ds_buf_1;
-                expected_value = (uint32_t)(mpi_rank) * small_ds_slice_size;
+                expected_value = (uint32_t)((size_t)mpi_rank * small_ds_slice_size);
 
-
-                start_index = (i * edge_size * edge_size * edge_size * edge_size) +
+                start_index = (size_t)((i * edge_size * edge_size * edge_size * edge_size) +
                               (j * edge_size * edge_size * edge_size) +
                               (k * edge_size * edge_size) +
-                              (l * edge_size);
-                stop_index = start_index + (int)small_ds_slice_size - 1;
+                              (l * edge_size));
+                stop_index = start_index + small_ds_slice_size - 1;
 
-                HDassert( 0 <= start_index );
                 HDassert( start_index < stop_index );
-                HDassert( stop_index < (int)large_ds_size );
+                HDassert( stop_index < large_ds_size );
 
-                for ( n = 0; n < (int)large_ds_size; n++ ) {
+                for ( n = 0; n < large_ds_size; n++ ) {
 
                     if ( ( n >= start_index ) && ( n <= stop_index ) ) {
 
@@ -1986,14 +1982,14 @@ checker_board_hyperslab_dr_pio_test__select_checker_board(
      * pre-C99 compilers again.
      */
 
-    base_count = edge_size / (checker_edge_size * 2);
+    base_count = (hsize_t)(edge_size / (checker_edge_size * 2));
 
     if ( (edge_size % (checker_edge_size * 2)) > 0 ) {
 
         base_count++;
     }
 
-    offset_count = (edge_size - checker_edge_size) / (checker_edge_size * 2);
+    offset_count = (hsize_t)((edge_size - checker_edge_size) / (checker_edge_size * 2));
 
     if ( ((edge_size - checker_edge_size) % (checker_edge_size * 2)) > 0 ) {
 
@@ -2019,7 +2015,7 @@ checker_board_hyperslab_dr_pio_test__select_checker_board(
     while ( i < sel_offset ) {
 
         start[i] = sel_start[i];
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
         block[i] = 1;
 
@@ -2028,8 +2024,8 @@ checker_board_hyperslab_dr_pio_test__select_checker_board(
 
     while ( i < test_max_rank ) {
 
-        stride[i] = 2 * checker_edge_size;
-        block[i] = checker_edge_size;
+        stride[i] = (hsize_t)(2 * checker_edge_size);
+        block[i] = (hsize_t)checker_edge_size;
 
         i++;
     }
@@ -2045,7 +2041,7 @@ checker_board_hyperslab_dr_pio_test__select_checker_board(
 
             } else {
 
-                start[0] = checker_edge_size;
+                start[0] = (hsize_t)checker_edge_size;
                 count[0] = offset_count;
 
             }
@@ -2062,7 +2058,7 @@ checker_board_hyperslab_dr_pio_test__select_checker_board(
 
                 } else {
 
-                    start[1] = checker_edge_size;
+                    start[1] = (hsize_t)checker_edge_size;
                     count[1] = offset_count;
 
                 }
@@ -2079,7 +2075,7 @@ checker_board_hyperslab_dr_pio_test__select_checker_board(
 
                     } else {
 
-                        start[2] = checker_edge_size;
+                        start[2] = (hsize_t)checker_edge_size;
                         count[2] = offset_count;
 
                     }
@@ -2096,7 +2092,7 @@ checker_board_hyperslab_dr_pio_test__select_checker_board(
 
                         } else {
 
-                            start[3] = checker_edge_size;
+                            start[3] = (hsize_t)checker_edge_size;
                             count[3] = offset_count;
 
                         }
@@ -2113,7 +2109,7 @@ checker_board_hyperslab_dr_pio_test__select_checker_board(
 
                             } else {
 
-                                start[4] = checker_edge_size;
+                                start[4] = (hsize_t)checker_edge_size;
                                 count[4] = offset_count;
 
                             }
@@ -2218,9 +2214,9 @@ checker_board_hyperslab_dr_pio_test__select_checker_board(
     for ( i = 0; i < test_max_rank; i++ ) {
 
         start[i]  = 0;
-        stride[i] = edge_size;
+        stride[i] = (hsize_t)edge_size;
         count[i]  = 1;
-        block[i]  = edge_size;
+        block[i]  = (hsize_t)edge_size;
     }
 
     ret = H5Sselect_hyperslab(tgt_sid, H5S_SELECT_AND,
@@ -2497,10 +2493,11 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     hbool_t	use_gpfs = FALSE;   /* Use GPFS hints */
     hbool_t	data_ok = FALSE;
     hbool_t	mis_match = FALSE;
-    int		i, j, k, l, n;
+    int		i, j, k, l;
+    size_t      u;
     int         mrc;
-    int         start_index;
-    int         stop_index;
+    size_t      start_index;
+    size_t      stop_index;
     int		small_ds_offset;
     int         large_ds_offset;
     const int   test_max_rank = 5;  /* must update code if this changes */
@@ -2515,7 +2512,6 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     uint32_t  * large_ds_slice_buf = NULL;
     uint32_t  * ptr_0;
     uint32_t  * ptr_1;
-    uint32_t  * ptr_2;
     int		mpi_rank;
     int		mpi_size;
     MPI_Comm    mpi_comm = MPI_COMM_NULL;
@@ -2692,8 +2688,8 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
 
     /* setup dims: */
-    dims[0] = (int)(mpi_size + 1);
-    dims[1] = dims[2] = dims[3] = dims[4] = edge_size;
+    dims[0] = (hsize_t)(mpi_size + 1);
+    dims[1] = dims[2] = dims[3] = dims[4] = (hsize_t)edge_size;
 
 
     /* Create small ds dataspaces */
@@ -2790,7 +2786,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
         }
 
         chunk_dims[1] = chunk_dims[2] = 
-                        chunk_dims[3] = chunk_dims[4] = chunk_edge_size;
+                        chunk_dims[3] = chunk_dims[4] = (hsize_t)chunk_edge_size;
 
         small_ds_dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
         VRFY((ret != FAIL), "H5Pcreate() small_ds_dcpl_id succeeded");
@@ -2836,17 +2832,17 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
 
     /* setup selection to write initial data to the small and large data sets */
-    start[0] = mpi_rank;
-    stride[0] = 2 * (mpi_size + 1);
+    start[0] = (hsize_t)mpi_rank;
+    stride[0] = (hsize_t)(2 * (mpi_size + 1));
     count[0] = 1;
     block[0] = 1;
 
     for ( i = 1; i < large_rank; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
-        block[i] = edge_size;
+        block[i] = (hsize_t)edge_size;
     }
 
     /* setup selections for writing initial data to the small data set */
@@ -2868,7 +2864,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
     if ( MAINPROCESS ) { /* add an additional slice to the selections */
 
-        start[0] = mpi_size;
+        start[0] = (hsize_t)mpi_size;
 
         ret = H5Sselect_hyperslab(mem_small_ds_sid,
                                   H5S_SELECT_OR,
@@ -2935,7 +2931,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
     /* setup selections for writing initial data to the large data set */
 
-    start[0] = mpi_rank;
+    start[0] = (hsize_t)mpi_rank;
 
     ret = H5Sselect_hyperslab(mem_large_ds_sid,
                               H5S_SELECT_SET,
@@ -2975,7 +2971,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
     if ( MAINPROCESS ) { /* add an additional slice to the selections */
 
-        start[0] = mpi_size;
+        start[0] = (hsize_t)mpi_size;
 
         ret = H5Sselect_hyperslab(mem_large_ds_sid,
                                   H5S_SELECT_OR,
@@ -3067,7 +3063,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
      */
 
     sel_start[0] = sel_start[1] = sel_start[2] = sel_start[3] = sel_start[4] = 0;
-    sel_start[small_ds_offset] = mpi_rank;
+    sel_start[small_ds_offset] = (hsize_t)mpi_rank;
 
     checker_board_hyperslab_dr_pio_test__select_checker_board(mpi_rank,
                                                               small_ds_slice_sid,
@@ -3097,7 +3093,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     for ( i = 0; i < PAR_SS_DR_MAX_RANK; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
         if ( (PAR_SS_DR_MAX_RANK - i) > (small_rank - 1) ) {
 
@@ -3105,7 +3101,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
         } else {
 
-            block[i] = edge_size;
+            block[i] = (hsize_t)edge_size;
         }
     }
 
@@ -3172,10 +3168,10 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                  * large_rank > small_rank by the assertions at the head 
                  * of this function.  Thus no need for another inner loop.
                  */
-                start[0] = i;
-                start[1] = j;
-                start[2] = k;
-                start[3] = l;
+                start[0] = (hsize_t)i;
+                start[1] = (hsize_t)j;
+                start[2] = (hsize_t)k;
+                start[3] = (hsize_t)l;
                 start[4] = 0;
 
                 HDassert( ( start[0] == 0 ) || ( 0 < small_ds_offset + 1 ) );
@@ -3220,7 +3216,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                               file_large_ds_sid_0,
                               xfer_plist,
                               small_ds_slice_buf);
-                VRFY((ret >= 0), "H5Sread() slice from large ds succeeded.");
+                VRFY((ret >= 0), "H5Dread() slice from large ds succeeded.");
 
 #if CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 
 		HDfprintf(stdout, "%s:%d: H5Dread() returns.\n", 
@@ -3268,7 +3264,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
      */
 
     sel_start[0] = sel_start[1] = sel_start[2] = sel_start[3] = sel_start[4] = 0;
-    sel_start[small_ds_offset] = mpi_rank;
+    sel_start[small_ds_offset] = (hsize_t)mpi_rank;
 
     checker_board_hyperslab_dr_pio_test__select_checker_board(mpi_rank,
                                                               file_small_ds_sid_0,
@@ -3295,7 +3291,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     for ( i = 0; i < PAR_SS_DR_MAX_RANK; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
         if ( (PAR_SS_DR_MAX_RANK - i) > (small_rank - 1) ) {
 
@@ -3303,7 +3299,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
         } else {
 
-            block[i] = edge_size;
+            block[i] = (hsize_t)edge_size;
         }
     }
 
@@ -3369,10 +3365,10 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                  * by the assertions at the head of this function.  Thus no
                  * need for another inner loop.
                  */
-                start[0] = i;
-                start[1] = j;
-                start[2] = k;
-                start[3] = l;
+                start[0] = (hsize_t)i;
+                start[1] = (hsize_t)j;
+                start[2] = (hsize_t)k;
+                start[3] = (hsize_t)l;
                 start[4] = 0;
 
                 HDassert( ( start[0] == 0 ) || ( 0 < small_ds_offset + 1 ) );
@@ -3417,24 +3413,25 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                               file_small_ds_sid_0,
                               xfer_plist,
                               large_ds_buf_1);
-                VRFY((ret >= 0), "H5Sread() slice from small ds succeeded.");
+                VRFY((ret >= 0), "H5Dread() slice from small ds succeeded.");
 
                 /* verify that the expected data and only the
                  * expected data was read.
                  */
                 data_ok = TRUE;
                 ptr_1 = large_ds_buf_1;
-                expected_value = mpi_rank * small_ds_slice_size;
-                start_index = 
+                expected_value = (uint32_t)((size_t)mpi_rank * small_ds_slice_size);
+                start_index = (size_t)(
                         (i * edge_size * edge_size * edge_size * edge_size) +
                         (j * edge_size * edge_size * edge_size) +
                         (k * edge_size * edge_size) +
-                        (l * edge_size);
-                stop_index = start_index + (int)small_ds_slice_size - 1;
+                        (l * edge_size));
+                stop_index = start_index + small_ds_slice_size - 1;
 
 #if CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 
 {
-int		m;
+int		m, n;
+
 		HDfprintf(stdout, "%s:%d: expected_value = %d.\n", 
                           fcnName, mpi_rank, expected_value);
 		HDfprintf(stdout, "%s:%d: start/stop index = %d/%d.\n",
@@ -3455,11 +3452,10 @@ int		m;
 }
 #endif 
 
-                HDassert( 0 <= start_index );
                 HDassert( start_index < stop_index );
-                HDassert( stop_index <= (int)large_ds_size );
+                HDassert( stop_index <= large_ds_size );
 
-                for ( n = 0; n < (int)start_index; n++ ) {
+                for ( u = 0; u < start_index; u++ ) {
 
                     if ( *ptr_1 != 0 ) {
 
@@ -3491,7 +3487,7 @@ int		m;
 
                 ptr_1 = large_ds_buf_1 + stop_index + 1;
 
-                for ( n = stop_index + 1; n < large_ds_size; n++ ) {
+                for ( u = stop_index + 1; u < large_ds_size; u++ ) {
 
                     if ( *ptr_1 != 0 ) {
 
@@ -3533,17 +3529,17 @@ int		m;
      * the memory and file selections.
      */
 
-    start[0] = mpi_rank;
-    stride[0] = 2 * (mpi_size + 1);
+    start[0] = (hsize_t)mpi_rank;
+    stride[0] = (hsize_t)(2 * (mpi_size + 1));
     count[0] = 1;
     block[0] = 1;
 
     for ( i = 1; i < large_rank; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
-        block[i] = edge_size;
+        block[i] = (hsize_t)edge_size;
     }
 
     ret = H5Sselect_hyperslab(file_small_ds_sid_0,
@@ -3564,7 +3560,7 @@ int		m;
 
 
     sel_start[0] = sel_start[1] = sel_start[2] = sel_start[3] = sel_start[4] = 0;
-    sel_start[small_ds_offset] = mpi_rank;
+    sel_start[small_ds_offset] = (hsize_t)mpi_rank;
 
     checker_board_hyperslab_dr_pio_test__select_checker_board(mpi_rank,
                                                               file_small_ds_sid_1,
@@ -3581,7 +3577,7 @@ int		m;
     for ( i = 0; i < PAR_SS_DR_MAX_RANK; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
         if ( (PAR_SS_DR_MAX_RANK - i) > (small_rank - 1) ) {
 
@@ -3589,7 +3585,7 @@ int		m;
 
         } else {
 
-            block[i] = edge_size;
+            block[i] = (hsize_t)edge_size;
         }
     }
 
@@ -3678,10 +3674,10 @@ int		m;
                 /* select the portion of the in memory large cube from which we
                  * are going to write data.
                  */
-                start[0] = i;
-                start[1] = j;
-                start[2] = k;
-                start[3] = l;
+                start[0] = (hsize_t)i;
+                start[1] = (hsize_t)j;
+                start[2] = (hsize_t)k;
+                start[3] = (hsize_t)l;
                 start[4] = 0;
 
                 HDassert( ( start[0] == 0 ) || ( 0 < small_ds_offset + 1 ) );
@@ -3747,35 +3743,34 @@ int		m;
                 /* verify that expected data is retrieved */
 
                 mis_match = FALSE;
-                ptr_1 = small_ds_buf_1;
 
-                expected_value = 
+                expected_value = (uint32_t)(
 			(i * edge_size * edge_size * edge_size * edge_size) +
                         (j * edge_size * edge_size * edge_size) +
                         (k * edge_size * edge_size) +
-                        (l * edge_size);
+                        (l * edge_size));
 
-                start_index = mpi_rank * small_ds_slice_size;
+                start_index = (size_t)mpi_rank * small_ds_slice_size;
                 stop_index = start_index + small_ds_slice_size - 1;
 
-                HDassert( 0 <= start_index );
                 HDassert( start_index < stop_index );
-                HDassert( stop_index <= (int)small_ds_size );
+                HDassert( stop_index <= small_ds_size );
 
                 data_ok = TRUE;
 
-                for ( n = 0; n < start_index; n++ ) {
+                ptr_1 = small_ds_buf_1;
+                for ( u = 0; u < start_index; u++, ptr_1++ ) {
 
-                    if ( *(ptr_1 + n) != 0 ) {
+                    if ( *ptr_1 != 0 ) {
 
                         data_ok = FALSE;
-                        *(ptr_1 + n) = 0;
+                        *ptr_1 = 0;
                     }
                 }
 
                 data_ok &= checker_board_hyperslab_dr_pio_test__verify_data
                            (
-                             ptr_1 + start_index,
+                             small_ds_buf_1 + start_index,
                              small_rank - 1,
                              edge_size,
                              checker_edge_size,
@@ -3784,12 +3779,13 @@ int		m;
                            );
 
 
-                for ( n = stop_index; n < small_ds_size; n++ ) {
+                ptr_1 = small_ds_buf_1;
+                for ( u = stop_index; u < small_ds_size; u++, ptr_1++ ) {
 
-                    if ( *(ptr_1 + n) != 0 ) {
+                    if ( *ptr_1 != 0 ) {
 
                         data_ok = FALSE;
-                        *(ptr_1 + n) = 0;
+                        *ptr_1 = 0;
                     }
                 }
 
@@ -3819,17 +3815,17 @@ int		m;
      * and file selections.
      */
 
-    start[0] = mpi_rank;
-    stride[0] = 2 * (mpi_size + 1);
+    start[0] = (hsize_t)mpi_rank;
+    stride[0] = (hsize_t)(2 * (mpi_size + 1));
     count[0] = 1;
     block[0] = 1;
 
     for ( i = 1; i < large_rank; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
-        block[i] = edge_size;
+        block[i] = (hsize_t)edge_size;
     }
 
     ret = H5Sselect_hyperslab(file_large_ds_sid_0,
@@ -3853,7 +3849,7 @@ int		m;
      */
 
     sel_start[0] = sel_start[1] = sel_start[2] = sel_start[3] = sel_start[4] = 0;
-    sel_start[small_ds_offset] = mpi_rank;
+    sel_start[small_ds_offset] = (hsize_t)mpi_rank;
 
     checker_board_hyperslab_dr_pio_test__select_checker_board(mpi_rank,
                                                               mem_small_ds_sid,
@@ -3870,7 +3866,7 @@ int		m;
     for ( i = 0; i < PAR_SS_DR_MAX_RANK; i++ ) {
 
         start[i] = 0;
-        stride[i] = 2 * edge_size;
+        stride[i] = (hsize_t)(2 * edge_size);
         count[i] = 1;
         if ( (PAR_SS_DR_MAX_RANK - i) > (small_rank - 1) ) {
 
@@ -3878,7 +3874,7 @@ int		m;
 
         } else {
 
-            block[i] = edge_size;
+            block[i] = (hsize_t)edge_size;
         }
     }
 
@@ -3959,10 +3955,10 @@ int		m;
                 /* select the portion of the in memory large cube to which we
                  * are going to write data.
                  */
-                start[0] = i;
-                start[1] = j;
-                start[2] = k;
-                start[3] = l;
+                start[0] = (hsize_t)i;
+                start[1] = (hsize_t)j;
+                start[2] = (hsize_t)k;
+                start[3] = (hsize_t)l;
                 start[4] = 0;
 
                 HDassert( ( start[0] == 0 ) || ( 0 < small_ds_offset + 1 ) );
@@ -4032,37 +4028,35 @@ int		m;
                 /* verify that the expected data and only the
                  * expected data was read.
                  */
-                ptr_1 = large_ds_buf_1;
-                expected_value = (uint32_t)(mpi_rank) * small_ds_slice_size;
+                expected_value = (uint32_t)((size_t)mpi_rank * small_ds_slice_size);
 
-
-                start_index = (i * edge_size * edge_size * edge_size * edge_size) +
+                start_index = (size_t)((i * edge_size * edge_size * edge_size * edge_size) +
                               (j * edge_size * edge_size * edge_size) +
                               (k * edge_size * edge_size) +
-                              (l * edge_size);
-                stop_index = start_index + (int)small_ds_slice_size - 1;
+                              (l * edge_size));
+                stop_index = start_index + small_ds_slice_size - 1;
 
-                HDassert( 0 <= start_index );
                 HDassert( start_index < stop_index );
-                HDassert( stop_index < (int)large_ds_size );
+                HDassert( stop_index < large_ds_size );
 
 
                 mis_match = FALSE;
 
                 data_ok = TRUE;
 
-                for ( n = 0; n < start_index; n++ ) {
+                ptr_1 = large_ds_buf_1;
+                for ( u = 0; u < start_index; u++, ptr_1++ ) {
 
-                    if ( *(ptr_1 + n) != 0 ) {
+                    if ( *ptr_1 != 0 ) {
 
                         data_ok = FALSE;
-                        *(ptr_1 + n) = 0;
+                        *ptr_1 = 0;
                     }
                 }
 
                 data_ok &= checker_board_hyperslab_dr_pio_test__verify_data
                            (
-                             ptr_1 + start_index,
+                             large_ds_buf_1 + start_index,
                              small_rank - 1,
                              edge_size,
                              checker_edge_size,
@@ -4071,12 +4065,13 @@ int		m;
                            );
 
 
-                for ( n = stop_index; n < small_ds_size; n++ ) {
+                ptr_1 = large_ds_buf_1;
+                for ( u = stop_index; u < small_ds_size; u++, ptr_1++ ) {
 
-                    if ( *(ptr_1 + n) != 0 ) {
+                    if ( *ptr_1 != 0 ) {
 
                         data_ok = FALSE;
-                        *(ptr_1 + n) = 0;
+                        *ptr_1 = 0;
                     }
                 }
 
