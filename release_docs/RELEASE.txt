@@ -112,7 +112,9 @@ Bug Fixes since HDF5-1.8.6
 
     Library
     -------
-    - None
+    - The datatype handler created with H5Tencode/decode used to have the 
+      reference count 0 (zero).  I have fixed it.  It is 1 (one) now.
+      (SLU - 2011/2/18)
 
     Parallel Library
     ----------------

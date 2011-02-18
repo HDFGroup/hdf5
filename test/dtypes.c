@@ -4901,6 +4901,10 @@ opaque_funcs(void)
  * Modifications: Raymond Lu
  *              July 13, 2009
  *              Added the test for VL string types.
+ *
+ *              Raymond Lu
+ *              17 February 2011
+ *              I added the test of reference count for decoded datatypes.
  *-------------------------------------------------------------------------
  */
 static int
@@ -5329,6 +5333,78 @@ test_encode(void)
     } /* end if */
 
     /*-----------------------------------------------------------------------
+     * Test the reference count of the decoded datatypes
+     *-----------------------------------------------------------------------
+     */
+
+    /* Make sure the reference counts for the decoded datatypes are one. */
+    if(H5Iget_ref(decoded_tid1) != 1) { 
+        H5_FAILED();
+        printf("Decoded datatype has incorrect reference count\n");
+        goto error;
+    } /* end if */
+
+    if(H5Iget_ref(decoded_tid2) != 1) { 
+        H5_FAILED();
+        printf("Decoded datatype has incorrect reference count\n");
+        goto error;
+    } /* end if */
+
+    if(H5Iget_ref(decoded_tid3) != 1) { 
+        H5_FAILED();
+        printf("Decoded datatype has incorrect reference count\n");
+        goto error;
+    } /* end if */
+
+    /* Make sure the reference counts for the decoded datatypes can be 
+     * decremented and the datatypes are closed. */
+    if(H5Idec_ref(decoded_tid1) != 0) { 
+        H5_FAILED();
+        printf("Decoded datatype can't close\n");
+        goto error;
+    } /* end if */
+
+    if(H5Idec_ref(decoded_tid2) != 0) { 
+        H5_FAILED();
+        printf("Decoded datatype can't close\n");
+        goto error;
+    } /* end if */
+
+    if(H5Idec_ref(decoded_tid3) != 0) { 
+        H5_FAILED();
+        printf("Decoded datatype can't close\n");
+        goto error;
+    } /* end if */
+
+    /* Make sure the decoded datatypes are already closed. */
+    H5E_BEGIN_TRY {
+	ret = H5Tclose(decoded_tid1);
+    } H5E_END_TRY;
+    if(ret!=FAIL) {
+        H5_FAILED();
+        printf("Decoded datatype should have been closed\n");
+        goto error;
+    }
+
+    H5E_BEGIN_TRY {
+	ret = H5Tclose(decoded_tid2);
+    } H5E_END_TRY;
+    if(ret!=FAIL) {
+        H5_FAILED();
+        printf("Decoded datatype should have been closed\n");
+        goto error;
+    }
+
+    H5E_BEGIN_TRY {
+	ret = H5Tclose(decoded_tid3);
+    } H5E_END_TRY;
+    if(ret!=FAIL) {
+        H5_FAILED();
+        printf("Decoded datatype should have been closed\n");
+        goto error;
+    }
+
+    /*-----------------------------------------------------------------------
      * Close and release
      *-----------------------------------------------------------------------
      */
@@ -5344,22 +5420,6 @@ test_encode(void)
         goto error;
     } /* end if */
     if(H5Tclose(tid3) < 0) {
-        H5_FAILED();
-        printf("Can't close datatype\n");
-        goto error;
-    } /* end if */
-
-    if(H5Tclose(decoded_tid1) < 0) {
-        H5_FAILED();
-        printf("Can't close datatype\n");
-        goto error;
-    } /* end if */
-    if(H5Tclose(decoded_tid2) < 0) {
-        H5_FAILED();
-        printf("Can't close datatype\n");
-        goto error;
-    } /* end if */
-    if(H5Tclose(decoded_tid3) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
