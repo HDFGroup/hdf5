@@ -44,7 +44,6 @@
 ./bin/compile
 ./bin/config.guess
 ./bin/config.sub
-./bin/config_para_ibm_sp.sh 
 ./bin/debug-ohdr			_DO_NOT_DISTRIBUTE_
 ./bin/dependencies
 ./bin/depcomp
