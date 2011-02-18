@@ -264,6 +264,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - The datatype handler created with H5Tencode/decode used to have the 
+            reference count 0 (zero).  I have fixed it.  It is 1 (one) now.
+            (SLU - 2011/2/18)
       - Fixed a bug that caused big endian machines to generate corrupt files
             when using the scale-offset filter with floating point data or
             fill values.  Note that such datasets will no longer be readable
