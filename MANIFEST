@@ -1139,6 +1139,8 @@
 ./tools/testfiles/tall.h5
 ./tools/testfiles/tarray1.ddl
 ./tools/testfiles/tarray1.h5
+./tools/testfiles/tarray1_big.ddl
+./tools/testfiles/tarray1_big.h5
 ./tools/testfiles/tarray2.ddl
 ./tools/testfiles/tarray2.h5
 ./tools/testfiles/tarray3.ddl

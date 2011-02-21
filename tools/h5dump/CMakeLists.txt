@@ -48,6 +48,7 @@ IF (BUILD_TESTING)
       tall-5s.ddl
       tallfilters.ddl
       tarray1.ddl
+      tarray1_big.ddl
       tarray2.ddl
       tarray3.ddl
       tarray4.ddl
@@ -223,6 +224,7 @@ IF (BUILD_TESTING)
       taindices.h5
       tall.h5
       tarray1.h5
+      tarray1_big.h5
       tarray2.h5
       tarray3.h5
       tarray4.h5
@@ -598,6 +600,8 @@ IF (BUILD_TESTING)
           tallfilters.out.err
           tarray1.out
           tarray1.out.err
+          tarray1_big.out
+          tarray1_big.out.err
           tarray2.out
           tarray2.out.err
           tarray3.out
@@ -883,6 +887,8 @@ IF (BUILD_TESTING)
 
   # test for files with array data
   ADD_H5_TEST (tarray1 0 tarray1.h5)
+  # # added for bug# 2092 - tarray1_big.h5
+  ADD_H5_TEST (tarray1_big 0 -R tarray1_big.h5)
   ADD_H5_TEST (tarray2 0 tarray2.h5)
   ADD_H5_TEST (tarray3 0 tarray3.h5)
   ADD_H5_TEST (tarray4 0 tarray4.h5)

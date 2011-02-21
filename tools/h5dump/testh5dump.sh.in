@@ -347,6 +347,8 @@ TOOLTEST tvlstr.ddl tvlstr.h5
 
 # test for files with array data
 TOOLTEST tarray1.ddl tarray1.h5
+# # added for bug# 2092 - tarray1_big.h
+TOOLTEST tarray1_big.ddl -R tarray1_big.h5
 TOOLTEST tarray2.ddl tarray2.h5
 TOOLTEST tarray3.ddl tarray3.h5
 TOOLTEST tarray4.ddl tarray4.h5

@@ -383,6 +383,7 @@ rem ############################################################################
 
     rem test for files with array data
     call :tooltest tarray1.ddl tarray1.h5
+    call :tooltest tarray1_big.ddl -R tarray1_big.h5
     call :tooltest tarray2.ddl tarray2.h5
     call :tooltest tarray3.ddl tarray3.h5
     call :tooltest tarray4.ddl tarray4.h5
