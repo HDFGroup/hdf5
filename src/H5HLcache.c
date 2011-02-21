@@ -139,13 +139,14 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
 static herr_t
 H5HL_fl_deserialize(H5HL_t *heap, hsize_t free_block)
 {
-    H5HL_free_t *fl, *tail = NULL;      /* Heap free block nodes */
+    H5HL_free_t *fl = NULL, *tail = NULL;      /* Heap free block nodes */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HL_fl_deserialize)
 
     /* check arguments */
     HDassert(heap);
+    HDassert(!heap->freelist);
 
     /* Build free list */
     while(H5HL_FREE_NULL != free_block) {
@@ -162,13 +163,6 @@ H5HL_fl_deserialize(H5HL_t *heap, hsize_t free_block)
         fl->prev = tail;
         fl->next = NULL;
 
-        /* Insert node into list */
-        if(tail)
-            tail->next = fl;
-        tail = fl;
-        if(!heap->freelist)
-            heap->freelist = fl;
-
         /* Decode offset of next free block */
         p = heap->dblk_image + free_block;
         H5F_DECODE_LENGTH_LEN(p, free_block, heap->sizeof_size);
@@ -179,9 +173,21 @@ H5HL_fl_deserialize(H5HL_t *heap, hsize_t free_block)
         H5F_DECODE_LENGTH_LEN(p, fl->size, heap->sizeof_size);
         if((fl->offset + fl->size) > heap->dblk_size)
             HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "bad heap free list")
+
+        /* Append node onto list */
+        if(tail)
+            tail->next = fl;
+        else
+            heap->freelist = fl;
+        tail = fl;
+        fl = NULL;
     } /* end while */
 
 done:
+    if(ret_value < 0)
+        if(fl)
+            fl = H5FL_FREE(H5HL_free_t, fl);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL_fl_deserialize() */
 
@@ -331,6 +337,11 @@ H5HL_prefix_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
             /* Check if the current buffer from the speculative read already has the heap data */
             if(spec_read_size >= (heap->prfx_size + heap->dblk_size)) {
+                /* Set p to the start of the data block.  This is necessary
+                 * because there may be a gap between the used portion of the
+                 * prefix and the data block due to alignment constraints. */
+                p = buf + heap->prfx_size;
+
                 /* Copy the heap data from the speculative read buffer */
                 HDmemcpy(heap->dblk_image, p, heap->dblk_size);
             } /* end if */
@@ -436,6 +447,11 @@ H5HL_prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 
         /* Check if the local heap is a single object in cache */
         if(heap->single_cache_obj) {
+            /* Set p to the start of the data block.  This is necessary because
+             * there may be a gap between the used portion of the prefix and the
+             * data block due to alignment constraints. */
+            p = buf + heap->prfx_size;
+
             /* Serialize the free list into the heap data's image */
             H5HL_fl_serialize(heap);
 
@@ -742,7 +758,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_datablock_clear(H5F_t UNUSED *f, void *_thing, hbool_t destroy)
+H5HL_datablock_clear(H5F_t *f, void *_thing, hbool_t destroy)
 {
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
     herr_t ret_value = SUCCEED;         /* Return value */

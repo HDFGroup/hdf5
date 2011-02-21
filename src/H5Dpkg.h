@@ -66,6 +66,10 @@
 
 #define H5D_CHUNK_HASH(D, ADDR) H5F_addr_hash(ADDR, (D)->cache.chunk.nslots)
 
+/* Flags for marking aspects of a dataset dirty */
+#define H5D_MARK_SPACE  0x01
+#define H5D_MARK_LAYOUT  0x02
+
 
 /****************************/
 /* Package Private Typedefs */
@@ -520,6 +524,7 @@ H5_DLL herr_t H5D_vlen_get_buf_size(void *elem, hid_t type_id, unsigned ndim,
 H5_DLL herr_t H5D_check_filters(H5D_t *dataset);
 H5_DLL herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 H5_DLL herr_t H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
+H5_DLL herr_t H5D_mark(H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 
 /* Functions that perform direct serial I/O operations */
 H5_DLL herr_t H5D_select_read(const H5D_io_info_t *io_info,
