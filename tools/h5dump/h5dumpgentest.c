@@ -2846,7 +2846,7 @@ static void gent_array1_big(void)
     hsize_t  block[SPACE1_RANK];     /* Block size of hyperslab */
     start[0]=0;
     stride[0]=1;
-    count[0]=600;
+    count[0]=999;
     block[0]=1;
     hdset_reg_ref_t   *wbuf;    /* buffer to write to disk */
     /* Allocate write & read buffers */

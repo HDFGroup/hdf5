@@ -786,7 +786,7 @@ IF (BUILD_TESTING)
   # test for files with array data
   ADD_H5_TEST (tarray1 0 tarray1.h5)
   # # added for bug# 2092 - tarray1_big.h5
-  ADD_H5_TEST (tarray1_big 0 tarray1_big.h5)
+  ADD_H5_TEST (tarray1_big 0 -R tarray1_big.h5)
   ADD_H5_TEST (tarray2 0 tarray2.h5)
   ADD_H5_TEST (tarray3 0 tarray3.h5)
   ADD_H5_TEST (tarray4 0 tarray4.h5)
