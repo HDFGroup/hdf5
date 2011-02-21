@@ -59,6 +59,7 @@ IF (BUILD_TESTING)
   TARGET_LINK_LIBRARIES (h5repacktest  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME h5repacktest COMMAND $<TARGET_FILE:h5repacktest>)
+  SET_TESTS_PROPERTIES (h5repacktest PROPERTIES DEPENDS testh5repack_detect_szip)
 
   IF (HDF5_TEST_VFD)
 
@@ -176,10 +177,12 @@ IF (BUILD_TESTING)
           NAME H5REPACK-${testname}
           COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out.${testfile}
       )
+      SET_TESTS_PROPERTIES (H5REPACK-${testname} PROPERTIES DEPENDS H5REPACK-clearall-objects)
       ADD_TEST (
           NAME H5REPACK-DIFF_${testname}
           COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out.${testfile}
       )
+      SET_TESTS_PROPERTIES (H5REPACK-DIFF_${testname} PROPERTIES DEPENDS H5REPACK-${testname})
     ENDIF (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_H5_TEST)
 
@@ -225,6 +228,7 @@ IF (BUILD_TESTING)
                 -D "TEST_REFERENCE=${testfilter}"
                 -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
         )
+        SET_TESTS_PROPERTIES (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES DEPENDS H5REPACK-${testname})
       ELSE (${resultcode} STREQUAL "0")
         IF (${testfilter} STREQUAL "CHUNKED")
           SET (nottestfilter "(CONTIGUOUS|COMPACT)")
@@ -247,6 +251,7 @@ IF (BUILD_TESTING)
                 -D "TEST_REFERENCE=${testfilter}"
                 -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
         )
+        SET_TESTS_PROPERTIES (H5REPACK_VERIFY_LAYOUT_ALL-${testname} PROPERTIES DEPENDS H5REPACK-${testname})
       ENDIF (${resultcode} STREQUAL "0")
     ENDIF (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_H5_VERIFY_TEST)

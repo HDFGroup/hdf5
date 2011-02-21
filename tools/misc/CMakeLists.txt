@@ -144,6 +144,7 @@ IF (BUILD_TESTING)
           COMMAND $<TARGET_FILE:h5mkgrp> ${PROJECT_BINARY_DIR}/../testfiles/${resultfile}.h5 ${ARGN}
       )
     ENDIF (NOT ${resultoption} STREQUAL " ")
+    SET_TESTS_PROPERTIES (H5MKGRP-${resultfile}${resultoption} PROPERTIES DEPENDS H5MKGRP-clear-${resultfile}${resultoption})
     ADD_TEST (
         NAME H5MKGRP-H5LS-${resultfile}${resultoption}
         COMMAND "${CMAKE_COMMAND}"
@@ -156,6 +157,7 @@ IF (BUILD_TESTING)
             -D "TEST_REFERENCE=${resultfile}.ls"
             -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
     )
+    SET_TESTS_PROPERTIES (H5MKGRP-H5LS-${resultfile}${resultoption} PROPERTIES DEPENDS H5MKGRP-${resultfile}${resultoption})
   ENDMACRO (ADD_H5_TEST resultfile resultcode resultoption)
 
   MACRO (ADD_H5_CMP resultfile resultcode)
@@ -187,6 +189,7 @@ IF (BUILD_TESTING)
   )
   # repartition family member size to 20,000 bytes.
   ADD_TEST (NAME h5repart_20K COMMAND $<TARGET_FILE:h5repart> -m 20000 family_file%05d.h5 fst_family%05d.h5)
+  SET_TESTS_PROPERTIES (h5repart_20K PROPERTIES DEPENDS h5repart_20K-clear-objects)
 
   # Remove any output file left over from previous test run
   ADD_TEST (
@@ -200,6 +203,7 @@ IF (BUILD_TESTING)
   )
   # repartition family member size to 5 KB.
   ADD_TEST (NAME h5repart_5K COMMAND $<TARGET_FILE:h5repart> -m 5k family_file%05d.h5 scd_family%05d.h5)
+  SET_TESTS_PROPERTIES (h5repart_5K PROPERTIES DEPENDS h5repart_5K-clear-objects)
 
   # Remove any output file left over from previous test run
   ADD_TEST (
@@ -210,9 +214,11 @@ IF (BUILD_TESTING)
   )
   # convert family file to sec2 file of 20,000 bytes
   ADD_TEST (NAME h5repart_sec2 COMMAND $<TARGET_FILE:h5repart> -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5)
+  SET_TESTS_PROPERTIES (h5repart_sec2 PROPERTIES DEPENDS h5repart_sec2-clear-objects)
 
   # test the output files repartitioned above.
   ADD_TEST (NAME h5repart_test COMMAND $<TARGET_FILE:h5repart_test>)
+  SET_TESTS_PROPERTIES (h5repart_test PROPERTIES DEPENDS h5repart_sec2 h5repart_5K h5repart_20K)
 
   SET (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
         h5repart_test

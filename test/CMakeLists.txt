@@ -293,9 +293,11 @@ SET (H5_TESTS
 )
 
 FOREACH (test ${H5_TESTS})
-    ADD_H5_TEST(${test})
+  ADD_H5_TEST(${test})
+  SET_TESTS_PROPERTIES(${test} PROPERTIES DEPENDS h5test-clear-objects)
 ENDFOREACH (test ${H5_TESTS})
 
+SET_TESTS_PROPERTIES(flush2 PROPERTIES DEPENDS flush1)
 
 ##############################################################################
 ##############################################################################
