@@ -489,6 +489,10 @@ IF (BUILD_TESTING)
             -D "TEST_REFERENCE=${resultfile}.ddl"
             -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
     )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5DUMP-${resultfile}")
   ENDMACRO (ADD_H5_TEST file)
 
   MACRO (ADD_H5_EXPORT_TEST resultfile targetfile resultcode)
@@ -507,11 +511,16 @@ IF (BUILD_TESTING)
         NAME H5DUMP-output-${resultfile}
         COMMAND $<TARGET_FILE:h5dump> -d /Dataset1 -s 0 -R -y -o ${PROJECT_BINARY_DIR}/${resultfile}.txt ${PROJECT_BINARY_DIR}/${targetfile}
     )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DUMP-output-${resultfile} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
     ADD_TEST (
         NAME H5DUMP-output-cmp-${resultfile}
         COMMAND ${CMAKE_COMMAND}
               -E compare_files ${PROJECT_BINARY_DIR}/${resultfile}.txt ${PROJECT_BINARY_DIR}/${resultfile}.exp
     )
+    SET_TESTS_PROPERTIES (H5DUMP-output-cmp-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile})
+    SET (last_test "H5DUMP-output-cmp-${resultfile}")
   ENDMACRO (ADD_H5_EXPORT_TEST file)
 
   MACRO (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
@@ -537,6 +546,10 @@ IF (BUILD_TESTING)
             -D "TEST_REFERENCE=${resultfile}.xml"
             -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
     )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5DUMP-XML-${resultfile}")
   ENDMACRO (ADD_XML_H5_TEST file)
 
   # --------------------------------------------------------------------
@@ -782,6 +795,10 @@ IF (BUILD_TESTING)
           tvms.out
           tvms.out.err
   )
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5DUMP-clearall-objects PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
+  SET (last_test "H5DUMP-clearall-objects")
 
   # If using memchecker add tests without using scripts
   IF (HDF5_ENABLE_USING_MEMCHECKER)
@@ -1064,6 +1081,10 @@ IF (BUILD_TESTING)
             out3.h5
     )
   ENDIF (NOT HDF5_NOCLEANUP)
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5DUMP-clear-objects PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
+  SET (last_test "H5DUMP-clear-objects")
 
   # test for dataset region references 
   ADD_H5_TEST (tdatareg 0 tdatareg.h5)
@@ -1210,6 +1231,10 @@ IF (BUILD_TESTING)
             tpbitsUnsignedLongLong16.out
             tpbitsUnsignedLongLong16.out.err
     )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DUMP_PACKED_BITS-clearall-objects PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5DUMP_PACKED_BITS-clearall-objects")
 
     # test failure handling
     # Missing file name
@@ -1425,6 +1450,10 @@ IF (BUILD_TESTING)
           tvlstr.h5.out
           tvlstr.h5.out.err
   )
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5DUMP-XML-clearall-objects PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
+  SET (last_test "H5DUMP-XML-clearall-objects")
 
   ########## test XML
 

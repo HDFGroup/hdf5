@@ -99,6 +99,10 @@ IF (BUILD_TESTING)
             -D "TEST_REFERENCE=${resultfile}.ddl"
             -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
     )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5STAT-${resultfile}")
   ENDMACRO (ADD_H5_TEST file)
 
 ##############################################################################
@@ -141,6 +145,10 @@ IF (BUILD_TESTING)
           h5stat_newgrat-UA.out
           h5stat_newgrat-UA.out.err
   )
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
+  SET (last_test "H5STAT-clearall-objects")
 
   # If using memchecker add tests without using scripts
   IF (HDF5_ENABLE_USING_MEMCHECKER)

@@ -59,6 +59,7 @@ IF (BUILD_TESTING)
   )
 
   ADD_TEST (NAME h5importtest COMMAND $<TARGET_FILE:h5importtest>)
+  SET_TESTS_PROPERTIES (h5importtest PROPERTIES DEPENDS H5IMPORT-clear-objects)
 ENDIF (BUILD_TESTING)
 
 ##############################################################################
