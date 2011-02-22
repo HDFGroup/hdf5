@@ -5,12 +5,6 @@ PROJECT (HDF5_HL_FORTRAN_TESTS C CXX Fortran)
 # Add Tests
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
-LINK_DIRECTORIES (
-    ${CMAKE_Fortran_MODULE_DIRECTORY}
-    ${HDF5_HL_F90_BINARY_DIR}
-    ${HDF5_F90_BINARY_DIR}
-    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-)
 
 # Remove any output file left over from previous test run
 ADD_TEST (

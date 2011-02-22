@@ -17,7 +17,7 @@ rem Purpose     : Copy all Files in the following formats from Windows to
 rem               approapriate directory: .bat .c .f90 .h .txt .js 
 rem             : 
 rem Written By  : Muqun Yang
-rem Last Update : November 17, 2007 by Scott Wegner
+rem Last Update : 2/18/08 by Scott Wegner
 
 pushd %~dp0
 

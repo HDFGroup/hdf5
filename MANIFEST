@@ -410,11 +410,11 @@
 ./release_docs/INSTALL_VMS.txt
 ./release_docs/INSTALL_Windows.txt
 ./release_docs/USING_Windows.txt
-./release_docs/CMake.txt
 ./release_docs/INSTALL_Windows_From_Command_Line.txt
 ./release_docs/INSTALL_Windows_Short_NET.TXT
 ./release_docs/INSTALL_Windows_Short_VS2005.TXT
 ./release_docs/INSTALL_Windows_Short_VS2008.TXT
+./release_docs/CMake.txt
 ./release_docs/INSTALL_parallel
 ./release_docs/RELEASE.txt
 
@@ -1961,9 +1961,10 @@
 ./config/cmake/hdf5-config.cmake.install.in
 ./config/cmake/hdf5-config-version.cmake.in
 ./config/cmake/HDF5Macros.cmake
+./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/libhdf5.settings.cmake.in
-./config/cmake/mccacheinit.cmake
 ./config/cmake/cacheinit.cmake
+./config/cmake/mccacheinit.cmake
 ./config/cmake/CTest.cmake
 ./config/cmake/grepTest.cmake
 ./config/cmake/runTest.cmake
@@ -2287,6 +2288,8 @@
 ./windows/test/dtransformdll/dtransformdll.vcproj
 ./windows/test/dtypes/dtypes.vcproj
 ./windows/test/dtypesdll/dtypesdll.vcproj
+./windows/test/efc/efc.vcproj
+./windows/test/efcdll/efcdll.vcproj
 ./windows/test/earray/earray.vcproj
 ./windows/test/earraydll/earraydll.vcproj
 ./windows/test/enum/enum.vcproj

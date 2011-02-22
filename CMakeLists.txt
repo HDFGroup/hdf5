@@ -249,6 +249,17 @@ ELSE (BUILD_SHARED_LIBS)
 ENDIF (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
+# Option to Build Static executables
+#-----------------------------------------------------------------------------
+OPTION (BUILD_STATIC_EXECS "Build Static Executabless" OFF)
+IF (BUILD_STATIC_EXECS)
+  IF (NOT WIN32)
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+  ENDIF (NOT WIN32)
+ENDIF (BUILD_STATIC_EXECS)
+
+#-----------------------------------------------------------------------------
 # Option to use code coverage
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
@@ -478,7 +489,6 @@ IF (HDF5_ENABLE_Z_LIB_SUPPORT)
               # [SVN_REVISION rev] 
               INSTALL_COMMAND ""
               CMAKE_ARGS
-                  -DBLDTYPE:STRING=Release
                   -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
           ) 
         ENDIF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
@@ -489,7 +499,6 @@ IF (HDF5_ENABLE_Z_LIB_SUPPORT)
               URL_MD5 ""
               INSTALL_COMMAND ""
               CMAKE_ARGS
-                  -DBLDTYPE:STRING=Release
                   -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
           ) 
         ENDIF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
@@ -568,7 +577,6 @@ IF (HDF5_ENABLE_SZIP_SUPPORT)
             # [SVN_REVISION rev] 
             INSTALL_COMMAND ""
             CMAKE_ARGS
-                -DBLDTYPE:STRING=Release
                 -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
                 -DSZIP_ENABLE_ENCODING:BOOL=${HDF5_ENABLE_SZIP_ENCODING}
         ) 
@@ -580,7 +588,6 @@ IF (HDF5_ENABLE_SZIP_SUPPORT)
             URL_MD5 ""
             INSTALL_COMMAND ""
             CMAKE_ARGS
-                -DBLDTYPE:STRING=Release
                 -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
                 -DSZIP_ENABLE_ENCODING:BOOL=${HDF5_ENABLE_SZIP_ENCODING}
         ) 
@@ -825,11 +832,12 @@ SET (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) name ## _")
 IF (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/fortran")
   OPTION (HDF5_BUILD_FORTRAN "Build FORTRAN support" OFF)
   IF (HDF5_BUILD_FORTRAN)
+    INCLUDE (${HDF5_RESOURCES_DIR}/HDF5UseFortran.cmake)
     ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/fortran ${PROJECT_BINARY_DIR}/fortran)
     IF (HDF5_BUILD_HL_LIB)
       IF (EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
         #-- Build the High Level Fortran source codes
-        ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/hl/fortran ${HDF5_BINARY_DIR}/hl/fortran)
+        ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/hl/fortran ${PROJECT_BINARY_DIR}/hl/fortran)
       ENDIF (EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
     ENDIF (HDF5_BUILD_HL_LIB)
   ENDIF (HDF5_BUILD_FORTRAN)
@@ -1028,7 +1036,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
     ELSE (WIN32 AND NOT CYGWIN)
       SET (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_cygwin.txt
+          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.txt
           ${HDF5_SOURCE_DIR}/release_docs/INSTALL_MinGW.txt
           ${HDF5_SOURCE_DIR}/release_docs/INSTALL_VMS.txt
       )
@@ -1064,7 +1072,8 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
     SET (CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/release_docs/RELEASE.txt")
   ENDIF (EXISTS "${HDF5_SOURCE_DIR}/release_docs")
   SET (CPACK_PACKAGE_RELOCATABLE TRUE)
-  
+  #only needed for cmake 2.8.3
+  SET (CPACK_MONOLITHIC_INSTALL 1)  
   IF (WIN32)
     SET (CPACK_NSIS_CONTACT "help@hdfgroup.org")
     SET (CPACK_NSIS_MODIFY_PATH ON)

@@ -23,8 +23,8 @@
 #include <string.h>
 
 
-HDF5_HL_F90CSTUBDLL char*  HD5f2cstring (_fcd fdesc, int len);
-HDF5_HL_F90CSTUBDLL void HD5packFstring (char *src, char *dest, size_t len);
+H5_FCDLL char*  HD5f2cstring (_fcd fdesc, int len);
+H5_FCDLL void HD5packFstring (char *src, char *dest, size_t len);
 
 
 /*

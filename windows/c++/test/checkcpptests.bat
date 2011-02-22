@@ -91,9 +91,8 @@ rem on it for sending parameters.  --SJW 9/6/07
     if "%nerrors%"=="0" (
 		echo.All C++ library tests passed.
 	) else (
-        echo.** FAILED C++ Library tests.
+        echo.** FAILED C++ library tests.
     )
-        
+
     popd
     endlocal & exit /b %nerrors%
-    

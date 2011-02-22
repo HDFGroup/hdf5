@@ -297,9 +297,11 @@ SET (H5_TESTS
 )
 
 FOREACH (test ${H5_TESTS})
-    ADD_H5_TEST(${test})
+  ADD_H5_TEST(${test})
+  SET_TESTS_PROPERTIES(${test} PROPERTIES DEPENDS h5test-clear-objects)
 ENDFOREACH (test ${H5_TESTS})
 
+SET_TESTS_PROPERTIES(flush2 PROPERTIES DEPENDS flush1)
 
 ##############################################################################
 ##############################################################################
@@ -313,6 +315,7 @@ H5_NAMING (cache ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (cache ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME cache COMMAND $<TARGET_FILE:cache>)
+SET_TESTS_PROPERTIES(cache PROPERTIES DEPENDS h5test-clear-objects)
 
 #-- Adding test for cache_api
 ADD_EXECUTABLE (cache_api ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)

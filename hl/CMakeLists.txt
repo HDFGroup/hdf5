@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-PROJECT (HDF5_HL)
+PROJECT (HDF5_HL C CXX)
 
 #-----------------------------------------------------------------------------
 # Shared Libs
