@@ -11,7 +11,7 @@ ENDIF (BUILD_SHARED_LIBS)
 #-----------------------------------------------------------------------------
 # List Source files
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_HL_SRC_DIR}/src ${CMAKE_Fortran_MODULE_DIRECTORY})
+INCLUDE_DIRECTORIES (${HDF5_HL_SRC_DIR}/src)
 
 SET (HL_SRCS
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DS.c

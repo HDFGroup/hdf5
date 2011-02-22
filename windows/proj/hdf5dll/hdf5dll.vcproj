@@ -623,6 +623,10 @@
 				RelativePath="..\..\..\src\H5FDwindows.c"
 				>
 			</File>
+            <File
+                RelativePath="..\..\..\src\H5Fefc.c"
+                >
+            </File>
 			<File
 				RelativePath="..\..\..\src\H5Ffake.c"
 				>
