@@ -1,11 +1,13 @@
 cmake_minimum_required (VERSION 2.8)
-PROJECT (HDF5_HL)
+PROJECT (HDF5_HL C CXX)
 
 #-----------------------------------------------------------------------------
 # Shared Libs
 #-----------------------------------------------------------------------------
 IF (BUILD_SHARED_LIBS)
   SET (HL_BUILT_AS_DYNAMIC_LIB 1)
+ELSE (BUILD_SHARED_LIBS)
+  SET (HL_BUILT_AS_STATIC_LIB 1)
 ENDIF (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------

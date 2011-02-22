@@ -55,16 +55,17 @@ SET (HDF5_REFERENCE_FILES
     err_compat_2
     error_test_1
     error_test_2
+    links_env.out
 )
 
 FOREACH (ref_file ${HDF5_REFERENCE_FILES})
-  SET (dest "${PROJECT_BINARY_DIR}/testfiles/${ref_file}")
+  SET (dest "${PROJECT_BINARY_DIR}/${ref_file}")
   #MESSAGE (STATUS " Copying ${h5_file}")
   ADD_CUSTOM_COMMAND (
       TARGET     ${HDF5_TEST_LIB_TARGET}
       POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file} ${dest}
+      COMMAND    ${XLATE_UTILITY}
+      ARGS       ${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file} ${dest} -l3
   )
 ENDFOREACH (ref_file ${HDF5_REFERENCE_FILES})
 
@@ -145,8 +146,7 @@ SET (testhdf5_SRCS
 
 #-- Adding test for testhdf5
 ADD_EXECUTABLE (testhdf5 ${testhdf5_SRCS})
-H5_NAMING (testhdf5)
-TARGET_WIN_PROPERTIES (testhdf5)
+H5_NAMING (testhdf5 ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (testhdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 ADD_TEST (NAME testhdf5 COMMAND $<TARGET_FILE:testhdf5>)
@@ -159,8 +159,7 @@ ADD_TEST (NAME testhdf5 COMMAND $<TARGET_FILE:testhdf5>)
 
 MACRO (ADD_H5_TEST file)
   ADD_EXECUTABLE (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
-  H5_NAMING (${file})
-  TARGET_WIN_PROPERTIES (${file})
+  H5_NAMING (${file} ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 
   ADD_TEST (NAME ${file} COMMAND $<TARGET_FILE:${file}>)
@@ -178,6 +177,12 @@ ADD_TEST (
         dtransform.h5
         dtypes4.h5
         dtypes5.h5
+        efc0.h5
+        efc1.h5
+        efc2.h5
+        efc3.h5
+        efc4.h5
+        efc5.h5
         extlinks16A00000.h5
         extlinks16A00001.h5
         extlinks16A00002.h5
@@ -257,6 +262,7 @@ SET (H5_TESTS
     filter_fail
     extend
     external
+    efc
     objcopy
     links
     unlink
@@ -283,16 +289,19 @@ SET (H5_TESTS
     earray
     btree2
     fheap
-    error_test
-    err_compat
+    #error_test
+    #err_compat
     tcheck_version
     testmeta
+    #links_env
 )
 
 FOREACH (test ${H5_TESTS})
-    ADD_H5_TEST(${test})
+  ADD_H5_TEST(${test})
+  SET_TESTS_PROPERTIES(${test} PROPERTIES DEPENDS h5test-clear-objects)
 ENDFOREACH (test ${H5_TESTS})
 
+SET_TESTS_PROPERTIES(flush2 PROPERTIES DEPENDS flush1)
 
 ##############################################################################
 ##############################################################################
@@ -302,24 +311,22 @@ ENDFOREACH (test ${H5_TESTS})
 
 #-- Adding test for cache
 ADD_EXECUTABLE (cache ${HDF5_TEST_SOURCE_DIR}/cache.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
-H5_NAMING (cache)
-TARGET_WIN_PROPERTIES (cache)
+H5_NAMING (cache ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (cache ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME cache COMMAND $<TARGET_FILE:cache>)
+SET_TESTS_PROPERTIES(cache PROPERTIES DEPENDS h5test-clear-objects)
 
 #-- Adding test for cache_api
 ADD_EXECUTABLE (cache_api ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
-H5_NAMING (cache_api)
-TARGET_WIN_PROPERTIES (cache_api)
+H5_NAMING (cache_api ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (cache_api ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME cache_api COMMAND $<TARGET_FILE:cache_api>)
 
 #-- Adding test for cache_tagging
 ADD_EXECUTABLE (cache_tagging ${HDF5_TEST_SOURCE_DIR}/cache_tagging.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
-H5_NAMING (cache_tagging)
-TARGET_WIN_PROPERTIES (cache_tagging)
+H5_NAMING (cache_tagging ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (cache_tagging ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME cache_tagging COMMAND $<TARGET_FILE:cache_tagging>)
@@ -331,11 +338,61 @@ ADD_EXECUTABLE (ttsafe
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_cancel.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
 )
-H5_NAMING (ttsafe)
-TARGET_WIN_PROPERTIES (ttsafe)
+H5_NAMING (ttsafe ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (ttsafe ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME ttsafe COMMAND $<TARGET_FILE:ttsafe>)
+
+#-- Adding test for err_compat
+IF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
+  ADD_EXECUTABLE (err_compat ${HDF5_TEST_SOURCE_DIR}/err_compat.c)
+  H5_NAMING (err_compat ${LIB_TYPE})
+  TARGET_LINK_LIBRARIES (err_compat ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+  ADD_TEST (NAME err_compat COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:err_compat>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_MASK_ERROR=true"
+      -D "TEST_OUTPUT=err_compat.txt"
+      -D "TEST_REFERENCE=err_compat_1"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+      -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+  )
+ENDIF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
+
+#-- Adding test for error_test
+ADD_EXECUTABLE (error_test ${HDF5_TEST_SOURCE_DIR}/error_test.c)
+H5_NAMING (error_test ${LIB_TYPE})
+TARGET_LINK_LIBRARIES (error_test ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+ADD_TEST (NAME error_test COMMAND "${CMAKE_COMMAND}"
+    -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
+    -D "TEST_ARGS:STRING="
+    -D "TEST_EXPECT=0"
+    -D "TEST_MASK_ERROR=true"
+    -D "TEST_OUTPUT=error_test.txt"
+    -D "TEST_REFERENCE=error_test_1"
+    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+    -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+)
+
+#-- Adding test for links_env
+ADD_EXECUTABLE (links_env ${HDF5_TEST_SOURCE_DIR}/links_env.c)
+H5_NAMING (links_env ${LIB_TYPE})
+TARGET_LINK_LIBRARIES (links_env ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+ADD_TEST (NAME links_env COMMAND "${CMAKE_COMMAND}"
+    -D "TEST_PROGRAM=$<TARGET_FILE:links_env>"
+    -D "TEST_ARGS:STRING="
+    -D "TEST_ENV_VAR:STRING=HDF5_EXT_PREFIX"
+    -D "TEST_ENV_VALUE:STRING=.:tmp"
+    -D "TEST_EXPECT=0"
+    -D "TEST_OUTPUT=links_env.txt"
+    -D "TEST_REFERENCE=links_env.out"
+    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+    -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+)
 
 IF (HDF5_TEST_VFD)
 
@@ -368,6 +425,7 @@ IF (HDF5_TEST_VFD)
       filter_fail
       extend
       external
+      efc
       objcopy
       links
       unlink
@@ -398,6 +456,7 @@ IF (HDF5_TEST_VFD)
       err_compat
       tcheck_version
       testmeta
+      links_env
 )
   
   IF (DIRECT_VFD)
@@ -449,8 +508,7 @@ ENDIF (HDF5_TEST_VFD)
 IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
   MACRO (ADD_H5_GENERATOR genfile)
     ADD_EXECUTABLE (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
-    H5_NAMING (${genfile})
-    TARGET_WIN_PROPERTIES (${genfile})
+    H5_NAMING (${genfile} ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (${genfile} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
   ENDMACRO (ADD_H5_GENERATOR genfile)
 
@@ -477,7 +535,7 @@ IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
   FOREACH (gen ${H5_GENERATORS})
     ADD_EXECUTABLE (${gen} ${HDF5_TEST_SOURCE_DIR}/${gen}.c)
-    H5_NAMING (${gen})
+    H5_NAMING (${gen} ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (${gen} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
   ENDFOREACH (gen ${H5_GENERATORS})
 

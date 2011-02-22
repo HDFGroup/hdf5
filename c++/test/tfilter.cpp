@@ -174,58 +174,61 @@ void test_szip_filter(H5File& file1)
     SUBTEST("szip filter (with encoder)");
 
     if ( h5_szip_can_encode() == 1) {
-    char* tconv_buf = new char [1000];
-    try {
-        const hsize_t   size[2] = {DSET_DIM1, DSET_DIM2};
+        char* tconv_buf = new char [1000];
 
-        // Create the data space
-        DataSpace space1(2, size, NULL);
+        try {
+            const hsize_t   size[2] = {DSET_DIM1, DSET_DIM2};
 
-        // Create a small conversion buffer to test strip mining (?)
-        DSetMemXferPropList xfer;
-        xfer.setBuffer (1000, tconv_buf, NULL);
+            // Create the data space
+            DataSpace space1(2, size, NULL);
 
-	// Prepare dataset create property list
-	DSetCreatPropList dsplist;
-	dsplist.setChunk(2, chunk_size);
+            // Create a small conversion buffer to test strip mining (?)
+            DSetMemXferPropList xfer;
+            xfer.setBuffer (1000, tconv_buf, NULL);
 
-	// Set up for szip compression
-	dsplist.setSzip(szip_options_mask, szip_pixels_per_block);
+            // Prepare dataset create property list
+            DSetCreatPropList dsplist;
+            dsplist.setChunk(2, chunk_size);
 
-	// Create a dataset with szip compression
-        DataSpace space2 (2, size, NULL);
-        DataSet dataset(file1.createDataSet (DSET_SZIP_NAME, PredType::NATIVE_INT, space2, dsplist));
+            // Set up for szip compression
+            dsplist.setSzip(szip_options_mask, szip_pixels_per_block);
 
-	hsize_t i, j, n;
-	for (i=n=0; i<size[0]; i++)
-        {
-            for (j=0; j<size[1]; j++)
+            // Create a dataset with szip compression
+            DataSpace space2 (2, size, NULL);
+            DataSet dataset(file1.createDataSet (DSET_SZIP_NAME, PredType::NATIVE_INT, space2, dsplist));
+
+            hsize_t i, j, n;
+            for (i=n=0; i<size[0]; i++)
             {
-                points[i][j] = (int)n++;
+                for (j=0; j<size[1]; j++)
+                {
+                    points[i][j] = (int)n++;
+                }
             }
+
+            // Write to the dataset then read back the values
+            dataset.write ((void*)points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+            dataset.read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+
+            // Check that the values read are the same as the values written
+            for (i = 0; i < size[0]; i++)
+                for (j = 0; j < size[1]; j++)
+                {
+                    int status = check_values (i, j, points[i][j], check[i][j]);
+                    if (status == -1)
+                        throw Exception("test_szip_filter", "Failed in testing szip method");
+                }
+            dsplist.close();
+            PASSED();
+        } // end of try
+
+        // catch all other exceptions
+        catch (Exception E)
+        {
+            issue_fail_msg("test_szip_filter()", __LINE__, __FILE__, E.getCDetailMsg());
         }
 
-	// Write to the dataset then read back the values
-        dataset.write ((void*)points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
-        dataset.read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
-
-        // Check that the values read are the same as the values written
-        for (i = 0; i < size[0]; i++)
-            for (j = 0; j < size[1]; j++)
-            {
-                int status = check_values (i, j, points[i][j], check[i][j]);
-                if (status == -1)
-                    throw Exception("test_szip_filter", "Failed in testing szip method");
-            }
-	dsplist.close();
-	PASSED();
-    } // end of try
-
-    // catch all other exceptions
-    catch (Exception E)
-    {
-        issue_fail_msg("test_szip_filter()", __LINE__, __FILE__, E.getCDetailMsg());
-    }
+        delete tconv_buf;
     } // if szip presents
     else {
 	SKIPPED();

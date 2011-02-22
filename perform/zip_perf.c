@@ -62,10 +62,6 @@
 #  define fileno(file)  file->__file
 #endif  /* RISCOS */
 
-#if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
-#  include <unix.h>     /* for fileno */
-#endif  /* __MWERKS__ ... */
-
 #ifndef GZ_SUFFIX
 #  define GZ_SUFFIX     ".gz"
 #endif  /* GZ_SUFFIX */

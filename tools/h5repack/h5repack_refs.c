@@ -14,12 +14,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
 #include "h5repack.h"
-#include "H5private.h"
 #include "h5diff.h"
 #include "h5tools.h"
 

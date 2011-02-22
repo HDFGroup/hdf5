@@ -135,6 +135,9 @@ TOOLTEST tgroup-3.ls 0 -w80 tgroup.h5/g1
 TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
 TOOLTEST tgroup-2.ls 0 -w80 -g tgroup.h5/g1
 
+# test for files with groups that have long comments
+TOOLTEST tgrp_comments.ls 0 -w80 -v -g tgrp_comments.h5/glongcomment
+
 # test for displaying simple space datasets
 TOOLTEST tdset-1.ls 0 -w80 -r -d tdset.h5
 
@@ -187,6 +190,12 @@ TOOLTEST tcomp-1.ls 0 -w80 -r -d tcompound.h5
 
 #test for the nested compound type
 TOOLTEST tnestcomp-1.ls 0 -w80 -r -d tnestedcomp.h5
+
+TOOLTEST tnestcomp-2.ls 0 -w80 -r -d -S tnestedcomp.h5
+
+TOOLTEST tnestcomp-3.ls 0 -w80 -r -d -l tnestedcomp.h5
+
+TOOLTEST tnestcomp-4.ls 0 -w80 -r -d -l -S tnestedcomp.h5
 
 # test for loop detection
 TOOLTEST tloop-1.ls 0 -w80 -r -d tloop.h5

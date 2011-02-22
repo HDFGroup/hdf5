@@ -1814,7 +1814,9 @@ H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_al
          *      operation just sets the address and makes it constant)
          */
         if(time_alloc != H5D_ALLOC_CREATE && addr_set)
-            dset->shared->layout_dirty = TRUE;
+            /* Mark the layout as dirty, for later writing to the file */
+            if(H5D_mark(dset, dxpl_id, H5D_MARK_LAYOUT) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")
     } /* end if */
 
 done:
@@ -2330,7 +2332,8 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
         } /* end if */
 
         /* Mark the dataspace as dirty, for later writing to the file */
-        dset->shared->space_dirty = TRUE;
+        if(H5D_mark(dset, dxpl_id, H5D_MARK_SPACE) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")
     } /* end if */
 
 done:
@@ -2448,6 +2451,41 @@ done:
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D_flush_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_mark
+ *
+ * Purpose:     Mark some aspect of a dataset as dirty
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              July 4, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_mark(H5D_t *dataset, hid_t dxpl_id, unsigned flags)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_mark)
+
+    /* Check args */
+    HDassert(dataset);
+    HDassert(!(flags & (unsigned)~(H5D_MARK_SPACE | H5D_MARK_LAYOUT)));
+
+    /* Mark aspects of the dataset as dirty */
+    if(flags & H5D_MARK_SPACE)
+        dataset->shared->space_dirty = TRUE;
+    if(flags & H5D_MARK_LAYOUT)
+        dataset->shared->layout_dirty = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_mark() */
 
 
 /*-------------------------------------------------------------------------

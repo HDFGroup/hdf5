@@ -70,6 +70,8 @@ EXCLUDE_FILE1_2=h5diff_exclude1-2.h5
 # different structure and obj names
 EXCLUDE_FILE2_1=h5diff_exclude2-1.h5
 EXCLUDE_FILE2_2=h5diff_exclude2-2.h5
+# compound type with multiple vlen string types
+COMP_VL_STRS_FILE=h5diff_comp_vl_strs.h5
 
 TESTNAME=h5diff
 EXIT_SUCCESS=0
@@ -178,6 +180,13 @@ STDOUT_FILTER() {
 #    LA-MPI: *** Copyright 2001-2004, ACL, Los Alamos National Laboratory
 # 3. h5diff debug output:
 #    Debug output all have prefix "h5diff debug: ".
+# 4. AIX system prints messages like these when it is aborting:
+#    ERROR: 0031-300  Forcing all remote tasks to exit due to exit code 1 in task 0
+#    ERROR: 0031-250  task 4: Terminated
+#    ERROR: 0031-250  task 3: Terminated
+#    ERROR: 0031-250  task 2: Terminated
+#    ERROR: 0031-250  task 1: Terminated
+
 STDERR_FILTER() {
     result_file=$1
     tmp_file=/tmp/h5test_tmp_$$
@@ -189,9 +198,10 @@ STDERR_FILTER() {
     fi
     # Filter LANL MPI messages
     # and LLNL srun messages
+    # and AIX error messages
     if test -n "$pmode"; then
 	cp $result_file $tmp_file
-	sed -e '/^LA-MPI:/d' -e '/^srun:/d' \
+	sed -e '/^LA-MPI:/d' -e '/^srun:/d' -e '/^ERROR:/d' \
 	    < $tmp_file > $result_file
     fi
     # Filter h5diff debug output
@@ -779,8 +789,12 @@ TOOLTEST h5diff_482.txt -v --exclude-path "/group1" --exclude-path "/dset1" $EXC
 TOOLTEST h5diff_483.txt -v --exclude-path "/group1" $EXCLUDE_FILE2_1 $EXCLUDE_FILE2_2
 
 # Exclude from group compare
-TOOLTEST h5diff_484.txt -v --exclude-path "/dset3" h5diff_exclude1-1.h5 h5diff_exclude1-2.h5 /group1
+TOOLTEST h5diff_484.txt -v --exclude-path "/dset3" $EXCLUDE_FILE1_1 $EXCLUDE_FILE1_2 /group1
 
+# ##############################################################################
+# # diff various multiple vlen and fixed strings in a compound type dataset
+# ##############################################################################
+TOOLTEST h5diff_530.txt -v  $COMP_VL_STRS_FILE $COMP_VL_STRS_FILE
 
 # ##############################################################################
 # # END

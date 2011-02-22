@@ -27,11 +27,11 @@
 #include "h5test.h"
 #include "H5srcdir.h"
 
-#ifdef _WIN32
+#ifdef H5_HAVE_WINSOCK_H
 #include <process.h>
 #include <direct.h>
 #include <winsock2.h>
-#endif  /* _WIN32 */
+#endif  /* H5_HAVE_WINSOCK_H */
 
 /*
  * Define these environment variables or constants to influence functions in
@@ -648,7 +648,7 @@ void
 h5_show_hostname(void)
 {
     char	hostname[80];
-#ifdef _WIN32
+#ifdef H5_HAVE_WINSOCK_H
      WSADATA wsaData;
      int err;
 #endif
@@ -670,7 +670,7 @@ h5_show_hostname(void)
 #else
     printf("thread 0.");
 #endif
-#ifdef _WIN32
+#ifdef H5_HAVE_WINSOCK_H
 
    err = WSAStartup( MAKEWORD(2,2), &wsaData );
    if ( err != 0 ) {
@@ -700,7 +700,7 @@ h5_show_hostname(void)
 #else
     printf(" gethostname not supported\n");
 #endif
-#ifdef _WIN32
+#ifdef H5_HAVE_WINSOCK_H
     WSACleanup();
 #endif
 }

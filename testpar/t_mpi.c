@@ -1137,6 +1137,14 @@ main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
+    /* Attempt to turn off atexit post processing so that in case errors
+     * happen during the test and the process is aborted, it will not get
+     * hang in the atexit post processing in which it may try to make MPI
+     * calls.  By then, MPI calls may not work.
+     */
+    if (H5dont_atexit() < 0){
+	printf("Failed to turn off atexit processing. Continue.\n", mpi_rank);
+    };
     H5open();
     if (parse_options(argc, argv) != 0){
 	if (MAINPROCESS)

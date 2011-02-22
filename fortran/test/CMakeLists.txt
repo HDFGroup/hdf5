@@ -5,19 +5,11 @@ PROJECT (HDF5_FORTRAN_TESTS C CXX Fortran)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
-LINK_DIRECTORIES (
-    ${CMAKE_Fortran_MODULE_DIRECTORY}
-    ${HDF5_F90_BINARY_DIR}
-    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-)
 
 #-----------------------------------------------------------------------------
 # Add Test Lib
 #-----------------------------------------------------------------------------
 ADD_LIBRARY (${HDF5_F90_C_TEST_LIB_TARGET} ${LIB_TYPE} t.c)
-# Must explicity add a dependency here to force the generation of headers
-# which are created for ${HDF5_F90_C_LIB_TARGET}
-#ADD_DEPENDENCIES(${HDF5_F90_C_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} )
 TARGET_LINK_LIBRARIES (${HDF5_F90_C_TEST_LIB_TARGET}
     ${HDF5_F90_C_LIB_TARGET}
     ${HDF5_TEST_LIB_TARGET}
@@ -25,11 +17,7 @@ TARGET_LINK_LIBRARIES (${HDF5_F90_C_TEST_LIB_TARGET}
 H5_SET_LIB_OPTIONS (${HDF5_F90_C_TEST_LIB_TARGET} ${HDF5_F90_C_TEST_LIB_NAME} ${LIB_TYPE})
 
 ADD_LIBRARY (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf.f90)
-# Must explicity add a dependency here to force the generation of headers
-# which are created for ${HDF5_F90_C_LIB_TARGET}
-ADD_DEPENDENCIES(${HDF5_F90_TEST_LIB_TARGET} 
-  ${HDF5_F90_C_TEST_LIB_TARGET}
-)
+SET (SHARED_LINK_FLAGS " ")
 IF (WIN32 AND NOT CYGWIN)
   IF (BUILD_SHARED_LIBS)
     SET_PROPERTY (TARGET ${HDF5_F90_TEST_LIB_TARGET}
@@ -37,11 +25,7 @@ IF (WIN32 AND NOT CYGWIN)
 		    BUILD_HDF5_DLL
 	)
     IF (MSVC)
-      SET_TARGET_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET}
-          PROPERTIES
-              COMPILE_FLAGS "/dll"
-              LINK_FLAGS "/SUBSYSTEM:CONSOLE /DLL"
-      )
+      SET (SHARED_LINK_FLAGS "/DLL")
     ENDIF (MSVC)
   ENDIF (BUILD_SHARED_LIBS)
   SET_PROPERTY (TARGET ${HDF5_F90_TEST_LIB_TARGET}
@@ -49,6 +33,7 @@ IF (WIN32 AND NOT CYGWIN)
   	    HDF5F90_WINDOWS
   )
 ENDIF (WIN32 AND NOT CYGWIN)
+TARGET_FORTRAN_WIN_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} ${SHARED_LINK_FLAGS})
 SET_TARGET_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fortran)
 TARGET_LINK_LIBRARIES (${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_C_TEST_LIB_TARGET})
 H5_SET_LIB_OPTIONS (${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_TEST_LIB_NAME} ${LIB_TYPE})
@@ -74,8 +59,8 @@ ADD_EXECUTABLE (testhdf5_fortran
     tH5VL.f90
     tH5Z.f90
 )
-H5_NAMING (testhdf5_fortran)
-TARGET_FORTRAN_WIN_PROPERTIES (testhdf5_fortran)
+H5_NAMING (testhdf5_fortran ${LIB_TYPE})
+TARGET_FORTRAN_WIN_PROPERTIES (testhdf5_fortran "")
 TARGET_LINK_LIBRARIES (testhdf5_fortran 
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
@@ -96,8 +81,8 @@ ADD_EXECUTABLE (testhdf5_fortran_1_8
     tH5A_1_8.f90
     tH5G_1_8.f90
 )
-H5_NAMING (testhdf5_fortran_1_8)
-TARGET_FORTRAN_WIN_PROPERTIES (testhdf5_fortran_1_8)
+H5_NAMING (testhdf5_fortran_1_8 ${LIB_TYPE})
+TARGET_FORTRAN_WIN_PROPERTIES (testhdf5_fortran_1_8 "")
 TARGET_LINK_LIBRARIES (testhdf5_fortran_1_8 
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
@@ -112,8 +97,8 @@ ADD_TEST (NAME testhdf5_fortran_1_8 COMMAND $<TARGET_FILE:testhdf5_fortran_1_8>)
 
 #-- Adding test for fflush1
 ADD_EXECUTABLE (fflush1 fflush1.f90)
-H5_NAMING (fflush1)
-TARGET_FORTRAN_WIN_PROPERTIES (fflush1)
+H5_NAMING (fflush1 ${LIB_TYPE})
+TARGET_FORTRAN_WIN_PROPERTIES (fflush1 "")
 TARGET_LINK_LIBRARIES (fflush1 
     ${HDF5_F90_LIB_TARGET}
     ${HDF5_F90_TEST_LIB_TARGET}
@@ -128,8 +113,8 @@ ADD_TEST (NAME fflush1 COMMAND $<TARGET_FILE:fflush1>)
 
 #-- Adding test for fflush2
 ADD_EXECUTABLE (fflush2 fflush2.f90)
-H5_NAMING (fflush2)
-TARGET_FORTRAN_WIN_PROPERTIES (fflush2)
+H5_NAMING (fflush2 ${LIB_TYPE})
+TARGET_FORTRAN_WIN_PROPERTIES (fflush2 "")
 TARGET_LINK_LIBRARIES (fflush2 
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}

@@ -1,4 +1,4 @@
-HDF5 version 1.9.79-FA_a5 currently under development
+HDF5 version 1.9.80-FA_a5 currently under development
 ================================================================================
 
 
@@ -39,6 +39,15 @@ New Features
 
     Configuration:
     -------------
+    - Added mpicc and mpif90 as the default C and Fortran compilers for Linux
+      systems when --enable-parallel is specified but no $CC or $FC is defined.
+      (AKC - 2011/2/7)
+    - Added a new configure option, "--enable-unsupported", which can
+      be used to stop configure from preventing the use of unsupported
+      configure option combinations, such as c++ in parallel or parallel
+      HDF5 with threadsafe. Use at your own risk, as it may result in a 
+      library that won't compile or run as expected! 
+      (MAM - 2010/11/17 - Bug 2061)
     - PHDF5 changed to use "mpiexec", instead of mpirun, as the default MPI
       applications startup command as defined in the MPI-2 definition, section
       4.1. (AKC - 2010/6/11 - Bug 1921)
@@ -76,6 +85,12 @@ New Features
 
     Library:
     --------
+    - Added ability to cache files opened through external links.  Added new
+      public functions H5Pset_elink_file_cache_size(),
+      H5Pget_elink_file_cache_size(), and H5Frelease_file_cache().
+      (NAF - 2011/02/17)
+    - Removed all old code for Metraowerks compilers, bracketed by
+      __MWERKS__). Metraowerks compiler is long gone. (AKC - 2010/11/17) 
     - Added support for threadsafety on windows using the windows threads
       library. Use the HDF5_ENABLE_THREADSAFE option in CMake while on a 
       windows platform to enable this functionality. This is supported on 
@@ -249,6 +264,17 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - The datatype handler created with H5Tencode/decode used to have the 
+            reference count 0 (zero).  I have fixed it.  It is 1 (one) now.
+            (SLU - 2011/2/18)
+      - Fixed a bug that caused big endian machines to generate corrupt files
+            when using the scale-offset filter with floating point data or
+            fill values.  Note that such datasets will no longer be readable
+            by any machine after this patch.  (NAF - 2010/02/02 - Bug 2131)
+      - Retrieving a link's name by index in the case where the link is
+            external and the file that the link refers to doesn't exist will 
+            now fail gracefully rather than cause a segmentation fault. 
+            (MAM - 2010/11/17)
       - Modified library to always cache symbol table information.  Libraries
             version 1.6.3 have a bug which causes them to require this
             information for some operations. (NAF - 2010/09/21 - 1864)
@@ -474,6 +500,20 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5dump for skipping array indices every certain number
+          when the array type dataset is relatively big. The certain number
+          varies according to the size of array. Bug#2092 (JKM 2011/2/15).
+        - Fixed h5diff for the segfault when compares compound datasets
+          with combination of fixed length string types and vlen string types 
+          in certain orders. bug#2089 (JKM 2010/12/28)
+        - Improve h5diff performance. 1) use HDmemcmp() before comparing each 
+          elements. 2) replace expensive H5Tequals() calls 3) retrieve datatype
+          information at dataset level not each element level for compound 
+          datasets
+        - Fixed h5ls to display nested compound type with curly bracket 
+          when -S (--simple) option is used with -l (--label), so it shows  
+          which member (in curly bracket) belong to which nested compound type 
+          and make the output make sense.  bug#1979 (JKM 2010/11/09)
         - Fixed h5diff to handle variable-length strings in a compound dataset 
           correctly. (also variable-length string array in a compound dataset)
           Garbage values were displayed when h5diff compared multiple 
@@ -607,11 +647,12 @@ Bug Fixes since HDF5-1.8.0 release
 Platforms Tested
 ================
 
-    AIX 5.3                       xlc 7.0.0.8, 8.0.0.20, 9.0.0.4
-    (LLNL Up)                     xlC 7.0.0.8, 8.0.0.20, 9.0.0.4
-                                  xlf 9.1.0.8, 10.1.0.9, 11.1.0.7
-                                  mpcc_r 7.0.0.8
-                                  mpxlf_r 09.01.0000.0008
+    AIX 6.1                       xlc 11.1.0.3
+    (NCSA BP)                     xlC 11.1.0.3
+                                  xlf 13.1.0.3
+                                  mpcc_r 11.1.0.3
+                                  mpxlf_r 13.1.0.3
+
     FreeBSD 6.2-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
                                   gcc 4.2.1 20080123
@@ -686,10 +727,7 @@ Platform                          C        F90    F90      C++   zlib  SZIP
                                   parallel        parallel
 SunOS5.10 64-bit                   n        y      n        y     y     y
 SunOS5.10 32-bit                   n        y      n        y     y     y
-AIX-5.2  32-bit                    y        y      y        y     y     y
-AIX-5.2  64-bit                    y        y      y        y     y     y
-Cray XT3 (not tested
-          for this release)        n        n      n        n     n     n
+AIX 6.1 32- and 64-bit             n        y      n        y     y     y
 Windows XP                         n        y(3)   n(3)     y     y     y
 Windows XP x64                     n        y(3)   n(3)     y     y     y
 Windows Vista                      n        y(3)   n(3)     y     y     y
@@ -717,10 +755,7 @@ Platform                          Shared   Shared    Shared    static-  Thread-
                                   C libs   F90 libs  C++ libs  exec     safe
 SunOS 5.10 32-bit                   y        y         y         x        y
 SunOS 5.10 64-bit                   y        y         y         x        y
-AIX-5.2 32-bit                      n        n         n         x        n
-AIX-5.2 64-bit                      n        n         n         x        n
-Cray XT3 (not tested
-          for this release)         n        n         n         x        n
+AIX 6.1 32- and 64-bit              n        n         n         x	  y
 Windows XP                          y        y(3)      y         y        n
 Windows XP x64                      y        y(3)      y         y        n
 Windows Vista                       y        y(3)      y         y        y
@@ -753,6 +788,20 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* examples/run-all-ex.sh does not work on Cygwin. (NAF - 2011/02/11)
+
+* While working on the 1.8.6 release of HDF5, a bug was discovered that can
+  occur when reading from a dataset in parallel shortly after it has been
+  written to collectively. The issue was exposed by a new test in the parallel
+  HDF5 test suite, but had existed before that. We believe the problem lies with
+  certain MPI implementations and/or filesystems.
+
+  We have provided a pure MPI test program, as well as a standalone HDF5
+  program, that can be used to determine if this is an issue on your system.
+  They should be run across multiple nodes with a varying number of processes.
+  These programs can be found at:
+  http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
+
 * Parallel mode in AIX will fail some of the testcheck_version.sh tests where
   it treats "exit(134) the same as if process 0 had received an abort signal.
   This is fixed and will be available in the next release. AKC - 2009/11/3

@@ -11,8 +11,7 @@ INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 # Add the h5stat executables
 # --------------------------------------------------------------------
 ADD_EXECUTABLE (h5stat ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat.c)
-H5_NAMING (h5stat)
-TARGET_WIN_PROPERTIES (h5stat)
+H5_NAMING (h5stat ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5stat)
@@ -29,8 +28,7 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5stat_gentest ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat_gentest.c)
-    H5_NAMING (h5stat_gentest)
-    TARGET_WIN_PROPERTIES (h5stat_gentest)
+    H5_NAMING (h5stat_gentest ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5stat_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     
     #ADD_TEST (NAME h5stat_gentest COMMAND $<TARGET_FILE:h5stat_gentest>)
@@ -101,6 +99,10 @@ IF (BUILD_TESTING)
             -D "TEST_REFERENCE=${resultfile}.ddl"
             -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
     )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5STAT-${resultfile}")
   ENDMACRO (ADD_H5_TEST file)
 
 ##############################################################################
@@ -143,6 +145,16 @@ IF (BUILD_TESTING)
           h5stat_newgrat-UA.out
           h5stat_newgrat-UA.out.err
   )
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
+  SET (last_test "H5STAT-clearall-objects")
+
+  # If using memchecker add tests without using scripts
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    ADD_TEST (NAME H5STAT-help COMMAND h5stat -h)
+    ADD_TEST (NAME H5STAT-filters COMMAND h5stat h5stat_filters.h5)
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
 # Test for help flag
   ADD_H5_TEST (h5stat_help1 0 -h)

@@ -21,8 +21,7 @@ SET (REPACK_COMMON_SRCS
 )
 
 ADD_EXECUTABLE (h5repack ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
-H5_NAMING (h5repack)
-TARGET_WIN_PROPERTIES (h5repack)
+H5_NAMING (h5repack ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5repack  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5repack)
@@ -38,8 +37,7 @@ IF (BUILD_TESTING)
   # Add h5Repack test executables
   # --------------------------------------------------------------------
   ADD_EXECUTABLE (testh5repack_detect_szip ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testh5repack_detect_szip.c)
-  H5_NAMING (testh5repack_detect_szip)
-  TARGET_WIN_PROPERTIES (testh5repack_detect_szip)
+  H5_NAMING (testh5repack_detect_szip ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (testh5repack_detect_szip ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME testh5repack_detect_szip COMMAND $<TARGET_FILE:testh5repack_detect_szip>)
@@ -57,11 +55,11 @@ IF (BUILD_TESTING)
   ENDIF (HDF5_ENABLE_SZIP_SUPPORT)
 
   ADD_EXECUTABLE (h5repacktest ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repacktst.c)
-  H5_NAMING (h5repacktest)
-  TARGET_WIN_PROPERTIES (h5repacktest)
+  H5_NAMING (h5repacktest ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (h5repacktest  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME h5repacktest COMMAND $<TARGET_FILE:h5repacktest>)
+  SET_TESTS_PROPERTIES (h5repacktest PROPERTIES DEPENDS testh5repack_detect_szip)
 
   IF (HDF5_TEST_VFD)
 
@@ -180,10 +178,15 @@ IF (BUILD_TESTING)
           NAME H5REPACK-${testname}
           COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out.${testfile}
       )
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5REPACK-${testname} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
       ADD_TEST (
           NAME H5REPACK-DIFF_${testname}
           COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out.${testfile}
       )
+      SET_TESTS_PROPERTIES (H5REPACK-DIFF_${testname} PROPERTIES DEPENDS H5REPACK-${testname})
+      SET (last_test "H5REPACK-DIFF_${testname}")
     ENDIF (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_H5_TEST)
 
@@ -206,6 +209,10 @@ IF (BUILD_TESTING)
               -D "TEST_REFERENCE=testfiles/${resultfile}.ddl"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5REPACK-${testname} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+      SET (last_test "H5REPACK-${testname}")
     ENDIF (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_H5_CMP_TEST)
 
@@ -229,6 +236,8 @@ IF (BUILD_TESTING)
                 -D "TEST_REFERENCE=${testfilter}"
                 -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
         )
+        SET_TESTS_PROPERTIES (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES DEPENDS H5REPACK-${testname})
+        SET (last_test "H5REPACK_VERIFY_LAYOUT-${testname}")
       ELSE (${resultcode} STREQUAL "0")
         IF (${testfilter} STREQUAL "CHUNKED")
           SET (nottestfilter "(CONTIGUOUS|COMPACT)")
@@ -251,6 +260,8 @@ IF (BUILD_TESTING)
                 -D "TEST_REFERENCE=${testfilter}"
                 -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
         )
+        SET_TESTS_PROPERTIES (H5REPACK_VERIFY_LAYOUT_ALL-${testname} PROPERTIES DEPENDS H5REPACK-${testname})
+        SET (last_test "H5REPACK_VERIFY_LAYOUT-${testname}")
       ENDIF (${resultcode} STREQUAL "0")
     ENDIF (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_H5_VERIFY_TEST)
@@ -326,6 +337,10 @@ IF (BUILD_TESTING)
           h5repack_ub_out.h5
           h5repack_attr_refs_out.h5
   )
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5REPACK-clearall-objects PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
+  SET (last_test "H5REPACK-clearall-objects")
 
   # --------------------------------------------------------------------
   # test file names 

@@ -26,25 +26,36 @@
 /* Define some handy debugging shorthands, routines, ... */
 /* debugging tools */
 
-#define MESG(x)                                                         \
-	if (VERBOSE_MED) printf("%s\n", x);                                 \
+/* Print message mesg if verbose level is at least medium and
+ * mesg is not an empty string.
+ */
+#define MESG(mesg)                                                     \
+    if (VERBOSE_MED && *mesg != '\0')                                  \
+	printf("%s\n", mesg)
 
+/* 
+ * VRFY: Verify if the condition val is true.
+ * If it is true, then call MESG to print mesg, depending on the verbose
+ * level.
+ * If val is not true, it prints error messages and if the verbose
+ * level is lower than medium, it calls MPI_Abort to abort the program.
+ * If verbose level is at least medium, it will not abort.
+ * This will allow program to continue and can be used for debugging.
+ * (The "do {...} while(0)" is to group all the statements as one unit.)
+ */
 #define VRFY(val, mesg) do {                                            \
     if (val) {                                                          \
-        if (*mesg != '\0') {                                            \
-            MESG(mesg);                                                 \
-        }                                                               \
+	MESG(mesg);                                                     \
     } else {                                                            \
         printf("Proc %d: ", mpi_rank);                                  \
-        printf("*** PHDF5 ERROR ***\n");                                \
-        printf("        Assertion (%s) failed at line %4d in %s\n",     \
+        printf("*** Parallel ERROR ***\n");                             \
+        printf("    VRFY (%s) failed at line %4d in %s\n",              \
                mesg, (int)__LINE__, __FILE__);                          \
         ++nerrors;                                                      \
         fflush(stdout);                                                 \
-        if (!VERBOSE_MED) {                                                 \
-            printf("aborting MPI process\n");                           \
-            MPI_Finalize();                                             \
-            exit(nerrors);                                              \
+        if (!VERBOSE_MED) {                                             \
+            printf("aborting MPI processes\n");                         \
+            MPI_Abort(MPI_COMM_WORLD, 1);                               \
         }                                                               \
     }                                                                   \
 } while(0)
@@ -56,9 +67,7 @@
  */
 #define INFO(val, mesg) do {                                            \
     if (val) {                                                          \
-        if (*mesg != '\0') {                                            \
-            MESG(mesg);                                                 \
-        }                                                               \
+	MESG(mesg);                                                 \
     } else {                                                            \
         printf("Proc %d: ", mpi_rank);                                  \
         printf("*** PHDF5 REMARK (not an error) ***\n");                \

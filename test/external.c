@@ -879,7 +879,7 @@ test_4 (hid_t fapl)
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
         goto error;
 
-    /* Open the external link */
+    /* Open the external link which is "/ link" as created previously via H5Lcreate_external() */
     if((xid = H5Gopen2(fid, "/ link", H5P_DEFAULT)) < 0)
         goto error;
 

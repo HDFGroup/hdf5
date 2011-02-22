@@ -472,9 +472,10 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
-    H5A_t *ret_value;                   /* Return value */
-    H5A_t *exist_attr = NULL;           /* Opened attribute object */
+    H5A_t *exist_attr = NULL;           /* Existing opened attribute object */
+    H5A_t *opened_attr = NULL;          /* Newly opened attribute object */
     htri_t found_open_attr = FALSE;     /* Whether opened object is found */
+    H5A_t *ret_value;                   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_attr_open_by_name, dxpl_id, loc->addr, NULL)
 
@@ -500,14 +501,14 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, name)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
     else if(found_open_attr == TRUE) {
-        if(NULL == (ret_value = H5A_copy(NULL, exist_attr)))
+        if(NULL == (opened_attr = H5A_copy(NULL, exist_attr)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute")
     } /* end else if */
     else {
         /* Check for attributes in dense storage */
         if(H5F_addr_defined(ainfo.fheap_addr)) {
             /* Open attribute with dense storage */
-            if(NULL == (ret_value = H5A_dense_open(loc->file, dxpl_id, &ainfo, name)))
+            if(NULL == (opened_attr = H5A_dense_open(loc->file, dxpl_id, &ainfo, name)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "can't open attribute")
         } /* end if */
         else {
@@ -530,18 +531,25 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
             /* Get attribute opened from object header */
             HDassert(udata.attr);
-            ret_value = udata.attr;
+            opened_attr = udata.attr;
         } /* end else */
 
         /* Mark datatype as being on disk now */
-        if(H5T_set_loc(ret_value->shared->dt, loc->file, H5T_LOC_DISK) < 0)
+        if(H5T_set_loc(opened_attr->shared->dt, loc->file, H5T_LOC_DISK) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "invalid datatype location")
-
     } /* end else */
+
+    /* Set return value */
+    ret_value = opened_attr;
 
 done:
     if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+
+    /* Release any resources, on error */
+    if(NULL == ret_value && opened_attr)
+        if(H5A_close(opened_attr) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, NULL, "can't close attribute")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
 } /* end H5O_attr_open_by_name() */
@@ -606,9 +614,10 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
 {
     H5O_t *oh = NULL;                   /* Object header */
     H5A_attr_iter_op_t attr_op;         /* Attribute operator */
-    H5A_t *exist_attr = NULL;           /* Opened attribute object */
+    H5A_t *exist_attr = NULL;           /* Existing opened attribute object */
+    H5A_t *opened_attr = NULL;          /* Newly opened attribute object */
     htri_t found_open_attr = FALSE;     /* Whether opened object is found */
-    H5A_t *ret_value = NULL;            /* Return value */
+    H5A_t *ret_value;                   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_open_by_idx)
 
@@ -620,7 +629,7 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     attr_op.u.lib_op = H5O_attr_open_by_idx_cb;
 
     /* Iterate over attributes to locate correct one */
-    if(H5O_attr_iterate_real((hid_t)-1, loc, dxpl_id, idx_type, order, n, NULL, &attr_op, &ret_value) < 0)
+    if(H5O_attr_iterate_real((hid_t)-1, loc, dxpl_id, idx_type, order, n, NULL, &attr_op, &opened_attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADITER, NULL, "can't locate attribute")
 
     /* Protect the object header to iterate over */
@@ -630,28 +639,36 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     /* Find out whether it has already been opened.  If it has, close the object
      * and make a copy of the already opened object to share the object info.
      */
-    if(ret_value) {
-        if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, ret_value->shared->name)) < 0)
+    if(opened_attr) {
+        if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, opened_attr->shared->name)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
 
         /* If found that the attribute is already opened, make a copy of it
          * and close the object just opened.
          */
         if(found_open_attr && exist_attr) {
-            if(H5A_close(ret_value) < 0)
+            if(H5A_close(opened_attr) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, NULL, "can't close attribute")
-            if(NULL == (ret_value = H5A_copy(NULL, exist_attr)))
+            if(NULL == (opened_attr = H5A_copy(NULL, exist_attr)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute")
         } else {
             /* Mark datatype as being on disk now */
-            if(H5T_set_loc(ret_value->shared->dt, loc->file, H5T_LOC_DISK) < 0)
+            if(H5T_set_loc(opened_attr->shared->dt, loc->file, H5T_LOC_DISK) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "invalid datatype location")
         } /* end if */
     } /* end if */
 
+    /* Set return value */
+    ret_value = opened_attr;
+
 done:
     if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+
+    /* Release any resources, on error */
+    if(NULL == ret_value && opened_attr)
+        if(H5A_close(opened_attr) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, NULL, "can't close attribute")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_open_by_idx() */

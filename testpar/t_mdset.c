@@ -2336,6 +2336,9 @@ void rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
 
 		disk_count[0] = (hsize_t)(LOCAL_DATA_SIZE);
 		disk_start[0] = (hsize_t)(LOCAL_DATA_SIZE * mpi_rank);
+
+    		mem_size[0] = (hsize_t)(LOCAL_DATA_SIZE);
+
 		mem_count[0] = (hsize_t)(LOCAL_DATA_SIZE);
 		mem_start[0] = (hsize_t)(0);
 

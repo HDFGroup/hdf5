@@ -3035,12 +3035,12 @@ out:
 *
 *-------------------------------------------------------------------------*/
 #define STR_RANK 1
-#define VLSTR1_DIM 1
-#define FLSTR2_SIZE 21
-#define FLSTR2_DIM 1
-#define VLSTRARRY3_DIM 3
-#define FLSTRARRY4_DIM 3
-#define FLSTRARRY4_SIZE 30
+#define VLEN_STR_DIM 1
+#define FIXLEN_STR_SIZE 21
+#define FIXLEN_STR_DIM 1
+#define VLEN_STR_ARRY_DIM 3
+#define FIXLEN_STR_ARRY_DIM 3
+#define FIXLEN_STR_ARRY_SIZE 30
 #define COMP_RANK 1
 #define COMP_DIM 1
 static int test_comp_vlen_strings(const char *fname1)
@@ -3049,87 +3049,291 @@ static int test_comp_vlen_strings(const char *fname1)
 
     hid_t    fid1;      /* file id */
 
-    /* compound datatype */
-    typedef struct comp_t
+    /* compound1 datatype */
+    typedef struct comp1_t
     {
-        char   *str1;  /* vlen string */
-        char   *str1_again;  /* vlen string */
-        char   str2[FLSTR2_SIZE];  /* fixed len string */
-        char   str2_again[FLSTR2_SIZE];  /* fixed len string */
-        char   *str3[VLSTRARRY3_DIM];  /* vlen string array */
-        char   *str3_again[VLSTRARRY3_DIM];  /* vlen string array */
-        char   str4[FLSTRARRY4_DIM][FLSTRARRY4_SIZE];  /* fixed len string array */
-        char   str4_again[FLSTRARRY4_DIM][FLSTRARRY4_SIZE];  /* fixed len string array */
-    } comp_t;
+        char   *str_vlen;  /* vlen string */
+        char   *str_vlen_repeat;  /* vlen string */
+        char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+    } comp1_t;
 
-    /* vlen string1 */
-    hid_t    sid_str1=0;      /* dataspace ID */
-    hid_t    tid_str1=0;      /* datatype ID */
-    hid_t    did_str1=0;      /* dataset ID */
-    const char vlstr1_buf[]= {
+    /* compound2 datatype */
+    typedef struct comp2_t
+    {
+        char   *str_vlen;  /* vlen string */
+        char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   *str_vlen_repeat;  /* vlen string */
+        char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+    } comp2_t;
+
+    /* compound3 datatype */
+    typedef struct comp3_t
+    {
+        char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   *str_vlen;  /* vlen string */
+        char   *str_vlen_repeat;  /* vlen string */
+        char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+    } comp3_t;
+
+    /* compound4 datatype */
+    typedef struct comp4_t
+    {
+        char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   *str_vlen;  /* vlen string */
+        char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   *str_vlen_repeat;  /* vlen string */
+        char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+    } comp4_t;
+
+    /* compound5 datatype */
+    typedef struct comp5_t
+    {
+        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   *str_vlen;  /* vlen string */
+        char   *str_vlen_repeat;  /* vlen string */
+        char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
+    } comp5_t;
+
+    /* compound6 datatype */
+    typedef struct comp6_t
+    {
+        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   *str_vlen;  /* vlen string */
+        char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   *str_vlen_repeat;  /* vlen string */
+        char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
+    } comp6_t;
+
+    /* compound7 datatype */
+    typedef struct comp7_t
+    {
+        char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   *str_vlen;  /* vlen string */
+        char   *str_vlen_repeat;  /* vlen string */
+    } comp7_t;
+
+    /* compound8 datatype */
+    typedef struct comp8_t
+    {
+        char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   *str_vlen;  /* vlen string */
+        char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
+        char   *str_vlen_repeat;  /* vlen string */
+    } comp8_t;
+
+    /* compound9 datatype */
+    typedef struct comp9_t
+    {
+        char   str_array_fixlen[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   str_fixlen_array_again[FIXLEN_STR_ARRY_DIM][FIXLEN_STR_ARRY_SIZE];  /* fixed len string array */
+        char   *str_array_vlen[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
+        char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
+        int    int_data1;
+        hobj_ref_t objref1;                  /* reference */
+        char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
+        hobj_ref_t objref2;                  /* reference */
+        char   *str_vlen;  /* vlen string */
+        int    int_data2;
+        char   *str_vlen_repeat;  /* vlen string */
+        hobj_ref_t objref3;                  /* reference */
+        int    int_data3;
+    } comp9_t;
+
+    /* vlen string */
+    hid_t    sid_vlen_str=0;      /* dataspace ID */
+    hid_t    tid_vlen_str=0;      /* datatype ID */
+    const char vlen_str_buf[]= {
         "Variable length string"
         };
-    hsize_t dims_str1[]  = {VLSTR1_DIM};
+    hsize_t dims_vlen_str[]  = {VLEN_STR_DIM};
 
-    /* fixlen string2 */
-    hid_t    sid_str2=0;      /* dataspace ID */
-    hid_t    tid_str2=0;      /* datatype ID */
-    hid_t    did_str2=0;      /* dataset ID */
-    const char flstr2_buf[FLSTR2_SIZE]= {
+    /* fixlen string */
+    hid_t    sid_fixlen_str=0;      /* dataspace ID */
+    hid_t    tid_fixlen_str=0;      /* datatype ID */
+    const char fixlen_str_buf[FIXLEN_STR_SIZE]= {
         "Fixed length string"
         };
-    hsize_t dims_str2[]  = {FLSTR2_DIM};
+    hsize_t dims_fixlen_str[]  = {FIXLEN_STR_DIM};
 
-    /* vlen string3 array */
-    hid_t    sid_str3=0;      /* dataspace ID */
-    hid_t    tid_str3=0;      /* datatype ID */
-    hid_t    tid_str3_array=0; /* datatype ID */
-    hid_t    did_str3=0;      /* dataset ID */
-    const char *vlstr3_buf[VLSTRARRY3_DIM]= {
+    /* vlen string array */
+    hid_t    sid_vlen_str_array=0;      /* dataspace ID */
+    hid_t    tid_vlen_str_array_pre=0;      /* datatype ID */
+    hid_t    tid_vlen_str_array=0; /* datatype ID */
+    const char *vlen_str_array_buf[VLEN_STR_ARRY_DIM]= {
         "1 - Variable length string Array",
         "2 - Testing variable length string array in compound type",
         "3 - Four score and seven\n years ago our forefathers brought forth on this continent a new nation,"
         };
-    hsize_t dims_str3[]  = {VLSTRARRY3_DIM};
+    hsize_t dims_vlen_str_array[]  = {VLEN_STR_ARRY_DIM};
 
-    /* fixlen string array 4 */
-    hid_t    sid_str4=0;      /* dataspace ID */
-    hid_t    tid_str4=0;      /* datatype ID */
-    hid_t    tid_str4_array=0; /* datatype ID */
-    hid_t    did_str4=0;      /* dataset ID */
-    const char *flstr4_buf[FLSTRARRY4_DIM]= {
+    /* fixlen string array  */
+    hid_t    sid_fixlen_str_array=0;      /* dataspace ID */
+    hid_t    tid_fixlen_str_array_pre=0;      /* datatype ID */
+    hid_t    tid_fixlen_str_array=0; /* datatype ID */
+    const char *fixlen_str_array_buf[FIXLEN_STR_ARRY_DIM]= {
         "1 - Fixed length string Array",
         "2 - Fixed length string Array",
         "3 - Fixed length string Array"
         };
-    hsize_t dims_str4[]  = {FLSTRARRY4_DIM};
+    hsize_t dims_fixlen_str_array[]  = {FIXLEN_STR_ARRY_DIM};
+
+    /* objref */
+    hsize_t    objref_dims[1]={1};
 
     /*------------------------------------------ 
      * compound dataset 
      *------------------------------------------*/
     hid_t    sid_comp=0;      /* dataspace ID */
-    hid_t    tid_comp=0;      /* datatype ID */
+    hid_t    tid1_comp=0;      /* datatype ID */
+    hid_t    tid2_comp=0;      /* datatype ID */
+    hid_t    tid3_comp=0;      /* datatype ID */
+    hid_t    tid4_comp=0;      /* datatype ID */
+    hid_t    tid5_comp=0;      /* datatype ID */
+    hid_t    tid6_comp=0;      /* datatype ID */
+    hid_t    tid7_comp=0;      /* datatype ID */
+    hid_t    tid8_comp=0;      /* datatype ID */
+    hid_t    tid9_comp=0;      /* datatype ID */
     hid_t    did_comp=0;      /* dataset ID */
     hsize_t dims_comp[]  = {COMP_DIM};
     herr_t  status = SUCCEED;
 
     /* make compound strings data */
-    comp_t comp_buf;
+    comp1_t comp1_buf;
+    comp2_t comp2_buf;
+    comp3_t comp3_buf;
+    comp4_t comp4_buf;
+    comp5_t comp5_buf;
+    comp6_t comp6_buf;
+    comp7_t comp7_buf;
+    comp8_t comp8_buf;
+    comp9_t comp9_buf;
 
-    /* copy string1 type to compound buffer */
-    comp_buf.str1 = comp_buf.str1_again = vlstr1_buf;
-    /* copy string2 type to compound buffer */
-    HDstrcpy(comp_buf.str2, flstr2_buf);
-    HDstrcpy(comp_buf.str2_again, flstr2_buf);
-    /* copy string3 type to compound buffer */
-    for (i=0; i < VLSTRARRY3_DIM; i++)
-        comp_buf.str3[i] = comp_buf.str3_again[i] = vlstr3_buf[i];
-    /* copy string4 type to compound buffer */
-    for (i=0; i < FLSTRARRY4_DIM; i++)
+    /* copy vlen string data to compound buffers */
+    comp1_buf.str_vlen = comp1_buf.str_vlen_repeat = vlen_str_buf;
+    comp2_buf.str_vlen = comp2_buf.str_vlen_repeat = vlen_str_buf;
+    comp3_buf.str_vlen = comp3_buf.str_vlen_repeat = vlen_str_buf;
+    comp4_buf.str_vlen = comp4_buf.str_vlen_repeat = vlen_str_buf;
+    comp5_buf.str_vlen = comp5_buf.str_vlen_repeat = vlen_str_buf;
+    comp6_buf.str_vlen = comp6_buf.str_vlen_repeat = vlen_str_buf;
+    comp7_buf.str_vlen = comp7_buf.str_vlen_repeat = vlen_str_buf;
+    comp8_buf.str_vlen = comp8_buf.str_vlen_repeat = vlen_str_buf;
+    comp9_buf.str_vlen = comp9_buf.str_vlen_repeat = vlen_str_buf;
+
+    /* copy fixlen string data to compound buffers */
+    HDstrcpy(comp1_buf.str_fixlen, fixlen_str_buf);
+    HDstrcpy(comp1_buf.str_fixlen_repeat, fixlen_str_buf);
+
+    HDstrcpy(comp2_buf.str_fixlen, fixlen_str_buf);
+    HDstrcpy(comp2_buf.str_fixlen_repeat, fixlen_str_buf);
+
+    HDstrcpy(comp3_buf.str_fixlen, fixlen_str_buf);
+    HDstrcpy(comp3_buf.str_fixlen_repeat, fixlen_str_buf);
+
+    HDstrcpy(comp3_buf.str_fixlen, fixlen_str_buf);
+    HDstrcpy(comp3_buf.str_fixlen_repeat, fixlen_str_buf);
+
+    HDstrcpy(comp4_buf.str_fixlen, fixlen_str_buf);
+    HDstrcpy(comp4_buf.str_fixlen_repeat, fixlen_str_buf);
+
+    HDstrcpy(comp5_buf.str_fixlen, fixlen_str_buf);
+    HDstrcpy(comp5_buf.str_fixlen_repeat, fixlen_str_buf);
+
+    HDstrcpy(comp6_buf.str_fixlen, fixlen_str_buf);
+    HDstrcpy(comp6_buf.str_fixlen_repeat, fixlen_str_buf);
+
+    HDstrcpy(comp7_buf.str_fixlen, fixlen_str_buf);
+    HDstrcpy(comp7_buf.str_fixlen_repeat, fixlen_str_buf);
+
+    HDstrcpy(comp8_buf.str_fixlen, fixlen_str_buf);
+    HDstrcpy(comp8_buf.str_fixlen_repeat, fixlen_str_buf);
+
+    HDstrcpy(comp9_buf.str_fixlen, fixlen_str_buf);
+    HDstrcpy(comp9_buf.str_fixlen_repeat, fixlen_str_buf);
+
+    /* copy vlen string array data to compound buffers */
+    for (i=0; i < VLEN_STR_ARRY_DIM; i++)
     {
-        HDstrcpy(comp_buf.str4[i], flstr4_buf[i]);
-        HDstrcpy(comp_buf.str4_again[i], flstr4_buf[i]);
+        comp1_buf.str_array_vlen[i] = comp1_buf.str_vlen_array_again[i] = vlen_str_array_buf[i];
+        comp2_buf.str_array_vlen[i] = comp2_buf.str_vlen_array_again[i] = vlen_str_array_buf[i];
+        comp3_buf.str_array_vlen[i] = comp3_buf.str_vlen_array_again[i] = vlen_str_array_buf[i];
+        comp4_buf.str_array_vlen[i] = comp4_buf.str_vlen_array_again[i] = vlen_str_array_buf[i];
+        comp5_buf.str_array_vlen[i] = comp5_buf.str_vlen_array_again[i] = vlen_str_array_buf[i];
+        comp6_buf.str_array_vlen[i] = comp6_buf.str_vlen_array_again[i] = vlen_str_array_buf[i];
+        comp7_buf.str_array_vlen[i] = comp7_buf.str_vlen_array_again[i] = vlen_str_array_buf[i];
+        comp8_buf.str_array_vlen[i] = comp8_buf.str_vlen_array_again[i] = vlen_str_array_buf[i];
+        comp9_buf.str_array_vlen[i] = comp9_buf.str_vlen_array_again[i] = vlen_str_array_buf[i];
+
     }
+
+    /* copy fixlen string attay data to compound buffers */
+    for (i=0; i < FIXLEN_STR_ARRY_DIM; i++)
+    {
+        HDstrcpy(comp1_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        HDstrcpy(comp1_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+
+        HDstrcpy(comp2_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        HDstrcpy(comp2_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+
+        HDstrcpy(comp3_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        HDstrcpy(comp3_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+
+        HDstrcpy(comp4_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        HDstrcpy(comp4_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+
+        HDstrcpy(comp5_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        HDstrcpy(comp5_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+
+        HDstrcpy(comp6_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        HDstrcpy(comp6_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+
+        HDstrcpy(comp7_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        HDstrcpy(comp7_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+
+        HDstrcpy(comp8_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        HDstrcpy(comp8_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+
+        HDstrcpy(comp9_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        HDstrcpy(comp9_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+    }
+
+    /* int data */
+    comp9_buf.int_data1 = 10;
+    comp9_buf.int_data2 = 20;
+    comp9_buf.int_data3 = 30;
+
 
     /*-----------------------------------------------------------------------
     * Create file(s)
@@ -3145,16 +3349,16 @@ static int test_comp_vlen_strings(const char *fname1)
     /*-----------------------------------------------------------------------
     * Variable length String1 - Create space and type
     *------------------------------------------------------------------------*/
-    sid_str1 = H5Screate_simple(STR_RANK, dims_str1, NULL);
-    if (sid_str1 < 0)
+    sid_vlen_str = H5Screate_simple(STR_RANK, dims_vlen_str, NULL);
+    if (sid_vlen_str < 0)
     {
         fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
-    tid_str1 = H5Tcopy(H5T_C_S1);
-    status = H5Tset_size(tid_str1, H5T_VARIABLE);
+    tid_vlen_str = H5Tcopy(H5T_C_S1);
+    status = H5Tset_size(tid_vlen_str, H5T_VARIABLE);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
@@ -3165,16 +3369,16 @@ static int test_comp_vlen_strings(const char *fname1)
     /*-----------------------------------------------------------------------
     * Fixed length String2 - Create space and type
     *------------------------------------------------------------------------*/
-    sid_str2 = H5Screate_simple(STR_RANK, dims_str2, NULL);
-    if (sid_str2 < 0)
+    sid_fixlen_str = H5Screate_simple(STR_RANK, dims_fixlen_str, NULL);
+    if (sid_fixlen_str < 0)
     {
         fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
-    tid_str2 = H5Tcopy(H5T_C_S1);
-    status = H5Tset_size(tid_str2, FLSTR2_SIZE);
+    tid_fixlen_str = H5Tcopy(H5T_C_S1);
+    status = H5Tset_size(tid_fixlen_str, FIXLEN_STR_SIZE);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
@@ -3185,16 +3389,16 @@ static int test_comp_vlen_strings(const char *fname1)
     /*-----------------------------------------------------------------------
     * Fixed length String3 array - Create space and type
     *------------------------------------------------------------------------*/
-    sid_str3 = H5Screate_simple(STR_RANK, dims_str3, NULL);
-    if (sid_str3 < 0)
+    sid_vlen_str_array = H5Screate_simple(STR_RANK, dims_vlen_str_array, NULL);
+    if (sid_vlen_str_array < 0)
     {
         fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
-    tid_str3 = H5Tcopy(H5T_C_S1);
-    status = H5Tset_size(tid_str3, H5T_VARIABLE);
+    tid_vlen_str_array_pre = H5Tcopy(H5T_C_S1);
+    status = H5Tset_size(tid_vlen_str_array_pre, H5T_VARIABLE);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
@@ -3203,8 +3407,8 @@ static int test_comp_vlen_strings(const char *fname1)
     }
 
      /* Create the array data type for the string array                */
-    tid_str3_array = H5Tarray_create2(tid_str3, COMP_RANK, dims_str3);
-    if (tid_str3_array < 0)
+    tid_vlen_str_array = H5Tarray_create2(tid_vlen_str_array_pre, COMP_RANK, dims_vlen_str_array);
+    if (tid_vlen_str_array < 0)
     {
         fprintf(stderr, "Error: %s> H5Tarray_create2 failed.\n", fname1);
         status = FAIL;
@@ -3214,16 +3418,16 @@ static int test_comp_vlen_strings(const char *fname1)
     /*-----------------------------------------------------------------------
     * Variable length String4 array - Create space and type
     *------------------------------------------------------------------------*/
-    sid_str4 = H5Screate_simple(STR_RANK, dims_str4, NULL);
-    if (sid_str4 < 0)
+    sid_fixlen_str_array = H5Screate_simple(STR_RANK, dims_fixlen_str_array, NULL);
+    if (sid_fixlen_str_array < 0)
     {
         fprintf(stderr, "Error: %s> H5Screate_simple failed.\n", fname1);
         status = FAIL;
         goto out;
     }
 
-    tid_str4 = H5Tcopy(H5T_C_S1);
-    status = H5Tset_size(tid_str4, FLSTRARRY4_SIZE);
+    tid_fixlen_str_array_pre = H5Tcopy(H5T_C_S1);
+    status = H5Tset_size(tid_fixlen_str_array_pre, FIXLEN_STR_ARRY_SIZE);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Tset_size failed.\n", fname1);
@@ -3231,8 +3435,8 @@ static int test_comp_vlen_strings(const char *fname1)
         goto out;
     }
      /* Create the array data type for the string array                */
-    tid_str4_array = H5Tarray_create2(tid_str4, COMP_RANK, dims_str4);
-    if (tid_str4_array < 0)
+    tid_fixlen_str_array = H5Tarray_create2(tid_fixlen_str_array_pre, COMP_RANK, dims_fixlen_str_array);
+    if (tid_fixlen_str_array < 0)
     {
         fprintf(stderr, "Error: %s> H5Tarray_create2 failed.\n", fname1);
         status = FAIL;
@@ -3249,66 +3453,270 @@ static int test_comp_vlen_strings(const char *fname1)
         status = FAIL;
         goto out;
     }
-    tid_comp = H5Tcreate (H5T_COMPOUND, sizeof(comp_t));
-    H5Tinsert(tid_comp, "VLEN_STR1", HOFFSET(comp_t, str1), tid_str1 );
-    H5Tinsert(tid_comp, "VLEN_STR2", HOFFSET(comp_t, str1_again), tid_str1 );
-    H5Tinsert(tid_comp, "FIXLEN_STR1", HOFFSET(comp_t, str2), tid_str2 );
-    H5Tinsert(tid_comp, "FIXLEN_STR2", HOFFSET(comp_t, str2_again), tid_str2 );
-    H5Tinsert(tid_comp, "VLEN_STR_ARRAY1", HOFFSET(comp_t, str3), tid_str3_array);
-    H5Tinsert(tid_comp, "VLEN_STR_ARRAY2", HOFFSET(comp_t, str3_again), tid_str3_array);
-    H5Tinsert(tid_comp, "FIXLEN_STR_ARRAY1", HOFFSET(comp_t, str4), tid_str4_array);
-    H5Tinsert(tid_comp, "FIXLEN_STR_ARRAY2", HOFFSET(comp_t, str4_again), tid_str4_array);
+    tid1_comp = H5Tcreate (H5T_COMPOUND, sizeof(comp1_t));
+    tid2_comp = H5Tcreate (H5T_COMPOUND, sizeof(comp2_t));
+    tid3_comp = H5Tcreate (H5T_COMPOUND, sizeof(comp3_t));
+    tid4_comp = H5Tcreate (H5T_COMPOUND, sizeof(comp4_t));
+    tid5_comp = H5Tcreate (H5T_COMPOUND, sizeof(comp5_t));
+    tid6_comp = H5Tcreate (H5T_COMPOUND, sizeof(comp6_t));
+    tid7_comp = H5Tcreate (H5T_COMPOUND, sizeof(comp7_t));
+    tid8_comp = H5Tcreate (H5T_COMPOUND, sizeof(comp8_t));
+    tid9_comp = H5Tcreate (H5T_COMPOUND, sizeof(comp9_t));
 
-    /* Write data to compound dataset buffer */
-    did_comp = H5Dcreate2(fid1, "Compound_dset", tid_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    status = H5Dwrite(did_comp, tid_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp_buf);
+    /* compound 1 */
+    H5Tinsert(tid1_comp, "VLEN_STR1", HOFFSET(comp1_t, str_vlen), tid_vlen_str );
+    H5Tinsert(tid1_comp, "VLEN_STR2", HOFFSET(comp1_t, str_vlen_repeat), tid_vlen_str );
+    H5Tinsert(tid1_comp, "FIXLEN_STR1", HOFFSET(comp1_t, str_fixlen), tid_fixlen_str );
+    H5Tinsert(tid1_comp, "FIXLEN_STR2", HOFFSET(comp1_t, str_fixlen_repeat), tid_fixlen_str );
+    H5Tinsert(tid1_comp, "VLEN_STR_ARRAY1", HOFFSET(comp1_t, str_array_vlen), tid_vlen_str_array);
+    H5Tinsert(tid1_comp, "VLEN_STR_ARRAY2", HOFFSET(comp1_t, str_vlen_array_again), tid_vlen_str_array);
+    H5Tinsert(tid1_comp, "FIXLEN_STR_ARRAY1", HOFFSET(comp1_t, str_array_fixlen), tid_fixlen_str_array);
+    H5Tinsert(tid1_comp, "FIXLEN_STR_ARRAY2", HOFFSET(comp1_t, str_fixlen_array_again), tid_fixlen_str_array);
+
+    /* compound 2 */
+    H5Tinsert(tid2_comp, "VLEN_STR1", HOFFSET(comp2_t, str_vlen), tid_vlen_str );
+    H5Tinsert(tid2_comp, "VLEN_STR2", HOFFSET(comp2_t, str_vlen_repeat), tid_vlen_str );
+    H5Tinsert(tid2_comp, "FIXLEN_STR1", HOFFSET(comp2_t, str_fixlen), tid_fixlen_str );
+    H5Tinsert(tid2_comp, "FIXLEN_STR2", HOFFSET(comp2_t, str_fixlen_repeat), tid_fixlen_str );
+    H5Tinsert(tid2_comp, "VLEN_STR_ARRAY1", HOFFSET(comp2_t, str_array_vlen), tid_vlen_str_array);
+    H5Tinsert(tid2_comp, "VLEN_STR_ARRAY2", HOFFSET(comp2_t, str_vlen_array_again), tid_vlen_str_array);
+    H5Tinsert(tid2_comp, "FIXLEN_STR_ARRAY1", HOFFSET(comp2_t, str_array_fixlen), tid_fixlen_str_array);
+    H5Tinsert(tid2_comp, "FIXLEN_STR_ARRAY2", HOFFSET(comp2_t, str_fixlen_array_again), tid_fixlen_str_array);
+
+    /* compound 3 */
+    H5Tinsert(tid3_comp, "VLEN_STR1", HOFFSET(comp3_t, str_vlen), tid_vlen_str );
+    H5Tinsert(tid3_comp, "VLEN_STR2", HOFFSET(comp3_t, str_vlen_repeat), tid_vlen_str );
+    H5Tinsert(tid3_comp, "FIXLEN_STR1", HOFFSET(comp3_t, str_fixlen), tid_fixlen_str );
+    H5Tinsert(tid3_comp, "FIXLEN_STR2", HOFFSET(comp3_t, str_fixlen_repeat), tid_fixlen_str );
+    H5Tinsert(tid3_comp, "VLEN_STR_ARRAY1", HOFFSET(comp3_t, str_array_vlen), tid_vlen_str_array);
+    H5Tinsert(tid3_comp, "VLEN_STR_ARRAY2", HOFFSET(comp3_t, str_vlen_array_again), tid_vlen_str_array);
+    H5Tinsert(tid3_comp, "FIXLEN_STR_ARRAY1", HOFFSET(comp3_t, str_array_fixlen), tid_fixlen_str_array);
+    H5Tinsert(tid3_comp, "FIXLEN_STR_ARRAY2", HOFFSET(comp3_t, str_fixlen_array_again), tid_fixlen_str_array);
+
+    /* compound 4 */
+    H5Tinsert(tid4_comp, "VLEN_STR1", HOFFSET(comp4_t, str_vlen), tid_vlen_str );
+    H5Tinsert(tid4_comp, "VLEN_STR2", HOFFSET(comp4_t, str_vlen_repeat), tid_vlen_str );
+    H5Tinsert(tid4_comp, "FIXLEN_STR1", HOFFSET(comp4_t, str_fixlen), tid_fixlen_str );
+    H5Tinsert(tid4_comp, "FIXLEN_STR2", HOFFSET(comp4_t, str_fixlen_repeat), tid_fixlen_str );
+    H5Tinsert(tid4_comp, "VLEN_STR_ARRAY1", HOFFSET(comp4_t, str_array_vlen), tid_vlen_str_array);
+    H5Tinsert(tid4_comp, "VLEN_STR_ARRAY2", HOFFSET(comp4_t, str_vlen_array_again), tid_vlen_str_array);
+    H5Tinsert(tid4_comp, "FIXLEN_STR_ARRAY1", HOFFSET(comp4_t, str_array_fixlen), tid_fixlen_str_array);
+    H5Tinsert(tid4_comp, "FIXLEN_STR_ARRAY2", HOFFSET(comp4_t, str_fixlen_array_again), tid_fixlen_str_array);
+
+    /* compound 5 */
+    H5Tinsert(tid5_comp, "VLEN_STR1", HOFFSET(comp5_t, str_vlen), tid_vlen_str );
+    H5Tinsert(tid5_comp, "VLEN_STR2", HOFFSET(comp5_t, str_vlen_repeat), tid_vlen_str );
+    H5Tinsert(tid5_comp, "FIXLEN_STR1", HOFFSET(comp5_t, str_fixlen), tid_fixlen_str );
+    H5Tinsert(tid5_comp, "FIXLEN_STR2", HOFFSET(comp5_t, str_fixlen_repeat), tid_fixlen_str );
+    H5Tinsert(tid5_comp, "VLEN_STR_ARRAY1", HOFFSET(comp5_t, str_array_vlen), tid_vlen_str_array);
+    H5Tinsert(tid5_comp, "VLEN_STR_ARRAY2", HOFFSET(comp5_t, str_vlen_array_again), tid_vlen_str_array);
+    H5Tinsert(tid5_comp, "FIXLEN_STR_ARRAY1", HOFFSET(comp5_t, str_array_fixlen), tid_fixlen_str_array);
+    H5Tinsert(tid5_comp, "FIXLEN_STR_ARRAY2", HOFFSET(comp5_t, str_fixlen_array_again), tid_fixlen_str_array);
+
+    /* compound 6 */
+    H5Tinsert(tid6_comp, "VLEN_STR1", HOFFSET(comp6_t, str_vlen), tid_vlen_str );
+    H5Tinsert(tid6_comp, "VLEN_STR2", HOFFSET(comp6_t, str_vlen_repeat), tid_vlen_str );
+    H5Tinsert(tid6_comp, "FIXLEN_STR1", HOFFSET(comp6_t, str_fixlen), tid_fixlen_str );
+    H5Tinsert(tid6_comp, "FIXLEN_STR2", HOFFSET(comp6_t, str_fixlen_repeat), tid_fixlen_str );
+    H5Tinsert(tid6_comp, "VLEN_STR_ARRAY1", HOFFSET(comp6_t, str_array_vlen), tid_vlen_str_array);
+    H5Tinsert(tid6_comp, "VLEN_STR_ARRAY2", HOFFSET(comp6_t, str_vlen_array_again), tid_vlen_str_array);
+    H5Tinsert(tid6_comp, "FIXLEN_STR_ARRAY1", HOFFSET(comp6_t, str_array_fixlen), tid_fixlen_str_array);
+    H5Tinsert(tid6_comp, "FIXLEN_STR_ARRAY2", HOFFSET(comp6_t, str_fixlen_array_again), tid_fixlen_str_array);
+
+    /* compound 7 */
+    H5Tinsert(tid7_comp, "VLEN_STR1", HOFFSET(comp7_t, str_vlen), tid_vlen_str );
+    H5Tinsert(tid7_comp, "VLEN_STR2", HOFFSET(comp7_t, str_vlen_repeat), tid_vlen_str );
+    H5Tinsert(tid7_comp, "FIXLEN_STR1", HOFFSET(comp7_t, str_fixlen), tid_fixlen_str );
+    H5Tinsert(tid7_comp, "FIXLEN_STR2", HOFFSET(comp7_t, str_fixlen_repeat), tid_fixlen_str );
+    H5Tinsert(tid7_comp, "VLEN_STR_ARRAY1", HOFFSET(comp7_t, str_array_vlen), tid_vlen_str_array);
+    H5Tinsert(tid7_comp, "VLEN_STR_ARRAY2", HOFFSET(comp7_t, str_vlen_array_again), tid_vlen_str_array);
+    H5Tinsert(tid7_comp, "FIXLEN_STR_ARRAY1", HOFFSET(comp7_t, str_array_fixlen), tid_fixlen_str_array);
+    H5Tinsert(tid7_comp, "FIXLEN_STR_ARRAY2", HOFFSET(comp7_t, str_fixlen_array_again), tid_fixlen_str_array);
+
+    /* compound 8 */
+    H5Tinsert(tid8_comp, "VLEN_STR1", HOFFSET(comp8_t, str_vlen), tid_vlen_str );
+    H5Tinsert(tid8_comp, "VLEN_STR2", HOFFSET(comp8_t, str_vlen_repeat), tid_vlen_str );
+    H5Tinsert(tid8_comp, "FIXLEN_STR1", HOFFSET(comp8_t, str_fixlen), tid_fixlen_str );
+    H5Tinsert(tid8_comp, "FIXLEN_STR2", HOFFSET(comp8_t, str_fixlen_repeat), tid_fixlen_str );
+    H5Tinsert(tid8_comp, "VLEN_STR_ARRAY1", HOFFSET(comp8_t, str_array_vlen), tid_vlen_str_array);
+    H5Tinsert(tid8_comp, "VLEN_STR_ARRAY2", HOFFSET(comp8_t, str_vlen_array_again), tid_vlen_str_array);
+    H5Tinsert(tid8_comp, "FIXLEN_STR_ARRAY1", HOFFSET(comp8_t, str_array_fixlen), tid_fixlen_str_array);
+    H5Tinsert(tid8_comp, "FIXLEN_STR_ARRAY2", HOFFSET(comp8_t, str_fixlen_array_again), tid_fixlen_str_array);
+
+    /* compound 9 */
+    H5Tinsert(tid9_comp, "VLEN_STR1", HOFFSET(comp9_t, str_vlen), tid_vlen_str );
+    H5Tinsert(tid9_comp, "VLEN_STR2", HOFFSET(comp9_t, str_vlen_repeat), tid_vlen_str );
+    H5Tinsert(tid9_comp, "FIXLEN_STR1", HOFFSET(comp9_t, str_fixlen), tid_fixlen_str );
+    H5Tinsert(tid9_comp, "FIXLEN_STR2", HOFFSET(comp9_t, str_fixlen_repeat), tid_fixlen_str );
+    H5Tinsert(tid9_comp, "VLEN_STR_ARRAY1", HOFFSET(comp9_t, str_array_vlen), tid_vlen_str_array);
+    H5Tinsert(tid9_comp, "VLEN_STR_ARRAY2", HOFFSET(comp9_t, str_vlen_array_again), tid_vlen_str_array);
+    H5Tinsert(tid9_comp, "FIXLEN_STR_ARRAY1", HOFFSET(comp9_t, str_array_fixlen), tid_fixlen_str_array);
+    H5Tinsert(tid9_comp, "FIXLEN_STR_ARRAY2", HOFFSET(comp9_t, str_fixlen_array_again), tid_fixlen_str_array);
+    H5Tinsert(tid9_comp, "INT_DATA1", HOFFSET(comp9_t, int_data1), H5T_STD_I32LE);
+    H5Tinsert(tid9_comp, "INT_DATA2", HOFFSET(comp9_t, int_data2), H5T_STD_I32BE);
+    H5Tinsert(tid9_comp, "INT_DATA3", HOFFSET(comp9_t, int_data3), H5T_STD_I32LE);
+    H5Tinsert(tid9_comp, "OBJREF1", HOFFSET(comp9_t, objref1), H5T_STD_REF_OBJ);
+    H5Tinsert(tid9_comp, "OBJREF2", HOFFSET(comp9_t, objref2), H5T_STD_REF_OBJ);
+    H5Tinsert(tid9_comp, "OBJREF3", HOFFSET(comp9_t, objref3), H5T_STD_REF_OBJ);
+
+
+    /* Write data to compound 1 dataset buffer */
+    did_comp = H5Dcreate2(fid1, "Compound_dset1", tid1_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(did_comp, tid1_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp1_buf);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
     }
+    H5Dclose(did_comp);
+
+    /* Write data to compound 2 dataset buffer */
+    did_comp = H5Dcreate2(fid1, "Compound_dset2", tid2_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(did_comp, tid2_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp2_buf);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    } 
+    H5Dclose(did_comp);
+
+    /* Write data to compound 3 dataset buffer */
+    did_comp = H5Dcreate2(fid1, "Compound_dset3", tid3_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(did_comp, tid3_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp3_buf);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    } 
+    H5Dclose(did_comp);
+
+    /* Write data to compound 4 dataset buffer */
+    did_comp = H5Dcreate2(fid1, "Compound_dset4", tid4_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(did_comp, tid4_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp4_buf);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    } 
+    H5Dclose(did_comp);
+
+    /* Write data to compound 5 dataset buffer */
+    did_comp = H5Dcreate2(fid1, "Compound_dset5", tid5_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(did_comp, tid5_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp5_buf);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    } 
+    H5Dclose(did_comp);
+
+    /* Write data to compound 6 dataset buffer */
+    did_comp = H5Dcreate2(fid1, "Compound_dset6", tid6_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(did_comp, tid6_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp6_buf);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    } 
+    H5Dclose(did_comp);
+
+    /* Write data to compound 7 dataset buffer */
+    did_comp = H5Dcreate2(fid1, "Compound_dset7", tid7_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(did_comp, tid7_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp7_buf);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    } 
+    H5Dclose(did_comp);
+
+    /* Write data to compound 8 dataset buffer */
+    did_comp = H5Dcreate2(fid1, "Compound_dset8", tid8_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(did_comp, tid8_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp8_buf);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    } 
+    H5Dclose(did_comp);
+
+    /* Write data to compound 9 dataset buffer */
+    did_comp = H5Dcreate2(fid1, "Compound_dset9", tid9_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* obj references */
+    status=H5Rcreate(&(comp9_buf.objref1),fid1,"/Compound_dset2",H5R_OBJECT,-1);
+    status=H5Rcreate(&(comp9_buf.objref2),fid1,"/Compound_dset3",H5R_OBJECT,-1);
+    status=H5Rcreate(&(comp9_buf.objref3),fid1,"/Compound_dset4",H5R_OBJECT,-1);
+
+    status = H5Dwrite(did_comp, tid9_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp9_buf);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    } 
+
+
+    H5Dclose(did_comp);
+
+    did_comp=0;
 out:
    /*-----------------------------------------------------------------------
     * Close
     *-----------------------------------------------------------------------*/
     if(fid1)
         H5Fclose(fid1);
-    /* string1 */
-    if(tid_str1)
-        H5Tclose(tid_str1);
-    if(did_str1)
-        H5Dclose(did_str1);
-    if(sid_str1)
-        H5Sclose(sid_str1);
-    /* string2 */
-    if(tid_str2)
-        H5Tclose(tid_str2);
-    if(did_str2)
-        H5Dclose(did_str2);
-    if(sid_str2)
-        H5Sclose(sid_str2);
-    /* string3 */
-    if(tid_str3)
-        H5Tclose(tid_str3);
-    if(tid_str3_array)
-        H5Tclose(tid_str3_array);
-    if(did_str3)
-        H5Dclose(did_str3);
-    if(sid_str3)
-        H5Sclose(sid_str3);
-    /* string4 */
-    if(tid_str4)
-        H5Tclose(tid_str4);
-    if(tid_str4_array)
-        H5Tclose(tid_str4_array);
-    if(did_str4)
-        H5Dclose(did_str4);
-    if(sid_str4)
-        H5Sclose(sid_str4);
+    /* vlen string */
+    if(tid_vlen_str)
+        H5Tclose(tid_vlen_str);
+    if(sid_vlen_str)
+        H5Sclose(sid_vlen_str);
+    /* fixed len string */
+    if(tid_fixlen_str)
+        H5Tclose(tid_fixlen_str);
+    if(sid_fixlen_str)
+        H5Sclose(sid_fixlen_str);
+    /* vlen string array */
+    if(tid_vlen_str_array_pre)
+        H5Tclose(tid_vlen_str_array_pre);
+    if(tid_vlen_str_array)
+        H5Tclose(tid_vlen_str_array);
+    if(sid_vlen_str_array)
+        H5Sclose(sid_vlen_str_array);
+    /* fixed len string array */
+    if(tid_fixlen_str_array_pre)
+        H5Tclose(tid_fixlen_str_array_pre);
+    if(tid_fixlen_str_array)
+        H5Tclose(tid_fixlen_str_array);
+    if(sid_fixlen_str_array)
+        H5Sclose(sid_fixlen_str_array);
     /* compound */
-    if(tid_comp)
-        H5Tclose(tid_comp);
+    if(tid1_comp)
+        H5Tclose(tid1_comp);
+    if(tid2_comp)
+        H5Tclose(tid2_comp);
+    if(tid3_comp)
+        H5Tclose(tid3_comp);
+    if(tid4_comp)
+        H5Tclose(tid4_comp);
+    if(tid5_comp)
+        H5Tclose(tid5_comp);
+    if(tid6_comp)
+        H5Tclose(tid6_comp);
+    if(tid7_comp)
+        H5Tclose(tid7_comp);
+    if(tid8_comp)
+        H5Tclose(tid8_comp);
+    if(tid9_comp)
+        H5Tclose(tid9_comp);
     if(did_comp)
         H5Dclose(did_comp);
     if(sid_comp)

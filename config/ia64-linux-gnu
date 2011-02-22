@@ -32,7 +32,7 @@ fi
 
 # Define RUNPARALLEL if parallel mode is enabled or a parallel compiler used.
 if test "X-$enable_parallel" = "X-yes" -o X-$CC_BASENAME = X-mpicc; then
-    RUNPARALLEL=${RUNPARALLEL="mpirun -np \$\${NPROCS:=3}"}
+    RUNPARALLEL=${RUNPARALLEL="mpirun -np \$\${NPROCS:=6}"}
 fi
 
 #----------------------------------------------------------------------------

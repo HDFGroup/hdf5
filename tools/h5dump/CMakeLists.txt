@@ -11,8 +11,7 @@ INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 # Add the h5dump executables
 # --------------------------------------------------------------------
 ADD_EXECUTABLE (h5dump ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dump.c)
-H5_NAMING (h5dump)
-TARGET_WIN_PROPERTIES (h5dump)
+H5_NAMING (h5dump ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5dump  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5dump)
@@ -29,8 +28,7 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5dumpgentest ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dumpgentest.c)
-    H5_NAMING (h5dumpgentest)
-    TARGET_WIN_PROPERTIES (h5dumpgentest)
+    H5_NAMING (h5dumpgentest ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5dumpgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     
     #ADD_TEST (NAME h5dumpgentest COMMAND $<TARGET_FILE:h5dumpgentest>)
@@ -40,6 +38,7 @@ IF (BUILD_TESTING)
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
   SET (HDF5_REFERENCE_FILES
+      packedbits.ddl
       tall-1.ddl
       tall-2.ddl
       tall-2A.ddl
@@ -49,6 +48,7 @@ IF (BUILD_TESTING)
       tall-5s.ddl
       tallfilters.ddl
       tarray1.ddl
+      tarray1_big.ddl
       tarray2.ddl
       tarray3.ddl
       tarray4.ddl
@@ -84,6 +84,7 @@ IF (BUILD_TESTING)
       texternal.ddl
       textlinksrc.ddl
       textlinkfar.ddl
+      textlink.ddl
       tfamily.ddl
       tfill.ddl
       tfletcher32.ddl
@@ -219,9 +220,11 @@ IF (BUILD_TESTING)
       tbin3.ddl
       tbin4.ddl
       out3.h5import
+      packedbits.h5
       taindices.h5
       tall.h5
       tarray1.h5
+      tarray1_big.h5
       tarray2.h5
       tarray3.h5
       tarray4.h5
@@ -243,6 +246,7 @@ IF (BUILD_TESTING)
       textlinkfar.h5
       textlinksrc.h5
       textlinktar.h5
+      textlink.h5
       tfamily00000.h5
       tfamily00001.h5
       tfamily00002.h5
@@ -413,6 +417,10 @@ IF (BUILD_TESTING)
             -D "TEST_REFERENCE=${resultfile}.ddl"
             -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
     )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5DUMP-${resultfile}")
   ENDMACRO (ADD_H5_TEST file)
 
   MACRO (ADD_H5_EXPORT_TEST resultfile targetfile resultcode)
@@ -420,11 +428,16 @@ IF (BUILD_TESTING)
         NAME H5DUMP-output-${resultfile}
         COMMAND $<TARGET_FILE:h5dump> -d /Dataset1 -s 0 -R -y -o ${PROJECT_BINARY_DIR}/${resultfile}.txt ${PROJECT_BINARY_DIR}/${targetfile}
     )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DUMP-output-${resultfile} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
     ADD_TEST (
         NAME H5DUMP-output-cmp-${resultfile}
         COMMAND ${CMAKE_COMMAND}
               -E compare_files ${PROJECT_BINARY_DIR}/${resultfile}.txt ${PROJECT_BINARY_DIR}/${resultfile}.exp
     )
+    SET_TESTS_PROPERTIES (H5DUMP-output-cmp-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile})
+    SET (last_test "H5DUMP-output-cmp-${resultfile}")
   ENDMACRO (ADD_H5_EXPORT_TEST file)
 
   MACRO (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
@@ -450,6 +463,10 @@ IF (BUILD_TESTING)
             -D "TEST_REFERENCE=${resultfile}.xml"
             -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
     )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5DUMP-XML-${resultfile}")
   ENDMACRO (ADD_XML_H5_TEST file)
 
   # --------------------------------------------------------------------
@@ -478,6 +495,8 @@ IF (BUILD_TESTING)
       NAME H5DUMP-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
+          packedbits.out
+          packedbits.out.err
           tall-1.out
           tall-1.out.err
           tall-2.out
@@ -496,6 +515,8 @@ IF (BUILD_TESTING)
           tallfilters.out.err
           tarray1.out
           tarray1.out.err
+          tarray1_big.out
+          tarray1_big.out.err
           tarray2.out
           tarray2.out.err
           tarray3.out
@@ -566,6 +587,8 @@ IF (BUILD_TESTING)
           textlinksrc.out.err
           textlinkfar.out
           textlinkfar.out.err
+          textlink.out
+          textlink.out.err
           tfamily.out
           tfamily.out.err
           tfill.out
@@ -691,7 +714,22 @@ IF (BUILD_TESTING)
           tvms.out
           tvms.out.err
   )
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5DUMP-clearall-objects PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
+  SET (last_test "H5DUMP-clearall-objects")
 
+  # If using memchecker add tests without using scripts
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    ADD_TEST (NAME H5DUMP-tgroup COMMAND h5dump tgroup.h5)
+    ADD_TEST (NAME H5DUMP-tdset COMMAND h5dump tdset.h5)
+    ADD_TEST (NAME H5DUMP-tattr COMMAND h5dump tattr.h5)
+    ADD_TEST (NAME H5DUMP-tslink COMMAND h5dump tslink.h5)
+    ADD_TEST (NAME H5DUMP-thlink COMMAND h5dump thlink.h5)
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
+  # test for signed/unsigned datasets
+  ADD_H5_TEST (packedbits 0 packedbits.h5)
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 tgroup.h5)
   # test for displaying the selected groups
@@ -764,6 +802,8 @@ IF (BUILD_TESTING)
 
   # test for files with array data
   ADD_H5_TEST (tarray1 0 tarray1.h5)
+  # # added for bug# 2092 - tarray1_big.h5
+  ADD_H5_TEST (tarray1_big 0 -R tarray1_big.h5)
   ADD_H5_TEST (tarray2 0 tarray2.h5)
   ADD_H5_TEST (tarray3 0 tarray3.h5)
   ADD_H5_TEST (tarray4 0 tarray4.h5)
@@ -960,6 +1000,10 @@ IF (BUILD_TESTING)
             out3.h5
     )
   ENDIF (NOT HDF5_NOCLEANUP)
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5DUMP-clear-objects PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
+  SET (last_test "H5DUMP-clear-objects")
 
   # test for dataset region references 
   ADD_H5_TEST (tdatareg 0 tdatareg.h5)
@@ -989,6 +1033,9 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (textlinksrc 0 textlinksrc.h5)
   ADD_H5_TEST (textlinkfar 0 textlinkfar.h5)
 
+  # test for dangling external links
+  ADD_H5_TEST (textlink 0 textlink.h5)
+
   ####### test for dataset packed bits ######
   IF (HDF5_USE_H5DUMP_PACKED_BITS)
     # Remove any output file left over from previous test run
@@ -1001,6 +1048,10 @@ IF (BUILD_TESTING)
             tpackedbits2.out
             tpackedbits2.out.err
     )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DUMP_PACKED_BITS-clearall-objects PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5DUMP_PACKED_BITS-clearall-objects")
     ADD_H5_TEST (tpackedbits 0 -d /dset1 -M 0,2 tdset.h5)
     ADD_H5_TEST (tpackedbits2 0 -d /dset1 -M 0,2,2,1 tdset.h5)
   ENDIF (HDF5_USE_H5DUMP_PACKED_BITS)
@@ -1139,8 +1190,22 @@ IF (BUILD_TESTING)
           tvlstr.h5.out
           tvlstr.h5.out.err
   )
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5DUMP-XML-clearall-objects PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
+  SET (last_test "H5DUMP-XML-clearall-objects")
 
   ########## test XML
+
+  # If using memchecker add tests without using scripts
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    ADD_TEST (NAME H5DUMP-XML-tgroup COMMAND h5dump --xml tgroup.h5)
+    ADD_TEST (NAME H5DUMP-XML-tdset COMMAND h5dump --xml tdset.h5)
+    ADD_TEST (NAME H5DUMP-XML-tattr COMMAND h5dump --xml tattr.h5)
+    ADD_TEST (NAME H5DUMP-XML-tslink COMMAND h5dump --xml tslink.h5)
+    ADD_TEST (NAME H5DUMP-XML-thlink COMMAND h5dump --xml thlink.h5)
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
   ADD_XML_H5_TEST (tall.h5 0 tall.h5)
   ADD_XML_H5_TEST (tattr.h5 0 tattr.h5)
   ADD_XML_H5_TEST (tbitfields.h5 0 tbitfields.h5)
