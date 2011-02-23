@@ -229,7 +229,7 @@ INCLUDE (${HDF5_RESOURCES_DIR}/ConfigureChecks.cmake)
 # Option to use legacy naming for windows libs/programs, default is legacy
 #-----------------------------------------------------------------------------
 IF (WIN32 AND NOT CYGWIN)
-  OPTION (H5_LEGACY_NAMING "Use Legacy Names for Libraries and Programs" ON)
+  OPTION (HDF_LEGACY_NAMING "Use Legacy Names for Libraries and Programs" OFF)
 ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
