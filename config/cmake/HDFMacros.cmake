@@ -66,7 +66,7 @@ MACRO (EXTERNAL_SZIP_LIBRARY compress_type lib_url libtype encoding)
         # [SVN_REVISION rev] 
         INSTALL_COMMAND ""
         CMAKE_ARGS
-            -DBUILD_SHARED_LIBS:BOOL=${libtype}
+            -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
             -DSZIP_ENABLE_ENCODING:BOOL=${encoding}
     ) 
   ELSEIF (${compress_type} MATCHES "TGZ")
@@ -75,7 +75,7 @@ MACRO (EXTERNAL_SZIP_LIBRARY compress_type lib_url libtype encoding)
         URL_MD5 ""
         INSTALL_COMMAND ""
         CMAKE_ARGS
-            -DBUILD_SHARED_LIBS:BOOL=${libtype}
+            -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
             -DSZIP_ENABLE_ENCODING:BOOL=${encoding}
     ) 
   ENDIF (${compress_type} MATCHES "SVN")
