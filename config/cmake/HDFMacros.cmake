@@ -4,13 +4,13 @@ MACRO (SET_GLOBAL_VARIABLE name value)
 ENDMACRO (SET_GLOBAL_VARIABLE)
 
 #-------------------------------------------------------------------------------
-MACRO (EXTERNAL_JPEG_LIBRARY compress_type lib_url jpeg_pic)
+MACRO (EXTERNAL_JPEG_LIBRARY compress_type jpeg_pic)
   # May need to build JPEG with PIC on x64 machines with gcc
   # Need to use CMAKE_ANSI_CFLAGS define so that compiler test works
 
   IF (${compress_type} MATCHES "SVN")
     EXTERNALPROJECT_ADD (JPEG
-        SVN_REPOSITORY ${lib_url}
+        SVN_REPOSITORY ${JPEG_URL}
         # [SVN_REVISION rev] 
         INSTALL_COMMAND ""
         CMAKE_ARGS
@@ -20,7 +20,7 @@ MACRO (EXTERNAL_JPEG_LIBRARY compress_type lib_url jpeg_pic)
     ) 
   ELSEIF (${compress_type} MATCHES "TGZ")
     EXTERNALPROJECT_ADD (JPEG
-        URL ${lib_url}
+        URL ${JPEG_URL}
         URL_MD5 ""
         INSTALL_COMMAND ""
         CMAKE_ARGS
@@ -59,10 +59,10 @@ MACRO (PACKAGE_JPEG_LIBRARY compress_type)
 ENDMACRO (PACKAGE_JPEG_LIBRARY)
 
 #-------------------------------------------------------------------------------
-MACRO (EXTERNAL_SZIP_LIBRARY compress_type lib_url libtype encoding)
+MACRO (EXTERNAL_SZIP_LIBRARY compress_type libtype encoding)
   IF (${compress_type} MATCHES "SVN")
     EXTERNALPROJECT_ADD (SZIP
-        SVN_REPOSITORY ${lib_url}
+        SVN_REPOSITORY ${SZIP_SVN_URL}
         # [SVN_REVISION rev] 
         INSTALL_COMMAND ""
         CMAKE_ARGS
@@ -71,7 +71,7 @@ MACRO (EXTERNAL_SZIP_LIBRARY compress_type lib_url libtype encoding)
     ) 
   ELSEIF (${compress_type} MATCHES "TGZ")
     EXTERNALPROJECT_ADD (SZIP
-        URL ${lib_url}
+        URL ${SZIP_SVN_URL}
         URL_MD5 ""
         INSTALL_COMMAND ""
         CMAKE_ARGS
@@ -129,10 +129,10 @@ MACRO (PACKAGE_SZIP_LIBRARY compress_type libtype)
 ENDMACRO (PACKAGE_SZIP_LIBRARY)
 
 #-------------------------------------------------------------------------------
-MACRO (EXTERNAL_ZLIB_LIBRARY compress_type lib_url libtype)
+MACRO (EXTERNAL_ZLIB_LIBRARY compress_type libtype)
   IF (${compress_type} MATCHES "SVN")
     EXTERNALPROJECT_ADD (ZLIB
-        SVN_REPOSITORY ${lib_url}
+        SVN_REPOSITORY ${ZLIB_URL}
         # [SVN_REVISION rev] 
         INSTALL_COMMAND ""
         CMAKE_ARGS
@@ -141,7 +141,7 @@ MACRO (EXTERNAL_ZLIB_LIBRARY compress_type lib_url libtype)
     ) 
   ELSEIF (${compress_type} MATCHES "TGZ")
     EXTERNALPROJECT_ADD (ZLIB
-        URL ${lib_url}
+        URL ${ZLIB_URL}
         URL_MD5 ""
         INSTALL_COMMAND ""
         CMAKE_ARGS
