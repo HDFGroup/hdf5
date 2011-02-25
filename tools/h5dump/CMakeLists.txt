@@ -38,7 +38,7 @@ IF (BUILD_TESTING)
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
   SET (HDF5_REFERENCE_FILES
-      filter_fail.ddl
+#      filter_fail.ddl
       packedbits.ddl
       tall-1.ddl
       tall-2.ddl
@@ -221,7 +221,7 @@ IF (BUILD_TESTING)
       tbin3.ddl
       tbin4.ddl
       out3.h5import
-      filter_fail.h5
+#      filter_fail.h5
       packedbits.h5
       taindices.h5
       tall.h5
@@ -1129,7 +1129,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (textlink 0 textlink.h5)
 
   # test for error stack display
-  ADD_H5_TEST (filter_fail 1 -E filter_fail.h5)
+#  ADD_H5_TEST (filter_fail 1 -E filter_fail.h5)
 
   ####### test for dataset packed bits ######
   IF (HDF5_USE_H5DUMP_PACKED_BITS)
