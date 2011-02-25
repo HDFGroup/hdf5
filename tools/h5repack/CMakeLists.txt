@@ -235,7 +235,9 @@ IF (BUILD_TESTING)
                 -D "TEST_REFERENCE=${testfilter}"
                 -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
         )
-        SET_TESTS_PROPERTIES (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES DEPENDS H5REPACK-${testname})
+        IF (NOT "${last_test}" STREQUAL "")
+          SET_TESTS_PROPERTIES (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES DEPENDS ${last_test})
+        ENDIF (NOT "${last_test}" STREQUAL "")
         SET (last_test "H5REPACK_VERIFY_LAYOUT-${testname}")
       ELSE (${resultcode} STREQUAL "0")
         IF (${testfilter} STREQUAL "CHUNKED")
@@ -259,8 +261,10 @@ IF (BUILD_TESTING)
                 -D "TEST_REFERENCE=${testfilter}"
                 -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
         )
-        SET_TESTS_PROPERTIES (H5REPACK_VERIFY_LAYOUT_ALL-${testname} PROPERTIES DEPENDS H5REPACK-${testname})
-        SET (last_test "H5REPACK_VERIFY_LAYOUT-${testname}")
+        IF (NOT "${last_test}" STREQUAL "")
+          SET_TESTS_PROPERTIES (H5REPACK_VERIFY_LAYOUT_ALL-${testname} PROPERTIES DEPENDS ${last_test})
+        ENDIF (NOT "${last_test}" STREQUAL "")
+        SET (last_test "H5REPACK_VERIFY_LAYOUT_ALL-${testname}")
       ENDIF (${resultcode} STREQUAL "0")
     ENDIF (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_H5_VERIFY_TEST)
