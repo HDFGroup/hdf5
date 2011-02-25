@@ -21,7 +21,7 @@ SET (REPACK_COMMON_SRCS
 )
 
 ADD_EXECUTABLE (h5repack ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
-H5_NAMING (h5repack ${LIB_TYPE})
+TARGET_NAMING (h5repack ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5repack  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5repack)
@@ -37,7 +37,7 @@ IF (BUILD_TESTING)
   # Add h5Repack test executables
   # --------------------------------------------------------------------
   ADD_EXECUTABLE (testh5repack_detect_szip ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testh5repack_detect_szip.c)
-  H5_NAMING (testh5repack_detect_szip ${LIB_TYPE})
+  TARGET_NAMING (testh5repack_detect_szip ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (testh5repack_detect_szip ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME testh5repack_detect_szip COMMAND $<TARGET_FILE:testh5repack_detect_szip>)
@@ -55,7 +55,7 @@ IF (BUILD_TESTING)
   ENDIF (HDF5_ENABLE_SZIP_SUPPORT)
 
   ADD_EXECUTABLE (h5repacktest ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repacktst.c)
-  H5_NAMING (h5repacktest ${LIB_TYPE})
+  TARGET_NAMING (h5repacktest ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (h5repacktest  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
   ADD_TEST (NAME h5repacktest COMMAND $<TARGET_FILE:h5repacktest>)
