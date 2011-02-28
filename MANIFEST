@@ -1166,6 +1166,8 @@
 ./tools/testfiles/family_file00015.h5
 ./tools/testfiles/family_file00016.h5
 ./tools/testfiles/family_file00017.h5
+./tools/testfiles/filter_fail.h5
+./tools/testfiles/filter_fail.ddl
 ./tools/testfiles/packedbits.h5
 ./tools/testfiles/packedbits.ddl
 ./tools/testfiles/file_space.h5
