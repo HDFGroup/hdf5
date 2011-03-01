@@ -197,18 +197,23 @@ IF (BUILD_TESTING)
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out.${resultfile}"
       )
     ELSE (${testtype} STREQUAL "SKIP")
-      ADD_TEST (
-          NAME H5REPACK-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
-              -D "TEST_ARGS:STRING=${ARGN};testfiles/${resultfile};testfiles/out.${resultfile}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_FILTER:STRING=${testfilter}"
-              -D "TEST_REFERENCE=testfiles/${resultfile}.ddl"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
-      )
+      # If using memchecker add tests without using scripts
+      IF (HDF5_ENABLE_USING_MEMCHECKER)
+        ADD_TEST (NAME H5REPACK-${testname} COMMAND $<TARGET_FILE:h5repack> ${ARGN} testfiles/${resultfile} testfiles/out.${resultfile})
+      ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+        ADD_TEST (
+            NAME H5REPACK-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
+                -D "TEST_ARGS:STRING=${ARGN};testfiles/${resultfile};testfiles/out.${resultfile}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=${resultfile}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_FILTER:STRING=${testfilter}"
+                -D "TEST_REFERENCE=testfiles/${resultfile}.ddl"
+                -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+        )
+      ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
       IF (NOT "${last_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5REPACK-${testname} PROPERTIES DEPENDS ${last_test})
       ENDIF (NOT "${last_test}" STREQUAL "")
@@ -223,50 +228,52 @@ IF (BUILD_TESTING)
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP -d ${testdset} -pH ${PROJECT_BINARY_DIR}/testfiles/out.${resultfile}"
       )
     ELSE (${testtype} STREQUAL "SKIP")
-      IF (${resultcode} STREQUAL "0")
-        ADD_TEST (
-            NAME H5REPACK_VERIFY_LAYOUT-${testname}
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-                -D "TEST_ARGS:STRING=-d;${testdset};-pH;testfiles/out.${testfile}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-                -D "TEST_OUTPUT=${testfile}-v.out"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_FILTER:STRING=${testfilter}"
-                -D "TEST_REFERENCE=${testfilter}"
-                -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
-        )
-        IF (NOT "${last_test}" STREQUAL "")
-          SET_TESTS_PROPERTIES (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES DEPENDS ${last_test})
-        ENDIF (NOT "${last_test}" STREQUAL "")
-        SET (last_test "H5REPACK_VERIFY_LAYOUT-${testname}")
-      ELSE (${resultcode} STREQUAL "0")
-        IF (${testfilter} STREQUAL "CHUNKED")
-          SET (nottestfilter "(CONTIGUOUS|COMPACT)")
-        ENDIF (${testfilter} STREQUAL "CHUNKED")
-        IF (${testfilter} STREQUAL "CONTIGUOUS")
-          SET (nottestfilter "(CHUNK|COMPACT)")
-        ENDIF (${testfilter} STREQUAL "CONTIGUOUS")
-        IF (${testfilter} STREQUAL "COMPACT")
-          SET (nottestfilter "(CONTIGUOUS|CHUNK)")
-        ENDIF (${testfilter} STREQUAL "COMPACT")
-        ADD_TEST (
-            NAME H5REPACK_VERIFY_LAYOUT_ALL-${testname}
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-                -D "TEST_ARGS:STRING=-pH;testfiles/out.${testfile}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-                -D "TEST_OUTPUT=${testfile}-v.out"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_FILTER:STRING=${nottestfilter}"
-                -D "TEST_REFERENCE=${testfilter}"
-                -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
-        )
-        IF (NOT "${last_test}" STREQUAL "")
-          SET_TESTS_PROPERTIES (H5REPACK_VERIFY_LAYOUT_ALL-${testname} PROPERTIES DEPENDS ${last_test})
-        ENDIF (NOT "${last_test}" STREQUAL "")
-        SET (last_test "H5REPACK_VERIFY_LAYOUT_ALL-${testname}")
-      ENDIF (${resultcode} STREQUAL "0")
+      IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+        IF (${resultcode} STREQUAL "0")
+          ADD_TEST (
+              NAME H5REPACK_VERIFY_LAYOUT-${testname}
+              COMMAND "${CMAKE_COMMAND}"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                  -D "TEST_ARGS:STRING=-d;${testdset};-pH;testfiles/out.${testfile}"
+                  -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                  -D "TEST_OUTPUT=${testfile}-v.out"
+                  -D "TEST_EXPECT=${resultcode}"
+                  -D "TEST_FILTER:STRING=${testfilter}"
+                  -D "TEST_REFERENCE=${testfilter}"
+                  -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
+          )
+          IF (NOT "${last_test}" STREQUAL "")
+            SET_TESTS_PROPERTIES (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES DEPENDS ${last_test})
+          ENDIF (NOT "${last_test}" STREQUAL "")
+          SET (last_test "H5REPACK_VERIFY_LAYOUT-${testname}")
+        ELSE (${resultcode} STREQUAL "0")
+          IF (${testfilter} STREQUAL "CHUNKED")
+            SET (nottestfilter "(CONTIGUOUS|COMPACT)")
+          ENDIF (${testfilter} STREQUAL "CHUNKED")
+          IF (${testfilter} STREQUAL "CONTIGUOUS")
+            SET (nottestfilter "(CHUNK|COMPACT)")
+          ENDIF (${testfilter} STREQUAL "CONTIGUOUS")
+          IF (${testfilter} STREQUAL "COMPACT")
+            SET (nottestfilter "(CONTIGUOUS|CHUNK)")
+          ENDIF (${testfilter} STREQUAL "COMPACT")
+          ADD_TEST (
+              NAME H5REPACK_VERIFY_LAYOUT_ALL-${testname}
+              COMMAND "${CMAKE_COMMAND}"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                  -D "TEST_ARGS:STRING=-pH;testfiles/out.${testfile}"
+                  -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                  -D "TEST_OUTPUT=${testfile}-v.out"
+                  -D "TEST_EXPECT=${resultcode}"
+                  -D "TEST_FILTER:STRING=${nottestfilter}"
+                  -D "TEST_REFERENCE=${testfilter}"
+                  -P "${HDF5_RESOURCES_DIR}/grepTest.cmake"
+          )
+          IF (NOT "${last_test}" STREQUAL "")
+            SET_TESTS_PROPERTIES (H5REPACK_VERIFY_LAYOUT_ALL-${testname} PROPERTIES DEPENDS ${last_test})
+          ENDIF (NOT "${last_test}" STREQUAL "")
+          SET (last_test "H5REPACK_VERIFY_LAYOUT_ALL-${testname}")
+        ENDIF (${resultcode} STREQUAL "0")
+      ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
     ENDIF (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_H5_VERIFY_TEST)
 

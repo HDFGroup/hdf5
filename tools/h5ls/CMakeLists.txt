@@ -136,17 +136,22 @@ IF (BUILD_TESTING)
 ##############################################################################
 
   MACRO (ADD_H5_TEST resultfile resultcode)
-    ADD_TEST (
-        NAME H5LS-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
-            -D "TEST_ARGS=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.ls"
-            -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
-    )
+    # If using memchecker add tests without using scripts
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5LS-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+              -D "TEST_ARGS=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ls"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
@@ -275,13 +280,6 @@ IF (BUILD_TESTING)
     SET_TESTS_PROPERTIES (H5LS-clearall-objects PROPERTIES DEPENDS ${last_test})
   ENDIF (NOT "${last_test}" STREQUAL "")
   SET (last_test "H5LS-clearall-objects")
-
-  # If using memchecker add tests without using scripts
-  IF (HDF5_ENABLE_USING_MEMCHECKER)
-    ADD_TEST (NAME H5LS-help COMMAND h5ls -w80 -h)
-    ADD_TEST (NAME H5LS-tall COMMAND h5ls -w80 tall.h5)
-    ADD_TEST (NAME H5LS-tsoftlinks COMMAND h5ls --follow-symlinks tsoftlinks.h5)
-  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
   # test the help syntax
   ADD_H5_TEST (help-1 0 -w80 -h)

@@ -68,19 +68,21 @@ IF (HDF5_TEST_VFD)
   ENDIF (DIRECT_VFD)
 
   MACRO (ADD_VFD_TEST vfdname resultcode)
-    FOREACH (test ${H5P_VFD_TESTS})
-      ADD_TEST (
-        NAME VFD-${vfdname}-${test} 
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:${test}>"
-            -D "TEST_ARGS:STRING="
-            -D "TEST_VFD:STRING=${vfdname}"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_OUTPUT=${test}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
-      )
-    ENDFOREACH (test ${H5P_VFD_TESTS})
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      FOREACH (test ${H5P_VFD_TESTS})
+        ADD_TEST (
+          NAME VFD-${vfdname}-${test} 
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:${test}>"
+              -D "TEST_ARGS:STRING="
+              -D "TEST_VFD:STRING=${vfdname}"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_OUTPUT=${test}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
+        )
+      ENDFOREACH (test ${H5P_VFD_TESTS})
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_VFD_TEST)
   
   # Run test with different Virtual File Driver
