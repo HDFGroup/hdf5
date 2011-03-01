@@ -26,9 +26,9 @@ SET (hdf2gif_SRCS
     ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/hdf2gif.c
     ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/hdfgifwr.c
 )
-ADD_EXECUTABLE (hdf2gif ${hdf2gif_SRCS})
-TARGET_NAMING (hdf2gif ${LIB_TYPE})
-TARGET_LINK_LIBRARIES (hdf2gif ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+ADD_EXECUTABLE (h52gif ${hdf2gif_SRCS})
+TARGET_NAMING (h52gif ${LIB_TYPE})
+TARGET_LINK_LIBRARIES (h52gif ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 
 # --------------------------------------------------------------------
 # This executable can generate the actual test files - Currently not
@@ -49,7 +49,7 @@ ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 INSTALL (
     TARGETS
         gif2h5
-        hdf2gif
+        h52gif
     RUNTIME DESTINATION
         ${HDF5_INSTALL_BIN_DIR}/tools
     COMPONENT
