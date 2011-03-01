@@ -264,7 +264,7 @@ ENDIF (BUILD_TESTING)
 #-----------------------------------------------------------------------------
 INSTALL (
     TARGETS
-        h5debug h5repart
+        h5debug h5repart h5mkgrp
     RUNTIME DESTINATION
         ${HDF5_INSTALL_BIN_DIR}/tools
     COMPONENT
