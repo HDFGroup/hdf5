@@ -2565,6 +2565,54 @@ test_libver_bounds(void)
 
 /****************************************************************
 **
+**  test_libver_macros():
+**	Verify that H5_VERSION_GE and H5_VERSION_LE work correactly.
+**
+****************************************************************/
+static void
+test_libver_macros(void)
+{
+    unsigned	major = H5_VERS_MAJOR;
+    unsigned	minor = H5_VERS_MINOR;
+    unsigned	release = H5_VERS_RELEASE;
+    herr_t	ret;                    /* Return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing macros for library version comparison\n"));
+
+    VERIFY(H5_VERSION_GE(major,minor,release), TRUE, "H5_VERSION_GE");
+    VERIFY(H5_VERSION_GE(major-1,minor,release), TRUE, "H5_VERSION_GE");
+    VERIFY(H5_VERSION_GE(major-1,minor+1,release), TRUE, "H5_VERSION_GE");
+    VERIFY(H5_VERSION_GE(major-1,minor,release+1), TRUE, "H5_VERSION_GE");
+    VERIFY(H5_VERSION_GE(major,minor-1,release), TRUE, "H5_VERSION_GE");
+    VERIFY(H5_VERSION_GE(major,minor-1,release+1), TRUE, "H5_VERSION_GE");
+    VERIFY(H5_VERSION_GE(major,minor,release-1), TRUE, "H5_VERSION_GE");
+
+    VERIFY(H5_VERSION_GE(major+1,minor,release), FALSE, "H5_VERSION_GE");
+    VERIFY(H5_VERSION_GE(major+1,minor-1,release), FALSE, "H5_VERSION_GE");
+    VERIFY(H5_VERSION_GE(major+1,minor-1,release-1), FALSE, "H5_VERSION_GE");
+    VERIFY(H5_VERSION_GE(major,minor+1,release), FALSE, "H5_VERSION_GE");
+    VERIFY(H5_VERSION_GE(major,minor+1,release-1), FALSE, "H5_VERSION_GE");
+    VERIFY(H5_VERSION_GE(major,minor,release+1), FALSE, "H5_VERSION_GE");
+
+    VERIFY(H5_VERSION_LE(major,minor,release), TRUE, "H5_VERSION_LE");
+    VERIFY(H5_VERSION_LE(major+1,minor,release), TRUE, "H5_VERSION_LE");
+    VERIFY(H5_VERSION_LE(major+1,minor-1,release), TRUE, "H5_VERSION_LE");
+    VERIFY(H5_VERSION_LE(major+1,minor-1,release-1), TRUE, "H5_VERSION_LE");
+    VERIFY(H5_VERSION_LE(major,minor+1,release), TRUE, "H5_VERSION_LE");
+    VERIFY(H5_VERSION_LE(major,minor+1,release-1), TRUE, "H5_VERSION_LE");
+    VERIFY(H5_VERSION_LE(major,minor,release+1), TRUE, "H5_VERSION_LE");
+
+    VERIFY(H5_VERSION_LE(major-1,minor,release), FALSE, "H5_VERSION_LE");
+    VERIFY(H5_VERSION_LE(major-1,minor+1,release), FALSE, "H5_VERSION_LE");
+    VERIFY(H5_VERSION_LE(major-1,minor+1,release+1), FALSE, "H5_VERSION_LE");
+    VERIFY(H5_VERSION_LE(major,minor-1,release), FALSE, "H5_VERSION_LE");
+    VERIFY(H5_VERSION_LE(major,minor-1,release+1), FALSE, "H5_VERSION_LE");
+    VERIFY(H5_VERSION_LE(major,minor,release-1), FALSE, "H5_VERSION_LE");
+} /* test_libver_macros() */
+
+/****************************************************************
+**
 **  test_file(): Main low-level file I/O test routine.
 **
 ****************************************************************/
@@ -2599,6 +2647,7 @@ test_file(void)
     test_rw_noupdate();         /* Test to ensure that RW permissions don't write the file unless dirtied */
     test_userblock_alignment(); /* Tests that files created with a userblock and alignment interact properly */
     test_libver_bounds();       /* Test compatibility for file space management */
+    test_libver_macros();       /* Test the macros for library version comparison */
 } /* test_file() */
 
 
