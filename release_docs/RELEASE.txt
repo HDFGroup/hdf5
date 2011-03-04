@@ -500,6 +500,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5dump for skipping some values for long array type dataset on 
+          Windows. This issue only occurred on Windows due to the different 
+          return behavior from _vsnprintf() funtion. Bug#2161 (JKM 2011/3/3)
         - Fixed h5dump for skipping array indices every certain number
           when the array type dataset is relatively big. The certain number
           varies according to the size of array. Bug#2092 (JKM 2011/2/15).
