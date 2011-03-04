@@ -40,8 +40,7 @@ int         opt_err = 1;    /*get_option prints errors if this is on */
 int         opt_ind = 1;    /*token pointer                          */
 const char *opt_arg;        /*flag argument (or value)               */
 static int  h5tools_d_status = 0;
-//static const char  *h5tools_progname = "h5tools";
-static char  *h5tools_progname = "h5tools";
+static const char  *h5tools_progname = "h5tools";
 
 /* ``parallel_print'' variables */
 unsigned char  g_Parallel = 0;  /*0 for serial, 1 for parallel */
