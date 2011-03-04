@@ -145,33 +145,39 @@ IF (BUILD_TESTING)
       )
     ENDIF (NOT ${resultoption} STREQUAL " ")
     SET_TESTS_PROPERTIES (H5MKGRP-${resultfile}${resultoption} PROPERTIES DEPENDS H5MKGRP-clear-${resultfile}${resultoption})
-    ADD_TEST (
-        NAME H5MKGRP-H5LS-${resultfile}${resultoption}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
-            -D "TEST_ARGS:STRING=-v;-r;../testfiles/${resultfile}.h5"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_MASK_MOD=true"
-            -D "TEST_REFERENCE=${resultfile}.ls"
-            -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
-    )
-    SET_TESTS_PROPERTIES (H5MKGRP-H5LS-${resultfile}${resultoption} PROPERTIES DEPENDS H5MKGRP-${resultfile}${resultoption})
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5MKGRP-H5LS-${resultfile}${resultoption}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+              -D "TEST_ARGS:STRING=-v;-r;../testfiles/${resultfile}.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_MASK_MOD=true"
+              -D "TEST_REFERENCE=${resultfile}.ls"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+      SET_TESTS_PROPERTIES (H5MKGRP-H5LS-${resultfile}${resultoption} PROPERTIES DEPENDS H5MKGRP-${resultfile}${resultoption})
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_TEST resultfile resultcode resultoption)
 
   MACRO (ADD_H5_CMP resultfile resultcode)
-    ADD_TEST (
-        NAME H5MKGRP-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5mkgrp>"
-            -D "TEST_ARGS:STRING=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.txt"
-            -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
-    )
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (NAME H5MKGRP-${resultfile} COMMAND $<TARGET_FILE:h5mkgrp> ${ARGN})
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5MKGRP-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5mkgrp>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.txt"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_CMP resultfile resultcode)
 
 ##############################################################################

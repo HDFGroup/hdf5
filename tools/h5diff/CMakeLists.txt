@@ -270,18 +270,23 @@ IF (BUILD_TESTING)
 ##############################################################################
 
   MACRO (ADD_H5_TEST resultfile resultcode)
-    ADD_TEST (
-        NAME H5DIFF-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-            -D "TEST_ARGS:STRING=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.txt"
-            -D "TEST_APPEND=EXIT CODE:"
-            -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
-    )
+    # If using memchecker add tests without using scripts
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (NAME H5DIFF-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${ARGN})
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5DIFF-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.txt"
+              -D "TEST_APPEND=EXIT CODE:"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
@@ -613,12 +618,6 @@ IF (BUILD_TESTING)
     SET_TESTS_PROPERTIES (H5DIFF-clearall-objects PROPERTIES DEPENDS ${last_test})
   ENDIF (NOT "${last_test}" STREQUAL "")
   SET (last_test "H5DIFF-clearall-objects")
-
-  # If using memchecker add tests without using scripts
-  IF (HDF5_ENABLE_USING_MEMCHECKER)
-    ADD_TEST (NAME H5DIFF-help COMMAND h5diff -h)
-    ADD_TEST (NAME H5DIFF-normal-mode COMMAND h5diff ${FILE1} ${FILE2})
-  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
 # ############################################################################
 # # Common usage
