@@ -92,6 +92,7 @@ static int          display_fi        = FALSE; /*file index */
 static int          display_ai        = TRUE;  /*array index */
 static int          display_escape    = FALSE; /*escape non printable characters */
 static int          display_region    = FALSE; /*print region reference data */
+static int          enable_error_stack= FALSE; /* re-enable error stack */
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
 static int          display_packed_bits = FALSE; /*print 1-8 byte numbers as packed bits*/
 #endif
@@ -405,7 +406,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language cancatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:R"
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:RE"
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
 "M:"
 #endif
@@ -523,6 +524,7 @@ static struct long_options l_opts[] = {
     { "sort_order", require_arg, 'z' },
     { "format", require_arg, 'm' },
     { "region", no_arg, 'R' },
+    { "enable-error-stack", no_arg, 'E' },
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
     { "packed-bits", require_arg, 'M' },
 #endif
@@ -698,6 +700,7 @@ usage(const char *prog)
     fprintf(stdout, "     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML\n");
     fprintf(stdout, "                          \":\": no namespace, default: \"hdf5:\"\n");
     fprintf(stdout, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
+    fprintf(stdout, "     -E, --enable-error-stack   Show all HDF5 error reporting\n");
     fprintf(stdout, "\n");
     fprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
     fprintf(stdout, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
@@ -4453,6 +4456,9 @@ end_collect:
         }
         /** end subsetting parameters **/
 
+        case 'E':
+            enable_error_stack = TRUE;
+            break;
         case 'h':
             usage(h5tools_getprogname());
             leave(EXIT_SUCCESS);
@@ -4574,11 +4580,13 @@ main(int argc, const char *argv[])
     h5tools_init();
     hand = parse_command_line(argc, argv);
 
-    if ( bin_output && outfname == NULL )
-    {
+    if (bin_output && outfname == NULL) {
         error_msg("binary output requires a file name, use -o <filename>\n");
         leave(EXIT_FAILURE);
     }
+
+    if (enable_error_stack)
+        H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     /* Check for conflicting options */
     if (doxml) {

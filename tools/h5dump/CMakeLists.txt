@@ -38,7 +38,7 @@ IF (BUILD_TESTING)
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
   SET (HDF5_REFERENCE_FILES
-#      filter_fail.ddl
+      filter_fail.ddl
       packedbits.ddl
       tall-1.ddl
       tall-2.ddl
@@ -221,7 +221,7 @@ IF (BUILD_TESTING)
       tbin3.ddl
       tbin4.ddl
       out3.h5import
-#      filter_fail.h5
+      filter_fail.h5
       packedbits.h5
       taindices.h5
       tall.h5
@@ -515,6 +515,25 @@ IF (BUILD_TESTING)
     SET_TESTS_PROPERTIES (H5DUMP-output-cmp-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile})
     SET (last_test "H5DUMP-output-cmp-${resultfile}")
   ENDMACRO (ADD_H5_EXPORT_TEST file)
+
+  MACRO (ADD_H5_MASK_TEST resultfile resultcode)
+    ADD_TEST (
+        NAME H5DUMP-${resultfile}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+            -D "TEST_ARGS:STRING=${ARGN}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+            -D "TEST_OUTPUT=${resultfile}.out"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_REFERENCE=${resultfile}.ddl"
+            -D "TEST_MASK_ERROR=true"
+            -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+    )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5DUMP-${resultfile}")
+  ENDMACRO (ADD_H5_MASK_TEST file)
 
   MACRO (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
     IF (${testtype} STREQUAL "SKIP")
@@ -1128,8 +1147,8 @@ IF (BUILD_TESTING)
   # test for dangling external links
   ADD_H5_TEST (textlink 0 textlink.h5)
 
-  # test for error stack display
-#  ADD_H5_TEST (filter_fail 1 -E filter_fail.h5)
+  # test for error stack display (BZ2048)
+  ADD_H5_MASK_TEST (filter_fail 1 -E filter_fail.h5)
 
   ####### test for dataset packed bits ######
   IF (HDF5_USE_H5DUMP_PACKED_BITS)

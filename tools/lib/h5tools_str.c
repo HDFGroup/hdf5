@@ -1065,6 +1065,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->arr_sep, "," OPTIONAL_LINE_BREAK));
 
+            fprintf(stderr, "lb: %d, i: %d, mod: %d, dim: %d, ndim: %d\n", info->arr_linebreak, i, i % dims[ndims - 1], dims[ndims - 1], ndims);
             if (info->arr_linebreak && i && i % dims[ndims - 1] == 0) {
                 int x;
 
@@ -1078,7 +1079,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 for (x = 0; x < ctx->indent_level + 1; x++)
                     h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
             } /* end if */
-            else if (i && info->arr_sep)
+            else 
+            if (i && info->arr_sep)
                 h5tools_str_append(str, " ");
 
             ctx->indent_level++;
