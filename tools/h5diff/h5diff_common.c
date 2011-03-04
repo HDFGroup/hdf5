@@ -104,7 +104,7 @@ void parse_command_line(int argc,
             options->m_report = 1;
             break;
         case 'l':
-            options->follow_links = 1; 
+            options->follow_links = 1;
             break;
         case 'x':
             options->no_dangle_links = 1;

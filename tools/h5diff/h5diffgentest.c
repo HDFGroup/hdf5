@@ -952,7 +952,7 @@ int test_datasets(const char *file,
 
 /*-------------------------------------------------------------------------
 *
-* Purpose: Create test files to compare links, one has longer name than 
+* Purpose: Create test files to compare links, one has longer name than
 *          the other and short name is subset of long name.
 *
 * Programmer: Jonathan Kim (Feb 17, 2010)
