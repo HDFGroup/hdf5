@@ -166,7 +166,7 @@ SUBROUTINE h5tbmake_table_f(table_title,&
  
  ! Find the size of each character string in the array
  DO i = 1, nfields
-  char_len_field_names(i) = LEN_TRIM(field_names(i))
+    char_len_field_names(i) = LEN_TRIM(field_names(i))
  END DO
 
  max_char_size_field_names = LEN(field_names(1)) 
@@ -1859,8 +1859,8 @@ SUBROUTINE h5tbget_field_info_f(loc_id,&
   DO i = 1, nfields
      namelen2(i) = LEN_TRIM(field_names(i))
   END DO
-
   maxlen = LEN(field_names(1))
+  c_maxlen_out = 0
 
   errcode = h5tbget_field_info_c(loc_id, namelen,dset_name, nfields, &
        field_sizes, field_offsets, type_size, namelen2, maxlen, field_names, c_maxlen_out)

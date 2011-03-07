@@ -61,7 +61,7 @@ nh5tbmake_table_c(int_f *namelen1,
     size_t *c_field_offset = NULL;
     hid_t *c_field_types = NULL;
     char **c_field_names = NULL;
-    char *tmp = NULL;
+    char *tmp = NULL, *tmp_p;
     int_f ret_value = 0;
 
     num_elem = *nfields;
@@ -95,13 +95,14 @@ nh5tbmake_table_c(int_f *namelen1,
     /*
      * move data from temorary buffer
      */
+    tmp_p = tmp;
     for(i = 0; i < num_elem; i++) {
         if(NULL == (c_field_names[i] = (char *)HDmalloc((size_t)char_len_field_names[i] + 1)))
             HGOTO_DONE(FAIL)
-        HDmemcpy(c_field_names[i], tmp, (size_t)char_len_field_names[i]);
+        HDmemcpy(c_field_names[i], tmp_p, (size_t)char_len_field_names[i]);
 	c_field_names[i][char_len_field_names[i]] = '\0';
 
-        tmp = tmp + *max_char_size_field_names;
+        tmp_p = tmp_p + *max_char_size_field_names;
     } /* end for */
 
     /*
@@ -122,7 +123,10 @@ done:
             if(c_field_names[i])
                 HDfree(c_field_names[i]);
         } /* end for */
+	HDfree(c_field_names);
     } /* end if */
+    if(tmp)
+        HDfree(tmp);
     if(c_field_offset)
         HDfree(c_field_offset);
     if(c_field_types)
