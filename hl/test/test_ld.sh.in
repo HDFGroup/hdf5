@@ -1,0 +1,94 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+#
+#
+# Concurrent tests for H5LD* routines
+#
+# Determine backward compatibility options eneabled
+DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
+
+CMP='cmp -s'
+DIFF='diff -c'
+CP='cp'
+KILL='kill'
+SLEEP='sleep'
+LD_MONITOR=ld_monitor
+LD_MONITOR_BIN=`pwd`/$LD_MONITOR
+LD_EXTEND=ld_extend
+LD_EXTEND_BIN=`pwd`/$LD_EXTEND
+
+nerrors=0
+verbose=yes
+
+# The build (current) directory might be different than the source directory.
+if test -z "$srcdir"; then
+   srcdir=.
+fi
+
+test -d ./testfiles || mkdir ./testfiles
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+    SPACES="                                                               "
+    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# $1 -- the hdf5 file to be monitored and extended
+# $2 -- the dataset name to be monitored and extended
+# $3 -- the expected output from monitoring the dataset
+TESTLD() {
+    expect="$srcdir/testfiles/$3"	# the expected output
+    actual="./testfiles/$3.OUT"		# the actual output
+    FNAME="`basename $1 .h5`_$2.h5"	# the HDF5 file
+    $CP $srcdir/$1 ./$FNAME		# copy the file to a temporary file
+    $LD_MONITOR_BIN $FNAME $2 > $actual 2>&1 &	# monitor the dataset in the file
+    MONITOR_PID=$!	    			# get the id of the monitor process
+    $LD_EXTEND_BIN $FNAME $2		# extend the dataset
+    echo "Sleeping for 3 seconds..."	
+    $SLEEP 3				# sleep to allow output to be flushed
+    echo "Killing the monitor..."	
+    $KILL $MONITOR_PID			# kill the monitor process
+    if $CMP $expect $actual; then	# compare the output with the expected output
+	echo " PASSED"
+    else
+	echo "*FAILED*"
+	echo "    Expected result differs from actual result"
+	nerrors="`expr $nerrors + 1`"
+	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+    if test -z "$HDF5_NOCLEANUP"; then	# clean up output file, temporary HDF5 file
+	rm -f $actual $FNAME
+    fi
+}
+
+##############################################################################
+##############################################################################
+###			  T H E   T E S T S                                ###
+##############################################################################
+##############################################################################
+
+# Monitor DSET_ONE while extending the dataset
+TESTLD test_ld.h5 DSET_ONE test_ld_out1
+#
+# Monitor DSET_TWO while extending the dataset
+TESTLD test_ld.h5 DSET_TWO test_ld_out2
+
+if test $nerrors -eq 0 ; then
+    echo "All high level H5LD concurrent tests passed."
+fi
+
+exit $nerrors

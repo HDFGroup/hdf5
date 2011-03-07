@@ -60,6 +60,59 @@
 #ifndef TRUE
 #   define TRUE 1
 #endif
+#ifndef HDcalloc
+    #define HDcalloc(N,Z)               calloc(N,Z)
+#endif /* HDcalloc */
+#ifndef HDrealloc
+    #define HDrealloc(M,Z)              realloc(M,Z)
+#endif /* HDrealloc */
+#ifndef HDfree
+    #define HDfree(M)           free(M)
+#endif /* HDfree */
+#ifndef HDmemcpy
+    #define HDmemcpy(X,Y,Z)             memcpy((char*)(X),(const char*)(Y),Z)
+#endif /* HDmemcpy */
+#ifndef HDmemset
+    #define HDmemset(X,C,Z)             memset(X,C,Z)
+#endif /* HDmemset */
+#ifndef HDassert
+    #define HDassert(X)         assert(X)
+#endif /* HDassert */
+#ifndef HDstrlen
+    #define HDstrlen(S)         strlen(S)
+#endif /* HDstrlen */
+#ifndef HDstrcat
+    #define HDstrcat(X,Y)               strcat(X,Y)
+#endif /* HDstrcat */
+#ifndef HDstrrchr
+    #define HDstrrchr(S,C)              strrchr(S,C)
+#endif /* HDstrrchr */
+#ifndef HDstrtol
+    #define HDstrtol(S,R,N)             strtol(S,R,N)
+#endif /* HDstrtol */
+#ifndef HDstrtod
+    #define HDstrtod(S,R)               strtod(S,R)
+#endif /* HDstrtod */
+#ifndef HDsleep
+    #define HDsleep(N)          sleep(N)
+#endif /* HDsleep */
+#ifndef HDfflush
+    #define HDfflush(F)         fflush(F)
+#endif /* HDfflush */
+#ifndef HDstrcmp
+    #define HDstrcmp(X,Y)       strcmp(X,Y)
+#endif /* HDstrcmp */
+/*
+ * And now for a couple non-Posix functions...  Watch out for systems that
+ * define these in terms of macros.
+ */
+#if !defined strdup && !defined H5_HAVE_STRDUP
+extern char *strdup(const char *s);
+#endif
+
+#ifndef HDstrdup
+    #define HDstrdup(S)     strdup(S)
+#endif /* HDstrdup */
 
 #endif /* _H5HLprivate2_H */
 

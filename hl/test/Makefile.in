@@ -15,7 +15,6 @@
 
 @SET_MAKE@
 
-#
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
@@ -54,11 +53,13 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(top_srcdir)/config/commence.am \
+	$(srcdir)/Makefile.in $(srcdir)/test_ld.sh.in \
+	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
-check_PROGRAMS = $(am__EXEEXT_1)
+check_PROGRAMS = $(am__EXEEXT_1) ld_monitor$(EXEEXT) \
+	ld_extend$(EXEEXT)
 @BUILD_ALL_CONDITIONAL_TRUE@noinst_PROGRAMS = $(am__EXEEXT_2)
-TESTS = $(check_PROGRAMS)
+TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 subdir = hl/test
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -66,16 +67,29 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = H5srcdir_str.h
+CONFIG_CLEAN_FILES = H5srcdir_str.h test_ld.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = test_lite$(EXEEXT) test_image$(EXEEXT) \
-	test_table$(EXEEXT) test_ds$(EXEEXT) test_packet$(EXEEXT)
-am__EXEEXT_2 = gen_test_ds$(EXEEXT)
+	test_table$(EXEEXT) test_ds$(EXEEXT) test_packet$(EXEEXT) \
+	test_ld$(EXEEXT)
+am__EXEEXT_2 = gen_test_ds$(EXEEXT) gen_test_ld$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 gen_test_ds_SOURCES = gen_test_ds.c
 gen_test_ds_OBJECTS = gen_test_ds.$(OBJEXT)
 gen_test_ds_LDADD = $(LDADD)
 gen_test_ds_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
+gen_test_ld_SOURCES = gen_test_ld.c
+gen_test_ld_OBJECTS = gen_test_ld.$(OBJEXT)
+gen_test_ld_LDADD = $(LDADD)
+gen_test_ld_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
+ld_extend_SOURCES = ld_extend.c
+ld_extend_OBJECTS = ld_extend.$(OBJEXT)
+ld_extend_LDADD = $(LDADD)
+ld_extend_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
+ld_monitor_SOURCES = ld_monitor.c
+ld_monitor_OBJECTS = ld_monitor.$(OBJEXT)
+ld_monitor_LDADD = $(LDADD)
+ld_monitor_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 test_ds_SOURCES = test_ds.c
 test_ds_OBJECTS = test_ds.$(OBJEXT)
 test_ds_LDADD = $(LDADD)
@@ -84,6 +98,10 @@ test_image_SOURCES = test_image.c
 test_image_OBJECTS = test_image.$(OBJEXT)
 test_image_LDADD = $(LDADD)
 test_image_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
+test_ld_SOURCES = test_ld.c
+test_ld_OBJECTS = test_ld.$(OBJEXT)
+test_ld_LDADD = $(LDADD)
+test_ld_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 test_lite_SOURCES = test_lite.c
 test_lite_OBJECTS = test_lite.$(OBJEXT)
 test_lite_LDADD = $(LDADD)
@@ -109,10 +127,12 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = gen_test_ds.c test_ds.c test_image.c test_lite.c \
-	test_packet.c test_table.c
-DIST_SOURCES = gen_test_ds.c test_ds.c test_image.c test_lite.c \
-	test_packet.c test_table.c
+SOURCES = gen_test_ds.c gen_test_ld.c ld_extend.c ld_monitor.c \
+	test_ds.c test_image.c test_ld.c test_lite.c test_packet.c \
+	test_table.c
+DIST_SOURCES = gen_test_ds.c gen_test_ld.c ld_extend.c ld_monitor.c \
+	test_ds.c test_image.c test_ld.c test_lite.c test_packet.c \
+	test_table.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -399,21 +419,27 @@ TRACE = perl $(top_srcdir)/bin/trace
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog combine_tables[1-2].h5 \
 	test_ds[1-9].h5 test_image[1-3].h5 test_lite[1-2].h5 \
 	test_table.h5 test_packet_table.h5 test_packet_compress.h5 \
-	test_detach.h5
+	test_detach.h5 test_ld.h5
+
+# Test script
+TEST_SCRIPT = test_ld.sh
+check_SCRIPTS = $(TEST_SCRIPT)
+SCRIPT_DEPEND = ld_monitor$(EXEEXT) ld_extend$(EXEEXT)
 
 # The tests depend on the hdf5, hdf5 test,  and hdf5_hl libraries
 LDADD = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.
-TEST_PROG = test_lite test_image test_table test_ds test_packet
+TEST_PROG = test_lite test_image test_table test_ds test_packet test_ld
 
 # These programs generate test files for the tests.  They don't need to be
 # compiled every time we want to test the library.  However, putting
 # them in a conditional causes automake to generate rules so that they
 # can be built by hand.  They can also be built by specifying
 # --enable-build-all at configure time.
-BUILD_ALL_PROGS = gen_test_ds
+BUILD_ALL_PROGS = gen_test_ds gen_test_ld
+DISTCLEANFILES = test_ld.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -466,6 +492,8 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 $(am__aclocal_m4_deps):
 H5srcdir_str.h: $(top_builddir)/config.status $(srcdir)/H5srcdir_str.h.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_ld.sh: $(top_builddir)/config.status $(srcdir)/test_ld.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -487,12 +515,24 @@ clean-noinstPROGRAMS:
 gen_test_ds$(EXEEXT): $(gen_test_ds_OBJECTS) $(gen_test_ds_DEPENDENCIES) 
 	@rm -f gen_test_ds$(EXEEXT)
 	$(LINK) $(gen_test_ds_OBJECTS) $(gen_test_ds_LDADD) $(LIBS)
+gen_test_ld$(EXEEXT): $(gen_test_ld_OBJECTS) $(gen_test_ld_DEPENDENCIES) 
+	@rm -f gen_test_ld$(EXEEXT)
+	$(LINK) $(gen_test_ld_OBJECTS) $(gen_test_ld_LDADD) $(LIBS)
+ld_extend$(EXEEXT): $(ld_extend_OBJECTS) $(ld_extend_DEPENDENCIES) 
+	@rm -f ld_extend$(EXEEXT)
+	$(LINK) $(ld_extend_OBJECTS) $(ld_extend_LDADD) $(LIBS)
+ld_monitor$(EXEEXT): $(ld_monitor_OBJECTS) $(ld_monitor_DEPENDENCIES) 
+	@rm -f ld_monitor$(EXEEXT)
+	$(LINK) $(ld_monitor_OBJECTS) $(ld_monitor_LDADD) $(LIBS)
 test_ds$(EXEEXT): $(test_ds_OBJECTS) $(test_ds_DEPENDENCIES) 
 	@rm -f test_ds$(EXEEXT)
 	$(LINK) $(test_ds_OBJECTS) $(test_ds_LDADD) $(LIBS)
 test_image$(EXEEXT): $(test_image_OBJECTS) $(test_image_DEPENDENCIES) 
 	@rm -f test_image$(EXEEXT)
 	$(LINK) $(test_image_OBJECTS) $(test_image_LDADD) $(LIBS)
+test_ld$(EXEEXT): $(test_ld_OBJECTS) $(test_ld_DEPENDENCIES) 
+	@rm -f test_ld$(EXEEXT)
+	$(LINK) $(test_ld_OBJECTS) $(test_ld_LDADD) $(LIBS)
 test_lite$(EXEEXT): $(test_lite_OBJECTS) $(test_lite_DEPENDENCIES) 
 	@rm -f test_lite$(EXEEXT)
 	$(LINK) $(test_lite_OBJECTS) $(test_lite_LDADD) $(LIBS)
@@ -510,8 +550,12 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_test_ds.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_test_ld.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ld_extend.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ld_monitor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_image.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ld.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_lite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_table.Po@am__quote@
@@ -626,7 +670,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(PROGRAMS) all-local
@@ -652,6 +696,7 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"

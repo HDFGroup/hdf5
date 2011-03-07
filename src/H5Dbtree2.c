@@ -1516,6 +1516,13 @@ done:
  *
  * Programmer:	Vailin Choi; June 2010
  *
+ * Modifications:
+ *	Vailin Choi; March 2011
+ *	Initialize size of an unfiltered chunk.
+ *	This is a fix for for the assertion failure in:
+ *	[src/H5FSsection.c:968: H5FS_sect_link_size: Assertion `bin < sinfo->nbins' failed.]
+ *	which is uncovered by test_unlink_chunked_dataset() in test/unlink.c
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1546,7 +1553,12 @@ H5D_bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
 	remove_udata.f = idx_info->f;
 	remove_udata.dxpl_id = idx_info->dxpl_id;
 
-	remove_op = idx_info->pline->nused > 0 ? H5D_bt2_filt_remove_cb : H5D_bt2_remove_cb;
+	if(idx_info->pline->nused > 0) /* filtered */
+            remove_op = H5D_bt2_filt_remove_cb;
+        else { /* non-filtered */
+            remove_op = H5D_bt2_remove_cb;
+            remove_udata.unfilt_size = idx_info->layout->size;
+        }
 
 	/* Delete the v2 B-tree */
 	/*(space in the file for each object is freed in the 'remove' callback) */

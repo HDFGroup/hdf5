@@ -1127,6 +1127,10 @@ H5Dflush(hid_t dset_id)
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
+    /* Flush any dataset information still cached in memory */
+    if (H5D_flush_real(dset, H5AC_dxpl_id) < 0)
+	HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
+
     /* Call private function to flush dataset object */
     if (H5O_flush_metadata(&dset->oloc, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush dataset")

@@ -74,6 +74,7 @@ NULL, /*fmt_ullong */
 "{\n", /*cmpd_pre */
 "}", /*cmpd_suf */
 "\n", /*cmpd_end */
+NULL, /* cmpd_listv */
 
 ", ", /*vlen_sep */
 "(", /*vlen_pre */
@@ -2269,6 +2270,9 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
  *                             + index_y * size_x
  *                             + index_x
  *
+ * Modifications:
+ *	Vailin Choi; August 2010
+ *	Modified for h5watch to handle the printing of compound fields.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2306,6 +2310,11 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
     ctx.size_last_dim = total_size[ctx.ndims - 1];
 
+    if(info->cmpd_listv)
+	ctx.cmpd_listv = info->cmpd_listv;
+    else
+	ctx.cmpd_listv = NULL;
+
     h5tools_display_simple_subset(stream, info, &ctx, dset, p_type, sset, f_space, total_size);
 
     /* Terminate the output */
@@ -2316,6 +2325,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     }
 
 CATCH
+
     if(f_space >= 0 && H5Sclose(f_space) < 0)
         H5E_THROW(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
 
