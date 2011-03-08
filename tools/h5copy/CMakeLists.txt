@@ -76,10 +76,9 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
-  MACRO (ADD_H5_TEST testname resultcode testfile vparam srcname dstname)
-    ADD_H5COPY_TEST (${testname} ${resultcode} ${testfile}.h5 ${testfile}.out.h5 ${vparam} ${srcname} ${dstname} ${ARGN})
-  ENDMACRO (ADD_H5_TEST testname resultcode testfile vparam srcname dstname)
-
+  #
+  # Perform h5copy according to passing parmeters
+  #
   MACRO (ADD_H5COPY_TEST testname resultcode infile outfile vparam srcname dstname)
   
     IF (NOT "${ARGN}" STREQUAL "")
@@ -107,8 +106,19 @@ IF (BUILD_TESTING)
       SET_TESTS_PROPERTIES (H5COPY-${testname} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
     SET (last_test "H5COPY-DIFF_${testname}")
-  ENDMACRO (ADD_H5COPY_TEST testname resultcode testfile vparam srcname dstname)
+  ENDMACRO (ADD_H5COPY_TEST)
 
+  #
+  # call ADD_H5COPY_TEST macro with assumption that source and target file
+  # is different
+  #
+  MACRO (ADD_H5_TEST testname resultcode testfile vparam srcname dstname)
+    ADD_H5COPY_TEST (${testname} ${resultcode} ${testfile}.h5 ${testfile}.out.h5 ${vparam} ${srcname} ${dstname} ${ARGN})
+  ENDMACRO (ADD_H5_TEST testname resultcode testfile vparam srcname dstname)
+
+  #
+  # Test result with h5ls
+  #
   MACRO (ADD_H5LS_TEST file filetest)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
@@ -133,6 +143,10 @@ IF (BUILD_TESTING)
     SET (last_test "H5COPY-H5LS_${file}-${filetest}")
   ENDMACRO (ADD_H5LS_TEST file filetest)
 
+  #
+  # Similiar to ADD_H5_TEST macro. Compare to outputs from source & target
+  # files instead of checking with h5ls.
+  #
   MACRO (ADD_H5_CMP_TEST testname resultcode testfile vparam srcname dstname)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
@@ -170,6 +184,7 @@ IF (BUILD_TESTING)
   SET (HDF_FILE2 h5copy_ref)
   SET (HDF_EXT_SRC_FILE h5copy_extlinks_src)
   SET (HDF_EXT_TRG_FILE h5copy_extlinks_trg)
+  SET (HDF_FILE1_TMP h5copytst_tmp)
 
   # Remove any output file left over from previous test run
   ADD_TEST (
@@ -312,15 +327,29 @@ IF (BUILD_TESTING)
           ./testfiles/${HDF_FILE1}.out.h5
           ./testfiles/${HDF_FILE1}.out.out
           ./testfiles/${HDF_FILE1}.out.out.err
+          ./testfiles/${HDF_FILE1_TMP}.h5
   )
   IF (NOT "${last_test}" STREQUAL "")
     SET_TESTS_PROPERTIES (H5COPY-clear-misc PROPERTIES DEPENDS ${last_test})
   ENDIF (NOT "${last_test}" STREQUAL "")
   SET (last_test "H5COPY-clear-misc")
 
+  #-----------------------------------------------------------------
   # "Test copying object into group which doesn't exist, without -p"
+  #
   ADD_H5_CMP_TEST (h5copy_misc1 1 ${HDF_FILE1} v /simple /g1/g2/simple)
   
+  #-------------------------------------------
+  # "Test copying objects to the same file "
+  #
+  # create temporary test file with some objects
+  ADD_H5COPY_TEST (samefile1_pre 0 ${HDF_FILE1}.h5 ${HDF_FILE1_TMP}.h5 v /simple /simple)
+  ADD_H5COPY_TEST (samefile2_pre 0 ${HDF_FILE1}.h5 ${HDF_FILE1_TMP}.h5 v /grp_dsets /grp_dsets)
+  # actual test cases
+  # - dataset
+  ADD_H5COPY_TEST (samefile1 0 ${HDF_FILE1_TMP}.h5 ${HDF_FILE1_TMP}.h5 v /simple /simple_cp)
+  # - group with some datasets
+  ADD_H5COPY_TEST (samefile2 0 ${HDF_FILE1_TMP}.h5 ${HDF_FILE1_TMP}.h5 v /grp_dsets /grp_dsets_cp)
 ENDIF (BUILD_TESTING)
 
 ##############################################################################

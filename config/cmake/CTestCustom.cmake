@@ -42,6 +42,10 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5COPY-H5LS_h5copy_extlinks_src-links    #uses runTest.cmake
     H5COPY-clear-misc
     H5COPY-CMP-h5copy_misc1           #uses runTest.cmake
+    H5COPY-samefile1_pre              #needs clear-ext-links
+    H5COPY-samefile2_pre              #needs clear-ext-links
+    H5COPY-samefile1                  #needs clear-ext-links
+    H5COPY-samefile2                  #needs clear-ext-links
     ######### tools/h5diff #########
     H5DIFF-clearall-objects
     H5DIFF-h5diff_10      #uses runTest.cmake

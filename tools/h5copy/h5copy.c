@@ -319,6 +319,14 @@ main (int argc, const char *argv[])
         leave(EXIT_FAILURE);
     }
 
+   /*-------------------------------------------------------------------------
+    * open output file
+    *-------------------------------------------------------------------------*/
+
+    /* Attempt to open an existing HDF5 file first. Need to open the dst file
+       before the src file just in case that the dst and src are the same file
+     */
+    fid_dst = h5tools_fopen(fname_dst, H5F_ACC_RDWR, H5P_DEFAULT, NULL, NULL, 0);
 
    /*-------------------------------------------------------------------------
     * open input file
@@ -337,12 +345,10 @@ main (int argc, const char *argv[])
         leave(EXIT_FAILURE);
     }
 
-   /*-------------------------------------------------------------------------
-    * open output file
-    *-------------------------------------------------------------------------*/
 
-    /* Attempt to open an existing HDF5 file first */
-    fid_dst = h5tools_fopen(fname_dst, H5F_ACC_RDWR, H5P_DEFAULT, NULL, NULL, 0);
+   /*-------------------------------------------------------------------------
+    * create an output file when failed to open it
+    *-------------------------------------------------------------------------*/
 
     /* If we couldn't open an existing file, try creating file */
     /* (use "EXCL" instead of "TRUNC", so we don't blow away existing non-HDF5 file) */

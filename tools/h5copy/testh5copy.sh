@@ -443,6 +443,15 @@ TEST_MISC()
     echo "Test copying object into group which doesn't exist, without -p"
     TOOLTEST_FAIL h5copy_misc1.out -v -i $TESTFILE -o $FILEOUT -s /simple  -d /g1/g2/simple
 
+    echo "Test copying objects to the same file "
+    rm -f $FILEOUT
+    # create temporary test file ($FILEOUT) with some objects
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /simple -d /simple 
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /grp_dsets  -d /grp_dsets
+    # actual test cases
+    TOOLTEST -i $FILEOUT -o $FILEOUT -v -s /simple -d /simple_cp
+    TOOLTEST -i $FILEOUT -o $FILEOUT -v -s /grp_dsets  -d /grp_dsets_cp
+
     # Remove output file created, if the "no cleanup" environment variable is
     #   not defined
     if test -z "$HDF5_NOCLEANUP"; then
