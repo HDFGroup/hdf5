@@ -123,6 +123,7 @@ char *
 h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
 {
     va_list ap;
+    hbool_t isReallocated = FALSE;
 
     /* Make sure we have some memory into which to print */
     if (!str->s || str->nalloc <= 0) {
@@ -148,12 +149,23 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
         nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
         va_end(ap);
 
-        if (nchars < 0) {
+        /* Note: HDvsnprintf() behaves differently on Windows as Unix, when 
+         * buffer is smaller than source string. On Unix, this function 
+         * returns length of the source string and copy string upto the 
+         * buffer size with NULL at the end of the buffer. However on 
+         * Windows with the same condition, this function returns -1 and 
+         * doesn't add NULL at the end of the buffer.
+         * Because of this different return results, isReallocated variable
+         * is used to handle when HDvsnprintf() returns -1 on Windows due
+         * to lack of buffer size, so try one more time after realloc more
+         * buffer size before return NULL. 
+         */
+        if (nchars < 0 && isReallocated == TRUE) {
             /* failure, such as bad format */
             return NULL;
         }
 
-        if ((size_t) nchars >= avail || (0 == nchars && (strcmp(fmt, "%s")))) {
+        if (nchars < 0 || (size_t) nchars >= avail || (0 == nchars && (strcmp(fmt, "%s")))) {
             /* Truncation return value as documented by C99, or zero return value with either of the
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is
@@ -165,6 +177,7 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
             str->s = realloc(str->s, newsize);
             assert(str->s);
             str->nalloc = newsize;
+            isReallocated = TRUE;
         }
         else {
             /* Success */
