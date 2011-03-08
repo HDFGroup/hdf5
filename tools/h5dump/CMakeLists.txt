@@ -759,11 +759,17 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tgroup-1 0 tgroup.h5)
   # test for displaying the selected groups
   ADD_H5_TEST (tgroup-2 1 --group=/g2 --group / -g /y tgroup.h5)
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    SET_TESTS_PROPERTIES (H5DUMP-tgroup-2 PROPERTIES WILL_FAIL "true")
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
   # test for displaying simple space datasets
   ADD_H5_TEST (tdset-1 0 tdset.h5)
   # test for displaying selected datasets
   ADD_H5_TEST (tdset-2 1 -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5)
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    SET_TESTS_PROPERTIES (H5DUMP-tdset-2 PROPERTIES WILL_FAIL "true")
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
   # test for displaying attributes
   ADD_H5_TEST (tattr-1 0 tattr.h5)
@@ -771,6 +777,9 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tattr-2 0 -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
   # test for header and error messages
   ADD_H5_TEST (tattr-3 1 --header -a /attr2 --attribute=/attr tattr.h5)
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    SET_TESTS_PROPERTIES (H5DUMP-tattr-3 PROPERTIES WILL_FAIL "true")
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
   # test for displaying attributes in shared datatype (also in group and dataset)
   ADD_H5_TEST (tnamed_dtype_attr 0 tnamed_dtype_attr.h5)
 
@@ -868,6 +877,9 @@ IF (BUILD_TESTING)
   # test failure handling
   # Missing file name
   ADD_H5_TEST (tnofilename 1)
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    SET_TESTS_PROPERTIES (H5DUMP-tnofilename PROPERTIES WILL_FAIL "true")
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
   # rev. 2004
 
@@ -877,6 +889,9 @@ IF (BUILD_TESTING)
 
   # test -p with a non existing dataset
   ADD_H5_TEST (tperror 1 -p -d bogus tfcontents1.h5)
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    SET_TESTS_PROPERTIES (H5DUMP-tperror PROPERTIES WILL_FAIL "true")
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
   # test for file contents
   ADD_H5_TEST (tcontents 0 -n tfcontents1.h5)
