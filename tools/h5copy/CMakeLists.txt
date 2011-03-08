@@ -77,22 +77,26 @@ IF (BUILD_TESTING)
 ##############################################################################
 
   MACRO (ADD_H5_TEST testname resultcode testfile vparam srcname dstname)
+    ADD_H5COPY_TEST (${testname} ${resultcode} ${testfile}.h5 ${testfile}.out.h5 ${vparam} ${srcname} ${dstname} ${ARGN})
+  ENDMACRO (ADD_H5_TEST testname resultcode testfile vparam srcname dstname)
+
+  MACRO (ADD_H5COPY_TEST testname resultcode infile outfile vparam srcname dstname)
   
     IF (NOT "${ARGN}" STREQUAL "")
       ADD_TEST (
           NAME H5COPY-${testname}
-          COMMAND $<TARGET_FILE:h5copy> -f ${ARGN} -i ./testfiles/${testfile}.h5 -o ./testfiles/${testfile}.out.h5 -${vparam} -s ${srcname} -d ${dstname}
+          COMMAND $<TARGET_FILE:h5copy> -f ${ARGN} -i ./testfiles/${infile} -o ./testfiles/${outfile} -${vparam} -s ${srcname} -d ${dstname}
       )
     ELSE (NOT "${ARGN}" STREQUAL "")
       ADD_TEST (
           NAME H5COPY-${testname}
-          COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${testfile}.h5 -o ./testfiles/${testfile}.out.h5 -${vparam} -s ${srcname} -d ${dstname}
+          COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${outfile} -${vparam} -s ${srcname} -d ${dstname}
       )
     ENDIF (NOT "${ARGN}" STREQUAL "")
     IF (NOT ${resultcode} STREQUAL "2")
       ADD_TEST (
           NAME H5COPY-DIFF_${testname}
-          COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${testfile}.h5 ./testfiles/${testfile}.out.h5 ${srcname} ${dstname}
+          COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${outfile} ${srcname} ${dstname}
       )
       SET_TESTS_PROPERTIES(H5COPY-DIFF_${testname} PROPERTIES DEPENDS H5COPY-${testname})
       IF (${resultcode} STREQUAL "1")
@@ -103,7 +107,7 @@ IF (BUILD_TESTING)
       SET_TESTS_PROPERTIES (H5COPY-${testname} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
     SET (last_test "H5COPY-DIFF_${testname}")
-  ENDMACRO (ADD_H5_TEST testname resultcode testfile vparam srcname dstname)
+  ENDMACRO (ADD_H5COPY_TEST testname resultcode testfile vparam srcname dstname)
 
   MACRO (ADD_H5LS_TEST file filetest)
     # If using memchecker add tests without using scripts
