@@ -824,8 +824,11 @@ table_list_free(void)
 
         /* Free each table */
         free_table(table_list.tables[u].group_table);
+        HDfree(table_list.tables[u].group_table);
         free_table(table_list.tables[u].dset_table);
+        HDfree(table_list.tables[u].dset_table);
         free_table(table_list.tables[u].type_table);
+        HDfree(table_list.tables[u].type_table);
     }
 
     /* Free the table list */
@@ -4478,6 +4481,7 @@ main(int argc, const char *argv[])
                     "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
                     "xsi:schemaLocation=\"http://hdfgroup.org/DTDs/HDF5-File "
                     "http://www.hdfgroup.org/DTDs/HDF5-File.xsd\">\n",xmlnsprefix,ns);
+                HDfree(ns);
             }
         } else {
                 printf("<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n",
