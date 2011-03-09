@@ -2776,10 +2776,11 @@ dump_comment(hid_t obj_id)
      * H5Oget_comment again with the correct value.
      * If the call to H5Oget_comment returned an error, skip this block */
     if (cmt_bufsize > 0) {
-        comment = (char *)HDmalloc((size_t)cmt_bufsize); /* new_size including null terminator */
+        comment = (char *)HDmalloc((size_t)(cmt_bufsize+1)); /* new_size including null terminator */
         if(comment) {
             cmt_bufsize = H5Oget_comment(obj_id, comment, cmt_bufsize);
             if(cmt_bufsize > 0) {
+                comment[cmt_bufsize] = '\0'; /* necessary because null char is not returned */
                 indentation(indent);
                 printf("COMMENT \"%s\"\n", comment);
             } /* end if */
