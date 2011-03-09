@@ -1164,7 +1164,9 @@ print_datatype(hid_t type,unsigned in_group)
                 indentation(indent + COL);
                 printf("H5T_OPAQUE;\n");
                 indentation(indent + COL);
-                printf("OPAQUE_TAG \"%s\";\n", H5Tget_tag(type));
+                mname = H5Tget_tag(type);
+                printf("OPAQUE_TAG \"%s\";\n", mname);
+                free(mname);
                 indentation(indent);
                 break;
 
