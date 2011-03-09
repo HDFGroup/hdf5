@@ -1449,6 +1449,13 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
            p_type = h5tools_get_native_type(type);
 
         if(p_type >= 0) {
+            /* VL data special information */
+            unsigned int        vl_data = 0; /* contains VL datatypes */
+
+            /* Check if we have VL data in the dataset's datatype */
+            if (H5Tdetect_vlen_str(p_type) == TRUE)
+                vl_data = TRUE;
+
             temp_need= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
             assert(temp_need == (hsize_t)((size_t)temp_need));
             need = (size_t)temp_need;
@@ -1456,6 +1463,11 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
             assert(buf);
             if(H5Aread(attr, p_type, buf) >= 0)
                h5tools_dump_mem(stdout, &info, attr, p_type, space, buf, -1);
+
+            /* Reclaim any VL memory, if necessary */
+            if (vl_data)
+                H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
+
             free(buf);
             H5Tclose(p_type);
         } /* end if */
