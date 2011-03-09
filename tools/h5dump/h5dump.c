@@ -1463,8 +1463,11 @@ dump_selected_attr(hid_t loc_id, const char *name)
     obj_name = (char *)HDmalloc((size_t)j + 2);
 
     /* find the last / */
-    while(name[j] != '/' && j >= 0)
+    while(j >= 0) {
+        if (name[j] == '/')
+            break;
         j--;
+    }
 
     /* object name */
     if(j == -1)
