@@ -1179,7 +1179,6 @@
 ./tools/testfiles/tall-5s.ddl
 ./tools/testfiles/tall-6.ddl
 ./tools/testfiles/tall.h5
-./tools/testfiles/tall-6.ddl
 ./tools/testfiles/tarray1.ddl
 ./tools/testfiles/tarray1.h5
 ./tools/testfiles/tarray1_big.ddl
