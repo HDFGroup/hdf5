@@ -909,19 +909,19 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
 
                             h5tools_str_append(&buffer, info->dset_format, ref_name);
 
-                            dimension_break = h5tools_render_element(stream, info,
+                            dimension_break = h5tools_render_element(stdout, info,
                                        ctx, &buffer, &curr_pos, ncols, i, elmt_counter);
 
                             region_type = H5Sget_select_type(region_space);
                             if(region_type==H5S_SEL_POINTS)
                                 /* Print point information */
                                 dimension_break = h5tools_dump_region_data_points(
-                                                       region_space, region_id, stream, info, ctx,
+                                                       region_space, region_id, stdout, info, ctx,
                                                        &buffer, &curr_pos, ncols, i, elmt_counter);
                             else if(region_type==H5S_SEL_HYPERSLABS)
                                 /* Print block information */
                                 dimension_break = h5tools_dump_region_data_blocks(
-                                                       region_space, region_id, stream, info, ctx,
+                                                       region_space, region_id, stdout, info, ctx,
                                                        &buffer, &curr_pos, ncols, i, elmt_counter);
                             else
                                 HERROR(H5E_tools_g, H5E_tools_min_id_g, "invalid region type");
@@ -950,7 +950,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                 if (i + 1 < nelmts || (flags & END_OF_DATA) == 0)
                     h5tools_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
 
-                dimension_break = h5tools_render_element(rawdatastream, info, ctx, &buffer,
+                dimension_break = h5tools_render_element(stream, info, ctx, &buffer,
                                                            &curr_pos, ncols, i, elmt_counter);
                 /* Render the data element end*/
 
@@ -2310,9 +2310,9 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
 
     /* Terminate the output */
     if (ctx.cur_column) {
-        fputs(OPT(info->line_suf, ""), stream);
-        putc('\n', stream);
-        fputs(OPT(info->line_sep, ""), stream);
+        fputs(OPT(info->line_suf, ""), stdout);
+        putc('\n', stdout); 
+        fputs(OPT(info->line_sep, ""), stdout);
     }
 
 CATCH
@@ -2657,9 +2657,9 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
     /* Print the data */
     if (space_type == H5S_SIMPLE || space_type == H5S_SCALAR) {
         if(!sset)
-            status = h5tools_dump_simple_dset(stream, info, dset, p_type, indentlevel);
+            status = h5tools_dump_simple_dset(rawdatastream, info, dset, p_type, indentlevel);
         else
-            status = h5tools_dump_simple_subset(stream, info, dset, p_type, sset, indentlevel);
+            status = h5tools_dump_simple_subset(rawdatastream, info, dset, p_type, sset, indentlevel);
     }
     else
         /* space is H5S_NULL */
