@@ -47,6 +47,7 @@ IF (BUILD_TESTING)
       tall-3.ddl
       tall-4s.ddl
       tall-5s.ddl
+      tall-6.ddl
       tallfilters.ddl
       tarray1.ddl
       tarray1_big.ddl
@@ -619,6 +620,8 @@ IF (BUILD_TESTING)
           tall-4s.out.err
           tall-5s.out
           tall-5s.out.err
+          tall-6.out
+          tall-6.out.err
           tallfilters.out
           tallfilters.out.err
           tarray1.out
@@ -1151,6 +1154,9 @@ IF (BUILD_TESTING)
 
   # test for error stack display (BZ2048)
   ADD_H5_MASK_TEST (filter_fail 1 -E filter_fail.h5)
+
+  # test for -o -y for dataset with attributes
+  ADD_H5_TEST (tall-6 0 -y -o data -d /g1/g1.1/dset1.1.1 tall.h5)
 
   ####### test for dataset packed bits ######
   IF (HDF5_USE_H5DUMP_PACKED_BITS)
