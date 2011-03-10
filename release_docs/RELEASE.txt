@@ -189,6 +189,10 @@ New Features
 
     Tools:
     ------
+     - h5dump: Added new option --enable-error-stack. This option will display 
+               error stack information in the output stream. This is useful
+               when the "h5dump: Unable to print data" message is output.
+               (ADB - 2011/02/24)
      - h5diff: Add a new flag --exclude-path. Specified path to an object will
                be excluded from comparing the two files or two groups. If group
                is specified all the member objects will be excluded.  
@@ -202,13 +206,15 @@ New Features
      - h5diff: Add new flag --follow-symlinks. (refer to --help for details)
                (JKM - 2010/01/25) 
      - h5diff: fix for displaying garbage value on LE machine for BE data.
-	   (JKM - 2009/11/20)
-     - h5dump subsetting now allows default for count. Also trailing ; in short form
-       can be omitted after last specified value. (ADB - 2009/09/04)
-     - h5dump/h5ls now can display data in region references 
-       using new -R, --region flag.  (ADB - 2009/09/04)
-     - h5diff new flag, -c, --compare, list objects that are not comparable.
-        (PVN - 2009/4/10 - 1368)
+	           (JKM - 2009/11/20)
+     - h5dump: subsetting now allows default for count. Also trailing ; in short form
+               can be omitted after last specified value. 
+               (ADB - 2009/09/04)
+     - h5dump/h5ls: now can display data in region references 
+               using new -R, --region flag.  
+               (ADB - 2009/09/04)
+     - h5diff: new flag, -c, --compare, list objects that are not comparable.
+               (PVN - 2009/4/10 - 1368)
      - h5diff new flag, -N, --nan, avoids NaNs detection. (PVN - 2009/4/10)
      - h5dump correctly specifies XML dtd / schema urls (ADB - 2009/4/3 - 1519)
      - h5repack now handles group creation order. (PVN - 2009/4/2 - 1402)
