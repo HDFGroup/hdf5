@@ -649,7 +649,7 @@ H5Tdetect_vlen_str(hid_t tid)
     }
     else if (tclass == H5T_COMPOUND) {
         n = H5Tget_nmembers(tid);
-        for (int i = 0; i < n; i++) {
+        for (i = 0; i < n; i++) {
             hid_t mtid = H5Tget_member_type(tid, i);
             has_vlen_str = H5Tdetect_vlen_str(mtid);
             if (has_vlen_str == TRUE) {
