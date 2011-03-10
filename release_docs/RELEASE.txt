@@ -803,6 +803,8 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* --with-mpe configure option does not work with Mpich2. AKC - 2011/03/10)
+
 * examples/run-all-ex.sh does not work on Cygwin. (NAF - 2011/02/11)
 
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can
