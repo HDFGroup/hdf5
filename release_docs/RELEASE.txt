@@ -112,6 +112,9 @@ Bug Fixes since HDF5-1.8.6
 
     Library
     -------
+    - Tell the VFL flush call that the file will be closing, allowing
+      the VFDs to avoid sync'ing the file (particularly valuable in parallel).
+      (QAK - 2011/03/09)
     - The datatype handler created with H5Tencode/decode used to have the 
       reference count 0 (zero).  I have fixed it.  It is 1 (one) now.
       (SLU - 2011/2/18)
