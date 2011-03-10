@@ -82,7 +82,10 @@ New Features
  
     Tools
     -----
-    - None
+     - h5dump: Added new option --enable-error-stack. This option will display 
+               error stack information in the output stream. This is useful
+               when the "h5dump: Unable to print data" message is output.
+               (ADB - 2011/03/03)
 
     High-Level APIs
     ---------------
