@@ -633,6 +633,7 @@ h5tools_ncols(const char *s)
 htri_t
 H5Tdetect_vlen_str(hid_t tid)
 {
+    int i = 0;
     int n = 0;
     htri_t has_vlen_str = FALSE;
     H5T_class_t tclass = -1;
