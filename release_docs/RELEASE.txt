@@ -500,6 +500,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5dump not to include attribute values in the output file when 
+          h5dump "-y -o output_file" options were used. The problem was introduced 
+          in HDF5 1.8.6 by showing data pointed by region references. (XCAO 2011/3/9)
         - Fixed h5copy to be able to copy any object into the same HDF5 file.
           Previously h5copy displayed error message when target file is same
           as source file. (XCAO 2011/3/8)
