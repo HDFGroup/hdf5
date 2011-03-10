@@ -39,6 +39,7 @@ ENDIF (HDF5_BUILD_HL_LIB AND HDF5_BUILD_CPP_LIB)
 
 IF (HDF5_BUILD_TOOLS)
   SET (HDF5_INCLUDE_DIR_TOOLS "@CMAKE_INSTALL_PREFIX@/include/tools" )
+  SET (HDF5_TOOLS_DIR "@CMAKE_INSTALL_PREFIX@/bin/tools" )
 ENDIF (HDF5_BUILD_TOOLS)
 
 #-----------------------------------------------------------------------------
