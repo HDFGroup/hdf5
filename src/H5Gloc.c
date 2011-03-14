@@ -947,7 +947,7 @@ done:
  * Purpose:	Retrieve the information for an object from a group location
  *              and path to that object
  *
- * Return:	Success:	Number of bytes in the comment including the
+ * Return:	Success:	Number of bytes in the comment excluding the
  *				null terminator.  Zero if the object has no
  *				comment.
  *
