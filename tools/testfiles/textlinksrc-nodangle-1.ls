@@ -6,7 +6,11 @@ Error: --no-dangling-links must be used along with --follow-symlinks option!
 usage: h5ls [OPTIONS] [OBJECTS...]
   OPTIONS
    -h, -?, --help  Print a usage message and exit
-   -a, --address   Print addresses for raw data
+   -a, --address   Print raw data address.  If dataset is contiguous, address
+                   is offset in file of beginning of raw data. If chunked,
+                   returned list of addresses indicates offset of each chunk.
+                   Must be used with -v, --verbose option.
+                   Provides no information for non-dataset objects.
    -d, --data      Print the values of datasets
    -e, --errors    Show all HDF5 error reporting
    --follow-symlinks

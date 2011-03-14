@@ -128,6 +128,8 @@ Bug Fixes since HDF5-1.8.6
 
     Tools
     -----
+    - Fixed and improved help page for -a option of h5ls. 
+      Bug#1904 (JKM 2011/3/11)
     - Fixed h5copy to be able to copy any object into the same HDF5 file.
       Previously h5copy displayed error message when target file is same
       as source file. (XCAO 2011/3/8)

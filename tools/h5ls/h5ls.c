@@ -105,7 +105,11 @@ usage (void)
 usage: %s [OPTIONS] [OBJECTS...]\n\
   OPTIONS\n\
    -h, -?, --help  Print a usage message and exit\n\
-   -a, --address   Print addresses for raw data\n\
+   -a, --address   Print raw data address.  If dataset is contiguous, address\n\
+                   is offset in file of beginning of raw data. If chunked,\n\
+                   returned list of addresses indicates offset of each chunk.\n\
+                   Must be used with -v, --verbose option.\n\
+                   Provides no information for non-dataset objects.\n\
    -d, --data      Print the values of datasets\n\
    -e, --errors    Show all HDF5 error reporting\n\
    --follow-symlinks\n\
