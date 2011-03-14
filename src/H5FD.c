@@ -2186,6 +2186,11 @@ H5FDaio_read(H5FD_t *file,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
     }
 
+    if ( ( type < H5FD_MEM_DEFAULT ) || ( type >= H5FD_MEM_NTYPES ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem type out of range");
+    }
+
     /* Get the default dataset transfer property list if the user 
      * didn't provide one 
      */
@@ -2288,6 +2293,11 @@ H5FDaio_write(H5FD_t *file,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
     }
 
+    if ( ( type < H5FD_MEM_DEFAULT ) || ( type >= H5FD_MEM_NTYPES ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem type out of range");
+    }
+
     /* Get the default dataset transfer property list if the user 
      * didn't provide one 
      */
@@ -2310,8 +2320,17 @@ H5FDaio_write(H5FD_t *file,
     }
 
     if ( ( ctlblk_ptr_ptr == NULL ) ||
-         ( *ctlblk_ptr_ptr != NULL ) ) {
+         ( (void *)(*ctlblk_ptr_ptr) != NULL ) ) {
+#if 0 /* JRM */
+	if ( ctlblk_ptr_ptr == NULL ) {
 
+            HDfprintf(stdout, "%s: ctlblk_ptr_ptr == NULL.\n", FUNC);
+	} 
+        if ( ( ctlblk_ptr_ptr != NULL ) &&
+             ( *ctlblk_ptr_ptr != NULL ) ) {
+            HDfprintf(stdout, "%s: *ctlblk_ptr_ptr != NULL.\n", FUNC);
+        }
+#endif /* JRM */
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad ctlblk_ptr_ptr")
     }
 
@@ -2639,7 +2658,7 @@ H5FDaio_cancel(H5FD_t *file,
                     "ctlblk_ptr NULL on entry")
     }
 
-    result = H5FDaio_cancel(file, ctlblk_ptr);
+    result = H5FD_aio_cancel(file, ctlblk_ptr);
 
     if ( result < 0 ) {
 

@@ -23,10 +23,10 @@ include $(top_srcdir)/config/commence.am
 
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
-# Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh
+# Test script for error_test, err_compat, and fsync
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh fsync_tests.sh
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) fsync_tests.c$(EXEEXT)
 
 
 # These are our main targets. They should be listed in the order to be
@@ -50,7 +50,8 @@ TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
-check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta
+check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta \
+	fsync_tests
 
 
 # These programs generate test files for the tests.  They don't need to be

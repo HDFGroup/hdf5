@@ -58,7 +58,8 @@ DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
-	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT)
+	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT) \
+	fsync_tests$(EXEEXT)
 @BUILD_ALL_CONDITIONAL_TRUE@noinst_PROGRAMS = $(am__EXEEXT_2)
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 subdir = test
@@ -197,6 +198,10 @@ freespace_SOURCES = freespace.c
 freespace_OBJECTS = freespace.$(OBJEXT)
 freespace_LDADD = $(LDADD)
 freespace_DEPENDENCIES = libh5test.la $(LIBHDF5)
+fsync_tests_SOURCES = fsync_tests.c
+fsync_tests_OBJECTS = fsync_tests.$(OBJEXT)
+fsync_tests_LDADD = $(LDADD)
+fsync_tests_DEPENDENCIES = libh5test.la $(LIBHDF5)
 gen_bad_ohdr_SOURCES = gen_bad_ohdr.c
 gen_bad_ohdr_OBJECTS = gen_bad_ohdr.$(OBJEXT)
 gen_bad_ohdr_LDADD = $(LDADD)
@@ -376,20 +381,7 @@ SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c btree2.c \
 	cache.c cache_api.c cmpd_dset.c cross_read.c dangle.c dsets.c \
 	dt_arith.c dtransform.c dtypes.c earray.c enum.c err_compat.c \
 	error_test.c extend.c external.c farray.c fheap.c fillval.c \
-	flush1.c flush2.c freespace.c gen_bad_ohdr.c gen_bogus.c \
-	gen_cross.c gen_deflate.c gen_filespace.c gen_filters.c \
-	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
-	gen_new_super.c gen_noencoder.c gen_nullspace.c \
-	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
-	istore.c lheap.c links.c mf.c mount.c mtime.c ntypes.c \
-	objcopy.c ohdr.c pool.c reserved.c set_extent.c \
-	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
-	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
-DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
-	btree2.c cache.c cache_api.c cmpd_dset.c cross_read.c dangle.c \
-	dsets.c dt_arith.c dtransform.c dtypes.c earray.c enum.c \
-	err_compat.c error_test.c extend.c external.c farray.c fheap.c \
-	fillval.c flush1.c flush2.c freespace.c gen_bad_ohdr.c \
+	flush1.c flush2.c freespace.c fsync_tests.c gen_bad_ohdr.c \
 	gen_bogus.c gen_cross.c gen_deflate.c gen_filespace.c \
 	gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c \
 	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
@@ -399,6 +391,20 @@ DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
 	set_extent.c space_overflow.c stab.c tcheck_version.c \
 	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
 	vfd.c
+DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
+	btree2.c cache.c cache_api.c cmpd_dset.c cross_read.c dangle.c \
+	dsets.c dt_arith.c dtransform.c dtypes.c earray.c enum.c \
+	err_compat.c error_test.c extend.c external.c farray.c fheap.c \
+	fillval.c flush1.c flush2.c freespace.c fsync_tests.c \
+	gen_bad_ohdr.c gen_bogus.c gen_cross.c gen_deflate.c \
+	gen_filespace.c gen_filters.c gen_new_array.c gen_new_fill.c \
+	gen_new_group.c gen_new_mtime.c gen_new_super.c \
+	gen_noencoder.c gen_nullspace.c gen_specmetaread.c \
+	gen_udlinks.c getname.c gheap.c hyperslab.c istore.c lheap.c \
+	links.c mf.c mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c \
+	reserved.c set_extent.c space_overflow.c stab.c \
+	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
+	$(ttsafe_SOURCES) unlink.c vfd.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -691,10 +697,10 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog cmpd_dset.h5 \
 	app_ref.h5 farray.h5 earray.h5
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
-# Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh
+# Test script for error_test, err_compat, and fsync
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh fsync_tests.sh
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) fsync_tests.c$(EXEEXT)
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
@@ -909,6 +915,9 @@ flush2$(EXEEXT): $(flush2_OBJECTS) $(flush2_DEPENDENCIES)
 freespace$(EXEEXT): $(freespace_OBJECTS) $(freespace_DEPENDENCIES) 
 	@rm -f freespace$(EXEEXT)
 	$(LINK) $(freespace_OBJECTS) $(freespace_LDADD) $(LIBS)
+fsync_tests$(EXEEXT): $(fsync_tests_OBJECTS) $(fsync_tests_DEPENDENCIES) 
+	@rm -f fsync_tests$(EXEEXT)
+	$(LINK) $(fsync_tests_OBJECTS) $(fsync_tests_LDADD) $(LIBS)
 gen_bad_ohdr$(EXEEXT): $(gen_bad_ohdr_OBJECTS) $(gen_bad_ohdr_DEPENDENCIES) 
 	@rm -f gen_bad_ohdr$(EXEEXT)
 	$(LINK) $(gen_bad_ohdr_OBJECTS) $(gen_bad_ohdr_LDADD) $(LIBS)
@@ -1056,6 +1065,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flush1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flush2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/freespace.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fsync_tests.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_bad_ohdr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_bogus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_cross.Po@am__quote@

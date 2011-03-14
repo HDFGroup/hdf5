@@ -29,6 +29,13 @@
  * this file. */
 /* #define _XOPEN_SOURCE 600 */
 
+/* JRM */
+#if 0
+#define __BSD_VISIBLE 1
+#include <sys/fcntl.h>
+#endif
+/* JRM */
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/

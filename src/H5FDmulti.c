@@ -2233,6 +2233,8 @@ H5FD_multi_aio_alloc_ctlblk(H5FD_multi_aio_ctlblk_t **ctlblk_ptr_ptr)
         (ctlblk_ptr->sub_ctlblks[i]).finished = FALSE;
     }
 
+    *ctlblk_ptr_ptr = ctlblk_ptr;
+
     return(0);
 
 } /* H5FD_multi_aio_alloc_ctlblk() */
@@ -2368,7 +2370,7 @@ H5FD_multi_aio_read(H5FD_t *file,
     H5FD_multi_t            * multi_file;
     H5FD_t                  * tgt_file;
     void                    * subctlblk_ptr = NULL;
-    H5FD_multi_aio_ctlblk_t * ctlblk_ptr;
+    H5FD_multi_aio_ctlblk_t * ctlblk_ptr = NULL;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -2535,7 +2537,7 @@ H5FD_multi_aio_write(H5FD_t *file,
     H5FD_multi_t            * multi_file;
     H5FD_t                  * tgt_file;
     void                    * subctlblk_ptr = NULL;
-    H5FD_multi_aio_ctlblk_t * ctlblk_ptr;
+    H5FD_multi_aio_ctlblk_t * ctlblk_ptr = NULL;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -3114,7 +3116,7 @@ H5FD_multi_aio_fsync(H5FD_t *file,
     H5FD_multi_t            * multi_file;
     H5FD_t                  * drivers[H5FD_MEM_NTYPES];
     void                    * ctlblks[H5FD_MEM_NTYPES];
-    H5FD_multi_aio_ctlblk_t * ctlblk_ptr;
+    H5FD_multi_aio_ctlblk_t * ctlblk_ptr = NULL;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -3157,6 +3159,8 @@ H5FD_multi_aio_fsync(H5FD_t *file,
             H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOSYNCFAIL, \
                         "sub aio fsync request failed.", -1)
         }
+
+	i++;
     }
 
     /* if all goes well, allocate the control block and initialize it */

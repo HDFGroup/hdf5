@@ -491,6 +491,39 @@ typedef struct {
 #ifndef HDacos
     #define HDacos(X)		acos(X)
 #endif /* HDacos */
+
+#ifndef HDaiocb
+    #define HDaiocb		aiocb
+#endif /* HDaiocb */
+
+#ifndef HDaio_cancel
+    #define HDaio_cancel(F,A)	aio_cancel(F, A)
+#endif /* HDaio_cancel */
+
+#ifndef HDaio_error
+    #define HDaio_error(A)	aio_error(A)
+#endif /* HDaio_error */
+
+#ifndef HDaio_fsync
+    #define HDaio_fsync(O,A)	aio_fsync(O, A)
+#endif /* HDaio_fsync */
+
+#ifndef HDaio_read
+    #define HDaio_read(A)	aio_read(A)
+#endif /* HDaio_read */
+
+#ifndef HDaio_return
+    #define HDaio_return(A)	aio_return(A)
+#endif /* HDaio_return */
+
+#ifndef HDaio_suspend
+    #define HDaio_suspend(L,N,T)	aio_suspend(L, N, T)
+#endif /* HDaio_suspend */
+
+#ifndef HDaio_write
+    #define HDaio_write(A)	aio_write(A)
+#endif /* HDaio_write */
+
 #ifndef HDalarm
     #ifdef H5_HAVE_ALARM
         #define HDalarm(N)              alarm(N)

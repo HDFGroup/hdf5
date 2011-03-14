@@ -835,6 +835,8 @@
 ./test/fillval.c
 ./test/flush1.c
 ./test/flush2.c
+./test/fsync_tests.c
+./test/fsync_tests.sh
 ./test/gen_bad_ohdr.c                   _DO_NOT_DISTRIBUTE_
 ./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_

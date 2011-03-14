@@ -1716,7 +1716,7 @@ H5FD_family_aio_discard_ctlblk(H5FD_family_aio_ctlblk_t *ctlblk_ptr)
     }
 
     if ( ( ctlblk_ptr->subctlblks == NULL ) ||
-         (  ctlblk_ptr->array_len <= 1 ) ) {
+         (  ctlblk_ptr->array_len < 1 ) ) {
 
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
                     "subctlblks fields corrupt?")
@@ -1830,7 +1830,7 @@ H5FD_family_aio_extend_ctlblk(H5FD_family_aio_ctlblk_t *ctlblk_ptr)
     }
 
     if ( ( ctlblk_ptr->subctlblks == NULL ) ||
-         (  ctlblk_ptr->array_len <= 1 ) ) {
+         (  ctlblk_ptr->array_len < 1 ) ) {
 
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
                     "subctlblks fields corrupt?")
@@ -2057,7 +2057,7 @@ H5FD_family_aio_read(H5FD_t *file,
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
                     "NULL ctlblk_ptr or bad ctlblk magic")
 
-    } else if ( ( ctlblk_ptr->array_len <= 1 ) ||
+    } else if ( ( ctlblk_ptr->array_len < 1 ) ||
                 ( ctlblk_ptr->num_subctlblks != 0 ) ||
                 ( ctlblk_ptr->subctlblks == NULL ) ||
                 ( (ctlblk_ptr->subctlblks)[0].magic != 
@@ -2115,6 +2115,8 @@ H5FD_family_aio_read(H5FD_t *file,
                             "sub control block array still full?!?")
             }
         }
+
+        subctlblk_ptr = NULL;
 
         result = H5FDaio_read(family_file->memb[sub_file_num], type, 
                               memb_dxpl_id, subfile_addr, subfile_size, 
@@ -2236,7 +2238,7 @@ H5FD_family_aio_write(H5FD_t *file,
     H5P_genplist_t           * plist;      /* Property list pointer */
     H5FD_family_t            * family_file;
     void                     * buffer_remaining;
-    void                     * subctlblk_ptr = NULL;
+    void                     * subctlblk_ptr;
     H5FD_family_aio_ctlblk_t * ctlblk_ptr = NULL;
 
     FUNC_ENTER_NOAPI(H5FD_family_aio_write, FAIL)
@@ -2296,7 +2298,7 @@ H5FD_family_aio_write(H5FD_t *file,
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
                     "NULL ctlblk_ptr or bad ctlblk magic")
 
-    } else if ( ( ctlblk_ptr->array_len <= 1 ) ||
+    } else if ( ( ctlblk_ptr->array_len < 1 ) ||
                 ( ctlblk_ptr->num_subctlblks != 0 ) ||
                 ( ctlblk_ptr->subctlblks == NULL ) ||
                 ( (ctlblk_ptr->subctlblks)[0].magic != 
@@ -2354,6 +2356,8 @@ H5FD_family_aio_write(H5FD_t *file,
                             "sub control block array still full?!?")
             }
         }
+
+        subctlblk_ptr = NULL;
 
         result = H5FDaio_write(family_file->memb[sub_file_num], type, 
                                memb_dxpl_id, subfile_addr, subfile_size, 
@@ -2902,14 +2906,14 @@ H5FD_family_aio_fsync(H5FD_t *file,
     herr_t                     ret_value = SUCCEED;  /* Return value */
     herr_t	 	       result;
     hbool_t                    success = FALSE;
-    int                        i;
-    int		 	       num_sub_files;
+    unsigned int               i;
+    unsigned int 	       num_sub_files;
     H5FD_family_t            * family_file;
     H5FD_t                   * tgt_file;
     H5FD_family_aio_ctlblk_t * ctlblk_ptr = NULL;
     void                     * subctlblk_ptr;
 
-    FUNC_ENTER_NOAPI(H5FD_family_aio_finish, FAIL)
+    FUNC_ENTER_NOAPI(H5FD_family_aio_fsync, FAIL)
 
     if ( ( file == NULL ) ||
          ( file->cls == NULL ) ||
@@ -2950,7 +2954,7 @@ H5FD_family_aio_fsync(H5FD_t *file,
                     "bad sub control block array")
     }
 
-    for ( i = i; i < num_sub_files; i++ ) {
+    for ( i = 0; i < num_sub_files; i++ ) {
 
         if ( (ctlblk_ptr->subctlblks[i]).magic != 
 	     H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC ) {
@@ -3158,8 +3162,8 @@ H5FD_family_fsync(H5FD_t *file,
 {
     herr_t                     ret_value = SUCCEED;  /* Return value */
     herr_t	 	       result;
-    int                        i;
-    int		 	       num_sub_files;
+    unsigned int               i;
+    unsigned int	       num_sub_files;
     H5FD_family_t            * family_file;
     H5FD_t                   * tgt_file;
 
@@ -3178,6 +3182,11 @@ H5FD_family_fsync(H5FD_t *file,
     for ( i = i; i < num_sub_files; i++ ) {
 
         tgt_file = family_file->memb[i];
+
+        if ( tgt_file == NULL ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "NULL tgt file.")
+        }
 
 	result = H5FDfsync(tgt_file, dxpl_id);
 

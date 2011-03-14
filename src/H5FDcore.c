@@ -1137,7 +1137,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_fsync
  *
- * Purpose:	Fsync the backing store file if there is one. 
+ * Purpose:	Flush and fsync the backing store file if there is one. 
+ *
+ *		This is a somewhat novel interpretation of fsync -- but 
+ *		one that gives the results that one would expect.  If it 
+ *		has been written to the core file driver, it winds up on 
+ *		disk after the fsync (assuming there is a backing file).
  *
  * Return:	Success:	0
  *
@@ -1160,7 +1165,7 @@ H5FD_core_fsync(H5FD_t *file,
     herr_t        ret_value=SUCCEED;       /* Return value */
     int           result;
 
-    FUNC_ENTER_NOAPI(H5FD_core_flush, FAIL)
+    FUNC_ENTER_NOAPI(H5FD_core_fsync, FAIL)
 
     HDassert( file != NULL );
 
@@ -1169,6 +1174,11 @@ H5FD_core_fsync(H5FD_t *file,
     /* sync the backing store file -- if it exists  */
     if ( ( core_file->fd >= 0 ) && 
          ( core_file->backing_store ) ) {
+
+        /* Flush any changed buffers */
+        if(H5FD_core_flush(core_file, (hid_t)-1, TRUE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
+
 
         result = HDfsync(core_file->fd);
 

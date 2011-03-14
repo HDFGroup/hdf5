@@ -28,6 +28,7 @@
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5FD_sec2_init_interface
 
+#include <strings.h>
 #include <aio.h>
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -51,7 +52,7 @@ typedef enum {
 } H5FD_sec2_file_op_t;
 
 /*
- * structure used to store the instance of struct aiocb associated with
+ * structure used to store the instance of struct HDaiocb associated with
  * each asynchronous operation, along with such data about the operation
  * needed for its management.
  *
@@ -99,7 +100,7 @@ typedef struct H5FD_sec2_aio_ctlblk_t {
     void *buf;
     struct H5FD_sec2_aio_ctlblk_t * next_ptr;
     struct H5FD_sec2_aio_ctlblk_t * prev_ptr;
-    struct aiocb ctlblk;
+    struct HDaiocb ctlblk;
 
 } H5FD_sec2_aio_ctlblk_t;
 
@@ -1211,7 +1212,7 @@ H5FD_sec2_aio_alloc_ctlblk(H5FD_sec2_aio_ctlblk_t **ctlblk_ptr_ptr)
     ctlblk_ptr->prev_ptr = NULL;
 
     /* zero the posix control block as recommended */
-    bzero((void *)(&(ctlblk_ptr->ctlblk)), sizeof(struct aiocb));
+    HDmemset((void *)(&(ctlblk_ptr->ctlblk)), 0, sizeof(struct HDaiocb));
 
     *ctlblk_ptr_ptr = ctlblk_ptr;
 
@@ -1267,7 +1268,7 @@ H5FD_sec2_aio_discard_ctlblk(H5FD_sec2_aio_ctlblk_t *ctlblk_ptr)
     ctlblk_ptr->prev_ptr = NULL;
 
     /* zero the posix control block */
-    bzero((void *)(&(ctlblk_ptr->ctlblk)), sizeof(struct aiocb));
+    HDmemset((void *)(&(ctlblk_ptr->ctlblk)), 0, sizeof(struct HDaiocb));
 
     ctlblk_ptr = H5FL_FREE(H5FD_sec2_aio_ctlblk_t, ctlblk_ptr);
 
@@ -1350,6 +1351,20 @@ H5FD_sec2_aio_read(H5FD_t *file,
     HDassert( ctlblk_ptr_ptr != NULL );
     HDassert( *ctlblk_ptr_ptr == NULL );
 
+    /* setup the file pointer */
+    file_ptr = (H5FD_sec2_t *)file;
+
+    /* Check for overflow conditions */
+    if ( ! H5F_addr_defined(addr) )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "addr undefined, addr = %llu", (unsigned long long)addr)
+    if ( REGION_OVERFLOW(addr, size) )
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, \
+                    "addr overflow, addr = %llu", (unsigned long long)addr)
+    if ( (addr + size) > file_ptr->eoa )
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, \
+                    "addr overflow, addr = %llu", (unsigned long long)addr)
+
     /* allocate the control block */
 
     result = H5FD_sec2_aio_alloc_ctlblk(&ctlblk_ptr);
@@ -1365,9 +1380,6 @@ H5FD_sec2_aio_read(H5FD_t *file,
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
                     "NULL ctlblk_ptr or bad ctlblk magic")
     }
-
-    /* setup the file pointer */
-    file_ptr = (H5FD_sec2_t *)file;
 
     /* setup the control block */
     ctlblk_ptr->file_ptr = (H5FD_sec2_t *)file;
@@ -1397,7 +1409,7 @@ H5FD_sec2_aio_read(H5FD_t *file,
      * haven't succeeded in queueing the read by the time we do a 
      * wait on it.
      */
-    posix_result = aio_read(&(ctlblk_ptr->ctlblk));
+    posix_result = HDaio_read(&(ctlblk_ptr->ctlblk));
 
     if ( posix_result != 0 ) {
 
@@ -1414,14 +1426,14 @@ H5FD_sec2_aio_read(H5FD_t *file,
 
 #if H5FD_SEC2_AIO_READ__DEBUG
             HDfprintf(stdout,
-                      "%s: aio_read(ctlblk) failed. errno = %d (%s)\n",
+                      "%s: HDaio_read(ctlblk) failed. errno = %d (%s)\n",
                       FUNC, errno, strerror(errno));
             HDfprintf(stdout, "%s: offset/size = %lld/%d\n",
                       FUNC, (long long)addr, (int)size);
 #endif /* H5FD_SEC2_AIO_READ__DEBUG */
 
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, \
-                        "call to aio_read() failed.")
+                        "call to HDaio_read() failed.")
         }
     } else {
 
@@ -1537,6 +1549,20 @@ H5FD_sec2_aio_write(H5FD_t *file,
     HDassert( ctlblk_ptr_ptr != NULL );
     HDassert( *ctlblk_ptr_ptr == NULL );
 
+    /* setup the file pointer */
+    file_ptr = (H5FD_sec2_t *)file;
+
+    /* Check for overflow conditions */
+    if ( ! H5F_addr_defined(addr) )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "addr undefined, addr = %llu", (unsigned long long)addr)
+    if ( REGION_OVERFLOW(addr, size) )
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, \
+                    "addr overflow, addr = %llu", (unsigned long long)addr)
+    if ( (addr + size) > file_ptr->eoa )
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, \
+                    "addr overflow, addr = %llu", (unsigned long long)addr)
+
     /* allocate the control block */
 
     result = H5FD_sec2_aio_alloc_ctlblk(&ctlblk_ptr);
@@ -1552,9 +1578,6 @@ H5FD_sec2_aio_write(H5FD_t *file,
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
                     "NULL ctlblk_ptr or bad ctlblk magic")
     }
-
-    /* setu the file pointer */
-    file_ptr = (H5FD_sec2_t *)file;
 
     /* setup the control block */
     ctlblk_ptr->file_ptr = (H5FD_sec2_t *)file;
@@ -1583,7 +1606,7 @@ H5FD_sec2_aio_write(H5FD_t *file,
      * haven't succeeded in queueing the write by the time we do a 
      * wait on it.
      */
-    posix_result = aio_write(&(ctlblk_ptr->ctlblk));
+    posix_result = HDaio_write(&(ctlblk_ptr->ctlblk));
 
     if ( posix_result != 0 ) {
 
@@ -1600,14 +1623,14 @@ H5FD_sec2_aio_write(H5FD_t *file,
 
 #if H5FD_SEC2_AIO_WRITE__DEBUG
             HDfprintf(stdout,
-                      "%s: aio_write(ctlblk) failed. errno = %d (%s)\n",
+                      "%s: HDaio_write(ctlblk) failed. errno = %d (%s)\n",
                       FUNC, errno, strerror(errno));
             HDfprintf(stdout, "%s: offset/size = %lld/%d\n",
                       FUNC, (long long)addr, (int)size);
 #endif /* H5FD_SEC2_AIO_WRITE__DEBUG */
 
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
-                        "call to aio_write() failed.")
+                        "call to HDaio_write() failed.")
         }
     } else {
 
@@ -1686,15 +1709,15 @@ done:
  *		If the asynchronous operation indicated by the supplied
  *		control block has been queued and is not known to be 
  *		complete (i.e. status is H5FD_SEC2_AIO_STATUS__QUEUED), 
- *		test completion status with aio_error().  
+ *		test completion status with HDaio_error().  
  *
- *		If aio_error() returns either 0 or any error code other 
+ *		If HDaio_error() returns either 0 or any error code other 
  *		than EINPROGRESS, load the error code into the control 
  *		block's err_num field, set the control block's status 
  *		field to H5FD_SEC2_AIO_STATUS__COMPLETE, set *done_ptr 
  *		to TRUE, and return success.
  *
- *		If aio_error() returns EAGAIN, simply set *done_ptr to 
+ *		If HDaio_error() returns EAGAIN, simply set *done_ptr to 
  *		FALSE and return success.
  *
  *		If the supplied control block is invalid, or if status
@@ -1758,18 +1781,18 @@ H5FD_sec2_aio_test(hbool_t *done_ptr,
             switch ( cb_ptr->op )
             {
 		case H5FD_SEC2_AIO_OP__READ:
-                    posix_result = aio_read(&(cb_ptr->ctlblk));
+                    posix_result = HDaio_read(&(cb_ptr->ctlblk));
 		    break;
 
 		case H5FD_SEC2_AIO_OP__WRITE:
-                    posix_result = aio_write(&(cb_ptr->ctlblk));
+                    posix_result = HDaio_write(&(cb_ptr->ctlblk));
 		    break;
 
 		case H5FD_SEC2_AIO_OP__FSYNC:
-                    /* not sure we want to do this with aio_fsync() --
+                    /* not sure we want to do this with HDaio_fsync() --
                      * revisit this issue at some point.
                      */
-                    posix_result = aio_fsync(O_SYNC, &(cb_ptr->ctlblk));
+                    posix_result = HDaio_fsync(O_SYNC, &(cb_ptr->ctlblk));
 		    break;
 
 		default:
@@ -1810,7 +1833,7 @@ H5FD_sec2_aio_test(hbool_t *done_ptr,
 	    break;
 
 	case H5FD_SEC2_AIO_STATUS__QUEUED:
-            posix_result = aio_error(&(cb_ptr->ctlblk));
+            posix_result = HDaio_error(&(cb_ptr->ctlblk));
 
             if ( posix_result == EINPROGRESS ) {
 
@@ -1912,7 +1935,7 @@ H5FD_sec2_aio_wait(void *ctlblk_ptr)
     herr_t      		ret_value = SUCCEED;       /* Return value */
     herr_t			result;
     int				posix_result;
-    const struct aiocb        * aiocb_list[1] = { NULL };
+    const struct HDaiocb      * aiocb_list[1] = { NULL };
     H5FD_sec2_aio_ctlblk_t    * cb_ptr = NULL;
     H5FD_sec2_t               * file_ptr = NULL;
 
@@ -1955,33 +1978,33 @@ H5FD_sec2_aio_wait(void *ctlblk_ptr)
 		case H5FD_SEC2_AIO_OP__READ:
 		case H5FD_SEC2_AIO_OP__WRITE:
 		    /* for an asynchronous read or write, we can use
-                     * aio_suspend() to wait for completion of the operation.
+                     * HDaio_suspend() to wait for completion of the operation.
                      */
                     aiocb_list[0] = &(cb_ptr->ctlblk);
 
-                    posix_result = aio_suspend(aiocb_list, 1, NULL);
+                    posix_result = HDaio_suspend(aiocb_list, 1, NULL);
 
                     if ( posix_result != 0 ) {
 #if H5FD_SEC2_AIO_WAIT__DEBUG
 			HDfprintf(stdout, 
-                            "%s: aio_suspend() failed with errno = %d (%s).\n", 
+                            "%s: HDaio_suspend() failed with errno = %d (%s).\n", 
                             FUNC, errno, strerror(errno));
 #endif /* H5FD_SEC2_AIO_WAIT__DEBUG */
                         HGOTO_ERROR(H5E_IO, H5E_FILE, FAIL, \
-                                    "aio_suspend() failed.");
+                                    "HDaio_suspend() failed.");
                     }
                     /* at this point, we know that the operation has
                      * completed, but we don't have its error return.
-                     * Need to call aio_error() for this.  Rather than
+                     * Need to call HDaio_error() for this.  Rather than
                      * duplicate code, fall through to the next item
                      * in the case statement.
                      */
                     /***** INTENTIONAL FALL THROUGH *****/
 
 		case H5FD_SEC2_AIO_OP__FSYNC:
-                    /* can't use aio_suspend() to wait for the completion
-		     * of an aio_fsync(), so busy wait instead using 
-                     * repeated calls to aio_error().
+                    /* can't use HDaio_suspend() to wait for the completion
+		     * of an HDaio_fsync(), so busy wait instead using 
+                     * repeated calls to HDaio_error().
                      *
                      * In the case of a fall through from the above,
                      * case, we should only make one pass through the 
@@ -1989,7 +2012,7 @@ H5FD_sec2_aio_wait(void *ctlblk_ptr)
                      */
                     do
     		    {
-        		posix_result = aio_error(&(cb_ptr->ctlblk));
+        		posix_result = HDaio_error(&(cb_ptr->ctlblk));
 
                         if ( posix_result == 0 ) { /* successful completion */
 
@@ -2088,7 +2111,7 @@ done:
  *-------------------------------------------------------------------------
  */
 
-#define H5FD_SEC2_AIO_FINISH__DEBUG 1
+#define H5FD_SEC2_AIO_FINISH__DEBUG 0
 
 static herr_t 
 H5FD_sec2_aio_finish(int *errno_ptr, 
@@ -2133,7 +2156,7 @@ H5FD_sec2_aio_finish(int *errno_ptr,
     switch ( cb_ptr->status )
     {
 	case H5FD_SEC2_AIO_STATUS__COMPLETE:
-            posix_result = aio_return(&(cb_ptr->ctlblk));
+            posix_result = HDaio_return(&(cb_ptr->ctlblk));
 
             if ( cb_ptr->err_num == 0 ) { /* operation succeeded */
 
@@ -2143,14 +2166,14 @@ H5FD_sec2_aio_finish(int *errno_ptr,
 
 #if H5FD_SEC2_AIO_FINISH__DEBUG
                     HDfprintf(stdout, 
-                              "%s: op successful but aio_return returned -1.\n",
+                              "%s: op successful but HDaio_return returned -1.\n",
                               FUNC);
                     HDfprintf(stdout, "%s: errno = %d (%s).\n", FUNC,
                               errno, strerror(errno));
 #endif /* H5FD_SEC2_AIO_FINISH__DEBUG */
 
                     HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
-                                "op successful, but aio_return returned -1!?!.")
+                                "op successful, but HDaio_return returned -1!?!.")
                 }
 
                 if ( (haddr_t)posix_result > cb_ptr->size ) {
@@ -2161,28 +2184,62 @@ H5FD_sec2_aio_finish(int *errno_ptr,
                     *errno_ptr = EIO;
 
                     HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
-                                "aio_return() val > cb_ptr->size!?!")
+                                "HDaio_return() val > cb_ptr->size!?!")
                 }
 
                 if ( (haddr_t)posix_result != cb_ptr->size ) {
 
+#if H5FD_SEC2_AIO_FINISH__DEBUG
+                    HDfprintf(stdout, "%s: read successful, but short %lld of %lld bytes.\n",
+                              FUNC, (long long)remaining_buffer_size, 
+                              (long long)(cb_ptr->size));
+#endif /* H5FD_SEC2_AIO_FINISH__DEBUG */
+
                     if ( cb_ptr->op == H5FD_SEC2_AIO_OP__READ ) {
                     
                         /* if a read is short, but otherwise no error,
-                         * assume that we have reached end of file, and 
-                         * fill in the rest of the buffer with nulls.
+                         * check to see if we have reached the end of file.
+                         * If so, fill in the rest of the buffer with nulls.
                          */
-                        size_t remaining_buffer_size;
-                        void * remaining_buffer;
 
-                        remaining_buffer_size = 
-				(size_t)(cb_ptr->size) - (size_t)posix_result;
+                        if ( ( (size_t)posix_result < cb_ptr->size ) &&
+                             ( (cb_ptr->addr + (haddr_t)posix_result) >= file_ptr->eof ) ) {
 
-                        remaining_buffer = (void *)
-			  ((uint8_t *)(cb_ptr->buf) + remaining_buffer_size);
+                            size_t remaining_buffer_size;
+                            void * remaining_buffer;
+#if H5FD_SEC2_AIO_FINISH__DEBUG
+                            HDfprintf(stdout, "%s: Filling in read past eof with nulls.\n",
+                                      FUNC);
+#endif /* H5FD_SEC2_AIO_FINISH__DEBUG */
 
-                        HDmemset(remaining_buffer, 0, remaining_buffer_size);
+                            remaining_buffer_size = 
+                                    (size_t)(cb_ptr->size) - (size_t)posix_result;
 
+                            remaining_buffer = (void *)
+			              ((uint8_t *)(cb_ptr->buf) + remaining_buffer_size);
+
+                            HDmemset(remaining_buffer, 0, remaining_buffer_size);
+
+                        } else {
+
+                            /* flag an error -- although if we get serious about error
+                             * recovery, it would make sense to attempt an SIO read here
+                             * instead.
+                             *
+                             * must set *errno_ptr to something other than 0 on failure.
+                             * The following seems reasonable, but feel free to change it.
+                             */
+#if H5FD_SEC2_AIO_FINISH__DEBUG
+                            HDfprintf(stdout, "%s: Incomplete read -- flagging error.\n", 
+                                      FUNC);
+#endif /* H5FD_SEC2_AIO_FINISH__DEBUG */
+
+                             *errno_ptr = EIO;
+
+                             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, \
+                                         "couldn't complete the read.")
+
+                        }
                     } else if ( cb_ptr->op == H5FD_SEC2_AIO_OP__WRITE ) {
 
                         /* must set *errno_ptr to something other than 0
@@ -2191,13 +2248,21 @@ H5FD_sec2_aio_finish(int *errno_ptr,
                          */
                         *errno_ptr = EIO;
 
+#if H5FD_SEC2_AIO_FINISH__DEBUG
+                        HDfprintf(stdout,
+                          "%s: write successful, but bytes written = %lld, %lld expected.\n",
+                                  FUNC,
+                                  (long long)posix_result,
+                                  (long long)(cb_ptr->size));
+#endif /* H5FD_SEC2_AIO_FINISH__DEBUG */
+
                          HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
-                             "couldn't complete the write.")
+                                     "couldn't complete the write.")
 
                     } else {
 
                         /* note that we set cb_ptr->size to 0 in the 
-                         * case of aio_fsync().
+                         * case of HDaio_fsync().
                          */
                         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
                                     "this should be unreachable");
@@ -2218,7 +2283,7 @@ H5FD_sec2_aio_finish(int *errno_ptr,
                         "%s: unexpected errno = %d (%s). %d (%s) expected.\n",
                         FUNC, errno, strerror(errno), 
                         cb_ptr->err_num, strerror(cb_ptr->err_num));
-                    HDfprintf(stdout, "%s: aio_return() returned %lld.\n",
+                    HDfprintf(stdout, "%s: HDaio_return() returned %lld.\n",
                               FUNC, (long long)posix_result);
                 }
 #endif /* H5FD_SEC2_AIO_FINISH__DEBUG */
@@ -2227,7 +2292,7 @@ H5FD_sec2_aio_finish(int *errno_ptr,
                 if ( posix_result != -1 ) {
 
                     HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
-                        "op failed, but aio_return reports good status!?!.")
+                        "op failed, but HDaio_return reports good status!?!.")
                 }
 
                 switch ( cb_ptr->op ) {
@@ -2314,7 +2379,7 @@ H5FD_sec2_aio_finish(int *errno_ptr,
 		    break;
 
 		case H5FD_SEC2_AIO_OP__FSYNC:
-                    posix_result = fsync(cb_ptr->file_ptr->fd);
+                    posix_result = HDfsync(cb_ptr->file_ptr->fd);
 
                     if ( posix_result == 0 ) { /* success */
 
@@ -2324,7 +2389,7 @@ H5FD_sec2_aio_finish(int *errno_ptr,
 
                         *errno_ptr = errno;
                          HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, \
-                                     "fallback call to fsync() failed.")
+                                     "fallback call to HDfsync() failed.")
                     }
 		    break;
 
@@ -2493,7 +2558,7 @@ H5FD_sec2_aio_fsync(H5FD_t *file,
     ctlblk_ptr->retries  = -1;
 
     /* set ctlblk_ptr->size to zero so as to simplify processing in
-     * H5FD_sec2_aio_finish().  Needless to say, aio_fsync() doesn't
+     * H5FD_sec2_aio_finish().  Needless to say, HDaio_fsync() doesn't
      * get passed a size, and thus doesn't care.
      */
     ctlblk_ptr->size     = 0; 
@@ -2509,7 +2574,7 @@ H5FD_sec2_aio_fsync(H5FD_t *file,
      * haven't succeeded in queueing the fsync by the time we do a 
      * wait on it.
      */
-    posix_result = aio_fsync(O_SYNC, &(ctlblk_ptr->ctlblk));
+    posix_result = HDaio_fsync(O_SYNC, &(ctlblk_ptr->ctlblk));
 
     if ( posix_result != 0 ) {
 
@@ -2526,12 +2591,12 @@ H5FD_sec2_aio_fsync(H5FD_t *file,
 
 #if H5FD_SEC2_AIO_READ__DEBUG
             HDfprintf(stdout,
-                "%s: aio_fsync(O_SYNC, ctlblk) failed. errno = %d (%s)\n",
+                "%s: HDaio_fsync(O_SYNC, ctlblk) failed. errno = %d (%s)\n",
                 FUNC, errno, strerror(errno));
 #endif /* H5FD_SEC2_AIO_READ__DEBUG */
 
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, \
-                        "call to aio_fsync() failed.")
+                        "call to HDaio_fsync() failed.")
         }
     } else {
 
@@ -2587,11 +2652,32 @@ done:
  * Purpose:	Attempt to cancel the asynchronous operation associated 
  *		with the control block pointed to by ctlblk_ptr.  
  *
- *		Note that this 
- *		operation may have completed, but it is an error if 
- *		H5FD_sec2_aio_finish() has been called on it.
+ *		Note that this target operation may not have started, may
+ *		be in progress, or may have completed.  Note however, that
+ *		it is an error to call H5FD_sec2_aio_cancel() on an operation
+ *		if it has already been completed by a call to 
+ *		H5FD_sec2_aio_finish().
  *
- *		As part of the cancel, free the associated control blocks.
+ *		As part of the cancel, tidy up the operation and free the 
+ *		associated control block.
+ *
+ *		Note however, that "cancel and forget" feature of our 
+ *		implementation comes at a cost.  While we can cheaply 
+ *		cancel operation that have not yet started, or that 
+ *		have already completed, our management of operations that
+ *		are in progress are necessarily more time consuming -- at
+ *		least in the case of AIO reads and writes.  Here we must
+ *		await conclusion of AIO read/write operations that we 
+ *		are not able to cancel -- as if we don't, we risk the 
+ *		possiblity that the buffers used in these operations will
+ *		be freed before the operations complese.  This in turns 
+ *		opens the possibility of reads/writes to unallocated memory
+ *		and thus heap corruption.
+ *
+ *		In general, this is what we should do anyway, and further,
+ *		at least at this writing I would expect aio cancels to be
+ *		rare.  However, if either of these assertions proves untrue,
+ *		we will have to revisit the API for the aio cancel operation.
  *
  *		Return SUCCEED if successful, and the appropriate error 
  *		code otherwise.
@@ -2614,10 +2700,10 @@ H5FD_sec2_aio_cancel(void *ctlblk_ptr)
     herr_t      		ret_value = SUCCEED;       /* Return value */
     herr_t			result;
     hbool_t			cancel_succeeded = FALSE;
-    int				posix_result;
+    ssize_t			posix_result;
     H5FD_sec2_aio_ctlblk_t    * cb_ptr = NULL;
     H5FD_sec2_t               * file_ptr = NULL;
-
+    const struct HDaiocb      * aiocb_list[1] = { NULL };
     FUNC_ENTER_NOAPI(H5FD_sec2_aio_cancel, FAIL)
 
     if ( ( ctlblk_ptr == NULL ) ||
@@ -2631,7 +2717,7 @@ H5FD_sec2_aio_cancel(void *ctlblk_ptr)
 
     if ( ( cb_ptr->op != H5FD_SEC2_AIO_OP__READ ) &&
          ( cb_ptr->op != H5FD_SEC2_AIO_OP__WRITE ) &&
-         ( cb_ptr->op != H5FD_SEC2_AIO_OP__WRITE ) ) {
+         ( cb_ptr->op != H5FD_SEC2_AIO_OP__FSYNC ) ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
                     "Undefined or unknown ctlblk op on entry.")
@@ -2653,65 +2739,69 @@ H5FD_sec2_aio_cancel(void *ctlblk_ptr)
             /* the asynchronous operation has been queued -- must attempt
              * to cancel it.
              */
-	    posix_result = aio_cancel(cb_ptr->file_ptr->fd, &(cb_ptr->ctlblk));
+	    posix_result = HDaio_cancel(cb_ptr->file_ptr->fd, &(cb_ptr->ctlblk));
 
             switch ( posix_result ) {
 
                 case AIO_CANCELED: /* success */
+#if H5FD_SEC2_AIO_CANCEL__DEBUG
+		    HDfprintf(stdout, "%s: HDaio_cancel() reports AIO_CANCELED.\n", FUNC);
+#endif /* H5FD_SEC2_AIO_CANCEL__DEBUG */
                     /* verify that the cancel succeeded */
-                    posix_result = aio_error(&(cb_ptr->ctlblk));
+                    posix_result = HDaio_error(&(cb_ptr->ctlblk));
 
                     if ( posix_result != ECANCELED ) {
 
 #if H5FD_SEC2_AIO_CANCEL__DEBUG
 		    HDfprintf(stdout, 
-                      "%s: aio_error() returned %d after successful cancel.\n",
+                      "%s: HDaio_error() returned %d after successful cancel.\n",
                       FUNC, posix_result);
                     HDfprintf(stdout, "%s: errno = %d (%s).\n",
                               FUNC, errno, strerror(errno));
 #endif /* H5FD_SEC2_AIO_CANCEL__DEBUG */
                         HGOTO_ERROR(H5E_IO, H5E_AIOCANCELFAIL, FAIL, \
-                            "aio_error() didn't return ECANCELED after cancel.")
+                            "HDaio_error() didn't return ECANCELED after cancel.")
                     }
 
-		    /* call aio_return() to let the OS tidy up after the
+		    /* call HDaio_return() to let the OS tidy up after the
                      * operation 
                      */
-                    posix_result = aio_return(&(cb_ptr->ctlblk));
+                    posix_result = HDaio_return(&(cb_ptr->ctlblk));
 
                     if ( ( posix_result != -1 ) &&
                          ( errno != ECANCELED ) ) {
 
 #if H5FD_SEC2_AIO_CANCEL__DEBUG
 		    HDfprintf(stdout, 
-                      "%s: aio_return() returned %d after successful cancel.\n",
+                      "%s: HDaio_return() returned %d after successful cancel.\n",
                       FUNC, posix_result);
                     HDfprintf(stdout, "%s: errno = %d (%s).\n",
                               FUNC, errno, strerror(errno));
 #endif /* H5FD_SEC2_AIO_CANCEL__DEBUG */
                         HGOTO_ERROR(H5E_IO, H5E_AIOCANCELFAIL, FAIL, \
-                            "unexpected aio_return() after successful cancel.")
+                            "unexpected HDaio_return() after successful cancel.")
                     }
                     cancel_succeeded = TRUE;
                     break;
 
             	case AIO_NOTCANCELED:
-		    /* operation in progress when aio_cancel() was called.
+		    /* operation in progress when HDaio_cancel() was called.
                      *
                      * this is a bit sticky, as we can't just drop the 
-		     * operation on the floor.  Instead, we must hold on
-                     * to the associated control block until the operation
-                     * completes, and then discard it.
+		     * operation on the floor.  
                      *
-                     * The easy way to do this would be to just wait until
-                     * the operation completes, and call aio_return() on
-                     * it, and then discard the control block.  
+                     * To make things more difficult, if the operation 
+                     * is a read or write, it is possible that the operation 
+                     * has a dynamically allocated buffer associated with it.
+                     * Thus in the case of a read or a write, we must wait 
+                     * until the operation completes, call HDaio_return(), and 
+                     * then discard the control block.  
                      *
-                     * However, this would be a bit slow.  So instead,
-                     * we mark the operation as canceled, place it on
-                     * a canceled op queue, and check to see if any 
-                     * canceled ops have completed whenever we do 
-                     * anything else.
+                     * In the case of an fsync, no buffer can be associated 
+                     * with the operation.  In this case, we can mark the 
+                     * operation as canceled, place it on a canceled op 
+                     * queue, and check to see if any canceled ops have 
+                     * completed whenever we do anything else.
                      *
                      * Rather than duplicate code, just set the control
                      * block status to 
@@ -2721,29 +2811,94 @@ H5FD_sec2_aio_cancel(void *ctlblk_ptr)
                      * and deal with switching queues at the end of this
                      * function.
                      */
-                    cb_ptr->status = H5FD_SEC2_AIO_STATUS__CANCELED_IN_PROGRESS;
+#if H5FD_SEC2_AIO_CANCEL__DEBUG
+		    HDfprintf(stdout, "%s: HDaio_cancel() reports AIO_NOTCANCELED.\n", FUNC);
+#endif /* H5FD_SEC2_AIO_CANCEL__DEBUG */
+
+                    if ( ( cb_ptr->op == H5FD_SEC2_AIO_OP__READ ) ||
+                         ( cb_ptr->op == H5FD_SEC2_AIO_OP__WRITE ) ) {
+#if H5FD_SEC2_AIO_CANCEL__DEBUG
+                        HDfprintf(stdout, "%s: completing read or write\n", FUNC);
+#endif /* H5FD_SEC2_AIO_CANCEL__DEBUG */
+
+                        /* await the end of the read or write */
+			aiocb_list[0] = &(cb_ptr->ctlblk);
+                        posix_result = HDaio_suspend(aiocb_list, 1, NULL);
+
+                        if ( posix_result != 0 ) {
+#if H5FD_SEC2_AIO_CANCEL__DEBUG
+                            HDfprintf(stdout,
+                                "%s: HDaio_suspend() failed with errno = %d (%s).\n",
+                                FUNC, errno, strerror(errno));
+#endif /* H5FD_SEC2_AIO_CANCEL__DEBUG */
+                            HGOTO_ERROR(H5E_IO, H5E_AIOCANCELFAIL, FAIL, \
+                                        "HDaio_suspend() failed after in progress.");
+                        }
+
+                        /* call HDaio_return() to let the OS tidy up after the
+                         * operation 
+                         */
+                        posix_result = HDaio_return(&(cb_ptr->ctlblk));
+
+                        /* as we are trying to cancel the operation, the 
+                         * return value is typically of no interest.  However, if
+                         * desired for debugging purposes, display result if they 
+                         * indicate failure.
+                         */
+                        if ( posix_result == -1 ) {
+
+#if H5FD_SEC2_AIO_CANCEL__DEBUG
+		            HDfprintf(stdout, 
+                         "%s: HDaio_return() returned %d after successful HDaio_suspend().\n",
+                                      FUNC, posix_result);
+                            HDfprintf(stdout, "%s: errno = %d (%s).\n",
+                                      FUNC, errno, strerror(errno));
+#endif /* H5FD_SEC2_AIO_CANCEL__DEBUG */
+                        }
+
+                        cancel_succeeded = TRUE;
+
+                    } else {
+#if H5FD_SEC2_AIO_CANCEL__DEBUG
+                        HDfprintf(stdout, "%s: marked fsync canceled in progress\n", FUNC);
+#endif /* H5FD_SEC2_AIO_CANCEL__DEBUG */
+
+                        cb_ptr->status = H5FD_SEC2_AIO_STATUS__CANCELED_IN_PROGRESS;
+
+                    } 
                     break;
 
                 case AIO_ALLDONE: /* operation was alread completed */
 
-                    /* call aio_error() to verify that the op has completed */
-                    posix_result = aio_error(&(cb_ptr->ctlblk));
+#if H5FD_SEC2_AIO_CANCEL__DEBUG
+		    HDfprintf(stdout, "%s: HDaio_cancel() reports AIO_ALLDONE.\n", FUNC);
+#endif /* H5FD_SEC2_AIO_CANCEL__DEBUG */
 
-                    if ( posix_result == EINPROGRESS ) {
+                    /* On both Solaris and BSD, we run into problem if we 
+		     * use a call to HDaio_error() to verify that the aio operation
+                     * is, in fact, complete.
+                     *
+                     * On the one hand, given that the result of calling HDaio_return
+                     * on an operation that is not complete is specifically undefined,
+                     * it seems prudent to make this verification.
+                     *
+                     * On the other hand, the ommition doesn't seem to 
+                     * cause any problems on any system tested so far.
+                     *
+                     * Thus I've decided to ommit the call -- even though the 
+                     * standard does seem to indicate that it should succeed
+                     * in this case.
+                     */
 
-                        HGOTO_ERROR(H5E_IO, H5E_AIOCANCELFAIL, FAIL, \
-                            "aio_error() reports op still in progress.")
-                    }
-
-		    /* call aio_return() to let the OS tidy up after the
+		    /* call HDaio_return() to let the OS tidy up after the
                      * operation 
                      */
-                    posix_result = aio_return(&(cb_ptr->ctlblk));
+                    posix_result = HDaio_return(&(cb_ptr->ctlblk));
 
                     if ( posix_result == EINVAL ) {
 
                         HGOTO_ERROR(H5E_IO, H5E_AIOCANCELFAIL, FAIL, \
-                          "aio_return() failed after cancel after completion.")
+                          "HDaio_return() failed after cancel after completion.")
                     }
                     cancel_succeeded = TRUE;
                     break;
@@ -2751,21 +2906,21 @@ H5FD_sec2_aio_cancel(void *ctlblk_ptr)
                 case -1: /* error */ 
 #if H5FD_SEC2_AIO_CANCEL__DEBUG
 		    HDfprintf(stdout, 
-                              "%s: aio_cancel() failed with errno = %d(%s).\n",
+                              "%s: HDaio_cancel() failed with errno = %d(%s).\n",
                               FUNC, errno, strerror(errno));
 #endif /* H5FD_SEC2_AIO_CANCEL__DEBUG */
                     HGOTO_ERROR(H5E_IO, H5E_AIOCANCELFAIL, FAIL, \
-                                "call to aio_cancel() failed.")
+                                "call to HDaio_cancel() failed.")
                     break;
 
                 default:
 #if H5FD_SEC2_AIO_CANCEL__DEBUG
 		    HDfprintf(stdout, 
-                            "%s: aio_cancel() returned unexpected value %d.\n",
+                            "%s: HDaio_cancel() returned unexpected value %d.\n",
                             FUNC, posix_result);
 #endif /* H5FD_SEC2_AIO_CANCEL__DEBUG */
                     HGOTO_ERROR(H5E_IO, H5E_AIOCANCELFAIL, FAIL, \
-                        "call to aio_cancel() returned unexpected value.")
+                        "call to HDaio_cancel() returned unexpected value.")
 		    break;
             }
             break;
@@ -2816,7 +2971,8 @@ H5FD_sec2_aio_cancel(void *ctlblk_ptr)
 done:
 
     if ( ( cancel_succeeded ) ||
-         ( cb_ptr->status == H5FD_SEC2_AIO_STATUS__CANCELED_IN_PROGRESS ) ) { 
+         ( ( cb_ptr != NULL ) &&
+           ( cb_ptr->status == H5FD_SEC2_AIO_STATUS__CANCELED_IN_PROGRESS ) ) ) { 
 
         /* must remove the control block from the appropriate op list
          * and then release it.
@@ -2880,7 +3036,7 @@ done:
  *
  * Purpose:	Check the head of the canceled list for operations that 
  *		were canceled while in progress that have since completed.
- *		If any are found, call aio_return() on them, and discard
+ *		If any are found, call HDaio_return() on them, and discard
  *		the control blocks.
  *
  *		Return SUCCEED if no errors are detected, and FAIL 
@@ -2904,7 +3060,7 @@ H5FD_sec2_aio_cancel__retire_canceled_in_progress(H5FD_sec2_t * file_ptr)
     herr_t      		ret_value = SUCCEED;       /* Return value */
     herr_t			result;
     hbool_t			done = FALSE;
-    int				posix_result;
+    ssize_t			posix_result;
     H5FD_sec2_aio_ctlblk_t    * cb_ptr = NULL;
 
     FUNC_ENTER_NOAPI(H5FD_sec2_aio_cancel__retire_canceled_in_progress, FAIL)
@@ -2924,8 +3080,8 @@ H5FD_sec2_aio_cancel__retire_canceled_in_progress(H5FD_sec2_t * file_ptr)
                         "non-canceled op on canceled list")
         }
 
-        /* call aio_error() to see if the op has completed */
-        posix_result = aio_error(&(cb_ptr->ctlblk));
+        /* call HDaio_error() to see if the op has completed */
+        posix_result = HDaio_error(&(cb_ptr->ctlblk));
 
         if ( posix_result == EINPROGRESS ) {
 
@@ -2933,15 +3089,18 @@ H5FD_sec2_aio_cancel__retire_canceled_in_progress(H5FD_sec2_t * file_ptr)
 
         } else {
 
-	    /* call aio_return() to let the OS tidy up after the
+	    /* call HDaio_return() to let the OS tidy up after the
              * operation 
              */
-            posix_result = aio_return(&(cb_ptr->ctlblk));
+#if H5FD_SEC2_AIO_CANCEL__RETIRE_CANCELED_IN_PROGRESS__DEBUG
+	    HDfprintf(stdout, "%s: retiring head of canceled list.\n", FUNC);
+#endif /* H5FD_SEC2_AIO_CANCEL__RETIRE_CANCELED_IN_PROGRESS__DEBUG */
+            posix_result = HDaio_return(&(cb_ptr->ctlblk));
 
             if ( posix_result == EINVAL ) {
 
                 HGOTO_ERROR(H5E_IO, H5E_AIOCANCELFAIL, FAIL, \
-                       "aio_return() failed after cancel after completion.")
+                       "HDaio_return() failed after cancel after completion.")
             }
 
             H5FD_SEC2__DLL_REMOVE(cb_ptr, \
