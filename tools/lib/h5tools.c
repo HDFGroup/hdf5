@@ -622,7 +622,7 @@ h5tools_ncols(const char *s)
 }
 
 /*-------------------------------------------------------------------------
- * Function: H5Tdetect_vlen_str
+ * Function: h5tools_detect_vlen_str
  *
  * Purpose: Recursive check for variable length string of a datatype.
  *
@@ -631,7 +631,7 @@ h5tools_ncols(const char *s)
  *-------------------------------------------------------------------------
  */
 htri_t
-H5Tdetect_vlen_str(hid_t tid)
+h5tools_detect_vlen_str(hid_t tid)
 {
     int i = 0;
     int n = 0;
@@ -644,7 +644,7 @@ H5Tdetect_vlen_str(hid_t tid)
     tclass = H5Tget_class(tid);
     if (tclass == H5T_ARRAY) {
         hid_t btid = H5Tget_super(tid);
-        has_vlen_str = H5Tdetect_vlen_str(btid);
+        has_vlen_str = h5tools_detect_vlen_str(btid);
         H5Tclose(btid);
         return has_vlen_str;
     }
@@ -652,7 +652,7 @@ H5Tdetect_vlen_str(hid_t tid)
         n = H5Tget_nmembers(tid);
         for (i = 0; i < n; i++) {
             hid_t mtid = H5Tget_member_type(tid, i);
-            has_vlen_str = H5Tdetect_vlen_str(mtid);
+            has_vlen_str = h5tools_detect_vlen_str(mtid);
             if (has_vlen_str == TRUE) {
                 H5Tclose(mtid);
                 return TRUE;
@@ -2030,7 +2030,9 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
     size_row_block = sset->block.data[row_dim];
 
     /* Check if we have VL data in the dataset's datatype */
-    if (H5Tdetect_vlen_str(p_type) == TRUE)
+    if (h5tools_detect_vlen_str(p_type) == TRUE)
+        vl_data = TRUE;
+    if (H5Tdetect_class(p_type, H5T_VLEN) == TRUE)
         vl_data = TRUE;
 
     /* display loop */
@@ -2468,7 +2470,9 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info,
     }
 
     /* Check if we have VL data in the dataset's datatype */
-    if (H5Tdetect_vlen_str(p_type) == TRUE)
+    if (h5tools_detect_vlen_str(p_type) == TRUE)
+        vl_data = TRUE;
+    if (H5Tdetect_class(p_type, H5T_VLEN) == TRUE)
         vl_data = TRUE;
  
     /*

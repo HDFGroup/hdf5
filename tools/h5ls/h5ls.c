@@ -1457,8 +1457,10 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
             unsigned int        vl_data = 0; /* contains VL datatypes */
 
             /* Check if we have VL data in the dataset's datatype */
-            if (H5Tdetect_vlen_str(p_type) == TRUE)
+            if (h5tools_detect_vlen_str(p_type) == TRUE)
                 vl_data = TRUE;
+    		if (H5Tdetect_class(p_type, H5T_VLEN) == TRUE)
+        		vl_data = TRUE;
 
             temp_need= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
             assert(temp_need == (hsize_t)((size_t)temp_need));
