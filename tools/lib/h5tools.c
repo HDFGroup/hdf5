@@ -627,6 +627,48 @@ h5tools_ncols(const char *s)
 }
 
 /*-------------------------------------------------------------------------
+ * Function: h5tools_detect_vlen_str
+ *
+ * Purpose: Recursive check for variable length string of a datatype.
+ *
+ * Return: TRUE if type conatains a variable string type, else FALSE
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+h5tools_detect_vlen_str(hid_t tid)
+{
+    int i = 0;
+    int n = 0;
+    htri_t has_vlen_str = FALSE;
+    H5T_class_t tclass = -1;
+
+    if (H5Tis_variable_str(tid) == TRUE)
+        return TRUE;
+
+    tclass = H5Tget_class(tid);
+    if (tclass == H5T_ARRAY) {
+        hid_t btid = H5Tget_super(tid);
+        has_vlen_str = h5tools_detect_vlen_str(btid);
+        H5Tclose(btid);
+        return has_vlen_str;
+    }
+    else if (tclass == H5T_COMPOUND) {
+        n = H5Tget_nmembers(tid);
+        for (i = 0; i < n; i++) {
+            hid_t mtid = H5Tget_member_type(tid, i);
+            has_vlen_str = h5tools_detect_vlen_str(mtid);
+            if (has_vlen_str == TRUE) {
+                H5Tclose(mtid);
+                return TRUE;
+            }
+            H5Tclose(mtid);
+        }
+    }
+    return FALSE;
+}
+
+/*-------------------------------------------------------------------------
  * Audience:    Public
  * Chapter:     H5Tools Library
  * Purpose:     Emit a simple prefix to STREAM.
@@ -1981,6 +2023,9 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
     hsize_t           size_row_block;          /* size for blocks along rows */
     hsize_t           row_counter = 0;
 
+    /* VL data special information */
+    unsigned int        vl_data = 0; /* contains VL datatypes */
+
     if ((size_t) ctx->ndims > NELMTS(sm_size))
         H5E_THROW(FAIL, H5E_tools_min_id_g, "ndims and sm_size comparision failed");
 
@@ -1988,6 +2033,12 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
         init_acc_pos(ctx, total_size);
 
     size_row_block = sset->block.data[row_dim];
+
+    /* Check if we have VL data in the dataset's datatype */
+    if (h5tools_detect_vlen_str(p_type) == TRUE)
+        vl_data = TRUE;
+    if (H5Tdetect_class(p_type, H5T_VLEN) == TRUE)
+        vl_data = TRUE;
 
     /* display loop */
     for (; hyperslab_count > 0; temp_start[row_dim] += temp_stride[row_dim], hyperslab_count--) {
@@ -2071,6 +2122,10 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
             ctx->sm_pos = elmtno;
 
             h5tools_dump_simple_data(stream, info, dset, ctx, flags, sm_nelmts, p_type, sm_buf);
+
+            /* Reclaim any VL memory, if necessary */
+            if (vl_data)
+                H5Dvlen_reclaim(p_type, sm_space, H5P_DEFAULT, sm_buf);
 
             if(H5Sclose(sm_space) < 0)
                 H5E_THROW(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
@@ -2420,9 +2475,11 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info,
     }
 
     /* Check if we have VL data in the dataset's datatype */
+    if (h5tools_detect_vlen_str(p_type) == TRUE)
+        vl_data = TRUE;
     if (H5Tdetect_class(p_type, H5T_VLEN) == TRUE)
         vl_data = TRUE;
-
+ 
     /*
      * Determine the strip mine size and allocate a buffer. The strip mine is
      * a hyperslab whose size is manageable.

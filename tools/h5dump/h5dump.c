@@ -867,8 +867,11 @@ table_list_free(void)
 
         /* Free each table */
         free_table(table_list.tables[u].group_table);
+        HDfree(table_list.tables[u].group_table);
         free_table(table_list.tables[u].dset_table);
+        HDfree(table_list.tables[u].dset_table);
         free_table(table_list.tables[u].type_table);
+        HDfree(table_list.tables[u].type_table);
     }
 
     /* Free the table list */
@@ -1204,7 +1207,9 @@ print_datatype(hid_t type,unsigned in_group)
                 indentation(indent + COL);
                 printf("H5T_OPAQUE;\n");
                 indentation(indent + COL);
-                printf("OPAQUE_TAG \"%s\";\n", H5Tget_tag(type));
+                mname = H5Tget_tag(type);
+                printf("OPAQUE_TAG \"%s\";\n", mname);
+                free(mname);
                 indentation(indent);
                 break;
 
@@ -1503,8 +1508,11 @@ dump_selected_attr(hid_t loc_id, const char *name)
     obj_name = (char *)HDmalloc((size_t)j + 2);
 
     /* find the last / */
-    while(name[j] != '/' && j >= 0)
+    while(j >= 0) {
+        if (name[j] == '/')
+            break;
         j--;
+    }
 
     /* object name */
     if(j == -1)
@@ -2601,10 +2609,19 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
             char        string_prefix[64];
             h5tool_format_t    string_dataformat;
 
+            /* VL data special information */
+            unsigned int        vl_data = 0; /* contains VL datatypes */
+
             type = H5Aget_type(obj_id);
             p_type = h5tools_get_native_type(type);
 
             ndims = H5Sget_simple_extent_dims(space, size, NULL);
+
+            /* Check if we have VL data in the dataset's datatype */
+            if (h5tools_detect_vlen_str(p_type) == TRUE)
+                vl_data = TRUE;
+            if (H5Tdetect_class(p_type, H5T_VLEN) == TRUE)
+                vl_data = TRUE;
 
             for (i = 0; i < ndims; i++)
                 nelmts *= size[i];
@@ -2645,6 +2662,10 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
 
             status = h5tools_dump_mem(stdout, outputformat, obj_id, p_type,
                                     space, buf, depth);
+
+            /* Reclaim any VL memory, if necessary */
+            if (vl_data)
+                H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
 
             free(buf);
             H5Tclose(p_type);
@@ -2772,8 +2793,7 @@ dump_comment(hid_t obj_id)
 
     cmt_bufsize = H5Oget_comment(obj_id, comment, buf_size);
 
-    /* if the actual length of the comment is longer than cmt_bufsize, then call
-     * H5Oget_comment again with the correct value.
+    /* call H5Oget_comment again with the correct value.
      * If the call to H5Oget_comment returned an error, skip this block */
     if (cmt_bufsize > 0) {
         comment = (char *)HDmalloc((size_t)(cmt_bufsize+1)); /* new_size including null terminator */
@@ -4711,6 +4731,7 @@ main(int argc, const char *argv[])
                     "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
                     "xsi:schemaLocation=\"http://hdfgroup.org/DTDs/HDF5-File "
                     "http://www.hdfgroup.org/DTDs/HDF5-File.xsd\">\n",xmlnsprefix,ns);
+                HDfree(ns);
             }
         } else {
                 printf("<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n",
@@ -5731,9 +5752,17 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
             H5Tclose(type);
         } else if (H5Tget_class(type) == H5T_STRING) {
             status = xml_print_strs(obj_id, ATTRIBUTE_DATA);
-        } else {
-            /* all other data */
+        } else {  /* all other data */
+            /* VL data special information */
+            unsigned int vl_data = 0; /* contains VL datatypes */
+            
             p_type = h5tools_get_native_type(type);
+
+            /* Check if we have VL data in the dataset's datatype */
+            if (h5tools_detect_vlen_str(p_type) == TRUE)
+                vl_data = TRUE;
+            if (H5Tdetect_class(p_type, H5T_VLEN) == TRUE)
+                vl_data = TRUE;
 
             H5Tclose(type);
 
@@ -5750,6 +5779,10 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
             if (H5Aread(obj_id, p_type, buf) >= 0)
                 status = h5tools_dump_mem(stdout, outputformat, obj_id,
                                               p_type, space, buf, depth);
+
+            /* Reclaim any VL memory, if necessary */
+            if (vl_data)
+                H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
 
             free(buf);
             H5Tclose(p_type);
