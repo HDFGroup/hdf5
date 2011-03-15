@@ -92,6 +92,7 @@ IF (BUILD_TESTING)
           COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${outfile} -${vparam} -s ${srcname} -d ${dstname}
       )
     ENDIF (NOT "${ARGN}" STREQUAL "")
+    # resultcode=2 will cause the test to skip the diff test
     IF (NOT ${resultcode} STREQUAL "2")
       ADD_TEST (
           NAME H5COPY-DIFF_${testname}
