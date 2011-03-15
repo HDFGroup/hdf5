@@ -291,13 +291,13 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (ext_link_f 2 ${HDF_EXT_SRC_FILE} v /group_ext/extlink_dset /copy2_dset ext)
 
   # "Test copying dangling external link (no obj) directly without -f ext"
-  ADD_H5_TEST (ext_dangle_noobj 0 ${HDF_EXT_SRC_FILE} v /group_ext/extlink_notyet1 /copy_dangle1_1)
+  ADD_H5_TEST (ext_dangle_noobj 2 ${HDF_EXT_SRC_FILE} v /group_ext/extlink_notyet1 /copy_dangle1_1)
 
   # "Test copying dangling external link (no obj) directly with -f ext"
   ADD_H5_TEST (ext_dangle_noobj_f 2 ${HDF_EXT_SRC_FILE} v /group_ext/extlink_notyet1 /copy_dangle1_2 ext)
 
   # "Test copying dangling external link (no file) directly without -f ext"
-  ADD_H5_TEST (ext_dangle_nofile 0 ${HDF_EXT_SRC_FILE} v /group_ext/extlink_notyet2 /copy_dangle2_1)
+  ADD_H5_TEST (ext_dangle_nofile 2 ${HDF_EXT_SRC_FILE} v /group_ext/extlink_notyet2 /copy_dangle2_1)
 
   # "Test copying dangling external link (no file) directly with -f ext"
   ADD_H5_TEST (ext_dangle_nofile_f 2 ${HDF_EXT_SRC_FILE} v /group_ext/extlink_notyet2 /copy_dangle2_2 ext)
