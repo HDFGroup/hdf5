@@ -273,9 +273,9 @@ IF (BUILD_TESTING)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME H5DIFF-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${ARGN})
-      IF (${resultcode} STREQUAL "1")
+      IF (NOT ${resultcode} STREQUAL "0")
         SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-      ENDIF (${resultcode} STREQUAL "1")
+      ENDIF (NOT ${resultcode} STREQUAL "0")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5DIFF-${resultfile}
