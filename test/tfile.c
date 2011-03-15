@@ -109,6 +109,9 @@
 #define FILE5			"tfile5.h5"	/* Test file */
 #define TEST_THRESHOLD10        10		/* Free space section threshold */
 
+/* Declaration for test_libver_macros2() */
+#define FILE6			"tfile6.h5"	/* Test file */
+
 const char *OLD_FILENAME[] = {  /* Files created under 1.6 branch and 1.8 branch */
     "filespace_1_6.h5",	/* 1.6 HDF5 file */
     "filespace_1_8.h5"	/* 1.8 HDF5 file */
@@ -3124,7 +3127,6 @@ test_libver_macros(void)
     unsigned	major = H5_VERS_MAJOR;
     unsigned	minor = H5_VERS_MINOR;
     unsigned	release = H5_VERS_RELEASE;
-    herr_t	ret;                    /* Return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing macros for library version comparison\n"));
@@ -3159,6 +3161,70 @@ test_libver_macros(void)
     VERIFY(H5_VERSION_LE(major,minor-1,release+1), FALSE, "H5_VERSION_LE");
     VERIFY(H5_VERSION_LE(major,minor,release-1), FALSE, "H5_VERSION_LE");
 } /* test_libver_macros() */
+
+/****************************************************************
+**
+**  test_libver_macros2():
+**	Verify that H5_VERSION_GE works correactly and show how
+**      to use it.
+**
+****************************************************************/
+static void
+test_libver_macros2(void)
+{
+    hid_t    file;
+    hid_t    grp;
+    htri_t   status;
+    herr_t   ret;                    /* Return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing macros for library version comparison with a file\n"));
+
+    /*
+     * Create a file.
+     */
+    file = H5Fcreate(FILE6, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /*
+     * Create a group in the file.
+     */
+    grp = H5Gcreate(file, "Group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Gcreate");
+
+    /*
+     * Close the group
+     */
+    ret = H5Gclose(grp);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* 
+     * Delete the group using different function based on the library version.
+     *  And verify the action. 
+     */
+#if H5_VERSION_GE(1,8,0)
+    ret = H5Ldelete(file, "Group", H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lunlink");
+
+    status = H5Lexists(file, "Group", H5P_DEFAULT);
+    VERIFY(status, FALSE, "H5Lexists");
+#else
+    ret = H5Gunlink(file, "Group");
+    CHECK(ret, FAIL, "H5Gunlink");
+
+    H5E_BEGIN_TRY {
+        grp = H5Gopen(file, "Group");
+    } H5E_END_TRY;
+    VERIFY(grp, FAIL, "H5Gopen");
+#endif
+
+    /*
+     * Close the file.
+     */
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* test_libver_macros2() */
 
 /****************************************************************
 **
@@ -3341,6 +3407,7 @@ test_file(void)
     test_filespace_compatible();/* Test compatibility for file space management */
     test_libver_bounds();       /* Test compatibility for file space management */
     test_libver_macros();       /* Test the macros for library version comparison */
+    test_libver_macros2();      /* Test the macros for library version comparison */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_deprec();              /* Test deprecated routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
