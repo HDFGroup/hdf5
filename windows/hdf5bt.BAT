@@ -25,9 +25,6 @@ rem .  /log              Log the build and test results in files defined by
 rem .                      environment variables HDF5BUILD_LOG and
 rem .                      HDF5CHECK_LOG
 rem .  /?                Help information
-rem By Xuan Bai
-rem Created: Aug. 16, 2004
-rem Last Updated: Scott Wegner, 7/2/08
 
 rem This batch file makes the following assumptions:
 rem    - The appropriate version of Visual Studio is installed and setup

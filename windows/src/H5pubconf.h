@@ -54,6 +54,10 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #define H5_FC_FUNC_(name,NAME) NAME
 
+/* LAHEY compiler for C identifiers containing underscores. */
+/* #define H5_FC_FUNC(name,NAME) name ## _ */
+/* #define H5_FC_FUNC_(name,NAME) name ## _ */
+
 /* Define if your system can handle overflow converting floating-point to
    integer values. */
 #define H5_FP_TO_INTEGER_OVERFLOW_WORKS 1

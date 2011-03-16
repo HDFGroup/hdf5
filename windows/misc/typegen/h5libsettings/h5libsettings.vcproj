@@ -76,7 +76,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile=".\Release/h5libsettings.pdb"
 				SubSystem="1"
@@ -167,7 +167,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile=".\Release/h5libsettings.pdb"
 				SubSystem="1"
@@ -256,7 +256,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/h5libsettings.pdb"
@@ -347,7 +347,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/h5libsettings.pdb"
@@ -392,16 +392,6 @@
 				RelativePath="..\..\..\..\src\H5make_libsettings.c"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;fi;fd"
-			>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-			>
 		</Filter>
 	</Files>
 	<Globals>

@@ -2103,49 +2103,73 @@
 ./windows/examples/writetest/writetest.vcproj
 ./windows/examples/writetestdll/writetestdll.vcproj
 
+#lahey compiler file
+./windows/fortran/src/hdf5_fortrandll_lf.def
+
 # Fortran Examples
 ./windows/fortran/examples/allf90examples/allf90examples.sln
 ./windows/fortran/examples/allf90examples/allf90examples.vcproj
+./windows/fortran/examples/allf90examples/lahey_allf90examples.sln
+./windows/fortran/examples/attreexampletest/attreexampletest.lfproj
 ./windows/fortran/examples/attreexampletest/attreexampletest.vfproj
 ./windows/fortran/examples/attreexampletestdll/attreexampletestdll.vfproj
+./windows/fortran/examples/compoundtest/compoundtest.lfproj
 ./windows/fortran/examples/compoundtest/compoundtest.vfproj
 ./windows/fortran/examples/compoundtestdll/compoundtestdll.vfproj
+./windows/fortran/examples/dsetexampletest/dsetexampletest.lfproj
 ./windows/fortran/examples/dsetexampletest/dsetexampletest.vfproj
 ./windows/fortran/examples/dsetexampletestdll/dsetexampletestdll.vfproj
+./windows/fortran/examples/fileexampletest/fileexampletest.lfproj
 ./windows/fortran/examples/fileexampletest/fileexampletest.vfproj
 ./windows/fortran/examples/fileexampletestdll/fileexampletestdll.vfproj
+./windows/fortran/examples/groupexampletest/groupexampletest.lfproj
 ./windows/fortran/examples/groupexampletest/groupexampletest.vfproj
 ./windows/fortran/examples/groupexampletestdll/groupexampletestdll.vfproj
+./windows/fortran/examples/grpdsetexampletest/grpdsetexampletest.lfproj
 ./windows/fortran/examples/grpdsetexampletest/grpdsetexampletest.vfproj
 ./windows/fortran/examples/grpdsetexampletestdll/grpdsetexampletestdll.vfproj
+./windows/fortran/examples/grpittest/grpittest.lfproj
 ./windows/fortran/examples/grpittest/grpittest.vfproj
 ./windows/fortran/examples/grpittestdll/grpittestdll.vfproj
+./windows/fortran/examples/grpsexampletest/grpsexampletest.lfproj
 ./windows/fortran/examples/grpsexampletest/grpsexampletest.vfproj
 ./windows/fortran/examples/grpsexampletestdll/grpsexampletestdll.vfproj
+./windows/fortran/examples/hyperslabtest/hyperslabtest.lfproj
 ./windows/fortran/examples/hyperslabtest/hyperslabtest.vfproj
 ./windows/fortran/examples/hyperslabtestdll/hyperslabtestdll.vfproj
+./windows/fortran/examples/mountexampletest/mountexampletest.lfproj
 ./windows/fortran/examples/mountexampletest/mountexampletest.vfproj
 ./windows/fortran/examples/mountexampletestdll/mountexampletestdll.vfproj
+./windows/fortran/examples/refobjexampletest/refobjexampletest.lfproj
 ./windows/fortran/examples/refobjexampletest/refobjexampletest.vfproj
 ./windows/fortran/examples/refobjexampletestdll/refobjexampletestdll.vfproj
+./windows/fortran/examples/refregexampletest/refregexampletest.lfproj
 ./windows/fortran/examples/refregexampletest/refregexampletest.vfproj
 ./windows/fortran/examples/refregexampletestdll/refregexampletestdll.vfproj
+./windows/fortran/examples/rwdsetexampletest/rwdsetexampletest.lfproj
 ./windows/fortran/examples/rwdsetexampletest/rwdsetexampletest.vfproj
 ./windows/fortran/examples/rwdsetexampletestdll/rwdsetexampletestdll.vfproj
+./windows/fortran/examples/selecteletest/selecteletest.lfproj
 ./windows/fortran/examples/selecteletest/selecteletest.vfproj
 ./windows/fortran/examples/selecteletestdll/selecteletestdll.vfproj
 
 # Fortran Tests
 ./windows/fortran/test/checkfortrantests.bat
+./windows/fortran/test/flush1_fortran/flush1_fortran.lfproj
 ./windows/fortran/test/flush1_fortran/flush1_fortran.vfproj
 ./windows/fortran/test/flush1_fortrandll/flush1_fortrandll.vfproj
+./windows/fortran/test/flush2_fortran/flush2_fortran.lfproj
 ./windows/fortran/test/flush2_fortran/flush2_fortran.vfproj
 ./windows/fortran/test/flush2_fortrandll/flush2_fortrandll.vfproj
+./windows/fortran/test/libtest_cstubdll/lahey_libtest_cstubdll.vcproj
 ./windows/fortran/test/libtest_cstubdll/libtest_cstubdll.vcproj
 ./windows/fortran/test/libtest_fortran/libtest_cstub.vcproj
+./windows/fortran/test/libtest_fortran/libtest_fortran.lfproj
 ./windows/fortran/test/libtest_fortran/libtest_fortran.vfproj
 ./windows/fortran/test/libtest_fortrandll/libtest_fortrandll.vfproj
+./windows/fortran/test/testhdf5_fortran/testhdf5_fortran.lfproj
 ./windows/fortran/test/testhdf5_fortran/testhdf5_fortran.vfproj
+./windows/fortran/test/testhdf5_fortran_1_8/testhdf5_fortran_1_8.lfproj
 ./windows/fortran/test/testhdf5_fortran_1_8/testhdf5_fortran_1_8.vfproj
 ./windows/fortran/test/testhdf5_fortran_1_8dll/testhdf5_fortran_1_8dll.vfproj
 ./windows/fortran/test/testhdf5_fortrandll/testhdf5_fortrandll.vfproj
@@ -2203,16 +2227,21 @@
 # High-Level Fortran Examples
 ./windows/hl/fortran/examples/test_hl_f90examples.BAT
 ./windows/hl/fortran/examples/allhlf90examples/allhlf90examples.sln
+./windows/hl/fortran/examples/allhlf90examples/lahey_allhlf90examples.sln
 ./windows/hl/fortran/examples/allhlf90examples/allhlf90examples.vcproj
+./windows/hl/fortran/examples/ex_lite/ex_lite.lfproj
 ./windows/hl/fortran/examples/ex_lite/ex_lite.vfproj
 ./windows/hl/fortran/examples/ex_litedll/ex_litedll.vfproj
 
 # High-Level Fortran Tests
 ./windows/hl/fortran/test/checkhlfortrantests.bat
+./windows/hl/fortran/test/hl_test_image_fortran/hl_test_image_fortran.lfproj
 ./windows/hl/fortran/test/hl_test_image_fortran/hl_test_image_fortran.vfproj
 ./windows/hl/fortran/test/hl_test_image_fortrandll/hl_test_image_fortrandll.vfproj
+./windows/hl/fortran/test/hl_test_lite_fortran/hl_test_lite_fortran.lfproj
 ./windows/hl/fortran/test/hl_test_lite_fortran/hl_test_lite_fortran.vfproj
 ./windows/hl/fortran/test/hl_test_lite_fortrandll/hl_test_lite_fortrandll.vfproj
+./windows/hl/fortran/test/hl_test_table_fortran/hl_test_table_fortran.lfproj
 ./windows/hl/fortran/test/hl_test_table_fortran/hl_test_table_fortran.vfproj
 ./windows/hl/fortran/test/hl_test_table_fortrandll/hl_test_table_fortrandll.vfproj
 
@@ -2238,7 +2267,9 @@
 ./windows/hl/tools/gifconvdll/h52gifdll.vcproj
 
 # Misc. Projects
+./windows/misc/typegen/h5fort_type_defines/h5fort_type_defines.lfproj
 ./windows/misc/typegen/h5fort_type_defines/h5fort_type_defines.vfproj
+./windows/misc/typegen/h5fortran_detect/h5fortran_detect.lfproj
 ./windows/misc/typegen/h5fortran_detect/h5fortran_detect.vfproj
 ./windows/misc/typegen/h5match_types/h5match_types.vcproj
 ./windows/misc/typegen/h5tinit/h5tinit.vcproj
@@ -2254,12 +2285,15 @@
 ./windows/proj/all/all.vcproj
 ./windows/proj/all_fortran/all_fortran.sln
 ./windows/proj/all_fortran/all_fortran.vcproj
+./windows/proj/lahey_all_fortran/all_fortran.sln
+./windows/proj/lahey_all_fortran/all_fortran.vcproj
 ./windows/proj/hdf5/hdf5.vcproj
 ./windows/proj/hdf5_cpp/hdf5_cpp.vcproj
 ./windows/proj/hdf5_cppdll/hdf5_cppdll.vcproj
 ./windows/proj/hdf5dll/hdf5dll.vcproj
 ./windows/proj/hdf5_f90cstub/hdf5_f90cstub.vcproj
 ./windows/proj/hdf5_f90cstubdll/hdf5_f90cstubdll.vcproj
+./windows/proj/hdf5_fortran/hdf5_fortran.lfproj
 ./windows/proj/hdf5_fortran/hdf5_fortran.vfproj
 ./windows/proj/hdf5_fortrandll/hdf5_fortrandll.vfproj
 ./windows/proj/hdf5_hl/hdf5_hl.vcproj
@@ -2268,6 +2302,7 @@
 ./windows/proj/hdf5_hldll/hdf5_hldll.vcproj
 ./windows/proj/hdf5_hl_f90cstubdll/hdf5_hl_f90cstubdll.vcproj
 ./windows/proj/hdf5_hl_fortran/hdf5_hl_f90cstub.vcproj
+./windows/proj/hdf5_hl_fortran/hdf5_hl_fortran.lvfproj
 ./windows/proj/hdf5_hl_fortran/hdf5_hl_fortran.vfproj
 ./windows/proj/hdf5_hl_fortrandll/hdf5_hl_fortrandll.vfproj
 

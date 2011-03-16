@@ -354,6 +354,11 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;fi;fd"
+			>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

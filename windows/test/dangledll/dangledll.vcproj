@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="dangledll"
 	ProjectGUID="{D15E5D9B-A1A6-4935-889C-D880FD0068CE}"
+	RootNamespace="dangledll"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -75,7 +76,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\../../../test/dangledll/Debug/dangledll.pdb"
@@ -165,7 +166,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\../../../test/dangledll/Debug/dangledll.pdb"
@@ -255,7 +256,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile=".\../../../test/dangledll/Release/dangledll.pdb"
 				SubSystem="1"
@@ -345,7 +346,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile=".\../../../test/dangledll/Release/dangledll.pdb"
 				SubSystem="1"
@@ -382,48 +383,6 @@
 		<File
 			RelativePath="..\..\..\test\dangle.c"
 			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					Optimization="0"
-					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
-					BasicRuntimeChecks="3"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Debug|x64"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					Optimization="0"
-					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
-					BasicRuntimeChecks="3"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					Optimization="2"
-					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|x64"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					Optimization="2"
-					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
-				/>
-			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>
