@@ -3189,7 +3189,7 @@ test_libver_macros2(void)
     /*
      * Create a group in the file.
      */
-    grp = H5Gcreate(file, "Group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    grp = H5Gcreate2(file, "Group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Gcreate");
 
     /*
