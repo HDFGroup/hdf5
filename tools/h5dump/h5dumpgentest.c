@@ -2844,11 +2844,11 @@ static void gent_array1_big(void)
     hsize_t  stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t  count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t  block[SPACE1_RANK];     /* Block size of hyperslab */
-    start[0]=0;
-    stride[0]=1;
-    count[0]=999;
-    block[0]=1;
-    hdset_reg_ref_t   *wbuf;    /* buffer to write to disk */
+    hdset_reg_ref_t   *wbuf;         /* buffer to write to disk */
+    start[0] = 0;
+    stride[0] = 1;
+    count[0] = 999;
+    block[0] = 1;
     /* Allocate write & read buffers */
     wbuf = (hdset_reg_ref_t*) calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
 
