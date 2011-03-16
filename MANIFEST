@@ -2302,7 +2302,7 @@
 ./windows/proj/hdf5_hldll/hdf5_hldll.vcproj
 ./windows/proj/hdf5_hl_f90cstubdll/hdf5_hl_f90cstubdll.vcproj
 ./windows/proj/hdf5_hl_fortran/hdf5_hl_f90cstub.vcproj
-./windows/proj/hdf5_hl_fortran/hdf5_hl_fortran.lvfproj
+./windows/proj/hdf5_hl_fortran/hdf5_hl_fortran.lfproj
 ./windows/proj/hdf5_hl_fortran/hdf5_hl_fortran.vfproj
 ./windows/proj/hdf5_hl_fortrandll/hdf5_hl_fortrandll.vfproj
 
