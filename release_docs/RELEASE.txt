@@ -506,6 +506,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed memory leak for h5diff when accessing symbolic links with 
+          --follow-symlink option. Bug#2214  (JKM 2011/3/18)
         - Fixed memory leak for h5diff when access variable length string
           data. Bug#2216 (JKM 2011/3/18)
         - Fixed and improved help page for -a option of h5ls. 

@@ -1958,9 +1958,6 @@ hsize_t diff(hid_t file1_id,
             if(options->m_verbose)
                 print_found(nfound);
 
-            /* free link info buffer */
-            HDfree(linkinfo1.trg_path);
-            HDfree(linkinfo2.trg_path);
             }
             break;
 
@@ -2007,10 +2004,6 @@ hsize_t diff(hid_t file1_id,
                                   file2_id, path2, 
                                   options, linkinfo1.trg_type);
                 } 
-
-                /* free link info buffer */
-                HDfree(linkinfo1.trg_path);
-                HDfree(linkinfo2.trg_path);
             } /* end if */
             else 
             {
@@ -2044,6 +2037,12 @@ hsize_t diff(hid_t file1_id,
             options->not_cmp = 1;
             break;
      }
+
+    /* free link info buffer */
+    if (linkinfo1.trg_path)
+        HDfree(linkinfo1.trg_path);
+    if (linkinfo2.trg_path)
+        HDfree(linkinfo2.trg_path);
 
     return nfound;
 
