@@ -622,6 +622,55 @@ h5tools_ncols(const char *s)
 }
 
 /*-------------------------------------------------------------------------
+ * Function: h5tools_detect_vlen_data
+ *
+ * Purpose: Recursive check for any variable length data in given type.
+ *
+ * Return: TRUE if type conatains any variable length data, else FALSE
+ * 
+ * Programmer: Jonathan Kim  March 18, 2011
+ * 
+ * Note: Adopted from h5tools_detect_vlen_str() which only check
+ *       vlen-string data in type.
+ *-------------------------------------------------------------------------
+ */
+htri_t
+h5tools_detect_vlen_data(hid_t tid)
+{
+    int i = 0;
+    int n = 0;
+    htri_t has_vlen_str = FALSE;
+    H5T_class_t tclass = -1;
+
+    /* detect any vlen data in type */
+    if (H5Tdetect_class(tid, H5T_VLEN) == TRUE ||           /* VLEN-data */
+        H5Tis_variable_str(tid) == TRUE)                    /* VLEN-string*/
+        return TRUE;
+
+    tclass = H5Tget_class(tid);
+    if (tclass == H5T_ARRAY) {
+        hid_t btid = H5Tget_super(tid);
+        has_vlen_str = h5tools_detect_vlen_data(btid);
+        H5Tclose(btid);
+        return has_vlen_str;
+    }
+    else if (tclass == H5T_COMPOUND) {
+        n = H5Tget_nmembers(tid);
+        for (i = 0; i < n; i++) {
+            hid_t mtid = H5Tget_member_type(tid, i);
+            has_vlen_str = h5tools_detect_vlen_data(mtid);
+            if (has_vlen_str == TRUE) {
+                H5Tclose(mtid);
+                return TRUE;
+            }
+            H5Tclose(mtid);
+        }
+    }
+    return FALSE;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function: h5tools_detect_vlen_str
  *
  * Purpose: Recursive check for variable length string of a datatype.
