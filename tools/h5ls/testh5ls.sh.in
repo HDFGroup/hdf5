@@ -15,6 +15,10 @@
 #
 # Tests for the h5ls tool
 
+TESTNAME=h5ls
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
 H5LS=h5ls               # The tool name
 H5LS_BIN=`pwd`/$H5LS    # The path of the tool binary
 
@@ -26,12 +30,20 @@ WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
 
 nerrors=0
 verbose=yes
+h5haveexitcode=yes	    # default is yes
 
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
     srcdir=.
 fi
 test -d ../testfiles || mkdir ../testfiles
+
+# RUNSERIAL is used. Check if it can return exit code from executalbe correctly.
+if [ -n "$RUNSERIAL_NOEXITCODE" ]; then
+    echo "***Warning*** Serial Exit Code is not passed back to shell corretly."
+    echo "***Warning*** Exit code checking is skipped."
+    h5haveexitcode=no
+fi
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -70,7 +82,7 @@ TOOLTEST() {
     
     exitcode=$?
     cat $actual_err >> $actual
-    if [ $exitcode -ne $retvalexpect ]; then
+    if [ $h5haveexitcode = 'yes' -a $exitcode -ne $retvalexpect ]; then
 	echo "*FAILED*"
 	nerrors="`expr $nerrors + 1`"
 	if [ yes = "$verbose" ]; then
@@ -123,22 +135,52 @@ TOOLTEST tgroup-3.ls 0 -w80 tgroup.h5/g1
 TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
 TOOLTEST tgroup-2.ls 0 -w80 -g tgroup.h5/g1
 
+# test for files with groups that have long comments
+TOOLTEST tgrp_comments.ls 0 -w80 -v -g tgrp_comments.h5/glongcomment
+
 # test for displaying simple space datasets
 TOOLTEST tdset-1.ls 0 -w80 -r -d tdset.h5
 
 # test for displaying soft links
 TOOLTEST tslink-1.ls 0 -w80 -r tslink.h5
 
-# test for displaying external and user-defined links
+# test for displaying more soft links with --follow-symlinks
+TOOLTEST tsoftlinks-1.ls 0 --follow-symlinks tsoftlinks.h5
+TOOLTEST tsoftlinks-2.ls 0 --follow-symlinks -r tsoftlinks.h5
+TOOLTEST tsoftlinks-3.ls 0 --follow-symlinks tsoftlinks.h5/group1
+TOOLTEST tsoftlinks-4.ls 0 --follow-symlinks -r tsoftlinks.h5/group1
+TOOLTEST tsoftlinks-5.ls 0 --follow-symlinks tsoftlinks.h5/soft_dset1
+
+# test for displaying external and user-defined links with --follow-symlinks
 TOOLTEST textlink-1.ls 0 -w80 -r textlink.h5
-TOOLTEST textlinksrc-1.ls 0 -w80 -Er textlinksrc.h5
-TOOLTEST textlinksrc-2.ls 0 -w80 -Erv textlinksrc.h5/ext_link5
-TOOLTEST textlinksrc-3.ls 0 -w80 -Er textlinksrc.h5/ext_link1
+TOOLTEST textlinksrc-1.ls 0 -w80 --follow-symlinks -r textlinksrc.h5
+TOOLTEST textlinksrc-2.ls 0 -w80 --follow-symlinks -rv textlinksrc.h5/ext_link5
+TOOLTEST textlinksrc-3.ls 0 -w80 --follow-symlinks -r textlinksrc.h5/ext_link1
 TOOLTEST textlinksrc-4.ls 0 -w80 -r textlinksrc.h5
 TOOLTEST textlinksrc-5.ls 0 -w80 -r textlinksrc.h5/ext_link1
-TOOLTEST textlinksrc-6.ls 0 -w80 -E textlinksrc.h5
-TOOLTEST textlinksrc-7.ls 0 -w80 -E textlinksrc.h5/ext_link1
+TOOLTEST textlinksrc-6.ls 0 -w80 --follow-symlinks textlinksrc.h5
+TOOLTEST textlinksrc-7.ls 0 -w80 --follow-symlinks textlinksrc.h5/ext_link1
 TOOLTEST tudlink-1.ls 0 -w80 -r tudlink.h5
+
+# test for displaying external links with -E
+# the option -E will be depriciated but keep it for backward compatibility
+TOOLTEST textlinksrc-1-old.ls 0 -w80 -Er textlinksrc.h5
+TOOLTEST textlinksrc-2-old.ls 0 -w80 -Erv textlinksrc.h5/ext_link5
+TOOLTEST textlinksrc-3-old.ls 0 -w80 -Er textlinksrc.h5/ext_link1
+TOOLTEST textlinksrc-6-old.ls 0 -w80 -E textlinksrc.h5
+TOOLTEST textlinksrc-7-old.ls 0 -w80 -E textlinksrc.h5/ext_link1
+
+# tests for no-dangling-links 
+# if this option is given on dangling link, h5ls should return exit code 1
+# when used alone , expect to print out help and return exit code 1
+TOOLTEST textlinksrc-nodangle-1.ls 1 -w80 --no-dangling-links textlinksrc.h5
+# external dangling link - expected exit code 1
+TOOLTEST textlinksrc-nodangle-2.ls 1 -w80 --follow-symlinks --no-dangling-links textlinksrc.h5
+# soft dangling link - expected exit code 1
+TOOLTEST tsoftlinks-nodangle-1.ls 1 -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5
+# when used file with no dangling links - expected exit code 0
+TOOLTEST thlinks-nodangle-1.ls 0 -w80 --follow-symlinks --no-dangling-links thlink.h5
+
 
 # tests for hard links
 TOOLTEST thlink-1.ls 0 -w80 thlink.h5
@@ -148,6 +190,12 @@ TOOLTEST tcomp-1.ls 0 -w80 -r -d tcompound.h5
 
 #test for the nested compound type
 TOOLTEST tnestcomp-1.ls 0 -w80 -r -d tnestedcomp.h5
+
+TOOLTEST tnestcomp-2.ls 0 -w80 -r -d -S tnestedcomp.h5
+
+TOOLTEST tnestcomp-3.ls 0 -w80 -r -d -l tnestedcomp.h5
+
+TOOLTEST tnestcomp-4.ls 0 -w80 -r -d -l -S tnestedcomp.h5
 
 # test for loop detection
 TOOLTEST tloop-1.ls 0 -w80 -r -d tloop.h5
@@ -192,7 +240,9 @@ fi
 
 
 if test $nerrors -eq 0 ; then
-	echo "All h5ls tests passed."
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
 fi
-
-exit $nerrors

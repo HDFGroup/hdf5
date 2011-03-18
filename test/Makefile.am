@@ -23,10 +23,10 @@ include $(top_srcdir)/config/commence.am
 
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
-# Test script for error_test, err_compat, and fsync
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh fsync_tests.sh
+# Test script for error_test and err_compat
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh fsync_tests.sh
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) fsync_tests.c$(EXEEXT)
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) fsync_tests.c$(EXEEXT)
 
 
 # These are our main targets. They should be listed in the order to be
@@ -36,10 +36,10 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) fsync_tests.c$(EXEEXT)
 # These tests (fheap, btree2) are under development and are not used by
 # the library yet. Move them to the end so that their failure do not block
 # other current library code tests.
-TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
-           pool hyperslab istore bittests dt_arith \
-           dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
-           fillval mount flush1 flush2 app_ref enum \
+TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
+           pool accum hyperslab istore bittests dt_arith \
+           dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
+           big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe \
            getname vfd ntypes dangle dtransform reserved cross_read \
            freespace mf farray earray btree2 fheap
@@ -50,8 +50,7 @@ TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
-check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta \
-	fsync_tests
+check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env  fsync_tests
 
 
 # These programs generate test files for the tests.  They don't need to be
@@ -63,7 +62,8 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta \
 # so do not appear in this list.
 BUILD_ALL_PROGS=gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
     gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
-    gen_nullspace gen_udlinks space_overflow gen_filespace gen_specmetaread
+    gen_nullspace gen_udlinks space_overflow gen_filespace gen_specmetaread \
+    gen_sizes_lheap
 
 if BUILD_ALL_CONDITIONAL
   noinst_PROGRAMS=$(BUILD_ALL_PROGS)
@@ -104,11 +104,11 @@ flush2.chkexe_: flush1.chkexe_
 # specifying a file prefix or low-level driver.  Changing the file
 # prefix or low-level driver with environment variables will influence
 # the temporary file name in ways that the makefile is not aware of.
-CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
+CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
     max_compact_dataset.h5 simple.h5 set_local.h5 random_chunks.h5 \
     huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_expand.h5 \
     copy_dcpl_newfile.h5 extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
-    sys_file1 tfile[1-4].h5 th5s[1-3].h5 lheap.h5 fheap.h5 ohdr.h5 \
+    sys_file1 tfile[1-5].h5 th5s[1-3].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 \
     dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
@@ -125,7 +125,7 @@ CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
     objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5       \
-    earray.h5
+    earray.h5 efc[0-5].h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
@@ -134,6 +134,6 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tvlstr.c tvltypes.c
 
 # Temporary files.
-DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh
+DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh fsync_tests.sh
 
 include $(top_srcdir)/config/conclude.am

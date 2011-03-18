@@ -13,11 +13,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
-
 #include "h5repack.h"
 #include "h5tools_utils.h"
 
@@ -109,7 +104,7 @@ obj_list_t* parse_filter(const char *str,
         if ( c==',' || j==end_obj-1)
         {
             if ( c==',') sobj[k]='\0'; else sobj[k+1]='\0';
-            strcpy(obj_list[n].obj,sobj);
+            HDstrcpy(obj_list[n].obj,sobj);
             memset(sobj,0,sizeof(sobj));
             n++;
             k=-1;
@@ -143,7 +138,7 @@ obj_list_t* parse_filter(const char *str,
                 * example SZIP=8,NN
                 *-------------------------------------------------------------------------
                 */
-                if (strcmp(scomp,"SZIP")==0)
+                if (HDstrcmp(scomp,"SZIP")==0)
                 {
                     l=-1; /* mask index check */
                     for ( m=0,u=i+1; u<len; u++,m++)
@@ -171,9 +166,9 @@ obj_list_t* parse_filter(const char *str,
                                 smask[l]='\0';
                                 i=len-1; /* end */
                                 (*n_objs)--; /* we counted an extra ',' */
-                                if (strcmp(smask,"NN")==0)
+                                if (HDstrcmp(smask,"NN")==0)
                                     filt->cd_values[j++]=H5_SZIP_NN_OPTION_MASK;
-                                else if (strcmp(smask,"EC")==0)
+                                else if (HDstrcmp(smask,"EC")==0)
                                     filt->cd_values[j++]=H5_SZIP_EC_OPTION_MASK;
                                 else
                                 {
@@ -203,7 +198,7 @@ obj_list_t* parse_filter(const char *str,
                   *-------------------------------------------------------------------------
                 */
 
-                else if (strcmp(scomp,"SOFF")==0)
+                else if (HDstrcmp(scomp,"SOFF")==0)
                 {
                     l=-1; /* mask index check */
                     for ( m=0,u=i+1; u<len; u++,m++)
@@ -231,9 +226,9 @@ obj_list_t* parse_filter(const char *str,
                                 smask[l]='\0';
                                 i=len-1; /* end */
                                 (*n_objs)--; /* we counted an extra ',' */
-                                if (strcmp(smask,"IN")==0)
+                                if (HDstrcmp(smask,"IN")==0)
                                     filt->cd_values[j++]=H5Z_SO_INT;
-                                else if (strcmp(smask,"DS")==H5Z_SO_FLOAT_DSCALE)
+                                else if (HDstrcmp(smask,"DS")==H5Z_SO_FLOAT_DSCALE)
                                     filt->cd_values[j++]=H5Z_SO_FLOAT_DSCALE;
                                 else
                                 {
@@ -290,7 +285,7 @@ obj_list_t* parse_filter(const char *str,
    * H5Z_FILTER_NONE
    *-------------------------------------------------------------------------
    */
-   if (strcmp(scomp,"NONE")==0)
+   if (HDstrcmp(scomp,"NONE")==0)
    {
        filt->filtn=H5Z_FILTER_NONE;
        filt->cd_nelmts = 0;
@@ -300,7 +295,7 @@ obj_list_t* parse_filter(const char *str,
    * H5Z_FILTER_DEFLATE
    *-------------------------------------------------------------------------
    */
-   else if (strcmp(scomp,"GZIP")==0)
+   else if (HDstrcmp(scomp,"GZIP")==0)
    {
        filt->filtn=H5Z_FILTER_DEFLATE;
        filt->cd_nelmts = 1;
@@ -316,7 +311,7 @@ obj_list_t* parse_filter(const char *str,
    * H5Z_FILTER_SZIP
    *-------------------------------------------------------------------------
    */
-   else if (strcmp(scomp,"SZIP")==0)
+   else if (HDstrcmp(scomp,"SZIP")==0)
    {
        filt->filtn=H5Z_FILTER_SZIP;
        filt->cd_nelmts = 2;
@@ -332,7 +327,7 @@ obj_list_t* parse_filter(const char *str,
    * H5Z_FILTER_SHUFFLE
    *-------------------------------------------------------------------------
    */
-   else if (strcmp(scomp,"SHUF")==0)
+   else if (HDstrcmp(scomp,"SHUF")==0)
    {
        filt->filtn=H5Z_FILTER_SHUFFLE;
        filt->cd_nelmts = 0;
@@ -347,7 +342,7 @@ obj_list_t* parse_filter(const char *str,
    * H5Z_FILTER_FLETCHER32
    *-------------------------------------------------------------------------
    */
-   else if (strcmp(scomp,"FLET")==0)
+   else if (HDstrcmp(scomp,"FLET")==0)
    {
        filt->filtn=H5Z_FILTER_FLETCHER32;
        filt->cd_nelmts = 0;
@@ -362,7 +357,7 @@ obj_list_t* parse_filter(const char *str,
    * H5Z_FILTER_NBIT
    *-------------------------------------------------------------------------
    */
-   else if (strcmp(scomp,"NBIT")==0)
+   else if (HDstrcmp(scomp,"NBIT")==0)
    {
        filt->filtn=H5Z_FILTER_NBIT;
        filt->cd_nelmts = 0;
@@ -377,7 +372,7 @@ obj_list_t* parse_filter(const char *str,
    * H5Z_FILTER_SCALEOFFSET
    *-------------------------------------------------------------------------
    */
-   else if (strcmp(scomp,"SOFF")==0)
+   else if (HDstrcmp(scomp,"SOFF")==0)
    {
        filt->filtn=H5Z_FILTER_SCALEOFFSET;
        filt->cd_nelmts = 2;
@@ -437,7 +432,7 @@ obj_list_t* parse_filter(const char *str,
            error_msg("pixels_per_block is too large in <%s>\n",str);
            exit(EXIT_FAILURE);
        }
-       if ( (strcmp(smask,"NN")!=0) && (strcmp(smask,"EC")!=0) )
+       if ( (HDstrcmp(smask,"NN")!=0) && (HDstrcmp(smask,"EC")!=0) )
        {
            if (obj_list) free(obj_list);
            error_msg("szip mask must be 'NN' or 'EC' \n");
@@ -530,7 +525,7 @@ obj_list_t* parse_layout(const char *str,
         if ( c==',' || j==end_obj-1)
         {
             if ( c==',') sobj[k]='\0'; else sobj[k+1]='\0';
-            strcpy(obj_list[n].obj,sobj);
+            HDstrcpy(obj_list[n].obj,sobj);
             memset(sobj,0,sizeof(sobj));
             n++;
             k=-1;
@@ -551,11 +546,11 @@ obj_list_t* parse_layout(const char *str,
         if (n==5)
         {
             slayout[n]='\0';  /*cut string */
-            if (strcmp(slayout,"COMPA")==0)
+            if (HDstrcmp(slayout,"COMPA")==0)
                 pack->layout=H5D_COMPACT;
-            else if (strcmp(slayout,"CONTI")==0)
+            else if (HDstrcmp(slayout,"CONTI")==0)
                 pack->layout=H5D_CONTIGUOUS;
-            else if (strcmp(slayout,"CHUNK")==0)
+            else if (HDstrcmp(slayout,"CHUNK")==0)
                 pack->layout=H5D_CHUNKED;
             else {
                 error_msg("in parse layout, not a valid layout in <%s>\n",str);
@@ -618,7 +613,7 @@ obj_list_t* parse_layout(const char *str,
                 else if (i==len-1) { /*no more parameters */
                     sdim[k]='\0';
                     k=0;
-                    if (strcmp(sdim,"NONE")==0)
+                    if (HDstrcmp(sdim,"NONE")==0)
                     {
                         pack->chunk.rank=-2;
                     }

@@ -24,7 +24,14 @@ $ type sys$input
         Running h5detect to create h5tinit.c
 $ define/user_mode sys$output h5tinit.c
 $ run h5detect
-$
+$!
+$ ccc h5make_libsettings.c
+$ link h5make_libsettings
+$ type sys$input
+        Running h5make_libsettings to create H5lib_settings.h
+$ define/user_mode sys$output H5lib_settings.h
+$ run h5make_libsettings
+$!
 $ type sys$input
          Creating  HDF5 library
 $!
@@ -44,10 +51,10 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5Gname, H5Gnode, H5Gobj, H5Goh, H5Groot, H5Gstab, H5Gtest, H5Gtraverse,"+-
         "H5HFbtree2, H5HF, H5HFcache, H5HFdbg, H5HFdblock, H5HFdtable, H5HFhdr, H5HFhuge, H5HFiblock,"+-
         "H5HFiter, H5HFman, H5HFsection, H5HFspace, H5HFstat, H5HFtest, H5HFtiny,"+-
-        "H5HG, H5HGcache, H5HGdbg, H5HL, H5HLcache, H5HLdbg, H5HLint, H5HP, H5I, H5L, H5Lexternal"
+        "H5HG, H5HGcache, H5HGdbg, H5HL, H5HLcache, H5HLdbg, H5HLint, H5HP, H5I, H5Itest, H5L, H5Lexternal"
 $ cobj1= "H5MFaggr, H5MF, H5MFdbg, H5MFsection, H5MM,"+-
         "H5MP, H5MPtest, H5Oainfo, H5Oalloc, H5Oattr, H5Oattribute, H5Obogus, H5Obtreek,"+-
-        "H5O, H5Ocache, H5Ocont, H5Ocopy, H5Odbg, H5Odrvinfo, H5Odtype, H5Oefl, H5Ofill, H5Ofsinfo,"+-
+        "H5O, H5Ocache, H5Ochunk, H5Ocont, H5Ocopy, H5Odbg, H5Odrvinfo, H5Odtype, H5Oefl, H5Ofill, H5Ofsinfo,"+-
         "H5Oginfo, H5Olayout, H5Olinfo, H5Olink, H5Omessage, H5Omtime, H5Oname, H5Onull, H5Opline,"+-
         "H5Orefcount, H5Osdspace, H5Oshared, H5Oshmesg, H5Ostab, H5Otest, H5Ounknown,"+-
         "H5Pacpl, H5P, H5Pdapl, H5Pdcpl, H5Pdeprec, H5Pdxpl, H5Pfapl, H5Pfcpl, H5Pfmpl, H5Pgcpl, H5Pint,"+-

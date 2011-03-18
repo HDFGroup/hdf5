@@ -75,13 +75,11 @@ typedef struct H5EA__test_ctx_t {
 static void *H5EA__test_crt_context(void *udata);
 static herr_t H5EA__test_dst_context(void *ctx);
 static herr_t H5EA__test_fill(void *nat_blk, size_t nelmts);
-static herr_t H5EA__test_encode(void *raw, const void *elmt, size_t nelmts,
-    void *ctx);
-static herr_t H5EA__test_decode(const void *raw, void *elmt, size_t nelmts,
-    void *ctx);
-static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth,
-    hsize_t idx, const void *elmt);
-
+static herr_t H5EA__test_encode(void *raw, const void *elmt, size_t nelmts, void *ctx);
+static herr_t H5EA__test_decode(const void *raw, void *elmt, size_t nelmts, void *ctx);
+static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt);
+static void *H5EA__test_crt_dbg_context(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED obj_addr);
+static herr_t H5EA__test_dst_dbg_context(void *_ctx);
 
 /*********************/
 /* Package Variables */
@@ -90,13 +88,16 @@ static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth,
 /* Extensible array testing class information */
 const H5EA_class_t H5EA_CLS_TEST[1]={{
     H5EA_CLS_TEST_ID,           /* Type of Extensible array */
+    "Testing",                  /* Name of Extensible Array class */
     sizeof(uint64_t),           /* Size of native element */
     H5EA__test_crt_context,     /* Create context */
     H5EA__test_dst_context,     /* Destroy context */
     H5EA__test_fill,            /* Fill block of missing elements callback */
     H5EA__test_encode,          /* Element encoding callback */
     H5EA__test_decode,          /* Element decoding callback */
-    H5EA__test_debug            /* Element debugging callback */
+    H5EA__test_debug,           /* Element debugging callback */
+    H5EA__test_crt_dbg_context, /* Create debugging context */
+    H5EA__test_dst_dbg_context  /* Destroy debugging context */
 }};
 
 
@@ -111,6 +112,9 @@ const H5EA_class_t H5EA_CLS_TEST[1]={{
 
 /* Declare a free list to manage the H5EA__test_ctx_t struct */
 H5FL_DEFINE_STATIC(H5EA__test_ctx_t);
+
+/* Declare a free list to manage the H5EA__ctx_cb_t struct */
+H5FL_DEFINE_STATIC(H5EA__ctx_cb_t);
 
 
 
@@ -337,6 +341,63 @@ H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
         (unsigned long long)*(const uint64_t *)elmt);
 
 END_FUNC(STATIC)  /* end H5EA__test_debug() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5EA__test_crt_dbg_context
+ *
+ * Purpose:     Create context for debugging callback
+ *              
+ * Return:      Success:        non-NULL
+ *              Failure:        NULL
+ *              
+ * Programmer:	Vailin Choi; August 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+void *, NULL, NULL,
+H5EA__test_crt_dbg_context(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED obj_addr))
+    
+    /* Local variables */
+    H5EA__ctx_cb_t *ctx;              /* Context for callbacks */
+    
+    /* Allocate new context structure */
+    if(NULL == (ctx = H5FL_MALLOC(H5EA__ctx_cb_t)))
+        H5E_THROW(H5E_CANTALLOC, "can't allocate extensible array client callback context")
+
+    /* Set return value */
+    ret_value = ctx;
+
+CATCH
+
+END_FUNC(STATIC)  /* end H5EA__test_crt_dbg_context() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__test_dst_dbg_context
+ *
+ * Purpose:	Destroy context for callbacks
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Vailin Choi; August 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, NOERR,
+herr_t, SUCCEED, -,
+H5EA__test_dst_dbg_context(void *_ctx))
+
+    /* Local variables */
+    H5EA__ctx_cb_t *ctx = (H5EA__ctx_cb_t *)_ctx;   /* Callback context to destroy */
+
+    HDassert(_ctx);
+
+    /* Release context structure */
+    ctx = H5FL_FREE(H5EA__ctx_cb_t, ctx);
+
+END_FUNC(STATIC)  /* end H5EA__test_dst_dbg_context() */
 
 
 /*-------------------------------------------------------------------------

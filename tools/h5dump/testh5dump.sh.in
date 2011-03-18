@@ -144,6 +144,107 @@ TOOLTEST1() {
 
 }
 
+# same as TOOLTEST1 but compares generated file to expected output
+#                   and compares the generated data file to the expected data file
+# used for the binary tests that expect a full path in -o without -b
+TOOLTEST2() {
+
+    expectdata="$srcdir/../testfiles/$1"
+    expect="$srcdir/../testfiles/`basename $1 .exp`.ddl"
+    actualdata="../testfiles/`basename $1 .exp`.txt"
+    actual="../testfiles/`basename $1 .exp`.out"
+    actual_err="../testfiles/`basename $1 .exp`.err"
+    shift
+
+    # Run test.
+    TESTING $DUMPER $@
+    (
+      
+      cd $srcdir/../testfiles
+      $RUNSERIAL $DUMPER_BIN $@
+    ) >$actual 2>$actual_err
+    cat $actual_err >> $actual
+
+    if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+     echo " CREATED"
+     cp $actual $expect
+    elif $CMP $expect $actual; then
+      if [ ! -f $expectdata ]; then
+      # Create the expect data file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actualdata $expectdata
+      elif $CMP $expectdata $actualdata; then
+        echo " PASSED"
+      else
+        echo "*FAILED*"
+        echo "    Expected datafile (*.exp) differs from actual datafile (*.txt)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expectdata $actualdata |sed 's/^/    /'
+      fi
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.ddl) differs from actual result (*.out)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+    
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actualdata $actual_err
+    fi
+
+}
+
+# same as TOOLTEST but filters error stack outp
+# Extract file name, line number, version and thread IDs because they may be different
+TOOLTEST3() {
+
+    expect="$srcdir/../testfiles/$1"
+    actual="../testfiles/`basename $1 .ddl`.out"
+    actual_err="../testfiles/`basename $1 .ddl`.err"
+    actual_ext="../testfiles/`basename $1 .ddl`.ext"
+    shift
+
+    # Run test.
+    TESTING $DUMPER $@
+    (
+      echo "#############################"
+      echo "Expected output for '$DUMPER $@'" 
+      echo "#############################"
+      cd $srcdir/../testfiles
+      $RUNSERIAL $DUMPER_BIN $@
+    ) >$actual 2>$actual_err
+
+    # Extract file name, line number, version and thread IDs because they may be different
+    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+        -e 's/line [0-9]*/line (number)/' \
+        -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
+        -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+        -e 's/H5Eget_auto[1-2]*/H5Eget_auto(1 or 2)/' \
+        -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
+     $actual_err > $actual_ext
+    cat $actual_ext >> $actual
+
+    if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+     echo " CREATED"
+     cp $actual $expect
+    elif $CMP $expect $actual; then
+     echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.ddl) differs from actual result (*.out)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
+
+}
 
 # Print a "SKIP" message
 SKIP() {
@@ -218,6 +319,8 @@ IMPORTTEST()
 ##############################################################################
 ##############################################################################
 
+# test for signed/unsigned datasets
+TOOLTEST packedbits.ddl packedbits.h5
 # test for displaying groups
 TOOLTEST tgroup-1.ddl tgroup.h5
 # test for displaying the selected groups
@@ -290,6 +393,8 @@ TOOLTEST tvlstr.ddl tvlstr.h5
 
 # test for files with array data
 TOOLTEST tarray1.ddl tarray1.h5
+# # added for bug# 2092 - tarray1_big.h
+TOOLTEST tarray1_big.ddl -R tarray1_big.h5
 TOOLTEST tarray2.ddl tarray2.h5
 TOOLTEST tarray3.ddl tarray3.h5
 TOOLTEST tarray4.ddl tarray4.h5
@@ -382,6 +487,12 @@ TOOLTEST tindicessub3.ddl -d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2  -k 1,2,2  taindices.
 
 # 4D case
 TOOLTEST tindicessub4.ddl -d 4d -s 0,0,1,2  -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2  taindices.h5
+
+#Exceed the dimensions for subsetting
+TOOLTEST1 texceedsubstart.ddl -d 1d -s 1,3 taindices.h5
+TOOLTEST1 texceedsubcount.ddl -d 1d -c 1,3 taindices.h5
+TOOLTEST1 texceedsubstride.ddl -d 1d -S 1,3 taindices.h5
+TOOLTEST1 texceedsubblock.ddl -d 1d -k 1,3 taindices.h5
 
 
 # tests for filters
@@ -482,13 +593,18 @@ if test -z "$HDF5_NOCLEANUP"; then
  rm -f $TESTDIR/out3.h5
 fi
 
-
-
 # test for dataset region references 
 TOOLTEST tdatareg.ddl tdatareg.h5
 TOOLTEST tdataregR.ddl -R tdatareg.h5
 TOOLTEST tattrreg.ddl tattrreg.h5
 TOOLTEST tattrregR.ddl -R tattrreg.h5
+
+TOOLTEST2   tbinregR.exp -d /Dataset1 -s 0 -R -y -o $TESTDIR/tbinregR.txt    tdatareg.h5
+
+# Clean up text output files
+if test -z "$HDF5_NOCLEANUP"; then
+ rm -f $TESTDIR/tbinregR.txt
+fi
 
 # tests for group creation order
 # "1" tracked, "2" name, root tracked
@@ -504,7 +620,6 @@ TOOLTEST torderattr2.ddl -H --sort_by=name --sort_order=descending torderattr.h5
 TOOLTEST torderattr3.ddl -H --sort_by=creation_order --sort_order=ascending torderattr.h5
 TOOLTEST torderattr4.ddl -H --sort_by=creation_order --sort_order=descending torderattr.h5
 
-
 # tests for floating point user defined printf format
 TOOLTEST tfpformat.ddl -m %.7f tfpformat.h5
 
@@ -512,7 +627,16 @@ TOOLTEST tfpformat.ddl -m %.7f tfpformat.h5
 TOOLTEST textlinksrc.ddl textlinksrc.h5
 TOOLTEST textlinkfar.ddl textlinkfar.h5
 
+# test for dangling external links
+TOOLTEST textlink.ddl textlink.h5
 
+# test for error stack display (BZ2048)
+TOOLTEST3 filter_fail.ddl -E filter_fail.h5
+
+# test for -o -y for dataset with attributes
+TOOLTEST tall-6.ddl -y -o data -d /g1/g1.1/dset1.1.1 tall.h5
+
+# Report test results and exit
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."
     exit $EXIT_SUCCESS

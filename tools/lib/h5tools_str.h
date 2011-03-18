@@ -33,20 +33,17 @@ extern char    *h5tools_str_reset(h5tools_str_t *str);
 extern char    *h5tools_str_trunc(h5tools_str_t *str, size_t size);
 extern char    *h5tools_str_fmt(h5tools_str_t *str, size_t start, const char *fmt);
 extern char    *h5tools_str_prefix(h5tools_str_t *str, const h5tool_format_t *info,
-                                   hsize_t elmtno, unsigned ndims, hsize_t min_idx[],
-                                   hsize_t max_idx[], h5tools_context_t *ctx);
+                        hsize_t elmtno, unsigned ndims, h5tools_context_t *ctx);
 /*
  * new functions needed to display region reference data
  */
 extern char    *h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
-                                   hsize_t elmtno, hsize_t *ptdata, unsigned ndims, hsize_t min_idx[],
+                                   hsize_t elmtno, hsize_t *ptdata, unsigned ndims, 
                                    hsize_t max_idx[], h5tools_context_t *ctx);
-extern void     h5tools_str_dump_region_blocks(h5tools_str_t *, hid_t, const h5tool_format_t *,
-                                   h5tools_context_t *ctx);
-extern void     h5tools_str_dump_region_points(h5tools_str_t *, hid_t, const h5tool_format_t *,
-                                   h5tools_context_t *ctx);
+extern void     h5tools_str_dump_region_blocks(h5tools_str_t *, hid_t, const h5tool_format_t *);
+extern void     h5tools_str_dump_region_points(h5tools_str_t *, hid_t, const h5tool_format_t *);
 extern void     h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info, hid_t container,
-                                   void *vp, h5tools_context_t *ctx);
+                                   void *vp);
 extern char    *h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info,
                                    hid_t container, hid_t type, void *vp,
                                    h5tools_context_t *ctx);

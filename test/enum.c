@@ -71,7 +71,7 @@ test_named(hid_t file)
     if(H5Tclose(type) < 0) FAIL_STACK_ERROR
 
     /* A smaller type */
-    if((type = H5Tcreate(H5T_ENUM, 1)) < 0) FAIL_STACK_ERROR
+    if((type = H5Tcreate(H5T_ENUM, (size_t)1)) < 0) FAIL_STACK_ERROR
     if(H5Tenum_insert(type, "RED",   CPTR(val8, E1_RED  )) < 0) FAIL_STACK_ERROR
     if(H5Tenum_insert(type, "GREEN", CPTR(val8, E1_GREEN)) < 0) FAIL_STACK_ERROR
     if(H5Tenum_insert(type, "BLUE",  CPTR(val8, E1_BLUE )) < 0) FAIL_STACK_ERROR

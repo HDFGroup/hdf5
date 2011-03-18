@@ -1780,6 +1780,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         } /* end if */
     } /* end if */
     else {
+#if 0 /* JRM -- 3/23/10 */ /* this is no longer always the case */
         /* Only one process can do the actual metadata write */
         if(file->mpi_rank != H5_PAR_META_WRITE)
 #ifdef LATER
@@ -1787,6 +1788,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 #else /* LATER */
             HGOTO_DONE(SUCCEED) /* skip the actual write */
 #endif /* LATER */
+#endif /* JRM */
     } /* end if */
 
     /* Write the data. */

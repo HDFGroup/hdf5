@@ -26,7 +26,7 @@
 #   Jonathan Kim:
 #    Improved to use single line
 #    Improved to check exit code (only serial mode, not necessary for parallel)
-#    Added test 400 - 425  (links with --follow-links option)
+#    Added test 400 - 425  (links with --follow-symlinks option)
 #    Added test 450 - 459  (dangling links)
 
 
@@ -54,6 +54,22 @@ FILE17=h5diff_ext2softlink_src.h5
 FILE18=h5diff_ext2softlink_trg.h5
 DANGLE_LINK_FILE1=h5diff_danglelinks1.h5
 DANGLE_LINK_FILE2=h5diff_danglelinks2.h5
+# group recursive
+GRP_RECURSE_FILE1=h5diff_grp_recurse1.h5
+GRP_RECURSE_FILE2=h5diff_grp_recurse2.h5
+# group recursive - same structure via external links through files
+GRP_RECURSE1_EXT=h5diff_grp_recurse_ext1.h5
+GRP_RECURSE2_EXT1=h5diff_grp_recurse_ext2-1.h5
+GRP_RECURSE2_EXT2=h5diff_grp_recurse_ext2-2.h5
+GRP_RECURSE2_EXT3=h5diff_grp_recurse_ext2-3.h5
+# same structure, same obj name with different value
+EXCLUDE_FILE1_1=h5diff_exclude1-1.h5
+EXCLUDE_FILE1_2=h5diff_exclude1-2.h5
+# different structure and obj names
+EXCLUDE_FILE2_1=h5diff_exclude2-1.h5
+EXCLUDE_FILE2_2=h5diff_exclude2-2.h5
+# compound type with multiple vlen string types
+COMP_VL_STRS_FILE=h5diff_comp_vl_strs.h5
 
 TESTNAME=h5diff
 EXIT_SUCCESS=0
@@ -67,6 +83,7 @@ DIFF='diff -c'
 
 nerrors=0
 verbose=yes
+h5haveexitcode=yes	    # default is yes
 pmode=			    # default to run h5diff tests
 mydomainname=`domainname 2>/dev/null`
 
@@ -102,6 +119,13 @@ while [ $# -gt 0 ]; do
 	;;
     esac
 done
+
+# RUNSERIAL is used. Check if it can return exit code from executalbe correctly.
+if [ -n "$RUNSERIAL_NOEXITCODE" ]; then
+    echo "***Warning*** Serial Exit Code is not passed back to shell corretly."
+    echo "***Warning*** Exit code checking is skipped."
+    h5haveexitcode=no
+fi
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -154,6 +178,13 @@ STDOUT_FILTER() {
 #    LA-MPI: *** Copyright 2001-2004, ACL, Los Alamos National Laboratory
 # 3. h5diff debug output:
 #    Debug output all have prefix "h5diff debug: ".
+# 4. AIX system prints messages like these when it is aborting:
+#    ERROR: 0031-300  Forcing all remote tasks to exit due to exit code 1 in task 0
+#    ERROR: 0031-250  task 4: Terminated
+#    ERROR: 0031-250  task 3: Terminated
+#    ERROR: 0031-250  task 2: Terminated
+#    ERROR: 0031-250  task 1: Terminated
+
 STDERR_FILTER() {
     result_file=$1
     tmp_file=/tmp/h5test_tmp_$$
@@ -165,9 +196,10 @@ STDERR_FILTER() {
     fi
     # Filter LANL MPI messages
     # and LLNL srun messages
+    # and AIX error messages
     if test -n "$pmode"; then
 	cp $result_file $tmp_file
-	sed -e '/^LA-MPI:/d' -e '/^srun:/d' \
+	sed -e '/^LA-MPI:/d' -e '/^srun:/d' -e '/^ERROR:/d' \
 	    < $tmp_file > $result_file
     fi
     # Filter h5diff debug output
@@ -224,7 +256,7 @@ TOOLTEST() {
     # is from mpirun not tool)
     # if any problem occurs relate to an exit code, it will be caught in 
     # serial mode, so the test is fullfilled.
-    if test -z "$pmode"; then
+    if test $h5haveexitcode = 'yes' -a -z "$pmode"; then
       echo "EXIT CODE: $EXIT_CODE" >> $actual
     fi
 
@@ -234,7 +266,7 @@ TOOLTEST() {
         cp $actual $expect
     elif $CMP $expect $actual; then
         echo " PASSED"
-    elif test -z "$pmode"; then
+    elif test $h5haveexitcode = 'yes' -a -z "$pmode"; then
         echo "*FAILED*"
         echo "    Expected result ($expect) differs from actual result ($actual)"
         nerrors="`expr $nerrors + 1`"
@@ -296,7 +328,6 @@ SKIP() {
 # ############################################################################
 # # Common usage
 # ############################################################################
-
 
 # 1.0
 TOOLTEST h5diff_10.txt -h
@@ -416,6 +447,9 @@ TOOLTEST h5diff_58.txt -v $FILE7 $FILE8 refreg
 
 # 6.0: Check if the command line number of arguments is less than 3
 TOOLTEST h5diff_600.txt $FILE1 
+
+# 6.1: Check if non-exist object name is specified 
+TOOLTEST h5diff_601.txt $FILE1 $FILE1 nono_obj
 
 
 # ##############################################################################
@@ -558,126 +592,201 @@ TOOLTEST h5diff_206.txt -c $FILE2 $FILE2 g2/dset7  g2/dset8
 TOOLTEST h5diff_207.txt -c $FILE2 $FILE2 g2/dset8  g2/dset9
 
 # ##############################################################################
-# # Links compare without --follow-links nor --no-dangling-links
+# # Links compare without --follow-symlinks nor --no-dangling-links
 # ##############################################################################
 # test for bug1749
 TOOLTEST h5diff_300.txt -v $FILE12 $FILE12 /link_g1 /link_g2
 
 # ##############################################################################
-# # Links compare with --follow-links Only
+# # Links compare with --follow-symlinks Only
 # ##############################################################################
 # soft links file to file
-TOOLTEST h5diff_400.txt --follow-links -v $FILE13 $FILE13
+TOOLTEST h5diff_400.txt --follow-symlinks -v $FILE13 $FILE13
 
 # softlink vs dset"
-TOOLTEST h5diff_401.txt --follow-links -v $FILE13 $FILE13 /softlink_dset1_1 /target_dset2
+TOOLTEST h5diff_401.txt --follow-symlinks -v $FILE13 $FILE13 /softlink_dset1_1 /target_dset2
 
 # dset vs softlink"
-TOOLTEST h5diff_402.txt --follow-links -v $FILE13 $FILE13 /target_dset2 /softlink_dset1_1
+TOOLTEST h5diff_402.txt --follow-symlinks -v $FILE13 $FILE13 /target_dset2 /softlink_dset1_1
 
 # softlink vs softlink"
-TOOLTEST h5diff_403.txt --follow-links -v $FILE13 $FILE13 /softlink_dset1_1 /softlink_dset2
+TOOLTEST h5diff_403.txt --follow-symlinks -v $FILE13 $FILE13 /softlink_dset1_1 /softlink_dset2
 
 # extlink vs extlink (FILE)"
-TOOLTEST h5diff_404.txt --follow-links -v $FILE15 $FILE15
+TOOLTEST h5diff_404.txt --follow-symlinks -v $FILE15 $FILE15
 
 # extlink vs dset"
-TOOLTEST h5diff_405.txt --follow-links -v $FILE15 $FILE16 /ext_link_dset1 /target_group2/x_dset
+TOOLTEST h5diff_405.txt --follow-symlinks -v $FILE15 $FILE16 /ext_link_dset1 /target_group2/x_dset
 
 # dset vs extlink"
-TOOLTEST h5diff_406.txt --follow-links -v $FILE16 $FILE15 /target_group2/x_dset /ext_link_dset1
+TOOLTEST h5diff_406.txt --follow-symlinks -v $FILE16 $FILE15 /target_group2/x_dset /ext_link_dset1
 
 # extlink vs extlink"
-TOOLTEST h5diff_407.txt --follow-links -v $FILE15 $FILE15 /ext_link_dset1 /ext_link_dset2
+TOOLTEST h5diff_407.txt --follow-symlinks -v $FILE15 $FILE15 /ext_link_dset1 /ext_link_dset2
 
 # softlink vs extlink"
-TOOLTEST h5diff_408.txt --follow-links -v $FILE13 $FILE15 /softlink_dset1_1 /ext_link_dset2
+TOOLTEST h5diff_408.txt --follow-symlinks -v $FILE13 $FILE15 /softlink_dset1_1 /ext_link_dset2
 
 # extlink vs softlink "
-TOOLTEST h5diff_409.txt --follow-links -v $FILE15 $FILE13 /ext_link_dset2 /softlink_dset1_1
+TOOLTEST h5diff_409.txt --follow-symlinks -v $FILE15 $FILE13 /ext_link_dset2 /softlink_dset1_1
 
 # linked_softlink vs linked_softlink (FILE)"
-TOOLTEST h5diff_410.txt --follow-links -v $FILE14 $FILE14
+TOOLTEST h5diff_410.txt --follow-symlinks -v $FILE14 $FILE14
 
 # dset2 vs linked_softlink_dset1"
-TOOLTEST h5diff_411.txt --follow-links -v $FILE14 $FILE14 /target_dset2 /softlink1_to_slink2
+TOOLTEST h5diff_411.txt --follow-symlinks -v $FILE14 $FILE14 /target_dset2 /softlink1_to_slink2
 
 # linked_softlink_dset1 vs dset2"
-TOOLTEST h5diff_412.txt --follow-links -v $FILE14 $FILE14 /softlink1_to_slink2 /target_dset2
+TOOLTEST h5diff_412.txt --follow-symlinks -v $FILE14 $FILE14 /softlink1_to_slink2 /target_dset2
 
 # linked_softlink_to_dset1 vs linked_softlink_to_dset2"
-TOOLTEST h5diff_413.txt --follow-links -v $FILE14 $FILE14 /softlink1_to_slink2 /softlink2_to_slink2
+TOOLTEST h5diff_413.txt --follow-symlinks -v $FILE14 $FILE14 /softlink1_to_slink2 /softlink2_to_slink2
 
 # group vs linked_softlink_group1"
-TOOLTEST h5diff_414.txt --follow-links -v $FILE14 $FILE14 /target_group /softlink3_to_slink2
+TOOLTEST h5diff_414.txt --follow-symlinks -v $FILE14 $FILE14 /target_group /softlink3_to_slink2
 
 # linked_softlink_group1 vs group"
-TOOLTEST h5diff_415.txt --follow-links -v $FILE14 $FILE14 /softlink3_to_slink2 /target_group
+TOOLTEST h5diff_415.txt --follow-symlinks -v $FILE14 $FILE14 /softlink3_to_slink2 /target_group
 
 # linked_softlink_to_group1 vs linked_softlink_to_group2"
-TOOLTEST h5diff_416.txt --follow-links -v $FILE14 $FILE14 /softlink3_to_slink2 /softlink4_to_slink2
+TOOLTEST h5diff_416.txt --follow-symlinks -v $FILE14 $FILE14 /softlink3_to_slink2 /softlink4_to_slink2
 
 # non-exist-softlink vs softlink"
-TOOLTEST h5diff_417.txt --follow-links -v $FILE13 $FILE13 /softlink_noexist /softlink_dset2
+TOOLTEST h5diff_417.txt --follow-symlinks -v $FILE13 $FILE13 /softlink_noexist /softlink_dset2
 
 # softlink vs non-exist-softlink"
-TOOLTEST h5diff_418.txt --follow-links -v $FILE13 $FILE13 /softlink_dset2 /softlink_noexist
+TOOLTEST h5diff_418.txt --follow-symlinks -v $FILE13 $FILE13 /softlink_dset2 /softlink_noexist
 
 # non-exist-extlink_file vs extlink"
-TOOLTEST h5diff_419.txt --follow-links -v $FILE15 $FILE15 /ext_link_noexist2 /ext_link_dset2
+TOOLTEST h5diff_419.txt --follow-symlinks -v $FILE15 $FILE15 /ext_link_noexist2 /ext_link_dset2
 
 # exlink vs non-exist-extlink_file"
-TOOLTEST h5diff_420.txt --follow-links -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist2
+TOOLTEST h5diff_420.txt --follow-symlinks -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist2
 
 # extlink vs non-exist-extlink_obj"
-TOOLTEST h5diff_421.txt --follow-links -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist1
+TOOLTEST h5diff_421.txt --follow-symlinks -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist1
 
 # non-exist-extlink_obj vs extlink"
-TOOLTEST h5diff_422.txt --follow-links -v $FILE15 $FILE15 /ext_link_noexist1 /ext_link_dset2
+TOOLTEST h5diff_422.txt --follow-symlinks -v $FILE15 $FILE15 /ext_link_noexist1 /ext_link_dset2
 
 # extlink_to_softlink_to_dset1 vs dset2"
-TOOLTEST h5diff_423.txt --follow-links -v $FILE17 $FILE18 /ext_link_to_slink1 /dset2
+TOOLTEST h5diff_423.txt --follow-symlinks -v $FILE17 $FILE18 /ext_link_to_slink1 /dset2
 
 # dset2 vs extlink_to_softlink_to_dset1"
-TOOLTEST h5diff_424.txt --follow-links -v $FILE18 $FILE17 /dset2 /ext_link_to_slink1
+TOOLTEST h5diff_424.txt --follow-symlinks -v $FILE18 $FILE17 /dset2 /ext_link_to_slink1
 
 # extlink_to_softlink_to_dset1 vs extlink_to_softlink_to_dset2"
-TOOLTEST h5diff_425.txt --follow-links -v $FILE17 $FILE17 /ext_link_to_slink1 /ext_link_to_slink2
+TOOLTEST h5diff_425.txt --follow-symlinks -v $FILE17 $FILE17 /ext_link_to_slink1 /ext_link_to_slink2
 
 
 # ##############################################################################
-# # Dangling links compare (--follow-links and --no-dangling-links)
+# # Dangling links compare (--follow-symlinks and --no-dangling-links)
 # ##############################################################################
-# dangling links --follow-links (FILE to FILE)
-TOOLTEST h5diff_450.txt  --follow-links -v $DANGLE_LINK_FILE1 $DANGLE_LINK_FILE2
+# dangling links --follow-symlinks (FILE to FILE)
+TOOLTEST h5diff_450.txt  --follow-symlinks -v $DANGLE_LINK_FILE1 $DANGLE_LINK_FILE2
 
-# dangling links --follow-links and --no-dangling-links (FILE to FILE)
-TOOLTEST h5diff_451.txt  --follow-links -v --no-dangling-links  $DANGLE_LINK_FILE1 $DANGLE_LINK_FILE2 
+# dangling links --follow-symlinks and --no-dangling-links (FILE to FILE)
+TOOLTEST h5diff_451.txt  --follow-symlinks -v --no-dangling-links  $DANGLE_LINK_FILE1 $DANGLE_LINK_FILE2 
 
-# try --no-dangling-links without --follow-links options
+# try --no-dangling-links without --follow-symlinks options
 TOOLTEST h5diff_452.txt  --no-dangling-links  $FILE13 $FILE13
 
 # dangling link found for soft links (FILE to FILE)
-TOOLTEST h5diff_453.txt  --follow-links -v --no-dangling-links  $FILE13 $FILE13  
+TOOLTEST h5diff_453.txt  --follow-symlinks -v --no-dangling-links  $FILE13 $FILE13  
 
 # dangling link found for soft links (obj to obj)
-TOOLTEST h5diff_454.txt  --follow-links -v --no-dangling-links  $FILE13 $FILE13 /softlink_dset2 /softlink_noexist 
+TOOLTEST h5diff_454.txt  --follow-symlinks -v --no-dangling-links  $FILE13 $FILE13 /softlink_dset2 /softlink_noexist 
 
 # dangling link found for soft links (obj to obj) Both dangle links
-TOOLTEST h5diff_455.txt  --follow-links -v --no-dangling-links  $FILE13 $FILE13 /softlink_noexist /softlink_noexist 
+TOOLTEST h5diff_455.txt  --follow-symlinks -v --no-dangling-links  $FILE13 $FILE13 /softlink_noexist /softlink_noexist 
 
 # dangling link found for ext links (FILE to FILE)
-TOOLTEST h5diff_456.txt  --follow-links -v --no-dangling-links  $FILE15 $FILE15 
+TOOLTEST h5diff_456.txt  --follow-symlinks -v --no-dangling-links  $FILE15 $FILE15 
 
 # dangling link found for ext links (obj to obj). target file exist
-TOOLTEST h5diff_457.txt  --follow-links -v --no-dangling-links  $FILE15 $FILE15 /ext_link_dset1 /ext_link_noexist1 
+TOOLTEST h5diff_457.txt  --follow-symlinks -v --no-dangling-links  $FILE15 $FILE15 /ext_link_dset1 /ext_link_noexist1 
 
 # dangling link found for ext links (obj to obj). target file NOT exist
-TOOLTEST h5diff_458.txt  --follow-links -v --no-dangling-links  $FILE15 $FILE15 /ext_link_dset1 /ext_link_noexist2  
+TOOLTEST h5diff_458.txt  --follow-symlinks -v --no-dangling-links  $FILE15 $FILE15 /ext_link_dset1 /ext_link_noexist2  
 
 # dangling link found for ext links (obj to obj). Both dangle links
-TOOLTEST h5diff_459.txt  --follow-links -v --no-dangling-links  $FILE15 $FILE15 /ext_link_noexist1 /ext_link_noexist2
+TOOLTEST h5diff_459.txt  --follow-symlinks -v --no-dangling-links  $FILE15 $FILE15 /ext_link_noexist1 /ext_link_noexist2
 
+
+# ##############################################################################
+# # test for group diff recursivly
+# ##############################################################################
+# root 
+TOOLTEST h5diff_500.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 / /
+TOOLTEST h5diff_501.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 / /
+
+# root vs group
+TOOLTEST h5diff_502.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 / /grp1/grp2/grp3
+
+# group vs group (same name and structure)
+TOOLTEST h5diff_503.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp1 /grp1
+
+# group vs group (different name and structure)
+TOOLTEST h5diff_504.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp1/grp2 /grp1/grp2/grp3
+
+# groups vs soft-link
+TOOLTEST h5diff_505.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp1 /slink_grp1
+TOOLTEST h5diff_506.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp1/grp2 /slink_grp2
+
+# groups vs ext-link
+TOOLTEST h5diff_507.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp1 /elink_grp1
+TOOLTEST h5diff_508.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp1 /elink_grp1
+
+# soft-link vs ext-link
+TOOLTEST h5diff_509.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /slink_grp1 /elink_grp1
+TOOLTEST h5diff_510.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /slink_grp1 /elink_grp1
+
+# circled ext links
+TOOLTEST h5diff_511.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp10 /grp11
+TOOLTEST h5diff_512.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /grp10 /grp11
+
+# circled soft2ext-link vs soft2ext-link
+TOOLTEST h5diff_513.txt -v $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /slink_grp10 /slink_grp11
+TOOLTEST h5diff_514.txt -v --follow-symlinks $GRP_RECURSE_FILE1 $GRP_RECURSE_FILE2 /slink_grp10 /slink_grp11
+
+###############################################################################
+# Test for group recursive diff via multi-linked external links 
+# With follow-symlinks, file $GRP_RECURSE1_EXT and $GRP_RECURSE2_EXT1 should
+# be same with the external links.
+###############################################################################
+# file vs file
+TOOLTEST h5diff_515.txt -v $GRP_RECURSE1_EXT $GRP_RECURSE2_EXT1
+TOOLTEST h5diff_516.txt -v --follow-symlinks $GRP_RECURSE1_EXT $GRP_RECURSE2_EXT1
+# group vs group
+TOOLTEST h5diff_517.txt -v $GRP_RECURSE1_EXT $GRP_RECURSE2_EXT1 /g1
+TOOLTEST h5diff_518.txt -v --follow-symlinks $GRP_RECURSE1_EXT $GRP_RECURSE2_EXT1 /g1
+
+# ##############################################################################
+# # Exclude objects (--exclude-path)
+# ##############################################################################
+#
+# Same structure, same names and different value.
+#
+# Exclude the object with different value. Expect return - same
+TOOLTEST h5diff_480.txt -v --exclude-path /group1/dset3 $EXCLUDE_FILE1_1 $EXCLUDE_FILE1_2
+# Verify different by not excluding. Expect return - diff
+TOOLTEST h5diff_481.txt -v $EXCLUDE_FILE1_1 $EXCLUDE_FILE1_2
+
+#
+# Different structure, different names. 
+#
+# Exclude all the different objects. Expect return - same
+TOOLTEST h5diff_482.txt -v --exclude-path "/group1" --exclude-path "/dset1" $EXCLUDE_FILE2_1 $EXCLUDE_FILE2_2
+# Exclude only some different objects. Expect return - diff
+TOOLTEST h5diff_483.txt -v --exclude-path "/group1" $EXCLUDE_FILE2_1 $EXCLUDE_FILE2_2
+
+# Exclude from group compare
+TOOLTEST h5diff_484.txt -v --exclude-path "/dset3" $EXCLUDE_FILE1_1 $EXCLUDE_FILE1_2 /group1
+
+# ##############################################################################
+# # diff various multiple vlen and fixed strings in a compound type dataset
+# ##############################################################################
+TOOLTEST h5diff_530.txt -v  $COMP_VL_STRS_FILE $COMP_VL_STRS_FILE
 
 # ##############################################################################
 # # END

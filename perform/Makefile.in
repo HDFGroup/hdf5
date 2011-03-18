@@ -56,8 +56,12 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/conclude.am COPYING
 @BUILD_PARALLEL_CONDITIONAL_FALSE@bin_PROGRAMS =  \
 @BUILD_PARALLEL_CONDITIONAL_FALSE@	h5perf_serial$(EXEEXT)
-@BUILD_PARALLEL_CONDITIONAL_TRUE@bin_PROGRAMS = h5perf$(EXEEXT)
-check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_4)
+@BUILD_PARALLEL_CONDITIONAL_TRUE@bin_PROGRAMS =  \
+@BUILD_PARALLEL_CONDITIONAL_TRUE@	h5perf_serial$(EXEEXT) \
+@BUILD_PARALLEL_CONDITIONAL_TRUE@	h5perf$(EXEEXT)
+check_PROGRAMS = iopipe$(EXEEXT) chunk$(EXEEXT) overhead$(EXEEXT) \
+	zip_perf$(EXEEXT) perf_meta$(EXEEXT) $(am__EXEEXT_2) \
+	perf$(EXEEXT)
 TESTS = $(check_PROGRAMS)
 subdir = perform
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -69,14 +73,9 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
-@BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = h5perf$(EXEEXT) \
-@BUILD_PARALLEL_CONDITIONAL_TRUE@	perf$(EXEEXT)
-@BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_2 = benchpar$(EXEEXT) \
+@BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = benchpar$(EXEEXT) \
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	mpi-perf$(EXEEXT)
-@BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_3 = $(am__EXEEXT_2)
-am__EXEEXT_4 = iopipe$(EXEEXT) chunk$(EXEEXT) overhead$(EXEEXT) \
-	zip_perf$(EXEEXT) perf_meta$(EXEEXT) h5perf_serial$(EXEEXT) \
-	$(am__EXEEXT_3)
+@BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
 PROGRAMS = $(bin_PROGRAMS)
 benchpar_SOURCES = benchpar.c
 benchpar_OBJECTS = benchpar.$(OBJEXT)
@@ -182,6 +181,7 @@ CXX = @CXX@
 CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
+CXX_VERSION = @CXX_VERSION@
 CYGPATH_W = @CYGPATH_W@
 DEBUG_PKG = @DEBUG_PKG@
 DEFAULT_API_VERSION = @DEFAULT_API_VERSION@
@@ -189,6 +189,7 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
 DIRECT_VFD = @DIRECT_VFD@
+DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 DYNAMIC_DIRS = @DYNAMIC_DIRS@
@@ -207,6 +208,7 @@ FC = @FC@
 FCFLAGS = @FCFLAGS@
 FCFLAGS_f90 = @FCFLAGS_f90@
 FCLIBS = @FCLIBS@
+FC_VERSION = @FC_VERSION@
 FGREP = @FGREP@
 FILTERS = @FILTERS@
 FSEARCH_DIRS = @FSEARCH_DIRS@
@@ -249,6 +251,7 @@ LTLIBOBJS = @LTLIBOBJS@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 MPI_GET_SIZE = @MPI_GET_SIZE@
@@ -305,6 +308,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -343,7 +347,6 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -384,14 +387,25 @@ LIBH5_HL = $(top_builddir)/hl/src/libhdf5_hl.la
 LIBH5F_HL = $(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
 LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 
+# Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below  
+# has been removed. According to the official description of DESTDIR by Gnu at 
+# http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is 
+# prepended to the normal and complete install path that it precedes for the 
+# purpose of installing in a temporary directory which is useful for building 
+# rpms and other packages.  The '/' after ${DESTDIR} will be followed by another 
+# '/' at the beginning of the normal install path.  When DESTDIR is empty the  
+# path then begins with '//', which is incorrect and causes problems at least for 
+# Cygwin.   
+
 # Scripts used to build examples
 # If only shared libraries have been installed, have h5cc build examples with
 # shared libraries instead of static libraries
-H5CC = $(bindir)/h5cc
-H5CC_PP = $(bindir)/h5pcc
-H5FC = $(bindir)/h5fc
-H5FC_PP = $(bindir)/h5pfc
-H5CPP = $(bindir)/h5c++
+H5CC = ${DESTDIR}$(bindir)/h5cc
+H5CC_PP = ${DESTDIR}$(bindir)/h5pcc
+H5FC = ${DESTDIR}$(bindir)/h5fc
+H5FC_PP = ${DESTDIR}$(bindir)/h5pfc
+H5CPP = ${DESTDIR}$(bindir)/h5c++
+ACLOCAL_AMFLAGS = "-I m4"
 
 # The trace script; this is used on source files from the C library to
 # insert tracing macros.
@@ -402,7 +416,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
-@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = h5perf perf
 
 # Add h5perf and h5perf_serial specific linker flags here
 h5perf_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
@@ -414,8 +427,11 @@ h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@PARA_BUILD_ALL = benchpar mpi-perf
 @BUILD_ALL_CONDITIONAL_TRUE@BUILD_ALL_PROGS = $(PARA_BUILD_ALL)
 
-# These are the programs that `make all' or `make tests' will build and which
-# `make check' will run. List them in the order they should be run.
+# Define programs that will be run in 'make check'
+# List them in the order they should be run.
+# Parallel test programs.
+@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = h5perf perf
+# Serial test programs.
 TEST_PROG = iopipe chunk overhead zip_perf perf_meta h5perf_serial $(BUILD_ALL_PROGS)
 h5perf_SOURCES = pio_perf.c pio_engine.c pio_timer.c
 h5perf_serial_SOURCES = sio_perf.c sio_engine.c sio_timer.c

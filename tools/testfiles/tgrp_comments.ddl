@@ -42,5 +42,8 @@ GROUP "/" {
          COMMENT "Comment for group /g3/g3.4"
       }
    }
+   GROUP "glongcomment" {
+      COMMENT "Comment for group /glongcomment with a really, really, really long, long, long comment"
+   }
 }
 }

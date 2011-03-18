@@ -25,14 +25,14 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #
-TEST_PROG_PARA=t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2
+TEST_PROG_PARA=t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2 t_shapesame
 TEST_SCRIPT_PARA=testph5.sh
 
 check_PROGRAMS = $(TEST_PROG_PARA)
 check_SCRIPTS= $(TEST_SCRIPT)
 
 testphdf5_SOURCES=testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c \
-        t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c 
+        t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c
 
 # The tests all depend on the hdf5 library and the test library
 LDADD = $(LIBH5TEST) $(LIBHDF5)

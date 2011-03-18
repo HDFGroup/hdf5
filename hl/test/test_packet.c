@@ -31,7 +31,9 @@
 #define TEST_FILE_NAME "test_packet_table.h5"
 #define TEST_COMPRESS_FILE "test_packet_compress.h5"
 #define PT_NAME "Test Packet Table"
+#ifdef VLPT_REMOVED
 #define VL_TABLE_NAME "Varlen Test Table"
+#endif /* VLPT_REMOVED */
 #define H5TB_TABLE_NAME "Table1"
 
 /*-------------------------------------------------------------------------
@@ -774,7 +776,7 @@ test_compress(void)
     size_t c;
     size_t num_elems = 1;
     unsigned filter_vals[1];
-    particle_t readPart;
+    particle_t readPart[1];
     hsize_t count;
 
     TESTING("packet table compression");
@@ -807,13 +809,14 @@ test_compress(void)
     if( count != BIG_TABLE_SIZE ) TEST_ERROR;
 
     /* Read particles to ensure that all of them were written correctly  */
+    HDmemset(readPart, 0, sizeof(readPart));
     for(c = 0; c < BIG_TABLE_SIZE; c++)
     {
-        err = H5PTget_next(table, 1, &readPart);
+        err = H5PTget_next(table, 1, readPart);
         if(err < 0) TEST_ERROR;
 
         /* Ensure that particles were read correctly */
-        if( cmp_par(c % 8, 0, testPart, &readPart) != 0) TEST_ERROR;
+        if( cmp_par(c % 8, 0, testPart, readPart) != 0) TEST_ERROR;
     }
 
     /* Close the table */

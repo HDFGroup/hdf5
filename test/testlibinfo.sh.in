@@ -84,6 +84,11 @@ case `uname -s` in
         shlibsuffix=.dylib
         break
         ;;
+    AIX)	# AIX .a is already a shared lib
+	# this is a temporary patch.
+        shlibsuffix=.a
+        break
+        ;;
     *)		# default
         shlibsuffix=.so
         break

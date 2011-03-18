@@ -13,10 +13,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
 #include "h5tools_utils.h"
 #include "h5repack.h"
 
@@ -124,7 +120,7 @@ int main(int argc, const char **argv)
             infile = argv[ opt_ind ];
             outfile = argv[ opt_ind + 1 ];
 
-            if ( strcmp( infile, outfile ) == 0 )
+            if ( HDstrcmp( infile, outfile ) == 0 )
             {
                 error_msg("file names cannot be the same\n");
                 usage(h5tools_getprogname());
@@ -390,7 +386,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
                 int idx = 0;
                 int ssize = 0;
-                char *msgPtr = strchr( opt_arg, ':');
+                char *msgPtr = HDstrchr( opt_arg, ':');
                 options->latest = 1; /* must use latest format */
                 if (msgPtr == NULL)
                 {
@@ -401,22 +397,22 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 else
                 {
                     char msgType[10];
-                    strcpy(msgType, msgPtr+1);
+                    HDstrcpy(msgType, msgPtr+1);
                     msgPtr[0] = '\0';
                     ssize = atoi( opt_arg );
-                    if (strncmp(msgType, "dspace",6) == 0) {
+                    if (HDstrncmp(msgType, "dspace",6) == 0) {
                         options->msg_size[0] = ssize;
                     }
-                    else if (strncmp(msgType, "dtype", 5) == 0) {
+                    else if (HDstrncmp(msgType, "dtype", 5) == 0) {
                         options->msg_size[1] = ssize;
                     }
-                    else if (strncmp(msgType, "fill", 4) == 0) {
+                    else if (HDstrncmp(msgType, "fill", 4) == 0) {
                         options->msg_size[2] = ssize;
                     }
-                    else if (strncmp(msgType, "pline", 5) == 0) {
+                    else if (HDstrncmp(msgType, "pline", 5) == 0) {
                         options->msg_size[3] = ssize;
                     }
-                    else if (strncmp(msgType, "attr", 4) == 0) {
+                    else if (HDstrncmp(msgType, "attr", 4) == 0) {
                         options->msg_size[4] = ssize;
                     }
                 }
@@ -454,14 +450,14 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 	{
             char strategy[MAX_NC_NAME];
 
-            strcpy(strategy, opt_arg);
-            if(!strcmp(strategy, "ALL_PERSIST"))
+            HDstrcpy(strategy, opt_arg);
+            if(!HDstrcmp(strategy, "ALL_PERSIST"))
                 options->fs_strategy = H5F_FILE_SPACE_ALL_PERSIST;
-            else if(!strcmp(strategy, "ALL"))
+            else if(!HDstrcmp(strategy, "ALL"))
                 options->fs_strategy = H5F_FILE_SPACE_ALL;
-            else if(!strcmp(strategy, "AGGR_VFD"))
+            else if(!HDstrcmp(strategy, "AGGR_VFD"))
                 options->fs_strategy = H5F_FILE_SPACE_AGGR_VFD;
-            else if(!strcmp(strategy, "VFD"))
+            else if(!HDstrcmp(strategy, "VFD"))
                 options->fs_strategy = H5F_FILE_SPACE_VFD;
             else {
                 error_msg("invalid file space management strategy\n", opt_arg );
@@ -533,7 +529,7 @@ void read_info(const char *filename,
         * filter
         *-------------------------------------------------------------------------
         */
-        if (strcmp(stype,"-f") == 0) {
+        if (HDstrcmp(stype,"-f") == 0) {
 
             /* find begining of info */
             i=0; c='0';
@@ -563,7 +559,7 @@ void read_info(const char *filename,
         * layout
         *-------------------------------------------------------------------------
         */
-        else if (strcmp(stype,"-l") == 0) {
+        else if (HDstrcmp(stype,"-l") == 0) {
 
             /* find begining of info */
             i=0; c='0';

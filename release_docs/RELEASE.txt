@@ -1,4 +1,4 @@
-HDF5 version 1.9.70 currently under development
+HDF5 version 1.9.80 currently under development
 ================================================================================
 
 
@@ -39,6 +39,18 @@ New Features
 
     Configuration:
     -------------
+    - Added mpicc and mpif90 as the default C and Fortran compilers for Linux
+      systems when --enable-parallel is specified but no $CC or $FC is defined.
+      (AKC - 2011/2/7)
+    - Added a new configure option, "--enable-unsupported", which can
+      be used to stop configure from preventing the use of unsupported
+      configure option combinations, such as c++ in parallel or parallel
+      HDF5 with threadsafe. Use at your own risk, as it may result in a 
+      library that won't compile or run as expected! 
+      (MAM - 2010/11/17 - Bug 2061)
+    - PHDF5 changed to use "mpiexec", instead of mpirun, as the default MPI
+      applications startup command as defined in the MPI-2 definition, section
+      4.1. (AKC - 2010/6/11 - Bug 1921)
     - Configure now adds appropriate defines for supporting large (64-bit)
       files on all systems, where supported, by default, instead of only linux.
       This largefile support is controllable with the --enable-largefile 
@@ -73,6 +85,24 @@ New Features
 
     Library:
     --------
+    - Added ability to cache files opened through external links.  Added new
+      public functions H5Pset_elink_file_cache_size(),
+      H5Pget_elink_file_cache_size(), and H5Frelease_file_cache().
+      (NAF - 2011/02/17)
+    - Removed all old code for Metraowerks compilers, bracketed by
+      __MWERKS__). Metraowerks compiler is long gone. (AKC - 2010/11/17) 
+    - Added support for threadsafety on windows using the windows threads
+      library. Use the HDF5_ENABLE_THREADSAFE option in CMake while on a 
+      windows platform to enable this functionality. This is supported on 
+      Windows Vista and newer Windows operating systems. (MAM - 2010/09/10)
+    - When a mandatory filter failed to write data chunks, the dataset
+      couldn't close (bug 1260).  The fix releases all resources and closes
+      the dataset but returns a failure. (SLU - 2010/9/8)
+    - H5Tset_order and H5Tget_order now support all data types.  A new byte
+      order H5T_ORDER_MIXED has been added specifically for compound datatype
+      and its derived type.  Please see bug #1934. (SLU - 2010/8/23)
+    - Improved performance of the chunk cache by avoiding unnecessary b-tree
+      lookups of chunks already in cache. (NAF - 2010/06/15) 
     - Greatly improved performance of extending a dataset with early
       allocation. (NAF - 2010/03/24 - 1637)
     - Added support for filtering densely stored groups.  Many of the API
@@ -159,18 +189,32 @@ New Features
 
     Tools:
     ------
+     - h5dump: Added new option --enable-error-stack. This option will display 
+               error stack information in the output stream. This is useful
+               when the "h5dump: Unable to print data" message is output.
+               (ADB - 2011/02/24)
+     - h5diff: Add a new flag --exclude-path. Specified path to an object will
+               be excluded from comparing the two files or two groups. If group
+               is specified all the member objects will be excluded.  
+               (JKM - 2010/09/16).
+     - h5ls: Add new flag --no-dangling-links. (refer to --help for details)
+               (JKM - 2010/06/15) 
+     - h5ls: Add new flag --follow-symlinks. (refer to --help for details)
+               (JKM - 2010/05/25)
      - h5diff: Add new flag --no-dangling-links. (refer to --help for details)
                (JKM - 2010/02/10) 
-     - h5diff: Add new flag --follow-links. (refer to --help for details)
+     - h5diff: Add new flag --follow-symlinks. (refer to --help for details)
                (JKM - 2010/01/25) 
      - h5diff: fix for displaying garbage value on LE machine for BE data.
-	   (JKM - 2009/11/20)
-     - h5dump subsetting now allows default for count. Also trailing ; in short form
-       can be omitted after last specified value. (ADB - 2009/09/04)
-     - h5dump/h5ls now can display data in region references 
-       using new -R, --region flag.  (ADB - 2009/09/04)
-     - h5diff new flag, -c, --compare, list objects that are not comparable.
-        (PVN - 2009/4/10 - 1368)
+	           (JKM - 2009/11/20)
+     - h5dump: subsetting now allows default for count. Also trailing ; in short form
+               can be omitted after last specified value. 
+               (ADB - 2009/09/04)
+     - h5dump/h5ls: now can display data in region references 
+               using new -R, --region flag.  
+               (ADB - 2009/09/04)
+     - h5diff: new flag, -c, --compare, list objects that are not comparable.
+               (PVN - 2009/4/10 - 1368)
      - h5diff new flag, -N, --nan, avoids NaNs detection. (PVN - 2009/4/10)
      - h5dump correctly specifies XML dtd / schema urls (ADB - 2009/4/3 - 1519)
      - h5repack now handles group creation order. (PVN - 2009/4/2 - 1402)
@@ -217,6 +261,7 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+    - Intel V11.1 uses now -O3 optimization in production mode (EIP - 2010/10/08)
     - PathScale compilers are recognized and can build the HDF5 library
       properly. AKC - 2009/7/28 -
 
@@ -225,6 +270,43 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - The datatype handler created with H5Tencode/decode used to have the 
+            reference count 0 (zero).  I have fixed it.  It is 1 (one) now.
+            (SLU - 2011/2/18)
+      - Fixed a bug that caused big endian machines to generate corrupt files
+            when using the scale-offset filter with floating point data or
+            fill values.  Note that such datasets will no longer be readable
+            by any machine after this patch.  (NAF - 2010/02/02 - Bug 2131)
+      - Retrieving a link's name by index in the case where the link is
+            external and the file that the link refers to doesn't exist will 
+            now fail gracefully rather than cause a segmentation fault. 
+            (MAM - 2010/11/17)
+      - Modified library to always cache symbol table information.  Libraries
+            version 1.6.3 have a bug which causes them to require this
+            information for some operations. (NAF - 2010/09/21 - 1864)
+      - Fixed a bug that could occur when getting information for a new-style
+            group that was previously opened through a file handle that was
+            later closed. (NAF - 2010/09/15)
+      - Added define check in H5public.h if stdint.h is supported by the C++
+            compiler. This define is only available on Windows with VS2010 and
+            using CMake to build the library. (ADB - 2010/09/13 - Bug 1938)
+      - H5Eset_current_stack now also closes the error stack to be set as the
+            default.  This is to avoid a potential problem (Bug 1799).
+            (SLU - 2010/9/7)
+      - Fixed the bug in the filter's public CAN_APPLY function.  The return
+            value should be htri_t not herr_t (Bug #1239). (SLU - 2010/8/5)
+      - Fixed a bug in the direct I/O driver that could render files with
+            certain kinds of unaligned data unreadable or corrupt them.
+            (NAF - 2010/07/28)
+      - valgrind reported an error of copying data to itself when a new attribute
+            is written (Bug #1956).  I fixed it by taking out the memcpy step in 
+            the attribute code. (SLU - 2010/07/28)
+      - Fixed a bug that could cause file corruption when using non-default
+            sizes of addresses and/or lengths.  This bug could also cause
+            uncorrupted files with this property to be unreadable.  This bug
+            was introduced in 1.8.5. (NAF - 2010/07/16 - 1951)
+      - Fixed a file corruption bug that could happen when shrinking a
+            compressed dataset. (NAF - 2010/05/20)
       - Fixed some memory leaks in VL datatype conversion when strings are
             used as fill values. (MAM - 2010/05/12 - BZ# 1826)
       - Fixed a bug when copying objects with NULL references with the
@@ -371,6 +453,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Removed recognition of the parallel compilers of LAM(hcc) and
+      ChMPIon(cmpicc) since we have no access to these two MPI implementations
+      and cannot verify their correctness. (AKC - 2010/7/14 - Bug 1921)
     - Removed the following config files, as we no longer support them:
         config/dec-osf*, config/hpux11.00, config/irix5.x, 
         config/powerpc-ibm-aix4.x config/rs6000-ibm-aix5.x config/unicos*
@@ -421,6 +506,45 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed and improved help page for -a option of h5ls. 
+          Bug#1904 (JKM 2011/3/11)
+        - Fixed h5dump not to include attribute values in the output file when 
+          h5dump "-y -o output_file" options were used. The problem was introduced 
+          in HDF5 1.8.6 by showing data pointed by region references. (XCAO 2011/3/9)
+        - Fixed h5copy to be able to copy any object into the same HDF5 file.
+          Previously h5copy displayed error message when target file is same
+          as source file. (XCAO 2011/3/8)
+        - Fixed h5dump for skipping some values for long array type dataset on 
+          Windows. This issue only occurred on Windows due to the different 
+          return behavior from _vsnprintf() funtion. Bug#2161 (JKM 2011/3/3)
+        - Fixed h5dump for skipping array indices every certain number
+          when the array type dataset is relatively big. The certain number
+          varies according to the size of array. Bug#2092 (JKM 2011/2/15).
+        - Fixed h5diff for the segfault when compares compound datasets
+          with combination of fixed length string types and vlen string types 
+          in certain orders. bug#2089 (JKM 2010/12/28)
+        - Improve h5diff performance. 1) use HDmemcmp() before comparing each 
+          elements. 2) replace expensive H5Tequals() calls 3) retrieve datatype
+          information at dataset level not each element level for compound 
+          datasets
+        - Fixed h5ls to display nested compound type with curly bracket 
+          when -S (--simple) option is used with -l (--label), so it shows  
+          which member (in curly bracket) belong to which nested compound type 
+          and make the output make sense.  bug#1979 (JKM 2010/11/09)
+        - Fixed h5diff to handle variable-length strings in a compound dataset 
+          correctly. (also variable-length string array in a compound dataset)
+          Garbage values were displayed when h5diff compared multiple 
+          variable-length strings in a compound type dataset. 
+          Bug#1989 (JKM 2010/10/28)
+        - Fixed h5copy to fail gracefully when copying object to non-exist
+          group without -p option. Bug#2040 (JKM 2010/10/18)
+        - Fixed to compare member objects and groups recursively when two 
+          files or groups are specified to be compared. Bug#1975
+          (JKM 2010/9/16)
+        - Make h5repack be able to convert a layout to COMPACT for small size
+          dataset as default.  bug#1896 (JKM 2010/09/15)
+        - Change h5ls not to manipulate special characters in object name or 
+          attribute name for smart display.  bug#1784 (JKM 2010/06/28)
         - Fixed h5ls to return exit code 1 (error) when non-existent file is
           specified. bug#1793. (JKM 2010/04/27)
         - h5copy failed to copy dangling link when the link is specified 
@@ -469,6 +593,11 @@ Bug Fixes since HDF5-1.8.0 release
 
     High-Level APIs:
      ------
+      - Fixed a bug in H5DSattach_scale, H5DSis_attached and H5DSdetach_scale
+        caused by using H5Tget_native_type function to determine the native
+        type for reading REFERENCE_LIST attribute. The bug was exposed
+        on Mac PPC.
+                                     (EIP - 2010/05/22 -1851) 
       - Fixed a bug in the H5DSdetach_scale function when 0 bytes  
         were allocated after the last reference to a dim. scale  
         was removed from the list of references in a VL element of the 
@@ -535,11 +664,12 @@ Bug Fixes since HDF5-1.8.0 release
 Platforms Tested
 ================
 
-    AIX 5.3                       xlc 7.0.0.8, 8.0.0.20, 9.0.0.4
-    (LLNL Up)                     xlC 7.0.0.8, 8.0.0.20, 9.0.0.4
-                                  xlf 9.1.0.8, 10.1.0.9, 11.1.0.7
-                                  mpcc_r 7.0.0.8
-                                  mpxlf_r 09.01.0000.0008
+    AIX 6.1                       xlc 11.1.0.3
+    (NCSA BP)                     xlC 11.1.0.3
+                                  xlf 13.1.0.3
+                                  mpcc_r 11.1.0.3
+                                  mpxlf_r 13.1.0.3
+
     FreeBSD 6.2-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
                                   gcc 4.2.1 20080123
@@ -576,15 +706,22 @@ Platforms Tested
                                   Intel(R) C++ Version 8.1
                                   Intel(R) Fortran Compiler Version 8.1
 				  mpich-gm-1.2.5..10-intel-r2
-    Windows XP                    
-				  Visual Studio .NET
-                                  Visual Studio 2005 w/ Intel Fortran 9.1
-                                  Cygwin(native gcc compiler and g95)
-				  MinGW(native gcc compiler and g95)
-    Windows XP x64                
-			          Visual Studio 2005 w/ Intel Fortran 9.1
-    Windows Vista			
-			          Visual Studio 2005
+    
+    Windows XP                    Visual Studio 2008 w/ Intel Fortran 11.1
+                                  Visual Studio 2010
+                                  Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
+				  
+    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 11.1
+                                  Visual Studio 2010
+                                  Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
+
+    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 11.1
+
+    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 11.1
+
+    Windows 7                     Visual Studio 2010
+
+    Windows 7 x64                 Visual Studio 2010
 
     MAC OS  10.5 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
@@ -607,13 +744,11 @@ Platform                          C        F90    F90      C++   zlib  SZIP
                                   parallel        parallel
 SunOS5.10 64-bit                   n        y      n        y     y     y
 SunOS5.10 32-bit                   n        y      n        y     y     y
-AIX-5.2  32-bit                    y        y      y        y     y     y
-AIX-5.2  64-bit                    y        y      y        y     y     y
-Cray XT3 (not tested
-          for this release)        n        n      n        n     n     n
+AIX 6.1 32- and 64-bit             n        y      n        y     y     y
 Windows XP                         n        y(3)   n(3)     y     y     y
 Windows XP x64                     n        y(3)   n(3)     y     y     y
-Windows Vista                      n        n      n        y     y     y
+Windows Vista                      n        y(3)   n(3)     y     y     y
+Windows Vista x64                  n        y(3)   n(3)     y     y     y
 Mac OS X 10.5 Intel                n        y      n        y     y     y
 FreeBSD 6.2 32-bit                 n        n      n        y     y     y
 FreeBSD 6.2 64-bit
@@ -637,13 +772,11 @@ Platform                          Shared   Shared    Shared    static-  Thread-
                                   C libs   F90 libs  C++ libs  exec     safe
 SunOS 5.10 32-bit                   y        y         y         x        y
 SunOS 5.10 64-bit                   y        y         y         x        y
-AIX-5.2 32-bit                      n        n         n         x        n
-AIX-5.2 64-bit                      n        n         n         x        n
-Cray XT3 (not tested
-          for this release)         n        n         n         x        n
-Windows XP                          y        y(3)      y         y        y
-Windows XP x64                      y        y(3)      y         y        y
-Windows Vista                       y        n         n         y        y
+AIX 6.1 32- and 64-bit              n        n         n         x	  y
+Windows XP                          y        y(3)      y         y        n
+Windows XP x64                      y        y(3)      y         y        n
+Windows Vista                       y        y(3)      y         y        y
+Windows Vista x64                   y        y(3)      y         y        y
 Mac OS X 10.5 Intel                 y        y         y         x        n
 FreeBSD 6.2 32-bit                  y        y         y         x        n
 FreeBSD 6.2 64-bit                  y        y         y         x        n
@@ -662,7 +795,7 @@ SuSe Linux 2.6.5
 
     Notes: (1)  Using mpich 1.2.6.
            (2) Using mpich2 1.0.6.
-           (3) Using Visual Studio 2005 or Cygwin
+           (3) Using Visual Studio 2008 (Cygwin shared libraries are not supported)
            (4) With PGI and Absoft compilers.
            (5) AMD Opteron x86_64
     Compiler versions for each platform are listed in the preceding
@@ -672,6 +805,22 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* --with-mpe configure option does not work with Mpich2. AKC - 2011/03/10)
+
+* examples/run-all-ex.sh does not work on Cygwin. (NAF - 2011/02/11)
+
+* While working on the 1.8.6 release of HDF5, a bug was discovered that can
+  occur when reading from a dataset in parallel shortly after it has been
+  written to collectively. The issue was exposed by a new test in the parallel
+  HDF5 test suite, but had existed before that. We believe the problem lies with
+  certain MPI implementations and/or filesystems.
+
+  We have provided a pure MPI test program, as well as a standalone HDF5
+  program, that can be used to determine if this is an issue on your system.
+  They should be run across multiple nodes with a varying number of processes.
+  These programs can be found at:
+  http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
+
 * Parallel mode in AIX will fail some of the testcheck_version.sh tests where
   it treats "exit(134) the same as if process 0 had received an abort signal.
   This is fixed and will be available in the next release. AKC - 2009/11/3

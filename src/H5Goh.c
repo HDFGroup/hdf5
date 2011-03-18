@@ -263,7 +263,7 @@ H5O_group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
     HDassert(obj_loc);
 
     /* Create the the group */
-    if(NULL == (grp = H5G_create(f, crt_info->gcpl_id, dxpl_id)))
+    if(NULL == (grp = H5G_create(f, crt_info, dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group")
 
     /* Set up the new group's location */
@@ -340,7 +340,7 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
     H5B2_t      *bt2_corder = NULL;     /* v2 B-tree handle for creation order index */
     herr_t      ret_value = SUCCEED;  	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_group_bh_info)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_group_bh_info, dxpl_id, oh->cache_info.addr, FAIL)
 
     /* Sanity check */
     HDassert(f);
@@ -411,6 +411,6 @@ done:
     if(bt2_corder && H5B2_close(bt2_corder, dxpl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5O_group_bh_info() */
 

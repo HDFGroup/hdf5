@@ -317,6 +317,7 @@ int main(int argc, char **argv)
     H5Ptest_param_t ndsets_params, ngroups_params;
     H5Ptest_param_t collngroups_params;
     H5Ptest_param_t io_mode_confusion_params;
+    H5Ptest_param_t rr_obj_flush_confusion_params;
 
     /* Un-buffer the stdout and stderr */
     setbuf(stderr, NULL);
@@ -334,6 +335,15 @@ int main(int argc, char **argv)
 	printf("PHDF5 TESTS START\n");
 	printf("===================================\n");
     }
+
+    /* Attempt to turn off atexit post processing so that in case errors
+     * happen during the test and the process is aborted, it will not get
+     * hang in the atexit post processing in which it may try to make MPI
+     * calls.  By then, MPI calls may not work.
+     */
+    if (H5dont_atexit() < 0){
+	printf("Failed to turn off atexit processing. Continue.\n", mpi_rank);
+    };
     H5open();
     h5_show_hostname();
 
@@ -462,7 +472,6 @@ int main(int argc, char **argv)
 	coll_irregular_complex_chunk_read,NULL,
 	"collective irregular complex chunk read",PARATESTFILE);
 
-
     AddTest("null", null_dataset, NULL,
 	    "null dataset test", PARATESTFILE);
 
@@ -472,6 +481,23 @@ int main(int argc, char **argv)
     AddTest("I/Omodeconf", io_mode_confusion, NULL,
 	    "I/O mode confusion test -- hangs quickly on failure",
             &io_mode_confusion_params);
+
+    rr_obj_flush_confusion_params.name = PARATESTFILE;
+    rr_obj_flush_confusion_params.count = 0; /* value not used */
+    AddTest("rrobjflushconf", rr_obj_hdr_flush_confusion, NULL,
+	    "round robin object header flush confusion test",
+            &rr_obj_flush_confusion_params);
+
+    AddTest("tldsc",
+            lower_dim_size_comp_test, NULL,
+            "test lower dim size comp in span tree to mpi derived type", 
+            PARATESTFILE);
+
+    AddTest("lccio",
+            link_chunk_collective_io_test, NULL,
+            "test mpi derived type management", 
+            PARATESTFILE);
+
 
     /* Display testing information */
     TestInfo(argv[0]);

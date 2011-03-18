@@ -30,6 +30,8 @@
 ##
 ## INSTALL_FILES
 ## The source files that the examples use which should be installed.
+## INSTALL_SCRIPT_FILES
+## INSTALL_TOP_SCRIPT_FILES
 ##
 ## EXAMPLEDIR
 ## The directory into which examples should be installed. 
@@ -52,6 +54,8 @@ CLEANFILES=$(TEST_PROG) $(TEST_PROG_PARA)
 # How to create EXAMPLEDIR if it doesn't already exist
 $(EXAMPLEDIR):
 	-$(top_srcdir)/bin/mkdirs $@
+$(EXAMPLETOPDIR):
+	-$(top_srcdir)/bin/mkdirs $@
 
 # Install and uninstall rules.  We install the source files, not the
 # example programs themselves.
@@ -63,13 +67,30 @@ uninstall-local:
 install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
 	@for f in X $(INSTALL_FILES); do                                     \
 	  if test $$f != X; then                                             \
-	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);    \
+            chmod a-x $(EXAMPLEDIR)/$$f;                                     \
+	  fi;                                                                \
+	done
+	@for f in X $(INSTALL_SCRIPT_FILES); do                                   \
+	  if test $$f != X; then                                             \
+	    (set -x; $(INSTALL) $$f $(EXAMPLEDIR)/. || exit 1);\
+	  fi;                                                                \
+	done
+	@for f in X $(INSTALL_TOP_SCRIPT_FILES); do                       \
+	  if test $$f != X; then                                             \
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLETOPDIR)/. || exit 1); \
 	  fi;                                                                \
 	done
 
 uninstall-examples:
-	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);              \
+	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then             \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);                \
+        fi
+	@if test -n "$(INSTALL_SCRIPT_FILES)" -a -d $(EXAMPLEDIR); then           \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_SCRIPT_FILES);              \
+        fi
+	@if test -n "$(INSTALL_TOP_SCRIPT_FILES)" -a -d $(EXAMPLETOPDIR); then    \
+	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_SCRIPT_FILES);       \
         fi
 
 installcheck-local:

@@ -36,7 +36,6 @@
  * Returns:           0 on success, -1 on failure
  * Programmer:        Elena Pourmal
  *                    Tuesday, August 3, 1999
- * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
 nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes )
@@ -254,7 +253,6 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
  * Returns:           0 on success, -1 on failure
  * Programmer:        Elena Pourmal
  *                    Tuesday, August 3, 1999
- * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
 nh5close_types_c( hid_t_f * types, int_f *lentypes,
@@ -300,13 +298,6 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  * Returns:           0 on success, -1 on failure
  * Programmer:        Elena Pourmal
  *                    Tuesday, August 3, 1999
- * Modifications:     Added Z flags. EIP,  March 12, 2003
- *                    Added more FD flags and new H5LIB flags
- *                    Added more FD flags for HDF5 file driver
- *                                  EIP, April 9, 2005
- *                    Added Generic flags introduced in version 1.8
- *                                  MSB, January, 2008
- *                    Added types in lines h5*_flags = ( )variable to match input
  *---------------------------------------------------------------------------*/
 int_f
 nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
@@ -644,35 +635,33 @@ nh5init1_flags_c(int_f *h5lib_flags)
  * Returns:           0 on success, -1 on failure
  * Programmer:        Elena Pourmal
  *                    Friday, November 17, 2000
- * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5open_c()
+nh5open_c(void)
 {
-
     int ret_value = -1;
+
     if (H5open() < 0) return ret_value;
     ret_value = 0;
     return ret_value;
 }
+
 /*---------------------------------------------------------------------------
  * Name:              h5close_c
  * Purpose:           Calls H5close call to close C HDF5 library
  * Returns:           0 on success, -1 on failure
  * Programmer:        Elena Pourmal
  *                    Friday, November 17, 2000
- * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5close_c()
+nh5close_c(void)
 {
-
     int ret_value = -1;
+
     if (H5close() < 0) return ret_value;
     ret_value = 0;
     return ret_value;
 }
-
 
 /*---------------------------------------------------------------------------
  * Name:              h5get_libversion_c
@@ -687,10 +676,9 @@ nh5close_c()
  * Returns:           0 on success, -1 on failure
  * Programmer:        Elena Pourmal
  *                    Tuesday, September 24, 2002
- * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5get_libversion_c( int_f *majnum, int_f *minnum, int_f *relnum)
+nh5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum)
 {
 
     int ret_value = -1;
@@ -705,7 +693,6 @@ nh5get_libversion_c( int_f *majnum, int_f *minnum, int_f *relnum)
     return ret_value;
 }
 
-
 /*---------------------------------------------------------------------------
  * Name:              h5check_version_c
  * Purpose:           Calls H5check_version function
@@ -719,14 +706,13 @@ nh5get_libversion_c( int_f *majnum, int_f *minnum, int_f *relnum)
  * Returns:           0 on success, aborts on failure
  * Programmer:        Elena Pourmal
  *                    Tuesday, September 24, 2002
- * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5check_version_c( int_f *majnum, int_f *minnum, int_f *relnum)
+nh5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum)
 {
-
     int ret_value = -1;
     unsigned c_majnum, c_minnum, c_relnum;
+
     c_majnum = (unsigned) *majnum;
     c_minnum = (unsigned) *minnum;
     c_relnum = (unsigned) *relnum;
@@ -743,13 +729,12 @@ nh5check_version_c( int_f *majnum, int_f *minnum, int_f *relnum)
  * Returns:           0 on success, -1 on failure
  * Programmer:        Elena Pourmal
  *                    Tuesday, September 24, 2002
- * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5garbage_collect_c()
+nh5garbage_collect_c(void)
 {
-
     int ret_value = -1;
+
     if (H5garbage_collect() < 0) return ret_value;
     ret_value = 0;
     return ret_value;
@@ -761,14 +746,14 @@ nh5garbage_collect_c()
  * Returns:           0 on success, -1 on failure
  * Programmer:        Elena Pourmal
  *                    Tuesday, September 24, 2002
- * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5dont_atexit_c()
+nh5dont_atexit_c(void)
 {
-
     int ret_value = -1;
+
     if (H5dont_atexit() < 0) return ret_value;
     ret_value = 0;
     return ret_value;
 }
+

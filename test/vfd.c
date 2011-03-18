@@ -20,6 +20,7 @@
  * Purpose:     Tests the basic features of Virtual File Drivers
  */
 
+#include "H5pubconf.h"
 #include "h5test.h"
 
 #define KB              1024U
@@ -67,6 +68,16 @@ const char *FILENAME[] = {
 #define READ_OP		0
 #define WRITE_OP	1
 
+
+/* The following #defines indicate the maximum length of a read or write 
+ * that can appear in a test at the indicated express test length.  If 
+ * either of these constants is reduced below 1 MB, additional code will 
+ * be required to implement the restriction.
+ */
+#define EXPRESS_TEST_1_MAX_LENGTH	(32 * 1024 * 1024)
+#define EXPRESS_TEST_2_MAX_LENGTH	( 1 * 1024 * 1024)
+
+
 static void aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
 				                    int op_count,
                                                     int ops[],
@@ -75,16 +86,20 @@ static void aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
 				                    size_t lengths[],
 				                    const char * tags[],
                                                     hbool_t * pass_ptr, 
-                                                    const char ** failure_mssg_ptr);
+                                                    const char ** failure_mssg_ptr,
+                                                    const int express_test,
+                                                    int * sub_tests_skipped_ptr);
 
 static void aio_multi_write_sync_read_check(H5FD_t * file,
                                             int write_count,
                                             H5FD_mem_t types[],
                                             haddr_t offsets[],
-                                            size_t lengths[],
+                                            const size_t lengths[],
                                             const char * tags[],
                                             hbool_t * pass_ptr, 
-                                            const char ** failure_mssg_ptr);
+                                            const char ** failure_mssg_ptr,
+                                            const int express_test,
+                                            int * sub_tests_skipped_ptr);
 
 static void aio_single_write_read_check(H5FD_t * file,
                                         H5FD_mem_t type,
@@ -98,7 +113,8 @@ static void aio_single_write_read_check(H5FD_t * file,
 static int generic_aio_test(const char * test_banner, 
                             const int file_name_num,
 		            hid_t fapl_id,
-                            haddr_t maxaddr);
+                            haddr_t maxaddr,
+                            const int express_test);
 
 static int generic_aio_input_error_tests(const char * test_banner,
                                          const char * tag_string,
@@ -107,7 +123,8 @@ static int generic_aio_input_error_tests(const char * test_banner,
                                          hbool_t verbose);
 
 static int multi_file_driver_aio_test(const char * test_banner, 
-                                      const int file_name_num);
+                                      const int file_name_num,
+                                      int express_test);
 
 
 /*-------------------------------------------------------------------------
@@ -1208,7 +1225,9 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
 				        size_t lengths[],
 				        const char * tags[],
                                         hbool_t * pass_ptr, 
-                                        const char ** failure_mssg_ptr)
+                                        const char ** failure_mssg_ptr,
+                                        const int express_test,
+                                        int * sub_tests_skipped_ptr)
 {
     const char * fcn_name = "aio_multi_read_write_fsync_cancel_check()";
     const char * H5FD_mem_t_strings[H5FD_MEM_NTYPES] =
@@ -1244,7 +1263,8 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
              ( offsets == NULL ) ||
              ( lengths == NULL ) ||
              ( tags == NULL ) ||
-             ( failure_mssg_ptr == NULL ) ) {
+             ( failure_mssg_ptr == NULL ) ||
+             ( sub_tests_skipped_ptr == NULL ) ) {
 
 	    *pass_ptr = FALSE;
             *failure_mssg_ptr = 
@@ -1283,10 +1303,10 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
         while ( ( *pass_ptr ) &&
                 ( i < op_count ) ) {
 
-            if ( lengths[i] <= 0 ) {
+            if ( lengths[i] < 16 ) {
 
                 *pass_ptr = FALSE;
-                *failure_mssg_ptr = "length[i] <= 16.";
+                *failure_mssg_ptr = "length[i] < 16.";
 
             } else {
 
@@ -1296,9 +1316,19 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
 
                     *pass_ptr = FALSE;
                     *failure_mssg_ptr = "buffer allocation(s) failed(2).";
-                }
-                else 
-                {
+
+                } else if ( ( ( express_test > 0 ) && 
+                              ( lengths[i] > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+                            ( ( express_test > 1 ) && 
+                              ( lengths[i] > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+
+                    /* we will be skipping the test associated with this buffer -- thus
+                     * no need to allocate and initialize it.
+                     */
+                    bufs[i] = NULL;
+
+                } else {
+
                     sprintf(write_num, "%d: ", i);
                     op_num_len = (int)HDstrlen(write_num);
 
@@ -1346,36 +1376,46 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
     while ( ( *pass_ptr ) &&
             ( i < op_count ) ) {
 
-        switch( ops[i] ) {
+        if ( ( ( express_test > 0 ) && ( lengths[i] > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+             ( ( express_test > 1 ) && ( lengths[i] > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
 
-            case READ_OP:
-                result = H5FDaio_read(file, types[i], H5P_DEFAULT, 
-                                       offsets[i], lengths[i], (void *)(bufs[i]), 
-                                       &(ctlblks[i]));
+            /* skip this test */
+            (*sub_tests_skipped_ptr)++;
+            ctlblks[i] = NULL;
 
-                if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
+        } else {
 
+            switch( ops[i] ) {
+
+                case READ_OP:
+                    result = H5FDaio_read(file, types[i], H5P_DEFAULT, 
+                                           offsets[i], lengths[i], (void *)(bufs[i]), 
+                                           &(ctlblks[i]));
+
+                    if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
+
+                        *pass_ptr = FALSE;
+                        *failure_mssg_ptr = "H5FDaio_read(0) failed.";
+                    }
+		    break;
+
+	        case WRITE_OP:
+                    result = H5FDaio_write(file, types[i], H5P_DEFAULT, 
+                                           offsets[i], lengths[i], (void *)(bufs[i]), 
+                                           &(ctlblks[i]));
+
+                    if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
+
+                        *pass_ptr = FALSE;
+                        *failure_mssg_ptr = "H5FDaio_write(0) failed.";
+                    }
+                    break;
+
+	        default:
                     *pass_ptr = FALSE;
-                    *failure_mssg_ptr = "H5FDaio_read(0) failed.";
-                }
-		break;
-
-	    case WRITE_OP:
-                result = H5FDaio_write(file, types[i], H5P_DEFAULT, 
-                                       offsets[i], lengths[i], (void *)(bufs[i]), 
-                                       &(ctlblks[i]));
-
-                if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
-
-                    *pass_ptr = FALSE;
-                    *failure_mssg_ptr = "H5FDaio_write(0) failed.";
-                }
-                break;
-
-	    default:
-                *pass_ptr = FALSE;
-                *failure_mssg_ptr = "unknown op.";
-		break;
+                    *failure_mssg_ptr = "unknown op.";
+		    break;
+            }
 	}
 
         i++;
@@ -1403,13 +1443,19 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
     i = 0;
     while ( ( *pass_ptr ) &&
             ( i < op_count ) ) {
+        
+        /* recall that if ctlblks[i] == NULL, either we have a failure (in which
+         * case this code should be unreachable), or we skipped this read or write.
+         */
+        if ( ctlblks[i] != NULL ) {
 
-        result = H5FDaio_cancel(file, ctlblks[i]);
+            result = H5FDaio_cancel(file, ctlblks[i]);
 
-	if ( result < 0 ) {
+	    if ( result < 0 ) {
 
-            *pass_ptr = FALSE;
-            *failure_mssg_ptr = "H5FDaio_cancel(0) failed.";
+                *pass_ptr = FALSE;
+                *failure_mssg_ptr = "H5FDaio_cancel(0) failed.";
+            }
         }
 
         i++;
@@ -1493,10 +1539,12 @@ aio_multi_write_sync_read_check(H5FD_t * file,
 				int write_count,
 			        H5FD_mem_t types[],
 				haddr_t offsets[],
-				size_t lengths[],
+				const size_t lengths[],
 				const char * tags[],
                                 hbool_t * pass_ptr, 
-                                const char ** failure_mssg_ptr)
+                                const char ** failure_mssg_ptr,
+                                const int express_test,
+                                int * sub_tests_skipped_ptr)
 {
     const char * fcn_name = "aio_multi_write_sync_read_check()";
     const char * H5FD_mem_t_strings[H5FD_MEM_NTYPES] =
@@ -1535,7 +1583,8 @@ aio_multi_write_sync_read_check(H5FD_t * file,
              ( offsets == NULL ) ||
              ( lengths == NULL ) ||
              ( tags == NULL ) ||
-             ( failure_mssg_ptr == NULL ) ) {
+             ( failure_mssg_ptr == NULL ) ||
+             ( sub_tests_skipped_ptr == NULL ) ) {
 
 	    *pass_ptr = FALSE;
             *failure_mssg_ptr = 
@@ -1577,10 +1626,21 @@ aio_multi_write_sync_read_check(H5FD_t * file,
         while ( ( *pass_ptr ) &&
                 ( i < write_count ) ) {
 
-            if ( lengths[i] <= 0 ) {
+            if ( lengths[i] < 16 ) {
 
                 *pass_ptr = FALSE;
-                *failure_mssg_ptr = "length[i] <= 16.";
+                *failure_mssg_ptr = "length[i] < 16.";
+
+            } else if ( ( ( express_test > 0 ) && 
+                          ( lengths[i] > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+                        ( ( express_test > 1 ) && 
+                          ( lengths[i] > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+
+                /* we will be skipping the test associated with this buffer -- thus
+                 * no need to allocate and initialize it.
+                 */
+                write_bufs[i] = NULL;
+                read_bufs[i] = NULL;
 
             } else {
 
@@ -1648,14 +1708,22 @@ aio_multi_write_sync_read_check(H5FD_t * file,
     while ( ( *pass_ptr ) &&
             ( i < write_count ) ) {
 
-        result = H5FDaio_write(file, types[i], H5P_DEFAULT, 
-                               offsets[i], lengths[i], (void *)(write_bufs[i]), 
-                               &(ctlblks[i]));
+        if ( ( ( express_test > 0 ) && ( lengths[i] > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+             ( ( express_test > 1 ) && ( lengths[i] > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
 
-        if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
+            ctlblks[i] = NULL;
 
-            *pass_ptr = FALSE;
-            *failure_mssg_ptr = "H5FDaio_write(0) failed.";
+        } else {
+
+            result = H5FDaio_write(file, types[i], H5P_DEFAULT, 
+                                   offsets[i], lengths[i], (void *)(write_bufs[i]), 
+                                   &(ctlblks[i]));
+
+            if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
+
+                *pass_ptr = FALSE;
+                *failure_mssg_ptr = "H5FDaio_write(0) failed.";
+            }
         }
 
         i++;
@@ -1672,29 +1740,35 @@ aio_multi_write_sync_read_check(H5FD_t * file,
     while ( ( *pass_ptr ) &&
             ( i < write_count ) ) {
 
-        if ( do_wait ) {
+        /* recall that if ctlblks[i] == NULL, either we have a failure (in which
+         * case this code should be unreachable), or we skipped this write.
+         */
+        if ( ctlblks[i] != NULL ) {
 
-            if ( *pass_ptr ) {
+            if ( do_wait ) {
 
-                result = H5FDaio_wait(file, ctlblks[i]);
+                if ( *pass_ptr ) {
 
-                if ( result < 0 ) {
+                    result = H5FDaio_wait(file, ctlblks[i]);
 
-                    *pass_ptr = FALSE;
-                    *failure_mssg_ptr = "H5FDaio_wait(0) failed.";
+                    if ( result < 0 ) {
+
+                        *pass_ptr = FALSE;
+                        *failure_mssg_ptr = "H5FDaio_wait(0) failed.";
+                    }
                 }
-            }
-        } else {
+            } else {
 
-            done = FALSE;
-            while ( ( *pass_ptr ) && ( ! done ) ) {
+                done = FALSE;
+                while ( ( *pass_ptr ) && ( ! done ) ) {
 
-                result = H5FDaio_test(file, &done, ctlblks[i]);
+                    result = H5FDaio_test(file, &done, ctlblks[i]);
 
-                if ( result < 0 ) {
+                    if ( result < 0 ) {
 
-                    *pass_ptr = FALSE;
-                    *failure_mssg_ptr = "H5FDaio_test(0) failed.";
+                        *pass_ptr = FALSE;
+                        *failure_mssg_ptr = "H5FDaio_test(0) failed.";
+                    }
                 }
             }
         }
@@ -1712,15 +1786,21 @@ aio_multi_write_sync_read_check(H5FD_t * file,
     while ( ( *pass_ptr ) &&
             ( i < write_count ) ) {
 
-        result = H5FDaio_finish(file, &error_num, ctlblks[i]);
+        /* recall that if ctlblks[i] == NULL, either we have a failure (in which
+         * case this code should be unreachable), or we skipped this write.
+         */
+        if ( ctlblks[i] != NULL ) {
 
-        if ( ( result < 0 ) || ( error_num != 0 ) ) {
+            result = H5FDaio_finish(file, &error_num, ctlblks[i]);
 
-            *pass_ptr = FALSE;
-            *failure_mssg_ptr = "H5FDaio_finish(0) failed.";
+            if ( ( result < 0 ) || ( error_num != 0 ) ) {
+
+                *pass_ptr = FALSE;
+                *failure_mssg_ptr = "H5FDaio_finish(0) failed.";
+            }
+
+            ctlblks[i] = NULL;
         }
-
-        ctlblks[i] = NULL;
 
         i++;
     }
@@ -1772,14 +1852,26 @@ aio_multi_write_sync_read_check(H5FD_t * file,
     while ( ( *pass_ptr ) &&
             ( i < write_count ) ) {
 
-        result = H5FDaio_read(file, types[0], H5P_DEFAULT, 
-                              offsets[i], lengths[i], (void *)(read_bufs[i]), 
-                              &(ctlblks[i]));
+	/* the lengths table is constant, so we should skip the reads matching 
+         * the writes skipped above -- if not, we will hear about it.
+         */
+        if ( ( ( express_test > 0 ) && ( lengths[i] > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+             ( ( express_test > 1 ) && ( lengths[i] > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
 
-        if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
+            /* don't increment *sub_tests_skipped as we have already done this above */
+            ctlblks[i] = NULL;
 
-            *pass_ptr = FALSE;
-            *failure_mssg_ptr = "H5FDaio_write(0) failed.";
+        } else {
+
+            result = H5FDaio_read(file, types[0], H5P_DEFAULT, 
+                                  offsets[i], lengths[i], (void *)(read_bufs[i]), 
+                                  &(ctlblks[i]));
+
+            if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
+
+                *pass_ptr = FALSE;
+                *failure_mssg_ptr = "H5FDaio_write(0) failed.";
+            }
         }
 
         i++;
@@ -1797,29 +1889,35 @@ aio_multi_write_sync_read_check(H5FD_t * file,
     while ( ( *pass_ptr ) &&
             ( i < write_count ) ) {
 
-        if ( do_wait ) {
+        /* recall that if ctlblks[i] == NULL, either we have a failure (in which
+         * case this code should be unreachable), or we skipped this read.
+         */
+        if ( ctlblks[i] != NULL ) {
 
-            if ( *pass_ptr ) {
+            if ( do_wait ) {
 
-                result = H5FDaio_wait(file, ctlblks[i]);
+                if ( *pass_ptr ) {
 
-                if ( result < 0 ) {
+                    result = H5FDaio_wait(file, ctlblks[i]);
 
-                    *pass_ptr = FALSE;
-                    *failure_mssg_ptr = "H5FDaio_wait(0) failed.";
+                    if ( result < 0 ) {
+
+                        *pass_ptr = FALSE;
+                        *failure_mssg_ptr = "H5FDaio_wait(0) failed.";
+                    }
                 }
-            }
-        } else {
+            } else {
 
-            done = FALSE;
-            while ( ( *pass_ptr ) && ( ! done ) ) {
+                done = FALSE;
+                while ( ( *pass_ptr ) && ( ! done ) ) {
 
-                result = H5FDaio_test(file, &done, ctlblks[i]);
+                    result = H5FDaio_test(file, &done, ctlblks[i]);
 
-                if ( result < 0 ) {
+                    if ( result < 0 ) {
 
-                    *pass_ptr = FALSE;
-                    *failure_mssg_ptr = "H5FDaio_test(0) failed.";
+                        *pass_ptr = FALSE;
+                        *failure_mssg_ptr = "H5FDaio_test(0) failed.";
+                    }
                 }
             }
         }
@@ -1838,15 +1936,21 @@ aio_multi_write_sync_read_check(H5FD_t * file,
     while ( ( *pass_ptr ) &&
             ( i < write_count ) ) {
 
-        result = H5FDaio_finish(file, &error_num, ctlblks[i]);
+        /* recall that if ctlblks[i] == NULL, either we have a failure (in which
+         * case this code should be unreachable), or we skipped this read.
+         */
+        if ( ctlblks[i] != NULL ) {
 
-        if ( ( result < 0 ) || ( error_num != 0 ) ) {
+            result = H5FDaio_finish(file, &error_num, ctlblks[i]);
 
-            *pass_ptr = FALSE;
-            *failure_mssg_ptr = "H5FDaio_finish(0) failed.";
+            if ( ( result < 0 ) || ( error_num != 0 ) ) {
+
+                *pass_ptr = FALSE;
+                *failure_mssg_ptr = "H5FDaio_finish(0) failed.";
+            }
+
+            ctlblks[i] = NULL;
         }
-
-        ctlblks[i] = NULL;
 
         i++;
     }
@@ -1861,23 +1965,35 @@ aio_multi_write_sync_read_check(H5FD_t * file,
     while ( ( *pass_ptr ) &&
             ( i < write_count ) ) {
 
-        j = 0;
-        while ( ( *pass_ptr ) &&
-                ( j < (int)lengths[i] ) ) {
+	/* the lengths table is constant, so we should skip the checks matching 
+         * the writes and reads skipped above -- if not, we will hear about it.
+         */
+        if ( ( ( express_test > 0 ) && ( lengths[i] > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+             ( ( express_test > 1 ) && ( lengths[i] > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
 
-            if ( (write_bufs[i])[j] != (read_bufs[i])[j] ) {
+            /* we skipped this test -- increment the counter */
+	    (*sub_tests_skipped_ptr)++;
 
-                HDfprintf(stdout, "lengths[%d] = %d\n", i, lengths[i]);
-                HDfprintf(stdout, "offsets[%d] = %lld\n", 
-                          i, (long long)(offsets[i]));
-                HDfprintf(stdout, "write_bufs[%d][%d] = %c\n", 
-                          i, j, (write_bufs[i])[j]);
-                HDfprintf(stdout, "read_bufs[%d][%d] = %c\n", 
-                          i, j, (read_bufs[i])[j]);
-                *pass_ptr = FALSE;
-                *failure_mssg_ptr = "data mismatch(1).";
+        } else {
+
+            j = 0;
+            while ( ( *pass_ptr ) &&
+                    ( j < (int)lengths[i] ) ) {
+
+                if ( (write_bufs[i])[j] != (read_bufs[i])[j] ) {
+
+                    HDfprintf(stdout, "lengths[%d] = %d\n", i, lengths[i]);
+                    HDfprintf(stdout, "offsets[%d] = %lld\n", 
+                              i, (long long)(offsets[i]));
+                    HDfprintf(stdout, "write_bufs[%d][%d] = %c\n", 
+                              i, j, (write_bufs[i])[j]);
+                    HDfprintf(stdout, "read_bufs[%d][%d] = %c\n", 
+                              i, j, (read_bufs[i])[j]);
+                    *pass_ptr = FALSE;
+                    *failure_mssg_ptr = "data mismatch(1).";
+                }
+                j++;
             }
-            j++;
         }
 
         i++;
@@ -2295,7 +2411,8 @@ static int
 generic_aio_test(const char * test_banner, 
                  const int file_name_num,
 		 hid_t fapl_id,
-                 haddr_t maxaddr)
+                 haddr_t maxaddr,
+                 const int express_test)
 {
     const char * fcn_name = "generic_aio_test()";
     const char * failure_mssg = NULL;
@@ -2313,6 +2430,7 @@ generic_aio_test(const char * test_banner,
     hbool_t pass = TRUE;
     hbool_t show_progress = FALSE;
     hbool_t verbose = FALSE;
+    int sub_tests_skipped = 0;
     int cp = 0;
     int ret_val = 0;
     int write_count = 10;
@@ -2610,14 +2728,23 @@ generic_aio_test(const char * test_banner,
 
     write_size *= (size_t)16;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "1 MB -- test for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ FALSE,
-                                &pass,
-                                &failure_mssg);
+    if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+         ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+    
+        /* skip this test */
+        sub_tests_skipped++;
+
+    } else {
+
+        aio_single_write_read_check(file,
+                                    H5FD_MEM_DRAW,
+                                    "1 MB -- test for completion",
+                                    offset,
+                                    write_size,
+                                    /* do_wait = */ FALSE,
+                                    &pass,
+                                    &failure_mssg);
+    }
 
     if ( show_progress ) { /* cp == 14 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 MB, wait.\n", 
@@ -2626,14 +2753,23 @@ generic_aio_test(const char * test_banner,
 
     offset += (haddr_t)write_size;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "1 MB -- wait for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ TRUE,
-                                &pass,
-                                &failure_mssg);
+    if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+         ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+    
+        /* skip this test */
+        sub_tests_skipped++;
+
+    } else {
+
+        aio_single_write_read_check(file,
+                                    H5FD_MEM_DRAW,
+                                    "1 MB -- wait for completion",
+                                    offset,
+                                    write_size,
+                                    /* do_wait = */ TRUE,
+                                    &pass,
+                                    &failure_mssg);
+    }
 
     if ( show_progress ) { /* cp == 15 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 16 MB, poll.\n", 
@@ -2644,14 +2780,23 @@ generic_aio_test(const char * test_banner,
 
     write_size *= (size_t)16;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "16 MB -- test for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ FALSE,
-                                &pass,
-                                &failure_mssg);
+    if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+         ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+    
+        /* skip this test */
+        sub_tests_skipped++;
+
+    } else {
+
+        aio_single_write_read_check(file,
+                                    H5FD_MEM_DRAW,
+                                    "16 MB -- test for completion",
+                                    offset,
+                                    write_size,
+                                    /* do_wait = */ FALSE,
+                                    &pass,
+                                    &failure_mssg);
+    }
 
     if ( show_progress ) { /* cp == 16 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 16 MB, wait.\n", 
@@ -2660,14 +2805,23 @@ generic_aio_test(const char * test_banner,
 
     offset += (haddr_t)write_size;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "16 MB -- wait for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ TRUE,
-                                &pass,
-                                &failure_mssg);
+    if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+         ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+    
+        /* skip this test */
+        sub_tests_skipped++;
+
+    } else {
+
+        aio_single_write_read_check(file,
+                                    H5FD_MEM_DRAW,
+                                    "16 MB -- wait for completion",
+                                    offset,
+                                    write_size,
+                                    /* do_wait = */ TRUE,
+                                    &pass,
+                                    &failure_mssg);
+    }
 
     if ( show_progress ) { /* cp == 17 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 MB, poll.\n", 
@@ -2678,14 +2832,23 @@ generic_aio_test(const char * test_banner,
 
     write_size *= (size_t)16;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "256 MB -- test for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ FALSE,
-                                &pass,
-                                &failure_mssg);
+    if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+         ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+    
+        /* skip this test */
+        sub_tests_skipped++;
+
+    } else {
+
+        aio_single_write_read_check(file,
+                                    H5FD_MEM_DRAW,
+                                    "256 MB -- test for completion",
+                                    offset,
+                                    write_size,
+                                    /* do_wait = */ FALSE,
+                                    &pass,
+                                    &failure_mssg);
+    }
 
     if ( show_progress ) { /* cp == 18 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 MB, wait.\n", 
@@ -2694,14 +2857,23 @@ generic_aio_test(const char * test_banner,
 
     offset += (haddr_t)write_size;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "256 MB -- wait for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ TRUE,
-                                &pass,
-                                &failure_mssg);
+    if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+         ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+    
+        /* skip this test */
+        sub_tests_skipped++;
+
+    } else {
+
+        aio_single_write_read_check(file,
+                                    H5FD_MEM_DRAW,
+                                    "256 MB -- wait for completion",
+                                    offset,
+                                    write_size,
+                                    /* do_wait = */ TRUE,
+                                    &pass,
+                                    &failure_mssg);
+    }
 
     if ( show_progress ) { /* cp == 19 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d -- mwsrchk.\n", 
@@ -2715,13 +2887,15 @@ generic_aio_test(const char * test_banner,
 				    lengths,
 				    tags,
                                     &pass,
-                                    &failure_mssg);
+                                    &failure_mssg,
+                                    express_test,
+                                    &sub_tests_skipped);
 
     if ( show_progress ) { /* cp == 20 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d -- wrfcchk.\n", 
                   fcn_name, cp++, (int)pass);
     }
-#if 1 /* JRM */
+
     aio_multi_read_write_fsync_cancel_check(file,
 				            op_count,
                                             ops,
@@ -2730,8 +2904,10 @@ generic_aio_test(const char * test_banner,
 				            lengths,
 				            tags,
                                             &pass, 
-                                            &failure_mssg);
-#endif /* JRM */
+                                            &failure_mssg,
+                                            express_test,
+                                            &sub_tests_skipped);
+
     if ( show_progress ) { /* cp == 21 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d -- close file.\n", 
                   fcn_name, cp++, (int)pass);
@@ -2768,6 +2944,12 @@ generic_aio_test(const char * test_banner,
                   fcn_name, failure_mssg);
 	H5_FAILED(); 
         ret_val = -1;
+    }
+
+    if ( sub_tests_skipped > 0 ) {
+
+        HDfprintf(stdout, "	%d sub test(s) skipped to expedite test.\n", 
+                  sub_tests_skipped);
     }
 
     if ( verbose ) {
@@ -3101,7 +3283,7 @@ generic_aio_input_error_tests(const char * test_banner,
 
         H5E_BEGIN_TRY {
             result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, 
-                                   0, (void *)(write_buf), &write_ctlblk_ptr);
+                                   (size_t)0, (void *)(write_buf), &write_ctlblk_ptr);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3716,7 +3898,7 @@ generic_aio_input_error_tests(const char * test_banner,
 
         H5E_BEGIN_TRY {
             result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, 
-                                  0, (void *)(read_buf), &read_ctlblk_ptr);
+                                  (size_t)0, (void *)(read_buf), &read_ctlblk_ptr);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -4004,7 +4186,8 @@ generic_aio_input_error_tests(const char * test_banner,
 
 static int
 multi_file_driver_aio_test(const char * test_banner, 
-                           const int file_name_num)
+                           const int file_name_num,
+                           const int express_test)
 {
     const char * fcn_name = "multi_file_driver_aio_test()";
     const char * memb_name[H5FD_MEM_NTYPES];
@@ -4109,6 +4292,7 @@ multi_file_driver_aio_test(const char * test_banner,
                   WRITE_OP, WRITE_OP, WRITE_OP, WRITE_OP, WRITE_OP, WRITE_OP,
 		  READ_OP,  READ_OP,  READ_OP,  READ_OP,  READ_OP,  READ_OP, 
                   WRITE_OP, WRITE_OP, WRITE_OP, WRITE_OP, WRITE_OP, WRITE_OP };
+    int sub_tests_skipped = 0;
     hid_t       fapl_id;
     hid_t       memb_fapl[H5FD_MEM_NTYPES];
     H5FD_mem_t types[] = { 
@@ -4888,14 +5072,23 @@ multi_file_driver_aio_test(const char * test_banner,
 
             HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
 
-            aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "1 MB -- test for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ FALSE,
-                                        &pass,
-                                        &failure_mssg);
+            if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+                 ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+    
+                /* skip this test */
+		sub_tests_skipped++;
+
+            } else {
+
+                aio_single_write_read_check(file,
+                                            (H5FD_mem_t)i,
+                                            "1 MB -- test for completion",
+                                            type_offset,
+                                            write_size,
+                                            /* do_wait = */ FALSE,
+                                            &pass,
+                                            &failure_mssg);
+            }
         }
     }
 
@@ -4922,14 +5115,23 @@ multi_file_driver_aio_test(const char * test_banner,
 
             HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
 
-            aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "1 MB -- wait for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ TRUE,
-                                        &pass,
-                                        &failure_mssg);
+            if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+                 ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+    
+                /* skip this test */
+		sub_tests_skipped++;
+
+            } else {
+
+                aio_single_write_read_check(file,
+                                            (H5FD_mem_t)i,
+                                            "1 MB -- wait for completion",
+                                            type_offset,
+                                            write_size,
+                                            /* do_wait = */ TRUE,
+                                            &pass,
+                                            &failure_mssg);
+            }
         }
     }
 
@@ -4958,14 +5160,23 @@ multi_file_driver_aio_test(const char * test_banner,
 
             HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
 
-            aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "16 MB -- test for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ FALSE,
-                                        &pass,
-                                        &failure_mssg);
+            if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+                 ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+    
+                /* skip this test */
+		sub_tests_skipped++;
+
+            } else {
+
+                aio_single_write_read_check(file,
+                                            (H5FD_mem_t)i,
+                                            "16 MB -- test for completion",
+                                            type_offset,
+                                            write_size,
+                                            /* do_wait = */ FALSE,
+                                            &pass,
+                                            &failure_mssg);
+            }
         }
     }
 
@@ -4992,14 +5203,23 @@ multi_file_driver_aio_test(const char * test_banner,
 
             HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
 
-            aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "16 MB -- wait for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ TRUE,
-                                        &pass,
-                                        &failure_mssg);
+            if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+                 ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+    
+                /* skip this test */
+		sub_tests_skipped++;
+
+            } else {
+
+                aio_single_write_read_check(file,
+                                            (H5FD_mem_t)i,
+                                            "16 MB -- wait for completion",
+                                            type_offset,
+                                            write_size,
+                                            /* do_wait = */ TRUE,
+                                            &pass,
+                                            &failure_mssg);
+            }
         }
     }
 
@@ -5028,14 +5248,23 @@ multi_file_driver_aio_test(const char * test_banner,
 
             HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
 
-            aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "256 MB -- test for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ FALSE,
-                                        &pass,
-                                        &failure_mssg);
+            if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+                 ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+    
+                /* skip this test */
+		sub_tests_skipped++;
+
+            } else {
+
+                aio_single_write_read_check(file,
+                                            (H5FD_mem_t)i,
+                                            "256 MB -- test for completion",
+                                            type_offset,
+                                            write_size,
+                                            /* do_wait = */ FALSE,
+                                            &pass,
+                                            &failure_mssg);
+            }
         }
     }
 
@@ -5072,14 +5301,23 @@ multi_file_driver_aio_test(const char * test_banner,
 
             HDassert( type_offset < ((haddr_t)(i + 1) * TYPE_SLICE) );
 
-            aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "256 MB -- wait for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ TRUE,
-                                        &pass,
-                                        &failure_mssg);
+            if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
+                 ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
+    
+                /* skip this test */
+		sub_tests_skipped++;
+
+            } else {
+
+                aio_single_write_read_check(file,
+                                            (H5FD_mem_t)i,
+                                            "256 MB -- wait for completion",
+                                            type_offset,
+                                            write_size,
+                                            /* do_wait = */ TRUE,
+                                            &pass,
+                                            &failure_mssg);
+            }
         }
     }
 
@@ -5095,13 +5333,15 @@ multi_file_driver_aio_test(const char * test_banner,
 				    lengths,
 				    tags,
                                     &pass,
-                                    &failure_mssg);
+                                    &failure_mssg,
+                                    express_test,
+                                    &sub_tests_skipped);
 
     if ( show_progress ) { /* cp == 21 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d -- wrfcchk.\n", 
                   fcn_name, cp++, (int)pass);
     }
-#if 1 /* JRM */
+
     aio_multi_read_write_fsync_cancel_check(file,
 				            op_count,
                                             ops,
@@ -5110,8 +5350,10 @@ multi_file_driver_aio_test(const char * test_banner,
 				            lengths,
 				            tags,
                                             &pass, 
-                                            &failure_mssg);
-#endif /* JRM */
+                                            &failure_mssg,
+                                            express_test,
+                                            &sub_tests_skipped);
+
     if ( show_progress ) { /* cp == 22 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d -- close file.\n", 
                   fcn_name, cp++, (int)pass);
@@ -5151,6 +5393,13 @@ multi_file_driver_aio_test(const char * test_banner,
         ret_val = -1;
     }
 
+    if ( sub_tests_skipped > 0 ) {
+
+        HDfprintf(stdout, "	%d sub test(s) skipped to expedite test.\n", 
+                  sub_tests_skipped);
+    }
+
+
     if ( verbose ) {
 
         HDfprintf(stdout, "exiting generic_aio_test() -- ret_val == %d.\n",
@@ -5181,6 +5430,7 @@ int
 main(void)
 {
     const char *memb_name[H5FD_MEM_NTYPES];
+    int         express_test;
     int 	nerrors = 0;
     int		result;
     hid_t 	fapl;
@@ -5190,6 +5440,28 @@ main(void)
     H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];
 
     h5_reset();
+
+    /* obtain the current value of express_test here, and pass it through
+     * to the tests that use it.  Do this to facilitate easy over ride for
+     * testing purposes.
+     */
+    express_test = GetTestExpress();
+
+    printf("========================================\n");
+    printf("Virtual file driver tests\n");
+    printf("        express_test = %d\n", express_test);
+#ifdef H5_HAVE_AIO
+    printf("        H5_HAVE_AIO is defined.\n");
+#else /* H5_HAVE_AIO */
+    printf("        H5_HAVE_AIO is undefined.\n");
+#endif /* H5_HAVE_AIO */
+#ifdef H5_HAVE_POSIX_AIO
+    printf("        H5_HAVE_POSIX AIO is defined.\n");
+#else /* H5_HAVE_POSIX_AIO */
+    printf("        H5_HAVE_POSIX_AIO is undefined.\n");
+#endif /* H5_HAVE_POSIX_AIO */
+    printf("========================================\n");
+
 #if 1
     nerrors += test_sec2() < 0      ? 1 : 0;
     nerrors += test_core() < 0      ? 1 : 0;
@@ -5213,7 +5485,7 @@ main(void)
     } else {
 
         result = generic_aio_test("AIO on SEC2 file driver", 6, fapl, 
-                                  (haddr_t)0x40000000);
+                                  (haddr_t)0x40000000, express_test);
         nerrors += ( result < 0 ) ? 1 : 0;
     }
 
@@ -5243,7 +5515,7 @@ main(void)
     } else {
 
         result = generic_aio_test("AIO on CORE file driver", 7, fapl, 
-                                   (haddr_t)0x40000000);
+                                   (haddr_t)0x40000000, express_test);
         nerrors += ( result < 0 ) ? 1 : 0;
     }
 
@@ -5272,7 +5544,7 @@ main(void)
     } else {
 
         result = generic_aio_test("AIO on STDIO file driver", 8, fapl, 
-                                  (haddr_t)0x40000000);
+                                  (haddr_t)0x40000000, express_test);
         nerrors += ( result < 0 ) ? 1 : 0;
     }
 
@@ -5301,7 +5573,7 @@ main(void)
     } else {
 
         result = generic_aio_test("AIO on FAMILY file driver", 9, fapl, 
-                                  (haddr_t)0x40000000);
+                                  (haddr_t)0x40000000, express_test);
         nerrors += ( result < 0 ) ? 1 : 0;
     }
 
@@ -5358,11 +5630,12 @@ main(void)
     } else {
 
         result = generic_aio_test("AIO on MULTI file driver", 10, fapl, 
-                                  (haddr_t)0x40000000);
+                                  (haddr_t)0x40000000, express_test);
         nerrors += ( result < 0 ) ? 1 : 0;
     
         result = multi_file_driver_aio_test(
-			    "AIO with varied mem types on MULTI file driver", 11);
+			    "AIO with varied mem types on MULTI file driver", 
+                            11, express_test);
         nerrors += ( result < 0 ) ? 1 : 0;
     }
 

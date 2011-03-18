@@ -68,8 +68,8 @@ typedef struct acreate_data_struct {
 
 void tts_acreate(void)
 {
-    /* Pthread declarations */
-    pthread_t threads[NUM_THREADS];
+    /* Thread declarations */
+    H5TS_thread_t threads[NUM_THREADS];
 
     /* HDF5 data declarations */
     hid_t   file, dataset;
@@ -118,13 +118,11 @@ void tts_acreate(void)
         attrib_data->datatype = datatype;
         attrib_data->dataspace = dataspace;
         attrib_data->current_index = i;
-        ret = pthread_create(&threads[i], NULL, tts_acreate_thread, attrib_data);
-        assert(ret == 0);
+        threads[i] = H5TS_create_thread(tts_acreate_thread, NULL, attrib_data);
     } /* end for */
 
     for(i = 0; i < NUM_THREADS; i++) {
-        ret = pthread_join(threads[i], NULL);
-        assert(ret == 0);
+        H5TS_wait_for_thread(threads[i]);
     } /* end for */
 
 

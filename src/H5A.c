@@ -369,7 +369,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     htri_t      tri_ret;        /* htri_t return value */
     hid_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_create)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5A_create, dxpl_id, loc->oloc->addr, FAIL)
 
     /* check args */
     HDassert(loc);
@@ -500,7 +500,7 @@ done:
     if(ret_value < 0 && attr && H5A_close(attr) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* H5A_create() */
 
 
@@ -959,7 +959,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
     size_t		buf_size;		/* desired buffer size	*/
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_write)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5A_write, dxpl_id, attr->oloc.addr, FAIL)
 
     HDassert(attr);
     HDassert(mem_type);
@@ -1029,16 +1029,16 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 
 done:
     /* Release resources */
-    if(src_id >= 0)
-        (void)H5I_dec_ref(src_id, FALSE);
-    if(dst_id >= 0)
-        (void)H5I_dec_ref(dst_id, FALSE);
+    if(src_id >= 0 && H5I_dec_ref(src_id) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
+    if(dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
     if(tconv_buf && !tconv_owned)
         tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
     if(bkg_buf)
         bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* H5A_write() */
 
 
@@ -1175,10 +1175,10 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
 
 done:
     /* Release resources */
-    if(src_id >= 0)
-        (void)H5I_dec_ref(src_id, FALSE);
-    if(dst_id >= 0)
-        (void)H5I_dec_ref(dst_id, FALSE);
+    if(src_id >= 0 && H5I_dec_ref(src_id) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
+    if(dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
     if(tconv_buf)
         tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
     if(bkg_buf)
@@ -2047,8 +2047,8 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 done:
     /* Release resources */
     if(obj_loc_id > 0) {
-        if(H5I_dec_ref(obj_loc_id, TRUE) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "unable to close temporary object")
+        if(H5I_dec_app_ref(obj_loc_id) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
     } /* end if */
     else if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
@@ -2271,7 +2271,7 @@ H5Aclose(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Decrement references to that atom (and close it) */
-    if(H5I_dec_ref(attr_id, TRUE) < 0)
+    if(H5I_dec_app_ref(attr_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't close attribute")
 
 done:
@@ -2424,18 +2424,19 @@ H5A_close(H5A_t *attr)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release object header info")
 
     /* Reference count can be 0.  It only happens when H5A_create fails. */
-    if(1 >= attr->shared->nrefs) {
+    if(attr->shared->nrefs <= 1) {
         /* Free dynamicly allocated items */
         if(H5A_free(attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
 
         /* Destroy shared attribute struct */
         attr->shared = H5FL_FREE(H5A_shared_t, attr->shared);
-    } else if(attr->shared->nrefs > 1) {
+    } /* end if */
+    else {
         /* There are other references to the shared part of the attribute.
          * Only decrement the reference count. */
         --attr->shared->nrefs;
-    }
+    } /* end else */
 
     /* Free group hierarchy path */
     if(H5G_name_free(&(attr->path)) < 0)

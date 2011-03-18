@@ -25,20 +25,18 @@ ELSE (FORTRAN_HAVE_SIZEOF)
       ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind.f90
   )
 ENDIF (FORTRAN_HAVE_SIZEOF)
-IF (WIN32)
-  IF (MSVC)
-    IF (BUILD_SHARED_LIBS)
-      SET_TARGET_PROPERTIES (H5test_FortranHavekind
-          PROPERTIES
-              COMPILE_FLAGS "/MT"
-      )
-    ENDIF (BUILD_SHARED_LIBS)
+IF (WIN32 AND MSVC)
+  IF (BUILD_SHARED_LIBS)
     SET_TARGET_PROPERTIES (H5test_FortranHavekind
         PROPERTIES
-            LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+            COMPILE_FLAGS "/MT"
     )
-  ENDIF (MSVC)
-ENDIF (WIN32)
+  ENDIF (BUILD_SHARED_LIBS)
+  SET_TARGET_PROPERTIES (H5test_FortranHavekind
+      PROPERTIES
+          LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+  )
+ENDIF (WIN32 AND MSVC)
 SET_TARGET_PROPERTIES (H5test_FortranHavekind PROPERTIES LINKER_LANGUAGE Fortran)
 
 SET (CMD ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}${CFG_INIT}/H5test_FortranHavekind${EXE_EXT})
@@ -53,20 +51,18 @@ ADD_CUSTOM_COMMAND (
 ADD_EXECUTABLE (H5fortran_detect
     ${HDF5_F90_BINARY_DIR}/H5fortran_detect.f90
 )
-IF (WIN32)
-  IF (MSVC)
-    IF (BUILD_SHARED_LIBS)
-      SET_TARGET_PROPERTIES (H5fortran_detect
-          PROPERTIES
-              COMPILE_FLAGS "/MT"
-      )
-    ENDIF (BUILD_SHARED_LIBS)
+IF (WIN32 AND MSVC)
+  IF (BUILD_SHARED_LIBS)
     SET_TARGET_PROPERTIES (H5fortran_detect
         PROPERTIES
-            LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+            COMPILE_FLAGS "/MT"
     )
-  ENDIF (MSVC)
-ENDIF (WIN32)
+  ENDIF (BUILD_SHARED_LIBS)
+  SET_TARGET_PROPERTIES (H5fortran_detect
+      PROPERTIES
+          LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+  )
+ENDIF (WIN32 AND MSVC)
 SET_TARGET_PROPERTIES (H5test_FortranHavekind PROPERTIES LINKER_LANGUAGE Fortran)
 
 SET (CMD ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}${CFG_INIT}/H5fortran_detect${EXE_EXT})
@@ -78,6 +74,7 @@ ADD_CUSTOM_COMMAND (
     DEPENDS H5fortran_detect
 )
 
+INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY})
 #-----------------------------------------------------------------------------
 ADD_EXECUTABLE (H5match_types
     ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
@@ -188,29 +185,52 @@ ENDIF (H5_HAVE_PARALLEL)
 # Add Main fortran library
 #-----------------------------------------------------------------------------
 ADD_LIBRARY (${HDF5_F90_LIB_TARGET} ${LIB_TYPE} ${f90_F_SRCS})
-IF (WIN32)
+SET (SHARED_LINK_FLAGS " ")
+IF (WIN32 AND NOT CYGWIN)
   IF (BUILD_SHARED_LIBS)
     SET_PROPERTY (TARGET ${HDF5_F90_LIB_TARGET}
 	    APPEND PROPERTY COMPILE_DEFINITIONS
 		    BUILD_HDF5_DLL
 	)
     IF (MSVC)
-      SET_TARGET_PROPERTIES (${HDF5_F90_LIB_TARGET}
-          PROPERTIES
-              COMPILE_FLAGS "/dll"
-			  LINK_FLAGS "/SUBSYSTEM:CONSOLE /DLL /DEF:${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def"
-      )
+      SET (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def")
     ENDIF (MSVC)
   ENDIF (BUILD_SHARED_LIBS)
   SET_PROPERTY (TARGET ${HDF5_F90_LIB_TARGET}
       APPEND PROPERTY COMPILE_DEFINITIONS
   	    HDF5F90_WINDOWS
   )
-ENDIF (WIN32)
+ENDIF (WIN32 AND NOT CYGWIN)
+TARGET_FORTRAN_WIN_PROPERTIES (${HDF5_F90_LIB_TARGET} ${SHARED_LINK_FLAGS})
 SET_TARGET_PROPERTIES (${HDF5_F90_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fortran)
 TARGET_LINK_LIBRARIES (${HDF5_F90_LIB_TARGET} ${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET})
 SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_F90_LIB_TARGET} ${HDF5_F90_LIB_NAME} ${LIB_TYPE})
+
+#-----------------------------------------------------------------------------
+# Add file(s) to CMake Install
+#-----------------------------------------------------------------------------
+INSTALL (
+    FILES 
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h 
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h 
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h 
+        ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
+        ${HDF5_F90_BINARY_DIR}/H5fortran_types.f90
+    DESTINATION 
+        ${HDF5_INSTALL_INCLUDE_DIR}/fortran 
+    COMPONENT 
+        fortheaders
+)
+
+INSTALL (
+    DIRECTORY
+        ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
+    DESTINATION
+        ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+    COMPONENT
+        fortheaders
+)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
@@ -222,8 +242,8 @@ IF (HDF5_EXPORTED_TARGETS)
           ${HDF5_F90_LIB_TARGET}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib
-      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
+      ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
+      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT fortlibraries
   )
 ENDIF (HDF5_EXPORTED_TARGETS)

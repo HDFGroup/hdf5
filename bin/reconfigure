@@ -28,11 +28,11 @@
 # of versions that can get confused (not even counting the m4 utility)!
 
 # HDF5 currently uses the following versions of the autotools:
-AUTOCONF_VERSION="autoconf (GNU Autoconf) 2.65"
+AUTOCONF_VERSION="autoconf (GNU Autoconf) 2.68"
 AUTOMAKE_VERSION="automake (GNU automake) 1.11.1"
-AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.65"
+AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.68"
 ACLOCAL_VERSION="aclocal (GNU automake) 1.11.1"
-LIBTOOL_VERSION="(GNU libtool) 2.2.6b-mcg"
+LIBTOOL_VERSION="(GNU libtool) 2.4"
 #
 # When upgrading automake's version, don't forget to also update its
 # helper utilities, especially depcomp.
@@ -41,19 +41,19 @@ LIBTOOL_VERSION="(GNU libtool) 2.2.6b-mcg"
 # If paths to autotools are not specified by the user, assume tools are
 # running on jam in /mnt/hdf/packages and set paths accordingly.
 if test -z ${AUTOCONF}; then
-  AUTOCONF=/mnt/hdf/packages/autoconf/autoconf-2.65/bin/autoconf
+  AUTOCONF=/mnt/hdf/packages/autoconf/autoconf-2.68/bin/autoconf
 fi
 if test -z ${AUTOMAKE}; then
   AUTOMAKE=/mnt/hdf/packages/automake/automake-1.11.1/bin/automake-1.11
 fi
 if test -z ${AUTOHEADER}; then
-  AUTOHEADER=/mnt/hdf/packages/autoconf/autoconf-2.65/bin/autoheader
+  AUTOHEADER=/mnt/hdf/packages/autoconf/autoconf-2.68/bin/autoheader
 fi
 if test -z ${ACLOCAL}; then
   ACLOCAL=/mnt/hdf/packages/automake/automake-1.11.1/bin/aclocal-1.11
 fi
 if test -z ${LIBTOOL}; then
-  LIBTOOL=/mnt/hdf/packages/libtool/libtool-2.2.6b-mcg/bin/libtool
+  LIBTOOL=/mnt/hdf/packages/libtool/libtool-2.4/bin/libtool
 fi
 
 # Check version numbers of all autotools against the "correct" versions
@@ -84,7 +84,7 @@ if test -z "${LT_VERS}"; then
 fi
 
 # Use the latest version of M4
-PATH=/mnt/hdf/packages/m4/m4-1.4.7/bin:/mnt/hdf/packages/m4/m4-1.4.7/share:$PATH
+PATH=/mnt/hdf/packages/m4/m4-1.4.15/bin:/mnt/hdf/packages/m4/m4-1.4.15/share:$PATH
 
 # Make sure that the tools are in the path.
 AUTOCONF_DIR=`dirname ${AUTOCONF}`

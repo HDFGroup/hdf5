@@ -188,6 +188,9 @@ TOOLTEST torderattr2.h5.xml --xml -H --sort_by=name --sort_order=descending tord
 TOOLTEST torderattr3.h5.xml --xml -H --sort_by=creation_order --sort_order=ascending torderattr.h5
 TOOLTEST torderattr4.h5.xml --xml -H --sort_by=creation_order --sort_order=descending torderattr.h5
 
+# tests for floating point user defined printf format
+TOOLTEST tfpformat.h5.xml -u -m %.7f tfpformat.h5
+
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."

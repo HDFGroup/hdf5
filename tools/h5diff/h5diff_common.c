@@ -40,8 +40,9 @@ static struct long_options l_opts[] = {
     { "nan", no_arg, 'N' },
     { "compare", no_arg, 'c' },
     { "use-system-epsilon", no_arg, 'e' },
-    { "follow-links", no_arg, 'l' },
+    { "follow-symlinks", no_arg, 'l' },
     { "no-dangling-links", no_arg, 'x' },
+    { "exclude-path", require_arg, 'E' },
     { NULL, 0, '\0' }
 };
 
@@ -64,6 +65,7 @@ void parse_command_line(int argc,
 {
 
     int opt;
+    struct exclude_path_list *exclude_head, *exclude_prev, *exclude_node;
 
     /* process the command-line */
     memset(options, 0, sizeof (diff_opt_t));
@@ -73,6 +75,9 @@ void parse_command_line(int argc,
 
     /* NaNs are handled by default */
     options->do_nans = 1;
+
+    /* init for exclude-path option */
+    exclude_head = NULL;
 
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF)
@@ -99,10 +104,39 @@ void parse_command_line(int argc,
             options->m_report = 1;
             break;
         case 'l':
-            options->follow_links = 1; 
+            options->follow_links = 1;
             break;
         case 'x':
             options->no_dangle_links = 1;
+            break;
+        case 'E':
+            options->exclude_path = 1;
+            
+            /* create linked list of excluding objects */
+            if( (exclude_node = (struct exclude_path_list*) malloc(sizeof(struct exclude_path_list))) == NULL)
+            {
+                printf("Error: lack of memory!\n");
+                h5diff_exit(EXIT_FAILURE);
+            }
+
+            /* init */
+            exclude_node->obj_path = opt_arg;
+            exclude_node->obj_type = H5TRAV_TYPE_UNKNOWN;
+            exclude_prev = exclude_head;
+            
+            if (NULL == exclude_head)            
+            {
+                exclude_head = exclude_node;
+                exclude_head->next = NULL;
+            }
+            else
+            {
+                while(NULL != exclude_prev->next)
+                    exclude_prev=exclude_prev->next;
+
+                exclude_node->next = NULL;
+                exclude_prev->next = exclude_node;
+            }            
             break;
         case 'd':
             options->d=1;
@@ -162,6 +196,10 @@ void parse_command_line(int argc,
             break;
         }
     }
+
+    /* if exclude-path option is used, keep the exclude path list */
+    if (options->exclude_path)
+        options->exclude = exclude_head;
 
     /* if use system epsilon, unset -p and -d option */
     if (options->use_system_epsilon)
@@ -351,7 +389,7 @@ check_d_input( const char *str )
 
 void usage(void)
 {
- printf("usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]] \n");
+ printf("usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]] \n");
  printf("  file1                    File name of the first HDF5 file\n");
  printf("  file2                    File name of the second HDF5 file\n");
  printf("  [obj1]                   Name of an HDF5 object, in absolute path\n");
@@ -363,7 +401,7 @@ void usage(void)
  printf("   -r, --report            Report mode. Print differences.\n");
  printf("   -v, --verbose           Verbose mode. Print differences, list of objects.\n");
  printf("   -q, --quiet             Quiet mode. Do not produce output.\n");
- printf("   --follow-links          Follow symbolic links (soft links and external links)\n");
+ printf("   --follow-symlinks       Follow symbolic links (soft links and external links)\n");
  printf("                           and compare the links' target objects.\n");
  printf("                           If symbolic link(s) with the same name exist in the\n");
  printf("                           files being compared, then determine whether the \n");
@@ -374,13 +412,13 @@ void usage(void)
  printf("                           - If both symbolic links are dangling links, they\n");
  printf("                             are treated as being the same; by default, h5diff\n");
  printf("                             returns an exit code of 0. If, however, \n");
- printf("                             --no-dangling-links is used with --follow-links, \n");
+ printf("                             --no-dangling-links is used with --follow-symlinks,\n");
  printf("                             this situation is treated as an error and h5diff \n");
  printf("                             returns an exit code of 2.\n");
  printf("                           - If only one of the two links is a dangling link,\n");
  printf("                             they are treated as being different and h5diff \n");
  printf("                             returns an exit code of 1. If, however, \n");
- printf("                             --no-dangling-links is used with --follow-links, \n");
+ printf("                             --no-dangling-links is used with --follow-symlinks,\n");
  printf("                             this situation is treated as an error and h5diff \n");
  printf("                             returns an exit code of 2.\n");
  printf("                           - If both symbolic links point to existing objects,\n");
@@ -388,7 +426,7 @@ void usage(void)
  printf("                           If any symbolic link specified in the call to h5diff\n");
  printf("                           does not exist, h5diff treats it as an error and\n");
  printf("                           returns an exit code of 2.\n");
- printf("   --no-dangling-links     Must be used with --follow-links option;\n");
+ printf("   --no-dangling-links     Must be used with --follow-symlinks option;\n");
  printf("                           otherwise, h5diff shows error message and returns\n");
  printf("                           an exit code of 2.\n");
  printf("                           Check for any symbolic links (soft links or external\n");
@@ -415,6 +453,30 @@ void usage(void)
  printf("                           comparing floating point values.\n");
  printf("                           By default, strict equality is used. Use -p or -d to\n");
  printf("                           set specific tolerance.\n");
+ printf("   --exclude-path \"path\"   Exclude the specified path to an object when\n");
+ printf("                           comparing files or groups. If a group is excluded,\n");
+ printf("                           all member objects will also be excluded.\n");
+ printf("                           The specified path is excluded wherever it occurs.\n");
+ printf("                           This flexibility enables the same option to exclude\n");
+ printf("                           either objects that exist only in one file or\n");
+ printf("                           common objects that are known to differ.\n");
+ printf("\n");
+ printf("                           When comparing files, \"path\" is the absolute path to\n");
+ printf("                           the excluded object; when comparing groups, \"path\" is\n");
+ printf("                           similar to the relative path from the group to the\n");
+ printf("                           excluded object. This \"path\" can be taken from the\n");
+ printf("                           first section of the output of the --verbose option.\n");
+ printf("                           For example, if you are comparing the group /groupA\n");
+ printf("                           in two files and you want to exclude\n");
+ printf("                           /groupA/groupB/groupC in both files, the exclude\n");
+ printf("                           option would read as follows:\n");
+ printf("                             --exclude-path \"/groupB/groupC\"\n");
+ printf("\n");
+ printf("                           If there are multiple paths to an object, only the\n");
+ printf("                           specified path(s) will be excluded; the comparison\n");
+ printf("                           will include any path not explicitly excluded.\n");
+ printf("                           This option can be used repeatedly to exclude\n");
+ printf("                           multiple paths.\n");
  printf("\n");
 
  printf(" Modes of output:\n");
@@ -425,18 +487,29 @@ void usage(void)
 
  printf("\n");
 
- printf(" Compare criteria\n");
- printf("  If no objects [obj1[obj2]] are specified, h5diff only compares objects\n");
- printf("  with the same absolute path in both files\n");
+ printf(" File comparison:\n");
+ printf("  If no objects [obj1[ obj2]] are specified, the h5diff comparison proceeds as\n");
+ printf("  a comparison of the two files' root groups.  That is, h5diff first compares\n");
+ printf("  the names of root group members, generates a report of root group objects\n");
+ printf("  that appear in only one file or in both files, and recursively compares\n");
+ printf("  common objects.\n");
  printf("\n");
 
- printf(" The compare criteria is:\n");
- printf("  1) datasets: numerical array differences\n");
- printf("  2) groups: name string difference\n");
- printf("  3) datatypes: the return value of H5Tequal\n");
- printf("  4) links: name string difference of the linked value as default\n");
- printf("            (refer to --follow-links option).\n");
+ printf(" Object comparison:\n");
+ printf("  1) Groups \n");
+ printf("      First compares the names of member objects (relative path, from the\n");
+ printf("      specified group) and generates a report of objects that appear in only\n");
+ printf("      one group or in both groups. Common objects are then compared recursively.\n");
+ printf("  2) Datasets \n");
+ printf("      Array rank and dimensions, datatypes, and data values are compared.\n");
+ printf("  3) Datatypes \n");
+ printf("      The comparison is based on the return value of H5Tequal.\n");
+ printf("  4) Symbolic links \n");
+ printf("      The paths to the target objects are compared.\n");
+ printf("      (The option --follow-symlinks overrides the default behavior when\n");
+ printf("       symbolic links are compared.).\n");
  printf("\n");
+
  printf(" Exit code:\n");
  printf("  0 if no differences, 1 if differences found, 2 if error\n");
  printf("\n");

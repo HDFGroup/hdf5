@@ -394,7 +394,7 @@ done:
  * Modifications: N/A
  *---------------------------------------------------------------------------*/
 int_f
-nh5lget_info_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
+nh5lget_info_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
 		int_f *cset, int_f *corder, int_f *corder_valid, int_f *link_type,
 		haddr_t_f *address, size_t_f *val_size,
 		hid_t_f *lapl_id)
@@ -406,16 +406,16 @@ nh5lget_info_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
     /*
      * Convert FORTRAN name to C name
      */
-    if((c_link_name = HD5f2cstring(link_name, (size_t)*link_namelen)) == NULL)
-      HGOTO_DONE(FAIL);
+    if(NULL == (c_link_name = HD5f2cstring(link_name, (size_t)*link_namelen)))
+        HGOTO_DONE(FAIL);
+
     /*
      * Call H5Linfo function.
      */
     if(H5Lget_info((hid_t)*link_loc_id, c_link_name, &link_buff, (hid_t)*lapl_id) < 0)
-      HGOTO_DONE(FAIL);
+        HGOTO_DONE(FAIL);
 
     /* Unpack the structure */
-
     *cset = (int_f)link_buff.cset;
     *corder = (int_f)link_buff.corder;
     *corder_valid = 0;
@@ -425,6 +425,9 @@ nh5lget_info_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
     *val_size = (size_t_f)link_buff.u.val_size;
 
 done:
+    if(c_link_name)
+        HDfree(c_link_name);
+
     return ret_value;
 }
 
@@ -606,7 +609,7 @@ nh5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
     /*
      * Allocate buffer to hold name of an attribute
      */
-    if ((c_name = HDmalloc(c_size)) == NULL)
+    if(NULL == (c_name = (char *)HDmalloc(c_size)))
         HGOTO_DONE(FAIL)
 
     if((*size = (size_t)H5Lget_name_by_idx((hid_t)*loc_id, c_group_name, (H5_index_t)*index_field,

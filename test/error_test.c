@@ -515,6 +515,67 @@ error:
     return(-1);
 } /* end test_create() */
 
+/*-------------------------------------------------------------------------
+ * Function:    test_copy
+ *
+ * Purpose:     Test copyinging an error stack
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ * Programmer:  Allen Byrne
+ *              February 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_copy(void)
+{
+    const char *err_func = "test_copy";      /* Function name for pushing error */
+    const char *err_msg = "Error message";     /* Error message for pushing error */
+    int         err_num;             /* Number of errors on stack */
+    int         err_num_copy;        /* Number of errors on stack copy */
+    hid_t       estack_id;           /* Error stack ID */
+    herr_t      ret;                 /* Generic return value */
+
+    /* Push an error with a long description */
+    if(H5Epush(H5E_DEFAULT, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, err_msg) < 0) TEST_ERROR;
+
+    /* Check the number of errors on stack */
+    err_num = H5Eget_num(H5E_DEFAULT);
+    if(err_num != 1) TEST_ERROR
+            
+    /* Copy error stack, which clears the original */
+    if((estack_id = H5Eget_current_stack()) < 0) TEST_ERROR
+    
+    /* Check the number of errors on stack copy */
+    err_num = H5Eget_num(estack_id);
+    if(err_num != 1) TEST_ERROR
+
+    /* Check the number of errors on original stack */
+    err_num = H5Eget_num(H5E_DEFAULT);
+    if(err_num != 0) TEST_ERROR
+
+    /* Put the stack copy as the default.  It closes the stack copy, too. */
+    if(H5Eset_current_stack(estack_id) < 0) TEST_ERROR
+
+    /* Check the number of errors on default stack */
+    err_num = H5Eget_num(H5E_DEFAULT);
+    if(err_num != 1) TEST_ERROR
+
+    /* Try to close error stack copy.  Should fail because 
+     * the current H5Eset_current_stack closes the stack to be set.*/
+    H5E_BEGIN_TRY {
+       ret = H5Eclose_stack(estack_id);
+    } H5E_END_TRY
+    if(ret >= 0) TEST_ERROR
+
+    return(0);
+
+error:
+    return(-1);
+} /* end test_copy() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	close_error
@@ -623,6 +684,9 @@ main(void)
 
     /* Test creating a new error stack */
     if(test_create() < 0) TEST_ERROR;
+
+    /* Test copying a new error stack */
+    if(test_copy() < 0) TEST_ERROR;
 
     if(H5Fclose(file) < 0) TEST_ERROR;
     h5_cleanup(FILENAME, fapl);

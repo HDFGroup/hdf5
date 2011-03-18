@@ -31,8 +31,15 @@ if test "X-" =  "X-$CC"; then
 fi
 
 # Define RUNPARALLEL if parallel mode is enabled or a parallel compiler used.
+# Define RUNSERIAL: Temporary patch for Bug 1678. -q32 binary default to run
+# with smaller memory.
+# Ask for more memory so that "make check" will pass. Not necessary for -q64
+# mode but it does no harm.
 if test "X-$enable_parallel" = "X-yes" -o X-$CC_BASENAME = X-mpcc_r; then
-    RUNPARALLEL=${RUNPARALLEL="env MP_PROCS=\$\${NPROCS:=3} MP_TASKS_PER_NODE=\$\${NPROCS:=3} poe"}
+    RUNPARALLEL=${RUNPARALLEL="env LDR_CNTRL=MAXDATA=0x20000000@DSA MP_PROCS=\$\${NPROCS:=6} MP_TASKS_PER_NODE=\$\${NPROCS:=6} poe"}
+    RUNSERIAL=${RUNSERIAL="env LDR_CNTRL=MAXDATA=0x20000000@DSA MP_PROCS=1 MP_TASKS_PER_NODE=1 poe"}
+else
+    RUNSERIAL=${RUNSERIAL="env LDR_CNTRL=MAXDATA=0x20000000@DSA"}
 fi
 
 
@@ -43,18 +50,7 @@ fi
 
 case $CC_BASENAME in
   xlc|xlc-*|mpcc_r|mpcc_r-*)
-    # Turn off shared lib option.  It causes some test suite to fail.
-    enable_shared="${enable_shared:-no}"
-    # Make sure this is applied to other API compile options such as C++.
-    AM_CFLAGS="$AM_CFLAGS"
-    H5_CFLAGS="-qlanglvl=stdc99 $H5_CFLAGS"
-    DEBUG_CFLAGS="-g -qfullpath"
-    DEBUG_CPPFLAGS=
-    # -O causes test/dtypes to fail badly. Turn it off for now.
-    PROD_CFLAGS=""
-    PROD_CPPFLAGS=
-    PROFILE_CFLAGS="-g -qfullpath -pg"
-    PROFILE_CPPFLAGS=
+    . $srcdir/config/ibm-flags
     ;;
 
   gcc)

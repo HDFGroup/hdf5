@@ -74,3 +74,9 @@ fi
 # Temporarily hard set this variable.  The problem of loss of the last 2 bytes of mantissa
 # turns out to be elusive.  Hard set it until a better solution is found. 
 hdf5_cv_ullong_to_ldouble_precision_works=${hdf5_cv_ullong_to_ldouble_precision_works='no'}
+
+# unconditionally add #define of __BSD_VISIBLE to 1 -- need this to allow 
+# H5FDdirect.c to complile.  Note that at some point we may wish to make this 
+# BSD version dependent, # as the issue appears with BSD version 8.2 (freedom).  
+#                                                JRM -- 3/15/11
+H5_CFLAGS="$H5_CFLAGS -D__BSD_VISIBLE=1"

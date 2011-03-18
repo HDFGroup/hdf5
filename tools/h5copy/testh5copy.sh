@@ -41,6 +41,7 @@ DIFF='diff -c'
 
 nerrors=0
 verbose=yes
+h5haveexitcode=yes	    # default is yes
 
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
@@ -50,6 +51,13 @@ INDIR=$srcdir/testfiles
 OUTDIR=./testfiles
 
 test -d $OUTDIR || mkdir $OUTDIR
+
+# RUNSERIAL is used. Check if it can return exit code from executalbe correctly.
+if [ -n "$RUNSERIAL_NOEXITCODE" ]; then
+    echo "***Warning*** Serial Exit Code is not passed back to shell corretly."
+    echo "***Warning*** Exit code checking is skipped."
+    h5haveexitcode=no
+fi
 
 # Print a "SKIP" message
 SKIP() {
@@ -81,6 +89,15 @@ VERIFY_H5LS()
 {
     SPACES="                                                               "
     echo "Verifying h5ls file structure $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Verifying".
+#
+VERIFY_OUTPUT() 
+{
+    SPACES="                                                               "
+    echo "Verifying output files $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Run a test and print PASS or *FAIL*. If h5copy can complete
@@ -135,44 +152,74 @@ TOOLTEST()
 }
 
 
+# Compare the two text files
+# PASS if same
+# FAIL if different, and show the diff
+#
+# Assumed arguments:
+# $1 is text file1 (expected output)
+# $2 is text file2 (actual output)
+CMP_OUTPUT()
+{
+    expect=$1
+    actual=$2
+
+    VERIFY_OUTPUT $@
+    if [ ! -f $expect ]; then
+        # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
+    elif $CMP $expect $actual; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        echo "    Expected output differs from actual output"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+}
+
 TOOLTEST_FAIL() 
 {
-     runh5diff=yes
-     if [ "$1" = -i ]; then
+    expectout="$INDIR/$1"
+    actualout="$OUTDIR/$1.out"
+    actualerr="$OUTDIR/$1.err"
+    shift
+    if [ "$1" = -i ]; then
       inputfile=$2
-     else
-      runh5diff=no
-     fi
-     if [ "$3" = -o ]; then
+    fi
+    if [ "$3" = -o ]; then
       outputfile=$4
-     else 
-      runh5diff=no
-     fi
-  
+    fi
+
     TESTING $H5COPY $@
     (
-    echo "#############################"
-    echo " output for '$H5COPY $@'"
-    echo "#############################"
+    #echo "#############################"
+    #echo " output for '$H5COPY $@'"
+    #echo "#############################"
     $RUNSERIAL $H5COPY_BIN $@
-    ) > output.out
+    ) > $actualout 2> $actualerr
     RET=$?
     if [ $RET != 0 ]; then
+        echo " PASSED"
+        # Verifying output text from h5copy
+        if [ "$expectout" != "SKIP" ]; then
+            # combine stderr to stdout to compare the output at once.
+            # We may seperate stdout and stderr later.
+            cat $actualerr >> $actualout
+            CMP_OUTPUT $expectout $actualout
+        fi
+    else
         echo "*FAILED*"
         echo "failed result is:"
-        cat output.out
+        cat $actualout
         nerrors="`expr $nerrors + 1`"
-    else
-        echo " PASSED"
-
-        # Clean up output file
-        if test -z "$HDF5_NOCLEANUP"; then
-           rm -f output.out
-        fi
     fi
    
-    if [ $runh5diff != no ]; then
-     H5DIFFTEST_FAIL $inputfile $outputfile $7 $9
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+       rm -f $actualout $actualerr
     fi
 }
 
@@ -200,7 +247,7 @@ H5DIFFTEST_FAIL()
     $RUNSERIAL $H5DIFF_BIN -q "$@" 
     RET=$?
 
-    if [ $RET != 1 ] ; then
+    if [ $h5haveexitcode = 'yes' -a $RET != 1 ] ; then
          echo "*FAILED*"
          nerrors="`expr $nerrors + 1`"
     else
@@ -286,17 +333,17 @@ COPY_OBJECTS()
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /grp_dsets/simple  -d /grp_dsets/simple_group
 
     echo "Test copying & renaming group"
-    TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d grp_rename
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d grp_rename
 
     echo "Test copying 'full' group hierarchy into group in destination file"
-    TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d /grp_rename/grp_dsets
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d /grp_rename/grp_dsets
 
     echo "Test copying objects into group hier. that doesn't exist yet in destination file"
     TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s simple    -d /A/B1/simple
     TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s simple    -d /A/B2/simple2
     TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets/simple    -d /C/D/simple
-    TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets -d /E/F/grp_dsets
-    TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_nested -d /G/H/grp_nested
+    TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets -d /E/F/grp_dsets
+    TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s /grp_nested -d /G/H/grp_nested
 
     # Verify that the file created above is correct
     H5LSTEST $FILEOUT
@@ -381,6 +428,37 @@ COPY_EXT_LINKS()
     fi
 }
 
+# Test misc.
+#
+# Assumed arguments:
+# <none>
+TEST_MISC() 
+{
+    TESTFILE="$HDF_FILE1"
+    FILEOUT="$OUTDIR/`basename $HDF_FILE1 .h5`.out.h5"
+
+    # Remove any output file left over from previous test run
+    rm -f $FILEOUT
+
+    echo "Test copying object into group which doesn't exist, without -p"
+    TOOLTEST_FAIL h5copy_misc1.out -v -i $TESTFILE -o $FILEOUT -s /simple  -d /g1/g2/simple
+
+    echo "Test copying objects to the same file "
+    rm -f $FILEOUT
+    # create temporary test file ($FILEOUT) with some objects
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /simple -d /simple 
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /grp_dsets  -d /grp_dsets
+    # actual test cases
+    TOOLTEST -i $FILEOUT -o $FILEOUT -v -s /simple -d /simple_cp
+    TOOLTEST -i $FILEOUT -o $FILEOUT -v -s /grp_dsets  -d /grp_dsets_cp
+
+    # Remove output file created, if the "no cleanup" environment variable is
+    #   not defined
+    if test -z "$HDF5_NOCLEANUP"; then
+        rm -f $FILEOUT
+    fi
+}
+
 ##############################################################################
 ###           T H E   T E S T S                                            ###
 ##############################################################################
@@ -388,6 +466,7 @@ COPY_EXT_LINKS()
 COPY_OBJECTS 
 COPY_REFERENCES
 COPY_EXT_LINKS
+TEST_MISC
 
 
 if test $nerrors -eq 0 ; then

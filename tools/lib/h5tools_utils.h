@@ -28,6 +28,10 @@
 extern "C" {
 #endif
 
+/* ``parallel_print'' information */
+#define PRINT_DATA_MAX_SIZE 	512
+#define OUTBUFF_SIZE 		(PRINT_DATA_MAX_SIZE*4)
+
 /*
  * begin get_option section
  */
@@ -110,6 +114,7 @@ H5TOOLS_DLLVAR int     nCols;               /*max number of columns for outputti
 /* Definitions of useful routines */
 H5TOOLS_DLL void     indentation(int);
 H5TOOLS_DLL void     print_version(const char *progname);
+H5TOOLS_DLL void     parallel_print(const char* format, ... );
 H5TOOLS_DLL void     error_msg(const char *fmt, ...);
 H5TOOLS_DLL void     warn_msg(const char *fmt, ...);
 H5TOOLS_DLL void     free_table(table_t *table);
@@ -140,18 +145,19 @@ typedef struct {
     int msg_mode;
 } h5tool_opt_t;
 
-/* obtain link info from H5tools_get_link_info() */
+/* obtain link info from H5tools_get_symlink_info() */
 typedef struct {
     H5O_type_t  trg_type;  /* OUT: target type */
     const char *trg_path;  /* OUT: target obj path. This must be freed 
-                            *      when used with H5tools_get_link_info() */
+                            *      when used with H5tools_get_symlink_info() */
     H5L_info_t linfo;      /* OUT: link info */
     h5tool_opt_t opt;      /* IN: options */
 } h5tool_link_info_t;
 
 
 /* Definitions of routines */
-H5TOOLS_DLL int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info);
+H5TOOLS_DLL int H5tools_get_symlink_info(hid_t file_id, const char * linkpath,
+    h5tool_link_info_t *link_info, hbool_t get_obj_type);
 H5TOOLS_DLL const char *h5tools_getprogname(void);
 H5TOOLS_DLL void     h5tools_setprogname(const char*progname);
 H5TOOLS_DLL int      h5tools_getstatus(void);

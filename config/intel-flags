@@ -70,13 +70,8 @@ if test "X-icc" = "X-$cc_vendor"; then
     # Default to C99 standard.
     H5_CFLAGS="${H5_CFLAGS:--std=c99 $arch}"
 
-    # Production
-    # -Wl,-s to remove all symbols for smaller file
-    # O3 optimization causes compilation failures on many platforms;
-    # the problem exists in all versions of the icc compiler up to the latest 9.1
-    # I changed optimization flag to default -O2. EIP, 2006-08-15
-    #PROD_CFLAGS="-O3 -Wl,-s"
-    PROD_CFLAGS="-O2 -Wl,-s"
+    # Production is set to default; see settings for specific version further down
+    PROD_CFLAGS="-O" 
     PROD_CPPFLAGS=
 
     # Debug
@@ -98,7 +93,12 @@ fi
 # Please follow the pattern below by adding new versions at the top, copying
 # the information from the previous version and adding modifications to that.
 case "$cc_vendor-$cc_version" in
-    icc-10.0*)
+    icc-11*)
+        # -s became obsolete; we also fixed bugs that allow us to enable higher level
+        # of optimization starting with 1.8.7
+        PROD_CFLAGS="-O3"
+        ;;
+    icc-10*)
         PROD_CFLAGS="-O1 -Wl,-s"
         ;;
     icc-8.0*)

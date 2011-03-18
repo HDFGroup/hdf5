@@ -688,7 +688,7 @@ H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     htri_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5A_get_ainfo, FAIL)
+    FUNC_ENTER_NOAPI_TAG(H5A_get_ainfo, dxpl_id, oh->cache_info.addr, FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -727,7 +727,7 @@ done:
     if(bt2_name && H5B2_close(bt2_name, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5A_get_ainfo() */
 
 
@@ -872,7 +872,8 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
         dst_oloc->file = file_dst;
 
         /* Copy the shared object from source to destination */
-        if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, cpy_info, FALSE) < 0)
+        if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, cpy_info, FALSE,
+                NULL, NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
 
         /* Update shared message info from named datatype info */
@@ -1028,20 +1029,19 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     ret_value = attr_dst;
 
 done:
-    if(buf_sid > 0)
-        if(H5I_dec_ref(buf_sid, FALSE) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary dataspace ID")
+    if(buf_sid > 0 && H5I_dec_ref(buf_sid) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary dataspace ID")
     if(tid_src > 0)
         /* Don't decrement ID, we want to keep underlying datatype */
-        if(H5I_remove(tid_src) == NULL)
+        if(NULL == H5I_remove(tid_src))
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
     if(tid_dst > 0)
         /* Don't decrement ID, we want to keep underlying datatype */
-        if(H5I_remove(tid_dst) == NULL)
+        if(NULL == H5I_remove(tid_dst))
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
     if(tid_mem > 0)
         /* Decrement the memory datatype ID, it's transient */
-        if(H5I_dec_ref(tid_mem, FALSE) < 0)
+        if(H5I_dec_ref(tid_mem) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
     if(buf)
         buf = H5FL_BLK_FREE(attr_buf, buf);
@@ -1149,23 +1149,27 @@ H5A_dense_copy_file_cb(const H5A_t *attr_src, void *_udata)
     HDassert(udata->file);
     HDassert(udata->cpy_info);
 
-    if ( NULL == (attr_dst=H5A_attr_copy_file(attr_src, udata->file,
-        udata->recompute_size, udata->cpy_info,  udata->dxpl_id)))
+    if(NULL == (attr_dst = H5A_attr_copy_file(attr_src, udata->file,
+            udata->recompute_size, udata->cpy_info,  udata->dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
 
     /* Reset shared location information */
     if(H5O_msg_reset_share(H5O_ATTR_ID, attr_dst) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to reset attribute sharing")
 
+    /* Set COPIED tag for destination object's metadata */
+    H5_BEGIN_TAG(udata->dxpl_id, H5AC__COPIED_TAG, H5_ITER_ERROR);
+
     /* Insert attribute into dense storage */
     if(H5A_dense_insert(udata->file, udata->dxpl_id, udata->ainfo, attr_dst) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to add to dense storage")
 
+    /* Reset metadata tag */
+    H5_END_TAG(H5_ITER_ERROR);
+
 done:
-    if(attr_dst) {
-        (void)H5A_free(attr_dst);
-        attr_dst = H5FL_FREE(H5A_t, attr_dst);
-    } /* end if */
+    if(attr_dst && H5A_close(attr_dst) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close destination attribute")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_dense_copy_file_cb() */

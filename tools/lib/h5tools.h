@@ -507,12 +507,17 @@ typedef struct h5tools_context_t {
     hsize_t sm_pos;                   /* current stripmine element position */
 } h5tools_context_t;
 
+typedef struct subset_d {
+    hsize_t     *data;
+    unsigned int len;
+} subset_d;
+
 /* a structure to hold the subsetting particulars for a dataset */
 struct subset_t {
-    hsize_t *start;
-    hsize_t *stride;
-    hsize_t *count;
-    hsize_t *block;
+    subset_d start;
+    subset_d stride;
+    subset_d count;
+    subset_d block;
 };
 
 /* The following include, h5tools_str.h, must be after the
@@ -548,6 +553,7 @@ H5TOOLS_DLL hid_t    h5tools_get_native_type(hid_t type);
 H5TOOLS_DLL hid_t    h5tools_get_little_endian_type(hid_t type);
 H5TOOLS_DLL hid_t    h5tools_get_big_endian_type(hid_t type);
 
+H5TOOLS_DLL htri_t   H5Tdetect_vlen_str(hid_t tid);
 
 H5TOOLS_DLL void     h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t container,
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,

@@ -889,6 +889,10 @@ test_h5s_compound_scalar_write(void)
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
+    /* Close compound datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
     /* Close scalar dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
@@ -1039,9 +1043,9 @@ test_h5s_chunk(void)
     dsetID = H5Dopen2(fileID, "coords", H5P_DEFAULT);
     CHECK(dsetID, FAIL, "H5Dopen2");
 
-    status= H5Dread (dsetID, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_dbl);
+    status= H5Dread(dsetID, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_dbl);
     CHECK(status, FAIL, "H5Dread");
-    status= H5Dread (dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt);
+    status= H5Dread(dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt);
     CHECK(status, FAIL, "H5Dread");
 
     status = H5Dclose(dsetID);

@@ -43,9 +43,13 @@
 #   include <limits.h>		/*for H5T_NATIVE_CHAR defn in H5Tpublic.h    */
 #endif
 #ifndef __cplusplus
-#ifdef H5_HAVE_STDINT_H
+# ifdef H5_HAVE_STDINT_H
 #   include <stdint.h>		/*for C9x types				     */
-#endif
+# endif
+#else
+# ifdef H5_HAVE_STDINT_H_CXX
+#   include <stdint.h>		/*for C9x types	when include from C++	     */
+# endif
 #endif
 #ifdef H5_HAVE_INTTYPES_H
 #   include <inttypes.h>        /* For uint64_t on some platforms            */
@@ -71,13 +75,24 @@ extern "C" {
 /* Version numbers */
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	9	/* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	70	/* For tweaks, bug-fixes, or development     */
+#define H5_VERS_RELEASE	80	/* For tweaks, bug-fixes, or development     */
 #define H5_VERS_SUBRELEASE ""	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
-#define H5_VERS_INFO    "HDF5 library version: 1.9.70"      /* Full version string */
+#define H5_VERS_INFO    "HDF5 library version: 1.9.80"      /* Full version string */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)
+
+/* macros for comparing the version */
+#define H5_VERSION_GE(Maj,Min,Rel) \
+       (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
+        ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
+        (H5_VERS_MAJOR>Maj))
+
+#define H5_VERSION_LE(Maj,Min,Rel) \
+       (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE<=Rel)) || \
+        ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR<Min)) || \
+        (H5_VERS_MAJOR<Maj))
 
 /*
  * Status return values.  Failed integer functions in HDF5 result almost

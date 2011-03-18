@@ -158,12 +158,53 @@ echo "FILEOUT=" $FILEOUT
     fi
 }
 
+# Single run of tool
+#
+# Assumed arguments:
+# $1 is test expected output file
+# $2 is h5mkgrp options
+# $* are groups to create
+CMPTEST() 
+{
+    FILEOUT=$OUTDIR/$1
+    expect="$srcdir/testfiles/`basename $1 .h5`.txt"
+    actual="$OUTDIR/`basename $1 .h5`.out"
+    actual_err="$OUTDIR/`basename $1 .h5`.err"
+    shift
+
+    # Stderr is included in stdout so that the diff can detect
+    # any unexpected output from that stream too.
+    TESTING $H5MKGRP $@
+    (
+    $RUNSERIAL $H5MKGRP_BIN $@
+    ) >$actual 2>$actual_err
+    cat $actual_err >> $actual
+    
+   if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+    echo " CREATED"
+    cp $actual $expect
+   elif $CMP $expect $actual; then
+      echo " PASSED"
+   else
+      echo "*FAILED*"
+      echo "    Expected result (*.txt) differs from actual result (*.out)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+   fi
+
+   # Clean up output file
+   if test -z "$HDF5_NOCLEANUP"; then
+      rm -f $actual $actual_err
+   fi
+}
+
 ##############################################################################
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
 # Check that help & version is displayed properly
-RUNTEST h5mkgrp_help.h5 "-h"
+CMPTEST h5mkgrp_help.h5 "-h"
 RUNTEST h5mkgrp_version.h5 "-V"
 
 # Create single group at root level

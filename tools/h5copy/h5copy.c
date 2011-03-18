@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+#include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
 #include <string.h>
@@ -54,9 +54,8 @@ static struct long_options l_opts[] = {
 static void
 leave(int ret)
 {
- h5tools_close();
-
- exit(ret);
+    h5tools_close();
+    exit(ret);
 }
 
 
@@ -76,7 +75,7 @@ leave(int ret)
 static void
 usage (void)
 {
- fprintf(stdout, "\
+    fprintf(stdout, "\
 usage: h5copy [OPTIONS] [OBJECTS...]\n\
    OBJECTS\n\
       -i, --input        input file name\n\
@@ -144,45 +143,45 @@ usage: h5copy [OPTIONS] [OBJECTS...]\n\
 
 static int parse_flag(const char* str_flag, unsigned *flag)
 {
- unsigned fla=0;
+    unsigned fla=0;
 
- if (strcmp(str_flag,"shallow")==0)
- {
-  fla = H5O_COPY_SHALLOW_HIERARCHY_FLAG;
- }
- else  if (strcmp(str_flag,"soft")==0)
- {
-  fla = H5O_COPY_EXPAND_SOFT_LINK_FLAG;
- }
- else  if (strcmp(str_flag,"ext")==0)
- {
-  fla = H5O_COPY_EXPAND_EXT_LINK_FLAG;
- }
- else  if (strcmp(str_flag,"ref")==0)
- {
-  fla = H5O_COPY_EXPAND_REFERENCE_FLAG;
- }
- else  if (strcmp(str_flag,"noattr")==0)
- {
-  fla = H5O_COPY_WITHOUT_ATTR_FLAG;
- }
- else  if (strcmp(str_flag,"allflags")==0)
- {
-  fla = H5O_COPY_ALL;
- }
- else  if (strcmp(str_flag,"nullmsg")==0)
- {
-  fla = H5O_COPY_PRESERVE_NULL_FLAG;
- }
- else
- {
-  error_msg("Error in input flag\n");
-  return -1;
- }
+    if (HDstrcmp(str_flag,"shallow")==0)
+    {
+        fla = H5O_COPY_SHALLOW_HIERARCHY_FLAG;
+    }
+    else  if (HDstrcmp(str_flag,"soft")==0)
+    {
+        fla = H5O_COPY_EXPAND_SOFT_LINK_FLAG;
+    }
+    else  if (HDstrcmp(str_flag,"ext")==0)
+    {
+        fla = H5O_COPY_EXPAND_EXT_LINK_FLAG;
+    }
+    else  if (HDstrcmp(str_flag,"ref")==0)
+    {
+        fla = H5O_COPY_EXPAND_REFERENCE_FLAG;
+    }
+    else  if (HDstrcmp(str_flag,"noattr")==0)
+    {
+        fla = H5O_COPY_WITHOUT_ATTR_FLAG;
+    }
+    else  if (HDstrcmp(str_flag,"allflags")==0)
+    {
+        fla = H5O_COPY_ALL;
+    }
+    else  if (HDstrcmp(str_flag,"nullmsg")==0)
+    {
+        fla = H5O_COPY_PRESERVE_NULL_FLAG;
+    }
+    else
+    {
+        error_msg("Error in input flag\n");
+        return -1;
+    }
 
- *flag = (*flag) | fla;
+    *flag = (*flag) | fla;
 
- return 0;
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -200,193 +199,202 @@ static int parse_flag(const char* str_flag, unsigned *flag)
 int
 main (int argc, const char *argv[])
 {
- hid_t        fid_src=-1;
- hid_t        fid_dst=-1;
- char         *fname_src=NULL;
- char         *fname_dst=NULL;
- char         *oname_src=NULL;
- char         *oname_dst=NULL;
- unsigned     flag=0;
- unsigned     verbose=0;
- unsigned     parents=0;
- hid_t        ocpl_id = (-1);          /* Object copy property list */
- hid_t        lcpl_id = (-1);          /* Link creation property list */
- char         str_flag[20];
- int          opt;
- int          li_ret;
- h5tool_link_info_t linkinfo;
+    hid_t        fid_src=-1;
+    hid_t        fid_dst=-1;
+    char         *fname_src=NULL;
+    char         *fname_dst=NULL;
+    char         *oname_src=NULL;
+    char         *oname_dst=NULL;
+    unsigned     flag=0;
+    unsigned     verbose=0;
+    unsigned     parents=0;
+    hid_t        ocpl_id = (-1);          /* Object copy property list */
+    hid_t        lcpl_id = (-1);          /* Link creation property list */
+    char         str_flag[20];
+    int          opt;
+    int          li_ret;
+    h5tool_link_info_t linkinfo;
+    int          i, len;
+    char         *str_ptr=NULL;
 
- h5tools_setprogname(PROGRAMNAME);
- h5tools_setstatus(EXIT_SUCCESS);
-/* initialize h5tools lib */
- h5tools_init();
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
+    /* initialize h5tools lib */
+    h5tools_init();
 
- /* Check for no command line parameters */
- if(argc == 1) {
-   usage();
-   leave(EXIT_FAILURE);
- } /* end if */
+    /* init linkinfo struct */
+    HDmemset(&linkinfo, 0, sizeof(h5tool_link_info_t));
 
- /* parse command line options */
- while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF)
- {
-  switch ((char)opt)
-  {
-  case 'd':
-   oname_dst = strdup(opt_arg);
-   break;
+    /* Check for no command line parameters */
+    if(argc == 1) 
+    {
+        usage();
+        leave(EXIT_FAILURE);
+    } /* end if */
 
-  case 'f':
-   /* validate flag */
-   if (parse_flag(opt_arg,&flag)<0)
-   {
-    usage();
-    leave(EXIT_FAILURE);
-   }
-   strcpy(str_flag,opt_arg);
-   break;
+    /* parse command line options */
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF)
+    {
+        switch ((char)opt)
+        {
+        case 'd':
+            oname_dst = HDstrdup(opt_arg);
+            break;
 
-  case 'h':
-   usage();
-   leave(EXIT_SUCCESS);
-   break;
+        case 'f':
+            /* validate flag */
+            if (parse_flag(opt_arg,&flag)<0)
+            {
+                usage();
+                leave(EXIT_FAILURE);
+            }
+            HDstrcpy(str_flag,opt_arg);
+            break;
 
-  case 'i':
-   fname_src = strdup(opt_arg);
-   break;
+        case 'h':
+            usage();
+            leave(EXIT_SUCCESS);
+            break;
 
-  case 'o':
-   fname_dst = strdup(opt_arg);
-   break;
+        case 'i':
+            fname_src = HDstrdup(opt_arg);
+            break;
 
-  case 'p':
-   parents = 1;
-   break;
+        case 'o':
+            fname_dst = HDstrdup(opt_arg);
+            break;
 
-  case 's':
-   oname_src = strdup(opt_arg);
-   break;
+        case 'p':
+            parents = 1;
+            break;
 
-  case 'V':
-   print_version(h5tools_getprogname());
-   leave(EXIT_SUCCESS);
-   break;
+        case 's':
+            oname_src = HDstrdup(opt_arg);
+            break;
 
-  case 'v':
-   verbose = 1;
-   break;
+        case 'V':
+            print_version(h5tools_getprogname());
+            leave(EXIT_SUCCESS);
+            break;
 
-  default:
-   usage();
-   leave(EXIT_FAILURE);
-  }
- }
+        case 'v':
+            verbose = 1;
+            break;
+
+        default:
+            usage();
+            leave(EXIT_FAILURE);
+        }
+    } /* end of while */
 
 /*-------------------------------------------------------------------------
  * check for missing file/object names
  *-------------------------------------------------------------------------*/
 
- if (fname_src==NULL)
- {
-  error_msg("Input file name missing\n");
-  usage();
-  leave(EXIT_FAILURE);
- }
+    if (fname_src==NULL)
+    {
+        error_msg("Input file name missing\n");
+        usage();
+        leave(EXIT_FAILURE);
+    }
 
- if (fname_dst==NULL)
- {
-  error_msg("Output file name missing\n");
-  usage();
-  leave(EXIT_FAILURE);
- }
+    if (fname_dst==NULL)
+    {
+        error_msg("Output file name missing\n");
+        usage();
+        leave(EXIT_FAILURE);
+    }
 
- if (oname_src==NULL)
- {
-  error_msg("Source object name missing\n");
-  usage();
-  leave(EXIT_FAILURE);
- }
+    if (oname_src==NULL)
+    {
+        error_msg("Source object name missing\n");
+        usage();
+        leave(EXIT_FAILURE);
+    }
 
- if (oname_dst==NULL)
- {
-  error_msg("Destination object name missing\n");
-  usage();
-  leave(EXIT_FAILURE);
- }
+    if (oname_dst==NULL)
+    {
+        error_msg("Destination object name missing\n");
+        usage();
+        leave(EXIT_FAILURE);
+    }
 
+   /*-------------------------------------------------------------------------
+    * open output file
+    *-------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------
- * open input file
- *-------------------------------------------------------------------------*/
-
-  fid_src = h5tools_fopen(fname_src, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0);
-
-/*-------------------------------------------------------------------------
- * test for error in opening input file
- *-------------------------------------------------------------------------*/
- if (fid_src==-1)
- {
-  error_msg("Could not open input file <%s>...Exiting\n", fname_src);
-  if (fname_src)
-   free(fname_src);
-  leave(EXIT_FAILURE);
- }
-
-/*-------------------------------------------------------------------------
- * open output file
- *-------------------------------------------------------------------------*/
-
-    /* Attempt to open an existing HDF5 file first */
+    /* Attempt to open an existing HDF5 file first. Need to open the dst file
+       before the src file just in case that the dst and src are the same file
+     */
     fid_dst = h5tools_fopen(fname_dst, H5F_ACC_RDWR, H5P_DEFAULT, NULL, NULL, 0);
+
+   /*-------------------------------------------------------------------------
+    * open input file
+    *-------------------------------------------------------------------------*/
+
+    fid_src = h5tools_fopen(fname_src, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0);
+
+   /*-------------------------------------------------------------------------
+    * test for error in opening input file
+    *-------------------------------------------------------------------------*/
+    if (fid_src==-1)
+    {
+        error_msg("Could not open input file <%s>...Exiting\n", fname_src);
+        if (fname_src)
+            HDfree(fname_src);
+        leave(EXIT_FAILURE);
+    }
+
+
+   /*-------------------------------------------------------------------------
+    * create an output file when failed to open it
+    *-------------------------------------------------------------------------*/
 
     /* If we couldn't open an existing file, try creating file */
     /* (use "EXCL" instead of "TRUNC", so we don't blow away existing non-HDF5 file) */
     if(fid_dst < 0)
         fid_dst = H5Fcreate(fname_dst, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
 
-/*-------------------------------------------------------------------------
- * test for error in opening output file
- *-------------------------------------------------------------------------*/
- if (fid_dst==-1)
- {
-  error_msg("Could not open output file <%s>...Exiting\n", fname_dst);
-  if (fname_src)
-   free(fname_src);
-  if (fname_dst)
-   free(fname_dst);
-  leave(EXIT_FAILURE);
- }
+   /*-------------------------------------------------------------------------
+    * test for error in opening output file
+    *-------------------------------------------------------------------------*/
+    if (fid_dst==-1)
+    {
+        error_msg("Could not open output file <%s>...Exiting\n", fname_dst);
+        if (fname_src)
+            HDfree(fname_src);
+        if (fname_dst)
+            HDfree(fname_dst);
+        leave(EXIT_FAILURE);
+    }
 
-/*-------------------------------------------------------------------------
- * print some info
- *-------------------------------------------------------------------------*/
+   /*-------------------------------------------------------------------------
+    * print some info
+    *-------------------------------------------------------------------------*/
 
- if (verbose)
- {
-  printf("Copying file <%s> and object <%s> to file <%s> and object <%s>\n",
-   fname_src,
-   oname_src,
-   fname_dst,
-   oname_dst);
-  if (flag)
-   printf("Using %s flag\n", str_flag);
- }
+    if (verbose)
+    {
+        printf("Copying file <%s> and object <%s> to file <%s> and object <%s>\n",
+        fname_src, oname_src, fname_dst, oname_dst);
+        if (flag)
+            printf("Using %s flag\n", str_flag);
+    }
 
 
-/*-------------------------------------------------------------------------
- * create property lists for copy
- *-------------------------------------------------------------------------*/
+   /*-------------------------------------------------------------------------
+    * create property lists for copy
+    *-------------------------------------------------------------------------*/
 
- /* create property to pass copy options */
- if ( (ocpl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0)
-  goto error;
+    /* create property to pass copy options */
+    if ( (ocpl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0)
+        goto error;
 
- /* set options for object copy */
- if (flag)
- {
-  if ( H5Pset_copy_object(ocpl_id, flag) < 0)
-   goto error;
- }
+    /* set options for object copy */
+    if (flag)
+    {
+        if ( H5Pset_copy_object(ocpl_id, flag) < 0)
+            goto error;
+    }
 
     /* Create link creation property list */
     if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) {
@@ -406,88 +414,107 @@ main (int argc, const char *argv[])
         if(verbose)
             printf("%s: Creating parent groups\n", h5tools_getprogname());
     } /* end if */
+    else /* error, if parent groups doesn't already exist in destination file */
+    {
+        len = HDstrlen(oname_dst);        
+        /* check if all the parents groups exist. skip root group */
+        for (i = 1; i < len; i++)
+        {
+            if ('/'==oname_dst[i])
+            {
+                str_ptr = (char*)HDcalloc((size_t)i+1, sizeof(char));
+                HDstrncpy (str_ptr, oname_dst, (size_t)i);
+                str_ptr[i]='\0';
+                if (H5Lexists(fid_dst, str_ptr, H5P_DEFAULT) <= 0)
+                {
+                    error_msg("group <%s> doesn't exist. Use -p to create parent groups.\n", str_ptr);
+                    HDfree(str_ptr);
+                    goto error;
+                }
+                HDfree(str_ptr);
+            }
+        }
+    }
 
-/*-------------------------------------------------------------------------
- * do the copy
- *-------------------------------------------------------------------------*/
- /* init linkinfo struct */
- memset(&linkinfo, 0, sizeof(h5tool_link_info_t));
+   /*-------------------------------------------------------------------------
+    * do the copy
+    *-------------------------------------------------------------------------*/
  
- if(verbose)
-    linkinfo.opt.msg_mode = 1;
+    if(verbose)
+        linkinfo.opt.msg_mode = 1;
  
- li_ret = H5tools_get_link_info(fid_src, oname_src, &linkinfo);
- if (li_ret == 0) /* dangling link */
- {
-    if(H5Lcopy(fid_src, oname_src, 
-               fid_dst, oname_dst,
-               H5P_DEFAULT, H5P_DEFAULT) < 0)
-               goto error;
- }
- else /* valid link */
- {
-  if (H5Ocopy(fid_src,          /* Source file or group identifier */
-              oname_src,        /* Name of the source object to be copied */
-              fid_dst,          /* Destination file or group identifier  */
-              oname_dst,        /* Name of the destination object  */
-              ocpl_id,          /* Object copy property list */
-              lcpl_id)<0)       /* Link creation property list */
-              goto error;
- }
+    li_ret = H5tools_get_symlink_info(fid_src, oname_src, &linkinfo, 1);
+    if (li_ret == 0) /* dangling link */
+    {
+        if(H5Lcopy(fid_src, oname_src, 
+                   fid_dst, oname_dst,
+                   H5P_DEFAULT, H5P_DEFAULT) < 0)
+            goto error;
+    }
+    else /* valid link */
+    {
+        if (H5Ocopy(fid_src,          /* Source file or group identifier */
+                  oname_src,        /* Name of the source object to be copied */
+                  fid_dst,          /* Destination file or group identifier  */
+                  oname_dst,        /* Name of the destination object  */
+                  ocpl_id,          /* Object copy property list */
+                  lcpl_id)<0)       /* Link creation property list */
+            goto error;
+    }
 
- /* free link info path */
- if (linkinfo.trg_path)
-    free(linkinfo.trg_path);
+    /* free link info path */
+    if (linkinfo.trg_path)
+        HDfree(linkinfo.trg_path);
 
- /* close propertis */
- if(H5Pclose(ocpl_id)<0)
-  goto error;
- if(H5Pclose(lcpl_id)<0)
-  goto error;
+    /* close propertis */
+    if(H5Pclose(ocpl_id)<0)
+        goto error;
+    if(H5Pclose(lcpl_id)<0)
+        goto error;
 
- /* close files */
- if (H5Fclose(fid_src)<0)
-  goto error;
- if (H5Fclose(fid_dst)<0)
-  goto error;
+    /* close files */
+    if (H5Fclose(fid_src)<0)
+        goto error;
+    if (H5Fclose(fid_dst)<0)
+        goto error;
 
- if (fname_src)
-  free(fname_src);
- if (fname_dst)
-  free(fname_dst);
- if (oname_dst)
-  free(oname_dst);
- if (oname_src)
-  free(oname_src);
+    if (fname_src)
+        HDfree(fname_src);
+    if (fname_dst)
+        HDfree(fname_dst);
+    if (oname_dst)
+        HDfree(oname_dst);
+    if (oname_src)
+        HDfree(oname_src);
 
- h5tools_close();
+    h5tools_close();
 
- return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 
 error:
- printf("Error in copy...Exiting\n");
+    printf("Error in copy...Exiting\n");
 
- /* free link info path */
- if (linkinfo.trg_path)
-    free(linkinfo.trg_path);
+    /* free link info path */
+    if (linkinfo.trg_path)
+        HDfree(linkinfo.trg_path);
 
  H5E_BEGIN_TRY {
-  H5Pclose(ocpl_id);
-  H5Pclose(lcpl_id);
-  H5Fclose(fid_src);
-  H5Fclose(fid_dst);
-  } H5E_END_TRY;
- if (fname_src)
-  free(fname_src);
- if (fname_dst)
-  free(fname_dst);
- if (oname_dst)
-  free(oname_dst);
- if (oname_src)
-  free(oname_src);
+    H5Pclose(ocpl_id);
+    H5Pclose(lcpl_id);
+    H5Fclose(fid_src);
+    H5Fclose(fid_dst);
+ } H5E_END_TRY;
+    if (fname_src)
+        HDfree(fname_src);
+    if (fname_dst)
+        HDfree(fname_dst);
+    if (oname_dst)
+        HDfree(oname_dst);
+    if (oname_src)
+        HDfree(oname_src);
 
- h5tools_close();
+    h5tools_close();
 
- return EXIT_FAILURE;
+    return EXIT_FAILURE;
 }
 

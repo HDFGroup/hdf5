@@ -53,7 +53,6 @@ const char *FILENAME[] = {
 
 /* Definitions for 'read_old' test */
 #define READ_OLD_NGROUPS        100
-#define READ_OLD_BUFSIZE        1024
 
 /* The group_old.h5 is generated from gen_old_fill.c in HDF5 'test' directory
  * for version 1.6.  To get this data file, simply compile gen_old_group.c with
@@ -79,7 +78,6 @@ const char *FILENAME[] = {
 /* Definitions for 'corrupt_stab_msg' test */
 #define CORRUPT_STAB_FILE           "corrupt_stab_msg.h5"
 #define CORRUPT_STAB_TMP_FILE       "corrupt_stab_msg_tmp.h5"
-#define CORRUPT_STAB_COPY_BUF_SIZE  4096
 #define CORRUPT_STAB_DSET           "DS1"
 
 

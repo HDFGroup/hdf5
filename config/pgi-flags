@@ -72,6 +72,10 @@ if test "X-pgcc" = "X-$cc_vendor"; then
 
     # Production
     case "$cc_vendor-$cc_version" in
+      # Tweak down compiler optimizations for v10.6, it has a bug
+      pgcc-10.6*)
+        PROD_CFLAGS="-O1 -s"
+        ;;
       # Tweak down compiler optimizations for v9.x
       pgcc-9.*)
         PROD_CFLAGS="-O1 -s"
@@ -83,7 +87,7 @@ if test "X-pgcc" = "X-$cc_vendor"; then
     PROD_CPPFLAGS=
 
     # Debug
-    DEBUG_CFLAGS="-g -Mbounds -Mchkfpstk"
+    DEBUG_CFLAGS="-g -Mbounds"
     DEBUG_CPPFLAGS=
 
     # Profile

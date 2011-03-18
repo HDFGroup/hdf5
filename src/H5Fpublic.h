@@ -22,7 +22,6 @@
 /* Public header files needed by this file */
 #include "H5public.h"
 #include "H5ACpublic.h"
-#include "H5Cpublic.h"
 #include "H5Ipublic.h"
 
 /* When this header is included from a private header, don't make calls to H5check() */
@@ -199,6 +198,7 @@ H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo);
 H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type,
     size_t nsects, H5F_sect_info_t *sect_info/*out*/);
+H5_DLL herr_t H5Frelease_file_cache(hid_t file_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

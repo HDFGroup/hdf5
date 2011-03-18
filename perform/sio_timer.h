@@ -26,9 +26,9 @@
 #   include <time.h>
 #endif
 
-#ifdef _WIN32
-#	include <winsock.h>
-#endif /* _WIN32 */
+#ifdef H5_HAVE_WINSOCK_H
+#	include <winsock2.h>
+#endif /* H5_HAVE_WINSOCK_H */
 
 /* The different types of timers we can have */
 typedef enum timer_type_ {

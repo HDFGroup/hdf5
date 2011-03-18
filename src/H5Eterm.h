@@ -162,6 +162,7 @@ H5E_NOIDS_g=
 /* Cache related errors */    
 H5E_CANTFLUSH_g=    
 H5E_CANTSERIALIZE_g=    
+H5E_CANTTAG_g=    
 H5E_CANTLOAD_g=    
 H5E_PROTECT_g=    
 H5E_NOTCACHED_g=    

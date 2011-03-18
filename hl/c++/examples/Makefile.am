@@ -27,12 +27,14 @@ TEST_PROG=ptExampleFL ptExampleVL
 
 # These are the example files to be installed
 INSTALL_FILES=ptExampleFL.cpp ptExampleVL.cpp
+INSTALL_SCRIPT_FILES = run-hlc++-ex.sh
 
 # Tell conclude.am that these are C++ tests.
 CXX_API=yes
 
 # Where to install examples
-EXAMPLEDIR=$(docdir)/hdf5/examples/hl/c++
+# Note: no '/' after DESTDIR.  Explanation in commence.am
+EXAMPLEDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples/hl/c++
 
 # How to build programs using h5c++
 $(EXTRA_PROG): $(H5CPP)

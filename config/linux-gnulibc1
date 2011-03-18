@@ -22,8 +22,14 @@
 
 # The default compiler is `gcc'.
 if test -z "$CC"; then
-   CC=gcc
-   CC_BASENAME=gcc
+    if test "X-$enable_parallel" = "X-yes"; then
+	# default to use mpicc which is the defacto MPI compiler name
+	CC=mpicc
+	CC_BASENAME=mpicc
+    else
+	CC=gcc
+	CC_BASENAME=gcc
+    fi
 fi
 
 # Figure out GNU C compiler flags
@@ -35,6 +41,7 @@ fi
 # Figure out Intel C compiler flags
 . $srcdir/config/intel-flags
 
+echo "CC_BASENAME is $CC_BASENAME."
 # Use default Fortran 90 compiler according to what C compiler is used.
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
@@ -61,7 +68,7 @@ else
         ifc*|ifort*|pgf90*)
             ;;
 
-        *)
+        *f95*)
             # Figure out which compiler we are using: pgf90 or Absoft f95
             RM='rm -f'
             tmpfile=/tmp/cmpver.$$
@@ -75,6 +82,10 @@ else
                 fi 
             fi
             $RM $tmpfile
+            fc_version_info=`$FC -V | grep Absoft`
+            ;;
+
+         *)
             ;;
     esac
 fi
@@ -138,4 +149,87 @@ LIBS="$LIBS -lrt"
 #don't have any contributions to IOs.
 hdf5_cv_mpi_special_collective_io_works=${hdf5_cv_mpi_special_collective_io_works='no'}
 hdf5_cv_mpi_complex_derived_datatype_works=${hdf5_cv_mpi_complex_derived_datatype_works='no'}
+
+# compiler version strings
+case $CC in
+    # whatever matches *pgcc* will also match *gcc*, so this one must come first
+    *pgcc*)
+        cc_version_info=`$CC $CFLAGS $H5_CFLAGS -V 2>&1 | grep 'pgcc'`
+        ;;
+
+    *gcc*)
+        cc_version_info=`$CC $CFLAGS $H5_CFLAGS --version 2>&1 | grep -v 'PathScale' |\
+            grep 'GCC' | sed 's/\(.*(GCC) [-a-z0-9\. ]*\).*/\1/'`
+        ;;
+
+    *icc*)
+        cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
+    *)
+        echo "No match to get cc_version_info for $CC"
+        ;;
+esac
+
+# get fortran version info
+case $FC in
+    *gfortran*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS --version 2>&1 |\
+            grep 'GCC' | sed 's/\(.*(GCC) [-a-z0-9\. ]*\).*/\1/'`
+        ;;
+
+    *ifc*|*ifort*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
+    *f95*)
+        # Figure out which compiler we are using: pgf90 or Absoft f95
+        RM='rm -f'
+        tmpfile=/tmp/cmpver.$$
+        $FC -V >$tmpfile
+        if test -s "$tmpfile"; then 
+            if( grep -s 'Absoft' $tmpfile > /dev/null) then
+                FC_BASENAME=f95
+            fi 
+        fi
+        $RM $tmpfile
+        fc_version_info=`$FC -V | grep Absoft`
+        ;;
+
+    *g95*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS --version 2>&1 |\
+            grep 'GCC'` 
+        ;;
+
+    *pgf90*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'pgf90'`
+        ;;
+
+     *)
+        echo "No match to get fc_version_info for $FC"
+        ;;
+esac
+
+
+# get c++ version info
+case $CXX in
+    *g++*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
+            grep 'GCC' | sed 's/\(.*(GCC) [-a-z0-9\. ]*\).*/\1/'`
+        ;;
+    *icpc*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+    *pgCC*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'pgCC'`
+        ;;
+
+
+    *)
+        echo "No match to get cxx_version_info for $CXX"
+        ;;
+esac
 

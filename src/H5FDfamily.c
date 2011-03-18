@@ -89,6 +89,8 @@
  * and retain those values when not in use.
  */
 
+#ifdef H5_HAVE_AIO
+
 #define H5FD_FAMILY_AIO_CTLBLK_T__MAGIC		  0x00000000 /* 'FACB' */
 #define H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC	  0x00000000 /* 'FSCB' */
 #define H5FD_FAMILY_AIO_SUBCTLBLK_INIT_ARRAY_SIZE 1
@@ -120,6 +122,8 @@ H5FL_DEFINE_STATIC(H5FD_family_aio_ctlblk_t);
  * just do a malloc.
  */
 H5FL_DEFINE_STATIC(H5FD_family_aio_subctlblk_t);
+
+#endif /* H5_HAVE_AIO */
 
 
 /* The driver identification number, initialized at runtime */
@@ -183,6 +187,7 @@ static herr_t H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, h
 				size_t size, const void *_buf);
 static herr_t H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+#ifdef H5_HAVE_AIO
 static herr_t H5FD_family_aio_alloc_ctlblk(int init_array_len, 
                                      H5FD_family_aio_ctlblk_t **ctlblk_ptr_ptr);
 static herr_t H5FD_family_aio_discard_ctlblk(
@@ -208,6 +213,7 @@ static herr_t H5FD_family_aio_wait(void *ctlblk_ptr);
 static herr_t H5FD_family_aio_finish(int *errno_ptr, void *ctlblk_ptr);
 static herr_t H5FD_family_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr);
 static herr_t H5FD_family_aio_cancel(void *ctlblk_ptr);
+#endif /* H5_HAVE_AIO */
 static herr_t H5FD_family_fsync(H5FD_t *file, hid_t dxpl_id);
 
 /* The class struct */
@@ -242,6 +248,7 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+#ifdef H5_HAVE_AIO
     H5FD_family_aio_read,                       /*aio_read              */
     H5FD_family_aio_write,                      /*aio_write             */
     H5FD_family_aio_test,                       /*aio_test              */
@@ -249,6 +256,15 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_aio_finish,                     /*aio_finish            */
     H5FD_family_aio_fsync,                      /*aio_fsync             */
     H5FD_family_aio_cancel,                     /*aio_cancel            */
+#else /* H5_HAVE_AIO */
+    NULL,                                       /*aio_read              */
+    NULL,                                       /*aio_write             */
+    NULL,                                       /*aio_test              */
+    NULL,                                       /*aio_wait              */
+    NULL,                                       /*aio_finish            */
+    NULL,                                       /*aio_fsync             */
+    NULL,                                       /*aio_cancel            */
+#endif /* H5_HAVE_AIO */
     H5FD_family_fsync,				/*fsync			*/
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
@@ -572,11 +588,11 @@ static herr_t
 H5FD_family_fapl_free(void *_fa)
 {
     H5FD_family_fapl_t	*fa = (H5FD_family_fapl_t*)_fa;
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_fapl_free, FAIL)
 
-    if(H5I_dec_ref(fa->memb_fapl_id, FALSE)<0)
+    if(H5I_dec_ref(fa->memb_fapl_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
     H5MM_xfree(fa);
 
@@ -658,11 +674,11 @@ static herr_t
 H5FD_family_dxpl_free(void *_dx)
 {
     H5FD_family_dxpl_t	*dx = (H5FD_family_dxpl_t*)_dx;
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_dxpl_free, FAIL)
 
-    if(H5I_dec_ref(dx->memb_dxpl_id, FALSE)<0)
+    if(H5I_dec_ref(dx->memb_dxpl_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
     H5MM_xfree(dx);
 
@@ -959,29 +975,30 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 
 done:
     /* Cleanup and fail */
-    if (ret_value==NULL && file!=NULL) {
-        unsigned nerrors=0;     /* Number of errors closing member files */
+    if(ret_value == NULL && file != NULL) {
+        unsigned nerrors = 0;   /* Number of errors closing member files */
         unsigned u;             /* Local index variable */
 
         /* Close as many members as possible. Use private function here to avoid clearing
          * the error stack. We need the error message to indicate wrong member file size. */
-        for (u=0; u<file->nmembs; u++)
-            if (file->memb[u])
-                if (H5FD_close(file->memb[u])<0)
+        for(u = 0; u < file->nmembs; u++)
+            if(file->memb[u])
+                if(H5FD_close(file->memb[u]) < 0)
                     nerrors++;
-        if (nerrors)
+        if(nerrors)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "unable to close member files")
 
-        if (file->memb)
+        if(file->memb)
             H5MM_xfree(file->memb);
-        if(H5I_dec_ref(file->memb_fapl_id, FALSE)<0)
+        if(H5I_dec_ref(file->memb_fapl_id) < 0)
             HDONE_ERROR(H5E_VFL, H5E_CANTDEC, NULL, "can't close driver ID")
-        if (file->name)
+        if(file->name)
             H5MM_xfree(file->name);
         H5MM_xfree(file);
-    }
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_family_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -1025,7 +1042,7 @@ H5FD_family_close(H5FD_t *_file)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close member files")
 
     /* Clean up other stuff */
-    if(H5I_dec_ref(file->memb_fapl_id, FALSE) < 0)
+    if(H5I_dec_ref(file->memb_fapl_id) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
     H5MM_xfree(file->memb);
@@ -1553,6 +1570,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_family_truncate() */
 
+#ifdef H5_HAVE_AIO
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_family_aio_alloc_ctlblk
@@ -3140,6 +3158,8 @@ done:
 
 } /* end H5FD_family_aio_cancel() */
 
+#endif /* H5_HAVE_AIO */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_family_fsync
@@ -3179,13 +3199,17 @@ H5FD_family_fsync(H5FD_t *file,
 
     num_sub_files = family_file->nmembs;
 
-    for ( i = i; i < num_sub_files; i++ ) {
+    for ( i = 0; i < num_sub_files; i++ ) {
 
         tgt_file = family_file->memb[i];
 
         if ( tgt_file == NULL ) {
 
 	    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "NULL tgt file.")
+
+        } else if ( tgt_file->cls == NULL ) {
+
+	    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "NULL tgt_file->cls.")
         }
 
 	result = H5FDfsync(tgt_file, dxpl_id);
@@ -3202,3 +3226,4 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_family_fsync() */
+

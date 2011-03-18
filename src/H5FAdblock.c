@@ -225,7 +225,7 @@ HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
             H5E_THROW(H5E_CANTSET, "can't set fixed array data block elements to class's fill value")
 
     /* Cache the new fixed array data block */
-    if(H5AC_set(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_insert_entry(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add fixed array data block to cache")
 
     /* Mark the header dirty (for updating statistics) */

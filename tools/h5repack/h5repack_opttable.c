@@ -13,8 +13,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
 #include "h5repack.h"
 #include "h5tools_utils.h"
 
@@ -32,7 +30,7 @@ void init_packobject(pack_info_t *obj)
 {
     int j, k;
 
-    strcpy(obj->path,"\0");
+    HDstrcpy(obj->path,"\0");
     for ( j=0; j<H5_REPACK_MAX_NFILTERS; j++)
     {
         obj->filter[j].filtn        = -1;
@@ -225,7 +223,7 @@ int options_add_layout( obj_list_t *obj_list,
             for (i = 0; i < table->nelems; i++)
             {
                 /*already on the table */
-                if (strcmp(obj_list[j].obj,table->objs[i].path)==0)
+                if (HDstrcmp(obj_list[j].obj,table->objs[i].path)==0)
                 {
                     /* already chunk info inserted for this one; exit */
                     if (table->objs[i].chunk.rank>0)
@@ -248,7 +246,7 @@ int options_add_layout( obj_list_t *obj_list,
                 /* keep the grow in a temp var */
                 I = table->nelems + added;
                 added++;
-                strcpy(table->objs[I].path,obj_list[j].obj);
+                HDstrcpy(table->objs[I].path,obj_list[j].obj);
                 aux_tblinsert_layout(table,I,pack);
             }
             /* cases where we have an already inserted name but there is a new name also
@@ -256,12 +254,12 @@ int options_add_layout( obj_list_t *obj_list,
             -f dset1:GZIP=1 -l dset1,dset2:CHUNK=20x20
             dset1 is already inserted, but dset2 must also be
             */
-            else if (found==1 && strcmp(obj_list[j].obj,table->objs[i].path)!=0)
+            else if (found==1 && HDstrcmp(obj_list[j].obj,table->objs[i].path)!=0)
             {
                 /* keep the grow in a temp var */
                 I = table->nelems + added;
                 added++;
-                strcpy(table->objs[I].path,obj_list[j].obj);
+                HDstrcpy(table->objs[I].path,obj_list[j].obj);
                 aux_tblinsert_layout(table,I,pack);
             }
         } /* j */
@@ -275,7 +273,7 @@ int options_add_layout( obj_list_t *obj_list,
         {
             I = table->nelems + added;
             added++;
-            strcpy(table->objs[I].path,obj_list[j].obj);
+            HDstrcpy(table->objs[I].path,obj_list[j].obj);
             aux_tblinsert_layout(table,I,pack);
 
         }
@@ -324,7 +322,7 @@ int options_add_filter(obj_list_t *obj_list,
             for (i = 0; i < table->nelems; i++)
             {
                 /*already on the table */
-                if (strcmp(obj_list[j].obj,table->objs[i].path)==0)
+                if (HDstrcmp(obj_list[j].obj,table->objs[i].path)==0)
                 {
                     /* insert */
                     aux_tblinsert_filter(table,i,filt);
@@ -338,7 +336,7 @@ int options_add_filter(obj_list_t *obj_list,
                 /* keep the grow in a temp var */
                 I = table->nelems + added;
                 added++;
-                strcpy(table->objs[I].path,obj_list[j].obj);
+                HDstrcpy(table->objs[I].path,obj_list[j].obj);
                 aux_tblinsert_filter(table,I,filt);
             }
             /* cases where we have an already inserted name but there is a new name also
@@ -346,12 +344,12 @@ int options_add_filter(obj_list_t *obj_list,
             -l dset1:CHUNK=20x20 -f dset1,dset2:GZIP=1
             dset1 is already inserted, but dset2 must also be
             */
-            else if (found==1 && strcmp(obj_list[j].obj,table->objs[i].path)!=0)
+            else if (found==1 && HDstrcmp(obj_list[j].obj,table->objs[i].path)!=0)
             {
                 /* keep the grow in a temp var */
                 I = table->nelems + added;
                 added++;
-                strcpy(table->objs[I].path,obj_list[j].obj);
+                HDstrcpy(table->objs[I].path,obj_list[j].obj);
                 aux_tblinsert_filter(table,I,filt);
             }
         } /* j */
@@ -365,7 +363,7 @@ int options_add_filter(obj_list_t *obj_list,
         {
             I = table->nelems + added;
             added++;
-            strcpy(table->objs[I].path,obj_list[j].obj);
+            HDstrcpy(table->objs[I].path,obj_list[j].obj);
             aux_tblinsert_filter(table,I,filt);
         }
     }
@@ -393,7 +391,7 @@ pack_info_t* options_get_object( const char *path,
     for ( i = 0; i < table->nelems; i++)
     {
         /* found it */
-        if (strcmp(table->objs[i].path,path)==0)
+        if (HDstrcmp(table->objs[i].path,path)==0)
         {
             return (&table->objs[i]);
         }

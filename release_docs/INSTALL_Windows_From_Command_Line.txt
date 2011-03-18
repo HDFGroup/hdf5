@@ -13,7 +13,7 @@ Note: This instruction is written for users who would like to build HDF5
          Microsoft Visual Studio 2008 for 32- or 64-bit Windows.
          
       2. Building and testing HDF5 C/C++/Fortran libraries and utilities using
-         CMake tools. Refer to CMAKE_Windows.txt file for detailed information.
+         CMake tools. Refer to the CMAKE.txt file for detailed information.
       
       For all other Windows development tools, HDF5 should be built in
       the development environment.  Please refer to INSTALL_Windows.txt

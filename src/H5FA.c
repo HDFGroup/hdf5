@@ -75,8 +75,6 @@
 /* Remember to add client ID to H5FA_cls_id_t in H5FAprivate.h when adding a new
  * client class..
  */
-extern const H5FA_class_t H5FA_CLS_TEST[1];
-
 const H5FA_class_t *const H5FA_client_class_g[] = {
     H5FA_CLS_TEST,		/* ? - H5FA_CLS_TEST_ID 		*/
 };

@@ -123,6 +123,7 @@ char *
 h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
 {
     va_list ap;
+    hbool_t isReallocated = FALSE;
 
     /* Make sure we have some memory into which to print */
     if (!str->s || str->nalloc <= 0) {
@@ -148,12 +149,23 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
         nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
         va_end(ap);
 
-        if (nchars < 0) {
+        /* Note: HDvsnprintf() behaves differently on Windows as Unix, when 
+         * buffer is smaller than source string. On Unix, this function 
+         * returns length of the source string and copy string upto the 
+         * buffer size with NULL at the end of the buffer. However on 
+         * Windows with the same condition, this function returns -1 and 
+         * doesn't add NULL at the end of the buffer.
+         * Because of this different return results, isReallocated variable
+         * is used to handle when HDvsnprintf() returns -1 on Windows due
+         * to lack of buffer size, so try one more time after realloc more
+         * buffer size before return NULL. 
+         */
+        if (nchars < 0 && isReallocated == TRUE) {
             /* failure, such as bad format */
             return NULL;
         }
 
-        if ((size_t) nchars >= avail || (0 == nchars && (strcmp(fmt, "%s")))) {
+        if (nchars < 0 || (size_t) nchars >= avail || (0 == nchars && (strcmp(fmt, "%s")))) {
             /* Truncation return value as documented by C99, or zero return value with either of the
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is
@@ -165,6 +177,7 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
             str->s = realloc(str->s, newsize);
             assert(str->s);
             str->nalloc = newsize;
+            isReallocated = TRUE;
         }
         else {
             /* Success */
@@ -305,8 +318,7 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
  */
 char *
 h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
-                   hsize_t elmtno, unsigned ndims, hsize_t min_idx[],
-                   hsize_t max_idx[], h5tools_context_t *ctx)
+    hsize_t elmtno, unsigned ndims, h5tools_context_t *ctx)
 {
     size_t i = 0;
     hsize_t curr_pos = elmtno;
@@ -358,7 +370,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
  */
 char *
 h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
-        hsize_t elmtno, hsize_t *ptdata, unsigned ndims, hsize_t min_idx[], hsize_t max_idx[],
+        hsize_t elmtno, hsize_t *ptdata, unsigned ndims, hsize_t max_idx[],
         h5tools_context_t *ctx)
 {
     hsize_t p_prod[H5S_MAX_RANK];
@@ -414,7 +426,7 @@ h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
  */
 void
 h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
-        const h5tool_format_t *info, h5tools_context_t *ctx)
+        const h5tool_format_t *info)
 {
     hssize_t   nblocks;
     hsize_t    alloc_size;
@@ -434,7 +446,7 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
 
         alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
         assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
-        ptdata = malloc((size_t) alloc_size);
+        ptdata = (hsize_t *)malloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(nblocks, hssize_t, hsize_t);
         H5Sget_select_hyper_blocklist(region, (hsize_t)0, (hsize_t)nblocks, ptdata);
 
@@ -475,7 +487,7 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
  */
 void
 h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
-        const h5tool_format_t *info, h5tools_context_t *ctx)
+        const h5tool_format_t *info)
 {
     hssize_t   npoints;
     hsize_t    alloc_size;
@@ -495,7 +507,7 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
 
         alloc_size = npoints * ndims * sizeof(ptdata[0]);
         assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
-        ptdata = malloc((size_t) alloc_size);
+        ptdata = (hsize_t *)malloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(npoints, hssize_t, hsize_t);
         H5Sget_select_elem_pointlist(region, (hsize_t)0, (hsize_t)npoints, ptdata);
 
@@ -639,7 +651,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     char          *name;
     unsigned char *ucp_vp = (unsigned char *)vp;
     char          *cp_vp = (char *)vp;
-    hid_t          memb, obj, region;
+    hid_t          memb, obj;
     unsigned       nmembs;
     static char    fmt_llong[8], fmt_ullong[8];
     H5T_str_t      pad;
@@ -790,7 +802,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
     }
     else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-        h5tools_str_append(str, OPT(info->fmt_schar, "%d"), *cp_vp);
+        h5tools_str_append(str, OPT(info->fmt_schar, "%hhd"), *cp_vp);
     }
     else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
         h5tools_str_append(str, OPT(info->fmt_uchar, "%u"), *ucp_vp);
@@ -934,7 +946,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             h5tools_str_append(str, "NULL");
         }
         else {
-            h5tools_str_sprint_region(str, info, container, vp, ctx);
+            h5tools_str_sprint_region(str, info, container, vp);
         }
     }
     else if (H5Tequal(type, H5T_STD_REF_OBJ)) {
@@ -1112,7 +1124,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
  */
 void
 h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
-        hid_t container, void *vp, h5tools_context_t *ctx)
+        hid_t container, void *vp)
 {
     hid_t   obj, region;
     char    ref_name[1024];
@@ -1130,9 +1142,9 @@ h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
 
             region_type = H5Sget_select_type(region);
             if(region_type==H5S_SEL_POINTS)
-                h5tools_str_dump_region_points(str, region, info, ctx);
+                h5tools_str_dump_region_points(str, region, info);
             else
-                h5tools_str_dump_region_blocks(str, region, info, ctx);
+                h5tools_str_dump_region_blocks(str, region, info);
 
             h5tools_str_append(str, "}");
 

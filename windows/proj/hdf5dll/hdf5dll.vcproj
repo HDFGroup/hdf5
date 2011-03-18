@@ -704,6 +704,10 @@
 				RelativePath="..\..\..\src\H5FDwindows.c"
 				>
 			</File>
+            <File
+                RelativePath="..\..\..\src\H5Fefc.c"
+                >
+            </File>
 			<File
 				RelativePath="..\..\..\src\H5Ffake.c"
 				>
@@ -944,6 +948,10 @@
 				RelativePath="..\..\..\src\H5I.c"
 				>
 			</File>
+            <File
+                RelativePath="..\..\..\src\H5Itest.c"
+                >
+            </File>
 			<File
 				RelativePath="..\..\..\src\H5L.c"
 				>

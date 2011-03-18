@@ -1,5 +1,5 @@
 <-n 0> is not a valid option
-usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]] 
+usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]] 
   file1                    File name of the first HDF5 file
   file2                    File name of the second HDF5 file
   [obj1]                   Name of an HDF5 object, in absolute path
@@ -11,7 +11,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
    -r, --report            Report mode. Print differences.
    -v, --verbose           Verbose mode. Print differences, list of objects.
    -q, --quiet             Quiet mode. Do not produce output.
-   --follow-links          Follow symbolic links (soft links and external links)
+   --follow-symlinks       Follow symbolic links (soft links and external links)
                            and compare the links' target objects.
                            If symbolic link(s) with the same name exist in the
                            files being compared, then determine whether the 
@@ -22,13 +22,13 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
                            - If both symbolic links are dangling links, they
                              are treated as being the same; by default, h5diff
                              returns an exit code of 0. If, however, 
-                             --no-dangling-links is used with --follow-links, 
+                             --no-dangling-links is used with --follow-symlinks,
                              this situation is treated as an error and h5diff 
                              returns an exit code of 2.
                            - If only one of the two links is a dangling link,
                              they are treated as being different and h5diff 
                              returns an exit code of 1. If, however, 
-                             --no-dangling-links is used with --follow-links, 
+                             --no-dangling-links is used with --follow-symlinks,
                              this situation is treated as an error and h5diff 
                              returns an exit code of 2.
                            - If both symbolic links point to existing objects,
@@ -36,7 +36,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
                            If any symbolic link specified in the call to h5diff
                            does not exist, h5diff treats it as an error and
                            returns an exit code of 2.
-   --no-dangling-links     Must be used with --follow-links option;
+   --no-dangling-links     Must be used with --follow-symlinks option;
                            otherwise, h5diff shows error message and returns
                            an exit code of 2.
                            Check for any symbolic links (soft links or external
@@ -63,6 +63,30 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
                            comparing floating point values.
                            By default, strict equality is used. Use -p or -d to
                            set specific tolerance.
+   --exclude-path "path"   Exclude the specified path to an object when
+                           comparing files or groups. If a group is excluded,
+                           all member objects will also be excluded.
+                           The specified path is excluded wherever it occurs.
+                           This flexibility enables the same option to exclude
+                           either objects that exist only in one file or
+                           common objects that are known to differ.
+
+                           When comparing files, "path" is the absolute path to
+                           the excluded object; when comparing groups, "path" is
+                           similar to the relative path from the group to the
+                           excluded object. This "path" can be taken from the
+                           first section of the output of the --verbose option.
+                           For example, if you are comparing the group /groupA
+                           in two files and you want to exclude
+                           /groupA/groupB/groupC in both files, the exclude
+                           option would read as follows:
+                             --exclude-path "/groupB/groupC"
+
+                           If there are multiple paths to an object, only the
+                           specified path(s) will be excluded; the comparison
+                           will include any path not explicitly excluded.
+                           This option can be used repeatedly to exclude
+                           multiple paths.
 
  Modes of output:
   Default mode: print the number of differences found and where they occured
@@ -70,16 +94,26 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
   -v Verbose mode: print the above plus a list of objects and warnings
   -q Quiet mode: do not print output
 
- Compare criteria
-  If no objects [obj1[obj2]] are specified, h5diff only compares objects
-  with the same absolute path in both files
+ File comparison:
+  If no objects [obj1[ obj2]] are specified, the h5diff comparison proceeds as
+  a comparison of the two files' root groups.  That is, h5diff first compares
+  the names of root group members, generates a report of root group objects
+  that appear in only one file or in both files, and recursively compares
+  common objects.
 
- The compare criteria is:
-  1) datasets: numerical array differences
-  2) groups: name string difference
-  3) datatypes: the return value of H5Tequal
-  4) links: name string difference of the linked value as default
-            (refer to --follow-links option).
+ Object comparison:
+  1) Groups 
+      First compares the names of member objects (relative path, from the
+      specified group) and generates a report of objects that appear in only
+      one group or in both groups. Common objects are then compared recursively.
+  2) Datasets 
+      Array rank and dimensions, datatypes, and data values are compared.
+  3) Datatypes 
+      The comparison is based on the return value of H5Tequal.
+  4) Symbolic links 
+      The paths to the target objects are compared.
+      (The option --follow-symlinks overrides the default behavior when
+       symbolic links are compared.).
 
  Exit code:
   0 if no differences, 1 if differences found, 2 if error

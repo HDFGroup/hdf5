@@ -361,7 +361,7 @@ static int test_is_valid(void)
     CHECK(ret, FAIL, "H5I_inc_ref");
     if (ret < 0)
         goto out;
-    ret = H5I_dec_ref(dtype, TRUE);
+    ret = H5I_dec_app_ref(dtype);
     CHECK(ret, FAIL, "H5I_dec_ref");
     if (ret < 0)
         goto out;
@@ -377,7 +377,7 @@ static int test_is_valid(void)
     CHECK(nmembs1, FAIL, "H5I_nmembers");
     if (nmembs1 < 0)
         goto out;
-    ret = H5I_dec_ref(dtype, FALSE);
+    ret = H5I_dec_ref(dtype);
     CHECK(ret, FAIL, "H5I_dec_ref");
     if (ret < 0)
         goto out;

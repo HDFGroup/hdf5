@@ -83,7 +83,7 @@
  * This contains the filename prefix specificied as command line option for
  * the parallel test files.
  */
-H5_DLLVAR char *paraprefix;
+H5TEST_DLLVAR char *paraprefix;
 #ifdef H5_HAVE_PARALLEL
 extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #endif
@@ -118,11 +118,9 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 /*
  * Alarm definitions to wait up (terminate) a test that runs too long.
  */
-#define alarm_seconds	1200	/* default is 20 minutes */
-#define ALARM_ON	HDalarm(alarm_seconds)
+#define H5_ALARM_SEC	1200	/* default is 20 minutes */
+#define ALARM_ON	TestAlarmOn()
 #define ALARM_OFF	HDalarm(0)
-/* set alarms to N seconds if N > 0, else use default alarm_seconds. */
-#define ALARM_SET(N)	HDalarm((N)>0 ? N : alarm_seconds)
 
 /*
  * The methods to compare the equality of floating-point values:
@@ -183,6 +181,8 @@ H5TEST_DLL void  IncTestNumErrs(void);
 H5TEST_DLL const void *GetTestParameters(void);
 H5TEST_DLL int  TestErrPrintf(const char *format, ...);
 H5TEST_DLL void SetTest(const char *testname, int action);
+H5TEST_DLL void TestAlarmOn(void);
+H5TEST_DLL void TestAlarmOff(void);
 
 #ifdef H5_HAVE_FILTER_SZIP
 H5TEST_DLL int h5_szip_can_encode(void);

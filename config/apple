@@ -55,3 +55,54 @@ if test "X-" != "X-$enable_fortran"; then
         enable_shared="no"
 fi
 
+# compiler version strings
+case $CC in
+    *gcc*)
+        cc_version_info=`$CC $CFLAGS $H5_CFLAGS --version 2>&1 | grep -v 'PathScale' |\
+            grep 'GCC' | sed 's/.*\((GCC) [-a-z0-9\. ]*.*\)/\1/'`
+        ;;
+
+    *icc*)
+        cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
+    *)
+        echo "No match to get cc_version_info for $CC"
+        ;;
+esac
+
+case $FC in
+    *gfortran*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS --version 2>&1 |\
+            grep 'GCC' | sed 's/\(.*(GCC) [-a-z0-9\. ]*\).*/\1/'`
+        ;;
+
+    *ifc*|*ifort*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
+     *)
+        echo "No match to get fc_version_info for $FC"
+        ;;
+
+esac
+
+# get c++ version info
+case $CXX in
+    *g++*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
+            grep 'GCC' | sed 's/.*\((GCC) [-a-z0-9\. ]*.*\)/\1/'`
+        ;;
+
+   *icpc*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
+    *)
+        echo "No match to get cxx_version_info for $CXX"
+        ;;
+esac
+

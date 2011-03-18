@@ -1142,6 +1142,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
         /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value is user-defined
          * as compound type */
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
+        HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
         fill_ctype.y = 4444.4444;
         if(H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0) goto error;
         nerrors += test_rdwr_cases(file, dcpl, "dset11", &fill_ctype, H5D_FILL_TIME_ALLOC,
@@ -1194,6 +1195,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
     /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value is user-defined
      * as compound type */
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
+    HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
     fill_ctype.y = 4444.4444;
     if(H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0) goto error;
     nerrors += test_rdwr_cases(file, dcpl, "dset12", &fill_ctype, H5D_FILL_TIME_ALLOC,

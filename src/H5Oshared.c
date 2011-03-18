@@ -612,7 +612,8 @@ H5O_shared_copy_file(H5F_t UNUSED *file_src, H5F_t *file_dst,
         dst_oloc.file = file_dst;
         src_oloc.file = shared_src->file;
         src_oloc.addr = shared_src->u.loc.oh_addr;
-        if(H5O_copy_header_map(&src_oloc, &dst_oloc, dxpl_id, cpy_info, FALSE) < 0)
+        if(H5O_copy_header_map(&src_oloc, &dst_oloc, dxpl_id, cpy_info, FALSE,
+                NULL, NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
         /* Set up destination message's shared info */
@@ -623,8 +624,16 @@ H5O_shared_copy_file(H5F_t UNUSED *file_src, H5F_t *file_dst,
         /* Message is always shared in heap in dest. file because the dest.
          *      object header doesn't quite exist yet - JML
          */
+
+        /* Set copied metadata tag */
+        H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, FAIL);
+
         if(H5SM_try_share(file_dst, dxpl_id, NULL, mesg_type->id, _native_dst, NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to determine if message should be shared")
+
+        /* Reset metadata tag */
+        H5_END_TAG(FAIL);
+
     } /* end else */
 
 done:

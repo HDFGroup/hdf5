@@ -100,6 +100,8 @@
  * and retain those values when not in use.
  */
 
+#ifdef H5_HAVE_AIO 
+
 #define H5FD_MULTI_AIO_CTLBLK_T__MAGIC	0x4D414344	/* 'MACB' */
 
 typedef struct H5FD_multi_aio_subctlblk_t {
@@ -118,6 +120,7 @@ typedef struct H5FD_multi_aio_ctlblk_t {
 
 } H5FD_multi_aio_ctlblk_t;
 
+#endif /* H5_HAVE_AIO */
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_MULTI_g = 0;
@@ -189,6 +192,7 @@ static herr_t H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, ha
 			       size_t size, const void *_buf);
 static herr_t H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+#ifdef H5_HAVE_AIO
 static herr_t H5FD_multi_aio_alloc_ctlblk(H5FD_multi_aio_ctlblk_t **ctlblk_ptr_ptr);
 static herr_t H5FD_multi_aio_discard_ctlblk(H5FD_multi_aio_ctlblk_t *ctlblk_ptr);
 static herr_t H5FD_multi_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
@@ -202,6 +206,7 @@ static herr_t H5FD_multi_aio_wait(void *ctlblk_ptr);
 static herr_t H5FD_multi_aio_finish(int *errno_ptr, void *ctlblk_ptr);
 static herr_t H5FD_multi_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr);
 static herr_t H5FD_multi_aio_cancel(void *ctlblk_ptr);
+#endif /* H5_HAVE_AIO */
 static herr_t H5FD_multi_fsync(H5FD_t *file, hid_t dxpl_id);
 
 /* The class struct */
@@ -236,6 +241,7 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+#ifdef H5_HAVE_AIO
     H5FD_multi_aio_read,                        /*aio_read              */
     H5FD_multi_aio_write,                       /*aio_write             */
     H5FD_multi_aio_test,                        /*aio_test              */
@@ -243,6 +249,15 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_aio_finish,                      /*aio_finish            */
     H5FD_multi_aio_fsync,                       /*aio_fsync             */
     H5FD_multi_aio_cancel,                      /*aio_cancel            */
+#else /* H5_HAVE_AIO */
+    NULL,                                       /*aio_read              */
+    NULL,                                       /*aio_write             */
+    NULL,                                       /*aio_test              */
+    NULL,                                       /*aio_wait              */
+    NULL,                                       /*aio_finish            */
+    NULL,                                       /*aio_fsync             */
+    NULL,                                       /*aio_cancel            */
+#endif /* H5_HAVE_AIO */
     H5FD_multi_fsync,				/*fsync			*/
     H5FD_FLMAP_DEFAULT 				/*fl_map		*/
 };
@@ -2179,6 +2194,8 @@ open_members(H5FD_multi_t *file)
     return 0;
 }
 
+#ifdef H5_HAVE_AIO
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_multi_aio_alloc_ctlblk
@@ -3314,6 +3331,8 @@ H5FD_multi_aio_cancel(void *ctlblk_ptr)
     return(0);
 
 } /* end H5FD_multi_aio_cancel() */
+
+#endif /* H5_HAVE_AIO */
 
 
 /*-------------------------------------------------------------------------

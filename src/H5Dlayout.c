@@ -202,7 +202,7 @@ H5D_layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_layout_oh_create)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_layout_oh_create, dxpl_id, dset->oloc.addr, FAIL)
 
     /* Sanity checking */
     HDassert(file);
@@ -302,7 +302,7 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D_layout_oh_create() */
 
 

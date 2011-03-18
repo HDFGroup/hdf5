@@ -1,15 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-PROJECT(HDF5_HL_F90 C CXX Fortran)
-
-#-----------------------------------------------------------------------------
-# Setup include Directories
-#-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_F90_SOURCE_DIR}/src)
-INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR})
-INCLUDE_DIRECTORIES (${HDF5_F90_SRC_BINARY_DIR})
-INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY})
-
-LINK_DIRECTORIES (${HDF5_SRC_DIR} ${HDF5_FORTRAN_SOURCE_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+PROJECT (HDF5_HL_F90 C CXX Fortran)
 
 #-----------------------------------------------------------------------------
 # List Source files

@@ -385,7 +385,7 @@ H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
     H5G_copy_file_ud_t *udata = (H5G_copy_file_ud_t *) _udata;
     void                 *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_linfo_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_linfo_copy_file, dxpl_id, H5AC__COPIED_TAG, NULL)
 
     /* check args */
     HDassert(linfo_src);
@@ -426,7 +426,7 @@ done:
         if(linfo_dst)
             linfo_dst = H5FL_FREE(H5O_linfo_t, linfo_dst);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
 } /* H5O_linfo_copy_file() */
 
 
@@ -465,10 +465,16 @@ H5O_linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy link")
     dst_lnk_init = TRUE;
 
+    /* Set metadata tag in dxpl_id */
+    H5_BEGIN_TAG(udata->dxpl_id, H5AC__COPIED_TAG, FAIL);
+
     /* Insert the new object in the destination file's group */
     /* (Doesn't increment the link count - that's already been taken care of for hard links) */
     if(H5G_dense_insert(udata->dst_oloc->file, udata->dxpl_id, udata->dst_linfo, &dst_lnk) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert destination link")
+
+    /* Reset metadata tag in dxpl_id */
+    H5_END_TAG(FAIL);
 
 done:
     /* Check if the destination link has been initialized */

@@ -16,8 +16,6 @@
 #ifndef _PH5DIFF_H__
 #define _PH5DIFF_H__
 
-#define PRINT_DATA_MAX_SIZE 	512
-#define OUTBUFF_SIZE 		(PRINT_DATA_MAX_SIZE*4)
 /* Send from manager to workers */
 #define MPI_TAG_ARGS		1
 #define MPI_TAG_PRINT_TOK	2
@@ -40,7 +38,8 @@ extern FILE *	overflow_file;
 
 struct diff_args
 {
-    char	name[256];
+    char	name1[256];
+    char	name2[256];
     h5trav_type_t   type;
     diff_opt_t	options;
 };

@@ -460,7 +460,7 @@ H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
     size_t      idx, size, name_offset, heap_size;
     void        *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_efl_copy_file, dxpl_id, H5AC__COPIED_TAG, NULL)
 
     /* check args */
     HDassert(efl_src);
@@ -520,7 +520,7 @@ done:
         if(efl_dst)
             H5MM_xfree(efl_dst);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
 } /* end H5O_efl_copy_file() */
 
 

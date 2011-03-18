@@ -26,7 +26,7 @@
 /*
  * Definitions for the testing structure.
  */
-#define MAXNUMOFTESTS   45
+#define MAXNUMOFTESTS   50
 #define MAXTESTNAME     16
 #define MAXTESTDESC     64
 
@@ -124,7 +124,7 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
  */
 void TestInit(const char *ProgName, void (*private_usage)(void), int (*private_parser)(int ac, char *av[]))
 {
-#if !(defined MAC || defined __MWERKS__ || defined SYMANTEC_C)
+#if !(defined MAC)
     /* Un-buffer the stdout and stderr */
     setbuf(stderr, NULL);
     setbuf(stdout, NULL);
@@ -588,3 +588,21 @@ void SetTest(const char *testname, int action)
 	    break;
     }
 }
+
+
+/*
+ * Enable alarm on test execution, configurable by environment variable
+ */
+void TestAlarmOn(void)
+{
+    char * env_val = HDgetenv("HDF5_ALARM_SECONDS");    /* Alarm environment */
+    unsigned long alarm_sec = H5_ALARM_SEC;     /* Number of seconds before alarm goes off */
+
+    /* Get the alarm value from the environment variable, if set */
+    if(env_val != NULL)
+        alarm_sec = (unsigned)HDstrtoul(env_val, (char **)NULL, 10);
+
+    /* Set the number of seconds before alarm goes off */
+    HDalarm((unsigned)alarm_sec);
+}
+

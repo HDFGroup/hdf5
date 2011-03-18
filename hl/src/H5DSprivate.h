@@ -38,6 +38,7 @@ typedef struct ds_list_t {
  */
 
 H5_HLDLL herr_t  H5DS_is_reserved( hid_t did);
+H5_HLDLL hid_t H5DS_get_REFLIST_type(void);
 
 #endif
 

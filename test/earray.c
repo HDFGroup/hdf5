@@ -322,6 +322,11 @@ create_file(hid_t fapl, hid_t *file, H5F_t **f)
     if(NULL == (*f = (H5F_t *)H5I_object(*file)))
         FAIL_STACK_ERROR
 
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(*f) < 0) {
+        FAIL_STACK_ERROR
+    }
+
     /* Success */
     return(0);
 
@@ -448,6 +453,11 @@ reopen_file(hid_t *file, H5F_t **f, hid_t fapl, hid_t dxpl,
         /* Get a pointer to the internal file object */
         if(NULL == (*f = (H5F_t *)H5I_object(*file)))
             FAIL_STACK_ERROR
+
+        /* Ignore metadata tags in the file's cache */
+        if(H5AC_ignore_tags(*f) < 0) {
+            FAIL_STACK_ERROR
+        }
 
         /* Re-open array, if given */
         if(ea) {
@@ -1433,7 +1443,7 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
 
     /* Insert test entry into cache */
     base_addr = HADDR_MAX;
-    if(H5AC_set(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, base_addr, base_entry, H5AC__PIN_ENTRY_FLAG) < 0)
+    if(H5AC_insert_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, base_addr, base_entry, H5AC__PIN_ENTRY_FLAG) < 0)
         TEST_ERROR
 
     /* Set the base entry as a flush dependency for the array */
@@ -1448,7 +1458,7 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
 
     /* Insert test entry into cache */
     addr1 = HADDR_MAX - 1;
-    if(H5AC_set(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr1, entry1, H5AC__PIN_ENTRY_FLAG) < 0)
+    if(H5AC_insert_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr1, entry1, H5AC__PIN_ENTRY_FLAG) < 0)
         TEST_ERROR
 
     /* Set the test entry as a flush dependency for 0th index in the array */
@@ -1470,7 +1480,7 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
 
     /* Insert test entry into cache */
     addr2 = HADDR_MAX - 2;
-    if(H5AC_set(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr2, entry2, H5AC__PIN_ENTRY_FLAG) < 0)
+    if(H5AC_insert_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr2, entry2, H5AC__PIN_ENTRY_FLAG) < 0)
         TEST_ERROR
 
     /* Set the test entry as a flush dependency for 1st index in the array */
@@ -1492,7 +1502,7 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
 
     /* Insert test entry into cache */
     addr3 = HADDR_MAX - 3;
-    if(H5AC_set(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr3, entry3, H5AC__PIN_ENTRY_FLAG) < 0)
+    if(H5AC_insert_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr3, entry3, H5AC__PIN_ENTRY_FLAG) < 0)
         TEST_ERROR
 
     /* Set the test entry as a flush dependency for 10,000th index in the array */
