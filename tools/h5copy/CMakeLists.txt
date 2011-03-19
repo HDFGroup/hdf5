@@ -152,6 +152,9 @@ IF (BUILD_TESTING)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME H5COPY-CMP-${testname} COMMAND $<TARGET_FILE:h5copy> -i ${testfile}.h5 -o ./testfiles/${testfile}.out.h5 -${vparam} -s ${srcname} -d ${dstname})
+      IF (${resultcode} STREQUAL "1")
+        SET_TESTS_PROPERTIES (H5COPY-CMP-${testname} PROPERTIES WILL_FAIL "true")
+      ENDIF (${resultcode} STREQUAL "1")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5COPY-CMP-${testname}
