@@ -207,6 +207,7 @@ IF (BUILD_TESTING)
           scd_family00002.h5
           scd_family00003.h5
   )
+  SET_TESTS_PROPERTIES (h5repart_5K-clear-objects PROPERTIES DEPENDS h5repart_20K)
   # repartition family member size to 5 KB.
   ADD_TEST (NAME h5repart_5K COMMAND $<TARGET_FILE:h5repart> -m 5k family_file%05d.h5 scd_family%05d.h5)
   SET_TESTS_PROPERTIES (h5repart_5K PROPERTIES DEPENDS h5repart_5K-clear-objects)
@@ -218,23 +219,18 @@ IF (BUILD_TESTING)
           -E remove 
           family_to_sec2.h5
   )
+  SET_TESTS_PROPERTIES (h5repart_sec2-clear-objects PROPERTIES DEPENDS h5repart_5K)
   # convert family file to sec2 file of 20,000 bytes
   ADD_TEST (NAME h5repart_sec2 COMMAND $<TARGET_FILE:h5repart> -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5)
   SET_TESTS_PROPERTIES (h5repart_sec2 PROPERTIES DEPENDS h5repart_sec2-clear-objects)
 
   # test the output files repartitioned above.
   ADD_TEST (NAME h5repart_test COMMAND $<TARGET_FILE:h5repart_test>)
-  SET_TESTS_PROPERTIES (h5repart_test PROPERTIES DEPENDS h5repart_sec2 h5repart_5K h5repart_20K)
+  SET_TESTS_PROPERTIES (h5repart_test PROPERTIES DEPENDS h5repart_sec2)
 
   SET (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
         h5repart_test
   )
-
-  # If using memchecker add tests without using scripts
-  IF (HDF5_ENABLE_USING_MEMCHECKER)
-    ADD_TEST (NAME H5MKGRP-help COMMAND h5mkgrp -h)
-    ADD_TEST (NAME H5MKGRP-version COMMAND h5mkgrp -V)
-  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
   # Check that help & version is displayed properly
   ADD_H5_CMP (h5mkgrp_help 0 "-h")
