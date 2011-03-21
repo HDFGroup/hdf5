@@ -330,7 +330,7 @@ hsize_t diff_datasetid( hid_t did1,
     
     /* Check if type is either VLEN-data or VLEN-string to reclaim any
      * VLEN memory buffer later */
-    if( TRUE == h5tools_detect_vlen_data(m_tid1) )
+    if( TRUE == h5tools_detect_vlen(m_tid1) )
         vl_data = TRUE;
 
     /*-------------------------------------------------------------------------

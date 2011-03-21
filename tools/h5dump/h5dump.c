@@ -2559,7 +2559,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
             ndims = H5Sget_simple_extent_dims(space, size, NULL);
 
             /* Check if we have VL data in the dataset's datatype */
-            if (h5tools_detect_vlen_data(p_type) == TRUE)
+            if (h5tools_detect_vlen(p_type) == TRUE)
                 vl_data = TRUE;
 
             for (i = 0; i < ndims; i++)
@@ -5525,7 +5525,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
             p_type = h5tools_get_native_type(type);
 
             /* Check if we have VL data in the dataset's datatype */
-            if (h5tools_detect_vlen_data(p_type) == TRUE)
+            if (h5tools_detect_vlen(p_type) == TRUE)
                 vl_data = TRUE;
 
             H5Tclose(type);
