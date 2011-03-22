@@ -174,6 +174,17 @@ IF (BUILD_TESTING)
       h5diff_628.txt
       h5diff_629.txt
       h5diff_70.txt
+      h5diff_700.txt
+      h5diff_701.txt
+      h5diff_702.txt
+      h5diff_703.txt
+      h5diff_704.txt
+      h5diff_705.txt
+      h5diff_706.txt
+      h5diff_707.txt
+      h5diff_708.txt
+      h5diff_709.txt
+      h5diff_710.txt
       h5diff_80.txt
       h5diff_90.txt
   )
@@ -209,6 +220,8 @@ IF (BUILD_TESTING)
       h5diff_exclude2-1.h5
       h5diff_exclude2-2.h5
       h5diff_comp_vl_strs.h5
+      h5diff_attr_v_level1.h5
+      h5diff_attr_v_level2.h5
   )
 
   FOREACH (txt_file ${HDF5_REFERENCE_FILES})
@@ -340,6 +353,10 @@ IF (BUILD_TESTING)
   SET (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
   # compound type with multiple vlen string types
   SET (COMP_VL_STRS_FILE h5diff_comp_vl_strs.h5)
+  # attrs with verbose option level
+  SET (ATTR_VERBOSE_LEVEL_FILE1 h5diff_attr_v_level1.h5)
+  SET (ATTR_VERBOSE_LEVEL_FILE2 h5diff_attr_v_level2.h5)
+
 
   # Remove any output file left over from previous test run
   ADD_TEST (
@@ -612,6 +629,28 @@ IF (BUILD_TESTING)
           h5diff_629.out.err
           h5diff_70.out
           h5diff_70.out.err
+          h5diff_700.out
+          h5diff_700.out.err
+          h5diff_701.out
+          h5diff_701.out.err
+          h5diff_702.out
+          h5diff_702.out.err
+          h5diff_703.out
+          h5diff_703.out.err
+          h5diff_704.out
+          h5diff_704.out.err
+          h5diff_705.out
+          h5diff_705.out.err
+          h5diff_706.out
+          h5diff_706.out.err
+          h5diff_707.out
+          h5diff_707.out.err
+          h5diff_708.out
+          h5diff_708.out.err
+          h5diff_709.out
+          h5diff_709.out.err
+          h5diff_710.out
+          h5diff_710.out.err
           h5diff_80.out
           h5diff_80.out.err
           h5diff_90.out
@@ -843,6 +882,37 @@ ADD_H5_TEST (h5diff_628 1 -n 1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 # 7.  attributes
 # ##############################################################################
 ADD_H5_TEST (h5diff_70 1 -v ${FILE5} ${FILE6}) 
+
+# ##################################################
+#  attrs with verbose option level
+# ##################################################
+ADD_H5_TEST (h5diff_700 1 -v1 ${FILE5} ${FILE6}) 
+ADD_H5_TEST (h5diff_701 1 -v2 ${FILE5} ${FILE6})
+ADD_H5_TEST (h5diff_702 1 --verbose=1 ${FILE5} ${FILE6})
+ADD_H5_TEST (h5diff_703 1 --verbose=2 ${FILE5} ${FILE6})
+
+# same attr number , all same attr name
+ADD_H5_TEST (h5diff_704 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g)
+
+# same attr number , some same attr name
+ADD_H5_TEST (h5diff_705 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /dset)
+
+# same attr number , all different attr name
+ADD_H5_TEST (h5diff_706 0 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /ntype)
+
+# different attr number , same attr name (intersected)
+ADD_H5_TEST (h5diff_707 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g2)
+
+# different attr number , all different attr name 
+ADD_H5_TEST (h5diff_708 0 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g3)
+
+# when no attributes exist in both objects
+ADD_H5_TEST (h5diff_709 0 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g4)
+
+# file vs file
+ADD_H5_TEST (h5diff_710 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2})
+
+
 
 # ##############################################################################
 # 8.  all dataset datatypes

@@ -47,8 +47,7 @@
  *  2) when diff was found (normal mode)
  *-------------------------------------------------------------------------
  */
-int
-print_objname (diff_opt_t * options, hsize_t nfound)
+int print_objname (diff_opt_t * options, hsize_t nfound)
 {
     return ((options->m_verbose || nfound) && !options->m_quiet) ? 1 : 0;
 }
@@ -60,10 +59,28 @@ print_objname (diff_opt_t * options, hsize_t nfound)
  *
  *-------------------------------------------------------------------------
  */
-void
-do_print_objname (const char *OBJ, const char *path1, const char *path2)
+void do_print_objname (const char *OBJ, const char *path1, const char *path2, diff_opt_t * opts)
 {
+    /* if verbose level is higher than 0, put space line before
+     * displaying any object or symbolic links. This improves
+     * readability of the output. 
+     */
+    if (opts->m_verbose_level >= 1)
+        parallel_print("\n");
     parallel_print("%-7s: <%s> and <%s>\n", OBJ, path1, path2);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: do_print_attrname
+ *
+ * Purpose: print attribute name
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+do_print_attrname (const char *attr, const char *path1, const char *path2)
+{
+    parallel_print("%-7s: <%s> and <%s>\n", attr, path1, path2);
 }
 
 /*-------------------------------------------------------------------------
@@ -1689,7 +1706,7 @@ out:
     {
         if(print_objname(options, nfound))
         {
-            do_print_objname("dangling link", obj1name, obj2name);
+            do_print_objname("dangling link", obj1name, obj2name, options);
             print_found(nfound);
         }
     }
@@ -1828,7 +1845,7 @@ hsize_t diff(hid_t file1_id,
 			/* verbose (-v) and report (-r) mode */
             if(options->m_verbose || options->m_report)
             {
-                do_print_objname("dataset", path1, path2);
+                do_print_objname("dataset", path1, path2, options);
                 nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
                 print_found(nfound);
             }
@@ -1844,7 +1861,7 @@ hsize_t diff(hid_t file1_id,
                 /* print info if compatible and difference found  */
                 if (!options->not_cmp && nfound)
                 {
-                    do_print_objname("dataset", path1, path2);
+                    do_print_objname("dataset", path1, path2, options);
                     print_found(nfound);	
                 }
             }
@@ -1867,7 +1884,7 @@ hsize_t diff(hid_t file1_id,
             nfound = (ret > 0) ? 0 : 1;
 
             if(print_objname(options,nfound))
-                do_print_objname("datatype", path1, path2);
+                do_print_objname("datatype", path1, path2, options);
 
             /* always print the number of differences found in verbose mode */
             if(options->m_verbose)
@@ -1894,7 +1911,7 @@ hsize_t diff(hid_t file1_id,
         */
         case H5TRAV_TYPE_GROUP:
             if(print_objname(options, nfound))
-                do_print_objname("group", path1, path2);
+                do_print_objname("group", path1, path2, options);
 
             /* always print the number of differences found in verbose mode */
             if(options->m_verbose)
@@ -1933,7 +1950,7 @@ hsize_t diff(hid_t file1_id,
             nfound = (ret != 0) ? 1 : 0;
 
             if(print_objname(options, nfound))
-                do_print_objname("link", path1, path2);
+                do_print_objname("link", path1, path2, options);
 
             if (options->follow_links)
             {
@@ -1985,7 +2002,7 @@ hsize_t diff(hid_t file1_id,
                 nfound = (ret != 0) ? 1 : 0;
 
                 if(print_objname(options, nfound))
-                    do_print_objname("external link", path1, path2);
+                    do_print_objname("external link", path1, path2, options);
 
                 if (options->follow_links)
                 {
@@ -2021,7 +2038,7 @@ hsize_t diff(hid_t file1_id,
                     nfound = 0;
 
                 if (print_objname (options, nfound))
-                    do_print_objname ("user defined link", path1, path2);
+                    do_print_objname ("user defined link", path1, path2, options);
             } /* end else */
 
             /* always print the number of differences found in verbose mode */
@@ -2058,7 +2075,7 @@ out2:
     {
         if(print_objname(options, nfound))
         {
-            do_print_objname("dangling link", path1, path2);
+            do_print_objname("dangling link", path1, path2, options);
             print_found(nfound);
         }
     }

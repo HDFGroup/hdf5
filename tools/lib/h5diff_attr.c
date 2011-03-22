@@ -18,6 +18,262 @@
 #include "h5tools_utils.h"
 #include "h5diff.h"
 
+#define ATTR_NAME_MAX 255
+
+typedef struct table_attr_t {
+    char      *name;
+    unsigned   exist[2];
+} match_attr_t;
+
+typedef struct table_attrs_t {
+    size_t      size;
+    size_t      nattrs;
+    size_t      nattrs_only1;
+    size_t      nattrs_only2;
+    match_attr_t *attrs;
+} table_attrs_t;
+
+
+/*-------------------------------------------------------------------------
+ * Function: table_attrs_init
+ *
+ * Purpose: Initialize the table
+ *
+ * Parameter:
+ *  - tbl [OUT]
+ *
+ * Programmer: Jonathan Kim
+ *
+ * Date: March 15, 2011
+ *------------------------------------------------------------------------*/
+static void table_attrs_init(table_attrs_t **tbl)
+{
+    table_attrs_t* table_attrs = (table_attrs_t*) HDmalloc(sizeof(table_attrs_t));
+
+    table_attrs->size = 0;
+    table_attrs->nattrs = 0;
+    table_attrs->nattrs_only1 = 0;
+    table_attrs->nattrs_only2 = 0;
+    table_attrs->attrs = NULL;
+
+    *tbl = table_attrs;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: table_attrs_free
+ *
+ * Purpose: free given table
+ *
+ * Parameter:
+ *  - table [IN]
+ *
+ * Programmer: Jonathan Kim
+ *
+ * Date: March 15, 2011
+ *------------------------------------------------------------------------*/
+static void table_attrs_free( table_attrs_t *table )
+{
+    unsigned int i;
+
+    if (table)
+    {
+        if(table->attrs) 
+        {
+            for(i = 0; i < table->nattrs; i++) 
+            {
+                if(table->attrs[i].name)
+                    HDfree(table->attrs[i].name );
+            } /* end for */
+            HDfree(table->attrs);
+            table->attrs = NULL;
+        } /* end if */
+        HDfree(table);
+        table = NULL;
+    }
+}
+
+/*-------------------------------------------------------------------------
+ * Function: table_attr_mark_exist
+ *
+ * Purpose: mark given attribute name to table as sign of exsit
+ *
+ * Parameter:
+ *  - exist [IN]
+ *  - name [IN]  : attribute name
+ *  - table [OUT]
+ *
+ * Programmer: Jonathan Kim
+ *
+ * Date: March 15, 2011
+ *------------------------------------------------------------------------*/
+static void table_attr_mark_exist(unsigned *exist, char *name, table_attrs_t *table)
+{
+    unsigned int new;
+
+    if(table->nattrs == table->size) {
+        table->size = MAX(1, table->size * 2);
+        table->attrs = (match_attr_t *)HDrealloc(table->attrs, table->size * sizeof(match_attr_t));
+    } /* end if */
+
+    new = table->nattrs++;
+    table->attrs[new].exist[0] = exist[0];
+    table->attrs[new].exist[1] = exist[1];
+    table->attrs[new].name = (char *)HDstrdup(name);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: build_match_list_attrs
+ *
+ * Purpose: get list of matching attribute name from obj1 and obj2
+ *
+ * Note:
+ *  Find common attribute; the algorithm for search is referred from 
+ *  build_match_list() in h5diff.c .
+ *
+ * Parameter:
+ *  table_out [OUT] : return the list
+ *
+ * Programmer: Jonathan Kim
+ *
+ * Date: March 15, 2011
+ *------------------------------------------------------------------------*/
+static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t ** table_out,  diff_opt_t *options)
+{
+    H5O_info_t oinfo1, oinfo2;  /* Object info */
+    hid_t      attr1_id=-1;     /* attr ID */
+    hid_t      attr2_id=-1;     /* attr ID */
+    size_t curr1 = 0;
+    size_t curr2 = 0;
+    unsigned infile[2];
+    char  name1[ATTR_NAME_MAX];
+    char  name2[ATTR_NAME_MAX];
+    int cmp;
+    unsigned i;
+    table_attrs_t *table_lp = NULL;
+
+    if(H5Oget_info(loc1_id, &oinfo1) < 0)
+        goto error;
+    if(H5Oget_info(loc2_id, &oinfo2) < 0)
+        goto error;
+
+    table_attrs_init( &table_lp );
+
+    
+   /*--------------------------------------------------
+    * build the list
+    */
+    while(curr1 < oinfo1.num_attrs && curr2 < oinfo2.num_attrs)
+    {
+        /*------------------ 
+         * open attribute1 */
+        if((attr1_id = H5Aopen_by_idx(loc1_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)curr1, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
+        /* get name */
+        if(H5Aget_name(attr1_id, ATTR_NAME_MAX, name1) < 0)
+            goto error;
+
+        /*------------------ 
+         * open attribute2 */
+        if((attr2_id = H5Aopen_by_idx(loc2_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)curr2, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
+        /* get name */
+        if(H5Aget_name(attr2_id, ATTR_NAME_MAX, name2) < 0)
+            goto error;
+
+        /* criteria is string compare */
+        cmp = HDstrcmp(name1, name2);
+
+        if(cmp == 0) 
+        {
+            infile[0] = 1;
+            infile[1] = 1;
+            table_attr_mark_exist(infile, name1, table_lp);
+            curr1++;
+            curr2++;
+        }
+        else if(cmp < 0)
+        {
+            infile[0] = 1;
+            infile[1] = 0;
+            table_attr_mark_exist(infile, name1, table_lp);
+            table_lp->nattrs_only1++;
+            curr1++;
+        }
+        else
+        {
+            infile[0] = 0;
+            infile[1] = 1;
+            table_attr_mark_exist(infile, name2, table_lp);
+            table_lp->nattrs_only2++;
+            curr2++;
+        }
+    } /* end while */
+
+    /* list1 did not end */
+    infile[0] = 1;
+    infile[1] = 0;
+    while(curr1 < oinfo1.num_attrs)
+    {
+        /*------------------ 
+         * open attribute1 */
+        if((attr1_id = H5Aopen_by_idx(loc1_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)curr1, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
+        /* get name */
+        if(H5Aget_name(attr1_id, ATTR_NAME_MAX, name1) < 0)
+            goto error;
+
+        table_attr_mark_exist(infile, name1, table_lp);
+        table_lp->nattrs_only1++;
+        curr1++;
+    }
+
+    /* list2 did not end */
+    infile[0] = 0;
+    infile[1] = 1;
+    while(curr2 < oinfo2.num_attrs)
+    {
+        /*------------------ 
+         * open attribute2 */
+        if((attr2_id = H5Aopen_by_idx(loc2_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)curr2, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
+        /* get name */
+        if(H5Aget_name(attr2_id, ATTR_NAME_MAX, name2) < 0)
+            goto error;
+
+        table_attr_mark_exist(infile, name2, table_lp);
+        table_lp->nattrs_only2++;
+        curr2++;
+    }
+
+    /*------------------------------------------------------
+    * print the list
+    */
+    if(options->m_verbose_level == 2)
+    {
+        /* if '-v2' is detected */
+        parallel_print("   obj1   obj2\n");
+        parallel_print(" --------------------------------------\n");
+        for(i = 0; i < (unsigned int) table_lp->nattrs; i++) 
+        {
+            char c1, c2;
+            c1 = (table_lp->attrs[i].exist[0]) ? 'x' : ' ';
+            c2 = (table_lp->attrs[i].exist[1]) ? 'x' : ' ';
+            parallel_print("%5c %6c    %-15s\n", c1, c2, table_lp->attrs[i].name);
+        } /* end for */
+    }
+
+    if(options->m_verbose_level >= 1)
+    {
+        parallel_print("Attributes status:  %d common, %d only in obj1, %d only in obj2\n", table_lp->nattrs - table_lp->nattrs_only1 - table_lp->nattrs_only2, table_lp->nattrs_only1, table_lp->nattrs_only2 );
+    }
+
+    *table_out = table_lp;
+
+    return 0;
+
+error:
+    return -1;
+}
 
 /*-------------------------------------------------------------------------
  * Function: diff_attr
@@ -63,45 +319,33 @@ hsize_t diff_attr(hid_t loc1_id,
     int        rank2;           /* rank of dataset */
     hsize_t    dims1[H5S_MAX_RANK];/* dimensions of dataset */
     hsize_t    dims2[H5S_MAX_RANK];/* dimensions of dataset */
-    char       name1[512];
-    char       name2[512];
+    char       *name1;
+    char       *name2;
     char       np1[512];
     char       np2[512];
-    H5O_info_t oinfo1, oinfo2;     /* Object info */
     unsigned   u;                  /* Local index variable */
     hsize_t    nfound = 0;
     hsize_t    nfound_total = 0;
     int       j;
 
-    if(H5Oget_info(loc1_id, &oinfo1) < 0)
+    table_attrs_t * match_list_attrs = NULL;
+    if( build_match_list_attrs(loc1_id, loc2_id, &match_list_attrs, options) < 0)
         goto error;
-    if(H5Oget_info(loc2_id, &oinfo2) < 0)
-        goto error;
 
-    if(oinfo1.num_attrs != oinfo2.num_attrs)
-        return 1;
-
-    for(u = 0; u < (unsigned)oinfo1.num_attrs; u++) {
-        /* reset buffers for every attribute, we might goto out and call free */
-        buf1 = NULL;
-        buf2 = NULL;
-
-        /* open attribute */
-        if((attr1_id = H5Aopen_by_idx(loc1_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-            goto error;
-        /* get name */
-        if(H5Aget_name(attr1_id, 255, name1) < 0)
-            goto error;
-
-        /* use the name on the first file to open the second file */
-        H5E_BEGIN_TRY
+    for(u = 0; u < (unsigned)match_list_attrs->nattrs; u++)
+    {
+        if( (match_list_attrs->attrs[u].exist[0]) && (match_list_attrs->attrs[u].exist[1]) )
         {
-            if((attr2_id = H5Aopen(loc2_id, name1, H5P_DEFAULT)) < 0)
-                goto error;
-        } H5E_END_TRY;
+        name1 = name2 = match_list_attrs->attrs[u].name;
 
-        /* get name */
-        if(H5Aget_name(attr2_id, 255, name2) < 0)
+       /*--------------
+        * attribute 1 */
+        if((attr1_id = H5Aopen(loc1_id, name1, H5P_DEFAULT)) < 0)
+            goto error;
+
+       /*--------------
+        * attribute 2 */
+        if((attr2_id = H5Aopen(loc2_id, name2, H5P_DEFAULT)) < 0)
             goto error;
 
         /* get the datatypes  */
@@ -192,7 +436,7 @@ hsize_t diff_attr(hid_t loc1_id,
         /* always print name */
         /* verbose (-v) and report (-r) mode */
         if(options->m_verbose || options->m_report) {
-            do_print_objname("attribute", np1, np2);
+            do_print_attrname("attribute", np1, np2);
 
             nfound = diff_array(buf1, buf2, nelmts1, (hsize_t)0, rank1, dims1,
                 options, np1, np2, mtype1_id, attr1_id, attr2_id);
@@ -210,7 +454,7 @@ hsize_t diff_attr(hid_t loc1_id,
 
                 /* not comparable, no display the different number */
                 if(!options->not_cmp && nfound) {
-                    do_print_objname("attribute", np1, np2);
+                    do_print_attrname("attribute", np1, np2);
                     print_found(nfound);
                 } /* end if */
         } /* end else */
@@ -251,7 +495,10 @@ hsize_t diff_attr(hid_t loc1_id,
             goto error;
 
         nfound_total += nfound;
+        }
     } /* u */
+
+    table_attrs_free(match_list_attrs);
 
     return nfound_total;
 
@@ -267,6 +514,9 @@ error:
                 H5Dvlen_reclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
             HDfree(buf2);
         } /* end if */
+
+        table_attrs_free(match_list_attrs);
+
         H5Tclose(ftype1_id);
         H5Tclose(ftype2_id);
         H5Tclose(mtype1_id);
