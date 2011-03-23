@@ -51,7 +51,7 @@
 #define H5_FP_TO_ULLONG_RIGHT_MAXIMUM 1
 
 /* Define if gettimeofday() populates the tz pointer passed in */
-#define H5_GETTIMEOFDAY_GIVES_TZ 1
+/* #define H5_GETTIMEOFDAY_GIVES_TZ 1 */
 
 /* Define to 1 if you have the `alarm' function. */
 #define H5_HAVE_ALARM 1
@@ -312,7 +312,7 @@
 /* #undef H5_HAVE_STRUCT_TEXT_INFO */
 
 /* Define if `struct timezone' is defined */
-#define H5_HAVE_STRUCT_TIMEZONE 1
+/* #define H5_HAVE_STRUCT_TIMEZONE 1 */
 
 /* Define to 1 if `tm_zone' is member of `struct tm'. */
 #define H5_HAVE_STRUCT_TM_TM_ZONE 1
@@ -375,7 +375,7 @@
 #define H5_HAVE_TMPFILE 1
 
 /* Define if `tm_gmtoff' is a member of `struct tm' */
-#define H5_HAVE_TM_GMTOFF 1
+/* #define H5_HAVE_TM_GMTOFF 1 */
 
 /* Define to 1 if your `struct tm' has `tm_zone'. Deprecated, use
    `HAVE_STRUCT_TM_TM_ZONE' instead. */

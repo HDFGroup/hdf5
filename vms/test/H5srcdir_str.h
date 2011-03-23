@@ -20,4 +20,3 @@
 
 /* Set the 'srcdir' path from configure time */
 static const char *config_srcdir = "[.]";
-

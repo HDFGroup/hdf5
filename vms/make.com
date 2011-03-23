@@ -40,7 +40,7 @@ $ copy [.tools.misc]make.com    [-.tools.misc]
 $!
 $! Define location of ZLIB library. If you do not have it on your system, download
 $! source code from http://www.zlib.net/, build and install on your system
-$ define zlib_dir sys$sysusers:[pourmal.zlib-1_2_3]
+$ define zlib_dir disk$user:[hdfgroup.zlib-1_2_5_ieee]
 $! define zlib_dir sys$sysusers:[pourmal.zlib-1_2_3-ieee]
 $!
 $! Set up compilation flags here
