@@ -5,8 +5,42 @@ file1     file2
     x      x    /dset          
     x      x    /g1            
 
+
 group  : </> and </>
 0 differences found
+   obj1   obj2
+ --------------------------------------
+    x      x    VLstring       
+    x      x    VLstring2D     
+    x      x    VLstring3D     
+    x      x    array          
+    x      x    array2D        
+    x      x    array3D        
+    x      x    bitfield       
+    x      x    bitfield2D     
+    x      x    bitfield3D     
+    x      x    compound       
+    x      x    compound2D     
+    x      x    compound3D     
+    x      x    enum           
+    x      x    enum2D         
+    x      x    enum3D         
+    x      x    float          
+    x      x    float2D        
+    x      x    float3D        
+    x      x    integer        
+    x      x    integer2D      
+    x      x    integer3D      
+    x      x    opaque         
+    x      x    opaque2D       
+    x      x    opaque3D       
+    x      x    string         
+    x      x    string2D       
+    x      x    string3D       
+    x      x    vlen           
+    x      x    vlen2D         
+    x      x    vlen3D         
+Attributes status:  30 common, 0 only in obj1, 0 only in obj2
 attribute: <VLstring of </>> and <VLstring of </>>
 size:           [2]           [2]
 position        VLstring of </> VLstring of </> difference          
@@ -676,8 +710,45 @@ position        vlen3D of </>   vlen3D of </>   difference
 [ 3 2 1 ]          58              0               58             
 [ 3 2 1 ]          59              0               59             
 59 differences found
+
 dataset: </dset> and </dset>
 Not comparable: </dset> or </dset> is an empty dataset
+   obj1   obj2
+ --------------------------------------
+    x      x    VLstring       
+    x      x    VLstring2D     
+    x      x    VLstring3D     
+    x      x    array          
+    x      x    array2D        
+    x      x    array3D        
+    x      x    bitfield       
+    x      x    bitfield2D     
+    x      x    bitfield3D     
+    x      x    compound       
+    x      x    compound2D     
+    x      x    compound3D     
+    x      x    enum           
+    x      x    enum2D         
+    x      x    enum3D         
+    x      x    float          
+    x      x    float2D        
+    x      x    float3D        
+    x      x    integer        
+    x      x    integer2D      
+    x      x    integer3D      
+    x      x    opaque         
+    x      x    opaque2D       
+    x      x    opaque3D       
+    x      x    reference      
+    x      x    reference2D    
+    x      x    reference3D    
+    x      x    string         
+    x      x    string2D       
+    x      x    string3D       
+    x      x    vlen           
+    x      x    vlen2D         
+    x      x    vlen3D         
+Attributes status:  33 common, 0 only in obj1, 0 only in obj2
 attribute: <VLstring of </dset>> and <VLstring of </dset>>
 size:           [2]           [2]
 position        VLstring of </dset> VLstring of </dset> difference          
@@ -1354,8 +1425,42 @@ position        vlen3D of </dset> vlen3D of </dset> difference
 [ 3 2 1 ]          59              0               59             
 59 differences found
 519 differences found
+
 group  : </g1> and </g1>
 0 differences found
+   obj1   obj2
+ --------------------------------------
+    x      x    VLstring       
+    x      x    VLstring2D     
+    x      x    VLstring3D     
+    x      x    array          
+    x      x    array2D        
+    x      x    array3D        
+    x      x    bitfield       
+    x      x    bitfield2D     
+    x      x    bitfield3D     
+    x      x    compound       
+    x      x    compound2D     
+    x      x    compound3D     
+    x      x    enum           
+    x      x    enum2D         
+    x      x    enum3D         
+    x      x    float          
+    x      x    float2D        
+    x      x    float3D        
+    x      x    integer        
+    x      x    integer2D      
+    x      x    integer3D      
+    x      x    opaque         
+    x      x    opaque2D       
+    x      x    opaque3D       
+    x      x    string         
+    x      x    string2D       
+    x      x    string3D       
+    x      x    vlen           
+    x      x    vlen2D         
+    x      x    vlen3D         
+Attributes status:  30 common, 0 only in obj1, 0 only in obj2
 attribute: <VLstring of </g1>> and <VLstring of </g1>>
 size:           [2]           [2]
 position        VLstring of </g1> VLstring of </g1> difference          

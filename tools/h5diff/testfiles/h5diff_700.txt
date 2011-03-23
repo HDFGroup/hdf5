@@ -5,8 +5,10 @@ file1     file2
     x      x    /dset          
     x      x    /g1            
 
+
 group  : </> and </>
 0 differences found
+Attributes status:  30 common, 0 only in obj1, 0 only in obj2
 attribute: <VLstring of </>> and <VLstring of </>>
 size:           [2]           [2]
 position        VLstring of </> VLstring of </> difference          
@@ -676,8 +678,10 @@ position        vlen3D of </>   vlen3D of </>   difference
 [ 3 2 1 ]          58              0               58             
 [ 3 2 1 ]          59              0               59             
 59 differences found
+
 dataset: </dset> and </dset>
 Not comparable: </dset> or </dset> is an empty dataset
+Attributes status:  33 common, 0 only in obj1, 0 only in obj2
 attribute: <VLstring of </dset>> and <VLstring of </dset>>
 size:           [2]           [2]
 position        VLstring of </dset> VLstring of </dset> difference          
@@ -1354,8 +1358,10 @@ position        vlen3D of </dset> vlen3D of </dset> difference
 [ 3 2 1 ]          59              0               59             
 59 differences found
 519 differences found
+
 group  : </g1> and </g1>
 0 differences found
+Attributes status:  30 common, 0 only in obj1, 0 only in obj2
 attribute: <VLstring of </g1>> and <VLstring of </g1>>
 size:           [2]           [2]
 position        VLstring of </g1> VLstring of </g1> difference          

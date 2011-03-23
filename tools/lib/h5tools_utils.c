@@ -231,8 +231,11 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
                 if (l_opts[i].has_arg != no_arg) {
                     if (arg[len] == '=') {
                         opt_arg = &arg[len + 1];
-                    } else if (opt_ind < (argc - 1) && argv[opt_ind + 1][0] != '-') {
-                        opt_arg = argv[++opt_ind];
+                    }
+                    else if (l_opts[i].has_arg != optional_arg) {
+                        if (opt_ind < (argc - 1)) 
+                            if (argv[opt_ind + 1][0] != '-')
+                                opt_arg = argv[++opt_ind];
                     } else if (l_opts[i].has_arg == require_arg) {
                         if (opt_err)
                             HDfprintf(stderr,
