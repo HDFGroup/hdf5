@@ -26,26 +26,9 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     hl_fortran_test-clear-objects
     ######### tools/h5copy #########
     H5COPY-clearall-objects
-    H5COPY-H5LS_h5copytst-basic       #uses runTest.cmake
     H5COPY-clear-refs
-    H5COPY-region_ref                 #needs clear-refs
-    H5COPY-H5LS_h5copy_ref-refs       #uses runTest.cmake
     H5COPY-clear-ext-links
-    H5COPY-ext_link                   #needs clear-ext-links
-    H5COPY-ext_link_f                 #needs clear-ext-links
-    H5COPY-ext_dangle_noobj           #needs clear-ext-links
-    H5COPY-ext_dangle_noobj_f         #needs clear-ext-links
-    H5COPY-ext_dangle_nofile          #needs clear-ext-links
-    H5COPY-ext_dangle_nofile_f        #needs clear-ext-links
-    H5COPY-ext_link_group             #needs clear-ext-links
-    H5COPY-ext_link_group_f           #needs clear-ext-links
-    H5COPY-H5LS_h5copy_extlinks_src-links    #uses runTest.cmake
     H5COPY-clear-misc
-    H5COPY-CMP-h5copy_misc1           #uses runTest.cmake
-    H5COPY-samefile1_pre              #needs clear-ext-links
-    H5COPY-samefile2_pre              #needs clear-ext-links
-    H5COPY-samefile1                  #needs clear-ext-links
-    H5COPY-samefile2                  #needs clear-ext-links
     ######### tools/h5diff #########
     H5DIFF-clearall-objects
     ######### tools/h5dump #########
@@ -57,6 +40,102 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP-XML-clearall-objects
     ######### tools/h5import #########
     H5IMPORT-clear-objects
+    H5IMPORT-ASCII_F32-clear-objects
+    H5IMPORT-ASCII_UI16-clear-objects
+    H5IMPORT-ASCII_UI32-clear-objects
+    H5IMPORT-ASCII_I8-clear-objects
+    H5IMPORT-ASCII_I16-clear-objects
+    H5IMPORT-ASCII_I32-clear-objects
+    H5IMPORT-ASCII_F64_R1-clear-objects
+    H5IMPORT-BINARY_I8_EOF-clear-objects
+    H5IMPORT-STR-clear-objects
+    H5IMPORT-BINARY_UI32-clear-objects
+    H5IMPORT-BINARY_UI16-clear-objects
+    H5IMPORT-BINARY_I32-clear-objects
+    H5IMPORT-BINARY_I8-clear-objects
+    H5IMPORT-BINARY_I16-clear-objects
+    H5IMPORT-BINARY_F64-clear-objects
+    H5IMPORT-ASCII_F64-clear-objects
+    ######### tools/h5jam #########
+    H5JAM-SETUP-N_twithub_u511_c-clear-objects
+    H5JAM-N_twithub_u511_c-clear-objects
+    H5JAM-CHECKFILE-N_twithub_u511_c-clear-objects
+    H5JAM-SETUP-N_twithub_u512_c-clear-objects
+    H5JAM-N_twithub_u512_c-clear-objects
+    H5JAM-CHECKFILE-N_twithub_u512_c-clear-objects
+    H5JAM-SETUP-N_twithub_u513_c-clear-objects
+    H5JAM-N_twithub_u513_c-clear-objects
+    H5JAM-CHECKFILE-N_twithub_u513_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u10_c-clear-objects
+    H5JAM-N_twithub513_u10_c-clear-objects
+    H5JAM-CHECKFILE-N_twithub513_u10_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u511_c-clear-objects
+    H5JAM-N_twithub513_u511_c-clear-objects
+    H5JAM-CHECKFILE-N_twithub513_u511_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u512_c-clear-objects
+    H5JAM-N_twithub513_u512_c-clear-objects
+    H5JAM-CHECKFILE-N_twithub513_u512_c-clear-objects
+    H5JAM-CHECKFILE-twithub_u10_c-clear-objects
+    H5JAM-twithub_u511_c-clear-objects
+    H5JAM-CHECKFILE-twithub_u511_c-clear-objects
+    H5JAM-twithub_u512_c-clear-objects
+    H5JAM-CHECKFILE-twithub_u512_c-clear-objects
+    H5JAM-twithub_u513_c-clear-objects
+    H5JAM-CHECKFILE-twithub_u513_c-clear-objects
+    H5JAM-twithub513_u10_c-clear-objects
+    H5JAM-CHECKFILE-twithub513_u10_c-clear-objects
+    H5JAM-twithub513_u511_c-clear-objects
+    H5JAM-CHECKFILE-twithub513_u511_c-clear-objects
+    H5JAM-twithub513_u512_c-clear-objects
+    H5JAM-CHECKFILE-twithub513_u512_c-clear-objects
+    H5JAM-twithub513_u513_c-clear-objects
+    H5JAM-CHECKFILE-twithub513_u513_c-clear-objects
+    H5JAM-SETUP-N_twithub_u10_c-clear-objects
+    H5JAM-N_twithub_u10_c-clear-objects
+    H5JAM-CHECKFILE-N_twithub_u10_c-clear-objects
+    H5JAM-SETUP-D_twithub_tall-clear-objects
+    H5JAM-UNJAM-D_twithub_tall-clear-objects
+    H5JAM-CHECKFILE-D_twithub_tall-clear-objects
+    H5JAM-SETUP-D_twithub513_tall-clear-objects
+    H5JAM-UNJAM-D_twithub513_tall-clear-objects
+    H5JAM-CHECKFILE-D_twithub513_tall-clear-objects
+    H5JAM-CHECKFILE-ta_u513-clear-objects
+    H5JAM-twithub_u10-clear-objects
+    H5JAM-CHECKFILE-twithub_u10-clear-objects
+    H5JAM-twithub_u511-clear-objects
+    H5JAM-CHECKFILE-twithub_u511-clear-objects
+    H5JAM-twithub_u512-clear-objects
+    H5JAM-CHECKFILE-twithub_u512-clear-objects
+    H5JAM-twithub_u513-clear-objects
+    H5JAM-CHECKFILE-twithub_u513-clear-objects
+    H5JAM-twithub513_u10-clear-objects
+    H5JAM-CHECKFILE-twithub513_u10-clear-objects
+    H5JAM-twithub513_u511-clear-objects
+    H5JAM-CHECKFILE-twithub513_u511-clear-objects
+    H5JAM-twithub513_u512-clear-objects
+    H5JAM-CHECKFILE-twithub513_u512-clear-objects
+    H5JAM-twithub513_u513-clear-objects
+    H5JAM-CHECKFILE-twithub513_u513-clear-objects
+    H5JAM-twithub_u10_c-clear-objects
+    H5JAM-tall_u10-clear-objects
+    H5JAM-CHECKFILE-tall_u10-clear-objects
+    H5JAM-tall_u511-clear-objects
+    H5JAM-CHECKFILE-tall_u511-clear-objects
+    H5JAM-tall_u512-clear-objects
+    H5JAM-CHECKFILE-tall_u512-clear-objects
+    H5JAM-tall_u513-clear-objects
+    H5JAM-CHECKFILE-tall_u513-clear-objects
+    H5JAM-SETUP-ta_u10-clear-objects
+    H5JAM-ta_u10-clear-objects
+    H5JAM-CHECKFILE-ta_u10-clear-objects
+    H5JAM-SETUP-ta_u511-clear-objects
+    H5JAM-ta_u511-clear-objects
+    H5JAM-CHECKFILE-ta_u511-clear-objects
+    H5JAM-SETUP-ta_u512-clear-objects
+    H5JAM-ta_u512-clear-objects
+    H5JAM-CHECKFILE-ta_u512-clear-objects
+    H5JAM-SETUP-ta_u513-clear-objects
+    H5JAM-ta_u513-clear-objects
     ######### tools/h5ls #########
     H5LS-clearall-objects
     ######### tools/h5repack #########
