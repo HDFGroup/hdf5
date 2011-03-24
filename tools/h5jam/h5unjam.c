@@ -13,15 +13,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-
-#ifdef H5_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 #include "hdf5.h"
 #include "H5private.h"
 #include "h5tools_utils.h"
@@ -177,7 +168,7 @@ main(int argc, const char *argv[])
     herr_t status;
     hid_t plist;
     int res;
-    struct stat sbuf;
+    h5_stat_t sbuf;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
