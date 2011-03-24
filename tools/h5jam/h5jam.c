@@ -13,13 +13,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#ifdef H5_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 #include "hdf5.h"
 #include "H5private.h"
 #include "h5tools_utils.h"
@@ -177,8 +170,8 @@ main (int argc, const char *argv[])
   hsize_t where;
   hsize_t newubsize;
   off_t fsize;
-  struct stat sbuf;
-  struct stat sbuf2;
+  h5_stat_t sbuf;
+  h5_stat_t sbuf2;
   int res;
 
   h5tools_setprogname(PROGRAMNAME);
@@ -375,7 +368,7 @@ copy_some_to_file (int infid, int outfid, hsize_t startin, hsize_t startout,
 		   ssize_t limit)
 {
   char buf[1024];
-  struct stat sbuf;
+  h5_stat_t sbuf;
   int res;
   ssize_t tot = 0;
   ssize_t howmuch = 0;
