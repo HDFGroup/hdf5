@@ -92,6 +92,10 @@ IF (BUILD_TESTING)
           COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${outfile} -${vparam} -s ${srcname} -d ${dstname}
       )
     ENDIF (NOT "${ARGN}" STREQUAL "")
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5COPY-${testname} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5COPY-${testname}")
     # resultcode=2 will cause the test to skip the diff test
     IF (NOT ${resultcode} STREQUAL "2")
       ADD_TEST (
@@ -99,14 +103,11 @@ IF (BUILD_TESTING)
           COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${outfile} ${srcname} ${dstname}
       )
       SET_TESTS_PROPERTIES(H5COPY-DIFF_${testname} PROPERTIES DEPENDS H5COPY-${testname})
+      SET (last_test "H5COPY-DIFF_${testname}")
       IF (${resultcode} STREQUAL "1")
         SET_TESTS_PROPERTIES (H5COPY-DIFF_${testname} PROPERTIES WILL_FAIL "true")
       ENDIF (${resultcode} STREQUAL "1")
     ENDIF (NOT ${resultcode} STREQUAL "2")
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5COPY-${testname} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5COPY-DIFF_${testname}")
   ENDMACRO (ADD_H5COPY_TEST)
 
   #
