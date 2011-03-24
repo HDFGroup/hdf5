@@ -1935,6 +1935,7 @@
 ./vms/src/h5pubconf.h
 ./vms/test/check.com
 ./vms/test/make.com
+./vms/test/H5srcdir_str.h
 
 ./vms/build.com
 ./vms/install.com
