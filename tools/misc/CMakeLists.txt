@@ -163,6 +163,14 @@ IF (BUILD_TESTING)
   ENDMACRO (ADD_H5_TEST resultfile resultcode resultoption)
 
   MACRO (ADD_H5_CMP resultfile resultcode)
+    ADD_TEST (
+        NAME H5MKGRP-clear-${resultfile}
+        COMMAND    ${CMAKE_COMMAND}
+            -E remove 
+                ${PROJECT_BINARY_DIR}/../testfiles/${resultfile}.h5 
+                ${PROJECT_BINARY_DIR}/${resultfile}.out
+                ${PROJECT_BINARY_DIR}/${resultfile}.out.err
+    )
     IF (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME H5MKGRP-${resultfile} COMMAND $<TARGET_FILE:h5mkgrp> ${ARGN})
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
@@ -178,6 +186,7 @@ IF (BUILD_TESTING)
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    SET_TESTS_PROPERTIES (H5MKGRP-${resultfile} PROPERTIES DEPENDS H5MKGRP-clear-${resultfile})
   ENDMACRO (ADD_H5_CMP resultfile resultcode)
 
 ##############################################################################
