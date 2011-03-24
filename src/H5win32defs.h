@@ -48,11 +48,11 @@ typedef __int64             h5_stat_size_t;
     #ifdef __cplusplus
         extern "C" {
     #endif /* __cplusplus */
-    H5_DLL int HDgettimeofday(struct timeval *tv, void *tz);
+    H5_DLL int Wgettimeofday(struct timeval *tv, void *tz);
     #ifdef __cplusplus
         }
     #endif /* __cplusplus */
-    #define HDgettimeofday(V,Z) HDgettimeofday(V,Z)
+    #define HDgettimeofday(V,Z) Wgettimeofday(V,Z)
 #endif /* H5_HAVE_GETTIMEOFDAY */
 #define HDgetdrive()        _getdrive()
 #define HDlseek(F,O,W)      _lseeki64(F,O,W)
