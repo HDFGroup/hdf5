@@ -25,20 +25,6 @@
 #include "hdf5.h"
 #include "H5private.h"
 
-#ifdef H5_STDC_HEADERS
-#   include <signal.h>
-#   include <stdarg.h>
-#endif
-
-#if defined(H5_TIME_WITH_SYS_TIME)
-#   include <sys/time.h>
-#   include <time.h>
-#elif defined(H5_HAVE_SYS_TIME_H)
-#   include <sys/time.h>
-#else
-#   include <time.h>
-#endif
-
 /*
  * Predefined test verbosity levels.
  *
@@ -92,7 +78,7 @@
  * This contains the filename prefix specificied as command line option for
  * the parallel test files.
  */
-H5_DLLVAR char *paraprefix;
+H5TEST_DLLVAR char *paraprefix;
 #ifdef H5_HAVE_PARALLEL
 extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #endif
