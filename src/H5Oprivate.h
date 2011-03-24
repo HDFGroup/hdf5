@@ -170,7 +170,8 @@ typedef struct H5O_copy_t {
 #define H5O_AINFO_ID    0x0015          /* Attribute info message.  */
 #define H5O_REFCOUNT_ID 0x0016          /* Reference count message.  */
 #define H5O_FSINFO_ID   0x0017          /* Free-space manager info message.  */
-#define H5O_UNKNOWN_ID  0x0018          /* Placeholder message ID for unknown message.  */
+#define H5O_EOA_ID      0x0018          /* 'EOA' value info message */
+#define H5O_UNKNOWN_ID  0x0019          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
 
 
@@ -663,6 +664,8 @@ H5_DLL herr_t H5O_msg_write_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     unsigned type_id, unsigned mesg_flags, unsigned update_flags, void *mesg);
 H5_DLL void *H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
     hid_t dxpl_id);
+H5_DLL herr_t H5O_msg_flags(const H5O_loc_t *loc, unsigned type_id, 
+    unsigned *mesg_flags, hid_t dxpl_id);
 H5_DLL void *H5O_msg_read_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     void *mesg);
 H5_DLL herr_t H5O_msg_reset(unsigned type_id, void *native);

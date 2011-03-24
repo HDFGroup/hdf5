@@ -1664,7 +1664,7 @@ H5FD_multi_get_eof(const H5FD_t *_file)
 	if (tmp_eoa>eoa) eoa = tmp_eoa;
     } END_MEMBERS;
 
-    return MAX(eoa, eof);
+    return eof;
 }
 
 

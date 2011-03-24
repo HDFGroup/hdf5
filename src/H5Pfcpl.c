@@ -80,6 +80,9 @@
 #define H5F_CRT_FILE_SPACE_STRATEGY_DEF        H5F_FILE_SPACE_STRATEGY_DEF
 #define H5F_CRT_FREE_SPACE_THRESHOLD_SIZE      sizeof(hsize_t)
 #define H5F_CRT_FREE_SPACE_THRESHOLD_DEF       H5F_FREE_SPACE_THRESHOLD_DEF
+/* Definitions for avoiding file truncation */
+#define H5F_CRT_AVOID_TRUNCATE_SIZE            sizeof(hbool_t)
+#define H5F_CRT_AVOID_TRUNCATE_DEF             (FALSE)
 
 
 /******************/
@@ -156,6 +159,7 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     unsigned sohm_list_max  = H5F_CRT_SHMSG_LIST_MAX_DEF;
     unsigned sohm_btree_min  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
     unsigned file_space_strategy = H5F_CRT_FILE_SPACE_STRATEGY_DEF;
+    hbool_t avoid_truncate = H5F_CRT_AVOID_TRUNCATE_DEF;
     hsize_t free_space_threshold = H5F_CRT_FREE_SPACE_THRESHOLD_DEF;
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -205,6 +209,10 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the free space section threshold */
     if(H5P_register_real(pclass, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, H5F_CRT_FREE_SPACE_THRESHOLD_SIZE, &free_space_threshold, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the avoid truncate property */
+    if(H5P_register_real(pclass, H5F_CRT_AVOID_TRUNCATE_NAME, H5F_CRT_AVOID_TRUNCATE_SIZE, &avoid_truncate, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -995,3 +1003,72 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_file_space() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_avoid_truncate
+ *
+ * Purpose:     Gets whether or not the library avoids truncation calls
+ *              by storing an EOA message in the superblock extension.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              January 26, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_avoid_truncate(hid_t fcpl_id, hbool_t *avoid_truncate)
+{
+    H5P_genplist_t  *plist;  /* Property list pointer */
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Pget_avoid_truncate, FAIL)
+    H5TRACE2("e", "i*b", fcpl_id, avoid_truncate);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(fcpl_id, H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get the avoid truncate value */
+    if(H5P_get(plist, H5F_CRT_AVOID_TRUNCATE_NAME, avoid_truncate) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get 'avoid truncate' property")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pget_avoid_truncate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_avoid_truncate
+ *
+ * Purpose:     Sets whether or not the library avoids truncation calls 
+ *              by storing an EOA message in the superblock extension.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              January 26, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_avoid_truncate(hid_t fcpl_id, hbool_t avoid_truncate)
+{
+    H5P_genplist_t  *plist;  /* Property list pointer */
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Pset_avoid_truncate, FAIL)
+    H5TRACE2("e", "ib", fcpl_id, avoid_truncate);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(fcpl_id, H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set the avoid_truncate value */
+	if(H5P_set(plist, H5F_CRT_AVOID_TRUNCATE_NAME, &avoid_truncate) < 0)
+	    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'avoid truncate' property")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_avoid_truncate() */

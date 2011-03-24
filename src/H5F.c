@@ -880,6 +880,8 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space strategy")
         if(H5P_get(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, &f->shared->fs_threshold) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get free-space section threshold")
+        if(H5P_get(plist, H5F_CRT_AVOID_TRUNCATE_NAME, &f->shared->avoid_truncate) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'avoid truncate' feature")
 
         /* Get the FAPL values to cache */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1009,6 +1011,22 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
             if(H5F_flush(f, dxpl_id, TRUE) < 0)
                 HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
 
+#ifdef H5_HAVE_PARALLEL
+    /* Depending on how entries in the cache were distributed amongst flushing
+     * processes, the superblock may have been given an EOF value that's not
+     * accurate. Check for that here, and mark the superblock as dirty if we
+     * need to re-flush it. Note this only matters if we're avoiding truncation,
+     * as otherwise we use the EOA value rather than EOF value when writing
+     * out the superblock.
+     */
+    if (f->shared->avoid_truncate)
+        if((f->shared->flags & H5F_ACC_RDWR) && flush)
+            if (f->shared->sblock->eof_in_file != H5FD_get_eof(f->shared->lf))
+                if (H5F_super_dirty(f) < 0)
+                    HDONE_ERROR(H5E_VFL, H5E_CANTMARKDIRTY, HADDR_UNDEF,
+                                "unable to mark superblock as dirty")
+#endif /* H5_HAVE_PARALLEL */
+
         /* Release the external file cache */
         if(f->shared->efc) {
             if(H5F_efc_destroy(f->shared->efc) < 0)
@@ -1085,12 +1103,14 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list")
 
-        /* Only truncate the file on an orderly close, with write-access */
-        if(f->closing && (H5F_ACC_RDWR & H5F_INTENT(f))) {
-            /* Truncate the file to the current allocated size */
-            if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)TRUE) < 0)
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
+        if (!f->shared->avoid_truncate) {
+            /* Only truncate the file on an orderly close, with write-access */
+            if(f->closing && (H5F_ACC_RDWR & H5F_INTENT(f))) {
+                /* Truncate the file to the current allocated size */
+                if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)TRUE) < 0)
+                    /* Push error, but keep going*/
+                    HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
+            } /* end if */
         } /* end if */
 
         /* Close the file */
@@ -1301,7 +1321,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
      */
-    if(0 == H5FD_get_eof(lf) && (flags & H5F_ACC_RDWR)) {
+    if(0 == (MAX(H5FD_get_eof(lf),H5FD_get_eoa(lf,H5FD_MEM_SUPER))) && (flags & H5F_ACC_RDWR)) {
         /*
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.

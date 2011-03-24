@@ -24,6 +24,7 @@
 
 #include "hdf5.h"
 #include "h5tools_error.h"
+#include "H5private.h"
 
 #define ESCAPE_HTML             1
 #define OPT(X,S)                ((X) ? (X) : (S))

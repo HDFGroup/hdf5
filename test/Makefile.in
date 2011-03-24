@@ -79,17 +79,18 @@ libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
 am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	stab$(EXEEXT) gheap$(EXEEXT) cache$(EXEEXT) cache_api$(EXEEXT) \
 	cache_tagging$(EXEEXT) pool$(EXEEXT) accum$(EXEEXT) \
-	hyperslab$(EXEEXT) istore$(EXEEXT) bittests$(EXEEXT) \
-	dt_arith$(EXEEXT) dtypes$(EXEEXT) dsets$(EXEEXT) \
-	cmpd_dset$(EXEEXT) filter_fail$(EXEEXT) extend$(EXEEXT) \
-	external$(EXEEXT) efc$(EXEEXT) objcopy$(EXEEXT) links$(EXEEXT) \
-	unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) fillval$(EXEEXT) \
-	mount$(EXEEXT) flush1$(EXEEXT) flush2$(EXEEXT) \
-	app_ref$(EXEEXT) enum$(EXEEXT) set_extent$(EXEEXT) \
-	ttsafe$(EXEEXT) getname$(EXEEXT) vfd$(EXEEXT) ntypes$(EXEEXT) \
-	dangle$(EXEEXT) dtransform$(EXEEXT) reserved$(EXEEXT) \
-	cross_read$(EXEEXT) freespace$(EXEEXT) mf$(EXEEXT) \
-	farray$(EXEEXT) earray$(EXEEXT) btree2$(EXEEXT) fheap$(EXEEXT)
+	trunc_detect$(EXEEXT) hyperslab$(EXEEXT) istore$(EXEEXT) \
+	bittests$(EXEEXT) dt_arith$(EXEEXT) dtypes$(EXEEXT) \
+	dsets$(EXEEXT) cmpd_dset$(EXEEXT) filter_fail$(EXEEXT) \
+	extend$(EXEEXT) external$(EXEEXT) efc$(EXEEXT) \
+	objcopy$(EXEEXT) links$(EXEEXT) unlink$(EXEEXT) big$(EXEEXT) \
+	mtime$(EXEEXT) fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
+	flush2$(EXEEXT) app_ref$(EXEEXT) enum$(EXEEXT) \
+	set_extent$(EXEEXT) ttsafe$(EXEEXT) getname$(EXEEXT) \
+	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
+	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
+	freespace$(EXEEXT) mf$(EXEEXT) farray$(EXEEXT) earray$(EXEEXT) \
+	btree2$(EXEEXT) fheap$(EXEEXT)
 am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
 	gen_new_array$(EXEEXT) gen_new_fill$(EXEEXT) \
@@ -97,7 +98,8 @@ am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_new_super$(EXEEXT) gen_noencoder$(EXEEXT) \
 	gen_nullspace$(EXEEXT) gen_udlinks$(EXEEXT) \
 	space_overflow$(EXEEXT) gen_filespace$(EXEEXT) \
-	gen_specmetaread$(EXEEXT) gen_sizes_lheap$(EXEEXT)
+	gen_specmetaread$(EXEEXT) gen_sizes_lheap$(EXEEXT) \
+	gen_eoamessage$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 accum_SOURCES = accum.c
 accum_OBJECTS = accum.$(OBJEXT)
@@ -231,6 +233,10 @@ gen_deflate_SOURCES = gen_deflate.c
 gen_deflate_OBJECTS = gen_deflate.$(OBJEXT)
 gen_deflate_LDADD = $(LDADD)
 gen_deflate_DEPENDENCIES = libh5test.la $(LIBHDF5)
+gen_eoamessage_SOURCES = gen_eoamessage.c
+gen_eoamessage_OBJECTS = gen_eoamessage.$(OBJEXT)
+gen_eoamessage_LDADD = $(LDADD)
+gen_eoamessage_DEPENDENCIES = libh5test.la $(LIBHDF5)
 gen_filespace_SOURCES = gen_filespace.c
 gen_filespace_OBJECTS = gen_filespace.$(OBJEXT)
 gen_filespace_LDADD = $(LDADD)
@@ -371,6 +377,10 @@ testmeta_SOURCES = testmeta.c
 testmeta_OBJECTS = testmeta.$(OBJEXT)
 testmeta_LDADD = $(LDADD)
 testmeta_DEPENDENCIES = libh5test.la $(LIBHDF5)
+trunc_detect_SOURCES = trunc_detect.c
+trunc_detect_OBJECTS = trunc_detect.$(OBJEXT)
+trunc_detect_LDADD = $(LDADD)
+trunc_detect_DEPENDENCIES = libh5test.la $(LIBHDF5)
 am_ttsafe_OBJECTS = ttsafe.$(OBJEXT) ttsafe_dcreate.$(OBJEXT) \
 	ttsafe_error.$(OBJEXT) ttsafe_cancel.$(OBJEXT) \
 	ttsafe_acreate.$(OBJEXT)
@@ -404,29 +414,30 @@ SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c bittests.c \
 	earray.c efc.c enum.c err_compat.c error_test.c extend.c \
 	external.c farray.c fheap.c fillval.c filter_fail.c flush1.c \
 	flush2.c freespace.c gen_bad_ohdr.c gen_bogus.c gen_cross.c \
-	gen_deflate.c gen_filespace.c gen_filters.c gen_new_array.c \
-	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
-	gen_noencoder.c gen_nullspace.c gen_sizes_lheap.c \
-	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
-	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
-	ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c \
-	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
-	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+	gen_deflate.c gen_eoamessage.c gen_filespace.c gen_filters.c \
+	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
+	gen_new_super.c gen_noencoder.c gen_nullspace.c \
+	gen_sizes_lheap.c gen_specmetaread.c gen_udlinks.c getname.c \
+	gheap.c hyperslab.c istore.c lheap.c links.c links_env.c mf.c \
+	mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c \
+	set_extent.c space_overflow.c stab.c tcheck_version.c \
+	$(testhdf5_SOURCES) testmeta.c trunc_detect.c \
+	$(ttsafe_SOURCES) unlink.c vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c \
 	bittests.c btree2.c cache.c cache_api.c cache_tagging.c \
 	cmpd_dset.c cross_read.c dangle.c dsets.c dt_arith.c \
 	dtransform.c dtypes.c earray.c efc.c enum.c err_compat.c \
 	error_test.c extend.c external.c farray.c fheap.c fillval.c \
 	filter_fail.c flush1.c flush2.c freespace.c gen_bad_ohdr.c \
-	gen_bogus.c gen_cross.c gen_deflate.c gen_filespace.c \
-	gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c \
-	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
-	gen_nullspace.c gen_sizes_lheap.c gen_specmetaread.c \
-	gen_udlinks.c getname.c gheap.c hyperslab.c istore.c lheap.c \
-	links.c links_env.c mf.c mount.c mtime.c ntypes.c objcopy.c \
-	ohdr.c pool.c reserved.c set_extent.c space_overflow.c stab.c \
-	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c vfd.c
+	gen_bogus.c gen_cross.c gen_deflate.c gen_eoamessage.c \
+	gen_filespace.c gen_filters.c gen_new_array.c gen_new_fill.c \
+	gen_new_group.c gen_new_mtime.c gen_new_super.c \
+	gen_noencoder.c gen_nullspace.c gen_sizes_lheap.c \
+	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
+	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
+	ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c \
+	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
+	testmeta.c trunc_detect.c $(ttsafe_SOURCES) unlink.c vfd.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -715,7 +726,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 	huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_expand.h5 \
 	copy_dcpl_newfile.h5 extend.h5 istore.h5 extlinks*.h5 \
 	frspace.h5 links*.h5 sys_file1 tfile[1-5].h5 th5s[1-3].h5 \
-	lheap.h5 fheap.h5 ohdr.h5 stab.h5 extern_[1-3].h5 \
+	lheap.h5 trunc.h5 fheap.h5 ohdr.h5 stab.h5 extern_[1-3].h5 \
 	extern_[1-4][ab].raw gheap[0-4].h5 dt_arith[1-2] links.h5 \
 	links[0-6]*.h5 extlinks[0-15].h5 tmp big.data \
 	big[0-9][0-9][0-9][0-9][0-9].h5 stdio.h5 sec2.h5 \
@@ -747,7 +758,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
 # the library yet. Move them to the end so that their failure do not block
 # other current library code tests.
 TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
-           pool accum hyperslab istore bittests dt_arith \
+           pool accum trunc_detect hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe \
@@ -765,7 +776,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
 BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
     gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
     gen_nullspace gen_udlinks space_overflow gen_filespace gen_specmetaread \
-    gen_sizes_lheap
+    gen_sizes_lheap gen_eoamessage
 
 
 # The libh5test library provides common support code for the tests.
@@ -979,6 +990,9 @@ gen_cross$(EXEEXT): $(gen_cross_OBJECTS) $(gen_cross_DEPENDENCIES)
 gen_deflate$(EXEEXT): $(gen_deflate_OBJECTS) $(gen_deflate_DEPENDENCIES) 
 	@rm -f gen_deflate$(EXEEXT)
 	$(LINK) $(gen_deflate_OBJECTS) $(gen_deflate_LDADD) $(LIBS)
+gen_eoamessage$(EXEEXT): $(gen_eoamessage_OBJECTS) $(gen_eoamessage_DEPENDENCIES) 
+	@rm -f gen_eoamessage$(EXEEXT)
+	$(LINK) $(gen_eoamessage_OBJECTS) $(gen_eoamessage_LDADD) $(LIBS)
 gen_filespace$(EXEEXT): $(gen_filespace_OBJECTS) $(gen_filespace_DEPENDENCIES) 
 	@rm -f gen_filespace$(EXEEXT)
 	$(LINK) $(gen_filespace_OBJECTS) $(gen_filespace_LDADD) $(LIBS)
@@ -1078,6 +1092,9 @@ testhdf5$(EXEEXT): $(testhdf5_OBJECTS) $(testhdf5_DEPENDENCIES)
 testmeta$(EXEEXT): $(testmeta_OBJECTS) $(testmeta_DEPENDENCIES) 
 	@rm -f testmeta$(EXEEXT)
 	$(LINK) $(testmeta_OBJECTS) $(testmeta_LDADD) $(LIBS)
+trunc_detect$(EXEEXT): $(trunc_detect_OBJECTS) $(trunc_detect_DEPENDENCIES) 
+	@rm -f trunc_detect$(EXEEXT)
+	$(LINK) $(trunc_detect_OBJECTS) $(trunc_detect_LDADD) $(LIBS)
 ttsafe$(EXEEXT): $(ttsafe_OBJECTS) $(ttsafe_DEPENDENCIES) 
 	@rm -f ttsafe$(EXEEXT)
 	$(LINK) $(ttsafe_OBJECTS) $(ttsafe_LDADD) $(LIBS)
@@ -1128,6 +1145,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_bogus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_cross.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_deflate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_eoamessage.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_filespace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_filters.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_new_array.Po@am__quote@
@@ -1179,6 +1197,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tmisc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trefer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trefstr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trunc_detect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tselect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tskiplist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tsohm.Po@am__quote@

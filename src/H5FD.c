@@ -1612,7 +1612,7 @@ H5FDget_eof(H5FD_t *file)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file pointer")
 
     /* The real work */
-    if(HADDR_UNDEF == (ret_value = H5FD_get_eof(file)))
+    if(HADDR_UNDEF == (ret_value = MAX(H5FD_get_eof(file), H5FD_get_eoa(file, H5FD_MEM_SUPER))))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file get eof request failed")
 
     /* (Note compensating for base address subtraction in internal routine) */

@@ -666,7 +666,7 @@ H5FD_windows_get_eof(const H5FD_t *_file)
     FUNC_ENTER_NOAPI(H5FD_windows_get_eof, HADDR_UNDEF)
 
     /* Set return value */
-    ret_value=MAX(file->eof, file->eoa);
+    ret_value=file->eof;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -4343,6 +4343,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/lib/Makefile
                  tools/misc/Makefile
                  tools/misc/h5cc
+                 tools/misc/testh5extend.sh
                  tools/misc/testh5repart.sh
                  tools/h5stat/testh5stat.sh
                  tools/h5stat/Makefile

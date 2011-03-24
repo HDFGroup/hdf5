@@ -845,6 +845,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id)
     /* Attempt to flush all entries from rank 0 & Bcast clean list to other ranks */
     if(H5AC_flush_entries(f) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
+
 #endif /* H5_HAVE_PARALLEL */
 
     /* Flush the cache */

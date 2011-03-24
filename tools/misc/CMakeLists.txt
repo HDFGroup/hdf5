@@ -23,10 +23,15 @@ ADD_EXECUTABLE (h5mkgrp ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5mkgrp.c)
 TARGET_NAMING (h5mkgrp ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5mkgrp  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
+ADD_EXECUTABLE (h5extend ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5extend.c)
+H5_NAMING (h5extend ${LIB_TYPE})
+TARGET_LINK_LIBRARIES (h5extend ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+
 SET (H5_DEP_EXECUTABLES
     h5debug
     h5repart
     h5mkgrp
+    h5extend
 )
 
 ##############################################################################
@@ -43,7 +48,9 @@ IF (BUILD_TESTING)
     ADD_EXECUTABLE (h5repart_gentest ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5repart_gentest.c)
     TARGET_NAMING (h5repart_gentest ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5repart_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
-    #ADD_TEST (NAME h5repart_gentest COMMAND $<TARGET_FILE:h5repart_gentest>)
+    ADD_EXECUTABLE (h5extend_gentest ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5extend_gentest.c)
+    H5_NAMING (h5extend_gentest ${LIB_TYPE})
+    TARGET_LINK_LIBRARIES (h5extend_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
   ADD_EXECUTABLE (h5repart_test ${HDF5_TOOLS_MISC_SOURCE_DIR}/repart_test.c)
@@ -266,7 +273,7 @@ ENDIF (BUILD_TESTING)
 #-----------------------------------------------------------------------------
 INSTALL (
     TARGETS
-        h5debug h5repart h5mkgrp
+        h5debug h5repart h5mkgrp h5extend
     RUNTIME DESTINATION
         ${HDF5_INSTALL_BIN_DIR}/tools
     COMPONENT

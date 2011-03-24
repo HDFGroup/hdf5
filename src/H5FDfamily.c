@@ -1178,7 +1178,7 @@ H5FD_family_get_eof(const H5FD_t *_file)
     eof += ((unsigned)i)*file->memb_size;
 
     /* Set return value */
-    ret_value = MAX(eof, file->eoa);
+    ret_value = eof;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

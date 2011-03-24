@@ -212,6 +212,7 @@ void independent_group_read(void);
 void test_fapl_mpio_dup(void);
 void test_fapl_mpiposix_dup(void);
 void test_split_comm_access(void);
+void test_avoid_truncation(void);
 void dataset_writeInd(void);
 void dataset_writeAll(void);
 void extend_writeInd(void);

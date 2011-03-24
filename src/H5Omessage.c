@@ -438,6 +438,71 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_msg_flags
+ *
+ * Purpose:     Retrieves the flags from a message in an object header.
+ *
+ * Return:      Success: SUCCEED
+ *              Failure: FAL
+ *
+ * Programmer:  Mike McGreevy
+ *              February 10, 2011
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_flags(const H5O_loc_t *loc, unsigned type_id, unsigned *mesg_flags, hid_t dxpl_id)
+{
+    H5O_t *oh = NULL;                   /* Object header to use */
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
+    unsigned       idx;                 /* Message's index in object header */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_TAG(H5O_msg_flags, dxpl_id, loc->addr, FAIL)
+
+    /* check args */
+    HDassert(loc);
+    HDassert(loc->file);
+    HDassert(H5F_addr_defined(loc->addr));
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+
+    /* Get the object header */
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header")
+
+    type = H5O_msg_class_g[type_id];
+    HDassert(type);
+
+    /* Scan through the messages looking for the right one */
+    for(idx = 0; idx < oh->nmesgs; idx++)
+        if(type == oh->mesg[idx].type)
+            break;
+
+    /* make sure we found the message */
+    if(idx == oh->nmesgs)
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message type not found")
+
+    /*
+     * Decode the message if necessary.  If the message is shared then retrieve
+     * native message through the shared interface.
+     */
+    H5O_LOAD_NATIVE(loc->file, dxpl_id, 0, oh, &(oh->mesg[idx]), NULL)
+
+    /*
+     * The object header caches the native message (along with
+     * the raw message) so we must copy the native message before
+     * returning.
+     */
+    *mesg_flags = oh->mesg[idx].flags;
+
+done:
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+} /* H5O_msg_flags */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_msg_read
  *
  * Purpose:	Reads a message from an object header and returns a pointer

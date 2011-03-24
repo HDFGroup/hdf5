@@ -1025,7 +1025,7 @@ H5FD_log_get_eof(const H5FD_t *_file)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_log_get_eof)
 
-    FUNC_LEAVE_NOAPI(MAX(file->eof, file->eoa))
+    FUNC_LEAVE_NOAPI(file->eof)
 } /* end H5FD_log_get_eof() */
 
 

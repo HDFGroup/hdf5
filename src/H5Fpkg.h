@@ -189,6 +189,9 @@ typedef struct H5F_super_t {
     haddr_t     driver_addr;    /* File driver information block address      */
     haddr_t     root_addr;      /* Root group address                         */
     H5G_entry_t *root_ent;      /* Root group symbol table entry              */
+#ifdef H5_HAVE_PARALLEL
+    haddr_t     eof_in_file;    /* Last known EOF stored in file's superblock */
+#endif /* H5_HAVE_PARALLEL */
 } H5F_super_t;
 
 /*
@@ -214,6 +217,7 @@ typedef struct H5F_file_t {
     unsigned	sohm_nindexes;	/* Number of shared messages indexes in the table */
     unsigned long feature_flags; /* VFL Driver feature Flags            */
     haddr_t	maxaddr;	/* Maximum address for file             */
+    hbool_t avoid_truncate; /* Whether or not to avoid file truncation */
 
     H5AC_t      *cache;		/* The object cache	 		*/
     H5AC_cache_config_t

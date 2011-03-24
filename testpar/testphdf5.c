@@ -356,6 +356,9 @@ int main(int argc, char **argv)
     AddTest("posixdup", test_fapl_mpiposix_dup, NULL,
 	    "fapl_mpiposix duplicate", NULL);
 
+    AddTest("trunc", test_avoid_truncation, NULL,
+	    "file avoiding truncation", PARATESTFILE);
+
     AddTest("split", test_split_comm_access, NULL,
 	    "dataset using split communicators", PARATESTFILE);
 

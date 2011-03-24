@@ -1,0 +1,131 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+#
+# Tests for the h5extend tool
+
+TESTNAME=h5extend
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+EXTEND=h5extend             # The tool name
+EXTEND_BIN=`pwd`/$EXTEND    # The path of the tool binary
+
+EXTENDED_TEST=extend_test                # The test name
+EXTENDED_TEST_BIN=`pwd`/$EXTENDED_TEST    # The path of the test binary
+
+CMP='cmp -s'
+DIFF='diff -c'
+
+nerrors=0
+verbose=yes
+
+# The build (current) directory might be different than the source directory.
+if test -z "$srcdir"; then
+   srcdir=.
+fi
+
+test -d ../testfiles || mkdir ../testfiles
+
+actual_dir=`pwd`/../testfiles
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Run a test and print PASS or *FAIL*.  If a test fails then increment
+# the `nerrors' global variable.
+#
+TOOLTEST() {
+
+    expect="$srcdir/../testfiles/$1"
+    actual="../testfiles/`basename $1 .ddl`.out"
+    actual_err="../testfiles/`basename $1 .ddl`.err"
+    shift
+
+    # Run tool test.
+    TESTING $EXTEND $@
+    (
+      echo "#############################"
+      echo "Expected output for '$EXTEND $@'" 
+      echo "#############################"
+	  #cd $srcdir/../testfiles
+      $RUNSERIAL $EXTEND_BIN $@
+    ) >$actual 2>$actual_err
+    cat $actual_err >> $actual
+
+	if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+     echo " CREATED"
+     cp $actual $expect
+    elif $CMP $expect $actual; then
+     echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.ddl) differs from actual result (*.out)"
+	 nerrors="`expr $nerrors + 1`"
+	 test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+	 rm -f $actual $actual_err
+    fi
+}
+
+OUTPUTTEST() {
+   # Run test program.
+   TESTING $EXTENDED_TEST $@
+   (
+      cd $actual_dir
+      $RUNSERIAL $EXTENDED_TEST_BIN $@
+   )
+
+   if test $? -eq 0; then
+       echo " PASSED"
+   else
+       echo " FAILED"
+       nerrors=`expr $nerrors + 1`
+   fi
+}
+
+# Print a "SKIP" message
+SKIP() {
+	 TESTING $EXTEND $@
+	  echo  " -SKIP-"
+}
+
+##############################################################################
+##############################################################################
+###			  T H E   T E S T S                                ###
+##############################################################################
+##############################################################################
+
+TOOLTEST h5extend_exp1.ddl h5extend_tfile.h5
+TOOLTEST h5extend_exp2.ddl -e h5extend_tfile.h5
+TOOLTEST h5extend_exp3.ddl h5extend_tfile.h5
+TOOLTEST h5extend_exp4.ddl -r h5extend_tfile.h5
+TOOLTEST h5extend_exp5.ddl h5extend_tfile.h5
+
+if test $nerrors -eq 0 ; then
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
+fi

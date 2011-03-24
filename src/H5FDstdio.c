@@ -710,7 +710,7 @@ H5FD_stdio_get_eof(const H5FD_t *_file)
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    return(MAX(file->eof, file->eoa));
+    return(file->eof);
 }
 
 
