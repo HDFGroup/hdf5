@@ -433,7 +433,16 @@ void usage(void)
  printf("   -h, --help              Print a usage message and exit.\n");
  printf("   -V, --version           Print version number and exit.\n");
  printf("   -r, --report            Report mode. Print differences.\n");
- printf("   -v, --verbose           Verbose mode. Print differences, list of objects.\n");
+ printf("   -v --verbose            Verbose mode. Print differences information and list\n");
+ printf("                           of objects.\n");
+ printf("   -vN --verbose=N         Verbose mode with level. Print differences and list\n");
+ printf("                           of objects.\n");
+ printf("                           Level of detail depends on value of N:\n");
+ printf("                            0 : Identical to '-v' or '--verbose'.\n");
+ printf("                            1 : All level 0 information plus one-line attribute\n");
+ printf("                                status summary.\n");
+ printf("                            2 : All level 1 information plus extended attribute\n");
+ printf("                                status report.\n");
  printf("   -q, --quiet             Quiet mode. Do not produce output.\n");
  printf("   --follow-symlinks       Follow symbolic links (soft links and external links)\n");
  printf("                           and compare the links' target objects.\n");
