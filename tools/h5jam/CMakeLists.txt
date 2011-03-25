@@ -165,6 +165,7 @@ IF (BUILD_TESTING)
   ENDMACRO(SETUP testname infile outfile)
 
   MACRO (CHECK_UB_1 testname testfile ufile)
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER) #Temporary
     ADD_TEST (
         NAME H5JAM-CHECK_UB_1-${testname}
         COMMAND ${CMAKE_COMMAND} -E echo "CHECK_UB_1 ${testname} ${testfile} ${ufile} ${ARGN}"
@@ -173,9 +174,11 @@ IF (BUILD_TESTING)
       SET_TESTS_PROPERTIES (H5JAM-CHECK_UB_1-${testname} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
     SET (last_test "H5JAM-CHECK_UB_1-${testname}")
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER) #Temporary
   ENDMACRO(CHECK_UB_1 testname testfile ufile)
 
   MACRO (CHECK_NOUB testname testfile)
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER) #Temporary
     ADD_TEST (
         NAME H5JAM-CHECK_NOUB-${testname}
         COMMAND ${CMAKE_COMMAND} -E echo "CHECK_NOUB ${testname} ${testfile} ${ARGN}"
@@ -184,6 +187,7 @@ IF (BUILD_TESTING)
       SET_TESTS_PROPERTIES (H5JAM-CHECK_NOUB-${testname} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
     SET (last_test "H5JAM-CHECK_NOUB-${testname}")
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER) #Temporary
   ENDMACRO(CHECK_NOUB testname testfile)
 
   MACRO (UNJAMTEST testname infile ufile outfile)
@@ -210,17 +214,21 @@ IF (BUILD_TESTING)
             COMMAND ${CMAKE_COMMAND} -E remove ${outfile}.ufile.txt ${outfile}.ufile.txt.err
         )
         SET_TESTS_PROPERTIES (H5JAM-UNJAM_D-${testname}-clear-objects PROPERTIES DEPENDS H5JAM-UNJAM-${testname}-clear-objects)
-        ADD_TEST (
-            NAME H5JAM-UNJAM-${testname}
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5unjam>"
-                -D "TEST_ARGS:STRING=-i;${infile};-o;${outfile}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-                -D "TEST_OUTPUT=${outfile}.ufile.txt"
-                -D "TEST_EXPECT=0"
-                -D "TEST_SKIP_COMPARE=TRUE"
-                -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
-        )
+        IF (HDF5_ENABLE_USING_MEMCHECKER)
+          ADD_TEST (NAME H5JAM-UNJAM-${testname} COMMAND <TARGET_FILE:h5unjam> -i ${infile} -o ${outfile})
+        ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+          ADD_TEST (
+              NAME H5JAM-UNJAM-${testname}
+              COMMAND "${CMAKE_COMMAND}"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5unjam>"
+                  -D "TEST_ARGS:STRING=-i;${infile};-o;${outfile}"
+                  -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                  -D "TEST_OUTPUT=${outfile}.ufile.txt"
+                  -D "TEST_EXPECT=0"
+                  -D "TEST_SKIP_COMPARE=TRUE"
+                  -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+          )
+        ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
         SET_TESTS_PROPERTIES (H5JAM-UNJAM-${testname} PROPERTIES DEPENDS H5JAM-UNJAM_D-${testname}-clear-objects)
         SET (compare_test "${outfile}.ufile.txt")
       ELSE (NOT "${ARGN}" STREQUAL "--delete")
