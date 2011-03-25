@@ -82,6 +82,10 @@ New Features
  
     Tools
     -----
+     - h5diff: Added new level for -v (verbose) option. The new levels are
+               1 and 2.  So -v1 and -v2 can be specified to view more 
+               information about attributes differences. 
+               Bug#2121 (JKM 2011/3/23)
      - h5dump: Added new option --enable-error-stack. This option will display 
                error stack information in the output stream. This is useful
                when the "h5dump: Unable to print data" message is output.
