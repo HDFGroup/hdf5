@@ -75,6 +75,9 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5JAM-SETUP-N_twithub513_u512_c-clear-objects
     H5JAM-N_twithub513_u512_c-clear-objects
     H5JAM-CHECKFILE-N_twithub513_u512_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u513_c-clear-objects
+    H5JAM-N_twithub513_u513_c-clear-objects
+    H5JAM-CHECKFILE-N_twithub513_u513_c-clear-objects
     H5JAM-CHECKFILE-twithub_u10_c-clear-objects
     H5JAM-twithub_u511_c-clear-objects
     H5JAM-CHECKFILE-twithub_u511_c-clear-objects
@@ -93,11 +96,29 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5JAM-SETUP-N_twithub_u10_c-clear-objects
     H5JAM-N_twithub_u10_c-clear-objects
     H5JAM-CHECKFILE-N_twithub_u10_c-clear-objects
+    H5JAM-SETUP-twithub_tall-clear-objects
+    H5JAM-UNJAM-twithub_tall-clear-objects
+    H5JAM-UNJAM_D-twithub_tall-clear-objects
+    H5JAM-CHECKFILE-twithub_tall-clear-objects
+    H5JAM-SETUP-twithub513_tall-clear-objects
+    H5JAM-UNJAM-twithub513_tall-clear-objects
+    H5JAM-UNJAM_D-twithub513_tall-clear-objects
+    H5JAM-CHECKFILE-twithub513_tall-clear-objects
+    H5JAM-SETUP-N_twithub_tall-clear-objects
+    H5JAM-UNJAM-N_twithub_tall-clear-objects
+    H5JAM-UNJAM_D-N_twithub_tall-clear-objects
+    H5JAM-CHECKFILE-N_twithub_tall-clear-objects
+    H5JAM-SETUP-N_twithub513_tall-clear-objects
+    H5JAM-UNJAM-N_twithub513_tall-clear-objects
+    H5JAM-UNJAM_D-N_twithub513_tall-clear-objects
+    H5JAM-CHECKFILE-N_twithub513_tall-clear-objects
     H5JAM-SETUP-D_twithub_tall-clear-objects
     H5JAM-UNJAM-D_twithub_tall-clear-objects
+    H5JAM-UNJAM_D-D_twithub_tall-clear-objects
     H5JAM-CHECKFILE-D_twithub_tall-clear-objects
     H5JAM-SETUP-D_twithub513_tall-clear-objects
     H5JAM-UNJAM-D_twithub513_tall-clear-objects
+    H5JAM-UNJAM_D-D_twithub513_tall-clear-objects
     H5JAM-CHECKFILE-D_twithub513_tall-clear-objects
     H5JAM-CHECKFILE-ta_u513-clear-objects
     H5JAM-twithub_u10-clear-objects
@@ -140,7 +161,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5LS-clearall-objects
     ######### tools/h5repack #########
     H5REPACK-clearall-objects
-    H5REPACK-gzip_verbose_filters                 #uses runTest.cmake
+    H5REPACK-gzip_verbose_filters                       #uses runTest.cmake
     H5REPACK_VERIFY_LAYOUT-dset2_chunk_20x10            #uses grepTest.cmake
     H5REPACK_VERIFY_LAYOUT_ALL-chunk_20x10              #uses grepTest.cmake
     H5REPACK_VERIFY_LAYOUT-dset2_conti                  #uses grepTest.cmake
@@ -166,8 +187,8 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     h5repart_20K-clear-objects
     h5repart_5K-clear-objects
     h5repart_sec2-clear-objects
-    H5MKGRP-h5mkgrp_help                                #uses runTest.cmake
-    H5MKGRP-h5mkgrp_version                             #uses runTest.cmake
+    H5MKGRP-clear-h5mkgrp_help
+    H5MKGRP-clear-h5mkgrp_version
     H5MKGRP-clear-h5mkgrp_single
     H5MKGRP-h5mkgrp_single                              #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_single                         #uses runTest.cmake
@@ -204,4 +225,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5MKGRP-clear-h5mkgrp_nested_mult_latest-lp
     H5MKGRP-h5mkgrp_nested_mult_latest-lp               #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_nested_mult_latest-lp          #uses runTest.cmake
+    ######### examples #########
+    EXAMPLES-clear-objects
+    cpp_ex-clear-objects
 )
