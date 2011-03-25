@@ -329,9 +329,9 @@ IF (BUILD_TESTING)
       NAME H5COPY-clear-misc
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
-          ./testfiles/${HDF_FILE1}.out.h5
-          ./testfiles/${HDF_FILE1}.out.out
-          ./testfiles/${HDF_FILE1}.out.out.err
+          ./testfiles/h5copy_misc1.out.h5
+          ./testfiles/h5copy_misc1.out.out
+          ./testfiles/h5copy_misc1.out.out.err
           ./testfiles/${HDF_FILE1_TMP}.h5
   )
   IF (NOT "${last_test}" STREQUAL "")
