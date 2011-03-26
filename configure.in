@@ -4252,21 +4252,63 @@ AC_RUN_IFELSE([
 
 dnl
 dnl ----------------------------------------------------------------------
-dnl Check for AIO support. For now, if we are on either BSD or Linux, 
-dnl assume AIO support.  This check may become more specific in the future.
+dnl Check for AIO support. In addition to setting H5_HAVE_AIO, also define
+dnl flags indicating whether POSIX AIO is available, and if so, whether 
+dnl we should use the 64 bit versions.
 dnl
 AC_MSG_CHECKING([if AIO is supported])
 
 case $host_os in
-  linux* | freebsd* )
+  linux* )
     AIO_SUPPORTED=yes
+    POSIX_AIO_SUPPORTED=yes
+    REQUIRE_64_BIT_POSIX_AIO=yes
+    ;;
+  freebsd* )
+    AIO_SUPPORTED=yes
+    POSIX_AIO_SUPPORTED=yes
+    REQUIRE_64_BIT_POSIX_AIO=no
     ;;
 esac
+
+if (${CC-cc} -V 2>&1 | grep '^pgcc') > /dev/null ; then
+    AIO_SUPPORTED=no
+fi
+
+dnl ----------------------------------------------------------------------
 
 case "X-$AIO_SUPPORTED" in
   X-yes)
     AC_MSG_RESULT([yes])
     AC_DEFINE([HAVE_AIO], [1], [Define if AIO is supported])
+    ;;
+  X-no|*)
+    AC_MSG_RESULT([no])
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------
+
+AC_MSG_CHECKING([if POSIX AIO is supported])
+case "X-$POSIX_AIO_SUPPORTED" in
+  X-yes)
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_POSIX_AIO], [1], [Define if POSIX AIO is supported])
+    H5_CFLAGS="$H5_CFLAGS -D_POSIX_C_SOURCE=199309L"
+    LIBS="$LIBS -lrt"
+    ;;
+  X-no|*)
+    AC_MSG_RESULT([no])
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------
+
+AC_MSG_CHECKING([if 64 POSIX AIO CALLS should be used])
+case "X-$REQUIRE_64_BIT_POSIX_AIO" in
+  X-yes)
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([USE_64_BIT_POSIX_AIO], [1], [Define if 64 bit POSIX AIO must be specified])
     ;;
   X-no|*)
     AC_MSG_RESULT([no])

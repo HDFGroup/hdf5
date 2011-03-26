@@ -497,11 +497,42 @@ typedef struct {
 #endif /* HDacos */
 
 #ifdef H5_HAVE_AIO
-#if _POSIX_ASYNCHRONOUS_IO >= 0
+#ifdef H5_HAVE_POSIX_AIO
+#ifdef H5_USE_64_BIT_POSIX_AIO
 
-#ifndef H5_HAVE_POSIX_AIO
-    #define H5_HAVE_POSIX_AIO	1
-#endif /* H5_HAVE_POSIX_AIO */
+#ifndef HDaiocb
+    #define HDaiocb		aiocb64
+#endif /* HDaiocb */
+
+#ifndef HDaio_cancel
+    #define HDaio_cancel(F,A)	aio_cancel64(F, A)
+#endif /* HDaio_cancel */
+
+#ifndef HDaio_error
+    #define HDaio_error(A)	aio_error64(A)
+#endif /* HDaio_error */
+
+#ifndef HDaio_fsync
+    #define HDaio_fsync(O,A)	aio_fsync64(O, A)
+#endif /* HDaio_fsync */
+
+#ifndef HDaio_read
+    #define HDaio_read(A)	aio_read64(A)
+#endif /* HDaio_read */
+
+#ifndef HDaio_return
+    #define HDaio_return(A)	aio_return64(A)
+#endif /* HDaio_return */
+
+#ifndef HDaio_suspend
+    #define HDaio_suspend(L,N,T)	aio_suspend64(L, N, T)
+#endif /* HDaio_suspend */
+
+#ifndef HDaio_write
+    #define HDaio_write(A)	aio_write64(A)
+#endif /* HDaio_write */
+
+#else /* H5_USE_64_BIT_POSIX_AIO */
 
 #ifndef HDaiocb
     #define HDaiocb		aiocb
@@ -535,6 +566,7 @@ typedef struct {
     #define HDaio_write(A)	aio_write(A)
 #endif /* HDaio_write */
 
+#endif /* H5_USE_64_BIT_POSIX_AIO */
 #endif /* _POSIX_ASYNCHRONOUS_IO >= 0 */
 #endif /* H5_HAVE_AIO */
 

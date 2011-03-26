@@ -108,8 +108,8 @@ typedef struct H5FD_family_aio_subctlblk_t {
 typedef struct H5FD_family_aio_ctlblk_t {
 
     uint32_t                      magic;
-    int			          array_len;
-    int                           num_subctlblks;
+    unsigned		          array_len;
+    unsigned                      num_subctlblks;
     H5FD_family_aio_subctlblk_t * subctlblks;
 
 } H5FD_family_aio_ctlblk_t;
@@ -188,7 +188,7 @@ static herr_t H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, h
 static herr_t H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 #ifdef H5_HAVE_AIO
-static herr_t H5FD_family_aio_alloc_ctlblk(int init_array_len, 
+static herr_t H5FD_family_aio_alloc_ctlblk(unsigned init_array_len, 
                                      H5FD_family_aio_ctlblk_t **ctlblk_ptr_ptr);
 static herr_t H5FD_family_aio_discard_ctlblk(
                                      H5FD_family_aio_ctlblk_t *ctlblk_ptr);
@@ -1593,11 +1593,11 @@ done:
  */
 
 static herr_t
-H5FD_family_aio_alloc_ctlblk(int init_array_len,
+H5FD_family_aio_alloc_ctlblk(unsigned init_array_len,
                              H5FD_family_aio_ctlblk_t **ctlblk_ptr_ptr)
 {
     herr_t                     ret_value = SUCCEED;       /* Return value */
-    int                        i;
+    unsigned                   i;
     H5FD_family_aio_ctlblk_t * ctlblk_ptr = NULL;
 
     FUNC_ENTER_NOAPI(H5FD_family_aio_alloc_ctlblk, FAIL)
@@ -2494,7 +2494,7 @@ H5FD_family_aio_test(hbool_t *done_ptr,
     hbool_t			done = TRUE;
     hbool_t			tgt_done;
     hbool_t			already_done = TRUE;
-    int                         i = 0;
+    unsigned                    i = 0;
     H5FD_family_aio_ctlblk_t  * family_ctlblk_ptr;
     H5FD_t                    * tgt_file;
     void                      * subctlblk_ptr;
@@ -2634,7 +2634,7 @@ H5FD_family_aio_wait(void *ctlblk_ptr)
     herr_t                      ret_value = SUCCEED;  /* Return value */
     herr_t			result;
     hbool_t			already_done = TRUE;
-    int                         i;
+    unsigned                    i;
     H5FD_family_aio_ctlblk_t  * family_ctlblk_ptr;
     H5FD_t                    * tgt_file;
     void                      * subctlblk_ptr;
@@ -2766,7 +2766,7 @@ H5FD_family_aio_finish(int *errno_ptr,
 {
     herr_t                      ret_value = SUCCEED;  /* Return value */
     herr_t			result;
-    int                         i;
+    unsigned                    i;
     int				error_num = 0;
     int				sub_errno;
     H5FD_family_aio_ctlblk_t  * family_ctlblk_ptr;
@@ -3073,7 +3073,7 @@ H5FD_family_aio_cancel(void *ctlblk_ptr)
 {
     herr_t                       ret_value = SUCCEED;  /* Return value */
     herr_t			 result;
-    int                          i;
+    unsigned                     i;
     H5FD_family_aio_ctlblk_t   * family_ctlblk_ptr;
     H5FD_t                     * tgt_file;
     void                       * subctlblk_ptr;

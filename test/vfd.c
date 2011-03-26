@@ -1567,6 +1567,7 @@ aio_multi_write_sync_read_check(H5FD_t * file,
     hbool_t done;
     hbool_t do_wait;
     hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
     int error_num;
     int i;
     int j;
@@ -1736,7 +1737,7 @@ aio_multi_write_sync_read_check(H5FD_t * file,
      * other half 
      */
     i = 0;
-    do_wait = FALSE;
+    do_wait = TRUE;
     while ( ( *pass_ptr ) &&
             ( i < write_count ) ) {
 
@@ -1773,6 +1774,12 @@ aio_multi_write_sync_read_check(H5FD_t * file,
             }
         }
 
+        if ( verbose ) {
+
+            HDfprintf(stdout, "%s:%d: write %d complete. do_wait = %d.\n", 
+                      fcn_name, *pass_ptr, i, (int)do_wait);
+        }
+
         do_wait = (hbool_t)(! do_wait);
 
         i++;
@@ -1790,6 +1797,12 @@ aio_multi_write_sync_read_check(H5FD_t * file,
          * case this code should be unreachable), or we skipped this write.
          */
         if ( ctlblks[i] != NULL ) {
+
+            if ( verbose ) {
+
+                HDfprintf(stdout, "%s:%d: finishing write %d.\n", 
+                          fcn_name, *pass_ptr, i);
+            }
 
             result = H5FDaio_finish(file, &error_num, ctlblks[i]);
 
@@ -1848,6 +1861,9 @@ aio_multi_write_sync_read_check(H5FD_t * file,
     if ( show_progress ) 
 	HDfprintf(stdout, "%s:%d: starting reads.\n", fcn_name, *pass_ptr);
 
+    if ( verbose )
+        HDfprintf(stdout, "%s: write_count = %d.\n", fcn_name, write_count);
+
     i = 0;
     while ( ( *pass_ptr ) &&
             ( i < write_count ) ) {
@@ -1861,9 +1877,15 @@ aio_multi_write_sync_read_check(H5FD_t * file,
             /* don't increment *sub_tests_skipped as we have already done this above */
             ctlblks[i] = NULL;
 
+            if ( show_progress ) 
+                HDfprintf(stdout, "%s:%d: read %d skipped.\n", fcn_name, *pass_ptr, i);
+
         } else {
 
-            result = H5FDaio_read(file, types[0], H5P_DEFAULT, 
+            if ( show_progress ) 
+                HDfprintf(stdout, "%s:%d: attempting read %d.\n", fcn_name, *pass_ptr, i);
+
+            result = H5FDaio_read(file, types[i], H5P_DEFAULT, 
                                   offsets[i], lengths[i], (void *)(read_bufs[i]), 
                                   &(ctlblks[i]));
 
@@ -5488,7 +5510,7 @@ main(void)
                                   (haddr_t)0x40000000, express_test);
         nerrors += ( result < 0 ) ? 1 : 0;
     }
-
+#if 1
     fapl = h5_fileaccess();
 
     if ( H5Pset_fapl_sec2(fapl) < 0 ) {
@@ -5503,6 +5525,7 @@ main(void)
                                                12, fapl, FALSE);
         nerrors += ( result < 0 ) ? 1 : 0;
     }
+#endif
 #endif /* SEC2 test */
 
 #if 1 /* CORE test */

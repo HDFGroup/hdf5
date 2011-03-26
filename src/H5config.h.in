@@ -250,6 +250,9 @@
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL
 
+/* Define if POSIX AIO is supported */
+#undef HAVE_POSIX_AIO
+
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H
 
@@ -659,6 +662,9 @@
 
 /* Define using v1.6 public API symbols by default */
 #undef USE_16_API_DEFAULT
+
+/* Define if 64 bit POSIX AIO must be specified */
+#undef USE_64_BIT_POSIX_AIO
 
 /* Define if a memory checking tool will be used on the library, to cause
    library to be very picky about memory operations and also disable the
