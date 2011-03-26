@@ -57,24 +57,31 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5IMPORT-ASCII_F64_R1-clear-objects
     ######### tools/h5jam #########
     H5JAM-SETUP-N_twithub_u511_c-clear-objects
+    H5JAM-SETUP-N_twithub_u511_c
     H5JAM-N_twithub_u511_c-clear-objects
     H5JAM-CHECKFILE-N_twithub_u511_c-clear-objects
     H5JAM-SETUP-N_twithub_u512_c-clear-objects
+    H5JAM-SETUP-N_twithub_u512_c
     H5JAM-N_twithub_u512_c-clear-objects
     H5JAM-CHECKFILE-N_twithub_u512_c-clear-objects
     H5JAM-SETUP-N_twithub_u513_c-clear-objects
+    H5JAM-SETUP-N_twithub_u513_c
     H5JAM-N_twithub_u513_c-clear-objects
     H5JAM-CHECKFILE-N_twithub_u513_c-clear-objects
     H5JAM-SETUP-N_twithub513_u10_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u10_c
     H5JAM-N_twithub513_u10_c-clear-objects
     H5JAM-CHECKFILE-N_twithub513_u10_c-clear-objects
     H5JAM-SETUP-N_twithub513_u511_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u511_c
     H5JAM-N_twithub513_u511_c-clear-objects
     H5JAM-CHECKFILE-N_twithub513_u511_c-clear-objects
     H5JAM-SETUP-N_twithub513_u512_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u512_c
     H5JAM-N_twithub513_u512_c-clear-objects
     H5JAM-CHECKFILE-N_twithub513_u512_c-clear-objects
     H5JAM-SETUP-N_twithub513_u513_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u513_c
     H5JAM-N_twithub513_u513_c-clear-objects
     H5JAM-CHECKFILE-N_twithub513_u513_c-clear-objects
     H5JAM-CHECKFILE-twithub_u10_c-clear-objects
@@ -93,21 +100,26 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5JAM-twithub513_u513_c-clear-objects
     H5JAM-CHECKFILE-twithub513_u513_c-clear-objects
     H5JAM-SETUP-N_twithub_u10_c-clear-objects
+    H5JAM-SETUP-N_twithub_u10_c
     H5JAM-N_twithub_u10_c-clear-objects
     H5JAM-CHECKFILE-N_twithub_u10_c-clear-objects
     H5JAM-SETUP-twithub_tall-clear-objects
+    H5JAM-SETUP-twithub_tall
     H5JAM-UNJAM-twithub_tall-clear-objects
     H5JAM-UNJAM_D-twithub_tall-clear-objects
     H5JAM-CHECKFILE-twithub_tall-clear-objects
     H5JAM-SETUP-twithub513_tall-clear-objects
+    H5JAM-SETUP-twithub513_tall
     H5JAM-UNJAM-twithub513_tall-clear-objects
     H5JAM-UNJAM_D-twithub513_tall-clear-objects
     H5JAM-CHECKFILE-twithub513_tall-clear-objects
     H5JAM-SETUP-N_twithub_tall-clear-objects
+    H5JAM-SETUP-N_twithub_tall
     H5JAM-UNJAM-N_twithub_tall-clear-objects
     H5JAM-UNJAM_D-N_twithub_tall-clear-objects
     H5JAM-CHECKFILE-N_twithub_tall-clear-objects
     H5JAM-SETUP-N_twithub513_tall-clear-objects
+    H5JAM-SETUP-N_twithub513_tall
     H5JAM-UNJAM-N_twithub513_tall-clear-objects
     H5JAM-UNJAM_D-N_twithub513_tall-clear-objects
     H5JAM-CHECKFILE-N_twithub513_tall-clear-objects
@@ -116,6 +128,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5JAM-UNJAM_D-D_twithub_tall-clear-objects
     H5JAM-CHECKFILE-D_twithub_tall-clear-objects
     H5JAM-SETUP-D_twithub513_tall-clear-objects
+    H5JAM-SETUP-D_twithub513_tall
     H5JAM-UNJAM-D_twithub513_tall-clear-objects
     H5JAM-UNJAM_D-D_twithub513_tall-clear-objects
     H5JAM-CHECKFILE-D_twithub513_tall-clear-objects
@@ -146,15 +159,19 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5JAM-tall_u513-clear-objects
     H5JAM-CHECKFILE-tall_u513-clear-objects
     H5JAM-SETUP-ta_u10-clear-objects
+    H5JAM-SETUP-ta_u10
     H5JAM-ta_u10-clear-objects
     H5JAM-CHECKFILE-ta_u10-clear-objects
     H5JAM-SETUP-ta_u511-clear-objects
+    H5JAM-SETUP-ta_u511
     H5JAM-ta_u511-clear-objects
     H5JAM-CHECKFILE-ta_u511-clear-objects
     H5JAM-SETUP-ta_u512-clear-objects
+    H5JAM-SETUP-ta_u512
     H5JAM-ta_u512-clear-objects
     H5JAM-CHECKFILE-ta_u512-clear-objects
     H5JAM-SETUP-ta_u513-clear-objects
+    H5JAM-SETUP-ta_u513
     H5JAM-ta_u513-clear-objects
     ######### tools/h5ls #########
     H5LS-clearall-objects
