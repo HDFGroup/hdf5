@@ -39,14 +39,14 @@ SUBROUTINE test_table1()
   CHARACTER(len=8), PARAMETER :: filename = "f1tab.h5"   ! File name
   CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"     ! Dataset name
   INTEGER(HID_T) :: file_id                              ! File identifier
-  INTEGER(HSIZE_T), PARAMETER :: nfields  = 4;           ! nfields
-  INTEGER(HSIZE_T), PARAMETER :: nrecords = 5;           ! nrecords
+  INTEGER(HSIZE_T), PARAMETER :: nfields  = 4            ! nfields
+  INTEGER(HSIZE_T), PARAMETER :: nrecords = 5            ! nrecords
   CHARACTER(LEN=10),DIMENSION(1:nfields) :: field_names  ! field names
   INTEGER(SIZE_T),  DIMENSION(1:nfields) :: field_offset ! field offset
   INTEGER(HID_T),   DIMENSION(1:nfields) :: field_types  ! field types
   INTEGER(HSIZE_T), PARAMETER  :: chunk_size = 5         ! chunk size
   INTEGER, PARAMETER :: compress = 0                     ! compress
-  INTEGER            :: errcode                          ! Error flag
+  INTEGER            :: errcode = 0                      ! Error flag
   INTEGER            :: i                                ! general purpose integer
   INTEGER(SIZE_T)    :: type_size                        ! Size of the datatype
   INTEGER(SIZE_T)    :: type_sizec                       ! Size of the character datatype
@@ -69,8 +69,8 @@ SUBROUTINE test_table1()
   CHARACTER(LEN=9), DIMENSION(1:nfields) :: field_namesr  ! field names
   INTEGER(SIZE_T),  DIMENSION(1:nfields) :: field_offsetr ! field offset
   INTEGER(SIZE_T),  DIMENSION(1:nfields) :: field_sizesr  ! field sizes
-  INTEGER(SIZE_T)  :: type_sizeout                        ! size of the datatype
-  INTEGER :: maxlen                                       ! max chararter length of a field name
+  INTEGER(SIZE_T)  :: type_sizeout = 0                    ! size of the datatype
+  INTEGER :: maxlen = 0                                   ! max chararter length of a field name
 
 
   !
@@ -375,7 +375,6 @@ SUBROUTINE test_table1()
   ENDIF
 
   CALL passed()
-
 
   !-------------------------------------------------------------------------
   ! Get information about fields
