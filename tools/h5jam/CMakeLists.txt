@@ -215,7 +215,7 @@ IF (BUILD_TESTING)
         )
         SET_TESTS_PROPERTIES (H5JAM-UNJAM_D-${testname}-clear-objects PROPERTIES DEPENDS H5JAM-UNJAM-${testname}-clear-objects)
         IF (HDF5_ENABLE_USING_MEMCHECKER)
-          ADD_TEST (NAME H5JAM-UNJAM-${testname} COMMAND <TARGET_FILE:h5unjam> -i ${infile} -o ${outfile})
+          ADD_TEST (NAME H5JAM-UNJAM-${testname} COMMAND $<TARGET_FILE:h5unjam> -i ${infile} -o ${outfile})
         ELSE (HDF5_ENABLE_USING_MEMCHECKER)
           ADD_TEST (
               NAME H5JAM-UNJAM-${testname}
