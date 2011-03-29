@@ -132,6 +132,12 @@ Bug Fixes since HDF5-1.8.6
 
     Tools
     -----
+    - Fixed output for H5T_REFERENCE in h5dump. According to the BNF document
+      the output of a H5T_REFERENCE should be followed by the type;
+      <reference> ::= H5T_REFERENCE { <ref_type> }
+      <ref_type> ::= H5T_STD_REF_OBJECT | H5T_STD_REF_DSETREG
+      Previously this was only displayed if the -R option was used.
+      Bug#1725 (ADB 2011/3/28)
     - Fix h5diff issues for #1: h5diff compared attributes correctly only 
       when two objects have the same number of attributes and attribute 
       names are identical, #2: didn't display useful information about 
