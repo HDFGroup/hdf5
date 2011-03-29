@@ -60,17 +60,11 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
                            number.
    -p R, --relative=R      Print difference if (|(a-b)/b| > R), R is a positive
                            number.
-   --use-system-epsilon    Print difference if (|a-b| > EPSILON),
-                           where EPSILON (FLT_EPSILON or FLT_EPSILON) is the
-                           system epsilon value. 
-                           If the system epsilon is not defined, use the value
-                           below:
+   --use-system-epsilon    Print difference if (|a-b| > EPSILON), EPSILON is
+                           a system epsilon value.
+                           The system epsilon values are defined as below:
                                FLT_EPSILON = 1.19209E-07 for float
                                DBL_EPSILON = 2.22045E-16 for double
-                           -d, -p, and --use-system-epsilon options are used for
-                           comparing floating point values.
-                           By default, strict equality is used. Use -p or -d to
-                           set specific tolerance.
    --exclude-path "path"   Exclude the specified path to an object when
                            comparing files or groups. If a group is excluded,
                            all member objects will also be excluded.

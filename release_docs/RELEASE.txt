@@ -132,6 +132,9 @@ Bug Fixes since HDF5-1.8.6
 
     Tools
     -----
+    - Fix h5diff for --use-system-epsilon option: the calculation changed
+      from ( |a - b| / b ) to ( |a - b| ). This was decided for better
+      performance. Bug#2184 (JKM 2011/3/24)
     - Fixed output for H5T_REFERENCE in h5dump. According to the BNF document
       the output of a H5T_REFERENCE should be followed by the type;
       <reference> ::= H5T_REFERENCE { <ref_type> }

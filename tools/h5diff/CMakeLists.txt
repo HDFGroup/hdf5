@@ -45,6 +45,8 @@ IF (BUILD_TESTING)
       h5diff_100.txt
       #h5diff_101.txt
       #h5diff_102.txt
+      #h5diff_103.txt
+      #h5diff_104.txt
       h5diff_11.txt
       h5diff_12.txt
       h5diff_13.txt
@@ -260,6 +262,19 @@ IF (BUILD_TESTING)
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102w.txt ${PROJECT_BINARY_DIR}/h5diff_102.txt
     )
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5diff
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_103w.txt ${PROJECT_BINARY_DIR}/h5diff_103.txt
+    )
+
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5diff
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104w.txt ${PROJECT_BINARY_DIR}/h5diff_104.txt
+    )
   ELSE (WIN32 AND NOT CYGWIN)
     ADD_CUSTOM_COMMAND (
         TARGET     h5diff
@@ -273,6 +288,19 @@ IF (BUILD_TESTING)
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102.txt ${PROJECT_BINARY_DIR}/h5diff_102.txt
+    )
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5diff
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_103.txt ${PROJECT_BINARY_DIR}/h5diff_103.txt
+    )
+
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5diff
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104.txt ${PROJECT_BINARY_DIR}/h5diff_104.txt
     )
   ENDIF (WIN32 AND NOT CYGWIN)
   
@@ -371,6 +399,10 @@ IF (BUILD_TESTING)
           h5diff_101.out.err
           h5diff_102.out
           h5diff_102.out.err
+          h5diff_103.out
+          h5diff_103.out.err
+          h5diff_104.out
+          h5diff_104.out.err
           h5diff_11.out
           h5diff_11.out.err
           h5diff_12.out
@@ -935,6 +967,13 @@ ADD_H5_TEST (h5diff_101 1 -v ${FILE1} ${FILE1} g1/d1  g1/d2)
 
 ADD_H5_TEST (h5diff_102 1 -v ${FILE1} ${FILE1} g1/fp1 g1/fp2) 
 
+# with --use-system-epsilon for double value. expect less differences  
+ADD_H5_TEST (h5diff_103 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/d1
+g1/d2) 
+
+# with --use-system-epsilon for float value. expect less differences
+ADD_H5_TEST (h5diff_104 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp1
+g1/fp2)
 
 # not comparable -c flag
 ADD_H5_TEST (h5diff_200 0 ${FILE2} ${FILE2} g2/dset1  g2/dset2) 

@@ -602,13 +602,23 @@ rem ############################################################################
 
     rem 11. floating point comparison
     rem Not tested on Windows due to difference in formatting of scientific 
-    rem notation  --SJW 8/23/07
-    call :testing h5diff_101.txt -v %srcfile1% %srcfile1% g1/d1  g1/d2
+    rem notation (101, 102)  --SJW 8/23/07
+    call :testing %h5diff% -v %srcfile1% %srcfile1% g1/d1  g1/d2
     rem call :tooltest h5diff_101.txt -v %file1% %file1% g1/d1  g1/d2
     call :results -SKIP-
 
     call :testing %h5diff% -v  %srcfile1% %srcfile1%  g1/fp1 g1/fp2
     rem call :tooltest h5diff_102.txt -v %file1% %file1% g1/fp1 g1/fp2
+    call :results -SKIP-
+
+    rem Not tested on Windows due to difference in formatting of scientific 
+    rem notation with other OS. printf("%g") (103, 104)  
+    call :testing %h5diff% -v --use-system-epsilon %srcfile1% %srcfile1% g1/d1  g1/d2
+    rem call :tooltest h5diff_103.txt -v --use-system-epsilon %file1% %file1% g1/d1  g1/d2
+    call :results -SKIP-
+
+    call :testing %h5diff% -v --use-system-epsilon %srcfile1% %srcfile1%  g1/fp1 g1/fp2
+    rem call :tooltest h5diff_102.txt -v --use-system-epsilon %file1% %file1% g1/fp1 g1/fp2
     call :results -SKIP-
 
     rem   New option added #1368(E1)  - ADB 2/5/2009

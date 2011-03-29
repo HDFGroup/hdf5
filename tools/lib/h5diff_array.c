@@ -5550,7 +5550,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    equal_double
  *
- * Purpose:     use a relative error formula to deal with floating point
+ * Purpose:     use a absolute error formula to deal with floating point
  *              uncertainty
  *
  * Modifications:
@@ -5604,7 +5604,7 @@ hbool_t equal_double(double value, double expected, diff_opt_t *options)
 /*-------------------------------------------------------------------------
  * Function:    equal_ldouble
  *
- * Purpose:     use a relative error formula to deal with floating point
+ * Purpose:     use a absolute error formula to deal with floating point
  *              uncertainty
  *
  *-------------------------------------------------------------------------
@@ -5647,7 +5647,7 @@ hbool_t equal_ldouble(long double value, long double expected, diff_opt_t *optio
         return TRUE;
 
     if (options->use_system_epsilon) {
-        if ( ABS( (value-expected) / expected) < DBL_EPSILON)
+        if ( ABS( (value-expected) ) < DBL_EPSILON)
             return TRUE;
     }
 
@@ -5660,7 +5660,7 @@ hbool_t equal_ldouble(long double value, long double expected, diff_opt_t *optio
 /*-------------------------------------------------------------------------
  * Function:    equal_float
  *
- * Purpose:     use a relative error formula to deal with floating point
+ * Purpose:     use a absolute error formula to deal with floating point
  *              uncertainty
  *
  * Modifications:
@@ -5704,7 +5704,7 @@ hbool_t equal_float(float value, float expected, diff_opt_t *options)
         return TRUE;
 
     if (options->use_system_epsilon) {
-        if ( ABS( (value-expected) / expected) < FLT_EPSILON)
+        if ( ABS( (value-expected) ) < FLT_EPSILON)
             return TRUE;
     }
 
