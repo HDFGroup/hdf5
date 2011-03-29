@@ -1241,16 +1241,12 @@ print_datatype(hid_t type,unsigned in_group)
             case H5T_REFERENCE:
                 printf("H5T_REFERENCE");
                 /* The BNF document states that the type of reference should be
-                 * displayed after "H5T_REFERENCE". Therefore add the missing
-                 * reference type if the region command line option is used. This
-                 * reference type will not be displayed if the region option is not used. */
-                if(display_region) {
-                    if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
-                        printf(" { H5T_STD_REF_DSETREG }");
-                    }
-                    else {
-                        printf(" { H5T_STD_REF_OBJECT }");
-                    }
+                 * displayed after "H5T_REFERENCE". */
+                if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
+                    printf(" { H5T_STD_REF_DSETREG }");
+                }
+                else {
+                    printf(" { H5T_STD_REF_OBJECT }");
                 }
                 break;
 
