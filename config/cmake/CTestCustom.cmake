@@ -203,8 +203,8 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     h5repart_20K-clear-objects
     h5repart_5K-clear-objects
     h5repart_sec2-clear-objects
-    H5MKGRP-clear-h5mkgrp_help
-    H5MKGRP-clear-h5mkgrp_version
+    H5MKGRP_CMP-clear-h5mkgrp_help
+    H5MKGRP_CMP-clear-h5mkgrp_version
     H5MKGRP-clear-h5mkgrp_single
     H5MKGRP-h5mkgrp_single                              #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_single                         #uses runTest.cmake
