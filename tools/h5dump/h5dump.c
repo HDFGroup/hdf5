@@ -663,7 +663,8 @@ usage(const char *prog)
     fprintf(stdout, "     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML\n");
     fprintf(stdout, "                          \":\": no namespace, default: \"hdf5:\"\n");
     fprintf(stdout, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
-    fprintf(stdout, "     -E, --enable-error-stack   Show all HDF5 error reporting\n");
+    fprintf(stdout, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
+    fprintf(stdout, "                          occur.\n");
     fprintf(stdout, "\n");
     fprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
     fprintf(stdout, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");

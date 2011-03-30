@@ -510,6 +510,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Updated to unify option name to '--enable-error-stack' for printing 
+          HDF5 error stack messages for HDF5 tools. h5ls and h5dump for now.
+          For h5ls, this replaces "-e/--errors" option, which is deprecated. 
+          Bug#2182 (JKM 2011/3/30)
         - Fixed output for H5T_REFERENCE in h5dump. According to the BNF document
           the output of a H5T_REFERENCE should be followed by the type;
           <reference> ::= H5T_REFERENCE { <ref_type> }
