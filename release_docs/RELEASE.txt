@@ -514,6 +514,9 @@ Bug Fixes since HDF5-1.8.0 release
           HDF5 error stack messages for HDF5 tools. h5ls and h5dump for now.
           For h5ls, this replaces "-e/--errors" option, which is deprecated. 
           Bug#2182 (JKM 2011/3/30)
+        - Fix h5diff for --use-system-epsilon option: the calculation changed
+          from ( |a - b| / b ) to ( |a - b| ). This was decided for better
+          performance. Bug#2184 (JKM 2011/3/24)
         - Fixed output for H5T_REFERENCE in h5dump. According to the BNF document
           the output of a H5T_REFERENCE should be followed by the type;
           <reference> ::= H5T_REFERENCE { <ref_type> }
