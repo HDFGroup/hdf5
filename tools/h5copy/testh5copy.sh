@@ -401,13 +401,13 @@ COPY_EXT_LINKS()
     TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_dset -d /copy2_dset
 
     echo "Test copying dangling external link (no obj) directly without -f ext"
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_1
+    TOOLTEST -v -i $TESTFILE -o $FILEOUT -s /group_ext/extlink_notyet1 -d /copy_dangle1_1
 
     echo "Test copying dangling external link (no obj) directly with -f ext"
     TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2
 
     echo "Test copying dangling external link (no file) directly without -f ext"
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_1
+    TOOLTEST -v -i $TESTFILE -o $FILEOUT -s /group_ext/extlink_notyet2 -d /copy_dangle2_1
 
     echo "Test copying dangling external link (no file) directly with -f ext"
     TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2
@@ -442,6 +442,15 @@ TEST_MISC()
 
     echo "Test copying object into group which doesn't exist, without -p"
     TOOLTEST_FAIL h5copy_misc1.out -v -i $TESTFILE -o $FILEOUT -s /simple  -d /g1/g2/simple
+
+    echo "Test copying objects to the same file "
+    rm -f $FILEOUT
+    # create temporary test file ($FILEOUT) with some objects
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /simple -d /simple 
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /grp_dsets  -d /grp_dsets
+    # actual test cases
+    TOOLTEST -i $FILEOUT -o $FILEOUT -v -s /simple -d /simple_cp
+    TOOLTEST -i $FILEOUT -o $FILEOUT -v -s /grp_dsets  -d /grp_dsets_cp
 
     # Remove output file created, if the "no cleanup" environment variable is
     #   not defined

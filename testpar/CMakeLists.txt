@@ -21,14 +21,14 @@ SET (testphdf5_SRCS
 
 #-- Adding test for testhdf5
 ADD_EXECUTABLE (testphdf5 ${testphdf5_SRCS})
-H5_NAMING (testphdf5 ${LIB_TYPE})
+TARGET_NAMING (testphdf5 ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (testphdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 ADD_TEST (NAME testphdf5 COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:testphdf5>)
 
 MACRO (ADD_H5P_TEST file)
   ADD_EXECUTABLE (${file} ${HDF5_TEST_PAR_SOURCE_DIR}/${file}.c)
-  H5_NAMING (${file} ${LIB_TYPE})
+  TARGET_NAMING (${file} ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 
   ADD_TEST (NAME ${file} COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:${file}> -p)
@@ -68,19 +68,21 @@ IF (HDF5_TEST_VFD)
   ENDIF (DIRECT_VFD)
 
   MACRO (ADD_VFD_TEST vfdname resultcode)
-    FOREACH (test ${H5P_VFD_TESTS})
-      ADD_TEST (
-        NAME VFD-${vfdname}-${test} 
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:${test}>"
-            -D "TEST_ARGS:STRING="
-            -D "TEST_VFD:STRING=${vfdname}"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_OUTPUT=${test}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
-      )
-    ENDFOREACH (test ${H5P_VFD_TESTS})
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      FOREACH (test ${H5P_VFD_TESTS})
+        ADD_TEST (
+          NAME VFD-${vfdname}-${test} 
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:${test}>"
+              -D "TEST_ARGS:STRING="
+              -D "TEST_VFD:STRING=${vfdname}"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_OUTPUT=${test}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
+        )
+      ENDFOREACH (test ${H5P_VFD_TESTS})
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_VFD_TEST)
   
   # Run test with different Virtual File Driver

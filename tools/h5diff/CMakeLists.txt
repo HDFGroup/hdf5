@@ -14,7 +14,7 @@ ADD_EXECUTABLE (h5diff
     ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.c
     ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_main.c
 )
-H5_NAMING (h5diff ${LIB_TYPE})
+TARGET_NAMING (h5diff ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5diff)
@@ -31,7 +31,7 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5diffgentest ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diffgentest.c)
-    H5_NAMING (h5diffgentest ${LIB_TYPE})
+    TARGET_NAMING (h5diffgentest ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5diffgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     
     #ADD_TEST (NAME h5diffgentest COMMAND $<TARGET_FILE:h5diffgentest>)
@@ -174,6 +174,17 @@ IF (BUILD_TESTING)
       h5diff_628.txt
       h5diff_629.txt
       h5diff_70.txt
+      h5diff_700.txt
+      h5diff_701.txt
+      h5diff_702.txt
+      h5diff_703.txt
+      h5diff_704.txt
+      h5diff_705.txt
+      h5diff_706.txt
+      h5diff_707.txt
+      h5diff_708.txt
+      h5diff_709.txt
+      h5diff_710.txt
       h5diff_80.txt
       h5diff_90.txt
   )
@@ -209,6 +220,8 @@ IF (BUILD_TESTING)
       h5diff_exclude2-1.h5
       h5diff_exclude2-2.h5
       h5diff_comp_vl_strs.h5
+      h5diff_attr_v_level1.h5
+      h5diff_attr_v_level2.h5
   )
 
   FOREACH (txt_file ${HDF5_REFERENCE_FILES})
@@ -270,18 +283,26 @@ IF (BUILD_TESTING)
 ##############################################################################
 
   MACRO (ADD_H5_TEST resultfile resultcode)
-    ADD_TEST (
-        NAME H5DIFF-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-            -D "TEST_ARGS:STRING=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.txt"
-            -D "TEST_APPEND=EXIT CODE:"
-            -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
-    )
+    # If using memchecker add tests without using scripts
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (NAME H5DIFF-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${ARGN})
+      IF (NOT ${resultcode} STREQUAL "0")
+        SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+      ENDIF (NOT ${resultcode} STREQUAL "0")
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5DIFF-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.txt"
+              -D "TEST_APPEND=EXIT CODE:"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
@@ -332,6 +353,10 @@ IF (BUILD_TESTING)
   SET (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
   # compound type with multiple vlen string types
   SET (COMP_VL_STRS_FILE h5diff_comp_vl_strs.h5)
+  # attrs with verbose option level
+  SET (ATTR_VERBOSE_LEVEL_FILE1 h5diff_attr_v_level1.h5)
+  SET (ATTR_VERBOSE_LEVEL_FILE2 h5diff_attr_v_level2.h5)
+
 
   # Remove any output file left over from previous test run
   ADD_TEST (
@@ -604,6 +629,28 @@ IF (BUILD_TESTING)
           h5diff_629.out.err
           h5diff_70.out
           h5diff_70.out.err
+          h5diff_700.out
+          h5diff_700.out.err
+          h5diff_701.out
+          h5diff_701.out.err
+          h5diff_702.out
+          h5diff_702.out.err
+          h5diff_703.out
+          h5diff_703.out.err
+          h5diff_704.out
+          h5diff_704.out.err
+          h5diff_705.out
+          h5diff_705.out.err
+          h5diff_706.out
+          h5diff_706.out.err
+          h5diff_707.out
+          h5diff_707.out.err
+          h5diff_708.out
+          h5diff_708.out.err
+          h5diff_709.out
+          h5diff_709.out.err
+          h5diff_710.out
+          h5diff_710.out.err
           h5diff_80.out
           h5diff_80.out.err
           h5diff_90.out
@@ -613,12 +660,6 @@ IF (BUILD_TESTING)
     SET_TESTS_PROPERTIES (H5DIFF-clearall-objects PROPERTIES DEPENDS ${last_test})
   ENDIF (NOT "${last_test}" STREQUAL "")
   SET (last_test "H5DIFF-clearall-objects")
-
-  # If using memchecker add tests without using scripts
-  IF (HDF5_ENABLE_USING_MEMCHECKER)
-    ADD_TEST (NAME H5DIFF-help COMMAND h5diff -h)
-    ADD_TEST (NAME H5DIFF-normal-mode COMMAND h5diff ${FILE1} ${FILE2})
-  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
 # ############################################################################
 # # Common usage
@@ -841,6 +882,37 @@ ADD_H5_TEST (h5diff_628 1 -n 1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 # 7.  attributes
 # ##############################################################################
 ADD_H5_TEST (h5diff_70 1 -v ${FILE5} ${FILE6}) 
+
+# ##################################################
+#  attrs with verbose option level
+# ##################################################
+ADD_H5_TEST (h5diff_700 1 -v1 ${FILE5} ${FILE6}) 
+ADD_H5_TEST (h5diff_701 1 -v2 ${FILE5} ${FILE6})
+ADD_H5_TEST (h5diff_702 1 --verbose=1 ${FILE5} ${FILE6})
+ADD_H5_TEST (h5diff_703 1 --verbose=2 ${FILE5} ${FILE6})
+
+# same attr number , all same attr name
+ADD_H5_TEST (h5diff_704 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g)
+
+# same attr number , some same attr name
+ADD_H5_TEST (h5diff_705 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /dset)
+
+# same attr number , all different attr name
+ADD_H5_TEST (h5diff_706 0 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /ntype)
+
+# different attr number , same attr name (intersected)
+ADD_H5_TEST (h5diff_707 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g2)
+
+# different attr number , all different attr name 
+ADD_H5_TEST (h5diff_708 0 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g3)
+
+# when no attributes exist in both objects
+ADD_H5_TEST (h5diff_709 0 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g4)
+
+# file vs file
+ADD_H5_TEST (h5diff_710 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2})
+
+
 
 # ##############################################################################
 # 8.  all dataset datatypes

@@ -72,6 +72,9 @@
 #define EXCLUDE_FILE2_2     "h5diff_exclude2-2.h5"
 /* compound type with multiple vlen string types */
 #define COMP_VL_STRS_FILE   "h5diff_comp_vl_strs.h5"
+/* attribute compre with verbose level */
+#define ATTR_VERBOSE_LEVEL_FILE1 "h5diff_attr_v_level1.h5"
+#define ATTR_VERBOSE_LEVEL_FILE2 "h5diff_attr_v_level2.h5"
 
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
@@ -117,10 +120,11 @@ static int test_external_links(const char *fname1, const char *fname2);
 static int test_ext2soft_links(const char *fname1, const char *fname2);
 static int test_dangle_links(const char *fname1, const char *fname2);
 static int test_group_recurse(const char *fname1, const char *fname2);
-static int test_group_recurse2();
+static int test_group_recurse2(void);
 static int test_exclude_obj1(const char *fname1, const char *fname2);
 static int test_exclude_obj2(const char *fname1, const char *fname2);
 static int test_comp_vlen_strings(const char *fname1);
+static int test_attributes_verbose_level(const char *fname1, const char *fname2);
 
 /* called by test_attributes() and test_datasets() */
 static void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
@@ -150,6 +154,9 @@ int main(void)
     /* generate 2 files, the second call creates a similar file with differences */
     test_attributes(FILE5,0);
     test_attributes(FILE6,1);
+
+    /* test attributes with verbose level */
+    test_attributes_verbose_level(ATTR_VERBOSE_LEVEL_FILE1, ATTR_VERBOSE_LEVEL_FILE2);
 
     /* generate 2 files, the second call creates a similar file with differences */
     test_datasets(FILE7,0);
@@ -905,6 +912,293 @@ int test_attributes(const char *file,
 
 
 /*-------------------------------------------------------------------------
+* Function: test_attributes_verbose_level
+*
+* Purpose: Cresting test files for testing attributes along with 
+* levels of verbos option
+*
+*-------------------------------------------------------------------------
+*/
+static int test_attributes_verbose_level(const char *fname1, const char *fname2)
+{
+    int i;
+    herr_t  status = SUCCEED;
+    hid_t   fid1, fid2;
+    hid_t   f1_gid, f2_gid;
+    hid_t   f1_gid2, f2_gid2;
+    hid_t   f1_gid3, f2_gid3;
+    hid_t   f1_gid4, f2_gid4;
+    hid_t   f1_did, f2_did;
+    hid_t   f1_sid, f2_sid;
+    hid_t   f1_tid, f2_tid;
+    /* dset */
+    hsize_t dset_dims[1]={3};
+    int dset_data[3] = {0,1,2};
+
+    /* common attrs dim */
+    hsize_t attr_dims[1]={2};
+
+    /* file1 attr */
+    int    f1_attr_idata[2]= {1,2};        /* integer */
+    float  f1_attr_fdata[2]= {1.1,2.2};    /* float */
+    /* file2 attr */
+    int    f2_attr_idata[2]= {2,3};        /* integer */
+    float  f2_attr_fdata[2]= {2.1,3.2};    /* float */
+
+
+    /*----------------------------------------------------------------------
+    * Create file1
+    *-----------------------------------------------------------------------*/
+    if((fid1  = H5Fcreate(fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+   /*----------------------------------
+    * Groups
+    */
+    f1_gid = H5Gcreate2(fid1, "g", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (f1_gid < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    f1_gid2 = H5Gcreate2(fid1, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (f1_gid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    f1_gid3 = H5Gcreate2(fid1, "g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (f1_gid3 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    f1_gid4 = H5Gcreate2(fid1, "g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (f1_gid4 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+   /*----------------------------------
+    * Datasets
+    */
+    f1_sid = H5Screate_simple(1, dset_dims, NULL);
+    f1_did = H5Dcreate2(fid1, "dset", H5T_NATIVE_INT, f1_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (f1_did == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+    status = H5Dwrite(f1_did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+   /*----------------------------------
+    * Named Datatype
+    */
+    f1_tid = H5Tcopy(H5T_NATIVE_INT);
+    status = H5Tcommit2(fid1, "ntype", f1_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    
+
+
+    /*----------------------------------------------------------------------
+    * Create file2
+    *-----------------------------------------------------------------------*/
+    if((fid2  = H5Fcreate(fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+   /*----------------------------------
+    * Groups
+    */
+    f2_gid = H5Gcreate2(fid2, "g", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (f2_gid < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    f2_gid2 = H5Gcreate2(fid2, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (f2_gid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    f2_gid3 = H5Gcreate2(fid2, "g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (f2_gid3 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    f2_gid4 = H5Gcreate2(fid2, "g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (f2_gid4 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+   /*----------------------------------
+    * Datasets
+    */
+    f2_sid = H5Screate_simple(1, dset_dims, NULL);
+    f2_did = H5Dcreate2(fid2, "dset", H5T_NATIVE_INT, f2_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (f2_did == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+    status = H5Dwrite(f2_did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+   /*----------------------------------
+    * Named Datatype
+    */
+    f2_tid = H5Tcopy(H5T_NATIVE_INT);
+    status = H5Tcommit2(fid2, "ntype", f2_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+   /*----------------------------------
+    * CASE1 - Same attr number, all Same attr name
+    * add attr to group 
+    */
+    write_attr(f1_gid,1,attr_dims,"integer1",H5T_NATIVE_INT,f1_attr_idata);
+    write_attr(f1_gid,1,attr_dims,"float1",H5T_NATIVE_FLOAT,f1_attr_fdata);
+
+    write_attr(f2_gid,1,attr_dims,"integer1",H5T_NATIVE_INT,f2_attr_idata);
+    write_attr(f2_gid,1,attr_dims,"float1",H5T_NATIVE_FLOAT,f2_attr_fdata);
+
+   /*----------------------------------
+    * CASE2 - Same attr number, some Same attr name 
+    * add attr to dset 
+    */
+    write_attr(f1_did,1,attr_dims,"integer1",H5T_NATIVE_INT,f1_attr_idata);
+    write_attr(f1_did,1,attr_dims,"float2",H5T_NATIVE_FLOAT,f1_attr_fdata);
+
+    write_attr(f2_did,1,attr_dims,"integer1",H5T_NATIVE_INT,f2_attr_idata);
+    write_attr(f2_did,1,attr_dims,"float3",H5T_NATIVE_FLOAT,f2_attr_fdata);
+
+   /*----------------------------------
+    * CASE3 - Same attr number, all different attr name 
+    * add attr to ntype 
+    */
+    write_attr(f1_tid,1,attr_dims,"integer1",H5T_NATIVE_INT,f1_attr_idata);
+    write_attr(f1_tid,1,attr_dims,"float2",H5T_NATIVE_FLOAT,f1_attr_fdata);
+    write_attr(f1_tid,1,attr_dims,"float3",H5T_NATIVE_FLOAT,f1_attr_fdata);
+
+    write_attr(f2_tid,1,attr_dims,"integer4",H5T_NATIVE_INT,f2_attr_idata);
+    write_attr(f2_tid,1,attr_dims,"float5",H5T_NATIVE_FLOAT,f2_attr_fdata);
+    write_attr(f2_tid,1,attr_dims,"float6",H5T_NATIVE_FLOAT,f2_attr_fdata);
+
+   /*----------------------------------
+    * CASE4 - Different attr number, some same attr name (vs file2-g2)
+    * add attr to g2
+    */
+    write_attr(f1_gid2,1,attr_dims,"integer1",H5T_NATIVE_INT,f1_attr_idata);
+    write_attr(f1_gid2,1,attr_dims,"float2",H5T_NATIVE_FLOAT,f1_attr_fdata);
+    write_attr(f1_gid2,1,attr_dims,"float3",H5T_NATIVE_FLOAT,f1_attr_fdata);
+
+    write_attr(f2_gid2,1,attr_dims,"integer1",H5T_NATIVE_INT,f2_attr_idata);
+    write_attr(f2_gid2,1,attr_dims,"float2",H5T_NATIVE_FLOAT,f2_attr_fdata);
+    
+
+   /*----------------------------------
+    * CASE5 - Different attr number, all different attr name
+    * add attr to g3  
+    */
+    write_attr(f1_gid3,1,attr_dims,"integer10",H5T_NATIVE_INT,f1_attr_idata);
+    write_attr(f1_gid3,1,attr_dims,"float11",H5T_NATIVE_FLOAT,f1_attr_fdata);
+    write_attr(f1_gid3,1,attr_dims,"float12",H5T_NATIVE_FLOAT,f1_attr_fdata);
+
+    write_attr(f2_gid3,1,attr_dims,"integer3",H5T_NATIVE_INT,f2_attr_idata);
+    write_attr(f2_gid3,1,attr_dims,"float4",H5T_NATIVE_FLOAT,f2_attr_fdata);
+
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close
+    *-----------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    if(fid2)
+        H5Fclose(fid2);
+    if(f1_gid > 0)
+        H5Gclose(f1_gid);
+    if(f2_gid > 0)
+        H5Gclose(f2_gid);
+    if(f1_gid2 > 0)
+        H5Gclose(f1_gid2);
+    if(f2_gid2 > 0)
+        H5Gclose(f2_gid2);
+    if(f1_gid3 > 0)
+        H5Gclose(f1_gid3);
+    if(f2_gid3 > 0)
+        H5Gclose(f2_gid3);
+    if(f1_gid4 > 0)
+        H5Gclose(f1_gid4);
+    if(f2_gid4 > 0)
+        H5Gclose(f2_gid4);
+    if(f1_did > 0)
+        H5Dclose(f1_did);
+    if(f2_did > 0)
+        H5Dclose(f2_did);
+    if(f1_sid >0)
+        H5Sclose(f1_sid);
+    if(f2_sid >0)
+        H5Sclose(f2_sid);
+    if(f1_tid >0)
+        H5Tclose(f1_tid);
+    if(f2_tid >0)
+        H5Tclose(f2_tid);
+
+    return status;
+}
+
+
+/*-------------------------------------------------------------------------
 * Function: test_datasets
 *
 * Purpose: Check all HDF5 classes
@@ -964,7 +1258,7 @@ int test_datasets(const char *file,
 
 /*-------------------------------------------------------------------------
 *
-* Purpose: Create test files to compare links, one has longer name than 
+* Purpose: Create test files to compare links, one has longer name than
 *          the other and short name is subset of long name.
 *
 * Programmer: Jonathan Kim (Feb 17, 2010)
@@ -2427,7 +2721,7 @@ out:
 *-------------------------------------------------------------------------*/
 #define GRP_R_DSETNAME1 "dset1"
 #define GRP_R_DSETNAME2 "dset2"
-static int test_group_recurse2()
+static int test_group_recurse2(void)
 {
     hid_t       fileid1;
     hid_t       grp1=0, grp2;

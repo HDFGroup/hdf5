@@ -6,9 +6,14 @@ Error: 'recursive' option not compatible with 'group info' option!
 usage: h5ls [OPTIONS] [OBJECTS...]
   OPTIONS
    -h, -?, --help  Print a usage message and exit
-   -a, --address   Print addresses for raw data
+   -a, --address   Print raw data address.  If dataset is contiguous, address
+                   is offset in file of beginning of raw data. If chunked,
+                   returned list of addresses indicates offset of each chunk.
+                   Must be used with -v, --verbose option.
+                   Provides no information for non-dataset objects.
    -d, --data      Print the values of datasets
-   -e, --errors    Show all HDF5 error reporting
+   --enable-error-stack
+                   Prints messages from the HDF5 error stack as they occur.
    --follow-symlinks
                    Follow symbolic links (soft links and external links)
                    to display target object information.
@@ -54,3 +59,5 @@ usage: h5ls [OPTIONS] [OBJECTS...]
 
    -E or --external   Follow external links.
                       Replaced by --follow-symlinks.
+   -e, --errors       Show all HDF5 error reporting
+                      Replaced by --enable-error-stack.

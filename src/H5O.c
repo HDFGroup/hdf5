@@ -823,7 +823,7 @@ done:
  *
  * Purpose:	Retrieve comment for an object.
  *
- * Return:	Success:	Number of bytes in the comment including the
+ * Return:	Success:	Number of bytes in the comment excluding the
  *				null terminator.  Zero if the object has no
  *				comment.
  *
@@ -861,7 +861,7 @@ done:
  *
  * Purpose:	Retrieve comment for an object.
  *
- * Return:	Success:	Number of bytes in the comment including the
+ * Return:	Success:	Number of bytes in the comment excluding the
  *				null terminator.  Zero if the object has no
  *				comment.
  *

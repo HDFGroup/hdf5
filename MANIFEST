@@ -1186,6 +1186,8 @@
 ./tools/testfiles/family_file00015.h5
 ./tools/testfiles/family_file00016.h5
 ./tools/testfiles/family_file00017.h5
+./tools/testfiles/filter_fail.h5
+./tools/testfiles/filter_fail.ddl
 ./tools/testfiles/packedbits.h5
 ./tools/testfiles/packedbits.ddl
 ./tools/testfiles/file_space.h5
@@ -1195,6 +1197,7 @@
 ./tools/testfiles/tall-3.ddl
 ./tools/testfiles/tall-4s.ddl
 ./tools/testfiles/tall-5s.ddl
+./tools/testfiles/tall-6.ddl
 ./tools/testfiles/tall.h5
 ./tools/testfiles/tarray1.ddl
 ./tools/testfiles/tarray1.h5
@@ -1597,6 +1600,17 @@
 ./tools/h5diff/testfiles/h5diff_628.txt
 ./tools/h5diff/testfiles/h5diff_629.txt
 ./tools/h5diff/testfiles/h5diff_70.txt
+./tools/h5diff/testfiles/h5diff_700.txt
+./tools/h5diff/testfiles/h5diff_701.txt
+./tools/h5diff/testfiles/h5diff_702.txt
+./tools/h5diff/testfiles/h5diff_703.txt
+./tools/h5diff/testfiles/h5diff_704.txt
+./tools/h5diff/testfiles/h5diff_705.txt
+./tools/h5diff/testfiles/h5diff_706.txt
+./tools/h5diff/testfiles/h5diff_707.txt
+./tools/h5diff/testfiles/h5diff_708.txt
+./tools/h5diff/testfiles/h5diff_709.txt
+./tools/h5diff/testfiles/h5diff_710.txt
 ./tools/h5diff/testfiles/h5diff_80.txt
 ./tools/h5diff/testfiles/h5diff_90.txt
 ./tools/h5diff/testfiles/h5diff_100.txt
@@ -1678,6 +1692,8 @@
 
 ./tools/h5diff/testfiles/h5diff_attr1.h5
 ./tools/h5diff/testfiles/h5diff_attr2.h5
+./tools/h5diff/testfiles/h5diff_attr_v_level1.h5
+./tools/h5diff/testfiles/h5diff_attr_v_level2.h5
 ./tools/h5diff/testfiles/h5diff_basic1.h5
 ./tools/h5diff/testfiles/h5diff_basic2.h5
 ./tools/h5diff/testfiles/h5diff_dset1.h5
@@ -2015,6 +2031,7 @@
 ./vms/src/h5pubconf.h
 ./vms/test/check.com
 ./vms/test/make.com
+./vms/test/H5srcdir_str.h
 
 ./vms/build.com
 ./vms/install.com
@@ -2056,6 +2073,7 @@
 ./config/cmake/hdf5-config.cmake.build.in
 ./config/cmake/hdf5-config.cmake.install.in
 ./config/cmake/hdf5-config-version.cmake.in
+./config/cmake/HDFMacros.cmake
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/libhdf5.settings.cmake.in

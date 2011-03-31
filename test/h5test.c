@@ -1115,10 +1115,22 @@ getenv_all(MPI_Comm comm, int root, const char* name)
 hid_t
 h5_make_local_copy(char *origfilename, char *local_copy_name)
 {
-    const char *filename = H5_get_srcdir_filename(origfilename); /* Corrected test file name */
     int fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
     ssize_t nread;                      /* Number of bytes read in */
     char  buf[READ_BUF_SIZE];        /* Buffer for copying data */
+    char  filename[FILENAME_BUF_SIZE] = "";
+#ifdef H5_VMS 
+    HDstrcat(filename, origfilename);
+#else
+    char * srcdir = HDgetenv("srcdir"); /* The source directory */
+
+    if(srcdir && ((HDstrlen(srcdir) +
+                   HDstrlen(origfilename) + 6) < FILENAME_BUF_SIZE)) {
+        HDstrcpy(filename, srcdir);
+        HDstrcat(filename, "/");
+    }
+    HDstrcat(filename, origfilename);
+#endif
 
     /* Copy old file into temporary file */
     if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0) return -1;
@@ -1135,4 +1147,3 @@ h5_make_local_copy(char *origfilename, char *local_copy_name)
 
     return 0;
 }
-

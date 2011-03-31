@@ -92,6 +92,7 @@ static int          display_fi        = FALSE; /*file index */
 static int          display_ai        = TRUE;  /*array index */
 static int          display_escape    = FALSE; /*escape non printable characters */
 static int          display_region    = FALSE; /*print region reference data */
+static int          enable_error_stack= FALSE; /* re-enable error stack */
 
 /* sort parameters */
 static H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
@@ -387,7 +388,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:R";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:RE";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -500,6 +501,7 @@ static struct long_options l_opts[] = {
     { "sort_order", require_arg, 'z' },
     { "format", require_arg, 'm' },
     { "region", no_arg, 'R' },
+    { "enable-error-stack", no_arg, 'E' },
     { NULL, 0, '\0' }
 };
 
@@ -662,6 +664,8 @@ usage(const char *prog)
     fprintf(stdout, "     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML\n");
     fprintf(stdout, "                          \":\": no namespace, default: \"hdf5:\"\n");
     fprintf(stdout, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
+    fprintf(stdout, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
+    fprintf(stdout, "                          occur.\n");
     fprintf(stdout, "\n");
     fprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
     fprintf(stdout, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
@@ -822,8 +826,11 @@ table_list_free(void)
 
         /* Free each table */
         free_table(table_list.tables[u].group_table);
+        HDfree(table_list.tables[u].group_table);
         free_table(table_list.tables[u].dset_table);
+        HDfree(table_list.tables[u].dset_table);
         free_table(table_list.tables[u].type_table);
+        HDfree(table_list.tables[u].type_table);
     }
 
     /* Free the table list */
@@ -1159,7 +1166,9 @@ print_datatype(hid_t type,unsigned in_group)
                 indentation(indent + COL);
                 printf("H5T_OPAQUE;\n");
                 indentation(indent + COL);
-                printf("OPAQUE_TAG \"%s\";\n", H5Tget_tag(type));
+                mname = H5Tget_tag(type);
+                printf("OPAQUE_TAG \"%s\";\n", mname);
+                free(mname);
                 indentation(indent);
                 break;
 
@@ -1191,16 +1200,12 @@ print_datatype(hid_t type,unsigned in_group)
             case H5T_REFERENCE:
                 printf("H5T_REFERENCE");
                 /* The BNF document states that the type of reference should be
-                 * displayed after "H5T_REFERENCE". Therefore add the missing
-                 * reference type if the region command line option is used. This
-                 * reference type will not be displayed if the region option is not used. */
-                if(display_region) {
-                    if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
-                        printf(" { H5T_STD_REF_DSETREG }");
-                    }
-                    else {
-                        printf(" { H5T_STD_REF_OBJECT }");
-                    }
+                 * displayed after "H5T_REFERENCE". */
+                if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
+                    printf(" { H5T_STD_REF_DSETREG }");
+                }
+                else {
+                    printf(" { H5T_STD_REF_OBJECT }");
                 }
                 break;
 
@@ -1458,8 +1463,11 @@ dump_selected_attr(hid_t loc_id, const char *name)
     obj_name = (char *)HDmalloc((size_t)j + 2);
 
     /* find the last / */
-    while(name[j] != '/' && j >= 0)
+    while(j >= 0) {
+        if (name[j] == '/')
+            break;
         j--;
+    }
 
     /* object name */
     if(j == -1)
@@ -2540,10 +2548,17 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
             char        string_prefix[64];
             h5tool_format_t    string_dataformat;
 
+            /* VL data special information */
+            unsigned int        vl_data = 0; /* contains VL datatypes */
+
             type = H5Aget_type(obj_id);
             p_type = h5tools_get_native_type(type);
 
             ndims = H5Sget_simple_extent_dims(space, size, NULL);
+
+            /* Check if we have VL data in the dataset's datatype */
+            if (h5tools_detect_vlen(p_type) == TRUE)
+                vl_data = TRUE;
 
             for (i = 0; i < ndims; i++)
                 nelmts *= size[i];
@@ -2584,6 +2599,10 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
 
             status = h5tools_dump_mem(stdout, outputformat, obj_id, p_type,
                                     space, buf, depth);
+
+            /* Reclaim any VL memory, if necessary */
+            if (vl_data)
+                H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
 
             free(buf);
             H5Tclose(p_type);
@@ -2655,7 +2674,7 @@ dump_comment(hid_t obj_id)
     /* call H5Oget_comment again with the correct value.
      * If the call to H5Oget_comment returned an error, skip this block */
     if (cmt_bufsize > 0) {
-        comment = (char *)HDmalloc((size_t)cmt_bufsize); /* new_size including null terminator */
+        comment = (char *)HDmalloc((size_t)(cmt_bufsize+1)); /* new_size including null terminator */
         if(comment) {
             cmt_bufsize = H5Oget_comment(obj_id, comment, cmt_bufsize);
             if(cmt_bufsize > 0) {
@@ -4222,6 +4241,9 @@ end_collect:
         }
         /** end subsetting parameters **/
 
+        case 'E':
+            enable_error_stack = TRUE;
+            break;
         case 'h':
             usage(h5tools_getprogname());
             leave(EXIT_SUCCESS);
@@ -4343,11 +4365,13 @@ main(int argc, const char *argv[])
     h5tools_init();
     hand = parse_command_line(argc, argv);
 
-    if ( bin_output && outfname == NULL )
-    {
+    if (bin_output && outfname == NULL) {
         error_msg("binary output requires a file name, use -o <filename>\n");
         leave(EXIT_FAILURE);
     }
+
+    if (enable_error_stack)
+        H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     /* Check for conflicting options */
     if (doxml) {
@@ -4471,6 +4495,7 @@ main(int argc, const char *argv[])
                     "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
                     "xsi:schemaLocation=\"http://hdfgroup.org/DTDs/HDF5-File "
                     "http://www.hdfgroup.org/DTDs/HDF5-File.xsd\">\n",xmlnsprefix,ns);
+                HDfree(ns);
             }
         } else {
                 printf("<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n",
@@ -5491,9 +5516,15 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
             H5Tclose(type);
         } else if (H5Tget_class(type) == H5T_STRING) {
             status = xml_print_strs(obj_id, ATTRIBUTE_DATA);
-        } else {
-            /* all other data */
+        } else {  /* all other data */
+            /* VL data special information */
+            unsigned int vl_data = 0; /* contains VL datatypes */
+            
             p_type = h5tools_get_native_type(type);
+
+            /* Check if we have VL data in the dataset's datatype */
+            if (h5tools_detect_vlen(p_type) == TRUE)
+                vl_data = TRUE;
 
             H5Tclose(type);
 
@@ -5510,6 +5541,10 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
             if (H5Aread(obj_id, p_type, buf) >= 0)
                 status = h5tools_dump_mem(stdout, outputformat, obj_id,
                                               p_type, space, buf, depth);
+
+            /* Reclaim any VL memory, if necessary */
+            if (vl_data)
+                H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
 
             free(buf);
             H5Tclose(p_type);

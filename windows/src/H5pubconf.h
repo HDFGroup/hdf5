@@ -54,6 +54,10 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #define H5_FC_FUNC_(name,NAME) NAME
 
+/* LAHEY compiler for C identifiers containing underscores. */
+/* #define H5_FC_FUNC(name,NAME) name ## _ */
+/* #define H5_FC_FUNC_(name,NAME) name ## _ */
+
 /* Define if your system can handle overflow converting floating-point to
    integer values. */
 #define H5_FP_TO_INTEGER_OVERFLOW_WORKS 1
@@ -108,6 +112,7 @@
 /* #undef H5_HAVE_FEATURES_H */
 
 /* Define if support for deflate (zlib) filter is enabled */
+#define H5_HAVE_FILTER_DEFLATE 1
 
 /* Define if support for Fletcher32 checksum is enabled */
 #define H5_HAVE_FILTER_FLETCHER32 1

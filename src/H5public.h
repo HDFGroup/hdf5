@@ -83,6 +83,17 @@ extern "C" {
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)
 
+/* macros for comparing the version */
+#define H5_VERSION_GE(Maj,Min,Rel) \
+       (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
+        ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
+        (H5_VERS_MAJOR>Maj))
+
+#define H5_VERSION_LE(Maj,Min,Rel) \
+       (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE<=Rel)) || \
+        ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR<Min)) || \
+        (H5_VERS_MAJOR<Maj))
+
 /*
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return

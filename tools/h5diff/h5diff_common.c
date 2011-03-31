@@ -27,12 +27,12 @@ static int check_d_input( const char* );
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVrvqn:d:p:Nc";
+static const char *s_opts = "hVrv:qn:d:p:Nc";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
     { "report", no_arg, 'r' },
-    { "verbose", no_arg, 'v' },
+    { "verbose", optional_arg, 'v' },
     { "quiet", no_arg, 'q' },
     { "count", require_arg, 'n' },
     { "delta", require_arg, 'd' },
@@ -63,7 +63,7 @@ void parse_command_line(int argc,
                         const char** objname2,
                         diff_opt_t* options)
 {
-
+    int i;
     int opt;
     struct exclude_path_list *exclude_head, *exclude_prev, *exclude_node;
 
@@ -95,6 +95,40 @@ void parse_command_line(int argc,
             h5diff_exit(EXIT_SUCCESS);
         case 'v':
             options->m_verbose = 1;
+            /* This for loop is for handling style like 
+             * -v, -v1, --verbose, --verbose=1.
+             */
+            for (i = 1; i < argc; i++)
+            {                
+                /* 
+                 * short opt 
+                 */
+                if (!strcmp (argv[i], "-v"))  /* no arg */
+	        	{
+                    opt_ind--;
+                    options->m_verbose_level = 0;
+                    break;
+        		}
+                else if (!strncmp (argv[i], "-v", 2))
+        		{
+                    options->m_verbose_level = atoi(&argv[i][2]);
+                    break;
+        		}		
+
+                /* 
+                 * long opt 
+                 */
+                if (!strcmp (argv[i], "--verbose"))  /* no arg */
+	        	{
+                    options->m_verbose_level = 0;
+                    break;
+        		}
+        		else if ( !strncmp (argv[i], "--verbose", 9) && argv[i][9]=='=')
+        		{
+                    options->m_verbose_level = atoi(&argv[i][10]);
+                    break;
+                }
+            }
             break;
         case 'q':
             /* use quiet mode; supress the message "0 differences found" */
@@ -104,7 +138,7 @@ void parse_command_line(int argc,
             options->m_report = 1;
             break;
         case 'l':
-            options->follow_links = 1; 
+            options->follow_links = 1;
             break;
         case 'x':
             options->no_dangle_links = 1;
@@ -399,7 +433,16 @@ void usage(void)
  printf("   -h, --help              Print a usage message and exit.\n");
  printf("   -V, --version           Print version number and exit.\n");
  printf("   -r, --report            Report mode. Print differences.\n");
- printf("   -v, --verbose           Verbose mode. Print differences, list of objects.\n");
+ printf("   -v --verbose            Verbose mode. Print differences information and list\n");
+ printf("                           of objects.\n");
+ printf("   -vN --verbose=N         Verbose mode with level. Print differences and list\n");
+ printf("                           of objects.\n");
+ printf("                           Level of detail depends on value of N:\n");
+ printf("                            0 : Identical to '-v' or '--verbose'.\n");
+ printf("                            1 : All level 0 information plus one-line attribute\n");
+ printf("                                status summary.\n");
+ printf("                            2 : All level 1 information plus extended attribute\n");
+ printf("                                status report.\n");
  printf("   -q, --quiet             Quiet mode. Do not produce output.\n");
  printf("   --follow-symlinks       Follow symbolic links (soft links and external links)\n");
  printf("                           and compare the links' target objects.\n");

@@ -196,6 +196,55 @@ TOOLTEST2() {
 
 }
 
+# same as TOOLTEST but filters error stack outp
+# Extract file name, line number, version and thread IDs because they may be different
+TOOLTEST3() {
+
+    expect="$srcdir/../testfiles/$1"
+    actual="../testfiles/`basename $1 .ddl`.out"
+    actual_err="../testfiles/`basename $1 .ddl`.err"
+    actual_ext="../testfiles/`basename $1 .ddl`.ext"
+    shift
+
+    # Run test.
+    TESTING $DUMPER $@
+    (
+      echo "#############################"
+      echo "Expected output for '$DUMPER $@'" 
+      echo "#############################"
+      cd $srcdir/../testfiles
+      $RUNSERIAL $DUMPER_BIN $@
+    ) >$actual 2>$actual_err
+
+    # Extract file name, line number, version and thread IDs because they may be different
+    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+        -e 's/line [0-9]*/line (number)/' \
+        -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
+        -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+        -e 's/H5Eget_auto[1-2]*/H5Eget_auto(1 or 2)/' \
+        -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
+     $actual_err > $actual_ext
+    cat $actual_ext >> $actual
+
+    if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+     echo " CREATED"
+     cp $actual $expect
+    elif $CMP $expect $actual; then
+     echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.ddl) differs from actual result (*.out)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
+
+}
 
 # Print a "SKIP" message
 SKIP() {
@@ -581,9 +630,14 @@ TOOLTEST textlinkfar.ddl textlinkfar.h5
 # test for dangling external links
 TOOLTEST textlink.ddl textlink.h5
 
+# test for error stack display (BZ2048)
+TOOLTEST3 filter_fail.ddl --enable-error-stack filter_fail.h5
+
+# test for -o -y for dataset with attributes
+TOOLTEST tall-6.ddl -y -o data -d /g1/g1.1/dset1.1.1 tall.h5
+
 # tests for Fixed Array chunk indices
 TOOLTEST tdset_idx.ddl -p -H tdset_idx.h5
-
 
 # Report test results and exit
 if test $nerrors -eq 0 ; then

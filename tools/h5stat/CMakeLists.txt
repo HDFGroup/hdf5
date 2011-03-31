@@ -11,7 +11,7 @@ INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 # Add the h5stat executables
 # --------------------------------------------------------------------
 ADD_EXECUTABLE (h5stat ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat.c)
-H5_NAMING (h5stat ${LIB_TYPE})
+TARGET_NAMING (h5stat ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5stat)
@@ -28,7 +28,7 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5stat_gentest ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat_gentest.c)
-    H5_NAMING (h5stat_gentest ${LIB_TYPE})
+    TARGET_NAMING (h5stat_gentest ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5stat_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     
     #ADD_TEST (NAME h5stat_gentest COMMAND $<TARGET_FILE:h5stat_gentest>)
@@ -88,17 +88,22 @@ IF (BUILD_TESTING)
 ##############################################################################
 
   MACRO (ADD_H5_TEST resultfile resultcode)
-    ADD_TEST (
-        NAME H5STAT-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
-            -D "TEST_ARGS=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.ddl"
-            -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
-    )
+    # If using memchecker add tests without using scripts
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5STAT-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
+              -D "TEST_ARGS=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")

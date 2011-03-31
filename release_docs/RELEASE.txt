@@ -189,6 +189,14 @@ New Features
 
     Tools:
     ------
+     - h5diff: Added new level for -v (verbose) option. The new levels are
+               1 and 2.  So -v1 and -v2 can be specified to view more 
+               information about attributes differences. 
+               Bug#2121 (JKM 2011/3/23)
+     - h5dump: Added new option --enable-error-stack. This option will display 
+               error stack information in the output stream. This is useful
+               when the "h5dump: Unable to print data" message is output.
+               (ADB - 2011/02/24)
      - h5diff: Add a new flag --exclude-path. Specified path to an object will
                be excluded from comparing the two files or two groups. If group
                is specified all the member objects will be excluded.  
@@ -202,13 +210,15 @@ New Features
      - h5diff: Add new flag --follow-symlinks. (refer to --help for details)
                (JKM - 2010/01/25) 
      - h5diff: fix for displaying garbage value on LE machine for BE data.
-	   (JKM - 2009/11/20)
-     - h5dump subsetting now allows default for count. Also trailing ; in short form
-       can be omitted after last specified value. (ADB - 2009/09/04)
-     - h5dump/h5ls now can display data in region references 
-       using new -R, --region flag.  (ADB - 2009/09/04)
-     - h5diff new flag, -c, --compare, list objects that are not comparable.
-        (PVN - 2009/4/10 - 1368)
+	           (JKM - 2009/11/20)
+     - h5dump: subsetting now allows default for count. Also trailing ; in short form
+               can be omitted after last specified value. 
+               (ADB - 2009/09/04)
+     - h5dump/h5ls: now can display data in region references 
+               using new -R, --region flag.  
+               (ADB - 2009/09/04)
+     - h5diff: new flag, -c, --compare, list objects that are not comparable.
+               (PVN - 2009/4/10 - 1368)
      - h5diff new flag, -N, --nan, avoids NaNs detection. (PVN - 2009/4/10)
      - h5dump correctly specifies XML dtd / schema urls (ADB - 2009/4/3 - 1519)
      - h5repack now handles group creation order. (PVN - 2009/4/2 - 1402)
@@ -500,6 +510,35 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Updated to unify option name to '--enable-error-stack' for printing 
+          HDF5 error stack messages for HDF5 tools. h5ls and h5dump for now.
+          For h5ls, this replaces "-e/--errors" option, which is deprecated. 
+          Bug#2182 (JKM 2011/3/30)
+        - Fixed output for H5T_REFERENCE in h5dump. According to the BNF document
+          the output of a H5T_REFERENCE should be followed by the type;
+          <reference> ::= H5T_REFERENCE { <ref_type> }
+          <ref_type> ::= H5T_STD_REF_OBJECT | H5T_STD_REF_DSETREG
+          Previously this was only displayed if the -R option was used.
+          Bug#1725 (ADB 2011/3/28)
+        - Fix h5diff issues for #1: h5diff compared attributes correctly only 
+          when two objects have the same number of attributes and attribute 
+          names are identical, #2: didn't display useful information about 
+          attribute difference. Bug#2121 (JKM 2011/3/17)
+        - Fixed memory leak for h5diff when accessing symbolic links with 
+          --follow-symlink option. Bug#2214  (JKM 2011/3/18)
+        - Fixed memory leak for h5diff when access variable length string
+          data. Bug#2216 (JKM 2011/3/18)
+        - Fixed and improved help page for -a option of h5ls. 
+          Bug#1904 (JKM 2011/3/11)
+        - Fixed h5dump not to include attribute values in the output file when 
+          h5dump "-y -o output_file" options were used. The problem was introduced 
+          in HDF5 1.8.6 by showing data pointed by region references. (XCAO 2011/3/9)
+        - Fixed h5copy to be able to copy any object into the same HDF5 file.
+          Previously h5copy displayed error message when target file is same
+          as source file. (XCAO 2011/3/8)
+        - Fixed h5dump for skipping some values for long array type dataset on 
+          Windows. This issue only occurred on Windows due to the different 
+          return behavior from _vsnprintf() funtion. Bug#2161 (JKM 2011/3/3)
         - Fixed h5dump for skipping array indices every certain number
           when the array type dataset is relatively big. The certain number
           varies according to the size of array. Bug#2092 (JKM 2011/2/15).
@@ -788,6 +827,8 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* --with-mpe configure option does not work with Mpich2. AKC - 2011/03/10)
+
 * examples/run-all-ex.sh does not work on Cygwin. (NAF - 2011/02/11)
 
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can

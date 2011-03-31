@@ -623,6 +623,114 @@ h5tools_ncols(const char *s)
 }
 
 /*-------------------------------------------------------------------------
+ * Function: h5tools_detect_vlen
+ *
+ * Purpose: Recursive check for any variable length data in given type.
+ *
+ * Return: 
+ *    TRUE : type conatains any variable length data
+ *    FALSE : type doesn't contain any variable length data
+ *    Negative value: error occur
+ * 
+ * Programmer: Jonathan Kim  March 18, 2011
+ *-------------------------------------------------------------------------
+ */
+htri_t
+h5tools_detect_vlen(hid_t tid)
+{
+    htri_t status;
+    htri_t ret = FALSE;
+    /* recursive detect any vlen data values in type (compound, array ...) */
+    status = H5Tdetect_class(tid, H5T_VLEN);
+    if ( (status == TRUE) || (status < 0) )
+    {
+        ret = status;
+        goto done;
+    }
+
+    /* recursive detect any vlen string in type (compound, array ...) */
+    status = h5tools_detect_vlen_str(tid);
+    if ( (status == TRUE) || (status < 0) )
+
+    {
+        ret = status;
+        goto done;
+    }
+
+done:
+    return ret;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: h5tools_detect_vlen_str
+ *
+ * Purpose: Recursive check for variable length string of a datatype.
+ *
+ * Return: 
+ *    TRUE : type conatains any variable length string
+ *    FALSE : type doesn't contain any variable length string
+ *    Negative value: error occur
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+h5tools_detect_vlen_str(hid_t tid)
+{
+    int i = 0;
+    int n = 0;
+    htri_t ret = FALSE;
+    H5T_class_t tclass = -1;
+    hid_t btid;
+    hid_t mtid;
+
+    ret = H5Tis_variable_str(tid);
+    if ( (ret == TRUE) || (ret < 0) )
+        goto done;
+
+    tclass = H5Tget_class(tid);
+    if (tclass == H5T_ARRAY) 
+    {
+        btid = H5Tget_super(tid);
+        if (btid < 0)
+        {
+            ret = (htri_t) btid;
+            goto done;
+        }
+        ret = h5tools_detect_vlen_str(btid);
+        if ( (ret == TRUE) || (ret < 0) ) 
+        {
+            H5Tclose(btid);
+            goto done;
+        }
+    }
+    else if (tclass == H5T_COMPOUND) 
+    {
+        n = H5Tget_nmembers(tid);
+        if (n < 0) 
+        {
+            n = ret;
+            goto done;
+        }
+
+        for (i = 0; i < n; i++) 
+        {
+            mtid = H5Tget_member_type(tid, i);
+            ret = h5tools_detect_vlen_str(mtid);
+            if ( (ret == TRUE) || (ret < 0) ) 
+            {
+                H5Tclose(mtid);
+                goto done;
+            }
+            H5Tclose(mtid);
+        }
+    }
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
  * Audience:    Public
  * Chapter:     H5Tools Library
  * Purpose:     Emit a simple prefix to STREAM.
@@ -910,19 +1018,19 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
 
                             h5tools_str_append(&buffer, info->dset_format, ref_name);
 
-                            dimension_break = h5tools_render_element(stream, info,
+                            dimension_break = h5tools_render_element(stdout, info,
                                        ctx, &buffer, &curr_pos, ncols, i, elmt_counter);
 
                             region_type = H5Sget_select_type(region_space);
                             if(region_type==H5S_SEL_POINTS)
                                 /* Print point information */
                                 dimension_break = h5tools_dump_region_data_points(
-                                                       region_space, region_id, stream, info, ctx,
+                                                       region_space, region_id, stdout, info, ctx,
                                                        &buffer, &curr_pos, ncols, i, elmt_counter);
                             else if(region_type==H5S_SEL_HYPERSLABS)
                                 /* Print block information */
                                 dimension_break = h5tools_dump_region_data_blocks(
-                                                       region_space, region_id, stream, info, ctx,
+                                                       region_space, region_id, stdout, info, ctx,
                                                        &buffer, &curr_pos, ncols, i, elmt_counter);
                             else
                                 HERROR(H5E_tools_g, H5E_tools_min_id_g, "invalid region type");
@@ -951,7 +1059,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                 if (i + 1 < nelmts || (flags & END_OF_DATA) == 0)
                     h5tools_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
 
-                dimension_break = h5tools_render_element(rawdatastream, info, ctx, &buffer,
+                dimension_break = h5tools_render_element(stream, info, ctx, &buffer,
                                                            &curr_pos, ncols, i, elmt_counter);
                 /* Render the data element end*/
 
@@ -1977,6 +2085,9 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
     hsize_t           size_row_block;          /* size for blocks along rows */
     hsize_t           row_counter = 0;
 
+    /* VL data special information */
+    unsigned int        vl_data = 0; /* contains VL datatypes */
+
     if ((size_t) ctx->ndims > NELMTS(sm_size))
         H5E_THROW(FAIL, H5E_tools_min_id_g, "ndims and sm_size comparision failed");
 
@@ -1984,6 +2095,12 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
         init_acc_pos(ctx, total_size);
 
     size_row_block = sset->block.data[row_dim];
+
+    /* Check if we have VL data in the dataset's datatype */
+    if (h5tools_detect_vlen_str(p_type) == TRUE)
+        vl_data = TRUE;
+    if (H5Tdetect_class(p_type, H5T_VLEN) == TRUE)
+        vl_data = TRUE;
 
     /* display loop */
     for (; hyperslab_count > 0; temp_start[row_dim] += temp_stride[row_dim], hyperslab_count--) {
@@ -2067,6 +2184,10 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
             ctx->sm_pos = elmtno;
 
             h5tools_dump_simple_data(stream, info, dset, ctx, flags, sm_nelmts, p_type, sm_buf);
+
+            /* Reclaim any VL memory, if necessary */
+            if (vl_data)
+                H5Dvlen_reclaim(p_type, sm_space, H5P_DEFAULT, sm_buf);
 
             if(H5Sclose(sm_space) < 0)
                 H5E_THROW(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
@@ -2319,9 +2440,9 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
 
     /* Terminate the output */
     if (ctx.cur_column) {
-        fputs(OPT(info->line_suf, ""), stream);
-        putc('\n', stream);
-        fputs(OPT(info->line_sep, ""), stream);
+        fputs(OPT(info->line_suf, ""), stdout);
+        putc('\n', stdout); 
+        fputs(OPT(info->line_sep, ""), stdout);
     }
 
 CATCH
@@ -2425,9 +2546,11 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info,
     }
 
     /* Check if we have VL data in the dataset's datatype */
+    if (h5tools_detect_vlen_str(p_type) == TRUE)
+        vl_data = TRUE;
     if (H5Tdetect_class(p_type, H5T_VLEN) == TRUE)
         vl_data = TRUE;
-
+ 
     /*
      * Determine the strip mine size and allocate a buffer. The strip mine is
      * a hyperslab whose size is manageable.
@@ -2667,9 +2790,9 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
     /* Print the data */
     if (space_type == H5S_SIMPLE || space_type == H5S_SCALAR) {
         if(!sset)
-            status = h5tools_dump_simple_dset(stream, info, dset, p_type, indentlevel);
+            status = h5tools_dump_simple_dset(rawdatastream, info, dset, p_type, indentlevel);
         else
-            status = h5tools_dump_simple_subset(stream, info, dset, p_type, sset, indentlevel);
+            status = h5tools_dump_simple_subset(rawdatastream, info, dset, p_type, sset, indentlevel);
     }
     else
         /* space is H5S_NULL */

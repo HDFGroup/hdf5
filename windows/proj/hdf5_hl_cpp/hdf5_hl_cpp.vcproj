@@ -321,18 +321,8 @@
 	<References>
 	</References>
 	<Files>
-		<Filter
-			Name="Source Files"
-			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp"
-			>
-			<File
-				RelativePath="..\..\..\hl\c++\src\H5PacketTable.cpp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;fi;fd"
+		<File
+			RelativePath="..\..\..\hl\c++\src\H5PacketTable.cpp"
 			>
 		</Filter>
 	</Files>

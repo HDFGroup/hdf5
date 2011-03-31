@@ -584,7 +584,7 @@ HDremove_all(const char *fname)
 #endif
 
 /*-------------------------------------------------------------------------
- * Function:	HDgettimeofday
+ * Function:	Wgettimeofday
  *
  * Purpose:	Wrapper function for gettimeofday on Windows systems
  *
@@ -610,7 +610,7 @@ HDremove_all(const char *fname)
 #define _W32_FT_OFFSET (116444736000000000ULL)
 
 int
-HDgettimeofday(struct timeval *tv, void *tz)
+Wgettimeofday(struct timeval *tv, void *tz)
  {
   union {
     unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */

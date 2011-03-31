@@ -32,7 +32,7 @@ SET (examples
 
 FOREACH (example ${examples})
   ADD_EXECUTABLE (f90_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
-  H5_NAMING (f90_ex_${example} ${LIB_TYPE})
+  TARGET_NAMING (f90_ex_${example} ${LIB_TYPE})
   TARGET_FORTRAN_WIN_PROPERTIES (f90_ex_${example} "")
   IF (WIN32 AND NOT CYGWIN)
     SET_PROPERTY (TARGET f90_ex_${example} 
@@ -54,7 +54,7 @@ ENDFOREACH (example ${examples})
 
 IF (H5_HAVE_PARALLEL)
   ADD_EXECUTABLE (f90_ex_ph5example ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
-  H5_NAMING (f90_ex_ph5example ${LIB_TYPE})
+  TARGET_NAMING (f90_ex_ph5example ${LIB_TYPE})
   TARGET_FORTRAN_WIN_PROPERTIES (f90_ex_ph5example "")
   IF (WIN32 AND NOT CYGWIN)
     SET_PROPERTY (TARGET f90_ex_ph5example 

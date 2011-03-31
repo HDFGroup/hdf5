@@ -2927,7 +2927,9 @@ main(void)
     nerrors += test_main(file_id, fapl);
     nerrors += test_obj_ref(fapl);
     nerrors += test_reg_ref(fapl);
+#ifndef H5_CANNOT_OPEN_TWICE
     nerrors += test_elinks(fapl);
+#endif /*H5_CANNOT_OPEN_TWICE*/
 
     /* Close file */
     H5Fclose(file_id);

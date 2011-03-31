@@ -36,7 +36,7 @@ INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR} )
 
 ADD_EXECUTABLE (cpp_testhdf5 ${CPP_TEST_SRCS} )
-H5_NAMING (cpp_testhdf5 ${LIB_TYPE})
+TARGET_NAMING (cpp_testhdf5 ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (cpp_testhdf5
     ${HDF5_CPP_LIB_TARGET}
     ${HDF5_LIB_TARGET}
@@ -61,17 +61,19 @@ IF (HDF5_TEST_VFD)
   ENDIF (DIRECT_VFD)
 
   MACRO (ADD_VFD_TEST vfdname resultcode)
-    ADD_TEST (
-      NAME VFD-${vfdname}-cpp_testhdf5 
-      COMMAND "${CMAKE_COMMAND}"
-          -D "TEST_PROGRAM=$<TARGET_FILE:cpp_testhdf5>"
-          -D "TEST_ARGS:STRING="
-          -D "TEST_VFD:STRING=${vfdname}"
-          -D "TEST_EXPECT=${resultcode}"
-          -D "TEST_OUTPUT=cpp_testhdf5"
-          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-          -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
-    )
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+        NAME VFD-${vfdname}-cpp_testhdf5 
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:cpp_testhdf5>"
+            -D "TEST_ARGS:STRING="
+            -D "TEST_VFD:STRING=${vfdname}"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_OUTPUT=cpp_testhdf5"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+            -P "${HDF5_RESOURCES_DIR}/vfdTest.cmake"
+      )
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_VFD_TEST)
   
   # Run test with different Virtual File Driver
