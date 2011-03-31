@@ -111,7 +111,8 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
                    Must be used with -v, --verbose option.\n\
                    Provides no information for non-dataset objects.\n\
    -d, --data      Print the values of datasets\n\
-   -e, --errors    Show all HDF5 error reporting\n\
+   --enable-error-stack\n\
+                   Prints messages from the HDF5 error stack as they occur.\n\
    --follow-symlinks\n\
                    Follow symbolic links (soft links and external links)\n\
                    to display target object information.\n\
@@ -156,7 +157,9 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
     updated to use the replacement option.\n\
 \n\
    -E or --external   Follow external links.\n\
-                      Replaced by --follow-symlinks.\n",
+                      Replaced by --follow-symlinks.\n\
+   -e, --errors       Show all HDF5 error reporting\n\
+                      Replaced by --enable-error-stack.\n",
      h5tools_getprogname());
 }
 
@@ -2295,6 +2298,9 @@ main(int argc, const char *argv[])
             address_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--data")) {
             data_g = TRUE;
+        } else if(!HDstrcmp(argv[argno], "--enable-error-stack")) {
+            show_errors_g = TRUE;
+        /* deprecated --errors */
         } else if(!HDstrcmp(argv[argno], "--errors")) {
             show_errors_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--follow-symlinks")) {
@@ -2380,6 +2386,7 @@ main(int argc, const char *argv[])
                         data_g = TRUE;
                         break;
 
+                    /* deprecated -e */
                     case 'e': /* --errors */
                         show_errors_g = TRUE;
                         break;

@@ -41,7 +41,8 @@ usage: h5dump [OPTIONS] file
      -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML
                           ":": no namespace, default: "hdf5:"
                           E.g., to dump a file called `-f', use h5dump -- -f
-     -E, --enable-error-stack   Show all HDF5 error reporting
+     --enable-error-stack Prints messages from the HDF5 error stack as they
+                          occur.
 
  Subsetting is available by using the following options with a dataset
  attribute. Subsetting is done by selecting a hyperslab from the data.

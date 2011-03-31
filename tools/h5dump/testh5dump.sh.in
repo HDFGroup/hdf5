@@ -637,7 +637,7 @@ TOOLTEST textlinkfar.ddl textlinkfar.h5
 TOOLTEST textlink.ddl textlink.h5
 
 # test for error stack display (BZ2048)
-TOOLTEST3 filter_fail.ddl -E filter_fail.h5
+TOOLTEST3 filter_fail.ddl --enable-error-stack filter_fail.h5
 
 # test for -o -y for dataset with attributes
 TOOLTEST tall-6.ddl -y -o data -d /g1/g1.1/dset1.1.1 tall.h5
