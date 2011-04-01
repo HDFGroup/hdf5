@@ -601,9 +601,17 @@ else
 fi
 
 # 11. floating point comparison
+# double value
 TOOLTEST h5diff_101.txt -v $FILE1 $FILE1 g1/d1  g1/d2 
 
+# float value
 TOOLTEST h5diff_102.txt -v $FILE1 $FILE1 g1/fp1 g1/fp2 
+
+# with --use-system-epsilon for double value 
+TOOLTEST h5diff_103.txt -v --use-system-epsilon $FILE1 $FILE1 g1/d1  g1/d2 
+
+# with --use-system-epsilon for float value
+TOOLTEST h5diff_104.txt -v --use-system-epsilon $FILE1 $FILE1 g1/fp1 g1/fp2 
 
 
 # not comparable -c flag

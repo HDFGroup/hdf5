@@ -195,12 +195,9 @@ IF (BUILD_TESTING)
           txtin16.txt
           txtin32.txt
   )
-  SET (last_test "H5IMPORT-clear-objects")
 
   ADD_TEST (NAME H5IMPORT-h5importtest COMMAND $<TARGET_FILE:h5importtest>)
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5IMPORT-h5importtest PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
+  SET_TESTS_PROPERTIES (H5IMPORT-h5importtest PROPERTIES DEPENDS H5IMPORT-clear-objects)
   SET (last_test "H5IMPORT-h5importtest")
 
   # ----- TESTING "ASCII I32 rank 3 - Output BE " ;

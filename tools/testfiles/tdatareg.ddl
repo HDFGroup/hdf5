@@ -4,7 +4,7 @@ Expected output for 'h5dump tdatareg.h5'
 HDF5 "tdatareg.h5" {
 GROUP "/" {
    DATASET "Dataset1" {
-      DATATYPE  H5T_REFERENCE
+      DATATYPE  H5T_REFERENCE { H5T_STD_REF_DSETREG }
       DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
       DATA {
          DATASET /Dataset2 {(2,2)-(7,7)}, DATASET /Dataset2 {(6,9), (2,2),

@@ -663,7 +663,8 @@ usage(const char *prog)
     fprintf(stdout, "     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML\n");
     fprintf(stdout, "                          \":\": no namespace, default: \"hdf5:\"\n");
     fprintf(stdout, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
-    fprintf(stdout, "     -E, --enable-error-stack   Show all HDF5 error reporting\n");
+    fprintf(stdout, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
+    fprintf(stdout, "                          occur.\n");
     fprintf(stdout, "\n");
     fprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
     fprintf(stdout, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
@@ -1198,16 +1199,12 @@ print_datatype(hid_t type,unsigned in_group)
             case H5T_REFERENCE:
                 printf("H5T_REFERENCE");
                 /* The BNF document states that the type of reference should be
-                 * displayed after "H5T_REFERENCE". Therefore add the missing
-                 * reference type if the region command line option is used. This
-                 * reference type will not be displayed if the region option is not used. */
-                if(display_region) {
-                    if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
-                        printf(" { H5T_STD_REF_DSETREG }");
-                    }
-                    else {
-                        printf(" { H5T_STD_REF_OBJECT }");
-                    }
+                 * displayed after "H5T_REFERENCE". */
+                if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
+                    printf(" { H5T_STD_REF_DSETREG }");
+                }
+                else {
+                    printf(" { H5T_STD_REF_OBJECT }");
                 }
                 break;
 

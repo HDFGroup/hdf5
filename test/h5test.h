@@ -25,11 +25,6 @@
 #include "hdf5.h"
 #include "H5private.h"
 
-#ifdef H5_STDC_HEADERS
-#   include <signal.h>
-#   include <stdarg.h>
-#endif
-
 /*
  * Predefined test verbosity levels.
  *
