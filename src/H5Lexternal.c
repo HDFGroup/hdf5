@@ -434,7 +434,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
 
 
     /* Retrieve the "group location" for the file's root group */
-    if(H5G_loc_root(ext_file, &root_loc) < 0)
+    if(H5G_root_loc(ext_file, &root_loc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to create location for file")
 
     /* Open the object referenced in the external file */

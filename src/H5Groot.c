@@ -68,8 +68,24 @@ H5G_rootof(H5F_t *f)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_rootof)
 
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Walk to top of mounted files */
     while(f->parent)
         f = f->parent;
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->root_grp);
+
+    /* Check to see if the root group was opened through a different
+    * "top" file, and switch it to point at the current "top" file.
+    */
+    if(f->shared->root_grp->oloc.file != f)
+        f->shared->root_grp->oloc.file = f;
 
     FUNC_LEAVE_NOAPI(f->shared->root_grp)
 } /* end H5G_rootof() */
@@ -276,4 +292,88 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_mkroot() */
+
+
+/*-------------------------------------------------------------------------
+* Function:    H5G_root_free
+*
+* Purpose:	Free memory used by an H5G_t struct (and its H5G_shared_t).
+*		Does not close the group or decrement the reference count.
+*		Used to free memory used by the root group.
+*
+* Return:	Success:    Non-negative
+*		Failure:    Negative
+*
+* Programmer:	James Laird
+*		Tuesday, September 7, 2004
+*
+*-------------------------------------------------------------------------
+*/
+herr_t
+H5G_root_free(H5G_t *grp)
+{
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_root_free)
+
+    /* Check args */
+    HDassert(grp && grp->shared);
+    HDassert(grp->shared->fo_count > 0);
+
+    /* Free the path */
+    H5G_name_free(&(grp->path));
+
+    grp->shared = H5FL_FREE(H5G_shared_t, grp->shared);
+    grp = H5FL_FREE(H5G_t, grp);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_root_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_root_loc
+ *
+ * Purpose:	Construct a "group location" for the root group of a file
+ *
+ * Return:	Success:	Non-negative
+ * 		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar  5 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_root_loc(H5F_t *f, H5G_loc_t *loc)
+{
+    H5G_t *root_grp;                    /* Pointer to root group's info */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_root_loc, FAIL)
+
+    HDassert(f);
+    HDassert(loc);
+
+    /* Retrieve the root group for the file */
+    root_grp = H5G_rootof(f);
+    HDassert(root_grp);
+
+    /* Build the group location for the root group */
+    if(NULL == (loc->oloc = H5G_oloc(root_grp)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group")
+    if(NULL == (loc->path = H5G_nameof(root_grp)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
+
+    /* Patch up root group's object location to reflect this file */
+    /* (Since the root group info is only stored once for files which
+     *  share an underlying low-level file)
+     */
+    /* (but only for non-mounted files) */
+    if(!H5F_is_mount(f)) {
+        loc->oloc->file = f;
+        loc->oloc->holding_file = FALSE;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_root_loc() */
 
