@@ -141,7 +141,7 @@ CONTENTS
         tar file can be found at ftp://ftp.hdfgroup.org/lib-external/szip/.
         
         To configure the HDF5 Library with the Szip compression filter, use 
-        the '--enable-szlib=/PATH_TO_SZIP' flag. For more information, see 
+        the '--with-szlib=/PATH_TO_SZIP' flag. For more information, see 
         section 4.3.7, "Specifying other libraries and headers."
 
         Starting with release 1.6.3, Szip library binaries are distributed 
