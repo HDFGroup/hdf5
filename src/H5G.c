@@ -1211,38 +1211,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_free
- *
- * Purpose:	Free memory used by an H5G_t struct (and its H5G_shared_t).
- *          Does not close the group or decrement the reference count.
- *          Used to free memory used by the root group.
- *
- * Return:  Success:    Non-negative
- *	        Failure:    Negative
- *
- * Programmer:  James Laird
- *              Tuesday, September 7, 2004
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_free(H5G_t *grp)
-{
-    herr_t      ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_free, FAIL)
-
-    HDassert(grp && grp->shared);
-
-    grp->shared = H5FL_FREE(H5G_shared_t, grp->shared);
-    grp = H5FL_FREE(H5G_t, grp);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_free() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5G_oloc
  *
  * Purpose:	Returns a pointer to the object location for a group.
@@ -1312,40 +1280,6 @@ H5G_fileof(H5G_t *grp)
 
     FUNC_LEAVE_NOAPI(grp->oloc.file)
 } /* end H5G_fileof() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_free_grp_name
- *
- * Purpose:	Free the 'ID to name' buffers.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: August 22, 2002
- *
- * Comments: Used now only on the root group close, in H5F_close()
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_free_grp_name(H5G_t *grp)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_free_grp_name, FAIL)
-
-    /* Check args */
-    HDassert(grp && grp->shared);
-    HDassert(grp->shared->fo_count > 0);
-
-    /* Free the path */
-    H5G_name_free(&(grp->path));
-
-done:
-     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_free_grp_name() */
 
 
 /*-------------------------------------------------------------------------
