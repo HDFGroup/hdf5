@@ -510,9 +510,9 @@ MACRO (HDF5_FUNCTION_TEST OTHER_TEST)
         H5_HAVE_SYS_TYPES_H
         H5_HAVE_SYS_SOCKET_H
     )
-      IF ("${def}")
+      IF ("${H5_${def}}")
         SET (MACRO_CHECK_FUNCTION_DEFINITIONS "${MACRO_CHECK_FUNCTION_DEFINITIONS} -D${def}")
-      ENDIF ("${def}")
+      ENDIF ("${H5_${def}}")
     ENDFOREACH (def)
 
     IF (LARGEFILE)
