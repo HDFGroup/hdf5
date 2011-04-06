@@ -487,7 +487,8 @@ void usage(void)
  printf("                           number.\n");
  printf("   --use-system-epsilon    Print difference if (|a-b| > EPSILON), EPSILON is\n");
  printf("                           a system epsilon value.\n");
- printf("                           The system epsilon values are defined as below:\n");
+ printf("                           If the system epsilon is not defined, the below\n");
+ printf("                           predefined value will be used:\n");
  printf("                               FLT_EPSILON = 1.19209E-07 for float\n");
  printf("                               DBL_EPSILON = 2.22045E-16 for double\n");
  printf("   --exclude-path \"path\"   Exclude the specified path to an object when\n");
