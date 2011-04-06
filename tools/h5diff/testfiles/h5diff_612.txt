@@ -63,7 +63,8 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
                            number.
    --use-system-epsilon    Print difference if (|a-b| > EPSILON), EPSILON is
                            a system epsilon value.
-                           The system epsilon values are defined as below:
+                           If the system epsilon is not defined, the below
+                           predefined value will be used:
                                FLT_EPSILON = 1.19209E-07 for float
                                DBL_EPSILON = 2.22045E-16 for double
    --exclude-path "path"   Exclude the specified path to an object when
