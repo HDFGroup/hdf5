@@ -8,6 +8,7 @@ INCLUDE (${CMAKE_ROOT}/Modules/CheckIncludeFiles.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckLibraryExists.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckSymbolExists.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
+INCLUDE (${CMAKE_ROOT}/Modules/CheckVariableExists.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckFortranFunctionExists.cmake)
 
 #-----------------------------------------------------------------------------
@@ -127,9 +128,9 @@ ENDMACRO (CHECK_LIBRARY_EXISTS_CONCAT)
 
 SET (WINDOWS)
 IF (WIN32)
-  IF (NOT UNIX AND NOT CYGWIN)
+  IF (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
     SET (WINDOWS 1)
-  ENDIF (NOT UNIX AND NOT CYGWIN)
+  ENDIF (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
 ENDIF (WIN32)
 
 #IF (WIN32)
@@ -519,7 +520,7 @@ MACRO (HDF5_FUNCTION_TEST OTHER_TEST)
       )
     ENDIF (LARGEFILE)
 
-    # (STATUS "Performing ${OTHER_TEST}")
+    #MESSAGE (STATUS "Performing ${OTHER_TEST}")
     TRY_COMPILE (${OTHER_TEST}
         ${CMAKE_BINARY_DIR}
         ${HDF5_RESOURCES_DIR}/HDF5Tests.c
@@ -569,11 +570,11 @@ IF (NOT WINDOWS)
       LONE_COLON
   )
     HDF5_FUNCTION_TEST (${test})
-    IF (NOT CYGWIN)
-      HDF5_FUNCTION_TEST (HAVE_TIMEZONE)
-#      HDF5_FUNCTION_TEST (HAVE_STAT_ST_BLOCKS)
-    ENDIF (NOT CYGWIN)
   ENDFOREACH (test)
+  IF (NOT CYGWIN AND NOT MINGW)
+    HDF5_FUNCTION_TEST (HAVE_TIMEZONE)
+#      HDF5_FUNCTION_TEST (HAVE_STAT_ST_BLOCKS)
+  ENDIF (NOT CYGWIN AND NOT MINGW)
 ENDIF (NOT WINDOWS)
 
 #-----------------------------------------------------------------------------
