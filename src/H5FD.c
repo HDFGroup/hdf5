@@ -1899,6 +1899,73 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FDcoordinate
+ *
+ * Purpose:     Coordinates values between processes in parallel based on 
+ *              'op' parameter specified. This function is collective.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:  Mike McGreevy
+ *              April 4, 2011
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDcoordinate(H5FD_t *file, hid_t dxpl_id, H5FD_coord_t op, void * udata)
+{
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(H5FDcoordinate, FAIL)
+
+    /* Check args */
+    if(!file || !file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+
+    /* Do the real work */
+    if(H5FD_coordinate(file, dxpl_id, op, udata) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "file coordinate request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5FDcoordinate */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_coordinate
+ *
+ * Purpose:     Private version of H5FDcoordinate()
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:  Mike McGreevy
+ *              April 4, 2011
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_coordinate(H5FD_t *file, hid_t dxpl_id, H5FD_coord_t op, void * udata)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_coordinate, FAIL)
+
+    HDassert(file && file->cls);
+
+    if(file->cls->coordinate && (file->cls->coordinate)(file, dxpl_id, op, udata) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver coordinate request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_coordinate() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FDtruncate
  *
  * Purpose:	Notify driver to truncate the file back to the allocated size.

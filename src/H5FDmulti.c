@@ -177,6 +177,7 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+    NULL,                           /* coordinate */
     H5FD_FLMAP_DEFAULT 				/*fl_map		*/
 };
 

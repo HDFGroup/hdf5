@@ -192,6 +192,7 @@ static herr_t H5FD_mpiposix_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, 
 static herr_t H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
         size_t size, const void *buf);
 static herr_t H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing);
+static herr_t H5FD_mpiposix_coordinate(H5FD_t *_file, hid_t UNUSED dxpl_id, H5FD_coord_t op, void * udata);
 static herr_t H5FD_mpiposix_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static int H5FD_mpiposix_mpi_rank(const H5FD_t *_file);
 static int H5FD_mpiposix_mpi_size(const H5FD_t *_file);
@@ -236,6 +237,7 @@ static const H5FD_class_mpi_t H5FD_mpiposix_g = {
     H5FD_mpiposix_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+    H5FD_mpiposix_coordinate,       /* coordinate */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
     },  /* End of superclass information */
     H5FD_mpiposix_mpi_rank,                     /*get_rank              */
@@ -1432,6 +1434,63 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpiposix_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_mpiposix_coordinate
+ *
+ * Purpose:     Coordinates values between processes in parallel based on 
+ *              'op' parameter specified. This function is collective.
+ *
+ * Return:      Success: Non-negative
+ *              Failure: Negative
+ *
+ * Programmer:  Mike McGreevy
+ *              April 4, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_mpiposix_coordinate(H5FD_t *_file, hid_t UNUSED dxpl_id, H5FD_coord_t op, void * UNUSED udata)
+{
+    H5FD_mpiposix_t *file = (H5FD_mpiposix_t*)_file;
+    int mpi_code; /* mpi return code */
+    herr_t              ret_value = SUCCEED;
+    haddr_t max_eof;    /* End-of-file value */
+
+    FUNC_ENTER_NOAPI(H5FD_mpiposix_coordinate, FAIL)
+
+    HDassert(file);
+    HDassert(H5FD_MPIPOSIX == file->pub.driver_id);
+
+    /* Switch on coordinate operation type */
+    switch (op) {
+
+        case H5FD_COORD_EOF:
+
+            /* Find maximum 'EOF' among all processes' locally tracked copies */
+            if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&(file->local_eof),
+                                                        &max_eof, 1,
+                                                        HADDR_AS_MPI_TYPE,
+                                                        MPI_MAX, file->comm)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
+
+            /* Synchronize eof amongst all processes with max value reported */
+            file->eof = max_eof;
+            break;
+
+        default:
+            /* For now, don't do anything if invalid case is provided.
+             * Depending on how this function evolves, we may opt to 
+             * make this fail if no operation is provided. */
+            break;
+
+    } /* end switch */
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_mpiposix_coordinate() */
 
 
 /*-------------------------------------------------------------------------

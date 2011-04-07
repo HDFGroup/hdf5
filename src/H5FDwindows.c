@@ -176,6 +176,7 @@ static const H5FD_class_t H5FD_windows_g = {
     H5FD_windows_truncate,			/*truncate		*/
     NULL,					/*lock          */
     NULL,					/*unlock        */
+    NULL,                           /* coordinate */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
 

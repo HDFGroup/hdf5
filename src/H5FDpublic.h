@@ -29,6 +29,12 @@
 /* Types of allocation requests: see H5Fpublic.h  */
 typedef enum H5F_mem_t	H5FD_mem_t;
 
+/* Class for coordinate callback */
+typedef enum H5FD_coord_t {
+    H5FD_COORD_EOF        = 0,  /* EOF coordination */
+    H5FD_NCOORDS                /* this must be last */
+} H5FD_coord_t;
+
 /* Map "fractal heap" header blocks to 'ohdr' type file memory, since its
  * a fair amount of work to add a new kind of file memory and they are similar
  * enough to object headers and probably too minor to deserve their own type.
@@ -252,6 +258,7 @@ typedef struct H5FD_class_t {
     herr_t  (*truncate)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t  (*lock)(H5FD_t *file, unsigned char *oid, unsigned lock_type, hbool_t last);
     herr_t  (*unlock)(H5FD_t *file, unsigned char *oid, hbool_t last);
+    herr_t  (*coordinate)(H5FD_t *file, hid_t dxpl_id, H5FD_coord_t op, void * udata);
     H5FD_mem_t fl_map[H5FD_MEM_NTYPES];
 } H5FD_class_t;
 
@@ -304,6 +311,7 @@ H5_DLL herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                         haddr_t addr, size_t size, const void *buf);
 H5_DLL herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, unsigned closing);
 H5_DLL herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
+H5_DLL herr_t H5FDcoordinate(H5FD_t *file, hid_t dxpl_id, H5FD_coord_t op, void * udata);
 
 #ifdef __cplusplus
 }

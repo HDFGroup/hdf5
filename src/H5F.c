@@ -1740,6 +1740,13 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
 
+#ifdef H5_HAVE_PARALLEL
+    /* Coordinate to synchronize EOF value amongst all processes */
+    if(H5FD_coordinate(f->shared->lf, dxpl_id, H5FD_COORD_EOF, NULL) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level coordinate failed")
+#endif /* H5_HAVE_PARALLEL */
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_flush() */
