@@ -10,9 +10,6 @@ INCLUDE (${CMAKE_ROOT}/Modules/CheckSymbolExists.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckFortranFunctionExists.cmake)
 
-MESSAGE (STATUS "Configure Checks that still need to be implemented")
-MESSAGE (STATUS "  GetConsoleScreenBufferInfo function for Windows")
-
 #-----------------------------------------------------------------------------
 # Always SET this for now IF we are on an OS X box
 #-----------------------------------------------------------------------------
@@ -176,6 +173,7 @@ IF (WINDOWS)
   SET (H5_HAVE_LONGJMP 1)
   SET (H5_STDC_HEADERS 1)
   SET (H5_HAVE_GETHOSTNAME 1)
+  SET (H5_HAVE_GETCONSOLESCREENBUFFERINFO 1)
   SET (H5_HAVE_TIMEZONE 1)
   SET (H5_HAVE_FUNCTION 1)
   SET (H5_LONE_COLON 0)
