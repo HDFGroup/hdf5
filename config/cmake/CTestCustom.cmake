@@ -29,6 +29,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5COPY-clear-refs
     H5COPY-clear-ext-links
     H5COPY-clear-misc
+    H5COPY-clear-samefile
     ######### tools/h5diff #########
     H5DIFF-clearall-objects
     ######### tools/h5dump #########
