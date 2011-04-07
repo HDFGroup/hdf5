@@ -31,6 +31,7 @@ typedef enum H5F_mem_t	H5FD_mem_t;
 
 /* Class for coordinate callback */
 typedef enum H5FD_coord_t {
+    H5FD_COORD_NONE       = -1, /* No action */
     H5FD_COORD_EOF        = 0,  /* EOF coordination */
     H5FD_NCOORDS                /* this must be last */
 } H5FD_coord_t;

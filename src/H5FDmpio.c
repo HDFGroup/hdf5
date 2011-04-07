@@ -1963,6 +1963,7 @@ H5FD_mpio_coordinate(H5FD_t *_file, hid_t UNUSED dxpl_id, H5FD_coord_t op, void 
             file->eof = max_eof;
             break;
 
+        case H5FD_COORD_NONE:
         default:
 
             /* For now, don't do anything if invalid case is provided.

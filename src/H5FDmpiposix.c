@@ -1479,6 +1479,7 @@ H5FD_mpiposix_coordinate(H5FD_t *_file, hid_t UNUSED dxpl_id, H5FD_coord_t op, v
             file->eof = max_eof;
             break;
 
+        case H5FD_COORD_NONE:
         default:
             /* For now, don't do anything if invalid case is provided.
              * Depending on how this function evolves, we may opt to 
