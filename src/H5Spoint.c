@@ -1551,8 +1551,8 @@ herr_t
 H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem,
     const hsize_t *coord)
 {
-    H5S_t *space;               /* Dataspace to modify selection of */
-    herr_t ret_value;           /* Return value */
+    H5S_t    *space;               /* Dataspace to modify selection of */
+    herr_t   ret_value;            /* Return value */
 
     FUNC_ENTER_API(H5Sselect_elements, FAIL)
     H5TRACE4("e", "iSsz*h", spaceid, op, num_elem, coord);
