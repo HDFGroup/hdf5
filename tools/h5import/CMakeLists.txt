@@ -99,16 +99,7 @@ IF (BUILD_TESTING)
     )
   ENDFOREACH (txt_file ${HDF5_REFERENCE_TXT_FILES})
 
-  FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/tmp_testfiles")
   FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    SET (tmpdest "${PROJECT_BINARY_DIR}/tmp_testfiles/${h5_file}")
-    #MESSAGE (STATUS " Copying ${h5_file}")
-    ADD_CUSTOM_COMMAND (
-        TARGET     h5import
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5IMPORT_SOURCE_DIR}/testfiles/${h5_file} ${tmpdest}
-    )
     SET (dest "${PROJECT_BINARY_DIR}/testfiles/${h5_file}")
     #MESSAGE (STATUS " Copying ${h5_file}")
     ADD_CUSTOM_COMMAND (
@@ -148,7 +139,7 @@ IF (BUILD_TESTING)
           NAME H5IMPORT-H5DUMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=testfiles/${testfile}"
+              -D "TEST_ARGS:STRING=${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${testfile}.new"
               -D "TEST_EXPECT=0"
@@ -161,7 +152,7 @@ IF (BUILD_TESTING)
           NAME H5IMPORT-H5DUMP_CMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=tmp_testfiles/${testfile}"
+              -D "TEST_ARGS:STRING=testfiles/${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${testfile}.out"
               -D "TEST_EXPECT=0"
@@ -194,6 +185,7 @@ IF (BUILD_TESTING)
           binuin32.bin
           txtin16.txt
           txtin32.txt
+          ${HDF5_REFERENCE_TEST_FILES}
   )
 
   ADD_TEST (NAME H5IMPORT-h5importtest COMMAND $<TARGET_FILE:h5importtest>)
