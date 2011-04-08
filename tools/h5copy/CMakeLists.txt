@@ -95,7 +95,7 @@ IF (BUILD_TESTING)
       SET_TESTS_PROPERTIES (H5COPY_F-${testname} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
     SET (last_test "H5COPY_F-${testname}")
-    ADD_H5_DIFF_TEST (${testname} ${resultcode} ${infile} ${outfile} ${srcname} ${dstname})
+    ADD_H5_DIFF_TEST (${testname} ${resultcode} ${last_test} ${infile} ${outfile} ${srcname} ${dstname})
   ENDMACRO (ADD_H5_F_TEST)
   
   MACRO (ADD_H5_TEST testname resultcode infile outfile vparam sparam srcname dparam dstname)
@@ -107,19 +107,17 @@ IF (BUILD_TESTING)
       SET_TESTS_PROPERTIES (H5COPY-${testname} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
     SET (last_test "H5COPY-${testname}")
-    ADD_H5_DIFF_TEST (${testname} ${resultcode} ${infile} ${outfile} ${srcname} ${dstname})
+    ADD_H5_DIFF_TEST (${testname} ${resultcode} ${last_test} ${infile} ${outfile} ${srcname} ${dstname})
   ENDMACRO (ADD_H5_TEST)
   
-  MACRO (ADD_H5_DIFF_TEST testname resultcode infile outfile srcname dstname)
+  MACRO (ADD_H5_DIFF_TEST testname resultcode testdepends infile outfile srcname dstname)
     # resultcode=2 will cause the test to skip the diff test
     IF (NOT ${resultcode} STREQUAL "2")
       ADD_TEST (
           NAME H5COPY-DIFF_${testname}
           COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${outfile} ${srcname} ${dstname}
       )
-      IF (NOT "${last_test}" STREQUAL "")
-        SET_TESTS_PROPERTIES(H5COPY-DIFF_${testname} PROPERTIES DEPENDS ${last_test})
-      ENDIF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES(H5COPY-DIFF_${testname} PROPERTIES DEPENDS ${testdepends})
       SET (last_test "H5COPY-DIFF_${testname}")
       IF (${resultcode} STREQUAL "1")
         SET_TESTS_PROPERTIES (H5COPY-DIFF_${testname} PROPERTIES WILL_FAIL "true")
