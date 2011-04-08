@@ -3566,11 +3566,11 @@ external_set_elink_fapl1(hid_t fapl, hbool_t new_format)
 
     sprintf(sv[H5FD_MEM_LHEAP], "%%s-%c.h5", 'l');
     memb_name[H5FD_MEM_LHEAP] = sv[H5FD_MEM_LHEAP];
-    memb_addr[H5FD_MEM_LHEAP] = HADDR_MAX*2/3;
+    memb_addr[H5FD_MEM_LHEAP] = (HADDR_MAX/3)*2;
 
     sprintf(sv[H5FD_MEM_OHDR], "%%s-%c.h5", 'o');
     memb_name[H5FD_MEM_OHDR] = sv[H5FD_MEM_OHDR];
-    memb_addr[H5FD_MEM_OHDR] = HADDR_MAX*5/6;
+    memb_addr[H5FD_MEM_OHDR] = (HADDR_MAX/6)*5;
 
     /* create "multi" fapl */
     multi_fapl = h5_fileaccess();
