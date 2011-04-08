@@ -1033,3 +1033,384 @@ done:
 
 } /* end H5FD_fsync() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_aggregate_stats
+ *
+ * Purpose:     Aggregate the contents of *new_stats_ptr into 
+ *              *base_stats_ptr.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              3/30/11
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5FD_aggregate_stats(H5FD_stats_t *base_stats_ptr, H5FD_stats_t *new_stats_ptr)
+{
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5FD_aggregate_stats)
+
+    if ((base_stats_ptr == NULL)||(base_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC)||
+        (new_stats_ptr == NULL)||(new_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
+
+    if (new_stats_ptr->defined){
+        base_stats_ptr->defined = TRUE;
+        base_stats_ptr->complete = (hbool_t)(base_stats_ptr->complete && new_stats_ptr->complete);
+        base_stats_ptr->aio_reads_attempted += new_stats_ptr->aio_reads_attempted;
+        base_stats_ptr->aio_reads_completed_successfully += new_stats_ptr->aio_reads_completed_successfully;
+        base_stats_ptr->aio_read_queue_attempts += new_stats_ptr->aio_read_queue_attempts;
+        base_stats_ptr->aio_read_queue_attempt_failures += new_stats_ptr->aio_read_queue_attempt_failures;
+        base_stats_ptr->aio_reads_converted_to_sio += new_stats_ptr->aio_reads_converted_to_sio;
+        base_stats_ptr->aio_read_failures += new_stats_ptr->aio_read_failures;
+        base_stats_ptr->aio_read_failures_recovered_via_sio += new_stats_ptr->aio_read_failures_recovered_via_sio;
+        base_stats_ptr->aio_partial_reads += new_stats_ptr->aio_partial_reads;
+        base_stats_ptr->aio_partial_reads_recovered_via_sio += new_stats_ptr->aio_partial_reads_recovered_via_sio;
+        base_stats_ptr->aio_writes_attempted += new_stats_ptr->aio_writes_attempted;
+        base_stats_ptr->aio_writes_completed_successfully += new_stats_ptr->aio_writes_completed_successfully;
+        base_stats_ptr->aio_write_queue_attempts += new_stats_ptr->aio_write_queue_attempts;
+        base_stats_ptr->aio_write_queue_attempt_failures += new_stats_ptr->aio_write_queue_attempt_failures;
+        base_stats_ptr->aio_writes_converted_to_sio += new_stats_ptr->aio_writes_converted_to_sio;
+        base_stats_ptr->aio_write_failures += new_stats_ptr->aio_write_failures;
+        base_stats_ptr->aio_write_failures_recovered_via_sio += new_stats_ptr->aio_write_failures_recovered_via_sio;
+        base_stats_ptr->aio_partial_writes += new_stats_ptr->aio_partial_writes;
+        base_stats_ptr->aio_partial_writes_recovered_via_sio += new_stats_ptr->aio_partial_writes_recovered_via_sio;
+        base_stats_ptr->aio_fsyncs_attempted += new_stats_ptr->aio_fsyncs_attempted;
+        base_stats_ptr->aio_fsyncs_completed_successfully += new_stats_ptr->aio_fsyncs_completed_successfully;
+        base_stats_ptr->aio_fsync_queue_attempts += new_stats_ptr->aio_fsync_queue_attempts;
+        base_stats_ptr->aio_fsync_queue_attempt_failures += new_stats_ptr->aio_fsync_queue_attempt_failures;
+        base_stats_ptr->aio_fsyncs_converted_to_sio += new_stats_ptr->aio_fsyncs_converted_to_sio;
+        base_stats_ptr->aio_fsync_failures += new_stats_ptr->aio_fsync_failures;
+        base_stats_ptr->aio_fsync_failures_recovered_via_sio += new_stats_ptr->aio_fsync_failures_recovered_via_sio;
+    }else
+        base_stats_ptr->complete=FALSE;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_aggregate_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_copy_stats
+ *
+ * Purpose:     copy the contents of *src_stats_ptr into *dest_stats_ptr.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              3/30/11
+ *-------------------------------------------------------------------------
+ */
+#define H5FD_COPY_STATS__DEBUG 0
+herr_t
+H5FD_copy_stats(H5FD_stats_t *dest_stats_ptr, H5FD_stats_t *src_stats_ptr)
+{
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5FD_copy_stats)
+
+#if H5FD_COPY_STATS__DEBUG > 1
+    HDfprintf(stdout, "%s: entering.\n", FUNC);
+#endif /* H5FD_COPY_STATS__DEBUG > 1 */
+
+    if ((dest_stats_ptr == NULL)||(dest_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC)||
+        (src_stats_ptr == NULL)||(src_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
+
+    dest_stats_ptr->defined = src_stats_ptr->defined;
+
+    if (src_stats_ptr->defined){
+
+#if H5FD_COPY_STATS__DEBUG > 1
+    HDfprintf(stdout, "%s: stats defined -- copying........", FUNC);
+#endif /* H5FD_COPY_STATS__DEBUG > 1 */
+
+        dest_stats_ptr->complete = src_stats_ptr->complete;
+        dest_stats_ptr->aio_reads_attempted = src_stats_ptr->aio_reads_attempted;
+        dest_stats_ptr->aio_reads_completed_successfully = src_stats_ptr->aio_reads_completed_successfully;
+        dest_stats_ptr->aio_read_queue_attempts = src_stats_ptr->aio_read_queue_attempts;
+        dest_stats_ptr->aio_read_queue_attempt_failures = src_stats_ptr->aio_read_queue_attempt_failures;
+        dest_stats_ptr->aio_reads_converted_to_sio = src_stats_ptr->aio_reads_converted_to_sio;
+        dest_stats_ptr->aio_read_failures = src_stats_ptr->aio_read_failures;
+        dest_stats_ptr->aio_read_failures_recovered_via_sio = src_stats_ptr->aio_read_failures_recovered_via_sio;
+        dest_stats_ptr->aio_partial_reads = src_stats_ptr->aio_partial_reads;
+        dest_stats_ptr->aio_partial_reads_recovered_via_sio = src_stats_ptr->aio_partial_reads_recovered_via_sio;
+        dest_stats_ptr->aio_writes_attempted = src_stats_ptr->aio_writes_attempted;
+        dest_stats_ptr->aio_writes_completed_successfully = src_stats_ptr->aio_writes_completed_successfully;
+        dest_stats_ptr->aio_write_queue_attempts = src_stats_ptr->aio_write_queue_attempts;
+        dest_stats_ptr->aio_write_queue_attempt_failures = src_stats_ptr->aio_write_queue_attempt_failures;
+        dest_stats_ptr->aio_writes_converted_to_sio = src_stats_ptr->aio_writes_converted_to_sio;
+        dest_stats_ptr->aio_write_failures = src_stats_ptr->aio_write_failures;
+        dest_stats_ptr->aio_write_failures_recovered_via_sio = src_stats_ptr->aio_write_failures_recovered_via_sio;
+        dest_stats_ptr->aio_partial_writes = src_stats_ptr->aio_partial_writes;
+        dest_stats_ptr->aio_partial_writes_recovered_via_sio = src_stats_ptr->aio_partial_writes_recovered_via_sio;
+        dest_stats_ptr->aio_fsyncs_attempted = src_stats_ptr->aio_fsyncs_attempted;
+        dest_stats_ptr->aio_fsyncs_completed_successfully = src_stats_ptr->aio_fsyncs_completed_successfully;
+        dest_stats_ptr->aio_fsync_queue_attempts = src_stats_ptr->aio_fsync_queue_attempts;
+        dest_stats_ptr->aio_fsync_queue_attempt_failures = src_stats_ptr->aio_fsync_queue_attempt_failures;
+        dest_stats_ptr->aio_fsyncs_converted_to_sio = src_stats_ptr->aio_fsyncs_converted_to_sio;
+        dest_stats_ptr->aio_fsync_failures = src_stats_ptr->aio_fsync_failures;
+        dest_stats_ptr->aio_fsync_failures_recovered_via_sio = src_stats_ptr->aio_fsync_failures_recovered_via_sio;
+
+#if H5FD_COPY_STATS__DEBUG > 1
+        HDfprintf(stdout, "done.\n");
+#endif /* H5FD_COPY_STATS__DEBUG > 1 */
+    }
+
+done:
+
+#if H5FD_COPY_STATS__DEBUG > 1
+    HDfprintf(stdout, "%s: exiting.\n", FUNC);
+#endif /* H5FD_COPY_STATS__DEBUG > 1 */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_copy_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_dump_stats
+ *
+ * Purpose:     Dump the contents of the supplied instance of H5FD_stats_t
+ *		to the indicated stream.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              4/4/11
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5FD_dump_stats(FILE * out_stream,H5FD_stats_t *stats_ptr,const char *label_ptr)
+{
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5FD_dump_stats)
+
+    if((out_stream==NULL)||(stats_ptr==NULL)||(stats_ptr->magic!=H5FD__H5FD_STATS_T_MAGIC)||(label_ptr==NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
+
+    HDfprintf(out_stream, "\n%s\n", label_ptr);
+    if(!(stats_ptr->defined))
+	HDfprintf(out_stream,"	Stats are undefined.\n\n");
+    else{
+	HDfprintf(out_stream, "\nstats defined/complete = %d/%d.\n\n",
+                  (int)(stats_ptr->defined), (int)(stats_ptr->complete));
+        HDfprintf(out_stream, 
+	      "                                aio_read        aio_write       aio_fsync\n");
+        HDfprintf(out_stream, 
+	      "=========================================================================\n");
+        HDfprintf(out_stream, 
+              "attempted                        %5lld           %5lld           %5lld\n",
+              (long long)(stats_ptr->aio_reads_attempted), 
+              (long long)(stats_ptr->aio_writes_attempted), 
+              (long long)(stats_ptr->aio_fsyncs_attempted));
+        HDfprintf(out_stream, 
+              "completed successfuly            %5lld           %5lld           %5lld\n",
+              stats_ptr->aio_reads_completed_successfully, 
+              stats_ptr->aio_writes_completed_successfully, 
+              stats_ptr->aio_fsyncs_completed_successfully);
+        HDfprintf(out_stream, 
+              "queue attempts                   %5lld           %5lld           %5lld\n",
+              stats_ptr->aio_read_queue_attempts,
+              stats_ptr->aio_write_queue_attempts,
+              stats_ptr->aio_fsync_queue_attempts);
+        HDfprintf(out_stream, 
+              "queue attempt failures           %5lld           %5lld           %5lld\n",
+              stats_ptr->aio_read_queue_attempt_failures,
+              stats_ptr->aio_write_queue_attempt_failures,
+              stats_ptr->aio_fsync_queue_attempt_failures);
+        HDfprintf(out_stream, 
+              "converted to sio                 %5lld           %5lld           %5lld\n",
+              stats_ptr->aio_reads_converted_to_sio,
+              stats_ptr->aio_writes_converted_to_sio,
+              stats_ptr->aio_fsyncs_converted_to_sio);
+        HDfprintf(out_stream, 
+              "failures                         %5lld           %5lld           %5lld\n",
+              stats_ptr->aio_read_failures,
+              stats_ptr->aio_write_failures,
+              stats_ptr->aio_fsync_failures);
+        HDfprintf(out_stream, 
+              "failures recovered via sio       %5lld           %5lld           %5lld\n",
+              stats_ptr->aio_read_failures_recovered_via_sio,
+              stats_ptr->aio_write_failures_recovered_via_sio,
+              stats_ptr->aio_fsync_failures_recovered_via_sio);
+        HDfprintf(out_stream, 
+              "partial                          %5lld           %5lld             n/a\n",
+              stats_ptr->aio_partial_reads, stats_ptr->aio_partial_writes);
+        HDfprintf(out_stream, 
+              "partial complete via sio         %5lld           %5lld             n/a\n",
+              stats_ptr->aio_partial_reads_recovered_via_sio,
+              stats_ptr->aio_partial_writes_recovered_via_sio);
+        HDfprintf(out_stream, 
+	      "=========================================================================\n\n");
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_initialize_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_get_stats
+ *
+ * Purpose:     Request stats from the specified file, returning them
+ *		in *stats_ptr.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              3/30/11
+ *
+ * Changes: 	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t 
+H5FD_get_stats(H5FD_t *file, H5FD_stats_t *stats_ptr)
+{
+    const H5FD_private_class_t * private_class_ptr;
+    herr_t                       ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_get_stats, FAIL)
+
+    if((file == NULL)||(file->cls == NULL)||(stats_ptr==NULL)||
+       (stats_ptr->magic!=H5FD__H5FD_STATS_T_MAGIC))
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad param(s) on entry.")
+
+    if((file->feature_flags&H5FD_FEAT_EXTENDED_CLASS)!=0){
+        private_class_ptr = (const H5FD_private_class_t *)(file->cls);
+        if(private_class_ptr->magic!=H5FD__H5FD_PRIVATE_CLASS_T__MAGIC)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "bad extended class magic.")
+        if(private_class_ptr->get_stats!=NULL){
+	    if((private_class_ptr->get_stats)(file,stats_ptr)<0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "target get_stats() call failed.")
+        }else
+            stats_ptr->defined = FALSE;
+    }else 
+        stats_ptr->defined = FALSE;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_get_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_initialize_stats
+ *
+ * Purpose:     Set the fields of the supplied instance of H5FD_stats_t
+ *		to standard initial values.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              3/30/11
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5FD_initialize_stats(H5FD_stats_t *stats_ptr)
+{
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5FD_initialize_stats)
+
+    if(( stats_ptr == NULL) || (stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
+
+    stats_ptr->magic = H5FD__H5FD_STATS_T_MAGIC;
+    stats_ptr->defined = TRUE;
+    stats_ptr->complete = TRUE;
+    stats_ptr->aio_reads_attempted = 0;
+    stats_ptr->aio_reads_completed_successfully = 0;
+    stats_ptr->aio_read_queue_attempts = 0;
+    stats_ptr->aio_read_queue_attempt_failures = 0;
+    stats_ptr->aio_reads_converted_to_sio = 0;
+    stats_ptr->aio_read_failures = 0;
+    stats_ptr->aio_read_failures_recovered_via_sio = 0;
+    stats_ptr->aio_partial_reads = 0;
+    stats_ptr->aio_partial_reads_recovered_via_sio = 0;
+    stats_ptr->aio_writes_attempted = 0;
+    stats_ptr->aio_writes_completed_successfully = 0;
+    stats_ptr->aio_write_queue_attempts = 0;
+    stats_ptr->aio_write_queue_attempt_failures = 0;
+    stats_ptr->aio_writes_converted_to_sio = 0;
+    stats_ptr->aio_write_failures = 0;
+    stats_ptr->aio_write_failures_recovered_via_sio = 0;
+    stats_ptr->aio_partial_writes = 0;
+    stats_ptr->aio_partial_writes_recovered_via_sio = 0;
+    stats_ptr->aio_fsyncs_attempted = 0;
+    stats_ptr->aio_fsyncs_completed_successfully = 0;
+    stats_ptr->aio_fsync_queue_attempts = 0;
+    stats_ptr->aio_fsync_queue_attempt_failures = 0;
+    stats_ptr->aio_fsyncs_converted_to_sio = 0;
+    stats_ptr->aio_fsync_failures = 0;
+    stats_ptr->aio_fsync_failures_recovered_via_sio = 0;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_initialize_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_reset_stats
+ *
+ * Purpose:     Reset stats for the specified file.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              3/30/11
+ *
+ * Changes: 	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t 
+H5FD_reset_stats(H5FD_t *file)
+{
+    const H5FD_private_class_t * private_class_ptr;
+    herr_t                       ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_reset_stats, FAIL)
+
+    if((file == NULL)||(file->cls == NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad file param on entry.")
+
+    if((file->feature_flags&H5FD_FEAT_EXTENDED_CLASS)==0){
+        private_class_ptr = (const H5FD_private_class_t *)(file->cls);
+        if(private_class_ptr->magic!=H5FD__H5FD_PRIVATE_CLASS_T__MAGIC)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "bad extended class magic.")
+        if(private_class_ptr->reset_stats!=NULL)
+	    if((private_class_ptr->reset_stats)(file)<0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "target reset_stats() call failed.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_reset_stats() */
+
+

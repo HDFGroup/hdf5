@@ -35,6 +35,7 @@
 /*lint -esym( 534, H5Eclear2, H5Epush2) */
 
 #include "hdf5.h"
+#include "H5FDprivate.h"        /* File drivers                         */
 
 /*
  * Define H5FD_MULTI_DEBUG if you want the ability to print debugging

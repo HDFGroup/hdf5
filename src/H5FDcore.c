@@ -1176,7 +1176,7 @@ H5FD_core_fsync(H5FD_t *file,
          ( core_file->backing_store ) ) {
 
         /* Flush any changed buffers */
-        if(H5FD_core_flush(core_file, (hid_t)-1, TRUE) < 0)
+        if(H5FD_core_flush(file, (hid_t)-1, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
 
 

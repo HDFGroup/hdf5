@@ -210,7 +210,13 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * of type 'int' and is compatible with POSIX I/O calls.
      */
 #define H5FD_FEAT_POSIX_COMPAT_HANDLE   0x00000080
-
+    /* 
+     * Defining the H5FD_FEAT_EXTENDED_CLASS for a VFD driver means that the 
+     * driver supports some or all of the extended VFD calls used for 
+     * test and debug of file drivers by the HDF5 library.  External file 
+     * drivers should never set this flag.
+     */
+#define H5FD_FEAT_EXTENDED_CLASS	0x80000000
 
 /* Forward declaration */
 typedef struct H5FD_t H5FD_t;

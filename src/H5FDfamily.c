@@ -194,19 +194,11 @@ static herr_t H5FD_family_aio_discard_ctlblk(
                                      H5FD_family_aio_ctlblk_t *ctlblk_ptr);
 static herr_t H5FD_family_aio_extend_ctlblk(
                                      H5FD_family_aio_ctlblk_t *ctlblk_ptr);
-static herr_t H5FD_family_aio_read(H5FD_t *file, 
-                                   H5FD_mem_t type, 
-                                   hid_t dxpl_id,
-                                   haddr_t addr, 
-                                   size_t size, 
-                                   void *buffer,
+static herr_t H5FD_family_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, 
+                                   haddr_t addr, size_t size, void *buffer, 
                                    void **ctlblk_ptr_ptr);
-static herr_t H5FD_family_aio_write(H5FD_t *file, 
-                                    H5FD_mem_t type, 
-                                    hid_t dxpl_id,
-                                    haddr_t addr, 
-                                    size_t size, 
-                                    void *buffer,
+static herr_t H5FD_family_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+                                    haddr_t addr, size_t size, void *buffer, 
                                     void **ctlblk_ptr_ptr);
 static herr_t H5FD_family_aio_test(hbool_t *done_ptr, void *ctlblk_ptr);
 static herr_t H5FD_family_aio_wait(void *ctlblk_ptr);
@@ -215,58 +207,66 @@ static herr_t H5FD_family_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr);
 static herr_t H5FD_family_aio_cancel(void *ctlblk_ptr);
 #endif /* H5_HAVE_AIO */
 static herr_t H5FD_family_fsync(H5FD_t *file, hid_t dxpl_id);
+static herr_t H5FD_family_get_stats(H5FD_t *file, H5FD_stats_t *stats_ptr);
+static herr_t H5FD_family_reset_stats(H5FD_t *file);
+
 
 /* The class struct */
-static const H5FD_class_t H5FD_family_g = {
-    "family",					/*name			*/
-    HADDR_MAX,					/*maxaddr		*/
-    H5F_CLOSE_WEAK,				/*fc_degree		*/
-    H5FD_family_sb_size,			/*sb_size		*/
-    H5FD_family_sb_encode,			/*sb_encode		*/
-    H5FD_family_sb_decode,			/*sb_decode		*/
-    sizeof(H5FD_family_fapl_t),			/*fapl_size		*/
-    H5FD_family_fapl_get,			/*fapl_get		*/
-    H5FD_family_fapl_copy,			/*fapl_copy		*/
-    H5FD_family_fapl_free,			/*fapl_free		*/
-    sizeof(H5FD_family_dxpl_t),			/*dxpl_size		*/
-    H5FD_family_dxpl_copy,			/*dxpl_copy		*/
-    H5FD_family_dxpl_free,			/*dxpl_free		*/
-    H5FD_family_open,				/*open			*/
-    H5FD_family_close,				/*close			*/
-    H5FD_family_cmp,				/*cmp			*/
-    H5FD_family_query,		                /*query			*/
-    NULL,					/*get_type_map		*/
-    NULL,					/*alloc			*/
-    NULL,					/*free			*/
-    H5FD_family_get_eoa,			/*get_eoa		*/
-    H5FD_family_set_eoa,			/*set_eoa		*/
-    H5FD_family_get_eof,			/*get_eof		*/
-    H5FD_family_get_handle,                     /*get_handle            */
-    H5FD_family_read,				/*read			*/
-    H5FD_family_write,				/*write			*/
-    H5FD_family_flush,				/*flush			*/
-    H5FD_family_truncate,			/*truncate		*/
-    NULL,                                       /*lock                  */
-    NULL,                                       /*unlock                */
+static const H5FD_private_class_t H5FD_family_g = {
+    {
+        "family",				/*name			*/
+        HADDR_MAX,				/*maxaddr		*/
+        H5F_CLOSE_WEAK,				/*fc_degree		*/
+        H5FD_family_sb_size,			/*sb_size		*/
+        H5FD_family_sb_encode,			/*sb_encode		*/
+        H5FD_family_sb_decode,			/*sb_decode		*/
+        sizeof(H5FD_family_fapl_t),		/*fapl_size		*/
+        H5FD_family_fapl_get,			/*fapl_get		*/
+        H5FD_family_fapl_copy,			/*fapl_copy		*/
+        H5FD_family_fapl_free,			/*fapl_free		*/
+        sizeof(H5FD_family_dxpl_t),		/*dxpl_size		*/
+        H5FD_family_dxpl_copy,			/*dxpl_copy		*/
+        H5FD_family_dxpl_free,			/*dxpl_free		*/
+        H5FD_family_open,			/*open			*/
+        H5FD_family_close,			/*close			*/
+        H5FD_family_cmp,			/*cmp			*/
+        H5FD_family_query,		        /*query			*/
+        NULL,					/*get_type_map		*/
+        NULL,					/*alloc			*/
+        NULL,					/*free			*/
+        H5FD_family_get_eoa,			/*get_eoa		*/
+        H5FD_family_set_eoa,			/*set_eoa		*/
+        H5FD_family_get_eof,			/*get_eof		*/
+        H5FD_family_get_handle,                 /*get_handle            */
+        H5FD_family_read,			/*read			*/
+        H5FD_family_write,			/*write			*/
+        H5FD_family_flush,			/*flush			*/
+        H5FD_family_truncate,			/*truncate		*/
+        NULL,                                   /*lock                  */
+        NULL,                                   /*unlock                */
 #ifdef H5_HAVE_AIO
-    H5FD_family_aio_read,                       /*aio_read              */
-    H5FD_family_aio_write,                      /*aio_write             */
-    H5FD_family_aio_test,                       /*aio_test              */
-    H5FD_family_aio_wait,                       /*aio_wait              */
-    H5FD_family_aio_finish,                     /*aio_finish            */
-    H5FD_family_aio_fsync,                      /*aio_fsync             */
-    H5FD_family_aio_cancel,                     /*aio_cancel            */
+        H5FD_family_aio_read,                   /*aio_read              */
+        H5FD_family_aio_write,                  /*aio_write             */
+        H5FD_family_aio_test,                   /*aio_test              */
+        H5FD_family_aio_wait,                   /*aio_wait              */
+        H5FD_family_aio_finish,                 /*aio_finish            */
+        H5FD_family_aio_fsync,                  /*aio_fsync             */
+        H5FD_family_aio_cancel,                 /*aio_cancel            */
 #else /* H5_HAVE_AIO */
-    NULL,                                       /*aio_read              */
-    NULL,                                       /*aio_write             */
-    NULL,                                       /*aio_test              */
-    NULL,                                       /*aio_wait              */
-    NULL,                                       /*aio_finish            */
-    NULL,                                       /*aio_fsync             */
-    NULL,                                       /*aio_cancel            */
+        NULL,                                   /*aio_read              */
+        NULL,                                   /*aio_write             */
+        NULL,                                   /*aio_test              */
+        NULL,                                   /*aio_wait              */
+        NULL,                                   /*aio_finish            */
+        NULL,                                   /*aio_fsync             */
+        NULL,                                   /*aio_cancel            */
 #endif /* H5_HAVE_AIO */
-    H5FD_family_fsync,				/*fsync			*/
-    H5FD_FLMAP_SINGLE 				/*fl_map		*/
+        H5FD_family_fsync,			/*fsync			*/
+        H5FD_FLMAP_SINGLE 			/*fl_map		*/
+    },
+    H5FD__H5FD_PRIVATE_CLASS_T__MAGIC,          /*magic                 */
+    H5FD_family_get_stats,			/*get_stats		*/
+    H5FD_family_reset_stats			/*reset_stats		*/
 };
 
 
@@ -317,7 +317,7 @@ H5FD_family_init(void)
     FUNC_ENTER_NOAPI(H5FD_family_init, FAIL)
 
     if (H5I_VFL!=H5Iget_type(H5FD_FAMILY_g))
-        H5FD_FAMILY_g = H5FD_register(&H5FD_family_g,sizeof(H5FD_class_t),FALSE);
+        H5FD_FAMILY_g = H5FD_register(&H5FD_family_g,sizeof(H5FD_private_class_t),FALSE);
 
     /* Set return value */
     ret_value=H5FD_FAMILY_g;
@@ -1120,6 +1120,7 @@ H5FD_family_query(const H5FD_t * _file, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes. */
         *flags |= H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+	*flags |= H5FD_FEAT_EXTENDED_CLASS;     /* this driver supports H5FD_private_class_t */
 
         /* Check for flags that are set by h5repart */
         if(file->repart_members)
@@ -1715,8 +1716,8 @@ H5FD_family_aio_discard_ctlblk(H5FD_family_aio_ctlblk_t *ctlblk_ptr)
 {
     herr_t                        ret_value = SUCCEED;  /* Return value */
     hbool_t		          bad_subctlblk_magic = FALSE;
-    int                           i;
-    int				  array_len = 0;
+    unsigned int                  i;
+    unsigned int		  array_len = 0;
     H5FD_family_aio_subctlblk_t * subctlblks = NULL;
 
     FUNC_ENTER_NOAPI(H5FD_family_aio_discard_ctlblk, FAIL)
@@ -1827,9 +1828,9 @@ H5FD_family_aio_extend_ctlblk(H5FD_family_aio_ctlblk_t *ctlblk_ptr)
 {
     herr_t                        ret_value = SUCCEED;  /* Return value */
     hbool_t		          bad_subctlblk_magic = FALSE;
-    int                           i;
-    int			          old_array_len;
-    int			          new_array_len;
+    unsigned int                  i;
+    unsigned int	          old_array_len;
+    unsigned int	          new_array_len;
     H5FD_family_aio_subctlblk_t * old_subctlblks = NULL;
     H5FD_family_aio_subctlblk_t * new_subctlblks = NULL;
 
@@ -2004,7 +2005,7 @@ H5FD_family_aio_read(H5FD_t *file,
     herr_t                     ret_value = SUCCEED;  /* Return value */
     herr_t		       result;
     hbool_t		       success = FALSE;
-    int                        i;
+    unsigned                   i;
     unsigned                   sub_file_num;         /* Local index variable */
     hid_t                      memb_dxpl_id = H5P_DATASET_XFER_DEFAULT;
     size_t		       size_remaining;
@@ -2245,7 +2246,7 @@ H5FD_family_aio_write(H5FD_t *file,
     herr_t                     ret_value = SUCCEED;  /* Return value */
     herr_t		       result;
     hbool_t		       success = FALSE;
-    int                        i;
+    unsigned                   i;
     unsigned                   sub_file_num;         /* Local index variable */
     hid_t                      memb_dxpl_id = H5P_DATASET_XFER_DEFAULT;
     size_t		       size_remaining;
@@ -3226,4 +3227,123 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_family_fsync() */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_family_get_stats
+ *
+ * Purpose:	Obtain stats from all underlying files, construct 
+ *		aggregate stats if possible, and return them in *stats_ptr.
+ *
+ *		If any errors are detected, simply fail.
+ *		
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              3/30/11
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_family_get_stats(H5FD_t *file, H5FD_stats_t *stats_ptr)
+{
+    herr_t                     ret_value = SUCCEED;  /* Return value */
+    hbool_t		       defined = FALSE;
+    unsigned int               i;
+    unsigned int 	       num_sub_files;
+    H5FD_family_t            * family_file;
+    H5FD_t                   * tgt_file;
+    H5FD_stats_t               subfile_stats;
+
+    FUNC_ENTER_NOAPI(H5FD_family_get_stats, FAIL)
+
+    if((file == NULL)||(file->cls == NULL)||(stats_ptr == NULL)||
+         (stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad arg(s) on entry")
+
+    if(H5FD_initialize_stats(stats_ptr) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "H5FD_initialize_stats(1) failed.")
+
+    family_file = (H5FD_family_t *)file;
+
+    num_sub_files = family_file->nmembs;
+
+    for ( i = 0; i < num_sub_files; i++ ) {
+
+        subfile_stats.magic = H5FD__H5FD_STATS_T_MAGIC;
+
+        if(H5FD_initialize_stats(&subfile_stats) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "H5FD_initialize_stats(1) failed.")
+
+        tgt_file = family_file->memb[i];
+
+        if(H5FD_get_stats(tgt_file, &subfile_stats) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "H5FD_get_stats() failed")
+
+        if ( subfile_stats.defined )
+	    defined = TRUE;
+
+        if ( H5FD_aggregate_stats(stats_ptr,&subfile_stats)<0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "H5FD_aggregate_stats() failed")
+    }
+
+    stats_ptr->defined = defined;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_family_get_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_family_reset_stats
+ *
+ * Purpose:	Reset the stats of all the underlying files.
+ *
+ *		If any errors are detected, simply fail.
+ *		
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              3/30/11
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+H5FD_family_reset_stats(H5FD_t *file)
+{
+    herr_t                     ret_value = SUCCEED;  /* Return value */
+    unsigned int               i;
+    unsigned int 	       num_sub_files;
+    H5FD_family_t            * family_file;
+    H5FD_t                   * tgt_file;
+
+    FUNC_ENTER_NOAPI(H5FD_family_reset_stats, FAIL)
+
+    if((file == NULL)||(file->cls == NULL))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad arg(s) on entry")
+
+    family_file = (H5FD_family_t *)file;
+
+    num_sub_files = family_file->nmembs;
+
+    for ( i = 0; i < num_sub_files; i++ ) {
+
+        tgt_file = family_file->memb[i];
+
+        if(H5FD_reset_stats(tgt_file) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "H5FD_reset_stats() failed")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_family_reset_stats() */
 

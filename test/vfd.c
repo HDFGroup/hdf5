@@ -20,7 +20,9 @@
  * Purpose:     Tests the basic features of Virtual File Drivers
  */
 
+#include <stdio.h>
 #include "H5pubconf.h"
+#include "H5FDprivate.h"
 #include "h5test.h"
 
 #define KB              1024U
@@ -114,7 +116,8 @@ static int generic_aio_test(const char * test_banner,
                             const int file_name_num,
 		            hid_t fapl_id,
                             haddr_t maxaddr,
-                            const int express_test);
+                            const int express_test,
+                            hbool_t dump_stats);
 
 static int generic_aio_input_error_tests(const char * test_banner,
                                          const char * tag_string,
@@ -1356,6 +1359,20 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
 
                             *(bufs[i] + j) = tag_string[j - op_num_len - type_string_len];
 
+			} else if ( j == op_num_len + type_string_len + tag_len ) {
+
+                            *(bufs[i] + j) = ' ';
+
+                        } else if ( j < (int)lengths[i] - 1 ) {
+
+			    if ( (j % 64) == 0 ) {
+
+				*(bufs[i] + j) = '\n';
+
+                            } else {
+
+				*(bufs[i] + j) = '-';
+                            }
 			} else {
 
                             *(bufs[i] + j) = '\0';
@@ -1680,13 +1697,25 @@ aio_multi_write_sync_read_check(H5FD_t * file,
                             *(write_bufs[i] + j) = 
 				type_string[j - write_num_len];
 
-			} else if ( j < write_num_len + 
-                                        type_string_len + 
-                                        tag_len ) {
+			} else if ( j < write_num_len + type_string_len + tag_len ) {
 
                             *(write_bufs[i] + j) = 
 				tag_string[j - write_num_len - type_string_len];
 
+			} else if ( j == write_num_len + type_string_len + tag_len ) {
+
+                            *(write_bufs[i] + j) = ' ';
+
+                        } else if ( j < (int)lengths[i] - 1 ) {
+
+			    if ( (j % 64) == 0 ) {
+
+                                *(write_bufs[i] + j) = '\n';
+
+                            } else {
+
+                                *(write_bufs[i] + j) = '+';
+                            }
 			} else {
 
                             *(write_bufs[i] + j) = '\0';
@@ -2213,10 +2242,20 @@ aio_single_write_read_check(H5FD_t * file,
 
                     write_buf[i] = tag_string[i - type_string_len - 1];
 
-                } else if ( i < (int)(write_size - 1) ) {
+		} else if ( i == type_string_len + tag_len + 1 ) {
 
                     write_buf[i] = ' ';
 
+                } else if ( i < (int)(write_size - 1) ) {
+
+                    if ( (i % 64) == 0 ) {
+
+                        write_buf[i] = '\n';
+
+                    } else {
+
+                        write_buf[i] = '*';
+                    }
                 } else {
 
                     write_buf[i] = '\0';
@@ -2434,7 +2473,8 @@ generic_aio_test(const char * test_banner,
                  const int file_name_num,
 		 hid_t fapl_id,
                  haddr_t maxaddr,
-                 const int express_test)
+                 const int express_test,
+                 hbool_t dump_stats)
 {
     const char * fcn_name = "generic_aio_test()";
     const char * failure_mssg = NULL;
@@ -2501,6 +2541,9 @@ generic_aio_test(const char * test_banner,
 			 (haddr_t)6297136,
                          (haddr_t)73406000};
     H5FD_t * file;
+    H5FD_stats_t stats;
+
+    stats.magic = 0; /* to indicate that we haven't collected stats */
 
     if ( verbose ) {
 
@@ -2937,6 +2980,12 @@ generic_aio_test(const char * test_banner,
 
     if ( file != NULL ) {
 
+        if ( dump_stats ) {
+
+            stats.magic = H5FD__H5FD_STATS_T_MAGIC;
+            H5FD_get_stats(file, &stats);
+        }
+
         result = H5FDclose(file);
 
         if ( result < 0 ) {
@@ -2973,7 +3022,12 @@ generic_aio_test(const char * test_banner,
         HDfprintf(stdout, "	%d sub test(s) skipped to expedite test.\n", 
                   sub_tests_skipped);
     }
+#ifdef H5_HAVE_AIO
+    if ( ( dump_stats ) && ( stats.magic == H5FD__H5FD_STATS_T_MAGIC ) ) {
 
+        H5FD_dump_stats(stdout, &stats, "stats from generic_aio_test():");
+    }
+#endif /* H5_HAVE_AIO */
     if ( verbose ) {
 
         HDfprintf(stdout, "exiting generic_aio_test() -- ret_val == %d.\n",
@@ -5507,7 +5561,8 @@ main(void)
     } else {
 
         result = generic_aio_test("AIO on SEC2 file driver", 6, fapl, 
-                                  (haddr_t)0x40000000, express_test);
+                                  (haddr_t)0x40000000, express_test,
+                                  /* dump_stats = */ TRUE);
         nerrors += ( result < 0 ) ? 1 : 0;
     }
 #if 1
@@ -5538,7 +5593,8 @@ main(void)
     } else {
 
         result = generic_aio_test("AIO on CORE file driver", 7, fapl, 
-                                   (haddr_t)0x40000000, express_test);
+                                   (haddr_t)0x40000000, express_test,
+                                   /* dump_stats = */ FALSE);
         nerrors += ( result < 0 ) ? 1 : 0;
     }
 
@@ -5567,7 +5623,8 @@ main(void)
     } else {
 
         result = generic_aio_test("AIO on STDIO file driver", 8, fapl, 
-                                  (haddr_t)0x40000000, express_test);
+                                  (haddr_t)0x40000000, express_test,
+                                  /* dump_stats = */ FALSE);
         nerrors += ( result < 0 ) ? 1 : 0;
     }
 
@@ -5596,7 +5653,8 @@ main(void)
     } else {
 
         result = generic_aio_test("AIO on FAMILY file driver", 9, fapl, 
-                                  (haddr_t)0x40000000, express_test);
+                                  (haddr_t)0x40000000, express_test,
+                                  /* dump_stats = */ TRUE);
         nerrors += ( result < 0 ) ? 1 : 0;
     }
 
@@ -5653,7 +5711,8 @@ main(void)
     } else {
 
         result = generic_aio_test("AIO on MULTI file driver", 10, fapl, 
-                                  (haddr_t)0x40000000, express_test);
+                                  (haddr_t)0x40000000, express_test,
+                                  /* dump_stats = */ FALSE);
         nerrors += ( result < 0 ) ? 1 : 0;
     
         result = multi_file_driver_aio_test(
