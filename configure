@@ -692,8 +692,10 @@ SED
 LIBTOOL
 CXX_SHARED_CONDITIONAL_FALSE
 CXX_SHARED_CONDITIONAL_TRUE
+H5_CXX_SHARED
 FORTRAN_SHARED_CONDITIONAL_FALSE
 FORTRAN_SHARED_CONDITIONAL_TRUE
+H5_FORTRAN_SHARED
 TESTPARALLEL
 RUNPARALLEL
 RUNSERIAL
@@ -7416,36 +7418,41 @@ elif test "X${enable_shared}" = "Xyes" -a "X${PARALLEL}" != "X"; then
     echo '    shared libraries explicitly enabled by user'
 fi
 
-if test "X${HDF_FORTRAN}" = "Xyes"; then
+
+H5_FORTRAN_SHARED="no"
+if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if shared Fortran libraries are supported" >&5
+$as_echo_n "checking if shared Fortran libraries are supported... " >&6; }
   H5_FORTRAN_SHARED="yes"
 
-  if (${FC} -V 2>&1 | grep '^pgf90') > /dev/null; then
+    case "`uname`" in
+    Darwin*)
     H5_FORTRAN_SHARED="no"
-  fi
+    CHECK_WARN="Shared Fortran libraries not currently supported on Mac."
+      ;;
+  esac
 
-  if (${FC} -V 2>&1 | grep '^Intel(R) Fortran') > /dev/null; then
-    if (${FC} -v 2>&1 | grep '^Version 8.') > /dev/null; then
-      H5_FORTRAN_SHARED="no"
+    if test "X${H5_FORTRAN_SHARED}" = "Xno"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $CHECK_WARN" >&5
+$as_echo "$as_me: WARNING: $CHECK_WARN" >&2;}
+    if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling shared Fortran libraries." >&5
+$as_echo "$as_me: WARNING: Disabling shared Fortran libraries." >&2;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: To override this behavior, please use --enable-unsupported configure option." >&5
+$as_echo "$as_me: WARNING: To override this behavior, please use --enable-unsupported configure option." >&2;}
+        if test "X${enable_static}" = "Xno"; then
+          as_fn_error $? "both static and shared Fortran libraries are disabled" "$LINENO" 5
+        fi
     else
-      FCFLAGS="${FCFLAGS} -fPIC"
-      AM_FCFLAGS="${AM_FCFLAGS} -fPIC"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Allowing unsupported Fortran shared libraries due to use of --enable-unsupported flag" >&5
+$as_echo "$as_me: WARNING: Allowing unsupported Fortran shared libraries due to use of --enable-unsupported flag" >&2;}
+      H5_FORTRAN_SHARED="yes"
     fi
-  fi
-  if (${FC} +version 2>&1 | grep '^HP F90') > /dev/null; then
-    H5_FORTRAN_SHARED="no"
-  fi
-
-  if (${FC} -V 2>&1 | grep '^Absoft') > /dev/null; then
-    H5_FORTRAN_SHARED="no"
-  fi
-
-  if test "X${enable_shared}" != "Xno" && test "X${H5_FORTRAN_SHARED}" = "Xno"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: shared libraries are not supported; disabling shared Fortran libraries" >&5
-$as_echo "$as_me: WARNING: shared libraries are not supported; disabling shared Fortran libraries" >&2;}
-  fi
-
-  if test "X${enable_static}" = "Xno" && test "X${H5_FORTRAN_SHARED}" = "Xno"; then
-    as_fn_error $? "both static and shared Fortran libraries are disabled" "$LINENO" 5
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
   fi
 fi
 
@@ -7458,19 +7465,38 @@ else
 fi
 
 
+
 H5_CXX_SHARED="no"
 if test "X${HDF_CXX}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if shared C++ libraries are supported" >&5
+$as_echo_n "checking if shared C++ libraries are supported... " >&6; }
   H5_CXX_SHARED="yes"
 
-
-  if (echo dummy ${CXX} ${CXXLD} ${CFLAGS} ${CXXFLAGS} ${LDFLAGS} | grep 'DD64') > /dev/null; then
-    echo "    warning: +DD64 flag detected"
-    echo "    disabling shared C++ libraries"
+    if (echo dummy ${CXX} ${CXXLD} ${CFLAGS} ${CXXFLAGS} ${LDFLAGS} | grep 'DD64') > /dev/null; then
     H5_CXX_SHARED="no"
+    CHECK_WARN="Shared C++ libraries not currently supported with +DD64 flag."
   fi
 
-  if test "X${enable_static}" = "Xno" && test "X${H5_CXX_SHARED}" = "Xno"; then
-    as_fn_error $? "both static and shared C++ libraries are disabled" "$LINENO" 5
+    if test "X${H5_CXX_SHARED}" = "Xno"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $CHECK_WARN" >&5
+$as_echo "$as_me: WARNING: $CHECK_WARN" >&2;}
+    if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling shared C++ libraries." >&5
+$as_echo "$as_me: WARNING: Disabling shared C++ libraries." >&2;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: To override this behavior, please use --enable-unsupported configure option." >&5
+$as_echo "$as_me: WARNING: To override this behavior, please use --enable-unsupported configure option." >&2;}
+      if test "X${enable_static}" = "Xno"; then
+        as_fn_error $? "both static and shared C++ libraries are disabled" "$LINENO" 5
+      fi
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Allowing unsupported C++ shared librares due to use of --enable-unsupported flag" >&5
+$as_echo "$as_me: WARNING: Allowing unsupported C++ shared librares due to use of --enable-unsupported flag" >&2;}
+    fi
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
   fi
 fi
 
