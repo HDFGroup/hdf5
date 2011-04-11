@@ -1092,7 +1092,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (textlink 0 textlink.h5)
 
   # test for error stack display (BZ2048)
-  ADD_H5_MASK_TEST (filter_fail 1 -E filter_fail.h5)
+  ADD_H5_MASK_TEST (filter_fail 1 --enable-error-stack filter_fail.h5)
 
   # test for -o -y for dataset with attributes
   ADD_H5_TEST (tall-6 0 -y -o data -d /g1/g1.1/dset1.1.1 tall.h5)
