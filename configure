@@ -596,9 +596,6 @@ ac_includes_default="\
 # endif
 #endif
 #ifdef HAVE_STRING_H
-# if !defined STDC_HEADERS && defined HAVE_MEMORY_H
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif
 #ifdef HAVE_STRINGS_H
@@ -11007,7 +11004,7 @@ $as_echo "#define STDC_HEADERS 1" >>confdefs.h
 fi
 
 # On IRIX 5.3, sys/types and inttypes.h are conflicting.
-for ac_header in sys/types.h sys/stat.h stdlib.h string.h memory.h strings.h \
+for ac_header in sys/types.h sys/stat.h stdlib.h string.h strings.h \
 		  inttypes.h stdint.h unistd.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`

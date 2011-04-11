@@ -235,9 +235,6 @@
 /* Define to 1 if you have the `lseek64' function. */
 /* #undef H5_HAVE_LSEEK64 */
 
-/* Define to 1 if you have the <memory.h> header file. */
-#define H5_HAVE_MEMORY_H 1
-
 /* Define if we have MPE support */
 /* #undef H5_HAVE_MPE */
 

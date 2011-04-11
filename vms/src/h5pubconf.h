@@ -238,9 +238,6 @@
 /* Define to 1 if you have the `lstat' function. */
 /* #define H5_HAVE_LSTAT 1 */
 
-/* Define to 1 if you have the <memory.h> header file. */
-#define H5_HAVE_MEMORY_H 1
-
 /* Define if we have MPE support */
 /* #undef H5_HAVE_MPE */
 
