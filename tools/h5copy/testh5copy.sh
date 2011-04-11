@@ -416,7 +416,7 @@ COPY_EXT_LINKS()
     TOOLTEST -v -i $TESTFILE -o $FILEOUT -s /group_ext -d /copy1_group
 
     echo "Test copying a group contains external links with -f ext"
-    TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -f ext -s /group_ext -d /copy2_group
+    TOOLTEST -f ext -v -i $TESTFILE -o $FILEOUT -s /group_ext -d /copy2_group
 
     # Verify that the file created above is correct
     H5LSTEST $FILEOUT
