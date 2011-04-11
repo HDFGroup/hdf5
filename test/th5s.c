@@ -528,6 +528,7 @@ test_h5s_zero_dim(void)
     hid_t               attr;           /* Attribute ID                 */
     int		        rank;		/* Logical rank of dataspace	*/
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t		extend_dims[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t             chunk_dims[] = {SPACE1_DIM1, SPACE1_DIM2/3, SPACE1_DIM3};
     hsize_t		tdims[SPACE1_RANK];	/* Dimension array to test with */
     int                 wdata[SPACE1_DIM2][SPACE1_DIM3];
@@ -609,6 +610,12 @@ test_h5s_zero_dim(void)
             wdata_short[i][j] = i + j;
             rdata_short[i][j] = 7;
         }
+
+    for(i=0; i<SPACE1_DIM1; i++)
+        for(j=0; j<SPACE1_DIM2; j++)
+            for(k=0; k<SPACE1_DIM3; k++)
+                wdata_real[i][j][k] = i + j + k;
+
 
     /* Contiguous dataset */
     dset1 = H5Dcreate2(fid1, BASICDATASET, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -703,6 +710,54 @@ test_h5s_zero_dim(void)
     /* Write "nothing" to the dataset */
     ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
+
+    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
+    CHECK(ret, FAIL, "H5Fflush");
+
+    /* Try reading from the dataset (make certain our buffer is unmodified) */
+    ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Check results */
+    for(i=0; i<SPACE1_DIM2; i++)
+        for(j=0; j<SPACE1_DIM3; j++) {
+            if(rdata[i][j] != 7) {
+                H5_FAILED();
+                printf("element [%d][%d] is %d but should have been 7\n",
+                       i, j, rdata[i][j]);
+            }
+    }
+
+    /* Now extend the dataset and make sure we can write data to it */ 
+    ret = H5Dset_extent(dset1, extend_dims);
+    CHECK(ret, FAIL, "H5Dset_extent");
+
+    ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata_real);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
+    CHECK(ret, FAIL, "H5Fflush");
+
+    ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata_real);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Check results */
+    for(i=0; i<SPACE1_DIM1; i++) {
+        for(j=0; j<SPACE1_DIM2; j++) {
+            for(k=0; k<SPACE1_DIM3; k++) {
+                if(rdata_real[i][j][k] != wdata_real[i][j][k]) {
+                    H5_FAILED();
+                    printf("element [%d][%d][%d] is %d but should have been %d\n",
+                       i, j, k, rdata_real[i][j][k], wdata_real[i][j][k]);
+                }
+            }
+        }
+    }
+
+    /* Now shrink the dataset to 0 dimension size and make sure no data is in it */
+    extend_dims[0] = 0;
+    ret = H5Dset_extent(dset1, extend_dims);
+    CHECK(ret, FAIL, "H5Dset_extent");
 
     ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
     CHECK(ret, FAIL, "H5Fflush");
@@ -883,12 +938,6 @@ test_h5s_zero_dim(void)
     dset1 = H5Dcreate2(fid1, BASICDATASET4, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dset1, FAIL, "H5Dcreate2");
 
-    for(i=0; i<SPACE1_DIM1; i++)
-        for(j=0; j<SPACE1_DIM2; j++)
-            for(k=0; k<SPACE1_DIM3; k++)
-                wdata_real[i][j][k] = i + j + k;
-
-
     ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata_real);
     CHECK(ret, FAIL, "H5Dwrite");
 
@@ -968,6 +1017,13 @@ test_h5s_zero_dim(void)
     /* Verify there is zero element in the dataspace */
     nelem = H5Sget_simple_extent_npoints(sid1);
     VERIFY(nelem, 0, "H5Sget_simple_extent_npoints");
+
+    /* Verify the dimension sizes are correct */
+    rank = H5Sget_simple_extent_dims(sid1, tdims, NULL);
+    CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
+    VERIFY(tdims[0], 0, "H5Sget_simple_extent_dims");
+    VERIFY(tdims[1], SPACE1_DIM2, "H5Sget_simple_extent_dims");
+    VERIFY(tdims[2], SPACE1_DIM3, "H5Sget_simple_extent_dims");
 
     /* Try reading from the dataset (make certain our buffer is unmodified) */
     ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
@@ -2139,4 +2195,5 @@ cleanup_h5s(void)
     remove(DATAFILE);
     remove(NULLFILE);
     remove(BASICFILE);
+    remove(ZEROFILE);
 }
