@@ -217,7 +217,9 @@ SIMPLE_TEST(struct tm tm; tm.tm_gmtoff=0);
 
 #ifdef HAVE_TIMEZONE
 
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 #include <time.h>
 SIMPLE_TEST(timezone=0);
 
