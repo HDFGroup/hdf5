@@ -294,6 +294,9 @@
 /* Define to 1 if you have the <pthread.h> header file. */
 #cmakedefine H5_HAVE_PTHREAD_H @H5_HAVE_PTHREAD_H@
 
+/* Define to 1 if you have the 'InitOnceExecuteOnce' function. */
+#cmakedefine H5_HAVE_WIN_THREADS @H5_HAVE_WIN_THREADS@
+
 /* Define to 1 if you have the `random' function. */
 #cmakedefine H5_HAVE_RANDOM @H5_HAVE_RANDOM@
 

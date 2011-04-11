@@ -384,4 +384,21 @@ int main ()
 
 #endif /* HAVE_GPFS */
 
+#ifdef HAVE_WIN_THREADS
+
+#include <windows.h>
+int main ()
+{
+    BOOL first_init_g=INIT_ONCE_STATIC_INIT;
+    BOOL CALLBACK win32_first_thread_init(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContext);
+    BOOL ret=FALSE;
+    
+    ret=InitOnceExecuteOnce(&first_init_g, win32_first_thread_init, NULL, NULL);
+    exit(ret ? 0 : 1);
+}
+BOOL CALLBACK 
+win32_first_thread_init(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContext)
+{return TRUE;}
+
+#endif /* HAVE_WIN_THREADS */
 
