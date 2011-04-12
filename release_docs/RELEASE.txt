@@ -517,6 +517,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Updated h5dump test case script to prevent entire test failure upon 
+          source directory is read-only. Bug# HDFFV-4342 (JKM 2011/4/12)
         - Updated to unify option name to '--enable-error-stack' for printing 
           HDF5 error stack messages for HDF5 tools. h5ls and h5dump for now.
           For h5ls, this replaces "-e/--errors" option, which is deprecated. 

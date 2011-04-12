@@ -68,7 +68,6 @@ TESTING() {
 # non-zero value.
 #
 TOOLTEST() {
-
     expect="$srcdir/../testfiles/$1"
     actual="../testfiles/`basename $1 .ddl`.out"
     actual_err="../testfiles/`basename $1 .ddl`.err"
@@ -634,7 +633,7 @@ TOOLTEST textlink.ddl textlink.h5
 TOOLTEST3 filter_fail.ddl --enable-error-stack filter_fail.h5
 
 # test for -o -y for dataset with attributes
-TOOLTEST tall-6.ddl -y -o data -d /g1/g1.1/dset1.1.1 tall.h5
+TOOLTEST1 tall-6.ddl -y -o $TESTDIR/data -d /g1/g1.1/dset1.1.1 tall.h5
 
 # Report test results and exit
 if test $nerrors -eq 0 ; then
