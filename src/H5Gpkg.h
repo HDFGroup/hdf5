@@ -391,7 +391,6 @@ H5_DLL herr_t H5G_iterate(hid_t loc_id, const char *group_name,
 /*
  * Group hierarchy traversal routines
  */
-H5_DLL herr_t H5G_traverse_term_interface(void);
 H5_DLL herr_t H5G_traverse_special(const H5G_loc_t *grp_loc,
     const H5O_link_t *lnk, unsigned target, size_t *nlinks, hbool_t last_comp,
     H5G_loc_t *obj_loc, hbool_t *obj_exists, hid_t lapl_id, hid_t dxpl_id);

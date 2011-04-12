@@ -38,6 +38,7 @@
 #include "H5Lprivate.h"		/* Links				*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppublic.h"		/* Property Lists			*/
+#include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 /* Private typedefs */
 
@@ -54,8 +55,6 @@ typedef struct {
 /* Private macros */
 
 /* Local variables */
-static char *H5G_comp_g = NULL;                 /*component buffer      */
-static size_t H5G_comp_alloc_g = 0;             /*sizeof component buffer */
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_traverse_slink_cb(H5G_loc_t *grp_loc, const char *name,
@@ -71,34 +70,6 @@ static herr_t H5G_traverse_mount(H5G_loc_t *loc/*in,out*/);
 static herr_t H5G_traverse_real(const H5G_loc_t *loc, const char *name,
     unsigned target, size_t *nlinks, H5G_traverse_t op, void *op_data,
     hid_t lapl_id, hid_t dxpl_id);
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_traverse_term_interface
- *
- * Purpose:	Terminates part  of the H5G interface - free the global
- *              component buffer.
- *
- * Return:	Success:	Non-negative.
- *
- * 		Failure:	Negative.
- *
- * Programmer:	Quincey Koziol
- *		Monday, September	26, 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_traverse_term_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_traverse_term_interface)
-
-    /* Free the global component buffer */
-    H5G_comp_g = (char *)H5MM_xfree(H5G_comp_g);
-    H5G_comp_alloc_g = 0;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_traverse_term_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -570,8 +541,11 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
     H5O_link_t          lnk;            /* Link information for object  */
     hbool_t link_valid = FALSE;         /* Flag to indicate that the link information is valid */
     hbool_t obj_loc_valid = FALSE;      /* Flag to indicate that the object location is valid */
-    H5G_own_loc_t own_loc=H5G_OWN_NONE; /* Enum to indicate whether callback took ownership of locations*/
+    H5G_own_loc_t own_loc = H5G_OWN_NONE; /* Enum to indicate whether callback took ownership of locations*/
     hbool_t group_copy = FALSE;         /* Flag to indicate that the group entry is copied */
+    char                comp_buf[1024];     /* Temporary buffer for path components */
+    char                *comp;          /* Pointer to buffer for path components */
+    H5WB_t              *wb = NULL;     /* Wrapped buffer for temporary buffer */
     hbool_t last_comp = FALSE;          /* Flag to indicate that a component is the last component in the name */
     herr_t              ret_value = SUCCEED;       /* Return value */
 
@@ -596,8 +570,8 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         HDassert(root_grp);
 
         /* Set the location entry to the root group's info */
-        loc.oloc=&(root_grp->oloc);
-        loc.path=&(root_grp->path);
+        loc.oloc = &(root_grp->oloc);
+        loc.path = &(root_grp->path);
     } /* end if */
     else {
         loc.oloc = _loc->oloc;
@@ -625,17 +599,13 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
     if(H5G_loc_reset(&obj_loc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset location")
 
-    /* Check for needing a larger buffer for the individual path name components */
-    if((HDstrlen(name) + 1) > H5G_comp_alloc_g) {
-        char *new_comp;                 /* New component buffer */
-        size_t new_alloc;               /* New component buffer size */
+    /* Wrap the local buffer for serialized header info */
+    if(NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
 
-        new_alloc = MAX3(1024, (2 * H5G_comp_alloc_g), (HDstrlen(name) + 1));
-        if(NULL == (new_comp = (char *)H5MM_realloc(H5G_comp_g, new_alloc)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "unable to allocate component buffer")
-        H5G_comp_g = new_comp;
-        H5G_comp_alloc_g = new_alloc;
-    } /* end if */
+    /* Get a pointer to a buffer that's large enough  */
+    if(NULL == (comp = (uint8_t *)H5WB_actual(wb, (HDstrlen(name) + 1))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
     /* Traverse the path */
     while((name = H5G_component(name, &nchars)) && *name) {
@@ -647,13 +617,13 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 	 * Copy the component name into a null-terminated buffer so
 	 * we can pass it down to the other symbol table functions.
 	 */
-	HDmemcpy(H5G_comp_g, name, nchars);
-	H5G_comp_g[nchars] = '\0';
+	HDmemcpy(comp, name, nchars);
+	comp[nchars] = '\0';
 
 	/*
 	 * The special name `.' is a no-op.
 	 */
-	if('.' == H5G_comp_g[0] && !H5G_comp_g[1]) {
+	if('.' == comp[0] && !comp[1]) {
 	    name += nchars;
 	    continue;
 	} /* end if */
@@ -669,7 +639,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         } /* end if */
 
         /* Get information for object in current group */
-        if((lookup_status = H5G_obj_lookup(grp_loc.oloc, H5G_comp_g, &lnk/*out*/, dxpl_id)) < 0)
+        if((lookup_status = H5G_obj_lookup(grp_loc.oloc, comp, &lnk/*out*/, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't look up component")
         obj_exists = FALSE;
 
@@ -677,7 +647,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         if(lookup_status) {
             /* Sanity check link and indicate it's valid */
             HDassert(lnk.type >= H5L_TYPE_HARD);
-            HDassert(!HDstrcmp(H5G_comp_g, lnk.name));
+            HDassert(!HDstrcmp(comp, lnk.name));
             link_valid = TRUE;
 
             /* Build object location from the link */
@@ -714,7 +684,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
             } /* end else */
 
             /* Call 'operator' routine */
-            if((op)(&grp_loc, H5G_comp_g, cb_lnk, cb_loc, op_data, &own_loc) < 0)
+            if((op)(&grp_loc, comp, cb_lnk, cb_loc, op_data, &own_loc) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CALLBACK, FAIL, "traversal operator failed")
 
             HGOTO_DONE(SUCCEED)
@@ -796,7 +766,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 
                 /* Insert new group into current group's symbol table */
-                if(H5G_loc_insert(&grp_loc, H5G_comp_g, &obj_loc, H5O_TYPE_GROUP, &gcrt_info, dxpl_id) < 0)
+                if(H5G_loc_insert(&grp_loc, comp, &obj_loc, H5O_TYPE_GROUP, &gcrt_info, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert intermediate group")
 
                 /* Decrement refcount on intermediate group's object header in memory */
@@ -876,6 +846,10 @@ done:
     if(link_valid)
         if(H5O_msg_reset(H5O_LINK_ID, &lnk) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset link message")
+
+    /* Release temporary component buffer */
+    if(wb && H5WB_unwrap(wb) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer")
 
    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_traverse_real() */
