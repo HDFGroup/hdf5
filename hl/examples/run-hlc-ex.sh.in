@@ -47,17 +47,18 @@ H5TOOL_BIN="${prefix}/bin/${H5TOOL}"   # The path of the tool binary
 #### Run test ####
 RunTest()
 {
+    TEST_EXEC=$1
     Test=$1".c"
 
     echo
     echo "#################  $1  #################"
-    ${H5TOOL_BIN} $Test
+    ${H5TOOL_BIN} -o $TEST_EXEC $Test
     if [ $? -ne 0 ]
     then
         echo "messed up compiling $Test"
         exit 1
     fi
-    ./a.out
+    ./$TEST_EXEC
 }
 
 
@@ -68,25 +69,45 @@ RunTest()
 if [ $? -eq 0 ]
 then
     if (RunTest ex_lite1 &&\
+        rm ex_lite1 &&\
         RunTest ex_lite2 &&\
+        rm ex_lite2 &&\
         RunTest ex_lite3 &&\
+        rm ex_lite3 &&\
         RunTest ptExampleFL &&\
+        rm ptExampleFL &&\
         RunTest ptExampleVL &&\
+        rm ptExampleVL &&\
         RunTest ex_image1 &&\
+        rm ex_image1 &&\
         RunTest ex_image2 &&\
+        rm ex_image2 &&\
         RunTest ex_table_01 &&\
+        rm ex_table_01 &&\
         RunTest ex_table_02 &&\
+        rm ex_table_02 &&\
         RunTest ex_table_03 &&\
+        rm ex_table_03 &&\
         RunTest ex_table_04 &&\
+        rm ex_table_04 &&\
         RunTest ex_table_05 &&
+        rm ex_table_05 &&
         RunTest ex_table_06 &&\
+        rm ex_table_06 &&\
         RunTest ex_table_07 &&\
+        rm ex_table_07 &&\
         RunTest ex_table_08 &&\
+        rm ex_table_08 &&\
         RunTest ex_table_09 &&\
+        rm ex_table_09 &&\
         RunTest ex_table_10 &&\
+        rm ex_table_10 &&\
         RunTest ex_table_11 &&\
+        rm ex_table_11 &&\
         RunTest ex_table_12 &&\
-        RunTest ex_ds1); then
+        rm ex_table_12 &&\
+        RunTest ex_ds1 &&\
+        rm ex_ds1); then
         EXIT_VALUE=${EXIT_SUCCESS}
     else
         EXIT_VALUE=${EXIT_FAILURE}
@@ -94,7 +115,6 @@ then
 fi
 
 # Cleanup
-rm a.out
 rm *.o
 rm *.h5
 echo
