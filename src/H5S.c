@@ -1163,6 +1163,11 @@ H5Sis_simple(hid_t space_id)
     Raymond Lu 03/30/2011
     We allow 0-dimension for non-unlimited dimension starting from 1.8.7
     release.
+
+    Raymond Lu 04/11/2011
+    I added a condition check to make sure the new size won't exceed the
+    current maximal size when this function is called to change the 
+    dimension size of an existent dataspace.
 --------------------------------------------------------------------------*/
 herr_t
 H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
@@ -1196,6 +1201,14 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid maximum dimension size")
         }
     }
+
+    /* Check through all the dimensions to see if the new dimension size exceeds the current 
+     * size or if the new maximal size exceeds the current maximal size */
+    for(u = 0; u < space->extent.rank; u++) {
+        if(space->extent.max && H5S_UNLIMITED!=space->extent.max[u] &&
+                (space->extent.max[u]<dims[u] || (max && space->extent.max[u]<max[u])))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new size exceeds current maximal size")
+    } /* end for */
 
     /* Do it */
     if (H5S_set_extent_simple(space, (unsigned)rank, dims, max)<0)
@@ -1259,13 +1272,15 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
         } /* end for */
         space->extent.nelem = nelem;
 
-        /* Copy the maximum dimensions if specified */
+        /* Copy the maximum dimensions if specified. Otherwise, the maximal dimensions are the 
+         * same as the dimension */
+        space->extent.max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)rank);
         if(max != NULL) {
-            space->extent.max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)rank);
             HDmemcpy(space->extent.max, max, sizeof(hsize_t) * rank);
-        } /* end if */
-        else
-            space->extent.max = NULL;
+        } else {
+            for(u = 0; u < space->extent.rank; u++)
+                space->extent.max[u] = dims[u];
+        }
     } /* end else */
 
     /* Selection related cleanup */

@@ -108,7 +108,7 @@ test_h5s_basic(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspace Manipulation\n"));
 
-    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, max2);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     n = H5Sget_simple_extent_npoints(sid1);
@@ -144,9 +144,9 @@ test_h5s_basic(void)
     VERIFY(HDmemcmp(tmax, max2, SPACE2_RANK * sizeof(hsize_t)), 0,
 	   "H5Sget_simple_extent_dims");
 
-    /* Change max dims from zero to non-zero and back again */
-    ret = H5Sset_extent_simple(sid1, SPACE1_RANK, dims1, max2);
-    CHECK(ret, FAIL, "H5Sset_extent_simple");
+    /* Change max dims to be equal to the dimensions */
+    /*ret = H5Sset_extent_simple(sid1, SPACE1_RANK, dims1, max2);
+    CHECK(ret, FAIL, "H5Sset_extent_simple");*/
     ret = H5Sset_extent_simple(sid1, SPACE1_RANK, dims1, NULL);
     CHECK(ret, FAIL, "H5Sset_extent_simple");
     rank = H5Sget_simple_extent_dims(sid1, tdims, tmax);
@@ -523,11 +523,13 @@ test_h5s_zero_dim(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		sid1, attr_sid;	/* Dataspace ID			*/
+    hid_t		sid_chunk;	/* Dataspace ID for chunked dataset */
     hid_t		dset1;		/* Dataset ID			*/
     hid_t               plist_id;       /* Dataset creation property list */
     hid_t               attr;           /* Attribute ID                 */
     int		        rank;		/* Logical rank of dataspace	*/
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t		dims1[] = {0, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t		max_dims[] = {SPACE1_DIM1+1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		extend_dims[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t             chunk_dims[] = {SPACE1_DIM1, SPACE1_DIM2/3, SPACE1_DIM3};
     hsize_t		tdims[SPACE1_RANK];	/* Dimension array to test with */
@@ -552,7 +554,6 @@ test_h5s_zero_dim(void)
 
     /* Make sure we can create the space with the dimension size 0 (starting from v1.8.7).
      * The dimension doesn't need to be unlimited. */
-    dims1[0]=0;
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
@@ -562,6 +563,8 @@ test_h5s_zero_dim(void)
     sid1 = H5Screate(H5S_SIMPLE);
     CHECK(sid1, FAIL, "H5Screate");
 
+    /* SID1 has the 1st dimension size as zero.  The maximal dimension will be
+     * the same as the dimension because of the NULL passed in. */
     ret = H5Sset_extent_simple(sid1,SPACE1_RANK,dims1,NULL);
     CHECK(ret, FAIL, "H5Sset_extent_simple");
 
@@ -593,6 +596,11 @@ test_h5s_zero_dim(void)
     nelem = H5Sget_select_npoints(sid1);
     VERIFY(nelem, 0, "H5Sget_select_npoints");
 
+    /* Create the dataspace for chunked dataset with the first dimension size as zero.
+     * The maximal dimensions are bigger than the dimensions for later expansion. */
+    sid_chunk = H5Screate_simple(SPACE1_RANK, dims1, max_dims);
+    CHECK(sid_chunk, FAIL, "H5Screate_simple");
+
     /*============================================
      * Make sure we can use 0-dimension to create 
      * contiguous, chunked, compact, and external 
@@ -617,7 +625,7 @@ test_h5s_zero_dim(void)
                 wdata_real[i][j][k] = i + j + k;
 
 
-    /* Contiguous dataset */
+    /*===================== Contiguous dataset =======================*/
     dset1 = H5Dcreate2(fid1, BASICDATASET, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dset1, FAIL, "H5Dcreate2");
 
@@ -697,14 +705,14 @@ test_h5s_zero_dim(void)
     ret = H5Dclose(dset1);
     CHECK(ret, FAIL, "H5Dclose");
 
-    /* Chunked dataset */
+    /*=================== Chunked dataset ====================*/
     plist_id = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(plist_id, FAIL, "H5Pcreate");
 
     ret = H5Pset_chunk(plist_id, SPACE1_RANK, chunk_dims);
     CHECK(ret, FAIL, "H5Pset_chunk");
 
-    dset1 = H5Dcreate2(fid1, BASICDATASET1, H5T_NATIVE_INT, sid1, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    dset1 = H5Dcreate2(fid1, BASICDATASET1, H5T_NATIVE_INT, sid_chunk, H5P_DEFAULT, plist_id, H5P_DEFAULT);
     CHECK(dset1, FAIL, "H5Dcreate2");
 
     /* Write "nothing" to the dataset */
@@ -728,7 +736,8 @@ test_h5s_zero_dim(void)
             }
     }
 
-    /* Now extend the dataset and make sure we can write data to it */ 
+    /* Now extend the dataset to SPACE1_DIM1*SPACE1_DIM2*SPACE1_DIM3 and make sure 
+     * we can write data to it */ 
     ret = H5Dset_extent(dset1, extend_dims);
     CHECK(ret, FAIL, "H5Dset_extent");
 
@@ -754,7 +763,7 @@ test_h5s_zero_dim(void)
         }
     }
 
-    /* Now shrink the dataset to 0 dimension size and make sure no data is in it */
+    /* Now shrink the first dimension size of the dataset to 0 and make sure no data is in it */
     extend_dims[0] = 0;
     ret = H5Dset_extent(dset1, extend_dims);
     CHECK(ret, FAIL, "H5Dset_extent");
@@ -782,7 +791,7 @@ test_h5s_zero_dim(void)
     ret = H5Dclose(dset1);
     CHECK(ret, FAIL, "H5Dclose");
 
-    /* Compact dataset */
+    /*=================== Compact dataset =====================*/
     plist_id = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(plist_id, FAIL, "H5Pcreate");
 
@@ -822,7 +831,7 @@ test_h5s_zero_dim(void)
     ret = H5Dclose(dset1);
     CHECK(ret, FAIL, "H5Dclose");
 
-    /* Contiguous dataset with external storage */
+    /*=========== Contiguous dataset with external storage ============*/
     plist_id = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(plist_id, FAIL, "H5Pcreate");
 
@@ -867,7 +876,7 @@ test_h5s_zero_dim(void)
     ret = H5Dclose(dset1);
     CHECK(ret, FAIL, "H5Dclose");
 
-    /* Create an attribute for the file */
+    /*=============== Create an attribute for the file ================*/
     attr = H5Acreate2(fid1, NULLATTR, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
@@ -915,27 +924,38 @@ test_h5s_zero_dim(void)
         }
     }
 
-    /* Extend the dimension to make it a normal dataspace (3x15x13).  Verify that
-     * data can be written to and read from the dataset now. */
-    dims1[0]=3;
-    ret = H5Sset_extent_simple(sid1,SPACE1_RANK,dims1,NULL);
+    /*===============================================================
+     * Extend the dimension to make it a normal dataspace (3x15x13).  
+     * Verify that data can be written to and read from the chunked 
+     * dataset now. 
+     *=============================================================== 
+     */
+    dims1[0]=SPACE1_DIM1;
+    ret = H5Sset_extent_simple(sid_chunk,SPACE1_RANK,dims1,max_dims);
     CHECK(ret, FAIL, "H5Sset_extent_simple");
 
-    nelem = H5Sget_simple_extent_npoints(sid1);
+    nelem = H5Sget_simple_extent_npoints(sid_chunk);
     CHECK(nelem, FAIL, "H5Sget_simple_extent_npoints");
     VERIFY(nelem, SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3,
 	   "H5Sget_simple_extent_npoints");
 
-    rank = H5Sget_simple_extent_ndims(sid1);
+    rank = H5Sget_simple_extent_ndims(sid_chunk);
     CHECK(rank, FAIL, "H5Sget_simple_extent_ndims");
     VERIFY(rank, SPACE1_RANK, "H5Sget_simple_extent_ndims");
 
-    rank = H5Sget_simple_extent_dims(sid1, tdims, NULL);
+    rank = H5Sget_simple_extent_dims(sid_chunk, tdims, NULL);
     CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
     VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0,
 	   "H5Sget_simple_extent_dims");
 
-    dset1 = H5Dcreate2(fid1, BASICDATASET4, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    /* Set it to chunked dataset */
+    plist_id = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(plist_id, FAIL, "H5Pcreate");
+
+    ret = H5Pset_chunk(plist_id, SPACE1_RANK, chunk_dims);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+
+    dset1 = H5Dcreate2(fid1, BASICDATASET4, H5T_NATIVE_INT, sid_chunk, H5P_DEFAULT, plist_id, H5P_DEFAULT);
     CHECK(dset1, FAIL, "H5Dcreate2");
 
     ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata_real);
@@ -960,34 +980,40 @@ test_h5s_zero_dim(void)
         }
     }
 
+    ret = H5Pclose(plist_id);
+    CHECK(ret, FAIL, "H5Pclose");
+
     ret = H5Dclose(dset1);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Change the dimensions to make them zero size again (0x0x0).  Verify that
      * no element is in the dataspace. */
     dims1[0]=dims1[1]=dims1[2]=0;
-    ret = H5Sset_extent_simple(sid1,SPACE1_RANK,dims1,NULL);
+    ret = H5Sset_extent_simple(sid_chunk,SPACE1_RANK,dims1,NULL);
     CHECK(ret, FAIL, "H5Sset_extent_simple");
 
     /* Check that the dataspace actually has 0 elements */
-    nelem = H5Sget_simple_extent_npoints(sid1);
+    nelem = H5Sget_simple_extent_npoints(sid_chunk);
     VERIFY(nelem, 0, "H5Sget_simple_extent_npoints");
 
     /* Check that the dataspace was created with an "all" selection */
-    sel_type = H5Sget_select_type(sid1);
+    sel_type = H5Sget_select_type(sid_chunk);
     VERIFY(sel_type, H5S_SEL_ALL, "H5Sget_select_type");
 
     /* Check that the dataspace has 0 elements selected */
-    nelem = H5Sget_select_npoints(sid1);
+    nelem = H5Sget_select_npoints(sid_chunk);
     VERIFY(nelem, 0, "H5Sget_select_npoints");
 
     /* Change to "none" selection */
-    ret = H5Sselect_none(sid1);
+    ret = H5Sselect_none(sid_chunk);
     CHECK(ret, FAIL, "H5Sselect_none");
 
     /* Check that the dataspace has 0 elements selected */
-    nelem = H5Sget_select_npoints(sid1);
+    nelem = H5Sget_select_npoints(sid_chunk);
     VERIFY(nelem, 0, "H5Sget_select_npoints");
+
+    ret = H5Sclose(sid_chunk);
+    CHECK(ret, FAIL, "H5Sclose");
 
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
