@@ -2078,6 +2078,7 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
     size_t            p_type_nbytes;           /* size of memory type */
     hsize_t           sm_size[H5S_MAX_RANK];   /* stripmine size */
     hsize_t           sm_nbytes;               /* bytes per stripmine */
+    hssize_t          ssm_nelmts;              /* elements per stripmine*/
     hsize_t           sm_nelmts;               /* elements per stripmine*/
     unsigned char    *sm_buf = NULL;           /* buffer for raw data */
     hid_t             sm_space = -1;           /* stripmine data space */
@@ -2120,8 +2121,9 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
         if(H5Sselect_hyperslab(f_space, H5S_SELECT_SET, temp_start, temp_stride, temp_count, temp_block) < 0)
             H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
 
-        if((sm_nelmts = H5Sget_select_npoints(f_space)) < 0)
+        if((ssm_nelmts = H5Sget_select_npoints(f_space)) < 0)
             H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Sget_select_npoints failed");
+        sm_nelmts = (hsize_t)ssm_nelmts;
 
         if (sm_nelmts > 0) {
             /*
@@ -2855,8 +2857,9 @@ h5tools_print_datatype(h5tools_str_t *buffer, const h5tool_format_t *info,
     HERR_INIT(int, SUCCEED)
     char        *mname;
     hid_t        mtype, str_type;
+    int          snmembers;
     unsigned     nmembers;
-    unsigned     ndims;
+    int          sndims;
     unsigned     i;
     size_t       size = 0;
     hsize_t      dims[H5TOOLS_DUMP_MAX_RANK];
@@ -3200,8 +3203,9 @@ h5tools_print_datatype(h5tools_str_t *buffer, const h5tool_format_t *info,
         break;
 
     case H5T_COMPOUND:
-        if((nmembers = H5Tget_nmembers(type)) < 0)
+        if((snmembers = H5Tget_nmembers(type)) < 0)
             H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_nmembers failed");
+        nmembers = (unsigned)snmembers;
 
         h5tools_str_append(buffer, "H5T_COMPOUND %s\n", h5tools_dump_header_format->structblockbegin);
 
@@ -3277,7 +3281,9 @@ h5tools_print_datatype(h5tools_str_t *buffer, const h5tool_format_t *info,
         h5tools_str_append(buffer, "H5T_ARRAY { ");
 
         /* Get array information */
-        if((ndims = H5Tget_array_ndims(type)) >= 0) {
+        if((sndims = H5Tget_array_ndims(type)) >= 0) {
+            unsigned     ndims = (unsigned)sndims;
+
             if(H5Tget_array_dims2(type, dims) >= 0) {
                 /* Print array dimensions */
                 for (i = 0; i < ndims; i++)

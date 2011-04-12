@@ -739,7 +739,7 @@ H5TN_init_interface(void)\n\
 done:\n\
     if(ret_value < 0) {\n\
         if(dt != NULL) {\n\
-            H5FL_FREE(H5T_shared_t, dt->shared);\n\
+            dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);\n\
             dt = H5FL_FREE(H5T_t, dt);\n\
         } /* end if */\n\
     } /* end if */\n\
