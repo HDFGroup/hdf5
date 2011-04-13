@@ -47,7 +47,6 @@ IF (BUILD_TESTING)
       tall-3.ddl
       tall-4s.ddl
       tall-5s.ddl
-      tall-6.ddl
       tallfilters.ddl
       tarray1.ddl
       tarray1_big.ddl
@@ -221,6 +220,11 @@ IF (BUILD_TESTING)
       tbin2.ddl
       tbin3.ddl
       tbin4.ddl
+      tall-6.ddl
+      texceedsubstart.ddl
+      texceedsubcount.ddl
+      texceedsubstride.ddl
+      texceedsubblock.ddl
       out3.h5import
       filter_fail.h5
       packedbits.h5
@@ -677,6 +681,14 @@ IF (BUILD_TESTING)
           tindicessub3.out.err
           tindicessub4.out
           tindicessub4.out.err
+          texceedsubstart.out
+          texceedsubstart.out.err
+          texceedsubcount.out
+          texceedsubcount.out.err
+          texceedsubstride.out
+          texceedsubstride.out.err
+          texceedsubblock.out
+          texceedsubblock.out.err
           tindicesyes.out
           tindicesyes.out.err
           tlarge_objname.out
@@ -937,6 +949,12 @@ IF (BUILD_TESTING)
 
   # 4D case
   ADD_H5_TEST (tindicessub4 0 -d 4d -s 0,0,1,2  -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2  taindices.h5)
+
+  # Exceed the dimensions for subsetting
+  ADD_H5_TEST (texceedsubstart 1 -d 1d -s 1,3 taindices.h5)
+  ADD_H5_TEST (texceedsubcount 1 -d 1d -c 1,3 taindices.h5)
+  ADD_H5_TEST (texceedsubstride 1 -d 1d -S 1,3 taindices.h5)
+  ADD_H5_TEST (texceedsubblock 1 -d 1d -k 1,3 taindices.h5)
 
   # tests for filters
   # SZIP
