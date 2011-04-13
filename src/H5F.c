@@ -2951,7 +2951,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Frelease_file_cache
+ * Function:    H5Fclear_elink_file_cache
  *
  * Purpose:     Releases the external file cache associated with the
  *              provided file, potentially closing any cached files
@@ -2965,12 +2965,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Frelease_file_cache(hid_t file_id)
+H5Fclear_elink_file_cache(hid_t file_id)
 {
     H5F_t         *file;        /* File */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5Frelease_file_cache, FAIL)
+    FUNC_ENTER_API(H5Fclear_elink_file_cache, FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Check args */
@@ -2984,5 +2984,5 @@ H5Frelease_file_cache(hid_t file_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Frelease_file_cache() */
+} /* end H5Fclear_elink_file_cache() */
 

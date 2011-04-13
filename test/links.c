@@ -6799,7 +6799,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Release file 1's EFC */
-    if(H5Frelease_file_cache(fid1) < 0)
+    if(H5Fclear_elink_file_cache(fid1) < 0)
         TEST_ERROR
 
     /* Verify that only the parent file is now open */
@@ -6937,7 +6937,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Release file 1's EFC */
-    if(H5Frelease_file_cache(fid1) < 0)
+    if(H5Fclear_elink_file_cache(fid1) < 0)
         TEST_ERROR
 
     /* Verify that only file 1 is now open */
@@ -7047,7 +7047,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Release file 1's EFC */
-    if(H5Frelease_file_cache(fid1) < 0)
+    if(H5Fclear_elink_file_cache(fid1) < 0)
         TEST_ERROR
 
     /* Verify that only file 1 is now open */
