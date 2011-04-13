@@ -888,8 +888,9 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset datatype sharing")
     } /* end else */
 
-    /* Copy the dataspace for the attribute */
-    attr_dst->shared->ds = H5S_copy(attr_src->shared->ds, FALSE, FALSE);
+    /* Copy the dataspace for the attribute. Make sure the maximal dimension is also copied.
+     * Otherwise the comparison in the test may complain about it. SLU 2011/4/12 */
+    attr_dst->shared->ds = H5S_copy(attr_src->shared->ds, FALSE, TRUE);
     HDassert(attr_dst->shared->ds);
 
     /* Reset the dataspace's sharing in the source file before trying to share

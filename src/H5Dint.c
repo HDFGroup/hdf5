@@ -1628,16 +1628,23 @@ H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_al
             case H5D_COMPACT:
                 /* Check if space is already allocated */
                 if(NULL == layout->storage.u.compact.buf) {
-                    /* Reserve space in layout header message for the entire array. */
-                    HDassert(layout->storage.u.compact.size > 0);
-                    if(NULL == (layout->storage.u.compact.buf = H5MM_malloc(layout->storage.u.compact.size)))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for compact dataset")
-                    if(!full_overwrite)
-                        HDmemset(layout->storage.u.compact.buf, 0, layout->storage.u.compact.size);
-                    layout->storage.u.compact.dirty = TRUE;
+                    /* Reserve space in layout header message for the entire array. 
+                     * Starting from the 1.8.7 release, we allow dataspace to have 
+                     * zero dimension size.  So the storage size can be zero.
+                     * SLU 2011/4/4 */
+                    if(layout->storage.u.compact.size > 0) {
+                        if(NULL == (layout->storage.u.compact.buf = H5MM_malloc(layout->storage.u.compact.size)))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for compact dataset")
+                        if(!full_overwrite)
+                            HDmemset(layout->storage.u.compact.buf, 0, layout->storage.u.compact.size);
+                        layout->storage.u.compact.dirty = TRUE;
 
-                    /* Indicate that we should initialize storage space */
-                    must_init_space = TRUE;
+                        /* Indicate that we should initialize storage space */
+                        must_init_space = TRUE;
+                    } else {
+                        layout->storage.u.compact.dirty = FALSE;
+                        must_init_space = FALSE;
+                    }
                 } /* end if */
                 break;
 

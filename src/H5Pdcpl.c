@@ -966,6 +966,11 @@ done:
  *              Changed the way to check parameter and set property for
  *              generic property list.
  *
+ *              Raymond Lu
+ *              7 April 2011
+ *              Starting from the 1.8.7 release, we allow dataspace to have 
+ *              zero dimension size. So the external storage size for 
+ *              dataset can be zero.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -985,8 +990,6 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
     if (offset<0)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "negative external file offset")
-    if (size<=0)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "zero size")
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
