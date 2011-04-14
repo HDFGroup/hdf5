@@ -1161,13 +1161,8 @@ H5Sis_simple(hid_t space_id)
     Verifies that each element of DIMS is not equal to H5S_UNLIMITED.
 
     Raymond Lu 03/30/2011
-    We allow 0-dimension for non-unlimited dimension starting from 1.8.7
+    We allow 0 dimension size for non-unlimited dimension starting from 1.8.7
     release.
-
-    Raymond Lu 04/11/2011
-    I added a condition check to make sure the new size won't exceed the
-    current maximal size when this function is called to change the 
-    dimension size of an existent dataspace.
 --------------------------------------------------------------------------*/
 herr_t
 H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
