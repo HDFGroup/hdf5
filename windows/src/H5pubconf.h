@@ -169,7 +169,7 @@
 /* #undef H5_HAVE_GETTEXTINFO */
 
 /* Define to 1 if you have the `gettimeofday' function. */
-#define H5_HAVE_GETTIMEOFDAY
+#define H5_HAVE_GETTIMEOFDAY 1
 
 /* Define to 1 if you have the `get_fpc_csr' function. */
 /* #undef H5_HAVE_GET_FPC_CSR */
