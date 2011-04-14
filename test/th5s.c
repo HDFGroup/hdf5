@@ -145,8 +145,6 @@ test_h5s_basic(void)
 	   "H5Sget_simple_extent_dims");
 
     /* Change max dims to be equal to the dimensions */
-    /*ret = H5Sset_extent_simple(sid1, SPACE1_RANK, dims1, max2);
-    CHECK(ret, FAIL, "H5Sset_extent_simple");*/
     ret = H5Sset_extent_simple(sid1, SPACE1_RANK, dims1, NULL);
     CHECK(ret, FAIL, "H5Sset_extent_simple");
     rank = H5Sget_simple_extent_dims(sid1, tdims, tmax);
@@ -784,6 +782,14 @@ test_h5s_zero_dim(void)
                        i, j, rdata[i][j]);
             }
     }
+
+    /* Now extend the first dimension size of the dataset to SPACE1_DIM1*3 past the maximal size.
+     * It is supposed to fail. */
+    extend_dims[0] = SPACE1_DIM1*3;
+    H5E_BEGIN_TRY {
+        ret = H5Dset_extent(dset1, extend_dims);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Dset_extent");
 
     ret = H5Pclose(plist_id);
     CHECK(ret, FAIL, "H5Pclose");

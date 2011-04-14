@@ -1202,14 +1202,6 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
         }
     }
 
-    /* Check through all the dimensions to see if the new dimension size exceeds the current 
-     * size or if the new maximal size exceeds the current maximal size */
-    for(u = 0; u < space->extent.rank; u++) {
-        if(space->extent.max && H5S_UNLIMITED!=space->extent.max[u] &&
-                (space->extent.max[u]<dims[u] || (max && space->extent.max[u]<max[u])))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new size exceeds current maximal size")
-    } /* end for */
-
     /* Do it */
     if (H5S_set_extent_simple(space, (unsigned)rank, dims, max)<0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set simple extent")
@@ -1840,7 +1832,7 @@ H5S_set_extent(H5S_t *space, const hsize_t *size)
             /* Check for invalid dimension size modification */
             if(space->extent.max && H5S_UNLIMITED != space->extent.max[u] &&
                      space->extent.max[u] < size[u])
-                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "dimension cannot be modified")
+                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "dimension cannot exceed the existing maximal size")
 
             /* Indicate that dimension size can be modified */
             ret_value = TRUE;
