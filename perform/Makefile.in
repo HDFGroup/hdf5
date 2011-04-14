@@ -81,6 +81,9 @@ benchpar_SOURCES = benchpar.c
 benchpar_OBJECTS = benchpar.$(OBJEXT)
 benchpar_LDADD = $(LDADD)
 benchpar_DEPENDENCIES = $(LIBHDF5)
+AM_V_lt = $(am__v_lt_$(V))
+am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
+am__v_lt_0 = --silent
 chunk_SOURCES = chunk.c
 chunk_OBJECTS = chunk.$(OBJEXT)
 chunk_LDADD = $(LDADD)
@@ -89,14 +92,14 @@ am_h5perf_OBJECTS = pio_perf.$(OBJEXT) pio_engine.$(OBJEXT) \
 	pio_timer.$(OBJEXT)
 h5perf_OBJECTS = $(am_h5perf_OBJECTS)
 h5perf_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-h5perf_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5perf_LDFLAGS) \
-	$(LDFLAGS) -o $@
+h5perf_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(h5perf_LDFLAGS) $(LDFLAGS) -o $@
 am_h5perf_serial_OBJECTS = sio_perf.$(OBJEXT) sio_engine.$(OBJEXT) \
 	sio_timer.$(OBJEXT)
 h5perf_serial_OBJECTS = $(am_h5perf_serial_OBJECTS)
 h5perf_serial_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-h5perf_serial_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+h5perf_serial_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5perf_serial_LDFLAGS) $(LDFLAGS) -o $@
 iopipe_SOURCES = iopipe.c
@@ -125,13 +128,26 @@ am__depfiles_maybe = depfiles
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
+AM_V_CC = $(am__v_CC_$(V))
+am__v_CC_ = $(am__v_CC_$(AM_DEFAULT_VERBOSITY))
+am__v_CC_0 = @echo "  CC    " $@;
+AM_V_at = $(am__v_at_$(V))
+am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
+am__v_at_0 = @
 CCLD = $(CC)
-LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
+LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_CCLD = $(am__v_CCLD_$(V))
+am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
+am__v_CCLD_0 = @echo "  CCLD  " $@;
+AM_V_GEN = $(am__v_GEN_$(V))
+am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
+am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = benchpar.c chunk.c $(h5perf_SOURCES) \
 	$(h5perf_serial_SOURCES) iopipe.c mpi-perf.c overhead.c perf.c \
 	perf_meta.c zip_perf.c
@@ -154,6 +170,7 @@ AMTAR = @AMTAR@
 AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
@@ -555,34 +572,34 @@ clean-checkPROGRAMS:
 	rm -f $$list
 benchpar$(EXEEXT): $(benchpar_OBJECTS) $(benchpar_DEPENDENCIES) 
 	@rm -f benchpar$(EXEEXT)
-	$(LINK) $(benchpar_OBJECTS) $(benchpar_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(benchpar_OBJECTS) $(benchpar_LDADD) $(LIBS)
 chunk$(EXEEXT): $(chunk_OBJECTS) $(chunk_DEPENDENCIES) 
 	@rm -f chunk$(EXEEXT)
-	$(LINK) $(chunk_OBJECTS) $(chunk_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(chunk_OBJECTS) $(chunk_LDADD) $(LIBS)
 h5perf$(EXEEXT): $(h5perf_OBJECTS) $(h5perf_DEPENDENCIES) 
 	@rm -f h5perf$(EXEEXT)
-	$(h5perf_LINK) $(h5perf_OBJECTS) $(h5perf_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(h5perf_LINK) $(h5perf_OBJECTS) $(h5perf_LDADD) $(LIBS)
 h5perf_serial$(EXEEXT): $(h5perf_serial_OBJECTS) $(h5perf_serial_DEPENDENCIES) 
 	@rm -f h5perf_serial$(EXEEXT)
-	$(h5perf_serial_LINK) $(h5perf_serial_OBJECTS) $(h5perf_serial_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(h5perf_serial_LINK) $(h5perf_serial_OBJECTS) $(h5perf_serial_LDADD) $(LIBS)
 iopipe$(EXEEXT): $(iopipe_OBJECTS) $(iopipe_DEPENDENCIES) 
 	@rm -f iopipe$(EXEEXT)
-	$(LINK) $(iopipe_OBJECTS) $(iopipe_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(iopipe_OBJECTS) $(iopipe_LDADD) $(LIBS)
 mpi-perf$(EXEEXT): $(mpi_perf_OBJECTS) $(mpi_perf_DEPENDENCIES) 
 	@rm -f mpi-perf$(EXEEXT)
-	$(LINK) $(mpi_perf_OBJECTS) $(mpi_perf_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(mpi_perf_OBJECTS) $(mpi_perf_LDADD) $(LIBS)
 overhead$(EXEEXT): $(overhead_OBJECTS) $(overhead_DEPENDENCIES) 
 	@rm -f overhead$(EXEEXT)
-	$(LINK) $(overhead_OBJECTS) $(overhead_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(overhead_OBJECTS) $(overhead_LDADD) $(LIBS)
 perf$(EXEEXT): $(perf_OBJECTS) $(perf_DEPENDENCIES) 
 	@rm -f perf$(EXEEXT)
-	$(LINK) $(perf_OBJECTS) $(perf_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(perf_OBJECTS) $(perf_LDADD) $(LIBS)
 perf_meta$(EXEEXT): $(perf_meta_OBJECTS) $(perf_meta_DEPENDENCIES) 
 	@rm -f perf_meta$(EXEEXT)
-	$(LINK) $(perf_meta_OBJECTS) $(perf_meta_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(perf_meta_OBJECTS) $(perf_meta_LDADD) $(LIBS)
 zip_perf$(EXEEXT): $(zip_perf_OBJECTS) $(zip_perf_DEPENDENCIES) 
 	@rm -f zip_perf$(EXEEXT)
-	$(LINK) $(zip_perf_OBJECTS) $(zip_perf_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(zip_perf_OBJECTS) $(zip_perf_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -606,22 +623,25 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zip_perf.Po@am__quote@
 
 .c.o:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<

@@ -36,6 +36,7 @@ AC_CONFIG_MACRO_DIR([m4])
 dnl AM_INIT_AUTOMAKE takes a list of options that should be applied to
 dnl every Makefile.am when automake is run.
 AM_INIT_AUTOMAKE([foreign])
+AM_SILENT_RULES([yes])
 
 dnl AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
 dnl for Makefiles, configure, src/H5config.h, etc.  If AM_MAINTAINER_MODE

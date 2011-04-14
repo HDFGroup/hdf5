@@ -72,13 +72,16 @@ getub_SOURCES = getub.c
 getub_OBJECTS = getub.$(OBJEXT)
 getub_LDADD = $(LDADD)
 getub_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+AM_V_lt = $(am__v_lt_$(V))
+am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
+am__v_lt_0 = --silent
 h5jam_SOURCES = h5jam.c
 h5jam_OBJECTS = h5jam.$(OBJEXT)
 h5jam_LDADD = $(LDADD)
 h5jam_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
-h5jam_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5jam_LDFLAGS) \
-	$(LDFLAGS) -o $@
+h5jam_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(h5jam_LDFLAGS) $(LDFLAGS) -o $@
 h5jamgentest_SOURCES = h5jamgentest.c
 h5jamgentest_OBJECTS = h5jamgentest.$(OBJEXT)
 h5jamgentest_LDADD = $(LDADD)
@@ -87,9 +90,9 @@ h5unjam_SOURCES = h5unjam.c
 h5unjam_OBJECTS = h5unjam.$(OBJEXT)
 h5unjam_LDADD = $(LDADD)
 h5unjam_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
-h5unjam_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5unjam_LDFLAGS) \
-	$(LDFLAGS) -o $@
+h5unjam_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(h5unjam_LDFLAGS) $(LDFLAGS) -o $@
 tellub_SOURCES = tellub.c
 tellub_OBJECTS = tellub.$(OBJEXT)
 tellub_LDADD = $(LDADD)
@@ -100,13 +103,26 @@ am__depfiles_maybe = depfiles
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
+AM_V_CC = $(am__v_CC_$(V))
+am__v_CC_ = $(am__v_CC_$(AM_DEFAULT_VERBOSITY))
+am__v_CC_0 = @echo "  CC    " $@;
+AM_V_at = $(am__v_at_$(V))
+am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
+am__v_at_0 = @
 CCLD = $(CC)
-LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
+LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_CCLD = $(am__v_CCLD_$(V))
+am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
+am__v_CCLD_0 = @echo "  CCLD  " $@;
+AM_V_GEN = $(am__v_GEN_$(V))
+am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
+am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = getub.c h5jam.c h5jamgentest.c h5unjam.c tellub.c
 DIST_SOURCES = getub.c h5jam.c h5jamgentest.c h5unjam.c tellub.c
 ETAGS = etags
@@ -125,6 +141,7 @@ AMTAR = @AMTAR@
 AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
@@ -511,19 +528,19 @@ clean-checkPROGRAMS:
 	rm -f $$list
 getub$(EXEEXT): $(getub_OBJECTS) $(getub_DEPENDENCIES) 
 	@rm -f getub$(EXEEXT)
-	$(LINK) $(getub_OBJECTS) $(getub_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(getub_OBJECTS) $(getub_LDADD) $(LIBS)
 h5jam$(EXEEXT): $(h5jam_OBJECTS) $(h5jam_DEPENDENCIES) 
 	@rm -f h5jam$(EXEEXT)
-	$(h5jam_LINK) $(h5jam_OBJECTS) $(h5jam_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(h5jam_LINK) $(h5jam_OBJECTS) $(h5jam_LDADD) $(LIBS)
 h5jamgentest$(EXEEXT): $(h5jamgentest_OBJECTS) $(h5jamgentest_DEPENDENCIES) 
 	@rm -f h5jamgentest$(EXEEXT)
-	$(LINK) $(h5jamgentest_OBJECTS) $(h5jamgentest_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(h5jamgentest_OBJECTS) $(h5jamgentest_LDADD) $(LIBS)
 h5unjam$(EXEEXT): $(h5unjam_OBJECTS) $(h5unjam_DEPENDENCIES) 
 	@rm -f h5unjam$(EXEEXT)
-	$(h5unjam_LINK) $(h5unjam_OBJECTS) $(h5unjam_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(h5unjam_LINK) $(h5unjam_OBJECTS) $(h5unjam_LDADD) $(LIBS)
 tellub$(EXEEXT): $(tellub_OBJECTS) $(tellub_DEPENDENCIES) 
 	@rm -f tellub$(EXEEXT)
-	$(LINK) $(tellub_OBJECTS) $(tellub_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(tellub_OBJECTS) $(tellub_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -538,22 +555,25 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tellub.Po@am__quote@
 
 .c.o:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<

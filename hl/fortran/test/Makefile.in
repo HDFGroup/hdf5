@@ -74,6 +74,9 @@ am_tstimage_OBJECTS = tstimage.$(OBJEXT)
 tstimage_OBJECTS = $(am_tstimage_OBJECTS)
 tstimage_LDADD = $(LDADD)
 tstimage_DEPENDENCIES = $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL) $(LIBHDF5)
+AM_V_lt = $(am__v_lt_$(V))
+am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
+am__v_lt_0 = --silent
 am_tstlite_OBJECTS = tstlite.$(OBJEXT)
 tstlite_OBJECTS = $(am_tstlite_OBJECTS)
 tstlite_LDADD = $(LDADD)
@@ -84,12 +87,24 @@ tsttable_LDADD = $(LDADD)
 tsttable_DEPENDENCIES = $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL) $(LIBHDF5)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
-LTFCCOMPILE = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+LTFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+AM_V_FC = $(am__v_FC_$(V))
+am__v_FC_ = $(am__v_FC_$(AM_DEFAULT_VERBOSITY))
+am__v_FC_0 = @echo "  FC    " $@;
+AM_V_at = $(am__v_at_$(V))
+am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
+am__v_at_0 = @
 FCLD = $(FC)
-FCLINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
+FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_FCLD = $(am__v_FCLD_$(V))
+am__v_FCLD_ = $(am__v_FCLD_$(AM_DEFAULT_VERBOSITY))
+am__v_FCLD_0 = @echo "  FCLD  " $@;
+AM_V_GEN = $(am__v_GEN_$(V))
+am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
+am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(tstimage_SOURCES) $(tstlite_SOURCES) $(tsttable_SOURCES)
 DIST_SOURCES = $(tstimage_SOURCES) $(tstlite_SOURCES) \
 	$(tsttable_SOURCES)
@@ -110,6 +125,7 @@ AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
 	-I$(top_builddir)/src -I$(top_srcdir)/hl/src
 AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@ -I$(top_builddir)/fortran/src \
 	-I$(top_builddir)/hl/fortran/src \
 	$(F9XMODFLAG)$(top_builddir)/fortran/src \
@@ -453,13 +469,13 @@ clean-checkPROGRAMS:
 	rm -f $$list
 tstimage$(EXEEXT): $(tstimage_OBJECTS) $(tstimage_DEPENDENCIES) 
 	@rm -f tstimage$(EXEEXT)
-	$(FCLINK) $(tstimage_OBJECTS) $(tstimage_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(FCLINK) $(tstimage_OBJECTS) $(tstimage_LDADD) $(LIBS)
 tstlite$(EXEEXT): $(tstlite_OBJECTS) $(tstlite_DEPENDENCIES) 
 	@rm -f tstlite$(EXEEXT)
-	$(FCLINK) $(tstlite_OBJECTS) $(tstlite_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(FCLINK) $(tstlite_OBJECTS) $(tstlite_LDADD) $(LIBS)
 tsttable$(EXEEXT): $(tsttable_OBJECTS) $(tsttable_DEPENDENCIES) 
 	@rm -f tsttable$(EXEEXT)
-	$(FCLINK) $(tsttable_OBJECTS) $(tsttable_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(FCLINK) $(tsttable_OBJECTS) $(tsttable_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -468,12 +484,15 @@ distclean-compile:
 	-rm -f *.tab.c
 
 .f90.o:
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
 .f90.obj:
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) `$(CYGPATH_W) '$<'`
 
 .f90.lo:
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(LTFCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
 mostlyclean-libtool:

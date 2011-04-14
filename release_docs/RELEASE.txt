@@ -39,6 +39,12 @@ New Features
 
     Configuration:
     -------------
+    - Configure now generates Makefiles that build in "silent make mode"
+      by default in which compile and link lines are significantly
+      simplified for clarity. To override this and view actual compile and
+      link lines during building, the --disable-silent-rules flag can be used
+      at configure time, or the 'make' command can be followed by V=1, to
+      indicate a "verbose" make. (MAM - 2011/4/14).
     - Added mpicc and mpif90 as the default C and Fortran compilers for Linux
       systems when --enable-parallel is specified but no $CC or $FC is defined.
       (AKC - 2011/2/7)

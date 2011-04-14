@@ -114,9 +114,13 @@ am_libhdf5_fortran_la_OBJECTS = H5f90global.lo H5fortran_types.lo \
 	H5Df.lo H5Ef.lo H5Ff.lo H5Gf.lo H5If.lo H5Lf.lo H5Of.lo \
 	H5Pf.lo H5Rf.lo H5Sf.lo H5Tf.lo H5Zf.lo $(am__objects_1)
 libhdf5_fortran_la_OBJECTS = $(am_libhdf5_fortran_la_OBJECTS)
-libhdf5_fortran_la_LINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
-	$(libhdf5_fortran_la_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_lt = $(am__v_lt_$(V))
+am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
+am__v_lt_0 = --silent
+libhdf5_fortran_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=FC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(FCLD) \
+	$(AM_FCFLAGS) $(FCFLAGS) $(libhdf5_fortran_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
 PROGRAMS = $(noinst_PROGRAMS)
 am_H5fortran_detect_OBJECTS = H5fortran_detect.$(OBJEXT)
 H5fortran_detect_OBJECTS = $(am_H5fortran_detect_OBJECTS)
@@ -138,20 +142,39 @@ am__depfiles_maybe = depfiles
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
+AM_V_CC = $(am__v_CC_$(V))
+am__v_CC_ = $(am__v_CC_$(AM_DEFAULT_VERBOSITY))
+am__v_CC_0 = @echo "  CC    " $@;
+AM_V_at = $(am__v_at_$(V))
+am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
+am__v_at_0 = @
 CCLD = $(CC)
-LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
+LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_CCLD = $(am__v_CCLD_$(V))
+am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
+am__v_CCLD_0 = @echo "  CCLD  " $@;
 FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
-LTFCCOMPILE = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+LTFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+AM_V_FC = $(am__v_FC_$(V))
+am__v_FC_ = $(am__v_FC_$(AM_DEFAULT_VERBOSITY))
+am__v_FC_0 = @echo "  FC    " $@;
 FCLD = $(FC)
-FCLINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
+FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_FCLD = $(am__v_FCLD_$(V))
+am__v_FCLD_ = $(am__v_FCLD_$(AM_DEFAULT_VERBOSITY))
+am__v_FCLD_0 = @echo "  FCLD  " $@;
+AM_V_GEN = $(am__v_GEN_$(V))
+am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
+am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(libhdf5_fortran_la_SOURCES) $(H5fortran_detect_SOURCES) \
 	H5match_types.c $(H5test_kind_SOURCES)
 DIST_SOURCES = $(am__libhdf5_fortran_la_SOURCES_DIST) \
@@ -173,6 +196,7 @@ AMTAR = @AMTAR@
 AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@ -I$(top_srcdir)/src \
 	-I$(top_srcdir)/fortran/src
 AM_LDFLAGS = @AM_LDFLAGS@ $(am__append_1)
@@ -595,7 +619,7 @@ clean-libLTLIBRARIES:
 	  rm -f "$${dir}/so_locations"; \
 	done
 libhdf5_fortran.la: $(libhdf5_fortran_la_OBJECTS) $(libhdf5_fortran_la_DEPENDENCIES) 
-	$(libhdf5_fortran_la_LINK) -rpath $(libdir) $(libhdf5_fortran_la_OBJECTS) $(libhdf5_fortran_la_LIBADD) $(LIBS)
+	$(AM_V_FCLD)$(libhdf5_fortran_la_LINK) -rpath $(libdir) $(libhdf5_fortran_la_OBJECTS) $(libhdf5_fortran_la_LIBADD) $(LIBS)
 
 clean-noinstPROGRAMS:
 	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -607,13 +631,13 @@ clean-noinstPROGRAMS:
 	rm -f $$list
 H5fortran_detect$(EXEEXT): $(H5fortran_detect_OBJECTS) $(H5fortran_detect_DEPENDENCIES) 
 	@rm -f H5fortran_detect$(EXEEXT)
-	$(FCLINK) $(H5fortran_detect_OBJECTS) $(H5fortran_detect_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(FCLINK) $(H5fortran_detect_OBJECTS) $(H5fortran_detect_LDADD) $(LIBS)
 H5match_types$(EXEEXT): $(H5match_types_OBJECTS) $(H5match_types_DEPENDENCIES) 
 	@rm -f H5match_types$(EXEEXT)
-	$(LINK) $(H5match_types_OBJECTS) $(H5match_types_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(H5match_types_OBJECTS) $(H5match_types_LDADD) $(LIBS)
 H5test_kind$(EXEEXT): $(H5test_kind_OBJECTS) $(H5test_kind_DEPENDENCIES) 
 	@rm -f H5test_kind$(EXEEXT)
-	$(FCLINK) $(H5test_kind_OBJECTS) $(H5test_kind_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(FCLINK) $(H5test_kind_OBJECTS) $(H5test_kind_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -640,45 +664,55 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5match_types.Po@am__quote@
 
 .c.o:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 .f90.o:
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
 .f90.obj:
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) `$(CYGPATH_W) '$<'`
 
 .f90.lo:
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(LTFCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
 H5test_kind.o: $(srcdir)/H5test_kind.f90
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind.o $(FCFLAGS_f90) `test -f '$(srcdir)/H5test_kind.f90' || echo '$(srcdir)/'`$(srcdir)/H5test_kind.f90
 
 H5test_kind.obj: $(srcdir)/H5test_kind.f90
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind.obj $(FCFLAGS_f90) `if test -f '$(srcdir)/H5test_kind.f90'; then $(CYGPATH_W) '$(srcdir)/H5test_kind.f90'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/H5test_kind.f90'; fi`
 
 H5test_kind_SIZEOF.o: $(srcdir)/H5test_kind_SIZEOF.f90
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind_SIZEOF.o $(FCFLAGS_f90) `test -f '$(srcdir)/H5test_kind_SIZEOF.f90' || echo '$(srcdir)/'`$(srcdir)/H5test_kind_SIZEOF.f90
 
 H5test_kind_SIZEOF.obj: $(srcdir)/H5test_kind_SIZEOF.f90
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind_SIZEOF.obj $(FCFLAGS_f90) `if test -f '$(srcdir)/H5test_kind_SIZEOF.f90'; then $(CYGPATH_W) '$(srcdir)/H5test_kind_SIZEOF.f90'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/H5test_kind_SIZEOF.f90'; fi`
 
 mostlyclean-libtool:
