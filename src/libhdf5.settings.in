@@ -27,6 +27,7 @@ Compiling Options:
                Static C Library: @enable_static@
   Statically Linked Executables: @STATIC_EXEC@
                         LDFLAGS: @LDFLAGS@
+                     H5_LDFLAGS: @H5_LDFLAGS@
                      AM_LDFLAGS: @AM_LDFLAGS@
  	 	Extra libraries: @LIBS@
  		       Archiver: @AR@
