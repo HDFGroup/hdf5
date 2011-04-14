@@ -788,6 +788,14 @@ test_h5s_zero_dim(void)
             }
     }
 
+    /* Now extend the first dimension size of the dataset to SPACE1_DIM1*3 past the maximal size.
+     * It is supposed to fail. */
+    extend_dims[0] = SPACE1_DIM1*3;
+    H5E_BEGIN_TRY {
+        ret = H5Dset_extent(dset1, extend_dims);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Dset_extent");
+
     ret = H5Pclose(plist_id);
     CHECK(ret, FAIL, "H5Pclose");
 
