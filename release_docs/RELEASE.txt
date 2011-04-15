@@ -115,7 +115,8 @@ Bug Fixes since HDF5-1.8.6
 
     Configuration
     -------------
-    - None
+    - Removed config/ibm-aix6.x. All IBM-AIX settings are in one file,
+      ibm-aix. (AKC - 2011/4/14)
 
     Library
     -------
