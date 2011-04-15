@@ -88,14 +88,16 @@ New Features
  
     Tools
     -----
-     - h5diff: Added new level for -v (verbose) option. The new levels are
-               1 and 2.  So -v1 and -v2 can be specified to view more 
-               information about attributes differences. 
-               Bug#2121 (JKM 2011/3/23)
-     - h5dump: Added new option --enable-error-stack. This option will display 
-               error stack information in the output stream. This is useful
-               when the "h5dump: Unable to print data" message is output.
-               (ADB - 2011/03/03)
+     - h5diff: Added new "verbose with levels" option, '-vN, --verbose=N'.
+       The old '-v, --verbose' option is depracated but remains available;
+       it is exactly equivalent to '-v0, --verbose=0'.
+       The new levels 1 ('-v1' or '--verbose=1') and 2 ('-v2' or 
+       '--verbose=2') can be specified to view more information regarding 
+       attributes differences.  Bug #2121 (JKM 2011/3/23)
+     - h5dump: Added new option --enable-error-stack. This option will 
+       display error stack information in the output stream. This is 
+       useful when the "h5dump: Unable to print data" message is output.
+       (ADB - 2011/03/03)
 
     High-Level APIs
     ---------------
@@ -141,7 +143,7 @@ Bug Fixes since HDF5-1.8.6
       the VFDs to avoid sync'ing the file (particularly valuable in parallel).
       (QAK - 2011/03/09)
     - The datatype handler created with H5Tencode/decode used to have the 
-      reference count 0 (zero).  I have fixed it.  It is 1 (one) now.
+      reference count 0 (zero); it now has the reference count 1 (one).
       (SLU - 2011/2/18)
     - Fixed the definition of H5_HAVE_GETTIMEOFDAY on Windows so that
       HDgettimeofday() is defined and works properly.  Bug HDFFV-5931
@@ -157,60 +159,61 @@ Bug Fixes since HDF5-1.8.6
 
     Tools
     -----
-    - Updated h5dump test case script to prevent entire test failure upon 
-      source directory is read-only. Bug# HDFFV-4342 (JKM 2011/4/12)
-    - Updated to unify option name to '--enable-error-stack' for printing 
-      HDF5 error stack messages for HDF5 tools. h5ls and h5dump for now.
+    - Updated h5dump test case script to prevent entire test failure when 
+      source directory is read-only. Bug #HDFFV-4342 (JKM 2011/4/12)
+    - Updated HDF5 tools to stadardize the option name as '--enable-error-stack' 
+      for printing HDF5 error stack messages. h5ls and h5dump for now.
       For h5ls, this replaces "-e/--errors" option, which is deprecated. 
-      Bug#2182 (JKM 2011/3/30)
-    - Fix h5diff for --use-system-epsilon option: the calculation changed
-      from ( |a - b| / b ) to ( |a - b| ). This was decided for better
-      performance. Bug#2184 (JKM 2011/3/24)
+      For h5dump, this is a new option. Bug #2182 (JKM 2011/3/30)
+    - Fixed h5diff --use-system-epsilon option: the formula used in the 
+      calculation was changed from ( |a - b| / b ) to ( |a - b| ). 
+      This was done to improve performance. Bug #2184 (JKM 2011/3/24)
     - Fixed output for H5T_REFERENCE in h5dump. According to the BNF document
       the output of a H5T_REFERENCE should be followed by the type;
       <reference> ::= H5T_REFERENCE { <ref_type> }
       <ref_type> ::= H5T_STD_REF_OBJECT | H5T_STD_REF_DSETREG
       Previously this was only displayed if the -R option was used.
-      Bug#1725 (ADB 2011/3/28)
-    - Fix h5diff issues for #1: h5diff compared attributes correctly only 
-      when two objects have the same number of attributes and attribute 
-      names are identical, #2: didn't display useful information about 
-      attribute difference. Bug#2121 (JKM 2011/3/17)
+      Bug #1725 (ADB 2011/3/28)
+    - Fixed two h5diff issues: 1) h5diff compared attributes correctly only 
+      when two objects had the same number of attributes and the attribute 
+      names were identical. 2) h5diff did not display useful information about 
+      attribute differences. Bug #2121 (JKM 2011/3/17)
     - Fixed memory leak for h5diff when accessing symbolic links with 
-      --follow-symlink option. Bug#2214  (JKM 2011/3/18)
+      --follow-symlink option. Bug #2214  (JKM 2011/3/18)
     - Fixed memory leak for h5diff when access variable length string
-      data. Bug#2216 (JKM 2011/3/18)
+      data. Bug #2216 (JKM 2011/3/18)
     - Fixed memory leak for h5diff when accessing symbolic links with 
-      --follow-symlink option. Bug#2214  (JKM 2011/3/18)
-    - Fixed and improved help page for -a option of h5ls. 
-      Bug#1904 (JKM 2011/3/11)
-    - Fixed h5copy to be able to copy any object into the same HDF5 file.
-      Previously h5copy displayed error message when target file is same
-      as source file. (XCAO 2011/3/8)
-    - Fixed h5dump for skipping some values for long array type dataset on 
-      Windows. This issue only occurred on Windows due to the different 
-      return behavior from _vsnprintf() funtion. Bug#2161 (JKM 2011/3/3)
-    - Fixed h5dump for skipping array indices every certain number
-      when the array type dataset is relatively big. The certain number
-      varies according to the size of array. Bug#2092 (JKM 2011/2/15).
-    - Fixed h5diff for the segfault when compares compound datasets
-      with combination of fixed length string types and vlen string types 
-      in certain orders. bug#2089 (JKM 2010/12/28)
-    - Improve h5diff performance. 1) use HDmemcmp() before comparing each 
-      elements. 2) replace expensive H5Tequals() calls 3) retrieve datatype
-      information at dataset level not each element level for compound 
-      datasets
-    - Fixed h5ls to display nested compound type with curly bracket 
+      --follow-symlink option. Bug #2214  (JKM 2011/3/18)
+    - Fixed and improved help page for h5ls -a, --address option. 
+      Bug #1904 (JKM 2011/3/11)
+    - Fixed h5copy to enable copying an object into the same HDF5 file.
+      Previously h5copy displayed an error message when the target file 
+      was the same as the source file. (XCAO 2011/3/8)
+    - Fixed h5dump problem that caused the tool to skip some data elements 
+      in large datasets with a large array datatype on Windows. This issue 
+      arose only on Windows due to the different return behavior of the 
+      _vsnprintf() funtion.  Bug #2161 (JKM 2011/3/3)
+    - Fixed h5dump, which was skipping some array indices in large datasets 
+      with a relatively large array datatype. The interval of skipped indices
+      varied according to the size of the array. Bug #2092 (JKM 2011/2/15)
+    - Fixed h5diff, which was segfaulting when comparing compound datasets
+      with a combination of fixed-length string datatypes and variable-length
+      string datatypes in certain orders. Bug #2089 (JKM 2010/12/28)
+    - Improved h5diff performance: 1) Use HDmemcmp() before comparing two 
+      elements. 2) Replace expensive H5Tequals() calls. 3) Retrieve datatype
+      information at dataset level, not at each element level for compound 
+      datasets.
+    - Fixed h5ls to display nested compound types with curly brackets 
       when -S (--simple) option is used with -l (--label), so it shows  
-      which member (in curly bracket) belong to which nested compound type 
-      and make the output make sense.  bug#1979 (JKM 2010/11/09)
+      which members (in curly brackets) belong to which nested compound type, 
+      making the output clearer.  Bug #1979 (JKM 2010/11/09)
     - Fixed h5diff to handle variable-length strings in a compound dataset 
-      correctly. (also variable-length string array in a compound dataset)
-      Garbage values were displayed when h5diff compared multiple 
+      correctly. (Also variable-length string arrays in a compound dataset.)
+      Garbage values were previously displayed when h5diff compared multiple 
       variable-length strings in a compound type dataset. 
-      Bug#1989 (JKM 2010/10/28)
-    - Fixed h5copy to fail gracefully when copying object to non-exist
-          group without -p option. Bug#2040 (JKM 2010/10/18)
+      Bug #1989 (JKM 2010/10/28)
+    - Fixed h5copy to fail gracefully when copying an object to a non-
+      existing group without the -p option. Bug #2040 (JKM 2010/10/18)
 
     F90 API
     ------
