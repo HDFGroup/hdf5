@@ -809,6 +809,7 @@
 ./test/Makefile.in
 ./test/accum.c
 ./test/app_ref.c
+./test/bad_compound.h5
 ./test/be_data.h5
 ./test/be_extlink1.h5
 ./test/be_extlink2.h5
@@ -852,6 +853,7 @@
 ./test/flush1.c
 ./test/flush2.c
 ./test/gen_bad_ohdr.c                   _DO_NOT_DISTRIBUTE_
+./test/gen_bad_compound.c               _DO_NOT_DISTRIBUTE_
 ./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
