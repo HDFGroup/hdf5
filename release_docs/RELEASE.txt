@@ -463,6 +463,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Removed config/ibm-aix6.x. All IBM-AIX settings are in one file,
+      ibm-aix. (AKC - 2011/4/14)
     - Shared C libraries are no longer disabled on Mac when Fortran
       is enabled. Shared Fortran libraries are still not supported on Mac,
       so configure will disable them by default, but this is overridable
