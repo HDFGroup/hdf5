@@ -8190,6 +8190,9 @@ main(void)
     /* Close 2nd FAPL */
     if(H5Pclose(fapl2) < 0) TEST_ERROR
 
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+
     if(nerrors)
         goto error;
     printf("All dataset tests passed.\n");

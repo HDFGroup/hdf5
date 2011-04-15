@@ -14460,6 +14460,9 @@ main(void)
     /* Close 2nd FAPL */
     H5Pclose(fapl2);
 
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+
     h5_cleanup(FILENAME, fapl);
 
     /* Test that external links can be used after a library reset.  MUST be

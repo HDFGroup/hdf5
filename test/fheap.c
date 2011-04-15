@@ -16691,6 +16691,9 @@ HDfprintf(stderr, "Uncomment tests!\n");
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
 
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+
     if(nerrors)
         goto error;
     puts("All fractal heap tests passed.");

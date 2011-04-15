@@ -583,6 +583,9 @@ main(void)
 
     H5Fclose(file);
 
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+
     if (nerrors) goto error;
     puts("All enum tests passed.");
     h5_cleanup(FILENAME, fapl);

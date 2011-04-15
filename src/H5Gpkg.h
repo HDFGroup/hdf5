@@ -608,6 +608,7 @@ H5_DLL herr_t H5G_new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *c
 H5_DLL herr_t H5G_lheap_size_test(hid_t gid, size_t *lheap_size);
 H5_DLL herr_t H5G_user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsigned *user_path_hidden);
 H5_DLL herr_t H5G_verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent);
+H5_DLL herr_t H5G_verify_cached_stabs_test(hid_t gid);
 #endif /* H5G_TESTING */
 
 #endif /* _H5Gpkg_H */
