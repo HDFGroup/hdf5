@@ -119,6 +119,10 @@ Bug Fixes since HDF5-1.8.6
 
     Library
     -------
+    - Changed assertion failure when decoding a compound datatype with no
+      fields into a normal error failure.  Also prohibit using this sort
+      of datatype for creating an attribute (as is already the case for
+      datasets and named datatypes).  (QAK - 2011/04/15, Jira issue #HDFFV-2766)
     - Tell the VFL flush call that the file will be closing, allowing
       the VFDs to avoid sync'ing the file (particularly valuable in parallel).
       (QAK - 2011/03/09)

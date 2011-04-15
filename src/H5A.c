@@ -389,14 +389,18 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
 
     /* Check if the dataspace has an extent set (or is NULL) */
     if(!(H5S_has_extent(space)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace extent has not been set")
+        HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "dataspace extent has not been set")
+
+    /* Check if the datatype is "sensible" for use in a dataset */
+    if(H5T_is_sensible(type) != TRUE)
+        HGOTO_ERROR(H5E_ATTR, H5E_BADTYPE, FAIL, "datatype is not sensible")
 
     /* Build the attribute information */
     if(NULL == (attr = H5FL_CALLOC(H5A_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for attribute info")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed for attribute info")
 
     if(NULL == (attr->shared = H5FL_CALLOC(H5A_shared_t)))
-        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate shared attr structure")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "can't allocate shared attr structure")
 
     /* If the creation property list is H5P_DEFAULT, use the default character encoding */
     if(acpl_id == H5P_DEFAULT)
