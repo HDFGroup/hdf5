@@ -56,6 +56,12 @@ New Features
 
     Configuration
     -------------
+    - Configure now generates Makefiles that build in "silent make mode"
+      by default in which compile and link lines are significantly
+      simplified for clarity. To override this and view actual compile and
+      link lines during building, the --disable-silent-rules flag can be used
+      at configure time, or the 'make' command can be followed by V=1, to
+      indicate a "verbose" make. (MAM - 2011/4/14).
     - Added mpicc and mpif90 as the default C and Fortran compilers for Linux
       systems when --enable-parallel is specified but no $CC or $FC is defined.
       (AKC - 2011/2/7)
@@ -117,6 +123,13 @@ Bug Fixes since HDF5-1.8.6
     -------------
     - Removed config/ibm-aix6.x. All IBM-AIX settings are in one file,
       ibm-aix. (AKC - 2011/4/14)
+    - Shared C libraries are no longer disabled on Mac when Fortran
+      is enabled. Shared Fortran libraries are still not supported on Mac,
+      so configure will disable them by default, but this is overridable
+      with the new --enable-unsupported configure option. The configure
+      summary has been updated to reflect the fact that the shared-ness of 
+      the C++/Fortran wrapper libraries may not align with the C library.
+      (MAM - 2011/04/11 - HDFFV-4353).
 
     Library
     -------

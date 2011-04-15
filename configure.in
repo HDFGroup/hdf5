@@ -35,6 +35,7 @@ AC_CONFIG_MACRO_DIR([m4])
 dnl AM_INIT_AUTOMAKE takes a list of options that should be applied to
 dnl every Makefile.am when automake is run.
 AM_INIT_AUTOMAKE([foreign])
+AM_SILENT_RULES([yes])
 
 dnl AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
 dnl for Makefiles, configure, src/H5config.h, etc.  If AM_MAINTAINER_MODE
@@ -93,6 +94,7 @@ AC_SUBST([H5_CFLAGS])
 AC_SUBST([H5_CPPFLAGS])
 AC_SUBST([H5_FCFLAGS])
 AC_SUBST([H5_CXXFLAGS])
+AC_SUBST([H5_LDFLAGS])
 
 dnl AM_CFLAGS (and company) are for CFLAGS that should be used on HDF5,
 dnl and WILL be exported to h5cc (or h5fc, etc) if set by configure.
@@ -847,68 +849,74 @@ elif test "X${enable_shared}" = "Xyes" -a "X${PARALLEL}" != "X"; then
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Many Fortran compilers don't support shared libraries.  Some of these
-dnl compilers include:
-dnl pgf90 version 6.0-4
-dnl Absoft 32bit Fortran 95 9.0
-dnl HP F90 v2.4
-dnl Intel Fortran Compiler 8.1
-dnl If any of these compilers is being used, disable shared libraries for
-dnl Fortran.  This prevents building shared libraries and also prevents
-dnl trying to link against shared libraries.
-if test "X${HDF_FORTRAN}" = "Xyes"; then
+dnl Fortran libraries are not currently supported on Mac. Disable them.
+dnl (this is overridable with --enable-unsupported).
+dnl
+AC_SUBST([H5_FORTRAN_SHARED])
+H5_FORTRAN_SHARED="no"
+if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
+  AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
 
-  if (${FC} -V 2>&1 | grep '^pgf90') > /dev/null; then
+  dnl Disable fortran shared libraries on Mac. (MAM - 03/30/11)
+  case "`uname`" in
+    Darwin*)
     H5_FORTRAN_SHARED="no"
-  fi
+    CHECK_WARN="Shared Fortran libraries not currently supported on Mac."
+      ;;
+  esac
 
-  if (${FC} -V 2>&1 | grep '^Intel(R) Fortran') > /dev/null; then
-    if (${FC} -v 2>&1 | grep '^Version 8.') > /dev/null; then
-      H5_FORTRAN_SHARED="no"
+  dnl Report results of check(s)
+  if test "X${H5_FORTRAN_SHARED}" = "Xno"; then
+    AC_MSG_RESULT([no])
+    AC_MSG_WARN([$CHECK_WARN])
+    if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+      AC_MSG_WARN([Disabling shared Fortran libraries.])
+      AC_MSG_WARN([To override this behavior, please use --enable-unsupported configure option.])
+        if test "X${enable_static}" = "Xno"; then
+          AC_MSG_ERROR([both static and shared Fortran libraries are disabled])
+        fi
     else
-dnl echo 'adding fortran compiler flag needed for building shared libraries'
-      FCFLAGS="${FCFLAGS} -fPIC"
-      AM_FCFLAGS="${AM_FCFLAGS} -fPIC"
+      AC_MSG_WARN([Allowing unsupported Fortran shared libraries due to use of --enable-unsupported flag])
+      H5_FORTRAN_SHARED="yes"
     fi
-  fi
-  if (${FC} +version 2>&1 | grep '^HP F90') > /dev/null; then
-    H5_FORTRAN_SHARED="no"
-  fi
-
-  if (${FC} -V 2>&1 | grep '^Absoft') > /dev/null; then
-    H5_FORTRAN_SHARED="no"
-  fi
-
-  if test "X${enable_shared}" != "Xno" && test "X${H5_FORTRAN_SHARED}" = "Xno"; then
-    AC_MSG_WARN([shared libraries are not supported; disabling shared Fortran libraries])
-  fi
-
-  if test "X${enable_static}" = "Xno" && test "X${H5_FORTRAN_SHARED}" = "Xno"; then
-    AC_MSG_ERROR([both static and shared Fortran libraries are disabled])
+  else
+    AC_MSG_RESULT([yes])
   fi
 fi
 
 AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
 
-dnl Disable C++ shared libraries if shared libraries are disabled.
-dnl This prevents Automake from trying to link against shared libraries,
-dnl which caused problems on tg-login
+dnl ----------------------------------------------------------------------
+dnl Disable C++ shared libraries if +DD64 flag is detected.
+dnl
+AC_SUBST([H5_CXX_SHARED])
 H5_CXX_SHARED="no"
 if test "X${HDF_CXX}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
+  AC_MSG_CHECKING([if shared C++ libraries are supported])
   H5_CXX_SHARED="yes"
 
-dnl Try to detect the +DD64 flag for HPUX aCC compiler and disable C++ shared libraries if it's
-dnl being used.
-
+  dnl Disable C++ shared libraries if DD64 flag is being used.
   if (echo dummy ${CXX} ${CXXLD} ${CFLAGS} ${CXXFLAGS} ${LDFLAGS} | grep 'DD64') > /dev/null; then
-    echo "    warning: +DD64 flag detected"
-    echo "    disabling shared C++ libraries"
     H5_CXX_SHARED="no"
+    CHECK_WARN="Shared C++ libraries not currently supported with +DD64 flag."
   fi
 
-  if test "X${enable_static}" = "Xno" && test "X${H5_CXX_SHARED}" = "Xno"; then
-    AC_MSG_ERROR([both static and shared C++ libraries are disabled])
+  dnl Report results of check(s)
+  if test "X${H5_CXX_SHARED}" = "Xno"; then
+    AC_MSG_RESULT([no])
+    AC_MSG_WARN([$CHECK_WARN])
+    if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+      AC_MSG_WARN([Disabling shared C++ libraries.])
+      AC_MSG_WARN([To override this behavior, please use --enable-unsupported configure option.])
+      if test "X${enable_static}" = "Xno"; then
+        AC_MSG_ERROR([both static and shared C++ libraries are disabled])
+      fi
+    else
+      AC_MSG_WARN([Allowing unsupported C++ shared librares due to use of --enable-unsupported flag])
+    fi
+  else
+    AC_MSG_RESULT([yes])
   fi
 fi
 
@@ -951,6 +959,11 @@ case "`uname`" in
     AC_DEFINE([CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM], [1], [Define a macro for Cygwin (on XP only) where the compiler has rounding problem converting from unsigned long long to long double])
     ;;
 esac
+
+dnl ----------------------------------------------------------------------
+dnl Windows won't create DLLs without the following macro.
+dnl
+AC_LIBTOOL_WIN32_DLL
 
 dnl ----------------------------------------------------------------------
 dnl Create libtool.  If shared/static libraries are going to be enabled
@@ -1241,6 +1254,27 @@ case "$host" in
     AC_CHECK_FUNCS([get_fpc_csr])
     ;;
 esac
+
+dnl ----------------------------------------------------------------------
+dnl Some platforms require that all symbols are resolved when a library
+dnl is linked. We can use the -no-undefined flag to tell libtool that
+dnl it will be able to build shared libraries on these architectures,
+dnl as it will not do so by default.
+dnl
+if test "X${enable_shared}" = "Xyes"; then
+  AC_MSG_CHECKING([if libtool needs -no-undefined flag to build shared libraries])
+  case "`uname`" in
+    CYGWIN*|MINGW*|AIX*)
+      dnl Add in the -no-undefined flag to LDFLAGS for libtool.
+      AC_MSG_RESULT([yes])
+      H5_LDFLAGS="$H5_LDFLAGS -no-undefined"
+      ;;
+    *)
+      dnl Don't add in anything.
+      AC_MSG_RESULT([no])
+      ;;
+  esac
+fi
 
 dnl ----------------------------------------------------------------------
 dnl Test for Largefile support.
@@ -4446,6 +4480,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/fortran/examples/run-hlfortran-ex.sh])
 
 AC_OUTPUT
+LT_OUTPUT
 no_create=$saved_no_create
 
 # Then the stamp2 file for H5config.h
