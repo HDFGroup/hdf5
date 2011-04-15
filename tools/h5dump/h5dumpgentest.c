@@ -2825,7 +2825,7 @@ static void gent_vldatatypes5(void)
 
 static void gent_array1_big(void)
 {
-    int wdata[SPACE_ARRAY1BIG_DIM][ARRAY1BIG_DIM];   /* Information to write */
+    int *wdata;   /* Information to write */
     hid_t  fid1;  /* HDF5 File IDs  */
     hid_t  dataset; /* Dataset ID   */
     hid_t  sid1;       /* Dataspace ID   */
@@ -2845,24 +2845,27 @@ static void gent_array1_big(void)
     hsize_t  count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t  block[SPACE1_RANK];     /* Block size of hyperslab */
     hdset_reg_ref_t   *wbuf;         /* buffer to write to disk */
+
     start[0] = 0;
     stride[0] = 1;
     count[0] = 999;
     block[0] = 1;
+
     /* Allocate write & read buffers */
     wbuf = (hdset_reg_ref_t*) calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    wdata = (int *)malloc(sizeof(int) * (size_t)(SPACE_ARRAY1BIG_DIM * ARRAY1BIG_DIM));
 
     /* Allocate and initialize array data to write */
-    for(i=0; i<SPACE_ARRAY1BIG_DIM; i++)
-        for(j=0; j<ARRAY1BIG_DIM; j++)
-            wdata[i][j]=i*1;
+    for(i = 0; i < SPACE_ARRAY1BIG_DIM; i++)
+        for(j = 0; j < ARRAY1BIG_DIM; j++)
+            *(wdata + (i * ARRAY1BIG_DIM) + j) = i * 1;
 
     /* Create file */
     fid1 = H5Fcreate(FILE25_BIG, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*-------------------------
      * Array type dataset 
-     *
+     */
     /* Create dataspace for datasets */
     sid1 = H5Screate_simple(SPACE1_RANK, sdims1, NULL);
 
@@ -2905,6 +2908,10 @@ static void gent_array1_big(void)
     assert(ret >= 0);
     ret = H5Fclose(fid1);
     assert(ret >= 0);
+
+    /* Release memory */
+    free(wbuf);
+    free(wdata);
 }
 
 static void gent_array1(void)
@@ -6918,7 +6925,7 @@ gent_packedbits(void)
     double  dsetdbl[F67_XDIM][F67_YDIM8];
     unsigned int i, j;
 
-    fid = H5Fcreate(FILE66, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE67, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Dataset of 8 bits unsigned int */
     dims[0] = F67_XDIM; dims[1] = F67_YDIM8;
