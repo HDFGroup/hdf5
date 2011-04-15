@@ -1851,7 +1851,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
 
 fi
 
-AM_CONDITIONAL([BUILD_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xyes"])
+AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xyes" && test "X$LL_PATH" != "X"])
 
 dnl Checkpoint the cache
 AC_CACHE_SAVE
@@ -3032,6 +3032,7 @@ if test "$DIRECT_VFD" = "yes"; then
 	  #include <sys/types.h>
 	  #include <sys/stat.h>
 	  #include <fcntl.h>
+	  #include <stdlib.h>
           int main(void)
           {
              int fid; 

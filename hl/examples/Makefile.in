@@ -652,7 +652,7 @@ ex_table10: $(srcdir)/ex_table10.c
 ex_table11: $(srcdir)/ex_table11.c
 ex_table12: $(srcdir)/ex_table12.c
 
-@BUILD_SZIP_CONDITIONAL_TRUE@export LD_LIBRARY_PATH=$(LL_PATH)
+@BUILD_SHARED_SZIP_CONDITIONAL_TRUE@export LD_LIBRARY_PATH=$(LL_PATH)
 
 # How to create EXAMPLEDIR if it doesn't already exist
 $(EXAMPLEDIR):

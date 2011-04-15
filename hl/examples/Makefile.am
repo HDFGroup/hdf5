@@ -91,7 +91,7 @@ ex_table10: $(srcdir)/ex_table10.c
 ex_table11: $(srcdir)/ex_table11.c
 ex_table12: $(srcdir)/ex_table12.c
 
-if BUILD_SZIP_CONDITIONAL
+if BUILD_SHARED_SZIP_CONDITIONAL
 export LD_LIBRARY_PATH=$(LL_PATH)
 endif
 

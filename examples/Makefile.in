@@ -658,7 +658,7 @@ h5_extlink: $(srcdir)/h5_extlink.c $(EXTLINK_DIRS)
 h5_elink_unix2win: $(srcdir)/h5_elink_unix2win.c $(EXTLINK_DIRS)
 h5_shared_mesg: $(srcdir)/h5_shared_mesg.c
 
-@BUILD_SZIP_CONDITIONAL_TRUE@export LD_LIBRARY_PATH=$(LL_PATH)
+@BUILD_SHARED_SZIP_CONDITIONAL_TRUE@export LD_LIBRARY_PATH=$(LL_PATH)
 
 # How to create EXAMPLEDIR if it doesn't already exist
 $(EXAMPLEDIR):
