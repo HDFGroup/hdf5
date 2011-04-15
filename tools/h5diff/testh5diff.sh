@@ -187,10 +187,19 @@ STDOUT_FILTER() {
 #    ERROR: 0031-250  task 3: Terminated
 #    ERROR: 0031-250  task 2: Terminated
 #    ERROR: 0031-250  task 1: Terminated
+# 5. LLNL Blue-Gene mpirun prints messages like there when it exit non-zero:
+#    <Apr 12 15:01:49.075658> BE_MPI (ERROR): The error message in the job record is as follows:
+#    <Apr 12 15:01:49.075736> BE_MPI (ERROR):   "killed by exit(1) on node 0"
+
 
 STDERR_FILTER() {
     result_file=$1
     tmp_file=/tmp/h5test_tmp_$$
+    # Filter LLNL Blue-Gene error messages in both serial and parallel modes
+    # since mpirun is used in both modes.
+    cp $result_file $tmp_file
+    sed -e '/ BE_MPI (ERROR): /d' \
+	< $tmp_file > $result_file
     # Filter MPE messages
     if test -n "$pmode"; then
 	cp $result_file $tmp_file
