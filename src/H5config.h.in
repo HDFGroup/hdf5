@@ -23,6 +23,9 @@
 /* Define if `dev_t' is a scalar */
 #undef DEV_T_IS_SCALAR
 
+/* Define if POSIX AIO error recovery is to be enabled */
+#undef ENABLE_POSIX_AIO_ERROR_RECOVERY
+
 /* Define to dummy `main' function (if any) required to link to the Fortran
    libraries. */
 #undef FC_DUMMY_MAIN

@@ -2345,6 +2345,28 @@ case "X-$METADATATRACEFILE" in
 esac
 
 dnl ----------------------------------------------------------------------
+dnl Check if they would like POSIX aio error recovery enabled
+dnl
+AC_MSG_CHECKING([whether posix aio error recovery should be enabled])
+AC_ARG_ENABLE([posix-aio-error-recovery],
+              [AC_HELP_STRING([--enable-posix-aio-error-recovery],
+                              [Enable POSIX AIO error recovery.])],
+              [POSIXAIOERRORRECOVERY=$enableval])
+
+case "X-$POSIXAIOERRORRECOVERY" in
+  X-yes)
+      POSIXAIOERRORRECOVERY=yes
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([ENABLE_POSIX_AIO_ERROR_RECOVERY], [1],
+                [Define if POSIX AIO error recovery is to be enabled])
+    ;;
+  *)
+      POSIXAIOERRORRECOVERY=no
+      AC_MSG_RESULT([no])
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------
 dnl Enable tracing of the API
 dnl This must come after the enable-debug since it depends on debug.
 dnl

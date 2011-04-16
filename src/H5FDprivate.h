@@ -63,6 +63,14 @@
     else if((op)==H5FD_AIO_OP__FSYNC)                                         \
         ((stats_ptr)->aio_fsyncs_completed_successfully)++; }
 
+#define H5FD_UPDATE_STATS__AIO_OP_CANCELED(stats_ptr, op) {                   \
+    if((op)==H5FD_AIO_OP__READ)                                               \
+        ((stats_ptr)->aio_reads_canceled)++;                                  \
+    else if((op)==H5FD_AIO_OP__WRITE)                                         \
+        ((stats_ptr)->aio_writes_canceled)++;                                 \
+    else if((op)==H5FD_AIO_OP__FSYNC)                                         \
+        ((stats_ptr)->aio_fsyncs_canceled)++; }
+
 #define H5FD_UPDATE_STATS__AIO_OP_QUEUE_ATTEMPTED(stats_ptr, op) {	      \
     if((op)==H5FD_AIO_OP__READ)                                               \
         ((stats_ptr)->aio_read_queue_attempts)++;                             \
@@ -129,6 +137,7 @@ typedef struct H5FD_stats_t {
     uint64_t aio_reads_completed_successfully;          /* number of aio reads requested, */
                                                         /* queued, and completed via aio  */
                                                         /* with all desired data read.    */
+    uint64_t aio_reads_canceled;			/* number of aio reads canceled   */
     uint64_t aio_read_queue_attempts;                   /* number of times we have tried  */
                                                         /* to queue an aio read.          */
     uint64_t aio_read_queue_attempt_failures;           /* number of times an attempt to  */
@@ -157,6 +166,7 @@ typedef struct H5FD_stats_t {
     uint64_t aio_writes_completed_successfully;         /* number of aio writes requested,*/
                                                         /* queued, and completed with all */
                                                         /* desired data read.             */
+    uint64_t aio_writes_canceled;			/* number of aio writes canceled  */
     uint64_t aio_write_queue_attempts;                  /* number of times we have tried  */
                                                         /* to queue an aio write.         */
     uint64_t aio_write_queue_attempt_failures;          /* number of times an attempt to  */
@@ -185,6 +195,7 @@ typedef struct H5FD_stats_t {
     uint64_t aio_fsyncs_completed_successfully;         /* number of aio fsyncs requested,*/
                                                         /* queued, and completed with out */
                                                         /* error.                         */
+    uint64_t aio_fsyncs_canceled;			/* number of aio writes canceled  */
     uint64_t aio_fsync_queue_attempts;                  /* number of times we have tried  */
                                                         /* to queue an aio fsync.         */
     uint64_t aio_fsync_queue_attempt_failures;          /* number of times an attempt to  */

@@ -278,7 +278,6 @@ done:
  *              block.
  *
  * Return:	Success:	The EOF address.
- *
  *		Failure:	HADDR_UNDEF
  *
  * Programmer:	Robb Matzke
@@ -353,44 +352,25 @@ done:
  *		as the underlying file driver does not support AIO.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	John Mainzer
  *              6/12/10
  *
- * Changes:	None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t 
-H5FD_aio_read(H5FD_t *file, 
-              H5FD_mem_t type, 
-              hid_t dxpl,
-              haddr_t addr, 
-              size_t size, 
-              void *buffer,
-              void **ctlblk_ptr_ptr)
+H5FD_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, 
+    size_t size, void *buffer, void **ctlblk_ptr_ptr)
 {
     herr_t      	ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_NOAPI(H5FD_aio_read, FAIL)
 
-    if ( ( file == NULL ) ||
-         ( file->cls == NULL ) ||
-         ( ! H5F_addr_defined(addr) ) ||
-         ( size <= 0 ) ||
-         ( buffer == NULL ) ||
-         ( ctlblk_ptr_ptr == NULL ) ||
-         ( *ctlblk_ptr_ptr != NULL ) ) {
-
+    if((file == NULL) || (file->cls == NULL) || (!H5F_addr_defined(addr)) || (size <= 0) || (buffer == NULL) || (ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
-    }
 
-    if ( file->cls->aio_read != NULL ) { /* aio_read supported */
-
+    if(file->cls->aio_read != NULL) { /* aio_read supported */
         /* if we have aio_read, verify that we also have aio_test, 
          * aio_wait, and aio_finish as well.
          */
@@ -398,36 +378,19 @@ H5FD_aio_read(H5FD_t *file,
         HDassert( file->cls->aio_wait != NULL );
         HDassert( file->cls->aio_finish != NULL );
 
-	result = (file->cls->aio_read)(file, type, dxpl, addr + file->base_addr,
-                                       size, buffer, ctlblk_ptr_ptr);
-
-	if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_AIOREADERROR, FAIL, \
-			"driver aio read request failed")
-        }
+	if((file->cls->aio_read)(file, type, dxpl, addr + file->base_addr, size, buffer, ctlblk_ptr_ptr) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_AIOREADERROR, FAIL, "driver aio read request failed")
     } else { /* aio_read not supported -- do synchronous read instead */
-
 	HDassert( file->cls->read != NULL );
 
-	result = (file->cls->read)(file, type, dxpl, addr + file->base_addr, 
-                                   size, buffer);
-
-        if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, \
-                        "driver fallback sio read request failed")
-
-	} else { /* setup the dummy control block pointer */
-
+	if((file->cls->read)(file, type, dxpl, addr + file->base_addr, size, buffer) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver fallback sio read request failed")
+	else /* setup the dummy control block pointer */
             *ctlblk_ptr_ptr = (void *)dummy_aio_ctlblk;
-        }
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_aio_read() */
 
 
@@ -469,44 +432,26 @@ done:
  *		as the underlying file driver does not support AIO.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	John Mainzer
  *              6/12/10
  *
- * Changes: 	None.
- *
  *-------------------------------------------------------------------------
  */
 
 herr_t 
-H5FD_aio_write(H5FD_t *file, 
-               H5FD_mem_t type, 
-               hid_t dxpl,
-               haddr_t addr, 
-               size_t size, 
-               void *buffer,
-               void **ctlblk_ptr_ptr)
+H5FD_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, 
+    size_t size, void *buffer, void **ctlblk_ptr_ptr)
 {
     herr_t              ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_NOAPI(H5FD_aio_write, FAIL)
 
-    if ( ( file == NULL ) ||
-         ( file->cls == NULL ) ||
-         ( ! H5F_addr_defined(addr) ) ||
-         ( size <= 0 ) ||
-         ( buffer == NULL ) ||
-         ( ctlblk_ptr_ptr == NULL ) ||
-         ( *ctlblk_ptr_ptr != NULL ) ) {
-
+    if((file == NULL) || (file->cls == NULL) || (!H5F_addr_defined(addr)) || (size <= 0) || (buffer == NULL) || (ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
-    }
 
     if ( file->cls->aio_write != NULL ) { /* aio_write supported */
-
         /* if we have aio_write, verify that we also have aio_test, 
          * aio_wait, and aio_finish as well.
          */
@@ -514,37 +459,19 @@ H5FD_aio_write(H5FD_t *file,
         HDassert( file->cls->aio_wait != NULL );
         HDassert( file->cls->aio_finish != NULL );
 
-	result = (file->cls->aio_write)(file, type, dxpl, 
-                                        addr + file->base_addr,
-                                        size, buffer, ctlblk_ptr_ptr);
-
-	if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_AIOWRITEERROR, FAIL, \
-			"driver aio write request failed")
-        }
+	if((file->cls->aio_write)(file, type, dxpl, addr + file->base_addr, size, buffer, ctlblk_ptr_ptr) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_AIOWRITEERROR, FAIL, "driver aio write request failed")
     } else { /* aio_write not supported -- do synchronous write instead */
-
 	HDassert( file->cls->write != NULL );
 
-	result = (file->cls->write)(file, type, dxpl, addr + file->base_addr, 
-                                    size, buffer);
-
-        if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, \
-                        "driver fallback sio write request failed")
-
-	} else { /* setup the dummy control block pointer */
-
+	if((file->cls->write)(file, type, dxpl, addr + file->base_addr, size, buffer) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver fallback sio write request failed")
+	else /* setup the dummy control block pointer */
             *ctlblk_ptr_ptr = (void *)dummy_aio_ctlblk;
-        }
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_aio_write() */
 
 
@@ -576,59 +503,35 @@ done:
  *		control block, set *done_ptr to TRUE and return.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	John Mainzer
  *              6/12/10
  *
- * Changes:	None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t 
-H5FD_aio_test(H5FD_t *file, 
-              hbool_t *done_ptr, 
-              void *ctlblk_ptr)
+H5FD_aio_test(H5FD_t *file, hbool_t *done_ptr, void *ctlblk_ptr)
 {
     herr_t		ret_value = SUCCEED;  /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_NOAPI(H5FD_aio_test, FAIL)
 
-    if ( ( file == NULL ) ||
-         ( file->cls == NULL ) ||
-         ( done_ptr == NULL ) ||
-         ( ctlblk_ptr == NULL ) ) {
-
+    if((file == NULL) || (file->cls == NULL) || (done_ptr == NULL) || (ctlblk_ptr == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
-    }
 
-    if ( file->cls->aio_test != NULL ) { /* aio_test supported */
-
-	result = (file->cls->aio_test)(done_ptr, ctlblk_ptr);
-
-	if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_AIOTESTFAIL, FAIL, \
-			"driver aio test request failed")
-        }
+    if(file->cls->aio_test != NULL) { /* aio_test supported */
+	if((file->cls->aio_test)(done_ptr, ctlblk_ptr) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_AIOTESTFAIL, FAIL, "driver aio test request failed")
     } else { /* aio_test not supported -- just fake it */
-
-        if ( ctlblk_ptr != (void *)dummy_aio_ctlblk ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
-                        "unexpected control block pointer.")
-        }
+        if(ctlblk_ptr != (void *)dummy_aio_ctlblk)
+            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "unexpected control block pointer.")
 
         *done_ptr = TRUE;
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_aio_test() */
 
 
@@ -657,58 +560,34 @@ done:
  *		control block, and return.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	John Mainzer
  *              6/12/10
  *
- * Changes:	None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t 
-H5FD_aio_wait(H5FD_t *file,
-              void *ctlblk_ptr)
+H5FD_aio_wait(H5FD_t *file, void *ctlblk_ptr)
 {
     herr_t    		ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_NOAPI(H5FD_aio_wait, FAIL)
 
-    if ( ( file == NULL ) ||
-         ( file->cls == NULL ) ||
-         ( ctlblk_ptr == NULL ) ) {
-
+    if((file == NULL) || (file->cls == NULL) || (ctlblk_ptr == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "NULL ctlblk ptr on entry.")
-    }
 
-    if ( ctlblk_ptr == NULL ) {
-
+    if(ctlblk_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
-    }
 
-    if ( file->cls->aio_wait != NULL ) { /* aio_wait supported */
-
-	result = (file->cls->aio_wait)(ctlblk_ptr);
-
-	if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_AIOWAITFAIL, FAIL, \
-			"driver aio wait request failed")
-        }
-    } else { /* aio_wait not supported -- just fake it */
-
-        if ( ctlblk_ptr != (void *)dummy_aio_ctlblk ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
-                        "unexpected control block pointer.")
-        }
-    }
+    if(file->cls->aio_wait != NULL) { /* aio_wait supported */
+	if((file->cls->aio_wait)(ctlblk_ptr) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_AIOWAITFAIL, FAIL, "driver aio wait request failed")
+    } else /* aio_wait not supported -- just fake it */
+        if(ctlblk_ptr != (void *)dummy_aio_ctlblk)
+            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "unexpected control block pointer.")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_aio_wait() */
@@ -742,7 +621,6 @@ done:
  *		and return.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	John Mainzer
@@ -750,49 +628,28 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t 
-H5FD_aio_finish(H5FD_t *file,
-                int *errno_ptr, 
-                void *ctlblk_ptr)
+H5FD_aio_finish(H5FD_t *file, int *errno_ptr, void *ctlblk_ptr)
 {
     herr_t              ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_NOAPI(H5FD_aio_finish, FAIL)
 
-    if ( ( file == NULL ) ||
-         ( file->cls == NULL ) ||
-         ( errno_ptr == NULL ) ||
-         ( ctlblk_ptr == NULL ) ) {
-
+    if((file == NULL) || (file->cls == NULL) || (errno_ptr == NULL) || (ctlblk_ptr == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "NULL param(s) on entry.")
-    }
 
-    if ( file->cls->aio_finish != NULL ) { /* aio_finish supported */
-
-	result = (file->cls->aio_finish)(errno_ptr, ctlblk_ptr);
-
-	if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_AIOFINISHFAIL, FAIL, \
-			"driver aio finish request failed")
-        }
+    if(file->cls->aio_finish != NULL) { /* aio_finish supported */
+	if((file->cls->aio_finish)(errno_ptr, ctlblk_ptr) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_AIOFINISHFAIL, FAIL, "driver aio finish request failed")
     } else { /* aio_finish not supported -- just fake it */
-
-        if ( ctlblk_ptr != (void *)dummy_aio_ctlblk ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
-                        "unexpected control block pointer.")
-        }
+        if(ctlblk_ptr != (void *)dummy_aio_ctlblk)
+            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "unexpected control block pointer.")
 
 	*errno_ptr = 0;
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_aio_finish() */
 
 
@@ -819,7 +676,6 @@ done:
  *		control block, and return.
  *
  * Return:	Success:	SUCCEED
- *
  *		Failure:	Negative
  *
  * Programmer:	John Mainzer
@@ -827,26 +683,17 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t 
-H5FD_aio_fsync(H5FD_t *file, 
-               void **ctlblk_ptr_ptr)
+H5FD_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr)
 {
     herr_t     		ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_NOAPI(H5FD_aio_fsync, FAIL)
 
-    if ( ( file == NULL ) ||
-         ( file->cls == NULL ) ||
-         ( ctlblk_ptr_ptr == NULL ) || 
-         ( *ctlblk_ptr_ptr != NULL ) ) {
-
+    if((file == NULL) || (file->cls == NULL) || (ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "NULL param(s) on entry.")
-    }
 
-    if ( file->cls->aio_fsync != NULL ) { /* aio_fsync supported */
-
+    if(file->cls->aio_fsync != NULL) { /* aio_fsync supported */
         /* if we have aio_fsync, verify that we also have aio_test, 
          * aio_wait, and aio_finish as well.
          */
@@ -854,32 +701,17 @@ H5FD_aio_fsync(H5FD_t *file,
         HDassert( file->cls->aio_wait != NULL );
         HDassert( file->cls->aio_finish != NULL );
 
-	result = (file->cls->aio_fsync)(file, ctlblk_ptr_ptr);
-
-	if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_AIOSYNCFAIL, FAIL, \
-			"driver aio fsync request failed")
-        }
+	if((file->cls->aio_fsync)(file, ctlblk_ptr_ptr) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_AIOSYNCFAIL, FAIL, "driver aio fsync request failed")
     } else { /* aio_fsync not supported -- do synchronous fsync instead */
-
-        result = H5FD_fsync(file, H5P_DATASET_XFER_DEFAULT);
-
-        if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, \
-                        "driver fallback sio fsync request failed")
-
-	} else { /* setup the dummy control block pointer */
-
+        if(H5FD_fsync(file, H5P_DATASET_XFER_DEFAULT) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, "driver fallback sio fsync request failed")
+	else /* setup the dummy control block pointer */
             *ctlblk_ptr_ptr = (void *)dummy_aio_ctlblk;
-        }
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_aio_fsync() */
 
 
@@ -918,45 +750,26 @@ done:
  */
 
 herr_t 
-H5FD_aio_cancel(H5FD_t *file,
-                void *ctlblk_ptr)
+H5FD_aio_cancel(H5FD_t *file, void *ctlblk_ptr)
 {
     herr_t   		ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_NOAPI(H5FD_aio_cancel, FAIL)
 
-    if ( ( file == NULL ) ||
-         ( file->cls == NULL ) ||
-         ( ctlblk_ptr == NULL ) ) {
-
+    if((file == NULL) || (file->cls == NULL) || (ctlblk_ptr == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "NULL ctlblk_ptr on entry.")
-    }
 
-    if ( file->cls->aio_cancel != NULL ) { /* aio_cancel supported */
-
-	result = (file->cls->aio_cancel)(ctlblk_ptr);
-
-	if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_AIOCANCELFAIL, FAIL, \
-			"driver aio cancel request failed")
-        }
+    if(file->cls->aio_cancel != NULL) { /* aio_cancel supported */
+	if((file->cls->aio_cancel)(ctlblk_ptr) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_AIOCANCELFAIL, FAIL, "driver aio cancel request failed")
     } else { /* aio_cancel not supported -- just fake it */
-
-        if ( ctlblk_ptr != (void *)dummy_aio_ctlblk ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, \
-                        "unexpected control block pointer.")
-        }
+        if(ctlblk_ptr != (void *)dummy_aio_ctlblk)
+            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "unexpected control block pointer.")
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_aio_cancel() */
-
 
 
 /*-------------------------------------------------------------------------
@@ -965,41 +778,26 @@ done:
  * Purpose:     Do an fsync on the indicated file.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	John Mainzer
  *              7/7/10
  *
- * Changes: 	None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t 
-H5FD_fsync(H5FD_t *file, 
-           hid_t dxpl)
+H5FD_fsync(H5FD_t *file, hid_t dxpl)
 {
     herr_t              ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_NOAPI(H5FD_fsync, FAIL)
 
-    if ( ( file == NULL ) ||
-         ( file->cls == NULL ) ) {
-
+    if((file == NULL) || (file->cls == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad file param on entry.")
-    }
 
-    if ( file->cls->fsync != NULL ) { /* fsync supported */
-
-	result = (file->cls->fsync)(file, dxpl);
-
-	if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, \
-                        "sio fsync request failed")
-        }
+    if(file->cls->fsync != NULL) { /* fsync supported */
+	if((file->cls->fsync)(file, dxpl) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, "sio fsync request failed")
     } else { /* fsync not supported */
 
 	/* Quincey:
@@ -1028,9 +826,7 @@ H5FD_fsync(H5FD_t *file,
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_fsync() */
 
 
@@ -1055,15 +851,15 @@ H5FD_aggregate_stats(H5FD_stats_t *base_stats_ptr, H5FD_stats_t *new_stats_ptr)
 
     FUNC_ENTER_NOAPI_NOINIT(H5FD_aggregate_stats)
 
-    if ((base_stats_ptr == NULL)||(base_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC)||
-        (new_stats_ptr == NULL)||(new_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
+    if((base_stats_ptr == NULL) || (base_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC) || (new_stats_ptr == NULL) || (new_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
-    if (new_stats_ptr->defined){
+    if(new_stats_ptr->defined){
         base_stats_ptr->defined = TRUE;
         base_stats_ptr->complete = (hbool_t)(base_stats_ptr->complete && new_stats_ptr->complete);
         base_stats_ptr->aio_reads_attempted += new_stats_ptr->aio_reads_attempted;
         base_stats_ptr->aio_reads_completed_successfully += new_stats_ptr->aio_reads_completed_successfully;
+        base_stats_ptr->aio_reads_canceled += new_stats_ptr->aio_reads_canceled;
         base_stats_ptr->aio_read_queue_attempts += new_stats_ptr->aio_read_queue_attempts;
         base_stats_ptr->aio_read_queue_attempt_failures += new_stats_ptr->aio_read_queue_attempt_failures;
         base_stats_ptr->aio_reads_converted_to_sio += new_stats_ptr->aio_reads_converted_to_sio;
@@ -1073,6 +869,7 @@ H5FD_aggregate_stats(H5FD_stats_t *base_stats_ptr, H5FD_stats_t *new_stats_ptr)
         base_stats_ptr->aio_partial_reads_recovered_via_sio += new_stats_ptr->aio_partial_reads_recovered_via_sio;
         base_stats_ptr->aio_writes_attempted += new_stats_ptr->aio_writes_attempted;
         base_stats_ptr->aio_writes_completed_successfully += new_stats_ptr->aio_writes_completed_successfully;
+        base_stats_ptr->aio_writes_canceled += new_stats_ptr->aio_writes_canceled;
         base_stats_ptr->aio_write_queue_attempts += new_stats_ptr->aio_write_queue_attempts;
         base_stats_ptr->aio_write_queue_attempt_failures += new_stats_ptr->aio_write_queue_attempt_failures;
         base_stats_ptr->aio_writes_converted_to_sio += new_stats_ptr->aio_writes_converted_to_sio;
@@ -1082,18 +879,17 @@ H5FD_aggregate_stats(H5FD_stats_t *base_stats_ptr, H5FD_stats_t *new_stats_ptr)
         base_stats_ptr->aio_partial_writes_recovered_via_sio += new_stats_ptr->aio_partial_writes_recovered_via_sio;
         base_stats_ptr->aio_fsyncs_attempted += new_stats_ptr->aio_fsyncs_attempted;
         base_stats_ptr->aio_fsyncs_completed_successfully += new_stats_ptr->aio_fsyncs_completed_successfully;
+        base_stats_ptr->aio_fsyncs_canceled += new_stats_ptr->aio_fsyncs_canceled;
         base_stats_ptr->aio_fsync_queue_attempts += new_stats_ptr->aio_fsync_queue_attempts;
         base_stats_ptr->aio_fsync_queue_attempt_failures += new_stats_ptr->aio_fsync_queue_attempt_failures;
         base_stats_ptr->aio_fsyncs_converted_to_sio += new_stats_ptr->aio_fsyncs_converted_to_sio;
         base_stats_ptr->aio_fsync_failures += new_stats_ptr->aio_fsync_failures;
         base_stats_ptr->aio_fsync_failures_recovered_via_sio += new_stats_ptr->aio_fsync_failures_recovered_via_sio;
-    }else
+    } else
         base_stats_ptr->complete=FALSE;
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_aggregate_stats() */
 
 
@@ -1109,7 +905,6 @@ done:
  *              3/30/11
  *-------------------------------------------------------------------------
  */
-#define H5FD_COPY_STATS__DEBUG 0
 herr_t
 H5FD_copy_stats(H5FD_stats_t *dest_stats_ptr, H5FD_stats_t *src_stats_ptr)
 {
@@ -1117,25 +912,16 @@ H5FD_copy_stats(H5FD_stats_t *dest_stats_ptr, H5FD_stats_t *src_stats_ptr)
 
     FUNC_ENTER_NOAPI_NOINIT(H5FD_copy_stats)
 
-#if H5FD_COPY_STATS__DEBUG > 1
-    HDfprintf(stdout, "%s: entering.\n", FUNC);
-#endif /* H5FD_COPY_STATS__DEBUG > 1 */
-
-    if ((dest_stats_ptr == NULL)||(dest_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC)||
-        (src_stats_ptr == NULL)||(src_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
+    if((dest_stats_ptr == NULL) || (dest_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC) || (src_stats_ptr == NULL) || (src_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     dest_stats_ptr->defined = src_stats_ptr->defined;
 
-    if (src_stats_ptr->defined){
-
-#if H5FD_COPY_STATS__DEBUG > 1
-    HDfprintf(stdout, "%s: stats defined -- copying........", FUNC);
-#endif /* H5FD_COPY_STATS__DEBUG > 1 */
-
+    if(src_stats_ptr->defined) {
         dest_stats_ptr->complete = src_stats_ptr->complete;
         dest_stats_ptr->aio_reads_attempted = src_stats_ptr->aio_reads_attempted;
         dest_stats_ptr->aio_reads_completed_successfully = src_stats_ptr->aio_reads_completed_successfully;
+        dest_stats_ptr->aio_reads_canceled = src_stats_ptr->aio_reads_canceled;
         dest_stats_ptr->aio_read_queue_attempts = src_stats_ptr->aio_read_queue_attempts;
         dest_stats_ptr->aio_read_queue_attempt_failures = src_stats_ptr->aio_read_queue_attempt_failures;
         dest_stats_ptr->aio_reads_converted_to_sio = src_stats_ptr->aio_reads_converted_to_sio;
@@ -1145,6 +931,7 @@ H5FD_copy_stats(H5FD_stats_t *dest_stats_ptr, H5FD_stats_t *src_stats_ptr)
         dest_stats_ptr->aio_partial_reads_recovered_via_sio = src_stats_ptr->aio_partial_reads_recovered_via_sio;
         dest_stats_ptr->aio_writes_attempted = src_stats_ptr->aio_writes_attempted;
         dest_stats_ptr->aio_writes_completed_successfully = src_stats_ptr->aio_writes_completed_successfully;
+        dest_stats_ptr->aio_writes_canceled = src_stats_ptr->aio_writes_canceled;
         dest_stats_ptr->aio_write_queue_attempts = src_stats_ptr->aio_write_queue_attempts;
         dest_stats_ptr->aio_write_queue_attempt_failures = src_stats_ptr->aio_write_queue_attempt_failures;
         dest_stats_ptr->aio_writes_converted_to_sio = src_stats_ptr->aio_writes_converted_to_sio;
@@ -1154,25 +941,16 @@ H5FD_copy_stats(H5FD_stats_t *dest_stats_ptr, H5FD_stats_t *src_stats_ptr)
         dest_stats_ptr->aio_partial_writes_recovered_via_sio = src_stats_ptr->aio_partial_writes_recovered_via_sio;
         dest_stats_ptr->aio_fsyncs_attempted = src_stats_ptr->aio_fsyncs_attempted;
         dest_stats_ptr->aio_fsyncs_completed_successfully = src_stats_ptr->aio_fsyncs_completed_successfully;
+        dest_stats_ptr->aio_fsyncs_canceled = src_stats_ptr->aio_fsyncs_canceled;
         dest_stats_ptr->aio_fsync_queue_attempts = src_stats_ptr->aio_fsync_queue_attempts;
         dest_stats_ptr->aio_fsync_queue_attempt_failures = src_stats_ptr->aio_fsync_queue_attempt_failures;
         dest_stats_ptr->aio_fsyncs_converted_to_sio = src_stats_ptr->aio_fsyncs_converted_to_sio;
         dest_stats_ptr->aio_fsync_failures = src_stats_ptr->aio_fsync_failures;
         dest_stats_ptr->aio_fsync_failures_recovered_via_sio = src_stats_ptr->aio_fsync_failures_recovered_via_sio;
-
-#if H5FD_COPY_STATS__DEBUG > 1
-        HDfprintf(stdout, "done.\n");
-#endif /* H5FD_COPY_STATS__DEBUG > 1 */
     }
 
 done:
-
-#if H5FD_COPY_STATS__DEBUG > 1
-    HDfprintf(stdout, "%s: exiting.\n", FUNC);
-#endif /* H5FD_COPY_STATS__DEBUG > 1 */
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_copy_stats() */
 
 
@@ -1187,9 +965,9 @@ done:
  *
  * Programmer:	John Mainzer
  *              4/4/11
+ *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5FD_dump_stats(FILE * out_stream,H5FD_stats_t *stats_ptr,const char *label_ptr)
 {
@@ -1197,7 +975,7 @@ H5FD_dump_stats(FILE * out_stream,H5FD_stats_t *stats_ptr,const char *label_ptr)
 
     FUNC_ENTER_NOAPI_NOINIT(H5FD_dump_stats)
 
-    if((out_stream==NULL)||(stats_ptr==NULL)||(stats_ptr->magic!=H5FD__H5FD_STATS_T_MAGIC)||(label_ptr==NULL))
+    if((out_stream == NULL) || (stats_ptr == NULL) || (stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC) || (label_ptr==NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     HDfprintf(out_stream, "\n%s\n", label_ptr);
@@ -1220,6 +998,11 @@ H5FD_dump_stats(FILE * out_stream,H5FD_stats_t *stats_ptr,const char *label_ptr)
               stats_ptr->aio_reads_completed_successfully, 
               stats_ptr->aio_writes_completed_successfully, 
               stats_ptr->aio_fsyncs_completed_successfully);
+        HDfprintf(out_stream, 
+              "canceled                         %5lld           %5lld           %5lld\n",
+              stats_ptr->aio_reads_canceled, 
+              stats_ptr->aio_writes_canceled, 
+              stats_ptr->aio_fsyncs_canceled);
         HDfprintf(out_stream, 
               "queue attempts                   %5lld           %5lld           %5lld\n",
               stats_ptr->aio_read_queue_attempts,
@@ -1260,7 +1043,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5FD_initialize_stats() */
+} /* end H5FD_dump_stats() */
 
 
 /*-------------------------------------------------------------------------
@@ -1275,11 +1058,8 @@ done:
  * Programmer:	John Mainzer
  *              3/30/11
  *
- * Changes: 	None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t 
 H5FD_get_stats(H5FD_t *file, H5FD_stats_t *stats_ptr)
 {
@@ -1288,11 +1068,10 @@ H5FD_get_stats(H5FD_t *file, H5FD_stats_t *stats_ptr)
 
     FUNC_ENTER_NOAPI(H5FD_get_stats, FAIL)
 
-    if((file == NULL)||(file->cls == NULL)||(stats_ptr==NULL)||
-       (stats_ptr->magic!=H5FD__H5FD_STATS_T_MAGIC))
+    if((file == NULL) || (file->cls == NULL) || (stats_ptr==NULL) || (stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad param(s) on entry.")
 
-    if((file->feature_flags&H5FD_FEAT_EXTENDED_CLASS)!=0){
+    if((file->feature_flags&H5FD_FEAT_EXTENDED_CLASS) != 0){
         private_class_ptr = (const H5FD_private_class_t *)(file->cls);
         if(private_class_ptr->magic!=H5FD__H5FD_PRIVATE_CLASS_T__MAGIC)
             HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "bad extended class magic.")
@@ -1305,9 +1084,7 @@ H5FD_get_stats(H5FD_t *file, H5FD_stats_t *stats_ptr)
         stats_ptr->defined = FALSE;
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_get_stats() */
 
 
@@ -1324,7 +1101,6 @@ done:
  *              3/30/11
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5FD_initialize_stats(H5FD_stats_t *stats_ptr)
 {
@@ -1340,6 +1116,7 @@ H5FD_initialize_stats(H5FD_stats_t *stats_ptr)
     stats_ptr->complete = TRUE;
     stats_ptr->aio_reads_attempted = 0;
     stats_ptr->aio_reads_completed_successfully = 0;
+    stats_ptr->aio_reads_canceled = 0;
     stats_ptr->aio_read_queue_attempts = 0;
     stats_ptr->aio_read_queue_attempt_failures = 0;
     stats_ptr->aio_reads_converted_to_sio = 0;
@@ -1349,6 +1126,7 @@ H5FD_initialize_stats(H5FD_stats_t *stats_ptr)
     stats_ptr->aio_partial_reads_recovered_via_sio = 0;
     stats_ptr->aio_writes_attempted = 0;
     stats_ptr->aio_writes_completed_successfully = 0;
+    stats_ptr->aio_writes_canceled = 0;
     stats_ptr->aio_write_queue_attempts = 0;
     stats_ptr->aio_write_queue_attempt_failures = 0;
     stats_ptr->aio_writes_converted_to_sio = 0;
@@ -1358,6 +1136,7 @@ H5FD_initialize_stats(H5FD_stats_t *stats_ptr)
     stats_ptr->aio_partial_writes_recovered_via_sio = 0;
     stats_ptr->aio_fsyncs_attempted = 0;
     stats_ptr->aio_fsyncs_completed_successfully = 0;
+    stats_ptr->aio_fsyncs_canceled = 0;
     stats_ptr->aio_fsync_queue_attempts = 0;
     stats_ptr->aio_fsync_queue_attempt_failures = 0;
     stats_ptr->aio_fsyncs_converted_to_sio = 0;

@@ -2151,86 +2151,50 @@ done:
  *              immediately evident.  
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	John Mainzer
  *              6/17/10
  *
- * Changes:	None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5FDaio_read(H5FD_t *file, 
-             H5FD_mem_t type, 
-             hid_t dxpl_id,
-             haddr_t addr, 
-             size_t size, 
-             void *buffer,
-             void **ctlblk_ptr_ptr)
+H5FDaio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, 
+    size_t size, void *buffer, void **ctlblk_ptr_ptr)
 {
     herr_t      	ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_API(H5FDaio_read, FAIL)
     H5TRACE7("e", "*xMtiaz*x**x", file, type, dxpl_id, addr, size, buffer,
              ctlblk_ptr_ptr);
 
     /* Check args */
-    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
-
+    if((file == NULL)  || (file->cls == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
-    }
 
-    if ( ( type < H5FD_MEM_DEFAULT ) || ( type >= H5FD_MEM_NTYPES ) ) {
-
+    if((type < H5FD_MEM_DEFAULT) || (type >= H5FD_MEM_NTYPES))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem type out of range");
-    }
 
     /* Get the default dataset transfer property list if the user 
      * didn't provide one 
      */
-    if ( H5P_DEFAULT == dxpl_id ) {
-
+    if(H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
+    else if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
 
-    } else {
-
-        if ( TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER) ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
-                        "not a data transfer property list")
-        }
-    }
-
-    if ( buffer == NULL ) {
-
+    if(buffer == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null result buffer")
-    }
 
-    if ( ( ctlblk_ptr_ptr == NULL ) ||
-         ( *ctlblk_ptr_ptr != NULL ) ) {
-
+    if((ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad ctlblk_ptr_ptr")
-    }
 
     /* do the real work */
-    result = H5FD_aio_read(file, type, dxpl_id, addr, size, 
-                           buffer, ctlblk_ptr_ptr);
-
-
-    if ( result < 0 ) {
-
-        HGOTO_ERROR(H5E_VFL, H5E_AIOREADERROR, FAIL, \
-                    "aio read request failed")
-    }
+    if(H5FD_aio_read(file, type, dxpl_id, addr, size, buffer, ctlblk_ptr_ptr) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_AIOREADERROR, FAIL, "aio read request failed")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* end H5FDaio_read() */
 
 
@@ -2264,89 +2228,45 @@ done:
  * Programmer:	John Mainzer
  *              6/17/10
  *
- * Changes: 	None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5FDaio_write(H5FD_t *file, 
-              H5FD_mem_t type, 
-              hid_t dxpl_id,
-              haddr_t addr, 
-              size_t size, 
-              void *buffer,
-              void **ctlblk_ptr_ptr)
+H5FDaio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, 
+    size_t size, void *buffer, void **ctlblk_ptr_ptr)
 {
     herr_t              ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_API(H5FDaio_write, FAIL)
     H5TRACE7("e", "*xMtiaz*x**x", file, type, dxpl_id, addr, size, buffer,
              ctlblk_ptr_ptr);
 
     /* Check args */
-    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
-
+    if((file == NULL)  || (file->cls == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
-    }
 
-    if ( ( type < H5FD_MEM_DEFAULT ) || ( type >= H5FD_MEM_NTYPES ) ) {
-
+    if((type < H5FD_MEM_DEFAULT) || (type >= H5FD_MEM_NTYPES))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem type out of range");
-    }
 
     /* Get the default dataset transfer property list if the user 
      * didn't provide one 
      */
-    if ( H5P_DEFAULT == dxpl_id ) {
-
+    if(H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
+    else if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
 
-    } else {
-
-        if ( TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER) ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
-                        "not a data transfer property list")
-        }
-    }
-
-    if ( buffer == NULL ) {
-
+    if(buffer == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null buffer")
-    }
 
-    if ( ( ctlblk_ptr_ptr == NULL ) ||
-         ( (void *)(*ctlblk_ptr_ptr) != NULL ) ) {
-#if 0 /* JRM */
-	if ( ctlblk_ptr_ptr == NULL ) {
-
-            HDfprintf(stdout, "%s: ctlblk_ptr_ptr == NULL.\n", FUNC);
-	} 
-        if ( ( ctlblk_ptr_ptr != NULL ) &&
-             ( *ctlblk_ptr_ptr != NULL ) ) {
-            HDfprintf(stdout, "%s: *ctlblk_ptr_ptr != NULL.\n", FUNC);
-        }
-#endif /* JRM */
+    if((ctlblk_ptr_ptr == NULL) || ((void *)(*ctlblk_ptr_ptr) != NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad ctlblk_ptr_ptr")
-    }
 
     /* do the real work */
-    result = H5FD_aio_write(file, type, dxpl_id, addr, size, 
-                            buffer, ctlblk_ptr_ptr);
-
-    if ( result < 0 ) {
-
-        HGOTO_ERROR(H5E_VFL, H5E_AIOWRITEERROR, FAIL, \
-                    "aio write request failed")
-    }
-
+    if(H5FD_aio_write(file, type, dxpl_id, addr, size, buffer, ctlblk_ptr_ptr) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_AIOWRITEERROR, FAIL, "aio write request failed")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* end H5FDaio_write() */
 
 
@@ -2378,45 +2298,29 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5FDaio_test(H5FD_t *file, 
-             hbool_t *done_ptr, 
-             void *ctlblk_ptr)
+H5FDaio_test(H5FD_t *file, hbool_t *done_ptr, void *ctlblk_ptr)
 {
     herr_t		ret_value = SUCCEED;  /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_API(H5FDaio_test, FAIL)
     H5TRACE3("e", "*x*b*x", file, done_ptr, ctlblk_ptr);
 
     /* Check args */
-    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
-
+    if((file == NULL) || (file->cls == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
-    }
 
-    if ( done_ptr == NULL ) {
-
+    if(done_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL done pointer")
-    }
 
-    if ( ctlblk_ptr == NULL ) {
-
+    if(ctlblk_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL control block pointer")
-    }
 
-    result = H5FD_aio_test(file, done_ptr, ctlblk_ptr);
-
-    if ( result < 0 ) {
-
+    if(H5FD_aio_test(file, done_ptr, ctlblk_ptr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_AIOTESTFAIL, FAIL, "aio test request failed")
-    }
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* end H5FDaio_test() */
 
 
@@ -2435,13 +2339,10 @@ done:
  *		to finish.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	John Mainzer
  *              6/17/10
- *
- * Changes:	None.
  *
  *-------------------------------------------------------------------------
  */
@@ -2451,33 +2352,22 @@ H5FDaio_wait(H5FD_t *file,
              void *ctlblk_ptr)
 {
     herr_t    		ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_API(H5FDaio_wait, FAIL)
     H5TRACE2("e", "*x*x", file, ctlblk_ptr);
 
     /* Check args */
-    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
-
+    if((file == NULL)  || (file->cls == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
-    }
 
-    if ( ctlblk_ptr == NULL ) {
-
+    if(ctlblk_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL control block pointer")
-    }
 
-    result = H5FD_aio_wait(file, ctlblk_ptr);
-
-    if ( result < 0 ) {
-
+    if(H5FD_aio_wait(file, ctlblk_ptr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_AIOWAITFAIL, FAIL, "aio wait request failed")
-    }
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* end H5FDaio_wait() */
 
 
@@ -2498,7 +2388,6 @@ done:
  *		asynchronous operation succeeded.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	John Mainzer
@@ -2513,39 +2402,25 @@ H5FDaio_finish(H5FD_t *file,
                void *ctlblk_ptr)
 {
     herr_t              ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_API(H5FDaio_finish, FAIL)
     H5TRACE3("e", "*x*Is*x", file, errno_ptr, ctlblk_ptr);
 
     /* Check args */
-    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
-
+    if((file == NULL) || (file->cls == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
-    }
 
-    if ( errno_ptr == NULL ) {
-
+    if(errno_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL errno pointer")
-    }
 
-    if ( ctlblk_ptr == NULL ) {
-
+    if(ctlblk_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL control block pointer")
-    }
 
-    result = H5FD_aio_finish(file, errno_ptr, ctlblk_ptr);
-
-    if ( result < 0 ) {
-
-        HGOTO_ERROR(H5E_VFL, H5E_AIOFINISHFAIL, FAIL, \
-		    "aio finish request failed")
-    }
+    if(H5FD_aio_finish(file, errno_ptr, ctlblk_ptr) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_AIOFINISHFAIL, FAIL, "aio finish request failed")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* end H5FDaio_finish() */
 
 
@@ -2563,7 +2438,6 @@ done:
  *		and reported successful by H5FDaio_finish.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	John Mainzer
@@ -2573,40 +2447,25 @@ done:
  */
 
 herr_t
-H5FDaio_fsync(H5FD_t *file, 
-              void **ctlblk_ptr_ptr)
+H5FDaio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr)
 {
     herr_t     		ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_API(H5FDaio_fsync, FAIL)
     H5TRACE2("e", "*x**x", file, ctlblk_ptr_ptr);
 
     /* Check args */
-    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
-
+    if((file == NULL) || (file->cls == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
-    }
 
-    if ( ( ctlblk_ptr_ptr == NULL ) ||
-         ( * ctlblk_ptr_ptr != NULL ) ) {
+    if((ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL ctlblk_ptr_ptr or *ctlblk_ptr_ptr != NULL")
 
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "NULL ctlblk_ptr_ptr or *ctlblk_ptr_ptr != NULL")
-    }
-
-    result = H5FD_aio_fsync(file, ctlblk_ptr_ptr);
-
-    if ( result < 0 ) {
-
-        HGOTO_ERROR(H5E_VFL, H5E_AIOSYNCFAIL, FAIL, \
-                    "aio fsync request failed")
-    }
+    if(H5FD_aio_fsync(file, ctlblk_ptr_ptr) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_AIOSYNCFAIL, FAIL, "aio fsync request failed")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* end H5FDaio_fsync() */
 
 
@@ -2625,7 +2484,6 @@ done:
  *		code otherwise.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	John Mainzer
@@ -2635,39 +2493,25 @@ done:
  */
 
 herr_t
-H5FDaio_cancel(H5FD_t *file,
-               void *ctlblk_ptr)
+H5FDaio_cancel(H5FD_t *file, void *ctlblk_ptr)
 {
     herr_t   		ret_value = SUCCEED;       /* Return value */
-    herr_t		result;
 
     FUNC_ENTER_API(H5FDaio_cancel, FAIL)
     H5TRACE2("e", "*x*x", file, ctlblk_ptr);
 
     /* Check args */
-    if ( ( file == NULL )  || ( file->cls == NULL ) ) {
-
+    if((file == NULL)  || (file->cls == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
-    }
 
-    if ( ctlblk_ptr == NULL ) {
+    if(ctlblk_ptr == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "ctlblk_ptr NULL on entry")
 
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "ctlblk_ptr NULL on entry")
-    }
-
-    result = H5FD_aio_cancel(file, ctlblk_ptr);
-
-    if ( result < 0 ) {
-
-        HGOTO_ERROR(H5E_VFL, H5E_AIOCANCELFAIL, FAIL, \
-                    "aio cancel request failed")
-    }
+    if(H5FD_aio_cancel(file, ctlblk_ptr) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_AIOCANCELFAIL, FAIL, "aio cancel request failed")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* end H5FDaio_cancel() */
 
 
@@ -2689,8 +2533,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDfsync(H5FD_t *file, 
-          hid_t dxpl_id)
+H5FDfsync(H5FD_t *file, hid_t dxpl_id)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -2698,36 +2541,22 @@ H5FDfsync(H5FD_t *file,
     H5TRACE2("e", "*xi", file, dxpl_id);
 
     /* Check args */
-    if ( ( file == NULL ) || ( file->cls == NULL ) ) {
-
+    if((file == NULL) || (file->cls == NULL))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
-    }
 
     /* Get the default dataset transfer property list if the user didn't 
      * provide one 
      */
-    if ( H5P_DEFAULT == dxpl_id ) {
-
+    if(H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
-
-    } else {
-
-        if ( TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER) ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
-                         "not a data transfer property list")
-        }
-    }
+    else if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
 
     /* Do the real work */
-    if ( H5FD_fsync(file, dxpl_id) < 0 ) {
-
+    if(H5FD_fsync(file, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, "file sync request failed")
-    }
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* end H5FDfsync() */
 

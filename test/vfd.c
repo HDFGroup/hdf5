@@ -80,53 +80,27 @@ const char *FILENAME[] = {
 #define EXPRESS_TEST_2_MAX_LENGTH	( 1 * 1024 * 1024)
 
 
-static void aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
-				                    int op_count,
-                                                    int ops[],
-			                            H5FD_mem_t types[],
-				                    haddr_t offsets[],
-				                    size_t lengths[],
-				                    const char * tags[],
+static void aio_multi_read_write_fsync_cancel_check(H5FD_t * file, int op_count,
+                                                    int ops[], H5FD_mem_t types[], 
+                                                    haddr_t offsets[], size_t lengths[],
+                                                    const char * tags[], 
                                                     hbool_t * pass_ptr, 
                                                     const char ** failure_mssg_ptr,
-                                                    const int express_test,
+                                                    const int express_test, 
                                                     int * sub_tests_skipped_ptr);
-
-static void aio_multi_write_sync_read_check(H5FD_t * file,
-                                            int write_count,
-                                            H5FD_mem_t types[],
-                                            haddr_t offsets[],
-                                            const size_t lengths[],
-                                            const char * tags[],
-                                            hbool_t * pass_ptr, 
-                                            const char ** failure_mssg_ptr,
-                                            const int express_test,
-                                            int * sub_tests_skipped_ptr);
-
-static void aio_single_write_read_check(H5FD_t * file,
-                                        H5FD_mem_t type,
-                                        const char * tag_string,
-                                        haddr_t offset,
-                                        const size_t write_size,
-                                        hbool_t do_wait,
-                                        hbool_t * pass_ptr,
-                                        const char ** failure_mssg_ptr);
-
-static int generic_aio_test(const char * test_banner, 
-                            const int file_name_num,
-		            hid_t fapl_id,
-                            haddr_t maxaddr,
-                            const int express_test,
-                            hbool_t dump_stats);
-
-static int generic_aio_input_error_tests(const char * test_banner,
-                                         const char * tag_string,
-                                         const int file_name_num,
-                                         hid_t fapl_id,
-                                         hbool_t verbose);
-
-static int multi_file_driver_aio_test(const char * test_banner, 
-                                      const int file_name_num,
+static void aio_multi_write_sync_read_check(H5FD_t * file, int write_count,
+                                            H5FD_mem_t types[], haddr_t offsets[], 
+                                            const size_t lengths[], const char * tags[], 
+                                            hbool_t * pass_ptr, const char ** failure_mssg_ptr,
+                                            const int express_test, int * sub_tests_skipped_ptr);
+static void aio_single_write_read_check(H5FD_t * file, H5FD_mem_t type, const char * tag_string, 
+                                        haddr_t offset, const size_t write_size, hbool_t do_wait, 
+                                        hbool_t * pass_ptr, const char ** failure_mssg_ptr);
+static int generic_aio_test(const char * test_banner, const int file_name_num, hid_t fapl_id, 
+                            haddr_t maxaddr, const int express_test, hbool_t dump_stats);
+static int generic_aio_input_error_tests(const char * test_banner, const char * tag_string, 
+                                         const int file_name_num, hid_t fapl_id, hbool_t verbose);
+static int multi_file_driver_aio_test(const char * test_banner, const int file_name_num, 
                                       int express_test);
 
 
@@ -1218,19 +1192,11 @@ error:
  * 
  *-------------------------------------------------------------------------
  */
-
 static void
-aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
-				        int op_count,
-                                        int ops[],
-			                H5FD_mem_t types[],
-				        haddr_t offsets[],
-				        size_t lengths[],
-				        const char * tags[],
-                                        hbool_t * pass_ptr, 
-                                        const char ** failure_mssg_ptr,
-                                        const int express_test,
-                                        int * sub_tests_skipped_ptr)
+aio_multi_read_write_fsync_cancel_check(H5FD_t * file, int op_count, 
+    int ops[], H5FD_mem_t types[], haddr_t offsets[], size_t lengths[], 
+    const char * tags[], hbool_t * pass_ptr, const char ** failure_mssg_ptr, 
+    const int express_test, int * sub_tests_skipped_ptr)
 {
     const char * fcn_name = "aio_multi_read_write_fsync_cancel_check()";
     const char * H5FD_mem_t_strings[H5FD_MEM_NTYPES] =
@@ -1255,83 +1221,50 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
     int tag_len;
     int type_string_len;
     int op_num_len;
-    herr_t result;
 
-    if ( *pass_ptr ) {
-
-        if ( ( file == NULL ) ||
-             ( op_count <= 0  ) ||
-             ( ops == NULL ) ||
-             ( types == NULL ) ||
-             ( offsets == NULL ) ||
-             ( lengths == NULL ) ||
-             ( tags == NULL ) ||
-             ( failure_mssg_ptr == NULL ) ||
-             ( sub_tests_skipped_ptr == NULL ) ) {
-
+    if(*pass_ptr)
+        if((file == NULL) || (op_count <= 0) || (ops == NULL) || (types == NULL) || (offsets == NULL) || (lengths == NULL) || (tags == NULL) || (failure_mssg_ptr == NULL) || (sub_tests_skipped_ptr == NULL)) {
 	    *pass_ptr = FALSE;
-            *failure_mssg_ptr = 
-	        "bad param(s) passed to aio_multi_read_write_fsync_cancel_check()";
+            *failure_mssg_ptr = "bad param(s) passed to aio_multi_read_write_fsync_cancel_check()";
         }
-    }
 
-    if ( show_progress ) 
+    if(show_progress) 
         HDfprintf(stdout, "%s:%d: allocating buffers.\n", fcn_name, *pass_ptr);
 
-    if ( *pass_ptr ) { /* allocate arrays of pointers to */
-
+    if(*pass_ptr) { /* allocate arrays of pointers to */
         bufs = (char **)HDmalloc((size_t)op_count * sizeof(char *));
         ctlblks = (void **)HDmalloc((size_t)op_count * sizeof(void *));
 
-        if ( ( bufs == NULL ) ||
-             ( ctlblks == NULL ) ) {
-
+        if((bufs == NULL) || (ctlblks == NULL)) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "buffer allocation(s) failed(1).";
-
         } else {
-
-            for ( i = 0; i < op_count; i++ ) {
-
+            for(i = 0; i < op_count; i++) {
                 bufs[i] = NULL;
                 ctlblks[i] = NULL;
             }
         }
     }
 
-    if ( *pass_ptr ) { /* allocate and intialize buffers */
-
+    if(*pass_ptr) { /* allocate and intialize buffers */
         i = 0;
 
-        while ( ( *pass_ptr ) &&
-                ( i < op_count ) ) {
-
-            if ( lengths[i] < 16 ) {
-
+        while((*pass_ptr) && (i < op_count)) {
+            if(lengths[i] < 16) {
                 *pass_ptr = FALSE;
                 *failure_mssg_ptr = "length[i] < 16.";
-
             } else {
-
                 bufs[i] = (char *)HDmalloc(lengths[i] * sizeof(char));
 
-                if ( bufs[i] == NULL ) {
-
+                if(bufs[i] == NULL) {
                     *pass_ptr = FALSE;
                     *failure_mssg_ptr = "buffer allocation(s) failed(2).";
-
-                } else if ( ( ( express_test > 0 ) && 
-                              ( lengths[i] > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-                            ( ( express_test > 1 ) && 
-                              ( lengths[i] > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-
+                } else if((( express_test > 0) && (lengths[i] > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (lengths[i] > EXPRESS_TEST_2_MAX_LENGTH)))
                     /* we will be skipping the test associated with this buffer -- thus
                      * no need to allocate and initialize it.
                      */
                     bufs[i] = NULL;
-
-                } else {
-
+                else {
                     sprintf(write_num, "%d: ", i);
                     op_num_len = (int)HDstrlen(write_num);
 
@@ -1345,38 +1278,22 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
 		    tag_string = tags[i];
 		    tag_len = (int)HDstrlen(tag_string);
 
-                    for ( j = 0; j < (int)lengths[i]; j++ ) {
-
-			if ( j < op_num_len ) {
-
+                    for(j = 0; j < (int)lengths[i]; j++) {
+			if(j < op_num_len)
                             *(bufs[i] + j) = write_num[j];
-
-                        } else if ( j < op_num_len + type_string_len ) {
-
+                        else if(j < op_num_len + type_string_len)
                             *(bufs[i] + j) = type_string[j - op_num_len];
-
-			} else if ( j < op_num_len + type_string_len + tag_len ) {
-
+			else if(j < op_num_len + type_string_len + tag_len)
                             *(bufs[i] + j) = tag_string[j - op_num_len - type_string_len];
-
-			} else if ( j == op_num_len + type_string_len + tag_len ) {
-
+			else if(j == op_num_len + type_string_len + tag_len)
                             *(bufs[i] + j) = ' ';
-
-                        } else if ( j < (int)lengths[i] - 1 ) {
-
-			    if ( (j % 64) == 0 ) {
-
+                        else if(j < (int)lengths[i] - 1) {
+			    if((j % 64) == 0)
 				*(bufs[i] + j) = '\n';
-
-                            } else {
-
+                            else
 				*(bufs[i] + j) = '-';
-                            }
-			} else {
-
+			} else
                             *(bufs[i] + j) = '\0';
-                        }
                     }
                 }
             }
@@ -1385,44 +1302,27 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
         }
     }
 
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: kicking off reads and writes.\n", fcn_name, *pass_ptr);
 
     /* kick off the reads and writes */
     i = 0;
-    while ( ( *pass_ptr ) &&
-            ( i < op_count ) ) {
-
-        if ( ( ( express_test > 0 ) && ( lengths[i] > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-             ( ( express_test > 1 ) && ( lengths[i] > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-
+    while((*pass_ptr) && (i < op_count)) {
+        if(((express_test > 0) && (lengths[i] > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (lengths[i] > EXPRESS_TEST_2_MAX_LENGTH))) {
             /* skip this test */
             (*sub_tests_skipped_ptr)++;
             ctlblks[i] = NULL;
-
         } else {
-
-            switch( ops[i] ) {
-
+            switch(ops[i]) {
                 case READ_OP:
-                    result = H5FDaio_read(file, types[i], H5P_DEFAULT, 
-                                           offsets[i], lengths[i], (void *)(bufs[i]), 
-                                           &(ctlblks[i]));
-
-                    if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
-
+                    if((H5FDaio_read(file, types[i], H5P_DEFAULT, offsets[i], lengths[i], (void *)(bufs[i]), &(ctlblks[i])) < 0) || (ctlblks[i] == NULL)) {
                         *pass_ptr = FALSE;
                         *failure_mssg_ptr = "H5FDaio_read(0) failed.";
                     }
 		    break;
 
 	        case WRITE_OP:
-                    result = H5FDaio_write(file, types[i], H5P_DEFAULT, 
-                                           offsets[i], lengths[i], (void *)(bufs[i]), 
-                                           &(ctlblks[i]));
-
-                    if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
-
+                    if((H5FDaio_write(file, types[i], H5P_DEFAULT, offsets[i], lengths[i], (void *)(bufs[i]), &(ctlblks[i])) < 0) || (ctlblks[i] == NULL)) {
                         *pass_ptr = FALSE;
                         *failure_mssg_ptr = "H5FDaio_write(0) failed.";
                     }
@@ -1438,72 +1338,51 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
         i++;
     }
 
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: calling aio fsync.\n", fcn_name, *pass_ptr);
 
     /* do an aio_fsync */
-    if ( *pass_ptr ) {
-
-        result = H5FDaio_fsync(file, &fsync_aioctlblk);
-
-        if ( ( result < 0 ) || ( fsync_aioctlblk ==  NULL ) ) {
-
+    if(*pass_ptr)
+        if((H5FDaio_fsync(file, &fsync_aioctlblk) < 0 ) || (fsync_aioctlblk ==  NULL)) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "H5FDaio_fsync(0) failed.";
         }
-    }
 
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: canceling all aio read/write ops.\n", fcn_name, *pass_ptr);
 
     /* canceling the reads and writes */
     i = 0;
-    while ( ( *pass_ptr ) &&
-            ( i < op_count ) ) {
-        
+    while((*pass_ptr) && (i < op_count)) {
         /* recall that if ctlblks[i] == NULL, either we have a failure (in which
          * case this code should be unreachable), or we skipped this read or write.
          */
-        if ( ctlblks[i] != NULL ) {
-
-            result = H5FDaio_cancel(file, ctlblks[i]);
-
-	    if ( result < 0 ) {
-
+        if(ctlblks[i] != NULL)
+            if(H5FDaio_cancel(file, ctlblks[i]) < 0) {
                 *pass_ptr = FALSE;
                 *failure_mssg_ptr = "H5FDaio_cancel(0) failed.";
             }
-        }
 
         i++;
     }
 
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: canceling aio fsync op.\n", fcn_name, *pass_ptr);
 
     /* canceling the aio_fsync */
-    if ( *pass_ptr ) {
-
-        result = H5FDaio_cancel(file, fsync_aioctlblk);
-
-	if ( result < 0 ) {
-
+    if(*pass_ptr)
+        if(H5FDaio_cancel(file, fsync_aioctlblk) < 0) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "H5FDaio_cancel(1) failed.";
         }
-    }
 
     /* discard the buffers */
-
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: discarding buffers.\n", fcn_name, *pass_ptr);
 
-    if ( bufs != NULL ) {
-
-        for ( i = 0; i < op_count; i++ ) {
-
-            if ( bufs[i] != NULL ) {
-
+    if(bufs != NULL) {
+        for(i = 0; i < op_count; i++) {
+            if(bufs[i] != NULL) {
                 HDfree(bufs[i]);
                 bufs[i] = NULL;
             }
@@ -1512,17 +1391,15 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
         bufs = NULL;
     }
 
-    if ( ctlblks != NULL ) {
-
+    if(ctlblks != NULL) {
         HDfree(ctlblks);
         ctlblks = NULL;
     }
 
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: done.\n", fcn_name, *pass_ptr);
 
     return;
-
 } /* aio_multi_read_write_fsync_cancel_check() */
 
 
@@ -1543,37 +1420,27 @@ aio_multi_read_write_fsync_cancel_check(H5FD_t * file,
  *		Set *pass_ptr to FALSE and set *failure_mssg_ptr if any
  *		error is detected.
  *
- *
  * Return:      void.
  *
  * Programmer:  JRM -- 11/2/10
  * 
  *-------------------------------------------------------------------------
  */
-
 static void
-aio_multi_write_sync_read_check(H5FD_t * file,
-				int write_count,
-			        H5FD_mem_t types[],
-				haddr_t offsets[],
-				const size_t lengths[],
-				const char * tags[],
-                                hbool_t * pass_ptr, 
-                                const char ** failure_mssg_ptr,
-                                const int express_test,
-                                int * sub_tests_skipped_ptr)
+aio_multi_write_sync_read_check(H5FD_t * file, int write_count, 
+    H5FD_mem_t types[], haddr_t offsets[], const size_t lengths[], 
+    const char * tags[], hbool_t * pass_ptr, const char ** failure_mssg_ptr, 
+    const int express_test, int * sub_tests_skipped_ptr)
 {
     const char * fcn_name = "aio_multi_write_sync_read_check()";
-    const char * H5FD_mem_t_strings[H5FD_MEM_NTYPES] =
-        {
-          "H5FD_MEM_DEFAULT ",
-          "H5FD_MEM_SUPER ",
-          "H5FD_MEM_BTREE ",
-          "H5FD_MEM_DRAW ",
-          "H5FD_MEM_GHEAP ",
-          "H5FD_MEM_LHEAP ",
-          "H5FD_MEM_OHDR "
-        };
+    const char * H5FD_mem_t_strings[H5FD_MEM_NTYPES] = { "H5FD_MEM_DEFAULT ",
+                                                         "H5FD_MEM_SUPER ",
+                                                         "H5FD_MEM_BTREE ",
+                                                         "H5FD_MEM_DRAW ",
+                                                         "H5FD_MEM_GHEAP ",
+                                                         "H5FD_MEM_LHEAP ",
+                                                         "H5FD_MEM_OHDR "
+                                                       };
     const char * type_string = NULL;
     const char * tag_string = NULL;
     char write_num[16];
@@ -1591,135 +1458,82 @@ aio_multi_write_sync_read_check(H5FD_t * file,
     int tag_len;
     int type_string_len;
     int write_num_len;
-    herr_t result;
 
-    if ( *pass_ptr ) {
-
-        if ( ( file == NULL ) ||
-             ( write_count <= 0  ) ||
-             ( types == NULL ) ||
-             ( offsets == NULL ) ||
-             ( lengths == NULL ) ||
-             ( tags == NULL ) ||
-             ( failure_mssg_ptr == NULL ) ||
-             ( sub_tests_skipped_ptr == NULL ) ) {
-
+    if(*pass_ptr) 
+        if((file == NULL) || (write_count <= 0) || (types == NULL) || (offsets == NULL) || (lengths == NULL) || (tags == NULL) || (failure_mssg_ptr == NULL) || (sub_tests_skipped_ptr == NULL)) {
 	    *pass_ptr = FALSE;
-            *failure_mssg_ptr = 
-	        "bad param(s) passed to aio_multi_write_sync_read_check()";
+            *failure_mssg_ptr = "bad param(s) passed to aio_multi_write_sync_read_check()";
         }
-    }
 
-    if ( show_progress ) 
+    if(show_progress) 
         HDfprintf(stdout, "%s:%d: allocating buffers.\n", fcn_name, *pass_ptr);
 
-    if ( *pass_ptr ) { /* allocate arrays of pointers to */
-
+    if(*pass_ptr) { /* allocate arrays of pointers to */
         write_bufs = (char **)HDmalloc((size_t)write_count * sizeof(char *));
         read_bufs  = (char **)HDmalloc((size_t)write_count * sizeof(char *));
         ctlblks    = (void **)HDmalloc((size_t)write_count * sizeof(void *));
 
-        if ( ( write_bufs == NULL ) ||
-             ( read_bufs == NULL ) ||
-             ( ctlblks == NULL ) ) {
-
+        if((write_bufs == NULL) || (read_bufs == NULL) || (ctlblks == NULL)) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "buffer allocation(s) failed(1).";
-
-        } else {
-
-            for ( i = 0; i < write_count; i++ ) {
-
+        } else 
+            for(i = 0; i < write_count; i++) {
                 write_bufs[i] = NULL;
                 read_bufs[i] = NULL;
                 ctlblks[i] = NULL;
             }
-        }
     }
 
-    if ( *pass_ptr ) { /* allocate and intialize read and write buffers */
-
+    if(*pass_ptr) { /* allocate and intialize read and write buffers */
         i = 0;
 
-        while ( ( *pass_ptr ) &&
-                ( i < write_count ) ) {
-
-            if ( lengths[i] < 16 ) {
-
+        while((*pass_ptr) && (i < write_count)) {
+            if(lengths[i] < 16) {
                 *pass_ptr = FALSE;
                 *failure_mssg_ptr = "length[i] < 16.";
-
-            } else if ( ( ( express_test > 0 ) && 
-                          ( lengths[i] > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-                        ( ( express_test > 1 ) && 
-                          ( lengths[i] > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-
+            } else if((( express_test > 0) && (lengths[i] > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (lengths[i] > EXPRESS_TEST_2_MAX_LENGTH))) {
                 /* we will be skipping the test associated with this buffer -- thus
                  * no need to allocate and initialize it.
                  */
                 write_bufs[i] = NULL;
                 read_bufs[i] = NULL;
-
             } else {
-
                 write_bufs[i] = (char *)HDmalloc(lengths[i] * sizeof(char));
                 read_bufs[i]  = (char *)HDmalloc(lengths[i] * sizeof(char));
 
-                if ( ( write_bufs[i] == NULL ) ||
-                     ( read_bufs[i] == NULL ) ) {
-
+                if((write_bufs[i] == NULL) || (read_bufs[i] == NULL)) {
                     *pass_ptr = FALSE;
                     *failure_mssg_ptr = "buffer allocation(s) failed(2).";
-                }
-                else 
-                {
+                } else {
                     sprintf(write_num, "%d: ", i);
                     write_num_len = (int)HDstrlen(write_num);
 
-                    HDassert( write_num_len < 16 );
+                    HDassert(write_num_len < 16);
 
 		    type_string = H5FD_mem_t_strings[types[i]];
 		    type_string_len = (int)HDstrlen(type_string);
 
-		    HDassert( type_string_len < 20 );
+		    HDassert(type_string_len < 20);
 
 		    tag_string = tags[i];
 		    tag_len = (int)HDstrlen(tag_string);
 
-                    for ( j = 0; j < (int)lengths[i]; j++ ) {
-
-			if ( j < write_num_len ) {
-
+                    for(j = 0; j < (int)lengths[i]; j++) {
+			if(j < write_num_len)
                             *(write_bufs[i] + j) = write_num[j];
-
-                        } else if ( j < write_num_len + type_string_len ) {
-
-                            *(write_bufs[i] + j) = 
-				type_string[j - write_num_len];
-
-			} else if ( j < write_num_len + type_string_len + tag_len ) {
-
-                            *(write_bufs[i] + j) = 
-				tag_string[j - write_num_len - type_string_len];
-
-			} else if ( j == write_num_len + type_string_len + tag_len ) {
-
+                        else if(j < write_num_len + type_string_len)
+                            *(write_bufs[i] + j) = type_string[j - write_num_len];
+			else if(j < write_num_len + type_string_len + tag_len)
+                            *(write_bufs[i] + j) = tag_string[j - write_num_len - type_string_len];
+			else if(j == write_num_len + type_string_len + tag_len)
                             *(write_bufs[i] + j) = ' ';
-
-                        } else if ( j < (int)lengths[i] - 1 ) {
-
-			    if ( (j % 64) == 0 ) {
-
+                        else if(j < (int)lengths[i] - 1) {
+			    if((j % 64) == 0)
                                 *(write_bufs[i] + j) = '\n';
-
-                            } else {
-
+                            else
                                 *(write_bufs[i] + j) = '+';
-                            }
-			} else {
-
+			} else 
                             *(write_bufs[i] + j) = '\0';
-                        }
                     
                         *(read_bufs[i] + j) = '\0';
                     }
@@ -1730,27 +1544,17 @@ aio_multi_write_sync_read_check(H5FD_t * file,
         }
     }
 
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: kicking off writes.\n", fcn_name, *pass_ptr);
 
     /* kick off the writes */
     i = 0;
-    while ( ( *pass_ptr ) &&
-            ( i < write_count ) ) {
-
-        if ( ( ( express_test > 0 ) && ( lengths[i] > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-             ( ( express_test > 1 ) && ( lengths[i] > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-
+    while((*pass_ptr) && (i < write_count)) {
+        if(((express_test > 0) && (lengths[i] > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (lengths[i] > EXPRESS_TEST_2_MAX_LENGTH)))
             ctlblks[i] = NULL;
+        else {
 
-        } else {
-
-            result = H5FDaio_write(file, types[i], H5P_DEFAULT, 
-                                   offsets[i], lengths[i], (void *)(write_bufs[i]), 
-                                   &(ctlblks[i]));
-
-            if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
-
+            if((H5FDaio_write(file, types[i], H5P_DEFAULT, offsets[i], lengths[i], (void *)(write_bufs[i]), &(ctlblks[i])) < 0) || (ctlblks[i] == NULL)) {
                 *pass_ptr = FALSE;
                 *failure_mssg_ptr = "H5FDaio_write(0) failed.";
             }
@@ -1759,7 +1563,7 @@ aio_multi_write_sync_read_check(H5FD_t * file,
         i++;
     }
 
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: waiting for writes.\n", fcn_name, *pass_ptr);
 
     /* wait for the writes to complete -- test half the time, and wait the 
@@ -1767,76 +1571,49 @@ aio_multi_write_sync_read_check(H5FD_t * file,
      */
     i = 0;
     do_wait = TRUE;
-    while ( ( *pass_ptr ) &&
-            ( i < write_count ) ) {
-
+    while((*pass_ptr) && (i < write_count)) {
         /* recall that if ctlblks[i] == NULL, either we have a failure (in which
          * case this code should be unreachable), or we skipped this write.
          */
-        if ( ctlblks[i] != NULL ) {
-
-            if ( do_wait ) {
-
-                if ( *pass_ptr ) {
-
-                    result = H5FDaio_wait(file, ctlblks[i]);
-
-                    if ( result < 0 ) {
-
+        if(ctlblks[i] != NULL) {
+            if(do_wait) {
+                if(*pass_ptr)
+                    if(H5FDaio_wait(file, ctlblks[i]) < 0) {
                         *pass_ptr = FALSE;
                         *failure_mssg_ptr = "H5FDaio_wait(0) failed.";
                     }
-                }
             } else {
-
                 done = FALSE;
-                while ( ( *pass_ptr ) && ( ! done ) ) {
-
-                    result = H5FDaio_test(file, &done, ctlblks[i]);
-
-                    if ( result < 0 ) {
-
+                while((*pass_ptr) && (!done))
+                    if(H5FDaio_test(file, &done, ctlblks[i]) < 0) {
                         *pass_ptr = FALSE;
                         *failure_mssg_ptr = "H5FDaio_test(0) failed.";
                     }
-                }
             }
         }
 
-        if ( verbose ) {
-
-            HDfprintf(stdout, "%s:%d: write %d complete. do_wait = %d.\n", 
-                      fcn_name, *pass_ptr, i, (int)do_wait);
-        }
+        if(verbose)
+            HDfprintf(stdout, "%s:%d: write %d complete. do_wait = %d.\n", fcn_name, *pass_ptr, i, (int)do_wait);
 
         do_wait = (hbool_t)(! do_wait);
 
         i++;
     }
 
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: finishing writes.\n", fcn_name, *pass_ptr);
 
     /* finish the writes */
     i = 0;
-    while ( ( *pass_ptr ) &&
-            ( i < write_count ) ) {
-
+    while((*pass_ptr) && (i < write_count)) {
         /* recall that if ctlblks[i] == NULL, either we have a failure (in which
          * case this code should be unreachable), or we skipped this write.
          */
-        if ( ctlblks[i] != NULL ) {
+        if(ctlblks[i] != NULL) {
+            if(verbose)
+                HDfprintf(stdout, "%s:%d: finishing write %d.\n", fcn_name, *pass_ptr, i);
 
-            if ( verbose ) {
-
-                HDfprintf(stdout, "%s:%d: finishing write %d.\n", 
-                          fcn_name, *pass_ptr, i);
-            }
-
-            result = H5FDaio_finish(file, &error_num, ctlblks[i]);
-
-            if ( ( result < 0 ) || ( error_num != 0 ) ) {
-
+            if((H5FDaio_finish(file, &error_num, ctlblks[i]) < 0) || (error_num != 0)) {
                 *pass_ptr = FALSE;
                 *failure_mssg_ptr = "H5FDaio_finish(0) failed.";
             }
@@ -1847,79 +1624,52 @@ aio_multi_write_sync_read_check(H5FD_t * file,
         i++;
     }
 
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: doing aio fsync.\n", fcn_name, *pass_ptr);
 
     /* do an aio_fsync */
-    if ( *pass_ptr ) {
-
-        result = H5FDaio_fsync(file, &fsync_aioctlblk);
-
-        if ( ( result < 0 ) || ( fsync_aioctlblk ==  NULL ) ) {
-
+    if(*pass_ptr)
+        if((H5FDaio_fsync(file, &fsync_aioctlblk) < 0) || (fsync_aioctlblk ==  NULL)) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "H5FDaio_fsync(0) failed.";
         }
-    }
 
-    if ( * pass_ptr ) {
-
-        result = H5FDaio_wait(file, fsync_aioctlblk);
-
-        if ( result < 0 ) {
-
+    if(*pass_ptr)
+        if(H5FDaio_wait(file, fsync_aioctlblk) < 0) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "H5FDaio_fsync(0) failed.";
         }
-    }
 
-    if ( * pass_ptr ) {
-
-        result = H5FDaio_finish(file, &error_num, fsync_aioctlblk);
-
-        if ( ( result < 0 ) || ( error_num != 0 ) ) {
-
+    if(*pass_ptr)
+        if((H5FDaio_finish(file, &error_num, fsync_aioctlblk) < 0) || (error_num != 0)) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "H5FDaio_finish(0) failed.";
         }
-    }
 
 
     /* kick off the reads */
-
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: starting reads.\n", fcn_name, *pass_ptr);
 
-    if ( verbose )
+    if(verbose)
         HDfprintf(stdout, "%s: write_count = %d.\n", fcn_name, write_count);
 
     i = 0;
-    while ( ( *pass_ptr ) &&
-            ( i < write_count ) ) {
-
+    while((*pass_ptr) && (i < write_count)) {
 	/* the lengths table is constant, so we should skip the reads matching 
          * the writes skipped above -- if not, we will hear about it.
          */
-        if ( ( ( express_test > 0 ) && ( lengths[i] > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-             ( ( express_test > 1 ) && ( lengths[i] > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-
+        if(((express_test > 0) && (lengths[i] > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (lengths[i] > EXPRESS_TEST_2_MAX_LENGTH))) {
             /* don't increment *sub_tests_skipped as we have already done this above */
             ctlblks[i] = NULL;
 
-            if ( show_progress ) 
+            if(show_progress) 
                 HDfprintf(stdout, "%s:%d: read %d skipped.\n", fcn_name, *pass_ptr, i);
-
         } else {
-
-            if ( show_progress ) 
+            if(show_progress) 
                 HDfprintf(stdout, "%s:%d: attempting read %d.\n", fcn_name, *pass_ptr, i);
 
-            result = H5FDaio_read(file, types[i], H5P_DEFAULT, 
-                                  offsets[i], lengths[i], (void *)(read_bufs[i]), 
-                                  &(ctlblks[i]));
-
-            if ( ( result < 0 ) || ( ctlblks[i] == NULL ) ) {
-
+            if((H5FDaio_read(file, types[i], H5P_DEFAULT, offsets[i], lengths[i], (void *)(read_bufs[i]), &(ctlblks[i])) < 0) || (ctlblks[i] == NULL)) {
                 *pass_ptr = FALSE;
                 *failure_mssg_ptr = "H5FDaio_write(0) failed.";
             }
@@ -1931,49 +1681,33 @@ aio_multi_write_sync_read_check(H5FD_t * file,
     /* wait for the reads to complete -- test half the time, and wait the 
      * other half 
      */
-
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: waiting for reads.\n", fcn_name, *pass_ptr);
 
     i = 0;
     do_wait = TRUE;
-    while ( ( *pass_ptr ) &&
-            ( i < write_count ) ) {
-
+    while((*pass_ptr) && (i < write_count)) {
         /* recall that if ctlblks[i] == NULL, either we have a failure (in which
          * case this code should be unreachable), or we skipped this read.
          */
-        if ( ctlblks[i] != NULL ) {
-
-            if ( do_wait ) {
-
-                if ( *pass_ptr ) {
-
-                    result = H5FDaio_wait(file, ctlblks[i]);
-
-                    if ( result < 0 ) {
-
+        if(ctlblks[i] != NULL) {
+            if(do_wait) {
+                if(*pass_ptr)
+                    if(H5FDaio_wait(file, ctlblks[i]) < 0) {
                         *pass_ptr = FALSE;
                         *failure_mssg_ptr = "H5FDaio_wait(0) failed.";
                     }
-                }
             } else {
-
                 done = FALSE;
-                while ( ( *pass_ptr ) && ( ! done ) ) {
-
-                    result = H5FDaio_test(file, &done, ctlblks[i]);
-
-                    if ( result < 0 ) {
-
+                while((*pass_ptr) && (!done))
+                    if(H5FDaio_test(file, &done, ctlblks[i]) < 0) {
                         *pass_ptr = FALSE;
                         *failure_mssg_ptr = "H5FDaio_test(0) failed.";
                     }
-                }
             }
         }
 
-        do_wait = (hbool_t)(! do_wait);
+        do_wait = (hbool_t)(!do_wait);
 
         i++;
     }
@@ -1984,22 +1718,15 @@ aio_multi_write_sync_read_check(H5FD_t * file,
 	HDfprintf(stdout, "%s:%d: finishing reads.\n", fcn_name, *pass_ptr);
 
     i = 0;
-    while ( ( *pass_ptr ) &&
-            ( i < write_count ) ) {
-
+    while((*pass_ptr) && (i < write_count)) {
         /* recall that if ctlblks[i] == NULL, either we have a failure (in which
          * case this code should be unreachable), or we skipped this read.
          */
-        if ( ctlblks[i] != NULL ) {
-
-            result = H5FDaio_finish(file, &error_num, ctlblks[i]);
-
-            if ( ( result < 0 ) || ( error_num != 0 ) ) {
-
+        if(ctlblks[i] != NULL) {
+            if((H5FDaio_finish(file, &error_num, ctlblks[i]) < 0) || (error_num != 0)) {
                 *pass_ptr = FALSE;
                 *failure_mssg_ptr = "H5FDaio_finish(0) failed.";
             }
-
             ctlblks[i] = NULL;
         }
 
@@ -2009,30 +1736,21 @@ aio_multi_write_sync_read_check(H5FD_t * file,
 
     /* verify the reads */
 
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: verifying reads.\n", fcn_name, *pass_ptr);
 
     i = 0;
-    while ( ( *pass_ptr ) &&
-            ( i < write_count ) ) {
-
+    while((*pass_ptr) && (i < write_count)) {
 	/* the lengths table is constant, so we should skip the checks matching 
          * the writes and reads skipped above -- if not, we will hear about it.
          */
-        if ( ( ( express_test > 0 ) && ( lengths[i] > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-             ( ( express_test > 1 ) && ( lengths[i] > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-
+        if(((express_test > 0) && (lengths[i] > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (lengths[i] > EXPRESS_TEST_2_MAX_LENGTH))) 
             /* we skipped this test -- increment the counter */
 	    (*sub_tests_skipped_ptr)++;
-
-        } else {
-
+        else {
             j = 0;
-            while ( ( *pass_ptr ) &&
-                    ( j < (int)lengths[i] ) ) {
-
-                if ( (write_bufs[i])[j] != (read_bufs[i])[j] ) {
-
+            while((*pass_ptr) && (j < (int)lengths[i])) {
+                if((write_bufs[i])[j] != (read_bufs[i])[j]) {
                     HDfprintf(stdout, "lengths[%d] = %d\n", i, lengths[i]);
                     HDfprintf(stdout, "offsets[%d] = %lld\n", 
                               i, (long long)(offsets[i]));
@@ -2046,54 +1764,43 @@ aio_multi_write_sync_read_check(H5FD_t * file,
                 j++;
             }
         }
-
         i++;
     }
 
     /* discard the buffers */
 
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: discarding buffers.\n", fcn_name, *pass_ptr);
 
-    if ( write_bufs != NULL ) {
-
-        for ( i = 0; i < write_count; i++ ) {
-
-            if ( write_bufs[i] != NULL ) {
-
+    if(write_bufs != NULL) {
+        for(i = 0; i < write_count; i++)
+            if(write_bufs[i] != NULL) {
                 HDfree(write_bufs[i]);
                 write_bufs[i] = NULL;
             }
-        }
         HDfree(write_bufs);
         write_bufs = NULL;
     }
 
-    if ( read_bufs != NULL ) {
-
-        for ( i = 0; i < write_count; i++ ) {
-
-            if ( read_bufs[i] != NULL ) {
-
+    if(read_bufs != NULL) {
+        for(i = 0; i < write_count; i++)
+            if(read_bufs[i] != NULL) {
                 HDfree(read_bufs[i]);
                 read_bufs[i] = NULL;
             }
-        }
         HDfree(write_bufs);
         write_bufs = NULL;
     }
 
-    if ( ctlblks != NULL ) {
-
+    if(ctlblks != NULL) {
         HDfree(ctlblks);
         ctlblks = NULL;
     }
 
-    if ( show_progress ) 
+    if(show_progress) 
 	HDfprintf(stdout, "%s:%d: done.\n", fcn_name, *pass_ptr);
 
     return;
-
 } /* aio_multi_write_sync_read_check() */
 
 
@@ -2121,28 +1828,20 @@ aio_multi_write_sync_read_check(H5FD_t * file,
  *
  *-------------------------------------------------------------------------
  */
-
 static void
-aio_single_write_read_check(H5FD_t * file,
-                            H5FD_mem_t type,
-                            const char * tag_string,
-                            haddr_t offset,
-                            const size_t write_size,
-                            hbool_t do_wait,
-                            hbool_t * pass_ptr,
-                            const char ** failure_mssg_ptr)
+aio_single_write_read_check(H5FD_t * file, H5FD_mem_t type, 
+    const char * tag_string, haddr_t offset, const size_t write_size, 
+    hbool_t do_wait, hbool_t * pass_ptr, const char ** failure_mssg_ptr)
 {
     const char * fcn_name = "aio_single_write_read_check()";
-    const char * H5FD_mem_t_strings[H5FD_MEM_NTYPES] =
-	{
-	  "H5FD_MEM_DEFAULT",
-	  "H5FD_MEM_SUPER",
-	  "H5FD_MEM_BTREE",
-	  "H5FD_MEM_DRAW",
-	  "H5FD_MEM_GHEAP",
-	  "H5FD_MEM_LHEAP",
- 	  "H5FD_MEM_OHDR"
-	};
+    const char * H5FD_mem_t_strings[H5FD_MEM_NTYPES] = { "H5FD_MEM_DEFAULT",
+	                                                 "H5FD_MEM_SUPER",
+	                                                 "H5FD_MEM_BTREE",
+	                                                 "H5FD_MEM_DRAW",
+	                                                 "H5FD_MEM_GHEAP",
+	                                                 "H5FD_MEM_LHEAP",
+ 	                                                 "H5FD_MEM_OHDR"
+	                                               };
     const char * type_string = NULL;
     char * write_buf = NULL;
     char * read_buf = NULL;
@@ -2154,70 +1853,44 @@ aio_single_write_read_check(H5FD_t * file,
     int i;
     int type_string_len;
     int tag_len;
-    herr_t result;
     void * aioctlblk_ptr = NULL;
 
-    HDassert( ( type >= 0 ) && ( type < H5FD_MEM_NTYPES ) );
+    HDassert((type >= 0) && (type < H5FD_MEM_NTYPES));
 
-    if ( verbose ) {
-
+    if(verbose) {
         HDfprintf(stdout, "entering %s.\n", fcn_name);
         HDfprintf(stdout, "	file->driver_id = 0x%llx.\n",
 		  (unsigned long long)(file->driver_id));
-        if ( file->driver_id == H5FD_CORE ) {
+        if(file->driver_id == H5FD_CORE)
             HDfprintf(stdout, "	file driver == CORE.\n");
-        }
-        if ( ( type >= 0 ) && ( type < H5FD_MEM_NTYPES ) ) {
-
-            HDfprintf(stdout, "	type		= %d (\"%s\").\n", 
-                      (int)type, H5FD_mem_t_strings[(int)type]);
-
-        } else {
-
+        if((type >= 0) && (type < H5FD_MEM_NTYPES))
+            HDfprintf(stdout, "	type		= %d (\"%s\").\n", (int)type, H5FD_mem_t_strings[(int)type]);
+        else 
             HDfprintf(stdout, "	type		= %d (\?\?\?).\n", (int)type);
-        }
         HDfprintf(stdout, "	tag_string      = \"%s\".\n", tag_string);
-        HDfprintf(stdout, "	offset          = 0x%llx.\n", 
-                  (unsigned long long)offset);
-        HDfprintf(stdout, "	write_size      = 0x%llx.\n", 
-                  (unsigned long long)write_size);
+        HDfprintf(stdout, "	offset          = 0x%llx.\n", (unsigned long long)offset);
+        HDfprintf(stdout, "	write_size      = 0x%llx.\n", (unsigned long long)write_size);
         HDfprintf(stdout, "	do_wait         = %d.\n", (int)do_wait);
         HDfprintf(stdout, "	*pass_ptr       = %d.\n", (int)(*pass_ptr));
     }
 
-    if ( *pass_ptr ) {
-
-        if ( ( file == NULL ) ||
-             ( type < 0 ) ||
-	     ( type >= H5FD_MEM_NTYPES ) ||
-             ( tag_string == NULL ) ||
-             ( write_size <= 0 ) ||
-             ( HDstrlen(tag_string) > write_size ) ) {
-
+    if(*pass_ptr) 
+        if((file == NULL) || (type < 0) || (type >= H5FD_MEM_NTYPES) || (tag_string == NULL) || (write_size <= 0) || (HDstrlen(tag_string) > write_size)) {
 	    *pass_ptr = FALSE;
-            *failure_mssg_ptr = 
-		"bad param(s) passed to aio_single_write_read_check()";
+            *failure_mssg_ptr = "bad param(s) passed to aio_single_write_read_check()";
         }
-    }
 
-    if ( show_progress ) { /* cp == 0 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- alloc & init buffers.\n", 
-                  fcn_name, cp++, (int)(*pass_ptr));
-    }
+    if(show_progress) /* cp == 0 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- alloc & init buffers.\n", fcn_name, cp++, (int)(*pass_ptr));
 
-    if ( *pass_ptr ) { /* allocate and initialize buffers */
-
+    if(*pass_ptr) { /* allocate and initialize buffers */
         write_buf = (char *)HDmalloc(write_size + 1);
         read_buf  = (char *)HDmalloc(write_size + 1);
 
-        if ( ( write_buf == NULL ) ||
-             ( read_buf == NULL ) ) {
-
+        if((write_buf == NULL) || (read_buf == NULL)) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "buffer allocation(s) failed.";
-
         } else {
-
             type_string = H5FD_mem_t_strings[type];
 
             HDassert( type_string != NULL );
@@ -2228,229 +1901,138 @@ aio_single_write_read_check(H5FD_t * file,
 
             tag_len = (int)HDstrlen(tag_string);
 
-            for ( i = 0; i < (int)write_size; i++ ) {
-
-		if ( i < type_string_len ) {
-
+            for(i = 0; i < (int)write_size; i++) {
+		if(i < type_string_len)
                     write_buf[i] = type_string[i];
-
-                } else if ( i == type_string_len ) {
-
+                else if(i == type_string_len)
                     write_buf[i] = ' ';
-
-		} else if ( i < type_string_len + tag_len + 1 ) {
-
+		else if(i < type_string_len + tag_len + 1)
                     write_buf[i] = tag_string[i - type_string_len - 1];
-
-		} else if ( i == type_string_len + tag_len + 1 ) {
-
+		else if(i == type_string_len + tag_len + 1)
                     write_buf[i] = ' ';
-
-                } else if ( i < (int)(write_size - 1) ) {
-
-                    if ( (i % 64) == 0 ) {
-
+                else if (i < (int)(write_size - 1)) {
+                    if((i % 64) == 0)
                         write_buf[i] = '\n';
-
-                    } else {
-
+                    else
                         write_buf[i] = '*';
-                    }
-                } else {
-
+                } else 
                     write_buf[i] = '\0';
-                }
                 
                 read_buf[i] = '\0';
             }
         }
     }
 
-    if ( show_progress ) { /* cp == 1 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- kicking off write.\n", 
-                  fcn_name, cp++, (int)(*pass_ptr));
-    }
+    if(show_progress) /* cp == 1 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- kicking off write.\n", fcn_name, cp++, (int)(*pass_ptr));
 
-    if ( *pass_ptr ) {
-
-        result = H5FDaio_write(file, type, H5P_DEFAULT, 
-                               offset, write_size, (void *)(write_buf), 
-                               &aioctlblk_ptr);
-
-        if ( ( result < 0 ) || ( aioctlblk_ptr == NULL ) ) {
-
+    if(*pass_ptr)
+        if((H5FDaio_write(file, type, H5P_DEFAULT, offset, write_size, (void *)(write_buf), &aioctlblk_ptr) < 0) || (aioctlblk_ptr == NULL)) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "H5FDaio_write(0) failed.";
         }
-    }
 
-    if ( show_progress ) { /* cp == 2 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d, do_wait = %d -- waiting til done.\n", 
-                  fcn_name, cp++, (int)(*pass_ptr), (int)do_wait);
-    }
+    if(show_progress)  /* cp == 2 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d, do_wait = %d -- waiting til done.\n", fcn_name, cp++, (int)(*pass_ptr), (int)do_wait);
 
-    if ( do_wait ) {
-
-        if ( *pass_ptr ) {
-
-            result = H5FDaio_wait(file, aioctlblk_ptr);
-
-            if ( result < 0 ) {
-
+    if(do_wait) {
+        if(*pass_ptr)
+            if(H5FDaio_wait(file, aioctlblk_ptr) < 0) {
                 *pass_ptr = FALSE;
                 *failure_mssg_ptr = "H5FDaio_wait(1) failed.";
             }
-        }
     } else {
-
         done = FALSE;
-        while ( ( *pass_ptr ) && ( ! done ) ) {
-
-            result = H5FDaio_test(file, &done, aioctlblk_ptr);
-
-            if ( result < 0 ) {
-
+        while((*pass_ptr) && (!done))
+            if(H5FDaio_test(file, &done, aioctlblk_ptr) < 0) {
                 *pass_ptr = FALSE;
                 *failure_mssg_ptr = "H5FDaio_test(0) failed.";
             }
-        }
     }
 
-    if ( show_progress ) { /* cp == 3 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- finishing write.\n", 
-                  fcn_name, cp++, (int)(*pass_ptr));
-    }
+    if(show_progress) /* cp == 3 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- finishing write.\n", fcn_name, cp++, (int)(*pass_ptr));
 
-    if ( *pass_ptr ) {
-
-        result = H5FDaio_finish(file, &error_num, aioctlblk_ptr);
-
-        if ( ( result < 0 ) || ( error_num != 0 ) ) {
-
+    if(*pass_ptr)
+        if((H5FDaio_finish(file, &error_num, aioctlblk_ptr) < 0) || (error_num != 0)) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "H5FDaio_finish(0) failed.";
         }
-    }
 
-    if ( show_progress ) { /* cp == 4 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- kicking off read.\n", 
-                  fcn_name, cp++, (int)(*pass_ptr));
-    }
+    if(show_progress) /* cp == 4 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- kicking off read.\n", fcn_name, cp++, (int)(*pass_ptr));
 
-    if ( *pass_ptr ) {
-
+    if(*pass_ptr) {
         aioctlblk_ptr = NULL;
 
-        result = H5FDaio_read(file, type, H5P_DEFAULT,
-                              offset, write_size, (void *)read_buf, 
-                              &aioctlblk_ptr);
-
-        if ( ( result < 0 ) || ( aioctlblk_ptr == NULL ) ) {
-
+        if((H5FDaio_read(file, type, H5P_DEFAULT, offset, write_size, (void *)read_buf, &aioctlblk_ptr) < 0) || (aioctlblk_ptr == NULL)) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "H5FDaio_read(0) failed.";
         }
     }
 
-    if ( show_progress ) { /* cp == 5 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d, do_wait = %d -- waiting til done.\n", 
-                  fcn_name, cp++, (int)(*pass_ptr), (int)do_wait);
-    }
+    if(show_progress) /* cp == 5 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d, do_wait = %d -- waiting til done.\n", fcn_name, cp++, (int)(*pass_ptr), (int)do_wait);
 
-    if ( do_wait ) {
-
-        if ( *pass_ptr ) {
-
-            result = H5FDaio_wait(file, aioctlblk_ptr);
-
-            if ( result < 0 ) {
-
+    if(do_wait) {
+        if(*pass_ptr)
+            if(H5FDaio_wait(file, aioctlblk_ptr) < 0) {
                 *pass_ptr = FALSE;
                 *failure_mssg_ptr = "H5FDaio_wait(1) failed.";
             }
-        }
     } else {
-
         done = FALSE;
-        while ( ( *pass_ptr ) && ( ! done ) ) {
-
-            result = H5FDaio_test(file, &done, aioctlblk_ptr);
-
-            if ( result < 0 ) {
-
+        while((*pass_ptr) &&(!done))
+            if(H5FDaio_test(file, &done, aioctlblk_ptr) < 0) {
                 *pass_ptr = FALSE;
                 *failure_mssg_ptr = "H5FDaio_test(1) failed.";
             }
-        }
     }
 
-    if ( show_progress ) { /* cp == 6 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- finishing read.\n", 
-                  fcn_name, cp++, (int)(*pass_ptr));
-    }
+    if(show_progress) /* cp == 6 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- finishing read.\n", fcn_name, cp++, (int)(*pass_ptr));
 
-    if ( *pass_ptr ) {
-
-        result = H5FDaio_finish(file, &error_num, aioctlblk_ptr);
-
-        if ( ( result < 0 ) || ( error_num != 0 ) ) {
-
+    if(*pass_ptr)
+        if((H5FDaio_finish(file, &error_num, aioctlblk_ptr) < 0) || (error_num != 0)) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "H5FDaio_finish(1) failed.";
         }
-    }
 
-    if ( show_progress ) { /* cp == 7 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- comparing buffers.\n", 
-                  fcn_name, cp++, (int)(*pass_ptr));
-    }
+    if(show_progress)  /* cp == 7 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- comparing buffers.\n", fcn_name, cp++, (int)(*pass_ptr));
 
     i = 0;
-    while ( ( *pass_ptr ) && ( i < (int)write_size ) ) {
-
-        if ( read_buf[i] != write_buf[i] ) {
-
+    while((*pass_ptr) && (i < (int)write_size)) {
+        if(read_buf[i] != write_buf[i]) {
             *pass_ptr = FALSE;
             *failure_mssg_ptr = "data mismatch(1).";
         }
         i++;
     }
 
-    if ( show_progress ) { /* cp == 8 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- discarding write buf.\n", 
-                  fcn_name, cp++, (int)(*pass_ptr));
-    }
+    if(show_progress) /* cp == 8 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- discarding write buf.\n", fcn_name, cp++, (int)(*pass_ptr));
 
-    if ( write_buf != NULL ) { /* must discard write buffer */
-
+    if(write_buf != NULL) { /* must discard write buffer */
         HDfree(write_buf);
         write_buf = NULL;
     }
 
-    if ( show_progress ) { /* cp == 9 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- discarding read buf.\n", 
-                  fcn_name, cp++, (int)(*pass_ptr));
-    }
+    if(show_progress) /* cp == 9 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- discarding read buf.\n", fcn_name, cp++, (int)(*pass_ptr));
 
-    if ( read_buf != NULL ) { /* must discard read buffer */
-
+    if(read_buf != NULL) { /* must discard read buffer */
         HDfree(read_buf);
         read_buf = NULL;
     }
 
-    if ( show_progress ) { /* cp == 10 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- done.\n", 
-                  fcn_name, cp++, (int)(*pass_ptr));
-    }
+    if(show_progress) /* cp == 10 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- done.\n", fcn_name, cp++, (int)(*pass_ptr));
 
-    if ( verbose ) {
-
+    if(verbose)
         HDfprintf(stdout, "exiting %s.\n", fcn_name);
-    }
-
 
     return;
-
 } /* aio_single_write_read_check() */
 
 
@@ -2467,14 +2049,10 @@ aio_single_write_read_check(H5FD_t * file,
  *
  *-------------------------------------------------------------------------
  */
-
 static int
-generic_aio_test(const char * test_banner, 
-                 const int file_name_num,
-		 hid_t fapl_id,
-                 haddr_t maxaddr,
-                 const int express_test,
-                 hbool_t dump_stats)
+generic_aio_test(const char * test_banner, const int file_name_num,
+    hid_t fapl_id, haddr_t maxaddr, const int express_test, 
+    hbool_t dump_stats)
 {
     const char * fcn_name = "generic_aio_test()";
     const char * failure_mssg = NULL;
@@ -2528,7 +2106,6 @@ generic_aio_test(const char * test_banner,
               (1024 * 1024 + 1), 
               (64 * 1024 *1024), 
                             24};
-    herr_t result;
     haddr_t offset;
     haddr_t offsets[] = {(haddr_t)0, 
                          (haddr_t)1024, 
@@ -2545,76 +2122,48 @@ generic_aio_test(const char * test_banner,
 
     stats.magic = 0; /* to indicate that we haven't collected stats */
 
-    if ( verbose ) {
-
-        HDfprintf(stdout, 
-                  "entering generic_aio_test(\"%s\", %d(\"%s\"), %d, 0x%llx)\n",
-                  test_banner, file_name_num, FILENAME[file_name_num],
-                  (int)fapl_id, (unsigned long long)maxaddr);
+    if(verbose) {
+        HDfprintf(stdout, "entering generic_aio_test(\"%s\", %d(\"%s\"), %d, 0x%llx)\n", test_banner, file_name_num, FILENAME[file_name_num], (int)fapl_id, (unsigned long long)maxaddr);
     }
 
     TESTING(test_banner);
 
-    if ( show_progress ) { /* cp == 0 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- fixing file name.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 0 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- fixing file name.\n", fcn_name, cp++, (int)pass);
 
     /* setup the file name */
-    if ( pass ) {
-
-        if ( NULL == h5_fixname(FILENAME[file_name_num], fapl_id, 
-                                file_name, sizeof(file_name)) ) {
-
+    if(pass)
+        if(NULL == h5_fixname(FILENAME[file_name_num], fapl_id, file_name, sizeof(file_name))) {
             pass = FALSE;
             failure_mssg = "h5_fixname() failed.";
         }
-    }
 
-    if ( verbose ) {
-
+    if(verbose)
         HDfprintf(stdout, "%s: file_name = \"%s\".\n", fcn_name, file_name);
-    }
 
-    if ( show_progress ) { /* cp == 1 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- opening file.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 1 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- opening file.\n", fcn_name, cp++, (int)pass);
 
     /* create the file */
-    if ( pass ) {
-
-        file = H5FDopen(file_name, (H5F_ACC_RDWR | H5F_ACC_CREAT), 
-                        fapl_id, maxaddr);
-
-        if ( file == NULL ) {
-
+    if(pass) {
+        if(NULL == (file = H5FDopen(file_name, (H5F_ACC_RDWR | H5F_ACC_CREAT), fapl_id, maxaddr))) {
             pass = FALSE;
             failure_mssg = "H5FDopen() failed.";
         }
     }
 
-    if ( show_progress ) { /* cp == 2 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- setting eoa.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 2 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- setting eoa.\n", fcn_name, cp++, (int)pass);
 
     /* set the EOA */
-    if ( pass ) { 
-
-        result = H5FDset_eoa(file, H5FD_MEM_DEFAULT, maxaddr);
-
-        if ( result < 0 ) {
-
+    if(pass)
+        if(H5FDset_eoa(file, H5FD_MEM_DEFAULT, maxaddr) < 0) {
             pass = FALSE;
             failure_mssg = "H5FDset_eoa() failed.";
         }
-    }
 
-    if ( show_progress ) { /* cp == 3 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 bytes, poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 3 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 bytes, poll.\n", fcn_name, cp++, (int)pass);
 
     /* first do some simple write, read back, and compare results tests with 
      * buffers of various sizes
@@ -2623,419 +2172,204 @@ generic_aio_test(const char * test_banner,
     offset = (haddr_t)0;
     write_size = (size_t)64;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "64 bytes -- test for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ FALSE,
-                                &pass,
-                                &failure_mssg);
+    aio_single_write_read_check(file, H5FD_MEM_DRAW, "64 bytes -- test for completion", offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
 
-    if ( show_progress ) { /* cp == 4 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 bytes, wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 4 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 bytes, wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "64 bytes -- wait for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ TRUE,
-                                &pass,
-                                &failure_mssg);
+    aio_single_write_read_check(file, H5FD_MEM_DRAW, "64 bytes -- wait for completion", offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
 
-    if ( show_progress ) { /* cp == 5 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 bytes, poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 5 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 bytes, poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)4;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "256 bytes -- test for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ FALSE,
-                                &pass,
-                                &failure_mssg);
+    aio_single_write_read_check(file, H5FD_MEM_DRAW, "256 bytes -- test for completion", offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
 
-    if ( show_progress ) { /* cp == 6 */
+    if(show_progress) /* cp == 6 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 bytes, wait.\n", 
                   fcn_name, cp++, (int)pass);
-    }
 
     offset += (haddr_t)write_size;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "256 bytes -- wait for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ TRUE,
-                                &pass,
-                                &failure_mssg);
+    aio_single_write_read_check(file, H5FD_MEM_DRAW, "256 bytes -- wait for completion", offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
 
-    if ( show_progress ) { /* cp == 7 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 KB, poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 7 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 KB, poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)4;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "1 KB -- test for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ FALSE,
-                                &pass,
-                                &failure_mssg);
+    aio_single_write_read_check(file, H5FD_MEM_DRAW, "1 KB -- test for completion", offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
 
-    if ( show_progress ) { /* cp == 8 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 KB, wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 8 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 KB, wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "1 KB -- wait for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ TRUE,
-                                &pass,
-                                &failure_mssg);
+    aio_single_write_read_check(file, H5FD_MEM_DRAW, "1 KB -- wait for completion", offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
 
-    if ( show_progress ) { /* cp == 9 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 4 KB, poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 9 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 4 KB, poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)4;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "4 KB -- test for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ FALSE,
-                                &pass,
-                                &failure_mssg);
+    aio_single_write_read_check(file, H5FD_MEM_DRAW, "4 KB -- test for completion", offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
 
-    if ( show_progress ) { /* cp == 10 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 4 KB, wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 10 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 4 KB, wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "4 KB -- wait for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ TRUE,
-                                &pass,
-                                &failure_mssg);
+    aio_single_write_read_check(file, H5FD_MEM_DRAW, "4 KB -- wait for completion", offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
 
-    if ( show_progress ) { /* cp == 11 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 KB, poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 11 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 KB, poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)16;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "64 KB -- test for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ FALSE,
-                                &pass,
-                                &failure_mssg);
+    aio_single_write_read_check(file, H5FD_MEM_DRAW, "64 KB -- test for completion", offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
 
-    if ( show_progress ) { /* cp == 12 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 KB, wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 12 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 KB, wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    aio_single_write_read_check(file,
-                                H5FD_MEM_DRAW,
-                                "64 KB -- wait for completion",
-                                offset,
-                                write_size,
-                                /* do_wait = */ TRUE,
-                                &pass,
-                                &failure_mssg);
+    aio_single_write_read_check(file, H5FD_MEM_DRAW, "64 KB -- wait for completion", offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
 
-    if ( show_progress ) { /* cp == 13 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 MB, poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 13 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 MB, poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)16;
 
-    if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-         ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-    
+    if(((express_test > 0) && (write_size > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (write_size > EXPRESS_TEST_2_MAX_LENGTH)))
         /* skip this test */
         sub_tests_skipped++;
+    else
+        aio_single_write_read_check(file, H5FD_MEM_DRAW, "1 MB -- test for completion", offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
 
-    } else {
-
-        aio_single_write_read_check(file,
-                                    H5FD_MEM_DRAW,
-                                    "1 MB -- test for completion",
-                                    offset,
-                                    write_size,
-                                    /* do_wait = */ FALSE,
-                                    &pass,
-                                    &failure_mssg);
-    }
-
-    if ( show_progress ) { /* cp == 14 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 MB, wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 14 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 MB, wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-         ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-    
+    if(((express_test > 0) && (write_size > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (write_size > EXPRESS_TEST_2_MAX_LENGTH)))
         /* skip this test */
         sub_tests_skipped++;
+    else
+        aio_single_write_read_check(file, H5FD_MEM_DRAW, "1 MB -- wait for completion", offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
 
-    } else {
-
-        aio_single_write_read_check(file,
-                                    H5FD_MEM_DRAW,
-                                    "1 MB -- wait for completion",
-                                    offset,
-                                    write_size,
-                                    /* do_wait = */ TRUE,
-                                    &pass,
-                                    &failure_mssg);
-    }
-
-    if ( show_progress ) { /* cp == 15 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 16 MB, poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 15 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 16 MB, poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)16;
 
-    if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-         ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-    
+    if(((express_test > 0) && (write_size > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (write_size > EXPRESS_TEST_2_MAX_LENGTH)))
         /* skip this test */
         sub_tests_skipped++;
+    else
+        aio_single_write_read_check(file, H5FD_MEM_DRAW, "16 MB -- test for completion", offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
 
-    } else {
-
-        aio_single_write_read_check(file,
-                                    H5FD_MEM_DRAW,
-                                    "16 MB -- test for completion",
-                                    offset,
-                                    write_size,
-                                    /* do_wait = */ FALSE,
-                                    &pass,
-                                    &failure_mssg);
-    }
-
-    if ( show_progress ) { /* cp == 16 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 16 MB, wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 16 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 16 MB, wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-         ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-    
+    if(((express_test > 0) && (write_size > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (write_size > EXPRESS_TEST_2_MAX_LENGTH)))
         /* skip this test */
         sub_tests_skipped++;
+    else
+        aio_single_write_read_check(file, H5FD_MEM_DRAW, "16 MB -- wait for completion", offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
 
-    } else {
-
-        aio_single_write_read_check(file,
-                                    H5FD_MEM_DRAW,
-                                    "16 MB -- wait for completion",
-                                    offset,
-                                    write_size,
-                                    /* do_wait = */ TRUE,
-                                    &pass,
-                                    &failure_mssg);
-    }
-
-    if ( show_progress ) { /* cp == 17 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 MB, poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 17 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 MB, poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)16;
 
-    if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-         ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-    
+    if(((express_test > 0) && (write_size > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (write_size > EXPRESS_TEST_2_MAX_LENGTH)))
         /* skip this test */
         sub_tests_skipped++;
+    else
+        aio_single_write_read_check(file, H5FD_MEM_DRAW, "256 MB -- test for completion", offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
 
-    } else {
-
-        aio_single_write_read_check(file,
-                                    H5FD_MEM_DRAW,
-                                    "256 MB -- test for completion",
-                                    offset,
-                                    write_size,
-                                    /* do_wait = */ FALSE,
-                                    &pass,
-                                    &failure_mssg);
-    }
-
-    if ( show_progress ) { /* cp == 18 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 MB, wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 18 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 MB, wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-         ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-    
+    if(((express_test > 0) && (write_size > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (write_size > EXPRESS_TEST_2_MAX_LENGTH)))
         /* skip this test */
         sub_tests_skipped++;
+    else
+        aio_single_write_read_check(file, H5FD_MEM_DRAW, "256 MB -- wait for completion", offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
 
-    } else {
+    if(show_progress) /* cp == 19 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- mwsrchk.\n", fcn_name, cp++, (int)pass);
 
-        aio_single_write_read_check(file,
-                                    H5FD_MEM_DRAW,
-                                    "256 MB -- wait for completion",
-                                    offset,
-                                    write_size,
-                                    /* do_wait = */ TRUE,
-                                    &pass,
-                                    &failure_mssg);
-    }
+    aio_multi_write_sync_read_check(file, write_count, types, offsets, lengths, tags, &pass, &failure_mssg, express_test, &sub_tests_skipped);
 
-    if ( show_progress ) { /* cp == 19 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- mwsrchk.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 20 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- wrfcchk.\n", fcn_name, cp++, (int)pass);
 
-    aio_multi_write_sync_read_check(file,
-				    write_count,
-			            types,
-				    offsets,
-				    lengths,
-				    tags,
-                                    &pass,
-                                    &failure_mssg,
-                                    express_test,
-                                    &sub_tests_skipped);
+    aio_multi_read_write_fsync_cancel_check(file, op_count, ops, types, offsets, lengths, tags, &pass, &failure_mssg, express_test, &sub_tests_skipped);
 
-    if ( show_progress ) { /* cp == 20 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- wrfcchk.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 21 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- close file.\n", fcn_name, cp++, (int)pass);
 
-    aio_multi_read_write_fsync_cancel_check(file,
-				            op_count,
-                                            ops,
-			                    types,
-				            offsets,
-				            lengths,
-				            tags,
-                                            &pass, 
-                                            &failure_mssg,
-                                            express_test,
-                                            &sub_tests_skipped);
-
-    if ( show_progress ) { /* cp == 21 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- close file.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
-
-    if ( file != NULL ) {
-
-        if ( dump_stats ) {
-
+    if(file != NULL) {
+        if(dump_stats) {
             stats.magic = H5FD__H5FD_STATS_T_MAGIC;
             H5FD_get_stats(file, &stats);
         }
 
-        result = H5FDclose(file);
-
-        if ( result < 0 ) {
-
+        if(H5FDclose(file) < 0) {
             pass = FALSE;
             failure_mssg = "H5FDclose() failed.";
-
-        } else if ( h5_cleanup(FILENAME, fapl_id) == 0 ) {
-
+        } else if (h5_cleanup(FILENAME, fapl_id) == 0) {
             pass = FALSE;
             failure_mssg = "h5_cleanup() failed.\n";
         }
     }
 
-    if ( show_progress ) { /* cp == 22 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- report results.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 22 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- report results.\n", fcn_name, cp++, (int)pass);
 
-    if ( pass ) { 
-
-	PASSED(); 
-
-    } else { 
-
+    if(pass)
+	PASSED() 
+    else { 
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 	H5_FAILED(); 
         ret_val = -1;
     }
 
-    if ( sub_tests_skipped > 0 ) {
-
+    if(sub_tests_skipped > 0)
         HDfprintf(stdout, "	%d sub test(s) skipped to expedite test.\n", 
                   sub_tests_skipped);
-    }
 #ifdef H5_HAVE_AIO
-    if ( ( dump_stats ) && ( stats.magic == H5FD__H5FD_STATS_T_MAGIC ) ) {
-
+    if((dump_stats) && (stats.magic == H5FD__H5FD_STATS_T_MAGIC)) {
         H5FD_dump_stats(stdout, &stats, "stats from generic_aio_test():");
     }
 #endif /* H5_HAVE_AIO */
-    if ( verbose ) {
-
-        HDfprintf(stdout, "exiting generic_aio_test() -- ret_val == %d.\n",
-                  ret_val);
-    }
+    if(verbose)
+        HDfprintf(stdout, "exiting generic_aio_test() -- ret_val == %d.\n", ret_val);
 
     return(ret_val);
-
 } /* generic_aio_test() */
 
 
@@ -3053,13 +2387,9 @@ generic_aio_test(const char * test_banner,
  *
  *-------------------------------------------------------------------------
  */
-
 static int
-generic_aio_input_error_tests(const char * test_banner,
-                              const char * tag_string,
-                              const int file_name_num,
-		              hid_t fapl_id,
-                              hbool_t verbose)
+generic_aio_input_error_tests(const char * test_banner, const char * tag_string,
+    const int file_name_num, hid_t fapl_id, hbool_t verbose)
 {
     const char * fcn_name = "generic_aio_input_error_tests()";
     const char * failure_mssg = NULL;
@@ -3085,316 +2415,218 @@ generic_aio_input_error_tests(const char * test_banner,
     void * write_ctlblk_ptr = NULL;
     void * read_ctlblk_ptr = NULL;
 
-    if ( verbose ) {
-
-        HDfprintf(stdout, 
-                  "entering generic_aio_input_error_tests(\"%s\", %d(\"%s\"), %d, %d)\n",
-                  test_banner, file_name_num, FILENAME[file_name_num],
-                  (int)fapl_id, (int)verbose);
-    }
+    if(verbose)
+        HDfprintf(stdout, "entering generic_aio_input_error_tests(\"%s\", %d(\"%s\"), %d, %d)\n", test_banner, file_name_num, FILENAME[file_name_num], (int)fapl_id, (int)verbose);
 
     TESTING(test_banner);
 
-    if ( show_progress ) { /* cp == 0 */
+    if(show_progress) /* cp == 0 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
     /* setup the file name */
-    if ( pass ) {
-
-        if ( NULL == h5_fixname(FILENAME[file_name_num], fapl_id, 
-                                file_name, sizeof(file_name)) ) {
-
+    if(pass)
+        if(NULL == h5_fixname(FILENAME[file_name_num], fapl_id, file_name, sizeof(file_name))) {
             pass = FALSE;
             failure_mssg = "h5_fixname() failed.";
         }
-    }
 
-    if ( verbose ) {
-
+    if(verbose)
         HDfprintf(stdout, "%s: file_name = \"%s\".\n", fcn_name, file_name);
-    }
 
-    if ( show_progress ) { /* cp == 1 */
+    if(show_progress) /* cp == 1 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
     /* create the file */
-    if ( pass ) {
-
-        file = H5FDopen(file_name, (H5F_ACC_RDWR | H5F_ACC_CREAT), 
-                        fapl_id, maxaddr);
-
-        if ( file == NULL ) {
-
+    if(pass)
+        if(NULL == (file = H5FDopen(file_name, (H5F_ACC_RDWR | H5F_ACC_CREAT), fapl_id, maxaddr))) {
             pass = FALSE;
             failure_mssg = "H5FDopen() failed.";
         }
-    }
 
-    if ( show_progress ) { /* cp == 2 */
+    if(show_progress) /* cp == 2 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
     /* set the EOA */
-    if ( pass ) { 
-
-        result = H5FDset_eoa(file, H5FD_MEM_DEFAULT, maxaddr);
-
-        if ( result < 0 ) {
-
+    if(pass)
+        if(H5FDset_eoa(file, H5FD_MEM_DEFAULT, maxaddr) < 0) {
             pass = FALSE;
             failure_mssg = "H5FDset_eoa() failed.";
         }
-    }
 
-    if ( show_progress ) { /* cp == 3 */
+    if(show_progress) /* cp == 3 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
     /* in what follows, we will verify that various AIO calls reject invalid 
      * input in the expected manner.  However, before we do so, we must construct
      * some valid inputs.  Do this now.
      */
 
-    if ( pass ) { /* allocate and initialize buffers, initialize mem_type */
-
-        if ( verbose ) {
-
-            HDfprintf(stdout, "%s: allocating write_buf = (char *)HDmalloc(%d).\n",
-                      fcn_name, (int)(write_size + 1));
-        }
-
+    if(pass) { /* allocate and initialize buffers, initialize mem_type */
         write_buf = (char *)HDmalloc(write_size + 1);
-
-        if ( verbose ) {
-
-            HDfprintf(stdout, "%s: allocating read_buf = (char *)HDmalloc(%d).\n",
-                      fcn_name, (int)(write_size + 1));
-        }
-
         read_buf  = (char *)HDmalloc(write_size + 1);
 
-        if ( ( write_buf == NULL ) ||
-             ( read_buf == NULL ) ) {
-
+        if((write_buf == NULL) || (read_buf == NULL)) {
             pass = FALSE;
             failure_mssg = "buffer allocation(s) failed.";
-
         } else {
-
             mem_type = H5FD_MEM_DEFAULT;
 
             type_string = "H5FD_MEM_DEFAULT";
 
-            HDassert( type_string != NULL );
+            HDassert(type_string != NULL);
 
             type_string_len = (int)HDstrlen(type_string);
 
-            HDassert( type_string_len < 20 );
+            HDassert(type_string_len < 20);
 
             tag_len = (int)HDstrlen(tag_string);
 
-            for ( i = 0; i < (int)write_size; i++ ) {
-
-                if ( i < type_string_len ) {
-
+            for(i = 0; i < (int)write_size; i++) {
+                if(i < type_string_len)
                     write_buf[i] = type_string[i];
-
-                } else if ( i == type_string_len ) {
-
+                else if ( i == type_string_len ) 
                     write_buf[i] = ' ';
-
-                } else if ( i < type_string_len + tag_len + 1 ) {
-
+                else if ( i < type_string_len + tag_len + 1 ) 
                     write_buf[i] = tag_string[i - type_string_len - 1];
-
-                } else {
-
+                else
                     write_buf[i] = '\0';
-                }
 
                 read_buf[i] = '\0';
             }
         }
     }
 
-    if ( show_progress ) { /* cp == 4 */
+    if(show_progress) /* cp == 4 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)(pass));
-    }
 
     /* now make several attempts to queue an asynchronous write with invalid input 
      * of some sort or another.  All such calls should be rejected.
      */
 
     /* try to queue a write with a NULL file */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_write(NULL, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x000, 
-                                   write_size, (void *)(write_buf), &write_ctlblk_ptr);
+            result = H5FDaio_write(NULL, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x000, write_size, (void *)(write_buf), &write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_write() succeeded with NULL file.";
-
-	} else if ( write_ctlblk_ptr != NULL ) {
-
+	} else if(write_ctlblk_ptr != NULL) {
 	    pass = FALSE;
             failure_mssg = "write_ctlblk_ptr != NULL after failed call to H5FDaio_write(0)";
         }
     }
 
-    if ( show_progress ) { /* cp == 5 */
+    if(show_progress) /* cp == 5 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
-
 
     /* try to queue a write with an invalid memory type */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_write(file, H5FD_MEM_NTYPES, H5P_DEFAULT, (haddr_t)0x000, 
-                                   write_size, (void *)(write_buf), &write_ctlblk_ptr);
+            result = H5FDaio_write(file, H5FD_MEM_NTYPES, H5P_DEFAULT, (haddr_t)0x000, write_size, (void *)(write_buf), &write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_write() succeeded with invalid memory type.";
-
 	} else if ( write_ctlblk_ptr != NULL ) {
-
 	    pass = FALSE;
             failure_mssg = "write_ctlblk_ptr != NULL after failed call to H5FDaio_write(1)";
         }
     }
 
-    if ( show_progress ) { /* cp == 6 */
+    if(show_progress) /* cp == 6 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
-
 
     /* try to queue a write with an invalid dxpl -- do this by passing in a fapl ID 
      * instead.
      */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, fapl_id, (haddr_t)0x000, 
-                                   write_size, (void *)(write_buf), &write_ctlblk_ptr);
+            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, fapl_id, (haddr_t)0x000, write_size, (void *)(write_buf), &write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_write() succeeded with invalid dxpl.";
-
-	} else if ( write_ctlblk_ptr != NULL ) {
-
+	} else if(write_ctlblk_ptr != NULL) {
 	    pass = FALSE;
             failure_mssg = "write_ctlblk_ptr != NULL after failed call to H5FDaio_write(2)";
         }
     }
 
-    if ( show_progress ) { /* cp == 7 */
+    if(show_progress) /* cp == 7 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a write with an invalid address */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, HADDR_UNDEF, 
-                                   write_size, (void *)(write_buf), &write_ctlblk_ptr);
+            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, HADDR_UNDEF, write_size, (void *)(write_buf), &write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_write() succeeded with invalid address.";
-
-	} else if ( write_ctlblk_ptr != NULL ) {
-
+	} else if(write_ctlblk_ptr != NULL) {
 	    pass = FALSE;
             failure_mssg = "write_ctlblk_ptr != NULL after failed call to H5FDaio_write(3)";
         }
     }
 
-    if ( show_progress ) { /* cp == 8 */
+    if(show_progress) /* cp == 8 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a write with an address beyond the eoa */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, maxaddr + 1, 
-                                   write_size, (void *)(write_buf), &write_ctlblk_ptr);
+            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, maxaddr + 1, write_size, (void *)(write_buf), &write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_write() succeeded with address beyond eoa.";
-
 	} else if ( write_ctlblk_ptr != NULL ) {
-
 	    pass = FALSE;
             failure_mssg = "write_ctlblk_ptr != NULL after failed call to H5FDaio_write(4)";
         }
     }
 
-    if ( show_progress ) { /* cp == 9 */
+    if(show_progress) /* cp == 9 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a write with zero size */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, 
-                                   (size_t)0, (void *)(write_buf), &write_ctlblk_ptr);
+            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, (size_t)0, (void *)(write_buf), &write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_write() succeeded with zero size.";
-
-	} else if ( write_ctlblk_ptr != NULL ) {
-
+	} else if(write_ctlblk_ptr != NULL) {
 	    pass = FALSE;
             failure_mssg = "write_ctlblk_ptr != NULL after failed call to H5FDaio_write(5)";
         }
     }
 
-    if ( show_progress ) { /* cp == 10 */
+    if(show_progress) /* cp == 10 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a write with address + size greater than eoa */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, 
-                                   maxaddr - (write_size / 2), write_size, 
-                                   (void *)(write_buf), &write_ctlblk_ptr);
+            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, maxaddr - (write_size / 2), write_size, (void *)(write_buf), &write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_write() succeeded with addr + size > eoa.";
-
-	} else if ( write_ctlblk_ptr != NULL ) {
-
+	} else if (write_ctlblk_ptr != NULL) {
 	    pass = FALSE;
             failure_mssg = "write_ctlblk_ptr != NULL after failed call to H5FDaio_write(6)";
         }
@@ -3406,99 +2638,75 @@ generic_aio_input_error_tests(const char * test_banner,
 
 
     /* try to queue a write with a NULL buffer pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, 
-                                   write_size, (void *)(NULL), &write_ctlblk_ptr);
+            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, write_size, (void *)(NULL), &write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_write() succeeded with NULL buffer pointer.";
-
-	} else if ( write_ctlblk_ptr != NULL ) {
-
+	} else if(write_ctlblk_ptr != NULL) {
 	    pass = FALSE;
             failure_mssg = "write_ctlblk_ptr != NULL after failed call to H5FDaio_write(7)";
         }
     }
 
-    if ( show_progress ) { /* cp == 12 */
+    if(show_progress) /* cp == 12 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a write with a NULL control block pointer pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, 
-                                   write_size, (void *)(write_buf), NULL);
+            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, write_size, (void *)(write_buf), NULL);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_write() succeeded with NULL ctlblk_ptr_ptr.";
-
-	} else if ( write_ctlblk_ptr != NULL ) {
-
+	} else if(write_ctlblk_ptr != NULL) {
 	    pass = FALSE;
             failure_mssg = "write_ctlblk_ptr != NULL after failed call to H5FDaio_write(8)";
         }
     }
 
-    if ( show_progress ) { /* cp == 13 */
+    if(show_progress) /* cp == 13 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a write with *ctlblk_ptr_ptr != NULL */
-    if ( pass ) {
-
+    if(pass) {
         write_ctlblk_ptr = (void *)read_buf;
 
         H5E_BEGIN_TRY {
-            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, 
-                                   write_size, (void *)(write_buf), &write_ctlblk_ptr);
+            result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, write_size, (void *)(write_buf), &write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_write() succeeded with *ctlblk_ptr_ptr != NULL.";
-
         }
 
         write_ctlblk_ptr = NULL;
     }
 
-    if ( show_progress ) { /* cp == 14 */
+    if(show_progress) /* cp == 14 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* now go ahead and queue the write successfully, as we will need an operation
      * in progress to test H5FDaio_test() and H5FDaio_wait().
      */
-    if ( pass ) {
-
-        result = H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, 
-                               write_size, (void *)(write_buf), &write_ctlblk_ptr);
-
-        if ( ( result < 0 ) || ( write_ctlblk_ptr == NULL ) ) {
-
+    if(pass) {
+        if((H5FDaio_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, write_size, (void *)(write_buf), &write_ctlblk_ptr) < 0) || (write_ctlblk_ptr == NULL)) {
             pass = FALSE;
             failure_mssg = "valid call to H5FDaio_write() failed.";
         }
     }
 
-    if ( show_progress ) { /* cp == 15 */
+    if(show_progress) /* cp == 15 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
-
 
 
     /* Make several calls to H5FDaio_test() with invalid input of some sort.
@@ -3506,79 +2714,67 @@ generic_aio_input_error_tests(const char * test_banner,
      */
 
     /* try to test the status of the write using a NULL file pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_test(NULL, &done, write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_test() succeeded with NULL file.";
         }
     }
 
-    if ( show_progress ) { /* cp == 16 */
+    if(show_progress) /* cp == 16 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to test the status of the write using a NULL done_ptr */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_test(file, NULL, write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_test() succeeded with NULL done pointer.";
         }
     }
 
-    if ( show_progress ) { /* cp == 17 */
+    if(show_progress) /* cp == 17 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to test the status of the write using a NULL control block pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_test(file, &done, NULL);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_test() succeeded with NULL ctlblk_ptr.";
         }
     }
 
-    if ( show_progress ) { /* cp == 18 */
+    if(show_progress) /* cp == 18 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to test the status of the write using an invalid control block pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_test(file, &done, (void *)read_buf);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_test() succeeded with invalid ctlblk_ptr.";
         }
     }
 
-    if ( show_progress ) { /* cp == 19 */
+    if(show_progress) /* cp == 19 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* Now make several calls to H5FDaio_wait() with invalid input of some sort.
@@ -3586,80 +2782,64 @@ generic_aio_input_error_tests(const char * test_banner,
      */
 
     /* try to do a wait with a NULL file pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_wait(NULL, write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_wait() succeeded with NULL file.";
         }
     }
 
-    if ( show_progress ) { /* cp == 20 */
+    if(show_progress) /* cp == 20 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to do a wait with a NULL control block pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_wait(file, NULL);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_wait() succeeded with NULL ctlblk_ptr.";
         }
     }
 
-    if ( show_progress ) { /* cp == 21 */
+    if(show_progress) /* cp == 21 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to do a wait with an invalid control block pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_wait(file, (void *)read_buf);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_wait() succeeded with invalid ctlblk_ptr.";
         }
     }
 
-    if ( show_progress ) { /* cp == 22 */
+    if(show_progress) /* cp == 22 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* finally, do a valid call to H5FDaio_wait() to ensure that the write has
      * completed, as we will need a completed write for our tests of H5FDaio_finish().
      */
-    if ( pass ) {
-
-        result = H5FDaio_wait(file, write_ctlblk_ptr);
-
-        if ( result < 0 ) {
-
+    if(pass)
+        if(H5FDaio_wait(file, write_ctlblk_ptr) < 0) {
             pass = FALSE;
             failure_mssg = "valid call H5FDaio_wait() failed.";
         }
-    }
 
-    if ( show_progress ) { /* cp == 23 */
+    if(show_progress) /* cp == 23 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
-
 
 
 
@@ -3675,71 +2855,60 @@ generic_aio_input_error_tests(const char * test_banner,
      */
 
     /* try to finish the write with a NULL file pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_finish(NULL, &error_num, write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_finish() succeeded with NULL file.";
         }
     }
 
-    if ( show_progress ) { /* cp == 24 */
+    if(show_progress) /* cp == 24 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to finish the write with a NULL errno_ptr */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_finish(file, NULL, write_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_finish() succeeded with NULL errno_ptr.";
         }
     }
 
-    if ( show_progress ) { /* cp == 25 */
+    if(show_progress) /* cp == 25 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to finish the write with a NULL control block pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_finish(file, &error_num, NULL);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_finish() succeeded with NULL ctlblk_ptr.";
         }
     }
 
-    if ( show_progress ) { /* cp == 26 */
+    if(show_progress) /* cp == 26 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to finish the write with an invalid control block pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_finish(file, &error_num, (void *)read_buf);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_finish() succeeded with an invalid ctlblk_ptr.";
         }
@@ -3751,27 +2920,18 @@ generic_aio_input_error_tests(const char * test_banner,
 
 
     /* finally, finish the write properly */
-    if ( pass ) {
-
-        result = H5FDaio_finish(file, &error_num, write_ctlblk_ptr);
-
-        if ( result < 0 ) {
-
+    if(pass) {
+        if(H5FDaio_finish(file, &error_num, write_ctlblk_ptr) < 0) {
             pass = FALSE;
             failure_mssg = "Valid call to H5FDaio_finish() failed for write.";
-
-        } else if ( error_num != 0 ) {
-
+        } else if(error_num != 0) {
             pass = FALSE;
             failure_mssg = "AIO write failed.";
-
         }
     }
 
-    if ( show_progress ) { /* cp == 28 */
+    if(show_progress) /* cp == 28 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
-
 
 
     /* Next, make several attempts to queue an asynchonous fsync with invalid input
@@ -3779,62 +2939,54 @@ generic_aio_input_error_tests(const char * test_banner,
      */
 
     /* try to queue an AIO fsync with a NULL file pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_fsync(NULL, &fsync_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_fsync() succeeded with NULL file.";
         }
     }
 
-    if ( show_progress ) { /* cp == 29 */
+    if(show_progress) { /* cp == 29 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
     }
 
 
     /* try to queue an AIO fsync with a NULL control block pointer pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_fsync(file, NULL);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
-
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_fsync() succeeded with NULL ctlblk_ptr_ptr.";
         }
     }
 
-    if ( show_progress ) { /* cp == 30 */
+    if(show_progress) /* cp == 30 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue an AIO fsync with *ctlblk_ptr_ptr != NULL */
-    if ( pass ) {
-
+    if(pass) {
         fsync_ctlblk_ptr = (void *)read_buf;
 
         H5E_BEGIN_TRY {
             result = H5FDaio_fsync(NULL, &fsync_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_fsync() succeeded with *ctlblk_ptr_ptr != NULL.";
         }
     }
 
-    if ( show_progress ) { /* cp == 31 */
+    if(show_progress) /* cp == 31 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
 
@@ -3843,45 +2995,35 @@ generic_aio_input_error_tests(const char * test_banner,
      */
 
     /* try to queue a read with a NULL file */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_read(NULL, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x000, 
-                                  write_size, (void *)(read_buf), &read_ctlblk_ptr);
+            result = H5FDaio_read(NULL, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x000, write_size, (void *)(read_buf), &read_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_read() succeeded with NULL file.";
-
-        } else if ( read_ctlblk_ptr != NULL ) {
-
+        } else if(read_ctlblk_ptr != NULL) {
             pass = FALSE;
             failure_mssg = "read_ctlblk_ptr != NULL after failed call to H5FDaio_read(0)";
         }
     }
 
-    if ( show_progress ) { /* cp == 32 */
+    if(show_progress) /* cp == 32 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a read with an invalid memory type */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_read(file, H5FD_MEM_NTYPES, H5P_DEFAULT, (haddr_t)0x000,
                                   write_size, (void *)(read_buf), &read_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_read() succeeded with invalid memory type.";
-
-        } else if ( read_ctlblk_ptr != NULL ) {
-
+        } else if(read_ctlblk_ptr != NULL) {
             pass = FALSE;
             failure_mssg = "read_ctlblk_ptr != NULL after failed call to H5FDaio_read(1)";
         }
@@ -3895,193 +3037,151 @@ generic_aio_input_error_tests(const char * test_banner,
     /* try to queue a read with an invalid dxpl -- do this by passing in a fapl ID
      * instead.
      */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_read(file, H5FD_MEM_DEFAULT, fapl_id, (haddr_t)0x000, 
-                                  write_size, (void *)(read_buf), &read_ctlblk_ptr);
+            result = H5FDaio_read(file, H5FD_MEM_DEFAULT, fapl_id, (haddr_t)0x000, write_size, (void *)(read_buf), &read_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_read() succeeded with invalid memory type.";
-
-        } else if ( read_ctlblk_ptr != NULL ) {
-
+        } else if(read_ctlblk_ptr != NULL) {
             pass = FALSE;
             failure_mssg = "read_ctlblk_ptr != NULL after failed call to H5FDaio_read(2)";
         }
     }
 
-    if ( show_progress ) { /* cp == 34 */
+    if(show_progress) /* cp == 34 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a read with an invalid address */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, HADDR_UNDEF, 
                                   write_size, (void *)(read_buf), &read_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_read() succeeded with invalid address.";
-
-        } else if ( read_ctlblk_ptr != NULL ) {
-
+        } else if(read_ctlblk_ptr != NULL) {
             pass = FALSE;
             failure_mssg = "read_ctlblk_ptr != NULL after failed call to H5FDaio_read(3)";
         }
     }
 
-    if ( show_progress ) { /* cp == 35 */
+    if(show_progress) /* cp == 35 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a read with an address beyond the eoa */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, maxaddr + 1, 
                                   write_size, (void *)(read_buf), &read_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_read() succeeded with address beyond eoa.";
-
         } else if ( read_ctlblk_ptr != NULL ) {
-
             pass = FALSE;
             failure_mssg = "read_ctlblk_ptr != NULL after failed call to H5FDaio_read(4)";
         }
     }
 
-    if ( show_progress ) { /* cp == 36 */
+    if(show_progress) /* cp == 36 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a read with zero size */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, 
-                                  (size_t)0, (void *)(read_buf), &read_ctlblk_ptr);
+            result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, (size_t)0, (void *)(read_buf), &read_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_read() succeeded with zero size.";
-
         } else if ( read_ctlblk_ptr != NULL ) {
-
             pass = FALSE;
             failure_mssg = "read_ctlblk_ptr != NULL after failed call to H5FDaio_read(5)";
         }
     }
 
-    if ( show_progress ) { /* cp == 37 */
+    if(show_progress) /* cp == 37 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a read with address + size greater than eoa */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, 
-                                  maxaddr - (write_size / 2),  write_size,
-                                  (void *)(read_buf), &read_ctlblk_ptr);
+            result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, maxaddr - (write_size / 2),  write_size, (void *)(read_buf), &read_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_read() succeeded with addr + size > eoa.";
-
-        } else if ( read_ctlblk_ptr != NULL ) {
-
+        } else if(read_ctlblk_ptr != NULL) {
             pass = FALSE;
             failure_mssg = "read_ctlblk_ptr != NULL after failed call to H5FDaio_read(6)";
         }
     }
 
-    if ( show_progress ) { /* cp == 38 */
+    if(show_progress) /* cp == 38 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a read with a NULL buffer pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000,
                                   write_size, (void *)(NULL), &read_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_read() succeeded with NULL buffer pointer.";
-
-        } else if ( read_ctlblk_ptr != NULL ) {
-
+        } else if(read_ctlblk_ptr != NULL) {
             pass = FALSE;
             failure_mssg = "read_ctlblk_ptr != NULL after failed call to H5FDaio_read(7)";
         }
     }
 
-    if ( show_progress ) { /* cp == 39 */
+    if(show_progress) { /* cp == 39 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
     }
 
 
     /* try to queue a read with a NULL control block pointer pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
-            result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000,
-                                  write_size, (void *)(read_buf), NULL);
+            result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, write_size, (void *)(read_buf), NULL);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_read() succeeded with NULL ctlblk_ptr_ptr.";
-
-        } else if ( read_ctlblk_ptr != NULL ) {
-
+        } else if(read_ctlblk_ptr != NULL) {
             pass = FALSE;
             failure_mssg = "read_ctlblk_ptr != NULL after failed call to H5FDaio_read(8)";
         }
     }
 
-    if ( show_progress ) { /* cp == 40 */
+    if(show_progress) /* cp == 40 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to queue a read with *ctlblk_ptr_ptr != NULL */
-    if ( pass ) {
-
+    if(pass) {
         read_ctlblk_ptr = (void *)read_buf;
 
         H5E_BEGIN_TRY {
-            result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000,
-                                  write_size, (void *)(read_buf), &read_ctlblk_ptr);
+            result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, write_size, (void *)(read_buf), &read_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_read() succeeded with *ctlblk_ptr_ptr != NULL.";
         }
@@ -4089,151 +3189,112 @@ generic_aio_input_error_tests(const char * test_banner,
         read_ctlblk_ptr = NULL;
     }
 
-    if ( show_progress ) { /* cp == 41 */
+    if(show_progress) /* cp == 41 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* go ahead and queue the read successfully, as we will need an operation
      * (possibly) in progress to test H5FDaio_cancel()
      */
-    if ( pass ) {
-
-        result = H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000,
-                              write_size, (void *)(read_buf), &read_ctlblk_ptr);
-
-        if ( ( result < 0 ) || ( read_ctlblk_ptr == NULL ) ) {
-
+    if(pass) {
+        if((H5FDaio_read(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0x0000, write_size, (void *)(read_buf), &read_ctlblk_ptr) < 0) || (read_ctlblk_ptr == NULL)) {
             pass = FALSE;
             failure_mssg = "valid call to H5FDaio_read() failed.";
         }
     }
 
-    if ( show_progress ) { /* cp == 42 */
+    if(show_progress) /* cp == 42 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* Now, make several calls to H5FDaio_cancel() with invalid input of some sort. */
 
     /* try to cancel the read with a NULL file pointer */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_cancel(NULL, read_ctlblk_ptr);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_cancel() succeeded with NULL file.";
-
         }
     }
 
-    if ( show_progress ) { /* cp == 43 */
+    if(show_progress) /* cp == 43 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to cancel the read with a NULL control block ptr */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_cancel(file, NULL);
         } H5E_END_TRY;
 
-        if ( result >= 0 ) {
-
+        if(result >= 0) {
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_cancel() succeeded with NULL ctlblk_ptr.";
-
         }
     }
 
-    if ( show_progress ) { /* cp == 44 */
+    if(show_progress) /* cp == 44 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* try to cancel the read with an invalid control block ptr */
-    if ( pass ) {
-
+    if(pass) {
         H5E_BEGIN_TRY {
             result = H5FDaio_cancel(file, (void *)write_buf);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
-
             pass = FALSE;
             failure_mssg = "Call to H5FDaio_cancel() succeeded with invalid ctlblk_ptr.";
-
         }
     }
 
-    if ( show_progress ) { /* cp == 45 */
+    if(show_progress) /* cp == 45 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
     /* finally, try to cancel the read with valid input -- should succeed */
-    if ( pass ) {
-
-        result = H5FDaio_cancel(file, read_ctlblk_ptr);
-
-        if ( result < 0 ) {
-
+    if(pass) {
+        if(H5FDaio_cancel(file, read_ctlblk_ptr) < 0) {
             pass = FALSE;
             failure_mssg = "Valid call to H5FDaio_cancel() failed.";
-
         }
     }
 
-    if ( show_progress ) { /* cp == 46 */
+    if(show_progress) /* cp == 46 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
 
-    if ( file != NULL ) {
-
-        result = H5FDclose(file);
-
-        if ( result < 0 ) {
-
+    if(file != NULL) {
+        if(H5FDclose(file) < 0) {
             pass = FALSE;
             failure_mssg = "H5FDclose() failed.";
-
-        } else if ( h5_cleanup(FILENAME, fapl_id) == 0 ) {
-
+        } else if (h5_cleanup(FILENAME, fapl_id) == 0) {
             pass = FALSE;
             failure_mssg = "h5_cleanup() failed.\n";
         }
     }
 
-    if ( show_progress ) { /* cp == 47 */
+    if(show_progress) /* cp == 47 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, (int)pass);
-    }
 
-    if ( pass ) { 
-
-	PASSED(); 
-
-    } else { 
-
+    if(pass)
+	PASSED()
+    else { 
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 	H5_FAILED(); 
         ret_val = -1;
     }
 
-    if ( verbose ) {
-
-        HDfprintf(stdout, "exiting generic_aio_input_error_tests() -- ret_val == %d.\n",
-                  ret_val);
-    }
+    if(verbose)
+        HDfprintf(stdout, "exiting generic_aio_input_error_tests() -- ret_val == %d.\n", ret_val);
 
     return(ret_val);
-
 } /* generic_aio_input_error_tests() */
 
 
@@ -4261,25 +3322,21 @@ generic_aio_input_error_tests(const char * test_banner,
 #define TYPE_SLICE ((haddr_t)0x24000000LL)
 
 static int
-multi_file_driver_aio_test(const char * test_banner, 
-                           const int file_name_num,
-                           const int express_test)
+multi_file_driver_aio_test(const char * test_banner, const int file_name_num,
+    const int express_test)
 {
     const char * fcn_name = "multi_file_driver_aio_test()";
     const char * memb_name[H5FD_MEM_NTYPES];
-    const char * (type_names[H5FD_MEM_NTYPES]) =
-        {
-            "H5FD_MEM_DEFAULT",
-            "H5FD_MEM_SUPER",
-            "H5FD_MEM_BTREE",
-            "H5FD_MEM_DRAW",
-            "H5FD_MEM_GHEAP",
-            "H5FD_MEM_LHEAP",
-            "H5FD_MEM_OHDR"
-        };
+    const char * (type_names[H5FD_MEM_NTYPES]) = { "H5FD_MEM_DEFAULT",
+                                                   "H5FD_MEM_SUPER",
+                                                   "H5FD_MEM_BTREE",
+                                                   "H5FD_MEM_DRAW",
+                                                   "H5FD_MEM_GHEAP",
+                                                   "H5FD_MEM_LHEAP",
+                                                   "H5FD_MEM_OHDR"
+                                                 };
     const char * failure_mssg = NULL;
-    const char * tags[] = {
-		            "1 KB write",
+    const char * tags[] = { "1 KB write",
 		            "1 KB write",
 		            "1 KB write",
 		            "1 KB write",
@@ -4371,8 +3428,7 @@ multi_file_driver_aio_test(const char * test_banner,
     int sub_tests_skipped = 0;
     hid_t       fapl_id;
     hid_t       memb_fapl[H5FD_MEM_NTYPES];
-    H5FD_mem_t types[] = { 
-			   H5FD_MEM_SUPER,
+    H5FD_mem_t types[] = { H5FD_MEM_SUPER,
 			   H5FD_MEM_BTREE,
                            H5FD_MEM_DRAW,
                            H5FD_MEM_GHEAP,
@@ -4443,9 +3499,7 @@ multi_file_driver_aio_test(const char * test_banner,
                            H5FD_MEM_OHDR,
                          };
     size_t write_size;
-    size_t lengths[] =  
-        {  
-                           1024, 
+    size_t lengths[] =  {  1024, 
                            1024, 
                            1024, 
                            1024, 
@@ -4515,13 +3569,11 @@ multi_file_driver_aio_test(const char * test_banner,
                             24,
                             24,
         };
-    herr_t result;
     haddr_t eoa;
     haddr_t max_addr;
     haddr_t memb_addr[H5FD_MEM_NTYPES];
     haddr_t offset;
-    haddr_t offsets[] = {
-                          (haddr_t)(0), 
+    haddr_t offsets[] = { (haddr_t)(0), 
                           (haddr_t)(0 + (1 * TYPE_SLICE)), 
                           (haddr_t)(0 + (2 * TYPE_SLICE)), 
                           (haddr_t)(0 + (3 * TYPE_SLICE)), 
@@ -4596,25 +3648,17 @@ multi_file_driver_aio_test(const char * test_banner,
     H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];
     H5FD_t * file;
 
-    if ( verbose ) {
-
-        HDfprintf(stdout, 
-                  "entering multi_file_driver_aio_test(\"%s\", %d(\"%s\"))\n",
-                  test_banner, file_name_num, FILENAME[file_name_num]);
-    }
+    if(verbose)
+        HDfprintf(stdout, "entering multi_file_driver_aio_test(\"%s\", %d(\"%s\"))\n", test_banner, file_name_num, FILENAME[file_name_num]);
 
     TESTING(test_banner);
 
-    if ( show_progress ) { /* cp == 0 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- setting up fapl.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 0 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- setting up fapl.\n", fcn_name, cp++, (int)pass);
 
     /* setup the fapl -- this is somewhat involved fot the multi file driver */
-    if ( pass ) {
-
-	for ( mt = 0; mt < H5FD_MEM_NTYPES; mt++ ) {
-
+    if(pass) {
+	for(mt = 0; mt < H5FD_MEM_NTYPES; mt++) {
             memb_addr[mt] = HADDR_UNDEF;
             memb_fapl[mt] = H5P_DEFAULT;
             memb_map[mt]  = H5FD_MEM_DRAW;
@@ -4655,91 +3699,52 @@ multi_file_driver_aio_test(const char * test_banner,
 
         fapl_id = h5_fileaccess();
 
-        if ( H5Pset_fapl_multi(fapl_id, memb_map, memb_fapl, memb_name,
-                               memb_addr, FALSE) < 0 ) {
-
+        if(H5Pset_fapl_multi(fapl_id, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0 ) {
             pass = FALSE;
             failure_mssg = "H5Pset_fapl_multi() failed.";
-
         }
     }
  
 
-    if ( show_progress ) { /* cp == 1 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- fixing name.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 1 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- fixing name.\n", fcn_name, cp++, (int)pass);
 
 
     /* setup the file name */
-    if ( pass ) {
-
-        if ( NULL == h5_fixname(FILENAME[file_name_num], fapl_id, 
-                                file_name, sizeof(file_name)) ) {
-
+    if(pass)
+        if(NULL == h5_fixname(FILENAME[file_name_num], fapl_id, file_name, sizeof(file_name))) {
             pass = FALSE;
             failure_mssg = "h5_fixname() failed.";
         }
-    }
 
-    if ( show_progress ) { /* cp == 2 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- opening file.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 2 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- opening file.\n", fcn_name, cp++, (int)pass);
 
     /* create the file */
-    if ( pass ) {
-
-        file = H5FDopen(file_name, (H5F_ACC_RDWR | H5F_ACC_CREAT), 
-                        fapl_id, max_addr);
-
-        if ( file == NULL ) {
-
+    if(pass)
+        if(NULL == (file = H5FDopen(file_name, (H5F_ACC_RDWR | H5F_ACC_CREAT), fapl_id, max_addr))) {
             pass = FALSE;
             failure_mssg = "H5FDopen() failed.";
         }
-    }
 
-    if ( show_progress ) { /* cp == 3 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- setting eoa.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 3 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- setting eoa.\n", fcn_name, cp++, (int)pass);
 
     /* set the EOA */
-    if ( verbose ) {
-
-        for ( mt = H5FD_MEM_SUPER; mt <= H5FD_MEM_OHDR; mt++ ) {
-
-            eoa = H5FDget_eoa(file, mt);
-
-            if ( eoa == HADDR_UNDEF ) {
-
-                HDfprintf(stdout, "%s: H5FDget_eoa(file, %s) failed.\n",
-                          fcn_name, type_names[(int)mt]);
-
-            } else {
-
-                HDfprintf(stdout, "%s: H5FDget_eoa(file, %s) returned 0x%llx.\n",
-                          fcn_name, type_names[(int)mt], (unsigned long long)eoa);
-
-            }
+    if(verbose) 
+        for(mt = H5FD_MEM_SUPER; mt <= H5FD_MEM_OHDR; mt++) {
+            if(HADDR_UNDEF == (eoa = H5FDget_eoa(file, mt)))
+                HDfprintf(stdout, "%s: H5FDget_eoa(file, %s) failed.\n", fcn_name, type_names[(int)mt]);
+            else
+                HDfprintf(stdout, "%s: H5FDget_eoa(file, %s) returned 0x%llx.\n", fcn_name, type_names[(int)mt], (unsigned long long)eoa);
         }
-    }
 
     mt = H5FD_MEM_SUPER;
-    while ( ( pass ) && ( mt <= H5FD_MEM_OHDR ) ) {
+    while((pass) && (mt <= H5FD_MEM_OHDR)) {
+        if(verbose)
+            HDfprintf(stdout, "calling H5FDset_eoa(file, %s, (%d * TYPE_SLICE) - 1).\n", type_names[(int)mt], (int)(mt));
 
-        if ( verbose ) {
-
-            HDfprintf(stdout,
-                      "calling H5FDset_eoa(file, %s, (%d * TYPE_SLICE) - 1).\n",
-                      type_names[(int)mt], (int)(mt));
-        }
-
-        result = H5FDset_eoa(file, mt, (((haddr_t)(mt)) * TYPE_SLICE) - 1);
-
-        if ( result < 0 ) {
-
+        if(H5FDset_eoa(file, mt, (((haddr_t)(mt)) * TYPE_SLICE) - 1) < 0) {
             pass = FALSE;
             failure_mssg = "H5FDset_eoa() failed.";
         }
@@ -4747,30 +3752,16 @@ multi_file_driver_aio_test(const char * test_banner,
         mt++;
     }
 
-    if ( verbose ) {
-
-        for ( mt = H5FD_MEM_SUPER; mt <= H5FD_MEM_OHDR; mt++ ) {
-
-            eoa = H5FDget_eoa(file, mt);
-
-            if ( eoa == HADDR_UNDEF ) {
-
-                HDfprintf(stdout, "%s: H5FDget_eoa(file, %s) failed.\n",
-                          fcn_name, type_names[(int)mt]);
-
-            } else {
-
-                HDfprintf(stdout, "%s: H5FDget_eoa(file, %s) returned 0x%llx.\n",
-                          fcn_name, type_names[(int)mt], (unsigned long long)eoa);
-
-            }
+    if(verbose)
+        for(mt = H5FD_MEM_SUPER; mt <= H5FD_MEM_OHDR; mt++) {
+            if(HADDR_UNDEF == (eoa = H5FDget_eoa(file, mt)))
+                HDfprintf(stdout, "%s: H5FDget_eoa(file, %s) failed.\n", fcn_name, type_names[(int)mt]);
+            else
+                HDfprintf(stdout, "%s: H5FDget_eoa(file, %s) returned 0x%llx.\n", fcn_name, type_names[(int)mt], (unsigned long long)eoa);
         }
-    }
 
-    if ( show_progress ) { /* cp == 4 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 bytes - poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 4 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 bytes - poll.\n", fcn_name, cp++, (int)pass);
 
     /* first do some simple write, read back, and compare results tests with 
      * buffers of various sizes
@@ -4779,711 +3770,364 @@ multi_file_driver_aio_test(const char * test_banner,
     offset = (haddr_t)0;
     write_size = (size_t)64;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
-            HDassert( type_offset < ((haddr_t)i * TYPE_SLICE) );
+            HDassert(type_offset < ((haddr_t)i * TYPE_SLICE));
 
-	    aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "64 bytes -- test for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ FALSE,
-                                        &pass,
-                                        &failure_mssg);
+	    aio_single_write_read_check(file, (H5FD_mem_t)i, "64 bytes -- test for completion", type_offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 5 */
+    if(show_progress) /* cp == 5 */
         HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 bytes - wait.\n", 
                   fcn_name, cp++, (int)pass);
-    }
 
     offset += (haddr_t)write_size;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
-            HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
+            HDassert(type_offset < ((haddr_t)(i) * TYPE_SLICE));
 
-	    aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "64 bytes -- wait for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ TRUE,
-                                        &pass,
-                                        &failure_mssg);
+	    aio_single_write_read_check(file, (H5FD_mem_t)i, "64 bytes -- wait for completion", type_offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
         }
-    }
 
 
-    if ( show_progress ) { /* cp == 6 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 bytes - poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 6 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 bytes - poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)4;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
-            HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
+            HDassert(type_offset < ((haddr_t)(i) * TYPE_SLICE));
 
-	    aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "256 bytes -- test for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ FALSE,
-                                        &pass,
-                                        &failure_mssg);
+	    aio_single_write_read_check(file, (H5FD_mem_t)i, "256 bytes -- test for completion", type_offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 7 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 bytes - wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 7 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 bytes - wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++) {
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
-            HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
+            HDassert(type_offset < ((haddr_t)(i) * TYPE_SLICE));
 
-	    aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "256 bytes -- wait for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ TRUE,
-                                        &pass,
-                                        &failure_mssg);
+	    aio_single_write_read_check(file, (H5FD_mem_t)i, "256 bytes -- wait for completion", type_offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
         }
     }
 
 
-    if ( show_progress ) { /* cp == 8 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 KB - poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 8 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 KB - poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)4;
 
-    if ( verbose ) {
+    if(verbose) 
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++) 
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
-            HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
+            HDassert(type_offset < ((haddr_t)(i) * TYPE_SLICE));
 
-	    aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "1 KB -- test for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ FALSE,
-                                        &pass,
-                                        &failure_mssg);
+	    aio_single_write_read_check(file, (H5FD_mem_t)i, "1 KB -- test for completion", type_offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 9 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 KB - wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 9 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 KB - wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
-            HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
+            HDassert(type_offset < ((haddr_t)(i) * TYPE_SLICE));
 
-	    aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "1 KB -- wait for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ TRUE,
-                                        &pass,
-                                        &failure_mssg);
+	    aio_single_write_read_check(file, (H5FD_mem_t)i, "1 KB -- wait for completion", type_offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 10 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 4 KB - poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 10 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 4 KB - poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)4;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
-            HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
+            HDassert(type_offset < ((haddr_t)(i) * TYPE_SLICE));
 
-            aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "4 KB -- test for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ FALSE,
-                                        &pass,
-                                        &failure_mssg);
+            aio_single_write_read_check(file, (H5FD_mem_t)i, "4 KB -- test for completion", type_offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 11 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 4 KB - wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 11 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 4 KB - wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++) 
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
             HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
 
-            aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "4 KB -- wait for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ TRUE,
-                                        &pass,
-                                        &failure_mssg);
+            aio_single_write_read_check(file, (H5FD_mem_t)i, "4 KB -- wait for completion", type_offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
         }
-    }
 
 
-    if ( show_progress ) { /* cp == 12 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 KB - poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 12 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 KB - poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)16;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
             HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
 
-            aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "64 KB -- test for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ FALSE,
-                                        &pass,
-                                        &failure_mssg);
+            aio_single_write_read_check(file, (H5FD_mem_t)i, "64 KB -- test for completion", type_offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 13 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 KB - wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 13 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 64 KB - wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
             HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
 
-            aio_single_write_read_check(file,
-                                        (H5FD_mem_t)i,
-                                        "64 KB -- wait for completion",
-                                        type_offset,
-                                        write_size,
-                                        /* do_wait = */ TRUE,
-                                        &pass,
-                                        &failure_mssg);
+            aio_single_write_read_check(file, (H5FD_mem_t)i, "64 KB -- wait for completion", type_offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 14 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 MB - poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 14 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 MB - poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)16;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
             HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
 
-            if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-                 ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-    
+            if((( express_test > 0) && (write_size > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (write_size > EXPRESS_TEST_2_MAX_LENGTH)))
                 /* skip this test */
 		sub_tests_skipped++;
-
-            } else {
-
-                aio_single_write_read_check(file,
-                                            (H5FD_mem_t)i,
-                                            "1 MB -- test for completion",
-                                            type_offset,
-                                            write_size,
-                                            /* do_wait = */ FALSE,
-                                            &pass,
-                                            &failure_mssg);
-            }
+            else 
+                aio_single_write_read_check(file, (H5FD_mem_t)i, "1 MB -- test for completion", type_offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 15 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 MB wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 15 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 1 MB wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
             HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
 
-            if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-                 ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-    
+            if(((express_test > 0) && (write_size > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (write_size > EXPRESS_TEST_2_MAX_LENGTH)))
                 /* skip this test */
 		sub_tests_skipped++;
-
-            } else {
-
-                aio_single_write_read_check(file,
-                                            (H5FD_mem_t)i,
-                                            "1 MB -- wait for completion",
-                                            type_offset,
-                                            write_size,
-                                            /* do_wait = */ TRUE,
-                                            &pass,
-                                            &failure_mssg);
-            }
+            else
+                aio_single_write_read_check(file, (H5FD_mem_t)i, "1 MB -- wait for completion", type_offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 16 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 16 MB - poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 16 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 16 MB - poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)16;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
             HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
 
-            if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-                 ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-    
+            if(((express_test > 0) && (write_size > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (write_size > EXPRESS_TEST_2_MAX_LENGTH)))
                 /* skip this test */
 		sub_tests_skipped++;
-
-            } else {
-
-                aio_single_write_read_check(file,
-                                            (H5FD_mem_t)i,
-                                            "16 MB -- test for completion",
-                                            type_offset,
-                                            write_size,
-                                            /* do_wait = */ FALSE,
-                                            &pass,
-                                            &failure_mssg);
-            }
+            else
+                aio_single_write_read_check(file, (H5FD_mem_t)i, "16 MB -- test for completion", type_offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 17 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 16 MB - wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 17 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 16 MB - wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
-            HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
+            HDassert(type_offset < ((haddr_t)(i) * TYPE_SLICE));
 
-            if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-                 ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-    
+            if((( express_test > 0) && (write_size > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (write_size > EXPRESS_TEST_2_MAX_LENGTH)))
                 /* skip this test */
 		sub_tests_skipped++;
-
-            } else {
-
-                aio_single_write_read_check(file,
-                                            (H5FD_mem_t)i,
-                                            "16 MB -- wait for completion",
-                                            type_offset,
-                                            write_size,
-                                            /* do_wait = */ TRUE,
-                                            &pass,
-                                            &failure_mssg);
-            }
+            else
+                aio_single_write_read_check(file, (H5FD_mem_t)i, "16 MB -- wait for completion", type_offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 18 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 MB - poll.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 18 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 MB - poll.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
     write_size *= (size_t)16;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
-            HDassert( type_offset < ((haddr_t)(i) * TYPE_SLICE) );
+            HDassert(type_offset < ((haddr_t)(i) * TYPE_SLICE));
 
-            if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-                 ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-    
+            if(((express_test > 0) && (write_size > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (write_size > EXPRESS_TEST_2_MAX_LENGTH)))
                 /* skip this test */
 		sub_tests_skipped++;
-
-            } else {
-
-                aio_single_write_read_check(file,
-                                            (H5FD_mem_t)i,
-                                            "256 MB -- test for completion",
-                                            type_offset,
-                                            write_size,
-                                            /* do_wait = */ FALSE,
-                                            &pass,
-                                            &failure_mssg);
-            }
+            else
+                aio_single_write_read_check(file, (H5FD_mem_t)i, "256 MB -- test for completion", type_offset, write_size, /* do_wait = */ FALSE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 19 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 MB - wait.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 19 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- swrchk 256 MB - wait.\n", fcn_name, cp++, (int)pass);
 
     offset += (haddr_t)write_size;
 
-    if ( verbose ) {
+    if(verbose)
+        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n", fcn_name, (unsigned long long)offset, (unsigned long long)write_size, (unsigned long long)(offset + write_size));
 
-        HDfprintf(stdout, "%s: offset = 0x%llx, write_size = 0x%llx, eow = 0x%llx.\n",
-                  fcn_name,
-                  (unsigned long long)offset, (unsigned long long)write_size,
-                  (unsigned long long)(offset + write_size));
-    }
-
-    for ( i = 1; i < H5FD_MEM_NTYPES; i++ ) {
-
-        if ( pass ) {
-
+    for(i = 1; i < H5FD_MEM_NTYPES; i++)
+        if(pass) {
             type_offset = ((haddr_t)(i - 1) * TYPE_SLICE) + offset;
 
-	    if ( type_offset >= ((haddr_t)(i) * TYPE_SLICE) ) {
-
+	    if(type_offset >= ((haddr_t)(i) * TYPE_SLICE)) {
 		HDfprintf(stdout, "type_offset = 0x%llx.\n", type_offset);
-		HDfprintf(stdout, 
-                          "i = %d, TYPE_SLICE = 0x%llx, offset = 0x%llx.\n",
-			  i, (long long)TYPE_SLICE, (long long)offset);
-		HDfprintf(stdout, "((i + 1) * TYPE_SLICE) = 0x%llx.\n",
-                          (long long)((haddr_t)(i + 1) * TYPE_SLICE) );
+		HDfprintf(stdout, "i = %d, TYPE_SLICE = 0x%llx, offset = 0x%llx.\n", i, (long long)TYPE_SLICE, (long long)offset);
+		HDfprintf(stdout, "((i + 1) * TYPE_SLICE) = 0x%llx.\n", (long long)((haddr_t)(i + 1) * TYPE_SLICE) );
 	    }
 
-            HDassert( type_offset < ((haddr_t)(i + 1) * TYPE_SLICE) );
+            HDassert(type_offset < ((haddr_t)(i + 1) * TYPE_SLICE));
 
-            if ( ( ( express_test > 0 ) && ( write_size > EXPRESS_TEST_1_MAX_LENGTH ) ) ||
-                 ( ( express_test > 1 ) && ( write_size > EXPRESS_TEST_2_MAX_LENGTH ) ) ) {
-    
+            if(((express_test > 0) && (write_size > EXPRESS_TEST_1_MAX_LENGTH)) || ((express_test > 1) && (write_size > EXPRESS_TEST_2_MAX_LENGTH)))
                 /* skip this test */
 		sub_tests_skipped++;
-
-            } else {
-
-                aio_single_write_read_check(file,
-                                            (H5FD_mem_t)i,
-                                            "256 MB -- wait for completion",
-                                            type_offset,
-                                            write_size,
-                                            /* do_wait = */ TRUE,
-                                            &pass,
-                                            &failure_mssg);
-            }
+            else
+                aio_single_write_read_check(file, (H5FD_mem_t)i, "256 MB -- wait for completion", type_offset, write_size, /* do_wait = */ TRUE, &pass, &failure_mssg);
         }
-    }
 
-    if ( show_progress ) { /* cp == 20 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- mwsrchk.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 20 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- mwsrchk.\n", fcn_name, cp++, (int)pass);
 
-    aio_multi_write_sync_read_check(file,
-				    write_count,
-			            types,
-				    offsets,
-				    lengths,
-				    tags,
-                                    &pass,
-                                    &failure_mssg,
-                                    express_test,
-                                    &sub_tests_skipped);
+    aio_multi_write_sync_read_check(file, write_count, types, offsets, lengths, tags, &pass, &failure_mssg, express_test, &sub_tests_skipped);
 
-    if ( show_progress ) { /* cp == 21 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- wrfcchk.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 21 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- wrfcchk.\n", fcn_name, cp++, (int)pass);
 
-    aio_multi_read_write_fsync_cancel_check(file,
-				            op_count,
-                                            ops,
-			                    types,
-				            offsets,
-				            lengths,
-				            tags,
-                                            &pass, 
-                                            &failure_mssg,
-                                            express_test,
-                                            &sub_tests_skipped);
+    aio_multi_read_write_fsync_cancel_check(file, op_count, ops, types, offsets, lengths, tags, &pass, &failure_mssg, express_test, &sub_tests_skipped);
 
-    if ( show_progress ) { /* cp == 22 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- close file.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 22 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- close file.\n", fcn_name, cp++, (int)pass);
 
-    if ( file != NULL ) {
-
-        result = H5FDclose(file);
-
-        if ( result < 0 ) {
-
+    if(file != NULL) {
+        if(H5FDclose(file)< 0 ) {
             pass = FALSE;
             failure_mssg = "H5FDclose() failed.";
-
-        } else if ( h5_cleanup(FILENAME, fapl_id) == 0 ) {
-
+        } else if(h5_cleanup(FILENAME, fapl_id) == 0) {
             pass = FALSE;
             failure_mssg = "h5_cleanup() failed.\n";
-
         }
     }
 
-    if ( show_progress ) { /* cp == 22 */
-        HDfprintf(stdout, "%s: cp = %d, pass = %d -- done.\n", 
-                  fcn_name, cp++, (int)pass);
-    }
+    if(show_progress) /* cp == 22 */
+        HDfprintf(stdout, "%s: cp = %d, pass = %d -- done.\n", fcn_name, cp++, (int)pass);
 
-    if ( pass ) { 
-
-	PASSED(); 
-
-    } else { 
-
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
-                  fcn_name, failure_mssg);
+    if(pass)
+	PASSED() 
+    else { 
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", fcn_name, failure_mssg);
 	H5_FAILED(); 
         ret_val = -1;
     }
 
-    if ( sub_tests_skipped > 0 ) {
-
-        HDfprintf(stdout, "	%d sub test(s) skipped to expedite test.\n", 
-                  sub_tests_skipped);
-    }
+    if(sub_tests_skipped > 0)
+        HDfprintf(stdout, "	%d sub test(s) skipped to expedite test.\n", sub_tests_skipped);
 
 
-    if ( verbose ) {
-
-        HDfprintf(stdout, "exiting generic_aio_test() -- ret_val == %d.\n",
-                  ret_val);
-    }
+    if(verbose)
+        HDfprintf(stdout, "exiting generic_aio_test() -- ret_val == %d.\n", ret_val);
 
     return(ret_val);
-
 } /* multi_file_driver_aio_test() */
 
 #undef TYPE_SLICE
@@ -5508,7 +4152,6 @@ main(void)
     const char *memb_name[H5FD_MEM_NTYPES];
     int         express_test;
     int 	nerrors = 0;
-    int		result;
     hid_t 	fapl;
     hid_t 	memb_fapl[H5FD_MEM_NTYPES];
     haddr_t     memb_addr[H5FD_MEM_NTYPES];
@@ -5523,7 +4166,7 @@ main(void)
      */
     express_test = GetTestExpress();
 
-    printf("========================================\n");
+    printf("==========================================================\n");
     printf("Virtual file driver tests\n");
     printf("        express_test = %d\n", express_test);
 #ifdef H5_HAVE_AIO
@@ -5536,7 +4179,12 @@ main(void)
 #else /* H5_HAVE_POSIX_AIO */
     printf("        H5_HAVE_POSIX_AIO is undefined.\n");
 #endif /* H5_HAVE_POSIX_AIO */
-    printf("========================================\n");
+#ifdef H5_ENABLE_POSIX_AIO_ERROR_RECOVERY
+    printf("        H5_ENABLE_POSIX_AIO_ERROR_RECOVERY AIO is defined.\n");
+#else /* H5_ENABLE_POSIX_AIO_ERROR_RECOVERY */
+    printf("        H5_ENABLE_POSIX_AIO_ERROR_RECOVERY is undefined.\n");
+#endif /* H5_ENABLE_POSIX_AIO_ERROR_RECOVERY */
+    printf("==========================================================\n");
 
 #if 1
     nerrors += test_sec2() < 0      ? 1 : 0;
@@ -5554,123 +4202,66 @@ main(void)
 
     fapl = h5_fileaccess();
 
-    if ( H5Pset_fapl_sec2(fapl) < 0 ) {
-
+    if(H5Pset_fapl_sec2(fapl) < 0)
         nerrors++;
+    else 
+        nerrors += (generic_aio_test("AIO on SEC2 file driver", 6, fapl, (haddr_t)0x40000000, express_test, /* dump_stats = */ TRUE) < 0) ? 1 : 0;
 
-    } else {
 
-        result = generic_aio_test("AIO on SEC2 file driver", 6, fapl, 
-                                  (haddr_t)0x40000000, express_test,
-                                  /* dump_stats = */ TRUE);
-        nerrors += ( result < 0 ) ? 1 : 0;
-    }
-#if 1
     fapl = h5_fileaccess();
 
-    if ( H5Pset_fapl_sec2(fapl) < 0 ) {
-
+    if(H5Pset_fapl_sec2(fapl) < 0)
         nerrors++;
-
-    } else {
-
-
-        result = generic_aio_input_error_tests("AIO on SEC2 file driver error rejection", 
-                                               "AIO SEC2 error rejection",
-                                               12, fapl, FALSE);
-        nerrors += ( result < 0 ) ? 1 : 0;
-    }
-#endif
+    else
+        nerrors += (generic_aio_input_error_tests("AIO on SEC2 file driver error rejection", "AIO SEC2 error rejection", 12, fapl, FALSE) < 0) ? 1 : 0;
 #endif /* SEC2 test */
 
 #if 1 /* CORE test */
     fapl = h5_fileaccess();
 
-    if(H5Pset_fapl_core(fapl, (size_t)0x40000000, TRUE) < 0) {
-
+    if(H5Pset_fapl_core(fapl, (size_t)0x40000000, TRUE) < 0)
         nerrors++;
-
-    } else {
-
-        result = generic_aio_test("AIO on CORE file driver", 7, fapl, 
-                                   (haddr_t)0x40000000, express_test,
-                                   /* dump_stats = */ FALSE);
-        nerrors += ( result < 0 ) ? 1 : 0;
-    }
+    else
+        nerrors += (generic_aio_test("AIO on CORE file driver", 7, fapl, (haddr_t)0x40000000, express_test, /* dump_stats = */ FALSE) < 0) ? 1 : 0;
 
     fapl = h5_fileaccess();
 
-    if(H5Pset_fapl_core(fapl, (size_t)0x40000000, TRUE) < 0) {
-
+    if(H5Pset_fapl_core(fapl, (size_t)0x40000000, TRUE) < 0)
         nerrors++;
-
-    } else {
-
-        result = generic_aio_input_error_tests("AIO on CORE file driver error rejection", 
-                                               "AIO CORE error rejection",
-                                               13, fapl, FALSE);
-        nerrors += ( result < 0 ) ? 1 : 0;
-    }
+    else
+        nerrors += (generic_aio_input_error_tests("AIO on CORE file driver error rejection", "AIO CORE error rejection", 13, fapl, FALSE) < 0) ? 1 : 0;
 #endif
 
 #if 1 /* STDIO test */
     fapl = h5_fileaccess();
 
-    if(H5Pset_fapl_stdio(fapl) < 0) {
-
+    if(H5Pset_fapl_stdio(fapl) < 0)
         nerrors++;
-
-    } else {
-
-        result = generic_aio_test("AIO on STDIO file driver", 8, fapl, 
-                                  (haddr_t)0x40000000, express_test,
-                                  /* dump_stats = */ FALSE);
-        nerrors += ( result < 0 ) ? 1 : 0;
-    }
+    else
+        nerrors += (generic_aio_test("AIO on STDIO file driver", 8, fapl, (haddr_t)0x40000000, express_test, /* dump_stats = */ FALSE) < 0) ? 1 : 0;
 
     fapl = h5_fileaccess();
 
-    if(H5Pset_fapl_stdio(fapl) < 0) {
-
+    if(H5Pset_fapl_stdio(fapl) < 0)
         nerrors++;
-
-    } else {
-
-        result = generic_aio_input_error_tests("AIO on STDIO file driver error rejection", 
-                                               "AIO STDIO error rejection",
-                                               14, fapl, FALSE);
-        nerrors += ( result < 0 ) ? 1 : 0;
-    }
+    else
+        nerrors += (generic_aio_input_error_tests("AIO on STDIO file driver error rejection", "AIO STDIO error rejection", 14, fapl, FALSE) < 0 ) ? 1 : 0;
 #endif
 
 #if 1 /* FAMILY File test */
     fapl = h5_fileaccess();
 
-    if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE_AIO, H5P_DEFAULT) < 0) {
-
+    if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE_AIO, H5P_DEFAULT) < 0)
         nerrors++;
-
-    } else {
-
-        result = generic_aio_test("AIO on FAMILY file driver", 9, fapl, 
-                                  (haddr_t)0x40000000, express_test,
-                                  /* dump_stats = */ TRUE);
-        nerrors += ( result < 0 ) ? 1 : 0;
-    }
+    else
+        nerrors += (generic_aio_test("AIO on FAMILY file driver", 9, fapl, (haddr_t)0x40000000, express_test, /* dump_stats = */ TRUE) < 0) ? 1 : 0;
 
     fapl = h5_fileaccess();
 
-    if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE_AIO, H5P_DEFAULT) < 0) {
-
+    if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE_AIO, H5P_DEFAULT) < 0)
         nerrors++;
-
-    } else {
-
-        result = generic_aio_input_error_tests("AIO on FAMILY file driver error rejection", 
-                                               "AIO FAMILY error rejection",
-                                               15, fapl, FALSE);
-        nerrors += ( result < 0 ) ? 1 : 0;
-    }
+    else
+        nerrors += (generic_aio_input_error_tests("AIO on FAMILY file driver error rejection", "AIO FAMILY error rejection", 15, fapl, FALSE) < 0) ? 1 : 0;
 #endif
 
 #if 1 /* MULTI File test */
@@ -5684,8 +4275,7 @@ main(void)
      * else in a second file.
      */
 
-    for ( mt = 0; mt < H5FD_MEM_NTYPES; mt++ ) {
-
+    for(mt = 0; mt < H5FD_MEM_NTYPES; mt++) {
         memb_addr[mt] = HADDR_UNDEF;
         memb_fapl[mt] = H5P_DEFAULT;
         memb_map[mt]  = H5FD_MEM_SUPER;
@@ -5703,26 +4293,15 @@ main(void)
 
     fapl = h5_fileaccess();
 
-    if ( H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, 
-                           memb_addr, FALSE) < 0 ) {
-
+    if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
         nerrors++;
-
-    } else {
-
-        result = generic_aio_test("AIO on MULTI file driver", 10, fapl, 
-                                  (haddr_t)0x40000000, express_test,
-                                  /* dump_stats = */ FALSE);
-        nerrors += ( result < 0 ) ? 1 : 0;
+    else {
+        nerrors += (generic_aio_test("AIO on MULTI file driver", 10, fapl, (haddr_t)0x40000000, express_test, /* dump_stats = */ FALSE) < 0) ? 1 : 0;
     
-        result = multi_file_driver_aio_test(
-			    "AIO with varied mem types on MULTI file driver", 
-                            11, express_test);
-        nerrors += ( result < 0 ) ? 1 : 0;
+        nerrors += (multi_file_driver_aio_test( "AIO with varied mem types on MULTI file driver", 11, express_test) < 0) ? 1 : 0;
     }
 
-    for ( mt = 0; mt < H5FD_MEM_NTYPES; mt++ ) {
-
+    for(mt = 0; mt < H5FD_MEM_NTYPES; mt++) {
         memb_addr[mt] = HADDR_UNDEF;
         memb_fapl[mt] = H5P_DEFAULT;
         memb_map[mt]  = H5FD_MEM_SUPER;
@@ -5740,18 +4319,10 @@ main(void)
 
     fapl = h5_fileaccess();
 
-    if ( H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, 
-                           memb_addr, FALSE) < 0 ) {
-
+    if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
         nerrors++;
-
-    } else {
-
-        result = generic_aio_input_error_tests("AIO on MULTI file driver error rejection", 
-                                               "AIO MULTI error rejection",
-                                               15, fapl, FALSE);
-        nerrors += ( result < 0 ) ? 1 : 0;
-    }
+    else
+        nerrors += (generic_aio_input_error_tests("AIO on MULTI file driver error rejection", "AIO MULTI error rejection", 15, fapl, FALSE) < 0) ? 1 : 0;
 #endif
 
     if(nerrors) {
