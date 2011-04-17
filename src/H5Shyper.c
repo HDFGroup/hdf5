@@ -4191,16 +4191,24 @@ H5S_hyper_project_simple_higher(const H5S_t *base_space, H5S_t *new_space)
         H5S_hyper_span_t *new_span;     /* Temporary hyperslab span */
 
         /* Allocate a new span_info node */
-        if(NULL == (new_span_info = H5FL_MALLOC(H5S_hyper_span_info_t)))
+        if(NULL == (new_span_info = H5FL_MALLOC(H5S_hyper_span_info_t))) {
+            if(prev_span)
+                if(H5S_hyper_free_span(prev_span) < 0)
+                    HERROR(H5E_DATASPACE, H5E_CANTFREE, "can't free hyperslab span");
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate hyperslab span info")
+        } /* end if */
 
         /* Check for linking into higher span */
         if(prev_span)
             prev_span->down = new_span_info;
 
         /* Allocate a new node */
-        if(NULL == (new_span = H5S_hyper_new_span(0, 0, NULL, NULL)))
+        if(NULL == (new_span = H5S_hyper_new_span(0, 0, NULL, NULL))) {
+            HDassert(new_span_info);
+            if(!prev_span)
+                (void)H5FL_FREE(H5S_hyper_span_info_t, new_span_info);
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate hyperslab span")
+        } /* end if */
 
         /* Set the span_info information */
         new_span_info->count = 1;
@@ -4225,6 +4233,15 @@ H5S_hyper_project_simple_higher(const H5S_t *base_space, H5S_t *new_space)
     prev_span->down->count++;
 
 done:
+    if(ret_value < 0 && new_space->select.sel_info.hslab->span_lst) {
+        if(new_space->select.sel_info.hslab->span_lst->head)
+            if(H5S_hyper_free_span(
+                    new_space->select.sel_info.hslab->span_lst->head) < 0)
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't free hyperslab span")
+
+        new_space->select.sel_info.hslab->span_lst = H5FL_FREE(H5S_hyper_span_info_t, new_space->select.sel_info.hslab->span_lst);
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_hyper_project_simple_higher() */
 

@@ -169,7 +169,7 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /* Print relevant node info */
     HDfprintf(stream, "%*sNode Info: (max_nrec/split_nrec/merge_nrec)\n", indent, "");
     for(u = 0; u < (unsigned)(hdr->depth + 1); u++) {
-        sprintf(temp_str, "Depth %u:", u);
+        HDsnprintf(temp_str, sizeof(temp_str), "Depth %u:", u);
         HDfprintf(stream, "%*s%-*s (%u/%u/%u)\n", indent + 3, "", MAX(0, fwidth - 3),
             temp_str,
             hdr->node_info[u].max_nrec, hdr->node_info[u].split_nrec, hdr->node_info[u].merge_nrec);
@@ -281,7 +281,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /* Print all node pointers and records */
     for(u = 0; u < internal->nrec; u++) {
         /* Print node pointer */
-        sprintf(temp_str, "Node pointer #%u: (all/node/addr)", u);
+        HDsnprintf(temp_str, sizeof(temp_str), "Node pointer #%u: (all/node/addr)", u);
         HDfprintf(stream, "%*s%-*s (%Hu/%u/%a)\n", indent + 3, "", MAX(0, fwidth - 3),
                   temp_str,
                   internal->node_ptrs[u].all_nrec,
@@ -289,7 +289,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
                   internal->node_ptrs[u].addr);
 
         /* Print record */
-        sprintf(temp_str, "Record #%u:", u);
+        HDsnprintf(temp_str, sizeof(temp_str), "Record #%u:", u);
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                   temp_str);
         HDassert(H5B2_INT_NREC(internal, hdr, u));
@@ -298,7 +298,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     } /* end for */
 
     /* Print final node pointer */
-    sprintf(temp_str, "Node pointer #%u: (all/node/addr)", u);
+    HDsnprintf(temp_str, sizeof(temp_str), "Node pointer #%u: (all/node/addr)", u);
     HDfprintf(stream, "%*s%-*s (%Hu/%u/%a)\n", indent + 3, "", MAX(0, fwidth - 3),
               temp_str,
               internal->node_ptrs[u].all_nrec,
@@ -410,7 +410,7 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /* Print all node pointers and records */
     for(u = 0; u < leaf->nrec; u++) {
         /* Print record */
-        sprintf(temp_str, "Record #%u:", u);
+        HDsnprintf(temp_str, sizeof(temp_str), "Record #%u:", u);
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                   temp_str);
         HDassert(H5B2_LEAF_NREC(leaf, hdr, u));
