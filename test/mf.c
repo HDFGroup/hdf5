@@ -1174,7 +1174,8 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Remove section A from free-space */
     if(H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type],
-		    (hsize_t)TEST_BLOCK_SIZE30, (H5FS_section_info_t **)&node) < 0)
+            (hsize_t)TEST_BLOCK_SIZE30, (H5FS_section_info_t **)&node) < 0)
+	TEST_ERROR
 
     /* Free the free-space section node */
     if(H5MF_sect_simple_free((H5FS_section_info_t *)node) < 0)

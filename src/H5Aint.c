@@ -232,9 +232,12 @@ H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_index_t idx_type,
     /* Correct # of attributes in table */
     atable->nattrs = udata.curr_attr;
 
-    /* Sort attribute table in correct iteration order */
-    if(H5A_attr_sort_table(atable, idx_type, order) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSORT, FAIL, "error sorting attribute table")
+    /* Don't sort an empty table. */
+    if(atable->nattrs > 0) {
+        /* Sort attribute table in correct iteration order */
+        if(H5A_attr_sort_table(atable, idx_type, order) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTSORT, FAIL, "error sorting attribute table")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -893,7 +893,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
+H5G_get_objinfo_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_trav_goi_t *udata = (H5G_trav_goi_t *)_udata;   /* User data passed in */
@@ -902,7 +902,7 @@ H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t 
     FUNC_ENTER_NOAPI_NOINIT(H5G_get_objinfo_cb)
 
     /* Check if the name in this group resolved to a valid link */
-    if(lnk == NULL && obj_loc == NULL)
+    if(lnk == NULL || obj_loc == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "'%s' doesn't exist", name)
 
     /* Only modify user's buffer if it's available */
@@ -910,8 +910,7 @@ H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t 
         H5G_stat_t *statbuf = udata->statbuf;   /* Convenience pointer for statbuf */
 
         /* Common code to retrieve the file's fileno */
-        /* (Use the object location's file info, if it's available) */
-        if(H5F_get_fileno((obj_loc ? obj_loc : grp_loc)->oloc->file, &statbuf->fileno[0]) < 0)
+        if(H5F_get_fileno(obj_loc->oloc->file, &statbuf->fileno[0]) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno")
 
         /* Info for soft and UD links is gotten by H5L_get_info. If we have

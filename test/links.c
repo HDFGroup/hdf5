@@ -1627,7 +1627,7 @@ test_deprec(hid_t fapl, hbool_t new_format)
     hid_t file_id = -1;
     hid_t group1_id = -1;
     hid_t group2_id = -1;
-    H5G_stat_t	sb_hard1, sb_hard2, sb_soft1;
+    H5G_stat_t	sb_hard1, sb_hard2, sb_soft1, sb_soft2;
     H5G_obj_t obj_type;         /* Object type */
     hsize_t num_objs;           /* Number of objects in a group */
     char filename[1024];
@@ -1656,6 +1656,7 @@ test_deprec(hid_t fapl, hbool_t new_format)
     if(H5Glink(file_id, H5G_LINK_HARD, "group2", "group1/link_to_group2") < 0) FAIL_STACK_ERROR
     if(H5Glink2(file_id, "group1", H5G_LINK_HARD, group2_id, "link_to_group1") < 0) FAIL_STACK_ERROR
     if(H5Glink2(file_id, "link_to_group1", H5G_LINK_SOFT, H5G_SAME_LOC, "group2/soft_link_to_group1") < 0) FAIL_STACK_ERROR
+    if(H5Glink2(file_id, "dangle", H5G_LINK_SOFT, H5G_SAME_LOC, "group2/dangle_soft_link") < 0) FAIL_STACK_ERROR
 
     /* Test getting the names for objects */
     if(H5Gget_objname_by_idx(group1_id, (hsize_t)0, tmpstr, sizeof(tmpstr)) < 0) FAIL_STACK_ERROR
@@ -1706,6 +1707,15 @@ test_deprec(hid_t fapl, hbool_t new_format)
 
     if(H5Gget_linkval(group2_id, "soft_link_to_group1", sb_soft1.linklen, tmpstr) < 0) FAIL_STACK_ERROR
     if(HDstrcmp("link_to_group1", tmpstr)) TEST_ERROR
+
+
+    /* Test the dangling soft link */
+    if(H5Gget_objinfo(file_id, "/group2/dangle_soft_link", FALSE, &sb_soft2) < 0) FAIL_STACK_ERROR
+    if(sb_soft2.type != H5G_LINK) TEST_ERROR
+    if(sb_soft2.linklen != HDstrlen("dangle") + 1) TEST_ERROR
+
+    if(H5Gget_linkval(group2_id, "dangle_soft_link", sb_soft2.linklen, tmpstr) < 0) FAIL_STACK_ERROR
+    if(HDstrcmp("dangle", tmpstr)) TEST_ERROR
 
 
     /* Test H5Gmove and H5Gmove2 */
@@ -3538,7 +3548,7 @@ external_set_elink_fapl1(hid_t fapl, hbool_t new_format)
     HDmemset(memb_addr, 0, sizeof memb_addr);
     HDmemset(sv, 0, sizeof sv);
 
-    for(mt = 0; mt < H5FD_MEM_NTYPES; mt++) {
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
 	memb_map[mt] = H5FD_MEM_SUPER;
 	memb_fapl[mt] = H5P_DEFAULT;
     } /* end for */
@@ -9567,7 +9577,7 @@ link_filters(hid_t fapl, hbool_t new_format)
 
         /* Check that the file size is smaller with the filter */
         if((double)filesize_filtered
-                > (filesize_unfiltered * FILTER_FILESIZE_MAX_FRACTION))
+                > ((double)filesize_unfiltered * FILTER_FILESIZE_MAX_FRACTION))
             TEST_ERROR
 
         /* Close */
@@ -11135,9 +11145,9 @@ delete_by_idx(hid_t fapl)
     herr_t      ret;                    /* Generic return value */
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <= H5_INDEX_CRT_ORDER; H5_INC_ENUM(H5_index_t, idx_type)) {
         /* Loop over operating in different orders */
-        for(order = H5_ITER_INC; order <=H5_ITER_DEC; order++) {
+        for(order = H5_ITER_INC; order <=H5_ITER_DEC; H5_INC_ENUM(H5_iter_order_t, order)) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
@@ -11451,7 +11461,7 @@ delete_by_idx_old(hid_t fapl)
     herr_t      ret;                    /* Generic return value */
 
     /* Loop over operating in different orders */
-    for(order = H5_ITER_INC; order <=H5_ITER_DEC; order++) {
+    for(order = H5_ITER_INC; order <=H5_ITER_DEC; H5_INC_ENUM(H5_iter_order_t, order)) {
         /* Print test banner */
         if(order == H5_ITER_INC)
             TESTING("deleting links by index in increasing order in old-style group")
@@ -11974,9 +11984,9 @@ link_iterate(hid_t fapl)
     iter_info.visited = visited;
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <= H5_INDEX_CRT_ORDER; H5_INC_ENUM(H5_index_t, idx_type)) {
         /* Loop over operating in different orders */
-        for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
+        for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; H5_INC_ENUM(H5_iter_order_t, order)) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
@@ -12426,7 +12436,7 @@ link_iterate_old(hid_t fapl)
     iter_info.visited = visited;
 
     /* Loop over operating in different orders */
-    for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
+    for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; H5_INC_ENUM(H5_iter_order_t, order)) {
         /* Print appropriate test message */
         if(order == H5_ITER_INC) {
             TESTING("iterating over links by name index in increasing order in old-style group")
@@ -12662,9 +12672,9 @@ open_by_idx(hid_t fapl)
     if((mount_file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <= H5_INDEX_CRT_ORDER; H5_INC_ENUM(H5_index_t, idx_type)) {
         /* Loop over operating in different orders */
-        for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
+        for(order = H5_ITER_INC; order <= H5_ITER_NATIVE; H5_INC_ENUM(H5_iter_order_t, order)) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
@@ -12878,7 +12888,7 @@ open_by_idx_old(hid_t fapl)
     if((mount_file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Loop over operating in different orders */
-    for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
+    for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; H5_INC_ENUM(H5_iter_order_t, order)) {
         /* Print appropriate test message */
         if(order == H5_ITER_INC) {
             TESTING("open object by name index in increasing order in old-style group")
@@ -13098,9 +13108,9 @@ object_info(hid_t fapl)
     if((space_id = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <= H5_INDEX_CRT_ORDER; H5_INC_ENUM(H5_index_t, idx_type)) {
         /* Loop over operating in different orders */
-        for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
+        for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; H5_INC_ENUM(H5_iter_order_t, order)) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
@@ -13334,7 +13344,7 @@ object_info_old(hid_t fapl)
     if((space_id = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
 
     /* Loop over operating in different orders */
-    for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
+    for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; H5_INC_ENUM(H5_iter_order_t, order)) {
         /* Print appropriate test message */
         if(order == H5_ITER_INC) {
             TESTING("query object info by name index in increasing order in old-style group")
@@ -13487,9 +13497,9 @@ group_info(hid_t fapl)
     if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) TEST_ERROR
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <= H5_INDEX_CRT_ORDER; H5_INC_ENUM(H5_index_t, idx_type)) {
         /* Loop over operating in different orders */
-        for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
+        for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; H5_INC_ENUM(H5_iter_order_t, order)) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
@@ -13898,7 +13908,7 @@ group_info_old(hid_t fapl)
     unsigned    u, v;                   /* Local index variables */
 
     /* Loop over operating in different orders */
-    for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; order++) {
+    for(order = H5_ITER_INC; order <=H5_ITER_NATIVE; H5_INC_ENUM(H5_iter_order_t, order)) {
         if(order == H5_ITER_INC) {
             TESTING("query group info by name index in increasing order in old-style group")
         } /* end if */

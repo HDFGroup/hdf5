@@ -888,7 +888,7 @@ done:
  *
  * Purpose:	Substitute a new object pointer for the specified ID.
  *
- * Return:	Success:	Non-null previsou object pointer associated
+ * Return:	Success:	Non-null previous object pointer associated
  *				with the specified ID.
  *		Failure:	NULL
  *

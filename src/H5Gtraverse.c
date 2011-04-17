@@ -604,7 +604,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
 
     /* Get a pointer to a buffer that's large enough  */
-    if(NULL == (comp = (uint8_t *)H5WB_actual(wb, (HDstrlen(name) + 1))))
+    if(NULL == (comp = (char *)H5WB_actual(wb, (HDstrlen(name) + 1))))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
     /* Traverse the path */
