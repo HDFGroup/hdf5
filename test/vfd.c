@@ -1223,19 +1223,11 @@ test_stdio(void)
     hid_t        fapl            = -1;
     hid_t        access_fapl     = -1;
     char         filename[1024];
-    int          *fhandle        = NULL;
+    FILE         **fhandle       = NULL;
     hsize_t      file_size       = 0;
 
-    // The STDIO file driver fails on 64-bit Solaris (SPARC) and
-    // 32-bit Darwin (Intel) for unknown reasons.  This test
-    // will be disabled while we investigate.
+
     TESTING("STDIO file driver");
-    SKIPPED();
-    printf("\t** NOTE **: The STDIO file driver fails on some systems\n");
-    printf("\t(64-bit Solaris(SPARC) and 32-bit Darwin(intel)).\n");
-    printf("\tThe STDIO VFD test has been disabled while we investigate.\n");
-    fflush(stdout);
-    return 0;
 
     /* Set property list and file name for STDIO driver. */
     fapl = h5_fileaccess();
@@ -1261,7 +1253,7 @@ test_stdio(void)
     /* Check file handle API */
     if(H5Fget_vfd_handle(file, H5P_DEFAULT, (void **)&fhandle) < 0)
         TEST_ERROR;
-    if(*fhandle < 0)
+    if(NULL == *fhandle)
         TEST_ERROR;
 
     /* Check file size API */
