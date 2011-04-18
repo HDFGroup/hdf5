@@ -95,7 +95,6 @@
 ./config/i686-pc-cygwin
 ./config/ia64-linux-gnu
 ./config/ibm-aix
-./config/ibm-aix6.x
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
@@ -809,6 +808,7 @@
 ./test/Makefile.in
 ./test/accum.c
 ./test/app_ref.c
+./test/bad_compound.h5
 ./test/be_data.h5
 ./test/be_extlink1.h5
 ./test/be_extlink2.h5
@@ -852,6 +852,7 @@
 ./test/flush1.c
 ./test/flush2.c
 ./test/gen_bad_ohdr.c                   _DO_NOT_DISTRIBUTE_
+./test/gen_bad_compound.c               _DO_NOT_DISTRIBUTE_
 ./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
@@ -1991,6 +1992,7 @@
 ./config/cmake/CTest.cmake
 ./config/cmake/grepTest.cmake
 ./config/cmake/runTest.cmake
+./config/cmake/userblockTest.cmake
 ./config/cmake/vfdTest.cmake
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/ConfigureChecks.cmake

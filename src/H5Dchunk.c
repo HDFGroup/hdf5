@@ -378,8 +378,9 @@ done:
 static herr_t
 H5D_chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
 {
-    const H5T_t *type = dset->shared->type;     /* Convenience pointer to dataset's datatype */
-    hsize_t max_dim[H5O_LAYOUT_NDIMS];          /* Maximum size of data in elements */
+    const H5T_t *type = dset->shared->type;      /* Convenience pointer to dataset's datatype */
+    hsize_t max_dims[H5O_LAYOUT_NDIMS];          /* Maximum size of data in elements */
+    hsize_t dims[H5O_LAYOUT_NDIMS];              /* Dimension size of data in elements */
     uint64_t chunk_size;        /* Size of chunk in bytes */
     int ndims;                  /* Rank of dataspace */
     unsigned u;                 /* Local index variable */
@@ -413,7 +414,7 @@ H5D_chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
     dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] = (uint32_t)H5T_GET_SIZE(type);
 
     /* Get local copy of dataset dimensions (for sanity checking) */
-    if(H5S_get_simple_extent_dims(dset->shared->space, NULL, max_dim) < 0)
+    if(H5S_get_simple_extent_dims(dset->shared->space, dims, max_dims) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to query maximum dimensions")
 
     /* Sanity check dimensions */
@@ -424,9 +425,10 @@ H5D_chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
 
         /*
          * The chunk size of a dimension with a fixed size cannot exceed
-         * the maximum dimension size
+         * the maximum dimension size. If any dimension size is zero, there
+         * will be no such restriction.
          */
-        if(max_dim[u] != H5S_UNLIMITED && max_dim[u] < dset->shared->layout.u.chunk.dim[u])
+        if(dims[u] && max_dims[u] != H5S_UNLIMITED && max_dims[u] < dset->shared->layout.u.chunk.dim[u])
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size must be <= maximum dimension size for fixed-sized dimensions")
     } /* end for */
 

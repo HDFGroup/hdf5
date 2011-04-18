@@ -665,6 +665,9 @@ main(int argc, char *argv[])
     H5Pclose(fcpl);
     H5Fclose(file);
 
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+
     if (nerrors) {
         printf("***** %d I-STORE TEST%s FAILED! *****\n",
                 nerrors, 1 == nerrors ? "" : "S");

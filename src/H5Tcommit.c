@@ -221,7 +221,7 @@ done:
     /* If the datatype was committed but something failed after that, we need
      * to return it to the state it was in before it was committed.
      */
-    if(ret_value < 0 && ocrt_info.new_obj) {
+    if(ret_value < 0 && (NULL != ocrt_info.new_obj)) {
 	if(dt->shared->state == H5T_STATE_OPEN && dt->sh_loc.type == H5O_SHARE_TYPE_COMMITTED) {
             /* Remove the datatype from the list of opened objects in the file */
             if(H5FO_top_decr(dt->sh_loc.file, dt->sh_loc.u.loc.oh_addr) < 0)

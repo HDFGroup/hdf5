@@ -1,4 +1,4 @@
-HDF5 version 1.9.80 currently under development
+HDF5 version 1.9.81 currently under development
 ================================================================================
 
 
@@ -39,6 +39,12 @@ New Features
 
     Configuration:
     -------------
+    - Configure now generates Makefiles that build in "silent make mode"
+      by default in which compile and link lines are significantly
+      simplified for clarity. To override this and view actual compile and
+      link lines during building, the --disable-silent-rules flag can be used
+      at configure time, or the 'make' command can be followed by V=1, to
+      indicate a "verbose" make. (MAM - 2011/4/14).
     - Added mpicc and mpif90 as the default C and Fortran compilers for Linux
       systems when --enable-parallel is specified but no $CC or $FC is defined.
       (AKC - 2011/2/7)
@@ -87,7 +93,7 @@ New Features
     --------
     - Added ability to cache files opened through external links.  Added new
       public functions H5Pset_elink_file_cache_size(),
-      H5Pget_elink_file_cache_size(), and H5Frelease_file_cache().
+      H5Pget_elink_file_cache_size(), and H5Fclear_elink_file_cache().
       (NAF - 2011/02/17)
     - Removed all old code for Metraowerks compilers, bracketed by
       __MWERKS__). Metraowerks compiler is long gone. (AKC - 2010/11/17) 
@@ -457,6 +463,15 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Removed config/ibm-aix6.x. All IBM-AIX settings are in one file,
+      ibm-aix. (AKC - 2011/4/14)
+    - Shared C libraries are no longer disabled on Mac when Fortran
+      is enabled. Shared Fortran libraries are still not supported on Mac,
+      so configure will disable them by default, but this is overridable
+      with the new --enable-unsupported configure option. The configure
+      summary has been updated to reflect the fact that the shared-ness of 
+      the C++/Fortran wrapper libraries may not align with the C library.
+      (MAM - 04/11/2011 - HDFFV-4353).
     - Removed recognition of the parallel compilers of LAM(hcc) and
       ChMPIon(cmpicc) since we have no access to these two MPI implementations
       and cannot verify their correctness. (AKC - 2010/7/14 - Bug 1921)
@@ -510,6 +525,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Updated h5dump test case script to prevent entire test failure upon 
+          source directory is read-only. Bug# HDFFV-4342 (JKM 2011/4/12)
         - Updated to unify option name to '--enable-error-stack' for printing 
           HDF5 error stack messages for HDF5 tools. h5ls and h5dump for now.
           For h5ls, this replaces "-e/--errors" option, which is deprecated. 
@@ -831,8 +848,6 @@ SuSe Linux 2.6.5
 Known Problems
 ==============
 * --with-mpe configure option does not work with Mpich2. AKC - 2011/03/10)
-
-* examples/run-all-ex.sh does not work on Cygwin. (NAF - 2011/02/11)
 
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can
   occur when reading from a dataset in parallel shortly after it has been

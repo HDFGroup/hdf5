@@ -71,7 +71,7 @@
 /* #undef H5_FP_TO_ULLONG_RIGHT_MAXIMUM 1 */
 
 /* Define if gettimeofday() populates the tz pointer passed in */
-/* #undef H5_GETTIMEOFDAY_GIVES_TZ */
+#define H5_GETTIMEOFDAY_GIVES_TZ 1
 
 /* Define to 1 if you have the `alarm' function. */
 /* #undef H5_HAVE_ALARM */
@@ -169,7 +169,7 @@
 /* #undef H5_HAVE_GETTEXTINFO */
 
 /* Define to 1 if you have the `gettimeofday' function. */
-/* #undef H5_HAVE_GETTIMEOFDAY */
+#define H5_HAVE_GETTIMEOFDAY 1
 
 /* Define to 1 if you have the `get_fpc_csr' function. */
 /* #undef H5_HAVE_GET_FPC_CSR */
@@ -234,9 +234,6 @@
 
 /* Define to 1 if you have the `lseek64' function. */
 /* #undef H5_HAVE_LSEEK64 */
-
-/* Define to 1 if you have the <memory.h> header file. */
-#define H5_HAVE_MEMORY_H 1
 
 /* Define if we have MPE support */
 /* #undef H5_HAVE_MPE */
@@ -314,7 +311,7 @@
 /* #undef H5_HAVE_STRUCT_TEXT_INFO */
 
 /* Define if `struct timezone' is defined */
-/* #undef H5_HAVE_STRUCT_TIMEZONE */
+#define H5_HAVE_STRUCT_TIMEZONE 1
 
 /* Define to 1 if `tm_zone' is member of `struct tm'. */
 /* #undef H5_HAVE_STRUCT_TM_TM_ZONE */
@@ -483,13 +480,13 @@
 #define H5_PACKAGE_NAME "HDF5"
 
 /* Define to the full name and version of this package. */
-#define H5_PACKAGE_STRING "HDF5 1.9.80"
+#define H5_PACKAGE_STRING "HDF5 1.9.81"
 
 /* Define to the one symbol short name of this package. */
 #define H5_PACKAGE_TARNAME "hdf5"
 
 /* Define to the version of this package. */
-#define H5_PACKAGE_VERSION "1.9.80"
+#define H5_PACKAGE_VERSION "1.9.81"
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #define H5_PRINTF_LL_WIDTH "I64"
@@ -646,7 +643,7 @@
 /* #undef H5_USING_MEMCHECKER */
 
 /* Version number of package */
-#define H5_VERSION "1.9.80"
+#define H5_VERSION "1.9.81"
 
 /* Define if vsnprintf() returns the correct value for formatted strings that
    don't fit into size allowed */

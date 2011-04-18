@@ -8431,6 +8431,9 @@ main(void)
     /* Reset file address checking info */
     addr_reset();
 
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+
     /* Results */
     if(nerrors) {
         printf("***** %d OBJECT COPY TEST%s FAILED! *****\n",

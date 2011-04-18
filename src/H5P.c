@@ -468,7 +468,7 @@ H5Pregister2(hid_t cls_id, const char *name, size_t size, void *def_value,
         HDassert(old_pclass == orig_pclass);
 
         /* Close the previous class */
-        if(H5P_close_class(orig_pclass) < 0)
+        if(H5P_close_class(old_pclass) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "unable to close original property class after substitution")
     } /* end if */
 

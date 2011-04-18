@@ -795,6 +795,9 @@ main(void)
             TEST_ERROR
     } /* end for */
 
+    /* Verify symbol table messages are cached */
+    if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR
+
     puts("All object header tests passed.");
     h5_cleanup(FILENAME, fapl);
     return(0);

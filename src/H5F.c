@@ -1071,13 +1071,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
          * the memory associated with it.
          */
         if(f->shared->root_grp) {
-            /* Free the ID to name buffer */
-            if(H5G_free_grp_name(f->shared->root_grp) < 0)
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
-
-            /* Free the memory for the root group */
-            if(H5G_free(f->shared->root_grp) < 0)
+            /* Free the root group */
+            if(H5G_root_free(f->shared->root_grp) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
             f->shared->root_grp = NULL;
@@ -2983,7 +2978,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Frelease_file_cache
+ * Function:    H5Fclear_elink_file_cache
  *
  * Purpose:     Releases the external file cache associated with the
  *              provided file, potentially closing any cached files
@@ -2997,12 +2992,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Frelease_file_cache(hid_t file_id)
+H5Fclear_elink_file_cache(hid_t file_id)
 {
     H5F_t         *file;        /* File */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5Frelease_file_cache, FAIL)
+    FUNC_ENTER_API(H5Fclear_elink_file_cache, FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Check args */
@@ -3016,5 +3011,5 @@ H5Frelease_file_cache(hid_t file_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Frelease_file_cache() */
+} /* end H5Fclear_elink_file_cache() */
 
