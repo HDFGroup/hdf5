@@ -628,7 +628,7 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_family_sb_encode)
 
     /* Name and version number */
-    HDstrncpy(name, "NCSAfami", (size_t)8);
+    HDstrncpy(name, "NCSAfami", (size_t)9);
     name[8] = '\0';
 
     /* Store member file size.  Use the member file size from the property here.
@@ -690,9 +690,9 @@ H5FD_family_sb_decode(H5FD_t *_file, const char UNUSED *name, const unsigned cha
 
     /* Check if member size from file access property is correct */
     if(msize != file->pmem_size) {
-        char                err_msg[128];
+        char err_msg[128];
 
-        sprintf(err_msg, "Family member size should be %lu.  But the size from file access property is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
+        HDsnprintf(err_msg, sizeof(err_msg), "Family member size should be %lu.  But the size from file access property is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
     } /* end if */
 
@@ -806,14 +806,14 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     file->flags = flags;
 
     /* Check that names are unique */
-    sprintf(memb_name, name, 0);
-    sprintf(temp, name, 1);
+    HDsnprintf(memb_name, sizeof(memb_name), name, 0);
+    HDsnprintf(temp, sizeof(temp), name, 1);
     if(!HDstrcmp(memb_name, temp))
         HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file names not unique")
 
     /* Open all the family members */
     while(1) {
-        sprintf(memb_name, name, file->nmembs);
+        HDsnprintf(memb_name, sizeof(memb_name), name, file->nmembs);
 
         /* Enlarge member array */
         if(file->nmembs >= file->amembs) {
@@ -1094,7 +1094,7 @@ H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
         /* Create another file if necessary */
         if(u >= file->nmembs || !file->memb[u]) {
             file->nmembs = MAX(file->nmembs, u+1);
-            sprintf(memb_name, file->name, u);
+            HDsnprintf(memb_name, sizeof(memb_name), file->name, u);
             H5E_BEGIN_TRY {
                 H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
                 file->memb[u] = H5FDopen(memb_name, file->flags | H5F_ACC_CREAT,
