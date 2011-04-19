@@ -902,7 +902,7 @@ H5G_get_objinfo_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char *name, const H5O_
     FUNC_ENTER_NOAPI_NOINIT(H5G_get_objinfo_cb)
 
     /* Check if the name in this group resolved to a valid link */
-    if(lnk == NULL || obj_loc == NULL)
+    if(lnk == NULL && obj_loc == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "'%s' doesn't exist", name)
 
     /* Only modify user's buffer if it's available */
@@ -910,7 +910,7 @@ H5G_get_objinfo_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char *name, const H5O_
         H5G_stat_t *statbuf = udata->statbuf;   /* Convenience pointer for statbuf */
 
         /* Common code to retrieve the file's fileno */
-        if(H5F_get_fileno(obj_loc->oloc->file, &statbuf->fileno[0]) < 0)
+        if(H5F_get_fileno((obj_loc ? obj_loc : grp_loc)->oloc->file, &statbuf->fileno[0]) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno")
 
         /* Info for soft and UD links is gotten by H5L_get_info. If we have
@@ -921,6 +921,7 @@ H5G_get_objinfo_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char *name, const H5O_
 
             /* Go retrieve the object information */
             /* (don't need index & heap info) */
+            HDassert(obj_loc);
             if(H5O_get_info(obj_loc->oloc, udata->dxpl_id, FALSE, &oinfo) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object info")
 
