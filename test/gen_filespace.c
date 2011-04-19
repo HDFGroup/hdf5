@@ -45,7 +45,7 @@ static void gen_file(void)
     unsigned    i, j;			/* Local index variable */
     H5F_file_space_type_t fs_type;	/* File space handling strategy */
 
-    for(j = 0, fs_type = H5F_FILE_SPACE_ALL_PERSIST; j < NELMTS(FILENAMES); j++, (H5F_file_space_type_t)(fs_type)++) {
+    for(j = 0, fs_type = H5F_FILE_SPACE_ALL_PERSIST; j < NELMTS(FILENAMES); j++, fs_type = (H5F_file_space_type_t)(fs_type + 1)) {
 	/* Get a copy of the default file creation property */
 	fcpl = H5Pcreate(H5P_FILE_CREATE);
 

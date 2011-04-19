@@ -110,6 +110,9 @@ int space5_data = 7;
  *		       passed to verify_val to 'long' as well.  If problems
  *		       arises later, this will have to be specificly handled
  *		       with a special routine.
+ *     April 12, 2011: Raymond Lu
+ *                     Starting from the 1.8.7 release, we allow dimension
+ *                     size to be zero.  So I took out the test against it.
  *-------------------------------------------------------------------------
  */
 static void test_h5s_basic()
@@ -203,28 +206,6 @@ static void test_h5s_basic()
 
     // CHECK_I(ret, "H5Fclose");  // leave this here, later, fake a failure
 		// in the p_close see how this will handle it. - BMR
-
-	// Verify that incorrect dimensions don't work
-	dims1[0] = 0;
-	try {
-	    DataSpace wrongdim_ds (SPACE1_RANK, dims1);
-
-	    // Should FAIL but didn't, so throw an invalid action exception
-	    throw InvalidActionException("DataSpace constructor", "Attempted to use incorrect dimensions");
-	}
-	catch( DataSpaceIException E ) // catching use of incorrect dimensions
-	{} // do nothing, exception expected
-
-	// Another incorrect dimension case
-	DataSpace sid3 (H5S_SIMPLE);
-	try {
-	    sid3.setExtentSimple( SPACE1_RANK, dims1 );
-
-	    // Should FAIL but didn't, so throw an invalid action exception
-	    throw InvalidActionException("DataSpace::setExtentSimple", "Attempted to use incorrect dimensions");
-	}
-	catch (DataSpaceIException E) // catching use of incorrect dimensions
-	{} // do nothing, exception expected
 
 	PASSED();
     }	// end of try block

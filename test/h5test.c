@@ -27,6 +27,11 @@
 #include "h5test.h"
 #include "H5srcdir.h"
 
+/* Necessary for h5_verify_cached_stabs() */
+#define H5G_PACKAGE
+#define H5G_TESTING
+#include "H5Gpkg.h"
+
 #ifdef H5_HAVE_WINSOCK_H
 #include <process.h>
 #include <direct.h>
@@ -1147,3 +1152,92 @@ h5_make_local_copy(char *origfilename, char *local_copy_name)
 
     return 0;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_verify_cached_stabs_cb
+ *
+ * Purpose:     Callback function for h5_verify_cached_stabs.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, April 12, 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+h5_verify_cached_stabs_cb(hid_t oid, const char UNUSED *name,
+    const H5O_info_t *oinfo, void UNUSED *udata)
+{
+    if(oinfo->type == H5O_TYPE_GROUP)
+        return(H5G_verify_cached_stabs_test(oid));
+    else
+        return(0);
+} /* end h5_verify_cached_stabs_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_verify_cached_stabs
+ *
+ * Purpose:     Verify that all groups in every file in base_name have
+ *              their symbol table information cached (if present, and if
+ *              the parent group also uses a symbol table).  Does not
+ *              check that the root group's symbol table information is
+ *              cached in the superblock.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, April 12, 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
+{
+    hid_t       file = -1;
+    char        filename[1024];
+    int         i = 0;
+
+    while(base_name[i]) {
+        if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
+            continue;
+
+        H5E_BEGIN_TRY {
+            file = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+        } H5E_END_TRY
+        if(file < 0) {
+            i++;
+            continue;
+        } /* end if */
+
+        if(H5Ovisit(file, H5_INDEX_NAME, H5_ITER_NATIVE,
+                h5_verify_cached_stabs_cb, NULL) < 0)
+            goto error;
+
+        if(H5Fclose(file) < 0)
+            goto error;
+        file = -1;
+
+        i++;
+    } /* end while */
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(file);
+    } H5E_END_TRY;
+
+    return -1;
+}
+

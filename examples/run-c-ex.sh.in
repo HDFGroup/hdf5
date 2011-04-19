@@ -47,17 +47,18 @@ H5TOOL_BIN="${prefix}/bin/${H5TOOL}"   # The path of the tool binary
 #### Run test ####
 RunTest()
 {
+    TEST_EXEC=$1
     Test=$1".c"
 
     echo
     echo "#################  $1  #################"
-    ${H5TOOL_BIN} $Test
+    ${H5TOOL_BIN} -o $TEST_EXEC $Test
     if [ $? -ne 0 ]
     then
         echo "messed up compiling $Test"
         exit 1
     fi
-    ./a.out
+    ./$TEST_EXEC
 }
 
 
@@ -78,20 +79,35 @@ fi
 if [ $? -eq 0 ]
 then
     if (RunTest h5_write &&\
+        rm h5_write &&\
         RunTest h5_read &&\
+        rm h5_read &&\
         RunTest h5_extend_write &&\
+        rm h5_extend_write &&\
         RunTest h5_chunk_read &&\
+        rm h5_chunk_read &&\
         RunTest h5_compound &&\
+        rm h5_compound &&\
         RunTest h5_group &&\
+        rm h5_group &&\
         RunTest h5_select &&\
+        rm h5_select &&\
         RunTest h5_attribute &&\
+        rm h5_attribute &&\
         RunTest h5_mount &&\
+        rm h5_mount &&\
         RunTest h5_reference &&\
+        rm h5_reference &&\
         RunTest h5_drivers &&\
+        rm h5_drivers &&\
         RunTest h5_ref2reg &&\
+        rm h5_ref2reg &&\
         RunTest h5_extlink &&\
+        rm h5_extlink &&\
         RunTest h5_elink_unix2win &&\
-        RunTest h5_shared_mesg); then
+        rm h5_elink_unix2win &&\
+        RunTest h5_shared_mesg &&\
+        rm h5_shared_mesg); then
         EXIT_VALUE=${EXIT_SUCCESS}
     else
         EXIT_VALUE=${EXIT_FAILURE}
@@ -99,7 +115,6 @@ then
 fi
 
 # Cleanup
-rm a.out
 rm *.o
 rm *.h5
 rm -rf red blue u2w

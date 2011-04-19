@@ -4162,7 +4162,7 @@ test_nbit_int_size(hid_t file)
     */
    if((precision = H5Tget_precision(datatype)) == 0) {
        H5_FAILED();
-       printf("    Line %d: wrong precision size: %d\n",__LINE__, precision);
+       printf("    Line %d: wrong precision size: %zu\n",__LINE__, precision);
        goto error;
    } /* end if */
 
@@ -4172,7 +4172,7 @@ test_nbit_int_size(hid_t file)
    if((dset_size = H5Dget_storage_size(dataset)) < DSET_DIM1*DSET_DIM2*(precision/8) || 
        dset_size > DSET_DIM1*DSET_DIM2*(precision/8) + 1*KB) {
        H5_FAILED();
-       printf("    Line %d: wrong dataset size: %d\n",__LINE__, dset_size);
+       HDfprintf(stdout, "    Line %d: wrong dataset size: %Hu\n",__LINE__, dset_size);
        goto error;
    } /* end if */
 
@@ -4369,7 +4369,7 @@ test_nbit_flt_size(hid_t file)
     */
    if((precision = H5Tget_precision(datatype)) == 0) {
        H5_FAILED();
-       printf("    Line %d: wrong precision size: %d\n",__LINE__, precision);
+       printf("    Line %d: wrong precision size: %zu\n",__LINE__, precision);
        goto error;
    } /* end if */
 
@@ -4379,7 +4379,7 @@ test_nbit_flt_size(hid_t file)
    if((dset_size = H5Dget_storage_size(dataset)) < DSET_DIM1*DSET_DIM2*(precision/8) || 
        dset_size > DSET_DIM1*DSET_DIM2*(precision/8) + 1*KB) {
        H5_FAILED();
-       printf("    Line %d: wrong dataset size: %d\n",__LINE__, dset_size);
+       HDfprintf(stdout, "    Line %d: wrong dataset size: %Hu\n",__LINE__, dset_size);
        goto error;
    } /* end if */
 
@@ -9907,6 +9907,9 @@ main(void)
 
     /* Close 2nd FAPL */
     if(H5Pclose(fapl2) < 0) TEST_ERROR
+
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     if(nerrors)
         goto error;

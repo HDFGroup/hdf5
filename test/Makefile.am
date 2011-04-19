@@ -114,7 +114,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_fast.h5 \
     chunk_expand.h5 \
     copy_dcpl_newfile.h5 extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
-    sys_file1 tfile[1-5].h5 th5s[1-3].h5 lheap.h5 fheap.h5 ohdr.h5 \
+    sys_file1 tfile[1-5].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 \
     dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
@@ -131,9 +131,10 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
     objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5       \
-    earray.h5 efc[0-5].h5 swmr_data.h5 flushrefresh.h5 flushrefresh_VERIFICATION_START \
-	flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \
-	flushrefresh_VERIFICATION_DONE
+    earray.h5 efc[0-5].h5 log_vfd_out.log swmr_data.h5 \
+    flushrefresh.h5 flushrefresh_VERIFICATION_START \
+    flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \
+    flushrefresh_VERIFICATION_DONE
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

@@ -199,6 +199,9 @@ main(void)
     }
     PASSED();
 
+    /* Verify symbol table messages are cached */
+    if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR
+
     puts("All local heap tests passed.");
     h5_cleanup(FILENAME, fapl);
 

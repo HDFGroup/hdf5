@@ -47,14 +47,6 @@ fi
  
 . $srcdir/config/intel-fflags
 
-# Fortran doesn't work with shared libraries
-# 
-if test "X-" != "X-$enable_fortran"; then
-        echo '    Warning: shared libraries are not supported with Fortran'
-        echo '    Disabling shared libraries'
-        enable_shared="no"
-fi
-
 # compiler version strings
 case $CC in
     *gcc*)

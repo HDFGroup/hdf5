@@ -711,6 +711,7 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
     H5HL_t *heap = NULL;        /* Pointer to local heap */
     H5O_stab_t	stab;	        /* Info about local heap & B-tree */
     H5G_bt_it_gnbi_t udata;     /* Iteration information */
+    hbool_t udata_valid = FALSE;        /* Whether iteration information is valid */
     ssize_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_get_name_by_idx, FAIL)
@@ -744,6 +745,7 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
     udata.common.op = H5G_stab_get_name_by_idx_cb;
     udata.heap = heap;
     udata.name = NULL;
+    udata_valid = TRUE;
 
     /* Iterate over the group members */
     if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, H5G_node_by_idx, &udata) < 0)
@@ -769,7 +771,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
     /* Free the duplicated name */
-    if(udata.name != NULL)
+    if(udata_valid && udata.name != NULL)
         H5MM_xfree(udata.name);
 
     FUNC_LEAVE_NOAPI(ret_value)

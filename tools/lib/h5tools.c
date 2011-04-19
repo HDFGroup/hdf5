@@ -638,29 +638,21 @@ h5tools_ncols(const char *s)
 htri_t
 h5tools_detect_vlen(hid_t tid)
 {
-    htri_t status;
-    htri_t ret = FALSE;
+    htri_t ret;
+
     /* recursive detect any vlen data values in type (compound, array ...) */
-    status = H5Tdetect_class(tid, H5T_VLEN);
-    if ( (status == TRUE) || (status < 0) )
-    {
-        ret = status;
+    ret = H5Tdetect_class(tid, H5T_VLEN);
+    if((ret == TRUE) || (ret < 0))
         goto done;
-    }
 
     /* recursive detect any vlen string in type (compound, array ...) */
-    status = h5tools_detect_vlen_str(tid);
-    if ( (status == TRUE) || (status < 0) )
-
-    {
-        ret = status;
+    ret = h5tools_detect_vlen_str(tid);
+    if((ret == TRUE) || (ret < 0))
         goto done;
-    }
 
 done:
     return ret;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: h5tools_detect_vlen_str
@@ -677,48 +669,41 @@ done:
 htri_t
 h5tools_detect_vlen_str(hid_t tid)
 {
-    int i = 0;
-    int n = 0;
-    htri_t ret = FALSE;
     H5T_class_t tclass = -1;
-    hid_t btid;
-    hid_t mtid;
+    htri_t ret = FALSE;
 
     ret = H5Tis_variable_str(tid);
-    if ( (ret == TRUE) || (ret < 0) )
+    if((ret == TRUE) || (ret < 0))
         goto done;
 
     tclass = H5Tget_class(tid);
-    if (tclass == H5T_ARRAY) 
-    {
-        btid = H5Tget_super(tid);
-        if (btid < 0)
-        {
-            ret = (htri_t) btid;
+    if(tclass == H5T_ARRAY || tclass == H5T_VLEN) {
+        hid_t btid = H5Tget_super(tid);
+
+        if(btid < 0) {
+            ret = (htri_t)btid;
             goto done;
         }
         ret = h5tools_detect_vlen_str(btid);
-        if ( (ret == TRUE) || (ret < 0) ) 
-        {
+        if((ret == TRUE) || (ret < 0)) {
             H5Tclose(btid);
             goto done;
         }
     }
-    else if (tclass == H5T_COMPOUND) 
-    {
-        n = H5Tget_nmembers(tid);
-        if (n < 0) 
-        {
+    else if(tclass == H5T_COMPOUND) {
+        int i = 0;
+        int n = H5Tget_nmembers(tid);
+
+        if(n < 0) {
             n = ret;
             goto done;
         }
 
-        for (i = 0; i < n; i++) 
-        {
-            mtid = H5Tget_member_type(tid, i);
+        for(i = 0; i < n; i++) {
+            hid_t mtid = H5Tget_member_type(tid, i);
+
             ret = h5tools_detect_vlen_str(mtid);
-            if ( (ret == TRUE) || (ret < 0) ) 
-            {
+            if((ret == TRUE) || (ret < 0)) {
                 H5Tclose(mtid);
                 goto done;
             }
@@ -2079,6 +2064,7 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
     size_t            p_type_nbytes;           /* size of memory type */
     hsize_t           sm_size[H5S_MAX_RANK];   /* stripmine size */
     hsize_t           sm_nbytes;               /* bytes per stripmine */
+    hssize_t          ssm_nelmts;              /* elements per stripmine*/
     hsize_t           sm_nelmts;               /* elements per stripmine*/
     unsigned char    *sm_buf = NULL;           /* buffer for raw data */
     hid_t             sm_space = -1;           /* stripmine data space */
@@ -2121,8 +2107,9 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
         if(H5Sselect_hyperslab(f_space, H5S_SELECT_SET, temp_start, temp_stride, temp_count, temp_block) < 0)
             H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
 
-        if((sm_nelmts = H5Sget_select_npoints(f_space)) < 0)
+        if((ssm_nelmts = H5Sget_select_npoints(f_space)) < 0)
             H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Sget_select_npoints failed");
+        sm_nelmts = (hsize_t)ssm_nelmts;
 
         if (sm_nelmts > 0) {
             /*
@@ -2865,8 +2852,9 @@ h5tools_print_datatype(h5tools_str_t *buffer, const h5tool_format_t *info,
     HERR_INIT(int, SUCCEED)
     char        *mname;
     hid_t        mtype, str_type;
+    int          snmembers;
     unsigned     nmembers;
-    unsigned     ndims;
+    int          sndims;
     unsigned     i;
     size_t       size = 0;
     hsize_t      dims[H5TOOLS_DUMP_MAX_RANK];
@@ -3210,8 +3198,9 @@ h5tools_print_datatype(h5tools_str_t *buffer, const h5tool_format_t *info,
         break;
 
     case H5T_COMPOUND:
-        if((nmembers = H5Tget_nmembers(type)) < 0)
+        if((snmembers = H5Tget_nmembers(type)) < 0)
             H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_nmembers failed");
+        nmembers = (unsigned)snmembers;
 
         h5tools_str_append(buffer, "H5T_COMPOUND %s\n", h5tools_dump_header_format->structblockbegin);
 
@@ -3287,7 +3276,9 @@ h5tools_print_datatype(h5tools_str_t *buffer, const h5tool_format_t *info,
         h5tools_str_append(buffer, "H5T_ARRAY { ");
 
         /* Get array information */
-        if((ndims = H5Tget_array_ndims(type)) >= 0) {
+        if((sndims = H5Tget_array_ndims(type)) >= 0) {
+            unsigned     ndims = (unsigned)sndims;
+
             if(H5Tget_array_dims2(type, dims) >= 0) {
                 /* Print array dimensions */
                 for (i = 0; i < ndims; i++)

@@ -50,10 +50,10 @@ int main(void)
     float fnok[2] = {5678., 6785.};
     float *fptr;
 
-    char *data;
-    char *mname;
+    char *data = NULL;
 
     int result = 0;
+    herr_t error = 1;
 
     printf("%-70s", "Testing alignment in compound datatypes");
 
@@ -67,7 +67,7 @@ int main(void)
     }
 
     H5E_BEGIN_TRY {
-        H5Ldelete(fil, setname, H5P_DEFAULT);
+        (void)H5Ldelete(fil, setname, H5P_DEFAULT);
     } H5E_END_TRY;
 
     cs6 = H5Tcopy(H5T_C_S1);
@@ -87,7 +87,7 @@ int main(void)
     H5Tinsert(cmp, "Not Ok", sizeof(fok) + sizeof(string5), array_dt);
     H5Tclose(array_dt);
 
-    fix=h5tools_get_native_type(cmp);
+    fix = h5tools_get_native_type(cmp);
 
     cmp1 = H5Tcreate(H5T_COMPOUND, sizeof(fok));
 
@@ -107,7 +107,8 @@ int main(void)
     H5Tclose(array_dt);
 
     plist = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_preserve(plist, 1);
+    if((error = H5Pset_preserve(plist, 1)) < 0) 
+        goto out;
 
     /*
      * Create a small dataset, and write data into it we write each field
@@ -136,25 +137,36 @@ int main(void)
     H5Dread(set, fix, spc, H5S_ALL, H5P_DEFAULT, data);
     fptr = (float *)(data + H5Tget_member_offset(fix, 1));
 
-    if(fok[0] != fptr[0] || fok[1] != fptr[1]
-                    || fnok[0] != fptr[2] || fnok[1] != fptr[3]) {
+out:
+    if(error < 0) {
         result = 1;
+        puts("*FAILED - HDF5 library error*");
+    } else if(fok[0] != fptr[0] || fok[1] != fptr[1]
+                    || fnok[0] != fptr[2] || fnok[1] != fptr[3]) {
+        char *mname;
+
+        result = 1;
+        mname = H5Tget_member_name(fix, 0);
         printf("%14s (%2d) %6s = %s\n",
-            mname = H5Tget_member_name(fix, 0), (int)H5Tget_member_offset(fix,0),
+            mname, (int)H5Tget_member_offset(fix,0),
             string5, (char *)(data + H5Tget_member_offset(fix, 0)));
         free(mname);
+
         fptr = (float *)(data + H5Tget_member_offset(fix, 1));
+        mname = H5Tget_member_name(fix, 1);
         printf("Data comparison:\n"
             "%14s (%2d) %6f = %f\n"
             "                    %6f = %f\n",
-            mname = H5Tget_member_name(fix, 1), (int)H5Tget_member_offset(fix,1),
+            mname, (int)H5Tget_member_offset(fix,1),
             fok[0], fptr[0],
             fok[1], fptr[1]);
         free(mname);
+
         fptr = (float *)(data + H5Tget_member_offset(fix, 2));
+        mname = H5Tget_member_name(fix, 2);
         printf("%14s (%2d) %6f = %f\n"
             "                    %6f = %6f\n",
-            mname = H5Tget_member_name(fix, 2), (int)H5Tget_member_offset(fix,2),
+            mname, (int)H5Tget_member_offset(fix,2),
             fnok[0], fptr[0],
             fnok[1], fptr[1]);
         free(mname);
@@ -170,12 +182,13 @@ int main(void)
             fok[1], fptr[1],
             fnok[0], fptr[2],
             fnok[1], fptr[3]);
-        puts("*FAILED*");
+        puts("*FAILED - compound type alignmnent problem*");
     } else {
         puts(" PASSED");
     }
 
-    free(data);
+    if(data)
+        free(data);
     H5Sclose(spc);
     H5Tclose(cmp);
     H5Tclose(cmp1);

@@ -26,13 +26,6 @@ if test "X-" = "X-$CC"; then
   CC_BASENAME=gcc
 fi
 
-# Add "_XOPEN_SOURCE" define to cpp flags, to quiet warnings
-#       from /usr/include/sys/cdefs.h
-# (Unless we are using g++ as a C compiler)
-#if test "X-g++" != "X-$CC"; then
-#    H5_CPPFLAGS="$H5_CPPFLAGS -D_XOPEN_SOURCE=600" 
-#fi
-
 # Figure out C compiler flags
 . $srcdir/config/gnu-flags
 
@@ -63,14 +56,3 @@ fi
 # Figure out Intel F90 compiler flags
 . $srcdir/config/intel-fflags
 
-# Special setup to use pthread support if enable-threadsafe is on.
-# Works with static executable only.
-if test "X-" != "X-$enable_threadsafe"; then
-  H5_CFLAGS="$H5_CFLAGS -D_THREAD_SAFE" 
-  H5_CXXFLAGS="$H5_CXXFLAGS -D_THREAD_SAFE" 
-  AM_LDFLAGS="$AM_LDFLAGS -pthread"
-fi
-
-# Temporarily hard set this variable.  The problem of loss of the last 2 bytes of mantissa
-# turns out to be elusive.  Hard set it until a better solution is found. 
-hdf5_cv_ullong_to_ldouble_precision_works=${hdf5_cv_ullong_to_ldouble_precision_works='no'}

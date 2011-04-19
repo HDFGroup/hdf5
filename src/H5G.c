@@ -843,9 +843,6 @@ H5G_term_interface(void)
 	    /* Destroy the group object id group */
 	    H5I_dec_type_ref(H5I_GROUP);
 
-            /* Free the global component buffer */
-            H5G_traverse_term_interface();
-
 	    /* Mark closed */
 	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/

@@ -287,6 +287,9 @@ main (void)
     if(H5Sclose(mem_space) < 0) TEST_ERROR;
     if(H5Fclose(file) < 0) TEST_ERROR;
 
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+
     if(nerrors) {
         printf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
         exit(1);
