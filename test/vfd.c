@@ -1223,7 +1223,7 @@ test_stdio(void)
     hid_t        fapl            = -1;
     hid_t        access_fapl     = -1;
     char         filename[1024];
-    FILE         **fhandle       = NULL;
+    FILE         *fhandle        = NULL;
     hsize_t      file_size       = 0;
 
 
@@ -1253,7 +1253,7 @@ test_stdio(void)
     /* Check file handle API */
     if(H5Fget_vfd_handle(file, H5P_DEFAULT, (void **)&fhandle) < 0)
         TEST_ERROR;
-    if(NULL == *fhandle)
+    if(NULL == fhandle)
         TEST_ERROR;
 
     /* Check file size API */
