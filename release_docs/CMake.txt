@@ -25,8 +25,11 @@ Notes: This short instruction is written for users who want to quickly build
             Please send us any comments on how CMake support can be improved on 
             any system. Visit the KitWare site for more information about CMake.
             
-         3. Build and test results can be submitted to our CDash server at:
-            www.cdash.hdfgroup.org. 
+         3. If you are building HDF5 on Windows, do NOT use or execute any
+            files from the windows folder.
+            
+         4. Build and test results can be submitted to our CDash server at:
+            cdash.hdfgroup.uiuc.edu. 
             Please read the HDF and CDash document at:
             www.hdfgroup.org/CDash/HowToSubmit. 
             

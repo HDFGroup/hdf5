@@ -314,11 +314,9 @@ The following platforms and compilers have been tested for this release.
                                   Visual Studio 2010 (cmake)
                                   Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
 
-    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
-                                  Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
 
-    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
-                                  Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
 
     Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
 

@@ -62,12 +62,16 @@ Preconditions:
                 Click the "Miscellaneous" tab and uncheck "TAR file smart CR/LF 
                 conversion" option, then click OK.
 
-   4. CMake is available for this release. CMake 2.8.2 can be downloaded from
-      the KitWare website at http://www.kitware.com.
+   4. CMake is available for this release. CMake 2.8.4 can be downloaded from
+      the KitWare website at http://www.kitware.com. See CMake.txt file for
+      more information.
       
       Note: We have attempted to mirror our Autoconf configuration files for
             maintainence reasons. We will maintain the current VS2008 project
             files for the 1.8 product.
+      Warning: The instructions in this file are not compatible with CMake.
+            Follow the instructions in CMake.txt, dot not use any files from
+            the WINDOWS subfolder.
             
    5. Set up a directory structure to unpack the library.  For example:
 
