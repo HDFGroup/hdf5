@@ -1586,6 +1586,7 @@ htri_t
 H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_op)
 {
     const H5D_t *dataset = io_info->dset;
+    htri_t no_filters = TRUE;
     htri_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_cacheable)
@@ -1593,10 +1594,22 @@ H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_o
     HDassert(io_info);
     HDassert(dataset);
 
-    /* Must bring the whole chunk in if there are any filters */
-    if(dataset->shared->dcpl_cache.pline.nused > 0)
-        ret_value = TRUE;
-    else {
+    /* Must bring the whole chunk in if there are any filters on the chunk.
+     * Make sure to check if filters are on the dataset but disabled for the
+     * chunk because it is a partial edge chunk. */
+    if(dataset->shared->dcpl_cache.pline.nused > 0) {
+        if(dataset->shared->layout.u.chunk.flags
+                & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) {
+            if((no_filters = H5D_chunk_is_partial_edge_chunk(
+                    io_info->store->chunk.offset, io_info->dset, 0, NULL, NULL))
+                    < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to determine if chunk is edge chunk")
+        } /* end if */
+        else
+            no_filters = FALSE;
+    } /* end if */
+
+    if(no_filters) {
 #ifdef H5_HAVE_PARALLEL
          /* If MPI based VFD is used and the file is opened for write access, must
           *         bypass the chunk-cache scheme because other MPI processes could
@@ -1636,7 +1649,9 @@ H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_o
 #ifdef H5_HAVE_PARALLEL
         } /* end else */
 #endif /* H5_HAVE_PARALLEL */
-    } /* end else */
+    } /* end if */
+    else
+        ret_value = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1735,12 +1750,16 @@ H5D_chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         /* Check for non-existant chunk & skip it if appropriate */
         if(H5F_addr_defined(udata.addr) || UINT_MAX != udata.idx_hint
                 || !skip_missing_chunks) {
-            /* Load the chunk into cache and lock it. */
+            /* Pass in chunk's coordinates. */
+            io_info->store->chunk.offset = chunk_info->coords;
+
+            /* Determine if we should use the chunk cache */
             if((cacheable = H5D_chunk_cacheable(io_info, udata.addr, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable")
+
             if(cacheable) {
-                /* Pass in chunk's coordinates in a union. */
-                io_info->store->chunk.offset = chunk_info->coords;
+                /* Load the chunk into cache and lock it. */
+                /* Pass in chunk's index. */
                 io_info->store->chunk.index = chunk_info->index;
 
                 /* Compute # of bytes accessed in chunk */
@@ -1856,18 +1875,24 @@ H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         /* Get the actual chunk information from the skip list node */
         chunk_info = H5D_CHUNK_GET_NODE_INFO(fm, chunk_node);
 
-        /* Load the chunk into cache.  But if the whole chunk is written,
-         * simply allocate space instead of load the chunk. */
+        /* Look up the chunk */
         if(H5D_chunk_lookup(io_info->dset, io_info->dxpl_id, chunk_info->coords,
                 chunk_info->index, &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
+
+        /* Pass in chunk's coordinates. */
+        io_info->store->chunk.offset = chunk_info->coords;
+
+        /* Determine if we should use the chunk cache */
         if((cacheable = H5D_chunk_cacheable(io_info, udata.addr, TRUE)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable")
+
         if(cacheable) {
+            /* Load the chunk into cache.  But if the whole chunk is written,
+             * simply allocate space instead of load the chunk. */
             hbool_t entire_chunk = TRUE;       /* Whether whole chunk is selected */
 
-            /* Pass in chunk's coordinates in a union. */
-            io_info->store->chunk.offset = chunk_info->coords;
+            /* Pass in chunk's index. */
             io_info->store->chunk.index = chunk_info->index;
 
             /* Compute # of bytes accessed in chunk */
