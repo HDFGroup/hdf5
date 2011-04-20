@@ -5,8 +5,8 @@ INTRODUCTION
 ============
 
 This document describes the differences between HDF5-1.8.6 and 
-HDF5 1.8.7-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.7-*. 
+HDF5 1.8.7, and contains information on the platforms tested and 
+known problems in HDF5-1.8.7. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
