@@ -74,6 +74,13 @@ New Features
 
     Library
     -------
+    - The library allows the dimension size of dataspace to be zero.  In the 
+      past, the library allows it only if the maximal dimension size is unlimited.
+      Now there is no such restriction. But no data can be written to this
+      kind of dataset. (SLU - 2011/4/20)
+    - We added two new macros H5_VERSION_GE and H5_VERSION_LE to let users
+      compare certain version number with the library being used. (SLU -
+      2011/4/20) 
     - Added ability to cache files opened through external links.  Added new
       public functions H5Pset_elink_file_cache_size(),
       H5Pget_elink_file_cache_size(), and H5Fclear_elink_file_cache().
