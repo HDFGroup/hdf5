@@ -69,6 +69,7 @@ IF (BUILD_TESTING)
       h5diff_205.txt
       h5diff_206.txt
       h5diff_207.txt
+      h5diff_208.txt
       h5diff_21.txt
       h5diff_22.txt
       h5diff_23.txt
@@ -209,6 +210,8 @@ IF (BUILD_TESTING)
       h5diff_extlink_trg.h5
       h5diff_ext2softlink_src.h5
       h5diff_ext2softlink_trg.h5
+      h5diff_dset_zero_dim_size1.h5
+      h5diff_dset_zero_dim_size2.h5
       h5diff_danglelinks1.h5
       h5diff_danglelinks2.h5
       h5diff_grp_recurse1.h5
@@ -364,6 +367,8 @@ IF (BUILD_TESTING)
   SET (FILE16 h5diff_extlink_trg.h5)
   SET (FILE17 h5diff_ext2softlink_src.h5)
   SET (FILE18 h5diff_ext2softlink_trg.h5)
+  SET (FILE19 h5diff_dset_zero_dim_size1.h5)
+  SET (FILE20 h5diff_dset_zero_dim_size2.h5)
   SET (DANGLE_LINK_FILE1 h5diff_danglelinks1.h5)
   SET (DANGLE_LINK_FILE2 h5diff_danglelinks2.h5)
   SET (GRP_RECURSE_FILE1 h5diff_grp_recurse1.h5)
@@ -447,6 +452,8 @@ IF (BUILD_TESTING)
           h5diff_206.out.err
           h5diff_207.out
           h5diff_207.out.err
+          h5diff_208.out
+          h5diff_208.out.err
           h5diff_21.out
           h5diff_21.out.err
           h5diff_22.out
@@ -993,6 +1000,9 @@ ADD_H5_TEST (h5diff_205 0 -c ${FILE2} ${FILE2} g2/dset5  g2/dset6)
 ADD_H5_TEST (h5diff_206 0 -c ${FILE2} ${FILE2} g2/dset7  g2/dset8)
 
 ADD_H5_TEST (h5diff_207 0 -c ${FILE2} ${FILE2} g2/dset8  g2/dset9)
+
+# not comparable in dataspace of zero dimension size
+ADD_H5_TEST (h5diff_208 0 -c ${FILE19} ${FILE20}) 
 
 # ##############################################################################
 # # Links compare without --follow-symlinks nor --no-dangling-links
