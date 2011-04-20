@@ -374,10 +374,7 @@ ENDIF (NOT H5_SIZEOF_OFF64_T)
 
 
 # For other tests to use the same libraries
-SET (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} "-DWIN32 -D_WINDOWS")
-# SET (CMAKE_REQUIRED_LIBRARIES ${LINK_LIBS})
-# SET (CMAKE_REQUIRED_INCLUDES ${USE_INCLUDES})
-# CHECK_FUNCTION_EXISTS (initonceexecuteonce       H5_HAVE_IOEO)
+SET (CMAKE_REQUIRED_LIBRARIES ${LINK_LIBS})
 
 #-----------------------------------------------------------------------------
 # Check for some functions that are used
