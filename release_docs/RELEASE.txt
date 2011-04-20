@@ -449,7 +449,7 @@ Known Problems
   sometimes fails in the perform directory due to the attempt to remove the
   executable of h5perf or h5perf_serial by two "parallel" commands. This error
   has no consequence on the functionality of the HDF5 library or install. It
-  is fixed in the next release. AKC - 2011/01/25  ??????? 4.18.2011. sent question to albert re: has this been fixed in 1.8.7?????????????????????????
+  is fixed in the next release. AKC - 2011/01/25
 
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can
   occur when reading from a dataset in parallel shortly after it has been
@@ -467,7 +467,7 @@ Known Problems
   but there cannot be more than one shared libraries that are interlinking with
   each other. This means only the low-level C APIs can work. The high-level APIs 
   will not work which is not very useful. We hope to have a solution in the next 
-  release. (AKC - 2010/10/15) ??????? 4.18.2011. sent question to albert re: has this been fixed in 1.8.7?????????????????????????
+  release. (AKC - 2010/10/15)
 
 * The library's test dt_arith.c showed a compiler's rounding problem on
   Cygwin when converting from unsigned long long to long double.  The 
