@@ -327,16 +327,6 @@ int main ()
 
 #endif /* DEV_T_IS_SCALAR */
 
-#if defined( INLINE_TEST_inline ) || defined( INLINE_TEST___inline__ ) || defined( INLINE_TEST___inline )
-#ifndef __cplusplus
-typedef int foo_t;
-static INLINE_TEST_INLINE foo_t static_foo () { return 0; }
-INLINE_TEST_INLINE foo_t foo () {return 0; }
-int main() { return 0; }
-#endif
-
-#endif /* INLINE_TEST */
-
 #ifdef HAVE_OFF64_T
 #include <sys/types.h>
 int main()
@@ -384,21 +374,31 @@ int main ()
 
 #endif /* HAVE_GPFS */
 
-#ifdef HAVE_WIN_THREADS
+#ifdef HAVE_IOEO
 
 #include <windows.h>
+typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
 int main ()
 {
-    BOOL first_init_g=INIT_ONCE_STATIC_INIT;
-    BOOL CALLBACK win32_first_thread_init(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContext);
-    BOOL ret=FALSE;
-    
-    ret=InitOnceExecuteOnce(&first_init_g, win32_first_thread_init, NULL, NULL);
-    exit(ret ? 0 : 1);
+	PGNSI pGNSI;
+	pGNSI = (PGNSI) GetProcAddress(
+      GetModuleHandle(TEXT("kernel32.dll")), 
+      "InitOnceExecuteOnce");
+	if(NULL == pGNSI)
+		return 1;
+	else
+		return 0;
 }
-BOOL CALLBACK 
-win32_first_thread_init(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContext)
-{return TRUE;}
 
-#endif /* HAVE_WIN_THREADS */
+#endif /* HAVE_IOEO */
 
+
+#if defined( INLINE_TEST_inline ) || defined( INLINE_TEST___inline__ ) || defined( INLINE_TEST___inline )
+#ifndef __cplusplus
+typedef int foo_t;
+static INLINE_TEST_INLINE foo_t static_foo () { return 0; }
+INLINE_TEST_INLINE foo_t foo () {return 0; }
+int main() { return 0; }
+#endif
+
+#endif /* INLINE_TEST */
