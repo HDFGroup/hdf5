@@ -96,6 +96,7 @@
 #define FILE64  "tattrreg.h5"
 #define FILE65  "file_space.h5"
 #define FILE66  "packedbits.h5"
+#define FILE67  "zerodim.h5"
 
 
 
@@ -176,6 +177,11 @@ const H5L_class_t UD_link_class[1] = {{
 #define CDIM1 DIM1/2
 #define CDIM2 DIM2/2
 #define RANK  2
+
+/* Dataspace of 0 dimension size */
+#define SPACE3_RANK 2
+#define SPACE3_DIM1 0
+#define SPACE3_DIM2 0
 
 /* Element selection information */
 #define POINT1_NPOINTS 10
@@ -5103,7 +5109,41 @@ static void gent_null_space(void)
     H5Fclose(fid);
 }
 
+/*-------------------------------------------------------------------------
+ * Function: gent_zero_dim_size
+ *
+ * Purpose: generates dataset and attribute with dataspace of 0 dimension size
+ *-------------------------------------------------------------------------
+ */
+static void gent_zero_dim_size(void)
+{
+    hid_t fid, root, dataset, space, attr;
+    hsize_t	dims1[] = {SPACE3_DIM1, SPACE3_DIM2};
+    int dset_buf = 10;
+    int point = 4;
 
+    fid = H5Fcreate(FILE67, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    root = H5Gopen2(fid, "/", H5P_DEFAULT);
+
+    /* dataspace of 0 dimension size */
+    space = H5Screate_simple(SPACE3_RANK, dims1, NULL);
+
+    /* dataset */
+    dataset = H5Dcreate2(fid, "dset of 0 dimension size", H5T_STD_I32BE, space, H5P_DEFAULT, 
+                         H5P_DEFAULT, H5P_DEFAULT);
+    /* nothing should be written */
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &dset_buf);
+
+    /* attribute */
+    attr = H5Acreate2(root, "attr of 0 dimension size", H5T_NATIVE_UINT, space, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr, H5T_NATIVE_INT, &point); /* Nothing can be written */
+
+    H5Dclose(dataset);
+    H5Aclose(attr);
+    H5Gclose(root);
+    H5Sclose(space);
+    H5Fclose(fid);
+}
 
 /*-------------------------------------------------------------------------
  * Function: make_dset
@@ -7144,6 +7184,7 @@ int main(void)
     gent_compound_complex();
     gent_named_dtype_attr();
     gent_null_space();
+    gent_zero_dim_size();
 
     gent_filters();
     gent_fvalues();

@@ -115,6 +115,7 @@ IF (BUILD_TESTING)
       tnbit.ddl
       tnofilename.ddl
       tnullspace.ddl
+      zerodim.ddl
       tordergr1.ddl
       tordergr2.ddl
       tordergr3.ddl
@@ -287,6 +288,7 @@ IF (BUILD_TESTING)
       tnamed_dtype_attr.h5
       tnestedcomp.h5
       tnullspace.h5
+      zerodim.h5
       torderattr.h5
       tordergr.h5
       tsaf.h5
@@ -711,6 +713,8 @@ IF (BUILD_TESTING)
           tnofilename.out.err
           tnullspace.out
           tnullspace.out.err
+          zerodim.out
+          zerodim.out.err
           tordergr1.out
           tordergr1.out.err
           tordergr2.out
@@ -1021,6 +1025,9 @@ IF (BUILD_TESTING)
   # test for displaying dataset and attribute of null space
   ADD_H5_TEST (tnullspace 0 tnullspace.h5)
 
+  # test for displaying dataset and attribute of space with 0 dimension size
+  ADD_H5_TEST (zerodim 0 zerodim.h5)
+
   # test for long double (some systems do not have long double)
   #ADD_H5_TEST (tldouble 0 tldouble.h5)
 
@@ -1327,6 +1334,8 @@ IF (BUILD_TESTING)
   ##Test dataset and attribute of null space.  Commented out:
   ## wait until the XML schema is updated for null space. 
   ##  ADD_XML_H5_TEST (tnullspace.h5 0 tnulspace.h5)
+  ## So is dataspace with 0 dimension size.
+  ##  ADD_XML_H5_TEST (zerodim.h5 0 zerodim.h5)
 
   # other options for xml
 
