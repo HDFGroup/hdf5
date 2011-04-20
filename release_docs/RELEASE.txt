@@ -130,6 +130,9 @@ Bug Fixes since HDF5-1.8.6
 
     Configuration
     -------------
+    - Shared C++ and HL libraries on AIX should now be working correctly.
+      Note that Fortran shared libraries are still not working on AIX. 
+      (See the Known Problems section, below). (MAM - 2011/4/20)
     - Removed config/ibm-aix6.x. All IBM-AIX settings are in one file,
       ibm-aix. (AKC - 2011/4/14)
     - Shared C libraries are no longer disabled on Mac when Fortran
@@ -450,6 +453,12 @@ SGI Linux 2.6.32.19                        y       y         y         y
 
 Known Problems
 ==============
+
+* Shared Fortran libraries are not quite working on AIX. While they are
+  generated when --enable-shared is specified, the fortran and hl/fortran
+  tests fail. We are looking into the issue. HL and C++ shared libraries
+  should now be working as intended, however. (MAM - 2011/04/20)
+
 * The --with-mpe configure option does not work with Mpich2. AKC - 2011/03/10
 
 * If parallel gmake (e.g., gmake -j 4) is used, the "gmake clean" command
@@ -469,12 +478,6 @@ Known Problems
   They should be run across multiple nodes with a varying number of processes.
   These programs can be found at:
   http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
-
-* The AIX --enable-shared does not quite work. It can produce a shared library
-  but there cannot be more than one shared libraries that are interlinking with
-  each other. This means only the low-level C APIs can work. The high-level APIs 
-  will not work which is not very useful. We hope to have a solution in the next 
-  release. (AKC - 2010/10/15)
 
 * The library's test dt_arith.c showed a compiler's rounding problem on
   Cygwin when converting from unsigned long long to long double.  The 
