@@ -4,22 +4,22 @@ HDF5 version 1.8.8-snap0 currently under development
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.6 and 
-HDF5 1.8.7-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.7-*. 
+This document describes the differences between HDF5-1.8.7 and 
+HDF5 1.8.8-*, and contains information on the platforms tested and 
+known problems in HDF5-1.8.8-*. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
-Links to the HDF5 1.8.7 source code, documentation, and additional materials
+Links to the HDF5 1.8.8 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.7 release can be obtained from:
+The HDF5 1.8.8 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.7 can be accessed directly at this location: 
+User documentation for 1.8.8 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
@@ -30,8 +30,8 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.7 (current 
-release) versus Release 1.8.6":
+from Release to Release" document, in the section "Release 1.8.8 (current 
+release) versus Release 1.8.7":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -45,7 +45,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
-- Bug Fixes since HDF5-1.8.6
+- Bug Fixes since HDF5-1.8.7
 - Platforms Tested
 - Supported Configuration Features Summary
 - Known Problems
@@ -56,31 +56,11 @@ New Features
 
     Configuration
     -------------
-    - Configure now generates Makefiles that build in "silent make mode"
-      by default in which compile and link lines are significantly
-      simplified for clarity. To override this and view actual compile and
-      link lines during building, the --disable-silent-rules flag can be used
-      at configure time, or the 'make' command can be followed by V=1, to
-      indicate a "verbose" make. (MAM - 2011/4/14).
-    - Added mpicc and mpif90 as the default C and Fortran compilers for Linux
-      systems when --enable-parallel is specified but no $CC or $FC is defined.
-      (AKC - 2011/2/7)
-    - Added a new configure option, "--enable-unsupported", which can
-      be used to stop configure from preventing the use of unsupported
-      configure option combinations, such as c++ in parallel or Fortran
-      with threadsafe. Use at your own risk, as it may result in a 
-      library that won't compile or run as expected!
-      (MAM - 2010/11/17 - Bug 2061)
-
+    - None
+    
     Library
     -------
-    - Added ability to cache files opened through external links.  Added new
-      public functions H5Pset_elink_file_cache_size(),
-      H5Pget_elink_file_cache_size(), and H5Fclear_elink_file_cache().
-      (NAF - 2011/02/17)
-    - Finished implementing all options for 'log' VFD.  (QAK - 2011/1/25)
-    - Removed all old code for Metraowerks compilers, bracketed by
-      __MWERKS__). Metraowerks compiler is long gone. (AKC - 2010/11/17) 
+    - None
 
     Parallel Library
     ----------------
@@ -88,16 +68,7 @@ New Features
  
     Tools
     -----
-     - h5diff: Added new "verbose with levels" option, '-vN, --verbose=N'.
-       The old '-v, --verbose' option is deprecated but remains available;
-       it is exactly equivalent to '-v0, --verbose=0'.
-       The new levels 1 ('-v1' or '--verbose=1') and 2 ('-v2' or 
-       '--verbose=2') can be specified to view more information regarding 
-       attributes differences.  Bug #2121 (JKM 2011/3/23)
-     - h5dump: Added new option --enable-error-stack. This option will 
-       display error stack information in the output stream. This is 
-       useful when the "h5dump: Unable to print data" message is output.
-       (ADB - 2011/03/03)
+    - None
 
     High-Level APIs
     ---------------
@@ -114,45 +85,19 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    - Intel V11.1 uses now -O3 optimization in production mode (EIP - 2010/10/08)
-             
+    - None
 
 
-Bug Fixes since HDF5-1.8.6
+Bug Fixes since HDF5-1.8.7
 ==========================
 
     Configuration
     -------------
-    - Removed config/ibm-aix6.x. All IBM-AIX settings are in one file,
-      ibm-aix. (AKC - 2011/4/14)
-    - Shared C libraries are no longer disabled on Mac when Fortran
-      is enabled. Shared Fortran libraries are still not supported on Mac,
-      so configure will disable them by default, but this is overrideable
-      with the new --enable-unsupported configure option. The configure
-      summary has been updated to reflect the fact that the shared-ness of 
-      the C++/Fortran wrapper libraries may not align with the C library.
-      (MAM - 2011/04/11 - HDFFV-4353).
+    - None
 
     Library
     -------
-    - Changed assertion failure when decoding a compound datatype with no
-      fields into a normal error failure.  Also prohibit using this sort
-      of datatype for creating an attribute (as is already the case for
-      datasets and committed (named) datatypes).  (QAK - 2011/04/15, Jira 
-      issue #HDFFV-2766)
-    - Tell the VFL flush call that the file will be closing, allowing
-      the VFDs to avoid sync'ing the file (particularly valuable in parallel).
-      (QAK - 2011/03/09)
-    - The datatype handler created with H5Tencode/decode used to have the 
-      reference count 0 (zero); it now has the reference count 1 (one).
-      (SLU - 2011/2/18)
-    - Fixed the definition of H5_HAVE_GETTIMEOFDAY on Windows so that
-      HDgettimeofday() is defined and works properly.  Bug HDFFV-5931
-      (DER - 2011/04/14)
-    - Added basic VFD tests for the Windows, STDIO and log VFD tests.  The
-      STDIO test is skipped for now due to failures on a few older platforms
-      (see "known problems", below).
-      (DER - 2011/04/11)
+    - None
 
     Parallel Library
     ----------------
@@ -160,62 +105,7 @@ Bug Fixes since HDF5-1.8.6
 
     Tools
     -----
-    - Updated h5dump test case script to prevent entire test failure when 
-      source directory is read-only. Bug #HDFFV-4342 (JKM 2011/4/12)
-    - Updated some HDF5 tools to standardize the option name as 
-      '--enable-error-stack' for printing HDF5 error stack messages. h5ls and 
-      h5dump have been updated. For h5ls, this replaces "-e/--errors" option, 
-      which is deprecated. For h5dump, this is a new option. Bug #2182 
-      (JKM 2011/3/30)
-    - Fixed the h5diff --use-system-epsilon option. The formula used in the 
-      calculation was changed from ( |a - b| / b ) to ( |a - b| ). 
-      This was done to improve performance. Bug #2184 (JKM 2011/3/24)
-    - Fixed output for H5T_REFERENCE in h5dump. According to the BNF document
-      the output of a H5T_REFERENCE should be followed by the type;
-      <reference> ::= H5T_REFERENCE { <ref_type> }
-      <ref_type> ::= H5T_STD_REF_OBJECT | H5T_STD_REF_DSETREG
-      Previously this was only displayed if the -R option was used.
-      Bug #1725 (ADB 2011/3/28)
-    - Fixed two h5diff issues. 1) h5diff compared attributes correctly only 
-      when two objects had the same number of attributes and the attribute 
-      names were identical. 2) h5diff did not display useful information about 
-      attribute differences. Bug #2121 (JKM 2011/3/17)
-    - Fixed a memory leak in h5diff that occurred when accessing symbolic links 
-      with the --follow-symlink option. Bug #2214  (JKM 2011/3/18)
-    - Fixed a memory leak in h5diff that occurred when accessing variable length 
-      string data. Bug #2216 (JKM 2011/3/18)
-    - Fixed a memory leak in h5diff that occurred when accessing symbolic links 
-      with the --follow-symlink option. Bug #2214  (JKM 2011/3/18)
-    - Fixed and improved the help page for h5ls -a, --address option. 
-      Bug #1904 (JKM 2011/3/11)
-    - Fixed h5copy to enable copying an object into the same HDF5 file.
-      Previously h5copy displayed an error message when the target file 
-      was the same as the source file. (XCAO 2011/3/8)
-    - Fixed an h5dump problem that caused the tool to skip some data elements 
-      in large datasets with a large array datatype on Windows. This issue 
-      arose only on Windows due to the different return behavior of the 
-      _vsnprintf() function.  Bug #2161 (JKM 2011/3/3)
-    - Fixed h5dump which was skipping some array indices in large datasets 
-      with a relatively large array datatype. The interval of skipped indices
-      varied according to the size of the array. Bug #2092 (JKM 2011/2/15)
-    - Fixed h5diff which was segfaulting when comparing compound datasets
-      with a combination of fixed-length string datatypes and variable-length
-      string datatypes in certain orders. Bug #2089 (JKM 2010/12/28)
-    - Improved h5diff performance. 1) Now use HDmemcmp() before comparing two 
-      elements. 2) Replace expensive H5Tequals() calls. 3) Retrieve datatype
-      information at dataset level, not at each element level for compound 
-      datasets. HDFFV-7516 (JKM 2011/4/18) 
-    - Fixed h5ls to display nested compound types with curly brackets 
-      when -S (--simple) option is used with -l (--label), so it shows  
-      which members (in curly brackets) belong to which nested compound type, 
-      making the output clearer.  Bug #1979 (JKM 2010/11/09)
-    - Fixed h5diff to handle variable-length strings in a compound dataset 
-      and variable-length string arrays in a compound dataset correctly.
-      Garbage values were previously displayed when h5diff compared multiple 
-      variable-length strings in a compound type dataset. 
-      Bug #1989 (JKM 2010/10/28)
-    - Fixed h5copy to fail gracefully when copying an object to a non-
-      existing group without the -p option. Bug #2040 (JKM 2010/10/18)
+    - None
 
     F90 API
     ------
