@@ -236,7 +236,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
 
     # Append more extra warning flags that only gcc 4.5+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wc++0x-compat -Wjump-misses-init -Wunsuffixed-float-constants"
+    H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
     # Append more extra warning flags that only gcc 4.6+ know about
     H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
@@ -300,7 +300,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
 
     # Append more extra warning flags that only gcc 4.5+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wc++0x-compat -Wjump-misses-init -Wunsuffixed-float-constants"
+    H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
     # Try out the new "stack protector" feature in gcc 4.1
     # (Strictly speaking this isn't really a "warning" flag, so it's added to
