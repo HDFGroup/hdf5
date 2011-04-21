@@ -25,7 +25,6 @@
 
 #define H5_HAVE_VFL 1 /*define a convenient app feature test*/
 #define H5FD_VFD_DEFAULT 0   /* Default VFL driver value */
-#define H5_HAVE_VFD_EXTENSIONS 1 /*Extensions to VFD to allow external VFD linking */
 
 /* Types of allocation requests: see H5Fpublic.h  */
 typedef enum H5F_mem_t	H5FD_mem_t;
@@ -232,6 +231,7 @@ typedef struct H5FD_class_t {
     const char *name;
     haddr_t maxaddr;
     H5F_close_degree_t fc_degree;
+    herr_t  (*terminate)(void);
     hsize_t (*sb_size)(H5FD_t *file);
     herr_t  (*sb_encode)(H5FD_t *file, char *name/*out*/,
                          unsigned char *p/*out*/);
@@ -252,9 +252,6 @@ typedef struct H5FD_class_t {
     haddr_t (*alloc)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
     herr_t  (*free)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                     haddr_t addr, hsize_t size);
-#ifdef H5_HAVE_VFD_EXTENSIONS
-    void    (*terminate)();
-#endif
     haddr_t (*get_eoa)(const H5FD_t *file, H5FD_mem_t type);
     herr_t  (*set_eoa)(H5FD_t *file, H5FD_mem_t type, haddr_t addr);
     haddr_t (*get_eof)(const H5FD_t *file);

@@ -97,7 +97,7 @@ static herr_t H5FD_free_cls(H5FD_class_t *cls);
  * object and the file is closed and re-opened, the 'fileno' value will
  * be different.
  */
-static unsigned long file_serial_no;
+static unsigned long H5FD_file_serial_no_g;
 
 
 /*-------------------------------------------------------------------------
@@ -153,7 +153,7 @@ H5FD_init_interface(void)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Reset the file serial numbers */
-    file_serial_no = 0;
+    H5FD_file_serial_no_g = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -221,15 +221,24 @@ H5FD_term_interface(void)
 static herr_t
 H5FD_free_cls(H5FD_class_t *cls)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_free_cls)
+    herr_t ret_value = SUCCEED;
 
-    // Give the File driver a chance to free singletons or other objects
-    // which will become invalid once the class structure is freed
-    if (cls && cls->terminate) cls->terminate();           
+    FUNC_ENTER_NOAPI_NOINIT(H5FD_free_cls)
+
+    /* Sanity check */
+    HDassert(cls);
+
+    /* If the file driver has a terminate callback, call it to give the file
+     * driver a chance to free singletons or other resources which will become
+     * invalid once the class structure is freed.
+     */
+    if(cls->terminate && cls->terminate() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEOBJ, FAIL, "virtual file driver '%s' did not terminate cleanly", cls->name)
 
     H5MM_xfree(cls);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_free_cls() */
 
 
@@ -1077,11 +1086,11 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver")
 
     /* Increment the global serial number & assign it to this H5FD_t object */
-    if(++file_serial_no == 0) {
+    if(++H5FD_file_serial_no_g == 0) {
         /* (Just error out if we wrap around for now...) */
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to get file serial number")
     } /* end if */
-    file->fileno = file_serial_no;
+    file->fileno = H5FD_file_serial_no_g;
 
     /* Start with base address set to 0 */
     /* (This will be changed later, when the superblock is located) */

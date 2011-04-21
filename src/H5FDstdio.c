@@ -170,6 +170,7 @@ typedef struct H5FD_stdio_t {
     HADDR_UNDEF==(A)+(Z) || (file_offset_t)((A)+(Z))<(file_offset_t)(A))
 
 /* Prototypes */
+static herr_t H5FD_stdio_term(void);
 static H5FD_t *H5FD_stdio_open(const char *name, unsigned flags,
                  hid_t fapl_id, haddr_t maxaddr);
 static herr_t H5FD_stdio_close(H5FD_t *lf);
@@ -191,6 +192,7 @@ static const H5FD_class_t H5FD_stdio_g = {
     "stdio",				        /*name			*/
     MAXADDR,				        /*maxaddr		*/
     H5F_CLOSE_WEAK,				/* fc_degree		*/
+    H5FD_stdio_term,                            /*terminate             */
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
@@ -208,7 +210,6 @@ static const H5FD_class_t H5FD_stdio_g = {
     NULL,					/*get_type_map		*/
     H5FD_stdio_alloc,				/*alloc			*/
     NULL,					/*free			*/
-    H5FD_stdio_term,                            /*terminate             */
     H5FD_stdio_get_eoa,		                /*get_eoa		*/
     H5FD_stdio_set_eoa, 	                /*set_eoa		*/
     H5FD_stdio_get_eof,		                /*get_eof		*/
@@ -258,21 +259,20 @@ H5FD_stdio_init(void)
  *
  * Purpose:	Shut down the VFD
  *
- * Return:	<none>
+ * Returns:     Non-negative on success or negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Friday, Jan 30, 2004
  *
- * Modification:
- *
  *---------------------------------------------------------------------------
  */
-void
+static herr_t
 H5FD_stdio_term(void)
 {
     /* Reset VFL ID */
     H5FD_STDIO_g=0;
 
+    return 0;
 } /* end H5FD_stdio_term() */
 
 

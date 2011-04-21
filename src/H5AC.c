@@ -485,7 +485,7 @@ H5AC_create(const H5F_t *f,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad cache configuration")
 
 #ifdef H5_HAVE_PARALLEL
-    if ( H5F_HAS_FEATURE(f,H5FD_FEAT_HAS_MPI) ) {
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
         MPI_Comm	 mpi_comm;
         int		 mpi_rank;
         int	 	 mpi_size;

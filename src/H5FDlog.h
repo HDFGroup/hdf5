@@ -22,8 +22,6 @@
 #ifndef H5FDlog_H
 #define H5FDlog_H
 
-#include "H5Ipublic.h"
-
 #define H5FD_LOG	(H5FD_log_init())
 
 /* Flags for H5Pset_fapl_log() */
@@ -61,7 +59,6 @@ extern "C" {
 #endif
 
 H5_DLL hid_t H5FD_log_init(void);
-H5_DLL void H5FD_log_term(void);
 H5_DLL herr_t H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, size_t buf_size);
 
 #ifdef __cplusplus
