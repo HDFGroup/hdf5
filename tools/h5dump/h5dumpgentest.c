@@ -6896,6 +6896,11 @@ gent_extlinks(void)
  H5Lcreate_external(FILE62, "type", source_fid, "ext_link3", H5P_DEFAULT, H5P_DEFAULT);
  H5Lcreate_external(FILE62, "group/elink_t2", source_fid, "ext_link4", H5P_DEFAULT, H5P_DEFAULT);
  H5Lcreate_external(FILE62, "empty_group", source_fid, "ext_link5", H5P_DEFAULT, H5P_DEFAULT);
+/* external link to soft link which linked to a dataset */
+ H5Lcreate_external(FILE4_1, "/soft_dset1", source_fid, "ext2soft_link1", H5P_DEFAULT, H5P_DEFAULT);
+
+/* external link to dangle soft link  */
+ H5Lcreate_external(FILE4_1, "/soft_dangle", source_fid, "ext2softdangle_link1", H5P_DEFAULT, H5P_DEFAULT);
 
 /*-------------------------------------------------------------------------
  * create external link in the "far" file pointing to the source file

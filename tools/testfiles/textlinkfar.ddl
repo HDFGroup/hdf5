@@ -7,6 +7,24 @@ GROUP "/" {
       TARGETFILE "textlinksrc.h5"
       TARGETPATH "/"
          GROUP "/" {
+            EXTERNAL_LINK "ext2soft_link1" {
+               TARGETFILE "tsoftlinks.h5"
+               TARGETPATH "/soft_dset1"
+                  DATASET "/soft_dset1" {
+                     DATATYPE  H5T_STD_I32BE
+                     DATASPACE  SIMPLE { ( 4, 2 ) / ( 4, 2 ) }
+                     DATA {
+                     (0,0): 0, 0,
+                     (1,0): 1, 1,
+                     (2,0): 2, 2,
+                     (3,0): 3, 3
+                     }
+                  }
+            }
+            EXTERNAL_LINK "ext2softdangle_link1" {
+               TARGETFILE "tsoftlinks.h5"
+               TARGETPATH "/soft_dangle"
+            }
             EXTERNAL_LINK "ext_link1" {
                TARGETFILE "textlinktar.h5"
                TARGETPATH "group"
