@@ -43,17 +43,6 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDpkg.h"		/* File Drivers				*/
-#include "H5FDcore.h"		/* Files stored entirely in memory	*/
-#include "H5FDfamily.h"		/* File families 			*/
-#include "H5FDlog.h"        	/* sec2 driver with I/O logging (for debugging) */
-#include "H5FDmpi.h"            /* MPI-based file drivers		*/
-#include "H5FDmulti.h"		/* Usage-partitioned file family	*/
-#include "H5FDsec2.h"		/* POSIX unbuffered file I/O		*/
-#include "H5FDstdio.h"		/* Standard C buffered I/O		*/
-#ifdef H5_HAVE_WINDOWS
-#include "H5FDwindows.h"        /* Windows buffered I/O     */
-#endif
-#include "H5FDdirect.h"		/* Direct file I/O			*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -201,26 +190,6 @@ H5FD_term_interface(void)
     if(H5_interface_initialize_g) {
 	if((n=H5I_nmembers(H5I_VFL))!=0) {
 	    H5I_clear_type(H5I_VFL, FALSE, FALSE);
-
-            /* Reset the VFL drivers, if they've been closed */
-            if(H5I_nmembers(H5I_VFL)==0) {
-                H5FD_sec2_term();
-#ifdef H5_HAVE_DIRECT
-                H5FD_direct_term();
-#endif
-                H5FD_log_term();
-                H5FD_stdio_term();
-#ifdef H5_HAVE_WINDOWS
-                H5FD_windows_term();
-#endif
-                H5FD_family_term();
-                H5FD_core_term();
-                H5FD_multi_term();
-#ifdef H5_HAVE_PARALLEL
-                H5FD_mpio_term();
-                H5FD_mpiposix_term();
-#endif /* H5_HAVE_PARALLEL */
-            } /* end if */
 	} else {
 	    H5I_dec_type_ref(H5I_VFL);
 	    H5_interface_initialize_g = 0;
@@ -253,6 +222,10 @@ static herr_t
 H5FD_free_cls(H5FD_class_t *cls)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_free_cls)
+
+    // Give the File driver a chance to free singletons or other objects
+    // which will become invalid once the class structure is freed
+    if (cls && cls->terminate) cls->terminate();           
 
     H5MM_xfree(cls);
 

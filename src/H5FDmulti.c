@@ -167,6 +167,7 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_get_type_map,			/*get_type_map		*/
     H5FD_multi_alloc,				/*alloc			*/
     H5FD_multi_free,				/*free			*/
+    H5FD_multi_term,                            /*terminate             */
     H5FD_multi_get_eoa,				/*get_eoa		*/
     H5FD_multi_set_eoa,				/*set_eoa		*/
     H5FD_multi_get_eof,				/*get_eof		*/

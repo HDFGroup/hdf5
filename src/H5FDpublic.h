@@ -25,6 +25,7 @@
 
 #define H5_HAVE_VFL 1 /*define a convenient app feature test*/
 #define H5FD_VFD_DEFAULT 0   /* Default VFL driver value */
+#define H5_HAVE_VFD_EXTENSIONS 1 /*Extensions to VFD to allow external VFD linking */
 
 /* Types of allocation requests: see H5Fpublic.h  */
 typedef enum H5F_mem_t	H5FD_mem_t;
@@ -209,8 +210,19 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * the handle for the VFD (returned with the 'get_handle' callback) is
      * of type 'int' and is compatible with POSIX I/O calls.
      */
-#define H5FD_FEAT_POSIX_COMPAT_HANDLE   0x00000080
-
+#define H5FD_FEAT_POSIX_COMPAT_HANDLE   0x00000080    
+    /*
+     * Defining the H5FD_FEAT_HAS_MPI for a VFL driver means that
+     * the driver makes use of MPI communication and code may retrieve
+     * communicator/rank information from it
+     */
+#define H5FD_FEAT_HAS_MPI               0x00000100
+    /*
+     * Defining the H5FD_FEAT_ALLOCATE_EARLY for a VFL driver means that
+     * the library will use the H5D_ALLOC_TIME_EARLY on dataset create
+     * instead of the default H5D_ALLOC_TIME_LATE
+     */
+#define H5FD_FEAT_ALLOCATE_EARLY        0x00000200
 
 /* Forward declaration */
 typedef struct H5FD_t H5FD_t;
@@ -240,6 +252,9 @@ typedef struct H5FD_class_t {
     haddr_t (*alloc)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
     herr_t  (*free)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                     haddr_t addr, hsize_t size);
+#ifdef H5_HAVE_VFD_EXTENSIONS
+    void    (*terminate)();
+#endif
     haddr_t (*get_eoa)(const H5FD_t *file, H5FD_mem_t type);
     herr_t  (*set_eoa)(H5FD_t *file, H5FD_mem_t type, haddr_t addr);
     haddr_t (*get_eof)(const H5FD_t *file);

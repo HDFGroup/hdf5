@@ -115,6 +115,7 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     NULL,					/*get_type_map		*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
+    H5FD_mpio_term,                             /*terminate             */
     H5FD_mpio_get_eoa,				/*get_eoa		*/
     H5FD_mpio_set_eoa, 				/*set_eoa		*/
     H5FD_mpio_get_eof,				/*get_eof		*/
@@ -1163,8 +1164,10 @@ H5FD_mpio_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags=0;
-        *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
+        *flags|=H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations */
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+        *flags|=H5FD_FEAT_HAS_MPI;             /* This driver uses MPI */
+        *flags|=H5FD_FEAT_ALLOCATE_EARLY;      /* Allocate space early instead of late */
     } /* end if */
 
 done:

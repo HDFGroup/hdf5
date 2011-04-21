@@ -208,6 +208,7 @@ static const H5FD_class_t H5FD_stdio_g = {
     NULL,					/*get_type_map		*/
     H5FD_stdio_alloc,				/*alloc			*/
     NULL,					/*free			*/
+    H5FD_stdio_term,                            /*terminate             */
     H5FD_stdio_get_eoa,		                /*get_eoa		*/
     H5FD_stdio_set_eoa, 	                /*set_eoa		*/
     H5FD_stdio_get_eof,		                /*get_eof		*/

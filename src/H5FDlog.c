@@ -201,6 +201,7 @@ static const H5FD_class_t H5FD_log_g = {
     NULL,					/*get_type_map		*/
     H5FD_log_alloc,				/*alloc			*/
     NULL,					/*free			*/
+    H5FD_log_term,                              /*terminate             */
     H5FD_log_get_eoa,				/*get_eoa		*/
     H5FD_log_set_eoa, 				/*set_eoa		*/
     H5FD_log_get_eof,				/*get_eof		*/

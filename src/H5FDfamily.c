@@ -136,6 +136,7 @@ static const H5FD_class_t H5FD_family_g = {
     NULL,					/*get_type_map		*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
+    H5FD_family_term,                           /*terminate             */
     H5FD_family_get_eoa,			/*get_eoa		*/
     H5FD_family_set_eoa,			/*set_eoa		*/
     H5FD_family_get_eof,			/*get_eof		*/

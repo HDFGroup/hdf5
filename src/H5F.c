@@ -934,7 +934,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
          *      merged into the trunk and journaling is enabled, at least until
          *      we make it work. - QAK)
          */
-        f->shared->use_tmp_space = !(IS_H5FD_MPI(f));
+        f->shared->use_tmp_space = !H5F_HAS_FEATURE(f,H5FD_FEAT_HAS_MPI);
 
 	/*
 	 * Create a metadata cache with the specified number of elements.
