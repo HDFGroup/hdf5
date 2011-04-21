@@ -833,7 +833,7 @@ H5B2_cache_internal_size(const H5F_t UNUSED *f, const H5B2_internal_t *internal,
  *-------------------------------------------------------------------------
  */
 static H5B2_leaf_t *
-H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
+H5B2_cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
     H5B2_leaf_cache_ud_t *udata = (H5B2_leaf_cache_ud_t *)_udata;
     H5B2_leaf_t		*leaf = NULL;   /* Pointer to lead node loaded */

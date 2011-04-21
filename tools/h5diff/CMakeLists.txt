@@ -45,6 +45,8 @@ IF (BUILD_TESTING)
       h5diff_100.txt
       #h5diff_101.txt
       #h5diff_102.txt
+      #h5diff_103.txt
+      #h5diff_104.txt
       h5diff_11.txt
       h5diff_12.txt
       h5diff_13.txt
@@ -174,6 +176,17 @@ IF (BUILD_TESTING)
       h5diff_628.txt
       h5diff_629.txt
       h5diff_70.txt
+      h5diff_700.txt
+      h5diff_701.txt
+      h5diff_702.txt
+      h5diff_703.txt
+      h5diff_704.txt
+      h5diff_705.txt
+      h5diff_706.txt
+      h5diff_707.txt
+      h5diff_708.txt
+      h5diff_709.txt
+      h5diff_710.txt
       h5diff_80.txt
       h5diff_90.txt
   )
@@ -209,6 +222,8 @@ IF (BUILD_TESTING)
       h5diff_exclude2-1.h5
       h5diff_exclude2-2.h5
       h5diff_comp_vl_strs.h5
+      h5diff_attr_v_level1.h5
+      h5diff_attr_v_level2.h5
   )
 
   FOREACH (txt_file ${HDF5_REFERENCE_FILES})
@@ -247,6 +262,19 @@ IF (BUILD_TESTING)
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102w.txt ${PROJECT_BINARY_DIR}/h5diff_102.txt
     )
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5diff
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_103w.txt ${PROJECT_BINARY_DIR}/h5diff_103.txt
+    )
+
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5diff
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104w.txt ${PROJECT_BINARY_DIR}/h5diff_104.txt
+    )
   ELSE (WIN32 AND NOT CYGWIN)
     ADD_CUSTOM_COMMAND (
         TARGET     h5diff
@@ -261,6 +289,19 @@ IF (BUILD_TESTING)
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102.txt ${PROJECT_BINARY_DIR}/h5diff_102.txt
     )
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5diff
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_103.txt ${PROJECT_BINARY_DIR}/h5diff_103.txt
+    )
+
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5diff
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104.txt ${PROJECT_BINARY_DIR}/h5diff_104.txt
+    )
   ENDIF (WIN32 AND NOT CYGWIN)
   
 ##############################################################################
@@ -273,9 +314,9 @@ IF (BUILD_TESTING)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME H5DIFF-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${ARGN})
-      IF (${resultcode} STREQUAL "1")
+      IF (NOT ${resultcode} STREQUAL "0")
         SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-      ENDIF (${resultcode} STREQUAL "1")
+      ENDIF (NOT ${resultcode} STREQUAL "0")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5DIFF-${resultfile}
@@ -340,6 +381,10 @@ IF (BUILD_TESTING)
   SET (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
   # compound type with multiple vlen string types
   SET (COMP_VL_STRS_FILE h5diff_comp_vl_strs.h5)
+  # attrs with verbose option level
+  SET (ATTR_VERBOSE_LEVEL_FILE1 h5diff_attr_v_level1.h5)
+  SET (ATTR_VERBOSE_LEVEL_FILE2 h5diff_attr_v_level2.h5)
+
 
   # Remove any output file left over from previous test run
   ADD_TEST (
@@ -354,6 +399,10 @@ IF (BUILD_TESTING)
           h5diff_101.out.err
           h5diff_102.out
           h5diff_102.out.err
+          h5diff_103.out
+          h5diff_103.out.err
+          h5diff_104.out
+          h5diff_104.out.err
           h5diff_11.out
           h5diff_11.out.err
           h5diff_12.out
@@ -612,6 +661,28 @@ IF (BUILD_TESTING)
           h5diff_629.out.err
           h5diff_70.out
           h5diff_70.out.err
+          h5diff_700.out
+          h5diff_700.out.err
+          h5diff_701.out
+          h5diff_701.out.err
+          h5diff_702.out
+          h5diff_702.out.err
+          h5diff_703.out
+          h5diff_703.out.err
+          h5diff_704.out
+          h5diff_704.out.err
+          h5diff_705.out
+          h5diff_705.out.err
+          h5diff_706.out
+          h5diff_706.out.err
+          h5diff_707.out
+          h5diff_707.out.err
+          h5diff_708.out
+          h5diff_708.out.err
+          h5diff_709.out
+          h5diff_709.out.err
+          h5diff_710.out
+          h5diff_710.out.err
           h5diff_80.out
           h5diff_80.out.err
           h5diff_90.out
@@ -844,6 +915,37 @@ ADD_H5_TEST (h5diff_628 1 -n 1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 # ##############################################################################
 ADD_H5_TEST (h5diff_70 1 -v ${FILE5} ${FILE6}) 
 
+# ##################################################
+#  attrs with verbose option level
+# ##################################################
+ADD_H5_TEST (h5diff_700 1 -v1 ${FILE5} ${FILE6}) 
+ADD_H5_TEST (h5diff_701 1 -v2 ${FILE5} ${FILE6})
+ADD_H5_TEST (h5diff_702 1 --verbose=1 ${FILE5} ${FILE6})
+ADD_H5_TEST (h5diff_703 1 --verbose=2 ${FILE5} ${FILE6})
+
+# same attr number , all same attr name
+ADD_H5_TEST (h5diff_704 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g)
+
+# same attr number , some same attr name
+ADD_H5_TEST (h5diff_705 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /dset)
+
+# same attr number , all different attr name
+ADD_H5_TEST (h5diff_706 0 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /ntype)
+
+# different attr number , same attr name (intersected)
+ADD_H5_TEST (h5diff_707 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g2)
+
+# different attr number , all different attr name 
+ADD_H5_TEST (h5diff_708 0 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g3)
+
+# when no attributes exist in both objects
+ADD_H5_TEST (h5diff_709 0 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g4)
+
+# file vs file
+ADD_H5_TEST (h5diff_710 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2})
+
+
+
 # ##############################################################################
 # 8.  all dataset datatypes
 # ##############################################################################
@@ -865,6 +967,13 @@ ADD_H5_TEST (h5diff_101 1 -v ${FILE1} ${FILE1} g1/d1  g1/d2)
 
 ADD_H5_TEST (h5diff_102 1 -v ${FILE1} ${FILE1} g1/fp1 g1/fp2) 
 
+# with --use-system-epsilon for double value. expect less differences  
+ADD_H5_TEST (h5diff_103 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/d1
+g1/d2) 
+
+# with --use-system-epsilon for float value. expect less differences
+ADD_H5_TEST (h5diff_104 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp1
+g1/fp2)
 
 # not comparable -c flag
 ADD_H5_TEST (h5diff_200 0 ${FILE2} ${FILE2} g2/dset1  g2/dset2) 

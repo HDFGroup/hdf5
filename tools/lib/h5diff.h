@@ -36,6 +36,7 @@ typedef struct {
     int      m_quiet;               /* quiet mide: no output at all */
     int      m_report;              /* report mode: print the data */
     int      m_verbose;             /* verbose mode: print the data, list of objcets, warnings */
+    int      m_verbose_level;       /* control verbose details */
     int      d;                     /* delta, absolute value to compare */
     double   delta;                 /* delta value */
     int      p;                     /* relative error to compare*/
@@ -169,7 +170,8 @@ const char* get_class(H5T_class_t tclass);
 const char* get_sign(H5T_sign_t sign);
 void        print_dimensions (int rank, hsize_t *dims);
 int         print_objname(diff_opt_t *options, hsize_t nfound);
-void        do_print_objname (const char *OBJ, const char *path1, const char *path2);
+void        do_print_objname (const char *OBJ, const char *path1, const char *path2, diff_opt_t * opts);
+void        do_print_attrname (const char *attr, const char *path1, const char *path2);
 
 
 /*-------------------------------------------------------------------------

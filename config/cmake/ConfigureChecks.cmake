@@ -8,10 +8,8 @@ INCLUDE (${CMAKE_ROOT}/Modules/CheckIncludeFiles.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckLibraryExists.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckSymbolExists.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
+INCLUDE (${CMAKE_ROOT}/Modules/CheckVariableExists.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckFortranFunctionExists.cmake)
-
-MESSAGE (STATUS "Configure Checks that still need to be implemented")
-MESSAGE (STATUS "  GetConsoleScreenBufferInfo function for Windows")
 
 #-----------------------------------------------------------------------------
 # Always SET this for now IF we are on an OS X box
@@ -130,9 +128,9 @@ ENDMACRO (CHECK_LIBRARY_EXISTS_CONCAT)
 
 SET (WINDOWS)
 IF (WIN32)
-  IF (NOT UNIX AND NOT CYGWIN)
+  IF (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
     SET (WINDOWS 1)
-  ENDIF (NOT UNIX AND NOT CYGWIN)
+  ENDIF (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
 ENDIF (WIN32)
 
 #IF (WIN32)
@@ -176,8 +174,11 @@ IF (WINDOWS)
   SET (H5_HAVE_LONGJMP 1)
   SET (H5_STDC_HEADERS 1)
   SET (H5_HAVE_GETHOSTNAME 1)
-  SET (H5_HAVE_TIMEZONE 1)
+  SET (H5_HAVE_GETCONSOLESCREENBUFFERINFO 1)
   SET (H5_HAVE_FUNCTION 1)
+  SET (H5_GETTIMEOFDAY_GIVES_TZ 1)
+  SET (H5_HAVE_TIMEZONE 1)
+  SET (H5_HAVE_GETTIMEOFDAY 1)
   SET (H5_LONE_COLON 0)
 ENDIF (WINDOWS)
 
@@ -258,7 +259,6 @@ CHECK_INCLUDE_FILE_CONCAT ("sys/timeb.h"     H5_HAVE_SYS_TIMEB_H)
 CHECK_INCLUDE_FILE_CONCAT ("sys/types.h"     H5_HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILE_CONCAT ("unistd.h"        H5_HAVE_UNISTD_H)
 CHECK_INCLUDE_FILE_CONCAT ("stdlib.h"        H5_HAVE_STDLIB_H)
-CHECK_INCLUDE_FILE_CONCAT ("memory.h"        H5_HAVE_MEMORY_H)
 CHECK_INCLUDE_FILE_CONCAT ("dlfcn.h"         H5_HAVE_DLFCN_H)
 CHECK_INCLUDE_FILE_CONCAT ("features.h"      H5_HAVE_FEATURES_H)
 CHECK_INCLUDE_FILE_CONCAT ("inttypes.h"      H5_HAVE_INTTYPES_H)
@@ -505,14 +505,14 @@ MACRO (HDF5_FUNCTION_TEST OTHER_TEST)
     ENDFOREACH (def)
 
     FOREACH (def
-        H5_HAVE_SYS_TIME_H
-        H5_HAVE_UNISTD_H
-        H5_HAVE_SYS_TYPES_H
-        H5_HAVE_SYS_SOCKET_H
+        HAVE_SYS_TIME_H
+        HAVE_UNISTD_H
+        HAVE_SYS_TYPES_H
+        HAVE_SYS_SOCKET_H
     )
-      IF ("${def}")
+      IF ("${H5_${def}}")
         SET (MACRO_CHECK_FUNCTION_DEFINITIONS "${MACRO_CHECK_FUNCTION_DEFINITIONS} -D${def}")
-      ENDIF ("${def}")
+      ENDIF ("${H5_${def}}")
     ENDFOREACH (def)
 
     IF (LARGEFILE)
@@ -521,7 +521,7 @@ MACRO (HDF5_FUNCTION_TEST OTHER_TEST)
       )
     ENDIF (LARGEFILE)
 
-    # (STATUS "Performing ${OTHER_TEST}")
+    #MESSAGE (STATUS "Performing ${OTHER_TEST}")
     TRY_COMPILE (${OTHER_TEST}
         ${CMAKE_BINARY_DIR}
         ${HDF5_RESOURCES_DIR}/HDF5Tests.c
@@ -571,11 +571,11 @@ IF (NOT WINDOWS)
       LONE_COLON
   )
     HDF5_FUNCTION_TEST (${test})
-    IF (NOT CYGWIN)
-      HDF5_FUNCTION_TEST (HAVE_TIMEZONE)
-#      HDF5_FUNCTION_TEST (HAVE_STAT_ST_BLOCKS)
-    ENDIF (NOT CYGWIN)
   ENDFOREACH (test)
+  IF (NOT CYGWIN AND NOT MINGW)
+    HDF5_FUNCTION_TEST (HAVE_TIMEZONE)
+#      HDF5_FUNCTION_TEST (HAVE_STAT_ST_BLOCKS)
+  ENDIF (NOT CYGWIN AND NOT MINGW)
 ENDIF (NOT WINDOWS)
 
 #-----------------------------------------------------------------------------

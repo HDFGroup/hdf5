@@ -1476,7 +1476,7 @@ H5FD_log_flush(H5FD_t *file,
     int          result;
     H5FD_log_t * log_file_ptr = NULL;
 
-    FUNC_ENTER_NOAPI(H5FD_log_fsync, FAIL)
+    FUNC_ENTER_NOAPI(H5FD_log_flush, FAIL)
 
     if ( file == NULL ) {
 

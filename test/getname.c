@@ -2927,10 +2927,15 @@ main(void)
     nerrors += test_main(file_id, fapl);
     nerrors += test_obj_ref(fapl);
     nerrors += test_reg_ref(fapl);
+#ifndef H5_CANNOT_OPEN_TWICE
     nerrors += test_elinks(fapl);
+#endif /*H5_CANNOT_OPEN_TWICE*/
 
     /* Close file */
     H5Fclose(file_id);
+
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     if(nerrors)
         goto error;

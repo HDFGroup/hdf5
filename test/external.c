@@ -957,6 +957,10 @@ main (void)
     nerrors += test_2(fapl);
     nerrors += test_3(fapl);
     nerrors += test_4(fapl);
+
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+
     if (nerrors>0) goto error;
 
     if (H5Fclose(file) < 0) goto error;

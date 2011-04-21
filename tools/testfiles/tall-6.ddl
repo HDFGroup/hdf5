@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -y -o data -d /g1/g1.1/dset1.1.1 tall.h5'
-#############################
 HDF5 "tall.h5" {
 DATASET "/g1/g1.1/dset1.1.1" {
    DATATYPE  H5T_STD_I32BE

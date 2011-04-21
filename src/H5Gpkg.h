@@ -391,7 +391,6 @@ H5_DLL herr_t H5G_iterate(hid_t loc_id, const char *group_name,
 /*
  * Group hierarchy traversal routines
  */
-H5_DLL herr_t H5G_traverse_term_interface(void);
 H5_DLL herr_t H5G_traverse_special(const H5G_loc_t *grp_loc,
     const H5O_link_t *lnk, unsigned target, size_t *nlinks, hbool_t last_comp,
     H5G_loc_t *obj_loc, hbool_t *obj_exists, hid_t lapl_id, hid_t dxpl_id);
@@ -590,10 +589,14 @@ H5_DLL H5RS_str_t *H5G_build_fullpath_refstr_str(H5RS_str_t *path_r, const char 
 /*
  * These functions operate on group "locations"
  */
-H5_DLL herr_t H5G_loc_root(H5F_t *f, H5G_loc_t *loc);
 H5_DLL herr_t H5G_loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth);
 H5_DLL herr_t H5G_loc_insert(H5G_loc_t *grp_loc, const char *name,
     H5G_loc_t *obj_loc, H5O_type_t obj_type, const void *crt_info, hid_t dxpl_id);
+
+/*
+ * These functions operate on the root group
+ */
+H5_DLL herr_t H5G_root_loc(H5F_t *f, H5G_loc_t *loc);
 
 /* Testing functions */
 #ifdef H5G_TESTING
@@ -605,6 +608,7 @@ H5_DLL herr_t H5G_new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *c
 H5_DLL herr_t H5G_lheap_size_test(hid_t gid, size_t *lheap_size);
 H5_DLL herr_t H5G_user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsigned *user_path_hidden);
 H5_DLL herr_t H5G_verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent);
+H5_DLL herr_t H5G_verify_cached_stabs_test(hid_t gid);
 #endif /* H5G_TESTING */
 
 #endif /* _H5Gpkg_H */

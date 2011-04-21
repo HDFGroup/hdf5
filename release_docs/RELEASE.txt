@@ -1,4 +1,4 @@
-HDF5 version 1.9.80 currently under development
+HDF5 version 1.9.81 currently under development
 ================================================================================
 
 
@@ -39,6 +39,12 @@ New Features
 
     Configuration:
     -------------
+    - Configure now generates Makefiles that build in "silent make mode"
+      by default in which compile and link lines are significantly
+      simplified for clarity. To override this and view actual compile and
+      link lines during building, the --disable-silent-rules flag can be used
+      at configure time, or the 'make' command can be followed by V=1, to
+      indicate a "verbose" make. (MAM - 2011/4/14).
     - Added mpicc and mpif90 as the default C and Fortran compilers for Linux
       systems when --enable-parallel is specified but no $CC or $FC is defined.
       (AKC - 2011/2/7)
@@ -85,9 +91,20 @@ New Features
 
     Library:
     --------
+    - Extended VFD calls to support AIO.  At present, the new AIO calls are 
+      NOT used during normal library operations -- modifications to the library
+      to use the new VFD calls will be added as time and funding permit.
+      User provided file drivers need not support AIO, but must be modified to
+      set the AIO related fields in their instance of H5FD_class_t to NULL in 
+      this case.  The top level of the VFD interface will fake AIO if the 
+      underlying driver does not support it. (JRM - 2011/04/20)
+    - Added fsync call to the VFD interface.  At present, this call is NOT
+      used by the library under normal circumstances.  However, it will be 
+      used in the future, and user supplied file drivers should move towards
+      supporting it if it is applicable to the driver. (JRM - 2011/04/20)
     - Added ability to cache files opened through external links.  Added new
       public functions H5Pset_elink_file_cache_size(),
-      H5Pget_elink_file_cache_size(), and H5Frelease_file_cache().
+      H5Pget_elink_file_cache_size(), and H5Fclear_elink_file_cache().
       (NAF - 2011/02/17)
     - Removed all old code for Metraowerks compilers, bracketed by
       __MWERKS__). Metraowerks compiler is long gone. (AKC - 2010/11/17) 
@@ -189,6 +206,10 @@ New Features
 
     Tools:
     ------
+     - h5diff: Added new level for -v (verbose) option. The new levels are
+               1 and 2.  So -v1 and -v2 can be specified to view more 
+               information about attributes differences. 
+               Bug#2121 (JKM 2011/3/23)
      - h5dump: Added new option --enable-error-stack. This option will display 
                error stack information in the output stream. This is useful
                when the "h5dump: Unable to print data" message is output.
@@ -453,6 +474,15 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Removed config/ibm-aix6.x. All IBM-AIX settings are in one file,
+      ibm-aix. (AKC - 2011/4/14)
+    - Shared C libraries are no longer disabled on Mac when Fortran
+      is enabled. Shared Fortran libraries are still not supported on Mac,
+      so configure will disable them by default, but this is overridable
+      with the new --enable-unsupported configure option. The configure
+      summary has been updated to reflect the fact that the shared-ness of 
+      the C++/Fortran wrapper libraries may not align with the C library.
+      (MAM - 04/11/2011 - HDFFV-4353).
     - Removed recognition of the parallel compilers of LAM(hcc) and
       ChMPIon(cmpicc) since we have no access to these two MPI implementations
       and cannot verify their correctness. (AKC - 2010/7/14 - Bug 1921)
@@ -506,6 +536,29 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Updated h5dump test case script to prevent entire test failure upon 
+          source directory is read-only. Bug# HDFFV-4342 (JKM 2011/4/12)
+        - Updated to unify option name to '--enable-error-stack' for printing 
+          HDF5 error stack messages for HDF5 tools. h5ls and h5dump for now.
+          For h5ls, this replaces "-e/--errors" option, which is deprecated. 
+          Bug#2182 (JKM 2011/3/30)
+        - Fix h5diff for --use-system-epsilon option: the calculation changed
+          from ( |a - b| / b ) to ( |a - b| ). This was decided for better
+          performance. Bug#2184 (JKM 2011/3/24)
+        - Fixed output for H5T_REFERENCE in h5dump. According to the BNF document
+          the output of a H5T_REFERENCE should be followed by the type;
+          <reference> ::= H5T_REFERENCE { <ref_type> }
+          <ref_type> ::= H5T_STD_REF_OBJECT | H5T_STD_REF_DSETREG
+          Previously this was only displayed if the -R option was used.
+          Bug#1725 (ADB 2011/3/28)
+        - Fix h5diff issues for #1: h5diff compared attributes correctly only 
+          when two objects have the same number of attributes and attribute 
+          names are identical, #2: didn't display useful information about 
+          attribute difference. Bug#2121 (JKM 2011/3/17)
+        - Fixed memory leak for h5diff when accessing symbolic links with 
+          --follow-symlink option. Bug#2214  (JKM 2011/3/18)
+        - Fixed memory leak for h5diff when access variable length string
+          data. Bug#2216 (JKM 2011/3/18)
         - Fixed and improved help page for -a option of h5ls. 
           Bug#1904 (JKM 2011/3/11)
         - Fixed h5dump not to include attribute values in the output file when 
@@ -806,8 +859,6 @@ SuSe Linux 2.6.5
 Known Problems
 ==============
 * --with-mpe configure option does not work with Mpich2. AKC - 2011/03/10)
-
-* examples/run-all-ex.sh does not work on Cygwin. (NAF - 2011/02/11)
 
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can
   occur when reading from a dataset in parallel shortly after it has been

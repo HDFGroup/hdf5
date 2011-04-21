@@ -748,7 +748,7 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_family_sb_encode)
 
     /* Name and version number */
-    HDstrncpy(name, "NCSAfami", (size_t)8);
+    HDstrncpy(name, "NCSAfami", (size_t)9);
     name[8] = '\0';
 
     /* Store member file size.  Use the member file size from the property here.
@@ -810,9 +810,9 @@ H5FD_family_sb_decode(H5FD_t *_file, const char UNUSED *name, const unsigned cha
 
     /* Check if member size from file access property is correct */
     if(msize != file->pmem_size) {
-        char                err_msg[128];
+        char err_msg[128];
 
-        sprintf(err_msg, "Family member size should be %lu.  But the size from file access property is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
+        HDsnprintf(err_msg, sizeof(err_msg), "Family member size should be %lu.  But the size from file access property is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
     } /* end if */
 
@@ -926,14 +926,14 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     file->flags = flags;
 
     /* Check that names are unique */
-    sprintf(memb_name, name, 0);
-    sprintf(temp, name, 1);
+    HDsnprintf(memb_name, sizeof(memb_name), name, 0);
+    HDsnprintf(temp, sizeof(temp), name, 1);
     if(!HDstrcmp(memb_name, temp))
         HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file names not unique")
 
     /* Open all the family members */
     while(1) {
-        sprintf(memb_name, name, file->nmembs);
+        HDsnprintf(memb_name, sizeof(memb_name), name, file->nmembs);
 
         /* Enlarge member array */
         if(file->nmembs >= file->amembs) {
@@ -1215,7 +1215,7 @@ H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
         /* Create another file if necessary */
         if(u >= file->nmembs || !file->memb[u]) {
             file->nmembs = MAX(file->nmembs, u+1);
-            sprintf(memb_name, file->name, u);
+            HDsnprintf(memb_name, sizeof(memb_name), file->name, u);
             H5E_BEGIN_TRY {
                 H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
                 file->memb[u] = H5FDopen(memb_name, file->flags | H5F_ACC_CREAT,
@@ -1623,7 +1623,8 @@ H5FD_family_aio_alloc_ctlblk(unsigned init_array_len,
     } else {
         HDassert( init_array_len > 1 );
 
-        if(NULL == (ctlblk_ptr->subctlblks = (H5FD_family_aio_subctlblk_t *) H5MM_malloc(((size_t)init_array_len) * sizeof(H5FD_family_aio_subctlblk_t))))
+        if(NULL == (ctlblk_ptr->subctlblks = (H5FD_family_aio_subctlblk_t *)
+                H5MM_malloc(((size_t)init_array_len) * sizeof(H5FD_family_aio_subctlblk_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed(3)")
     }
 
@@ -1650,7 +1651,8 @@ done:
             HDassert( ctlblk_ptr->subctlblks == NULL );
 
             if(NULL != (ctlblk_ptr = H5FL_FREE(H5FD_family_aio_ctlblk_t, ctlblk_ptr)))
-                HDONE_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "base ctlblk de-allocation failed")
+                HDONE_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, 
+                            "base ctlblk de-allocation failed")
         }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1788,7 +1790,8 @@ H5FD_family_aio_extend_ctlblk(H5FD_family_aio_ctlblk_t *ctlblk_ptr)
     /* everything looks good.  Allocate the new array of sub control blocks */
     new_array_len = 2 * old_array_len;
     HDassert( new_array_len > 1);
-    if(NULL == (new_subctlblks = (H5FD_family_aio_subctlblk_t *) H5MM_malloc(((size_t)new_array_len) * sizeof(H5FD_family_aio_subctlblk_t))))
+    if(NULL == (new_subctlblks = (H5FD_family_aio_subctlblk_t *)
+            H5MM_malloc(((size_t)new_array_len) * sizeof(H5FD_family_aio_subctlblk_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* copy existing data from old_subctlblks to new_sub_cltblks, and 
@@ -1904,7 +1907,13 @@ H5FD_family_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
 
     FUNC_ENTER_NOAPI(H5FD_family_aio_read, FAIL)
 
-    if((file == NULL) || (file->cls == NULL) || (addr == HADDR_UNDEF) || (size <= 0) || (buffer == NULL) || (ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (addr == HADDR_UNDEF) || 
+       (size <= 0) || 
+       (buffer == NULL) || 
+       (ctlblk_ptr_ptr == NULL) || 
+       (*ctlblk_ptr_ptr != NULL))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad arg(s) on entry")
 
     family_file = (H5FD_family_t *)file;
@@ -1927,11 +1936,15 @@ H5FD_family_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
     }
 
     /* allocate the family file AIO control block */
-    if(H5FD_family_aio_alloc_ctlblk(H5FD_FAMILY_AIO_SUBCTLBLK_INIT_ARRAY_SIZE, &ctlblk_ptr) != SUCCEED)
+    if(H5FD_family_aio_alloc_ctlblk(H5FD_FAMILY_AIO_SUBCTLBLK_INIT_ARRAY_SIZE, 
+                                    &ctlblk_ptr) != SUCCEED)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate aio control block")
     else if((ctlblk_ptr == NULL) || (ctlblk_ptr->magic != H5FD_FAMILY_AIO_CTLBLK_T__MAGIC))
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "NULL ctlblk_ptr or bad ctlblk magic")
-    else if(( ctlblk_ptr->array_len < 1) || (ctlblk_ptr->num_subctlblks != 0) || (ctlblk_ptr->subctlblks == NULL) || ((ctlblk_ptr->subctlblks)[0].magic != H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC))
+    else if(( ctlblk_ptr->array_len < 1) || 
+            (ctlblk_ptr->num_subctlblks != 0) || 
+            (ctlblk_ptr->subctlblks == NULL) || 
+            ((ctlblk_ptr->subctlblks)[0].magic != H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC))
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "bad sub control block array")
 
     /* Queue async reads for each member that handles a chunk of the data */
@@ -1940,7 +1953,8 @@ H5FD_family_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
     buffer_remaining = buffer;
 
     while(size_remaining > 0) {
-	H5_ASSIGN_OVERFLOW(sub_file_num, addr_of_remainder/family_file->memb_size, hsize_t, unsigned);
+	H5_ASSIGN_OVERFLOW(sub_file_num, addr_of_remainder/family_file->memb_size, 
+                           hsize_t, unsigned);
 
         subfile_addr = addr_of_remainder % family_file->memb_size;
 
@@ -1964,12 +1978,14 @@ H5FD_family_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
 	    if(H5FD_family_aio_extend_ctlblk(ctlblk_ptr) != SUCCEED)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't extend aio control block")
             else if(ctlblk_ptr->array_len <= ctlblk_ptr->num_subctlblks)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "sub control block array still full?!?")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
+                            "sub control block array still full?!?")
         }
 
         subctlblk_ptr = NULL;
 
-        if(H5FDaio_read(family_file->memb[sub_file_num], type, memb_dxpl_id, subfile_addr, subfile_size, buffer_remaining, &subctlblk_ptr) < 0)
+        if(H5FDaio_read(family_file->memb[sub_file_num], type, memb_dxpl_id, subfile_addr, 
+                        subfile_size, buffer_remaining, &subctlblk_ptr) < 0)
             HGOTO_ERROR(H5E_IO, H5E_AIOREADERROR, FAIL, "member file aio read failed")
 
         i = ctlblk_ptr->num_subctlblks;
@@ -2069,7 +2085,13 @@ H5FD_family_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
 
     FUNC_ENTER_NOAPI(H5FD_family_aio_write, FAIL)
 
-    if((file == NULL) || (file->cls == NULL) || (addr == HADDR_UNDEF) || (size <= 0) || (buffer == NULL) || (ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (addr == HADDR_UNDEF) || 
+       (size <= 0) || 
+       (buffer == NULL) || 
+       (ctlblk_ptr_ptr == NULL) || 
+       (*ctlblk_ptr_ptr != NULL))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad arg(s) on entry")
 
     family_file = (H5FD_family_t *)file;
@@ -2092,11 +2114,15 @@ H5FD_family_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
     }
 
     /* allocate the family file AIO control block */
-    if(H5FD_family_aio_alloc_ctlblk(H5FD_FAMILY_AIO_SUBCTLBLK_INIT_ARRAY_SIZE, &ctlblk_ptr) != SUCCEED)
+    if(H5FD_family_aio_alloc_ctlblk(H5FD_FAMILY_AIO_SUBCTLBLK_INIT_ARRAY_SIZE, 
+                                    &ctlblk_ptr) != SUCCEED)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate aio control block")
     else if((ctlblk_ptr == NULL) || (ctlblk_ptr->magic != H5FD_FAMILY_AIO_CTLBLK_T__MAGIC))
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "NULL ctlblk_ptr or bad ctlblk magic")
-    else if((ctlblk_ptr->array_len < 1) || (ctlblk_ptr->num_subctlblks != 0) || (ctlblk_ptr->subctlblks == NULL) || ((ctlblk_ptr->subctlblks)[0].magic != H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC))
+    else if((ctlblk_ptr->array_len < 1) || 
+            (ctlblk_ptr->num_subctlblks != 0) || 
+            (ctlblk_ptr->subctlblks == NULL) || 
+            ((ctlblk_ptr->subctlblks)[0].magic != H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC))
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "bad sub control block array")
 
     /* Queue async writes for each member that handles a chunk of the data */
@@ -2105,7 +2131,8 @@ H5FD_family_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
     buffer_remaining = buffer;
 
     while(size_remaining > 0) {
-	H5_ASSIGN_OVERFLOW(sub_file_num, addr_of_remainder/family_file->memb_size, hsize_t, unsigned);
+	H5_ASSIGN_OVERFLOW(sub_file_num, addr_of_remainder/family_file->memb_size, 
+                           hsize_t, unsigned);
 
         subfile_addr = addr_of_remainder % family_file->memb_size;
 
@@ -2129,12 +2156,14 @@ H5FD_family_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
 	    if(H5FD_family_aio_extend_ctlblk(ctlblk_ptr) != SUCCEED)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't extend aio control block")
             else if(ctlblk_ptr->array_len <= ctlblk_ptr->num_subctlblks)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "sub control block array still full?!?")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
+                            "sub control block array still full?!?")
         }
 
         subctlblk_ptr = NULL;
 
-        if(H5FDaio_write(family_file->memb[sub_file_num], type, memb_dxpl_id, subfile_addr, subfile_size, buffer_remaining, &subctlblk_ptr) < 0)
+        if(H5FDaio_write(family_file->memb[sub_file_num], type, memb_dxpl_id, subfile_addr, 
+                         subfile_size, buffer_remaining, &subctlblk_ptr) < 0)
             HGOTO_ERROR(H5E_IO, H5E_AIOWRITEERROR, FAIL, "member file aio write failed")
 
         i = ctlblk_ptr->num_subctlblks;
@@ -2547,7 +2576,10 @@ H5FD_family_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr)
 
     FUNC_ENTER_NOAPI(H5FD_family_aio_fsync, FAIL)
 
-    if((file == NULL) || (file->cls == NULL) || (ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (ctlblk_ptr_ptr == NULL) || 
+       (*ctlblk_ptr_ptr != NULL))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad arg(s) on entry")
 
     family_file = (H5FD_family_t *)file;
@@ -2561,7 +2593,10 @@ H5FD_family_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate aio control block")
     else if((ctlblk_ptr == NULL) || (ctlblk_ptr->magic != H5FD_FAMILY_AIO_CTLBLK_T__MAGIC))
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "NULL ctlblk_ptr or bad ctlblk magic")
-    else if((ctlblk_ptr->array_len != num_sub_files) || (ctlblk_ptr->num_subctlblks != 0) || (ctlblk_ptr->subctlblks == NULL) || ((ctlblk_ptr->subctlblks)[0].magic != H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC))
+    else if((ctlblk_ptr->array_len != num_sub_files) || 
+            (ctlblk_ptr->num_subctlblks != 0) || 
+            (ctlblk_ptr->subctlblks == NULL) || 
+            ((ctlblk_ptr->subctlblks)[0].magic != H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC))
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "bad sub control block array")
 
     for(i = 0; i < num_sub_files; i++) {
@@ -2689,7 +2724,8 @@ H5FD_family_aio_cancel(void *ctlblk_ptr)
 
     /* discard the control block */
     if(H5FD_family_aio_discard_ctlblk(family_ctlblk_ptr) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "Attempt to discard control block failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, 
+                    "Attempt to discard control block failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2777,7 +2813,10 @@ H5FD_family_get_stats(H5FD_t *file, H5FD_stats_t *stats_ptr)
 
     FUNC_ENTER_NOAPI(H5FD_family_get_stats, FAIL)
 
-    if((file == NULL) || (file->cls == NULL) || (stats_ptr == NULL) || (stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (stats_ptr == NULL) || 
+       (stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad arg(s) on entry")
 
     if(H5FD_initialize_stats(stats_ptr) < 0)

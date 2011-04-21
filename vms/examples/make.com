@@ -16,9 +16,8 @@ $! Makefile for VMS systems.
 $!
 $! Make HDF5 C examples
 $!
-$! ccopt = "/float=ieee_float/nowarnings/define=H5_VMS"
-$
-$ define zlib_dir sys$sysusers:[pourmale.zlib-1_2_3]
+$ define zlib_dir disk$user:[hdfgroup.zlib-1_2_5_ieee]
+$ ccopt = "/float=ieee_float/nowarnings/define=H5_VMS/include=zlib_dir"
 $ ccc := cc 'ccopt /include=([-.-.include])
 $ type sys$input
  	Compiling  C examples

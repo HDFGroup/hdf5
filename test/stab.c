@@ -57,8 +57,10 @@ const char *FILENAME[] = {
 /* The group_old.h5 is generated from gen_old_fill.c in HDF5 'test' directory
  * for version 1.6.  To get this data file, simply compile gen_old_group.c with
  * the HDF5 library in that branch and run it. */
+/* I changed the name "group_old.h5.copy" to "group_old_copy.h5" because OpenVMS 
+ * doesn't like any file name with more than one ".". SLU 2010/12/13 */ 
 #define FILE_OLD_GROUPS "group_old.h5"
-#define FILE_OLD_GROUPS_COPY "group_old.h5.copy"
+#define FILE_OLD_GROUPS_COPY "group_old_copy.h5"
 
 /* Definitions for 'no_compact' test */
 #define NO_COMPACT_TOP_GROUP     "top"
@@ -1195,6 +1197,9 @@ main(void)
 
     /* Close 2nd FAPL */
     H5Pclose(fapl2);
+
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     /* Check for test errors */
     if(nerrors)

@@ -167,7 +167,8 @@ check_test_in_progress(const char * str, hbool_t verbose)
 
     /* setup the test in progress file name */
     if(pass) {
-        if(h5_fixname(FILENAMES[TEST_IN_PROGRESS_FILE_NAME_INDEX], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
+        if(h5_fixname(FILENAMES[TEST_IN_PROGRESS_FILE_NAME_INDEX], H5P_DEFAULT, 
+                      filename, sizeof(filename)) == NULL) {
             pass = FALSE;
             failure_mssg = "h5_fixname() failed.\n";
         } else if(strlen(filename) >= 512) {
@@ -229,7 +230,8 @@ check_test_in_progress(const char * str, hbool_t verbose)
 
         if(bytes_read != (int)input_len) {
             if(verbose)
-                HDfprintf(stdout, "%s: HDread() failed. bytes_read = %d, errno = %d.\n", fcn_name, (int)bytes_read, errno);
+                HDfprintf(stdout, "%s: HDread() failed. bytes_read = %d, errno = %d.\n", 
+                          fcn_name, (int)bytes_read, errno);
             failure_mssg = "error reading test in progress file.";
             pass = FALSE;
         }
@@ -254,7 +256,8 @@ check_test_in_progress(const char * str, hbool_t verbose)
     if(pass) {
         if(strcmp(str, buffer) != 0) {
 	    if(verbose)
-	        HDfprintf(stdout, "%s: expected/actual test in progress = %s/%s\n", fcn_name, str, buffer);
+	        HDfprintf(stdout, "%s: expected/actual test in progress = %s/%s\n", 
+                          fcn_name, str, buffer);
             pass = FALSE;
             failure_mssg = "Unexpected test in progress?!?";
         }
@@ -306,10 +309,12 @@ file_exists(const char * file_path_ptr, hbool_t verbose)
 	    ret_val = TRUE;
         } else if (errno == ENOENT) {
 	    if(verbose)
-	        HDfprintf(stdout, "%s: HDstat(%s) failed with ENOENT\n", fcn_name, file_path_ptr);
+	        HDfprintf(stdout, "%s: HDstat(%s) failed with ENOENT\n", 
+                          fcn_name, file_path_ptr);
 	} else {
 	    if(verbose)
-	        HDfprintf(stdout, "%s: HDstat() failed with unexpected errno = %d.\n", fcn_name, errno);
+	        HDfprintf(stdout, "%s: HDstat() failed with unexpected errno = %d.\n", 
+                          fcn_name, errno);
 
 	    failure_mssg = "HDstat() returned unexpected value.";
 	    pass = FALSE;
@@ -372,7 +377,8 @@ mark_test_in_progress(const char * str)
 
     /* setup the test in progress file name */
     if(pass) {
-        if(h5_fixname(FILENAMES[TEST_IN_PROGRESS_FILE_NAME_INDEX], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
+        if(h5_fixname(FILENAMES[TEST_IN_PROGRESS_FILE_NAME_INDEX], H5P_DEFAULT, 
+                      filename, sizeof(filename)) == NULL) {
             pass = FALSE;
             failure_mssg = "h5_fixname() failed.\n";
         } else if(strlen(filename) >= 512) {
@@ -400,7 +406,8 @@ mark_test_in_progress(const char * str)
     if(pass)
 	if((fd = HDopen(filename, O_WRONLY|O_CREAT|O_TRUNC, 0777)) == -1) {
 	    if(verbose)
-	        HDfprintf(stdout, "%s: HDopen(i) failed with errno = %d.\n", fcn_name, errno);
+	        HDfprintf(stdout, "%s: HDopen(i) failed with errno = %d.\n", 
+                          fcn_name, errno);
             failure_mssg = "Can't open test in progress file.";
 	    pass = FALSE;
         }
@@ -410,7 +417,8 @@ mark_test_in_progress(const char * str)
 
         if(bytes_written != (int)strlen(str)) {
             if(verbose)
-                HDfprintf(stdout, "%s: HDwrite() failed. bytes_written = %d, errno = %d.\n", fcn_name, (int)bytes_written, errno);
+                HDfprintf(stdout, "%s: HDwrite() failed. bytes_written = %d, errno = %d.\n", 
+                          fcn_name, (int)bytes_written, errno);
             failure_mssg = "error writing test in progress file.";
             pass = FALSE;
         }
@@ -544,7 +552,8 @@ setup_generic_aio_fsync_test(const int file_name_num, hid_t fapl_id,
 
     /* setup the file name */
     if(pass)
-        if(h5_fixname(FILENAMES[file_name_num], fapl_id, filename, sizeof(filename)) == NULL) {
+        if(h5_fixname(FILENAMES[file_name_num], fapl_id, 
+                      filename, sizeof(filename)) == NULL) {
             pass = FALSE;
             failure_mssg = "h5_fixname() failed (1).\n";
         }
@@ -560,7 +569,8 @@ setup_generic_aio_fsync_test(const int file_name_num, hid_t fapl_id,
         HDfprintf(stdout, "%s write_size = 0x%llx.\n", fcn_name, (long long)write_size);
         HDfprintf(stdout, "%s max_addr = 0x%llx.\n", fcn_name, (long long)write_size);
         HDfprintf(stdout, "%d wait_on_fsync = %d.\n", fcn_name, (int)wait_on_fsync);
-        HDfprintf(stdout, "%s: FILENAMES[%d] = \"%s\".\n", fcn_name, file_name_num, FILENAMES[file_name_num]);
+        HDfprintf(stdout, "%s: FILENAMES[%d] = \"%s\".\n", 
+                  fcn_name, file_name_num, FILENAMES[file_name_num]);
 	HDfflush(stdout);
     }
 
@@ -579,7 +589,8 @@ setup_generic_aio_fsync_test(const int file_name_num, hid_t fapl_id,
         load_test_buffer(write_size, tag, write_buf);
 
     if(verbose)
-        HDfprintf(stdout, "%s strlen(write_buf) = %lld.\n", fcn_name, (long long)strlen(write_buf));
+        HDfprintf(stdout, "%s strlen(write_buf) = %lld.\n", 
+                  fcn_name, (long long)strlen(write_buf));
 
     if(show_progress) { /* 2 */
         HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
@@ -588,7 +599,8 @@ setup_generic_aio_fsync_test(const int file_name_num, hid_t fapl_id,
 
     /* create the file */
     if(pass) {
-        if(NULL == (h5fd_ptr = H5FDopen(filename, (H5F_ACC_RDWR | H5F_ACC_CREAT), fapl_id, maxaddr))) {
+        if(NULL == (h5fd_ptr = H5FDopen(filename, (H5F_ACC_RDWR | H5F_ACC_CREAT), 
+                                        fapl_id, maxaddr))) {
             pass = FALSE;
             failure_mssg = "H5FDopen() failed.";
         } else
@@ -615,7 +627,9 @@ setup_generic_aio_fsync_test(const int file_name_num, hid_t fapl_id,
     /* do the write */
     if(pass) {
 
-	if((H5FDaio_write(h5fd_ptr, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, (size_t)write_size, (void *)write_buf, &wrt_ctlblk_ptr) < 0) || (wrt_ctlblk_ptr == NULL)) {
+	if((H5FDaio_write(h5fd_ptr, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, 
+                          (size_t)write_size, (void *)write_buf, &wrt_ctlblk_ptr) < 0) || 
+           (wrt_ctlblk_ptr == NULL)) {
 	    pass = FALSE;
             failure_mssg = "H5FDaio_write() failed.\n";
         }
@@ -628,7 +642,8 @@ setup_generic_aio_fsync_test(const int file_name_num, hid_t fapl_id,
 
     /* do the aio_fsync() */
     if(pass)
-        if((H5FDaio_fsync(h5fd_ptr, &fsync_ctlblk_ptr) < 0) || (fsync_ctlblk_ptr ==  NULL)) {
+        if((H5FDaio_fsync(h5fd_ptr, &fsync_ctlblk_ptr) < 0) || 
+           (fsync_ctlblk_ptr ==  NULL)) {
             pass = FALSE;
             failure_mssg = "H5FDaio_fsync(0) failed.";
         }
@@ -662,7 +677,8 @@ setup_generic_aio_fsync_test(const int file_name_num, hid_t fapl_id,
 
     /* complete the aio fsync */
     if(pass)
-        if((H5FDaio_finish(h5fd_ptr, &error_num, fsync_ctlblk_ptr) < 0) || (error_num != 0)) {
+        if((H5FDaio_finish(h5fd_ptr, &error_num, fsync_ctlblk_ptr) < 0) || 
+           (error_num != 0)) {
             pass = FALSE;
             failure_mssg = "H5FDaio_finish(0) failed.";
         }
@@ -694,7 +710,8 @@ setup_generic_aio_fsync_test(const int file_name_num, hid_t fapl_id,
 
     /* finish the aio_write() */
     if(pass) {
-        if((H5FDaio_finish(h5fd_ptr, &error_num, wrt_ctlblk_ptr) < 0) || (error_num != 0)) {
+        if((H5FDaio_finish(h5fd_ptr, &error_num, wrt_ctlblk_ptr) < 0) || 
+           (error_num != 0)) {
             pass = FALSE;
             failure_mssg = "H5FDaio_finish(1) failed.";
         }
@@ -761,7 +778,8 @@ setup_generic_fsync_test(const int file_name_num, hid_t fapl_id,
 
     /* setup the file name */
     if(pass)
-        if(h5_fixname(FILENAMES[file_name_num], fapl_id, filename, sizeof(filename)) == NULL) {
+        if(h5_fixname(FILENAMES[file_name_num], fapl_id, 
+                      filename, sizeof(filename)) == NULL) {
             pass = FALSE;
             failure_mssg = "h5_fixname() failed (1).\n";
         }
@@ -776,7 +794,8 @@ setup_generic_fsync_test(const int file_name_num, hid_t fapl_id,
         HDfprintf(stdout, "%s tag = \"%s\".\n", fcn_name, tag);
         HDfprintf(stdout, "%s write_size = 0x%llx.\n", fcn_name, (long long)write_size);
         HDfprintf(stdout, "%s max_addr = 0x%llx.\n", fcn_name, (long long)write_size);
-        HDfprintf(stdout, "%s: FILENAMES[%d] = \"%s\".\n", fcn_name, file_name_num, FILENAMES[file_name_num]);
+        HDfprintf(stdout, "%s: FILENAMES[%d] = \"%s\".\n", 
+                  fcn_name, file_name_num, FILENAMES[file_name_num]);
 	HDfflush(stdout);
     }
 
@@ -795,7 +814,8 @@ setup_generic_fsync_test(const int file_name_num, hid_t fapl_id,
         load_test_buffer(write_size, tag, write_buf);
 
     if(verbose)
-        HDfprintf(stdout, "%s strlen(write_buf) = %lld.\n", fcn_name, (long long)strlen(write_buf));
+        HDfprintf(stdout, "%s strlen(write_buf) = %lld.\n", 
+                  fcn_name, (long long)strlen(write_buf));
 
     if(show_progress) { /* 2 */
         HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
@@ -804,7 +824,8 @@ setup_generic_fsync_test(const int file_name_num, hid_t fapl_id,
 
     /* create the file */
     if(pass) {
-        if(NULL == (h5fd_ptr = H5FDopen(filename, (H5F_ACC_RDWR | H5F_ACC_CREAT), fapl_id, maxaddr))) {
+        if(NULL == (h5fd_ptr = H5FDopen(filename, (H5F_ACC_RDWR | H5F_ACC_CREAT), 
+                                        fapl_id, maxaddr))) {
             pass = FALSE;
             failure_mssg = "H5FDopen() failed.";
         } else
@@ -830,7 +851,8 @@ setup_generic_fsync_test(const int file_name_num, hid_t fapl_id,
 
     /* do the write */
     if(pass)
-	if(H5FDwrite(h5fd_ptr, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, (size_t)write_size, (void *)write_buf) < 0) {
+	if(H5FDwrite(h5fd_ptr, H5FD_MEM_DRAW, H5P_DEFAULT, (haddr_t)0, 
+                     (size_t)write_size, (void *)write_buf) < 0) {
 	    pass = FALSE;
             failure_mssg = "H5FDwrite() failed.\n";
         }
@@ -970,7 +992,8 @@ setup_multi_file_driver_fsync_test(const int file_name_num,
 
         fapl_id = h5_fileaccess();
 
-        if(H5Pset_fapl_multi(fapl_id, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0) {
+        if(H5Pset_fapl_multi(fapl_id, memb_map, memb_fapl, 
+                             memb_name, memb_addr, FALSE) < 0) {
             pass = FALSE;
             failure_mssg = "H5Pset_fapl_multi() failed.";
         }
@@ -984,7 +1007,8 @@ setup_multi_file_driver_fsync_test(const int file_name_num,
 
     /* setup the file name */
     if(pass)
-        if(h5_fixname(FILENAMES[file_name_num], fapl_id, filename, sizeof(filename)) == NULL) {
+        if(h5_fixname(FILENAMES[file_name_num], fapl_id, 
+                      filename, sizeof(filename)) == NULL) {
             pass = FALSE;
             failure_mssg = "h5_fixname() failed (1).\n";
         }
@@ -994,7 +1018,8 @@ setup_multi_file_driver_fsync_test(const int file_name_num,
         HDfprintf(stdout, "%s tag = \"%s\".\n", fcn_name, tag);
         HDfprintf(stdout, "%s write_size = 0x%llx.\n", fcn_name, (long long)write_size);
         HDfprintf(stdout, "%s max_addr   = 0x%llx.\n", fcn_name, (long long)max_addr);
-        HDfprintf(stdout, "%s: FILENAMES[%d] = \"%s\".\n", fcn_name, file_name_num, FILENAMES[file_name_num]);
+        HDfprintf(stdout, "%s: FILENAMES[%d] = \"%s\".\n", 
+                  fcn_name, file_name_num, FILENAMES[file_name_num]);
 	HDfflush(stdout);
     }
 
@@ -1027,7 +1052,8 @@ setup_multi_file_driver_fsync_test(const int file_name_num,
             load_test_buffer(write_size, file_tag, write_bufs[i]);
 
             if(verbose)
-                HDfprintf(stdout, "%s strlen(write_bufs[%d]) = %lld.\n", fcn_name, i, (long long)strlen(write_bufs[i]));
+                HDfprintf(stdout, "%s strlen(write_bufs[%d]) = %lld.\n", 
+                          fcn_name, i, (long long)strlen(write_bufs[i]));
 	}
     }
 
@@ -1038,7 +1064,8 @@ setup_multi_file_driver_fsync_test(const int file_name_num,
 
     /* create the file */
     if(pass) {
-        if(NULL == (h5fd_ptr = H5FDopen(filename, (H5F_ACC_RDWR | H5F_ACC_CREAT), fapl_id, max_addr))) {
+        if(NULL == (h5fd_ptr = H5FDopen(filename, (H5F_ACC_RDWR | H5F_ACC_CREAT), 
+                                        fapl_id, max_addr))) {
             pass = FALSE;
             failure_mssg = "H5FDopen() failed.";
         } else
@@ -1056,15 +1083,18 @@ setup_multi_file_driver_fsync_test(const int file_name_num,
             eoa = H5FDget_eoa(h5fd_ptr, mt);
 
 	    if(eoa == HADDR_UNDEF)
-                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) failed.\n", fcn_name, type_names[(int)mt]);
+                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) failed.\n", 
+                          fcn_name, type_names[(int)mt]);
             else
-                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) returned 0x%llx.\n", fcn_name, type_names[(int)mt], (unsigned long long)eoa);
+                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) returned 0x%llx.\n", 
+                          fcn_name, type_names[(int)mt], (unsigned long long)eoa);
         }
 
     mt = H5FD_MEM_SUPER;
     while((pass) && (mt <= H5FD_MEM_OHDR)) {
         if(verbose)
-            HDfprintf(stdout, "calling H5FDset_eoa(h5fd_ptr, %s, (%d * TYPE_SLICE) - 1).\n", type_names[(int)mt], (int)(mt));
+            HDfprintf(stdout, "calling H5FDset_eoa(h5fd_ptr, %s, (%d * TYPE_SLICE) - 1).\n", 
+                      type_names[(int)mt], (int)(mt));
 
         if(H5FDset_eoa(h5fd_ptr, mt, (((haddr_t)(mt)) * TYPE_SLICE) - 1) < 0 ) {
             pass = FALSE;
@@ -1079,9 +1109,11 @@ setup_multi_file_driver_fsync_test(const int file_name_num,
             eoa = H5FDget_eoa(h5fd_ptr, mt);
 
 	    if(eoa == HADDR_UNDEF)
-                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) failed.\n", fcn_name, type_names[(int)mt]);
+                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) failed.\n", 
+                          fcn_name, type_names[(int)mt]);
             else
-                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) returned 0x%llx.\n", fcn_name, type_names[(int)mt], (unsigned long long)eoa);
+                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) returned 0x%llx.\n", 
+                          fcn_name, type_names[(int)mt], (unsigned long long)eoa);
         }
 
     if(show_progress) { /* 6 */
@@ -1095,9 +1127,14 @@ setup_multi_file_driver_fsync_test(const int file_name_num,
 
         while((pass) && (i <= H5FD_MEM_OHDR)) {
 	    if(verbose)
-                HDfprintf(stdout, "calling H5FDwrite(h5fd_ptr, %s, H5P_DEFAULT, 0x%llx, 0x%llx, write_bufs[%d])\n", type_names[i], (unsigned long long)(((haddr_t)(i - 1)) * TYPE_SLICE), (unsigned long long)write_size, i);
+                HDfprintf(stdout, "calling H5FDwrite(h5fd_ptr, %s, H5P_DEFAULT, 0x%llx, 0x%llx, write_bufs[%d])\n",
+                          type_names[i], 
+                          (unsigned long long)(((haddr_t)(i - 1)) * TYPE_SLICE), 
+                          (unsigned long long)write_size, i);
 
-            if(H5FDwrite(h5fd_ptr, (H5F_mem_t)i, H5P_DEFAULT, ((haddr_t)(i - 1)) * TYPE_SLICE, (size_t)write_size, (void *)write_bufs[i]) < 0) {
+            if(H5FDwrite(h5fd_ptr, (H5F_mem_t)i, H5P_DEFAULT, 
+                         ((haddr_t)(i - 1)) * TYPE_SLICE, (size_t)write_size, 
+                         (void *)write_bufs[i]) < 0) {
 	        pass = FALSE;
                 failure_mssg = "H5FDwrite() failed.\n";
             }
@@ -1258,7 +1295,8 @@ setup_multi_file_driver_aio_fsync_test(const int file_name_num,
 
     /* setup the file name */
     if(pass)
-        if(h5_fixname(FILENAMES[file_name_num], fapl_id, filename, sizeof(filename)) == NULL) {
+        if(h5_fixname(FILENAMES[file_name_num], fapl_id, 
+                      filename, sizeof(filename)) == NULL) {
             pass = FALSE;
             failure_mssg = "h5_fixname() failed (1).\n";
         }
@@ -1268,7 +1306,8 @@ setup_multi_file_driver_aio_fsync_test(const int file_name_num,
         HDfprintf(stdout, "%s tag = \"%s\".\n", fcn_name, tag);
         HDfprintf(stdout, "%s write_size = 0x%llx.\n", fcn_name, (long long)write_size);
         HDfprintf(stdout, "%s max_addr   = 0x%llx.\n", fcn_name, (long long)max_addr);
-        HDfprintf(stdout, "%s: FILENAMES[%d] = \"%s\".\n", fcn_name, file_name_num, FILENAMES[file_name_num]);
+        HDfprintf(stdout, "%s: FILENAMES[%d] = \"%s\".\n", 
+                  fcn_name, file_name_num, FILENAMES[file_name_num]);
 	HDfflush(stdout);
     }
 
@@ -1301,7 +1340,8 @@ setup_multi_file_driver_aio_fsync_test(const int file_name_num,
             load_test_buffer(write_size, file_tag, write_bufs[i]);
 
             if(verbose) 
-                HDfprintf(stdout, "%s strlen(write_bufs[%d]) = %lld.\n", fcn_name, i, (long long)strlen(write_bufs[i]));
+                HDfprintf(stdout, "%s strlen(write_bufs[%d]) = %lld.\n", 
+                          fcn_name, i, (long long)strlen(write_bufs[i]));
 	}
     }
 
@@ -1312,7 +1352,8 @@ setup_multi_file_driver_aio_fsync_test(const int file_name_num,
 
     /* create the file */
     if(pass) {
-        if(NULL == (h5fd_ptr = H5FDopen(filename, (H5F_ACC_RDWR | H5F_ACC_CREAT), fapl_id, max_addr))) {
+        if(NULL == (h5fd_ptr = H5FDopen(filename, (H5F_ACC_RDWR | H5F_ACC_CREAT), 
+                                        fapl_id, max_addr))) {
             pass = FALSE;
             failure_mssg = "H5FDopen() failed.";
         } else
@@ -1328,15 +1369,18 @@ setup_multi_file_driver_aio_fsync_test(const int file_name_num,
     if(verbose)
         for(mt = H5FD_MEM_SUPER; mt <= H5FD_MEM_OHDR; mt++) {
             if(HADDR_UNDEF == (eoa = H5FDget_eoa(h5fd_ptr, mt)))
-                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) failed.\n", fcn_name, type_names[(int)mt]);
+                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) failed.\n", 
+                          fcn_name, type_names[(int)mt]);
             else
-                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) returned 0x%llx.\n", fcn_name, type_names[(int)mt], (unsigned long long)eoa);
+                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) returned 0x%llx.\n", 
+                          fcn_name, type_names[(int)mt], (unsigned long long)eoa);
         }
 
     mt = H5FD_MEM_SUPER;
     while((pass) && (mt <= H5FD_MEM_OHDR)) {
         if(verbose)
-            HDfprintf(stdout, "calling H5FDset_eoa(h5fd_ptr, %s, (%d * TYPE_SLICE) - 1).\n", type_names[(int)mt], (int)(mt));
+            HDfprintf(stdout, "calling H5FDset_eoa(h5fd_ptr, %s, (%d * TYPE_SLICE) - 1).\n", 
+                      type_names[(int)mt], (int)(mt));
 
         if(H5FDset_eoa(h5fd_ptr, mt, (((haddr_t)(mt)) * TYPE_SLICE) - 1) < 0) {
             pass = FALSE;
@@ -1349,9 +1393,11 @@ setup_multi_file_driver_aio_fsync_test(const int file_name_num,
     if(verbose)
         for(mt = H5FD_MEM_SUPER; mt <= H5FD_MEM_OHDR; mt++) {
             if(HADDR_UNDEF == (eoa = H5FDget_eoa(h5fd_ptr, mt)))
-                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) failed.\n", fcn_name, type_names[(int)mt]);
+                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) failed.\n", 
+                          fcn_name, type_names[(int)mt]);
             else
-                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) returned 0x%llx.\n", fcn_name, type_names[(int)mt], (unsigned long long)eoa);
+                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) returned 0x%llx.\n", 
+                          fcn_name, type_names[(int)mt], (unsigned long long)eoa);
         }
 
     if(show_progress) { /* 6 */
@@ -1365,9 +1411,16 @@ setup_multi_file_driver_aio_fsync_test(const int file_name_num,
 
         while((pass) && (i <= H5FD_MEM_OHDR)) {
 	    if(verbose)
-                HDfprintf(stdout, "calling H5FDaio_write(%s, %s, %s, 0x%llx, 0x%llx, write_bufs[%d], &(wrt_ctlblk_ptrs[%d])\n", "h5fd_ptr", type_names[i], "H5P_DEFAULT", (unsigned long long)(((haddr_t)(i - 1)) * TYPE_SLICE), (unsigned long long)write_size, i, i);
+                HDfprintf(stdout, 
+                          "calling H5FDaio_write(%s, %s, %s, 0x%llx, 0x%llx, write_bufs[%d], &(wrt_ctlblk_ptrs[%d])\n", 
+                          "h5fd_ptr", type_names[i], "H5P_DEFAULT", 
+                          (unsigned long long)(((haddr_t)(i - 1)) * TYPE_SLICE), 
+                          (unsigned long long)write_size, i, i);
 
-            if((H5FDaio_write(h5fd_ptr, (H5F_mem_t)i, H5P_DEFAULT, ((haddr_t)(i - 1)) * TYPE_SLICE, (size_t)write_size, (void *)write_bufs[i], &(wrt_ctlblk_ptrs[i])) < 0) || (wrt_ctlblk_ptrs[i] == NULL)) {
+            if((H5FDaio_write(h5fd_ptr, (H5F_mem_t)i, H5P_DEFAULT, 
+                              ((haddr_t)(i - 1)) * TYPE_SLICE, (size_t)write_size, 
+                              (void *)write_bufs[i], &(wrt_ctlblk_ptrs[i])) < 0) || 
+               (wrt_ctlblk_ptrs[i] == NULL)) {
 	        pass = FALSE;
                 failure_mssg = "H5FDaio_write() failed.\n";
             }
@@ -1536,7 +1589,8 @@ check_generic_fsync_test(const int file_name_num, hid_t fapl_id,
 
     /* setup the file name */
     if(pass) 
-        if(h5_fixname(FILENAMES[file_name_num], fapl_id, file_name, sizeof(file_name)) == NULL) {
+        if(h5_fixname(FILENAMES[file_name_num], fapl_id, 
+                      file_name, sizeof(file_name)) == NULL) {
             pass = FALSE;
             failure_mssg = "h5_fixname() failed.\n";
         }
@@ -1548,7 +1602,8 @@ check_generic_fsync_test(const int file_name_num, hid_t fapl_id,
 
     if(verbose) {
         HDfprintf(stdout, "%s file_name = \"%s\".\n", fcn_name, file_name);
-        HDfprintf(stdout, "%s skip_file_existance_and_size_checks = %d.\n", fcn_name, (int)skip_file_existance_and_size_checks);
+        HDfprintf(stdout, "%s skip_file_existance_and_size_checks = %d.\n", 
+                  fcn_name, (int)skip_file_existance_and_size_checks);
          HDfflush(stdout);
     }
 
@@ -1582,7 +1637,8 @@ check_generic_fsync_test(const int file_name_num, hid_t fapl_id,
      * dealing with either a family or multi file name, and thus that no 
      * file of the exact name provided can be expected to exist.
      */
-    if((pass) && (!skip_file_existance_and_size_checks) && (!file_exists(file_name, verbose))) {
+    if((pass) && 
+       (!skip_file_existance_and_size_checks) && (!file_exists(file_name, verbose))) {
         pass = FALSE;
         failure_mssg = "target file doesn't exist?";
     }
@@ -1648,7 +1704,8 @@ check_generic_fsync_test(const int file_name_num, hid_t fapl_id,
 
     /* read the contents of the target file */
     if(pass)
-        if(H5FDread(h5fd_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0, (size_t)file_size, (void *)read_buf) < 0) {
+        if(H5FDread(h5fd_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT, (haddr_t)0, 
+                    (size_t)file_size, (void *)read_buf) < 0) {
             pass = FALSE;
             failure_mssg = "H5FDread() failed.";
         }
@@ -1884,7 +1941,8 @@ check_multi_file_driver_fsync_test(const int file_name_num, const char * tag,
             load_test_buffer(write_size, file_tag, test_bufs[i]);
 
             if(verbose)
-                HDfprintf(stdout, "%s strlen(test_bufs[%d]) = %lld.\n", fcn_name, i, (long long)strlen(test_bufs[i]));
+                HDfprintf(stdout, "%s strlen(test_bufs[%d]) = %lld.\n", 
+                          fcn_name, i, (long long)strlen(test_bufs[i]));
         }
     }
 
@@ -1909,15 +1967,18 @@ check_multi_file_driver_fsync_test(const int file_name_num, const char * tag,
     if(verbose)
         for(mt = H5FD_MEM_SUPER; mt <= H5FD_MEM_OHDR; mt++) {
             if(HADDR_UNDEF == (eoa = H5FDget_eoa(h5fd_ptr, mt)))
-                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) failed.\n", fcn_name, type_names[(int)mt]);
+                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) failed.\n", 
+                          fcn_name, type_names[(int)mt]);
             else
-                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) returned 0x%llx.\n", fcn_name, type_names[(int)mt], (unsigned long long)eoa);
+                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) returned 0x%llx.\n", 
+                          fcn_name, type_names[(int)mt], (unsigned long long)eoa);
         }
 
     mt = H5FD_MEM_SUPER;
     while((pass) && (mt <= H5FD_MEM_OHDR)) {
         if(verbose)
-            HDfprintf(stdout, "calling H5FDset_eoa(h5fd_ptr, %s, (%d * TYPE_SLICE) - 1).\n", type_names[(int)mt], (int)(mt));
+            HDfprintf(stdout, "calling H5FDset_eoa(h5fd_ptr, %s, (%d * TYPE_SLICE) - 1).\n", 
+                      type_names[(int)mt], (int)(mt));
 
         if(H5FDset_eoa(h5fd_ptr, mt, (((haddr_t)(mt)) * TYPE_SLICE) - 1) < 0) {
             pass = FALSE;
@@ -1930,9 +1991,11 @@ check_multi_file_driver_fsync_test(const int file_name_num, const char * tag,
     if(verbose) {
         for(mt = H5FD_MEM_SUPER; mt <= H5FD_MEM_OHDR; mt++) {
             if(HADDR_UNDEF == (eoa = H5FDget_eoa(h5fd_ptr, mt)))
-                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) failed.\n", fcn_name, type_names[(int)mt]);
+                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) failed.\n", 
+                          fcn_name, type_names[(int)mt]);
             else
-                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) returned 0x%llx.\n", fcn_name, type_names[(int)mt], (unsigned long long)eoa);
+                HDfprintf(stdout, "%s: H5FDget_eoa(h5fd_ptr, %s) returned 0x%llx.\n", 
+                          fcn_name, type_names[(int)mt], (unsigned long long)eoa);
         }
     }
 
@@ -1946,7 +2009,8 @@ check_multi_file_driver_fsync_test(const int file_name_num, const char * tag,
         i = H5FD_MEM_SUPER;
 
         while((pass) && (i <= H5FD_MEM_OHDR)) {
-            if(H5FDread(h5fd_ptr, (H5F_mem_t)i, H5P_DEFAULT, ((haddr_t)(i - 1)) * TYPE_SLICE, (size_t)write_size, (void *)read_bufs[i]) < 0) {
+            if(H5FDread(h5fd_ptr, (H5F_mem_t)i, H5P_DEFAULT, ((haddr_t)(i - 1)) * TYPE_SLICE,
+                        (size_t)write_size, (void *)read_bufs[i]) < 0) {
 
                 pass = FALSE;
                 failure_mssg = "H5FDread() failed.\n";
@@ -2073,8 +2137,8 @@ usage(void)
         "\n",
         "Returns 0 on success, 1 on failure.\n",
         "\n",
-        "multi_fd_fsync_test, multi_fd_aio_fsync_wait_test, and multi_fd_aio_fsync_poll_test\n",
-        "all require use of the multi file driver.\n"
+        "multi_fd_fsync_test, multi_fd_aio_fsync_wait_test, and\n",
+        "multi_fd_aio_fsync_poll_test all require use of the multi file driver.\n"
         "\n",
 	NULL,
     };
@@ -2183,9 +2247,11 @@ main(int argc,
 
     if(verbose) {
 	if(argc == 6)
-	    HDfprintf(stdout, "%s %s %s %s %s %s\n", argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
+	    HDfprintf(stdout, "%s %s %s %s %s %s\n", 
+                      argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
 	else if ( argc == 5 )
-	    HDfprintf(stdout, "%s %s %s %s %s\n", argv[0], argv[1], argv[2], argv[3], argv[4]);
+	    HDfprintf(stdout, "%s %s %s %s %s\n", 
+                      argv[0], argv[1], argv[2], argv[3], argv[4]);
 	else
 	    HDfprintf(stdout, "%s %s %s %s\n", argv[0], argv[1], argv[2], argv[3]);
     }
@@ -2237,7 +2303,11 @@ main(int argc,
         }
     }
 
-    if((pass) && ((tgt_test == multi_fd_fsync_test) || (tgt_test == multi_fd_aio_fsync_wait_test) || (tgt_test == multi_fd_aio_fsync_poll_test)) && (tgt_driver != multi_fd)) {
+    if((pass) && 
+       ((tgt_test == multi_fd_fsync_test) || 
+        (tgt_test == multi_fd_aio_fsync_wait_test) || 
+        (tgt_test == multi_fd_aio_fsync_poll_test)) && 
+       (tgt_driver != multi_fd)) {
         pass = FALSE;
         usage();
     }
@@ -2292,7 +2362,8 @@ main(int argc,
 	    default:		op_string = "???";		break;
 	}
 
-        HDfprintf(stdout, "fsync_tests %s %s %s %lld verbose\n", test_string, driver_string, op_string, (long long)write_size);
+        HDfprintf(stdout, "fsync_tests %s %s %s %lld verbose\n", 
+                  test_string, driver_string, op_string, (long long)write_size);
     }
 
     if(pass) {
@@ -2355,7 +2426,8 @@ main(int argc,
 			file_name_num = 4;
 			tag = "Family File SIO fsync";
 			fapl = h5_fileaccess();
-			if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE_AIO, H5P_DEFAULT) < 0) {
+			if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE_AIO, 
+                                              H5P_DEFAULT) < 0) {
                             pass = FALSE;
 			    failure_mssg = "H5Pset_fapl_family() failed.";
                         }
@@ -2384,7 +2456,8 @@ main(int argc,
 
                         fapl = h5_fileaccess();
 
-                        if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0) {
+                        if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, 
+                                             memb_name, memb_addr, FALSE) < 0) {
                             pass = FALSE;
 			    failure_mssg = "H5Pset_fapl_multi() failed.";
                         }
@@ -2399,11 +2472,13 @@ main(int argc,
 		if(pass) {
 		    switch(op) {
 			case setup:
-			    setup_generic_fsync_test(file_name_num, fapl, tag, write_size, max_addr, verbose);
+			    setup_generic_fsync_test(file_name_num, fapl, tag, 
+                                                     write_size, max_addr, verbose);
 			    break;
 
 			case check:
-                            check_generic_fsync_test(file_name_num, fapl, tag, write_size, max_addr, verbose);
+                            check_generic_fsync_test(file_name_num, fapl, tag, write_size, 
+                                                     max_addr, verbose);
 			    break;
 
 			default:
@@ -2470,7 +2545,8 @@ main(int argc,
 			file_name_num = 9;
 			tag = "Family File AIO fsync poll";
 			fapl = h5_fileaccess();
-			if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE_AIO, H5P_DEFAULT) < 0) {
+			if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE_AIO, 
+                                              H5P_DEFAULT) < 0) {
                             pass = FALSE;
 			    failure_mssg = "H5Pset_fapl_family() failed.";
                         }
@@ -2499,7 +2575,8 @@ main(int argc,
 
                         fapl = h5_fileaccess();
 
-                        if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0) {
+                        if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, 
+                                             memb_name, memb_addr, FALSE) < 0) {
                             pass = FALSE;
 			    failure_mssg = "H5Pset_fapl_multi() failed.";
                         }
@@ -2514,11 +2591,13 @@ main(int argc,
 		if(pass) {
 		    switch(op) {
 			case setup:
-			    setup_generic_aio_fsync_test(file_name_num, fapl, tag, write_size, max_addr, FALSE, verbose);
+			    setup_generic_aio_fsync_test(file_name_num, fapl, tag, 
+                                                       write_size, max_addr, FALSE, verbose);
 			    break;
 
 			case check:
-                            check_generic_fsync_test(file_name_num, fapl, tag, write_size, max_addr, verbose);
+                            check_generic_fsync_test(file_name_num, fapl, tag, write_size, 
+                                                     max_addr, verbose);
 			    break;
 
 			default:
@@ -2585,7 +2664,8 @@ main(int argc,
 			file_name_num = 14;
 			tag = "Family File AIO fsync wait";
 			fapl = h5_fileaccess();
-			if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE_AIO, H5P_DEFAULT) < 0) {
+			if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE_AIO, 
+                                              H5P_DEFAULT) < 0) {
                             pass = FALSE;
 			    failure_mssg = "H5Pset_fapl_family() failed.";
                         }
@@ -2614,7 +2694,8 @@ main(int argc,
 
                         fapl = h5_fileaccess();
 
-                        if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0) {
+                        if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, 
+                                             memb_name, memb_addr, FALSE) < 0) {
                             pass = FALSE;
 			    failure_mssg = "H5Pset_fapl_multi() failed.";
                         }
@@ -2629,11 +2710,13 @@ main(int argc,
 		if(pass) {
 		    switch(op) {
 			case setup:
-			    setup_generic_aio_fsync_test(file_name_num, fapl, tag, write_size, max_addr, TRUE, verbose);
+			    setup_generic_aio_fsync_test(file_name_num, fapl, tag, 
+                                                         write_size, max_addr, TRUE, verbose);
 			    break;
 
 			case check:
-                            check_generic_fsync_test(file_name_num, fapl, tag, write_size, max_addr, verbose);
+                            check_generic_fsync_test(file_name_num, fapl, tag, write_size, 
+                                                     max_addr, verbose);
 			    break;
 
 			default:
@@ -2651,11 +2734,13 @@ main(int argc,
 		if(pass) {
 		    switch(op) {
 			case setup:
-                            setup_multi_file_driver_fsync_test(file_name_num, tag, write_size, verbose);
+                            setup_multi_file_driver_fsync_test(file_name_num, tag, 
+                                                               write_size, verbose);
 			    break;
 
 			case check:
-                            check_multi_file_driver_fsync_test(file_name_num, tag, write_size, verbose);
+                            check_multi_file_driver_fsync_test(file_name_num, tag, 
+                                                               write_size, verbose);
 			    break;
 
 			default:
@@ -2673,11 +2758,13 @@ main(int argc,
 		if(pass) {
 		    switch(op) {
 			case setup:
-                            setup_multi_file_driver_aio_fsync_test(file_name_num, tag, write_size, TRUE, verbose);
+                            setup_multi_file_driver_aio_fsync_test(file_name_num, tag, 
+                                                                  write_size, TRUE, verbose);
 			    break;
 
 			case check:
-                            check_multi_file_driver_fsync_test(file_name_num, tag, write_size, verbose);
+                            check_multi_file_driver_fsync_test(file_name_num, tag,
+                                                               write_size, verbose);
 			    break;
 
 			default:
@@ -2695,11 +2782,13 @@ main(int argc,
 		if(pass) {
 		    switch(op) {
 			case setup:
-                            setup_multi_file_driver_aio_fsync_test(file_name_num, tag, write_size, FALSE, verbose);
+                            setup_multi_file_driver_aio_fsync_test(file_name_num, tag, 
+                                                                write_size, FALSE, verbose);
 			    break;
 
 			case check:
-                            check_multi_file_driver_fsync_test(file_name_num, tag, write_size, verbose);
+                            check_multi_file_driver_fsync_test(file_name_num, tag, 
+                                                               write_size, verbose);
 			    break;
 
 			default:

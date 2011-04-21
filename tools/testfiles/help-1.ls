@@ -10,7 +10,8 @@ usage: h5ls [OPTIONS] [OBJECTS...]
                    Must be used with -v, --verbose option.
                    Provides no information for non-dataset objects.
    -d, --data      Print the values of datasets
-   -e, --errors    Show all HDF5 error reporting
+   --enable-error-stack
+                   Prints messages from the HDF5 error stack as they occur.
    --follow-symlinks
                    Follow symbolic links (soft links and external links)
                    to display target object information.
@@ -56,3 +57,5 @@ usage: h5ls [OPTIONS] [OBJECTS...]
 
    -E or --external   Follow external links.
                       Replaced by --follow-symlinks.
+   -e, --errors       Show all HDF5 error reporting
+                      Replaced by --enable-error-stack.

@@ -874,13 +874,13 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_s
     FUNC_ENTER_NOAPI_NOFUNC(H5S_select_iter_init)
 
     /* Check args */
-    assert(sel_iter);
-    assert(space);
+    HDassert(sel_iter);
+    HDassert(space);
 
     /* Initialize common information */
 
     /* Save the dataspace's rank */
-    sel_iter->rank=space->extent.rank;
+    sel_iter->rank = space->extent.rank;
 
     /* Point to the dataspace dimensions, if there are any */
     if(sel_iter->rank > 0)
@@ -889,10 +889,11 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_s
         sel_iter->dims = NULL;
 
     /* Save the element size */
-    sel_iter->elmt_size=elmt_size;
+    sel_iter->elmt_size = elmt_size;
 
     /* Call initialization routine for selection type */
-    ret_value= (*space->select.type->iter_init)(sel_iter, space);
+    ret_value = (*space->select.type->iter_init)(sel_iter, space);
+    HDassert(sel_iter->type);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_iter_init() */

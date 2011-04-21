@@ -26,161 +26,12 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     hl_fortran_test-clear-objects
     ######### tools/h5copy #########
     H5COPY-clearall-objects
-    H5COPY-H5LS_h5copytst-basic       #uses runTest.cmake
     H5COPY-clear-refs
-    H5COPY-region_ref                 #needs clear-refs
-    H5COPY-H5LS_h5copy_ref-refs       #uses runTest.cmake
     H5COPY-clear-ext-links
-    H5COPY-ext_link                   #needs clear-ext-links
-    H5COPY-ext_link_f                 #needs clear-ext-links
-    H5COPY-ext_dangle_noobj           #needs clear-ext-links
-    H5COPY-ext_dangle_noobj_f         #needs clear-ext-links
-    H5COPY-ext_dangle_nofile          #needs clear-ext-links
-    H5COPY-ext_dangle_nofile_f        #needs clear-ext-links
-    H5COPY-ext_link_group             #needs clear-ext-links
-    H5COPY-ext_link_group_f           #needs clear-ext-links
-    H5COPY-H5LS_h5copy_extlinks_src-links    #uses runTest.cmake
     H5COPY-clear-misc
-    H5COPY-CMP-h5copy_misc1           #uses runTest.cmake
-    H5COPY-samefile1_pre              #needs clear-ext-links
-    H5COPY-samefile2_pre              #needs clear-ext-links
-    H5COPY-samefile1                  #needs clear-ext-links
-    H5COPY-samefile2                  #needs clear-ext-links
+    H5COPY-clear-samefile
     ######### tools/h5diff #########
     H5DIFF-clearall-objects
-    H5DIFF-h5diff_10      #uses runTest.cmake
-    H5DIFF-h5diff_11      #uses runTest.cmake
-    H5DIFF-h5diff_12      #uses runTest.cmake
-    H5DIFF-h5diff_13      #uses runTest.cmake
-    H5DIFF-h5diff_14      #uses runTest.cmake
-    H5DIFF-h5diff_15      #uses runTest.cmake
-    H5DIFF-h5diff_16_1    #uses runTest.cmake
-    H5DIFF-h5diff_16_2    #uses runTest.cmake
-    H5DIFF-h5diff_16_3    #uses runTest.cmake
-    H5DIFF-h5diff_17      #uses runTest.cmake
-    H5DIFF-h5diff_171     #uses runTest.cmake
-    H5DIFF-h5diff_172     #uses runTest.cmake
-    H5DIFF-h5diff_18      #uses runTest.cmake
-    H5DIFF-h5diff_18_1    #uses runTest.cmake
-    H5DIFF-h5diff_20      #uses runTest.cmake
-    H5DIFF-h5diff_21      #uses runTest.cmake
-    H5DIFF-h5diff_22      #uses runTest.cmake
-    H5DIFF-h5diff_23      #uses runTest.cmake
-    H5DIFF-h5diff_24      #uses runTest.cmake
-    H5DIFF-h5diff_25      #uses runTest.cmake
-    H5DIFF-h5diff_26      #uses runTest.cmake
-    H5DIFF-h5diff_27      #uses runTest.cmake
-    H5DIFF-h5diff_28      #uses runTest.cmake
-    H5DIFF-h5diff_50      #uses runTest.cmake
-    H5DIFF-h5diff_51      #uses runTest.cmake
-    H5DIFF-h5diff_52      #uses runTest.cmake
-    H5DIFF-h5diff_53      #uses runTest.cmake
-    H5DIFF-h5diff_54      #uses runTest.cmake
-    H5DIFF-h5diff_55      #uses runTest.cmake
-    H5DIFF-h5diff_56      #uses runTest.cmake
-    H5DIFF-h5diff_57      #uses runTest.cmake
-    H5DIFF-h5diff_58      #uses runTest.cmake
-    H5DIFF-h5diff_600     #uses runTest.cmake
-    H5DIFF-h5diff_601     #uses runTest.cmake
-    H5DIFF-h5diff_603     #uses runTest.cmake
-    H5DIFF-h5diff_604     #uses runTest.cmake
-    H5DIFF-h5diff_605     #uses runTest.cmake
-    H5DIFF-h5diff_606     #uses runTest.cmake
-    H5DIFF-h5diff_607     #uses runTest.cmake
-    H5DIFF-h5diff_608     #uses runTest.cmake
-    H5DIFF-h5diff_609     #uses runTest.cmake
-    H5DIFF-h5diff_610     #uses runTest.cmake
-    H5DIFF-h5diff_612     #uses runTest.cmake
-    H5DIFF-h5diff_613     #uses runTest.cmake
-    H5DIFF-h5diff_614     #uses runTest.cmake
-    H5DIFF-h5diff_615     #uses runTest.cmake
-    H5DIFF-h5diff_616     #uses runTest.cmake
-    H5DIFF-h5diff_617     #uses runTest.cmake
-    H5DIFF-h5diff_618     #uses runTest.cmake
-    H5DIFF-h5diff_619     #uses runTest.cmake
-    H5DIFF-h5diff_621     #uses runTest.cmake
-    H5DIFF-h5diff_622     #uses runTest.cmake
-    H5DIFF-h5diff_623     #uses runTest.cmake
-    H5DIFF-h5diff_624     #uses runTest.cmake
-    H5DIFF-h5diff_625     #uses runTest.cmake
-    H5DIFF-h5diff_626     #uses runTest.cmake
-    H5DIFF-h5diff_627     #uses runTest.cmake
-    H5DIFF-h5diff_628     #uses runTest.cmake
-    H5DIFF-h5diff_70      #uses runTest.cmake
-    H5DIFF-h5diff_80      #uses runTest.cmake
-    H5DIFF-h5diff_90      #uses runTest.cmake
-    H5DIFF-h5diff_101     #uses runTest.cmake
-    H5DIFF-h5diff_102     #uses runTest.cmake
-    H5DIFF-h5diff_200     #uses runTest.cmake
-    H5DIFF-h5diff_201     #uses runTest.cmake
-    H5DIFF-h5diff_202     #uses runTest.cmake
-    H5DIFF-h5diff_203     #uses runTest.cmake
-    H5DIFF-h5diff_204     #uses runTest.cmake
-    H5DIFF-h5diff_205     #uses runTest.cmake
-    H5DIFF-h5diff_206     #uses runTest.cmake
-    H5DIFF-h5diff_207     #uses runTest.cmake
-    H5DIFF-h5diff_300     #uses runTest.cmake
-    H5DIFF-h5diff_400     #uses runTest.cmake
-    H5DIFF-h5diff_401     #uses runTest.cmake
-    H5DIFF-h5diff_402     #uses runTest.cmake
-    H5DIFF-h5diff_403     #uses runTest.cmake
-    H5DIFF-h5diff_404     #uses runTest.cmake
-    H5DIFF-h5diff_405     #uses runTest.cmake
-    H5DIFF-h5diff_406     #uses runTest.cmake
-    H5DIFF-h5diff_407     #uses runTest.cmake
-    H5DIFF-h5diff_408     #uses runTest.cmake
-    H5DIFF-h5diff_409     #uses runTest.cmake
-    H5DIFF-h5diff_410     #uses runTest.cmake
-    H5DIFF-h5diff_411     #uses runTest.cmake
-    H5DIFF-h5diff_412     #uses runTest.cmake
-    H5DIFF-h5diff_413     #uses runTest.cmake
-    H5DIFF-h5diff_414     #uses runTest.cmake
-    H5DIFF-h5diff_415     #uses runTest.cmake
-    H5DIFF-h5diff_416     #uses runTest.cmake
-    H5DIFF-h5diff_417     #uses runTest.cmake
-    H5DIFF-h5diff_418     #uses runTest.cmake
-    H5DIFF-h5diff_419     #uses runTest.cmake
-    H5DIFF-h5diff_420     #uses runTest.cmake
-    H5DIFF-h5diff_421     #uses runTest.cmake
-    H5DIFF-h5diff_422     #uses runTest.cmake
-    H5DIFF-h5diff_423     #uses runTest.cmake
-    H5DIFF-h5diff_424     #uses runTest.cmake
-    H5DIFF-h5diff_425     #uses runTest.cmake
-    H5DIFF-h5diff_450     #uses runTest.cmake
-    H5DIFF-h5diff_451     #uses runTest.cmake
-    H5DIFF-h5diff_452     #uses runTest.cmake
-    H5DIFF-h5diff_453     #uses runTest.cmake
-    H5DIFF-h5diff_454     #uses runTest.cmake
-    H5DIFF-h5diff_455     #uses runTest.cmake
-    H5DIFF-h5diff_456     #uses runTest.cmake
-    H5DIFF-h5diff_457     #uses runTest.cmake
-    H5DIFF-h5diff_458     #uses runTest.cmake
-    H5DIFF-h5diff_459     #uses runTest.cmake
-    H5DIFF-h5diff_500     #uses runTest.cmake
-    H5DIFF-h5diff_501     #uses runTest.cmake
-    H5DIFF-h5diff_502     #uses runTest.cmake
-    H5DIFF-h5diff_503     #uses runTest.cmake
-    H5DIFF-h5diff_504     #uses runTest.cmake
-    H5DIFF-h5diff_505     #uses runTest.cmake
-    H5DIFF-h5diff_506     #uses runTest.cmake
-    H5DIFF-h5diff_507     #uses runTest.cmake
-    H5DIFF-h5diff_508     #uses runTest.cmake
-    H5DIFF-h5diff_509     #uses runTest.cmake
-    H5DIFF-h5diff_510     #uses runTest.cmake
-    H5DIFF-h5diff_511     #uses runTest.cmake
-    H5DIFF-h5diff_512     #uses runTest.cmake
-    H5DIFF-h5diff_513     #uses runTest.cmake
-    H5DIFF-h5diff_514     #uses runTest.cmake
-    H5DIFF-h5diff_515     #uses runTest.cmake
-    H5DIFF-h5diff_516     #uses runTest.cmake
-    H5DIFF-h5diff_517     #uses runTest.cmake
-    H5DIFF-h5diff_518     #uses runTest.cmake
-    H5DIFF-h5diff_480     #uses runTest.cmake
-    H5DIFF-h5diff_481     #uses runTest.cmake
-    H5DIFF-h5diff_482     #uses runTest.cmake
-    H5DIFF-h5diff_483     #uses runTest.cmake
-    H5DIFF-h5diff_484     #uses runTest.cmake
-    H5DIFF-h5diff_530     #uses runTest.cmake
     ######### tools/h5dump #########
     H5DUMP-clearall-objects
     H5DUMP-clear-out1
@@ -190,11 +41,158 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP-XML-clearall-objects
     ######### tools/h5import #########
     H5IMPORT-clear-objects
+    H5IMPORT-ASCII_F32-clear-objects
+    H5IMPORT-ASCII_UI16-clear-objects
+    H5IMPORT-ASCII_UI32-clear-objects
+    H5IMPORT-ASCII_I8-clear-objects
+    H5IMPORT-ASCII_I16-clear-objects
+    H5IMPORT-ASCII_I32-clear-objects
+    H5IMPORT-ASCII_F64_R1-clear-objects
+    H5IMPORT-BINARY_I8_EOF-clear-objects
+    H5IMPORT-STR-clear-objects
+    H5IMPORT-BINARY_UI32-clear-objects
+    H5IMPORT-BINARY_UI16-clear-objects
+    H5IMPORT-BINARY_I32-clear-objects
+    H5IMPORT-BINARY_I8-clear-objects
+    H5IMPORT-BINARY_I16-clear-objects
+    H5IMPORT-BINARY_F64-clear-objects
+    H5IMPORT-ASCII_F64-clear-objects
+    ######### tools/h5jam #########
+    H5JAM-SETUP-N_twithub_u10_c-clear-objects
+    H5JAM-SETUP-N_twithub_u10_c
+    H5JAM-N_twithub_u10_c-clear-objects
+    H5JAM-NONE_COPY-N_twithub_u10_c
+    H5JAM-CHECKFILE-N_twithub_u10_c-clear-objects
+    H5JAM-SETUP-N_twithub_u511_c-clear-objects
+    H5JAM-SETUP-N_twithub_u511_c
+    H5JAM-N_twithub_u511_c-clear-objects
+    H5JAM-NONE_COPY-N_twithub_u511_c
+    H5JAM-CHECKFILE-N_twithub_u511_c-clear-objects
+    H5JAM-SETUP-N_twithub_u512_c-clear-objects
+    H5JAM-SETUP-N_twithub_u512_c
+    H5JAM-N_twithub_u512_c-clear-objects
+    H5JAM-NONE_COPY-N_twithub_u512_c
+    H5JAM-CHECKFILE-N_twithub_u512_c-clear-objects
+    H5JAM-SETUP-N_twithub_u513_c-clear-objects
+    H5JAM-SETUP-N_twithub_u513_c
+    H5JAM-N_twithub_u513_c-clear-objects
+    H5JAM-NONE_COPY-N_twithub_u513_c
+    H5JAM-CHECKFILE-N_twithub_u513_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u10_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u10_c
+    H5JAM-N_twithub513_u10_c-clear-objects
+    H5JAM-NONE_COPY-N_twithub513_u10_c
+    H5JAM-CHECKFILE-N_twithub513_u10_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u511_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u511_c
+    H5JAM-N_twithub513_u511_c-clear-objects
+    H5JAM-NONE_COPY-N_twithub513_u511_c
+    H5JAM-CHECKFILE-N_twithub513_u511_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u512_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u512_c
+    H5JAM-N_twithub513_u512_c-clear-objects
+    H5JAM-NONE_COPY-N_twithub513_u512_c
+    H5JAM-CHECKFILE-N_twithub513_u512_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u513_c-clear-objects
+    H5JAM-SETUP-N_twithub513_u513_c
+    H5JAM-N_twithub513_u513_c-clear-objects
+    H5JAM-NONE_COPY-N_twithub513_u513_c
+    H5JAM-CHECKFILE-N_twithub513_u513_c-clear-objects
+    H5JAM-CHECKFILE-twithub_u10_c-clear-objects
+    H5JAM-twithub_u511_c-clear-objects
+    H5JAM-CHECKFILE-twithub_u511_c-clear-objects
+    H5JAM-twithub_u512_c-clear-objects
+    H5JAM-CHECKFILE-twithub_u512_c-clear-objects
+    H5JAM-twithub_u513_c-clear-objects
+    H5JAM-CHECKFILE-twithub_u513_c-clear-objects
+    H5JAM-twithub513_u10_c-clear-objects
+    H5JAM-CHECKFILE-twithub513_u10_c-clear-objects
+    H5JAM-twithub513_u511_c-clear-objects
+    H5JAM-CHECKFILE-twithub513_u511_c-clear-objects
+    H5JAM-twithub513_u512_c-clear-objects
+    H5JAM-CHECKFILE-twithub513_u512_c-clear-objects
+    H5JAM-twithub513_u513_c-clear-objects
+    H5JAM-CHECKFILE-twithub513_u513_c-clear-objects
+    H5JAM-SETUP-twithub_tall-clear-objects
+    H5JAM-SETUP-twithub_tall
+    H5JAM-UNJAM-twithub_tall-clear-objects
+    H5JAM-UNJAM_D-twithub_tall-clear-objects
+    H5JAM-CHECKFILE-twithub_tall-clear-objects
+    H5JAM-SETUP-twithub513_tall-clear-objects
+    H5JAM-SETUP-twithub513_tall
+    H5JAM-UNJAM-twithub513_tall-clear-objects
+    H5JAM-UNJAM_D-twithub513_tall-clear-objects
+    H5JAM-CHECKFILE-twithub513_tall-clear-objects
+    H5JAM-SETUP-N_twithub_tall-clear-objects
+    H5JAM-SETUP-N_twithub_tall
+    H5JAM-UNJAM-N_twithub_tall-clear-objects
+    H5JAM-UNJAM_D-N_twithub_tall-clear-objects
+    H5JAM-CHECKFILE-N_twithub_tall-clear-objects
+    H5JAM-SETUP-N_twithub513_tall-clear-objects
+    H5JAM-SETUP-N_twithub513_tall
+    H5JAM-UNJAM-N_twithub513_tall-clear-objects
+    H5JAM-UNJAM_D-N_twithub513_tall-clear-objects
+    H5JAM-CHECKFILE-N_twithub513_tall-clear-objects
+    H5JAM-SETUP-D_twithub_tall-clear-objects
+    H5JAM-SETUP-D_twithub_tall
+    H5JAM-UNJAM-D_twithub_tall-clear-objects
+    H5JAM-UNJAM_D-D_twithub_tall-clear-objects
+    H5JAM-CHECKFILE-D_twithub_tall-clear-objects
+    H5JAM-SETUP-D_twithub513_tall-clear-objects
+    H5JAM-SETUP-D_twithub513_tall
+    H5JAM-UNJAM-D_twithub513_tall-clear-objects
+    H5JAM-UNJAM_D-D_twithub513_tall-clear-objects
+    H5JAM-CHECKFILE-D_twithub513_tall-clear-objects
+    H5JAM-CHECKFILE-ta_u513-clear-objects
+    H5JAM-twithub_u10-clear-objects
+    H5JAM-CHECKFILE-twithub_u10-clear-objects
+    H5JAM-twithub_u511-clear-objects
+    H5JAM-CHECKFILE-twithub_u511-clear-objects
+    H5JAM-twithub_u512-clear-objects
+    H5JAM-CHECKFILE-twithub_u512-clear-objects
+    H5JAM-twithub_u513-clear-objects
+    H5JAM-CHECKFILE-twithub_u513-clear-objects
+    H5JAM-twithub513_u10-clear-objects
+    H5JAM-CHECKFILE-twithub513_u10-clear-objects
+    H5JAM-twithub513_u511-clear-objects
+    H5JAM-CHECKFILE-twithub513_u511-clear-objects
+    H5JAM-twithub513_u512-clear-objects
+    H5JAM-CHECKFILE-twithub513_u512-clear-objects
+    H5JAM-twithub513_u513-clear-objects
+    H5JAM-CHECKFILE-twithub513_u513-clear-objects
+    H5JAM-twithub_u10_c-clear-objects
+    H5JAM-tall_u10-clear-objects
+    H5JAM-CHECKFILE-tall_u10-clear-objects
+    H5JAM-tall_u511-clear-objects
+    H5JAM-CHECKFILE-tall_u511-clear-objects
+    H5JAM-tall_u512-clear-objects
+    H5JAM-CHECKFILE-tall_u512-clear-objects
+    H5JAM-tall_u513-clear-objects
+    H5JAM-CHECKFILE-tall_u513-clear-objects
+    H5JAM-SETUP-ta_u10-clear-objects
+    H5JAM-SETUP-ta_u10
+    H5JAM-ta_u10-clear-objects
+    H5JAM-NONE_COPY-ta_u10
+    H5JAM-CHECKFILE-ta_u10-clear-objects
+    H5JAM-SETUP-ta_u511-clear-objects
+    H5JAM-SETUP-ta_u511
+    H5JAM-ta_u511-clear-objects
+    H5JAM-NONE_COPY-ta_u511
+    H5JAM-CHECKFILE-ta_u511-clear-objects
+    H5JAM-SETUP-ta_u512-clear-objects
+    H5JAM-SETUP-ta_u512
+    H5JAM-ta_u512-clear-objects
+    H5JAM-NONE_COPY-ta_u512
+    H5JAM-CHECKFILE-ta_u512-clear-objects
+    H5JAM-SETUP-ta_u513-clear-objects
+    H5JAM-SETUP-ta_u513
+    H5JAM-ta_u513-clear-objects
+    H5JAM-NONE_COPY-ta_u513
     ######### tools/h5ls #########
     H5LS-clearall-objects
     ######### tools/h5repack #########
     H5REPACK-clearall-objects
-    H5REPACK-gzip_verbose_filters                 #uses runTest.cmake
+    H5REPACK-gzip_verbose_filters                       #uses runTest.cmake
     H5REPACK_VERIFY_LAYOUT-dset2_chunk_20x10            #uses grepTest.cmake
     H5REPACK_VERIFY_LAYOUT_ALL-chunk_20x10              #uses grepTest.cmake
     H5REPACK_VERIFY_LAYOUT-dset2_conti                  #uses grepTest.cmake
@@ -216,26 +214,12 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK_VERIFY_LAYOUT_ALL-layout_short_switches    #uses grepTest.cmake
     ######### tools/h5stat #########
     H5STAT-clearall-objects
-    H5STAT-h5stat_help1            #uses runTest.cmake
-    H5STAT-h5stat_help2            #uses runTest.cmake
-    H5STAT-h5stat_filters          #uses runTest.cmake
-    H5STAT-h5stat_filters-file     #uses runTest.cmake
-    H5STAT-h5stat_filters-F        #uses runTest.cmake
-    H5STAT-h5stat_filters-d        #uses runTest.cmake
-    H5STAT-h5stat_filters-g        #uses runTest.cmake
-    H5STAT-h5stat_filters-dT       #uses runTest.cmake
-    H5STAT-h5stat_filters-UD       #uses runTest.cmake
-    H5STAT-h5stat_filters-UT       #uses runTest.cmake
-    H5STAT-h5stat_tsohm            #uses runTest.cmake
-    H5STAT-h5stat_newgrat          #uses runTest.cmake
-    H5STAT-h5stat_newgrat-UG       #uses runTest.cmake
-    H5STAT-h5stat_newgrat-UA       #uses runTest.cmake
     ######### tools/misc #########
     h5repart_20K-clear-objects
     h5repart_5K-clear-objects
     h5repart_sec2-clear-objects
-    H5MKGRP-h5mkgrp_help                                #uses runTest.cmake
-    H5MKGRP-h5mkgrp_version                             #uses runTest.cmake
+    H5MKGRP_CMP-clear-h5mkgrp_help
+    H5MKGRP_CMP-clear-h5mkgrp_version
     H5MKGRP-clear-h5mkgrp_single
     H5MKGRP-h5mkgrp_single                              #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_single                         #uses runTest.cmake
@@ -272,4 +256,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5MKGRP-clear-h5mkgrp_nested_mult_latest-lp
     H5MKGRP-h5mkgrp_nested_mult_latest-lp               #uses runTest.cmake
     H5MKGRP-H5LS-h5mkgrp_nested_mult_latest-lp          #uses runTest.cmake
+    ######### examples #########
+    EXAMPLES-clear-objects
+    cpp_ex-clear-objects
 )

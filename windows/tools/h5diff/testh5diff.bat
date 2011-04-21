@@ -59,6 +59,8 @@ set srcexclude1_2=h5diff_exclude1-2.h5
 set srcexclude2_1=h5diff_exclude2-1.h5
 set srcexclude2_2=h5diff_exclude2-2.h5
 set src_comp_vl_strs=h5diff_comp_vl_strs.h5
+set src_ATTR_VERBOSE_LEVEL_FILE1=h5diff_attr_v_level1.h5
+set src_ATTR_VERBOSE_LEVEL_FILE2=h5diff_attr_v_level2.h5
 
 set file1=%indir%\h5diff_basic1.h5
 set file2=%indir%\h5diff_basic2.h5
@@ -91,6 +93,8 @@ set exclude1_2=%indir%\h5diff_exclude1-2.h5
 set exclude2_1=%indir%\h5diff_exclude2-1.h5
 set exclude2_2=%indir%\h5diff_exclude2-2.h5
 set comp_vl_strs=%indir%\h5diff_comp_vl_strs.h5
+set ATTR_VERBOSE_LEVEL_FILE1=%indir%\h5diff_attr_v_level1.h5
+set ATTR_VERBOSE_LEVEL_FILE2=%indir%\h5diff_attr_v_level2.h5
 
 
 rem The tool name
@@ -530,6 +534,50 @@ rem ############################################################################
     call :testing %h5diff% -v  %srcfile5% %srcfile6%
     call :tooltest h5diff_70.txt -v %file5% %file6%
 
+    rem ##################################################
+    rem  attrs with verbose option level
+    rem ##################################################
+    call :testing %h5diff% -v1 %srcfile5% %srcfile6%
+    call :tooltest h5diff_700.txt -v1 %file5% %file6%
+
+    call :testing %h5diff% -v2 %srcfile5% %srcfile6%
+    call :tooltest h5diff_701.txt -v2 %file5% %file6% 
+
+    call :testing %h5diff%  --verbose=1 %srcfile5% %srcfile6%
+    call :tooltest h5diff_702.txt --verbose=1 %file5% %file6% 
+
+    call :testing %h5diff% --verbose=2 %srcfile5% %srcfile6%
+    call :tooltest h5diff_703.txt --verbose=2 %file5% %file6% 
+
+    rem same attr number , all same attr name
+    call :testing %h5diff% -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2% /g
+    call :tooltest h5diff_704.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2% /g
+
+    rem same attr number , some same attr name
+    call :testing %h5diff%  -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2% /dset
+    call :tooltest h5diff_705.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2% /dset
+
+    rem same attr number , all different attr name
+    call :testing %h5diff% -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2% /ntype
+    call :tooltest h5diff_706.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2% /ntype
+
+    rem different attr number , same attr name (intersected)
+    call :testing %h5diff% -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2% /g2
+    call :tooltest h5diff_707.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2% /g2
+
+    rem different attr number , all different attr name 
+    call :testing %h5diff% -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2% /g3
+    call :tooltest h5diff_708.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2% /g3
+
+    rem when no attributes exist in both objects
+    call :testing %h5diff% -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2% /g4
+    call :tooltest h5diff_709.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2% /g4
+
+    rem file vs file
+    call :testing %h5diff% -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2%
+    call :tooltest h5diff_710.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2%
+
+
     rem #######################################################################
     rem 8.  all dataset datatypes
     rem #######################################################################
@@ -554,13 +602,23 @@ rem ############################################################################
 
     rem 11. floating point comparison
     rem Not tested on Windows due to difference in formatting of scientific 
-    rem notation  --SJW 8/23/07
-    call :testing h5diff_101.txt -v %srcfile1% %srcfile1% g1/d1  g1/d2
+    rem notation (101, 102)  --SJW 8/23/07
+    call :testing %h5diff% -v %srcfile1% %srcfile1% g1/d1  g1/d2
     rem call :tooltest h5diff_101.txt -v %file1% %file1% g1/d1  g1/d2
     call :results -SKIP-
 
     call :testing %h5diff% -v  %srcfile1% %srcfile1%  g1/fp1 g1/fp2
     rem call :tooltest h5diff_102.txt -v %file1% %file1% g1/fp1 g1/fp2
+    call :results -SKIP-
+
+    rem Not tested on Windows due to difference in formatting of scientific 
+    rem notation with other OS. printf("%g") (103, 104)  
+    call :testing %h5diff% -v --use-system-epsilon %srcfile1% %srcfile1% g1/d1  g1/d2
+    rem call :tooltest h5diff_103.txt -v --use-system-epsilon %file1% %file1% g1/d1  g1/d2
+    call :results -SKIP-
+
+    call :testing %h5diff% -v --use-system-epsilon %srcfile1% %srcfile1%  g1/fp1 g1/fp2
+    rem call :tooltest h5diff_102.txt -v --use-system-epsilon %file1% %file1% g1/fp1 g1/fp2
     call :results -SKIP-
 
     rem   New option added #1368(E1)  - ADB 2/5/2009

@@ -32,7 +32,11 @@ static char srcdir_path[1024] = "";
 static char srcdir_testpath[1024] = "";
 
 /* Append the test file name to the srcdir path and return the whole string */
+#ifdef H5_VMS
+static const char *H5_get_srcdir_filename(char *filename)
+#else
 static const char *H5_get_srcdir_filename(const char *filename)
+#endif
 {
     const char *srcdir = HDgetenv("srcdir");
 
@@ -43,8 +47,17 @@ static const char *H5_get_srcdir_filename(const char *filename)
     /* Build path to test file */
     if((HDstrlen(srcdir) + HDstrlen(filename) + 2) < sizeof(srcdir_testpath)) {
         HDstrcpy(srcdir_testpath, srcdir);
+#ifdef H5_VMS
+        if(filename[0] == '[') {
+            char *tmp = filename;
+            srcdir_testpath[strlen(srcdir)-1] = '\0';
+            strcat(srcdir_testpath, ++tmp);
+        } else
+            strcat(srcdir_testpath, filename);
+#else
         HDstrcat(srcdir_testpath, "/");
         HDstrcat(srcdir_testpath, filename);
+#endif
         return(srcdir_testpath);
     } /* end if */
     else

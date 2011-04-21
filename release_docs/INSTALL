@@ -141,7 +141,7 @@ CONTENTS
         tar file can be found at ftp://ftp.hdfgroup.org/lib-external/szip/.
         
         To configure the HDF5 Library with the Szip compression filter, use 
-        the '--enable-szlib=/PATH_TO_SZIP' flag. For more information, see 
+        the '--with-szlib=/PATH_TO_SZIP' flag. For more information, see 
         section 4.3.7, "Specifying other libraries and headers."
 
         Starting with release 1.6.3, Szip library binaries are distributed 
@@ -158,6 +158,22 @@ CONTENTS
         The parallel version of the library is built upon the foundation
         provided by MPI and MPI-IO. If these libraries are not available
         when HDF5 is configured, only a serial version of HDF5 can be built.
+
+3.4. AIO
+	Modification of the HDF5 library to support AIO for metadata writes,
+	and possibly raw data reads and writes is in progress.  To date, 
+	only the VFD modifications needed to support AIO have been included 
+	in the library.  This code is tested as part of the build process,
+	but is not yet used under normal operating circumstances.
+
+	However, it does depend on a working POSIX AIO implementation on
+	the host system.  At present, AIO support is configured by default
+	on Linux and BSD systems, and omitted on all other systems, and on
+	Linux and BSD systems when the PGI compilers are used.
+
+	This default can be over-ridden with the XXX configuration flag.  
+        Also, attempts to recover from AIO failures can be enabled with the 
+        YYY configuration flag.
 
 
 4. Full installation instructions for source distributions

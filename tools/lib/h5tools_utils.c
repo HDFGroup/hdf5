@@ -231,8 +231,11 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
                 if (l_opts[i].has_arg != no_arg) {
                     if (arg[len] == '=') {
                         opt_arg = &arg[len + 1];
-                    } else if (opt_ind < (argc - 1) && argv[opt_ind + 1][0] != '-') {
-                        opt_arg = argv[++opt_ind];
+                    }
+                    else if (l_opts[i].has_arg != optional_arg) {
+                        if (opt_ind < (argc - 1)) 
+                            if (argv[opt_ind + 1][0] != '-')
+                                opt_arg = argv[++opt_ind];
                     } else if (l_opts[i].has_arg == require_arg) {
                         if (opt_err)
                             HDfprintf(stderr,
@@ -783,9 +786,11 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
      */
     if(link_info->linfo.type == H5L_TYPE_EXTERNAL) {
         fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_sec2(fapl);
+        if(H5Pset_fapl_sec2(fapl) < 0)
+            goto out;
         lapl = H5Pcreate(H5P_LINK_ACCESS);
-        H5Pset_elink_fapl(lapl, fapl);
+        if(H5Pset_elink_fapl(lapl, fapl) < 0)
+            goto out;
     } /* end if */
 
     /* Check for retrieving object info */

@@ -2459,7 +2459,8 @@ H5FDaio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
 
     if((ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL ctlblk_ptr_ptr or *ctlblk_ptr_ptr != NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, 
+                    "NULL ctlblk_ptr_ptr or *ctlblk_ptr_ptr != NULL")
 
     if(H5FD_aio_fsync(file, ctlblk_ptr_ptr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_AIOSYNCFAIL, FAIL, "aio fsync request failed")

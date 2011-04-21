@@ -74,7 +74,7 @@
 
 #define END_MEMBERS	}}
 
-/* Type definitions of the structures used to store the aio control i
+/* Type definitions of the structures used to store the aio control 
  * block(s) returned by any underlying file driver(s) that support AIO, 
  * along with the information needed to route the control block to the 
  * appropriate driver when it is passed down to the multi driver.
@@ -2223,10 +2223,13 @@ H5FD_multi_aio_alloc_ctlblk(H5FD_multi_aio_ctlblk_t **ctlblk_ptr_ptr)
     H5FD_multi_aio_ctlblk_t * ctlblk_ptr = NULL;
 
     if((ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADVALUE, "bad ctlblk_ptr_ptr on entry", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_BADVALUE, 
+                    "bad ctlblk_ptr_ptr on entry", -1)
 
-    if(NULL == (ctlblk_ptr = (H5FD_multi_aio_ctlblk_t *)malloc(sizeof(H5FD_multi_aio_ctlblk_t))))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", -1)
+    if(NULL == (ctlblk_ptr = (H5FD_multi_aio_ctlblk_t *)
+                             malloc(sizeof(H5FD_multi_aio_ctlblk_t))))
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, 
+                    "memory allocation failed", -1)
 
     ctlblk_ptr->magic          = H5FD_MULTI_AIO_CTLBLK_T__MAGIC;
     ctlblk_ptr->num_subctlblks = 0;
@@ -2359,7 +2362,13 @@ H5FD_multi_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    if((file == NULL) || (file->cls == NULL) || (addr == HADDR_UNDEF) || (size <= 0) || (buffer == NULL) || (ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (addr == HADDR_UNDEF) || 
+       (size <= 0) || 
+       (buffer == NULL) || 
+       (ctlblk_ptr_ptr == NULL) || 
+       (*ctlblk_ptr_ptr != NULL))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "bad arg(s) on entry.", -1)
 
     multi_file = (H5FD_multi_t *)file;
@@ -2392,14 +2401,17 @@ H5FD_multi_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
     tgt_file = multi_file->memb[hi];
 
     /* pass on the aio read */
-    if(H5FDaio_read(tgt_file, type, (dx ? dx->memb_dxpl[hi] : H5P_DEFAULT), (addr - start_addr), size, buffer, &subctlblk_ptr) < 0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOREADERROR, "aio read request failed", -1)
+    if(H5FDaio_read(tgt_file, type, (dx ? dx->memb_dxpl[hi] : H5P_DEFAULT), 
+                    (addr - start_addr), size, buffer, &subctlblk_ptr) < 0)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOREADERROR, 
+                    "aio read request failed", -1)
 
     assert(subctlblk_ptr != NULL);
 
     /* allocate the control block */
     if(H5FD_multi_aio_alloc_ctlblk(&ctlblk_ptr) < 0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "can't allocate aio control block", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, 
+                    "can't allocate aio control block", -1)
 
     assert(ctlblk_ptr != NULL);
     assert(ctlblk_ptr->magic == H5FD_MULTI_AIO_CTLBLK_T__MAGIC);
@@ -2482,7 +2494,13 @@ H5FD_multi_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    if((file == NULL) || (file->cls == NULL) || (addr == HADDR_UNDEF) || (size <= 0) || (buffer == NULL) || (ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL)) 
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (addr == HADDR_UNDEF) || 
+       (size <= 0) || 
+       (buffer == NULL) || 
+       (ctlblk_ptr_ptr == NULL) || 
+       (*ctlblk_ptr_ptr != NULL)) 
         H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "bad arg(s) on entry.", -1)
 
     multi_file = (H5FD_multi_t *)file;
@@ -2514,14 +2532,17 @@ H5FD_multi_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
     tgt_file = multi_file->memb[hi];
 
     /* pass on the aio write */
-    if(H5FDaio_write(tgt_file, type, (dx ? dx->memb_dxpl[hi] : H5P_DEFAULT), (addr - start_addr), size, buffer, &subctlblk_ptr) < 0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOWRITEERROR, "aio write request failed", -1)
+    if(H5FDaio_write(tgt_file, type, (dx ? dx->memb_dxpl[hi] : H5P_DEFAULT), 
+                     (addr - start_addr), size, buffer, &subctlblk_ptr) < 0)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOWRITEERROR, 
+                    "aio write request failed", -1)
 
     assert( subctlblk_ptr != NULL );
 
     /* allocate the control block */
     if(H5FD_multi_aio_alloc_ctlblk(&ctlblk_ptr) < 0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "can't allocate aio control block", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, 
+                    "can't allocate aio control block", -1)
 
     assert( ctlblk_ptr != NULL );
     assert( ctlblk_ptr->magic == H5FD_MULTI_AIO_CTLBLK_T__MAGIC );
@@ -2613,17 +2634,20 @@ H5FD_multi_aio_test(hbool_t *done_ptr, void *ctlblk_ptr)
     if(multi_ctlblk_ptr->magic != H5FD_MULTI_AIO_CTLBLK_T__MAGIC) 
         H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "bad ctlblk magic on entry.", -1)
     else if ( multi_ctlblk_ptr->num_subctlblks < 1 ) 
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "empty control block on entry.", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, 
+                    "empty control block on entry.", -1)
 
     while((done) && (i < multi_ctlblk_ptr->num_subctlblks)) {
         tgt_file      = (multi_ctlblk_ptr->sub_ctlblks[i]).driver;
         subctlblk_ptr = (multi_ctlblk_ptr->sub_ctlblks[i]).ctlblk;
 
         if((tgt_file == NULL) || (subctlblk_ptr == NULL)) 
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "NULL tgt file or sub ctl blk.", -1)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, 
+                        "NULL tgt file or sub ctl blk.", -1)
 
         if((multi_ctlblk_ptr->sub_ctlblks[i]).finished) 
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "sub op already finished?!?!", -1)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, 
+                        "sub op already finished?!?!", -1)
 
         if(!((multi_ctlblk_ptr->sub_ctlblks[i]).done)) {
             already_done = FALSE;
@@ -2631,7 +2655,8 @@ H5FD_multi_aio_test(hbool_t *done_ptr, void *ctlblk_ptr)
             tgt_done = FALSE;
 
             if(H5FDaio_test(tgt_file, &tgt_done, subctlblk_ptr) < 0)
-                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOTESTFAIL, "aio test sub-request failed", -1)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOTESTFAIL, 
+                            "aio test sub-request failed", -1)
 
             if(tgt_done)
                 (multi_ctlblk_ptr->sub_ctlblks[i]).done = TRUE;
@@ -2708,7 +2733,8 @@ H5FD_multi_aio_wait(void *ctlblk_ptr)
     if(multi_ctlblk_ptr->magic != H5FD_MULTI_AIO_CTLBLK_T__MAGIC)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "bad ctlblk magic on entry.", -1)
     else if ( multi_ctlblk_ptr->num_subctlblks < 1 ) 
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "empty control block on entry.", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, 
+                    "empty control block on entry.", -1)
 
     i = 0;
 
@@ -2717,16 +2743,19 @@ H5FD_multi_aio_wait(void *ctlblk_ptr)
         subctlblk_ptr = (multi_ctlblk_ptr->sub_ctlblks[i]).ctlblk;
 
         if((tgt_file == NULL) || (subctlblk_ptr == NULL)) 
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "NULL tgt file or sub ctl blk.", -1)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, 
+                        "NULL tgt file or sub ctl blk.", -1)
 
         if((multi_ctlblk_ptr->sub_ctlblks[i]).finished)
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "sub op already finished?!?!", -1)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, 
+                        "sub op already finished?!?!", -1)
 
         if(!((multi_ctlblk_ptr->sub_ctlblks[i]).done)) {
             already_done = FALSE;
 
             if(H5FDaio_wait(tgt_file, subctlblk_ptr) < 0)
-                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOTESTFAIL, "aio sub wait request failed", -1)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOTESTFAIL, 
+                            "aio sub wait request failed", -1)
 
             (multi_ctlblk_ptr->sub_ctlblks[i]).done = TRUE;
         }
@@ -2804,7 +2833,8 @@ H5FD_multi_aio_finish(int *errno_ptr, void *ctlblk_ptr)
     if(multi_ctlblk_ptr->magic != H5FD_MULTI_AIO_CTLBLK_T__MAGIC)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "bad ctlblk magic on entry.", -1)
     else if ( multi_ctlblk_ptr->num_subctlblks < 1 ) 
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "empty control block on entry.", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, 
+                    "empty control block on entry.", -1)
 
     /* finish all the sub operations */
     i = 0;
@@ -2813,18 +2843,21 @@ H5FD_multi_aio_finish(int *errno_ptr, void *ctlblk_ptr)
         subctlblk_ptr = (multi_ctlblk_ptr->sub_ctlblks[i]).ctlblk;
 
         if((tgt_file == NULL) || (subctlblk_ptr == NULL)) 
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "NULL tgt file or sub ctl blk.", -1)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, 
+                        "NULL tgt file or sub ctl blk.", -1)
 
         if(!((multi_ctlblk_ptr->sub_ctlblks[i]).done))
             H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "sub op not done?!?!", -1)
 
         if((multi_ctlblk_ptr->sub_ctlblks[i]).finished)
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "sub op already finished?!?!", -1)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, 
+                         "sub op already finished?!?!", -1)
 
         sub_errno = 0;
 
         if(H5FDaio_finish(tgt_file, &sub_errno, subctlblk_ptr) < 0)
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOTESTFAIL, "aio finish sub-request failed", -1)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOTESTFAIL, 
+                        "aio finish sub-request failed", -1)
 
         if(sub_errno != 0)
             error_num = sub_errno;
@@ -2836,7 +2869,8 @@ H5FD_multi_aio_finish(int *errno_ptr, void *ctlblk_ptr)
 
     /* discard the control block */
     if(H5FD_multi_aio_discard_ctlblk(multi_ctlblk_ptr) < 0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_CANTFREE, "Attempt to discard control block failed", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_CANTFREE, 
+                    "Attempt to discard control block failed", -1)
 
     *errno_ptr = error_num;
 
@@ -2908,7 +2942,10 @@ H5FD_multi_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr)
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    if((file == NULL) || (file->cls == NULL) || (ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL)) 
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (ctlblk_ptr_ptr == NULL) || 
+       (*ctlblk_ptr_ptr != NULL)) 
         H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "bad arg(s) on entry.", -1)
 
     multi_file = (H5FD_multi_t *)file;
@@ -2929,14 +2966,16 @@ H5FD_multi_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr)
     i = 0;
     while(i < num_unique_open_files) {
         if(H5FDaio_fsync(drivers[i], &(ctlblks[i])) < 0)
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOSYNCFAIL, "sub aio fsync request failed.", -1)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOSYNCFAIL, 
+                        "sub aio fsync request failed.", -1)
 
 	i++;
     }
 
     /* if all goes well, allocate the control block and initialize it */
     if(H5FD_multi_aio_alloc_ctlblk(&ctlblk_ptr) < 0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "can't allocate aio control block", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, 
+                    "can't allocate aio control block", -1)
 
     assert( ctlblk_ptr != NULL );
     assert( ctlblk_ptr->magic == H5FD_MULTI_AIO_CTLBLK_T__MAGIC );
@@ -3013,7 +3052,8 @@ H5FD_multi_aio_cancel(void *ctlblk_ptr)
     if(multi_ctlblk_ptr->magic != H5FD_MULTI_AIO_CTLBLK_T__MAGIC) 
         H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "bad ctlblk magic on entry.", -1)
     else if(multi_ctlblk_ptr->num_subctlblks < 1)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "empty control block on entry.", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, 
+                    "empty control block on entry.", -1)
 
     i = 0;
 
@@ -3022,13 +3062,16 @@ H5FD_multi_aio_cancel(void *ctlblk_ptr)
         subctlblk_ptr = (multi_ctlblk_ptr->sub_ctlblks[i]).ctlblk;
 
         if((tgt_file == NULL) || (subctlblk_ptr == NULL)) 
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "NULL tgt file or sub ctl blk.", -1)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, 
+                        "NULL tgt file or sub ctl blk.", -1)
 
         if((multi_ctlblk_ptr->sub_ctlblks[i]).finished)
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, "sub op already finished?!?!", -1)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_SYSTEM, 
+                        "sub op already finished?!?!", -1)
 
         if(H5FDaio_cancel(tgt_file, subctlblk_ptr) < 0)
-            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOTESTFAIL, "aio sub wait request failed", -1)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_AIOTESTFAIL, 
+                        "aio sub wait request failed", -1)
 
 	(multi_ctlblk_ptr->sub_ctlblks[i]).driver   = NULL;
 	(multi_ctlblk_ptr->sub_ctlblks[i]).ctlblk   = NULL;
@@ -3040,7 +3083,8 @@ H5FD_multi_aio_cancel(void *ctlblk_ptr)
 
     /* discard the control block */
     if(H5FD_multi_aio_discard_ctlblk(multi_ctlblk_ptr) < 0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_CANTFREE, "Attempt to discard control block failed", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_CANTFREE, 
+                    "Attempt to discard control block failed", -1)
 
     return(0);
 } /* end H5FD_multi_aio_cancel() */
@@ -3083,7 +3127,8 @@ H5FD_multi_fsync(H5FD_t *file, hid_t dxpl_id)
             tgt_file = multi_file_ptr->memb[mt];
 
             if(H5FDfsync(tgt_file, dxpl_id) < 0)
-                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_SYNCFAIL, "sub fsync request failed", -1)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_SYNCFAIL, 
+                            "sub fsync request failed", -1)
         }
     } END_MEMBERS;
 

@@ -391,6 +391,9 @@ int main(void)
     nerrors += (test_filter_write(filename, fapl, FALSE) < 0	? 1 : 0);
     nerrors += (test_filter_read(filename, fapl) < 0		? 1 : 0);
 
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+
     h5_cleanup(FILENAME, fapl);
 
     /* Make sure we can close the library */

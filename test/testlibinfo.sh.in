@@ -74,26 +74,10 @@ fi
 # built too.
 if [ -n $Shared_Lib ]; then
    h5libdir=../src/.libs
+   shlib=$(grep dlname ../src/libhdf5.la | sed -e "s/dlname='//" -e "s/'//")
 else
    h5libdir=../src
 fi 
-
-# Different OS uses different naming for shared libs.
-case `uname -s` in
-    Darwin)	# MacOS
-        shlibsuffix=.dylib
-        break
-        ;;
-    AIX)	# AIX .a is already a shared lib
-	# this is a temporary patch.
-        shlibsuffix=.a
-        break
-        ;;
-    *)		# default
-        shlibsuffix=.so
-        break
-        ;;
-esac
 
 h5libsettings=../src/libhdf5.settings 
 
@@ -102,9 +86,9 @@ h5libsettings=../src/libhdf5.settings
 # libhdf5.settings file.
 # Check dynamic library file if built.
 if [ x-$Shared_Lib = x-yes ]; then
-    CHECK_LIBINFO ${h5libdir}/libhdf5${shlibsuffix}
+    CHECK_LIBINFO ${h5libdir}/${shlib}
 else
-    SKIP ${h5libdir}/libhdf5${shlibsuffix}
+    SKIP shlib
 fi
 
 # Though rare, libhdf5.a may not have been built.

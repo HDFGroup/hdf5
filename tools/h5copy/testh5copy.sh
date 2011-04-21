@@ -401,13 +401,13 @@ COPY_EXT_LINKS()
     TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_dset -d /copy2_dset
 
     echo "Test copying dangling external link (no obj) directly without -f ext"
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_1
+    TOOLTEST -v -i $TESTFILE -o $FILEOUT -s /group_ext/extlink_notyet1 -d /copy_dangle1_1
 
     echo "Test copying dangling external link (no obj) directly with -f ext"
     TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2
 
     echo "Test copying dangling external link (no file) directly without -f ext"
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_1
+    TOOLTEST -v -i $TESTFILE -o $FILEOUT -s /group_ext/extlink_notyet2 -d /copy_dangle2_1
 
     echo "Test copying dangling external link (no file) directly with -f ext"
     TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2
@@ -416,7 +416,7 @@ COPY_EXT_LINKS()
     TOOLTEST -v -i $TESTFILE -o $FILEOUT -s /group_ext -d /copy1_group
 
     echo "Test copying a group contains external links with -f ext"
-    TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -f ext -s /group_ext -d /copy2_group
+    TOOLTEST -f ext -v -i $TESTFILE -o $FILEOUT -s /group_ext -d /copy2_group
 
     # Verify that the file created above is correct
     H5LSTEST $FILEOUT

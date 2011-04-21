@@ -853,14 +853,14 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "reference" {
-         DATATYPE  H5T_REFERENCE
+         DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): DATASET 976 /dset , DATASET 976 /dset 
          }
       }
       ATTRIBUTE "reference2D" {
-         DATATYPE  H5T_REFERENCE
+         DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): DATASET 976 /dset , DATASET 976 /dset ,
@@ -869,7 +869,7 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "reference3D" {
-         DATATYPE  H5T_REFERENCE
+         DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): DATASET 976 /dset , DATASET 976 /dset ,
@@ -1817,14 +1817,14 @@ GROUP "/" {
          }
       }
       DATASET "reference" {
-         DATATYPE  H5T_REFERENCE
+         DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): DATASET 976 /dset , DATASET 976 /dset 
          }
       }
       DATASET "reference2D" {
-         DATATYPE  H5T_REFERENCE
+         DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): DATASET 976 /dset , DATASET 976 /dset ,
@@ -1833,7 +1833,7 @@ GROUP "/" {
          }
       }
       DATASET "reference3D" {
-         DATATYPE  H5T_REFERENCE
+         DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): DATASET 976 /dset , DATASET 976 /dset ,

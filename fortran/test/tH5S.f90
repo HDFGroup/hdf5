@@ -163,7 +163,13 @@
           IF (classtype .NE. 1) write(*,*)"class type not H5S_SIMPLE_f"
 
           !
-          !set the copied space to dim2 size.
+          !set the copied space to none before extend the dimensions.
+          !
+          CALL h5sset_extent_none_f(space2_id, error)
+              CALL check("h5sset_extent_none_f", error, total_error)
+
+          !
+          !set the copied space to dim2 size. 
           !
           CALL h5sset_extent_simple_f(space2_id, rank2, dims2, maxdims2, error)
               CALL check("h5sset_extent_simple_f", error, total_error)

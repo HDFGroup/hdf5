@@ -367,7 +367,13 @@ H5FD_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr,
 
     FUNC_ENTER_NOAPI(H5FD_aio_read, FAIL)
 
-    if((file == NULL) || (file->cls == NULL) || (!H5F_addr_defined(addr)) || (size <= 0) || (buffer == NULL) || (ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (!H5F_addr_defined(addr)) || 
+       (size <= 0) || 
+       (buffer == NULL) || 
+       (ctlblk_ptr_ptr == NULL) || 
+       (*ctlblk_ptr_ptr != NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     if(file->cls->aio_read != NULL) { /* aio_read supported */
@@ -378,7 +384,8 @@ H5FD_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr,
         HDassert( file->cls->aio_wait != NULL );
         HDassert( file->cls->aio_finish != NULL );
 
-	if((file->cls->aio_read)(file, type, dxpl, addr + file->base_addr, size, buffer, ctlblk_ptr_ptr) < 0)
+	if((file->cls->aio_read)(file, type, dxpl, addr + file->base_addr, size, buffer, 
+                                 ctlblk_ptr_ptr) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_AIOREADERROR, FAIL, "driver aio read request failed")
     } else { /* aio_read not supported -- do synchronous read instead */
 	HDassert( file->cls->read != NULL );
@@ -448,7 +455,13 @@ H5FD_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr,
 
     FUNC_ENTER_NOAPI(H5FD_aio_write, FAIL)
 
-    if((file == NULL) || (file->cls == NULL) || (!H5F_addr_defined(addr)) || (size <= 0) || (buffer == NULL) || (ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (!H5F_addr_defined(addr)) || 
+       (size <= 0) || 
+       (buffer == NULL) || 
+       (ctlblk_ptr_ptr == NULL) || 
+       (*ctlblk_ptr_ptr != NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     if ( file->cls->aio_write != NULL ) { /* aio_write supported */
@@ -459,13 +472,15 @@ H5FD_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr,
         HDassert( file->cls->aio_wait != NULL );
         HDassert( file->cls->aio_finish != NULL );
 
-	if((file->cls->aio_write)(file, type, dxpl, addr + file->base_addr, size, buffer, ctlblk_ptr_ptr) < 0)
+	if((file->cls->aio_write)(file, type, dxpl, addr + file->base_addr, size, 
+                                  buffer, ctlblk_ptr_ptr) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_AIOWRITEERROR, FAIL, "driver aio write request failed")
     } else { /* aio_write not supported -- do synchronous write instead */
 	HDassert( file->cls->write != NULL );
 
 	if((file->cls->write)(file, type, dxpl, addr + file->base_addr, size, buffer) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver fallback sio write request failed")
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, 
+                        "driver fallback sio write request failed")
 	else /* setup the dummy control block pointer */
             *ctlblk_ptr_ptr = (void *)dummy_aio_ctlblk;
     }
@@ -517,7 +532,10 @@ H5FD_aio_test(H5FD_t *file, hbool_t *done_ptr, void *ctlblk_ptr)
 
     FUNC_ENTER_NOAPI(H5FD_aio_test, FAIL)
 
-    if((file == NULL) || (file->cls == NULL) || (done_ptr == NULL) || (ctlblk_ptr == NULL))
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (done_ptr == NULL) || 
+       (ctlblk_ptr == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     if(file->cls->aio_test != NULL) { /* aio_test supported */
@@ -574,7 +592,9 @@ H5FD_aio_wait(H5FD_t *file, void *ctlblk_ptr)
 
     FUNC_ENTER_NOAPI(H5FD_aio_wait, FAIL)
 
-    if((file == NULL) || (file->cls == NULL) || (ctlblk_ptr == NULL))
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (ctlblk_ptr == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "NULL ctlblk ptr on entry.")
 
     if(ctlblk_ptr == NULL)
@@ -635,7 +655,10 @@ H5FD_aio_finish(H5FD_t *file, int *errno_ptr, void *ctlblk_ptr)
 
     FUNC_ENTER_NOAPI(H5FD_aio_finish, FAIL)
 
-    if((file == NULL) || (file->cls == NULL) || (errno_ptr == NULL) || (ctlblk_ptr == NULL))
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (errno_ptr == NULL) || 
+       (ctlblk_ptr == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "NULL param(s) on entry.")
 
     if(file->cls->aio_finish != NULL) { /* aio_finish supported */
@@ -690,7 +713,10 @@ H5FD_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr)
 
     FUNC_ENTER_NOAPI(H5FD_aio_fsync, FAIL)
 
-    if((file == NULL) || (file->cls == NULL) || (ctlblk_ptr_ptr == NULL) || (*ctlblk_ptr_ptr != NULL))
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (ctlblk_ptr_ptr == NULL) || 
+       (*ctlblk_ptr_ptr != NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "NULL param(s) on entry.")
 
     if(file->cls->aio_fsync != NULL) { /* aio_fsync supported */
@@ -851,40 +877,57 @@ H5FD_aggregate_stats(H5FD_stats_t *base_stats_ptr, H5FD_stats_t *new_stats_ptr)
 
     FUNC_ENTER_NOAPI_NOINIT(H5FD_aggregate_stats)
 
-    if((base_stats_ptr == NULL) || (base_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC) || (new_stats_ptr == NULL) || (new_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
+    if((base_stats_ptr == NULL) || 
+       (base_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC) || 
+       (new_stats_ptr == NULL) || 
+       (new_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     if(new_stats_ptr->defined){
         base_stats_ptr->defined = TRUE;
-        base_stats_ptr->complete = (hbool_t)(base_stats_ptr->complete && new_stats_ptr->complete);
+        base_stats_ptr->complete = (hbool_t)
+            (base_stats_ptr->complete && new_stats_ptr->complete);
         base_stats_ptr->aio_reads_attempted += new_stats_ptr->aio_reads_attempted;
-        base_stats_ptr->aio_reads_completed_successfully += new_stats_ptr->aio_reads_completed_successfully;
+        base_stats_ptr->aio_reads_completed_successfully += 
+            new_stats_ptr->aio_reads_completed_successfully;
         base_stats_ptr->aio_reads_canceled += new_stats_ptr->aio_reads_canceled;
         base_stats_ptr->aio_read_queue_attempts += new_stats_ptr->aio_read_queue_attempts;
-        base_stats_ptr->aio_read_queue_attempt_failures += new_stats_ptr->aio_read_queue_attempt_failures;
+        base_stats_ptr->aio_read_queue_attempt_failures += 
+            new_stats_ptr->aio_read_queue_attempt_failures;
         base_stats_ptr->aio_reads_converted_to_sio += new_stats_ptr->aio_reads_converted_to_sio;
         base_stats_ptr->aio_read_failures += new_stats_ptr->aio_read_failures;
-        base_stats_ptr->aio_read_failures_recovered_via_sio += new_stats_ptr->aio_read_failures_recovered_via_sio;
+        base_stats_ptr->aio_read_failures_recovered_via_sio += 
+            new_stats_ptr->aio_read_failures_recovered_via_sio;
         base_stats_ptr->aio_partial_reads += new_stats_ptr->aio_partial_reads;
-        base_stats_ptr->aio_partial_reads_recovered_via_sio += new_stats_ptr->aio_partial_reads_recovered_via_sio;
+        base_stats_ptr->aio_partial_reads_recovered_via_sio += 
+            new_stats_ptr->aio_partial_reads_recovered_via_sio;
         base_stats_ptr->aio_writes_attempted += new_stats_ptr->aio_writes_attempted;
-        base_stats_ptr->aio_writes_completed_successfully += new_stats_ptr->aio_writes_completed_successfully;
+        base_stats_ptr->aio_writes_completed_successfully += 
+            new_stats_ptr->aio_writes_completed_successfully;
         base_stats_ptr->aio_writes_canceled += new_stats_ptr->aio_writes_canceled;
         base_stats_ptr->aio_write_queue_attempts += new_stats_ptr->aio_write_queue_attempts;
-        base_stats_ptr->aio_write_queue_attempt_failures += new_stats_ptr->aio_write_queue_attempt_failures;
-        base_stats_ptr->aio_writes_converted_to_sio += new_stats_ptr->aio_writes_converted_to_sio;
+        base_stats_ptr->aio_write_queue_attempt_failures += 
+            new_stats_ptr->aio_write_queue_attempt_failures;
+        base_stats_ptr->aio_writes_converted_to_sio += 
+            new_stats_ptr->aio_writes_converted_to_sio;
         base_stats_ptr->aio_write_failures += new_stats_ptr->aio_write_failures;
-        base_stats_ptr->aio_write_failures_recovered_via_sio += new_stats_ptr->aio_write_failures_recovered_via_sio;
+        base_stats_ptr->aio_write_failures_recovered_via_sio += 
+            new_stats_ptr->aio_write_failures_recovered_via_sio;
         base_stats_ptr->aio_partial_writes += new_stats_ptr->aio_partial_writes;
-        base_stats_ptr->aio_partial_writes_recovered_via_sio += new_stats_ptr->aio_partial_writes_recovered_via_sio;
+        base_stats_ptr->aio_partial_writes_recovered_via_sio += 
+            new_stats_ptr->aio_partial_writes_recovered_via_sio;
         base_stats_ptr->aio_fsyncs_attempted += new_stats_ptr->aio_fsyncs_attempted;
-        base_stats_ptr->aio_fsyncs_completed_successfully += new_stats_ptr->aio_fsyncs_completed_successfully;
+        base_stats_ptr->aio_fsyncs_completed_successfully += 
+            new_stats_ptr->aio_fsyncs_completed_successfully;
         base_stats_ptr->aio_fsyncs_canceled += new_stats_ptr->aio_fsyncs_canceled;
         base_stats_ptr->aio_fsync_queue_attempts += new_stats_ptr->aio_fsync_queue_attempts;
-        base_stats_ptr->aio_fsync_queue_attempt_failures += new_stats_ptr->aio_fsync_queue_attempt_failures;
-        base_stats_ptr->aio_fsyncs_converted_to_sio += new_stats_ptr->aio_fsyncs_converted_to_sio;
+        base_stats_ptr->aio_fsync_queue_attempt_failures += 
+            new_stats_ptr->aio_fsync_queue_attempt_failures;
+        base_stats_ptr->aio_fsyncs_converted_to_sio += 
+            new_stats_ptr->aio_fsyncs_converted_to_sio;
         base_stats_ptr->aio_fsync_failures += new_stats_ptr->aio_fsync_failures;
-        base_stats_ptr->aio_fsync_failures_recovered_via_sio += new_stats_ptr->aio_fsync_failures_recovered_via_sio;
+        base_stats_ptr->aio_fsync_failures_recovered_via_sio += 
+            new_stats_ptr->aio_fsync_failures_recovered_via_sio;
     } else
         base_stats_ptr->complete=FALSE;
 
@@ -912,7 +955,10 @@ H5FD_copy_stats(H5FD_stats_t *dest_stats_ptr, H5FD_stats_t *src_stats_ptr)
 
     FUNC_ENTER_NOAPI_NOINIT(H5FD_copy_stats)
 
-    if((dest_stats_ptr == NULL) || (dest_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC) || (src_stats_ptr == NULL) || (src_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
+    if((dest_stats_ptr == NULL) || 
+       (dest_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC) || 
+       (src_stats_ptr == NULL) || 
+       (src_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     dest_stats_ptr->defined = src_stats_ptr->defined;
@@ -920,33 +966,46 @@ H5FD_copy_stats(H5FD_stats_t *dest_stats_ptr, H5FD_stats_t *src_stats_ptr)
     if(src_stats_ptr->defined) {
         dest_stats_ptr->complete = src_stats_ptr->complete;
         dest_stats_ptr->aio_reads_attempted = src_stats_ptr->aio_reads_attempted;
-        dest_stats_ptr->aio_reads_completed_successfully = src_stats_ptr->aio_reads_completed_successfully;
+        dest_stats_ptr->aio_reads_completed_successfully = 
+            src_stats_ptr->aio_reads_completed_successfully;
         dest_stats_ptr->aio_reads_canceled = src_stats_ptr->aio_reads_canceled;
         dest_stats_ptr->aio_read_queue_attempts = src_stats_ptr->aio_read_queue_attempts;
-        dest_stats_ptr->aio_read_queue_attempt_failures = src_stats_ptr->aio_read_queue_attempt_failures;
+        dest_stats_ptr->aio_read_queue_attempt_failures = 
+            src_stats_ptr->aio_read_queue_attempt_failures;
         dest_stats_ptr->aio_reads_converted_to_sio = src_stats_ptr->aio_reads_converted_to_sio;
         dest_stats_ptr->aio_read_failures = src_stats_ptr->aio_read_failures;
-        dest_stats_ptr->aio_read_failures_recovered_via_sio = src_stats_ptr->aio_read_failures_recovered_via_sio;
+        dest_stats_ptr->aio_read_failures_recovered_via_sio = 
+            src_stats_ptr->aio_read_failures_recovered_via_sio;
         dest_stats_ptr->aio_partial_reads = src_stats_ptr->aio_partial_reads;
-        dest_stats_ptr->aio_partial_reads_recovered_via_sio = src_stats_ptr->aio_partial_reads_recovered_via_sio;
+        dest_stats_ptr->aio_partial_reads_recovered_via_sio = 
+            src_stats_ptr->aio_partial_reads_recovered_via_sio;
         dest_stats_ptr->aio_writes_attempted = src_stats_ptr->aio_writes_attempted;
-        dest_stats_ptr->aio_writes_completed_successfully = src_stats_ptr->aio_writes_completed_successfully;
+        dest_stats_ptr->aio_writes_completed_successfully = 
+            src_stats_ptr->aio_writes_completed_successfully;
         dest_stats_ptr->aio_writes_canceled = src_stats_ptr->aio_writes_canceled;
         dest_stats_ptr->aio_write_queue_attempts = src_stats_ptr->aio_write_queue_attempts;
-        dest_stats_ptr->aio_write_queue_attempt_failures = src_stats_ptr->aio_write_queue_attempt_failures;
-        dest_stats_ptr->aio_writes_converted_to_sio = src_stats_ptr->aio_writes_converted_to_sio;
+        dest_stats_ptr->aio_write_queue_attempt_failures = 
+            src_stats_ptr->aio_write_queue_attempt_failures;
+        dest_stats_ptr->aio_writes_converted_to_sio = 
+            src_stats_ptr->aio_writes_converted_to_sio;
         dest_stats_ptr->aio_write_failures = src_stats_ptr->aio_write_failures;
-        dest_stats_ptr->aio_write_failures_recovered_via_sio = src_stats_ptr->aio_write_failures_recovered_via_sio;
+        dest_stats_ptr->aio_write_failures_recovered_via_sio = 
+            src_stats_ptr->aio_write_failures_recovered_via_sio;
         dest_stats_ptr->aio_partial_writes = src_stats_ptr->aio_partial_writes;
-        dest_stats_ptr->aio_partial_writes_recovered_via_sio = src_stats_ptr->aio_partial_writes_recovered_via_sio;
+        dest_stats_ptr->aio_partial_writes_recovered_via_sio = 
+            src_stats_ptr->aio_partial_writes_recovered_via_sio;
         dest_stats_ptr->aio_fsyncs_attempted = src_stats_ptr->aio_fsyncs_attempted;
-        dest_stats_ptr->aio_fsyncs_completed_successfully = src_stats_ptr->aio_fsyncs_completed_successfully;
+        dest_stats_ptr->aio_fsyncs_completed_successfully = 
+            src_stats_ptr->aio_fsyncs_completed_successfully;
         dest_stats_ptr->aio_fsyncs_canceled = src_stats_ptr->aio_fsyncs_canceled;
         dest_stats_ptr->aio_fsync_queue_attempts = src_stats_ptr->aio_fsync_queue_attempts;
-        dest_stats_ptr->aio_fsync_queue_attempt_failures = src_stats_ptr->aio_fsync_queue_attempt_failures;
-        dest_stats_ptr->aio_fsyncs_converted_to_sio = src_stats_ptr->aio_fsyncs_converted_to_sio;
+        dest_stats_ptr->aio_fsync_queue_attempt_failures = 
+            src_stats_ptr->aio_fsync_queue_attempt_failures;
+        dest_stats_ptr->aio_fsyncs_converted_to_sio = 
+            src_stats_ptr->aio_fsyncs_converted_to_sio;
         dest_stats_ptr->aio_fsync_failures = src_stats_ptr->aio_fsync_failures;
-        dest_stats_ptr->aio_fsync_failures_recovered_via_sio = src_stats_ptr->aio_fsync_failures_recovered_via_sio;
+        dest_stats_ptr->aio_fsync_failures_recovered_via_sio = 
+            src_stats_ptr->aio_fsync_failures_recovered_via_sio;
     }
 
 done:
@@ -975,7 +1034,10 @@ H5FD_dump_stats(FILE * out_stream,H5FD_stats_t *stats_ptr,const char *label_ptr)
 
     FUNC_ENTER_NOAPI_NOINIT(H5FD_dump_stats)
 
-    if((out_stream == NULL) || (stats_ptr == NULL) || (stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC) || (label_ptr==NULL))
+    if((out_stream == NULL) || 
+       (stats_ptr == NULL) || 
+       (stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC) || 
+       (label_ptr==NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     HDfprintf(out_stream, "\n%s\n", label_ptr);
@@ -1068,10 +1130,13 @@ H5FD_get_stats(H5FD_t *file, H5FD_stats_t *stats_ptr)
 
     FUNC_ENTER_NOAPI(H5FD_get_stats, FAIL)
 
-    if((file == NULL) || (file->cls == NULL) || (stats_ptr==NULL) || (stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
+    if((file == NULL) || 
+       (file->cls == NULL) || 
+       (stats_ptr==NULL) || 
+       (stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad param(s) on entry.")
 
-    if((file->feature_flags&H5FD_FEAT_EXTENDED_CLASS) != 0){
+    if((file->feature_flags&H5FD_FEAT_EXTENDED_CLASS) != 0) {
         private_class_ptr = (const H5FD_private_class_t *)(file->cls);
         if(private_class_ptr->magic!=H5FD__H5FD_PRIVATE_CLASS_T__MAGIC)
             HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "bad extended class magic.")
@@ -1183,7 +1248,8 @@ H5FD_reset_stats(H5FD_t *file)
             HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "bad extended class magic.")
         if(private_class_ptr->reset_stats!=NULL)
 	    if((private_class_ptr->reset_stats)(file)<0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "target reset_stats() call failed.")
+                HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
+                            "target reset_stats() call failed.")
     }
 
 done:

@@ -43,17 +43,18 @@ H5TOOL_BIN="${prefix}/bin/${H5TOOL}"   # The path of the tool binary
 #### Run test ####
 RunTest()
 {
+    TEST_EXEC=$1
     Test=$1".cpp"
 
     echo
     echo "#################  $1  #################"
-    ${H5TOOL_BIN} $Test
+    ${H5TOOL_BIN} -o $TEST_EXEC $Test
     if [ $? -ne 0 ]
     then
         echo "messed up compiling $Test"
         exit 1
     fi
-    ./a.out
+    ./$TEST_EXEC
 }
 
 
@@ -64,12 +65,19 @@ RunTest()
 if [ $? -eq 0 ]
 then
     if (RunTest create &&\
+        rm create &&\
         RunTest readdata &&\
+        rm readdata &&\
         RunTest writedata &&\
+        rm writedata &&\
         RunTest compound &&\
+        rm compound &&\
         RunTest extend_ds &&\
+        rm extend_ds &&\
         RunTest chunks &&\
-        RunTest h5group); then
+        rm chunks &&\
+        RunTest h5group &&\
+        rm h5group); then
         EXIT_VALUE=${EXIT_SUCCESS}
     else
         EXIT_VALUE=${EXIT_FAILURE}
@@ -77,7 +85,6 @@ then
 fi
 
 # Cleanup
-rm a.out
 rm *.o
 rm *.h5
 echo

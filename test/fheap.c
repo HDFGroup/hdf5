@@ -16298,7 +16298,9 @@ curr_test = FHEAP_TEST_NORMAL;
         nerrors += test_id_limits(fapl, &small_cparam);
         nerrors += test_filtered_create(fapl, &small_cparam);
         nerrors += test_size(fapl, &small_cparam);
+#ifndef H5_CANNOT_OPEN_TWICE
         nerrors += test_reopen_hdr(fapl, &small_cparam);
+#endif /*H5_CANNOT_OPEN_TWICE*/
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
@@ -16688,6 +16690,9 @@ HDfprintf(stderr, "Uncomment tests!\n");
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
+
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     if(nerrors)
         goto error;

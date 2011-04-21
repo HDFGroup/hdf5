@@ -1225,6 +1225,111 @@ test_h5o_comment_by_name(void)
 
 } /* test_h5o_comment_by_name() */
 
+
+/****************************************************************
+**
+**  test_h5o_getinfo_same_file():  Test that querying the object info for
+**      objects in the same file will return the same file "number"
+**
+****************************************************************/
+static void
+test_h5o_getinfo_same_file(void)
+{
+    hid_t       fid1, fid2;             /* HDF5 File ID */
+    hid_t       gid1, gid2;             /* Group IDs */
+    H5O_info_t	oinfo1, oinfo2;         /* Object info structs */
+    herr_t      ret;                    /* Value returned from API calls */
+
+    /* Create a new HDF5 file */
+    fid1 = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create two groups in the file */
+    gid1 = H5Gcreate2(fid1, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid1, FAIL, "H5Gcreate2");
+    gid2 = H5Gcreate2(fid1, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gcreate2");
+
+    /* Reset object info */
+    HDmemset(&oinfo1, 0, sizeof(oinfo1));
+    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+
+    /* Query the object info for each object, through group IDs */
+    ret = H5Oget_info(gid1, &oinfo1);
+    CHECK(ret, FAIL, "H5Oget_info");
+    ret = H5Oget_info(gid2, &oinfo2);
+    CHECK(ret, FAIL, "H5Oget_info");
+
+    VERIFY(oinfo1.fileno, oinfo2.fileno, "file number from H5Oget_info");
+
+    /* Reset object info */
+    HDmemset(&oinfo1, 0, sizeof(oinfo1));
+    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+
+    /* Query the object info for each object, by name */
+    ret = H5Oget_info_by_name(fid1, "group1", &oinfo1, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    ret = H5Oget_info_by_name(fid1, "group2", &oinfo2, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+
+    VERIFY(oinfo1.fileno, oinfo2.fileno, "file number from H5Oget_info");
+
+    /* Close everything */
+    ret = H5Gclose(gid1);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Open file twice */
+    fid1 = H5Fopen(TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+    fid2 = H5Fopen(TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Open the two groups in the file */
+    gid1 = H5Gopen2(fid1, "group1", H5P_DEFAULT);
+    CHECK(gid1, FAIL, "H5Gopen2");
+    gid2 = H5Gopen2(fid2, "group2", H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gopen2");
+
+    /* Reset object info */
+    HDmemset(&oinfo1, 0, sizeof(oinfo1));
+    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+
+    /* Query the object info for each object, through group IDs */
+    ret = H5Oget_info(gid1, &oinfo1);
+    CHECK(ret, FAIL, "H5Oget_info");
+    ret = H5Oget_info(gid2, &oinfo2);
+    CHECK(ret, FAIL, "H5Oget_info");
+
+    VERIFY(oinfo1.fileno, oinfo2.fileno, "file number from H5Oget_info");
+
+    /* Reset object info */
+    HDmemset(&oinfo1, 0, sizeof(oinfo1));
+    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+
+    /* Query the object info for each object, by name */
+    ret = H5Oget_info_by_name(fid1, "group1", &oinfo1, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    ret = H5Oget_info_by_name(fid1, "group2", &oinfo2, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+
+    VERIFY(oinfo1.fileno, oinfo2.fileno, "file number from H5Oget_info");
+
+    /* Close everything */
+    ret = H5Gclose(gid1);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* test_h5o_getinfo_same_file() */
 
 
 /****************************************************************
@@ -1246,6 +1351,7 @@ test_h5o(void)
     test_h5o_link();            /* Test object link routine */
     test_h5o_comment();         /* Test routines for comment */
     test_h5o_comment_by_name(); /* Test routines for comment by name */
+    test_h5o_getinfo_same_file(); /* Test info for objects in the same file */
 } /* test_h5o() */
 
 
