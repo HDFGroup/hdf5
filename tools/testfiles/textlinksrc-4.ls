@@ -2,6 +2,8 @@
  output for 'h5ls -w80 -r textlinksrc.h5'
 #############################
 /                        Group
+/ext2soft_link1          External Link {tsoftlinks.h5//soft_dset1}
+/ext2softdangle_link1    External Link {tsoftlinks.h5//soft_dangle}
 /ext_link1               External Link {textlinktar.h5//group}
 /ext_link2               External Link {textlinktar.h5//dset}
 /ext_link3               External Link {textlinktar.h5//type}
