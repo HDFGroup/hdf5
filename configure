@@ -21659,7 +21659,7 @@ fi
 
 
 case "X-$enable_production" in
-  X-|-yes)
+  X-|X-yes)
     enable_production="yes"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: production" >&5
 $as_echo "production" >&6; }
