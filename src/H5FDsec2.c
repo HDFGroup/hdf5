@@ -29,7 +29,6 @@
 #define H5_INTERFACE_INIT_FUNC	H5FD_sec2_init_interface
 
 #include <strings.h>
-#include <aio.h>
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -40,6 +39,11 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+
+#ifdef H5_HAVE_AIO
+#include <aio.h>
+#endif /* H5_HAVE_AIO */
+
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_SEC2_g = 0;

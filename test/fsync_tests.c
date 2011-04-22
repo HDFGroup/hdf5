@@ -20,8 +20,6 @@
  *		vfd calls.
  */
 
-#include <aio.h>
-
 #define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
 
 #include "h5test.h"

@@ -2372,6 +2372,46 @@ case "X-$METADATATRACEFILE" in
     ;;
 esac
 
+dnl ----------------------------------------------------------------------------
+dnl Allow user to over-ride configure's decision as to whether AIO is 
+dnl supported
+AC_MSG_CHECKING([if aio support should be forced])
+AC_ARG_ENABLE([aio],
+              [AC_HELP_STRING([--enable-aio],
+                              [force aio support on or off])],
+              [FORCE_AIO=$enableval])
+
+case "X-$FORCE_AIO" in 
+  X-|X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  X-yes)
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------------
+dnl Allow user to over-ride configure's decision as to whether to force use of
+dnl 64 bit POSIX AIO calls.
+AC_MSG_CHECKING([if aio support should be forced])
+AC_ARG_ENABLE([64-bit-posix-aio],
+              [AC_HELP_STRING([--enable-64-bit-posix-aio],
+                              [force use of 64 bit posix aio call])],
+              [FORCE_64_BIT_POSIX_AIO=$enableval])
+
+case "X-$FORCE_64_BIT_POSIX_AIO" in 
+  X-|X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  X-yes)
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    ;;
+esac
+
 dnl ----------------------------------------------------------------------
 dnl Check if they would like POSIX aio error recovery enabled
 dnl
@@ -4324,6 +4364,35 @@ esac
 if (${CC-cc} -V 2>&1 | grep '^pgcc') > /dev/null ; then
     AIO_SUPPORTED=no
 fi
+
+dnl Over-ride decision on aio support if the user has requested same.
+
+case "X-$FORCE_AIO" in 
+  X-|X-no)
+    AIO_SUPPORTED=no
+    POSIX_AIO_SUPPORTED=no
+    ;;
+  X-yes)
+    AIO_SUPPORTED=yes
+    POSIX_AIO_SUPPORTED=yes
+    ;;
+  *)
+    ;;
+esac
+
+dnl Over-ride decision on whether to require 64 bit POSIX AIO calls
+
+case "X-$FORCE_64_BIT_POSIX_AIO" in 
+  X-|X-no)
+    REQUIRE_64_BIT_POSIX_AIO=no
+    ;;
+  X-yes)
+    REQUIRE_64_BIT_POSIX_AIO=yes
+    ;;
+  *)
+    ;;
+esac
+
 
 dnl ----------------------------------------------------------------------
 

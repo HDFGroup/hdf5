@@ -171,9 +171,15 @@ CONTENTS
 	on Linux and BSD systems, and omitted on all other systems, and on
 	Linux and BSD systems when the PGI compilers are used.
 
-	This default can be over-ridden with the XXX configuration flag.  
-        Also, attempts to recover from AIO failures can be enabled with the 
-        YYY configuration flag.
+	This default can be over-ridden with the --enable-aio / --disable-aio  
+        configuration flags.  The --enable-64-bit-posix-aio / 
+        --disable-64-bit-posix-aio configuration flags allow an over-ride 
+	of the configure script's decision on whether the use of the 64 
+	bit aio calls should be forced.  
+
+	The --enable-posix-aio-error-recovery enables code that attempts
+	to recover from aio read/write failures by converting the operation
+	to SIO.
 
 
 4. Full installation instructions for source distributions

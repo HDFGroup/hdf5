@@ -567,7 +567,7 @@ typedef struct {
 #endif /* HDaio_write */
 
 #endif /* H5_USE_64_BIT_POSIX_AIO */
-#endif /* _POSIX_ASYNCHRONOUS_IO >= 0 */
+#endif /* H5_HAVE_POSIX_AIO  */
 #endif /* H5_HAVE_AIO */
 
 #ifndef HDalarm
