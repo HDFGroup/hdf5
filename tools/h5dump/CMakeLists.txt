@@ -251,7 +251,7 @@ IF (BUILD_TESTING)
       tdatareg.h5
       tdset.h5
       tempty.h5
-      textlinksrc.h5
+      tsoftlinks.h5
       textlinkfar.h5
       textlinksrc.h5
       textlinktar.h5
