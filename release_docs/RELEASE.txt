@@ -307,7 +307,7 @@ The following platforms and compilers have been tested for this release.
                                       gcc 4.1.2 and gfortran 4.1.2
 
     SGI ProPack 7 Linux           Intel(R) C++ Version 11.1 20100806
-    2.6.32.19-0.3.1.1982.0.PTF-   Intel(R) Fortran Version 11.1 20100806
+    2.6.32.24-0.2.1.2230.2.PTF-   Intel(R) Fortran Version 11.1 20100806
     default #1 SMP                SGI MPT 2.01
     SGI Altix UV
     (NCSA ember)
