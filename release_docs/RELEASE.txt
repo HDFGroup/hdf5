@@ -163,9 +163,7 @@ Bug Fixes since HDF5-1.8.6
     - Fixed the definition of H5_HAVE_GETTIMEOFDAY on Windows so that
       HDgettimeofday() is defined and works properly.  Bug HDFFV-5931
       (DER - 2011/04/14)
-    - Added basic VFD tests for the Windows, STDIO and log VFD tests.  The
-      STDIO test is skipped for now due to failures on a few older platforms
-      (see "known problems", below).
+    - Added basic VFD tests for the Windows, STDIO and log VFD tests.
       (DER - 2011/04/11)
 
     Parallel Library
@@ -528,12 +526,6 @@ Known Problems
   a non-zero for this particular test, therefore it concludes the test has
   failed when it receives 0 from yod.  Skip all the "failing" test for now
   by changing them as following.
-  
-* The STDIO VFD does not work on some architectures, possibly due to 32/64
-  bit or large file issues.  The basic STDIO VFD test is known to fail on
-  64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
-  10.7.0.  The STDIO VFD test has been disabled while we investigate and
-  a fix should appear in 1.8.8.
 
   ======== Original tools/h5ls/testh5ls.sh =========
   TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
