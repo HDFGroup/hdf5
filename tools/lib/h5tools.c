@@ -2545,6 +2545,9 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info,
         }
     }
 
+    if(!sm_nbytes) 
+        goto done;
+
     assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
     sm_buf = (unsigned char *)HDmalloc((size_t)sm_nbytes);
 
@@ -2619,10 +2622,11 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info,
         fputs(OPT(info->line_sep, ""), stream);
     }
 
+    HDfree(sm_buf);
+
+done:
     H5Sclose(sm_space);
     H5Sclose(f_space);
-
-    HDfree(sm_buf);
 
     return SUCCEED;
 }
