@@ -108,7 +108,11 @@ New Features
 
     High-Level APIs
     ---------------
-    - None
+    - Fortran LT make datasets routines (H5LTmake_dataset_f, 
+      h5ltmake_dataset_int_f, h5ltmake_dataset_float_f, h5ltmake_dataset_double_f) 
+      and LT read datasets routines (h5ltread_dataset_f,h5ltread_dataset_int_f,
+      h5ltread_dataset_float_f, 5ltread_dataset_double_f) can now handle 
+      4-dimensional to 7-dimensional rank datasets. HDFFV-1217 (MSB-2011/4/24/2011)
 
     F90 API
     -------
@@ -241,7 +245,14 @@ Bug Fixes since HDF5-1.8.6
 
     Fortran High-Level APIs:
     ------
-    - None
+    -  h5tbmake_table_f: Fixed error in passing an array of characters with different 
+       length field names.
+    -  h5tget_field_info_f: Fixed error with packing the C strings into a Fortran 
+       array of strings. Added optional argument called 'maxlen_out' which returns 
+       the maximum string character length in a field name element.
+       Bug HDFFV-1255 (MSB- 4/17/2011)
+
+
 
 
 Platforms Tested
