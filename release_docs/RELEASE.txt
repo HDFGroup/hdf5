@@ -717,16 +717,16 @@ Platforms Tested
                                   mpcc_r 11.1.0.3
                                   mpxlf_r 13.1.0.3
 
-    FreeBSD 6.2-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
-    (duty)                        g++ 3.4.6 [FreeBSD] 20060305
-                                  gcc 4.2.1 20080123
-                                  g++ 4.2.1 20080123
-                                  gfortran 4.2.1 20070620
-    FreeBSD 6.2-STABLE amd64      gcc 3.4.6 [FreeBSD] 20060305
-    (liberty)                     g++ 3.4.6 [FreeBSD] 20060305
-                                  gcc 4.2.1 20080123
-                                  g++ 4.2.1 20080123
-                                  gfortran 4.2.1 20080123
+    FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
+    (loyalty)                     g++ 4.2.1 [FreeBSD] 20070719
+                                  gcc 4.6.1 20110422
+                                  g++ 4.6.1 20110422
+                                  gfortran 4.6.1 20110422
+    FreeBSD 8.2-STABLE amd64      gcc 4.2.1 [FreeBSD] 20070719
+    (freedom)                     g++ 4.2.1 [FreeBSD] 20070719
+                                  gcc 4.6.1 20110422
+                                  g++ 4.6.1 20110422
+                                  gfortran 4.6.1 20110422
 
     Linux 2.6.9 (RHEL4)           Intel 10.0 compilers
     (abe.ncsa.uiuc.edu)
@@ -797,8 +797,7 @@ Windows XP x64                     n        y(3)   n(3)     y     y     y
 Windows Vista                      n        y(3)   n(3)     y     y     y
 Windows Vista x64                  n        y(3)   n(3)     y     y     y
 Mac OS X 10.5 Intel                n        y      n        y     y     y
-FreeBSD 6.2 32-bit                 n        n      n        y     y     y
-FreeBSD 6.2 64-bit
+FreeBSD 8.2 32- and 64-bit         n        x      n        x     y     y
 RedHat EL4 2.6.9 i686 GNU        W y(2)     y(4)   y(2)     y     y     y
 RedHat EL4 2.6.9 i686 Intel      W n        y      n        y     y     n
 RedHat EL4 2.6.9 i686 PGI        W n        y      n        y     y     n
@@ -825,8 +824,7 @@ Windows XP x64                      y        y(3)      y         y        n
 Windows Vista                       y        y(3)      y         y        y
 Windows Vista x64                   y        y(3)      y         y        y
 Mac OS X 10.5 Intel                 y        y         y         x        n
-FreeBSD 6.2 32-bit                  y        y         y         x        n
-FreeBSD 6.2 64-bit                  y        y         y         x        n
+FreeBSD 8.2 32- and 64-bit          y        x         x         y        y
 RHEL4 2.6.9 i686 GNU              W y        y(4)      y         x        y
 RHEL4 2.6.9 i686 Intel            W y        y         y         x        n
 RHEL4 2.6.9 i686 PGI              W y        y         y         x        n

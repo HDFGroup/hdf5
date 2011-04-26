@@ -985,7 +985,7 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
 
         /* (Re)allocate memory for the file buffer */
         if(NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block of %llu bytes", (unsigned long long)new_eof)
 #ifdef H5_CLEAR_MEMORY
 HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
 #endif /* H5_CLEAR_MEMORY */
