@@ -868,7 +868,7 @@ H5FD_mpiposix_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_mpiposix_t	*f2 = (const H5FD_mpiposix_t*)_f2;
     int ret_value=0;
 
-    FUNC_ENTER_NOAPI_NOFUNC_NOINIT(H5FD_mpiposix_cmp)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_mpiposix_cmp)
 
 #ifdef _WIN32
     if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)
