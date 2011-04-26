@@ -266,17 +266,17 @@ The following platforms and compilers have been tested for this release.
                                   mpcc_r 11.1.0.3
                                   mpxlf_r 13.1.0.3
 
-    FreeBSD 6.3-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
-    (duty)                        g++ 3.4.6 [FreeBSD] 20060305
-                                  gcc 4.4.5 20100803
-                                  g++ 4.4.5 20100803
-                                  gfortran 4.4.5 20100803
+    FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
+    (loyalty)                     g++ 4.2.1 [FreeBSD] 20070719
+                                  gcc 4.6.1 20110422
+                                  g++ 4.6.1 20110422
+                                  gfortran 4.6.1 20110422
 
-    FreeBSD 6.3-STABLE amd64      gcc 3.4.6 [FreeBSD] 20060305
-    (liberty)                     g++ 3.4.6 [FreeBSD] 20060305
-                                  gcc 4.4.5 20100803
-                                  g++ 4.4.5 20100803
-                                  gfortran 4.4.5 20100803
+    FreeBSD 8.2-STABLE amd64      gcc 4.2.1 [FreeBSD] 20070719
+    (freedom)                     g++ 4.2.1 [FreeBSD] 20070719
+                                  gcc 4.6.1 20110422
+                                  g++ 4.6.1 20110422
+                                  gfortran 4.6.1 20110422
 
     Linux 2.6.18-194.3.1.el5PAE   gcc (GCC) 4.1.2 and 4.4.2
     #1 SMP i686 i686 i386         G95 (GCC 4.0.3 (g95 0.93!) Apr 21 2010)
@@ -420,7 +420,7 @@ Windows Vista x64                          n        y(4)   n        y     y     
 OpenVMS Alpha                              n        y      n        y     y     n
 Mac OS X 10.6 Intel                        n        y      n        y     y     y
 AIX 6.1 32- and 64-bit                     y        y      y        y     y     y
-FreeBSD 6.3-STABLE 32&64 bit               n        y      n        y     y     y
+FreeBSD 8.2-STABLE 32&64 bit               n        x      n        x     y     y
 CentOS 5.5 Linux 2.6.18-194 i686 GNU (1)W  y        y(2)   y        y     y     y
 CentOS 5.5 Linux 2.6.18-194 i686 Intel  W  n        y      n        y     y     n
 CentOS 5.5 Linux 2.6.18-194 i686 PGI    W  n        y      n        y     y     n
@@ -443,7 +443,7 @@ Windows Vista x64                          y       y(4)      y         y
 OpenVMS Alpha                              n       n         n         n
 Mac OS X 10.6                              y(5)    n         y         n        
 AIX 6.1 32- and 64-bit                     n       n         n         y        
-FreeBSD 6.3-STABLE 32&64 bit               y       n         y         y        
+FreeBSD 8.2-STABLE 32&64 bit               y       x         x         y        
 CentOS 5.5 Linux 2.6.18-128 i686 GNU (1)W  y       y(2)      y         y        
 CentOS 5.5 Linux 2.6.18-128 i686 Intel  W  y       y         y         n        
 CentOS 5.5 Linux 2.6.18-128 i686 PGI    W  y       y         y         n        
@@ -465,6 +465,9 @@ SGI Linux 2.6.32.19                        y       y         y         y
 
 Known Problems
 ==============
+
+* The C++ and FORTRAN bindings are not currently working on FreeBSD.
+  (QAK - 2011/04/26)
 
 * Shared Fortran libraries are not quite working on AIX. While they are
   generated when --enable-shared is specified, the fortran and hl/fortran
