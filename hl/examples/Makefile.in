@@ -387,6 +387,7 @@ INSTALL_FILES = ex_lite1.c ex_lite2.c ex_lite3.c ptExampleFL.c ptExampleVL.c \
 
 INSTALL_SCRIPT_FILES = run-hlc-ex.sh
 INSTALL_TOP_SCRIPT_FILES = run-hl-ex.sh
+@BUILD_SHARED_SZIP_CONDITIONAL_TRUE@LD_LIBRARY_PATH = $(LL_PATH)
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
@@ -650,8 +651,6 @@ ex_table09: $(srcdir)/ex_table09.c
 ex_table10: $(srcdir)/ex_table10.c
 ex_table11: $(srcdir)/ex_table11.c
 ex_table12: $(srcdir)/ex_table12.c
-
-@BUILD_SZIP_CONDITIONAL_TRUE@export LD_LIBRARY_PATH=$(LL_PATH)
 
 # How to create EXAMPLEDIR if it doesn't already exist
 $(EXAMPLEDIR):
