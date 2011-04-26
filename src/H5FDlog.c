@@ -318,7 +318,7 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Pset_fapl_log, FAIL)
-    H5TRACE4("e", "i*sIuz", fapl_id, logfile, flags, buf_size);
+    H5TRACE4("e", "i*sULz", fapl_id, logfile, flags, buf_size);
 
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
