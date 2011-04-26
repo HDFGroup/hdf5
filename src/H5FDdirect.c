@@ -677,7 +677,7 @@ H5FD_direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_direct_t	*f2 = (const H5FD_direct_t*)_f2;
     int ret_value=0;
 
-    FUNC_ENTER_NOAPI_NOFUNC_NONIT(H5FD_direct_cmp)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_direct_cmp)
 
 #ifdef _WIN32
     if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)
