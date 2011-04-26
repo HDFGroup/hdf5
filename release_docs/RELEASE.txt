@@ -174,6 +174,11 @@ Bug Fixes since HDF5-1.8.6
     -----
     - Updated h5dump test case script to prevent entire test failure when 
       source directory is read-only. Bug #HDFFV-4342 (JKM 2011/4/12)
+    - Fixed h5dump displaying incorrect values for H5T_STD_I8BE type data in
+      attribute on Big-Endian machine. H5T_STD_I8BE is unsigned 8bit type,
+      so h5dump is supposed to display -2 instead of 254. It worked correctly
+      on Little-Endian system , but not on Big-Endian system.  Bug #HDFFV-4358
+      (JKM 04/08/2011)
     - Updated some HDF5 tools to standardize the option name as 
       '--enable-error-stack' for printing HDF5 error stack messages. h5ls and 
       h5dump have been updated. For h5ls, this replaces "-e/--errors" option, 
@@ -196,8 +201,6 @@ Bug Fixes since HDF5-1.8.6
       with the --follow-symlink option. Bug #2214  (JKM 2011/3/18)
     - Fixed a memory leak in h5diff that occurred when accessing variable length 
       string data. Bug #2216 (JKM 2011/3/18)
-    - Fixed a memory leak in h5diff that occurred when accessing symbolic links 
-      with the --follow-symlink option. Bug #2214  (JKM 2011/3/18)
     - Fixed and improved the help page for h5ls -a, --address option. 
       Bug #1904 (JKM 2011/3/11)
     - Fixed h5copy to enable copying an object into the same HDF5 file.
