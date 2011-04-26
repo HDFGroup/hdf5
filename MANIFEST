@@ -20,8 +20,8 @@
 # in column one with a '#'.
 #------------------------------------------------------------------------------
 
-./.autom4te.cfg             		_DO_NOT_DISTRIBUTE_
-./.h5chkright.ini			_DO_NOT_DISTRIBUTE_
+./.autom4te.cfg                 _DO_NOT_DISTRIBUTE_
+./.h5chkright.ini      _DO_NOT_DISTRIBUTE_
 ./ACKNOWLEDGMENTS
 ./COPYING
 ./MANIFEST
@@ -41,21 +41,21 @@
 
 ./bin/COPYING
 ./bin/buildhdf5
-./bin/checkapi				_DO_NOT_DISTRIBUTE_
-./bin/checkposix			_DO_NOT_DISTRIBUTE_
-./bin/chkconfigure			_DO_NOT_DISTRIBUTE_
-./bin/chkcopyright			_DO_NOT_DISTRIBUTE_
+./bin/checkapi        _DO_NOT_DISTRIBUTE_
+./bin/checkposix      _DO_NOT_DISTRIBUTE_
+./bin/chkconfigure      _DO_NOT_DISTRIBUTE_
+./bin/chkcopyright      _DO_NOT_DISTRIBUTE_
 ./bin/chkmanifest
 ./bin/compile
 ./bin/config.guess
 ./bin/config.sub
-./bin/debug-ohdr			_DO_NOT_DISTRIBUTE_
+./bin/debug-ohdr      _DO_NOT_DISTRIBUTE_
 ./bin/dependencies
 ./bin/depcomp
 ./bin/deploy
 ./bin/distdep
-./bin/errors			        _DO_NOT_DISTRIBUTE_
-./bin/gcov_script		        _DO_NOT_DISTRIBUTE_
+./bin/errors              _DO_NOT_DISTRIBUTE_
+./bin/gcov_script            _DO_NOT_DISTRIBUTE_
 ./bin/h5vers
 ./bin/install-sh
 ./bin/iostats
@@ -69,13 +69,13 @@
 ./bin/mkdirs
 ./bin/mkinstalldirs
 ./bin/newer
-./bin/reconfigure			_DO_NOT_DISTRIBUTE_
-./bin/README				_DO_NOT_DISTRIBUTE_
+./bin/reconfigure      _DO_NOT_DISTRIBUTE_
+./bin/README        _DO_NOT_DISTRIBUTE_
 ./bin/release
-./bin/runtest				_DO_NOT_DISTRIBUTE_
+./bin/runtest        _DO_NOT_DISTRIBUTE_
 ./bin/snapshot
-./bin/snapshot_version			_DO_NOT_DISTRIBUTE_
-./bin/timekeeper			_DO_NOT_DISTRIBUTE_
+./bin/snapshot_version      _DO_NOT_DISTRIBUTE_
+./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
 
@@ -216,7 +216,7 @@
 ./fortran/src/Makefile.am
 ./fortran/src/Makefile.in
 ./fortran/src/README
-./fortran/src/README_DEVELOPEMENT 	_DO_NOT_DISTRIBUTE_
+./fortran/src/README_DEVELOPEMENT   _DO_NOT_DISTRIBUTE_
 ./fortran/src/h5fc.in
 ./fortran/src/hdf5_fortrandll.def
 
@@ -417,10 +417,10 @@
 ./release_docs/INSTALL_parallel
 ./release_docs/RELEASE.txt
 
-./src/.indent.pro			_DO_NOT_DISTRIBUTE_
-./src/hdf5.lnt				_DO_NOT_DISTRIBUTE_
-./src/hdf5-win.lnt			_DO_NOT_DISTRIBUTE_
-./src/hdf5-lin.lnt			_DO_NOT_DISTRIBUTE_
+./src/.indent.pro      _DO_NOT_DISTRIBUTE_
+./src/hdf5.lnt        _DO_NOT_DISTRIBUTE_
+./src/hdf5-win.lnt      _DO_NOT_DISTRIBUTE_
+./src/hdf5-lin.lnt      _DO_NOT_DISTRIBUTE_
 ./src/COPYING
 ./src/H5.c
 ./src/H5checksum.c
@@ -457,7 +457,7 @@
 ./src/H5Bdbg.c
 ./src/H5Bpkg.h
 ./src/H5Bprivate.h
-./src/H5Bpublic.h			
+./src/H5Bpublic.h      
 ./src/H5B2.c
 ./src/H5B2cache.c
 ./src/H5B2dbg.c
@@ -465,7 +465,7 @@
 ./src/H5B2int.c
 ./src/H5B2pkg.h
 ./src/H5B2private.h
-./src/H5B2public.h		
+./src/H5B2public.h    
 ./src/H5B2stat.c
 ./src/H5B2test.c
 ./src/H5C.c
@@ -619,7 +619,7 @@
 ./src/H5HFman.c
 ./src/H5HFpkg.h
 ./src/H5HFprivate.h
-./src/H5HFpublic.h	
+./src/H5HFpublic.h  
 ./src/H5HFsection.c
 ./src/H5HFspace.c
 ./src/H5HFstat.c
@@ -855,23 +855,23 @@
 ./test/gen_bad_compound.c               _DO_NOT_DISTRIBUTE_
 ./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_
-./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
+./test/gen_deflate.c      _DO_NOT_DISTRIBUTE_
 ./test/gen_filespace.c                  _DO_NOT_DISTRIBUTE_
-./test/gen_mergemsg.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_group.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_mtime.c			_DO_NOT_DISTRIBUTE_
-./test/gen_new_super.c			_DO_NOT_DISTRIBUTE_
-./test/gen_noencoder.c			_DO_NOT_DISTRIBUTE_
-./test/gen_nullspace.c			_DO_NOT_DISTRIBUTE_
-./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
-./test/gen_old_group.c			_DO_NOT_DISTRIBUTE_
-./test/gen_old_layout.c			_DO_NOT_DISTRIBUTE_
-./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
+./test/gen_mergemsg.c      _DO_NOT_DISTRIBUTE_
+./test/gen_new_array.c      _DO_NOT_DISTRIBUTE_
+./test/gen_new_fill.c      _DO_NOT_DISTRIBUTE_
+./test/gen_new_group.c      _DO_NOT_DISTRIBUTE_
+./test/gen_new_mtime.c      _DO_NOT_DISTRIBUTE_
+./test/gen_new_super.c      _DO_NOT_DISTRIBUTE_
+./test/gen_noencoder.c      _DO_NOT_DISTRIBUTE_
+./test/gen_nullspace.c      _DO_NOT_DISTRIBUTE_
+./test/gen_old_array.c      _DO_NOT_DISTRIBUTE_
+./test/gen_old_group.c      _DO_NOT_DISTRIBUTE_
+./test/gen_old_layout.c      _DO_NOT_DISTRIBUTE_
+./test/gen_old_mtime.c      _DO_NOT_DISTRIBUTE_
 ./test/gen_sizes_lheap.c                _DO_NOT_DISTRIBUTE_
-./test/gen_specmetaread.c		_DO_NOT_DISTRIBUTE_
-./test/gen_udlinks.c			_DO_NOT_DISTRIBUTE_
+./test/gen_specmetaread.c    _DO_NOT_DISTRIBUTE_
+./test/gen_udlinks.c      _DO_NOT_DISTRIBUTE_
 ./test/getname.c
 ./test/gheap.c
 ./test/group_old.h5
@@ -895,7 +895,7 @@
 ./test/reserved.c
 ./test/pool.c
 ./test/set_extent.c
-./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
+./test/space_overflow.c      _DO_NOT_DISTRIBUTE_
 ./test/specmetaread.h5
 ./test/stab.c
 ./test/tarray.c
@@ -1999,6 +1999,8 @@
 ./config/cmake/vfdTest.cmake
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/ConfigureChecks.cmake
+./config/cmake/CPack.cmake
+./config/cmake/NSIS.template.in
 ./CMakeLists.txt
 ./CTestConfig.cmake
 ./c++/CMakeLists.txt
