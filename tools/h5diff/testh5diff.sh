@@ -52,6 +52,8 @@ FILE15=h5diff_extlink_src.h5
 FILE16=h5diff_extlink_trg.h5
 FILE17=h5diff_ext2softlink_src.h5
 FILE18=h5diff_ext2softlink_trg.h5
+FILE19=h5diff_dset_zero_dim_size1.h5
+FILE20=h5diff_dset_zero_dim_size2.h5
 DANGLE_LINK_FILE1=h5diff_danglelinks1.h5
 DANGLE_LINK_FILE2=h5diff_danglelinks2.h5
 # group recursive
@@ -627,11 +629,13 @@ TOOLTEST h5diff_204.txt -c $FILE2 $FILE2 g2/dset4  g2/dset5
 
 TOOLTEST h5diff_205.txt -c $FILE2 $FILE2 g2/dset5  g2/dset6
 
-
 # not comparable in compound
 TOOLTEST h5diff_206.txt -c $FILE2 $FILE2 g2/dset7  g2/dset8
 
 TOOLTEST h5diff_207.txt -c $FILE2 $FILE2 g2/dset8  g2/dset9
+
+# not comparable in dataspace of zero dimension size
+TOOLTEST h5diff_208.txt -c $FILE19 $FILE20 
 
 # ##############################################################################
 # # Links compare without --follow-symlinks nor --no-dangling-links

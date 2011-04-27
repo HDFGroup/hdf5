@@ -535,11 +535,11 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     /* Check arguments */
     if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name")
     if(0 == maxaddr || HADDR_UNDEF == maxaddr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
     if(ADDR_OVERFLOW(maxaddr))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr");
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr")
 
     /* Build the open flags */
     o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
@@ -561,7 +561,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     /* Create the new file struct */
     if(NULL == (file = H5FL_CALLOC(H5FD_sec2_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
 
     file->fd = fd;
     H5_ASSIGN_OVERFLOW(file->eof, sb.st_size, h5_stat_size_t, haddr_t);
@@ -613,7 +613,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
         /* Get the FAPL */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-            HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, NULL, "not a file access property list");
+            HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, NULL, "not a file access property list")
 
         /* This step is for h5repart tool only. If user wants to change file driver from
          * family to sec2 while using h5repart, this private property should be set so that
@@ -622,7 +622,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
          */
         if(H5P_exist_plist(plist, H5F_ACS_FAMILY_TO_SEC2_NAME) > 0)
             if(H5P_get(plist, H5F_ACS_FAMILY_TO_SEC2_NAME, &file->fam_to_sec2) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get property of changing family to sec2");
+                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get property of changing family to sec2")
     } /* end if */
 
     /* initialize the stats */
@@ -886,7 +886,7 @@ H5FD_sec2_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void **file_handle)
     FUNC_ENTER_NOAPI_NOINIT(H5FD_sec2_get_handle)
 
     if(!file_handle)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
 
     *file_handle = &(file->fd);
 
@@ -927,11 +927,11 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id,
 
     /* Check for overflow conditions */
     if(!H5F_addr_defined(addr))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if(REGION_OVERFLOW(addr, size))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr);
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
     if((addr + size) > file->eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr);
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
 
     /* Seek to the correct location */
     if(addr != file->pos || OP_READ != file->op) {
@@ -1014,11 +1014,11 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
 
     /* Check for overflow conditions */
     if(!H5F_addr_defined(addr))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if(REGION_OVERFLOW(addr, size))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu", (unsigned long long)addr, (unsigned long long)size);
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu", (unsigned long long)addr, (unsigned long long)size)
     if((addr + size) > file->eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu, eoa = %llu", (unsigned long long)addr, (unsigned long long)size, (unsigned long long)file->eoa);
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu, eoa = %llu", (unsigned long long)addr, (unsigned long long)size, (unsigned long long)file->eoa)
 
     /* Seek to the correct location */
     if(addr != file->pos || OP_WRITE != file->op) {
@@ -1106,7 +1106,7 @@ H5FD_sec2_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
         li.QuadPart = (LONGLONG)file->eoa;
         (void)SetFilePointer((HANDLE)filehandle, li.LowPart, &li.HighPart, FILE_BEGIN);
         if(SetEndOfFile((HANDLE)filehandle) == 0)
-            HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
+            HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #else /* _WIN32 */
 #ifdef H5_VMS
         /* Reset seek offset to the beginning of the file, so that the file isn't
@@ -1162,7 +1162,7 @@ H5FD_sec2_aio_alloc_ctlblk(H5FD_sec2_aio_ctlblk_t **ctlblk_ptr_ptr)
     HDassert( *ctlblk_ptr_ptr == NULL );
 
     if(NULL == (ctlblk_ptr = H5FL_CALLOC(H5FD_sec2_aio_ctlblk_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     ctlblk_ptr->magic    = H5FD_SEC2_AIO_CTLBLK_T__MAGIC;
     ctlblk_ptr->file_ptr = NULL;
@@ -1253,7 +1253,7 @@ H5FD_sec2_aio_discard_ctlblk(H5FD_sec2_aio_ctlblk_t *ctlblk_ptr)
     HDassert( ctlblk_ptr != NULL );
 
     if(ctlblk_ptr->magic != H5FD_SEC2_AIO_CTLBLK_T__MAGIC)
-        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad ctlblk magic");
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad ctlblk magic")
 
     ctlblk_ptr->magic    = 0;
     ctlblk_ptr->file_ptr = NULL;
@@ -1391,10 +1391,10 @@ H5FD_sec2_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr,
     HDassert(*ctlblk_ptr_ptr == NULL);
 
 #ifndef NDEBUG
-    if ( H5FD_sec2_aio_sc(file, stdout, "beginning of H5FD_sec2_aio_read()", 
-                          H5FD_SEC2_AIO__SC_VERBOSE) < 0 )
-        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
-                    "AIO data structures sanity check failure");
+    if(H5FD_sec2_aio_sc(file, stdout, "beginning of H5FD_sec2_aio_read()", 
+                        H5FD_SEC2_AIO__SC_VERBOSE) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
+                    "AIO data structures sanity check failure")
 #endif /* NDEBUG */
 
     /* setup the file pointer */
@@ -1405,13 +1405,13 @@ H5FD_sec2_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr,
     /* Check for overflow conditions */
     if(!H5F_addr_defined(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "addr undefined, addr = %llu", (unsigned long long)addr);
+                    "addr undefined, addr = %llu", (unsigned long long)addr)
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
-                    "addr overflow, addr = %llu", (unsigned long long)addr);
+                    "addr overflow, addr = %llu", (unsigned long long)addr)
     if((addr + size) > file_ptr->eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
-                    "addr overflow, addr = %llu", (unsigned long long)addr);
+                    "addr overflow, addr = %llu", (unsigned long long)addr)
 
     /* allocate the control block */
 
@@ -1590,7 +1590,7 @@ H5FD_sec2_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr,
 
     if(SUCCEED != H5FD_sec2_aio_alloc_ctlblk(&ctlblk_ptr))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate aio control block")
-    else if((ctlblk_ptr == NULL ) || ( ctlblk_ptr->magic != H5FD_SEC2_AIO_CTLBLK_T__MAGIC )) 
+    else if((ctlblk_ptr == NULL) || (ctlblk_ptr->magic != H5FD_SEC2_AIO_CTLBLK_T__MAGIC)) 
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "NULL ctlblk_ptr or bad ctlblk magic")
 
 #ifndef NDEBUG
@@ -1647,7 +1647,7 @@ H5FD_sec2_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr,
                 ctlblk_ptr->status = H5FD_SEC2_AIO_STATUS__DO_USING_SIO_ON_FINISH;
         } else {
             H5FD_UPDATE_STATS__AIO_OP_FAILURES(&(file_ptr->stats), op)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "call to HDaio_write() failed.");
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "call to HDaio_write() failed.")
         }
     } else 
         ctlblk_ptr->status = H5FD_SEC2_AIO_STATUS__QUEUED;
@@ -1816,7 +1816,7 @@ H5FD_sec2_aio_test(hbool_t *done_ptr, void *ctlblk_ptr)
                     /* This case should be unreachable.  It is included
                      * to keep some compilers happy.
                      */
-                    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "Undefined or unknown ctlblk.");
+                    HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "Undefined or unknown ctlblk.")
 		    break;
             }
 
@@ -1876,7 +1876,7 @@ H5FD_sec2_aio_test(hbool_t *done_ptr, void *ctlblk_ptr)
 
 	default:
             *done_ptr = TRUE;  /* just to set it to a known value */
-            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "unknown ctlblk status.");
+            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "unknown ctlblk status.")
 	    break;
     }
 
@@ -1939,7 +1939,7 @@ H5FD_sec2_aio_wait(void *ctlblk_ptr)
 
     if((ctlblk_ptr == NULL) || 
        (((H5FD_sec2_aio_ctlblk_t *)ctlblk_ptr)->magic != H5FD_SEC2_AIO_CTLBLK_T__MAGIC))
-        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.");
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     cb_ptr = (H5FD_sec2_aio_ctlblk_t *)ctlblk_ptr;
 
@@ -1947,7 +1947,7 @@ H5FD_sec2_aio_wait(void *ctlblk_ptr)
     if(H5FD_sec2_aio_sc((H5FD_t *)(cb_ptr->file_ptr), stdout, 
                         "beginning of H5FD_sec2_aio_wait()", H5FD_SEC2_AIO__SC_VERBOSE) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
-                    "AIO data structures sanity check failure");
+                    "AIO data structures sanity check failure")
 #endif /* NDEBUG */
 
     if((cb_ptr->op != H5FD_AIO_OP__READ) && 
@@ -1983,7 +1983,7 @@ H5FD_sec2_aio_wait(void *ctlblk_ptr)
                                         "H5FD_sec2_aio_wait() -- prior to HDaio_suspend()", 
                                         H5FD_SEC2_AIO__SC_VERBOSE) < 0 ) 
                         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
-                                    "AIO data structures sanity check failure");
+                                    "AIO data structures sanity check failure")
 #endif /* NDEBUG */
 
                     if(0 != HDaio_suspend(aiocb_list, 1, NULL))
@@ -2141,7 +2141,7 @@ H5FD_sec2_aio_finish(int *errno_ptr, void *ctlblk_ptr)
 
     if((ctlblk_ptr == NULL) || 
        (((H5FD_sec2_aio_ctlblk_t *)ctlblk_ptr)->magic != H5FD_SEC2_AIO_CTLBLK_T__MAGIC))
-        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad control block on entry.");
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad control block on entry.")
 
 #ifdef H5_ENABLE_POSIX_AIO_ERROR_RECOVERY
     attempt_error_recovery = TRUE;
@@ -2329,7 +2329,7 @@ H5FD_sec2_aio_finish(int *errno_ptr, void *ctlblk_ptr)
                         H5FD_UPDATE_STATS__AIO_OP_FAILURES(&(file_ptr->stats), cb_ptr->op)
 
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, 
-                                    "fallback call to H5FD_sec2_read() failed.");
+                                    "fallback call to H5FD_sec2_read() failed.")
                     }
 		    break;
 
@@ -2352,7 +2352,7 @@ H5FD_sec2_aio_finish(int *errno_ptr, void *ctlblk_ptr)
                         H5FD_UPDATE_STATS__AIO_OP_FAILURES(&(file_ptr->stats), cb_ptr->op)
 
                         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, 
-                                    "fallback call to H5FD_sec2_write() failed.");
+                                    "fallback call to H5FD_sec2_write() failed.")
                     }
 		    break;
 
@@ -2365,7 +2365,7 @@ H5FD_sec2_aio_finish(int *errno_ptr, void *ctlblk_ptr)
                         *errno_ptr = errno;
                         H5FD_UPDATE_STATS__AIO_OP_FAILURES(&(file_ptr->stats), cb_ptr->op)
                         HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, 
-                                     "fallback call to HDfsync() failed.");
+                                     "fallback call to HDfsync() failed.")
                     }
 		    break;
 
@@ -2386,22 +2386,22 @@ H5FD_sec2_aio_finish(int *errno_ptr, void *ctlblk_ptr)
 
                 case H5FD_AIO_OP__READ:
                      HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, 
-                                 "asychronous read couldn't be queued.");
+                                 "asychronous read couldn't be queued.")
                     break;
 
                 case H5FD_AIO_OP__WRITE:
                      HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, 
-                                 "asychronous write couldn't be queued.");
+                                 "asychronous write couldn't be queued.")
                     break;
 
                 case H5FD_AIO_OP__FSYNC:
                      HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, 
-                                 "asynchronous fsync couldn't be queued.");
+                                 "asynchronous fsync couldn't be queued.")
                     break;
 
                 default:
                     HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
-                                "this should be unreachable");
+                                "this should be unreachable")
                     break;
             }
 	    break;
@@ -2411,11 +2411,11 @@ H5FD_sec2_aio_finish(int *errno_ptr, void *ctlblk_ptr)
         case H5FD_SEC2_AIO_STATUS__QUEUED:
         case H5FD_SEC2_AIO_STATUS__CANCELED_IN_PROGRESS:
             HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
-                        "ctlblk status must be complete or \"do using SIO\".");
+                        "ctlblk status must be complete or \"do using SIO\".")
 	    break;
 
 	default:
-            HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "unknown ctlblk status.");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "unknown ctlblk status.")
 	    break;
     }
 
@@ -2440,23 +2440,23 @@ done:
         switch(cb_ptr->op) {
             case H5FD_AIO_OP__READ:
                 H5FD_SEC2__DLL_REMOVE(cb_ptr, file_ptr->aio_reads_head, 
-                                      file_ptr->aio_reads_tail, file_ptr->aio_reads_count);
+                                      file_ptr->aio_reads_tail, file_ptr->aio_reads_count)
                 break;
 
             case H5FD_AIO_OP__WRITE:
                 H5FD_SEC2__DLL_REMOVE(cb_ptr, file_ptr->aio_writes_head, 
-                                      file_ptr->aio_writes_tail, file_ptr->aio_writes_count);
+                                      file_ptr->aio_writes_tail, file_ptr->aio_writes_count)
                 break;
 
             case H5FD_AIO_OP__FSYNC:
                 H5FD_SEC2__DLL_REMOVE(cb_ptr, file_ptr->aio_fsyncs_head, 
-                                      file_ptr->aio_fsyncs_tail, file_ptr->aio_fsyncs_count);
+                                      file_ptr->aio_fsyncs_tail, file_ptr->aio_fsyncs_count)
                 break;
 
             default:
                 /* This should be unreachable. */
                 HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
-                            "reach default case in unlink switch statement.");
+                            "reach default case in unlink switch statement.")
                 break;
         }
 
@@ -2573,11 +2573,11 @@ H5FD_sec2_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr)
     if(file_ptr->aio_canceled_count > 0) 
         if(SUCCEED != H5FD_sec2_aio_cancel__retire_canceled_in_progress(file_ptr))
             HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
-                        "H5FD_sec2_aio_cancel__retire_canceled_in_progress() failed");
+                        "H5FD_sec2_aio_cancel__retire_canceled_in_progress() failed")
 
     /* add the fsync to the head of the fsync in progress list */
     H5FD_SEC2__DLL_PREPEND(ctlblk_ptr, file_ptr->aio_fsyncs_head, 
-                           file_ptr->aio_fsyncs_tail, file_ptr->aio_fsyncs_count);
+                           file_ptr->aio_fsyncs_tail, file_ptr->aio_fsyncs_count)
 
     /* set ctlblk_ptr_ptr */
     *ctlblk_ptr_ptr = ctlblk_ptr;
@@ -2707,7 +2707,7 @@ H5FD_sec2_aio_cancel(void *ctlblk_ptr)
                      */
                     if((-1 != HDaio_return(&(cb_ptr->ctlblk))) && (errno != ECANCELED))
                         HGOTO_ERROR(H5E_IO, H5E_AIOCANCELFAIL, FAIL, 
-                                    "unexpected HDaio_return() after successful cancel.");
+                                    "unexpected HDaio_return() after successful cancel.")
 
                     cancel_succeeded = TRUE;
                     break;
@@ -2790,19 +2790,19 @@ H5FD_sec2_aio_cancel(void *ctlblk_ptr)
 
                 case -1: /* error */ 
                     HGOTO_ERROR(H5E_IO, H5E_AIOCANCELFAIL, FAIL, 
-                                "call to HDaio_cancel() failed.");
+                                "call to HDaio_cancel() failed.")
                     break;
 
                 default:
                     HGOTO_ERROR(H5E_IO, H5E_AIOCANCELFAIL, FAIL, 
-                                "call to HDaio_cancel() returned unexpected value.");
+                                "call to HDaio_cancel() returned unexpected value.")
 		    break;
             }
             break;
 
 	case H5FD_SEC2_AIO_STATUS__COMPLETE:
             HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, 
-                        "op already reported complete  -- hence can't be canceled.");
+                        "op already reported complete  -- hence can't be canceled.")
             break;
 
  	case H5FD_SEC2_AIO_STATUS__CANT_QUEUE:
@@ -2816,18 +2816,18 @@ H5FD_sec2_aio_cancel(void *ctlblk_ptr)
 
 	case H5FD_SEC2_AIO_STATUS__UNDEFINED:
 	    /* should never be passed back to user -- throw an error */
-            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "ctlblk status undefined??.");
+            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "ctlblk status undefined??.")
             break;
 
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "unknown ctlblk status.");
+            HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "unknown ctlblk status.")
             break;
     }
 
     if(file_ptr->aio_canceled_count > 0) 
         if(SUCCEED != H5FD_sec2_aio_cancel__retire_canceled_in_progress(file_ptr))
             HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
-                        "H5FD_sec2_aio_cancel__retire_canceled_in_progress() failed.");
+                        "H5FD_sec2_aio_cancel__retire_canceled_in_progress() failed.")
 
 done:
     if((cancel_succeeded) || 
@@ -2972,7 +2972,7 @@ H5FD_sec2_aio_sc(H5FD_t *file, FILE *output_stream, const char *tag, hbool_t ver
     FUNC_ENTER_NOAPI_NOINIT(H5FD_sec2_aio_sc)
 
     if((file == NULL) || (output_stream == NULL) || (tag == NULL))
-        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.");
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     file_ptr = (H5FD_sec2_t *)file;
 
@@ -3124,7 +3124,7 @@ H5FD_sec2_aio_sc(H5FD_t *file, FILE *output_stream, const char *tag, hbool_t ver
             HDfflush(output_stream);
         }
         HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, 
-                    "aio data structures sanity check failed.");
+                    "aio data structures sanity check failed.")
     }
 
 done:
@@ -3155,12 +3155,12 @@ H5FD_aio_attempt_op_as_sio(H5FD_sec2_aio_ctlblk_t * cb_ptr, hbool_t failed)
 
     if((cb_ptr==NULL) ||
        (cb_ptr->magic!=H5FD_SEC2_AIO_CTLBLK_T__MAGIC))
-        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "null or invalid ctlblk on entry.");
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "null or invalid ctlblk on entry.")
 
     if((cb_ptr->op != H5FD_AIO_OP__READ) &&
        (cb_ptr->op != H5FD_AIO_OP__WRITE ) && 
        (cb_ptr->op != H5FD_AIO_OP__FSYNC))
-        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "Undefined or unknown ctlblk op on entry.");
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "Undefined or unknown ctlblk op on entry.")
 
     switch(cb_ptr->op){
         case H5FD_AIO_OP__READ:
@@ -3228,7 +3228,7 @@ H5FD_sec2_fsync(H5FD_t *file, hid_t UNUSED dxpl)
     FUNC_ENTER_NOAPI_NOINIT(H5FD_sec2_fsync)
 
     if(file == NULL) 
-        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.");
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     sec2_file_ptr = (H5FD_sec2_t *)file;
 
@@ -3262,12 +3262,12 @@ H5FD_sec2_get_stats(H5FD_t *file, H5FD_stats_t *stats_ptr)
     FUNC_ENTER_NOAPI_NOINIT(H5FD_sec2_get_stats)
 
     if((file == NULL)||(stats_ptr == NULL)||(stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
-        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.");
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     sec2_file_ptr = (H5FD_sec2_t *)file;
 
     if(H5FD_copy_stats(stats_ptr,&(sec2_file_ptr->stats))<0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "H5FD_copy_stats() failed.");
+        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "H5FD_copy_stats() failed.")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3297,13 +3297,13 @@ H5FD_sec2_reset_stats(H5FD_t *file)
     FUNC_ENTER_NOAPI_NOINIT(H5FD_sec2_reset_stats)
 
     if(file == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.");
+        HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
 
     sec2_file_ptr = (H5FD_sec2_t *)file;
     sec2_file_ptr->stats.magic = H5FD__H5FD_STATS_T_MAGIC;
 
     if(H5FD_initialize_stats(&(sec2_file_ptr->stats)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "H5FD_initialize_stats() failed.");
+        HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "H5FD_initialize_stats() failed.")
 
 done:
 

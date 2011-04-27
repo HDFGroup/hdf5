@@ -155,6 +155,7 @@ IF (WINDOWS)
   SET (H5_HAVE_WINDOW_PATH 1)
   SET (WINDOWS_MAX_BUF (1024 * 1024 * 1024))
   SET (H5_DEFAULT_VFD H5FD_WINDOWS)
+  SET (LINK_LIBS ${LINK_LIBS} "kernel32")
 ELSE (WINDOWS)
   SET (H5_DEFAULT_VFD H5FD_SEC2)
 ENDIF (WINDOWS)
@@ -208,7 +209,6 @@ ENDIF (NOT WINDOWS)
 
 CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" WSAStartup  H5_HAVE_LIBWS2_32)
 CHECK_LIBRARY_EXISTS_CONCAT ("wsock32" gethostbyname H5_HAVE_LIBWSOCK32)
-#CHECK_LIBRARY_EXISTS_CONCAT ("dl"     dlopen       H5_HAVE_LIBDL)
 CHECK_LIBRARY_EXISTS_CONCAT ("ucb"    gethostname  H5_HAVE_LIBUCB)
 CHECK_LIBRARY_EXISTS_CONCAT ("socket" connect      H5_HAVE_LIBSOCKET)
 CHECK_LIBRARY_EXISTS ("c" gethostbyname "" NOT_NEED_LIBNSL)
@@ -219,6 +219,9 @@ ENDIF (NOT NOT_NEED_LIBNSL)
 
 
 SET (USE_INCLUDES "")
+IF (WINDOWS)
+  SET (USE_INCLUDES ${USE_INCLUDES} "windows.h")
+ENDIF (WINDOWS)
 #-----------------------------------------------------------------------------
 # Check IF header file exists and add it to the list.
 #-----------------------------------------------------------------------------
@@ -275,6 +278,7 @@ IF (H5_HAVE_STDINT_H AND CMAKE_CXX_COMPILER_LOADED)
   CHECK_INCLUDE_FILE_CXX ("stdint.h" H5_HAVE_STDINT_H_CXX)
   IF (NOT H5_HAVE_STDINT_H_CXX)
     SET (H5_HAVE_STDINT_H "" CACHE INTERNAL "Have includes HAVE_STDINT_H")
+    SET (USE_INCLUDES ${USE_INCLUDES} "stdint.h")
   ENDIF (NOT H5_HAVE_STDINT_H_CXX)
 ENDIF (H5_HAVE_STDINT_H AND CMAKE_CXX_COMPILER_LOADED)
 
@@ -577,6 +581,70 @@ IF (NOT WINDOWS)
 #      HDF5_FUNCTION_TEST (HAVE_STAT_ST_BLOCKS)
   ENDIF (NOT CYGWIN AND NOT MINGW)
 ENDIF (NOT WINDOWS)
+
+#-----------------------------------------------------------------------------
+# Check if InitOnceExecuteOnce is available
+#-----------------------------------------------------------------------------
+IF (WINDOWS)
+  MESSAGE (STATUS "Checking for InitOnceExecuteOnce:")
+  IF("${H5_HAVE_IOEO}" MATCHES "^${H5_HAVE_IOEO}$")
+    IF (LARGEFILE)
+      SET (CMAKE_REQUIRED_DEFINITIONS
+          "${CURRENT_TEST_DEFINITIONS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE"
+      )
+    ENDIF (LARGEFILE)
+    SET(MACRO_CHECK_FUNCTION_DEFINITIONS 
+      "-DHAVE_IOEO ${CMAKE_REQUIRED_FLAGS}")
+    IF(CMAKE_REQUIRED_LIBRARIES)
+      SET(CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES
+        "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
+    ELSE(CMAKE_REQUIRED_LIBRARIES)
+      SET(CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES)
+    ENDIF(CMAKE_REQUIRED_LIBRARIES)
+    IF(CMAKE_REQUIRED_INCLUDES)
+      SET(CHECK_C_SOURCE_COMPILES_ADD_INCLUDES
+        "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
+    ELSE(CMAKE_REQUIRED_INCLUDES)
+      SET(CHECK_C_SOURCE_COMPILES_ADD_INCLUDES)
+    ENDIF(CMAKE_REQUIRED_INCLUDES)
+
+    TRY_RUN(HAVE_IOEO_EXITCODE HAVE_IOEO_COMPILED
+      ${CMAKE_BINARY_DIR}
+      ${HDF5_RESOURCES_DIR}/HDF5Tests.c
+      COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+      CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
+      -DCMAKE_SKIP_RPATH:BOOL=${CMAKE_SKIP_RPATH}
+      "${CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES}"
+      "${CHECK_C_SOURCE_COMPILES_ADD_INCLUDES}"
+      COMPILE_OUTPUT_VARIABLE OUTPUT)
+    # if it did not compile make the return value fail code of 1
+    IF(NOT HAVE_IOEO_COMPILED)
+      SET(HAVE_IOEO_EXITCODE 1)
+    ENDIF(NOT HAVE_IOEO_COMPILED)
+    # if the return value was 0 then it worked
+    IF("${HAVE_IOEO_EXITCODE}" EQUAL 0)
+      SET(H5_HAVE_IOEO 1 CACHE INTERNAL "Test InitOnceExecuteOnce")
+      MESSAGE(STATUS "Performing Test InitOnceExecuteOnce - Success")
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+        "Performing C SOURCE FILE Test InitOnceExecuteOnce succeded with the following output:\n"
+        "${OUTPUT}\n"
+        "Return value: ${HAVE_IOEO}\n")
+    ELSE("${HAVE_IOEO_EXITCODE}" EQUAL 0)
+      IF(CMAKE_CROSSCOMPILING AND "${HAVE_IOEO_EXITCODE}" MATCHES  "FAILED_TO_RUN")
+        SET(H5_HAVE_IOEO "${HAVE_IOEO_EXITCODE}")
+      ELSE(CMAKE_CROSSCOMPILING AND "${HAVE_IOEO_EXITCODE}" MATCHES  "FAILED_TO_RUN")
+        SET(H5_HAVE_IOEO "" CACHE INTERNAL "Test InitOnceExecuteOnce")
+      ENDIF(CMAKE_CROSSCOMPILING AND "${HAVE_IOEO_EXITCODE}" MATCHES  "FAILED_TO_RUN")
+
+      MESSAGE(STATUS "Performing Test InitOnceExecuteOnce - Failed")
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+        "Performing InitOnceExecuteOnce Test  failed with the following output:\n"
+        "${OUTPUT}\n"
+        "Return value: ${HAVE_IOEO_EXITCODE}\n")
+    ENDIF("${HAVE_IOEO_EXITCODE}" EQUAL 0)
+  ENDIF("${H5_HAVE_IOEO}" MATCHES "^${H5_HAVE_IOEO}$")
+ENDIF (WINDOWS)
+	
 
 #-----------------------------------------------------------------------------
 # Option to see if GPFS is available on this filesystem --enable-gpfs

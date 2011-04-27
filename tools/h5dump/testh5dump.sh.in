@@ -562,6 +562,9 @@ TOOLTEST thyperslab.ddl thyperslab.h5
 # test for displaying dataset and attribute of null space
 TOOLTEST tnullspace.ddl tnullspace.h5
 
+# test for displaying dataset and attribute of space with 0 dimension size
+TOOLTEST zerodim.ddl zerodim.h5
+
 # test for long double (some systems do not have long double)
 #TOOLTEST tldouble.ddl tldouble.h5
 

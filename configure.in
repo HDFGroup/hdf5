@@ -2375,11 +2375,12 @@ esac
 dnl ----------------------------------------------------------------------------
 dnl Allow user to over-ride configure's decision as to whether AIO is 
 dnl supported
-AC_MSG_CHECKING([if aio support should be forced])
+AC_MSG_CHECKING([if AIO support should be forced])
 AC_ARG_ENABLE([aio],
               [AC_HELP_STRING([--enable-aio],
-                              [force aio support on or off])],
-              [FORCE_AIO=$enableval])
+                              [force AIO support on or off])],
+              [FORCE_AIO=$enableval],
+              [FORCE_AIO="use-default"])
 
 case "X-$FORCE_AIO" in 
   X-|X-no)
@@ -2388,6 +2389,9 @@ case "X-$FORCE_AIO" in
   X-yes)
     AC_MSG_RESULT([yes])
     ;;
+  X-use-default)
+    AC_MSG_RESULT([use-default])
+    ;;
   *)
     ;;
 esac
@@ -2395,11 +2399,12 @@ esac
 dnl ----------------------------------------------------------------------------
 dnl Allow user to over-ride configure's decision as to whether to force use of
 dnl 64 bit POSIX AIO calls.
-AC_MSG_CHECKING([if aio support should be forced])
+AC_MSG_CHECKING([if AIO 64 bit calls should be forced])
 AC_ARG_ENABLE([64-bit-posix-aio],
               [AC_HELP_STRING([--enable-64-bit-posix-aio],
-                              [force use of 64 bit posix aio call])],
-              [FORCE_64_BIT_POSIX_AIO=$enableval])
+                              [force use of 64 bit posix AIO calls])],
+              [FORCE_64_BIT_POSIX_AIO=$enableval],
+              [FORCE_64_BIT_POSIX_AIO="use-default"])
 
 case "X-$FORCE_64_BIT_POSIX_AIO" in 
   X-|X-no)
@@ -2408,6 +2413,9 @@ case "X-$FORCE_64_BIT_POSIX_AIO" in
   X-yes)
     AC_MSG_RESULT([yes])
     ;;
+  X-use-default)
+    AC_MSG_RESULT([use-default])
+    ;;
   *)
     ;;
 esac
@@ -2415,7 +2423,7 @@ esac
 dnl ----------------------------------------------------------------------
 dnl Check if they would like POSIX aio error recovery enabled
 dnl
-AC_MSG_CHECKING([whether posix aio error recovery should be enabled])
+AC_MSG_CHECKING([whether to enable POSIX AIO error recovery])
 AC_ARG_ENABLE([posix-aio-error-recovery],
               [AC_HELP_STRING([--enable-posix-aio-error-recovery],
                               [Enable POSIX AIO error recovery.])],

@@ -1151,15 +1151,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Friday, August 25, 2000
  *
- * Modifications:
- *
- *		John Mainzer -- 9/21/05
- *		Modified code to turn off the
- *		H5FD_FEAT_ACCUMULATE_METADATA_WRITE flag.
- *              With the movement of
- *		all cache writes to process 0, this flag has become
- *		problematic in PHDF5.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2111,7 +2102,6 @@ done:
  *		and must involve all members of the file comunicator.
  *
  * Return:      Success:        Non-negative
- *
  *              Failure:        Negative
  *
  * Programmer:  John Mainzer
@@ -2119,33 +2109,23 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 static herr_t
-H5FD_mpio_fsync(H5FD_t *file,
-                hid_t UNUSED dxpl)
+H5FD_mpio_fsync(H5FD_t *file, hid_t UNUSED dxpl)
 {
     herr_t        ret_value = SUCCEED;       /* Return value */
-    int           result;
     H5FD_mpio_t * mpio_file = NULL;
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_fsync, FAIL)
 
-    if ( file == NULL ) {
-
+    if(file == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
-    }
 
     mpio_file = (H5FD_mpio_t *)file;
 
-    result = MPI_File_sync(mpio_file->f);
-
-    if ( result != MPI_SUCCESS ) {
-
+    if(MPI_SUCCESS != MPI_File_sync(mpio_file->f))
         HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, "MPI_File_sync() request failed")
-    }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_mpio_fsync() */

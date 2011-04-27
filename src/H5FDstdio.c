@@ -1094,11 +1094,9 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_stdio_fsync(H5FD_t *file, 
-                 hid_t dxpl_id)
+H5FD_stdio_fsync(H5FD_t *file, hid_t dxpl_id)
 {
     static const char * func = "H5FD_stdio_fsync";  
-    herr_t              result;
     int			filenum;
     H5FD_stdio_t      * stdio_file = (H5FD_stdio_t*)file;
 
@@ -1109,21 +1107,11 @@ H5FD_stdio_fsync(H5FD_t *file,
 
     stdio_file = (H5FD_stdio_t *)file;
 
-    filenum = fileno(stdio_file->fp);
+    if(-1 == (filenum = fileno(stdio_file->fp)))
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_SYNCFAIL, "fileno() request failed", -1)
 
-    if ( filenum == -1 ) {
-
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_SYNCFAIL, \
-                    "fileno() request on log file failed", -1)
-    }
-
-    result = fsync(filenum);
-
-    if ( result != 0 ) {
-
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_SYNCFAIL, \
-                    "log file fsync request failed", -1)
-    }
+    if(0 != fsync(filenum))
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_SYNCFAIL, "fsync() request failed", -1)
 
     return(0);
 

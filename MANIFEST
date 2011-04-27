@@ -1382,7 +1382,8 @@
 ./tools/testfiles/tfpformat.h5
 # h5dump h5repack validation
 ./tools/testfiles/h5repack_filters.h5.ddl
-
+./tools/testfiles/zerodim.ddl
+./tools/testfiles/zerodim.h5
 
 # Expected output from h5ls tests
 ./tools/testfiles/nosuchfile.ls
@@ -1611,6 +1612,7 @@
 ./tools/h5diff/testfiles/h5diff_205.txt
 ./tools/h5diff/testfiles/h5diff_206.txt
 ./tools/h5diff/testfiles/h5diff_207.txt
+./tools/h5diff/testfiles/h5diff_208.txt
 ./tools/h5diff/testfiles/h5diff_300.txt
 ./tools/h5diff/testfiles/h5diff_400.txt
 ./tools/h5diff/testfiles/h5diff_401.txt
@@ -1707,7 +1709,8 @@
 ./tools/h5diff/testfiles/h5diff_exclude2-1.h5
 ./tools/h5diff/testfiles/h5diff_exclude2-2.h5
 ./tools/h5diff/testfiles/h5diff_comp_vl_strs.h5
-
+./tools/h5diff/testfiles/h5diff_dset_zero_dim_size1.h5
+./tools/h5diff/testfiles/h5diff_dset_zero_dim_size2.h5
 
 #test files for h5repack
 ./tools/h5repack/testfiles/h5repack_fill.h5

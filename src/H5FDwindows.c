@@ -1104,12 +1104,10 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5FD_windows_fsync(H5FD_t *file, 
-                   hid_t UNUSED dxpl_id)
+H5FD_windows_fsync(H5FD_t *file, hid_t UNUSED dxpl_id)
 {
     H5FD_windows_t * windows_file = (H5FD_windows_t*)file;
     herr_t           ret_value = SUCCEED;       /* Return value */
-    int              result;
     int              filenum;
 
     FUNC_ENTER_NOAPI(H5FD_windows_flush, FAIL)
@@ -1117,36 +1115,24 @@ H5FD_windows_fsync(H5FD_t *file,
     HDassert( windows_file != NULL );
 
     /* no point in syncing the file unless we have write access */
-    if ( file->write_access ) {
-
+    if(file->write_access) {
 #ifndef WINDOWS_USE_STDIO
         filenum = windows_file->fd;
 
-        if ( filenum == -1 ) {
-
-            HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, \
-                        "invalid windows_file->fd?!?!")
-        }
+        if(filenum == -1)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_SYSTEM, FAIL, "invalid windows_file->fd?!?!")
 #else /* WINDOWS_USE_STDIO */
         filenum = fileno(windows_file->fp);
 
-        if ( filenum == -1 ) {
-
+        if(filenum == -1)
             HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, "fileno() failed")
-        }
 #endif /* WINDOWS_USE_STDIO */
 
-        result = fsync(filenum);
-
-        if ( result != 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, \
-                        "file fsync request failed")
-        }
+        if(0 != fsync(filenum))
+            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, "file fsync request failed")
     } /* end if */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_windows_fsync() */

@@ -2610,7 +2610,6 @@ H5FD_multi_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
  *
  *-------------------------------------------------------------------------
  */
-
 static herr_t 
 H5FD_multi_aio_test(hbool_t *done_ptr, void *ctlblk_ptr)
 {
@@ -3105,7 +3104,6 @@ H5FD_multi_aio_cancel(void *ctlblk_ptr)
  *
  *-------------------------------------------------------------------------
  */
-
 static herr_t
 H5FD_multi_fsync(H5FD_t *file, hid_t dxpl_id)
 {

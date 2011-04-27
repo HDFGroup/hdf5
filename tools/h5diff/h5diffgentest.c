@@ -53,6 +53,8 @@
 #define FILE16   "h5diff_extlink_trg.h5"
 #define FILE17   "h5diff_ext2softlink_src.h5"
 #define FILE18   "h5diff_ext2softlink_trg.h5"
+#define FILE19   "h5diff_dset_zero_dim_size1.h5"
+#define FILE20   "h5diff_dset_zero_dim_size2.h5"
 #define DANGLE_LINK_FILE1   "h5diff_danglelinks1.h5"
 #define DANGLE_LINK_FILE2   "h5diff_danglelinks2.h5"
 #define GRP_RECURSE_FILE1   "h5diff_grp_recurse1.h5"
@@ -78,8 +80,13 @@
 #define STR_SIZE 3
 #define GBLL    ((unsigned long long) 1024 * 1024 *1024 )
 
-
 #define MY_LINKCLASS 187
+
+/* Dataspace of 0 dimension size */
+#define SPACE1_RANK 2
+#define SPACE1_DIM1 0
+#define SPACE1_DIM2 0
+
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t UD_traverse(UNUSED const char * link_name, UNUSED hid_t cur_group,
                          UNUSED const void * udata, UNUSED size_t udata_size, UNUSED hid_t lapl_id)
@@ -110,6 +117,7 @@ static int test_types(const char *fname);
 static int test_datatypes(const char *fname);
 static int test_attributes(const char *fname,int make_diffs);
 static int test_datasets(const char *fname,int make_diffs);
+static int test_special_datasets(const char *fname,int make_diffs);
 static int test_hyperslab(const char *fname,int make_diffs);
 static int test_link_name(const char *fname1);
 static int test_soft_links(const char *fname1);
@@ -172,6 +180,10 @@ int main(void)
     test_external_links(FILE15, FILE16);
 
     test_ext2soft_links(FILE17, FILE18);
+
+    /* generate 2 files, the second call creates a similar file with differences */
+    test_special_datasets(FILE19,0);
+    test_special_datasets(FILE20,1);
 
     test_dangle_links(DANGLE_LINK_FILE1, DANGLE_LINK_FILE2);
 
@@ -1241,6 +1253,62 @@ int test_datasets(const char *file,
     status = H5Dclose(did);
     assert(status >= 0);
     status = H5Gclose(gid);
+    assert(status >= 0);
+
+    /* close file */
+    status = H5Fclose(fid);
+    assert(status >= 0);
+    return status;
+}
+
+/*-------------------------------------------------------------------------
+* Function: test_special_datasets
+*
+* Purpose: Check datasets with datasapce of zero dimension size.
+*-------------------------------------------------------------------------
+*/
+static
+int test_special_datasets(const char *file,
+                  int make_diffs /* flag to modify data buffers */)
+{
+    hid_t   fid;
+    hid_t   did;
+    hid_t   sid0, sid;
+    hsize_t dims0[SPACE1_RANK]={SPACE1_DIM1, SPACE1_DIM2};
+    hsize_t dims[SPACE1_RANK]={SPACE1_DIM1, SPACE1_DIM2};
+    herr_t  status;
+
+    /* Create a file  */
+    if((fid = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        return -1;
+
+    /* Create a dataset with zero dimension size */
+    sid0 = H5Screate_simple(SPACE1_RANK, dims0, NULL);
+    did  = H5Dcreate2(fid, "dset1", H5T_NATIVE_INT, sid0, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* close dataset */
+    status = H5Dclose(did);
+    assert(status >= 0);
+
+    /* close dataspace */
+    status = H5Sclose(sid0);
+    assert(status >= 0);
+
+    /* Create a dataset with zero dimension size in one file but the other one 
+     * has a dataset with a non-zero dimension size */
+    if(make_diffs) {
+        dims[1] = SPACE1_DIM2 + 4;        
+    }
+
+    sid = H5Screate_simple(SPACE1_RANK, dims, NULL);
+    did  = H5Dcreate2(fid, "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* close dataspace */
+    status = H5Sclose(sid);
+    assert(status >= 0);
+
+    /* close dataset */
+    status = H5Dclose(did);
     assert(status >= 0);
 
     /* close file */

@@ -1458,7 +1458,6 @@ done:
  *		without buffering, there is no need to flush it as well.
  *
  * Return:      Success:        Non-negative
- *
  *              Failure:        Negative
  *
  * Programmer:  John Mainzer
@@ -1466,38 +1465,25 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 static herr_t
-H5FD_log_flush(H5FD_t *file,
-               hid_t UNUSED dxpl,
-               unsigned closing)
+H5FD_log_flush(H5FD_t *file, hid_t UNUSED dxpl, unsigned closing)
 {
     herr_t       ret_value = SUCCEED;       /* Return value */
-    int          result;
     H5FD_log_t * log_file_ptr = NULL;
 
     FUNC_ENTER_NOAPI(H5FD_log_flush, FAIL)
 
-    if ( file == NULL ) {
-
+    if(file == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
-    }
 
     log_file_ptr = (H5FD_log_t *)file;
 
-    if ( ( ! closing ) && ( log_file_ptr->logfp != NULL ) )  {
-
-        result = HDfflush(log_file_ptr->logfp);
-
-        if ( result != 0 ) {
-
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
+    if((!closing) && (log_file_ptr->logfp != NULL))
+        if(HDfflush(log_file_ptr->logfp) != 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                         "log file fflush request failed")
-        }
-    }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_log_flush() */
@@ -1582,7 +1568,6 @@ done:
  *		be necessary before the sync to	obtain the desired result.
  *
  * Return:      Success:        Non-negative
- *
  *              Failure:        Negative
  *
  * Programmer:  John Mainzer
@@ -1590,54 +1575,35 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 static herr_t
-H5FD_log_fsync(H5FD_t *file,
-                hid_t UNUSED dxpl)
+H5FD_log_fsync(H5FD_t *file, hid_t UNUSED dxpl)
 {
     herr_t       ret_value = SUCCEED;       /* Return value */
     int		 filenum;
-    int          result;
     H5FD_log_t * log_file_ptr = NULL;
 
     FUNC_ENTER_NOAPI(H5FD_log_fsync, FAIL)
 
-    if ( file == NULL ) {
-
+    if(file == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
-    }
 
     log_file_ptr = (H5FD_log_t *)file;
 
-    result = HDfsync(log_file_ptr->fd);
-
-    if ( result != 0 ) {
-
-        HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, \
+    if(HDfsync(log_file_ptr->fd) != 0)
+        HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL,
 		    "unix file fsync request failed")
-    }
 
-    if ( log_file_ptr->logfp != NULL ) {
-
-        filenum = HDfileno(log_file_ptr->logfp);
-
-        if ( filenum == -1 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, \
+    if(log_file_ptr->logfp != NULL) {
+        if(-1 == (filenum = HDfileno(log_file_ptr->logfp)))
+            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, 
                         "fileno() request on log file failed")
-        }
 
-        result = HDfsync(filenum);
-
-        if ( result != 0 ) {
-
-            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, \
+        if(0 != HDfsync(filenum))
+            HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, 
                         "log file fsync request failed")
-        }
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_log_fsync() */

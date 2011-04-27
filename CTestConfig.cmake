@@ -26,5 +26,5 @@ SET (MEMORYCHECKCOMMAND "/usr/bin/valgrind")
 SET (CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=yes --num-callers=50 --show-reachable=yes --track-origins=yes --malloc-fill=0xff --free-fill=0xfe")
 SET (CTEST_MEMORYCHECKCOMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=yes --num-callers=50 --show-reachable=yes --track-origins=yes --malloc-fill=0xff --free-fill=0xfe")
 
-SET (CTEST_TESTING_TIMEOUT 1200) 
-SET (DART_TESTING_TIMEOUT 1200) 
+SET (CTEST_TESTING_TIMEOUT 3600) 
+SET (DART_TESTING_TIMEOUT 3600) 

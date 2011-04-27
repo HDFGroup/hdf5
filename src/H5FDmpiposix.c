@@ -1561,7 +1561,6 @@ done:
  * Purpose:     Sync the file to disk.
  *
  * Return:      Success:        Non-negative
- *
  *              Failure:        Negative
  *
  * Programmer:  John Mainzer
@@ -1569,21 +1568,16 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 static herr_t
-H5FD_mpiposix_fsync(H5FD_t *file,
-                    hid_t UNUSED dxpl)
+H5FD_mpiposix_fsync(H5FD_t *file, hid_t UNUSED dxpl)
 {
     herr_t            ret_value = SUCCEED;       /* Return value */
-    int               result;
     H5FD_mpiposix_t * mpiposix_file = NULL;
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_fsync, FAIL)
 
-    if ( file == NULL ) {
-
+    if(file == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
-    }
 
     /* Question: Do we really want every process doing the fsync()?
      *           Or would it be better to have just one?  This is a
@@ -1595,15 +1589,10 @@ H5FD_mpiposix_fsync(H5FD_t *file,
 
     mpiposix_file = (H5FD_mpiposix_t *)file;
 
-    result = HDfsync(mpiposix_file->fd);
-
-    if ( result != 0 ) {
-
+    if(0 != HDfsync(mpiposix_file->fd))
         HGOTO_ERROR(H5E_VFL, H5E_SYNCFAIL, FAIL, "fsync request failed")
-    }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_mpiposix_fsync() */

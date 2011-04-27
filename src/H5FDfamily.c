@@ -91,8 +91,8 @@
 
 #ifdef H5_HAVE_AIO
 
-#define H5FD_FAMILY_AIO_CTLBLK_T__MAGIC		  0x00000000 /* 'FACB' */
-#define H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC	  0x00000000 /* 'FSCB' */
+#define H5FD_FAMILY_AIO_CTLBLK_T__MAGIC		  0x46414342 /* 'FACB' */
+#define H5FD_FAMILY_AIO_SUBCTLBLK_T__MAGIC	  0x46534342 /* 'FSCB' */
 #define H5FD_FAMILY_AIO_SUBCTLBLK_INIT_ARRAY_SIZE 1
 
 typedef struct H5FD_family_aio_subctlblk_t {
@@ -2252,7 +2252,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 static herr_t 
 H5FD_family_aio_test(hbool_t *done_ptr, void *ctlblk_ptr)
 {
@@ -2866,7 +2865,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 static herr_t 
 H5FD_family_reset_stats(H5FD_t *file)
 {

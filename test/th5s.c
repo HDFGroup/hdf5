@@ -930,6 +930,10 @@ test_h5s_zero_dim(void)
         }
     }
 
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
     /*===============================================================
      * Extend the dimension to make it a normal dataspace (3x15x13).  
      * Verify that data can be written to and read from the chunked 
