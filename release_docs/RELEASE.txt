@@ -610,3 +610,7 @@ Known Problems
   Reducing optimization by setting CFLAGS to -O1 or below resolves the issue.
   Alternatively, using a newer version of the compiler (11.0) also works as
   intended. MAM - 2010/06/01
+
+* h5diff will not report enum value differences when one or both of the values
+  is not a valid enumeration value.  The source of this bug has been identified
+  and it will be fixed in 1.8.8. DER - 2011/04/27
