@@ -155,6 +155,7 @@ typedef struct H5FD_direct_t {
 				 (file_offset_t)((A)+(Z))<(file_offset_t)(A))
 
 /* Prototypes */
+static herr_t H5FD_direct_term(void);
 static void *H5FD_direct_fapl_get(H5FD_t *file);
 static void *H5FD_direct_fapl_copy(const void *_old_fa);
 static H5FD_t *H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id,
@@ -176,6 +177,7 @@ static const H5FD_class_t H5FD_direct_g = {
     "direct",					/*name			*/
     MAXADDR,					/*maxaddr		*/
     H5F_CLOSE_WEAK,				/* fc_degree		*/
+    H5FD_direct_term,                           /*terminate             */
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
@@ -272,16 +274,14 @@ done:
  *
  * Purpose:	Shut down the VFD
  *
- * Return:	<none>
+ * Returns:     Non-negative on success or negative on failure
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
  *
- * Modification:
- *
  *---------------------------------------------------------------------------
  */
-void
+static herr_t
 H5FD_direct_term(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_direct_term)
@@ -289,7 +289,7 @@ H5FD_direct_term(void)
     /* Reset VFL ID */
     H5FD_DIRECT_g=0;
 
-    FUNC_LEAVE_NOAPI_VOID
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_direct_term() */
 
 
@@ -677,7 +677,7 @@ H5FD_direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_direct_t	*f2 = (const H5FD_direct_t*)_f2;
     int ret_value=0;
 
-    FUNC_ENTER_NOAPI(H5FD_direct_cmp, H5FD_VFD_DEFAULT)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_direct_cmp)
 
 #ifdef _WIN32
     if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)

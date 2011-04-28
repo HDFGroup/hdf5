@@ -209,8 +209,19 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * the handle for the VFD (returned with the 'get_handle' callback) is
      * of type 'int' and is compatible with POSIX I/O calls.
      */
-#define H5FD_FEAT_POSIX_COMPAT_HANDLE   0x00000080
-
+#define H5FD_FEAT_POSIX_COMPAT_HANDLE   0x00000080    
+    /*
+     * Defining the H5FD_FEAT_HAS_MPI for a VFL driver means that
+     * the driver makes use of MPI communication and code may retrieve
+     * communicator/rank information from it
+     */
+#define H5FD_FEAT_HAS_MPI               0x00000100
+    /*
+     * Defining the H5FD_FEAT_ALLOCATE_EARLY for a VFL driver means that
+     * the library will use the H5D_ALLOC_TIME_EARLY on dataset create
+     * instead of the default H5D_ALLOC_TIME_LATE
+     */
+#define H5FD_FEAT_ALLOCATE_EARLY        0x00000200
 
 /* Forward declaration */
 typedef struct H5FD_t H5FD_t;
@@ -220,6 +231,7 @@ typedef struct H5FD_class_t {
     const char *name;
     haddr_t maxaddr;
     H5F_close_degree_t fc_degree;
+    herr_t  (*terminate)(void);
     hsize_t (*sb_size)(H5FD_t *file);
     herr_t  (*sb_encode)(H5FD_t *file, char *name/*out*/,
                          unsigned char *p/*out*/);

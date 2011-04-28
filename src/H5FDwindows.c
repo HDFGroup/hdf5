@@ -127,6 +127,7 @@ typedef struct H5FD_windows_t {
 				 (fseek_offset_t)((A)+(Z))<(fseek_offset_t)(A))
 
 /* Prototypes */
+static herr_t H5FD_windows_term(void);
 static H5FD_t *H5FD_windows_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
 static herr_t H5FD_windows_close(H5FD_t *_file);
@@ -149,6 +150,7 @@ static const H5FD_class_t H5FD_windows_g = {
     "windows",					/*name			*/
     MAXADDR,					/*maxaddr		*/
     H5F_CLOSE_WEAK,				/* fc_degree	*/
+    H5FD_windows_term,                          /*terminate             */
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
@@ -240,17 +242,14 @@ done:
  *
  * Purpose:	Shut down the VFD
  *
- * Return:	<none>
+ * Returns:     Non-negative on success or negative on failure
  *
  * Programmer:  Scott Wegner
- *				Based on code by Quincey Koziol
  *              Thursday, May 24 2007
- *
- * Modification:
  *
  *---------------------------------------------------------------------------
  */
-void
+static herr_t
 H5FD_windows_term(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_windows_term)
@@ -258,7 +257,7 @@ H5FD_windows_term(void)
     /* Reset VFL ID */
     H5FD_WINDOWS_g=0;
 
-    FUNC_LEAVE_NOAPI_VOID
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_windows_term() */
 
 /*-------------------------------------------------------------------------
@@ -512,10 +511,10 @@ H5FD_windows_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_windows_t	*f2 = (const H5FD_windows_t*)_f2;
     int ret_value=0;
 
-    FUNC_ENTER_NOAPI(H5FD_windows_cmp, H5FD_VFD_DEFAULT)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_windows_cmp)
 
-	if (f1->volumeserialnumber < f2->volumeserialnumber) HGOTO_DONE(-1)
-	if (f1->volumeserialnumber > f2->volumeserialnumber) HGOTO_DONE(1)
+    if (f1->volumeserialnumber < f2->volumeserialnumber) HGOTO_DONE(-1)
+    if (f1->volumeserialnumber > f2->volumeserialnumber) HGOTO_DONE(1)
 
     if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)
     if (f1->fileindexhi > f2->fileindexhi) HGOTO_DONE(1)

@@ -161,6 +161,7 @@ typedef struct H5FD_log_t {
 				 (HDoff_t)((A)+(Z))<(HDoff_t)(A))
 
 /* Prototypes */
+static herr_t H5FD_log_term(void);
 static void *H5FD_log_fapl_get(H5FD_t *file);
 static void *H5FD_log_fapl_copy(const void *_old_fa);
 static herr_t H5FD_log_fapl_free(void *_fa);
@@ -184,6 +185,7 @@ static const H5FD_class_t H5FD_log_g = {
     "log",					/*name			*/
     MAXADDR,					/*maxaddr		*/
     H5F_CLOSE_WEAK,				/* fc_degree		*/
+    H5FD_log_term,                              /*terminate             */
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
@@ -277,14 +279,14 @@ done:
  *
  * Purpose:	Shut down the VFD
  *
- * Return:	<none>
+ * Returns:     Non-negative on success or negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Friday, Jan 30, 2004
  *
  *---------------------------------------------------------------------------
  */
-void
+static herr_t
 H5FD_log_term(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_log_term)
@@ -292,7 +294,7 @@ H5FD_log_term(void)
     /* Reset VFL ID */
     H5FD_LOG_g = 0;
 
-    FUNC_LEAVE_NOAPI_VOID
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_log_term() */
 
 

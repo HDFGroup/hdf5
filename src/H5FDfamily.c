@@ -88,6 +88,7 @@ typedef struct H5FD_family_dxpl_t {
 } H5FD_family_dxpl_t;
 
 /* Callback prototypes */
+static herr_t H5FD_family_term(void);
 static void *H5FD_family_fapl_get(H5FD_t *_file);
 static void *H5FD_family_fapl_copy(const void *_old_fa);
 static herr_t H5FD_family_fapl_free(void *_fa);
@@ -119,6 +120,7 @@ static const H5FD_class_t H5FD_family_g = {
     "family",					/*name			*/
     HADDR_MAX,					/*maxaddr		*/
     H5F_CLOSE_WEAK,				/*fc_degree		*/
+    H5FD_family_term,                           /*terminate             */
     H5FD_family_sb_size,			/*sb_size		*/
     H5FD_family_sb_encode,			/*sb_encode		*/
     H5FD_family_sb_decode,			/*sb_decode		*/
@@ -212,16 +214,14 @@ done:
  *
  * Purpose:	Shut down the VFD
  *
- * Return:	<none>
+ * Returns:     Non-negative on success or negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Friday, Jan 30, 2004
  *
- * Modification:
- *
  *---------------------------------------------------------------------------
  */
-void
+static herr_t
 H5FD_family_term(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_family_term)
@@ -229,7 +229,7 @@ H5FD_family_term(void)
     /* Reset VFL ID */
     H5FD_FAMILY_g=0;
 
-    FUNC_LEAVE_NOAPI_VOID
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_family_term() */
 
 
@@ -957,18 +957,18 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
     const H5FD_family_t	*f1 = (const H5FD_family_t*)_f1;
     const H5FD_family_t	*f2 = (const H5FD_family_t*)_f2;
-    int ret_value=(H5FD_VFD_DEFAULT);
+    int ret_value = 0;
 
-    FUNC_ENTER_NOAPI(H5FD_family_cmp, H5FD_VFD_DEFAULT)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_family_cmp)
 
-    assert(f1->nmembs>=1 && f1->memb[0]);
-    assert(f2->nmembs>=1 && f2->memb[0]);
+    HDassert(f1->nmembs >= 1 && f1->memb[0]);
+    HDassert(f2->nmembs >= 1 && f2->memb[0]);
 
-    ret_value= H5FDcmp(f1->memb[0], f2->memb[0]);
+    ret_value = H5FDcmp(f1->memb[0], f2->memb[0]);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_family_cmp() */
 
 
 /*-------------------------------------------------------------------------

@@ -115,6 +115,7 @@ static int compute_next(H5FD_multi_t *file);
 static int open_members(H5FD_multi_t *file);
 
 /* Callback prototypes */
+static herr_t H5FD_multi_term(void);
 static hsize_t H5FD_multi_sb_size(H5FD_t *file);
 static herr_t H5FD_multi_sb_encode(H5FD_t *file, char *name/*out*/,
 				   unsigned char *buf/*out*/);
@@ -150,6 +151,7 @@ static const H5FD_class_t H5FD_multi_g = {
     "multi",					/*name			*/
     HADDR_MAX,					/*maxaddr		*/
     H5F_CLOSE_WEAK,				/* fc_degree		*/
+    H5FD_multi_term,                            /*terminate             */
     H5FD_multi_sb_size,				/*sb_size		*/
     H5FD_multi_sb_encode,			/*sb_encode		*/
     H5FD_multi_sb_decode,			/*sb_decode		*/
@@ -247,21 +249,20 @@ H5FD_multi_init(void)
  *
  * Purpose:	Shut down the VFD
  *
- * Return:	<none>
+ * Returns:     Non-negative on success or negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Friday, Jan 30, 2004
  *
- * Modification:
- *
  *---------------------------------------------------------------------------
  */
-void
+static herr_t
 H5FD_multi_term(void)
 {
     /* Reset VFL ID */
     H5FD_MULTI_g=0;
 
+    return 0;
 } /* end H5FD_multi_term() */
 
 

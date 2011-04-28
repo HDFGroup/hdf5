@@ -111,6 +111,7 @@ typedef struct H5FD_core_fapl_t {
 				 (size_t)((A)+(Z))<(size_t)(A))
 
 /* Prototypes */
+static herr_t H5FD_core_term(void);
 static void *H5FD_core_fapl_get(H5FD_t *_file);
 static H5FD_t *H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
@@ -132,6 +133,7 @@ static const H5FD_class_t H5FD_core_g = {
     "core",					/*name			*/
     MAXADDR,					/*maxaddr		*/
     H5F_CLOSE_WEAK,				/*fc_degree		*/
+    H5FD_core_term,                             /*terminate             */
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
@@ -225,16 +227,14 @@ done:
  *
  * Purpose:	Shut down the VFD
  *
- * Return:	<none>
+ * Returns:     Non-negative on success or negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Friday, Jan 30, 2004
  *
- * Modification:
- *
  *---------------------------------------------------------------------------
  */
-void
+static herr_t
 H5FD_core_term(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_core_term)
@@ -242,7 +242,7 @@ H5FD_core_term(void)
     /* Reset VFL ID */
     H5FD_CORE_g=0;
 
-    FUNC_LEAVE_NOAPI_VOID
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_core_term() */
 
 

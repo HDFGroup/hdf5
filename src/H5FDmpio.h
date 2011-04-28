@@ -46,7 +46,6 @@
 extern "C" {
 #endif
 H5_DLL hid_t H5FD_mpio_init(void);
-H5_DLL void H5FD_mpio_term(void);
 H5_DLL herr_t H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 H5_DLL herr_t H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/,
 			MPI_Info *info/*out*/);
@@ -63,3 +62,4 @@ H5_DLL herr_t H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_n
 #endif /* H5_HAVE_PARALLEL */
 
 #endif
+

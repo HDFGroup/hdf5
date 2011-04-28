@@ -35,19 +35,6 @@
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 
-/* Predefined file drivers */
-#include "H5FDcore.h"		/*temporary in-memory files		*/
-#include "H5FDfamily.h"		/*family of files			*/
-#include "H5FDlog.h"            /* sec2 driver with logging, for debugging */
-#include "H5FDmpi.h"            /* MPI-based file drivers		*/
-#include "H5FDmulti.h"		/*multiple files partitioned by mem usage */
-#include "H5FDsec2.h"		/*Posix unbuffered I/O			*/
-#include "H5FDstdio.h"		/* Standard C buffered I/O		*/
-#ifdef H5_HAVE_WINDOWS
-#include "H5FDwindows.h"        /* Windows buffered I/O     */
-#endif
-#include "H5FDdirect.h"         /*Linux direct I/O			*/
-
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
 typedef struct H5F_olist_t {
     H5I_type_t obj_type;        /* Type of object to look for */
@@ -934,7 +921,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
          *      merged into the trunk and journaling is enabled, at least until
          *      we make it work. - QAK)
          */
-        f->shared->use_tmp_space = !(IS_H5FD_MPI(f));
+        f->shared->use_tmp_space = !H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI);
 
 	/*
 	 * Create a metadata cache with the specified number of elements.

@@ -1003,7 +1003,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "compact dataset must have early space allocation")
 
         /* If MPI VFD is used, no filter support yet. */
-        if(IS_H5FD_MPI(file) && pline->nused > 0)
+        if(H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI) && pline->nused > 0)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "Parallel I/O does not support filters yet")
 
         /* Get the dataset's external file list information */
@@ -1023,7 +1023,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     } /* end if */
 
     /* Check if this dataset is going into a parallel file and set space allocation time */
-    if(IS_H5FD_MPI(file))
+    if(H5F_HAS_FEATURE(file, H5FD_FEAT_ALLOCATE_EARLY))
         new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
 
     /* Set the dataset's I/O operations */
@@ -1305,7 +1305,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
      */
     if((H5F_INTENT(dataset->oloc.file) & H5F_ACC_RDWR)
             && !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)
-            && IS_H5FD_MPI(dataset->oloc.file)) {
+            && H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_ALLOCATE_EARLY)) {
         if(H5D_alloc_storage(dataset, dxpl_id, H5D_ALLOC_OPEN, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage")
     } /* end if */
