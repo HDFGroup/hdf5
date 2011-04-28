@@ -56,3 +56,5 @@ SET (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FO
 
 SET (CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build Debug" FORCE)
 
+SET (CTEST_BUILD_CONFIGURATION "Debug" CACHE STRING "Build Debug" FORCE)
+
