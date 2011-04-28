@@ -1839,7 +1839,7 @@ AC_ARG_WITH([pthread],
 case "$withval" in
   yes)
     AC_CHECK_HEADERS([pthread.h])
-    AC_CHECK_LIB([pthread], [pthread_join],, [unset PTHREAD])
+    AC_CHECK_LIB([pthread], [pthread_self],, [unset PTHREAD])
     ;;
   no)
     AC_MSG_CHECKING([for pthread])
@@ -1884,11 +1884,11 @@ case "$withval" in
       saved_AM_LDFLAGS="$AM_LDFLAGS"
       LDFLAGS="$LDFLAGS -L$pthread_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
-      AC_CHECK_LIB([pthread], [pthread_join],,
+      AC_CHECK_LIB([pthread], [pthread_self],,
                    [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset PTHREAD])
 
     else
-      AC_CHECK_LIB([pthread], [pthread_join],, [unset PTHREAD])
+      AC_CHECK_LIB([pthread], [pthread_self],, [unset PTHREAD])
     fi
     ;;
 esac
@@ -1908,7 +1908,7 @@ case "X-$THREADSAFE" in
     ;;
   X-yes)
     dnl Check that we can link a simple Pthread program.
-    AC_TRY_LINK(, [pthread_join()],
+    AC_TRY_LINK(, [pthread_self()],
                 [AC_MSG_RESULT([yes]); THREADSAFE=yes],
                 [AC_MSG_ERROR([needed pthread library not available])])
     ;;
