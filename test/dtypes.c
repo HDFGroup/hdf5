@@ -3210,7 +3210,11 @@ test_compound_18(void)
 
     /* Open Generated File */
     /* (generated with gen_bad_compound.c) */
+#ifdef H5_VMS
+    if((file = H5Fopen(TESTFILE, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+#else
     if((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+#endif
 
     /* Try to open the datatype */
     H5E_BEGIN_TRY {
