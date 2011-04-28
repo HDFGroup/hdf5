@@ -292,10 +292,11 @@ uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
  * Programmer:  Bill Wendling, 06. June 2002
  * Modifications:
  */
+#define ZIP_PERF_FILE "zip_perf.data"
 static void
 get_unique_name(void)
 {
-    const char *prefix = NULL, *tmpl = "zip_perf.data";
+    const char *prefix = NULL;
     const char *env = getenv("HDF5_PREFIX");
 
     if (env)
@@ -306,9 +307,9 @@ get_unique_name(void)
 
     if (prefix)
 	/* 2 = 1 for '/' + 1 for null terminator */
-	filename = (char *) HDmalloc(strlen(prefix) + strlen(tmpl) + 2);
+	filename = (char *) HDmalloc(strlen(prefix) + strlen(ZIP_PERF_FILE) + 2);
     else
-	filename = (char *) HDmalloc(strlen(tmpl) + 1);
+	filename = (char *) HDmalloc(strlen(ZIP_PERF_FILE) + 1);
 
     if (!filename)
         error("out of memory");
@@ -317,7 +318,7 @@ get_unique_name(void)
 	strcpy(filename, prefix);
 	strcat(filename, "/");
     }
-    strcat(filename, tmpl);
+    strcat(filename, ZIP_PERF_FILE);
 }
 
 /*
