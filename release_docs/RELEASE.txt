@@ -713,9 +713,9 @@ Platforms Tested
 
     AIX 6.1                       xlc 11.1.0.3
     (NCSA BP)                     xlC 11.1.0.3
-                                  xlf 13.1.0.3
+                                  xlf90 13.1.0.3
                                   mpcc_r 11.1.0.3
-                                  mpxlf_r 13.1.0.3
+                                  mpxlf90_r 13.1.0.3
 
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
     (loyalty)                     g++ 4.2.1 [FreeBSD] 20070719
