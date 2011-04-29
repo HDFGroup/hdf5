@@ -365,10 +365,10 @@ TOOLTEST h5diff_16_3.txt -v -p 0.02 $FILE1 $FILE1 g1/dset9 g1/dset10
 TOOLTEST h5diff_17.txt -v $FILE1 $FILE2   
 
 # 1.7 test 32-bit INFINITY
-TOOLTEST h5diff_171.txt -v $FILE1 $FILE1 /g1/fp19
+TOOLTEST h5diff_171.txt -v $FILE1 $FILE1 /g1/fp19 /g1/fp19_COPY
 
 # 1.7 test 64-bit INFINITY
-TOOLTEST h5diff_172.txt -v $FILE1 $FILE1 /g1/fp20
+TOOLTEST h5diff_172.txt -v $FILE1 $FILE1 /g1/fp20 /g1/fp20_COPY
 
 # 1.8 quiet mode 
 TOOLTEST h5diff_18.txt -q $FILE1 $FILE2 
@@ -832,7 +832,7 @@ TOOLTEST h5diff_484.txt -v --exclude-path "/dset3" $EXCLUDE_FILE1_1 $EXCLUDE_FIL
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset
 # ##############################################################################
-TOOLTEST h5diff_530.txt -v  $COMP_VL_STRS_FILE $COMP_VL_STRS_FILE
+TOOLTEST h5diff_530.txt -v  $COMP_VL_STRS_FILE $COMP_VL_STRS_FILE /group /group_copy
 
 # ##############################################################################
 # # END

@@ -555,6 +555,7 @@ H5TOOLS_DLL hid_t    h5tools_get_big_endian_type(hid_t type);
 
 H5TOOLS_DLL htri_t   h5tools_detect_vlen(hid_t tid);
 H5TOOLS_DLL htri_t   h5tools_detect_vlen_str(hid_t tid);
+H5TOOLS_DLL hbool_t   h5tools_is_obj_same(hid_t loc_id1, const char *name1, hid_t loc_id2, const char *name2);
 
 H5TOOLS_DLL void     h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t container,
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,

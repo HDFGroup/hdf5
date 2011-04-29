@@ -129,7 +129,7 @@ static int test_group_recurse(const char *fname1, const char *fname2);
 static int test_group_recurse2(void);
 static int test_exclude_obj1(const char *fname1, const char *fname2);
 static int test_exclude_obj2(const char *fname1, const char *fname2);
-static int test_comp_vlen_strings(const char *fname1);
+static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new);
 static int test_attributes_verbose_level(const char *fname1, const char *fname2);
 
 /* called by test_attributes() and test_datasets() */
@@ -194,7 +194,8 @@ int main(void)
     test_exclude_obj2(EXCLUDE_FILE2_1, EXCLUDE_FILE2_2);
 
     /* diff various multiple vlen and fixlen string types in a compound dataset */
-    test_comp_vlen_strings(COMP_VL_STRS_FILE );
+    test_comp_vlen_strings(COMP_VL_STRS_FILE, "group", 1);
+    test_comp_vlen_strings(COMP_VL_STRS_FILE, "group_copy", 0);
 
     return 0;
 }
@@ -430,7 +431,9 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
         data20[3] = data20[4] = data20[5] = -log(0);
 
         write_dset(gid1,1,dims1,"fp19",H5T_NATIVE_FLOAT,data19);
+        write_dset(gid1,1,dims1,"fp19_COPY",H5T_NATIVE_FLOAT,data19);
         write_dset(gid1,1,dims1,"fp20",H5T_NATIVE_DOUBLE,data20);
+        write_dset(gid1,1,dims1,"fp20_COPY",H5T_NATIVE_DOUBLE,data20);
     }
 
     /*-------------------------------------------------------------------------
@@ -3309,11 +3312,12 @@ out:
 #define FIXLEN_STR_ARRY_SIZE 30
 #define COMP_RANK 1
 #define COMP_DIM 1
-static int test_comp_vlen_strings(const char *fname1)
+static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new)
 {
     int i;
 
     hid_t    fid1;      /* file id */
+    hid_t    gid;
 
     /* compound1 datatype */
     typedef struct comp1_t
@@ -3604,10 +3608,34 @@ static int test_comp_vlen_strings(const char *fname1)
     /*-----------------------------------------------------------------------
     * Create file(s)
     *------------------------------------------------------------------------*/
-    fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    if (fid1 < 0)
+    if (is_file_new == 1)
     {
-        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        if (fid1 < 0)
+        {
+            fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+            status = FAIL;
+            goto out;
+        }
+    }
+    else
+    {
+        fid1 = H5Fopen (fname1, H5F_ACC_RDWR, H5P_DEFAULT);
+        if (fid1 < 0)
+        {
+            fprintf(stderr, "Error: %s> H5Fopen failed.\n", fname1);
+            status = FAIL;
+            goto out;
+        }
+    }
+
+    /*-----------------------------------------------------------------------
+    * Create group 
+    *------------------------------------------------------------------------*/
+    gid = H5Gcreate2(fid1, grp_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
         status = FAIL;
         goto out;
     }
@@ -3827,7 +3855,7 @@ static int test_comp_vlen_strings(const char *fname1)
 
 
     /* Write data to compound 1 dataset buffer */
-    did_comp = H5Dcreate2(fid1, "Compound_dset1", tid1_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    did_comp = H5Dcreate2(gid, "Compound_dset1", tid1_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did_comp, tid1_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp1_buf);
     if (status < 0)
     {
@@ -3838,7 +3866,7 @@ static int test_comp_vlen_strings(const char *fname1)
     H5Dclose(did_comp);
 
     /* Write data to compound 2 dataset buffer */
-    did_comp = H5Dcreate2(fid1, "Compound_dset2", tid2_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    did_comp = H5Dcreate2(gid, "Compound_dset2", tid2_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did_comp, tid2_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp2_buf);
     if (status < 0)
     {
@@ -3849,7 +3877,7 @@ static int test_comp_vlen_strings(const char *fname1)
     H5Dclose(did_comp);
 
     /* Write data to compound 3 dataset buffer */
-    did_comp = H5Dcreate2(fid1, "Compound_dset3", tid3_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    did_comp = H5Dcreate2(gid, "Compound_dset3", tid3_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did_comp, tid3_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp3_buf);
     if (status < 0)
     {
@@ -3860,7 +3888,7 @@ static int test_comp_vlen_strings(const char *fname1)
     H5Dclose(did_comp);
 
     /* Write data to compound 4 dataset buffer */
-    did_comp = H5Dcreate2(fid1, "Compound_dset4", tid4_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    did_comp = H5Dcreate2(gid, "Compound_dset4", tid4_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did_comp, tid4_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp4_buf);
     if (status < 0)
     {
@@ -3871,7 +3899,7 @@ static int test_comp_vlen_strings(const char *fname1)
     H5Dclose(did_comp);
 
     /* Write data to compound 5 dataset buffer */
-    did_comp = H5Dcreate2(fid1, "Compound_dset5", tid5_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    did_comp = H5Dcreate2(gid, "Compound_dset5", tid5_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did_comp, tid5_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp5_buf);
     if (status < 0)
     {
@@ -3882,7 +3910,7 @@ static int test_comp_vlen_strings(const char *fname1)
     H5Dclose(did_comp);
 
     /* Write data to compound 6 dataset buffer */
-    did_comp = H5Dcreate2(fid1, "Compound_dset6", tid6_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    did_comp = H5Dcreate2(gid, "Compound_dset6", tid6_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did_comp, tid6_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp6_buf);
     if (status < 0)
     {
@@ -3893,7 +3921,7 @@ static int test_comp_vlen_strings(const char *fname1)
     H5Dclose(did_comp);
 
     /* Write data to compound 7 dataset buffer */
-    did_comp = H5Dcreate2(fid1, "Compound_dset7", tid7_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    did_comp = H5Dcreate2(gid, "Compound_dset7", tid7_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did_comp, tid7_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp7_buf);
     if (status < 0)
     {
@@ -3904,7 +3932,7 @@ static int test_comp_vlen_strings(const char *fname1)
     H5Dclose(did_comp);
 
     /* Write data to compound 8 dataset buffer */
-    did_comp = H5Dcreate2(fid1, "Compound_dset8", tid8_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    did_comp = H5Dcreate2(gid, "Compound_dset8", tid8_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did_comp, tid8_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp8_buf);
     if (status < 0)
     {
@@ -3915,12 +3943,12 @@ static int test_comp_vlen_strings(const char *fname1)
     H5Dclose(did_comp);
 
     /* Write data to compound 9 dataset buffer */
-    did_comp = H5Dcreate2(fid1, "Compound_dset9", tid9_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    did_comp = H5Dcreate2(gid, "Compound_dset9", tid9_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* obj references */
-    status=H5Rcreate(&(comp9_buf.objref1),fid1,"/Compound_dset2",H5R_OBJECT,-1);
-    status=H5Rcreate(&(comp9_buf.objref2),fid1,"/Compound_dset3",H5R_OBJECT,-1);
-    status=H5Rcreate(&(comp9_buf.objref3),fid1,"/Compound_dset4",H5R_OBJECT,-1);
+    status=H5Rcreate(&(comp9_buf.objref1),gid,"Compound_dset2",H5R_OBJECT,-1);
+    status=H5Rcreate(&(comp9_buf.objref2),gid,"Compound_dset3",H5R_OBJECT,-1);
+    status=H5Rcreate(&(comp9_buf.objref3),gid,"Compound_dset4",H5R_OBJECT,-1);
 
     status = H5Dwrite(did_comp, tid9_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp9_buf);
     if (status < 0)
@@ -3940,6 +3968,8 @@ out:
     *-----------------------------------------------------------------------*/
     if(fid1)
         H5Fclose(fid1);
+    if(gid)
+        H5Gclose(gid);
     /* vlen string */
     if(tid_vlen_str)
         H5Tclose(tid_vlen_str);

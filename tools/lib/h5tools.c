@@ -626,11 +626,11 @@ h5tools_ncols(const char *s)
  *
  * Purpose: Recursive check for any variable length data in given type.
  *
- * Return: 
+ * Return:
  *    TRUE : type conatains any variable length data
  *    FALSE : type doesn't contain any variable length data
  *    Negative value: error occur
- * 
+ *
  * Programmer: Jonathan Kim  March 18, 2011
  *-------------------------------------------------------------------------
  */
@@ -658,7 +658,7 @@ done:
  *
  * Purpose: Recursive check for variable length string of a datatype.
  *
- * Return: 
+ * Return:
  *    TRUE : type conatains any variable length string
  *    FALSE : type doesn't contain any variable length string
  *    Negative value: error occur
@@ -848,7 +848,7 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
     }
 
     /* Calculate new prefix */
-    h5tools_str_region_prefix(&prefix, info, elmtno, ptdata, ctx->ndims, 
+    h5tools_str_region_prefix(&prefix, info, elmtno, ptdata, ctx->ndims,
             ctx->p_max_idx, ctx);
 
     /* Write new prefix to output */
@@ -2419,7 +2419,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     /* Terminate the output */
     if (ctx.cur_column) {
         fputs(OPT(info->line_suf, ""), stdout);
-        putc('\n', stdout); 
+        putc('\n', stdout);
         fputs(OPT(info->line_sep, ""), stdout);
     }
 
@@ -2527,7 +2527,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info,
         vl_data = TRUE;
     if (H5Tdetect_class(p_type, H5T_VLEN) == TRUE)
         vl_data = TRUE;
- 
+
     /*
      * Determine the strip mine size and allocate a buffer. The strip mine is
      * a hyperslab whose size is manageable.
@@ -2545,7 +2545,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info,
         }
     }
 
-    if(!sm_nbytes) 
+    if(!sm_nbytes)
         goto done;
 
     assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
@@ -4321,5 +4321,47 @@ hbool_t h5tools_is_zero(const void *_mem, size_t size)
             return FALSE;
 
     return TRUE;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_is_obj_same
+ *
+ * Purpose: Check if two given object IDs or link names point to the same object.
+ *
+ * Parameters:
+ *             hid_t loc_id1: location of the first object
+ *             char *name1:   link name of the first object.
+ *                             Use "." or NULL if loc_id1 is the object to be compared.
+ *             hid_t loc_id2: location of the second object
+ *             char *name1:   link name of the first object.
+ *                             Use "." or NULL if loc_id2 is the object to be compared.
+ *
+ * Return:  TRUE if it is the same object; FALSE otherwise.
+ *
+ * Programmer: Peter Cao
+ *             4/27/2011
+  *
+ *-------------------------------------------------------------------------
+ */
+hbool_t h5tools_is_obj_same(hid_t loc_id1, const char *name1,
+		                    hid_t loc_id2, const char *name2)
+{
+    H5O_info_t oinfo1,  oinfo2;
+    hbool_t ret_val = 0;
+
+    if ( name1 && strcmp(name1, "."))
+    	H5Oget_info_by_name(loc_id1, name1, &oinfo1, H5P_DEFAULT);
+    else
+    	H5Oget_info(loc_id1, &oinfo1);
+
+    if ( name2 && strcmp(name2, "."))
+    	H5Oget_info_by_name(loc_id2, name2, &oinfo2, H5P_DEFAULT);
+    else
+    	H5Oget_info(loc_id2, &oinfo2);
+
+    if (oinfo1.fileno == oinfo2.fileno && oinfo1.addr==oinfo2.addr)
+    	ret_val = 1;
+
+    return ret_val;
 }
 

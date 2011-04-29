@@ -23,8 +23,10 @@ file1     file2
     x           /g1/fp17       
     x           /g1/fp18       
     x           /g1/fp19       
+    x           /g1/fp19_COPY  
     x           /g1/fp2        
     x           /g1/fp20       
+    x           /g1/fp20_COPY  
     x           /g1/ld         
            x    /g2            
            x    /g2/dset1      
