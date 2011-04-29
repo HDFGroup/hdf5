@@ -42,6 +42,11 @@ FILE       *rawdatastream; /* should initialize to stdout but gcc moans about it
 int         bin_output;    /* binary output */
 int         bin_form;      /* binary form */
 int         region_output; /* region output */
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+int         packed_bits_num; /* number of packed bits to display */
+int         packed_data_offset; /* offset of packed bits to display */
+unsigned long long packed_data_mask;  /* mask in which packed bits to display */
+#endif
 
 static h5tool_format_t h5tools_dataformat = {
 0, /*raw */

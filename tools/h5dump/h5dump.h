@@ -69,6 +69,11 @@
 #define EXTERNAL_FILE   "EXTERNAL_FILE"
 #define FILLVALUE       "FILLVALUE"
 #define FILE_CONTENTS   "FILE_CONTENTS"
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+#define PACKED_BITS     "PACKED_BITS"
+#define PACKED_OFFSET   "OFFSET"
+#define PACKED_LENGTH   "LENGTH"
+#endif
 
 #define BEGIN           "{"
 #define END             "}"
