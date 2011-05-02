@@ -7096,7 +7096,8 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    external_open_twice
  *
- * Purpose:     fnord
+ * Purpose:     Test opening the same object twice, both times through an
+ *              external links.
  *
  * Return:      Success:        0
  *              Failure:        -1
