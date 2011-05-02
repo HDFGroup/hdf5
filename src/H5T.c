@@ -3594,6 +3594,11 @@ H5T_close(H5T_t *dt)
                 if(H5O_close(&dt->oloc) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close")
             } /* end if */
+            else
+                /* Free object location (i.e. "unhold" the file if appropriate)
+                 */
+                if(H5O_loc_free(&(dt->oloc)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
         } /* end if */
 
         /* Free the group hier. path since we're not calling H5T_free*/

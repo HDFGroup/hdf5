@@ -1181,9 +1181,14 @@ H5G_close(H5G_t *grp)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
 
         /* Check reference count for this object in the top file */
-        if(H5FO_top_count(grp->oloc.file, grp->oloc.addr) == 0)
+        if(H5FO_top_count(grp->oloc.file, grp->oloc.addr) == 0) {
             if(H5O_close(&(grp->oloc)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")
+        } /* end if */
+        else
+            /* Free object location (i.e. "unhold" the file if appropriate) */
+            if(H5O_loc_free(&(grp->oloc)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
 
         /* If this group is a mount point and the mount point is the last open
          * reference to the group, then attempt to close down the file hierarchy
