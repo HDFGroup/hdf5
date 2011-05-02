@@ -75,9 +75,9 @@ New Features
     Library
     -------
     - The library allows the dimension size of a dataspace to be zero.  In 
-	  the past, the library would allow this only if the maximal dimension 
-	  size was unlimited. Now there is no such restriction, but no data 
-	  can be written to this kind of dataset. (SLU - 2011/4/20)
+      the past, the library would allow this only if the maximal dimension 
+      size was unlimited. Now there is no such restriction, but no data 
+      can be written to this kind of dataset. (SLU - 2011/4/20)
     - We added two new macros, H5_VERSION_GE and H5_VERSION_LE, to let users
       compare certain version numbers with the library being used. (SLU -
       2011/4/20) 
