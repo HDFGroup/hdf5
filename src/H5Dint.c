@@ -1457,9 +1457,14 @@ H5D_close(H5D_t *dataset)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
 
         /* Check reference count for this object in the top file */
-        if(H5FO_top_count(dataset->oloc.file, dataset->oloc.addr) == 0)
+        if(H5FO_top_count(dataset->oloc.file, dataset->oloc.addr) == 0) {
             if(H5O_close(&(dataset->oloc)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to close")
+        } /* end if */
+        else
+            /* Free object location (i.e. "unhold" the file if appropriate) */
+            if(H5O_loc_free(&(dataset->oloc)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
     } /* end else */
 
    /* Release the dataset's path info */
