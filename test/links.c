@@ -6964,7 +6964,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
 
 
     /*
-     * Test 3: 3 file cycle
+     * Test 5: 3 file cycle
      */
     /* Create files */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
@@ -7015,7 +7015,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
 
 
     /*
-     * Test 3: 3 file cycle, release parent's EFC
+     * Test 6: 3 file cycle, release parent's EFC
      */
     /* Create files */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
@@ -7073,6 +7073,9 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
 
+    /* Close fapl */
+    H5Pclose(my_fapl);
+
     PASSED();
     return 0;
 
@@ -7088,6 +7091,245 @@ error:
 
     return -1;
 } /* end external_file_cache */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    external_open_twice
+ *
+ * Purpose:     fnord
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              Saturday, April 30, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_open_twice(hid_t fapl, hbool_t new_format)
+{
+    hid_t       fid1 = (-1);                    /* File ID */
+    hid_t       fid2 = (-1);                    /* File ID */
+    hid_t       oid1 = (-1);                    /* Object ID */
+    hid_t       oid2 = (-1);                    /* Object ID */
+    hid_t       type = (-1);                    /* Datatype ID */
+    hid_t       space = (-1);                   /* Dataspace ID */
+    char        filename1[NAME_BUF_SIZE];
+    char        filename2[NAME_BUF_SIZE];
+
+    if(new_format)
+        TESTING("opening object twice through elink (w/new group format)")
+    else
+        TESTING("opening object twice through elink")
+
+    /* Set up filenames */
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+
+
+    /*
+     * Test 1: Open root group twice
+     */
+    /* Create files */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create link */
+    if(H5Lcreate_external(filename2, "/", fid1, "link_to_2", H5P_DEFAULT,
+            H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Close file 2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Open the target of the external link twice */
+    if((oid1 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((oid2 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Close both objects, in the reverse opening order (necessary to duplicate
+     * bug */
+    if(H5Oclose(oid2) < 0)
+        TEST_ERROR
+    if(H5Oclose(oid1) < 0)
+        TEST_ERROR
+
+    /* Close file 1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Verify that both files are now closed */
+    if(H5F_sfile_assert_num(0) < 0)
+        TEST_ERROR
+
+
+    /*
+     * Test 2: Open group twice
+     */
+    /* Create files */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create target group */
+    if((oid1 = H5Gcreate2(fid2, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))
+            < 0)
+        TEST_ERROR
+    if(H5Gclose(oid1) < 0)
+        TEST_ERROR
+
+    /* Create link */
+    if(H5Lcreate_external(filename2, "/group", fid1, "link_to_2", H5P_DEFAULT,
+            H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Close file 2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Open the target of the external link twice */
+    if((oid1 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((oid2 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Close both objects, in the reverse opening order (necessary to duplicate
+     * bug */
+    if(H5Oclose(oid2) < 0)
+        TEST_ERROR
+    if(H5Oclose(oid1) < 0)
+        TEST_ERROR
+
+    /* Close file 1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Verify that both files are now closed */
+    if(H5F_sfile_assert_num(0) < 0)
+        TEST_ERROR
+
+
+    /*
+     * Test 3: Open dataset twice
+     */
+    /* Create files */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create target dataset */
+    if((space = H5Screate(H5S_SCALAR)) < 0)
+        TEST_ERROR
+    if((oid1 = H5Dcreate2(fid2, "dset", H5T_NATIVE_INT, space, H5P_DEFAULT,
+            H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Dclose(oid1) < 0)
+        TEST_ERROR
+    if(H5Sclose(space) < 0)
+        TEST_ERROR
+
+    /* Create link */
+    if(H5Lcreate_external(filename2, "/dset", fid1, "link_to_2", H5P_DEFAULT,
+            H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Close file 2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Open the target of the external link twice */
+    if((oid1 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((oid2 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Close both objects, in the reverse opening order (necessary to duplicate
+     * bug */
+    if(H5Oclose(oid2) < 0)
+        TEST_ERROR
+    if(H5Oclose(oid1) < 0)
+        TEST_ERROR
+
+    /* Close file 1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Verify that both files are now closed */
+    if(H5F_sfile_assert_num(0) < 0)
+        TEST_ERROR
+
+
+    /*
+     * Test 4: Open datatype twice
+     */
+    /* Create files */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create target datatype */
+    if((type = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR
+    if(H5Tcommit2(fid2, "dtype", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)
+            < 0)
+        TEST_ERROR
+    if(H5Tclose(type) < 0)
+        TEST_ERROR
+
+    /* Create link */
+    if(H5Lcreate_external(filename2, "/dtype", fid1, "link_to_2", H5P_DEFAULT,
+            H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Close file 2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Open the target of the external link twice */
+    if((oid1 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((oid2 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Close both objects, in the reverse opening order (necessary to duplicate
+     * bug */
+    if(H5Oclose(oid2) < 0)
+        TEST_ERROR
+    if(H5Oclose(oid1) < 0)
+        TEST_ERROR
+
+    /* Close file 1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Verify that both files are now closed */
+    if(H5F_sfile_assert_num(0) < 0)
+        TEST_ERROR
+
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Oclose(oid1);
+        H5Oclose(oid2);
+        H5Tclose(type);
+        H5Fclose(fid1);
+        H5Fclose(fid2);
+        H5Sclose(space);
+    } H5E_END_TRY
+
+    return -1;
+} /* end efc_open_twice */
 
 
 /*-------------------------------------------------------------------------
@@ -14409,6 +14651,7 @@ main(void)
             nerrors += external_symlink(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
         } /* end for */
 
         /* These tests assume that external links are a form of UD links,
