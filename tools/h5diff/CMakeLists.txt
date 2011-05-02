@@ -735,10 +735,10 @@ ADD_H5_TEST (h5diff_16_3 1 -v -p 0.02 ${FILE1} ${FILE1} g1/dset9 g1/dset10)
 ADD_H5_TEST (h5diff_17 1 -v ${FILE1} ${FILE2})   
 
 # 1.7 test 32-bit INFINITY
-ADD_H5_TEST (h5diff_171 0 -v ${FILE1} ${FILE1} /g1/fp19)
+ADD_H5_TEST (h5diff_171 0 -v ${FILE1} ${FILE1} /g1/fp19 /g1/fp19_COPY)
 
 # 1.7 test 64-bit INFINITY
-ADD_H5_TEST (h5diff_172 0 -v ${FILE1} ${FILE1} /g1/fp20)
+ADD_H5_TEST (h5diff_172 0 -v ${FILE1} ${FILE1} /g1/fp20 /g1/fp20_COPY)
 
 # 1.8 quiet mode 
 ADD_H5_TEST (h5diff_18 1 -q ${FILE1} ${FILE2}) 
@@ -1199,7 +1199,7 @@ ADD_H5_TEST (h5diff_484 0 -v --exclude-path "/dset3" ${EXCLUDE_FILE1_1} ${EXCLUD
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset
 # ##############################################################################
-ADD_H5_TEST (h5diff_530 0 -v  ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE})
+ADD_H5_TEST (h5diff_530 0 -v  ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group /group_copy)
 
   
 ENDIF (BUILD_TESTING)
