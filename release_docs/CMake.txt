@@ -1,5 +1,43 @@
 ************************************************************************
-* Build and Install HDF5 C/C++ Library with CMake                      *
+* Installing and Using HDF5 C/C++ Library with CMake                   *
+************************************************************************
+
+Notes: This short instruction is written for users who want to quickly install 
+       and use the HDF5 library and tools from the HDF5 binary package using
+       the CMake tools.
+       
+       1. On windows, run the HDF5 installer. Note that there is a static and
+          a dynamic dll version for HDF5. At this time, the default install
+          location is the same; Program Files\HDFGroup\HDF5\1.8.7. By default,
+          the bin folder is added to the path. If you wish to use the tools,
+          the bin\tools folder will need to be added manually.
+          
+       2. Installing both static and dynamic versions will require installation
+          in seprate folders, so that the CMake FindPackage() function will work
+          properly. Please adjust your product CMakeLists.txt file to locate
+          the correct library.
+          
+       3. When selecting a new location, the windows installer will append the 
+          HDFGroup and HDF5 folders. 
+       
+       NOTES:
+         1. Using CPack for installing and using HDF5 is under active development. 
+            While we have attempted to provide error-free files, please 
+            understand that development with CPack has not been extensively 
+            tested outside of HDF. The CMake/CPack specific files may change
+            before the next release.
+            
+         2. CMake was originally introduced to support development on Windows, 
+            however it should be usable on any system where CMake is supported. 
+            Please send us any comments on how CMake support can be improved on 
+            any system. Visit the KitWare site for more information about CMake.
+       
+       More information about using CMake can be found at the KitWare site, 
+       www.cmake.org.
+
+
+************************************************************************
+* Build and Package HDF5 C/C++ Library with CMake                      *
 ************************************************************************
 
 Notes: This short instruction is written for users who want to quickly build 
