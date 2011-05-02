@@ -30,15 +30,15 @@
 #define H5_INTERFACE_INIT_FUNC	H5FD_log_init_interface
 
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5FDprivate.h"	/* File drivers				*/
-#include "H5FDlog.h"		/* Logging file driver			*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5private.h"      /* Generic Functions */
+#include "H5Eprivate.h"     /* Error handling */
+#include "H5Fprivate.h"     /* File access */
+#include "H5FDprivate.h"    /* File drivers */
+#include "H5FDlog.h"        /* Logging file driver */
+#include "H5FLprivate.h"    /* Free Lists */
+#include "H5Iprivate.h"     /* IDs */
+#include "H5MMprivate.h"    /* Memory management */
+#include "H5Pprivate.h"     /* Property lists */
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_LOG_g = 0;
@@ -50,8 +50,12 @@ typedef struct H5FD_log_fapl_t {
     size_t buf_size;            /* Size of buffers for track flavor and number of times each byte is accessed */
 } H5FD_log_fapl_t;
 
-/* Define strings for the different file memory types */
-static const char *flavors[]={   /* These are defined in H5FDpublic.h */
+/* Define strings for the different file memory types
+ * These are defined in the H5F_mem_t enum from H5Fpublic.h
+ * Note that H5FD_MEM_NOLIST is not listed here since it has
+ * a negative value.
+ */
+static const char *flavors[]={
     "H5FD_MEM_DEFAULT",
     "H5FD_MEM_SUPER",
     "H5FD_MEM_BTREE",
