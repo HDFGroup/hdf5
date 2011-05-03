@@ -270,6 +270,9 @@
 /* Define to 1 if you have the `lstat' function. */
 #cmakedefine H5_HAVE_LSTAT @H5_HAVE_LSTAT@
 
+/* Define to 1 if you have the <memory.h> header file. */
+#cmakedefine H5_HAVE_MEMORY_H @H5_HAVE_MEMORY_H@
+
 /* Define if we have MPE support */
 #cmakedefine H5_HAVE_MPE @H5_HAVE_MPE@
 

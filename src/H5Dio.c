@@ -339,7 +339,8 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
 #ifdef H5_HAVE_PARALLEL
     /* Collective access is not permissible without a MPI based VFD */
-    if(dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPI(dataset->oloc.file))
+    if(dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE && 
+      !(H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI)))
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only")
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -543,7 +544,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* Various MPI based checks */
 #ifdef H5_HAVE_PARALLEL
-    if(IS_H5FD_MPI(dataset->oloc.file)) {
+    if H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI) {
         /* If MPI based VFD is used, no VL datatype support yet. */
         /* This is because they use the global heap in the file and we don't */
         /* support parallel access of that yet */
@@ -768,7 +769,7 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
 
 #ifdef H5_HAVE_PARALLEL
     /* Determine if the file was opened with an MPI VFD */
-    io_info->using_mpi_vfd = IS_H5FD_MPI(dset->oloc.file);
+    io_info->using_mpi_vfd = H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI);
 #endif /* H5_HAVE_PARALLEL */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

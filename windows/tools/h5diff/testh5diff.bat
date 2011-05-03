@@ -297,12 +297,12 @@ rem ############################################################################
     call :tooltest h5diff_17.txt -v %file1% %file2% 
 
     rem 1.71 test 32-bit INFINITY
-    call :testing %h5diff% -v %srcfile1% %srcfile1% /g1/fp19
-    call :tooltest h5diff_171.txt -v %file1% %file1% /g1/fp19 
+    call :testing %h5diff% -v %srcfile1% %srcfile1% /g1/fp19 /g1/fp19_COPY
+    call :tooltest h5diff_171.txt -v %file1% %file1% /g1/fp19 /g1/fp19_COPY
 
     rem 1.72 test 64-bit INFINITY
-    call :testing %h5diff% -v %srcfile1% %srcfile1% /g1/fp20
-    call :tooltest h5diff_172.txt -v %file1% %file1% /g1/fp20 
+    call :testing %h5diff% -v %srcfile1% %srcfile1% /g1/fp20 /g1/fp20_COPY
+    call :tooltest h5diff_172.txt -v %file1% %file1% /g1/fp20 /g1/fp20_COPY
 
     rem 1.8 quiet mode 
     call :testing %h5diff% -q %srcfile1% %srcfile2%
@@ -916,8 +916,8 @@ rem ############################################################################
     rem ##############################################################################
     rem # diff various multiple vlen and fixed strings in a compound type dataset
     rem ##############################################################################
-    call :testing %h5diff% -v %src_comp_vl_strs% %src_comp_vl_strs%
-    call :tooltest h5diff_530.txt -v  %comp_vl_strs% %comp_vl_strs%
+    call :testing %h5diff% -v %src_comp_vl_strs% %src_comp_vl_strs% /group /group_copy
+    call :tooltest h5diff_530.txt -v  %comp_vl_strs% %comp_vl_strs% /group /group_copy
 
 	
     rem #######################################################################

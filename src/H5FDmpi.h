@@ -73,10 +73,6 @@ typedef struct H5FD_class_mpi_t {
 
 /* Macros */
 
-/* Single macro to check for all file drivers that use MPI */
-#define IS_H5FD_MPI(file)  \
-        (IS_H5FD_MPIO(file) || IS_H5FD_MPIPOSIX(file))
-
 #ifdef H5_HAVE_PARALLEL
 /* ======== Temporary data transfer properties ======== */
 /* Definitions for memory MPI type property */

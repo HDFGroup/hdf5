@@ -111,6 +111,11 @@ $ run  earray
 $ type sys$input
 
 $ type sys$input
+-------                 Running efc             -------
+$ run  efc
+$ type sys$input
+
+$ type sys$input
 -------			Running enum     	-------
 $ run  enum
 $ type sys$input

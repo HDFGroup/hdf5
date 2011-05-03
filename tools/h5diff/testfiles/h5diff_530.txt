@@ -1,7 +1,7 @@
 
-file1     file2
+group1   group2
 ---------------------------------------
-    x      x    /              
+    x      x                   
     x      x    /Compound_dset1
     x      x    /Compound_dset2
     x      x    /Compound_dset3
@@ -12,24 +12,24 @@ file1     file2
     x      x    /Compound_dset8
     x      x    /Compound_dset9
 
-group  : </> and </>
+group  : </group> and </group_copy>
 0 differences found
-dataset: </Compound_dset1> and </Compound_dset1>
+dataset: </group/Compound_dset1> and </group_copy/Compound_dset1>
 0 differences found
-dataset: </Compound_dset2> and </Compound_dset2>
+dataset: </group/Compound_dset2> and </group_copy/Compound_dset2>
 0 differences found
-dataset: </Compound_dset3> and </Compound_dset3>
+dataset: </group/Compound_dset3> and </group_copy/Compound_dset3>
 0 differences found
-dataset: </Compound_dset4> and </Compound_dset4>
+dataset: </group/Compound_dset4> and </group_copy/Compound_dset4>
 0 differences found
-dataset: </Compound_dset5> and </Compound_dset5>
+dataset: </group/Compound_dset5> and </group_copy/Compound_dset5>
 0 differences found
-dataset: </Compound_dset6> and </Compound_dset6>
+dataset: </group/Compound_dset6> and </group_copy/Compound_dset6>
 0 differences found
-dataset: </Compound_dset7> and </Compound_dset7>
+dataset: </group/Compound_dset7> and </group_copy/Compound_dset7>
 0 differences found
-dataset: </Compound_dset8> and </Compound_dset8>
+dataset: </group/Compound_dset8> and </group_copy/Compound_dset8>
 0 differences found
-dataset: </Compound_dset9> and </Compound_dset9>
+dataset: </group/Compound_dset9> and </group_copy/Compound_dset9>
 0 differences found
 EXIT CODE: 0
