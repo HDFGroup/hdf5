@@ -433,11 +433,7 @@ TOOLTEST tchar1.ddl -r tchar.h5
 
 # test failure handling
 # Missing file name
-if test "$Have_Packed_Bits" = "yes"; then
-    TOOLTEST tnofilename-with-packed-bits.ddl
-else
-TOOLTEST tnofilename.ddl
-fi
+TOOLTEST tnofilename-with-packed-bits.ddl
 
 # rev. 2004
 
