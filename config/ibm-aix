@@ -49,7 +49,7 @@ fi
 # `--enable-debug' switch of configure.
 
 case $CC_BASENAME in
-  xlc|xlc-*|mpcc_r|mpcc_r-*)
+  xlc|xlc-*|xlc_r|xlc_r-*|mpcc_r|mpcc_r-*)
     . $srcdir/config/ibm-flags
     ;;
 
