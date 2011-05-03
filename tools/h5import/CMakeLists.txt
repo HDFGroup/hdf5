@@ -136,7 +136,7 @@ IF (BUILD_TESTING)
     # If using memchecker add tests without using scripts
     IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
-          NAME H5IMPORT-H5DUMP-${testname}
+          NAME H5IMPORT-H5DMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${testfile}"
@@ -147,9 +147,9 @@ IF (BUILD_TESTING)
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-H5DUMP-${testname} PROPERTIES DEPENDS H5IMPORT-${testname})
+      SET_TESTS_PROPERTIES (H5IMPORT-H5DMP-${testname} PROPERTIES DEPENDS H5IMPORT-${testname})
       ADD_TEST (
-          NAME H5IMPORT-H5DUMP_CMP-${testname}
+          NAME H5IMPORT-H5DMP_CMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=testfiles/${testfile}"
@@ -160,8 +160,8 @@ IF (BUILD_TESTING)
               -D "TEST_REFERENCE=${testfile}.new"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-H5DUMP_CMP-${testname} PROPERTIES DEPENDS H5IMPORT-H5DUMP-${testname})
-      SET (last_test "H5IMPORT-H5DUMP_CMP-${testname}")
+      SET_TESTS_PROPERTIES (H5IMPORT-H5DMP_CMP-${testname} PROPERTIES DEPENDS H5IMPORT-H5DMP-${testname})
+      SET (last_test "H5IMPORT-H5DMP_CMP-${testname}")
     ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_TEST testname resultcode testfile vparam srcname dstname)
 

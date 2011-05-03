@@ -2055,6 +2055,7 @@
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.cmake
 ./config/cmake/NSIS.template.in
+./config/cmake/NSIS.InstallOptions.ini.in
 ./CMakeLists.txt
 ./CTestConfig.cmake
 ./c++/CMakeLists.txt

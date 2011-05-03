@@ -581,15 +581,6 @@ IF (WIN32 AND NOT CYGWIN)
 ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
-# Option to use PACKED BITS SUPPORT
-#-----------------------------------------------------------------------------
-OPTION (HDF5_USE_H5DUMP_PACKED_BITS "Use the PACKED BITS feature in h5dump" OFF)
-SET (H5_HAVE_H5DUMP_PACKED_BITS 0)
-IF (HDF5_USE_H5DUMP_PACKED_BITS)
-  SET (H5_HAVE_H5DUMP_PACKED_BITS 1)
-ENDIF (HDF5_USE_H5DUMP_PACKED_BITS)
-
-#-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
 #-----------------------------------------------------------------------------
 ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
