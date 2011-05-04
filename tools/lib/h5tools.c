@@ -311,7 +311,7 @@ h5tools_init(void)
 
     if (!h5tools_init_g) {
         /* register the error class */
-        sprintf(lib_str, "%d.%d.%d",H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+        HDsnprintf(lib_str, sizeof(lib_str), "%d.%d.%d",H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
 
         H5TOOLS_INIT_ERROR()
 
@@ -3191,7 +3191,12 @@ h5tools_print_datatype(h5tools_str_t *buffer, const h5tool_format_t *info,
     case H5T_OPAQUE:
         h5tools_str_append(buffer, "\n");
         h5tools_str_append(buffer, "H5T_OPAQUE;\n");
-        h5tools_str_append(buffer, "OPAQUE_TAG \"%s\";\n", H5Tget_tag(type));
+        {
+           char *ttag = H5Tget_tag(type);
+           h5tools_str_append(buffer, "OPAQUE_TAG \"%s\";\n", ttag);
+           if (ttag)
+              HDfree(ttag);
+        } 
         break;
 
     case H5T_COMPOUND:
