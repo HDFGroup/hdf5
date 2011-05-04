@@ -24,8 +24,8 @@
 #                                                                               #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-if (echo "Run c examples" && \ 
-   (cd c; sh ./run-c-ex.sh) && \
+echo "Run c examples"
+if ((cd c; sh ./run-c-ex.sh) && \
    (if test -d fortran; then   
        echo "Run fortran examples" 
        cd fortran; sh ./run-fortran-ex.sh 
