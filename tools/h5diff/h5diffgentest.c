@@ -75,6 +75,8 @@
 /* attribute compre with verbose level */
 #define ATTR_VERBOSE_LEVEL_FILE1 "h5diff_attr_v_level1.h5"
 #define ATTR_VERBOSE_LEVEL_FILE2 "h5diff_attr_v_level2.h5"
+/* file containing valid/invalid enum value mix */
+#define ENUM_INVALID_VALUES "h5diff_enum_invalid_values.h5"
 
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
@@ -131,6 +133,7 @@ static int test_exclude_obj1(const char *fname1, const char *fname2);
 static int test_exclude_obj2(const char *fname1, const char *fname2);
 static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new);
 static int test_attributes_verbose_level(const char *fname1, const char *fname2);
+static int test_enums(const char *fname);
 
 /* called by test_attributes() and test_datasets() */
 static void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
@@ -196,6 +199,13 @@ int main(void)
     /* diff various multiple vlen and fixlen string types in a compound dataset */
     test_comp_vlen_strings(COMP_VL_STRS_FILE, "group", 1);
     test_comp_vlen_strings(COMP_VL_STRS_FILE, "group_copy", 0);
+
+    /* diff when invalid enum values are present.
+     * This will probably grow to involve more extensive testing of
+     * enums so it has been given its own test file and test (apart
+     * from the basic type testing).
+     */
+    test_enums(ENUM_INVALID_VALUES);
 
     return 0;
 }
@@ -4020,6 +4030,77 @@ out:
 
     return status;
 }
+
+
+/*-------------------------------------------------------------------------
+*
+* Purpose: Test diffs of enum values which may include invalid values.
+*
+* Programmer: Dana Robinson
+*
+*-------------------------------------------------------------------------*/
+
+static int
+test_enums(const char *fname)
+{
+    hid_t       fid  = -1;
+
+    hid_t       tid       = -1;
+    int         enum_val  = -1;
+
+    /* The data in the two arrays cover the following cases:
+     *   
+     *   V = valid enum value, I = invalid enum value
+     *
+     *   0:  I-I (same value)
+     *   1:  V-I
+     *   2:  I-V
+     *   3:  V-V (same value)
+     *   4:  I-I (different values)
+     *   5:  V-V (different values)
+     */
+    int         data1[6] = {9, 0, 9, 0, 8, 0};
+    int         data2[6] = {9, 9, 0, 0, 9, 1};
+
+    hsize_t     dims = 6;
+
+    herr_t      status = SUCCEED;
+
+    /*-----------------------------------------------------------------------
+     * Create the file
+     *---------------------------------------------------------------------*/
+
+    fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*-----------------------------------------------------------------------
+     * Create enum types
+     *---------------------------------------------------------------------*/
+ 
+    tid = H5Tenum_create(H5T_NATIVE_INT);
+    enum_val = 0;
+    status = H5Tenum_insert(tid, "YIN", &enum_val);
+    enum_val = 1;
+    status = H5Tenum_insert(tid, "YANG", &enum_val);
+
+    /*-----------------------------------------------------------------------
+     * Create datasets containing enum data.
+     *---------------------------------------------------------------------*/
+ 
+    status = write_dset(fid, 1, &dims, "dset1", tid, data1);
+    status = write_dset(fid, 1, &dims, "dset2", tid, data2);
+
+out:
+    /*-----------------------------------------------------------------------
+     * Close
+     *---------------------------------------------------------------------*/
+    if(fid)
+        H5Fclose(fid);
+    if(tid)
+        H5Tclose(tid);
+    
+    return status;
+}
+
 
 /*-------------------------------------------------------------------------
 * Function: write_attr_in

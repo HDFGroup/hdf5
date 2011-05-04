@@ -76,6 +76,9 @@ COMP_VL_STRS_FILE=h5diff_comp_vl_strs.h5
 ATTR_VERBOSE_LEVEL_FILE1=h5diff_attr_v_level1.h5
 ATTR_VERBOSE_LEVEL_FILE2=h5diff_attr_v_level2.h5
 
+# test enum types which may have invalid values
+ENUM_INVALID_VALUES=h5diff_enum_invalid_values.h5
+
 TESTNAME=h5diff
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
@@ -411,6 +414,15 @@ TOOLTEST h5diff_27.txt -v $FILE3 $FILE3 t1 t2
 
 # 2.8
 TOOLTEST h5diff_28.txt -v $FILE3 $FILE3 l1 l2
+
+
+# ##############################################################################
+# # Enum value tests (may become more comprehensive in the future)
+# ##############################################################################
+
+# 3.0
+TOOLTEST h5diff_30.txt -v $ENUM_INVALID_VALUES $ENUM_INVALID_VALUES dset1 dset2
+
 
 
 
