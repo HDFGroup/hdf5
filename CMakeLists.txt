@@ -516,7 +516,6 @@ ENDIF (HDF5_ENABLE_Z_LIB_SUPPORT)
 #-----------------------------------------------------------------------------
 # Option for SzLib support
 #-----------------------------------------------------------------------------
-SET (CMAKE_MODULE_PATH ${HDF5_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
 OPTION (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" OFF)
 IF (HDF5_ENABLE_SZIP_SUPPORT)
   OPTION (HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding" OFF)
@@ -580,15 +579,6 @@ IF (WIN32 AND NOT CYGWIN)
     ENDIF (H5_HAVE_IOEO)
   ENDIF (HDF5_ENABLE_THREADSAFE)
 ENDIF (WIN32 AND NOT CYGWIN)
-
-#-----------------------------------------------------------------------------
-# Option to use PACKED BITS SUPPORT
-#-----------------------------------------------------------------------------
-OPTION (HDF5_USE_H5DUMP_PACKED_BITS "Use the PACKED BITS feature in h5dump" OFF)
-SET (H5_HAVE_H5DUMP_PACKED_BITS 0)
-IF (HDF5_USE_H5DUMP_PACKED_BITS)
-  SET (H5_HAVE_H5DUMP_PACKED_BITS 1)
-ENDIF (HDF5_USE_H5DUMP_PACKED_BITS)
 
 #-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
@@ -737,12 +727,40 @@ ENDIF (NOT HDF5_INSTALL_NO_DEVELOPMENT)
 #-----------------------------------------------------------------------------
 IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   IF (HDF5_PACKAGE_EXTLIBS)
+    IF (WIN32 AND BUILD_SHARED_LIBS)
+      SET (HDF5_INSTALL_EXTLIB_DIR ${HDF5_INSTALL_BIN_DIR})
+    ELSE (WIN32 AND BUILD_SHARED_LIBS)
+      SET (HDF5_INSTALL_EXTLIB_DIR ${HDF5_INSTALL_LIB_DIR})
+    ENDIF (WIN32 AND BUILD_SHARED_LIBS)
     IF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
       INSTALL (
           FILES ${ZLIB_INCLUDE_DIR}/zlib.h
           DESTINATION ${HDF5_INSTALL_INCLUDE_DIR}
           COMPONENT headers
       )
+      GET_PROPERTY (ZLIB_LIB TARGET ${ZLIB_LIBRARY} PROPERTY LOCATION_${BLDTYPE})
+      INSTALL(
+          FILES ${ZLIB_LIB}
+          DESTINATION ${HDF5_INSTALL_EXTLIB_DIR}
+          COMPONENT libraries
+      )
+      IF (BUILD_SHARED_LIBS)
+        IF (WIN32)
+          GET_PROPERTY (ZLIB_IMPLIB TARGET ${ZLIB_LIBRARY} PROPERTY IMPORTLIBRARY_${BLDTYPE})
+          INSTALL(
+              FILES ${ZLIB_IMPLIB}
+              DESTINATION ${HDF5_INSTALL_LIB_DIR}
+              COMPONENT libraries
+          )
+        ELSE (WIN32)
+          GET_PROPERTY (ZLIB_SOVERSION TARGET ${ZLIB_LIBRARY} PROPERTY SOVERSION)
+          INSTALL(
+              FILES ${ZLIB_LIB}.${ZLIB_SOVERSION}
+              DESTINATION ${HDF5_INSTALL_LIB_DIR}
+              COMPONENT libraries
+          )
+        ENDIF (WIN32)
+      ENDIF (BUILD_SHARED_LIBS)
     ENDIF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
     IF (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
       INSTALL (
@@ -750,24 +768,35 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
           DESTINATION ${HDF5_INSTALL_INCLUDE_DIR}
           COMPONENT headers
       )
+      GET_PROPERTY (SZIP_LIB TARGET ${SZIP_LIBRARY} PROPERTY LOCATION_${BLDTYPE})
+      INSTALL(
+          FILES ${SZIP_LIB}
+          DESTINATION ${HDF5_INSTALL_EXTLIB_DIR}
+          COMPONENT libraries
+      )
+      IF (BUILD_SHARED_LIBS)
+        IF (WIN32)
+          GET_PROPERTY (SZIP_IMPLIB TARGET ${SZIP_LIBRARY} PROPERTY IMPORTLIBRARY_${BLDTYPE})
+          INSTALL(
+              FILES ${SZIP_IMPLIB}
+              DESTINATION ${HDF5_INSTALL_LIB_DIR}
+              COMPONENT libraries
+          )
+        ELSE (WIN32)
+          GET_PROPERTY (SZIP_SOVERSION TARGET ${SZIP_LIBRARY} PROPERTY SOVERSION)
+          INSTALL(
+              FILES ${SZIP_LIB}.${SZIP_SOVERSION}
+              DESTINATION ${HDF5_INSTALL_LIB_DIR}
+              COMPONENT libraries
+          )
+        ENDIF (WIN32)
+      ENDIF (BUILD_SHARED_LIBS)
     ENDIF (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
     INSTALL (
         FILES ${EXTERNAL_HEADER_LIST}
         DESTINATION ${HDF5_INSTALL_INCLUDE_DIR}
         COMPONENT headers
     )
-    INSTALL(
-        FILES ${EXTERNAL_LIBRARY_LIST}
-        DESTINATION ${HDF5_INSTALL_LIB_DIR}
-        COMPONENT libraries
-    )
-    IF (WIN32 AND BUILD_SHARED_LIBS)
-      INSTALL(
-          FILES ${EXTERNAL_LIBRARYDLL_LIST}
-          DESTINATION ${HDF5_INSTALL_BIN_DIR}
-          COMPONENT libraries
-      )
-    ENDIF (WIN32 AND BUILD_SHARED_LIBS)
   ENDIF (HDF5_PACKAGE_EXTLIBS)
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 
@@ -900,8 +929,6 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
     SET (CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/release_docs/RELEASE.txt")
   ENDIF (EXISTS "${HDF5_SOURCE_DIR}/release_docs")
   SET (CPACK_PACKAGE_RELOCATABLE TRUE)
-  #only needed for cmake 2.8.3
-  SET (CPACK_MONOLITHIC_INSTALL 1)  
   IF (WIN32)
     SET (CPACK_NSIS_CONTACT "help@hdfgroup.org")
     SET (CPACK_NSIS_MODIFY_PATH ON)

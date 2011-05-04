@@ -119,7 +119,7 @@ IF (BUILD_TESTING)
         SET_TESTS_PROPERTIES (H5JAM-CHECKFILE-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       ENDIF (NOT "${last_test}" STREQUAL "")
       ADD_TEST (
-          NAME H5JAM-CHECKFILE-H5DUMP-${testname}
+          NAME H5JAM-CHECKFILE-H5DMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=testfiles/${expected}"
@@ -130,9 +130,9 @@ IF (BUILD_TESTING)
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5JAM-CHECKFILE-H5DUMP-${testname} PROPERTIES DEPENDS H5JAM-CHECKFILE-${testname}-clear-objects)
+      SET_TESTS_PROPERTIES (H5JAM-CHECKFILE-H5DMP-${testname} PROPERTIES DEPENDS H5JAM-CHECKFILE-${testname}-clear-objects)
       ADD_TEST (
-          NAME H5JAM-CHECKFILE-H5DUMP_CMP-${testname}
+          NAME H5JAM-CHECKFILE-H5DMP_CMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${actual}"
@@ -143,8 +143,8 @@ IF (BUILD_TESTING)
               -D "TEST_REFERENCE=${expected}.new"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5JAM-CHECKFILE-H5DUMP_CMP-${testname} PROPERTIES DEPENDS H5JAM-CHECKFILE-H5DUMP-${testname})
-      SET (last_test "H5JAM-CHECKFILE-H5DUMP_CMP-${testname}")
+      SET_TESTS_PROPERTIES (H5JAM-CHECKFILE-H5DMP_CMP-${testname} PROPERTIES DEPENDS H5JAM-CHECKFILE-H5DMP-${testname})
+      SET (last_test "H5JAM-CHECKFILE-H5DMP_CMP-${testname}")
     ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO(CHECKFILE testname expected actual)
 

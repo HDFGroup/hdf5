@@ -131,10 +131,10 @@ IF (BUILD_TESTING)
   MACRO (ADD_H5LS_TEST file filetest)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME H5COPY-H5LS_${file}-${filetest} COMMAND $<TARGET_FILE:h5ls> -Svr ./testfiles/${file}.out.h5)
+      ADD_TEST (NAME H5COPY-h5ls_${file}-${filetest} COMMAND $<TARGET_FILE:h5ls> -Svr ./testfiles/${file}.out.h5)
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
-          NAME H5COPY-H5LS_${file}-${filetest}
+          NAME H5COPY-h5ls_${file}-${filetest}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=-Svr;./testfiles/${file}.out.h5"
@@ -147,9 +147,9 @@ IF (BUILD_TESTING)
       )
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
     IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5COPY-H5LS_${file}-${filetest} PROPERTIES DEPENDS ${last_test})
+      SET_TESTS_PROPERTIES (H5COPY-h5ls_${file}-${filetest} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5COPY-H5LS_${file}-${filetest}")
+    SET (last_test "H5COPY-h5ls_${file}-${filetest}")
   ENDMACRO (ADD_H5LS_TEST)
 
   #
