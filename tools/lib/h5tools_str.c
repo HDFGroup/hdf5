@@ -671,8 +671,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
-        snprintf(fmt_llong, sizeof(fmt_llong), "%%%sd", H5_PRINTF_LL_WIDTH);
-        snprintf(fmt_ullong, sizeof(fmt_ullong), "%%%su", H5_PRINTF_LL_WIDTH);
+        HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%%sd", H5_PRINTF_LL_WIDTH);
+        HDsnprintf(fmt_ullong, sizeof(fmt_ullong), "%%%su", H5_PRINTF_LL_WIDTH);
     }
 
     /* Append value depending on data type */
@@ -1254,7 +1254,7 @@ h5tools_escape(char *s/*in,out*/, size_t size)
             break;
         default:
             if (!isprint(s[i])) {
-                snprintf(octal, sizeof(octal), "\\%03o", (unsigned char) s[i]);
+                HDsnprintf(octal, sizeof(octal), "\\%03o", (unsigned char) s[i]);
                 escape = octal;
             }
             else {
