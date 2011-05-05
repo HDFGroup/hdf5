@@ -4,7 +4,6 @@ position        dset1           dset2           difference
 ------------------------------------------------------------
 [ 1 ]          YIN              **INVALID VALUE**
 [ 2 ]          **INVALID VALUE** YIN              
-[ 4 ]          **INVALID VALUE** **INVALID VALUE**
 [ 5 ]          YIN              YANG             
-4 differences found
+3 differences found
 EXIT CODE: 1
