@@ -1,0 +1,12 @@
+HDF5 avoid_truncate feature branch
+
+This branch was created by Mike McGreevy on March 24, 2011. As far as he is
+aware, he is the only person working on this branch.
+
+This branch is being used to develop a feature to allow the library to avoid
+truncating an HDF5 file upon file close, an operation which has shown to have
+significant performance penalties in many-process parallel applications.
+
+This branch is off of the trunk. At this time, none of the changes in this
+branch are scheduled for merge with the 1.8.x release series, since the
+core avoid_truncate feature requires a file format change.

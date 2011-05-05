@@ -23,6 +23,7 @@
 ./.autom4te.cfg             		_DO_NOT_DISTRIBUTE_
 ./.h5chkright.ini			_DO_NOT_DISTRIBUTE_
 ./ACKNOWLEDGMENTS
+./BRANCH.txt                _DO_NOT_DISTRIBUTE_
 ./COPYING
 ./MANIFEST
 ./Makefile.dist
@@ -678,6 +679,7 @@
 ./src/H5Odrvinfo.c
 ./src/H5Odtype.c
 ./src/H5Oefl.c
+./src/H5Oeoa.c
 ./src/H5Ofill.c
 ./src/H5Ofsinfo.c
 ./src/H5Oginfo.c
@@ -928,6 +930,7 @@
 ./test/tmisc.c
 ./test/tmtimen.h5
 ./test/tmtimeo.h5
+./test/trunc_detect.c
 ./test/ttime.c
 ./test/trefer.c
 ./test/trefstr.c
@@ -1111,11 +1114,14 @@
 ./tools/misc/Makefile.in
 ./tools/misc/h5cc.in
 ./tools/misc/h5debug.c
+./tools/misc/h5extend.c
+./tools/misc/h5extend_gentest.c
 ./tools/misc/h5mkgrp.c
 ./tools/misc/h5redeploy.in
 ./tools/misc/h5repart.c
 ./tools/misc/h5repart_gentest.c
 ./tools/misc/repart_test.c
+./tools/misc/testh5extend.sh.in
 ./tools/misc/testh5mkgrp.sh
 ./tools/misc/testh5repart.sh.in
 ./tools/misc/talign.c
@@ -1772,6 +1778,13 @@
 ./tools/testfiles/h5mkgrp_single_latest.ls
 ./tools/testfiles/h5mkgrp_version.ls
 
+#test files for h5extend
+./tools/testfiles/h5extend_exp3.ddl
+./tools/testfiles/h5extend_exp4.ddl
+./tools/testfiles/h5extend_exp1.ddl
+./tools/testfiles/h5extend_exp5.ddl
+./tools/testfiles/h5extend_tfile.h5
+./tools/testfiles/h5extend_exp2.ddl
 
 # high level libraries
 ./hl/COPYING
