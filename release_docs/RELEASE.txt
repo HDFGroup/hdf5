@@ -525,13 +525,19 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5diff to compare file itself correctly. Previously h5diff
+          reported either different or not compatible in certain cases even
+          comparing file itself. This fix also improve performance when
+          comparing same target objects through verifying the obj&file
+          addresses before comparing the details in the objects (ex: datasets
+          or attributes) Bug #HDFFV-5928  (XCAO & JKM 05/06/2011)
         - Updated h5dump test case script to prevent entire test failure upon 
           source directory is read-only. Bug# HDFFV-4342 (JKM 2011/4/12)
         - Fixed h5dump displaying incorrect values for H5T_STD_I8BE type data in
-      attribute on Big-Endian machine. H5T_STD_I8BE is unsigned 8bit type,
-      so h5dump is supposed to display -2 instead of 254. It worked correctly
-      on Little-Endian system , but not on Big-Endian system.  Bug #HDFFV-4358
-      (JKM 04/08/2011)
+          attribute on Big-Endian machine. H5T_STD_I8BE is unsigned 8bit type,
+          so h5dump is supposed to display -2 instead of 254. It worked 
+          correctly on Little-Endian system , but not on Big-Endian system.  
+          Bug #HDFFV-4358 (JKM 04/08/2011)
         - Updated to unify option name to '--enable-error-stack' for printing 
           HDF5 error stack messages for HDF5 tools. h5ls and h5dump for now.
           For h5ls, this replaces "-e/--errors" option, which is deprecated. 

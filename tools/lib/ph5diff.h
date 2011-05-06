@@ -36,12 +36,12 @@ H5TOOLS_DLLVAR char    outBuff[];
 H5TOOLS_DLLVAR int	outBuffOffset;
 H5TOOLS_DLLVAR FILE *	overflow_file;
 
-struct diff_args
+struct diff_mpi_args
 {
     char	name1[256];
     char	name2[256];
-    h5trav_type_t   type;
     diff_opt_t	options;
+    diff_args_t argdata;  /* rest args */
 };
 
 struct diffs_found
