@@ -463,6 +463,22 @@ SGI Linux 2.6.32.19                        y       y         y         y
 
 Known Problems
 ==============
+* After the shared library support is fixed for some bugs, it is discovered
+  that "make prefix=XXX install" no longer work for shared libraries. It
+  still works correctly for static libraries. Therefore, if you want to
+  install the HDF5 shared libraries in location such as /usr/local/hdf5,
+  you need to specify it via the --prefix option during configure time.
+  E.g, ./configure --prefix=/usr/local/hdf5 ...
+  (AKC - 2011/05/07 HDFFV-7583)
+
+* The parallel test, t_shapesame, in testpar/, may run for a long time and may
+  get terminated by the alarm signal.  If that happens, one can increase the
+  alarm seconds (default is 1200 seconds = 20 minutes) by setting the
+  environment variable, $HDF5_ALARM_SECONDS, to a larger value such as 3600
+  which means 60 minutes = 1 hour.  Beware that the t_shapesame test may fail
+  in some systems (see the "While working on the 1.8.6 release..." problem
+  below).  If it does, it will waste more time if $HDF5_ALARM_SECONDS is set
+  to a larger value. (AKC - 2011/05/07)
 
 * The C++ and FORTRAN bindings are not currently working on FreeBSD.
   (QAK - 2011/04/26)
