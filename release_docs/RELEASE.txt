@@ -333,6 +333,28 @@ SGI Linux 2.6.32.19                        y       y         y         y
 
 Known Problems
 ==============
+* After the shared library support is fixed for some bugs, it is discovered
+  that "make prefix=XXX install" no longer work for shared libraries. It
+  still works correctly for static libraries. Therefore, if you want to
+  install the HDF5 shared libraries in location such as /usr/local/hdf5,
+  you need to specify it via the --prefix option during configure time.
+  E.g, ./configure --prefix=/usr/local/hdf5 ...
+  (AKC - 2011/05/07 HDFFV-7583)
+
+* The parallel test, t_shapesame, in testpar/, may run for a long time and may
+  get terminated by the alarm signal.  If that happens, one can increase the
+  alarm seconds (default is 1200 seconds = 20 minutes) by setting the
+  environment variable, $HDF5_ALARM_SECONDS, to a larger value such as 3600
+  which means 60 minutes = 1 hour.  Beware that the t_shapesame test may fail
+  in some systems (see the "While working on the 1.8.6 release..." problem
+  below).  If it does, it will waste more time if $HDF5_ALARM_SECONDS is set
+  to a larger value. (AKC - 2011/05/07)
+
+* Shared Fortran libraries are not quite working on AIX. While they are
+  generated when --enable-shared is specified, the fortran and hl/fortran
+  tests fail. We are looking into the issue. HL and C++ shared libraries
+  should now be working as intended, however. (MAM - 2011/04/20)
+
 * The --with-mpe configure option does not work with Mpich2. AKC - 2011/03/10
 
 * If parallel gmake (e.g., gmake -j 4) is used, the "gmake clean" command
@@ -352,12 +374,6 @@ Known Problems
   They should be run across multiple nodes with a varying number of processes.
   These programs can be found at:
   http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
-
-* The AIX --enable-shared does not quite work. It can produce a shared library
-  but there cannot be more than one shared libraries that are interlinking with
-  each other. This means only the low-level C APIs can work. The high-level APIs 
-  will not work which is not very useful. We hope to have a solution in the next 
-  release. (AKC - 2010/10/15) ??????? 4.18.2011. sent question to albert re: has this been fixed in 1.8.7?????????????????????????
 
 * The library's test dt_arith.c showed a compiler's rounding problem on
   Cygwin when converting from unsigned long long to long double.  The 
