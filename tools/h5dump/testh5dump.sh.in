@@ -59,6 +59,9 @@ TESTING() {
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
+# Source in the output filter function definitions.
+. $srcdir/../../bin/output_filter.sh
+
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the
 # difference between the actual output and the expected output. The
@@ -71,6 +74,8 @@ TOOLTEST() {
     expect="$srcdir/../testfiles/$1"
     actual="../testfiles/`basename $1 .ddl`.out"
     actual_err="../testfiles/`basename $1 .ddl`.err"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
     shift
 
     # Run test.
@@ -82,6 +87,12 @@ TOOLTEST() {
 	  cd $srcdir/../testfiles
   	  $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
+
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
     cat $actual_err >> $actual
 
 	if [ ! -f $expect ]; then
@@ -99,7 +110,7 @@ TOOLTEST() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	 rm -f $actual $actual_err
+	 rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
 
 }
@@ -112,6 +123,8 @@ TOOLTEST1() {
     expect="$srcdir/../testfiles/$1"
     actual="../testfiles/`basename $1 .ddl`.out"
     actual_err="../testfiles/`basename $1 .ddl`.err"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
     shift
 
     # Run test.
@@ -121,6 +134,12 @@ TOOLTEST1() {
 	  cd $srcdir/../testfiles
   	  $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
+
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
     cat $actual_err >> $actual
 
 	if [ ! -f $expect ]; then
@@ -138,7 +157,7 @@ TOOLTEST1() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	 rm -f $actual $actual_err
+	 rm -f $actual $actual_err $actual_sav $actual_err_sav $actual_ext
     fi
 
 }
@@ -203,6 +222,8 @@ TOOLTEST3() {
     actual="../testfiles/`basename $1 .ddl`.out"
     actual_err="../testfiles/`basename $1 .ddl`.err"
     actual_ext="../testfiles/`basename $1 .ddl`.ext"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
     shift
 
     # Run test.
@@ -214,6 +235,12 @@ TOOLTEST3() {
       cd $srcdir/../testfiles
       $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
+
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
 
     # Extract file name, line number, version and thread IDs because they may be different
     sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
@@ -240,7 +267,7 @@ TOOLTEST3() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-     rm -f $actual $actual_err
+	 rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
 
 }

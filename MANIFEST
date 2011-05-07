@@ -64,6 +64,7 @@
 ./bin/mkdirs
 ./bin/mkinstalldirs
 ./bin/newer
+./bin/output_filter.sh
 ./bin/reconfigure      _DO_NOT_DISTRIBUTE_
 ./bin/release
 ./bin/runtest        _DO_NOT_DISTRIBUTE_
