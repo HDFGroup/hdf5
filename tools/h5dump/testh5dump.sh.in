@@ -59,6 +59,9 @@ TESTING() {
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
+# Source in the output filter function definitions.
+. $srcdir/../../bin/output_filter.sh
+
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the
 # difference between the actual output and the expected output. The
@@ -71,6 +74,8 @@ TOOLTEST() {
     expect="$srcdir/../testfiles/$1"
     actual="../testfiles/`basename $1 .ddl`.out"
     actual_err="../testfiles/`basename $1 .ddl`.err"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
     shift
 
     # Run test.
@@ -79,12 +84,18 @@ TOOLTEST() {
       echo "#############################"
       echo "Expected output for '$DUMPER $@'" 
       echo "#############################"
-    cd $srcdir/../testfiles
-      $RUNSERIAL $DUMPER_BIN $@
+	  cd $srcdir/../testfiles
+  	  $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
+
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
     cat $actual_err >> $actual
 
-  if [ ! -f $expect ]; then
+	if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
@@ -93,13 +104,13 @@ TOOLTEST() {
     else
      echo "*FAILED*"
      echo "    Expected result (*.ddl) differs from actual result (*.out)"
-   nerrors="`expr $nerrors + 1`"
-   test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+	 nerrors="`expr $nerrors + 1`"
+	 test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-   rm -f $actual $actual_err
+	 rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
 
 }
@@ -112,18 +123,26 @@ TOOLTEST1() {
     expect="$srcdir/../testfiles/$1"
     actual="../testfiles/`basename $1 .ddl`.out"
     actual_err="../testfiles/`basename $1 .ddl`.err"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
     shift
 
     # Run test.
     TESTING $DUMPER $@
     (
       
-    cd $srcdir/../testfiles
-      $RUNSERIAL $DUMPER_BIN $@
+	  cd $srcdir/../testfiles
+  	  $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
+
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
     cat $actual_err >> $actual
 
-  if [ ! -f $expect ]; then
+	if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
@@ -132,13 +151,13 @@ TOOLTEST1() {
     else
      echo "*FAILED*"
      echo "    Expected result (*.ddl) differs from actual result (*.out)"
-   nerrors="`expr $nerrors + 1`"
-   test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+	 nerrors="`expr $nerrors + 1`"
+	 test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-   rm -f $actual $actual_err
+	 rm -f $actual $actual_err $actual_sav $actual_err_sav $actual_ext
     fi
 
 }
@@ -203,6 +222,8 @@ TOOLTEST3() {
     actual="../testfiles/`basename $1 .ddl`.out"
     actual_err="../testfiles/`basename $1 .ddl`.err"
     actual_ext="../testfiles/`basename $1 .ddl`.ext"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
     shift
 
     # Run test.
@@ -214,6 +235,12 @@ TOOLTEST3() {
       cd $srcdir/../testfiles
       $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
+
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
 
     # Extract file name, line number, version and thread IDs because they may be different
     sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
@@ -240,15 +267,15 @@ TOOLTEST3() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-     rm -f $actual $actual_err
+	 rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
 
 }
 
 # Print a "SKIP" message
 SKIP() {
-   TESTING $DUMPER $@
-    echo  " -SKIP-"
+	 TESTING $DUMPER $@
+	  echo  " -SKIP-"
 }
   
 # Print a line-line message left justified in a field of 70 characters
@@ -265,8 +292,8 @@ DIFFTEST()
 {
     PRINT_H5DIFF  $@
     (
-  cd $srcdir/../testfiles
-  $RUNSERIAL $H5DIFF_BIN "$@" -q
+	cd $srcdir/../testfiles
+	$RUNSERIAL $H5DIFF_BIN "$@" -q
     )
     RET=$?
     if [ $RET != 0 ] ; then
@@ -298,8 +325,8 @@ IMPORTTEST()
 
     PRINT_H5IMPORT  $@
     (
-  cd $srcdir/../testfiles
-  $RUNSERIAL $H5IMPORT_BIN "$@" 
+	cd $srcdir/../testfiles
+	$RUNSERIAL $H5IMPORT_BIN "$@" 
     )
     RET=$?
     if [ $RET != 0 ] ; then
@@ -314,7 +341,7 @@ IMPORTTEST()
 
 ##############################################################################
 ##############################################################################
-###        T H E   T E S T S                                            ###
+###			  T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
 
@@ -433,7 +460,7 @@ TOOLTEST tchar1.ddl -r tchar.h5
 
 # test failure handling
 # Missing file name
-TOOLTEST tnofilename-with-packed-bits.ddl
+    TOOLTEST tnofilename-with-packed-bits.ddl
 
 # rev. 2004
 

@@ -51,6 +51,9 @@ TESTING()
     echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\012'
 }
 
+# Source in the output filter function definitions.
+. $srcdir/../../bin/output_filter.sh 
+
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Verifying".
 #
@@ -97,6 +100,7 @@ H5LSTEST()
 {
     expect="$INDIR/`basename $1 .h5`.ls"
     actual="$OUTDIR/`basename $1 .h5`.out"
+    actual_sav=${actual}-sav
 
     # Stderr is included in stdout so that the diff can detect
     # any unexpected output from that stream too.
@@ -108,6 +112,10 @@ H5LSTEST()
       $RUNSERIAL $H5LS_BIN $H5LS_ARGS $@
     ) 2>&1 |sed 's/Modified:.*/Modified:  XXXX-XX-XX XX:XX:XX XXX/' >$actual
 
+    # save actual in case it is needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    STDERR_FILTER $actual
 
    if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
@@ -124,7 +132,7 @@ H5LSTEST()
 
    # Clean up output file
    if test -z "$HDF5_NOCLEANUP"; then
-      rm -f $actual $actual_err
+      rm -f $actual $actual_sav
    fi
 }
 

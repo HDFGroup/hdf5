@@ -100,6 +100,9 @@ VERIFY_OUTPUT()
     echo "Verifying output files $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
+# Source in the output filter function definitions.
+. $srcdir/../../bin/output_filter.sh
+
 # Run a test and print PASS or *FAIL*. If h5copy can complete
 # with exit status 0, consider it pass. If a test fails then increment
 # the `nerrors' global variable.
@@ -184,6 +187,8 @@ TOOLTEST_FAIL()
     expectout="$INDIR/$1"
     actualout="$OUTDIR/$1.out"
     actualerr="$OUTDIR/$1.err"
+    actualout_sav=${actualout}-sav
+    actualerr_sav=${actualerr}-sav
     shift
     if [ "$1" = -i ]; then
       inputfile=$2
@@ -199,7 +204,13 @@ TOOLTEST_FAIL()
     #echo "#############################"
     $RUNSERIAL $H5COPY_BIN $@
     ) > $actualout 2> $actualerr
+
     RET=$?
+    # save actualout and actualerr in case they are needed later.
+    cp $actualout $actualout_sav
+    STDOUT_FILTER $actualout
+    cp $actualerr $actualerr_sav
+    STDERR_FILTER $actualerr
     if [ $RET != 0 ]; then
         echo " PASSED"
         # Verifying output text from h5copy
@@ -219,7 +230,7 @@ TOOLTEST_FAIL()
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-       rm -f $actualout $actualerr
+       rm -f $actualout $actualerr $actualout_sav $actualerr_sav
     fi
 }
 

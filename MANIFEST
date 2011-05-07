@@ -70,6 +70,7 @@
 ./bin/mkinstalldirs
 ./bin/newer
 ./bin/reconfigure      _DO_NOT_DISTRIBUTE_
+./bin/output_filter.sh
 ./bin/README        _DO_NOT_DISTRIBUTE_
 ./bin/release
 ./bin/runtest        _DO_NOT_DISTRIBUTE_
