@@ -1401,8 +1401,8 @@ h5tools_print_region_data_blocks(hid_t region_id,
     hsize_t      elmtno; /* elemnt index  */
     unsigned int region_flags; /* buffer extent flags */
     hsize_t      curr_pos;
-    int          jndx;
-    size_t       indx;
+    size_t       jndx;
+    int          indx;
     int          type_size;
     hid_t        mem_space = -1;
     void        *region_buf = NULL;
