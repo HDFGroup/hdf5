@@ -1406,7 +1406,7 @@ h5tools_print_region_data_blocks(hid_t region_id,
     int          type_size;
     hid_t        mem_space = -1;
     void        *region_buf = NULL;
-    int          blkndx;
+    hsize_t      blkndx;
     hid_t        sid1 = -1;
     int          ret_value = SUCCEED;
     h5tools_context_t ctx;
@@ -1502,7 +1502,7 @@ h5tools_print_region_data_blocks(hid_t region_id,
 
             if(FALSE == dimension_break)
                 elmtno = 0;
-        } /* end for (indx = 0; indx < numelem; indx++, region_elmtno++, ctx.cur_elmt++) */
+        } /* end for (jndx = 0; jndx < numelem; jndx++, region_elmtno++, ctx.cur_elmt++) */
 
         ctx.indent_level--;
     } /* end for (blkndx = 0; blkndx < nblocks; blkndx++) */
@@ -1745,8 +1745,8 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id,
     unsigned int region_flags; /* buffer extent flags */
     hsize_t  curr_pos;
     hsize_t  total_size[H5S_MAX_RANK];
-    size_t   indx;
-    int      jndx;
+    int      indx;
+    size_t   jndx;
     int      type_size;
     hid_t    mem_space = -1;
     void    *region_buf = NULL;
