@@ -175,10 +175,11 @@ $ type sys$input
 $ run  links
 $ type sys$input
 
-$ type sys$input
--------			Running links_env    	-------
-$ run  links_env
-$ type sys$input
+$! Skip it because it needs a script file to run
+$! type sys$input
+$!-------			Running links_env    	-------
+$! run  links_env
+$! type sys$input
 
 $ type sys$input
 -------			Running mf    	-------
