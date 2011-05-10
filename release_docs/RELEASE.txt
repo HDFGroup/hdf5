@@ -105,7 +105,12 @@ Bug Fixes since HDF5-1.8.7
 
     Tools
     -----
-    - None
+    - Fixed h5diff to compare file itself correctly. Previously h5diff
+      reported either different or not compatible in certain cases even
+      comparing file itself. This fix also improve performance when
+      comparing same target objects through verifying the obj&file
+      addresses before comparing the details in the objects (ex: datasets
+      or attributes) Bug #HDFFV-5928  (XCAO & JKM 05/06/2011)
 
     F90 API
     ------

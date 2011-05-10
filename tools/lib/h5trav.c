@@ -307,6 +307,8 @@ trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type)
     idx = info->nused++;
     info->paths[idx].path = HDstrdup(path);
     info->paths[idx].type = obj_type;
+    info->paths[idx].fileno = 0;
+    info->paths[idx].objno = HADDR_UNDEF;
 } /* end trav_info_add() */
 
 
@@ -327,9 +329,17 @@ int
 trav_info_visit_obj(const char *path, const H5O_info_t *oinfo,
     const char UNUSED *already_visited, void *udata)
 {
+    size_t idx;
+    trav_info_t *info_p;
     /* Add the object to the 'info' struct */
     /* (object types map directly to "traversal" types) */
     trav_info_add((trav_info_t *)udata, path, (h5trav_type_t)oinfo->type);
+
+    /* set object addr and fileno. These are for checking same object */
+    info_p = (trav_info_t *) udata;
+    idx = info_p->nused - 1;
+    info_p->paths[idx].objno = oinfo->addr;
+    info_p->paths[idx].fileno = oinfo->fileno;
 
     return(0);
 } /* end trav_info_visit_obj() */
@@ -656,6 +666,7 @@ trav_table_add(trav_table_t *table,
     new = table->nobjs++;
     table->objs[new].objno = oinfo ? oinfo->addr : HADDR_UNDEF;
     table->objs[new].flags[0] = table->objs[new].flags[1] = 0;
+    table->objs[new].is_same_trgobj = 0;
     table->objs[new].name = (char *)HDstrdup(path);
     table->objs[new].type = oinfo ? (h5trav_type_t)oinfo->type : H5TRAV_TYPE_LINK;
     table->objs[new].nlinks = 0;
@@ -739,6 +750,7 @@ void trav_table_addflags(unsigned *flags,
     table->objs[new].objno = 0;
     table->objs[new].flags[0] = flags[0];
     table->objs[new].flags[1] = flags[1];
+    table->objs[new].is_same_trgobj = 0;
     table->objs[new].name = (char *)HDstrdup(name);
     table->objs[new].type = type;
     table->objs[new].nlinks = 0;
