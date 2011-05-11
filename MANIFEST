@@ -1173,6 +1173,7 @@
 ./tools/testfiles/packedbits.ddl
 ./tools/testfiles/file_space.h5
 ./tools/testfiles/file_space.ddl
+./tools/testfiles/h5dump-help.txt
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl
 ./tools/testfiles/tall-3.ddl
@@ -1803,11 +1804,13 @@
 
 # test files for jam
 ./tools/h5jam/testfiles/twithub.h5
+./tools/h5jam/testfiles/twithub513.h5
+./tools/h5jam/testfiles/h5jam-help.txt
+./tools/h5jam/testfiles/h5unjam-help.txt
 ./tools/h5jam/testfiles/u10.txt
 ./tools/h5jam/testfiles/tall.h5
 ./tools/h5jam/testfiles/u511.txt
 ./tools/h5jam/testfiles/u512.txt
-./tools/h5jam/testfiles/twithub513.h5
 ./tools/h5jam/testfiles/u513.txt
 
 # test files for h5copy

@@ -216,6 +216,7 @@ IF (BUILD_TESTING)
       tvlstr.h5.xml
   )
   SET (HDF5_REFERENCE_TEST_FILES
+      h5dump-help.txt
       tbin1.ddl
       tbin1.ddl
       tbin2.ddl
@@ -475,6 +476,29 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
+  MACRO (ADD_HELP_TEST testname resultcode)
+    # If using memchecker add tests without using scripts
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (NAME H5DUMP-${testname} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5DUMP-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=h5dump-${testname}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=h5dump-${testname}.txt"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DUMP-${testname} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5DUMP-${testname}")
+  ENDMACRO (ADD_HELP_TEST)
+
   MACRO (ADD_SKIP_H5_TEST skipresultfile skipresultcode testtype)
     IF (${testtype} STREQUAL "SKIP")
       IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -616,6 +640,7 @@ IF (BUILD_TESTING)
       NAME H5DUMP-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
+          h5dump-help.out
           filter_fail.out
           filter_fail.out.err
           packedbits.out
@@ -853,6 +878,8 @@ IF (BUILD_TESTING)
     SET_TESTS_PROPERTIES (H5DUMP-clearall-objects PROPERTIES DEPENDS ${last_test})
   ENDIF (NOT "${last_test}" STREQUAL "")
   SET (last_test "H5DUMP-clearall-objects")
+
+  ADD_HELP_TEST(help 0 -h)
 
   # test for signed/unsigned datasets
   ADD_H5_TEST (packedbits 0 packedbits.h5)

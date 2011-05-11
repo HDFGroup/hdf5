@@ -390,8 +390,12 @@ h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
             p_prod[i - 1] = (max_idx[i]) * p_prod[i];
 
         for (i = 0; i < (size_t) ndims; i++) {
-            ctx->pos[i] = curr_pos / p_prod[i];
-            curr_pos -= p_prod[i] * ctx->pos[i];
+            if(curr_pos > 0) {
+                ctx->pos[i] = curr_pos / p_prod[i];
+                curr_pos -= p_prod[i] * ctx->pos[i];
+            }
+            else
+                ctx->pos[i] = 0;
             ctx->pos[i] += (unsigned long) ptdata[ctx->sm_pos+i];
         }
 

@@ -56,6 +56,8 @@ IF (BUILD_TESTING)
       u511.txt
       u512.txt
       u513.txt
+      h5jam-help.txt
+      h5unjam-help.txt
   )
   SET (HDF5_REFERENCE_TEST_FILES
       tall.h5
@@ -91,6 +93,37 @@ IF (BUILD_TESTING)
 ###           T H E   T E S T S  M A C R O S                               ###
 ##############################################################################
 ##############################################################################
+
+  MACRO (ADD_HELP_TEST testname resultcode)
+    # If using memchecker add tests without using scripts
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (NAME H5JAM-${testname} COMMAND $<TARGET_FILE:h5jam> ${ARGN})
+      ADD_TEST (NAME H5JAM-UNJAM-${testname} COMMAND $<TARGET_FILE:h5unjam> ${ARGN})
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5JAM-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5jam>"
+              -D "TEST_ARGS=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=jam-${testname}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=jam-${testname}.txt"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+      ADD_TEST (
+          NAME H5JAM-UNJAM-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5unjam>"
+              -D "TEST_ARGS=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=unjam-${testname}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=unjam-${testname}.txt"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (ADD_HELP_TEST)
 
   MACRO (CLEANUP testname)
     ADD_TEST (
@@ -308,6 +341,8 @@ IF (BUILD_TESTING)
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
+
+  ADD_HELP_TEST(help 0 -h)
 
   JAMTEST (tall_u10 u10.txt tall.h5 ta2.h5)
   CHECKFILE (tall_u10 tall.h5 ta2.h5)

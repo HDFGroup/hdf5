@@ -1,0 +1,7 @@
+usage: h5unjam -i h5_file -o user_block_file_out -o h5_file_out [-d | --delete]
+           Extract user block from 'h5_file' into 'user_block_file'
+           and HDF5 file into 'h5_file_out'
+       h5unjam -h
+           Print a usage message and exit
+       h5unjam -V 
+           Print HDF5 library version and exit
