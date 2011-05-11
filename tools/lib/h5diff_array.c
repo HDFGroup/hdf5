@@ -621,12 +621,43 @@ hsize_t diff_datum(void       *_mem1,
             char enum_name1[1024];
             char enum_name2[1024];
 
+            herr_t err1;
+            herr_t err2; 
+
             /* disable error reporting */
             H5E_BEGIN_TRY {
 
-                if ((H5Tenum_nameof(m_type, mem1, enum_name1, sizeof enum_name1) >= 0) &&
-                    (H5Tenum_nameof(m_type, mem2, enum_name2, sizeof enum_name2) >= 0))
+                /* If the enum value cannot be converted to a string
+                 * it is set to an error string for later output.
+                 */
+                err1 = H5Tenum_nameof(m_type, mem1, enum_name1, sizeof enum_name1);
+                if(err1 < 0)
+                    strcpy(enum_name1, "**INVALID VALUE**");
+
+                err2 = H5Tenum_nameof(m_type, mem2, enum_name2, sizeof enum_name2);
+                if(err2 < 0)
+                    strcpy(enum_name2, "**INVALID VALUE**");
+
+                if(err1 < 0 || err2 < 0)
                 {
+                    /* One or more bad enum values */
+
+                    /* If the two values cannot be converted to a string
+                     * (probably due to them being invalid enum values),
+                     * don't attempt to convert them - just report errors.
+                     */
+                    nfound += 1;
+                    if ( print_data(options) )
+                    {
+                        print_pos(ph,0,i,acc,pos,rank,dims,obj1,obj2);
+                        parallel_print(SPACES);
+                        parallel_print(S_FORMAT,enum_name1,enum_name2);
+                    }
+                }
+                else
+                {
+                    /* Both enum values were valid */
+
                     if (HDstrcmp(enum_name1,enum_name2)!=0)
                     {
                         nfound=1;

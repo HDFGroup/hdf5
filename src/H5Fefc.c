@@ -147,7 +147,7 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
     H5F_efc_t   *efc = NULL;    /* External file cache for parent file */
     H5F_efc_ent_t *ent = NULL;  /* Entry for target file in efc */
     hbool_t     open_file = FALSE; /* Whether ent->file needs to be closed in case of error */
-    H5F_t       *ret_value;     /* Return value */
+    H5F_t       *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_efc_open)
 

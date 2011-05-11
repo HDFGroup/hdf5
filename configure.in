@@ -4421,7 +4421,11 @@ case "X-$POSIX_AIO_SUPPORTED" in
   X-yes)
     AC_MSG_RESULT([yes])
     AC_DEFINE([HAVE_POSIX_AIO], [1], [Define if POSIX AIO is supported])
-    H5_CFLAGS="$H5_CFLAGS -D_POSIX_C_SOURCE=199309L"
+    case $host_os in
+      linux* )
+        H5_CFLAGS="$H5_CFLAGS -D_POSIX_C_SOURCE=199309L"
+        ;;
+    esac
     LIBS="$LIBS -lrt"
     ;;
   X-no|*)

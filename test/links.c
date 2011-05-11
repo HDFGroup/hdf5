@@ -6962,7 +6962,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
     if(H5F_sfile_assert_num(0) < 0)
         TEST_ERROR
 
-
+#ifndef H5_CANNOT_OPEN_TWICE
     /*
      * Test 5: 3 file cycle
      */
@@ -7071,7 +7071,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
     /* Verify that all files are now closed */
     if(H5F_sfile_assert_num(0) < 0)
         TEST_ERROR
-
+#endif /* H5_CANNOT_OPEN_TWICE */
 
     /* Close fapl */
     H5Pclose(my_fapl);
@@ -14652,7 +14652,9 @@ main(void)
             nerrors += external_symlink(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
+#ifndef H5_CANNOT_OPEN_TWICE
             nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
+#endif /* H5_CANNOT_OPEN_TWICE */
         } /* end for */
 
         /* These tests assume that external links are a form of UD links,

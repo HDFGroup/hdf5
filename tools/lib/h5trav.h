@@ -65,6 +65,8 @@ typedef struct symlink_trav_t {
 typedef struct trav_path_t {
     char      *path;
     h5trav_type_t type;
+    haddr_t     objno;     /* object address */
+    unsigned long 	fileno; /* File number that object is located in */
 } trav_path_t;
 
 typedef struct trav_info_t {
@@ -95,6 +97,7 @@ typedef struct trav_link_t {
 typedef struct trav_obj_t {
     haddr_t     objno;     /* object address */
     unsigned    flags[2];  /* h5diff.object is present or not in both files*/
+    hbool_t     is_same_trgobj; /* same target object? no need to compare */
     char        *name;     /* name */
     h5trav_type_t type;    /* type of object */
     trav_link_t *links;    /* array of possible link names */

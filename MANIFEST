@@ -70,6 +70,7 @@
 ./bin/mkinstalldirs
 ./bin/newer
 ./bin/reconfigure      _DO_NOT_DISTRIBUTE_
+./bin/output_filter.sh
 ./bin/README        _DO_NOT_DISTRIBUTE_
 ./bin/release
 ./bin/runtest        _DO_NOT_DISTRIBUTE_
@@ -1598,6 +1599,7 @@
 ./tools/h5diff/testfiles/h5diff_26.txt
 ./tools/h5diff/testfiles/h5diff_27.txt
 ./tools/h5diff/testfiles/h5diff_28.txt
+./tools/h5diff/testfiles/h5diff_30.txt
 ./tools/h5diff/testfiles/h5diff_50.txt
 ./tools/h5diff/testfiles/h5diff_51.txt
 ./tools/h5diff/testfiles/h5diff_52.txt
@@ -1765,6 +1767,7 @@
 ./tools/h5diff/testfiles/h5diff_comp_vl_strs.h5
 ./tools/h5diff/testfiles/h5diff_dset_zero_dim_size1.h5
 ./tools/h5diff/testfiles/h5diff_dset_zero_dim_size2.h5
+./tools/h5diff/testfiles/h5diff_enum_invalid_values.h5
 
 #test files for h5repack
 ./tools/h5repack/testfiles/h5repack_fill.h5
@@ -2057,6 +2060,7 @@
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.cmake
 ./config/cmake/NSIS.template.in
+./config/cmake/NSIS.InstallOptions.ini.in
 ./CMakeLists.txt
 ./CTestConfig.cmake
 ./c++/CMakeLists.txt

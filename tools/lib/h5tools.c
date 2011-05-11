@@ -42,11 +42,9 @@ FILE       *rawdatastream; /* should initialize to stdout but gcc moans about it
 int         bin_output;    /* binary output */
 int         bin_form;      /* binary form */
 int         region_output; /* region output */
-#ifdef H5_HAVE_H5DUMP_PACKED_BITS
 int         packed_bits_num; /* number of packed bits to display */
 int         packed_data_offset; /* offset of packed bits to display */
 unsigned long long packed_data_mask;  /* mask in which packed bits to display */
-#endif
 
 static h5tool_format_t h5tools_dataformat = {
 0, /*raw */
@@ -313,7 +311,7 @@ h5tools_init(void)
 
     if (!h5tools_init_g) {
         /* register the error class */
-        sprintf(lib_str, "%d.%d.%d",H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+        HDsnprintf(lib_str, sizeof(lib_str), "%d.%d.%d",H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
 
         H5TOOLS_INIT_ERROR()
 
@@ -3193,7 +3191,12 @@ h5tools_print_datatype(h5tools_str_t *buffer, const h5tool_format_t *info,
     case H5T_OPAQUE:
         h5tools_str_append(buffer, "\n");
         h5tools_str_append(buffer, "H5T_OPAQUE;\n");
-        h5tools_str_append(buffer, "OPAQUE_TAG \"%s\";\n", H5Tget_tag(type));
+        {
+           char *ttag = H5Tget_tag(type);
+           h5tools_str_append(buffer, "OPAQUE_TAG \"%s\";\n", ttag);
+           if (ttag)
+              HDfree(ttag);
+        } 
         break;
 
     case H5T_COMPOUND:
@@ -4349,23 +4352,23 @@ hbool_t h5tools_is_zero(const void *_mem, size_t size)
  *-------------------------------------------------------------------------
  */
 hbool_t h5tools_is_obj_same(hid_t loc_id1, const char *name1,
-		                    hid_t loc_id2, const char *name2)
+                        hid_t loc_id2, const char *name2)
 {
     H5O_info_t oinfo1,  oinfo2;
     hbool_t ret_val = 0;
 
     if ( name1 && strcmp(name1, "."))
-    	H5Oget_info_by_name(loc_id1, name1, &oinfo1, H5P_DEFAULT);
+      H5Oget_info_by_name(loc_id1, name1, &oinfo1, H5P_DEFAULT);
     else
-    	H5Oget_info(loc_id1, &oinfo1);
+      H5Oget_info(loc_id1, &oinfo1);
 
     if ( name2 && strcmp(name2, "."))
-    	H5Oget_info_by_name(loc_id2, name2, &oinfo2, H5P_DEFAULT);
+      H5Oget_info_by_name(loc_id2, name2, &oinfo2, H5P_DEFAULT);
     else
-    	H5Oget_info(loc_id2, &oinfo2);
+      H5Oget_info(loc_id2, &oinfo2);
 
     if (oinfo1.fileno == oinfo2.fileno && oinfo1.addr==oinfo2.addr)
-    	ret_val = 1;
+      ret_val = 1;
 
     return ret_val;
 }
