@@ -1,0 +1,9 @@
+usage: h5jam -u user_block_file -i h5_file [-o ofile | --clobber] 
+           Add 'user_block_file' to front of 
+           'h5_file', pad so 'h5_file' starts on proper
+           byte.
+
+       h5jam -h 
+           Print a usage message and exit
+       h5jam -V 
+           Print HDF5 library version and exit

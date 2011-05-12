@@ -716,21 +716,47 @@ static struct handler_t *
 parse_command_line(int argc, const char *argv[])
 {
     int                opt, i;
-    struct handler_t   *hand;
+    struct handler_t   *hand = NULL;
 
     /* Allocate space to hold the command line info */
-    hand = (struct handler_t *)calloc((size_t)argc, sizeof(struct handler_t));
+    if((hand = (struct handler_t *)calloc((size_t)argc, sizeof(struct handler_t)))==NULL) {
+        error_msg("unable to parse command line arguments \n");
+        goto error;
+    }
 
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());
-                leave(EXIT_SUCCESS);
+            h5tools_setstatus(EXIT_SUCCESS);
+            if (hand) {
+                for (i = 0; i < argc; i++)
+                    if(hand[i].obj) {
+                        free(hand[i].obj);
+                        hand[i].obj=NULL;
+                    }
+
+                free(hand);
+                hand = NULL;
+            }
+            goto done;
+            break;
 
             case 'V':
                 print_version(h5tools_getprogname());
-                leave(EXIT_SUCCESS);
+            h5tools_setstatus(EXIT_SUCCESS);
+            if (hand) {
+                for (i = 0; i < argc; i++)
+                    if(hand[i].obj) {
+                        free(hand[i].obj);
+                        hand[i].obj=NULL;
+                    }
+
+                free(hand);
+                hand = NULL;
+            }
+            goto done;
                 break;
 
             case 'F':
@@ -784,7 +810,8 @@ parse_command_line(int argc, const char *argv[])
 
             default:
                 usage(h5tools_getprogname());
-                leave(EXIT_FAILURE);
+            h5tools_setstatus(EXIT_FAILURE);
+            goto error;
         } /* end switch */
     } /* end while */
 
@@ -792,11 +819,28 @@ parse_command_line(int argc, const char *argv[])
     if (argc <= opt_ind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
-        leave(EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto error;
     } /* end if */
 
+done:
     return hand;
-} /* parse_command_line() */
+
+error:
+    if (hand) {
+        for (i = 0; i < argc; i++)
+            if(hand[i].obj) {
+                free(hand[i].obj);
+                hand[i].obj=NULL;
+            }
+
+        free(hand);
+        hand = NULL;
+    }
+    h5tools_setstatus(EXIT_FAILURE);
+
+    return hand;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1326,9 +1370,10 @@ main(int argc, const char *argv[])
     iter_t          	iter;
     const char     	*fname = NULL;
     hid_t           	fid;
-    hid_t             	fcpl;   /* file creation property id */
-    struct handler_t   *hand;
+    hid_t               fcpl;
+    struct handler_t   *hand = NULL;
     H5F_info_t      	finfo;
+    int                 i;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -1338,11 +1383,9 @@ main(int argc, const char *argv[])
 
     /* Initialize h5tools lib */
     h5tools_init();
-    hand = parse_command_line (argc, argv);
-    if(!hand) {
-        error_msg("unable to parse command line arguments \n");
-        leave(EXIT_FAILURE);
-    } /* end if */
+    if((hand = parse_command_line(argc, argv))==NULL) {
+        goto done;
+    }
 
     fname = argv[opt_ind];
 
@@ -1351,7 +1394,8 @@ main(int argc, const char *argv[])
     fid = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT);
     if(fid < 0) {
         error_msg("unable to open file \"%s\"\n", fname);
-        leave(EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     } /* end if */
 
     /* Initialize iter structure */
@@ -1359,12 +1403,12 @@ main(int argc, const char *argv[])
 
     /* Get storge info for SOHM's btree/list/heap and superblock extension */
     if(H5Fget_info(fid, &finfo) < 0)
-	warn_msg("Unable to retrieve SOHM info\n");
+		warn_msg("Unable to retrieve SOHM info\n");
     else {
-	iter.super_ext_size = finfo.super_ext_size;
-	iter.SM_hdr_storage_size = finfo.sohm.hdr_size;
-	iter.SM_index_storage_size = finfo.sohm.msgs_info.index_size;
-	iter.SM_heap_storage_size = finfo.sohm.msgs_info.heap_size;
+		iter.super_ext_size = finfo.super_ext_size;
+		iter.SM_hdr_storage_size = finfo.sohm.hdr_size;
+		iter.SM_index_storage_size = finfo.sohm.msgs_info.index_size;
+		iter.SM_heap_storage_size = finfo.sohm.msgs_info.heap_size;
     } /* end else */
 
     if((fcpl = H5Fget_create_plist(fid)) < 0)
@@ -1393,13 +1437,23 @@ main(int argc, const char *argv[])
 	    print_statistics("/", &iter);
     } /* end else */
 
-    if (hand) free(hand);
+done:
+    if(hand) {
+        for (i = 0; i < argc; i++)
+            if(hand[i].obj) {
+                free(hand[i].obj);
+                hand[i].obj=NULL;
+            }
+
+        free(hand);
+        hand = NULL;
 
     if(H5Fclose(fid) < 0) {
         error_msg("unable to close file \"%s\"\n", fname);
-        leave(EXIT_FAILURE);
+            h5tools_setstatus(EXIT_FAILURE);
+        }
     }
 
-    leave(EXIT_SUCCESS);
-} /* main() */
+    leave(h5tools_getstatus());
+}
 

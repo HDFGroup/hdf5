@@ -4635,7 +4635,6 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
     if((hand = parse_command_line(argc, argv))==NULL) {
-        h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
@@ -4844,13 +4843,16 @@ main(int argc, const char *argv[])
     /* Free tables for objects */
     table_list_free();
 
+    if(hand) 
+        free_handler(hand, argc);
+
+    if(fid >=0)
     if (H5Fclose(fid) < 0)
         h5tools_setstatus(EXIT_FAILURE);
 
-    if(hand)
-        free_handler(hand, argc);
-
+    if(prefix)
     HDfree(prefix);
+    if(fname)
     HDfree(fname);
 
     /* To Do:  clean up XML table */
