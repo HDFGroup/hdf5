@@ -106,9 +106,9 @@ IF (BUILD_TESTING)
               -D "TEST_PROGRAM=$<TARGET_FILE:h5jam>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=jam-${testname}.out"
+              -D "TEST_OUTPUT=h5jam-${testname}.out"
               -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=jam-${testname}.txt"
+              -D "TEST_REFERENCE=h5jam-${testname}.txt"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
       ADD_TEST (
@@ -117,9 +117,9 @@ IF (BUILD_TESTING)
               -D "TEST_PROGRAM=$<TARGET_FILE:h5unjam>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=unjam-${testname}.out"
+              -D "TEST_OUTPUT=h5unjam-${testname}.out"
               -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=unjam-${testname}.txt"
+              -D "TEST_REFERENCE=h5unjam-${testname}.txt"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
