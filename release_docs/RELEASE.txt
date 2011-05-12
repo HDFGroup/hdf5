@@ -525,6 +525,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5dump to display correct value for H5T_STD_I8LE dataset
+          on a system (ppc64, linux, Big-Endian, clustering). 
+          Bug #HDFFV-7594  (ABERT & JKM 05/12/2011)
         - Fixed h5diff to compare file itself correctly. Previously h5diff
           reported either different or not compatible in certain cases even
           comparing file itself. This fix also improve performance when
