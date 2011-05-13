@@ -814,7 +814,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
     }
     else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-        char               tempchar;
+        signed char        tempchar;
         HDmemcpy(&tempchar, cp_vp, sizeof(char));
         if(packed_bits_num) {
             tempchar = (tempchar >> packed_data_offset) & packed_data_mask;
