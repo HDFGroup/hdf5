@@ -879,6 +879,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   IF (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
     SET (release_files
         ${HDF5_SOURCE_DIR}/release_docs/CMake.txt
+        ${HDF5_SOURCE_DIR}/release_docs/Using_CMake.txt
         ${HDF5_SOURCE_DIR}/release_docs/COPYING
         ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_9.txt
         ${HDF5_SOURCE_DIR}/release_docs/INSTALL
@@ -899,7 +900,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
     IF (HDF5_ENABLE_PARALLEL)
       SET (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_parallel.txt
+          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_parallel
       )
     ENDIF (HDF5_ENABLE_PARALLEL)
     INSTALL (
