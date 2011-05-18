@@ -103,7 +103,6 @@ SET (HDF5_REFERENCE_TEST_FILES
     tlayouto.h5
     tmtimen.h5
     tmtimeo.h5
-    vms_data.h5
 )
 
 FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
