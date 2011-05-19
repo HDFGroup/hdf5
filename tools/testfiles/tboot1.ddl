@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -H -B -d dset tfcontents1.h5'
-#############################
 HDF5 "tfcontents1.h5" {
 SUPER_BLOCK {
    SUPERBLOCK_VERSION 0

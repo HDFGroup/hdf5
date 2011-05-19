@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -d /DS16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5'
-#############################
 HDF5 "packedbits.h5" {
 DATASET "/DS16BITS" {
    DATATYPE  H5T_STD_I16LE

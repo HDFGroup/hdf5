@@ -81,56 +81,6 @@ TOOLTEST() {
     # Run test.
     TESTING $DUMPER $@
     (
-      echo "#############################"
-      echo "Expected output for '$DUMPER $@'" 
-      echo "#############################"
-	  cd $srcdir/../testfiles
-  	  $RUNSERIAL $DUMPER_BIN $@
-    ) >$actual 2>$actual_err
-
-    # save actual and actual_err in case they are needed later.
-    cp $actual $actual_sav
-    STDOUT_FILTER $actual
-    cp $actual_err $actual_err_sav
-    STDERR_FILTER $actual_err
-    cat $actual_err >> $actual
-
-	if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
-     echo " CREATED"
-     cp $actual $expect
-    elif $CMP $expect $actual; then
-     echo " PASSED"
-    else
-     echo "*FAILED*"
-     echo "    Expected result (*.ddl) differs from actual result (*.out)"
-	 nerrors="`expr $nerrors + 1`"
-	 test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
-    fi
-
-    # Clean up output file
-    if test -z "$HDF5_NOCLEANUP"; then
-	 rm -f $actual $actual_err $actual_sav $actual_err_sav
-    fi
-
-}
-
-
-# same as TOOLTEST but does not print the header Expected output
-# used for the binary tests that expect a full path in -o
-TOOLTEST1() {
-
-    expect="$srcdir/../testfiles/$1"
-    actual="../testfiles/`basename $1 .ddl`.out"
-    actual_err="../testfiles/`basename $1 .ddl`.err"
-    actual_sav=${actual}-sav
-    actual_err_sav=${actual_err}-sav
-    shift
-
-    # Run test.
-    TESTING $DUMPER $@
-    (
-      
 	  cd $srcdir/../testfiles
   	  $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
@@ -161,6 +111,7 @@ TOOLTEST1() {
     fi
 
 }
+
 
 # same as TOOLTEST1 but compares generated file to expected output
 #                   and compares the generated data file to the expected data file
@@ -229,9 +180,6 @@ TOOLTEST3() {
     # Run test.
     TESTING $DUMPER $@
     (
-      echo "#############################"
-      echo "Expected output for '$DUMPER $@'" 
-      echo "#############################"
       cd $srcdir/../testfiles
       $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
@@ -515,10 +463,10 @@ TOOLTEST tindicessub3.ddl -d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2  -k 1,2,2  taindices.
 TOOLTEST tindicessub4.ddl -d 4d -s 0,0,1,2  -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2  taindices.h5
 
 #Exceed the dimensions for subsetting
-TOOLTEST1 texceedsubstart.ddl -d 1d -s 1,3 taindices.h5
-TOOLTEST1 texceedsubcount.ddl -d 1d -c 1,3 taindices.h5
-TOOLTEST1 texceedsubstride.ddl -d 1d -S 1,3 taindices.h5
-TOOLTEST1 texceedsubblock.ddl -d 1d -k 1,3 taindices.h5
+TOOLTEST texceedsubstart.ddl -d 1d -s 1,3 taindices.h5
+TOOLTEST texceedsubcount.ddl -d 1d -c 1,3 taindices.h5
+TOOLTEST texceedsubstride.ddl -d 1d -S 1,3 taindices.h5
+TOOLTEST texceedsubblock.ddl -d 1d -k 1,3 taindices.h5
 
 
 # tests for filters
@@ -599,21 +547,21 @@ TOOLTEST zerodim.ddl zerodim.h5
 TOOLTEST tvms.ddl tvms.h5
 
 # test for binary output
-TOOLTEST1   tbin1.ddl -d integer -o $TESTDIR/out1.bin -b LE    tbinary.h5
+TOOLTEST   tbin1.ddl -d integer -o $TESTDIR/out1.bin -b LE    tbinary.h5
 
 # NATIVE default. the NATIVE test can be validated with h5import/h5diff
-TOOLTEST1   tbin1.ddl -d integer -o $TESTDIR/out1.bin  -b      tbinary.h5
+TOOLTEST   tbin1.ddl -d integer -o $TESTDIR/out1.bin  -b      tbinary.h5
 IMPORTTEST $TESTDIR/out1.bin -c out3.h5import -o $TESTDIR/out1.h5
 DIFFTEST   tbinary.h5 $TESTDIR/out1.h5 /integer /integer
 
-TOOLTEST1   tbin2.ddl -b BE -d float  -o $TESTDIR/out2.bin      tbinary.h5
+TOOLTEST   tbin2.ddl -b BE -d float  -o $TESTDIR/out2.bin      tbinary.h5
 
 # the NATIVE test can be validated with h5import/h5diff
-TOOLTEST1   tbin3.ddl -d integer -o $TESTDIR/out3.bin -b NATIVE tbinary.h5
+TOOLTEST   tbin3.ddl -d integer -o $TESTDIR/out3.bin -b NATIVE tbinary.h5
 IMPORTTEST $TESTDIR/out3.bin -c out3.h5import -o $TESTDIR/out3.h5
 DIFFTEST   tbinary.h5 $TESTDIR/out3.h5 /integer /integer
 
-TOOLTEST1   tbin4.ddl -d double  -b FILE -o $TESTDIR/out4.bin    tbinary.h5
+TOOLTEST   tbin4.ddl -d double  -b FILE -o $TESTDIR/out4.bin    tbinary.h5
    
 # Clean up binary output files
 if test -z "$HDF5_NOCLEANUP"; then
@@ -663,7 +611,7 @@ TOOLTEST textlink.ddl textlink.h5
 TOOLTEST3 filter_fail.ddl --enable-error-stack filter_fail.h5
 
 # test for -o -y for dataset with attributes
-TOOLTEST1 tall-6.ddl -y -o $TESTDIR/data -d /g1/g1.1/dset1.1.1 tall.h5
+TOOLTEST tall-6.ddl -y -o $TESTDIR/data -d /g1/g1.1/dset1.1.1 tall.h5
 
 # test for dataset packed bits 
 # Limits:

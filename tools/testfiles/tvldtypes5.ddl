@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tvldtypes5.h5'
-#############################
 HDF5 "tvldtypes5.h5" {
 GROUP "/" {
    DATASET "Dataset" {

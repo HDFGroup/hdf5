@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -q creation_order tordergr.h5'
-#############################
 HDF5 "tordergr.h5" {
 GROUP "/" {
    GROUP "2" {

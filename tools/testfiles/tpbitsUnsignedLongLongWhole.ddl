@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -d /DU64BITS -M 0,64 packedbits.h5'
-#############################
 HDF5 "packedbits.h5" {
 DATASET "/DU64BITS" {
    DATATYPE  H5T_STD_U64LE

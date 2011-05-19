@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net tempty.h5'
-#############################
 <?xml version="1.0" encoding="UTF-8"?>
 <HDF5-File xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://somewhere.net">
 <RootGroup OBJ-XID="xid_928" H5Path="/">

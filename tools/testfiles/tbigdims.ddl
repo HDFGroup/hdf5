@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -d dset4gb -s 4294967284 -c 22 tbigdims.h5'
-#############################
 HDF5 "tbigdims.h5" {
 DATASET "dset4gb" {
    DATATYPE  H5T_STD_I8LE

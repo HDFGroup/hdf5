@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump --enable-error-stack filter_fail.h5'
-#############################
 HDF5 "filter_fail.h5" {
 GROUP "/" {
    DATASET "dset_fail" {

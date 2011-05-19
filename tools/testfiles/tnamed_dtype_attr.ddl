@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tnamed_dtype_attr.h5'
-#############################
 HDF5 "tnamed_dtype_attr.h5" {
 GROUP "/" {
    DATASET "Dataset" {

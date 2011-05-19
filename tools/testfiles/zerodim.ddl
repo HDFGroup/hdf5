@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump zerodim.h5'
-#############################
 HDF5 "zerodim.h5" {
 GROUP "/" {
    ATTRIBUTE "attr of 0 dimension size" {

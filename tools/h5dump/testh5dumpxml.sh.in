@@ -62,9 +62,6 @@ TOOLTEST() {
    # Run test.
    TESTING $DUMPER $@
    (
-      echo "#############################"
-      echo "Expected output for '$DUMPER $@'" 
-      echo "#############################"
       cd $srcdir/../testfiles
       $RUNSERIAL $DUMPER_BIN $@
    ) >$actual 2>$actual_err

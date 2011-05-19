@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tsaf.h5'
-#############################
 HDF5 "tsaf.h5" {
 GROUP "/" {
    DATASET ".DSL_METADATA" {

@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -w157 tlarge_objname.h5'
-#############################
 HDF5 "tlarge_objname.h5" {
 GROUP "/" {
    GROUP "this_is_a_large_group_name" {

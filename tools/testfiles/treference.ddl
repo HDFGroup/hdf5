@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tattr2.h5'
-#############################
 HDF5 "tattr2.h5" {
 GROUP "/" {
    ATTRIBUTE "array" {

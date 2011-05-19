@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -d /dset1 -M 0,1,1,1 tcompound.h5'
-#############################
 HDF5 "tcompound.h5" {
 DATASET "/dset1" {
    DATATYPE  H5T_COMPOUND {
