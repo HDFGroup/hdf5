@@ -968,6 +968,45 @@ iter_init(iter_t *iter, hid_t fid)
 
 
 /*-------------------------------------------------------------------------
+ * Function: free_iter
+ *
+ * Purpose: Freee iter structure
+ *
+ * Return: Success: 0
+ *
+ * Failure: Never fails
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+iter_free(iter_t *iter)
+{
+    /* Clear array of bins for group counts */
+    if(iter->group_bins)
+        free(iter->group_bins);
+    iter->group_bins = NULL;
+    /* Clear array of bins for attribute counts */
+    if(iter->attr_bins)
+        free(iter->attr_bins);
+    iter->attr_bins = NULL;
+    /* Clear dataset datatype information found */
+    if(iter->dset_type_info)
+        free(iter->dset_type_info);
+    iter->dset_type_info = NULL;
+    /* Clear array of bins for dataset dimensions */
+    if(iter->dset_dim_bins)
+        free(iter->dset_dim_bins);
+    iter->dset_dim_bins = NULL;
+    /* Clear array of bins for free-space section sizes */
+    if(iter->sect_bins)
+        free(iter->sect_bins);
+    iter->sect_bins = NULL;
+
+    return 0;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function: print_file_info
  *
  * Purpose: Prints information about file
@@ -1671,6 +1710,9 @@ done:
 
         free(hand);
         hand = NULL;
+
+        /* Free iter structure */
+        iter_free(&iter);
     
         if(H5Fclose(fid) < 0) {
             error_msg("unable to close file \"%s\"\n", fname);
