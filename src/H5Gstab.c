@@ -714,6 +714,9 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
     hbool_t udata_valid = FALSE;        /* Whether iteration information is valid */
     ssize_t ret_value;          /* Return value */
 
+    /* Portably clear udata struct (before FUNC_ENTER) */
+    HDmemset(&udata, 0, sizeof(udata));
+
     FUNC_ENTER_NOAPI(H5G_stab_get_name_by_idx, FAIL)
 
     /* Sanity check */

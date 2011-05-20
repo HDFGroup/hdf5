@@ -527,7 +527,7 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
             /* Check that we found the attribute */
             if(!udata.attr)
-                HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't locate attribute")
+                HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't locate attribute: '%s'", name)
 
             /* Get attribute opened from object header */
             HDassert(udata.attr);
