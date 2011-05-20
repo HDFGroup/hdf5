@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump '
-#############################
 usage: h5dump [OPTIONS] file
   OPTIONS
      -h, --help           Print a usage message and exit

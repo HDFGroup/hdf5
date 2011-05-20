@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump packedbits.h5'
-#############################
 HDF5 "packedbits.h5" {
 GROUP "/" {
    DATASET "DS08BITS" {

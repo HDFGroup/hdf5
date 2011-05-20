@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tnestedcomp.h5'
-#############################
 HDF5 "tnestedcomp.h5" {
 GROUP "/" {
    DATASET "ArrayOfStructures" {

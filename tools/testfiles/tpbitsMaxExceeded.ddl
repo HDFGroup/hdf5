@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5'
-#############################
 usage: h5dump [OPTIONS] file
   OPTIONS
      -h, --help           Print a usage message and exit

@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -H -p -d fletcher32 tfilters.h5'
-#############################
 HDF5 "tfilters.h5" {
 DATASET "fletcher32" {
    DATATYPE  H5T_STD_I32LE

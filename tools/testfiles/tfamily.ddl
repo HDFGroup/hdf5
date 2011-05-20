@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump --filedriver=family tfamily%05d.h5'
-#############################
 HDF5 "tfamily%05d.h5" {
 GROUP "/" {
    DATASET "dset1" {

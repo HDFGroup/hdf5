@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -g 2 -q name -z ascending tordergr.h5'
-#############################
 HDF5 "tordergr.h5" {
 GROUP "2" {
    GROUP "a" {

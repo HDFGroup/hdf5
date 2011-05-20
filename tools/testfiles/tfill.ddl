@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -p tfvalues.h5'
-#############################
 HDF5 "tfvalues.h5" {
 GROUP "/" {
    DATASET "fill_array" {

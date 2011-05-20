@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -H -p -d contiguous tfilters.h5'
-#############################
 HDF5 "tfilters.h5" {
 DATASET "contiguous" {
 COMMENT "This is a dataset with contiguous storage"

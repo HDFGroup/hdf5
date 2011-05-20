@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump --filedriver=multi tmulti'
-#############################
 HDF5 "tmulti" {
 GROUP "/" {
    DATASET "dset1" {

@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump textlinkfar.h5'
-#############################
 HDF5 "textlinkfar.h5" {
 GROUP "/" {
    EXTERNAL_LINK "src_file" {

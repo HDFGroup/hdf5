@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump --group=/g2 --group / -g /y tgroup.h5'
-#############################
 HDF5 "tgroup.h5" {
 GROUP "/g2" {
    GROUP "g2.1" {

@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tvms.h5'
-#############################
 HDF5 "tvms.h5" {
 GROUP "/" {
    DATASET "Array" {

@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -u -m %.7f tfpformat.h5'
-#############################
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://www.hdfgroup.org/DTDs/HDF5-File.dtd">
 <HDF5-File>

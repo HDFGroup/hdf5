@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tarray7.h5'
-#############################
 HDF5 "tarray7.h5" {
 GROUP "/" {
    DATASET "Dataset1" {

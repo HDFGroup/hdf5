@@ -47,6 +47,7 @@ IF (BUILD_TESTING)
       tall-3.ddl
       tall-4s.ddl
       tall-5s.ddl
+      tall-6.ddl
       tallfilters.ddl
       tarray1.ddl
       tarray1_big.ddl
@@ -62,6 +63,11 @@ IF (BUILD_TESTING)
       tattr-3.ddl
       tattrreg.ddl
       tattrregR.ddl
+      tbin1.ddl
+      tbin1.ddl
+      tbin2.ddl
+      tbin3.ddl
+      tbin4.ddl
       tbinregR.ddl
       tbigdims.ddl
       tboot1.ddl
@@ -82,6 +88,10 @@ IF (BUILD_TESTING)
       tdset-2.ddl
       tdset-3s.ddl
       tempty.ddl
+      texceedsubstart.ddl
+      texceedsubcount.ddl
+      texceedsubstride.ddl
+      texceedsubblock.ddl
       texternal.ddl
       textlinksrc.ddl
       textlinkfar.ddl
@@ -149,6 +159,8 @@ IF (BUILD_TESTING)
       tvldtypes5.ddl
       tvlstr.ddl
       tvms.ddl
+      h5dump-help.txt
+      out3.h5import
   )
   SET (HDF5_XML_REFERENCE_FILES
       tall.h5.xml
@@ -216,18 +228,6 @@ IF (BUILD_TESTING)
       tvlstr.h5.xml
   )
   SET (HDF5_REFERENCE_TEST_FILES
-      h5dump-help.txt
-      tbin1.ddl
-      tbin1.ddl
-      tbin2.ddl
-      tbin3.ddl
-      tbin4.ddl
-      tall-6.ddl
-      texceedsubstart.ddl
-      texceedsubcount.ddl
-      texceedsubstride.ddl
-      texceedsubblock.ddl
-      out3.h5import
       filter_fail.h5
       packedbits.h5
       taindices.h5
@@ -335,23 +335,23 @@ IF (BUILD_TESTING)
 
   FOREACH (ddl_file ${HDF5_REFERENCE_FILES})
     SET (ddldest "${PROJECT_BINARY_DIR}/${ddl_file}")
-    #MESSAGE (STATUS " Translating ${ddl_file}")
+    #MESSAGE (STATUS " Copying ${ddl_file}")
     ADD_CUSTOM_COMMAND (
         TARGET     h5dump
         POST_BUILD
-        COMMAND    ${XLATE_UTILITY}
-        ARGS       ${HDF5_TOOLS_SRC_DIR}/testfiles/${ddl_file} ${ddldest} -l3
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${ddl_file} ${ddldest}
     )
   ENDFOREACH (ddl_file ${HDF5_REFERENCE_FILES})
 
   FOREACH (xml_file ${HDF5_XML_REFERENCE_FILES})
     SET (xmldest "${PROJECT_BINARY_DIR}/${xml_file}")
-    #MESSAGE (STATUS " Translating ${xml_file}")
+    #MESSAGE (STATUS " Copying ${xml_file}")
     ADD_CUSTOM_COMMAND (
         TARGET     h5dump
         POST_BUILD
-        COMMAND    ${XLATE_UTILITY}
-        ARGS       ${HDF5_TOOLS_SRC_DIR}/testfiles/${xml_file} ${xmldest} -l3
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${xml_file} ${xmldest}
     )
   ENDFOREACH (xml_file ${HDF5_XML_REFERENCE_FILES})
 
@@ -465,8 +465,8 @@ IF (BUILD_TESTING)
     ADD_CUSTOM_COMMAND (
         TARGET     h5dump
         POST_BUILD
-        COMMAND    ${XLATE_UTILITY}
-        ARGS       ${HDF5_TOOLS_SRC_DIR}/testfiles/${ddl_pbits} ${ddldest} -l3
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${ddl_pbits} ${ddldest}
     )
   ENDFOREACH (ddl_pbits ${HDF5_REFERENCE_PBITS})
   
