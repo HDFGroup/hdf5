@@ -815,7 +815,7 @@ herr_t H5DSdetach_scale(hid_t did,
             if(did_oi.fileno == tmp_oi.fileno && did_oi.addr == tmp_oi.addr) {
                 /* if we found not the last one, copy the last one to replace 
                    the one which is found */
-                if(i < nelmts-1)
+                if(ii < nelmts-1)
                     dsbuf[ii] = dsbuf[nelmts-1];
                 nelmts--;
                 found_dset=1;
