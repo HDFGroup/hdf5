@@ -3900,6 +3900,67 @@ mkstr(size_t len, H5T_str_t strpad)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_str_create
+ *
+ * Purpose:	Test string type creation using H5Tcreate
+ *
+ * Return:	Success:	0
+ *		Failure:	number of errors
+ *
+ * Programmer:	Raymond Lu
+ *              19 May 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_str_create(void)
+{
+    hid_t  fixed_str1, fixed_str2;
+    hid_t  vlen_str1,  vlen_str2;
+    htri_t is_vl_str = FALSE;
+    size_t query_size, str_size = 10;
+
+    TESTING("string type creation using H5Tcreate");
+
+    /* Create fixed-length string in two ways and make sure they are the same */
+    if((fixed_str1 = mkstr(str_size, H5T_STR_NULLTERM)) < 0) goto error;
+
+    if((fixed_str2 = H5Tcreate(H5T_STRING, str_size)) < 0) goto error;
+    if(H5Tset_strpad(fixed_str2, H5T_STR_NULLTERM) < 0) goto error;
+
+    if(!H5Tequal(fixed_str1, fixed_str2)) goto error;
+
+    if((query_size = H5Tget_size(fixed_str1)) == 0) goto error;
+    if(query_size != str_size) goto error;
+
+    if((query_size = H5Tget_size(fixed_str2)) == 0) goto error;
+    if(query_size != str_size) goto error;
+
+    /* Create variable-length string in two ways and make sure they are the same */
+    if((vlen_str1 = mkstr((size_t)H5T_VARIABLE, H5T_STR_NULLTERM)) < 0) goto error;
+
+    if((vlen_str2 = H5Tcreate(H5T_STRING, (size_t)H5T_VARIABLE)) < 0) goto error;
+    if(H5Tset_strpad(vlen_str2, H5T_STR_NULLTERM) < 0) goto error;
+
+    if(!H5Tequal(vlen_str1, vlen_str2)) goto error;
+
+    if((is_vl_str = H5Tis_variable_str(vlen_str1)) < 0) goto error;
+    if(!is_vl_str) goto error; 
+
+    if((is_vl_str = H5Tis_variable_str(vlen_str2)) < 0) goto error;
+    if(!is_vl_str) goto error; 
+
+
+    PASSED();
+    return 0;
+
+error:
+    H5_FAILED();
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_conv_str_1
  *
  * Purpose:	Test string conversions
@@ -6640,6 +6701,7 @@ main(void)
     nerrors += test_int_float_except();
     nerrors += test_named_indirect_reopen(fapl);
     nerrors += test_set_order_compound(fapl);
+    nerrors += test_str_create();
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     nerrors += test_deprec(fapl);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -6683,4 +6745,3 @@ main(void)
 
     return 0;
 }
-

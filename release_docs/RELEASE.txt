@@ -91,6 +91,8 @@ New Features
 
     Library:
     --------
+    - H5Tcreate now supports string type (fixed-length and variable-length).
+      (SLU - 2011/05/20)
     - Added ability to cache files opened through external links.  Added new
       public functions H5Pset_elink_file_cache_size(),
       H5Pget_elink_file_cache_size(), and H5Fclear_elink_file_cache().
