@@ -64,7 +64,8 @@ New Features
 
     Parallel Library
     ----------------
-    - None
+    - H5Tcreate now supports string type (fixed-length and variable-length).
+      (SLU - 2011/05/20)
  
     Tools
     -----
