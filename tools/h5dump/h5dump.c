@@ -6217,7 +6217,7 @@ xml_dump_group(hid_t gid, const char *name)
     H5Oget_info(gid, &oinfo);
 
     if(oinfo.rc > 1) {
-        obj_t  *found_obj;    /* Found object */
+        obj_t *found_obj;    /* Found object */
 
         /* Group with more than one link to it... */
         found_obj = search_obj(group_table, oinfo.addr);
@@ -6323,7 +6323,7 @@ xml_dump_group(hid_t gid, const char *name)
 
                 /* iterate through all the links */
 
-                if( (sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
+                if((sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
                     H5Literate(gid, sort_by, sort_order, NULL, dump_all_cb, NULL);
                 else
                     H5Literate(gid, H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL);
@@ -6407,7 +6407,7 @@ xml_dump_group(hid_t gid, const char *name)
     if(isRoot)
         HDfprintf(stdout, "</%sRootGroup>\n", xmlnsprefix);
     else
-        HDfprintf(stdout, "</%sGroup>\n" , xmlnsprefix);
+        HDfprintf(stdout, "</%sGroup>\n", xmlnsprefix);
     if(par)
         free(par);
     if(tmp)

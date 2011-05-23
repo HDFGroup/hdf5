@@ -211,7 +211,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
 
     /* Open the attribute on the object header */
     if(NULL == (attr = H5A_open_by_name(&loc, ".", name, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute: '%s'", name)
 
     /* Register the attribute and get an ID for it */
     if((ret_value = H5I_register(H5I_ATTR, attr, TRUE)) < 0)

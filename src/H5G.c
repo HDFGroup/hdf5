@@ -1737,6 +1737,9 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     unsigned    rc;		    /* Reference count of object    */
     herr_t      ret_value;          /* Return value */
 
+    /* Portably clear udata struct (before FUNC_ENTER) */
+    HDmemset(&udata, 0, sizeof(udata));
+
     FUNC_ENTER_NOAPI(H5G_visit, FAIL)
 
     /* Check args */

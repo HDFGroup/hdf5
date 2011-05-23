@@ -1105,7 +1105,8 @@ H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info_t *linfo,
         /* Check for object in same file (handles mounted files) */
         /* (re-verify address, in case we traversed a file mount) */
         if(udata->loc->addr == obj_loc.oloc->addr && udata->loc->file == obj_loc.oloc->file) {
-            udata->path = H5MM_strdup(path);
+            if(NULL == (udata->path = H5MM_strdup(path)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, H5_ITER_ERROR, "can't duplicate path string")
 
             /* We found a match so we return immediately */
             HGOTO_DONE(H5_ITER_STOP)
@@ -1145,6 +1146,9 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
     herr_t status;              /* Status from iteration */
     ssize_t ret_value;          /* Return value */
 
+    /* Portably clear udata struct (before FUNC_ENTER) */
+    HDmemset(&udata, 0, sizeof(udata));
+
     FUNC_ENTER_NOAPI(H5G_get_name_by_addr, FAIL)
 
     /* Construct the link info for the file's root group */
@@ -1153,7 +1157,8 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
 
     /* Check for root group being the object looked for */
     if(root_loc.oloc->addr == loc->addr && root_loc.oloc->file == loc->file) {
-        udata.path = H5MM_strdup("");
+        if(NULL == (udata.path = H5MM_strdup("")))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, FAIL, "can't duplicate path string")
         found_obj = TRUE;
     } /* end if */
     else {

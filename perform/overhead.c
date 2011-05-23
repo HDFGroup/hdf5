@@ -243,7 +243,8 @@ test(fill_t fill_style, const double splits[],
             hs_start[0] = j%2 ? j/2 : (hssize_t)cur_size[0]-j/2;
             break;
         case FILL_RANDOM:
-            for (j=HDrand()%(int)cur_size[0]; had[j]; j=(j+1)%(int)cur_size[0]) /*void*/;
+            for (j=HDrand()%(int)cur_size[0]; had[j]; j=(j+1)%(int)cur_size[0])
+                /*void*/;
             hs_start[0] = j;
             had[j] = 1;
             break;
@@ -273,8 +274,10 @@ test(fill_t fill_style, const double splits[],
         }
     }
 
-    if(had)
+    if(had) {
         free(had);
+        had = NULL;
+    } /* end if */
 
     H5Dclose(dset);
     H5Sclose(mspace);

@@ -3479,6 +3479,7 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     void        *chunk;	                /* The file chunk  */
     H5D_chunk_ud_t chk_udata;           /* User data for locking chunk */
     uint32_t    bytes_accessed;         /* Bytes accessed in chunk */
+    hbool_t     chunk_iter_init = FALSE; /* Whether the chunk iterator has been initialized */
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -3544,16 +3545,11 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     /* Create a selection iterator for scattering the elements to memory buffer */
     if(H5S_select_iter_init(&chunk_iter, udata->chunk_space, layout->u.chunk.dim[rank]) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunk selection information")
+    chunk_iter_init = TRUE;
 
     /* Scatter the data into memory */
-    if(H5D_scatter_mem(udata->fb_info.fill_buf, udata->chunk_space, &chunk_iter, (size_t)sel_nelmts, io_info->dxpl_cache, chunk/*out*/) < 0) {
-        H5S_SELECT_ITER_RELEASE(&chunk_iter);
+    if(H5D_scatter_mem(udata->fb_info.fill_buf, udata->chunk_space, &chunk_iter, (size_t)sel_nelmts, io_info->dxpl_cache, chunk/*out*/) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed")
-    } /* end if */
-
-    /* Release the selection iterator */
-    if(H5S_SELECT_ITER_RELEASE(&chunk_iter) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
 
 
     /* The number of bytes accessed in the chunk */
@@ -3566,6 +3562,10 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to unlock raw data chunk")
 
 done:
+    /* Release the selection iterator */
+    if(chunk_iter_init && H5S_SELECT_ITER_RELEASE(&chunk_iter) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_chunk_prune_fill */
 
