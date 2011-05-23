@@ -1391,9 +1391,11 @@ case "$host_cpu-$host_vendor-$host_os" in
     ;;
 esac
 
-dnl Need to add AM_CPPFLAGS into CPPFLAGS to make them visible for configure checks.
-dnl Note: CPPFLAGS will be restored by the end of configure.
-CPPFLAGS="$AM_CPPFLAGS $CPPFLAGS"
+dnl Need to add the AM_ and H5_ into CPFLAGS/CPPFLAGS to make them visible 
+dnl for configure checks.
+dnl Note: Both will be restored by the end of configure.
+CPPFLAGS="$H5_CPPFLAGS $AM_CPPFLAGS $CPPFLAGS"
+CFLAGS="$H5_CFLAGS $AM_CFLAGS $CFLAGS"
 
 AC_TRY_COMPILE([#include <sys/types.h>],
                [off64_t n = 0;],
