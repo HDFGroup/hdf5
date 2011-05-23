@@ -1214,6 +1214,9 @@ AC_CHECK_HEADERS([sys/socket.h sys/types.h])
 AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 
+dnl Darwin
+AC_CHECK_HEADERS([mach/mach_time.h])
+
 dnl Windows
 case "`uname`" in
   CYGWIN*)
