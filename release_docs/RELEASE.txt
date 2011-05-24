@@ -94,7 +94,10 @@ Bug Fixes since HDF5-1.8.7
 
     Configuration
     -------------
-    - None
+    - Configure now uses the same flags and symbols in its tests that are
+      used to build the library.
+    - On linux we now link to the bsd_compat library, as per the gcc
+      manual, since we define _BSD_SOURCE.
 
     Library
     -------
