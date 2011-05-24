@@ -2614,6 +2614,15 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
      * a native integer type as an index into the `val2dst'. The values of
      * that array are the index numbers in the destination type or negative
      * if the entry is unused.
+     *
+     * (This optimized algorithm doesn't work when the byte orders are different.  
+     * The code such as "n = *((int*)(src->shared->u.enumer.value+i*src->shared->size));"
+     * can change the value significantly. i.g. if the source value is big-endian 0x0000000f,
+     * executing the casting on little-endian machine will get a big number 0x0f000000.
+     * Then it can't meet the condition 
+     * "if(src->shared->u.enumer.nmembs<2 || (double)length/src->shared->u.enumer.nmembs<1.2)"
+     * Because this is the optimized code, we won't fix it. It should still work in some 
+     * situations. SLU - 2011/5/24) 
      */
     if (1==src->shared->size || sizeof(short)==src->shared->size || sizeof(int)==src->shared->size) {
 	for (i=0; i<src->shared->u.enumer.nmembs; i++) {
@@ -2796,6 +2805,12 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             for(i = 0; i < nelmts; i++, s += src_delta, d += dst_delta) {
                 if(priv->length) {
                     /* Use O(1) lookup */
+                    /* (The casting won't work when the byte orders are different. i.g. if the source value
+                     * is big-endian 0x0000000f, the direct casting "n = *((int*)s);" will make it a big
+                     * number 0x0f000000 on little-endian machine. But we won't fix it because it's an 
+                     * optimization code. Please also see the comment in the H5T_conv_enum_init() function.
+                     * SLU - 2011/5/24)
+                     */ 
                     if(1 == src->shared->size)
                         n = *((signed char*)s);
                     else if(sizeof(short) == src->shared->size)
