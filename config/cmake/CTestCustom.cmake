@@ -41,22 +41,6 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP-XML-clearall-objects
     ######### tools/h5import #########
     H5IMPORT-clear-objects
-    H5IMPORT-ASCII_F32-clear-objects
-    H5IMPORT-ASCII_UI16-clear-objects
-    H5IMPORT-ASCII_UI32-clear-objects
-    H5IMPORT-ASCII_I8-clear-objects
-    H5IMPORT-ASCII_I16-clear-objects
-    H5IMPORT-ASCII_I32-clear-objects
-    H5IMPORT-ASCII_F64_R1-clear-objects
-    H5IMPORT-BINARY_I8_EOF-clear-objects
-    H5IMPORT-STR-clear-objects
-    H5IMPORT-BINARY_UI32-clear-objects
-    H5IMPORT-BINARY_UI16-clear-objects
-    H5IMPORT-BINARY_I32-clear-objects
-    H5IMPORT-BINARY_I8-clear-objects
-    H5IMPORT-BINARY_I16-clear-objects
-    H5IMPORT-BINARY_F64-clear-objects
-    H5IMPORT-ASCII_F64-clear-objects
     ######### tools/h5jam #########
     H5JAM-SETUP-N_twithub_u10_c-clear-objects
     H5JAM-SETUP-N_twithub_u10_c
