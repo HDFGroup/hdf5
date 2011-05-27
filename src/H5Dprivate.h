@@ -76,6 +76,7 @@
 #define H5D_XFER_EDC_NAME               "err_detect"    /* EDC */
 #define H5D_XFER_FILTER_CB_NAME         "filter_cb"     /* Filter callback function */
 #define H5D_XFER_CONV_CB_NAME           "type_conv_cb"  /* Type conversion callback function */
+#define H5D_XFER_CONV_ENUM_OVERFLOW_NAME "conv_enum_overflow"  /* conversion of enum overflow values */
 #define H5D_XFER_XFORM_NAME             "data_transform" /* Data transform */
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 /* Collective chunk instrumentation properties */

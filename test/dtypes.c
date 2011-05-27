@@ -4482,12 +4482,20 @@ error:
  * Programmer:  Robb Matzke, LLNL, 2003-06-09
  *
  * Modifications:
+ *              Raymond Lu
+ *              26 May 2011
+ *              I added a few overflowing values (beyond the range of enumerate
+ *              values) to make sure the library retains these values. The test
+ *              for overflowing values when no conversion happens is in 
+ *              test_noconv of enum.c. 
  *-------------------------------------------------------------------------
  */
 static int
 test_conv_enum_2(void)
 {
     hid_t       srctype=-1, dsttype=-1, oddsize=-1;
+    hid_t       dxpl_id=-1;
+    hbool_t     conv_overflow;
     int         *data=NULL, i, nerrors=0;
     const char  *mname[] = { "RED",
                              "GREEN",
@@ -4497,7 +4505,7 @@ test_conv_enum_2(void)
                              "PURPLE",
                              "ORANGE",
                              "WHITE" };
-
+   
     TESTING("non-native enumeration type conversion");
 
     /* Source enum type */
@@ -4539,11 +4547,108 @@ test_conv_enum_2(void)
         }
     }
 
+    /* Now make the source data overflow and see the conversion retain the original values by default.
+     * The initialization makes the first 128 values be -1, -2, -3,..., -128. In hexadecimal,
+     * they are 0xffffff, 0xfffffe, 0xfffffd,..., 0xffff7f.  The rest values are between 0 
+     * and 127. */
+    for (i=0; i<NTESTELEM; i++) {
+        if(i > 127) {
+	    ((char*)data)[i*3+2] = i % 128;
+	    ((char*)data)[i*3+0] = 0;
+	    ((char*)data)[i*3+1] = 0;
+        } else {
+	    ((char*)data)[i*3+2] = -(i+1);
+	    ((char*)data)[i*3+0] = -1;
+	    ((char*)data)[i*3+1] = -1;
+        }
+    }
+
+    /* Convert to destination type */
+    H5Tconvert(srctype, dsttype, (size_t)NTESTELEM, data, NULL, H5P_DEFAULT);
+
+    /* Check results */
+    for (i=0; i<NTESTELEM; i++) {
+        if(i > 127) {
+	    if (data[i] != i%128) {
+		if (!nerrors++) {
+		    H5_FAILED();
+		    printf("element %d is %d but should have been  %d\n",
+			   i, data[i], i%128);
+		}
+	    }
+        } else {
+	    if (data[i] != -(i+1)) {
+		if (!nerrors++) {
+		    H5_FAILED();
+		    printf("element %d is %d but should have been  %d\n",
+			   i, data[i], -(i+1));
+		}
+	    }
+        }
+    }
+
+    /* Now make the source data overflow and set the property for handling overflowing data to fill them
+     * them with 0xff (-1).  The initialization makes the first 128 values be -1, -2, -3,..., -128. In 
+     * hexadecimal, they are 0xffffff, 0xfffffe, 0xfffffd,..., 0xffff7f.  The next 128 values are 128 to 
+     * 255. The rest values are between 0 and 7. */
+    for (i=0; i<NTESTELEM; i++) {
+        if(i > 255) {
+            ((char*)data)[i*3+2] = i % 8;
+            ((char*)data)[i*3+0] = 0;
+            ((char*)data)[i*3+1] = 0;
+        } else if(i > 127) {
+	    ((char*)data)[i*3+2] = i;
+	    ((char*)data)[i*3+0] = 0;
+	    ((char*)data)[i*3+1] = 0;
+    
+        } else {
+	    ((char*)data)[i*3+2] = -(i+1);
+	    ((char*)data)[i*3+0] = -1;
+	    ((char*)data)[i*3+1] = -1;
+        }
+    }
+
+    /* Set the property for handling overflowing data */ 
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+
+    /* First verify it's TRUE by default */    
+    H5Pget_enum_conv_overflow(dxpl_id, &conv_overflow);
+    if(!conv_overflow)
+        nerrors++;
+
+    /* Then set it to FALSE */
+    H5Pset_enum_conv_overflow(dxpl_id, FALSE);
+
+    /* Convert to destination type */
+    H5Tconvert(srctype, dsttype, (size_t)NTESTELEM, data, NULL, dxpl_id);
+
+    /* Check results.  All overflowing values should turn to -1. */
+    for (i=0; i<NTESTELEM; i++) {
+        if(i > 255) {
+	    if (data[i] != i%8) {
+		if (!nerrors++) {
+		    H5_FAILED();
+		    printf("element %d is %d but should have been  %d\n",
+			   i, data[i], i%8);
+		}
+	    }
+        } else {
+	    if (data[i] != -1) {
+		if (!nerrors++) {
+		    H5_FAILED();
+		    printf("element %d is %d but should have been -1\n",
+			   i, data[i]);
+		}
+	    }
+        }
+    }
+
     /* Cleanup */
     free(data);
     H5Tclose(srctype);
     H5Tclose(dsttype);
     H5Tclose(oddsize);
+    H5Pclose(dxpl_id);
 
     /* Failure */
     if (nerrors) {
