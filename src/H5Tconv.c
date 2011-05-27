@@ -2944,11 +2944,12 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
             /* Close the type IDs.  Have to use public function here */
 	    if(conv_overflow) {
-		if(H5Tclose(src_super_id) < 0)
-		    HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "problem closing datatype")
-
-		if(H5Tclose(dst_super_id) < 0)
-		    HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "problem closing datatype")
+                /* Disable the error stack for these two public functions. Otherwise they would
+                 * clear it */
+                H5E_BEGIN_TRY {
+                    H5Tclose(src_super_id);
+                    H5Tclose(dst_super_id);
+                } H5E_END_TRY;
 
 		HDfree(tmp_buf);
             }
