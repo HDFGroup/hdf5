@@ -1100,6 +1100,7 @@ H5Pset_enum_conv_overflow(hid_t plist_id, hbool_t conv_overflow)
     herr_t              ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_enum_conv_overflow, FAIL)
+    H5TRACE2("e", "ib", plist_id, conv_overflow);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
@@ -1137,6 +1138,7 @@ H5Pget_enum_conv_overflow(hid_t plist_id, hbool_t *conv_overflow/*out*/)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_enum_conv_overflow, FAIL)
+    H5TRACE2("e", "ix", plist_id, conv_overflow);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
