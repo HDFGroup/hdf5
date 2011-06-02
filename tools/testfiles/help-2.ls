@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -w80 -help'
-#############################
 usage: h5ls [OPTIONS] [OBJECTS...]
   OPTIONS
    -h, -?, --help  Print a usage message and exit

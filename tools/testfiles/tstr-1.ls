@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -w80 -r -d tstr.h5'
-#############################
 /                        Group
 /comp1                   Dataset {3, 6}
     Data:

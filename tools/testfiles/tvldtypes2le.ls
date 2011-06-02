@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -v tvldtypes1.h5'
-#############################
 Opened "tvldtypes1.h5" with sec2 driver.
 Dataset1.0               Dataset {4/4}
     Location:  1:976
