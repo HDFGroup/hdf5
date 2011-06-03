@@ -26,9 +26,9 @@ SET (H5_DEP_EXECUTABLES
 
 IF (BUILD_TESTING)
   # --------------------------------------------------------------------
-  # Copy all the HDF5 files from the test directory into the source directory
+  # Copy all the test files from source directory to test directory
   # --------------------------------------------------------------------
-  SET (HDF5_REFERENCE_FILES
+  SET (LIST_EXPECT_OUTPUT_FILES
       help-1.ls
       help-2.ls
       help-3.ls
@@ -83,7 +83,7 @@ IF (BUILD_TESTING)
       tvldtypes2le.ls
       tvldtypes2be.ls
   )
-  SET (HDF5_REFERENCE_TEST_FILES
+  SET (LIST_HDF5_TEST_FILES
       tall.h5
       tarray1.h5
       tattr2.h5
@@ -107,27 +107,29 @@ IF (BUILD_TESTING)
       tvldtypes1.h5
   )
 
-  FOREACH (ls_file ${HDF5_REFERENCE_FILES})
-    SET (lsdest "${PROJECT_BINARY_DIR}/${ls_file}")
-    #MESSAGE (STATUS " Translating ${ls_file}")
+  # copy the list of expected output files
+  FOREACH (out_file ${LIST_EXPECT_OUTPUT_FILES})
+    SET (out_dest "${PROJECT_BINARY_DIR}/${out_file}")
+    #MESSAGE (STATUS " Translating ${out_file}")
     ADD_CUSTOM_COMMAND (
         TARGET     h5ls
         POST_BUILD
-        COMMAND    ${XLATE_UTILITY}
-        ARGS       ${HDF5_TOOLS_SRC_DIR}/testfiles/${ls_file} ${lsdest} -l3
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${out_file} ${out_dest}
     )
-  ENDFOREACH (ls_file ${HDF5_REFERENCE_FILES})
+  ENDFOREACH (out_file ${LIST_EXPECT_OUTPUT_FILES})
 
-  FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    SET (dest "${PROJECT_BINARY_DIR}/${h5_file}")
+  # copy the list of hdf5 test files
+  FOREACH (h5_file ${LIST_HDF5_TEST_FILES})
+    SET (h5_dest "${PROJECT_BINARY_DIR}/${h5_file}")
     #MESSAGE (STATUS " Copying ${h5_file}")
     ADD_CUSTOM_COMMAND (
         TARGET     h5ls
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file} ${dest}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file} ${h5_dest}
     )
-  ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  ENDFOREACH (h5_file ${LIST_HDF5_TEST_FILES})
   
 ##############################################################################
 ##############################################################################

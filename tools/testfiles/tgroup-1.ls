@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -w80 -r -g tgroup.h5'
-#############################
 Error: 'recursive' option not compatible with 'group info' option!
 
 usage: h5ls [OPTIONS] [OBJECTS...]

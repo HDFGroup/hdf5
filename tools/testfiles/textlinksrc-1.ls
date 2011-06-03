@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -w80 --follow-symlinks -r textlinksrc.h5'
-#############################
 /                        Group
 /ext2soft_link1          External Link {tsoftlinks.h5//soft_dset1} {Dataset {4, 2}}
 /ext2softdangle_link1    External Link {tsoftlinks.h5//soft_dangle} {**NOT FOUND**}

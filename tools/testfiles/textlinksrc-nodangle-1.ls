@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -w80 --no-dangling-links textlinksrc.h5'
-#############################
 Error: --no-dangling-links must be used along with --follow-symlinks option!
 
 usage: h5ls [OPTIONS] [OBJECTS...]

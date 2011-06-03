@@ -78,9 +78,6 @@ TOOLTEST() {
     # any unexpected output from that stream too.
     TESTING $H5LS $@
     (
-	echo "#############################"
-	echo " output for '$H5LS $@'" 
-	echo "#############################"
 	cd $srcdir/../testfiles
         $RUNSERIAL $H5LS_BIN "$@"
     ) >$actual 2>$actual_err 

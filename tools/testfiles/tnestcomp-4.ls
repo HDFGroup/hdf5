@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -w80 -r -d -l -S tnestedcomp.h5'
-#############################
 /                        Group
 /ArrayOfStructures       Dataset {10}
     Data:
