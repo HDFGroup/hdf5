@@ -838,6 +838,7 @@
 ./test/external.c
 ./test/error_test.c
 ./test/err_compat.c
+./test/filter_error.h5
 ./test/links_env.c
 ./test/family_v16_00000.h5
 ./test/family_v16_00001.h5
