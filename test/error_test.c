@@ -25,7 +25,7 @@
 #ifdef H5_USE_16_API
 int main(void)
 {
-    printf("Test skipped because backward compatbility with v1.6 is configured in\n");
+    fprintf(stderr, "Test skipped because backward compatbility with v1.6 is configured in\n");
     return 0;
 }
 #else /* H5_USE_16_API */
@@ -363,7 +363,7 @@ test_long_desc(void)
     if(H5Epush(H5E_DEFAULT, __FILE__, test_FUNC, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, format, long_desc) < 0) TEST_ERROR;
 
     /* Create the string that should be in the description */
-    HDsnprintf(full_desc, (size_t)(LONG_DESC_SIZE + 128), format, long_desc);
+    snprintf(full_desc, (size_t)(LONG_DESC_SIZE + 128), format, long_desc);
 
     /* Make certain that the description is correct */
     if(H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, long_desc_cb, full_desc) < 0) TEST_ERROR;
@@ -747,18 +747,20 @@ main(void)
     if(close_error() < 0)
         TEST_ERROR;
 
-    /* Test error message during data reading when filter isn't registered */
-    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    /* Test error message during data reading when filter isn't registered 
+     * Use default FAPL to avoid some VFD drivers by the check-vfd test because
+     * the test file was pre-generated. */
+    h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof filename);
     if(test_filter_error(filename) < 0)
         TEST_ERROR;
 
     h5_cleanup(FILENAME, fapl);
 
-    printf("All error API tests passed.\n");
+    fprintf(stderr, "\nAll error API tests passed.\n");
     return 0;
 
 error:
-    printf("***** ERROR TEST FAILED! *****\n");
+    fprintf(stderr, "\n***** ERROR TEST FAILED (real problem)! *****\n");
     return 1;
 }
 #endif /* H5_USE_16_API */

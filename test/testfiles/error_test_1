@@ -1,7 +1,6 @@
 #############################
 Expected output for error_test
 #############################
-All error API tests passed.
    This program tests the Error API.  There're supposed to be some error messages
 ********* Print error stack in HDF5 default way *********
 Second Test-DIAG: Error detected in Second Program (1.0) thread (IDs):
@@ -57,3 +56,5 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #004: (file name) line (number) in H5Z_pipeline(): required filter 'bogus' is not registered
     major: Data filters
     minor: Read failed
+
+All error API tests passed.
