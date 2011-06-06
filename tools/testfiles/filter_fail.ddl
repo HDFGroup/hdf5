@@ -21,7 +21,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #003: (file name) line (number) in H5D_chunk_lock(): data pipeline read failed
     major: Data filters
     minor: Filter operation failed
-  #004: (file name) line (number) in H5Z_pipeline(): required filter is not registered
+  #004: (file name) line (number) in H5Z_pipeline(): required filter 'filter_fail_test' is not registered
     major: Data filters
     minor: Read failed
 h5dump error: unable to print data

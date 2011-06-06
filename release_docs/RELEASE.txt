@@ -105,8 +105,9 @@ Bug Fixes since HDF5-1.8.7
 
     Library
     -------
-    - None
-
+    - When a dataset had filters and reading data failed, the error message 
+      didn't say which filter isn't registered. It's fixed now. (SLU - 2011/6/3)
+  
     Parallel Library
     ----------------
     - None
