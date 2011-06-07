@@ -87,6 +87,7 @@ SET (HDF5_REFERENCE_TEST_FILES
     family_v16_00003.h5
     fill_old.h5
     fixed_idx.h5
+    filter_error.h5
     group_old.h5
     le_data.h5
     le_extlink1.h5
