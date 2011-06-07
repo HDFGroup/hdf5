@@ -96,6 +96,7 @@ H5Z_init_interface (void)
 	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register fletcher32 filter")
 #endif /* H5_HAVE_FILTER_FLETCHER32 */
 #ifdef H5_HAVE_FILTER_SZIP
+    H5Z_SZIP->encoder_present = SZ_encoder_enabled();
     if (H5Z_register (H5Z_SZIP)<0)
 	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register szip filter")
 #endif /* H5_HAVE_FILTER_SZIP */
