@@ -5241,7 +5241,7 @@ static int test_attach_detach(void)
     hid_t          sid;                                              /* dataspace ID */
     hid_t          dcpl_id;                                          /* dataset creation property */
     hid_t          dsid = -1;                                        /* DS dataset ID */
-    hid_t          var1_id, var2_id;                                 /* DS component name */
+    hid_t          var1_id, var2_id, var3_id;                        /* DS component name */
     hsize_t        dims[RANK1] = {DIM1};
 
     TESTING2("permutations of attaching and detaching");
@@ -5307,6 +5307,27 @@ static int test_attach_detach(void)
     if(H5Sclose(sid) < 0) 
       goto out;
 
+    /* Create 3rd variable that uses this dimension scale. */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
+      goto out;
+
+    if(H5Pset_attr_creation_order(dcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) 
+      goto out;
+
+    if((sid = H5Screate_simple(DIM1, dims, dims)) < 0) 
+      goto out;
+
+    if((var3_id = H5Dcreate2(gid, DS_33_NAME, H5T_NATIVE_FLOAT, sid,
+			     H5P_DEFAULT, H5P_DEFAULT,H5P_DEFAULT)) < 0) 
+      goto out;
+
+    if(H5Pclose(dcpl_id) < 0) 
+      goto out;
+
+    if(H5Sclose(sid) < 0) 
+      goto out;
+    
+    /* Attached var2 scale */
     if(H5DSattach_scale(var2_id, dsid, 0) < 0) 
       goto out;
 
@@ -5359,6 +5380,57 @@ static int test_attach_detach(void)
     if(H5DSis_attached(var2_id, dsid, 0) != 0) /* should not be attached */
       goto out;
 
+    /***************************************************
+     * Attach Three DS and remove the middle one first
+     *****************************************************/
+
+    if(H5DSattach_scale(var1_id, dsid, 0) < 0) 
+      goto out;
+
+    if(H5DSattach_scale(var2_id, dsid, 0) < 0) 
+      goto out;
+
+    if(H5DSattach_scale(var3_id, dsid, 0) < 0) 
+      goto out;
+
+
+    /* Detach the var2 scale */
+    if(H5DSdetach_scale(var2_id, dsid, 0) < 0)
+      goto out;
+
+    /* Check if in correct state of detached and attached */
+
+    if(H5DSis_attached(var1_id, dsid, 0) == 0) /* should still be attached */
+      goto out;
+    if(H5DSis_attached(var2_id, dsid, 0) != 0) /* should not be attached */
+      goto out;
+    if(H5DSis_attached(var3_id, dsid, 0) == 0) /* should still be attached */
+      goto out;
+
+    /* Detach the var3 scale */
+    if(H5DSdetach_scale(var3_id, dsid, 0) < 0)
+      goto out;
+
+    /* Check if in correct state of detached and attached */
+    if(H5DSis_attached(var1_id, dsid, 0) == 0) /* should still be attached */
+      goto out;
+    if(H5DSis_attached(var2_id, dsid, 0) != 0) /* should not be attached */
+      goto out;
+    if(H5DSis_attached(var3_id, dsid, 0) != 0) /* should not be attached */
+      goto out;
+
+    /* Detach the var1 scale */
+    if(H5DSdetach_scale(var1_id, dsid, 0) < 0)
+      goto out;
+
+    /* Check if in correct state of detached and attached */
+    if(H5DSis_attached(var1_id, dsid, 0) != 0) /* should not be attached */
+      goto out;
+    if(H5DSis_attached(var2_id, dsid, 0) != 0) /* should not be attached */
+      goto out;
+    if(H5DSis_attached(var3_id, dsid, 0) != 0) /* should not be attached */
+      goto out;
+
     /*-------------------------------------------------------------------------
     * close
     *-------------------------------------------------------------------------
@@ -5367,6 +5439,8 @@ static int test_attach_detach(void)
     if(H5Dclose(var1_id) < 0) 
       goto out;
     if(H5Dclose(var2_id) < 0) 
+      goto out;
+    if(H5Dclose(var3_id) < 0) 
       goto out;
     if(H5Dclose(dsid) < 0) 
       goto out;
@@ -5385,6 +5459,7 @@ out:
     {
 	H5Dclose(var1_id);
 	H5Dclose(var2_id);
+	H5Dclose(var3_id);
         H5Dclose(dsid);
         H5Gclose(gid);
         H5Fclose(fid);
