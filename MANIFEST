@@ -1949,6 +1949,8 @@
 ./hl/fortran/examples/Makefile.in
 ./hl/fortran/examples/exlite.f90
 ./hl/fortran/examples/run-hlfortran-ex.sh.in
+./hl/fortran/src/H5DSfc.c
+./hl/fortran/src/H5DSff.f90
 ./hl/fortran/src/H5IMcc.c
 ./hl/fortran/src/H5IMcc.h
 ./hl/fortran/src/H5IMfc.c
@@ -1962,6 +1964,7 @@
 ./hl/fortran/src/Makefile.in
 ./hl/fortran/test/Makefile.am
 ./hl/fortran/test/Makefile.in
+./hl/fortran/test/tstds.f90
 ./hl/fortran/test/tstimage.f90
 ./hl/fortran/test/tstlite.f90
 ./hl/fortran/test/tsttable.f90
