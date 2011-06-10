@@ -69,14 +69,19 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__EXEEXT_1 = tstlite$(EXEEXT) tstimage$(EXEEXT) tsttable$(EXEEXT)
+am__EXEEXT_1 = tstds$(EXEEXT) tstlite$(EXEEXT) tstimage$(EXEEXT) \
+	tsttable$(EXEEXT)
+am_tstds_OBJECTS = tstds.$(OBJEXT)
+tstds_OBJECTS = $(am_tstds_OBJECTS)
+tstds_LDADD = $(LDADD)
+tstds_DEPENDENCIES = $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL) $(LIBHDF5)
+AM_V_lt = $(am__v_lt_$(V))
+am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
+am__v_lt_0 = --silent
 am_tstimage_OBJECTS = tstimage.$(OBJEXT)
 tstimage_OBJECTS = $(am_tstimage_OBJECTS)
 tstimage_LDADD = $(LDADD)
 tstimage_DEPENDENCIES = $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL) $(LIBHDF5)
-AM_V_lt = $(am__v_lt_$(V))
-am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
-am__v_lt_0 = --silent
 am_tstlite_OBJECTS = tstlite.$(OBJEXT)
 tstlite_OBJECTS = $(am_tstlite_OBJECTS)
 tstlite_LDADD = $(LDADD)
@@ -105,8 +110,9 @@ am__v_FCLD_0 = @echo "  FCLD  " $@;
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
-SOURCES = $(tstimage_SOURCES) $(tstlite_SOURCES) $(tsttable_SOURCES)
-DIST_SOURCES = $(tstimage_SOURCES) $(tstlite_SOURCES) \
+SOURCES = $(tstds_SOURCES) $(tstimage_SOURCES) $(tstlite_SOURCES) \
+	$(tsttable_SOURCES)
+DIST_SOURCES = $(tstds_SOURCES) $(tstimage_SOURCES) $(tstlite_SOURCES) \
 	$(tsttable_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -397,13 +403,14 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # Temporary files.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog dsetf[1-4].h5 f1img.h5 \
-	f1tab.h5
+	f1tab.h5 tstds.h5
 
 # Our main target, the test programs
-TEST_PROG = tstlite tstimage tsttable
+TEST_PROG = tstds tstlite tstimage tsttable
 LDADD = $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL)  $(LIBHDF5)
 
 # Source files for the programs
+tstds_SOURCES = tstds.f90
 tstlite_SOURCES = tstlite.f90
 tstimage_SOURCES = tstimage.f90
 tsttable_SOURCES = tsttable.f90
@@ -470,6 +477,9 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+tstds$(EXEEXT): $(tstds_OBJECTS) $(tstds_DEPENDENCIES) 
+	@rm -f tstds$(EXEEXT)
+	$(AM_V_FCLD)$(FCLINK) $(tstds_OBJECTS) $(tstds_LDADD) $(LIBS)
 tstimage$(EXEEXT): $(tstimage_OBJECTS) $(tstimage_DEPENDENCIES) 
 	@rm -f tstimage$(EXEEXT)
 	$(AM_V_FCLD)$(FCLINK) $(tstimage_OBJECTS) $(tstimage_LDADD) $(LIBS)

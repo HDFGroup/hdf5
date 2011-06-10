@@ -94,8 +94,8 @@ am__base_list = \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5hl_fortran_la_DEPENDENCIES = $(LIBH5_HL) $(LIBH5F)
-am_libhdf5hl_fortran_la_OBJECTS = H5LTfc.lo H5IMfc.lo H5IMcc.lo \
-	H5TBfc.lo H5LTff.lo H5IMff.lo H5TBff.lo
+am_libhdf5hl_fortran_la_OBJECTS = H5DSfc.lo H5LTfc.lo H5IMfc.lo \
+	H5IMcc.lo H5TBfc.lo H5DSff.lo H5LTff.lo H5IMff.lo H5TBff.lo
 libhdf5hl_fortran_la_OBJECTS = $(am_libhdf5hl_fortran_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
@@ -451,8 +451,8 @@ libhdf5hl_fortran_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVI
 #endif
 
 # List sources to include in the HDF5 HL Fortran library.
-libhdf5hl_fortran_la_SOURCES = H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c H5LTff.f90  \
-                H5IMff.f90 H5TBff.f90
+libhdf5hl_fortran_la_SOURCES = H5DSfc.c H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c \
+	H5DSff.f90 H5LTff.f90 H5IMff.f90 H5TBff.f90
 
 
 # HDF5 HL Fortran library depends on HDF5 HL Library and HDF5 Fortran Library.
@@ -547,6 +547,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5DSfc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IMcc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IMfc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LTfc.Plo@am__quote@
@@ -851,6 +852,7 @@ uninstall-local:
 # determining this automagically (like we do with the C files). So, when
 # doing a parallel make, some modules could be made way before the
 # modules they depend upon are actually made. *sigh*
+H5DSff.lo:          $(srcdir)/H5DSff.f90
 H5LTff.lo:          $(srcdir)/H5LTff.f90
 H5IMff.lo:          $(srcdir)/H5IMff.f90
 H5TBff.lo:          $(srcdir)/H5TBff.f90
