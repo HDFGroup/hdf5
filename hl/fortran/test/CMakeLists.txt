@@ -20,6 +20,15 @@ ADD_TEST (
         f1tab.h5
 )
 
+#-- Adding test for hl_f90_tstds
+ADD_EXECUTABLE (hl_f90_tstds tstds.f90)
+TARGET_NAMING (hl_f90_tstds ${LIB_TYPE})
+TARGET_FORTRAN_WIN_PROPERTIES (hl_f90_tstds "")
+TARGET_LINK_LIBRARIES (hl_f90_tstds ${HDF5_HL_F90_LIB_TARGET} ${HDF5_F90_LIB_TARGET})
+SET_TARGET_PROPERTIES (hl_f90_tstds PROPERTIES LINKER_LANGUAGE Fortran)
+
+ADD_TEST (NAME hl_f90_tstds COMMAND $<TARGET_FILE:hl_f90_tstds>)
+
 #-- Adding test for hl_f90_tstlite
 ADD_EXECUTABLE (hl_f90_tstlite tstlite.f90)
 TARGET_NAMING (hl_f90_tstlite ${LIB_TYPE})
