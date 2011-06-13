@@ -32,9 +32,10 @@ int main(void)
 
 const char *FILENAME[] = {
     "errors",
-    "filter_error",
     NULL
 };
+
+#define DATAFILE "filter_error"
 
 #define DIM0    100
 #define DIM1    200
@@ -751,7 +752,7 @@ main(void)
     /* Test error message during data reading when filter isn't registered 
      * Use default FAPL to avoid some VFD drivers by the check-vfd test because
      * the test file was pre-generated. */
-    h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof filename);
+    h5_fixname(DATAFILE, H5P_DEFAULT, filename, sizeof filename);
     if(test_filter_error(filename) < 0)
         TEST_ERROR;
 
