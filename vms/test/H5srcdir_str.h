@@ -19,4 +19,4 @@
  */
 
 /* Set the 'srcdir' path from configure time */
-static const char *config_srcdir = "[...]";
+static const char *config_srcdir = "[-.test]";
