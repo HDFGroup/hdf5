@@ -93,6 +93,7 @@ VERS_OLD=
 test "$VERS" || exit 1
 verbose=yes
 check=yes
+release_date=`date +%F`
 today=`date +%Y%m%d`
 pmode='no'
 tmpdir="../#release_tmp.$$"	# tmp work directory
@@ -203,7 +204,7 @@ cp -p Makefile.dist Makefile
 # Update README.txt and release_docs/RELEASE.txt with release information in
 # line 1.
 for f in README.txt release_docs/RELEASE.txt; do
-    echo "HDF5 version $VERS released on `date`" >$f.x
+    echo "HDF5 version $VERS released on $release_date" >$f.x
     sed -e 1d $f >>$f.x
     mv $f.x $f
     # Make sure new files are of the right access mode
