@@ -95,10 +95,12 @@ $ type sys$input
 $ run  dtypes
 $ type sys$input
 
-$ type sys$input
--------                 Running efc             -------
-$ run  efc
-$ type sys$input
+$! Skip this test for now because it opens the same file many times.
+$! Please see Issue 7620 in Jira about it.
+$! type sys$input
+$! -------                 Running efc             -------
+$! run  efc
+$! type sys$input
 
 $ type sys$input
 -------			Running enum     	-------
