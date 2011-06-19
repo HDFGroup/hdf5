@@ -52,6 +52,10 @@ FOREACH (example ${examples})
 ENDFOREACH (example ${examples})
 
 IF (BUILD_TESTING)
+  SET_TESTS_PROPERTIES (hl_ex_ex_lite2 PROPERTIES DEPENDS hl_ex_ex_lite1)
+ENDIF (BUILD_TESTING)
+
+IF (BUILD_TESTING)
   SET (HDF5_TEST_FILES
       image24pixel.txt
       image8.txt
