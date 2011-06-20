@@ -26,166 +26,222 @@
 H5_FCDLL char*  HD5f2cstring (_fcd fdesc, int len);
 H5_FCDLL void HD5packFstring (char *src, char *dest, size_t len);
 
+/*
+ *  Functions from H5DSfc.c
+ */
+
+#define nh5dsset_scale_c      H5_FC_FUNC_(h5dsset_scale_c, H5DSSET_SCALE_C)
+#define nh5dsattach_scale_c   H5_FC_FUNC_(h5dsattach_scale_c, H5DSATTACH_SCALE_C)
+#define nh5dsdetach_scale_c   H5_FC_FUNC_(h5dsdetach_scale_c, H5DSDETACH_SCALE_C)
+#define nh5dsis_attached_c    H5_FC_FUNC_(h5dsis_attached_c, H5DSIS_ATTACHED_C)
+#define nh5dsis_scale_c       H5_FC_FUNC_(h5dsis_scale_c, H5DSIS_SCALE_C)
+#define nh5dsset_label_c      H5_FC_FUNC_(h5dsset_label_c, H5DSSET_LABEL_C)
+#define nh5dsget_label_c      H5_FC_FUNC_(h5dsget_label_c, H5DSGET_LABEL_C)
+#define nh5dsget_scale_name_c H5_FC_FUNC_(h5dsget_scale_name_c,H5DSGET_SCALE_NAME_C)
+#define nh5dsget_num_scales_c H5_FC_FUNC_(h5dsget_num_scales_c,H5DSGET_NUM_SCALES_C)
+
 
 /*
-*  Functions from H5LTfc.c
-*/
-#   define nh5ltmake_dataset_c       H5_FC_FUNC_(h5ltmake_dataset_c, H5LTMAKE_DATASET_C)
-#   define nh5ltmake_dataset_int1_c  H5_FC_FUNC_(h5ltmake_dataset_int1_c, H5LTMAKE_DATASET_INT1_C)
-#   define nh5ltmake_dataset_int2_c  H5_FC_FUNC_(h5ltmake_dataset_int2_c, H5LTMAKE_DATASET_INT2_C)
-#   define nh5ltmake_dataset_int3_c  H5_FC_FUNC_(h5ltmake_dataset_int3_c, H5LTMAKE_DATASET_INT3_C)
-#   define nh5ltmake_dataset_int4_c  H5_FC_FUNC_(h5ltmake_dataset_int4_c, H5LTMAKE_DATASET_INT4_C)
-#   define nh5ltmake_dataset_int5_c  H5_FC_FUNC_(h5ltmake_dataset_int5_c, H5LTMAKE_DATASET_INT5_C)
-#   define nh5ltmake_dataset_int6_c  H5_FC_FUNC_(h5ltmake_dataset_int6_c, H5LTMAKE_DATASET_INT6_C)
-#   define nh5ltmake_dataset_int7_c  H5_FC_FUNC_(h5ltmake_dataset_int7_c, H5LTMAKE_DATASET_INT7_C)
-#   define nh5ltmake_dataset_fl1_c   H5_FC_FUNC_(h5ltmake_dataset_fl1_c, H5LTMAKE_DATASET_FL1_C)
-#   define nh5ltmake_dataset_fl2_c   H5_FC_FUNC_(h5ltmake_dataset_fl2_c, H5LTMAKE_DATASET_FL2_C)
-#   define nh5ltmake_dataset_fl3_c   H5_FC_FUNC_(h5ltmake_dataset_fl3_c, H5LTMAKE_DATASET_FL3_C)
-#   define nh5ltmake_dataset_fl4_c   H5_FC_FUNC_(h5ltmake_dataset_fl4_c, H5LTMAKE_DATASET_FL4_C)
-#   define nh5ltmake_dataset_fl5_c   H5_FC_FUNC_(h5ltmake_dataset_fl5_c, H5LTMAKE_DATASET_FL5_C)
-#   define nh5ltmake_dataset_fl6_c   H5_FC_FUNC_(h5ltmake_dataset_fl6_c, H5LTMAKE_DATASET_FL6_C)
-#   define nh5ltmake_dataset_fl7_c   H5_FC_FUNC_(h5ltmake_dataset_fl7_c, H5LTMAKE_DATASET_FL7_C)
-#   define nh5ltmake_dataset_dl1_c   H5_FC_FUNC_(h5ltmake_dataset_dl1_c, H5LTMAKE_DATASET_DL1_C)
-#   define nh5ltmake_dataset_dl2_c   H5_FC_FUNC_(h5ltmake_dataset_dl2_c, H5LTMAKE_DATASET_DL2_C)
-#   define nh5ltmake_dataset_dl3_c   H5_FC_FUNC_(h5ltmake_dataset_dl3_c, H5LTMAKE_DATASET_DL3_C)
-#   define nh5ltmake_dataset_dl4_c   H5_FC_FUNC_(h5ltmake_dataset_dl4_c, H5LTMAKE_DATASET_DL4_C)
-#   define nh5ltmake_dataset_dl5_c   H5_FC_FUNC_(h5ltmake_dataset_dl5_c, H5LTMAKE_DATASET_DL5_C)
-#   define nh5ltmake_dataset_dl6_c   H5_FC_FUNC_(h5ltmake_dataset_dl6_c, H5LTMAKE_DATASET_DL6_C)
-#   define nh5ltmake_dataset_dl7_c   H5_FC_FUNC_(h5ltmake_dataset_dl7_c, H5LTMAKE_DATASET_DL7_C)
-#   define nh5ltmake_dataset_nint1_c H5_FC_FUNC_(h5ltmake_dataset_nint1_c, H5LTMAKE_DATASET_NINT1_C)
-#   define nh5ltmake_dataset_nint2_c H5_FC_FUNC_(h5ltmake_dataset_nint2_c, H5LTMAKE_DATASET_NINT2_C)
-#   define nh5ltmake_dataset_nint3_c H5_FC_FUNC_(h5ltmake_dataset_nint3_c, H5LTMAKE_DATASET_NINT3_C)
-#   define nh5ltmake_dataset_nint4_c H5_FC_FUNC_(h5ltmake_dataset_nint4_c, H5LTMAKE_DATASET_NINT4_C)
-#   define nh5ltmake_dataset_nint5_c H5_FC_FUNC_(h5ltmake_dataset_nint5_c, H5LTMAKE_DATASET_NINT5_C)
-#   define nh5ltmake_dataset_nint6_c H5_FC_FUNC_(h5ltmake_dataset_nint6_c, H5LTMAKE_DATASET_NINT6_C)
-#   define nh5ltmake_dataset_nint7_c H5_FC_FUNC_(h5ltmake_dataset_nint7_c, H5LTMAKE_DATASET_NINT7_C)
-#   define nh5ltmake_dataset_nfl1_c  H5_FC_FUNC_(h5ltmake_dataset_nfl1_c, H5LTMAKE_DATASET_NFL1_C)
-#   define nh5ltmake_dataset_nfl2_c  H5_FC_FUNC_(h5ltmake_dataset_nfl2_c, H5LTMAKE_DATASET_NFL2_C)
-#   define nh5ltmake_dataset_nfl3_c  H5_FC_FUNC_(h5ltmake_dataset_nfl3_c, H5LTMAKE_DATASET_NFL3_C)
-#   define nh5ltmake_dataset_nfl4_c  H5_FC_FUNC_(h5ltmake_dataset_nfl4_c, H5LTMAKE_DATASET_NFL4_C)
-#   define nh5ltmake_dataset_nfl5_c  H5_FC_FUNC_(h5ltmake_dataset_nfl5_c, H5LTMAKE_DATASET_NFL5_C)
-#   define nh5ltmake_dataset_nfl6_c  H5_FC_FUNC_(h5ltmake_dataset_nfl6_c, H5LTMAKE_DATASET_NFL6_C)
-#   define nh5ltmake_dataset_nfl7_c  H5_FC_FUNC_(h5ltmake_dataset_nfl7_c, H5LTMAKE_DATASET_NFL7_C)
-#   define nh5ltmake_dataset_ndl1_c  H5_FC_FUNC_(h5ltmake_dataset_ndl1_c, H5LTMAKE_DATASET_NDL1_C)
-#   define nh5ltmake_dataset_ndl2_c  H5_FC_FUNC_(h5ltmake_dataset_ndl2_c, H5LTMAKE_DATASET_NDL2_C)
-#   define nh5ltmake_dataset_ndl3_c  H5_FC_FUNC_(h5ltmake_dataset_ndl3_c, H5LTMAKE_DATASET_NDL3_C)
-#   define nh5ltmake_dataset_ndl4_c  H5_FC_FUNC_(h5ltmake_dataset_ndl4_c, H5LTMAKE_DATASET_NDL4_C)
-#   define nh5ltmake_dataset_ndl5_c  H5_FC_FUNC_(h5ltmake_dataset_ndl5_c, H5LTMAKE_DATASET_NDL5_C)
-#   define nh5ltmake_dataset_ndl6_c  H5_FC_FUNC_(h5ltmake_dataset_ndl6_c, H5LTMAKE_DATASET_NDL6_C)
-#   define nh5ltmake_dataset_ndl7_c  H5_FC_FUNC_(h5ltmake_dataset_ndl7_c, H5LTMAKE_DATASET_NDL7_C)
-#   define nh5ltread_dataset_c       H5_FC_FUNC_(h5ltread_dataset_c, H5LTREAD_DATASET_C)
-#   define nh5ltread_dataset_int1_c         H5_FC_FUNC_(h5ltread_dataset_int1_c, H5LTREAD_DATASET_INT1_C)
-#   define nh5ltread_dataset_int2_c         H5_FC_FUNC_(h5ltread_dataset_int2_c, H5LTREAD_DATASET_INT2_C)
-#   define nh5ltread_dataset_int3_c         H5_FC_FUNC_(h5ltread_dataset_int3_c, H5LTREAD_DATASET_INT3_C)
-#   define nh5ltread_dataset_int4_c         H5_FC_FUNC_(h5ltread_dataset_int4_c, H5LTREAD_DATASET_INT4_C)
-#   define nh5ltread_dataset_int5_c         H5_FC_FUNC_(h5ltread_dataset_int5_c, H5LTREAD_DATASET_INT5_C)
-#   define nh5ltread_dataset_int6_c         H5_FC_FUNC_(h5ltread_dataset_int6_c, H5LTREAD_DATASET_INT6_C)
-#   define nh5ltread_dataset_int7_c         H5_FC_FUNC_(h5ltread_dataset_int7_c, H5LTREAD_DATASET_INT7_C)
-#   define nh5ltread_dataset_fl1_c         H5_FC_FUNC_(h5ltread_dataset_fl1_c, H5LTREAD_DATASET_FL1_C)
-#   define nh5ltread_dataset_fl2_c         H5_FC_FUNC_(h5ltread_dataset_fl2_c, H5LTREAD_DATASET_FL2_C)
-#   define nh5ltread_dataset_fl3_c         H5_FC_FUNC_(h5ltread_dataset_fl3_c, H5LTREAD_DATASET_FL3_C)
-#   define nh5ltread_dataset_fl4_c         H5_FC_FUNC_(h5ltread_dataset_fl4_c, H5LTREAD_DATASET_FL4_C)
-#   define nh5ltread_dataset_fl5_c         H5_FC_FUNC_(h5ltread_dataset_fl5_c, H5LTREAD_DATASET_FL5_C)
-#   define nh5ltread_dataset_fl6_c         H5_FC_FUNC_(h5ltread_dataset_fl6_c, H5LTREAD_DATASET_FL6_C)
-#   define nh5ltread_dataset_fl7_c         H5_FC_FUNC_(h5ltread_dataset_fl7_c, H5LTREAD_DATASET_FL7_C)
-#   define nh5ltread_dataset_dl1_c         H5_FC_FUNC_(h5ltread_dataset_dl1_c, H5LTREAD_DATASET_DL1_C)
-#   define nh5ltread_dataset_dl2_c         H5_FC_FUNC_(h5ltread_dataset_dl2_c, H5LTREAD_DATASET_DL2_C)
-#   define nh5ltread_dataset_dl3_c         H5_FC_FUNC_(h5ltread_dataset_dl3_c, H5LTREAD_DATASET_DL3_C)
-#   define nh5ltread_dataset_dl4_c         H5_FC_FUNC_(h5ltread_dataset_dl4_c, H5LTREAD_DATASET_DL4_C)
-#   define nh5ltread_dataset_dl5_c         H5_FC_FUNC_(h5ltread_dataset_dl5_c, H5LTREAD_DATASET_DL5_C)
-#   define nh5ltread_dataset_dl6_c         H5_FC_FUNC_(h5ltread_dataset_dl6_c, H5LTREAD_DATASET_DL6_C)
-#   define nh5ltread_dataset_dl7_c         H5_FC_FUNC_(h5ltread_dataset_dl7_c, H5LTREAD_DATASET_DL7_C)
-#   define nh5ltread_dataset_nint1_c         H5_FC_FUNC_(h5ltread_dataset_nint1_c, H5LTREAD_DATASET_NINT1_C)
-#   define nh5ltread_dataset_nint2_c         H5_FC_FUNC_(h5ltread_dataset_nint2_c, H5LTREAD_DATASET_NINT2_C)
-#   define nh5ltread_dataset_nint3_c         H5_FC_FUNC_(h5ltread_dataset_nint3_c, H5LTREAD_DATASET_NINT3_C)
-#   define nh5ltread_dataset_nint4_c         H5_FC_FUNC_(h5ltread_dataset_nint4_c, H5LTREAD_DATASET_NINT4_C)
-#   define nh5ltread_dataset_nint5_c         H5_FC_FUNC_(h5ltread_dataset_nint5_c, H5LTREAD_DATASET_NINT5_C)
-#   define nh5ltread_dataset_nint6_c         H5_FC_FUNC_(h5ltread_dataset_nint6_c, H5LTREAD_DATASET_NINT6_C)
-#   define nh5ltread_dataset_nint7_c         H5_FC_FUNC_(h5ltread_dataset_nint7_c, H5LTREAD_DATASET_NINT7_C)
-#   define nh5ltread_dataset_nfl1_c         H5_FC_FUNC_(h5ltread_dataset_nfl1_c, H5LTREAD_DATASET_NFL1_C)
-#   define nh5ltread_dataset_nfl2_c         H5_FC_FUNC_(h5ltread_dataset_nfl2_c, H5LTREAD_DATASET_NFL2_C)
-#   define nh5ltread_dataset_nfl3_c         H5_FC_FUNC_(h5ltread_dataset_nfl3_c, H5LTREAD_DATASET_NFL3_C)
-#   define nh5ltread_dataset_nfl4_c         H5_FC_FUNC_(h5ltread_dataset_nfl4_c, H5LTREAD_DATASET_NFL4_C)
-#   define nh5ltread_dataset_nfl5_c         H5_FC_FUNC_(h5ltread_dataset_nfl5_c, H5LTREAD_DATASET_NFL5_C)
-#   define nh5ltread_dataset_nfl6_c         H5_FC_FUNC_(h5ltread_dataset_nfl6_c, H5LTREAD_DATASET_NFL6_C)
-#   define nh5ltread_dataset_nfl7_c         H5_FC_FUNC_(h5ltread_dataset_nfl7_c, H5LTREAD_DATASET_NFL7_C)
-#   define nh5ltread_dataset_ndl1_c         H5_FC_FUNC_(h5ltread_dataset_ndl1_c, H5LTREAD_DATASET_NDL1_C)
-#   define nh5ltread_dataset_ndl2_c         H5_FC_FUNC_(h5ltread_dataset_ndl2_c, H5LTREAD_DATASET_NDL2_C)
-#   define nh5ltread_dataset_ndl3_c         H5_FC_FUNC_(h5ltread_dataset_ndl3_c, H5LTREAD_DATASET_NDL3_C)
-#   define nh5ltread_dataset_ndl4_c         H5_FC_FUNC_(h5ltread_dataset_ndl4_c, H5LTREAD_DATASET_NDL4_C)
-#   define nh5ltread_dataset_ndl5_c         H5_FC_FUNC_(h5ltread_dataset_ndl5_c, H5LTREAD_DATASET_NDL5_C)
-#   define nh5ltread_dataset_ndl6_c         H5_FC_FUNC_(h5ltread_dataset_ndl6_c, H5LTREAD_DATASET_NDL6_C)
-#   define nh5ltread_dataset_ndl7_c         H5_FC_FUNC_(h5ltread_dataset_ndl7_c, H5LTREAD_DATASET_NDL7_C)
-#   define nh5ltmake_dataset_string_c  H5_FC_FUNC_(h5ltmake_dataset_string_c, H5LTMAKE_DATASET_STRING_C)
-#   define nh5ltread_dataset_string_c  H5_FC_FUNC_(h5ltread_dataset_string_c, H5LTREAD_DATASET_STRING_C)
+ *  Functions from H5LTfc.c
+ */
+#define nh5ltmake_dataset_c       H5_FC_FUNC_(h5ltmake_dataset_c, H5LTMAKE_DATASET_C)
+#define nh5ltmake_dataset_int1_c  H5_FC_FUNC_(h5ltmake_dataset_int1_c, H5LTMAKE_DATASET_INT1_C)
+#define nh5ltmake_dataset_int2_c  H5_FC_FUNC_(h5ltmake_dataset_int2_c, H5LTMAKE_DATASET_INT2_C)
+#define nh5ltmake_dataset_int3_c  H5_FC_FUNC_(h5ltmake_dataset_int3_c, H5LTMAKE_DATASET_INT3_C)
+#define nh5ltmake_dataset_int4_c  H5_FC_FUNC_(h5ltmake_dataset_int4_c, H5LTMAKE_DATASET_INT4_C)
+#define nh5ltmake_dataset_int5_c  H5_FC_FUNC_(h5ltmake_dataset_int5_c, H5LTMAKE_DATASET_INT5_C)
+#define nh5ltmake_dataset_int6_c  H5_FC_FUNC_(h5ltmake_dataset_int6_c, H5LTMAKE_DATASET_INT6_C)
+#define nh5ltmake_dataset_int7_c  H5_FC_FUNC_(h5ltmake_dataset_int7_c, H5LTMAKE_DATASET_INT7_C)
+#define nh5ltmake_dataset_fl1_c   H5_FC_FUNC_(h5ltmake_dataset_fl1_c, H5LTMAKE_DATASET_FL1_C)
+#define nh5ltmake_dataset_fl2_c   H5_FC_FUNC_(h5ltmake_dataset_fl2_c, H5LTMAKE_DATASET_FL2_C)
+#define nh5ltmake_dataset_fl3_c   H5_FC_FUNC_(h5ltmake_dataset_fl3_c, H5LTMAKE_DATASET_FL3_C)
+#define nh5ltmake_dataset_fl4_c   H5_FC_FUNC_(h5ltmake_dataset_fl4_c, H5LTMAKE_DATASET_FL4_C)
+#define nh5ltmake_dataset_fl5_c   H5_FC_FUNC_(h5ltmake_dataset_fl5_c, H5LTMAKE_DATASET_FL5_C)
+#define nh5ltmake_dataset_fl6_c   H5_FC_FUNC_(h5ltmake_dataset_fl6_c, H5LTMAKE_DATASET_FL6_C)
+#define nh5ltmake_dataset_fl7_c   H5_FC_FUNC_(h5ltmake_dataset_fl7_c, H5LTMAKE_DATASET_FL7_C)
+#define nh5ltmake_dataset_dl1_c   H5_FC_FUNC_(h5ltmake_dataset_dl1_c, H5LTMAKE_DATASET_DL1_C)
+#define nh5ltmake_dataset_dl2_c   H5_FC_FUNC_(h5ltmake_dataset_dl2_c, H5LTMAKE_DATASET_DL2_C)
+#define nh5ltmake_dataset_dl3_c   H5_FC_FUNC_(h5ltmake_dataset_dl3_c, H5LTMAKE_DATASET_DL3_C)
+#define nh5ltmake_dataset_dl4_c   H5_FC_FUNC_(h5ltmake_dataset_dl4_c, H5LTMAKE_DATASET_DL4_C)
+#define nh5ltmake_dataset_dl5_c   H5_FC_FUNC_(h5ltmake_dataset_dl5_c, H5LTMAKE_DATASET_DL5_C)
+#define nh5ltmake_dataset_dl6_c   H5_FC_FUNC_(h5ltmake_dataset_dl6_c, H5LTMAKE_DATASET_DL6_C)
+#define nh5ltmake_dataset_dl7_c   H5_FC_FUNC_(h5ltmake_dataset_dl7_c, H5LTMAKE_DATASET_DL7_C)
+#define nh5ltmake_dataset_nint1_c H5_FC_FUNC_(h5ltmake_dataset_nint1_c, H5LTMAKE_DATASET_NINT1_C)
+#define nh5ltmake_dataset_nint2_c H5_FC_FUNC_(h5ltmake_dataset_nint2_c, H5LTMAKE_DATASET_NINT2_C)
+#define nh5ltmake_dataset_nint3_c H5_FC_FUNC_(h5ltmake_dataset_nint3_c, H5LTMAKE_DATASET_NINT3_C)
+#define nh5ltmake_dataset_nint4_c H5_FC_FUNC_(h5ltmake_dataset_nint4_c, H5LTMAKE_DATASET_NINT4_C)
+#define nh5ltmake_dataset_nint5_c H5_FC_FUNC_(h5ltmake_dataset_nint5_c, H5LTMAKE_DATASET_NINT5_C)
+#define nh5ltmake_dataset_nint6_c H5_FC_FUNC_(h5ltmake_dataset_nint6_c, H5LTMAKE_DATASET_NINT6_C)
+#define nh5ltmake_dataset_nint7_c H5_FC_FUNC_(h5ltmake_dataset_nint7_c, H5LTMAKE_DATASET_NINT7_C)
+#define nh5ltmake_dataset_nfl1_c  H5_FC_FUNC_(h5ltmake_dataset_nfl1_c, H5LTMAKE_DATASET_NFL1_C)
+#define nh5ltmake_dataset_nfl2_c  H5_FC_FUNC_(h5ltmake_dataset_nfl2_c, H5LTMAKE_DATASET_NFL2_C)
+#define nh5ltmake_dataset_nfl3_c  H5_FC_FUNC_(h5ltmake_dataset_nfl3_c, H5LTMAKE_DATASET_NFL3_C)
+#define nh5ltmake_dataset_nfl4_c  H5_FC_FUNC_(h5ltmake_dataset_nfl4_c, H5LTMAKE_DATASET_NFL4_C)
+#define nh5ltmake_dataset_nfl5_c  H5_FC_FUNC_(h5ltmake_dataset_nfl5_c, H5LTMAKE_DATASET_NFL5_C)
+#define nh5ltmake_dataset_nfl6_c  H5_FC_FUNC_(h5ltmake_dataset_nfl6_c, H5LTMAKE_DATASET_NFL6_C)
+#define nh5ltmake_dataset_nfl7_c  H5_FC_FUNC_(h5ltmake_dataset_nfl7_c, H5LTMAKE_DATASET_NFL7_C)
+#define nh5ltmake_dataset_ndl1_c  H5_FC_FUNC_(h5ltmake_dataset_ndl1_c, H5LTMAKE_DATASET_NDL1_C)
+#define nh5ltmake_dataset_ndl2_c  H5_FC_FUNC_(h5ltmake_dataset_ndl2_c, H5LTMAKE_DATASET_NDL2_C)
+#define nh5ltmake_dataset_ndl3_c  H5_FC_FUNC_(h5ltmake_dataset_ndl3_c, H5LTMAKE_DATASET_NDL3_C)
+#define nh5ltmake_dataset_ndl4_c  H5_FC_FUNC_(h5ltmake_dataset_ndl4_c, H5LTMAKE_DATASET_NDL4_C)
+#define nh5ltmake_dataset_ndl5_c  H5_FC_FUNC_(h5ltmake_dataset_ndl5_c, H5LTMAKE_DATASET_NDL5_C)
+#define nh5ltmake_dataset_ndl6_c  H5_FC_FUNC_(h5ltmake_dataset_ndl6_c, H5LTMAKE_DATASET_NDL6_C)
+#define nh5ltmake_dataset_ndl7_c  H5_FC_FUNC_(h5ltmake_dataset_ndl7_c, H5LTMAKE_DATASET_NDL7_C)
+#define nh5ltread_dataset_c       H5_FC_FUNC_(h5ltread_dataset_c, H5LTREAD_DATASET_C)
+#define nh5ltread_dataset_int1_c         H5_FC_FUNC_(h5ltread_dataset_int1_c, H5LTREAD_DATASET_INT1_C)
+#define nh5ltread_dataset_int2_c         H5_FC_FUNC_(h5ltread_dataset_int2_c, H5LTREAD_DATASET_INT2_C)
+#define nh5ltread_dataset_int3_c         H5_FC_FUNC_(h5ltread_dataset_int3_c, H5LTREAD_DATASET_INT3_C)
+#define nh5ltread_dataset_int4_c         H5_FC_FUNC_(h5ltread_dataset_int4_c, H5LTREAD_DATASET_INT4_C)
+#define nh5ltread_dataset_int5_c         H5_FC_FUNC_(h5ltread_dataset_int5_c, H5LTREAD_DATASET_INT5_C)
+#define nh5ltread_dataset_int6_c         H5_FC_FUNC_(h5ltread_dataset_int6_c, H5LTREAD_DATASET_INT6_C)
+#define nh5ltread_dataset_int7_c         H5_FC_FUNC_(h5ltread_dataset_int7_c, H5LTREAD_DATASET_INT7_C)
+#define nh5ltread_dataset_fl1_c         H5_FC_FUNC_(h5ltread_dataset_fl1_c, H5LTREAD_DATASET_FL1_C)
+#define nh5ltread_dataset_fl2_c         H5_FC_FUNC_(h5ltread_dataset_fl2_c, H5LTREAD_DATASET_FL2_C)
+#define nh5ltread_dataset_fl3_c         H5_FC_FUNC_(h5ltread_dataset_fl3_c, H5LTREAD_DATASET_FL3_C)
+#define nh5ltread_dataset_fl4_c         H5_FC_FUNC_(h5ltread_dataset_fl4_c, H5LTREAD_DATASET_FL4_C)
+#define nh5ltread_dataset_fl5_c         H5_FC_FUNC_(h5ltread_dataset_fl5_c, H5LTREAD_DATASET_FL5_C)
+#define nh5ltread_dataset_fl6_c         H5_FC_FUNC_(h5ltread_dataset_fl6_c, H5LTREAD_DATASET_FL6_C)
+#define nh5ltread_dataset_fl7_c         H5_FC_FUNC_(h5ltread_dataset_fl7_c, H5LTREAD_DATASET_FL7_C)
+#define nh5ltread_dataset_dl1_c         H5_FC_FUNC_(h5ltread_dataset_dl1_c, H5LTREAD_DATASET_DL1_C)
+#define nh5ltread_dataset_dl2_c         H5_FC_FUNC_(h5ltread_dataset_dl2_c, H5LTREAD_DATASET_DL2_C)
+#define nh5ltread_dataset_dl3_c         H5_FC_FUNC_(h5ltread_dataset_dl3_c, H5LTREAD_DATASET_DL3_C)
+#define nh5ltread_dataset_dl4_c         H5_FC_FUNC_(h5ltread_dataset_dl4_c, H5LTREAD_DATASET_DL4_C)
+#define nh5ltread_dataset_dl5_c         H5_FC_FUNC_(h5ltread_dataset_dl5_c, H5LTREAD_DATASET_DL5_C)
+#define nh5ltread_dataset_dl6_c         H5_FC_FUNC_(h5ltread_dataset_dl6_c, H5LTREAD_DATASET_DL6_C)
+#define nh5ltread_dataset_dl7_c         H5_FC_FUNC_(h5ltread_dataset_dl7_c, H5LTREAD_DATASET_DL7_C)
+#define nh5ltread_dataset_nint1_c         H5_FC_FUNC_(h5ltread_dataset_nint1_c, H5LTREAD_DATASET_NINT1_C)
+#define nh5ltread_dataset_nint2_c         H5_FC_FUNC_(h5ltread_dataset_nint2_c, H5LTREAD_DATASET_NINT2_C)
+#define nh5ltread_dataset_nint3_c         H5_FC_FUNC_(h5ltread_dataset_nint3_c, H5LTREAD_DATASET_NINT3_C)
+#define nh5ltread_dataset_nint4_c         H5_FC_FUNC_(h5ltread_dataset_nint4_c, H5LTREAD_DATASET_NINT4_C)
+#define nh5ltread_dataset_nint5_c         H5_FC_FUNC_(h5ltread_dataset_nint5_c, H5LTREAD_DATASET_NINT5_C)
+#define nh5ltread_dataset_nint6_c         H5_FC_FUNC_(h5ltread_dataset_nint6_c, H5LTREAD_DATASET_NINT6_C)
+#define nh5ltread_dataset_nint7_c         H5_FC_FUNC_(h5ltread_dataset_nint7_c, H5LTREAD_DATASET_NINT7_C)
+#define nh5ltread_dataset_nfl1_c         H5_FC_FUNC_(h5ltread_dataset_nfl1_c, H5LTREAD_DATASET_NFL1_C)
+#define nh5ltread_dataset_nfl2_c         H5_FC_FUNC_(h5ltread_dataset_nfl2_c, H5LTREAD_DATASET_NFL2_C)
+#define nh5ltread_dataset_nfl3_c         H5_FC_FUNC_(h5ltread_dataset_nfl3_c, H5LTREAD_DATASET_NFL3_C)
+#define nh5ltread_dataset_nfl4_c         H5_FC_FUNC_(h5ltread_dataset_nfl4_c, H5LTREAD_DATASET_NFL4_C)
+#define nh5ltread_dataset_nfl5_c         H5_FC_FUNC_(h5ltread_dataset_nfl5_c, H5LTREAD_DATASET_NFL5_C)
+#define nh5ltread_dataset_nfl6_c         H5_FC_FUNC_(h5ltread_dataset_nfl6_c, H5LTREAD_DATASET_NFL6_C)
+#define nh5ltread_dataset_nfl7_c         H5_FC_FUNC_(h5ltread_dataset_nfl7_c, H5LTREAD_DATASET_NFL7_C)
+#define nh5ltread_dataset_ndl1_c         H5_FC_FUNC_(h5ltread_dataset_ndl1_c, H5LTREAD_DATASET_NDL1_C)
+#define nh5ltread_dataset_ndl2_c         H5_FC_FUNC_(h5ltread_dataset_ndl2_c, H5LTREAD_DATASET_NDL2_C)
+#define nh5ltread_dataset_ndl3_c         H5_FC_FUNC_(h5ltread_dataset_ndl3_c, H5LTREAD_DATASET_NDL3_C)
+#define nh5ltread_dataset_ndl4_c         H5_FC_FUNC_(h5ltread_dataset_ndl4_c, H5LTREAD_DATASET_NDL4_C)
+#define nh5ltread_dataset_ndl5_c         H5_FC_FUNC_(h5ltread_dataset_ndl5_c, H5LTREAD_DATASET_NDL5_C)
+#define nh5ltread_dataset_ndl6_c         H5_FC_FUNC_(h5ltread_dataset_ndl6_c, H5LTREAD_DATASET_NDL6_C)
+#define nh5ltread_dataset_ndl7_c         H5_FC_FUNC_(h5ltread_dataset_ndl7_c, H5LTREAD_DATASET_NDL7_C)
+#define nh5ltmake_dataset_string_c  H5_FC_FUNC_(h5ltmake_dataset_string_c, H5LTMAKE_DATASET_STRING_C)
+#define nh5ltread_dataset_string_c  H5_FC_FUNC_(h5ltread_dataset_string_c, H5LTREAD_DATASET_STRING_C)
 
-#   define nh5ltset_attribute_int_c    H5_FC_FUNC_(h5ltset_attribute_int_c, H5LTSET_ATTRIBUTE_INT_C)
-#   define nh5ltset_attribute_float_c  H5_FC_FUNC_(h5ltset_attribute_float_c, H5LTSET_ATTRIBUTE_FLOAT_C)
-#   define nh5ltset_attribute_double_c H5_FC_FUNC_(h5ltset_attribute_double_c, H5LTSET_ATTRIBUTE_DOUBLE_C)
-#   define nh5ltset_attribute_string_c H5_FC_FUNC_(h5ltset_attribute_string_c, H5LTSET_ATTRIBUTE_STRING_C)
+#define nh5ltset_attribute_int_c    H5_FC_FUNC_(h5ltset_attribute_int_c, H5LTSET_ATTRIBUTE_INT_C)
+#define nh5ltset_attribute_float_c  H5_FC_FUNC_(h5ltset_attribute_float_c, H5LTSET_ATTRIBUTE_FLOAT_C)
+#define nh5ltset_attribute_double_c H5_FC_FUNC_(h5ltset_attribute_double_c, H5LTSET_ATTRIBUTE_DOUBLE_C)
+#define nh5ltset_attribute_string_c H5_FC_FUNC_(h5ltset_attribute_string_c, H5LTSET_ATTRIBUTE_STRING_C)
 
-#   define nh5ltget_attribute_int_c    H5_FC_FUNC_(h5ltget_attribute_int_c, H5LTGET_ATTRIBUTE_INT_C)
-#   define nh5ltget_attribute_float_c  H5_FC_FUNC_(h5ltget_attribute_float_c, H5LTGET_ATTRIBUTE_FLOAT_C)
-#   define nh5ltget_attribute_double_c H5_FC_FUNC_(h5ltget_attribute_double_c, H5LTGET_ATTRIBUTE_DOUBLE_C)
-#   define nh5ltget_attribute_string_c H5_FC_FUNC_(h5ltget_attribute_string_c, H5LTGET_ATTRIBUTE_STRING_C)
+#define nh5ltget_attribute_int_c    H5_FC_FUNC_(h5ltget_attribute_int_c, H5LTGET_ATTRIBUTE_INT_C)
+#define nh5ltget_attribute_float_c  H5_FC_FUNC_(h5ltget_attribute_float_c, H5LTGET_ATTRIBUTE_FLOAT_C)
+#define nh5ltget_attribute_double_c H5_FC_FUNC_(h5ltget_attribute_double_c, H5LTGET_ATTRIBUTE_DOUBLE_C)
+#define nh5ltget_attribute_string_c H5_FC_FUNC_(h5ltget_attribute_string_c, H5LTGET_ATTRIBUTE_STRING_C)
 
-#   define nh5ltget_dataset_ndims_c    H5_FC_FUNC_(h5ltget_dataset_ndims_c, H5LTGET_DATASET_NDIMS_C)
-#   define nh5ltfind_dataset_c         H5_FC_FUNC_(h5ltfind_dataset_c, H5LTFIND_DATASET_C)
-#   define nh5ltget_dataset_info_c     H5_FC_FUNC_(h5ltget_dataset_info_c, H5LTGET_DATASET_INFO_C)
+#define nh5ltget_dataset_ndims_c    H5_FC_FUNC_(h5ltget_dataset_ndims_c, H5LTGET_DATASET_NDIMS_C)
+#define nh5ltfind_dataset_c         H5_FC_FUNC_(h5ltfind_dataset_c, H5LTFIND_DATASET_C)
+#define nh5ltget_dataset_info_c     H5_FC_FUNC_(h5ltget_dataset_info_c, H5LTGET_DATASET_INFO_C)
 
-#   define nh5ltget_attribute_ndims_c  H5_FC_FUNC_(h5ltget_attribute_ndims_c, H5LTGET_ATTRIBUTE_NDIMS_C)
-#   define nh5ltget_attribute_info_c   H5_FC_FUNC_(h5ltget_attribute_info_c, H5LTGET_ATTRIBUTE_INFO_C)
+#define nh5ltget_attribute_ndims_c  H5_FC_FUNC_(h5ltget_attribute_ndims_c, H5LTGET_ATTRIBUTE_NDIMS_C)
+#define nh5ltget_attribute_info_c   H5_FC_FUNC_(h5ltget_attribute_info_c, H5LTGET_ATTRIBUTE_INFO_C)
 
 /*-------------------------------------------------------------------------
 * Image
 *-------------------------------------------------------------------------
 */
-#   define nh5immake_image_8bit_c      H5_FC_FUNC_(h5immake_image_8bit_c, H5IMMAKE_IMAGE_8BIT_C)
-#   define nh5immake_image_24bit_c     H5_FC_FUNC_(h5immake_image_24bit_c, H5IMMAKE_IMAGE_24BIT_C)
-#   define nh5imread_image_c           H5_FC_FUNC_(h5imread_image_c, H5IMREAD_IMAGE_C)
-#   define nh5imget_image_info_c       H5_FC_FUNC_(h5imget_image_info_c, H5IMGET_IMAGE_INFO_C)
-#   define nh5imis_image_c             H5_FC_FUNC_(h5imis_image_c, H5IMIS_IMAGE_C)
-#   define nh5immake_palette_c         H5_FC_FUNC_(h5immake_palette_c, H5IMMAKE_PALETTE_C)
-#   define nh5imlink_palette_c         H5_FC_FUNC_(h5imlink_palette_c, H5IMLINK_PALETTE_C)
-#   define nh5imunlink_palette_c       H5_FC_FUNC_(h5imunlink_palette_c, H5IMUNLINK_PALETTE_C)
-#   define nh5imget_npalettes_c        H5_FC_FUNC_(h5imget_npalettes_c, H5IMGET_NPALETTES_C)
-#   define nh5imget_palette_info_c     H5_FC_FUNC_(h5imget_palette_info_c, H5IMGET_PALETTE_INFO_C)
-#   define nh5imget_palette_c          H5_FC_FUNC_(h5imget_palette_c, H5IMGET_PALETTE_C)
-#   define nh5imis_palette_c           H5_FC_FUNC_(h5imis_palette_c, H5IMIS_PALETTE_C)
+#define nh5immake_image_8bit_c      H5_FC_FUNC_(h5immake_image_8bit_c, H5IMMAKE_IMAGE_8BIT_C)
+#define nh5immake_image_24bit_c     H5_FC_FUNC_(h5immake_image_24bit_c, H5IMMAKE_IMAGE_24BIT_C)
+#define nh5imread_image_c           H5_FC_FUNC_(h5imread_image_c, H5IMREAD_IMAGE_C)
+#define nh5imget_image_info_c       H5_FC_FUNC_(h5imget_image_info_c, H5IMGET_IMAGE_INFO_C)
+#define nh5imis_image_c             H5_FC_FUNC_(h5imis_image_c, H5IMIS_IMAGE_C)
+#define nh5immake_palette_c         H5_FC_FUNC_(h5immake_palette_c, H5IMMAKE_PALETTE_C)
+#define nh5imlink_palette_c         H5_FC_FUNC_(h5imlink_palette_c, H5IMLINK_PALETTE_C)
+#define nh5imunlink_palette_c       H5_FC_FUNC_(h5imunlink_palette_c, H5IMUNLINK_PALETTE_C)
+#define nh5imget_npalettes_c        H5_FC_FUNC_(h5imget_npalettes_c, H5IMGET_NPALETTES_C)
+#define nh5imget_palette_info_c     H5_FC_FUNC_(h5imget_palette_info_c, H5IMGET_PALETTE_INFO_C)
+#define nh5imget_palette_c          H5_FC_FUNC_(h5imget_palette_c, H5IMGET_PALETTE_C)
+#define nh5imis_palette_c           H5_FC_FUNC_(h5imis_palette_c, H5IMIS_PALETTE_C)
 
 /*-------------------------------------------------------------------------
 * Table
 *-------------------------------------------------------------------------
 */
-#   define nh5tbmake_table_c           H5_FC_FUNC_(h5tbmake_table_c, H5TBMAKE_TABLE_C)
-#   define nh5tbwrite_field_name_c     H5_FC_FUNC_(h5tbwrite_field_name_c, H5TBWRITE_FIELD_NAME_C)
-#   define nh5tbwrite_field_name_int_c    H5_FC_FUNC_(h5tbwrite_field_name_int_c, H5TBWRITE_FIELD_NAME_INT_C)
-#   define nh5tbwrite_field_name_fl_c     H5_FC_FUNC_(h5tbwrite_field_name_fl_c, H5TBWRITE_FIELD_NAME_FL_C)
-#   define nh5tbwrite_field_name_dl_c     H5_FC_FUNC_(h5tbwrite_field_name_dl_c, H5TBWRITE_FIELD_NAME_DL_C)
-#   define nh5tbwrite_field_name_st_c     H5_FC_FUNC_(h5tbwrite_field_name_st_c, H5TBWRITE_FIELD_NAME_ST_C)
-#   define nh5tbread_field_name_c      H5_FC_FUNC_(h5tbread_field_name_c, H5TBREAD_FIELD_NAME_C)
-#   define nh5tbread_field_name_int_c     H5_FC_FUNC_(h5tbread_field_name_int_c, H5TBREAD_FIELD_NAME_INT_C)
-#   define nh5tbread_field_name_fl_c      H5_FC_FUNC_(h5tbread_field_name_fl_c, H5TBREAD_FIELD_NAME_FL_C)
-#   define nh5tbread_field_name_dl_c      H5_FC_FUNC_(h5tbread_field_name_dl_c, H5TBREAD_FIELD_NAME_DL_C)
-#   define nh5tbread_field_name_st_c      H5_FC_FUNC_(h5tbread_field_name_st_c, H5TBREAD_FIELD_NAME_ST_C)
-#   define nh5tbwrite_field_index_c    H5_FC_FUNC_(h5tbwrite_field_index_c, H5TBWRITE_FIELD_INDEX_C)
-#   define nh5tbwrite_field_index_int_c   H5_FC_FUNC_(h5tbwrite_field_index_int_c, H5TBWRITE_FIELD_INDEX_INT_C)
-#   define nh5tbwrite_field_index_fl_c    H5_FC_FUNC_(h5tbwrite_field_index_fl_c, H5TBWRITE_FIELD_INDEX_FL_C)
-#   define nh5tbwrite_field_index_dl_c    H5_FC_FUNC_(h5tbwrite_field_index_dl_c, H5TBWRITE_FIELD_INDEX_DL_C)
-#   define nh5tbwrite_field_index_st_c    H5_FC_FUNC_(h5tbwrite_field_index_st_c, H5TBWRITE_FIELD_INDEX_ST_C)
-#   define nh5tbread_field_index_c     H5_FC_FUNC_(h5tbread_field_index_c, H5TBREAD_FIELD_INDEX_C)
-#   define nh5tbread_field_index_int_c    H5_FC_FUNC_(h5tbread_field_index_int_c, H5TBREAD_FIELD_INDEX_INT_C)
-#   define nh5tbread_field_index_fl_c     H5_FC_FUNC_(h5tbread_field_index_fl_c, H5TBREAD_FIELD_INDEX_FL_C)
-#   define nh5tbread_field_index_dl_c     H5_FC_FUNC_(h5tbread_field_index_dl_c, H5TBREAD_FIELD_INDEX_DL_C)
-#   define nh5tbread_field_index_st_c     H5_FC_FUNC_(h5tbread_field_index_st_c, H5TBREAD_FIELD_INDEX_ST_C)
-#   define nh5tbinsert_field_c         H5_FC_FUNC_(h5tbinsert_field_c, H5TBINSERT_FIELD_C)
-#   define nh5tbinsert_field_int_c        H5_FC_FUNC_(h5tbinsert_field_int_c, H5TBINSERT_FIELD_INT_C)
-#   define nh5tbinsert_field_fl_c         H5_FC_FUNC_(h5tbinsert_field_fl_c, H5TBINSERT_FIELD_FL_C)
-#   define nh5tbinsert_field_dl_c         H5_FC_FUNC_(h5tbinsert_field_dl_c, H5TBINSERT_FIELD_DL_C)
-#   define nh5tbinsert_field_st_c         H5_FC_FUNC_(h5tbinsert_field_st_c, H5TBINSERT_FIELD_ST_C)
-#   define nh5tbdelete_field_c         H5_FC_FUNC_(h5tbdelete_field_c, H5TBDELETE_FIELD_C)
-#   define nh5tbget_table_info_c       H5_FC_FUNC_(h5tbget_table_info_c, H5TBGET_TABLE_INFO_C)
-#   define nh5tbget_field_info_c       H5_FC_FUNC_(h5tbget_field_info_c, H5TBGET_FIELD_INFO_C)
+#define nh5tbmake_table_c           H5_FC_FUNC_(h5tbmake_table_c, H5TBMAKE_TABLE_C)
+#define nh5tbwrite_field_name_c     H5_FC_FUNC_(h5tbwrite_field_name_c, H5TBWRITE_FIELD_NAME_C)
+#define nh5tbwrite_field_name_int_c    H5_FC_FUNC_(h5tbwrite_field_name_int_c, H5TBWRITE_FIELD_NAME_INT_C)
+#define nh5tbwrite_field_name_fl_c     H5_FC_FUNC_(h5tbwrite_field_name_fl_c, H5TBWRITE_FIELD_NAME_FL_C)
+#define nh5tbwrite_field_name_dl_c     H5_FC_FUNC_(h5tbwrite_field_name_dl_c, H5TBWRITE_FIELD_NAME_DL_C)
+#define nh5tbwrite_field_name_st_c     H5_FC_FUNC_(h5tbwrite_field_name_st_c, H5TBWRITE_FIELD_NAME_ST_C)
+#define nh5tbread_field_name_c      H5_FC_FUNC_(h5tbread_field_name_c, H5TBREAD_FIELD_NAME_C)
+#define nh5tbread_field_name_int_c     H5_FC_FUNC_(h5tbread_field_name_int_c, H5TBREAD_FIELD_NAME_INT_C)
+#define nh5tbread_field_name_fl_c      H5_FC_FUNC_(h5tbread_field_name_fl_c, H5TBREAD_FIELD_NAME_FL_C)
+#define nh5tbread_field_name_dl_c      H5_FC_FUNC_(h5tbread_field_name_dl_c, H5TBREAD_FIELD_NAME_DL_C)
+#define nh5tbread_field_name_st_c      H5_FC_FUNC_(h5tbread_field_name_st_c, H5TBREAD_FIELD_NAME_ST_C)
+#define nh5tbwrite_field_index_c    H5_FC_FUNC_(h5tbwrite_field_index_c, H5TBWRITE_FIELD_INDEX_C)
+#define nh5tbwrite_field_index_int_c   H5_FC_FUNC_(h5tbwrite_field_index_int_c, H5TBWRITE_FIELD_INDEX_INT_C)
+#define nh5tbwrite_field_index_fl_c    H5_FC_FUNC_(h5tbwrite_field_index_fl_c, H5TBWRITE_FIELD_INDEX_FL_C)
+#define nh5tbwrite_field_index_dl_c    H5_FC_FUNC_(h5tbwrite_field_index_dl_c, H5TBWRITE_FIELD_INDEX_DL_C)
+#define nh5tbwrite_field_index_st_c    H5_FC_FUNC_(h5tbwrite_field_index_st_c, H5TBWRITE_FIELD_INDEX_ST_C)
+#define nh5tbread_field_index_c     H5_FC_FUNC_(h5tbread_field_index_c, H5TBREAD_FIELD_INDEX_C)
+#define nh5tbread_field_index_int_c    H5_FC_FUNC_(h5tbread_field_index_int_c, H5TBREAD_FIELD_INDEX_INT_C)
+#define nh5tbread_field_index_fl_c     H5_FC_FUNC_(h5tbread_field_index_fl_c, H5TBREAD_FIELD_INDEX_FL_C)
+#define nh5tbread_field_index_dl_c     H5_FC_FUNC_(h5tbread_field_index_dl_c, H5TBREAD_FIELD_INDEX_DL_C)
+#define nh5tbread_field_index_st_c     H5_FC_FUNC_(h5tbread_field_index_st_c, H5TBREAD_FIELD_INDEX_ST_C)
+#define nh5tbinsert_field_c         H5_FC_FUNC_(h5tbinsert_field_c, H5TBINSERT_FIELD_C)
+#define nh5tbinsert_field_int_c        H5_FC_FUNC_(h5tbinsert_field_int_c, H5TBINSERT_FIELD_INT_C)
+#define nh5tbinsert_field_fl_c         H5_FC_FUNC_(h5tbinsert_field_fl_c, H5TBINSERT_FIELD_FL_C)
+#define nh5tbinsert_field_dl_c         H5_FC_FUNC_(h5tbinsert_field_dl_c, H5TBINSERT_FIELD_DL_C)
+#define nh5tbinsert_field_st_c         H5_FC_FUNC_(h5tbinsert_field_st_c, H5TBINSERT_FIELD_ST_C)
+#define nh5tbdelete_field_c         H5_FC_FUNC_(h5tbdelete_field_c, H5TBDELETE_FIELD_C)
+#define nh5tbget_table_info_c       H5_FC_FUNC_(h5tbget_table_info_c, H5TBGET_TABLE_INFO_C)
+#define nh5tbget_field_info_c       H5_FC_FUNC_(h5tbget_field_info_c, H5TBGET_FIELD_INFO_C)
+
+HDF5_HL_F90CSTUBDLL
+int_f
+nh5dsset_scale_c(hid_t_f *dsid, _fcd dimname, int_f *dimnamelen);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+nh5dsattach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+nh5dsattach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+nh5dsdetach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+nh5dsis_attached_c( hid_t_f *did, hid_t_f *dsid, int_f *idx, int_f *c_is_attached);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+nh5dsget_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *size);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+nh5dsis_scale_c(hid_t_f *did, int_f *is_scale);
+
+
+HDF5_HL_F90CSTUBDLL
+int_f
+nh5dsset_label_c(hid_t_f *did, int_f *idx, _fcd label, int_f *labellen);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+nh5dsget_scale_name_c(hid_t_f *did, _fcd label, size_t_f *size);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+nh5dsget_num_scales_c( hid_t_f *did, int_f *idx, int_f *num_scales);
+
 
 HDF5_HL_F90CSTUBDLL
 int_f
