@@ -320,7 +320,16 @@ IF (BUILD_TESTING)
       IF (NOT ${resultcode} STREQUAL "0")
         SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
       ENDIF (NOT ${resultcode} STREQUAL "0")
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+      SET (last_test "H5DIFF-${resultfile}")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5DIFF-clear-${resultfile}-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove ${resultfile}.out ${resultfile}.out.err
+      )
       ADD_TEST (
           NAME H5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -333,11 +342,8 @@ IF (BUILD_TESTING)
               -D "TEST_APPEND=EXIT CODE:"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
+      SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES DEPENDS "H5DIFF-clear-${resultfile}-objects")
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5DIFF-${resultfile}")
   ENDMACRO (ADD_H5_TEST file)
 
 ##############################################################################
@@ -390,9 +396,9 @@ IF (BUILD_TESTING)
   SET (ATTR_VERBOSE_LEVEL_FILE1 h5diff_attr_v_level1.h5)
   SET (ATTR_VERBOSE_LEVEL_FILE2 h5diff_attr_v_level2.h5)
 
-
-  # Remove any output file left over from previous test run
-  ADD_TEST (
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    # Remove any output file left over from previous test run
+    ADD_TEST (
       NAME H5DIFF-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
@@ -694,11 +700,12 @@ IF (BUILD_TESTING)
           h5diff_80.out.err
           h5diff_90.out
           h5diff_90.out.err
-  )
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5DIFF-clearall-objects PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5DIFF-clearall-objects")
+    )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DIFF-clearall-objects PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5DIFF-clearall-objects")
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
 # ############################################################################
 # # Common usage
