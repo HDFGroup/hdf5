@@ -1947,6 +1947,7 @@
 ./hl/fortran/Makefile.in
 ./hl/fortran/examples/Makefile.am
 ./hl/fortran/examples/Makefile.in
+./hl/fortran/examples/ex_ds1.f90
 ./hl/fortran/examples/exlite.f90
 ./hl/fortran/examples/run-hlfortran-ex.sh.in
 ./hl/fortran/src/H5DSfc.c
