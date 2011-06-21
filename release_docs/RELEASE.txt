@@ -534,6 +534,12 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5dump to display the first line of each element into correct 
+          position for multiple dimention array type.
+          Before this fix, the first line of each element in array were 
+          displayed after the last line of previous element without
+          moving to the next line (+indentation). 
+          Bug #HDFFV-5878  (JKM 06/15/2011)
         - Fixed h5dump to display correct value for H5T_STD_I8LE dataset
           on a system (ppc64, linux, Big-Endian, clustering). 
           Bug #HDFFV-7594  (ABERT & JKM 05/12/2011)
