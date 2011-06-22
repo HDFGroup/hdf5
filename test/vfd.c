@@ -1277,6 +1277,7 @@ test_multi_compat(void)
     if(H5Fclose(file) < 0)
         TEST_ERROR;
 
+    h5_cleanup(FILENAME, fapl);
     PASSED();
 
     return 0;

@@ -94,6 +94,8 @@ SET (HDF5_REFERENCE_TEST_FILES
     le_extlink1.h5
     le_extlink2.h5
     mergemsg.h5
+    multi_file_v16-r.h5
+    multi_file_v16-s.h5
     noencoder.h5
     specmetaread.h5
     tarrold.h5
@@ -224,6 +226,8 @@ ADD_TEST (
         extlinks19B00027.h5
         extlinks19B00028.h5
         fheap.h5
+        new_multi_file_v16-r.h5
+        new_multi_file_v16-s.h5
         objcopy_ext.h5
         sys_file1
         tattr.h5

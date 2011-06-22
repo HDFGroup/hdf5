@@ -125,7 +125,8 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
     objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5       \
-    earray.h5 efc[0-5].h5 log_vfd_out.log
+    earray.h5 efc[0-5].h5 log_vfd_out.log new_multi_file_v16-r.h5    \
+    new_multi_file_v16-s.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
