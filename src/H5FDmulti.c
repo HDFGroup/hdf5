@@ -83,6 +83,7 @@ typedef struct H5FD_multi_fapl_t {
     hid_t	memb_fapl[H5FD_MEM_NTYPES];/*member access properties	*/
     char	*memb_name[H5FD_MEM_NTYPES];/*name generators		*/
     haddr_t	memb_addr[H5FD_MEM_NTYPES];/*starting addr per member	*/
+    haddr_t     memb_eoa[H5FD_MEM_NTYPES]; /*EOA for individual files   */
     hbool_t	relax;			/*less stringent error checking	*/
 } H5FD_multi_fapl_t;
 
@@ -505,6 +506,9 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
     memcpy(fa.memb_name, memb_name, H5FD_MEM_NTYPES*sizeof(char*));
     memcpy(fa.memb_addr, memb_addr, H5FD_MEM_NTYPES*sizeof(haddr_t));
     fa.relax = relax;
+
+    /* Initialize all EOAs to zero */
+    memset(fa.memb_eoa, 0, H5FD_MEM_NTYPES*sizeof(haddr_t));
 
     /* Patch up H5P_DEFAULT property lists for members */
     for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
@@ -970,6 +974,9 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
         if (file->memb[mt])
             if(H5FDset_eoa(file->memb[mt], mt, memb_eoa[mt])<0)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_CANTSET, "set_eoa() failed", -1)
+       
+        /* Save the individual EOAs in one place for later comparison (in H5FD_multi_set_eoa) */ 
+        file->fa.memb_eoa[mt] = memb_eoa[mt]; 
     } END_MEMBERS;
 
     return 0;
@@ -1564,6 +1571,10 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
  *              for MULTI file.  This function only sets eoa for individual
  *              file.
  *
+ *              Raymond Lu
+ *              21 June 2011
+ *              Backward compatibility of EOA.  Please the comment in the
+ *              code.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1580,6 +1591,17 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     mmt = file->fa.memb_map[type];
     if(H5FD_MEM_DEFAULT == mmt)
         mmt = type;
+
+    /* Handle backward compatibility in a quick and simple way.  v1.6 library had EOA for the entire virtual 
+     * file.  But it wasn't meaningful.  So v1.8 library doesn't have it anymore.  It saves the EOA for the 
+     * metadata file, instead.  Here we try to figure out whether the EOA is from a v1.6 file by comparing its 
+     * value.  If it is a big value, we assume it's from v1.6 and simply discard it. This is the normal case 
+     * when the metadata file has the smallest starting address.  If the metadata file has the biggest address,
+     * the EOAs of v1.6 and v1.8 files are the same.  It won't cause any trouble.  (Please see Issue 2598 
+     * in Jira) SLU - 2011/6/21
+     */
+    if(H5FD_MEM_SUPER == type && file->fa.memb_eoa[H5FD_MEM_SUPER] > 0 && eoa > file->fa.memb_eoa[H5FD_MEM_SUPER])
+        return 0;
 
     assert(eoa >= file->fa.memb_addr[mmt]);
     assert(eoa < file->memb_next[mmt]);

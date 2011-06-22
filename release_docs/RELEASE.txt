@@ -286,6 +286,14 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+
+      - In v1.6 library, there was EOA for the whole MULTI file saved in the 
+            super block.  We took it out in v1.8 library because it's meaningless 
+            for the MULTI file.  v1.8 library saves the EOA for the metadata file, 
+            instead. But this caused some backward compatibility problem.
+            v1.8 library couldn't open the file created with v1.6 library.  We
+            fixed the problem by checking the EOA value to detect the file
+            created with v1.6 library. (SLU - 2011/6/22) 
       - When a dataset had filters and reading data failed, the error message 
             didn't say which filter isn't registered. It's fixed now.
             (SLU - 2011/6/3)  
@@ -519,7 +527,7 @@ Bug Fixes since HDF5-1.8.0 release
       prior to configuration. MAM - 2009/03/09 - BZ #1401.
     - Fixed error with 'make check install' failing due to h5dump
       needing other tools built first. MAM - 2008/10/24.
-    - When using shared szip, it is no longer necessary to specify
+    - Wpen using shared szip, it is no longer necessary to specify
       the path to the shared szip libraries in LD_LIBRARY_PATH. MAM - 
       2008/10/24.
     - The file libhdf5_fortran.settings is not installed since its content

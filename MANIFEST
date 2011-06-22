@@ -891,6 +891,8 @@
 ./test/mf.c
 ./test/mount.c
 ./test/mtime.c
+./test/multi_file_v16-r.h5
+./test/multi_file_v16-s.h5
 ./test/noencoder.h5
 ./test/ntypes.c
 ./test/ohdr.c

@@ -50,13 +50,14 @@ const char *FILENAME[] = {
     "log_file",          /*6*/
     "stdio_file",        /*7*/
     "windows_file",      /*8*/
+    "new_multi_file_v16",/*9*/
     NULL
 };
 
 #define LOG_FILENAME "log_vfd_out.log"
 
 #define COMPAT_BASENAME "family_v16_"
-
+#define MULTI_COMPAT_BASENAME "multi_file_v16"
 
 
 /*-------------------------------------------------------------------------
@@ -1123,6 +1124,175 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_multi_compat
+ *
+ * Purpose:     Tests the backward compatibility for MULTI driver.
+ *              See if we can open files created with v1.6 library.
+ *              The source file was created by the test/file_handle.c
+ *              of the v1.6 library.  This test verifies the fix for 
+ *              Issue 2598. In v1.6 library, there was EOA for the whole
+ *              MULTI file saved in the super block.  We took it out in
+ *              v1.8 library because it's meaningless for the MULTI file.
+ *              v1.8 library saves the EOA for the metadata file, instead.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Raymond Lu
+ *              21 June 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_multi_compat(void)
+{
+    hid_t       file=(-1), fapl, fapl2=(-1), dset=(-1), space=(-1);
+    hid_t       access_fapl = -1;
+    char        filename[1024], newname[1024], tmp[1024];
+    char        filename_s[1024], newname_s[1024];
+    char        filename_r[1024], newname_r[1024];
+    int         *fhandle2=NULL, *fhandle=NULL;
+    hsize_t     file_size;
+    H5FD_mem_t  mt, memb_map[H5FD_MEM_NTYPES];
+    hid_t       memb_fapl[H5FD_MEM_NTYPES];
+    haddr_t     memb_addr[H5FD_MEM_NTYPES];
+    const char  *memb_name[H5FD_MEM_NTYPES];
+    char        sv[H5FD_MEM_NTYPES][32];
+    hsize_t     dims[2]={MULTI_SIZE, MULTI_SIZE};
+    char        dname[]="dataset2";
+    int         i, j;
+    int         buf[MULTI_SIZE][MULTI_SIZE];
+
+    TESTING("MULTI file driver backward compatibility");
+
+    /* Set file access property list for MULTI driver */
+    fapl = h5_fileaccess();
+
+    HDmemset(memb_map, 0,  sizeof memb_map);
+    HDmemset(memb_fapl, 0, sizeof memb_fapl);
+    HDmemset(memb_name, 0, sizeof memb_name);
+    HDmemset(memb_addr, 0, sizeof memb_addr);
+    HDmemset(sv, 0, sizeof sv);
+
+    for(mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt))
+        memb_map[mt] = H5FD_MEM_SUPER;
+    memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
+
+    memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
+    sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
+    memb_addr[H5FD_MEM_SUPER] = 0;
+
+    memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
+    sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
+    memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
+
+    if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE)<0)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[9], fapl, newname, sizeof newname);
+
+    /* Make copy for the data file in the build directory, to protect the 
+     * original file in the source directory */
+    sprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
+    sprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
+    h5_make_local_copy(filename_s, newname_s);
+
+    sprintf(filename_r, "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
+    sprintf(newname_r, "%s-%c.h5", FILENAME[9], 'r');
+    h5_make_local_copy(filename_r, newname_r);
+
+    /* Reopen the file for read only.  Verify 1.8 library can open file
+     * created with 1.6 library. */
+    if((file=H5Fopen(newname, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+
+    if((dset = H5Dopen2(file, DSET1_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset) < 0)
+        TEST_ERROR;
+
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Make sure we can reopen the file for read and write */
+    if((file=H5Fopen(newname, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+
+    if((dset = H5Dopen2(file, DSET1_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset) < 0)
+        TEST_ERROR;
+
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Reopen the file for adding another dataset. The new EOA for metadata file 
+     * should be written to the file */
+    if((file=H5Fopen(newname, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create and write data set */
+    if((space=H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    if((dset=H5Dcreate2(file, DSET2_NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    for(i=0; i<MULTI_SIZE; i++)
+        for(j=0; j<MULTI_SIZE; j++)
+            buf[i][j] = i*10000+j;
+    if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset) < 0)
+        TEST_ERROR;
+
+    if(H5Sclose(space) < 0)
+        TEST_ERROR;
+
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Reopen the file for read only again. Verify the library can handle 
+     * the EOA correctly */
+    if((file=H5Fopen(newname, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+
+    if((dset = H5Dopen2(file, DSET1_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset) < 0)
+        TEST_ERROR;
+
+    if((dset = H5Dopen2(file, DSET2_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset) < 0)
+        TEST_ERROR;
+
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Sclose(space);
+        H5Dclose(dset);
+        H5Pclose(fapl);
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_log
  *
  * Purpose:     Tests the file handle interface for log driver
@@ -1402,6 +1572,7 @@ main(void)
     nerrors += test_family() < 0         ? 1 : 0;
     nerrors += test_family_compat() < 0  ? 1 : 0;
     nerrors += test_multi() < 0          ? 1 : 0;
+    nerrors += test_multi_compat() < 0   ? 1 : 0;
     nerrors += test_direct() < 0         ? 1 : 0;
     nerrors += test_log() < 0            ? 1 : 0;
     nerrors += test_stdio() < 0          ? 1 : 0;
