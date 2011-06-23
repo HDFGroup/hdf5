@@ -759,6 +759,8 @@
 # endif
 #endif
 
+#cmakedefine WORDS_BIGENDIAN @H5_WORDS_BIGENDIANR@
+
 /* Number of bits in a file offset, on hosts where this is settable. */
 #cmakedefine _FILE_OFFSET_BITS
 

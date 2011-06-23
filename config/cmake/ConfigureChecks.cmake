@@ -10,6 +10,7 @@ INCLUDE (${CMAKE_ROOT}/Modules/CheckSymbolExists.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckVariableExists.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckFortranFunctionExists.cmake)
+INCLUDE (${CMAKE_ROOT}/Modules/TestBigEndian.cmake)
 
 #-----------------------------------------------------------------------------
 # Always SET this for now IF we are on an OS X box
@@ -222,6 +223,9 @@ SET (USE_INCLUDES "")
 IF (WINDOWS)
   SET (USE_INCLUDES ${USE_INCLUDES} "windows.h")
 ENDIF (WINDOWS)
+
+TEST_BIG_ENDIAN(H5_WORDS_BIGENDIAN)
+
 #-----------------------------------------------------------------------------
 # Check IF header file exists and add it to the list.
 #-----------------------------------------------------------------------------

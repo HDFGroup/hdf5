@@ -397,15 +397,15 @@ IF (BUILD_TESTING)
   # test for non-existing file
   ADD_H5_TEST (nosuchfile 1 nosuchfile.h5)
 
-  IF (WORDS_BIGENDIAN)
+  IF (H5_WORDS_BIGENDIAN)
     # test for variable length data types in verbose mode
     ADD_H5_TEST (tvldtypes2be 0 -v tvldtypes1.h5)
     # test for dataset region references data types in verbose mode
     ADD_H5_TEST (tdataregbe 0 -v tdatareg.h5)
-  ELSE (WORDS_BIGENDIAN)
+  ELSE (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tvldtypes2le 0 -v tvldtypes1.h5)
     ADD_H5_TEST (tdataregle 0 -v tdatareg.h5)
-  ENDIF (WORDS_BIGENDIAN)
+  ENDIF (H5_WORDS_BIGENDIAN)
 
 ENDIF (BUILD_TESTING)
 
