@@ -83,7 +83,6 @@ typedef struct H5FD_multi_fapl_t {
     hid_t	memb_fapl[H5FD_MEM_NTYPES];/*member access properties	*/
     char	*memb_name[H5FD_MEM_NTYPES];/*name generators		*/
     haddr_t	memb_addr[H5FD_MEM_NTYPES];/*starting addr per member	*/
-    haddr_t     memb_eoa[H5FD_MEM_NTYPES]; /*EOA for individual files   */
     hbool_t	relax;			/*less stringent error checking	*/
 } H5FD_multi_fapl_t;
 
@@ -98,9 +97,11 @@ typedef struct H5FD_multi_t {
     H5FD_multi_fapl_t fa;	/*driver-specific file access properties*/
     haddr_t	memb_next[H5FD_MEM_NTYPES];/*addr of next member	*/
     H5FD_t	*memb[H5FD_MEM_NTYPES];	/*member pointers		*/
-    /*haddr_t	eoa;*/		/*end of allocated addresses.  Took it out
-                                 *because individual files have their own
-                                 *eoa.                                  */
+    haddr_t     memb_eoa[H5FD_MEM_NTYPES]; /*EOA for individual files,
+    				 *end of allocated addresses.  v1.6 library 
+                                 *have the EOA for the entire file. But it's
+                                 *meaningless for MULTI file.  We replaced it
+                                 *with the EOAs for individual files    */
     unsigned	flags;		/*file open flags saved for debugging	*/
     char	*name;		/*name passed to H5Fopen or H5Fcreate	*/
 } H5FD_multi_t;
@@ -506,9 +507,6 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
     memcpy(fa.memb_name, memb_name, H5FD_MEM_NTYPES*sizeof(char*));
     memcpy(fa.memb_addr, memb_addr, H5FD_MEM_NTYPES*sizeof(haddr_t));
     fa.relax = relax;
-
-    /* Initialize all EOAs to zero */
-    memset(fa.memb_eoa, 0, H5FD_MEM_NTYPES*sizeof(haddr_t));
 
     /* Patch up H5P_DEFAULT property lists for members */
     for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
@@ -976,7 +974,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_CANTSET, "set_eoa() failed", -1)
        
         /* Save the individual EOAs in one place for later comparison (in H5FD_multi_set_eoa) */ 
-        file->fa.memb_eoa[mt] = memb_eoa[mt]; 
+        file->memb_eoa[mt] = memb_eoa[mt]; 
     } END_MEMBERS;
 
     return 0;
@@ -1229,7 +1227,9 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /*
      * Initialize the file from the file access properties, using default
-     * values if necessary.
+     * values if necessary.  Make sure to use CALLOC here because the code
+     * in H5FD_multi_set_eoa depends on the proper initialization of memb_eoa 
+     * in H5FD_multi_t.
      */
     if(NULL == (file = (H5FD_multi_t *)calloc((size_t)1, sizeof(H5FD_multi_t))))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL)
@@ -1600,7 +1600,7 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
      * the EOAs of v1.6 and v1.8 files are the same.  It won't cause any trouble.  (Please see Issue 2598 
      * in Jira) SLU - 2011/6/21
      */
-    if(H5FD_MEM_SUPER == type && file->fa.memb_eoa[H5FD_MEM_SUPER] > 0 && eoa > file->fa.memb_eoa[H5FD_MEM_SUPER])
+    if(H5FD_MEM_SUPER == type && file->memb_eoa[H5FD_MEM_SUPER] > 0 && eoa > file->memb_eoa[H5FD_MEM_SUPER])
         return 0;
 
     assert(eoa >= file->fa.memb_addr[mmt]);
