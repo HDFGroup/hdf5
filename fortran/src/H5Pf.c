@@ -1719,7 +1719,7 @@ nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, 
       *       from the function then we need to give HD5packFstring the fortran buffer size so
       *       that it fills the remaining unused characters with blanks. MSB
       */
-     HD5packFstring(c_name, _fcdtocp(name), c_namelen+1);
+     HD5packFstring(c_name, _fcdtocp(name), c_namelen);
      ret_value = 0;
 
 DONE:
