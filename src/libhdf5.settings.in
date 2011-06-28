@@ -72,4 +72,3 @@ Clear file buffers before write: @CLEARFILEBUF@
       Strict File Format Checks: @STRICT_FORMAT_CHECKS@
    Optimization Instrumentation: @INSTRUMENT@
        Large File Support (LFS): @LARGEFILE@
-             H5dump Packed Bits: @PACKED_BITS@

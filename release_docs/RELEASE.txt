@@ -98,6 +98,10 @@ Bug Fixes since HDF5-1.8.7
 
     Configuration
     -------------
+    - The --enable-h5dump-packed-bits configure option has been removed,
+      as the h5dump code that this option conditionally enabled is now always
+      compiled into h5dump. Please refer to the h5dump reference manual for 
+      usage of the packed bits feature. (MAM - 2011/06/23)
     - Configure now uses the same flags and symbols in its tests that are
       used to build the library.
     - On linux we now link to the bsd_compat library, as per the gcc
