@@ -41,32 +41,10 @@ H5DUMP=../h5dump/h5dump         # The h5dump tool name
 H5DUMP_BIN=`pwd`/$H5DUMP        # The path of the h5dump tool binary
 
 GREP='grep'
+CP='cp'
 
 H5DETECTSZIP=testh5repack_detect_szip              
 H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP    
-
-INFO_FILE=testfiles/h5repack.info
-
-FILE0=h5repack_fill.h5
-FILE1=h5repack_objs.h5
-FILE2=h5repack_attr.h5
-FILE3=h5repack_hlink.h5
-FILE4=h5repack_layout.h5
-FILE5=h5repack_early.h5
-FILE7=h5repack_szip.h5
-FILE8=h5repack_deflate.h5
-FILE9=h5repack_shuffle.h5
-FILE10=h5repack_fletcher.h5
-FILE11=h5repack_filters.h5
-FILE12=h5repack_nbit.h5
-FILE13=h5repack_soffset.h5
-FILE14=h5repack_layouto.h5      # A file with an older version of the layout message
-                                # (copy of test/tlayouto.h5)
-FILE15=h5repack_named_dtypes.h5
-FILE16=tfamily%05d.h5           # located in common testfiles folder
-FILE18=h5repack_layout2.h5
-FILE_REF=h5repack_refs.h5
-FILE_ATTR_REF=h5repack_attr_refs.h5
 
 
 nerrors=0
@@ -78,7 +56,95 @@ if test -z "$srcdir"; then
    srcdir=.
 fi
 
+# source dirs
+SRC_TOOLS="$srcdir/.."
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+# testfiles source dirs for tools
+SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DIFF_TESTFILES="$SRC_TOOLS/h5diff/testfiles"
+SRC_H5COPY_TESTFILES="$SRC_TOOLS/h5copy/testfiles"
+SRC_H5REPACK_TESTFILES="$SRC_TOOLS/h5repack/testfiles"
+SRC_H5JAM_TESTFILES="$SRC_TOOLS/h5jam/testfiles"
+SRC_H5STAT_TESTFILES="$SRC_TOOLS/h5stat/testfiles"
+SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
 
+TESTDIR=./testfiles
+test -d $TESTDIR || mkdir $TESTDIR
+
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_HDF5_TEST_FILES="
+$SRC_H5REPACK_TESTFILES/h5repack_attr.h5
+$SRC_H5REPACK_TESTFILES/h5repack_attr_refs.h5
+$SRC_H5REPACK_TESTFILES/h5repack_deflate.h5
+$SRC_H5REPACK_TESTFILES/h5repack_early.h5
+$SRC_H5REPACK_TESTFILES/h5repack_ext.h5
+$SRC_H5REPACK_TESTFILES/h5repack_fill.h5
+$SRC_H5REPACK_TESTFILES/h5repack_filters.h5
+$SRC_H5REPACK_TESTFILES/h5repack_fletcher.h5
+$SRC_H5REPACK_TESTFILES/h5repack_hlink.h5
+$SRC_H5REPACK_TESTFILES/h5repack_layout.h5
+$SRC_H5REPACK_TESTFILES/h5repack_layouto.h5
+$SRC_H5REPACK_TESTFILES/h5repack_layout2.h5
+$SRC_H5REPACK_TESTFILES/h5repack_named_dtypes.h5
+$SRC_H5REPACK_TESTFILES/h5repack_nbit.h5
+$SRC_H5REPACK_TESTFILES/h5repack_objs.h5
+$SRC_H5REPACK_TESTFILES/h5repack_refs.h5
+$SRC_H5REPACK_TESTFILES/h5repack_shuffle.h5
+$SRC_H5REPACK_TESTFILES/h5repack_soffset.h5
+$SRC_H5REPACK_TESTFILES/h5repack_szip.h5
+$SRC_TOOLS_TESTFILES/tfamily00000.h5
+$SRC_TOOLS_TESTFILES/tfamily00001.h5
+$SRC_TOOLS_TESTFILES/tfamily00002.h5
+$SRC_TOOLS_TESTFILES/tfamily00003.h5
+$SRC_TOOLS_TESTFILES/tfamily00004.h5
+$SRC_TOOLS_TESTFILES/tfamily00005.h5
+$SRC_TOOLS_TESTFILES/tfamily00006.h5
+$SRC_TOOLS_TESTFILES/tfamily00007.h5
+$SRC_TOOLS_TESTFILES/tfamily00008.h5
+$SRC_TOOLS_TESTFILES/tfamily00009.h5
+$SRC_TOOLS_TESTFILES/tfamily00010.h5
+"
+
+LIST_OTHER_TEST_FILES="
+$SRC_H5REPACK_TESTFILES/h5repack_ext.bin
+$SRC_H5REPACK_TESTFILES/ublock.bin
+$SRC_H5REPACK_TESTFILES/h5repack.info
+$SRC_TOOLS_TESTFILES/h5repack_filters.h5.ddl
+"
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            if [ -a $tstfile ]; then
+                $CP -f $tstfile $TESTDIR
+            else
+                echo "Error: FAILED to copy $tstfile"
+                echo "       $tstfile doesn't exist!"
+                exit $EXIT_FAILURE
+            fi
+        fi
+    done
+}
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -128,8 +194,7 @@ TOOLTEST()
 {
     echo $@
     TOOLTEST_MAIN $@
-    path=`pwd`
-    outfile=$path/out.$1
+    outfile=$TESTDIR/out.$1
     rm -f $outfile
 }
 
@@ -139,9 +204,8 @@ TOOLTEST_MAIN()
     # Run test.
     TESTING $H5REPACK $@
 
-    infile=$srcdir/testfiles/$1
-    path=`pwd`
-    outfile=$path/out.$1
+    infile=$TESTDIR/$1
+    outfile=$TESTDIR/out.$1
     shift
     $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
     RET=$?
@@ -158,9 +222,8 @@ TOOLTEST_MAIN()
 # Verifying layouts of a dataset 
 VERIFY_LAYOUT_DSET()
 {
-    path=`pwd`
-    outfile=$path/out.$1
-    layoutfile=$path/layout.$1
+    outfile=$TESTDIR/out.$1
+    layoutfile=$TESTDIR/layout.$1
     dset=$2
     expectlayout=$3
     
@@ -184,9 +247,8 @@ VERIFY_LAYOUT_DSET()
 # Verifying layouts from entire file
 VERIFY_LAYOUT_ALL()
 {
-    path=`pwd`
-    outfile=$path/out.$1
-    layoutfile=$path/layout.$1
+    outfile=$TESTDIR/out.$1
+    layoutfile=$TESTDIR/layout.$1
     expectlayout=$2
     
     #---------------------------------
@@ -253,9 +315,8 @@ TOOLTEST0()
     # Run test.
     TESTING $H5REPACK $@
 
-    infile=$srcdir/testfiles/$1
-    path=`pwd`
-    outfile=$path/out.$1
+    infile=$TESTDIR/$1
+    outfile=$TESTDIR/out.$1
     shift
     $RUNSERIAL $H5REPACK_BIN -i $infile -o $outfile "$@"
     RET=$?
@@ -270,7 +331,7 @@ TOOLTEST0()
 }
 
 
-# same as TOOLTEST, but it uses the common testfiles at $srcdir/../testfiles/
+# same as TOOLTEST, but it uses without -i -o options
 # used to test the family driver, where these files reside
 #
 TOOLTEST1() 
@@ -278,9 +339,8 @@ TOOLTEST1()
     # Run test.
     TESTING $H5REPACK $@
 
-    infile=$srcdir/../testfiles/$1
-    path=`pwd`
-    outfile=$path/out.$1
+    infile=$TESTDIR/$1
+    outfile=$TESTDIR/out.$1
     shift
     $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
     RET=$?
@@ -300,13 +360,12 @@ TOOLTESTV()
 {
     # Run test.
     TESTING $H5REPACK $@
-    expect="$srcdir/../testfiles/$1.ddl"
-    actual="../testfiles/`basename $1 .ddl`.out"
-    actual_err="../testfiles/`basename $1 .ddl`.err"
+    expect="$TESTDIR/$1.ddl"
+    actual="$TESTDIR/`basename $1 .ddl`.out"
+    actual_err="$TESTDIR/`basename $1 .ddl`.err"
 
-    infile=$srcdir/testfiles/$1
-    path=`pwd`
-    outfile=$path/out.$1
+    infile=$TESTDIR/$1
+    outfile=$TESTDIR/out.$1
     shift
     $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile >$actual 2>$actual_err
     cp $actual $actual_sav
@@ -325,6 +384,7 @@ TOOLTESTV()
    rm -f $actual $actual_err $actual_sav
 }
 
+# This is different from $srcdir/../../bin/output_filter.sh
 STDOUT_FILTER() {
     result_file=$1
     tmp_file=/tmp/h5test_tmp_$$
@@ -355,19 +415,25 @@ if test $USE_FILTER_SZIP = "yes"; then
 USE_FILTER_SZIP_ENCODER=`$RUNSERIAL $H5DETECTSZIP_BIN`
 fi
 
+##############################################################################
+###			  T H E   T E S T S                               
+##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
+
 # copy files (these files have no filters) 
-TOOLTEST $FILE0
-TOOLTEST $FILE1
-TOOLTEST $FILE2
-TOOLTEST $FILE3
-TOOLTEST $FILE4
-TOOLTEST $FILE5
+TOOLTEST h5repack_fill.h5
+TOOLTEST h5repack_objs.h5
+TOOLTEST h5repack_attr.h5
+TOOLTEST h5repack_hlink.h5
+TOOLTEST h5repack_layout.h5
+TOOLTEST h5repack_early.h5
 
 
-# use $FILE4 to write some filters  (this file has  no filters)
+# use h5repack_layout.h5 to write some filters  (this file has  no filters)
 
 # gzip with individual object
-arg="$FILE4 -f dset1:GZIP=1  -l dset1:CHUNK=20x10"
+arg="h5repack_layout.h5 -f dset1:GZIP=1  -l dset1:CHUNK=20x10"
 if test  $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
@@ -375,7 +441,7 @@ else
 fi
   
 # gzip for all 
-arg="$FILE4 -f GZIP=1"
+arg="h5repack_layout.h5 -f GZIP=1"
 if test  $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
@@ -383,7 +449,7 @@ else
 fi
 
 # szip with individual object
-arg="$FILE4 -f dset2:SZIP=8,EC  -l dset2:CHUNK=20x10"
+arg="h5repack_layout.h5 -f dset2:SZIP=8,EC  -l dset2:CHUNK=20x10"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" ; then
  SKIP $arg
 else
@@ -391,7 +457,7 @@ else
 fi
 
 # szip for all
-arg="$FILE4 -f SZIP=8,NN"
+arg="h5repack_layout.h5 -f SZIP=8,NN"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" ; then
  SKIP $arg
 else
@@ -399,7 +465,7 @@ else
 fi
 
 # shuffle with individual object
-arg="$FILE4 -f dset2:SHUF  -l dset2:CHUNK=20x10"
+arg="h5repack_layout.h5 -f dset2:SHUF  -l dset2:CHUNK=20x10"
 if test $USE_FILTER_SHUFFLE != "yes"  ; then
  SKIP $arg
 else
@@ -408,7 +474,7 @@ fi
   
 
 # shuffle for all
-arg="$FILE4 -f SHUF"
+arg="h5repack_layout.h5 -f SHUF"
 if test $USE_FILTER_SHUFFLE != "yes"  ; then
  SKIP $arg
 else
@@ -416,7 +482,7 @@ else
 fi
   
 # fletcher32  with individual object
-arg="$FILE4 -f dset2:FLET  -l dset2:CHUNK=20x10"
+arg="h5repack_layout.h5 -f dset2:FLET  -l dset2:CHUNK=20x10"
 if test $USE_FILTER_FLETCHER32 != "yes"  ; then
  SKIP $arg
 else
@@ -424,7 +490,7 @@ else
 fi
 
 # fletcher32 for all
-arg="$FILE4 -f FLET"
+arg="h5repack_layout.h5 -f FLET"
 if test $USE_FILTER_FLETCHER32 != "yes"  ; then
  SKIP $arg
 else
@@ -432,7 +498,7 @@ else
 fi
 
 # all filters
-arg="$FILE4 -f dset2:SHUF -f dset2:FLET -f dset2:SZIP=8,NN -f dset2:GZIP=1 -l dset2:CHUNK=20x10"
+arg="h5repack_layout.h5 -f dset2:SHUF -f dset2:FLET -f dset2:SZIP=8,NN -f dset2:GZIP=1 -l dset2:CHUNK=20x10"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SHUFFLE != "yes" -o $USE_FILTER_FLETCHER32 != "yes" -o $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
@@ -440,7 +506,7 @@ else
 fi
 
 # verbose gzip with individual object
-arg="$FILE11 -v -f /dset_deflate:GZIP=9"
+arg="h5repack_filters.h5 -v -f /dset_deflate:GZIP=9"
 if test  $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
@@ -452,7 +518,7 @@ fi
 ###########################################################
 
 # szip copy
-arg="$FILE7"
+arg="h5repack_szip.h5"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" ; then
  SKIP $arg
 else
@@ -460,7 +526,7 @@ else
 fi
   
 # szip remove
-arg="$FILE7 --filter=dset_szip:NONE"
+arg="h5repack_szip.h5 --filter=dset_szip:NONE"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" ; then
  SKIP $arg
 else
@@ -468,7 +534,7 @@ else
 fi
   
 # deflate copy
-arg="$FILE8"
+arg="h5repack_deflate.h5"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
@@ -476,7 +542,7 @@ else
 fi
 
 # deflate remove
-arg="$FILE8 -f dset_deflate:NONE"
+arg="h5repack_deflate.h5 -f dset_deflate:NONE"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
@@ -484,7 +550,7 @@ else
 fi
     
 # shuffle copy
-arg="$FILE9"
+arg="h5repack_shuffle.h5"
 if test $USE_FILTER_SHUFFLE != "yes" ; then
  SKIP $arg
 else
@@ -492,7 +558,7 @@ else
 fi
 
 # shuffle remove
-arg="$FILE9 -f dset_shuffle:NONE"
+arg="h5repack_shuffle.h5 -f dset_shuffle:NONE"
 if test $USE_FILTER_SHUFFLE != "yes" ; then
  SKIP $arg
 else
@@ -500,7 +566,7 @@ else
 fi
 
 # fletcher32 copy
-arg="$FILE10"
+arg="h5repack_fletcher.h5"
 if test $USE_FILTER_FLETCHER32 != "yes" ; then
  SKIP $arg
 else
@@ -508,7 +574,7 @@ else
 fi
 
 # fletcher32 remove
-arg="$FILE10 -f dset_fletcher32:NONE"
+arg="h5repack_fletcher.h5 -f dset_fletcher32:NONE"
 if test $USE_FILTER_FLETCHER32 != "yes" ; then
  SKIP $arg
 else
@@ -516,7 +582,7 @@ else
 fi        
 
 # nbit copy
-arg="$FILE12"
+arg="h5repack_nbit.h5"
 if test $USE_FILTER_NBIT != "yes" ; then
  SKIP $arg
 else
@@ -524,7 +590,7 @@ else
 fi
 
 # nbit remove
-arg="$FILE12 -f dset_nbit:NONE"
+arg="h5repack_nbit.h5 -f dset_nbit:NONE"
 if test $USE_FILTER_NBIT != "yes" ; then
  SKIP $arg
 else
@@ -532,7 +598,7 @@ else
 fi        
 
 # nbit add
-arg="$FILE12 -f dset_int31:NBIT"
+arg="h5repack_nbit.h5 -f dset_int31:NBIT"
 if test $USE_FILTER_NBIT != "yes" ; then
  SKIP $arg
 else
@@ -540,7 +606,7 @@ else
 fi
 
 # scaleoffset copy
-arg="$FILE13"
+arg="h5repack_soffset.h5"
 if test $USE_FILTER_SCALEOFFSET != "yes" ; then
  SKIP $arg
 else
@@ -548,7 +614,7 @@ else
 fi
 
 # scaleoffset add
-arg="$FILE13 -f dset_none:SOFF=31,IN"
+arg="h5repack_soffset.h5 -f dset_none:SOFF=31,IN"
 if test $USE_FILTER_SCALEOFFSET != "yes" ; then
  SKIP $arg
 else
@@ -556,7 +622,7 @@ else
 fi
 
 # scaleoffset remove
-arg="$FILE13 -f dset_scaleoffset:NONE"
+arg="h5repack_soffset.h5 -f dset_scaleoffset:NONE"
 if test $USE_FILTER_SCALEOFFSET != "yes" ; then
  SKIP $arg
 else
@@ -564,7 +630,7 @@ else
 fi        
 
 # remove all  filters
-arg="$FILE11 -f NONE"
+arg="h5repack_filters.h5 -f NONE"
 if test $USE_FILTER_FLETCHER32 != "yes" -o $USE_FILTER_DEFLATE != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SHUFFLE != "yes"  -o $USE_FILTER_NBIT != "yes"  -o $USE_FILTER_SCALEOFFSET != "yes"  ; then
  SKIP $arg
 else
@@ -573,14 +639,14 @@ fi
 
 #filter conversions
 
-arg="$FILE8 -f dset_deflate:SZIP=8,NN"
+arg="h5repack_deflate.h5 -f dset_deflate:SZIP=8,NN"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
  TOOLTEST $arg 
 fi
 
-arg="$FILE7 -f dset_szip:GZIP=1"
+arg="h5repack_szip.h5 -f dset_szip:GZIP=1"
 if test $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SZIP_ENCODER != "yes"  -o $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
@@ -589,7 +655,7 @@ fi
 
 
 #limit
-arg="$FILE4 -f GZIP=1 -m 1024"
+arg="h5repack_layout.h5 -f GZIP=1 -m 1024"
 if test $USE_FILTER_DEFLATE != "yes"  ; then
  SKIP $arg
 else
@@ -597,7 +663,7 @@ else
 fi
 
 #file
-arg="$FILE4 -e $srcdir/$INFO_FILE"
+arg="h5repack_layout.h5 -e $TESTDIR/h5repack.info"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg 
 else
@@ -607,90 +673,90 @@ fi
 #########################################################
 # layout options (these files have no filters)
 #########################################################
-TOOLTEST_MAIN $FILE4 --layout dset2:CHUNK=20x10
-VERIFY_LAYOUT_DSET $FILE4 dset2 CHUNKED
+TOOLTEST_MAIN h5repack_layout.h5 --layout dset2:CHUNK=20x10
+VERIFY_LAYOUT_DSET h5repack_layout.h5 dset2 CHUNKED
 
-TOOLTEST_MAIN $FILE4 -l CHUNK=20x10
-VERIFY_LAYOUT_ALL $FILE4 CHUNKED
+TOOLTEST_MAIN h5repack_layout.h5 -l CHUNK=20x10
+VERIFY_LAYOUT_ALL h5repack_layout.h5 CHUNKED
 
-TOOLTEST_MAIN $FILE4 -l dset2:CONTI
-VERIFY_LAYOUT_DSET $FILE4 dset2 CONTIGUOUS
+TOOLTEST_MAIN h5repack_layout.h5 -l dset2:CONTI
+VERIFY_LAYOUT_DSET h5repack_layout.h5 dset2 CONTIGUOUS
 
-TOOLTEST_MAIN $FILE4 -l CONTI
-VERIFY_LAYOUT_ALL $FILE4 CONTIGUOUS
+TOOLTEST_MAIN h5repack_layout.h5 -l CONTI
+VERIFY_LAYOUT_ALL h5repack_layout.h5 CONTIGUOUS
 
-TOOLTEST_MAIN $FILE4 -l dset2:COMPA
-VERIFY_LAYOUT_DSET $FILE4 dset2 COMPACT
+TOOLTEST_MAIN h5repack_layout.h5 -l dset2:COMPA
+VERIFY_LAYOUT_DSET h5repack_layout.h5 dset2 COMPACT
 
-TOOLTEST_MAIN $FILE4 -l COMPA
-VERIFY_LAYOUT_ALL $FILE4 COMPACT
+TOOLTEST_MAIN h5repack_layout.h5 -l COMPA
+VERIFY_LAYOUT_ALL h5repack_layout.h5 COMPACT
 
 ################################################################
 # layout conversions (file has no filters)
 ###############################################################
 
-TOOLTEST_MAIN $FILE4 -l dset_compact:CONTI
-VERIFY_LAYOUT_DSET $FILE4 dset_compact CONTIGUOUS
+TOOLTEST_MAIN h5repack_layout.h5 -l dset_compact:CONTI
+VERIFY_LAYOUT_DSET h5repack_layout.h5 dset_compact CONTIGUOUS
 
-TOOLTEST_MAIN $FILE4 -l dset_compact:CHUNK=2x5
-VERIFY_LAYOUT_DSET $FILE4 dset_compact CHUNKED
+TOOLTEST_MAIN h5repack_layout.h5 -l dset_compact:CHUNK=2x5
+VERIFY_LAYOUT_DSET h5repack_layout.h5 dset_compact CHUNKED
 
-TOOLTEST_MAIN $FILE4 -l dset_compact:COMPA
-VERIFY_LAYOUT_DSET $FILE4 dset_compact COMPACT
+TOOLTEST_MAIN h5repack_layout.h5 -l dset_compact:COMPA
+VERIFY_LAYOUT_DSET h5repack_layout.h5 dset_compact COMPACT
 
-TOOLTEST_MAIN $FILE4 -l dset_contiguous:COMPA
-VERIFY_LAYOUT_DSET $FILE4 dset_contiguous COMPACT
+TOOLTEST_MAIN h5repack_layout.h5 -l dset_contiguous:COMPA
+VERIFY_LAYOUT_DSET h5repack_layout.h5 dset_contiguous COMPACT
 
-TOOLTEST_MAIN $FILE4 -l dset_contiguous:CHUNK=3x6
-VERIFY_LAYOUT_DSET $FILE4 dset_contiguous CHUNKED
+TOOLTEST_MAIN h5repack_layout.h5 -l dset_contiguous:CHUNK=3x6
+VERIFY_LAYOUT_DSET h5repack_layout.h5 dset_contiguous CHUNKED
 
-TOOLTEST_MAIN $FILE4 -l dset_contiguous:CONTI
-VERIFY_LAYOUT_DSET $FILE4 dset_contiguous CONTIGUOUS
+TOOLTEST_MAIN h5repack_layout.h5 -l dset_contiguous:CONTI
+VERIFY_LAYOUT_DSET h5repack_layout.h5 dset_contiguous CONTIGUOUS
 
-TOOLTEST_MAIN $FILE4 -l dset_chunk:COMPA
-VERIFY_LAYOUT_DSET $FILE4 dset_chunk COMPACT
+TOOLTEST_MAIN h5repack_layout.h5 -l dset_chunk:COMPA
+VERIFY_LAYOUT_DSET h5repack_layout.h5 dset_chunk COMPACT
 
-TOOLTEST_MAIN $FILE4 -l dset_chunk:CONTI
-VERIFY_LAYOUT_DSET $FILE4 dset_chunk CONTIGUOUS
+TOOLTEST_MAIN h5repack_layout.h5 -l dset_chunk:CONTI
+VERIFY_LAYOUT_DSET h5repack_layout.h5 dset_chunk CONTIGUOUS
 
-TOOLTEST_MAIN $FILE4 -l dset_chunk:CHUNK=18x13
-VERIFY_LAYOUT_DSET $FILE4 dset_chunk CHUNKED
+TOOLTEST_MAIN h5repack_layout.h5 -l dset_chunk:CHUNK=18x13
+VERIFY_LAYOUT_DSET h5repack_layout.h5 dset_chunk CHUNKED
 
 # test convert small size dataset ( < 1k) to compact layout without -m
-TOOLTEST_MAIN $FILE18 -l contig_small:COMPA
-VERIFY_LAYOUT_DSET $FILE18 contig_small COMPACT
+TOOLTEST_MAIN h5repack_layout2.h5 -l contig_small:COMPA
+VERIFY_LAYOUT_DSET h5repack_layout2.h5 contig_small COMPACT
 
-TOOLTEST_MAIN $FILE18 -l chunked_small_fixed:COMPA
-VERIFY_LAYOUT_DSET $FILE18 chunked_small_fixed COMPACT
+TOOLTEST_MAIN h5repack_layout2.h5 -l chunked_small_fixed:COMPA
+VERIFY_LAYOUT_DSET h5repack_layout2.h5 chunked_small_fixed COMPACT
 
 # Native option
 # Do not use FILE1, as the named dtype will be converted to native, and h5diff will
 # report a difference.
-TOOLTEST $FILE0 -n
-TOOLTEST $FILE2 -n
+TOOLTEST h5repack_fill.h5 -n
+TOOLTEST h5repack_attr.h5 -n
 
 
 # latest file format with long switches. use FILE4=h5repack_layout.h5 (no filters)
-arg="$FILE4 --layout CHUNK=20x10 --filter GZIP=1 --minimum=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype]"
+arg="h5repack_layout.h5 --layout CHUNK=20x10 --filter GZIP=1 --minimum=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype]"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
  TOOLTEST_MAIN $arg
- VERIFY_LAYOUT_ALL $FILE4 CHUNKED
+ VERIFY_LAYOUT_ALL h5repack_layout.h5 CHUNKED
 fi
 
 # latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
-arg="$FILE4 -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype]"
+arg="h5repack_layout.h5 -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype]"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
  TOOLTEST_MAIN $arg
- VERIFY_LAYOUT_ALL $FILE4 CHUNKED
+ VERIFY_LAYOUT_ALL h5repack_layout.h5 CHUNKED
 fi
 
 # several global filters
 
-arg="$FILE4 --filter GZIP=1 --filter SHUF"
+arg="h5repack_layout.h5 --filter GZIP=1 --filter SHUF"
 if test $USE_FILTER_DEFLATE != "yes" -o $USE_FILTER_SHUFFLE != "yes" ; then
  SKIP $arg
 else
@@ -699,7 +765,7 @@ fi
 
 # syntax of -i infile -o outfile
 # latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
-arg="$FILE4 -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype]"
+arg="h5repack_layout.h5 -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype]"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
@@ -707,34 +773,34 @@ else
 fi 
 
 # add a userblock to file
-arg="$FILE1 -u ublock.bin -b 2048"
+arg="h5repack_objs.h5 -u ublock.bin -b 2048"
 TOOLTEST $arg
 
 # add alignment
-arg="$FILE1 -t 1 -a 1 "
+arg="h5repack_objs.h5 -t 1 -a 1 "
 TOOLTEST $arg
 
 # Check repacking file with old version of layout message (should get upgraded
 #       to new version and be readable, etc.)
-TOOLTEST $FILE14
+TOOLTEST h5repack_layouto.h5
 
 # test for datum size > H5TOOLS_MALLOCSIZE
-TOOLTEST $FILE1 -f GZIP=1
+TOOLTEST h5repack_objs.h5 -f GZIP=1
 
 # Check repacking file with committed datatypes in odd configurations
-TOOLTEST $FILE15
+TOOLTEST h5repack_named_dtypes.h5
 
 # tests family driver (file is located in common testfiles folder, uses TOOLTEST1
-TOOLTEST1 $FILE16
+TOOLTEST1 tfamily%05d.h5
 
 # test various references (bug 1814 and 1726)
-TOOLTEST $FILE_REF
+TOOLTEST h5repack_refs.h5
 
 # test attribute with various references (bug 1797)
 # the references in attribute of compund or vlen datatype 
 # TODO: include this test when code portion is completed.
-SKIP $FILE_ATTR_REF
-#TOOLTEST $FILE_ATTR_REF 
+SKIP h5repack_attr_refs.h5
+#TOOLTEST h5repack_attr_refs.h5 
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."

@@ -29,7 +29,6 @@ EXIT_FAILURE=1
 
 DUMPER=h5dump                     # The tool name
 DUMPER_BIN=`pwd`/$DUMPER          # The path of the tool binary
-TESTDIR=`pwd`/../testfiles
 
 H5DIFF=../h5diff/h5diff           # The h5diff tool name 
 H5DIFF_BIN=`pwd`/$H5DIFF          # The path of the h5diff  tool binary
@@ -40,6 +39,7 @@ H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
 
 CMP='cmp -s'
 DIFF='diff -c'
+CP='cp'
 
 nerrors=0
 verbose=yes
@@ -48,8 +48,411 @@ verbose=yes
 if test -z "$srcdir"; then
    srcdir=.
 fi
+# source dirs
+SRC_TOOLS="$srcdir/../"
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+# testfiles source dirs for tools
+SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DIFF_TESTFILES="$SRC_TOOLS/h5diff/testfiles"
+SRC_H5COPY_TESTFILES="$SRC_TOOLS/h5copy/testfiles"
+SRC_H5REPACK_TESTFILES="$SRC_TOOLS/h5repack/testfiles"
+SRC_H5JAM_TESTFILES="$SRC_TOOLS/h5jam/testfiles"
+SRC_H5STAT_TESTFILES="$SRC_TOOLS/h5stat/testfiles"
+SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
 
+TESTDIR=./testfiles
 test -d $TESTDIR || mkdir $TESTDIR
+
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_HDF5_TEST_FILES="
+$SRC_H5DUMP_TESTFILES/file_space.h5
+$SRC_H5DUMP_TESTFILES/filter_fail.h5
+$SRC_H5DUMP_TESTFILES/packedbits.h5
+$SRC_H5DUMP_TESTFILES/taindices.h5
+$SRC_H5DUMP_TESTFILES/tall.h5
+$SRC_H5DUMP_TESTFILES/tarray1.h5
+$SRC_H5DUMP_TESTFILES/tarray1_big.h5
+$SRC_H5DUMP_TESTFILES/tarray2.h5
+$SRC_H5DUMP_TESTFILES/tarray3.h5
+$SRC_H5DUMP_TESTFILES/tarray4.h5
+$SRC_H5DUMP_TESTFILES/tarray5.h5
+$SRC_H5DUMP_TESTFILES/tarray6.h5
+$SRC_H5DUMP_TESTFILES/tarray7.h5
+$SRC_H5DUMP_TESTFILES/tarray8.h5
+$SRC_H5DUMP_TESTFILES/tattr.h5
+$SRC_H5DUMP_TESTFILES/tattr2.h5
+$SRC_H5DUMP_TESTFILES/tattrreg.h5
+$SRC_H5DUMP_TESTFILES/tbigdims.h5
+$SRC_H5DUMP_TESTFILES/tbinary.h5
+$SRC_H5DUMP_TESTFILES/tchar.h5
+$SRC_H5DUMP_TESTFILES/tcompound.h5
+$SRC_H5DUMP_TESTFILES/tcompound_complex.h5
+$SRC_H5DUMP_TESTFILES/tdatareg.h5
+$SRC_H5DUMP_TESTFILES/tdset.h5
+$SRC_H5DUMP_TESTFILES/tempty.h5
+$SRC_H5DUMP_TESTFILES/tsoftlinks.h5
+$SRC_H5DUMP_TESTFILES/textlinkfar.h5
+$SRC_H5DUMP_TESTFILES/textlinksrc.h5
+$SRC_H5DUMP_TESTFILES/textlinktar.h5
+$SRC_H5DUMP_TESTFILES/textlink.h5
+$SRC_H5DUMP_TESTFILES/tfamily00000.h5
+$SRC_H5DUMP_TESTFILES/tfamily00001.h5
+$SRC_H5DUMP_TESTFILES/tfamily00002.h5
+$SRC_H5DUMP_TESTFILES/tfamily00003.h5
+$SRC_H5DUMP_TESTFILES/tfamily00004.h5
+$SRC_H5DUMP_TESTFILES/tfamily00005.h5
+$SRC_H5DUMP_TESTFILES/tfamily00006.h5
+$SRC_H5DUMP_TESTFILES/tfamily00007.h5
+$SRC_H5DUMP_TESTFILES/tfamily00008.h5
+$SRC_H5DUMP_TESTFILES/tfamily00009.h5
+$SRC_H5DUMP_TESTFILES/tfamily00010.h5
+$SRC_H5DUMP_TESTFILES/tfcontents1.h5
+$SRC_H5DUMP_TESTFILES/tfcontents2.h5
+$SRC_H5DUMP_TESTFILES/tfilters.h5
+$SRC_H5DUMP_TESTFILES/tfpformat.h5
+$SRC_H5DUMP_TESTFILES/tfvalues.h5
+$SRC_H5DUMP_TESTFILES/tgroup.h5
+$SRC_H5DUMP_TESTFILES/tgrp_comments.h5
+$SRC_H5DUMP_TESTFILES/thlink.h5
+$SRC_H5DUMP_TESTFILES/thyperslab.h5
+$SRC_H5DUMP_TESTFILES/tlarge_objname.h5
+#$SRC_H5DUMP_TESTFILES/tldouble.h5
+$SRC_H5DUMP_TESTFILES/tlonglinks.h5
+$SRC_H5DUMP_TESTFILES/tloop.h5
+$SRC_H5DUMP_TESTFILES/tmulti-b.h5
+$SRC_H5DUMP_TESTFILES/tmulti-g.h5
+$SRC_H5DUMP_TESTFILES/tmulti-l.h5
+$SRC_H5DUMP_TESTFILES/tmulti-o.h5
+$SRC_H5DUMP_TESTFILES/tmulti-r.h5
+$SRC_H5DUMP_TESTFILES/tmulti-s.h5
+$SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.h5
+$SRC_H5DUMP_TESTFILES/tnestedcomp.h5
+$SRC_H5DUMP_TESTFILES/tnullspace.h5
+$SRC_H5DUMP_TESTFILES/zerodim.h5
+$SRC_H5DUMP_TESTFILES/torderattr.h5
+$SRC_H5DUMP_TESTFILES/tordergr.h5
+$SRC_H5DUMP_TESTFILES/tsaf.h5
+$SRC_H5DUMP_TESTFILES/tslink.h5
+$SRC_H5DUMP_TESTFILES/tsplit_file-m.h5
+$SRC_H5DUMP_TESTFILES/tsplit_file-r.h5
+$SRC_H5DUMP_TESTFILES/tstr.h5
+$SRC_H5DUMP_TESTFILES/tstr2.h5
+$SRC_H5DUMP_TESTFILES/tstr3.h5
+$SRC_H5DUMP_TESTFILES/tudlink.h5
+$SRC_H5DUMP_TESTFILES/tvldtypes1.h5
+$SRC_H5DUMP_TESTFILES/tvldtypes2.h5
+$SRC_H5DUMP_TESTFILES/tvldtypes3.h5
+$SRC_H5DUMP_TESTFILES/tvldtypes4.h5
+$SRC_H5DUMP_TESTFILES/tvldtypes5.h5
+$SRC_H5DUMP_TESTFILES/tvlstr.h5
+$SRC_H5DUMP_TESTFILES/tvms.h5
+"
+
+LIST_OTHER_TEST_FILES="
+$SRC_H5DUMP_TESTFILES/file_space.ddl
+$SRC_H5DUMP_TESTFILES/filter_fail.ddl
+$SRC_H5DUMP_TESTFILES/packedbits.ddl
+$SRC_H5DUMP_TESTFILES/tall-1.ddl
+$SRC_H5DUMP_TESTFILES/tall-2.ddl
+$SRC_H5DUMP_TESTFILES/tall-2A.ddl
+$SRC_H5DUMP_TESTFILES/tall-2B.ddl
+$SRC_H5DUMP_TESTFILES/tall-3.ddl
+$SRC_H5DUMP_TESTFILES/tall-4s.ddl
+$SRC_H5DUMP_TESTFILES/tall-5s.ddl
+$SRC_H5DUMP_TESTFILES/tall-6.ddl
+$SRC_H5DUMP_TESTFILES/tallfilters.ddl
+$SRC_H5DUMP_TESTFILES/tarray1.ddl
+$SRC_H5DUMP_TESTFILES/tarray1_big.ddl
+$SRC_H5DUMP_TESTFILES/tarray2.ddl
+$SRC_H5DUMP_TESTFILES/tarray3.ddl
+$SRC_H5DUMP_TESTFILES/tarray4.ddl
+$SRC_H5DUMP_TESTFILES/tarray5.ddl
+$SRC_H5DUMP_TESTFILES/tarray6.ddl
+$SRC_H5DUMP_TESTFILES/tarray7.ddl
+$SRC_H5DUMP_TESTFILES/tarray8.ddl
+$SRC_H5DUMP_TESTFILES/tattr-1.ddl
+$SRC_H5DUMP_TESTFILES/tattr-2.ddl
+$SRC_H5DUMP_TESTFILES/tattr-3.ddl
+$SRC_H5DUMP_TESTFILES/tattrreg.ddl
+$SRC_H5DUMP_TESTFILES/tattrregR.ddl
+$SRC_H5DUMP_TESTFILES/tbin1.ddl
+$SRC_H5DUMP_TESTFILES/tbin1.ddl
+$SRC_H5DUMP_TESTFILES/tbin2.ddl
+$SRC_H5DUMP_TESTFILES/tbin3.ddl
+$SRC_H5DUMP_TESTFILES/tbin4.ddl
+$SRC_H5DUMP_TESTFILES/tbinregR.ddl
+$SRC_H5DUMP_TESTFILES/tbigdims.ddl
+$SRC_H5DUMP_TESTFILES/tboot1.ddl
+$SRC_H5DUMP_TESTFILES/tboot2.ddl
+$SRC_H5DUMP_TESTFILES/tchar1.ddl
+$SRC_H5DUMP_TESTFILES/tchunked.ddl
+$SRC_H5DUMP_TESTFILES/tcomp-1.ddl
+$SRC_H5DUMP_TESTFILES/tcomp-2.ddl
+$SRC_H5DUMP_TESTFILES/tcomp-3.ddl
+$SRC_H5DUMP_TESTFILES/tcomp-4.ddl
+$SRC_H5DUMP_TESTFILES/tcompact.ddl
+$SRC_H5DUMP_TESTFILES/tcontents.ddl
+$SRC_H5DUMP_TESTFILES/tcontiguos.ddl
+$SRC_H5DUMP_TESTFILES/tdatareg.ddl
+$SRC_H5DUMP_TESTFILES/tdataregR.ddl
+$SRC_H5DUMP_TESTFILES/tdeflate.ddl
+$SRC_H5DUMP_TESTFILES/tdset-1.ddl
+$SRC_H5DUMP_TESTFILES/tdset-2.ddl
+$SRC_H5DUMP_TESTFILES/tdset-3s.ddl
+$SRC_H5DUMP_TESTFILES/tempty.ddl
+$SRC_H5DUMP_TESTFILES/texceedsubstart.ddl
+$SRC_H5DUMP_TESTFILES/texceedsubcount.ddl
+$SRC_H5DUMP_TESTFILES/texceedsubstride.ddl
+$SRC_H5DUMP_TESTFILES/texceedsubblock.ddl
+$SRC_H5DUMP_TESTFILES/texternal.ddl
+$SRC_H5DUMP_TESTFILES/textlinksrc.ddl
+$SRC_H5DUMP_TESTFILES/textlinkfar.ddl
+$SRC_H5DUMP_TESTFILES/textlink.ddl
+$SRC_H5DUMP_TESTFILES/tfamily.ddl
+$SRC_H5DUMP_TESTFILES/tfill.ddl
+$SRC_H5DUMP_TESTFILES/tfletcher32.ddl
+$SRC_H5DUMP_TESTFILES/tfpformat.ddl
+$SRC_H5DUMP_TESTFILES/tgroup-1.ddl
+$SRC_H5DUMP_TESTFILES/tgroup-2.ddl
+$SRC_H5DUMP_TESTFILES/tgrp_comments.ddl
+$SRC_H5DUMP_TESTFILES/thlink-1.ddl
+$SRC_H5DUMP_TESTFILES/thlink-2.ddl
+$SRC_H5DUMP_TESTFILES/thlink-3.ddl
+$SRC_H5DUMP_TESTFILES/thlink-4.ddl
+$SRC_H5DUMP_TESTFILES/thlink-5.ddl
+$SRC_H5DUMP_TESTFILES/thyperslab.ddl
+$SRC_H5DUMP_TESTFILES/tindicesno.ddl
+$SRC_H5DUMP_TESTFILES/tindicessub1.ddl
+$SRC_H5DUMP_TESTFILES/tindicessub2.ddl
+$SRC_H5DUMP_TESTFILES/tindicessub3.ddl
+$SRC_H5DUMP_TESTFILES/tindicessub4.ddl
+$SRC_H5DUMP_TESTFILES/tindicesyes.ddl
+$SRC_H5DUMP_TESTFILES/tlarge_objname.ddl
+#$SRC_H5DUMP_TESTFILES/tldouble.ddl 
+$SRC_H5DUMP_TESTFILES/tlonglinks.ddl
+$SRC_H5DUMP_TESTFILES/tloop-1.ddl
+$SRC_H5DUMP_TESTFILES/tmulti.ddl
+$SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.ddl
+$SRC_H5DUMP_TESTFILES/tnestcomp-1.ddl
+$SRC_H5DUMP_TESTFILES/tnbit.ddl
+$SRC_H5DUMP_TESTFILES/tnofilename.ddl
+$SRC_H5DUMP_TESTFILES/tnullspace.ddl
+$SRC_H5DUMP_TESTFILES/zerodim.ddl
+$SRC_H5DUMP_TESTFILES/tordergr1.ddl
+$SRC_H5DUMP_TESTFILES/tordergr2.ddl
+$SRC_H5DUMP_TESTFILES/tordergr3.ddl
+$SRC_H5DUMP_TESTFILES/tordergr4.ddl
+$SRC_H5DUMP_TESTFILES/tordergr5.ddl
+$SRC_H5DUMP_TESTFILES/torderattr1.ddl
+$SRC_H5DUMP_TESTFILES/torderattr2.ddl
+$SRC_H5DUMP_TESTFILES/torderattr3.ddl
+$SRC_H5DUMP_TESTFILES/torderattr4.ddl
+$SRC_H5DUMP_TESTFILES/tperror.ddl
+$SRC_H5DUMP_TESTFILES/treference.ddl
+$SRC_H5DUMP_TESTFILES/tsaf.ddl
+$SRC_H5DUMP_TESTFILES/tscaleoffset.ddl
+$SRC_H5DUMP_TESTFILES/tshuffle.ddl
+$SRC_H5DUMP_TESTFILES/tslink-1.ddl
+$SRC_H5DUMP_TESTFILES/tslink-2.ddl
+$SRC_H5DUMP_TESTFILES/tsplit_file.ddl
+$SRC_H5DUMP_TESTFILES/tstr-1.ddl
+$SRC_H5DUMP_TESTFILES/tstr-2.ddl
+$SRC_H5DUMP_TESTFILES/tstring.ddl
+$SRC_H5DUMP_TESTFILES/tstring2.ddl
+$SRC_H5DUMP_TESTFILES/tstringe.ddl
+$SRC_H5DUMP_TESTFILES/tszip.ddl
+$SRC_H5DUMP_TESTFILES/tudlink-1.ddl
+$SRC_H5DUMP_TESTFILES/tudlink-2.ddl
+$SRC_H5DUMP_TESTFILES/tuserfilter.ddl
+$SRC_H5DUMP_TESTFILES/tvldtypes1.ddl
+$SRC_H5DUMP_TESTFILES/tvldtypes2.ddl
+$SRC_H5DUMP_TESTFILES/tvldtypes3.ddl
+$SRC_H5DUMP_TESTFILES/tvldtypes4.ddl
+$SRC_H5DUMP_TESTFILES/tvldtypes5.ddl
+$SRC_H5DUMP_TESTFILES/tvlstr.ddl
+$SRC_H5DUMP_TESTFILES/tvms.ddl
+$SRC_H5DUMP_TESTFILES/h5dump-help.txt
+$SRC_H5DUMP_TESTFILES/out3.h5import
+$SRC_H5DUMP_TESTFILES/tnofilename-with-packed-bits.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsArray.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsCompound.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsIncomplete.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsLengthExceeded.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsCharLengthExceeded.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsIntLengthExceeded.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsLongLengthExceeded.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsLengthPositive.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsMax.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsMaxExceeded.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsOffsetExceeded.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsCharOffsetExceeded.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsIntOffsetExceeded.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsLongOffsetExceeded.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsOffsetNegative.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsOverlapped.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSigned.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsigned.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedInt.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedInt.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedLong.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLong.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedLongLong.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLong.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedWhole.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedWhole.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedIntWhole.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedIntWhole.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedLongWhole.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongWhole.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedLongLongWhole.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLongWhole.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedLongLongWhole1.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLongWhole1.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedLongLongWhole63.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLongWhole63.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSigned4.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsigned4.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedInt8.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedInt8.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedLong16.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLong16.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedLongLong32.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLong32.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSigned2.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsigned2.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedInt4.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedInt4.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedLong8.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLong8.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsSignedLongLong16.ddl
+$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLong16.ddl
+$SRC_H5DUMP_TESTFILES/tbinregR.exp
+"
+
+LIST_HDF5_TEST_FILES_XML="
+$SRC_H5DUMP_TESTFILES/tbitfields.h5
+$SRC_H5DUMP_TESTFILES/tcompound2.h5
+$SRC_H5DUMP_TESTFILES/tdset2.h5
+$SRC_H5DUMP_TESTFILES/tenum.h5
+$SRC_H5DUMP_TESTFILES/textlink.h5
+$SRC_H5DUMP_TESTFILES/tloop2.h5
+$SRC_H5DUMP_TESTFILES/tmany.h5
+$SRC_H5DUMP_TESTFILES/tname-amp.h5
+$SRC_H5DUMP_TESTFILES/tname-apos.h5
+$SRC_H5DUMP_TESTFILES/tname-gt.h5
+$SRC_H5DUMP_TESTFILES/tname-lt.h5
+$SRC_H5DUMP_TESTFILES/tname-quot.h5
+$SRC_H5DUMP_TESTFILES/tname-sp.h5
+$SRC_H5DUMP_TESTFILES/tnodata.h5
+$SRC_H5DUMP_TESTFILES/tobjref.h5
+$SRC_H5DUMP_TESTFILES/topaque.h5
+$SRC_H5DUMP_TESTFILES/tref.h5
+$SRC_H5DUMP_TESTFILES/tref-escapes.h5
+$SRC_H5DUMP_TESTFILES/tref-escapes-at.h5
+$SRC_H5DUMP_TESTFILES/tstring.h5
+$SRC_H5DUMP_TESTFILES/tstring-at.h5
+"
+
+LIST_OTHER_TEST_FILES_XML="
+$SRC_H5DUMP_TESTFILES/tall.h5.xml
+$SRC_H5DUMP_TESTFILES/tall-2A.h5.xml
+$SRC_H5DUMP_TESTFILES/tarray1.h5.xml
+$SRC_H5DUMP_TESTFILES/tarray2.h5.xml
+$SRC_H5DUMP_TESTFILES/tarray3.h5.xml
+$SRC_H5DUMP_TESTFILES/tarray6.h5.xml
+$SRC_H5DUMP_TESTFILES/tarray7.h5.xml
+$SRC_H5DUMP_TESTFILES/tattr.h5.xml
+$SRC_H5DUMP_TESTFILES/tbitfields.h5.xml
+$SRC_H5DUMP_TESTFILES/tcompound_complex.h5.xml
+$SRC_H5DUMP_TESTFILES/tcompound.h5.xml
+$SRC_H5DUMP_TESTFILES/tcompound2.h5.xml
+$SRC_H5DUMP_TESTFILES/tdatareg.h5.xml
+$SRC_H5DUMP_TESTFILES/tdset.h5.xml
+$SRC_H5DUMP_TESTFILES/tdset2.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-dtd.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-dtd-2.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-dtd-uri.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-nons.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-nons-2.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-nons-uri.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-ns.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-ns-2.h5.xml
+$SRC_H5DUMP_TESTFILES/tenum.h5.xml
+$SRC_H5DUMP_TESTFILES/textlink.h5.xml
+$SRC_H5DUMP_TESTFILES/tfpformat.h5.xml
+$SRC_H5DUMP_TESTFILES/tgroup.h5.xml
+$SRC_H5DUMP_TESTFILES/thlink.h5.xml
+$SRC_H5DUMP_TESTFILES/tloop.h5.xml
+$SRC_H5DUMP_TESTFILES/tloop2.h5.xml
+$SRC_H5DUMP_TESTFILES/tmany.h5.xml
+$SRC_H5DUMP_TESTFILES/tname-amp.h5.xml
+$SRC_H5DUMP_TESTFILES/tname-apos.h5.xml
+$SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.h5.xml
+$SRC_H5DUMP_TESTFILES/tname-gt.h5.xml
+$SRC_H5DUMP_TESTFILES/tname-lt.h5.xml
+$SRC_H5DUMP_TESTFILES/tname-quot.h5.xml
+$SRC_H5DUMP_TESTFILES/tname-sp.h5.xml
+$SRC_H5DUMP_TESTFILES/tnestedcomp.h5.xml
+$SRC_H5DUMP_TESTFILES/tnodata.h5.xml
+$SRC_H5DUMP_TESTFILES/tobjref.h5.xml
+$SRC_H5DUMP_TESTFILES/topaque.h5.xml
+$SRC_H5DUMP_TESTFILES/torderattr1.h5.xml
+$SRC_H5DUMP_TESTFILES/torderattr2.h5.xml
+$SRC_H5DUMP_TESTFILES/torderattr3.h5.xml
+$SRC_H5DUMP_TESTFILES/torderattr4.h5.xml
+$SRC_H5DUMP_TESTFILES/tref.h5.xml
+$SRC_H5DUMP_TESTFILES/tref-escapes.h5.xml
+$SRC_H5DUMP_TESTFILES/tref-escapes-at.h5.xml
+$SRC_H5DUMP_TESTFILES/tsaf.h5.xml
+$SRC_H5DUMP_TESTFILES/tslink.h5.xml
+$SRC_H5DUMP_TESTFILES/tstr.h5.xml
+$SRC_H5DUMP_TESTFILES/tstr2.h5.xml
+$SRC_H5DUMP_TESTFILES/tstring.h5.xml
+$SRC_H5DUMP_TESTFILES/tstring-at.h5.xml
+$SRC_H5DUMP_TESTFILES/tudlink.h5.xml
+$SRC_H5DUMP_TESTFILES/tvldtypes1.h5.xml
+$SRC_H5DUMP_TESTFILES/tvldtypes2.h5.xml
+$SRC_H5DUMP_TESTFILES/tvldtypes3.h5.xml
+$SRC_H5DUMP_TESTFILES/tvldtypes4.h5.xml
+$SRC_H5DUMP_TESTFILES/tvldtypes5.h5.xml
+$SRC_H5DUMP_TESTFILES/tvlstr.h5.xml
+"
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_HDF5_TEST_FILES_XML $LIST_OTHER_TEST_FILES_XML"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            if [ -a $tstfile ]; then
+                $CP -f $tstfile $TESTDIR
+            else
+                echo "Error: FAILED to copy $tstfile"
+                echo "       $tstfile doesn't exist!"
+                exit $EXIT_FAILURE
+            fi
+        fi
+    done
+}
+
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -71,9 +474,9 @@ TESTING() {
 # non-zero value.
 #
 TOOLTEST() {
-    expect="$srcdir/../testfiles/$1"
-    actual="../testfiles/`basename $1 .ddl`.out"
-    actual_err="../testfiles/`basename $1 .ddl`.err"
+    expect="$TESTDIR/$1"
+    actual="$TESTDIR/`basename $1 .ddl`.out"
+    actual_err="$TESTDIR/`basename $1 .ddl`.err"
     actual_sav=${actual}-sav
     actual_err_sav=${actual_err}-sav
     shift
@@ -81,7 +484,7 @@ TOOLTEST() {
     # Run test.
     TESTING $DUMPER $@
     (
-	  cd $srcdir/../testfiles
+	  cd $TESTDIR
   	  $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
 
@@ -118,18 +521,17 @@ TOOLTEST() {
 # used for the binary tests that expect a full path in -o without -b
 TOOLTEST2() {
 
-    expectdata="$srcdir/../testfiles/$1"
-    expect="$srcdir/../testfiles/`basename $1 .exp`.ddl"
-    actualdata="../testfiles/`basename $1 .exp`.txt"
-    actual="../testfiles/`basename $1 .exp`.out"
-    actual_err="../testfiles/`basename $1 .exp`.err"
+    expectdata="$TESTDIR/$1"
+    expect="$TESTDIR/`basename $1 .exp`.ddl"
+    actualdata="$TESTDIR/`basename $1 .exp`.txt"
+    actual="$TESTDIR/`basename $1 .exp`.out"
+    actual_err="$TESTDIR/`basename $1 .exp`.err"
     shift
 
     # Run test.
     TESTING $DUMPER $@
     (
-      
-      cd $srcdir/../testfiles
+      cd $TESTDIR
       $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
     cat $actual_err >> $actual
@@ -169,10 +571,10 @@ TOOLTEST2() {
 # Extract file name, line number, version and thread IDs because they may be different
 TOOLTEST3() {
 
-    expect="$srcdir/../testfiles/$1"
-    actual="../testfiles/`basename $1 .ddl`.out"
-    actual_err="../testfiles/`basename $1 .ddl`.err"
-    actual_ext="../testfiles/`basename $1 .ddl`.ext"
+    expect="$TESTDIR/$1"
+    actual="$TESTDIR/`basename $1 .ddl`.out"
+    actual_err="$TESTDIR/`basename $1 .ddl`.err"
+    actual_ext="$TESTDIR/`basename $1 .ddl`.ext"
     actual_sav=${actual}-sav
     actual_err_sav=${actual_err}-sav
     shift
@@ -180,7 +582,7 @@ TOOLTEST3() {
     # Run test.
     TESTING $DUMPER $@
     (
-      cd $srcdir/../testfiles
+      cd $TESTDIR
       $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
 
@@ -240,7 +642,7 @@ DIFFTEST()
 {
     PRINT_H5DIFF  $@
     (
-	cd $srcdir/../testfiles
+	cd $TESTDIR
 	$RUNSERIAL $H5DIFF_BIN "$@" -q
     )
     RET=$?
@@ -266,14 +668,14 @@ PRINT_H5IMPORT() {
 IMPORTTEST() 
 {
     # remove the output hdf5 file if it exists
-    hdf5_file="$srcdir/../testfiles/$5"
+    hdf5_file="$TESTDIR/$5"
     if [ -f $hdf5_file ]; then
      rm -f $hdf5_file
     fi
 
     PRINT_H5IMPORT  $@
     (
-	cd $srcdir/../testfiles
+	cd $TESTDIR
 	$RUNSERIAL $H5IMPORT_BIN "$@" 
     )
     RET=$?
@@ -292,6 +694,8 @@ IMPORTTEST()
 ###			  T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
 
 # test for signed/unsigned datasets
 TOOLTEST packedbits.ddl packedbits.h5
@@ -408,7 +812,7 @@ TOOLTEST tchar1.ddl -r tchar.h5
 
 # test failure handling
 # Missing file name
-    TOOLTEST tnofilename-with-packed-bits.ddl
+TOOLTEST tnofilename-with-packed-bits.ddl
 
 # rev. 2004
 
@@ -547,27 +951,27 @@ TOOLTEST zerodim.ddl zerodim.h5
 TOOLTEST tvms.ddl tvms.h5
 
 # test for binary output
-TOOLTEST   tbin1.ddl -d integer -o $TESTDIR/out1.bin -b LE    tbinary.h5
+TOOLTEST   tbin1.ddl -d integer -o out1.bin -b LE    tbinary.h5
 
 # NATIVE default. the NATIVE test can be validated with h5import/h5diff
-TOOLTEST   tbin1.ddl -d integer -o $TESTDIR/out1.bin  -b      tbinary.h5
-IMPORTTEST $TESTDIR/out1.bin -c out3.h5import -o $TESTDIR/out1.h5
-DIFFTEST   tbinary.h5 $TESTDIR/out1.h5 /integer /integer
+TOOLTEST   tbin1.ddl -d integer -o out1.bin  -b      tbinary.h5
+IMPORTTEST out1.bin -c out3.h5import -o out1.h5
+DIFFTEST   tbinary.h5 out1.h5 /integer /integer
 
-TOOLTEST   tbin2.ddl -b BE -d float  -o $TESTDIR/out2.bin      tbinary.h5
+TOOLTEST   tbin2.ddl -b BE -d float  -o out2.bin      tbinary.h5
 
 # the NATIVE test can be validated with h5import/h5diff
-TOOLTEST   tbin3.ddl -d integer -o $TESTDIR/out3.bin -b NATIVE tbinary.h5
-IMPORTTEST $TESTDIR/out3.bin -c out3.h5import -o $TESTDIR/out3.h5
-DIFFTEST   tbinary.h5 $TESTDIR/out3.h5 /integer /integer
+TOOLTEST   tbin3.ddl -d integer -o out3.bin -b NATIVE tbinary.h5
+IMPORTTEST out3.bin -c out3.h5import -o out3.h5
+DIFFTEST   tbinary.h5 out3.h5 /integer /integer
 
-TOOLTEST   tbin4.ddl -d double  -b FILE -o $TESTDIR/out4.bin    tbinary.h5
+TOOLTEST   tbin4.ddl -d double  -b FILE -o out4.bin    tbinary.h5
    
 # Clean up binary output files
 if test -z "$HDF5_NOCLEANUP"; then
- rm -f $TESTDIR/out[1-4].bin
- rm -f $TESTDIR/out1.h5
- rm -f $TESTDIR/out3.h5
+ rm -f out[1-4].bin
+ rm -f out1.h5
+ rm -f out3.h5
 fi
 
 # test for dataset region references 
@@ -576,11 +980,11 @@ TOOLTEST tdataregR.ddl -R tdatareg.h5
 TOOLTEST tattrreg.ddl tattrreg.h5
 TOOLTEST tattrregR.ddl -R tattrreg.h5
 
-TOOLTEST2   tbinregR.exp -d /Dataset1 -s 0 -R -y -o $TESTDIR/tbinregR.txt    tdatareg.h5
+TOOLTEST2   tbinregR.exp -d /Dataset1 -s 0 -R -y -o tbinregR.txt    tdatareg.h5
 
 # Clean up text output files
 if test -z "$HDF5_NOCLEANUP"; then
- rm -f $TESTDIR/tbinregR.txt
+ rm -f tbinregR.txt
 fi
 
 # tests for group creation order
@@ -611,7 +1015,7 @@ TOOLTEST textlink.ddl textlink.h5
 TOOLTEST3 filter_fail.ddl --enable-error-stack filter_fail.h5
 
 # test for -o -y for dataset with attributes
-TOOLTEST tall-6.ddl -y -o $TESTDIR/data -d /g1/g1.1/dset1.1.1 tall.h5
+TOOLTEST tall-6.ddl -y -o data -d /g1/g1.1/dset1.1.1 tall.h5
 
 # test for dataset packed bits 
 # Limits:
