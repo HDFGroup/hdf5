@@ -19,7 +19,7 @@ rem    Created:  Scott Wegner, 8/27/07
 rem    Modified:
 rem
 
-rem We currently don't build DLL version os h5jam / h5unjam, but the test script
+rem We currently don't build DLL version of h5jam / h5unjam, but the test script
 rem is setup to handle it if we ever decide to.  --SJW 8/27/07
 
 setlocal enabledelayedexpansion
