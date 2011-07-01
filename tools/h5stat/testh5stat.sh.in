@@ -32,6 +32,7 @@ STAT_BIN=`pwd`/$STAT    # The path of the tool binary
 
 CMP='cmp -s'
 DIFF='diff -c'
+CP='cp'
 
 nerrors=0
 verbose=yes
@@ -41,7 +42,79 @@ if test -z "$srcdir"; then
    srcdir=.
 fi
 
-test -d ./testfiles || mkdir ./testfiles
+# source dirs
+SRC_TOOLS="$srcdir/.."
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+
+# testfiles source dirs for tools
+SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DIFF_TESTFILES="$SRC_TOOLS/h5diff/testfiles"
+SRC_H5COPY_TESTFILES="$SRC_TOOLS/h5copy/testfiles"
+SRC_H5REPACK_TESTFILES="$SRC_TOOLS/h5repack/testfiles"
+SRC_H5JAM_TESTFILES="$SRC_TOOLS/h5jam/testfiles"
+SRC_H5STAT_TESTFILES="$SRC_TOOLS/h5stat/testfiles"
+SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
+
+TESTDIR=./testfiles
+test -d $TESTDIR || mkdir $TESTDIR
+
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_HDF5_TEST_FILES="
+$SRC_H5STAT_TESTFILES/h5stat_filters.h5
+$SRC_H5STAT_TESTFILES/h5stat_tsohm.h5
+$SRC_H5STAT_TESTFILES/h5stat_newgrat.h5
+"
+
+LIST_OTHER_TEST_FILES="
+$SRC_H5STAT_TESTFILES/h5stat_help1.ddl
+$SRC_H5STAT_TESTFILES/h5stat_help2.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-file.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-F.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-d.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-g.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-dT.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-UD.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-UT.ddl
+$SRC_H5STAT_TESTFILES/h5stat_tsohm.ddl
+$SRC_H5STAT_TESTFILES/h5stat_newgrat.ddl
+$SRC_H5STAT_TESTFILES/h5stat_newgrat-UG.ddl
+$SRC_H5STAT_TESTFILES/h5stat_newgrat-UA.ddl
+"
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            if [ -a $tstfile ]; then
+                $CP -f $tstfile $TESTDIR
+            else
+                echo "Error: FAILED to copy $tstfile"
+                echo "       $tstfile doesn't exist!"
+                exit $EXIT_FAILURE
+            fi
+        fi
+    done
+}
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -60,9 +133,9 @@ TESTING() {
 # non-zero value.
 #
 TOOLTEST() {
-   expect="$srcdir/testfiles/$1"
-   actual="./testfiles/`basename $1 .ddl`.out"
-   actual_err="./testfiles/`basename $1 .ddl`.err"
+   expect="$TESTDIR/$1"
+   actual="$TESTDIR/`basename $1 .ddl`.out"
+   actual_err="$TESTDIR/`basename $1 .ddl`.err"
    shift
 
    # Run test.
@@ -71,7 +144,7 @@ TOOLTEST() {
       echo "#############################"
       echo "Expected output for '$STAT $@'" 
       echo "#############################"
-      cd $srcdir/testfiles
+      cd $TESTDIR
       $RUNSERIAL $STAT_BIN $@
    ) >$actual 2>$actual_err
    cat $actual_err >> $actual
@@ -110,6 +183,8 @@ SKIP() {
 ###			  T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
 
 # Test for help flag
 TOOLTEST h5stat_help1.ddl -h

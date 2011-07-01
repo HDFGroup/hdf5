@@ -35,6 +35,7 @@ UNJAM_BIN=`pwd`    # The path of the jam binary
 CMP='cmp -s'
 DIFF='diff -c'
 AWK='awk'
+CP='cp'
 
 nerrors=0
 verbose=yes
@@ -43,15 +44,79 @@ verbose=yes
 if test -z "$srcdir"; then
    srcdir=.
 fi
-TESTFILES="$srcdir/testfiles"
 
+# source dirs
+SRC_TOOLS="$srcdir/.."
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+
+# testfiles source dirs for tools
+SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DIFF_TESTFILES="$SRC_TOOLS/h5diff/testfiles"
+SRC_H5COPY_TESTFILES="$SRC_TOOLS/h5copy/testfiles"
+SRC_H5REPACK_TESTFILES="$SRC_TOOLS/h5repack/testfiles"
+SRC_H5JAM_TESTFILES="$SRC_TOOLS/h5jam/testfiles"
+SRC_H5STAT_TESTFILES="$SRC_TOOLS/h5stat/testfiles"
+SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
+
+TESTDIR=./testfiles
+test -d $TESTDIR || mkdir $TESTDIR
+
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_HDF5_TEST_FILES="
+$SRC_H5JAM_TESTFILES/tall.h5
+$SRC_H5JAM_TESTFILES/twithub.h5
+$SRC_H5JAM_TESTFILES/twithub513.h5
+"
+LIST_OTHER_TEST_FILES="
+$SRC_H5JAM_TESTFILES/u10.txt
+$SRC_H5JAM_TESTFILES/u511.txt
+$SRC_H5JAM_TESTFILES/u512.txt
+$SRC_H5JAM_TESTFILES/u513.txt
+$SRC_H5JAM_TESTFILES/h5jam-help.txt
+$SRC_H5JAM_TESTFILES/h5unjam-help.txt
+"
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            if [ -a $tstfile ]; then
+                $CP -f $tstfile $TESTDIR
+            else
+                echo "Error: FAILED to copy $tstfile"
+                echo "       $tstfile doesn't exist!"
+                exit $EXIT_FAILURE
+            fi
+        fi
+    done
+}
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
 #
 TESTING() {
    SPACES="                                                               "
-   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+   echo "Testing $* $SPACES"
+   #echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -386,145 +451,148 @@ UNJAMTEST () {
 ###			  T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
 
-JAMTEST $TESTFILES/u10.txt $TESTFILES/tall.h5 ta2.h5
-CHECKFILE $TESTFILES/tall.h5 ta2.h5
+# test start
+JAMTEST $TESTDIR/u10.txt $TESTDIR/tall.h5 ta2.h5
+CHECKFILE $TESTDIR/tall.h5 ta2.h5
 CLEANUP ta2.h5
-JAMTEST $TESTFILES/u511.txt $TESTFILES/tall.h5 ta3.h5
-CHECKFILE $TESTFILES/tall.h5 ta3.h5
+JAMTEST $TESTDIR/u511.txt $TESTDIR/tall.h5 ta3.h5
+CHECKFILE $TESTDIR/tall.h5 ta3.h5
 CLEANUP ta3.h5
-JAMTEST $TESTFILES/u512.txt $TESTFILES/tall.h5 ta4.h5
-CHECKFILE $TESTFILES/tall.h5 ta4.h5
+JAMTEST $TESTDIR/u512.txt $TESTDIR/tall.h5 ta4.h5
+CHECKFILE $TESTDIR/tall.h5 ta4.h5
 CLEANUP ta4.h5
-JAMTEST $TESTFILES/u513.txt $TESTFILES/tall.h5 ta5.h5
-CHECKFILE $TESTFILES/tall.h5 ta5.h5
+JAMTEST $TESTDIR/u513.txt $TESTDIR/tall.h5 ta5.h5
+CHECKFILE $TESTDIR/tall.h5 ta5.h5
 CLEANUP ta5.h5
 
-SETUP $TESTFILES/tall.h5 ta.h5
-JAMTEST $TESTFILES/u10.txt ta.h5 
-CHECKFILE $TESTFILES/tall.h5 ta.h5
-SETUP $TESTFILES/tall.h5 ta.h5
-JAMTEST $TESTFILES/u511.txt ta.h5 
-CHECKFILE $TESTFILES/tall.h5 ta.h5
-SETUP $TESTFILES/tall.h5 ta.h5
-JAMTEST $TESTFILES/u512.txt ta.h5 
-CHECKFILE $TESTFILES/tall.h5 ta.h5
-SETUP $TESTFILES/tall.h5 ta.h5
-JAMTEST $TESTFILES/u513.txt ta.h5 
-CHECKFILE $TESTFILES/tall.h5 ta.h5
+SETUP $TESTDIR/tall.h5 ta.h5
+JAMTEST $TESTDIR/u10.txt ta.h5 
+CHECKFILE $TESTDIR/tall.h5 ta.h5
+SETUP $TESTDIR/tall.h5 ta.h5
+JAMTEST $TESTDIR/u511.txt ta.h5 
+CHECKFILE $TESTDIR/tall.h5 ta.h5
+SETUP $TESTDIR/tall.h5 ta.h5
+JAMTEST $TESTDIR/u512.txt ta.h5 
+CHECKFILE $TESTDIR/tall.h5 ta.h5
+SETUP $TESTDIR/tall.h5 ta.h5
+JAMTEST $TESTDIR/u513.txt ta.h5 
+CHECKFILE $TESTDIR/tall.h5 ta.h5
 CLEANUP ta.h5
 
-JAMTEST $TESTFILES/u10.txt $TESTFILES/twithub.h5 tax2.h5
-CHECKFILE $TESTFILES/tall.h5 tax2.h5
+JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub.h5 tax2.h5
+CHECKFILE $TESTDIR/tall.h5 tax2.h5
 CLEANUP tax2.h5
-JAMTEST $TESTFILES/u511.txt $TESTFILES/twithub.h5 tax3.h5
-CHECKFILE $TESTFILES/tall.h5 tax3.h5
+JAMTEST $TESTDIR/u511.txt $TESTDIR/twithub.h5 tax3.h5
+CHECKFILE $TESTDIR/tall.h5 tax3.h5
 CLEANUP tax3.h5
-JAMTEST $TESTFILES/u512.txt $TESTFILES/twithub.h5 tax4.h5
-CHECKFILE $TESTFILES/tall.h5 tax4.h5
+JAMTEST $TESTDIR/u512.txt $TESTDIR/twithub.h5 tax4.h5
+CHECKFILE $TESTDIR/tall.h5 tax4.h5
 CLEANUP tax4.h5
-JAMTEST $TESTFILES/u513.txt $TESTFILES/twithub.h5 tax5.h5
-CHECKFILE $TESTFILES/tall.h5 tax5.h5
+JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub.h5 tax5.h5
+CHECKFILE $TESTDIR/tall.h5 tax5.h5
 CLEANUP tax5.h5
 
-JAMTEST $TESTFILES/u10.txt $TESTFILES/twithub513.h5 tax6.h5
-CHECKFILE $TESTFILES/tall.h5 tax6.h5
+JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub513.h5 tax6.h5
+CHECKFILE $TESTDIR/tall.h5 tax6.h5
 CLEANUP tax6.h5
-JAMTEST $TESTFILES/u511.txt $TESTFILES/twithub513.h5 tax7.h5
-CHECKFILE $TESTFILES/tall.h5 tax7.h5
+JAMTEST $TESTDIR/u511.txt $TESTDIR/twithub513.h5 tax7.h5
+CHECKFILE $TESTDIR/tall.h5 tax7.h5
 CLEANUP tax7.h5
-JAMTEST $TESTFILES/u512.txt $TESTFILES/twithub513.h5 tax8.h5
-CHECKFILE $TESTFILES/tall.h5 tax8.h5
+JAMTEST $TESTDIR/u512.txt $TESTDIR/twithub513.h5 tax8.h5
+CHECKFILE $TESTDIR/tall.h5 tax8.h5
 CLEANUP tax8.h5
-JAMTEST $TESTFILES/u513.txt $TESTFILES/twithub513.h5 tax9.h5
-CHECKFILE $TESTFILES/tall.h5 tax9.h5
+JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub513.h5 tax9.h5
+CHECKFILE $TESTDIR/tall.h5 tax9.h5
 CLEANUP tax9.h5
 
-JAMTEST $TESTFILES/u10.txt $TESTFILES/twithub.h5 --clobber taz2.h5 
-CHECKFILE $TESTFILES/tall.h5 taz2.h5
+JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub.h5 --clobber taz2.h5 
+CHECKFILE $TESTDIR/tall.h5 taz2.h5
 CLEANUP taz2.h5
-JAMTEST $TESTFILES/u511.txt $TESTFILES/twithub.h5 --clobber taz3.h5
-CHECKFILE $TESTFILES/tall.h5 taz3.h5
+JAMTEST $TESTDIR/u511.txt $TESTDIR/twithub.h5 --clobber taz3.h5
+CHECKFILE $TESTDIR/tall.h5 taz3.h5
 CLEANUP taz3.h5
-JAMTEST $TESTFILES/u512.txt $TESTFILES/twithub.h5 --clobber taz4.h5 
-CHECKFILE $TESTFILES/tall.h5 taz4.h5
+JAMTEST $TESTDIR/u512.txt $TESTDIR/twithub.h5 --clobber taz4.h5 
+CHECKFILE $TESTDIR/tall.h5 taz4.h5
 CLEANUP taz4.h5
-JAMTEST $TESTFILES/u513.txt $TESTFILES/twithub.h5 --clobber taz5.h5 
-CHECKFILE $TESTFILES/tall.h5 taz5.h5
+JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub.h5 --clobber taz5.h5 
+CHECKFILE $TESTDIR/tall.h5 taz5.h5
 CLEANUP taz5.h5
 
-JAMTEST $TESTFILES/u10.txt $TESTFILES/twithub513.h5 --clobber taz6.h5 
-CHECKFILE $TESTFILES/tall.h5 taz6.h5
+JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub513.h5 --clobber taz6.h5 
+CHECKFILE $TESTDIR/tall.h5 taz6.h5
 CLEANUP taz6.h5
-JAMTEST $TESTFILES/u511.txt $TESTFILES/twithub513.h5 --clobber taz7.h5
-CHECKFILE $TESTFILES/tall.h5 taz7.h5
+JAMTEST $TESTDIR/u511.txt $TESTDIR/twithub513.h5 --clobber taz7.h5
+CHECKFILE $TESTDIR/tall.h5 taz7.h5
 CLEANUP taz7.h5
-JAMTEST $TESTFILES/u512.txt $TESTFILES/twithub513.h5 --clobber taz8.h5 
-CHECKFILE $TESTFILES/tall.h5 taz8.h5
+JAMTEST $TESTDIR/u512.txt $TESTDIR/twithub513.h5 --clobber taz8.h5 
+CHECKFILE $TESTDIR/tall.h5 taz8.h5
 CLEANUP taz8.h5
-JAMTEST $TESTFILES/u513.txt $TESTFILES/twithub513.h5 --clobber taz9.h5 
-CHECKFILE $TESTFILES/tall.h5 taz9.h5
+JAMTEST $TESTDIR/u513.txt $TESTDIR/twithub513.h5 --clobber taz9.h5 
+CHECKFILE $TESTDIR/tall.h5 taz9.h5
 CLEANUP taz9.h5
 
-SETUP $TESTFILES/twithub.h5 tay2.h5
-JAMTEST $TESTFILES/u10.txt tay2.h5 --clobber
-CHECKFILE $TESTFILES/tall.h5 tay2.h5
+SETUP $TESTDIR/twithub.h5 tay2.h5
+JAMTEST $TESTDIR/u10.txt tay2.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay2.h5
 CLEANUP tay2.h5
-SETUP $TESTFILES/twithub.h5 tay3.h5
-JAMTEST $TESTFILES/u511.txt tay3.h5 --clobber
-CHECKFILE $TESTFILES/tall.h5 tay3.h5
+SETUP $TESTDIR/twithub.h5 tay3.h5
+JAMTEST $TESTDIR/u511.txt tay3.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay3.h5
 CLEANUP tay3.h5
-SETUP $TESTFILES/twithub.h5 tay4.h5
-JAMTEST $TESTFILES/u512.txt tay4.h5 --clobber
-CHECKFILE $TESTFILES/tall.h5 tay4.h5
+SETUP $TESTDIR/twithub.h5 tay4.h5
+JAMTEST $TESTDIR/u512.txt tay4.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay4.h5
 CLEANUP tay4.h5
-SETUP $TESTFILES/twithub.h5 tay5.h5
-JAMTEST $TESTFILES/u513.txt tay5.h5 --clobber
-CHECKFILE $TESTFILES/tall.h5 tay5.h5
+SETUP $TESTDIR/twithub.h5 tay5.h5
+JAMTEST $TESTDIR/u513.txt tay5.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay5.h5
 CLEANUP tay5.h5
 
-SETUP $TESTFILES/twithub513.h5 tay6.h5
-JAMTEST $TESTFILES/u10.txt tay6.h5 --clobber
-CHECKFILE $TESTFILES/tall.h5 tay6.h5
+SETUP $TESTDIR/twithub513.h5 tay6.h5
+JAMTEST $TESTDIR/u10.txt tay6.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay6.h5
 CLEANUP tay6.h5
-SETUP $TESTFILES/twithub513.h5 tay7.h5
-JAMTEST $TESTFILES/u511.txt tay7.h5 --clobber
-CHECKFILE $TESTFILES/tall.h5 tay7.h5
+SETUP $TESTDIR/twithub513.h5 tay7.h5
+JAMTEST $TESTDIR/u511.txt tay7.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay7.h5
 CLEANUP tay7.h5
-SETUP $TESTFILES/twithub513.h5 tay8.h5
-JAMTEST $TESTFILES/u512.txt tay8.h5 --clobber
-CHECKFILE $TESTFILES/tall.h5 tay8.h5
+SETUP $TESTDIR/twithub513.h5 tay8.h5
+JAMTEST $TESTDIR/u512.txt tay8.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay8.h5
 CLEANUP tay8.h5
-SETUP $TESTFILES/twithub513.h5 tay9.h5
-JAMTEST $TESTFILES/u513.txt tay9.h5 --clobber
-CHECKFILE $TESTFILES/tall.h5 tay9.h5
+SETUP $TESTDIR/twithub513.h5 tay9.h5
+JAMTEST $TESTDIR/u513.txt tay9.h5 --clobber
+CHECKFILE $TESTDIR/tall.h5 tay9.h5
 CLEANUP tay9.h5
 
-SETUP $TESTFILES/twithub.h5 tai1.h5
+SETUP $TESTDIR/twithub.h5 tai1.h5
 UNJAMTEST tai1.h5 o10.txt taa1.h5
-CHECKFILE $TESTFILES/tall.h5 taa1.h5
+CHECKFILE $TESTDIR/tall.h5 taa1.h5
 CLEANUP taa1.h5 tai1.h5 o10.txt
-SETUP $TESTFILES/twithub513.h5 tai2.h5
+SETUP $TESTDIR/twithub513.h5 tai2.h5
 UNJAMTEST tai2.h5 o512.txt taa2.h5
-CHECKFILE $TESTFILES/tall.h5 taa2.h5
+CHECKFILE $TESTDIR/tall.h5 taa2.h5
 CLEANUP taa2.h5 tai2.h5 o512.txt
 
-SETUP $TESTFILES/twithub.h5 tai3.h5
+SETUP $TESTDIR/twithub.h5 tai3.h5
 UNJAMTEST tai3.h5 - taa3.h5
-CHECKFILE $TESTFILES/tall.h5 taa3.h5
+CHECKFILE $TESTDIR/tall.h5 taa3.h5
 CLEANUP taa3.h5 tai3.h5
-SETUP $TESTFILES/twithub513.h5 tai4.h5
+SETUP $TESTDIR/twithub513.h5 tai4.h5
 UNJAMTEST tai4.h5 - taa4.h5
-CHECKFILE $TESTFILES/tall.h5 taa4.h5
+CHECKFILE $TESTDIR/tall.h5 taa4.h5
 CLEANUP taa4.h5 tai4.h5
 
-SETUP $TESTFILES/twithub.h5 taj2.h5
+SETUP $TESTDIR/twithub.h5 taj2.h5
 UNJAMTEST taj2.h5 --delete tac2.h5
-CHECKFILE $TESTFILES/tall.h5 tac2.h5
+CHECKFILE $TESTDIR/tall.h5 tac2.h5
 CLEANUP tac2.h5 taj2.h5
-SETUP $TESTFILES/twithub513.h5 taj3.h5
+SETUP $TESTDIR/twithub513.h5 taj3.h5
 UNJAMTEST taj3.h5 --delete tac3.h5
-CHECKFILE $TESTFILES/tall.h5 tac3.h5
+CHECKFILE $TESTDIR/tall.h5 tac3.h5
 CLEANUP tac3.h5 taj3.h5
 
 
