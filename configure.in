@@ -1178,7 +1178,7 @@ case "X-$enable_production" in
   *)
     enable_production="user-defined"
     AC_MSG_RESULT([user-defined])
-    CONFIG_MODE="$X-enableval"
+    CONFIG_MODE="$enableval"
     ;;
 esac
 
