@@ -176,6 +176,13 @@ IF (BUILD_TESTING)
       h5diff_627.txt
       h5diff_628.txt
       h5diff_629.txt
+      h5diff_640.txt
+      h5diff_641.txt
+      h5diff_642.txt
+      h5diff_643.txt
+      h5diff_644.txt
+      h5diff_645.txt
+      h5diff_646.txt
       h5diff_70.txt
       h5diff_700.txt
       h5diff_701.txt
@@ -672,6 +679,20 @@ IF (BUILD_TESTING)
           h5diff_628.out.err
           h5diff_629.out
           h5diff_629.out.err
+          h5diff_640.out
+          h5diff_640.out.err
+          h5diff_641.out
+          h5diff_641.out.err
+          h5diff_642.out
+          h5diff_642.out.err
+          h5diff_643.out
+          h5diff_643.out.err
+          h5diff_644.out
+          h5diff_644.out.err
+          h5diff_645.out
+          h5diff_645.out.err
+          h5diff_646.out
+          h5diff_646.out.err
           h5diff_70.out
           h5diff_70.out.err
           h5diff_700.out
@@ -1207,6 +1228,19 @@ ADD_H5_TEST (h5diff_484 0 -v --exclude-path "/dset3" ${EXCLUDE_FILE1_1} ${EXCLUD
 # # diff various multiple vlen and fixed strings in a compound type dataset
 # ##############################################################################
 ADD_H5_TEST (h5diff_530 0 -v  ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group /group_copy)
+
+# ##############################################################################
+# # Test mutually exclusive options 
+# ##############################################################################
+#
+# Test with -d , -p and --use-system-epsilon. 
+ADD_H5_TEST (h5diff_640 1 -v -d 5 -p 0.05 --use-system-epsilon ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_641 1 -v -d 5 -p 0.05 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_642 1 -v -p 0.05 -d 5 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_643 1 -v -d 5 --use-system-epsilon ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_644 1 -v --use-system-epsilon -d 5 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_645 1 -v -p 0.05 --use-system-epsilon ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_646 1 -v --use-system-epsilon -p 0.05 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
 
   
 ENDIF (BUILD_TESTING)

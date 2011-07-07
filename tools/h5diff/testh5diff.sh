@@ -254,6 +254,13 @@ $SRC_H5DIFF_TESTFILES/h5diff_626.txt
 $SRC_H5DIFF_TESTFILES/h5diff_627.txt
 $SRC_H5DIFF_TESTFILES/h5diff_628.txt
 $SRC_H5DIFF_TESTFILES/h5diff_629.txt
+$SRC_H5DIFF_TESTFILES/h5diff_640.txt
+$SRC_H5DIFF_TESTFILES/h5diff_641.txt
+$SRC_H5DIFF_TESTFILES/h5diff_642.txt
+$SRC_H5DIFF_TESTFILES/h5diff_643.txt
+$SRC_H5DIFF_TESTFILES/h5diff_644.txt
+$SRC_H5DIFF_TESTFILES/h5diff_645.txt
+$SRC_H5DIFF_TESTFILES/h5diff_646.txt
 $SRC_H5DIFF_TESTFILES/h5diff_70.txt
 $SRC_H5DIFF_TESTFILES/h5diff_700.txt
 $SRC_H5DIFF_TESTFILES/h5diff_701.txt
@@ -969,6 +976,20 @@ TOOLTEST h5diff_484.txt -v --exclude-path "/dset3" h5diff_exclude1-1.h5 h5diff_e
 # # diff various multiple vlen and fixed strings in a compound type dataset
 # ##############################################################################
 TOOLTEST h5diff_530.txt -v  h5diff_comp_vl_strs.h5 h5diff_comp_vl_strs.h5 /group /group_copy
+
+# ##############################################################################
+# # Test mutually exclusive options 
+# ##############################################################################
+#
+# Test with -d , -p and --use-system-epsilon. 
+TOOLTEST h5diff_640.txt -v -d 5 -p 0.05 --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
+TOOLTEST h5diff_641.txt -v -d 5 -p 0.05 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
+TOOLTEST h5diff_642.txt -v -p 0.05 -d 5 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
+TOOLTEST h5diff_643.txt -v -d 5 --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
+TOOLTEST h5diff_644.txt -v --use-system-epsilon -d 5 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
+TOOLTEST h5diff_645.txt -v -p 0.05 --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
+TOOLTEST h5diff_646.txt -v --use-system-epsilon -p 0.05 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
+
 
 # ##############################################################################
 # # END

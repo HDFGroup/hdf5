@@ -1638,6 +1638,13 @@
 ./tools/h5diff/testfiles/h5diff_627.txt
 ./tools/h5diff/testfiles/h5diff_628.txt
 ./tools/h5diff/testfiles/h5diff_629.txt
+./tools/h5diff/testfiles/h5diff_640.txt
+./tools/h5diff/testfiles/h5diff_641.txt
+./tools/h5diff/testfiles/h5diff_642.txt
+./tools/h5diff/testfiles/h5diff_643.txt
+./tools/h5diff/testfiles/h5diff_644.txt
+./tools/h5diff/testfiles/h5diff_645.txt
+./tools/h5diff/testfiles/h5diff_646.txt
 ./tools/h5diff/testfiles/h5diff_70.txt
 ./tools/h5diff/testfiles/h5diff_700.txt
 ./tools/h5diff/testfiles/h5diff_701.txt

@@ -46,6 +46,31 @@ static struct long_options l_opts[] = {
     { NULL, 0, '\0' }
 };
 
+/*-------------------------------------------------------------------------
+ * Function: check_options
+ *
+ * Purpose: parse command line input
+ *
+ *-------------------------------------------------------------------------
+ */
+static check_options(diff_opt_t* options)
+{
+    /*--------------------------------------------------------------
+     * check for mutually exclusive options 
+     *--------------------------------------------------------------*/
+
+    /* check between -d , -p, --use-system-epsilon.
+     * These options are mutually exclusive.
+     */
+    if ((options->d + options->p + options->use_system_epsilon) > 1)
+    {
+        printf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
+        printf("use no more than one.\n");
+        printf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 Reference Manual'.\n", PROGRAMNAME);
+        h5diff_exit(EXIT_FAILURE);
+    }
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: parse_command_line
@@ -231,13 +256,12 @@ void parse_command_line(int argc,
         }
     }
 
+    /* check options */
+    check_options(options);
+
     /* if exclude-path option is used, keep the exclude path list */
     if (options->exclude_path)
         options->exclude = exclude_head;
-
-    /* if use system epsilon, unset -p and -d option */
-    if (options->use_system_epsilon)
-        options->d = options->p = 0;
 
     /* check for file names to be processed */
     if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL)
@@ -424,97 +448,98 @@ check_d_input( const char *str )
 void usage(void)
 {
  printf("usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]] \n");
- printf("  file1                    File name of the first HDF5 file\n");
- printf("  file2                    File name of the second HDF5 file\n");
- printf("  [obj1]                   Name of an HDF5 object, in absolute path\n");
- printf("  [obj2]                   Name of an HDF5 object, in absolute path\n");
+ printf("  file1             File name of the first HDF5 file\n");
+ printf("  file2             File name of the second HDF5 file\n");
+ printf("  [obj1]            Name of an HDF5 object, in absolute path\n");
+ printf("  [obj2]            Name of an HDF5 object, in absolute path\n");
  printf("\n");
  printf("  OPTIONS\n");
- printf("   -h, --help              Print a usage message and exit.\n");
- printf("   -V, --version           Print version number and exit.\n");
- printf("   -r, --report            Report mode. Print differences.\n");
- printf("   -v --verbose            Verbose mode. Print differences information and list\n");
- printf("                           of objects.\n");
- printf("   -vN --verbose=N         Verbose mode with level. Print differences and list\n");
- printf("                           of objects.\n");
- printf("                           Level of detail depends on value of N:\n");
- printf("                            0 : Identical to '-v' or '--verbose'.\n");
- printf("                            1 : All level 0 information plus one-line attribute\n");
- printf("                                status summary.\n");
- printf("                            2 : All level 1 information plus extended attribute\n");
- printf("                                status report.\n");
- printf("   -q, --quiet             Quiet mode. Do not produce output.\n");
- printf("   --follow-symlinks       Follow symbolic links (soft links and external links)\n");
- printf("                           and compare the links' target objects.\n");
- printf("                           If symbolic link(s) with the same name exist in the\n");
- printf("                           files being compared, then determine whether the \n");
- printf("                           target of each link is an existing object (dataset,\n");
- printf("                           group, or named datatype) or the link is a dangling\n");
- printf("                           link (a soft or external link pointing to a target\n");
- printf("                           object that does not yet exist).\n");
- printf("                           - If both symbolic links are dangling links, they\n");
- printf("                             are treated as being the same; by default, h5diff\n");
- printf("                             returns an exit code of 0. If, however, \n");
- printf("                             --no-dangling-links is used with --follow-symlinks,\n");
- printf("                             this situation is treated as an error and h5diff \n");
- printf("                             returns an exit code of 2.\n");
- printf("                           - If only one of the two links is a dangling link,\n");
- printf("                             they are treated as being different and h5diff \n");
- printf("                             returns an exit code of 1. If, however, \n");
- printf("                             --no-dangling-links is used with --follow-symlinks,\n");
- printf("                             this situation is treated as an error and h5diff \n");
- printf("                             returns an exit code of 2.\n");
- printf("                           - If both symbolic links point to existing objects,\n");
- printf("                             h5diff compares the two objects.\n");
- printf("                           If any symbolic link specified in the call to h5diff\n");
- printf("                           does not exist, h5diff treats it as an error and\n");
- printf("                           returns an exit code of 2.\n");
- printf("   --no-dangling-links     Must be used with --follow-symlinks option;\n");
- printf("                           otherwise, h5diff shows error message and returns\n");
- printf("                           an exit code of 2.\n");
- printf("                           Check for any symbolic links (soft links or external\n");
- printf("                           links) that do not resolve to an existing object\n");
- printf("                           (dataset, group, or named datatype).  If any\n");
- printf("                           dangling link is found, this situation is treated as\n");
- printf("                           an error and h5diff returns an exit code of 2.\n");
- printf("   -c, --compare           List objects that are not comparable\n");
- printf("   -N, --nan               Avoid NaNs detection\n");
- printf("   -n C, --count=C         Print differences up to C number, C is a positive\n");
- printf("                           integer.\n");
- printf("   -d D, --delta=D         Print difference if (|a-b| > D), D is a positive\n");
- printf("                           number.\n");
- printf("   -p R, --relative=R      Print difference if (|(a-b)/b| > R), R is a positive\n");
- printf("                           number.\n");
- printf("   --use-system-epsilon    Print difference if (|a-b| > EPSILON), EPSILON is\n");
- printf("                           a system epsilon value.\n");
- printf("                           If the system epsilon is not defined, the below\n");
- printf("                           one of the following predefined values will be used:\n");
- printf("                             FLT_EPSILON = 1.19209E-07 for floating-point type\n");
- printf("                             DBL_EPSILON = 2.22045E-16 for double percision type\n");
- printf("   --exclude-path \"path\"   Exclude the specified path to an object when\n");
- printf("                           comparing files or groups. If a group is excluded,\n");
- printf("                           all member objects will also be excluded.\n");
- printf("                           The specified path is excluded wherever it occurs.\n");
- printf("                           This flexibility enables the same option to exclude\n");
- printf("                           either objects that exist only in one file or\n");
- printf("                           common objects that are known to differ.\n");
+ printf("   -h, --help\n");
+ printf("         Print a usage message and exit.\n");
+ printf("   -V, --version\n");
+ printf("         Print version number and exit.\n");
+ printf("   -r, --report\n");
+ printf("         Report mode. Print differences.\n");
+ printf("   -v --verbose\n");
+ printf("         Verbose mode. Print differences information and list of objects.\n");
+ printf("   -vN --verbose=N\n");
+ printf("         Verbose mode with level. Print differences and list of objects.\n");
+ printf("         Level of detail depends on value of N:\n");
+ printf("          0 : Identical to '-v' or '--verbose'.\n");
+ printf("          1 : All level 0 information plus one-line attribute\n");
+ printf("              status summary.\n");
+ printf("          2 : All level 1 information plus extended attribute\n");
+ printf("              status report.\n");
+ printf("   -q, --quiet\n");
+ printf("         Quiet mode. Do not produce output.\n");
+ printf("   --follow-symlinks\n");
+ printf("         Follow symbolic links (soft links and external links and compare the)\n");
+ printf("         links' target objects.\n");
+ printf("         If symbolic link(s) with the same name exist in the files being\n");
+ printf("         compared, then determine whether the target of each link is an existing\n");
+ printf("         object (dataset, group, or named datatype) or the link is a dangling\n");
+ printf("         link (a soft or external link pointing to a target object that does\n");
+ printf("         not yet exist).\n");
+ printf("         - If both symbolic links are dangling links, they are treated as being\n");
+ printf("           the same; by default, h5diff returns an exit code of 0.\n");
+ printf("           If, however, --no-dangling-links is used with --follow-symlinks,\n");
+ printf("           this situation is treated as an error and h5diff returns an\n");
+ printf("           exit code of 2.\n");
+ printf("         - If only one of the two links is a dangling link,they are treated as\n");
+ printf("           being different and h5diff returns an exit code of 1.\n");
+ printf("           If, however, --no-dangling-links is used with --follow-symlinks,\n");
+ printf("           this situation is treated as an error and h5diff returns an\n");
+ printf("           exit code of 2.\n");
+ printf("         - If both symbolic links point to existing objects, h5diff compares the\n");
+ printf("           two objects.\n");
+ printf("         If any symbolic link specified in the call to h5diff does not exist,\n");
+ printf("         h5diff treats it as an error and returns an exit code of 2.\n");
+ printf("   --no-dangling-links\n");
+ printf("         Must be used with --follow-symlinks option; otherwise, h5diff shows\n");
+ printf("         error message and returns an exit code of 2.\n");
+ printf("         Check for any symbolic links (soft links or external links) that do not\n");
+ printf("         resolve to an existing object (dataset, group, or named datatype).\n");
+ printf("         If any dangling link is found, this situation is treated as an error\n");
+ printf("         and h5diff returns an exit code of 2.\n");
+ printf("   -c, --compare\n");
+ printf("         List objects that are not comparable\n");
+ printf("   -N, --nan\n");
+ printf("         Avoid NaNs detection\n");
+ printf("   -n C, --count=C\n");
+ printf("         Print differences up to C. C must be a positive integer.\n");
+ printf("   -d D, --delta=D\n");
+ printf("         Print difference if (|a-b| > D). D must be a positive number.\n");
+ printf("         Can not use with '-p' or '--use-system-epsilon'.\n");
+ printf("   -p R, --relative=R\n");
+ printf("         Print difference if (|(a-b)/b| > R). R must be a positive number.\n");
+ printf("         Can not use with '-d' or '--use-system-epsilon'.\n");
+ printf("   --use-system-epsilon\n");
+ printf("         Print difference if (|a-b| > EPSILON), EPSILON is system defined value.\n");
+ printf("         If the system epsilon is not defined,one of the following predefined\n");
+ printf("         values will be used:\n");
+ printf("           FLT_EPSILON = 1.19209E-07 for floating-point type\n");
+ printf("           DBL_EPSILON = 2.22045E-16 for double precision type\n");
+ printf("         Can not use with '-p' or '-d'.\n");
+ printf("   --exclude-path \"path\" \n");
+ printf("         Exclude the specified path to an object when comparing files or groups.\n");
+ printf("         If a group is excluded, all member objects will also be excluded.\n");
+ printf("         The specified path is excluded wherever it occurs.\n");
+ printf("         This flexibility enables the same option to exclude either objects that\n");
+ printf("         exist only in one file or common objects that are known to differ.\n");
  printf("\n");
- printf("                           When comparing files, \"path\" is the absolute path to\n");
- printf("                           the excluded object; when comparing groups, \"path\" is\n");
- printf("                           similar to the relative path from the group to the\n");
- printf("                           excluded object. This \"path\" can be taken from the\n");
- printf("                           first section of the output of the --verbose option.\n");
- printf("                           For example, if you are comparing the group /groupA\n");
- printf("                           in two files and you want to exclude\n");
- printf("                           /groupA/groupB/groupC in both files, the exclude\n");
- printf("                           option would read as follows:\n");
- printf("                             --exclude-path \"/groupB/groupC\"\n");
+ printf("         When comparing files, \"path\" is the absolute path to the excluded;\n");
+ printf("         object; when comparing groups, \"path\" is similar to the relative\n");
+ printf("         path from the group to the excluded object. This \"path\" can be\n");
+ printf("         taken from the first section of the output of the --verbose option.\n");
+ printf("         For example, if you are comparing the group /groupA in two files and\n");
+ printf("         you want to exclude /groupA/groupB/groupC in both files, the exclude\n");
+ printf("         option would read as follows:\n");
+ printf("           --exclude-path \"/groupB/groupC\"\n");
  printf("\n");
- printf("                           If there are multiple paths to an object, only the\n");
- printf("                           specified path(s) will be excluded; the comparison\n");
- printf("                           will include any path not explicitly excluded.\n");
- printf("                           This option can be used repeatedly to exclude\n");
- printf("                           multiple paths.\n");
+ printf("         If there are multiple paths to an object, only the specified path(s)\n");
+ printf("         will be excluded; the comparison will include any path not explicitly\n");
+ printf("         excluded.\n");
+ printf("         This option can be used repeatedly to exclude multiple paths.\n");
  printf("\n");
 
  printf(" Modes of output:\n");

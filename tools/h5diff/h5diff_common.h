@@ -17,6 +17,8 @@
 #define H5DIFFCOMMON_H__
 
 #include "h5tools.h"
+/* Name of tool */
+#define PROGRAMNAME "h5diff"
 
 #ifdef __cplusplus
 extern "C" {
