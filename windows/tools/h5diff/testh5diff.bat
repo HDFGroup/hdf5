@@ -884,9 +884,9 @@ rem ############################################################################
     call :tooltest h5diff_518.txt -v --follow-symlinks %grp_recurse1_ext% %grp_recurse2_ext1% /g1
 
 
-    rem ##############################################################################
+    rem #######################################################################
     rem # Exclude objects (--exclude-path)
-    rem ##############################################################################
+    rem #######################################################################
     rem #-------------------------------------------------
     rem # Same structure, same names and different value.
 
@@ -913,12 +913,38 @@ rem ############################################################################
     call :testing %h5diff% -v --exclude-path "/dset3" %srcexclude1_1% %srcexclude1_2% /group1
     call :tooltest h5diff_484.txt -v --exclude-path "/dset3"  %exclude1_1% %exclude1_2% /group1
 
-    rem ##############################################################################
+    rem #######################################################################
     rem # diff various multiple vlen and fixed strings in a compound type dataset
-    rem ##############################################################################
+    rem #######################################################################
     call :testing %h5diff% -v %src_comp_vl_strs% %src_comp_vl_strs% /group /group_copy
     call :tooltest h5diff_530.txt -v  %comp_vl_strs% %comp_vl_strs% /group /group_copy
 
+    rem #######################################################################
+    rem # Test mutually exclusive options 
+    rem #######################################################################
+
+    rem ------------------------------------------------------
+    rem Test with -d , -p and --use-system-epsilon. 
+    call :testing %h5diff% -v -d 5 -p 0.05 --use-system-epsilon %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_640.txt -v -d 5 -p 0.05 --use-system-epsilon %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v -d 5 -p 0.05 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_641.txt -v -d 5 -p 0.05 %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v -p 0.05 -d 5 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_642.txt -v -p 0.05 -d 5 %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v -d 5 --use-system-epsilon %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_643.txt -v -d 5 --use-system-epsilon %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v --use-system-epsilon -d 5 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_644.txt -v --use-system-epsilon -d 5 %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v -p 0.05 --use-system-epsilon %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_645.txt -v -p 0.05 --use-system-epsilon %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v --use-system-epsilon -p 0.05 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_646.txt -v --use-system-epsilon -p 0.05 %file1% %file2% /g1/dset3 /g1/dset4
 	
     rem #######################################################################
     rem # END
