@@ -154,7 +154,29 @@ ADD_EXECUTABLE (testhdf5 ${testhdf5_SRCS})
 TARGET_NAMING (testhdf5 ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (testhdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 
+# Remove any output file left over from previous test run
+ADD_TEST (
+    NAME h5test-clear-testhdf5-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove 
+        coord.h5
+        sys_file1
+        tattr.h5
+        tfile1.h5
+        tfile2.h5
+        tfile3.h5
+        tfile4.h5
+        tfile5.h5
+        tfile6.h5
+        th5o_file
+        th5s1.h5
+        tselect.h5
+        tsohm.h5
+        tsohm_dst.h5
+        tsohm_src.h5
+)
 ADD_TEST (NAME testhdf5 COMMAND $<TARGET_FILE:testhdf5>)
+SET_TESTS_PROPERTIES(testhdf5 PROPERTIES DEPENDS h5test-clear-testhdf5-objects)
   
 ##############################################################################
 ##############################################################################
@@ -175,8 +197,6 @@ ADD_TEST (
     NAME h5test-clear-objects
     COMMAND    ${CMAKE_COMMAND}
         -E remove 
-        cache_test.h5
-        coord.h5
         dt_arith1.h5
         dt_arith2.h5
         dtransform.h5
@@ -228,24 +248,8 @@ ADD_TEST (
         fheap.h5
         new_multi_file_v16-r.h5
         new_multi_file_v16-s.h5
-        objcopy_ext.h5
-        sys_file1
-        tattr.h5
+        objcopy_ext.dat
         testmeta.h5
-        tfile1.h5
-        tfile2.h5
-        tfile3.h5
-        tfile4.h5
-        tfile5.h5
-        th5o_file
-        th5s1.h5
-        th5s2.h5
-        th5s3.h5
-        tnullspace.h5
-        tselect.h5
-        tsohm.h5
-        tsohm_dst.h5
-        tsohm_src.h5
         tstint1.h5
         tstint2.h5
 )
@@ -320,23 +324,44 @@ SET_TESTS_PROPERTIES(flush2 PROPERTIES DEPENDS flush1)
 ADD_EXECUTABLE (cache ${HDF5_TEST_SOURCE_DIR}/cache.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 TARGET_NAMING (cache ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (cache ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-
+ADD_TEST (
+    NAME h5test-clear-cache-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove 
+        cache_test.h5
+)
 ADD_TEST (NAME cache COMMAND $<TARGET_FILE:cache>)
-SET_TESTS_PROPERTIES(cache PROPERTIES DEPENDS h5test-clear-objects)
+SET_TESTS_PROPERTIES(cache PROPERTIES DEPENDS h5test-clear-cache-objects)
 
 #-- Adding test for cache_api
 ADD_EXECUTABLE (cache_api ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 TARGET_NAMING (cache_api ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (cache_api ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
+ADD_TEST (
+    NAME h5test-clear-cache_api-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove 
+        cache_api_test.h5
+)
 ADD_TEST (NAME cache_api COMMAND $<TARGET_FILE:cache_api>)
+SET_TESTS_PROPERTIES(cache_api PROPERTIES DEPENDS h5test-clear-cache_api-objects)
 
 #-- Adding test for cache_tagging
 ADD_EXECUTABLE (cache_tagging ${HDF5_TEST_SOURCE_DIR}/cache_tagging.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 TARGET_NAMING (cache_tagging ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (cache_tagging ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
+ADD_TEST (
+    NAME h5test-clear-cache_tagging-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove 
+        tagging_test.h5
+        tagging_ext_test.h5
+)
 ADD_TEST (NAME cache_tagging COMMAND $<TARGET_FILE:cache_tagging>)
+SET_TESTS_PROPERTIES(cache_tagging PROPERTIES DEPENDS h5test-clear-cache_tagging-objects)
+
 #-- Adding test for ttsafe
 ADD_EXECUTABLE (ttsafe
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
@@ -348,7 +373,17 @@ ADD_EXECUTABLE (ttsafe
 TARGET_NAMING (ttsafe ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (ttsafe ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
+ADD_TEST (
+    NAME h5test-clear-ttsafe-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove 
+        ttsafe_error.h5
+        ttsafe_dcreate.h5
+        ttsafe_cancel.h5
+        ttsafe_acreate.h5
+)
 ADD_TEST (NAME ttsafe COMMAND $<TARGET_FILE:ttsafe>)
+SET_TESTS_PROPERTIES(ttsafe PROPERTIES DEPENDS h5test-clear-ttsafe-objects)
 
 #-- Adding test for err_compat
 IF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
@@ -356,6 +391,13 @@ IF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
   TARGET_NAMING (err_compat ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (err_compat ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
+  ADD_TEST (
+      NAME h5test-clear-err_compat-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove 
+          err_compat.txt
+          err_compat.txt.err
+  )
   ADD_TEST (NAME err_compat COMMAND "${CMAKE_COMMAND}"
       -D "TEST_PROGRAM=$<TARGET_FILE:err_compat>"
       -D "TEST_ARGS:STRING="
@@ -366,6 +408,7 @@ IF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
       -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
   )
+  SET_TESTS_PROPERTIES(err_compat PROPERTIES DEPENDS h5test-clear-err_compat-objects)
 ENDIF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
 
 #-- Adding test for error_test
@@ -373,6 +416,13 @@ ADD_EXECUTABLE (error_test ${HDF5_TEST_SOURCE_DIR}/error_test.c)
 TARGET_NAMING (error_test ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (error_test ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
+ADD_TEST (
+    NAME h5test-clear-error_test-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove 
+        error_test.txt
+        error_test.txt.err
+)
 ADD_TEST (NAME error_test COMMAND "${CMAKE_COMMAND}"
     -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
     -D "TEST_ARGS:STRING="
@@ -383,12 +433,23 @@ ADD_TEST (NAME error_test COMMAND "${CMAKE_COMMAND}"
     -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
     -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
 )
+SET_TESTS_PROPERTIES(error_test PROPERTIES DEPENDS h5test-clear-error_test-objects)
 
 #-- Adding test for links_env
 ADD_EXECUTABLE (links_env ${HDF5_TEST_SOURCE_DIR}/links_env.c)
 TARGET_NAMING (links_env ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (links_env ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
+ADD_TEST (
+    NAME h5test-clear-links_env-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+        links_env.txt
+        links_env.txt.err 
+        extlinks_env0.h5
+        extlinks_env1.h5
+        tmp/extlinks_env1.h5
+)
 ADD_TEST (NAME links_env COMMAND "${CMAKE_COMMAND}"
     -D "TEST_PROGRAM=$<TARGET_FILE:links_env>"
     -D "TEST_ARGS:STRING="
@@ -400,6 +461,13 @@ ADD_TEST (NAME links_env COMMAND "${CMAKE_COMMAND}"
     -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
     -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
 )
+SET_TESTS_PROPERTIES(links_env PROPERTIES DEPENDS h5test-clear-links_env-objects)
+
+##############################################################################
+##############################################################################
+###                         V F D   T E S T S                              ###
+##############################################################################
+##############################################################################
 
 IF (HDF5_TEST_VFD)
 
