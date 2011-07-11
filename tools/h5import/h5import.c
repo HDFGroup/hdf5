@@ -25,6 +25,12 @@
 /* Name of tool */
 #define PROGRAMNAME "h5import"
 
+#ifdef WIN32
+#define READ_OPEN_FLAGS "rb"
+#else
+#define READ_OPEN_FLAGS "r"
+#endif
+
 int main(int argc, char *argv[])
 {
     struct Options  opt;
@@ -50,8 +56,8 @@ int main(int argc, char *argv[])
     (void) HDsetvbuf(stderr, (char *) NULL, _IOLBF, 0);
     (void) HDsetvbuf(stdout, (char *) NULL, _IOLBF, 0);
 
-    if (argv[1] && (strcmp("-V", argv[1]) == 0)) {
-        print_version("h5import");
+    if (argv[1] && (HDstrcmp("-V", argv[1]) == 0)) {
+        print_version(PROGRAMNAME);
         exit(EXIT_SUCCESS);
     }
 
@@ -185,15 +191,15 @@ int main(int argc, char *argv[])
     for (i = 0; i < opt.fcount; i++) {
         in = &(opt.infiles[i].in);
         if (in->sizeOfDimension)
-            free(in->sizeOfDimension);
+            HDfree(in->sizeOfDimension);
         if (in->sizeOfChunk)
-            free(in->sizeOfChunk);
+            HDfree(in->sizeOfChunk);
         if (in->maxsizeOfDimension)
-            free(in->maxsizeOfDimension);
+            HDfree(in->maxsizeOfDimension);
         if (in->externFilename)
-            free(in->externFilename);
+            HDfree(in->externFilename);
         if (in->data)
-            free(in->data);
+            HDfree(in->data);
     }
 
     return (EXIT_SUCCESS);
@@ -202,15 +208,15 @@ err:
     for (i = 0; i < opt.fcount; i++) {
         in = &(opt.infiles[i].in);
         if (in->sizeOfDimension)
-            free(in->sizeOfDimension);
+            HDfree(in->sizeOfDimension);
         if (in->sizeOfChunk)
-            free(in->sizeOfChunk);
+            HDfree(in->sizeOfChunk);
         if (in->maxsizeOfDimension)
-            free(in->maxsizeOfDimension);
+            HDfree(in->maxsizeOfDimension);
         if (in->externFilename)
-            free(in->externFilename);
+            HDfree(in->externFilename);
         if (in->data)
-            free(in->data);
+            HDfree(in->data);
     }
     return (EXIT_FAILURE);
 }
@@ -311,28 +317,17 @@ static int processDataFile(char *infile, struct Input *in, hid_t file_id)
      */
     if (in->inputClass == 4 /* "IN" */|| in->inputClass == 3 /* "FP" */|| in->inputClass == 7 /* "UIN" */) {
 
-#ifdef WIN32
-
-        if ((strm = fopen(infile, "rb")) == NULL) {
-            (void) fprintf(stderr, err1, infile);
-            return(-1);
-        }
-#else
-
-        if ((strm = fopen(infile, "r")) == NULL) {
+        if ((strm = HDfopen(infile, READ_OPEN_FLAGS)) == NULL) {
             (void) fprintf(stderr, err1, infile);
             return (-1);
         }
-
-#endif
-
     }
     /*-------------------------------------------------------------------------
      * if the input class is not binary, just use "r"
      *-------------------------------------------------------------------------
      */
     else {
-        if ((strm = fopen(infile, "r")) == NULL) {
+        if ((strm = HDfopen(infile, "r")) == NULL) {
             (void) fprintf(stderr, err1, infile);
             return (-1);
         }
@@ -343,13 +338,13 @@ static int processDataFile(char *infile, struct Input *in, hid_t file_id)
     case 4: /*  IN  */
         if (allocateIntegerStorage(in) == -1) {
             (void) fprintf(stderr, err2, infile);
-            fclose(strm);
+            HDfclose(strm);
             return (-1);
         }
 
         if (readIntegerData(strm, in) == -1) {
             (void) fprintf(stderr, err4, infile);
-            fclose(strm);
+            HDfclose(strm);
             return (-1);
         }
         break;
@@ -359,14 +354,14 @@ static int processDataFile(char *infile, struct Input *in, hid_t file_id)
     case 3: /*  FP  */
         if (allocateFloatStorage(in) == -1) {
             (void) fprintf(stderr, err3, infile);
-            fclose(strm);
+            HDfclose(strm);
             return (-1);
 
         }
 
         if (readFloatData(strm, in) == -1) {
             (void) fprintf(stderr, err5, infile);
-            fclose(strm);
+            HDfclose(strm);
             return (-1);
         }
         break;
@@ -375,7 +370,7 @@ static int processDataFile(char *infile, struct Input *in, hid_t file_id)
 
         if (processStrData(strm, in, file_id) == -1) {
             (void) fprintf(stderr, err11, infile);
-            fclose(strm);
+            HDfclose(strm);
             return (-1);
         }
 
@@ -385,22 +380,22 @@ static int processDataFile(char *infile, struct Input *in, hid_t file_id)
     case 7: /* UIN */
         if (allocateUIntegerStorage(in) == -1) {
             (void) fprintf(stderr, err6, infile);
-            fclose(strm);
+            HDfclose(strm);
             return (-1);
         }
         if (readUIntegerData(strm, in) == -1) {
             (void) fprintf(stderr, err7, infile);
-            fclose(strm);
+            HDfclose(strm);
             return (-1);
         }
         break;
 
     default:
         (void) fprintf(stderr, "%s", err10);
-        fclose(strm);
+        HDfclose(strm);
         return (-1);
     }
-    fclose(strm);
+    HDfclose(strm);
     return (0);
 }
 
@@ -410,7 +405,7 @@ static int readIntegerData(FILE *strm, struct Input *in)
     H5DT_INT16 *in16;
     H5DT_INT16  temp;
     H5DT_INT32 *in32;
-#ifndef WIN32
+#ifdef H5_SIZEOF_LONG_LONG
     H5DT_INT64 *in64;
     char        buffer[256];
 #endif
@@ -442,7 +437,7 @@ static int readIntegerData(FILE *strm, struct Input *in)
         case 4: /* IN */
             in08 = (H5DT_INT8 *) in->data;
             for (i = 0; i < len; i++, in08++) {
-                if (fread((char *) in08, sizeof(H5DT_INT8), 1, strm) != 1) {
+                if (HDfread((char *) in08, sizeof(H5DT_INT8), 1, strm) != 1) {
                     (void) fprintf(stderr, "%s", err1);
                     return (-1);
                 }
@@ -470,7 +465,7 @@ static int readIntegerData(FILE *strm, struct Input *in)
 
         case 4: /* IN */
             for (i = 0; i < len; i++, in16++) {
-                if (fread((char *) in16, sizeof(H5DT_INT16), 1, strm) != 1) {
+                if (HDfread((char *) in16, sizeof(H5DT_INT16), 1, strm) != 1) {
                     (void) fprintf(stderr, "%s", err1);
                     return (-1);
                 }
@@ -497,7 +492,7 @@ static int readIntegerData(FILE *strm, struct Input *in)
 
         case 4: /* IN */
             for (i = 0; i < len; i++, in32++) {
-                if (fread((char *) in32, sizeof(H5DT_INT32), 1, strm) != 1) {
+                if (HDfread((char *) in32, sizeof(H5DT_INT32), 1, strm) != 1) {
                     (void) fprintf(stderr, "%s", err1);
                     return (-1);
                 }
@@ -510,7 +505,7 @@ static int readIntegerData(FILE *strm, struct Input *in)
         }
         break;
 
-#ifndef _WIN32
+#ifdef H5_SIZEOF_LONG_LONG
     case 64:
         in64 = (H5DT_INT64 *) in->data;
         switch (in->inputClass) {
@@ -526,7 +521,7 @@ static int readIntegerData(FILE *strm, struct Input *in)
 
         case 4: /* IN */
             for (i = 0; i < len; i++, in64++) {
-                if (fread((char *) in64, sizeof(H5DT_INT64), 1, strm) != 1) {
+                if (HDfread((char *) in64, sizeof(H5DT_INT64), 1, strm) != 1) {
                     (void) fprintf(stderr, "%s", err1);
                     return (-1);
                 }
@@ -538,7 +533,7 @@ static int readIntegerData(FILE *strm, struct Input *in)
             return (-1);
         }
         break;
-#endif /* ifndef _WIN32 */
+#endif /* ifdef H5_SIZEOF_LONG_LONG */
 
     default:
         (void) fprintf(stderr, "%s", err3);
@@ -553,7 +548,7 @@ static int readUIntegerData(FILE *strm, struct Input *in)
     H5DT_UINT16 *in16;
     H5DT_UINT16  temp;
     H5DT_UINT32 *in32;
-#ifndef _WIN32
+#ifdef H5_SIZEOF_LONG_LONG
     H5DT_UINT64 *in64;
     char        buffer[256];
 #endif
@@ -584,7 +579,7 @@ static int readUIntegerData(FILE *strm, struct Input *in)
         case 7: /* UIN */
             in08 = (H5DT_UINT8 *) in->data;
             for (i = 0; i < len; i++, in08++) {
-                if (fread((char *) in08, sizeof(H5DT_UINT8), 1, strm) != 1) {
+                if (HDfread((char *) in08, sizeof(H5DT_UINT8), 1, strm) != 1) {
                     (void) fprintf(stderr, "%s", err1);
                     return (-1);
                 }
@@ -611,7 +606,7 @@ static int readUIntegerData(FILE *strm, struct Input *in)
 
         case 7: /* UIN */
             for (i = 0; i < len; i++, in16++) {
-                if (fread((char *) in16, sizeof(H5DT_UINT16), 1, strm) != 1) {
+                if (HDfread((char *) in16, sizeof(H5DT_UINT16), 1, strm) != 1) {
                     (void) fprintf(stderr, "%s", err1);
                     return (-1);
                 }
@@ -638,7 +633,7 @@ static int readUIntegerData(FILE *strm, struct Input *in)
 
         case 7: /* UIN */
             for (i = 0; i < len; i++, in32++) {
-                if (fread((char *) in32, sizeof(H5DT_UINT32), 1, strm) != 1) {
+                if (HDfread((char *) in32, sizeof(H5DT_UINT32), 1, strm) != 1) {
                     (void) fprintf(stderr, "%s", err1);
                     return (-1);
                 }
@@ -651,7 +646,7 @@ static int readUIntegerData(FILE *strm, struct Input *in)
         }
         break;
 
-#ifndef _WIN32
+#ifdef H5_SIZEOF_LONG_LONG
     case 64:
         in64 = (H5DT_UINT64 *) in->data;
         switch (in->inputClass) {
@@ -667,7 +662,7 @@ static int readUIntegerData(FILE *strm, struct Input *in)
 
         case 7: /* UIN */
             for (i = 0; i < len; i++, in64++) {
-                if (fread((char *) in64, sizeof(H5DT_UINT64), 1, strm) != 1) {
+                if (HDfread((char *) in64, sizeof(H5DT_UINT64), 1, strm) != 1) {
                     (void) fprintf(stderr, "%s", err1);
                     return (-1);
                 }
@@ -679,7 +674,7 @@ static int readUIntegerData(FILE *strm, struct Input *in)
             return (-1);
         }
         break;
-#endif /* ifndef _WIN32 */
+#endif /* ifdef H5_SIZEOF_LONG_LONG */
 
     default:
         (void) fprintf(stderr, "%s", err3);
@@ -733,7 +728,7 @@ static int readFloatData(FILE *strm, struct Input *in)
 
         case 3: /* FP */
             for (i = 0; i < len; i++, fp32++) {
-                if (fread((char *) fp32, sizeof(H5DT_FLOAT32), 1, strm) != 1) {
+                if (HDfread((char *) fp32, sizeof(H5DT_FLOAT32), 1, strm) != 1) {
                     (void) fprintf(stderr, "%s", err1);
                     return (-1);
                 }
@@ -775,7 +770,7 @@ static int readFloatData(FILE *strm, struct Input *in)
 
         case 3: /* FP */
             for (i = 0; i < len; i++, fp64++) {
-                if (fread((char *) fp64, sizeof(H5DT_FLOAT64), 1, strm) != 1) {
+                if (HDfread((char *) fp64, sizeof(H5DT_FLOAT64), 1, strm) != 1) {
                     (void) fprintf(stderr, "%s", err1);
                     return (-1);
                 }
@@ -830,8 +825,8 @@ static int processStrData(FILE *strm, struct Input *in, hid_t file_id)
      *-------------------------------------------------------------------------
      */
 
-    while (!feof(strm)) {
-        c = fgetc(strm);
+    while (!HDfeof(strm)) {
+        c = HDfgetc(strm);
 
         if (c == 10) { /* eol */
             nlines++;
@@ -845,7 +840,7 @@ static int processStrData(FILE *strm, struct Input *in, hid_t file_id)
     dims[0] = nlines;
 
     /* rewind */
-    fseek(strm, 0L, 0);
+    HDfseek(strm, 0L, 0);
 
     /*-------------------------------------------------------------------------
      * read file again and generate an HDF5 dataset
@@ -897,8 +892,8 @@ static int processStrData(FILE *strm, struct Input *in, hid_t file_id)
 
     line = 0;
 
-    while (!feof(strm)) {
-        c = fgetc(strm);
+    while (!HDfeof(strm)) {
+        c = HDfgetc(strm);
 
         str[i] = c;
 
@@ -1120,7 +1115,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
      process the output file according to the options
      */
 
-    if ((strm = fopen(infile, "r")) == NULL) {
+    if ((strm = HDfopen(infile, "r")) == NULL) {
         (void) fprintf(stderr, err1, infile);
         return (-1);
     }
@@ -1128,24 +1123,24 @@ static int processConfigurationFile(char *infile, struct Input *in)
     while (fscanf(strm, "%s", key) == 1) {
         if ((kindex = mapKeywordToIndex(key)) == -1) {
             (void) fprintf(stderr, err2, infile);
-            fclose(strm);
+            HDfclose(strm);
             return (-1);
         }
         switch (kindex) {
         case 0: /* PATH */
             if (in->configOptionVector[PATH] == 1) {
                 (void) fprintf(stderr, err3a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             if (fscanf(strm, "%s", temp) != 1) {
                 (void) fprintf(stderr, "%s", err18);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             if (parsePathInfo(&in->path, temp) == -1) {
                 (void) fprintf(stderr, err3b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             in->configOptionVector[PATH] = 1;
@@ -1154,18 +1149,18 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 1: /* INPUT-CLASS */
             if (in->configOptionVector[INPUT_CLASS] == 1) {
                 (void) fprintf(stderr, err4a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
             if (fscanf(strm, "%s", temp) != 1) {
                 (void) fprintf(stderr, "%s", err18);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             if (getInputClass(in, temp) == -1) {
                 (void) fprintf(stderr, err4b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
@@ -1186,17 +1181,17 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 2: /* INPUT-SIZE */
             if (in->configOptionVector[INPUT_SIZE] == 1) {
                 (void) fprintf(stderr, err5a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             if (fscanf(strm, "%d", (&ival)) != 1) {
                 (void) fprintf(stderr, "%s", err19);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             if (getInputSize(in, ival) == -1) {
                 (void) fprintf(stderr, err5b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             in->configOptionVector[INPUT_SIZE] = 1;
@@ -1209,13 +1204,13 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 3: /* RANK */
             if (in->configOptionVector[RANK] == 1) {
                 (void) fprintf(stderr, err6a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
             if (getRank(in, strm) == -1) {
                 (void) fprintf(stderr, err6b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             in->configOptionVector[RANK] = 1;
@@ -1224,18 +1219,18 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 4: /* DIMENSION-SIZES */
             if (in->configOptionVector[DIM] == 1) {
                 (void) fprintf(stderr, err7a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
             if (in->configOptionVector[RANK] == 0) {
                 (void) fprintf(stderr, err7b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             if (getDimensionSizes(in, strm) == -1) {
                 (void) fprintf(stderr, err7c, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             in->configOptionVector[DIM] = 1;
@@ -1244,13 +1239,13 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 5: /* OUTPUT-CLASS */
             if (in->configOptionVector[OUTPUT_CLASS] == 1) {
                 (void) fprintf(stderr, err8a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
             if (getOutputClass(in, strm) == -1) {
                 (void) fprintf(stderr, err8b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             in->configOptionVector[OUTPUT_CLASS] = 1;
@@ -1259,13 +1254,13 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 6: /* OUTPUT-SIZE */
             if (in->configOptionVector[OUTPUT_SIZE] == 1) {
                 (void) fprintf(stderr, err9a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
             if (getOutputSize(in, strm) == -1) {
                 (void) fprintf(stderr, err9b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             in->configOptionVector[OUTPUT_SIZE] = 1;
@@ -1274,13 +1269,13 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 7: /* OUTPUT-ARCHITECTURE */
             if (in->configOptionVector[OUTPUT_ARCH] == 1) {
                 (void) fprintf(stderr, err10a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
             if (getOutputArchitecture(in, strm) == -1) {
                 (void) fprintf(stderr, err10b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             in->configOptionVector[OUTPUT_ARCH] = 1;
@@ -1289,13 +1284,13 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 8: /* OUTPUT-BYTE-ORDER */
             if (in->configOptionVector[OUTPUT_B_ORDER] == 1) {
                 (void) fprintf(stderr, err11a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
             if (getOutputByteOrder(in, strm) == -1) {
                 (void) fprintf(stderr, err11b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             in->configOptionVector[OUTPUT_B_ORDER] = 1;
@@ -1304,19 +1299,19 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 9: /* CHUNKED-DIMENSION-SIZES */
             if (in->configOptionVector[CHUNK] == 1) {
                 (void) fprintf(stderr, err12a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             /* cant appear before dimension sizes have been provided */
             if (in->configOptionVector[DIM] == 0) {
                 (void) fprintf(stderr, err12b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
             if (getChunkedDimensionSizes(in, strm) == -1) {
                 (void) fprintf(stderr, err12c, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             in->configOptionVector[CHUNK] = 1;
@@ -1325,13 +1320,13 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 10: /* COMPRESSION-TYPE */
             if (in->configOptionVector[COMPRESS] == 1) {
                 (void) fprintf(stderr, err13a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
             if (getCompressionType(in, strm) == -1) {
                 (void) fprintf(stderr, err13b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             in->configOptionVector[COMPRESS] = 1;
@@ -1345,13 +1340,13 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 11: /* COMPRESSION-PARAM */
             if (in->configOptionVector[COMPRESS_PARAM] == 1) {
                 (void) fprintf(stderr, err14a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
             if (getCompressionParameter(in, strm) == -1) {
                 (void) fprintf(stderr, err14b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
@@ -1365,13 +1360,13 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 12: /* EXTERNAL-STORAGE */
             if (in->configOptionVector[EXTERNAL] == 1) {
                 (void) fprintf(stderr, err15a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
 
             if (getExternalFilename(in, strm) == -1) {
                 (void) fprintf(stderr, err15b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             in->configOptionVector[EXTERNAL] = 1;
@@ -1380,18 +1375,18 @@ static int processConfigurationFile(char *infile, struct Input *in)
         case 13: /* MAXIMUM-DIMENSIONS */
             if (in->configOptionVector[EXTEND] == 1) {
                 (void) fprintf(stderr, err16a, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             /* cant appear before dimension sizes have been provided */
             if (in->configOptionVector[DIM] == 0) {
                 (void) fprintf(stderr, err16b, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             if (getMaximumDimensionSizes(in, strm) == -1) {
                 (void) fprintf(stderr, err16c, infile);
-                fclose(strm);
+                HDfclose(strm);
                 return (-1);
             }
             in->configOptionVector[EXTEND] = 1;
@@ -1408,11 +1403,11 @@ static int processConfigurationFile(char *infile, struct Input *in)
 
     if (validateConfigurationParameters(in) == -1) {
         (void) fprintf(stderr, err17, infile);
-        fclose(strm);
+        HDfclose(strm);
         return (-1);
     }
 
-    fclose(strm);
+    HDfclose(strm);
     return (0);
 }
 
@@ -1424,7 +1419,7 @@ static int validateConfigurationParameters(struct Input *in)
     const char *err4a = "OUTPUT-ARCHITECTURE cannot be STD if OUTPUT-CLASS is floating point (FP).\n";
     const char *err4b = "OUTPUT-ARCHITECTURE cannot be IEEE if OUTPUT-CLASS is integer (IN).\n";
     const char *err5 = "For OUTPUT-CLASS FP, valid values for OUTPUT-SIZE are (32, 64) .\n";
-#ifdef _WIN32
+#ifndef H5_SIZEOF_LONG_LONG
     const char *err6 = "No support for reading 64-bit integer (INPUT-CLASS: IN, TEXTIN, UIN, TEXTUIN files\n";
 #endif
 
@@ -1471,7 +1466,7 @@ static int validateConfigurationParameters(struct Input *in)
             return (-1);
         }
 
-#ifdef _WIN32
+#ifndef H5_SIZEOF_LONG_LONG
     if (in->inputSize == 64 && (in->inputClass == 0 || in->inputClass == 4 || in->inputClass == 6 || in->inputClass == 7) ) {
         (void) fprintf(stderr, "%s", err6);
         return -1;
