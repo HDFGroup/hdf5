@@ -109,10 +109,6 @@ rem
         rem We need to replace PERCENT here with "%" for tests that use percents
         rem Also remove quotes here, because Linux 'echo' command strips them.
         rem --SJW 8/24/07
-        set params_echo=!params:PERCENT=%%!
-        echo.#############################
-        echo.Expected output for 'h5dump !params_echo:"=!'
-        echo.#############################
         pushd %CD%\..\testfiles
         %dumper_bin% !params:PERCENT=%%!
         popd
@@ -616,8 +612,8 @@ rem ############################################################################
     rem test for dangling external links
     call :tooltest textlink.ddl textlink.h5
 
-	rem test for dataset packed bits 
-	rem Set up xCMD to test or skip.
+  rem test for dataset packed bits 
+  rem Set up xCMD to test or skip.
     rem Limits:
     rem Maximum number of packed bits is 8 (for now).
     rem Maximum integer size is 64 (for now).

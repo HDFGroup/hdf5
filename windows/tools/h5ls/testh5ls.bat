@@ -87,11 +87,6 @@ rem %2 and on -- argument for the h5ls tool
     rem Stderr is included in stdout so that the diff can detect
     rem any unexpected output from that stream too
     (
-        echo.#############################
-        rem We strip out the parentesis here because echo on Linux does.
-        rem --SJW 8/28/07
-        echo. output for 'h5ls %params:"=%'
-        echo.#############################
         pushd %CD%\..\testfiles
         %h5ls_bin% %params%
         popd

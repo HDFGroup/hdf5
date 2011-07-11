@@ -194,15 +194,11 @@ rem
     
     rem Run test.
     (
-        rem echo.#############################
-        rem rem Remove quotes here, because Linux 'echo' command strips them
-        rem echo.Expected output for 'h5diff %params:"=%'
-        rem echo.#############################
         pushd testfiles
         %h5diff_bin% %params%
         popd
     ) > %actual% 2> %actual_err%
-	set EXIT_CODE=!errorlevel!
+  set EXIT_CODE=!errorlevel!
     rem save actual and actual_err in case they are needed later.
     copy /y %actual% %actual_sav% > nul
     call :stdout_filter %actual%
@@ -523,7 +519,7 @@ rem ############################################################################
     call :testing %h5diff% -n 1 %srcfile1% %srcfile2%  g1/dset3 g1/dset4
     call :tooltest h5diff_628.txt -n 1 %file1% %file2% g1/dset3 g1/dset4
 
-	rem This is disabled on *nix platforms
+  rem This is disabled on *nix platforms
     rem 6.29  non valid files
     call :testing %h5diff% file1.h6 file2.h6
     call :tooltest h5diff_629.txt file1.h6 file2.h6
@@ -622,145 +618,145 @@ rem ############################################################################
     call :results -SKIP-
 
     rem   New option added #1368(E1)  - ADB 2/5/2009
-	rem not compable -c flag
-	call :testing %h5diff% %srcfile2% %srcfile2% g2/dset1  g2/dset2
+  rem not compable -c flag
+  call :testing %h5diff% %srcfile2% %srcfile2% g2/dset1  g2/dset2
     call :tooltest h5diff_200.txt %file2% %file2% g2/dset1  g2/dset2 
 
-	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset1  g2/dset2
+  call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset1  g2/dset2
     call :tooltest h5diff_201.txt -c %file2% %file2% g2/dset1  g2/dset2 
 
-	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset2  g2/dset3
+  call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset2  g2/dset3
     call :tooltest h5diff_202.txt -c %file2% %file2% g2/dset2  g2/dset3
 
-	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset3  g2/dset4
+  call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset3  g2/dset4
     call :tooltest h5diff_203.txt -c %file2% %file2% g2/dset3  g2/dset4
 
-	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset4  g2/dset5
+  call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset4  g2/dset5
     call :tooltest h5diff_204.txt -c %file2% %file2% g2/dset4  g2/dset5
 
-	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset5  g2/dset6
+  call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset5  g2/dset6
     call :tooltest h5diff_205.txt -c %file2% %file2% g2/dset5  g2/dset6
-	
+  
     rem   New option added - ADB 2/11/2009
-	rem # not comparable in compound
-	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset7  g2/dset8
+  rem # not comparable in compound
+  call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset7  g2/dset8
     call :tooltest h5diff_206.txt -c %file2% %file2% g2/dset7  g2/dset8
 
-	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset8  g2/dset9
+  call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset8  g2/dset9
     call :tooltest h5diff_207.txt -c %file2% %file2% g2/dset8  g2/dset9
 
     rem #######################################################################
     rem # Links compare without --follow-symlinks nor --no-dangling-links
     rem #######################################################################
     rem test for bug1749
-	call :testing %h5diff% -v %srcfile12% %srcfile12% /link_g1 /link_g2
+  call :testing %h5diff% -v %srcfile12% %srcfile12% /link_g1 /link_g2
     call :tooltest h5diff_300.txt -v %file12% %file12% /link_g1 /link_g2
 
     rem #######################################################################
     rem # Links compare with --follow-symlinks Only
     rem #######################################################################
     rem soft links file to file
-	call :testing %h5diff% --follow-symlinks -v  %srcfile13% %srcfile13%
+  call :testing %h5diff% --follow-symlinks -v  %srcfile13% %srcfile13%
     call :tooltest h5diff_400.txt --follow-symlinks -v %file13% %file13% 
 
     rem softlink vs dset"
-	call :testing %h5diff% --follow-symlinks -v %srcfile13% %srcfile13% /softlink_dset1_1 /target_dset2
+  call :testing %h5diff% --follow-symlinks -v %srcfile13% %srcfile13% /softlink_dset1_1 /target_dset2
     call :tooltest h5diff_401.txt --follow-symlinks -v %file13% %file13% /softlink_dset1_1 /target_dset2
 
     rem dset vs softlink"
-	call :testing %h5diff% --follow-symlinks -v %srcfile13% %srcfile13% /target_dset2 /softlink_dset1_1
+  call :testing %h5diff% --follow-symlinks -v %srcfile13% %srcfile13% /target_dset2 /softlink_dset1_1
     call :tooltest h5diff_402.txt --follow-symlinks -v %file13% %file13% /target_dset2 /softlink_dset1_1
 
     rem softlink vs softlink"
-	call :testing %h5diff% --follow-symlinks -v %srcfile13% %srcfile13% /softlink_dset1_1 /softlink_dset2
+  call :testing %h5diff% --follow-symlinks -v %srcfile13% %srcfile13% /softlink_dset1_1 /softlink_dset2
     call :tooltest h5diff_403.txt --follow-symlinks -v %file13% %file13% /softlink_dset1_1 /softlink_dset2
 
     rem extlink vs extlink (FILE)"
-	call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile15%
+  call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile15%
     call :tooltest h5diff_404.txt --follow-symlinks -v %file15% %file15%
 
     rem extlink vs dset"
-	call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile16% /ext_link_dset1 /target_group2/x_dset
+  call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile16% /ext_link_dset1 /target_group2/x_dset
     call :tooltest h5diff_405.txt --follow-symlinks -v %file15% %file16% /ext_link_dset1 /target_group2/x_dset
 
     rem dset vs extlink"
-	call :testing %h5diff% --follow-symlinks -v %srcfile16% %srcfile15% /target_group2/x_dset /ext_link_dset1
+  call :testing %h5diff% --follow-symlinks -v %srcfile16% %srcfile15% /target_group2/x_dset /ext_link_dset1
     call :tooltest h5diff_406.txt --follow-symlinks -v %file16% %file15% /target_group2/x_dset /ext_link_dset1
 
     rem extlink vs extlink"
-	call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile15% /ext_link_dset1 /ext_link_dset2
+  call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile15% /ext_link_dset1 /ext_link_dset2
     call :tooltest h5diff_407.txt --follow-symlinks -v %file15% %file15% /ext_link_dset1 /ext_link_dset2
 
     rem softlink vs extlink"
-	call :testing %h5diff% --follow-symlinks -v %srcfile13% %srcfile15% /softlink_dset1_1 /ext_link_dset2
+  call :testing %h5diff% --follow-symlinks -v %srcfile13% %srcfile15% /softlink_dset1_1 /ext_link_dset2
     call :tooltest h5diff_408.txt --follow-symlinks -v %file13% %file15% /softlink_dset1_1 /ext_link_dset2
 
     rem extlink vs softlink "
-	call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile13% /ext_link_dset2 /softlink_dset1_1
+  call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile13% /ext_link_dset2 /softlink_dset1_1
     call :tooltest h5diff_409.txt --follow-symlinks -v %file15% %file13% /ext_link_dset2 /softlink_dset1_1
 
     rem linked_softlink vs linked_softlink (FILE)"
-	call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14%
+  call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14%
     call :tooltest h5diff_410.txt --follow-symlinks -v %file14% %file14%
 
     rem dset2 vs linked_softlink_dset1"
-	call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14% /target_dset2 /softlink1_to_slink2
+  call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14% /target_dset2 /softlink1_to_slink2
     call :tooltest h5diff_411.txt --follow-symlinks -v %file14% %file14% /target_dset2 /softlink1_to_slink2
 
     rem    rem linked_softlink_dset1 vs dset2"
-	call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14% /softlink1_to_slink2 /target_dset2
+  call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14% /softlink1_to_slink2 /target_dset2
     call :tooltest h5diff_412.txt --follow-symlinks -v %file14% %file14% /softlink1_to_slink2 /target_dset2
 
     rem linked_softlink_to_dset1 vs linked_softlink_to_dset2"
-	call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14% /softlink1_to_slink2 /softlink2_to_slink2
+  call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14% /softlink1_to_slink2 /softlink2_to_slink2
     call :tooltest h5diff_413.txt --follow-symlinks -v %file14% %file14% /softlink1_to_slink2 /softlink2_to_slink2
 
     rem group vs linked_softlink_group1"
-	call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14% /target_group /softlink3_to_slink2
+  call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14% /target_group /softlink3_to_slink2
     call :tooltest h5diff_414.txt --follow-symlinks -v %file14% %file14% /target_group /softlink3_to_slink2
 
     rem linked_softlink_group1 vs group"
-	call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14% /softlink3_to_slink2 /target_group
+  call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14% /softlink3_to_slink2 /target_group
     call :tooltest h5diff_415.txt --follow-symlinks -v %file14% %file14% /softlink3_to_slink2 /target_group
 
     rem linked_softlink_to_group1 vs linked_softlink_to_group2"
-	call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14% /softlink3_to_slink2 /softlink4_to_slink2
+  call :testing %h5diff% --follow-symlinks -v %srcfile14% %srcfile14% /softlink3_to_slink2 /softlink4_to_slink2
     call :tooltest h5diff_416.txt --follow-symlinks -v %file14% %file14% /softlink3_to_slink2 /softlink4_to_slink2
 
     rem non-exist-softlink vs softlink"
-	call :testing %h5diff% --follow-symlinks -v %srcfile13% %srcfile13% /softlink_noexist /softlink_dset2
+  call :testing %h5diff% --follow-symlinks -v %srcfile13% %srcfile13% /softlink_noexist /softlink_dset2
     call :tooltest h5diff_417.txt --follow-symlinks -v %file13% %file13% /softlink_noexist /softlink_dset2
 
     rem softlink vs non-exist-softlink"
-	call :testing %h5diff% --follow-symlinks -v %srcfile13% %srcfile13% /softlink_dset2 /softlink_noexist
+  call :testing %h5diff% --follow-symlinks -v %srcfile13% %srcfile13% /softlink_dset2 /softlink_noexist
     call :tooltest h5diff_418.txt --follow-symlinks -v %file13% %file13% /softlink_dset2 /softlink_noexist
 
     rem non-exist-extlink_file vs extlink"
-	call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile15% /ext_link_noexist2 /ext_link_dset2
+  call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile15% /ext_link_noexist2 /ext_link_dset2
     call :tooltest h5diff_419.txt --follow-symlinks -v %file15% %file15% /ext_link_noexist2 /ext_link_dset2
 
     rem exlink vs non-exist-extlink_file"
-	call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile15% /ext_link_dset2 /ext_link_noexist2
+  call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile15% /ext_link_dset2 /ext_link_noexist2
     call :tooltest h5diff_420.txt --follow-symlinks -v %file15% %file15% /ext_link_dset2 /ext_link_noexist2
 
     rem extlink vs non-exist-extlink_obj"
-	call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile15% /ext_link_dset2 /ext_link_noexist1
+  call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile15% /ext_link_dset2 /ext_link_noexist1
     call :tooltest h5diff_421.txt --follow-symlinks -v %file15% %file15% /ext_link_dset2 /ext_link_noexist1
 
     rem non-exist-extlink_obj vs extlink"
-	call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile15% /ext_link_noexist1 /ext_link_dset2
+  call :testing %h5diff% --follow-symlinks -v %srcfile15% %srcfile15% /ext_link_noexist1 /ext_link_dset2
     call :tooltest h5diff_422.txt --follow-symlinks -v %file15% %file15% /ext_link_noexist1 /ext_link_dset2
 
     rem extlink_to_softlink_to_dset1 vs dset2"
-	call :testing %h5diff% --follow-symlinks -v %srcfile17% %srcfile18% /ext_link_to_slink1 /dset2
+  call :testing %h5diff% --follow-symlinks -v %srcfile17% %srcfile18% /ext_link_to_slink1 /dset2
     call :tooltest h5diff_423.txt --follow-symlinks -v %file17% %file18% /ext_link_to_slink1 /dset2
 
     rem dset2 vs extlink_to_softlink_to_dset1"
-	call :testing %h5diff% --follow-symlinks -v %srcfile18% %srcfile17% /dset2 /ext_link_to_slink1
+  call :testing %h5diff% --follow-symlinks -v %srcfile18% %srcfile17% /dset2 /ext_link_to_slink1
     call :tooltest h5diff_424.txt --follow-symlinks -v %file18% %file17% /dset2 /ext_link_to_slink1
 
     rem extlink_to_softlink_to_dset1 vs extlink_to_softlink_to_dset2"
-	call :testing %h5diff% --follow-symlinks -v %srcfile17% %srcfile17% /ext_link_to_slink1 /ext_link_to_slink2
+  call :testing %h5diff% --follow-symlinks -v %srcfile17% %srcfile17% /ext_link_to_slink1 /ext_link_to_slink2
     call :tooltest h5diff_425.txt --follow-symlinks -v %file17% %file17% /ext_link_to_slink1 /ext_link_to_slink2
 
 
@@ -768,43 +764,43 @@ rem ############################################################################
     rem # Dangling links compare (--follow-symlinks and --no-dangling-links)
     rem #######################################################################
     rem dangling links --follow-symlinks (FILE to FILE)
-	call :testing %h5diff% --follow-symlinks -v %srclnkfile1% %srclnkfile2%
+  call :testing %h5diff% --follow-symlinks -v %srclnkfile1% %srclnkfile2%
     call :tooltest h5diff_450.txt --follow-symlinks -v %lnkfile1% %lnkfile2%
 
     rem dangling links --follow-symlinks and --no-dangling-links (FILE to FILE)
-	call :testing %h5diff% --follow-symlinks -v --no-dangling-links  %srclnkfile1% %srclnkfile2%
+  call :testing %h5diff% --follow-symlinks -v --no-dangling-links  %srclnkfile1% %srclnkfile2%
     call :tooltest h5diff_451.txt --follow-symlinks -v --no-dangling-links  %lnkfile1% %lnkfile2% 
 
     rem try --no-dangling-links without --follow-symlinks options
-	call :testing %h5diff%  --no-dangling-links %srcfile13% %srcfile13% 
+  call :testing %h5diff%  --no-dangling-links %srcfile13% %srcfile13% 
     call :tooltest h5diff_452.txt  --no-dangling-links %file13% %file13% 
 
     rem dangling link found for soft links (FILE to FILE)
-	call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile13% %srcfile13%
+  call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile13% %srcfile13%
     call :tooltest h5diff_453.txt --follow-symlinks -v --no-dangling-links %file13% %file13% 
 
     rem dangling link found for soft links (obj to obj)
-	call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile13% %srcfile13% /softlink_dset2 /softlink_noexist
+  call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile13% %srcfile13% /softlink_dset2 /softlink_noexist
     call :tooltest h5diff_454.txt --follow-symlinks -v --no-dangling-links %file13% %file13% /softlink_dset2 /softlink_noexist
 
     rem dangling link found for soft links (obj to obj) Both dangle links
-	call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile13% %srcfile13% /softlink_noexist /softlink_noexist
+  call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile13% %srcfile13% /softlink_noexist /softlink_noexist
     call :tooltest h5diff_455.txt --follow-symlinks -v --no-dangling-links %file13% %file13% /softlink_noexist /softlink_noexist
 
     rem dangling link found for ext links (FILE to FILE)
-	call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile15% %srcfile15%
+  call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile15% %srcfile15%
     call :tooltest h5diff_456.txt --follow-symlinks -v --no-dangling-links %file15% %file15%
 
     rem dangling link found for ext links (obj to obj). target file exist
-	call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile15% %srcfile15% /ext_link_dset1 /ext_link_noexist1
+  call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile15% %srcfile15% /ext_link_dset1 /ext_link_noexist1
     call :tooltest h5diff_457.txt --follow-symlinks -v --no-dangling-links %file15% %file15% /ext_link_dset1 /ext_link_noexist1
 
     rem dangling link found for ext links (obj to obj). target file NOT exist
-	call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile15% %srcfile15% /ext_link_dset1 /ext_link_noexist2
+  call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile15% %srcfile15% /ext_link_dset1 /ext_link_noexist2
     call :tooltest h5diff_458.txt --follow-symlinks -v --no-dangling-links %file15% %file15% /ext_link_dset1 /ext_link_noexist2
 
     rem dangling link found for ext links (obj to obj). Both dangle links
-	call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile15% %srcfile15% /ext_link_noexist1 /ext_link_noexist2
+  call :testing %h5diff% --follow-symlinks -v --no-dangling-links %srcfile15% %srcfile15% /ext_link_noexist1 /ext_link_noexist2
     call :tooltest h5diff_459.txt --follow-symlinks -v --no-dangling-links %file15% %file15% /ext_link_noexist1 /ext_link_noexist2
 
     rem ########################################################################
@@ -812,57 +808,57 @@ rem ############################################################################
     rem ########################################################################
     rem root 
     call :testing %h5diff% -v %src_grp_recurse1% %src_grp_recurse2% / /
-	call :tooltest h5diff_500.txt -v %grp_recurse1% %grp_recurse2% / /
+  call :tooltest h5diff_500.txt -v %grp_recurse1% %grp_recurse2% / /
 
     call :testing %h5diff% -v --follow-symlinks %src_grp_recurse1% %src_grp_recurse2% / /
-	call :tooltest h5diff_501.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% / /
+  call :tooltest h5diff_501.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% / /
 
     rem root vs group
     call :testing %h5diff% -v %src_grp_recurse1% %src_grp_recurse2% / /grp1/grp2/grp3
-	call :tooltest h5diff_502.txt -v %grp_recurse1% %grp_recurse2% / /grp1/grp2/grp3
+  call :tooltest h5diff_502.txt -v %grp_recurse1% %grp_recurse2% / /grp1/grp2/grp3
 
     rem group vs group (same name and structure)
     call :testing %h5diff% -v %src_grp_recurse1% %src_grp_recurse2% /grp1 /grp1
-	call :tooltest h5diff_503.txt -v %grp_recurse1% %grp_recurse2% /grp1 /grp1
+  call :tooltest h5diff_503.txt -v %grp_recurse1% %grp_recurse2% /grp1 /grp1
 
     rem group vs group (different name and structure)
     call :testing %h5diff% -v %src_grp_recurse1% %src_grp_recurse2% /grp1/grp2 /grp1/grp2/grp3
-	call :tooltest h5diff_504.txt -v %grp_recurse1% %grp_recurse2% /grp1/grp2 /grp1/grp2/grp3
+  call :tooltest h5diff_504.txt -v %grp_recurse1% %grp_recurse2% /grp1/grp2 /grp1/grp2/grp3
 
     rem groups vs soft-link
     call :testing %h5diff%
-	call :tooltest h5diff_505.txt -v %grp_recurse1% %grp_recurse2% /grp1 /slink_grp1
+  call :tooltest h5diff_505.txt -v %grp_recurse1% %grp_recurse2% /grp1 /slink_grp1
 
     call :testing %h5diff% -v --follow-symlinks %src_grp_recurse1% %src_grp_recurse2% /grp1/grp2 /slink_grp2
-	call :tooltest h5diff_506.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% /grp1/grp2 /slink_grp2
+  call :tooltest h5diff_506.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% /grp1/grp2 /slink_grp2
 
     rem groups vs ext-link
     call :testing %h5diff% -v %src_grp_recurse1% %src_grp_recurse2% /grp1 /elink_grp1
-	call :tooltest h5diff_507.txt -v %grp_recurse1% %grp_recurse2% /grp1 /elink_grp1
+  call :tooltest h5diff_507.txt -v %grp_recurse1% %grp_recurse2% /grp1 /elink_grp1
 
     call :testing %h5diff% -v --follow-symlinks %src_grp_recurse1% %src_grp_recurse2% /grp1 /elink_grp1
-	call :tooltest h5diff_508.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% /grp1 /elink_grp1
+  call :tooltest h5diff_508.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% /grp1 /elink_grp1
 
     rem soft-link vs ext-link
     call :testing %h5diff% -v %src_grp_recurse1% %src_grp_recurse2% /slink_grp1 /elink_grp1
-	call :tooltest h5diff_509.txt -v %grp_recurse1% %grp_recurse2% /slink_grp1 /elink_grp1
+  call :tooltest h5diff_509.txt -v %grp_recurse1% %grp_recurse2% /slink_grp1 /elink_grp1
 
     call :testing %h5diff% -v --follow-symlinks %src_grp_recurse1% %src_grp_recurse2% /slink_grp1 /elink_grp1
-	call :tooltest h5diff_510.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% /slink_grp1 /elink_grp1
+  call :tooltest h5diff_510.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% /slink_grp1 /elink_grp1
 
     rem circled ext links
     call :testing %h5diff% -v %src_grp_recurse1% %src_grp_recurse2% /grp10 /grp11
-	call :tooltest h5diff_511.txt -v %grp_recurse1% %grp_recurse2% /grp10 /grp11
+  call :tooltest h5diff_511.txt -v %grp_recurse1% %grp_recurse2% /grp10 /grp11
 
     call :testing %h5diff% -v --follow-symlinks %src_grp_recurse1% %src_grp_recurse2% /grp10 /grp11
-	call :tooltest h5diff_512.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% /grp10 /grp11
+  call :tooltest h5diff_512.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% /grp10 /grp11
 
     rem circled soft2ext-link vs soft2ext-link
     call :testing %h5diff% -v %src_grp_recurse1% %src_grp_recurse2% /slink_grp10 /slink_grp11
-	call :tooltest h5diff_513.txt -v %grp_recurse1% %grp_recurse2% /slink_grp10 /slink_grp11
+  call :tooltest h5diff_513.txt -v %grp_recurse1% %grp_recurse2% /slink_grp10 /slink_grp11
 
     call :testing %h5diff% -v --follow-symlinks %src_grp_recurse1% %src_grp_recurse2% /slink_grp10 /slink_grp11
-	call :tooltest h5diff_514.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% /slink_grp10 /slink_grp11
+  call :tooltest h5diff_514.txt -v --follow-symlinks %grp_recurse1% %grp_recurse2% /slink_grp10 /slink_grp11
 
     rem ######################################################################
     rem # Test for group recursive diff via multi-linked external links 
@@ -945,7 +941,7 @@ rem ############################################################################
 
     call :testing %h5diff% -v --use-system-epsilon -p 0.05 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
     call :tooltest h5diff_646.txt -v --use-system-epsilon -p 0.05 %file1% %file2% /g1/dset3 /g1/dset4
-	
+  
     rem #######################################################################
     rem # END
     rem #######################################################################

@@ -77,9 +77,6 @@ rem
     (
         rem Remove quotes here, because Linux 'echo' command strips them.
         rem --SJW 8/24/07
-        echo.#############################
-        echo.Expected output for 'h5dump !params:"=!'
-        echo.#############################
         pushd %CD%\..\testfiles
         %dumper_bin% !params!
         popd
