@@ -56,9 +56,18 @@ notes in INSTALL_Windows.txt before starting below procedures.
       find your Zlib and Szip library path (for example, c:\zlib125\dll, 
       c:\szip\dll) from the directory list, add the library path 
       (c:\zlib125\dll, c:\szip\dll) to the library directories.            
+          
+      NOTE:
+          If you are using VS2010, the path settings will need to be in project
+          property sheets per project. Go to "Project" and select "Properties", find 
+          "Configuration Properties", and then "VC++ Directories".
+          
+          Add the header path to the "Include Directories" setting.
+          
+          Add the library path to the "Library Directories" setting.
 
 ========================================================================
-          Building HDF5 C/C++ Libraries with Visual Studio 2005
+          Building HDF5 C/C++ Libraries with Visual Studio 2008
 ========================================================================
 
    1. Run batch file copy_hdf.bat

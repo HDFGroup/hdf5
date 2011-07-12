@@ -164,6 +164,16 @@ Preconditions:
           
       9.4 If building Fortran libraries, you will also need to setup the path
           for the Intel Fortran compiler.  Please see Section VI.
+          
+      NOTE:
+          If you are using VS2010, the path settings will need to be in project
+          property sheets per project. Go to "Project" and select "Properties", find 
+          "Configuration Properties", and then "VC++ Directories".
+          
+          9.1 If you are building on 64-bit Windows, find the "Platform" dropdown
+              and select "x64".
+          9.2 Add the header path to the "Include Directories" setting.
+          9.3 Add the library path to the "Library Directories" setting.
 
 Notes:
 
