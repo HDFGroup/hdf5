@@ -450,16 +450,9 @@
 /* Define if the metadata trace file code is to be compiled in */
 /* #undef H5_METADATA_TRACE_FILE */
 
-/* Define if your system can handle complicated MPI derived datatype
-   correctly. */
-#define H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS 1
-
 /* Define if your system's `MPI_File_set_size' function works for files over
    2GB. */
 #define H5_MPI_FILE_SET_SIZE_BIG 1
-
-/* Define if your system can handle special collective IO properly. */
-#define H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS 1
 
 /* Define if we can violate pointer alignment restrictions */
 #define H5_NO_ALIGNMENT_RESTRICTIONS 1

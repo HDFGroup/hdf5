@@ -156,6 +156,12 @@ New Features
 
     Parallel Library:
     -----------------
+    - Special Collective IO (IO when some processes do not contribute to the
+      IO) and Complex Derived Datatype MPI functionalities are no longer
+      conditionally enabled in the library by configure. They are always
+      enabled in order to take advantage of performance boosts from these
+      behaviors. Older MPI implementations that do not allow for these
+      functionalities can no longer by used by HDF5. (MAM - 2011/07/08).
     - Modified parallel tests to run with arbitrary number of processes. The
       modified tests are testphdf5 (parallel dataset access), t_chunk_alloc 
       (chunk allocation), and t_posix_compliant (posix compliance). The rest of

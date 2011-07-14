@@ -2796,76 +2796,36 @@ if test -n "$PARALLEL"; then
     AC_MSG_RESULT([no])
   fi
 
-dnl ----------------------------------------------------------------------
-dnl Set the flag to indicate that the MPI_File_get_size() function
-dnl works.  The default is enabled unless the user knows the function
-dnl doesn't work on the system and disables it.  (This flag should be set
-dnl for all machines except for SGI Altix Propack 4 where the function 
-dnl doesn't return correct file size.)
-dnl
-AC_ARG_ENABLE([mpi-size],
-              [AC_HELP_STRING([--enable-mpi-size],
-                              [Some systems (only SGI Altix Propack 4 so far) return wrong value
-                               from MPI_File_get_size.  By disabling this function, the library
-                               will replace it with stat to get the correct file size.
-                               [default=yes]])],
-              [MPI_GET_SIZE=$enableval])
+  dnl ----------------------------------------------------------------------
+  dnl Set the flag to indicate that the MPI_File_get_size() function
+  dnl works.  The default is enabled unless the user knows the function
+  dnl doesn't work on the system and disables it.  (This flag should be set
+  dnl for all machines except for SGI Altix Propack 4 where the function 
+  dnl doesn't return correct file size.)
+  dnl
+  AC_ARG_ENABLE([mpi-size],
+                [AC_HELP_STRING([--enable-mpi-size],
+                                [Some systems (only SGI Altix Propack 4 so far) return wrong value
+                                 from MPI_File_get_size.  By disabling this function, the library
+                                 will replace it with stat to get the correct file size.
+                                 [default=yes]])],
+                [MPI_GET_SIZE=$enableval])
 
-AC_MSG_CHECKING([if MPI_File_get_size is enabled])
+  AC_MSG_CHECKING([if MPI_File_get_size is enabled])
 
-AC_SUBST(MPI_GET_SIZE)
-case "X-$MPI_GET_SIZE" in
-  X-no)
-    AC_MSG_RESULT([no])
-    MPI_GET_SIZE=no
-    ;;
-  X-yes|*)
-    AC_MSG_RESULT([yes])
-    MPI_GET_SIZE=yes
-    AC_DEFINE([HAVE_MPI_GET_SIZE], [1],
-              [Define if MPI_File_get_size works correctly])
-    ;;
-esac
-
-dnl ----------------------------------------------------------------------
-dnl Check to see whether the complicate MPI derived datatype works. 
-dnl In Dec. 20th, 2004, we found that IBM's MPIO implemention didn't
-dnl handle with the displacement of the complicate MPI type derived datatype 
-dnl correctly. So we add the check here.
-dnl IBM fixed this bug in their new version that supported MPI-IO around spring 2005. 
-dnl We find that mpich 1.2.5 has the similar bug. The same
-dnl bug also occurs at SGI IRIX 6.5 C with compiler version lower than or equal to 7.3.
-dnl In case people still use the old compiler, we keep this flag.
-AC_MSG_CHECKING([if irregular hyperslab optimization code works inside MPI-IO])
-
-AC_CACHE_VAL([hdf5_cv_mpi_complex_derived_datatype_works],[hdf5_cv_mpi_complex_derived_datatype_works=yes])
-
-if test ${hdf5_cv_mpi_complex_derived_datatype_works} = "yes"; then
-  AC_DEFINE([MPI_COMPLEX_DERIVED_DATATYPE_WORKS], [1],
-            [Define if your system can handle complicated MPI derived datatype correctly.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-
-dnl ----------------------------------------------------------------------
-dnl Check to see whether MPI-IO can do collective IO successfully when one or more processes don't do 
-dnl any IOs.
-dnl Up to now(Feb. 8th, 2006), we find that it will cause program hung with mpich 1.2.x version 
-dnl and SGI altix. For those systems, we have to turn off this feature and use independent IO instead.
-dnl
-AC_MSG_CHECKING([if MPI-IO can do collective IO when one or more processes don't do IOs])
-
-AC_CACHE_VAL([hdf5_cv_mpi_special_collective_io_works],[hdf5_cv_mpi_special_collective_io_works=yes])
-
-if test ${hdf5_cv_mpi_special_collective_io_works} = "yes"; then
-  AC_DEFINE([MPI_SPECIAL_COLLECTIVE_IO_WORKS], [1],
-            [Define if your system can handle special collective IO properly.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
+  AC_SUBST(MPI_GET_SIZE)
+  case "X-$MPI_GET_SIZE" in
+    X-no)
+      AC_MSG_RESULT([no])
+      MPI_GET_SIZE=no
+      ;;
+    X-yes|*)
+      AC_MSG_RESULT([yes])
+      MPI_GET_SIZE=yes
+      AC_DEFINE([HAVE_MPI_GET_SIZE], [1],
+                [Define if MPI_File_get_size works correctly])
+      ;;
+  esac
 fi
 
 dnl ----------------------------------------------------------------------
