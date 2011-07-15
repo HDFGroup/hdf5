@@ -2139,7 +2139,12 @@ aio_single_write_read_check(H5FD_t * file, H5FD_mem_t type,
     HDassert((type >= 0) && (type < H5FD_MEM_NTYPES));
 
     if(verbose) {
+        haddr_t eoa;
+
         HDfprintf(stdout, "entering %s.\n", fcn_name);
+
+        eoa = H5FDget_eoa(file, type);
+
         HDfprintf(stdout, "	file->driver_id = 0x%llx.\n",
 		  (unsigned long long)(file->driver_id));
         if(file->driver_id == H5FD_CORE)
@@ -2149,6 +2154,10 @@ aio_single_write_read_check(H5FD_t * file, H5FD_mem_t type,
                       (int)type, H5FD_mem_t_strings[(int)type]);
         else 
             HDfprintf(stdout, "	type		= %d (\?\?\?).\n", (int)type);
+        if ( eoa == HADDR_UNDEF ) 
+            HDfprintf(stdout, "	eoa             = request for eoa failed.\n");
+        else
+            HDfprintf(stdout, "	eoa             = 0x%llx.\n", eoa);
         HDfprintf(stdout, "	tag_string      = \"%s\".\n", tag_string);
         HDfprintf(stdout, "	offset          = 0x%llx.\n", (unsigned long long)offset);
         HDfprintf(stdout, "	write_size      = 0x%llx.\n", (unsigned long long)write_size);
@@ -4053,29 +4062,34 @@ multi_file_driver_aio_test(const char * test_banner, const int file_name_num,
         memb_map[H5FD_MEM_BTREE]  = H5FD_MEM_BTREE;
         memb_fapl[H5FD_MEM_BTREE] = H5P_DEFAULT;
         memb_name[H5FD_MEM_BTREE] = "%s-b.h5";
-        memb_addr[H5FD_MEM_BTREE] = memb_addr[H5FD_MEM_SUPER] + TYPE_SLICE;
+        memb_addr[H5FD_MEM_BTREE] = (int)(H5FD_MEM_BTREE - 1) * TYPE_SLICE;
 
         memb_map[H5FD_MEM_DRAW]   = H5FD_MEM_DRAW;
         memb_fapl[H5FD_MEM_DRAW]  = H5P_DEFAULT;
         memb_name[H5FD_MEM_DRAW]  = "%s-r.h5";
-        memb_addr[H5FD_MEM_DRAW]  =  memb_addr[H5FD_MEM_BTREE] + TYPE_SLICE;
+        memb_addr[H5FD_MEM_DRAW]  =  (int)(H5FD_MEM_DRAW - 1) * TYPE_SLICE;
 
         memb_map[H5FD_MEM_GHEAP]  = H5FD_MEM_GHEAP;
         memb_fapl[H5FD_MEM_GHEAP] = H5P_DEFAULT;
         memb_name[H5FD_MEM_GHEAP] = "%s-g.h5";
-        memb_addr[H5FD_MEM_GHEAP] = memb_addr[H5FD_MEM_DRAW] + TYPE_SLICE;
+        memb_addr[H5FD_MEM_GHEAP] = (int)(H5FD_MEM_GHEAP - 1) * TYPE_SLICE;
 
         memb_map[H5FD_MEM_LHEAP]  = H5FD_MEM_LHEAP;
         memb_fapl[H5FD_MEM_LHEAP] = H5P_DEFAULT;
         memb_name[H5FD_MEM_LHEAP] = "%s-l.h5";
-        memb_addr[H5FD_MEM_LHEAP] = memb_addr[H5FD_MEM_GHEAP] + TYPE_SLICE;
+	memb_addr[H5FD_MEM_LHEAP] = (int)(H5FD_MEM_LHEAP -1) * TYPE_SLICE;
 
         memb_map[H5FD_MEM_OHDR]   = H5FD_MEM_OHDR;
         memb_fapl[H5FD_MEM_OHDR]  = H5P_DEFAULT;
         memb_name[H5FD_MEM_OHDR]  = "%s-o.h5";
-        memb_addr[H5FD_MEM_OHDR]  = memb_addr[H5FD_MEM_LHEAP] + TYPE_SLICE;
+        memb_addr[H5FD_MEM_OHDR]  = (int)(H5FD_MEM_OHDR - 1) * TYPE_SLICE;
 
-	max_addr = memb_addr[H5FD_MEM_OHDR] + TYPE_SLICE;
+	max_addr = (int)(H5FD_MEM_OHDR) * TYPE_SLICE;
+
+        if(verbose)
+            for(mt = 0; mt < H5FD_MEM_NTYPES; mt++)
+                HDfprintf(stdout, "%s: memb_addr[%d] = 0x%llx.\n", fcn_name, (int)mt,
+                          memb_addr[mt]);
 
         fapl_id = h5_fileaccess();
 
