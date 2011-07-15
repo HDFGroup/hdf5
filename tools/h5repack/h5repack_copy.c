@@ -808,6 +808,11 @@ int do_copy_objects(hid_t fidin,
                                 goto error;
                         }
 
+                        /* unset the unlimimted dimensions, which cannot be applied to layout other than chunked. */ 
+                        if (options->layout_g != H5D_CHUNKED) {
+                             H5Sset_extent_simple( f_space_id, rank, dims, NULL );
+                        }
+
                         /*-------------------------------------------------------------------------
                         * create the output dataset;
                         * disable error checking in case the dataset cannot be created with the
