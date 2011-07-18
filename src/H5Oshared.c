@@ -243,8 +243,17 @@ H5O_shared_link_adj(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
          * new object header. Adjust the reference count on that
          * object header.
          */
-        if(shared->file->shared != f->shared)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "interfile hard links are not allowed")
+        /* Unfortunately, it is possible for the shared->file pointer to become
+         * invalid if the oh is kept in cache (which is contained in
+         * shared->file->shared while shared->file is closed.  Just ignore
+         * shared->file until the "top-level" file pointer is removed at some
+         * point in the future.  -NAF */
+        /* This is related to Jira issue #7638 and should be uncommented after
+         * the library has been refactored to shift to using shared file
+         * pointers for file operations, instead of using top file pointers.
+         * -QAK */
+        /*if(shared->file->shared != f->shared)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "interfile hard links are not allowed")*/
 
         /* Build the object location for the shared message's object header */
         oloc.file = f;
@@ -579,7 +588,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_shared_copy_file(H5F_t UNUSED *file_src, H5F_t *file_dst,
+H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst,
     const H5O_msg_class_t *mesg_type, const void *_native_src, void *_native_dst,
     hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void UNUSED *udata,
     hid_t dxpl_id)
@@ -610,7 +619,7 @@ H5O_shared_copy_file(H5F_t UNUSED *file_src, H5F_t *file_dst,
 
         /* Copy the shared object from source to destination */
         dst_oloc.file = file_dst;
-        src_oloc.file = shared_src->file;
+        src_oloc.file = file_src;
         src_oloc.addr = shared_src->u.loc.oh_addr;
         if(H5O_copy_header_map(&src_oloc, &dst_oloc, dxpl_id, cpy_info, FALSE,
                 NULL, NULL) < 0)
