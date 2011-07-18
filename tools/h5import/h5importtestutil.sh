@@ -226,7 +226,7 @@ TESTING "BINARY I8 CR LF EOF"
 TOOLTEST binin8w.bin -c $TESTDIR/binin8w.conf -o binin8w.h5
 
 TESTING "ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE " 
-TOOLTEST $TESTDIR/in64.txt -c $TESTDIR/textpfe.conf -o test15.h5
+TOOLTEST $TESTDIR/textpfe64.txt -c $TESTDIR/textpfe.conf -o textpfe.h5
 
 
 
