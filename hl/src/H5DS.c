@@ -318,7 +318,7 @@ herr_t H5DSattach_scale(hid_t did,
             ref_j = ((hobj_ref_t *)buf[idx].p)[i];
 
             /* get the scale id for this REF */
-            if((dsid_j = H5Rdereference2(did,H5P_DATASET_ACCESS_DEFAULT,H5R_OBJECT,&ref_j)) < 0)
+            if((dsid_j = H5Rdereference2(did, H5P_DEFAULT, H5R_OBJECT, &ref_j)) < 0)
                 goto out;
 
             /* get info for DS in the parameter list */

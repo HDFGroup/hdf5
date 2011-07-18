@@ -437,7 +437,7 @@ void H5Object::reference(void* ref, const H5std_string& name) const
 hid_t H5Object::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type)
 {
    hid_t temp_id;
-   temp_id = H5Rdereference2(loc_id, H5P_DATASET_ACCESS_DEFAULT, ref_type, ref);
+   temp_id = H5Rdereference2(loc_id, H5P_DEFAULT, ref_type, ref);
    if (temp_id < 0)
    {
       throw ReferenceException("", "H5Rdereference failed");

@@ -184,12 +184,12 @@ test_reference_params(void)
     VERIFY(ret, FAIL, "H5Rcreate space");
 
     /* Test parameters to H5Rdereference */
-    dset2 = H5Rdereference2(-1, H5P_DATASET_ACCESS_DEFAULT, H5R_OBJECT, &rbuf[0]);
-    VERIFY(dset2, FAIL, "H5Rdereference loc_id");
+    dset2 = H5Rdereference2(-1, H5P_DEFAULT, H5R_OBJECT, &rbuf[0]);
+    VERIFY(dset2, FAIL, "H5Rdereference2 loc_id");
     dset2 = H5Rdereference2(dataset, dapl_id, H5R_OBJECT, NULL);
-    VERIFY(dset2, FAIL, "H5Rdereference ref");
+    VERIFY(dset2, FAIL, "H5Rdereference2 ref");
     dset2 = H5Rdereference2(dataset, dapl_id, H5R_MAXTYPE, &rbuf[0]);
-    VERIFY(dset2, FAIL, "H5Rdereference type");
+    VERIFY(dset2, FAIL, "H5Rdereference2 type");
 
     /* Test parameters to H5Rget_obj_type2 */
     ret = H5Rget_obj_type2(-1, H5R_OBJECT, &rbuf[0], NULL);
@@ -404,7 +404,7 @@ test_reference_obj(void)
 
     /* Open dataset object */
     dset2 = H5Rdereference2(dataset, dapl_id, H5R_OBJECT, &rbuf[0]);
-    CHECK(dset2, FAIL, "H5Rdereference");
+    CHECK(dset2, FAIL, "H5Rdereference2");
 
     /* Check information in referenced dataset */
     sid1 = H5Dget_space(dset2);
@@ -425,8 +425,8 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Open group object.  GAPL isn't supported yet.  But it's harmless to pass in */
-    group = H5Rdereference2(dataset, H5P_GROUP_ACCESS_DEFAULT, H5R_OBJECT, &rbuf[2]);
-    CHECK(group, FAIL, "H5Rdereference");
+    group = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &rbuf[2]);
+    CHECK(group, FAIL, "H5Rdereference2");
 
     /* Get group's comment */
     ret = H5Oget_comment(group, read_comment, (size_t)10);
@@ -441,8 +441,8 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Open datatype object. TAPL isn't supported yet.  But it's harmless to pass in */
-    tid1 = H5Rdereference2(dataset, H5P_DATATYPE_ACCESS_DEFAULT, H5R_OBJECT, &rbuf[3]);
-    CHECK(tid1, FAIL, "H5Rdereference");
+    tid1 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &rbuf[3]);
+    CHECK(tid1, FAIL, "H5Rdereference2");
 
     /* Verify correct datatype */
     {
@@ -639,7 +639,7 @@ test_reference_region(void)
 
     /* Try to open objects */
     dset2 = H5Rdereference2(dset1, dapl_id, H5R_DATASET_REGION, &rbuf[0]);
-    CHECK(dset2, FAIL, "H5Rdereference");
+    CHECK(dset2, FAIL, "H5Rdereference2");
 
     /* Check what H5Rget_obj_type2 function returns */
     ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &rbuf[0], &obj_type);
@@ -920,7 +920,7 @@ test_reference_region_1D(void)
 
     /* Try to open objects */
     dset3 = H5Rdereference2(dset1, dapl_id, H5R_DATASET_REGION, &rbuf[0]);
-    CHECK(dset3, FAIL, "H5Rdereference");
+    CHECK(dset3, FAIL, "H5Rdereference2");
 
     /* Check what H5Rget_obj_type2 function returns */
     ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &rbuf[0], &obj_type);
@@ -1130,13 +1130,13 @@ test_reference_obj_deleted(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Open deleted dataset object */
-    dset2 = H5Rdereference2(dataset, H5P_DATASET_ACCESS_DEFAULT, H5R_OBJECT, &oref);
-    VERIFY(dset2, FAIL, "H5Rdereference");
+    dset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &oref);
+    VERIFY(dset2, FAIL, "H5Rdereference2");
 
     /* Open nonsense reference */
     HDmemset(&oref, 0, sizeof(hobj_ref_t));
-    dset2 = H5Rdereference2(dataset, H5P_DATASET_ACCESS_DEFAULT, H5R_OBJECT, &oref);
-    VERIFY(dset2, FAIL, "H5Rdereference");
+    dset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &oref);
+    VERIFY(dset2, FAIL, "H5Rdereference2");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -1274,8 +1274,8 @@ test_reference_group(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Dereference to get the group */
-    gid = H5Rdereference2(did, H5P_GROUP_ACCESS_DEFAULT, H5R_OBJECT, &rref);
-    CHECK(gid, FAIL, "H5Rdereference");
+    gid = H5Rdereference2(did, H5P_DEFAULT, H5R_OBJECT, &rref);
+    CHECK(gid, FAIL, "H5Rdereference2");
 
     /* Iterate through objects in dereferenced group */
     ret = H5Literate(gid, H5_INDEX_NAME, H5_ITER_INC, NULL, test_deref_iter_op, &count);

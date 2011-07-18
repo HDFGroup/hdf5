@@ -988,7 +988,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                 char ref_name[1024];
 
                 /* region data */
-                region_id = H5Rdereference2(container, H5P_DATASET_ACCESS_DEFAULT, H5R_DATASET_REGION, memref);
+                region_id = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, memref);
                 if (region_id >= 0) {
                     region_space = H5Rget_region(container, H5R_DATASET_REGION, memref);
                     if (region_space >= 0) {
@@ -1033,7 +1033,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
 
                 } /* if (region_id >= 0) */
                 else
-                    HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdereference failed");
+                    HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdereference2 failed");
 
                 ctx->need_prefix = TRUE;
             } /* end if (region_output... */
@@ -4007,7 +4007,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem)
             hid_t   region_id, region_space;
             H5S_sel_type region_type;
 
-            region_id = H5Rdereference2(container, H5P_DATASET_ACCESS_DEFAULT, H5R_DATASET_REGION, mem);
+            region_id = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, mem);
             if (region_id >= 0) {
                 region_space = H5Rget_region(container, H5R_DATASET_REGION, mem);
                 if (region_space >= 0) {

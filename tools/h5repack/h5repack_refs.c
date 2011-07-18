@@ -178,7 +178,7 @@ int do_copy_refobjs(hid_t fidin,
                             } /* end if */
                             for(u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY {
-                                    if((refobj_id = H5Rdereference2(dset_in, H5P_DATASET_ACCESS_DEFAULT, H5R_OBJECT, &buf[u])) < 0)
+                                    if((refobj_id = H5Rdereference2(dset_in, H5P_DEFAULT, H5R_OBJECT, &buf[u])) < 0)
                                         continue;
                                 } H5E_END_TRY;
 
@@ -262,7 +262,7 @@ int do_copy_refobjs(hid_t fidin,
 
                             for(u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY {
-                                    if((refobj_id = H5Rdereference2(dset_in, H5P_DATASET_ACCESS_DEFAULT, H5R_DATASET_REGION, &buf[u])) < 0)
+                                    if((refobj_id = H5Rdereference2(dset_in, H5P_DEFAULT, H5R_DATASET_REGION, &buf[u])) < 0)
                                         continue;
                                 } H5E_END_TRY;
 
@@ -540,7 +540,7 @@ static int copy_refs_attr(hid_t loc_in,
                 {
                     H5E_BEGIN_TRY
                     {
-                        if((refobj_id = H5Rdereference2(attr_id, H5P_DATASET_ACCESS_DEFAULT, H5R_OBJECT, &buf[k])) < 0)
+                        if((refobj_id = H5Rdereference2(attr_id, H5P_DEFAULT, H5R_OBJECT, &buf[k])) < 0)
                             goto error;
                     } H5E_END_TRY;
 
@@ -620,7 +620,7 @@ static int copy_refs_attr(hid_t loc_in,
                 {
                     H5E_BEGIN_TRY
                     {
-                        if((refobj_id = H5Rdereference2(attr_id, H5P_DATASET_ACCESS_DEFAULT, H5R_DATASET_REGION, &buf[k])) < 0)
+                        if((refobj_id = H5Rdereference2(attr_id, H5P_DEFAULT, H5R_DATASET_REGION, &buf[k])) < 0)
                             continue;
                     } H5E_END_TRY;
 

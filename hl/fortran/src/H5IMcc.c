@@ -511,7 +511,7 @@ herr_t H5IM_get_palette(hid_t loc_id,
     goto out;
 
    /* Get the palette id */
-   if((pal_id = H5Rdereference2(image_id, H5P_DATASET_ACCESS_DEFAULT, H5R_OBJECT, &refbuf[pal_number])) < 0)
+   if((pal_id = H5Rdereference2(image_id, H5P_DEFAULT, H5R_OBJECT, &refbuf[pal_number])) < 0)
     goto out;
 
    /* Read the palette dataset using the memory type TID */

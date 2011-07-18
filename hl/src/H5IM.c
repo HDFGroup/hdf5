@@ -905,7 +905,7 @@ herr_t H5IMget_palette_info( hid_t loc_id,
             goto out;
 
         /* Get the actual palette */
-        if ( (pal_id = H5Rdereference2( did, H5P_DATASET_ACCESS_DEFAULT, H5R_OBJECT, &refbuf[pal_number] )) < 0)
+        if ( (pal_id = H5Rdereference2(did, H5P_DEFAULT, H5R_OBJECT, &refbuf[pal_number])) < 0)
             goto out;
 
         if ( (pal_space_id = H5Dget_space( pal_id )) < 0)
@@ -1016,7 +1016,7 @@ herr_t H5IMget_palette( hid_t loc_id,
             goto out;
 
         /* Get the palette id */
-        if ( (pal_id = H5Rdereference2( did, H5P_DATASET_ACCESS_DEFAULT, H5R_OBJECT, &refbuf[pal_number] )) < 0)
+        if ( (pal_id = H5Rdereference2(did, H5P_DEFAULT, H5R_OBJECT, &refbuf[pal_number])) < 0)
             goto out;
 
         /* Read the palette dataset */
