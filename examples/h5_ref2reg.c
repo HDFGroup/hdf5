@@ -39,6 +39,7 @@ int main(void)
     hid_t spacer_id;
     hid_t dsetv_id;       /*dataset identifiers*/
     hid_t dsetr_id;
+    hid_t dapl_id;        /* Dataset access property list */
     hsize_t dims[2] =  {2,9};
     hsize_t dimsr[1] =  {2};
     int rank = 2;
@@ -67,6 +68,9 @@ int main(void)
     space_id = H5Screate_simple(rank, dims, NULL);
     spacer_id = H5Screate_simple(rankr, dimsr, NULL);
 
+    /* Create dataset access property list */
+    dapl_id = H5Pcreate(H5P_DATASET_ACCESS);
+ 
     /*
      * Create integer dataset.
      */
@@ -130,7 +134,7 @@ int main(void)
     /*
      * Dereference the first reference.
      */
-    dsetv_id = H5Rdereference(dsetr_id, H5R_DATASET_REGION, &ref_out[0]);
+    dsetv_id = H5Rdereference(dsetr_id, dapl_id, H5R_DATASET_REGION, &ref_out[0]);
     /*
      * Get name of the dataset the first region reference points to
      * using H5Rget_name
@@ -177,7 +181,7 @@ int main(void)
     /*
      * Dereference the second reference.
      */
-    dsetv_id = H5Rdereference(dsetr_id, H5R_DATASET_REGION, &ref_out[1]);
+    dsetv_id = H5Rdereference(dsetr_id, dapl_id, H5R_DATASET_REGION, &ref_out[1]);
     space_id = H5Rget_region(dsetv_id, H5R_DATASET_REGION,&ref_out[1]);
 
     /*
@@ -199,6 +203,7 @@ int main(void)
      * Close dataspace and the dataset.
      */
     status = H5Sclose(space_id);
+    status = H5Pclose(dapl_id);
     status = H5Dclose(dsetv_id);
     status = H5Dclose(dsetr_id);
     status = H5Fclose(file_id);

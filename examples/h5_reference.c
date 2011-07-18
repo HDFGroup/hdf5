@@ -35,6 +35,7 @@ main(void) {
    hid_t gid_a;                       /* and  dataspaces identifiers   */
    hid_t did_b, sid_b, tid_b;
    hid_t did_r, tid_r, sid_r;
+   hid_t dapl_id;                     /* Dataset access property list */
    H5O_type_t obj_type;
    herr_t status;
 
@@ -54,6 +55,11 @@ main(void) {
     *  Create  group "A" in the file.
     */
    gid_a = H5Gcreate2(fid, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+   /* 
+    * Create dataset access property list 
+    */
+   dapl_id = H5Pcreate(H5P_DATASET_ACCESS);
 
   /*
    *  Create dataset "B" in the file.
@@ -128,7 +134,7 @@ main(void) {
    /*
     *  Get datatype of the dataset "B"
     */
-   did_b = H5Rdereference(did_r, H5R_OBJECT, &rbuf[1]);
+   did_b = H5Rdereference(did_r, dapl_id, H5R_OBJECT, &rbuf[1]);
    tid_b = H5Dget_type(did_b);
    if(H5Tequal(tid_b, H5T_NATIVE_FLOAT))
      printf("Datatype of the dataset is H5T_NATIVE_FLOAT.\n");
@@ -137,6 +143,7 @@ main(void) {
    /*
     * Close all objects and free memory buffers.
     */
+   H5Pclose(dapl_id);
    H5Dclose(did_r);
    H5Dclose(did_b);
    H5Tclose(tid_b);
