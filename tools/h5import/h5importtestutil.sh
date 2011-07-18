@@ -72,7 +72,7 @@ $SRC_H5IMPORT_TESTFILES/txtin32.h5
 $SRC_H5IMPORT_TESTFILES/txtuin16.h5
 $SRC_H5IMPORT_TESTFILES/txtuin32.h5
 $SRC_H5IMPORT_TESTFILES/txtstr.h5
-$SRC_H5IMPORT_TESTFILES/test15.h5
+$SRC_H5IMPORT_TESTFILES/textpfe.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -97,7 +97,7 @@ $SRC_H5IMPORT_TESTFILES/txtfp64.txt
 $SRC_H5IMPORT_TESTFILES/txtuin32.txt
 $SRC_H5IMPORT_TESTFILES/txtin16.txt
 $SRC_H5IMPORT_TESTFILES/txtin32.txt
-$SRC_H5IMPORT_TESTFILES/in64.txt
+$SRC_H5IMPORT_TESTFILES/textpfe64.txt
 $SRC_H5IMPORT_TESTFILES/txtstr.txt
 "
 
@@ -170,7 +170,7 @@ $CP $TESTDIR/*.h5 ./tmp_testfiles/
 $RUNSERIAL ./h5importtest
 
 ################################################
-###			  T H E   T E S T S
+###        T H E   T E S T S
 ################################################
 
 TESTING "ASCII I32 rank 3 - Output BE " ;
@@ -233,8 +233,8 @@ TOOLTEST $TESTDIR/in64.txt -c $TESTDIR/textpfe.conf -o test15.h5
 rm -f  txtin32.txt txtin16.txt *.bin *.h5
 rm -rf tmp_testfiles
 else
-	echo "** h5import or h5importtest not available ***"
-	nerrors="` expr $nerrors + 1 `";
+  echo "** h5import or h5importtest not available ***"
+  nerrors="` expr $nerrors + 1 `";
 fi
 
 #

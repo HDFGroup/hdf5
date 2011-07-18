@@ -54,7 +54,7 @@ IF (BUILD_TESTING)
       txtuin32.txt
       txtin16.txt
       txtin32.txt
-      in64.txt
+      textpfe64.txt
       txtstr.txt
   )
   SET (HDF5_REFERENCE_TEST_FILES
@@ -73,7 +73,7 @@ IF (BUILD_TESTING)
       txtuin16.h5
       txtuin32.h5
       txtstr.h5
-      test15.h5
+      textpfe.h5
   )
 
   FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
@@ -247,7 +247,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (BINARY_I8_EOF binin8w.bin binin8w.conf binin8w.h5)
 
   # ----- TESTING "ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE " 
-  ADD_H5_TEST (ASCII_F64_R1 in64.txt textpfe.conf test15.h5)
+  ADD_H5_TEST (ASCII_F64_R1 textpfe64.txt textpfe.conf textpfe.h5)
 
 ENDIF (BUILD_TESTING)
 
