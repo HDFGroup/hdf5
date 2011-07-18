@@ -31,48 +31,49 @@ IF (BUILD_TESTING)
   TARGET_LINK_LIBRARIES (h5importtest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 
   SET (HDF5_REFERENCE_CONF_FILES
-      binfp32.conf
       binfp64.conf
       binin8.conf
+      binin8w.conf
       binin16.conf
       binin32.conf
       binuin16.conf
       binuin32.conf
-      textfp32.conf
-      textfp64.conf
-      textin8.conf
-      textin16.conf
-      textin32.conf
-      textuin16.conf
-      textuin32.conf
+      txtfp32.conf
+      txtfp64.conf
+      txtin8.conf
+      txtin16.conf
+      txtin32.conf
+      txtuin16.conf
+      txtuin32.conf
       textpfe.conf
-      textstr.conf
+      txtstr.conf
   )
   SET (HDF5_REFERENCE_TXT_FILES
-      fp1.txt
-      fp2.txt
-      in1.txt
-      in16.txt
-      in32.txt
-      in64.txt
-      str.txt
+      txtfp32.txt
+      txtfp64.txt
+      txtuin32.txt
+      txtin16.txt
+      txtin32.txt
+      textpfe64.txt
+      txtstr.txt
   )
   SET (HDF5_REFERENCE_TEST_FILES
-      test1.h5
-      test2.h5
-      test3.h5
-      test4.h5
-      test5.h5
-      test6.h5
-      test7.h5
-      test8.h5
-      test9.h5
-      test10.h5
-      test11.h5
-      test12.h5
-      test13.h5
-      test14.h5
-      test15.h5
+      binfp64.h5
+      binin8.h5
+      binin8w.h5
+      binin16.h5
+      binin32.h5
+      binuin16.h5
+      binuin32.h5
+      txtfp32.h5
+      txtfp64.h5
+      txtin8.h5
+      txtin16.h5
+      txtin32.h5
+      txtuin16.h5
+      txtuin32.h5
+      txtstr.h5
+      textpfe.h5
   )
 
   FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
@@ -132,7 +133,7 @@ IF (BUILD_TESTING)
       SET (last_test "H5IMPORT-${testname}-clear-objects")
     ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
 
-	    ADD_TEST (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c testfiles/${conffile} -o ${testfile})
+    ADD_TEST (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c testfiles/${conffile} -o ${testfile})
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
@@ -200,50 +201,53 @@ IF (BUILD_TESTING)
   ENDIF (NOT "${last_test}" STREQUAL "")
   SET (last_test "H5IMPORT-h5importtest")
 
-  # ----- TESTING "ASCII I32 rank 3 - Output BE "
-  ADD_H5_TEST (ASCII_I32 in32.txt textin32.conf test1.h5)
+  # ----- TESTING "ASCII I32 rank 3 - Output BE " ;
+  ADD_H5_TEST (ASCII_I32 txtin16.txt txtin32.conf txtin32.h5)
 
   # ----- TESTING "ASCII I16 rank 3 - Output LE - CHUNKED - extended" 
-  ADD_H5_TEST (ASCII_I16 in16.txt textin16.conf test2.h5)
+  ADD_H5_TEST (ASCII_I16 txtin16.txt txtin16.conf txtin16.h5)
 
   # ----- TESTING "ASCII I8 - rank 3 - Output I8 LE-Chunked+Extended+Compressed " 
-  ADD_H5_TEST (ASCII_I8 in16.txt textin8.conf test3.h5)
+  ADD_H5_TEST (ASCII_I8 txtin16.txt txtin8.conf txtin8.h5)
 
   # ----- TESTING "ASCII UI32 - rank 3 - Output BE" 
-  ADD_H5_TEST (ASCII_UI32 in1.txt textuin32.conf test4.h5)
+  ADD_H5_TEST (ASCII_UI32 txtuin32.txt txtuin32.conf txtuin32.h5)
 
   # ----- TESTING "ASCII UI16 - rank 2 - Output LE+Chunked+Compressed " 
-  ADD_H5_TEST (ASCII_UI16 in1.txt textuin16.conf test5.h5)
+  ADD_H5_TEST (ASCII_UI16 txtuin32.txt txtuin16.conf txtuin16.h5)
 
   # ----- TESTING "ASCII F32 - rank 3 - Output LE " 
-  ADD_H5_TEST (ASCII_F32 fp1.txt textfp32.conf test6.h5)
+  ADD_H5_TEST (ASCII_F32 txtfp32.txt txtfp32.conf txtfp32.h5)
 
   # ----- TESTING "ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed " 
-  ADD_H5_TEST (ASCII_F64 fp2.txt textfp64.conf test7.h5)
+  ADD_H5_TEST (ASCII_F64 txtfp64.txt txtfp64.conf txtfp64.h5)
 
   # ----- TESTING "BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed " 
-  ADD_H5_TEST (BINARY_F64 binfp64.bin binfp64.conf test8.h5)
+  ADD_H5_TEST (BINARY_F64 binfp64.bin binfp64.conf binfp64.h5)
 
   # ----- TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
-  ADD_H5_TEST (BINARY_I16 binin16.bin binin16.conf test9.h5)
+  ADD_H5_TEST (BINARY_I16 binin16.bin binin16.conf binin16.h5)
 
   # ----- TESTING "BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
-  ADD_H5_TEST (BINARY_I8 binin8.bin binin8.conf test10.h5)
+  ADD_H5_TEST (BINARY_I8 binin8.bin binin8.conf binin8.h5)
 
   # ----- TESTING "BINARY I32 - rank 3 - Output BE + CHUNKED " 
-  ADD_H5_TEST (BINARY_I32 binin32.bin binin32.conf test11.h5)
+  ADD_H5_TEST (BINARY_I32 binin32.bin binin32.conf binin32.h5)
 
   # ----- TESTING "BINARY UI16 - rank 3 - Output byte BE + CHUNKED " 
-  ADD_H5_TEST (BINARY_UI16 binuin16.bin binuin16.conf test12.h5)
+  ADD_H5_TEST (BINARY_UI16 binuin16.bin binuin16.conf binuin16.h5)
 
   # ----- TESTING "BINARY UI32 - rank 3 - Output LE + CHUNKED " 
-  ADD_H5_TEST (BINARY_UI32 binuin32.bin binuin32.conf test13.h5)
+  ADD_H5_TEST (BINARY_UI32 binuin32.bin binuin32.conf binuin32.h5)
 
   # ----- TESTING "STR" 
-  ADD_H5_TEST (STR str.txt textstr.conf test14.h5)
+  ADD_H5_TEST (STR txtstr.txt txtstr.conf txtstr.h5)
+
+  # ----- TESTING "BINARY I8 CR LF EOF" 
+  ADD_H5_TEST (BINARY_I8_EOF binin8w.bin binin8w.conf binin8w.h5)
 
   # ----- TESTING "ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE " 
-  ADD_H5_TEST (ASCII_F64_R1 in64.txt textpfe.conf test15.h5)
+  ADD_H5_TEST (ASCII_F64_R1 textpfe64.txt textpfe.conf textpfe.h5)
 
 ENDIF (BUILD_TESTING)
 
