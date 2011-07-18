@@ -91,6 +91,10 @@ New Features
 
     Library:
     --------
+    - I added a new parameter of object access property list to the function 
+      H5Rdereference (Issue 2763).  It's called H5Rdereference2 now.  The former
+      H5Rdereference function has been deprecated to H5Rdereference1. (SLU -
+      2011/7/18)
     - The library added two new dataset transfer property to control whether
       to fill 0xff in the destination data or convert to the destination data
       when overflow happens to ENUM data (Issue 7579).  The two new functions

@@ -111,6 +111,10 @@
   #define H5Pregister_vers 1
 #endif /* !defined(H5Pregister_vers) */
 
+#if !defined(H5Rdereference_vers)
+#define H5Rdereference_vers 1
+#endif /* !defined(H5Rdereference_vers) */
+
 #if !defined(H5Rget_obj_type_vers)
   #define H5Rget_obj_type_vers 1
 #endif /* !defined(H5Rget_obj_type_vers) */
@@ -218,6 +222,10 @@
 #if !defined(H5Pregister_vers)
   #define H5Pregister_vers 2
 #endif /* !defined(H5Pregister_vers) */
+
+#if !defined(H5Rdereference_vers)
+#define H5Rdereference_vers 1
+#endif /* !defined(H5Rdereference_vers) */
 
 #if !defined(H5Rget_obj_type_vers)
   #define H5Rget_obj_type_vers 2
@@ -458,6 +466,17 @@
 #else /* H5Pregister_vers */
   #error "H5Pregister_vers set to invalid value"
 #endif /* H5Pregister_vers */
+
+#if !defined(H5Rdereference_vers) || H5Rdereference_vers == 2
+#ifndef H5Rdereference_vers
+#define H5Rdereference_vers 2
+#endif /* H5Rdereference_vers */
+#define H5Rdereference H5Rdereference2
+#elif H5Rdereference_vers == 1
+#define H5Rdereference H5Rdereference1
+#else /* H5Rdereference_vers */
+#error "H5Rdereference_vers set to invalid value"
+#endif /* H5Rdereference_vers */
 
 #if !defined(H5Rget_obj_type_vers) || H5Rget_obj_type_vers == 2
   #ifndef H5Rget_obj_type_vers

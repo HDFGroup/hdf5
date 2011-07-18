@@ -38,8 +38,6 @@
 /* Static functions */
 static herr_t H5R_create(void *ref, H5G_loc_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id);
-static hid_t H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type,
-    const void *_ref, hbool_t app_ref);
 static H5S_t * H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref);
 static ssize_t H5R_get_name(H5F_t *file, hid_t lapl_id, hid_t dxpl_id, hid_t id,
     H5R_type_t ref_type, const void *_ref, char *name, size_t size);
@@ -361,9 +359,13 @@ done:
     Currently only set up to work with references to datasets
  EXAMPLES
  REVISION LOG
+    Raymond Lu
+    13 July 2011
+    I added the OAPL_ID parameter for the object being referenced.  It only
+    supports dataset access property list currently.
 --------------------------------------------------------------------------*/
-static hid_t
-H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref, hbool_t app_ref)
+hid_t
+H5R_dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref, hbool_t app_ref)
 {
     H5O_loc_t oloc;             /* Object location */
     H5G_name_t path;            /* Path of object */
@@ -462,11 +464,10 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
 
         case H5O_TYPE_DATASET:
             {
-                hid_t dapl_id = H5P_DATASET_ACCESS_DEFAULT; /* dapl to use to open dataset */
                 H5D_t *dset;                /* Pointer to dataset to open */
 
                 /* Open the dataset */
-                if(NULL == (dset = H5D_open(&loc, dapl_id, dxpl_id)))
+                if(NULL == (dset = H5D_open(&loc, oapl_id, dxpl_id)))
                     HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
 
                 /* Create an atom for the dataset */
@@ -488,11 +489,11 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Rdereference
+    H5Rdereference2
  PURPOSE
     Opens the HDF5 object referenced.
  USAGE
-    hid_t H5Rdereference(ref)
+    hid_t H5Rdereference2(ref)
         hid_t id;       IN: Dataset reference object is in or location ID of
                             object that the dataset is located within.
         H5R_type_t ref_type;    IN: Type of reference to create
@@ -507,19 +508,22 @@ done:
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
+    Raymond Lu
+    13 July 2011
+    I added the OAPL_ID parameter for the object being referenced.  It only
+    supports dataset access property list currently.
 --------------------------------------------------------------------------*/
 hid_t
-H5Rdereference(hid_t id, H5R_type_t ref_type, const void *_ref)
+H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_ref)
 {
     H5G_loc_t loc;      /* Group location */
     H5F_t *file = NULL; /* File object */
     hid_t ret_value;
 
-    FUNC_ENTER_API(H5Rdereference, FAIL)
-    H5TRACE3("i", "iRt*x", id, ref_type, _ref);
+    FUNC_ENTER_API(H5Rdereference2, FAIL)
 
     /* Check args */
-    if(H5G_loc(id, &loc) < 0)
+    if(H5G_loc(obj_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(ref_type <= H5R_BADTYPE || ref_type >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
@@ -530,12 +534,12 @@ H5Rdereference(hid_t id, H5R_type_t ref_type, const void *_ref)
     file = loc.oloc->file;
 
     /* Create reference */
-    if((ret_value = H5R_dereference(file, H5AC_dxpl_id, ref_type, _ref, TRUE)) < 0)
+    if((ret_value = H5R_dereference(file, oapl_id, H5AC_dxpl_id, ref_type, _ref, TRUE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable dereference object")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* end H5Rdereference() */
+}   /* end H5Rdereference2() */
 
 
 /*--------------------------------------------------------------------------

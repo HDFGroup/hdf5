@@ -121,7 +121,7 @@ nh5rdereference_region_c(hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id)
      /*
       * Call H5Rdereference function.
       */
-     if((c_obj_id = H5Rdereference((hid_t)*dset_id, H5R_DATASET_REGION, &ref_c)) < 0)
+     if((c_obj_id = H5Rdereference2((hid_t)*dset_id, H5P_DATASET_ACCESS_DEFAULT, H5R_DATASET_REGION, &ref_c)) < 0)
          HGOTO_DONE(FAIL)
 
      /* Copy the object's ID */
@@ -151,7 +151,7 @@ nh5rdereference_object_c(hid_t_f *dset_id, haddr_t_f *ref, hid_t_f *obj_id)
      /*
       * Call H5Rdereference function.
       */
-     if((c_obj_id = H5Rdereference((hid_t)*dset_id, H5R_OBJECT, &ref_c)) < 0)
+     if((c_obj_id = H5Rdereference2((hid_t)*dset_id, H5P_DATASET_ACCESS_DEFAULT, H5R_OBJECT, &ref_c)) < 0)
          HGOTO_DONE(FAIL)
 
      /* Copy the object's ID */

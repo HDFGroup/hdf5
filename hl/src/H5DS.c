@@ -318,7 +318,7 @@ herr_t H5DSattach_scale(hid_t did,
             ref_j = ((hobj_ref_t *)buf[idx].p)[i];
 
             /* get the scale id for this REF */
-            if((dsid_j = H5Rdereference(did,H5R_OBJECT,&ref_j)) < 0)
+            if((dsid_j = H5Rdereference2(did,H5P_DATASET_ACCESS_DEFAULT,H5R_OBJECT,&ref_j)) < 0)
                 goto out;
 
             /* get info for DS in the parameter list */
@@ -690,7 +690,7 @@ herr_t H5DSdetach_scale(hid_t did,
             ref = ((hobj_ref_t *)buf[idx].p)[j];
 
             /* get the DS id */
-            if ((dsid_j = H5Rdereference(did,H5R_OBJECT,&ref)) < 0)
+            if ((dsid_j = H5Rdereference2(did,H5P_DATASET_ACCESS_DEFAULT,H5R_OBJECT,&ref)) < 0)
                 goto out;
 
             /* get info for this DS */
@@ -800,7 +800,7 @@ herr_t H5DSdetach_scale(hid_t did,
             ref = dsbuf[ii].ref;
 
             /* get the dataset id */
-            if ((did_i = H5Rdereference(did,H5R_OBJECT,&ref)) < 0)
+            if ((did_i = H5Rdereference2(did,H5P_DATASET_ACCESS_DEFAULT,H5R_OBJECT,&ref)) < 0)
                 goto out;
 
             /* get info for this dataset */
@@ -1048,7 +1048,7 @@ htri_t H5DSis_attached(hid_t did,
             ref = ((hobj_ref_t *)buf[idx].p)[i];
 
             /* get the scale id for this REF */
-            if ((dsid_j = H5Rdereference(did,H5R_OBJECT,&ref)) < 0)
+            if ((dsid_j = H5Rdereference2(did,H5P_DATASET_ACCESS_DEFAULT,H5R_OBJECT,&ref)) < 0)
                 goto out;
 
             /* get info for DS in the parameter list */
@@ -1138,7 +1138,7 @@ htri_t H5DSis_attached(hid_t did,
             if (ref)
             {
                 /* get the dataset id */
-                if ((did_i = H5Rdereference(did,H5R_OBJECT,&ref)) < 0)
+                if ((did_i = H5Rdereference2(did,H5P_DATASET_ACCESS_DEFAULT,H5R_OBJECT,&ref)) < 0)
                     goto out;
 
                 /* get info for dataset in the parameter list */
@@ -1342,7 +1342,7 @@ herr_t H5DSiterate_scales(hid_t did,
                 /* disable error reporting, the ID might refer to a deleted dataset */
                 H5E_BEGIN_TRY {
                     /* get the DS id */
-                    if ((scale_id = H5Rdereference(did,H5R_OBJECT,&ref)) < 0)
+                    if ((scale_id = H5Rdereference2(did,H5P_DATASET_ACCESS_DEFAULT,H5R_OBJECT,&ref)) < 0)
                         goto out;
                 } H5E_END_TRY;
 
