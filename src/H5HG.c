@@ -552,7 +552,7 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
     HDassert(0 == size || obj);
     HDassert(hobj);
 
-    if(0 == (f->intent & H5F_ACC_RDWR))
+    if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Find a large enough collection on the CWFS list */
@@ -775,7 +775,7 @@ H5HG_link(H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
     /* Check args */
     HDassert(f);
     HDassert(hobj);
-    if(0 == (f->intent & H5F_ACC_RDWR))
+    if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Load the heap */
@@ -838,7 +838,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     /* Check args */
     HDassert(f);
     HDassert(hobj);
-    if(0 == (f->intent & H5F_ACC_RDWR))
+    if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Load the heap */

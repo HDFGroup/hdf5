@@ -17,24 +17,62 @@
  * Programmer: Robb Matzke <matzke@llnl.gov>
  *             Friday, September 19, 1997
  */
+
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 
-/* Packages needed by this file... */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"             /* File access				*/
+#include "H5Fprivate.h"         /* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
 
-/* Private macros */
 
-/* Private prototypes */
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
 
 /* Declare extern the PQ free list for the wrapped strings */
 H5FL_BLK_EXTERN(str_buf);
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -249,7 +287,7 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 
     /* fill with zero */
     if(*pp < p_ret)
-        HDmemset(*pp, 0, (p_ret - *pp));
+        HDmemset(*pp, 0, (size_t)(p_ret - *pp));
     *pp = p_ret;
 
 done:

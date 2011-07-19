@@ -399,6 +399,9 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
     else
         *corder_count = 0;
 
+    /* Reset metadata tag in dxpl_id */
+    H5_END_TAG(FAIL);
+
 done:
     /* Release resources */
     if(bt2_name && H5B2_close(bt2_name, H5AC_ind_dxpl_id) < 0)
@@ -407,9 +410,6 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
     if(oh && H5O_unprotect(loc, H5AC_ind_dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
-
-    /* Reset metadata tag in dxpl_id */
-    H5_END_TAG(FAIL);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5O_attr_dense_info_test() */
