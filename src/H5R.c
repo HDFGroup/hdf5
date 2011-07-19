@@ -466,6 +466,12 @@ H5R_dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, H5R_type_t ref_type, 
             {
                 H5D_t *dset;                /* Pointer to dataset to open */
 
+                /* Get correct property list */
+                if(H5P_DEFAULT == oapl_id)
+                    oapl_id = H5P_DATASET_ACCESS_DEFAULT;
+                else if(TRUE != H5P_isa_class(oapl_id, H5P_DATASET_ACCESS))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
+
                 /* Open the dataset */
                 if(NULL == (dset = H5D_open(&loc, oapl_id, dxpl_id)))
                     HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")

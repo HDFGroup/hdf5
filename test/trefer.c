@@ -186,6 +186,8 @@ test_reference_params(void)
     /* Test parameters to H5Rdereference */
     dset2 = H5Rdereference2(-1, H5P_DEFAULT, H5R_OBJECT, &rbuf[0]);
     VERIFY(dset2, FAIL, "H5Rdereference2 loc_id");
+    dset2 = H5Rdereference2(dataset, -1, H5R_OBJECT, &rbuf[0]);
+    VERIFY(dset2, FAIL, "H5Rdereference2 oapl_id");
     dset2 = H5Rdereference2(dataset, dapl_id, H5R_OBJECT, NULL);
     VERIFY(dset2, FAIL, "H5Rdereference2 ref");
     dset2 = H5Rdereference2(dataset, dapl_id, H5R_MAXTYPE, &rbuf[0]);
