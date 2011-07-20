@@ -509,6 +509,7 @@
 ./src/H5Eterm.h
 ./src/H5F.c
 ./src/H5Faccum.c
+./src/H5Fcwfs.c
 ./src/H5Fdbg.c
 ./src/H5Fefc.c
 ./src/H5Ffake.c
@@ -610,6 +611,7 @@
 ./src/H5HGpkg.h
 ./src/H5HGprivate.h
 ./src/H5HGpublic.h
+./src/H5HGquery.c
 ./src/H5HL.c
 ./src/H5HLcache.c
 ./src/H5HLdbg.c

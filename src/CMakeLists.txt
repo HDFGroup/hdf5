@@ -113,6 +113,7 @@ IDE_GENERATED_PROPERTIES ("H5E" "${H5E_HDRS}" "${H5E_SRCS}" )
 SET (H5F_SRCS
     ${HDF5_SRC_DIR}/H5F.c
     ${HDF5_SRC_DIR}/H5Faccum.c
+    ${HDF5_SRC_DIR}/H5Fcwfs.c
     ${HDF5_SRC_DIR}/H5Fdbg.c
     ${HDF5_SRC_DIR}/H5Fefc.c
     ${HDF5_SRC_DIR}/H5Ffake.c
@@ -235,6 +236,7 @@ SET (H5HG_SRCS
     ${HDF5_SRC_DIR}/H5HG.c
     ${HDF5_SRC_DIR}/H5HGcache.c
     ${HDF5_SRC_DIR}/H5HGdbg.c
+    ${HDF5_SRC_DIR}/H5HGquery.c
 )
 
 SET (H5HG_HDRS

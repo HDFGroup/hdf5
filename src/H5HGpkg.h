@@ -71,12 +71,6 @@ H5FL_BLK_EXTERN(gheap_chunk);
 #define H5HG_MINSIZE	4096
 
 /*
- * Maximum length of the CWFS list, the list of remembered collections that
- * have free space.
- */
-#define H5HG_NCWFS	16
-
-/*
  * Pad all global heap messages to a multiple of eight bytes so we can load
  * the entire collection into memory and operate on it there.  Eight should
  * be sufficient for machines that have alignment constraints because our
