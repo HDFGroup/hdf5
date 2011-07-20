@@ -35,6 +35,7 @@
 
 /* Main file structure */
 typedef struct H5F_t H5F_t;
+typedef struct H5F_file_t H5F_file_t;
 
 /* Block aggregation structure */
 typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
@@ -239,6 +240,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_OPEN_NAME(F)        ((F)->open_name)
 #define H5F_ACTUAL_NAME(F)      ((F)->actual_name)
 #define H5F_EXTPATH(F)          ((F)->extpath)
+#define H5F_SHARED(F)           ((F)->shared)
 #define H5F_PARENT(F)           ((F)->parent)
 #define H5F_SAME_SHARED(F1, F2) ((F1)->shared == (F2)->shared))
 #define H5F_FCPL(F)             ((F)->shared->fcpl_id)
@@ -267,6 +269,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_OPEN_NAME(F)        (H5F_get_open_name(F))
 #define H5F_ACTUAL_NAME(F)      (H5F_get_actual_name(F))
 #define H5F_EXTPATH(F)          (H5F_get_extpath(F))
+#define H5F_SHARED(F)           (H5F_get_shared(F))
 #define H5F_PARENT(F)           (H5F_get_parent(F))
 #define H5F_SAME_SHARED(F1, F2) (H5F_same_shared((F1), (F2)))
 #define H5F_FCPL(F)             (H5F_get_fcpl(F))
@@ -477,6 +480,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 struct H5B_class_t;
 struct H5RC_t;
 struct H5O_loc_t;
+struct H5HG_heap_t;
 
 /* Private functions */
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
@@ -491,6 +495,7 @@ H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
 H5_DLL char *H5F_get_open_name(const H5F_t *f);
 H5_DLL char *H5F_get_actual_name(const H5F_t *f);
 H5_DLL char *H5F_get_extpath(const H5F_t *f);
+H5_DLL H5F_file_t *H5F_get_shared(const H5F_t *f);
 H5_DLL H5F_t *H5F_get_parent(const H5F_t *f);
 H5_DLL hbool_t H5F_same_shared(const H5F_t *f1, const H5F_t *f2);
 H5_DLL hid_t H5F_get_id(H5F_t *file, hbool_t app_ref);
@@ -566,6 +571,13 @@ H5_DLL int H5F_mpi_get_size(const H5F_t *f);
 H5_DLL H5F_t *H5F_efc_open(H5F_t *parent, const char *name, unsigned flags,
     hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5F_efc_close(H5F_t *parent, H5F_t *file);
+
+/* Global heap CWFS routines */
+H5_DLL herr_t H5F_cwfs_add(H5F_t *f, struct H5HG_heap_t *heap);
+H5_DLL herr_t H5F_cwfs_find_free_heap(H5F_t *f, hid_t dxpl_id, size_t need, haddr_t *addr);
+H5_DLL herr_t H5F_cwfs_advance_heap(H5F_t *f, struct H5HG_heap_t *heap,
+    hbool_t add_heap);
+H5_DLL herr_t H5F_cwfs_remove_heap(H5F_file_t *shared, struct H5HG_heap_t *heap);
 
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE * stream, int indent, int fwidth);

@@ -181,6 +181,29 @@ H5F_get_extpath(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_get_shared
+ *
+ * Purpose:	Retrieve the file's 'shared' pointer
+ *
+ * Return:	'shared' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol, July 20, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+H5F_file_t *
+H5F_get_shared(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_shared)
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->shared)
+} /* end H5F_get_shared() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_get_parent
  *
  * Purpose:	Retrieve the file's 'parent' pointer

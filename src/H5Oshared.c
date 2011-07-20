@@ -30,7 +30,6 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 
@@ -39,7 +38,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"             /* File access				*/
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5HFprivate.h"        /* Fractal heap				*/
 #include "H5Opkg.h"             /* Object headers			*/
@@ -418,8 +417,8 @@ H5O_shared_encode(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_me
         version = H5O_SHARED_VERSION_2; /* version 1 is no longer used */
     } /* end else */
 
-    *buf++ = version;
-    *buf++ = (unsigned)sh_mesg->type;
+    *buf++ = (uint8_t)version;
+    *buf++ = (uint8_t)sh_mesg->type;
 
     /* Encode either the heap ID of the message or the address of the
      * object header that holds it.
@@ -483,8 +482,8 @@ H5O_shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_size)
 
     if(sh_mesg->type == H5O_SHARE_TYPE_COMMITTED) {
-        ret_value = 1 +			/*version			*/
-            1 +				/*the type field		*/
+        ret_value = (size_t)1 +		/*version			*/
+            (size_t)1 +			/*the type field		*/
             H5F_SIZEOF_ADDR(f);		/*sharing by another obj hdr	*/
     } /* end if */
     else {

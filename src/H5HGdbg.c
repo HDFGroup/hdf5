@@ -18,14 +18,57 @@
  *
  * Purpose:	Global Heap object debugging functions.
  */
+
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5HG_PACKAGE		/*suppress error about including H5HGpkg	  */
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		        */
 #include "H5HGpkg.h"		/* Global heaps				*/
 #include "H5Iprivate.h"		/* ID Functions		                */
+
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -38,18 +81,6 @@
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
  *		Mar 27, 1998
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *              Robb Matzke, LLNL, 2003-06-05
- *              The size does not include the object header, just the data.
- *
- *              John Mainzer, 6/17/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
  *
  *-------------------------------------------------------------------------
  */
@@ -142,4 +173,5 @@ done:
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5HG_debug() */
+

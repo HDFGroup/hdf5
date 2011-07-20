@@ -41,7 +41,6 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5HG_PACKAGE		/*suppress error about including H5HGpkg	  */
 
 
@@ -50,7 +49,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"             /* File access				*/
+#include "H5Fprivate.h"         /* File access				*/
 #include "H5HGpkg.h"		/* Global heaps				*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -59,13 +58,6 @@
 /****************/
 /* Local Macros */
 /****************/
-
-/*
- * Limit global heap collections to the some reasonable size.  This is
- * fairly arbitrary, but needs to be small enough that no more than H5HG_MAXIDX
- * objects will be allocated from a single heap.
- */
-#define H5HG_MAXSIZE	65536
 
 /*
  * The maximum number of links allowed to a global heap object.
@@ -164,7 +156,7 @@ H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
     heap->addr = addr;
     heap->size = size;
-    heap->shared = f->shared;
+    heap->shared = H5F_SHARED(f);
 
     if(NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
@@ -212,19 +204,8 @@ HDmemset(heap->chunk, 0, size);
 #endif /* OLD_WAY */
 
     /* Add this heap to the beginning of the CWFS list */
-    if(NULL == f->shared->cwfs) {
-	f->shared->cwfs = (H5HG_heap_t **)H5MM_malloc(H5HG_NCWFS * sizeof(H5HG_heap_t *));
-	if(NULL == (f->shared->cwfs))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
-	f->shared->cwfs[0] = heap;
-	f->shared->ncwfs = 1;
-    } /* end if */
-    else {
-	HDmemmove(f->shared->cwfs + 1, f->shared->cwfs,
-                   MIN(f->shared->ncwfs, H5HG_NCWFS - 1) * sizeof(H5HG_heap_t *));
-	f->shared->cwfs[0] = heap;
-	f->shared->ncwfs = MIN(H5HG_NCWFS, f->shared->ncwfs + 1);
-    } /* end else */
+    if(H5F_cwfs_add(f, heap) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "unable to add global heap collection to file's CWFS")
 
     /* Add the heap to the cache */
     if(H5AC_insert_entry(f, dxpl_id, H5AC_GHEAP, addr, heap, H5AC__NO_FLAGS_SET) < 0)
@@ -441,7 +422,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5HG_extend(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t need)
 {
     H5HG_heap_t *heap = NULL;       /* Pointer to heap to extend */
@@ -537,12 +518,10 @@ herr_t
 H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/)
 {
     size_t	need;		/*total space needed for object		*/
-    unsigned    cwfsno;
     size_t	idx;
-    haddr_t	addr = HADDR_UNDEF;
+    haddr_t	addr;           /* Address of heap to add object within */
     H5HG_heap_t	*heap = NULL;
     unsigned 	heap_flags = H5AC__NO_FLAGS_SET;
-    hbool_t     found = FALSE;          /* Flag to indicate a heap with enough space was found */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5HG_insert, dxpl_id, H5AC__GLOBALHEAP_TAG, FAIL)
@@ -558,81 +537,23 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
     /* Find a large enough collection on the CWFS list */
     need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
 
-    /* Note that we don't have metadata cache locks on the entries in
-     * f->shared->cwfs.
-     *
-     * In the current situation, this doesn't matter, as we are single
-     * threaded, and as best I can tell, entries are added to and deleted
-     * from f->shared->cwfs as they are added to and deleted from the
-     * metadata cache.
-     *
-     * To be proper, we should either lock each entry in f->shared->cwfs
-     * as we examine it, or lock the whole array.  However, at present
-     * I don't see the point as there will be significant overhead,
-     * and protecting and unprotecting all the collections in the global
-     * heap on a regular basis will skew the replacement policy.
-     *
-     *                                        JRM - 5/24/04
-     */
-    for(cwfsno = 0; cwfsno < f->shared->ncwfs; cwfsno++)
-	if(f->shared->cwfs[cwfsno]->obj[0].size >= need) {
-	    addr = f->shared->cwfs[cwfsno]->addr;
-            found = TRUE;
-	    break;
-	} /* end if */
-
-    /*
-     * If we didn't find any collection with enough free space the check if
-     * we can extend any of the collections to make enough room.
-     */
-    if(!found) {
-        size_t new_need;
-
-        for(cwfsno = 0; cwfsno < f->shared->ncwfs; cwfsno++) {
-            new_need = need;
-            new_need -= f->shared->cwfs[cwfsno]->obj[0].size;
-            new_need = MAX(f->shared->cwfs[cwfsno]->size, new_need);
-
-            if((f->shared->cwfs[cwfsno]->size + new_need) <= H5HG_MAXSIZE) {
-                htri_t extended;        /* Whether the heap was extended */
-
-                extended = H5MF_try_extend(f, dxpl_id, H5FD_MEM_GHEAP, f->shared->cwfs[cwfsno]->addr, (hsize_t)f->shared->cwfs[cwfsno]->size, (hsize_t)new_need);
-                if(extended < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "error trying to extend heap")
-                else if(extended == TRUE) {
-                    if(H5HG_extend(f, dxpl_id, f->shared->cwfs[cwfsno]->addr, new_need) < 0)
-                        HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to extend global heap collection")
-                    addr = f->shared->cwfs[cwfsno]->addr;
-                    found = TRUE;
-                    break;
-                } /* end if */
-            } /* end if */
-        } /* end for */
-    } /* end if */
+    /* Look for a heap in the file's CWFS that has enough space for the object */
+    addr = HADDR_UNDEF;
+    if(H5F_cwfs_find_free_heap(f, dxpl_id, need, &addr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "error trying to locate heap")
 
     /*
      * If we didn't find any collection with enough free space then allocate a
      * new collection large enough for the message plus the collection header.
      */
-    if(!found) {
-        addr = H5HG_create(f, dxpl_id, need+H5HG_SIZEOF_HDR (f));
+    if(!H5F_addr_defined(addr)) {
+        addr = H5HG_create(f, dxpl_id, need + H5HG_SIZEOF_HDR(f));
 
         if(!H5F_addr_defined(addr))
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to allocate a global heap collection")
     } /* end if */
-    else {
-        /* Move the collection forward in the CWFS list, if it's not
-         * already at the front
-         */
-        if(cwfsno > 0) {
-            H5HG_heap_t *tmp = f->shared->cwfs[cwfsno];
-
-            f->shared->cwfs[cwfsno] = f->shared->cwfs[cwfsno - 1];
-            f->shared->cwfs[cwfsno - 1] = tmp;
-            --cwfsno;
-        } /* end if */
-    } /* end else */
     HDassert(H5F_addr_defined(addr));
+
     if(NULL == (heap = H5HG_protect(f, dxpl_id, addr, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")
 
@@ -715,16 +636,8 @@ H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
      * with the H5AC_protect(), but it won't hurt to do it twice.
      */
     if(heap->obj[0].begin) {
-        unsigned u;     /* Local index variable */
-
-	for(u = 0; u < f->shared->ncwfs; u++)
-	    if(f->shared->cwfs[u] == heap) {
-		if(u) {
-		    f->shared->cwfs[u] = f->shared->cwfs[u - 1];
-		    f->shared->cwfs[u - 1] = heap;
-		} /* end if */
-		break;
-	    } /* end if */
+        if(H5F_cwfs_advance_heap(f, heap, FALSE) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTMODIFY, NULL, "can't adjust file's CWFS")
     } /* end if */
 
     /* If the caller would like to know the heap object's size, set that */
@@ -887,18 +800,8 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
          * H5AC_protect() might have done that too, but that's okay.  If the
          * heap isn't on the CWFS list then add it to the end.
          */
-        for(u = 0; u < f->shared->ncwfs; u++)
-            if(f->shared->cwfs[u] == heap) {
-                if(u) {
-                    f->shared->cwfs[u] = f->shared->cwfs[u - 1];
-                    f->shared->cwfs[u - 1] = heap;
-                } /* end if */
-                break;
-            } /* end if */
-        if(u >= f->shared->ncwfs) {
-            f->shared->ncwfs = MIN(f->shared->ncwfs + 1, H5HG_NCWFS);
-            f->shared->cwfs[f->shared->ncwfs - 1] = heap;
-        } /* end if */
+        if(H5F_cwfs_advance_heap(f, heap, TRUE) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTMODIFY, FAIL, "can't adjust file's CWFS")
     } /* end else */
 
 done:
@@ -924,21 +827,16 @@ done:
 herr_t
 H5HG_free(H5HG_heap_t *heap)
 {
-    unsigned u;         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_free)
+    FUNC_ENTER_NOAPI(H5HG_free, FAIL)
 
     /* Check arguments */
     HDassert(heap);
 
     /* Remove the heap from the CWFS list */
-    for(u = 0; u < heap->shared->ncwfs; u++) {
-        if(heap->shared->cwfs[u] == heap) {
-            heap->shared->ncwfs -= 1;
-            HDmemmove(heap->shared->cwfs + u, heap->shared->cwfs + u + 1, (heap->shared->ncwfs - u) * sizeof(H5HG_heap_t *));
-            break;
-        } /* end if */
-    } /* end for */
+    if(H5F_cwfs_remove_heap(heap->shared, heap) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove heap from file's CWFS")
 
     if(heap->chunk)
         heap->chunk = H5FL_BLK_FREE(gheap_chunk, heap->chunk);
@@ -946,6 +844,7 @@ H5HG_free(H5HG_heap_t *heap)
         heap->obj = H5FL_SEQ_FREE(H5HG_obj_t, heap->obj);
     heap = H5FL_FREE(H5HG_heap_t, heap);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HG_free() */
 
