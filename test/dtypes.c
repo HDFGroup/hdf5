@@ -6756,8 +6756,8 @@ test_delete_obj_named(hid_t fapl)
         create_del_obj_named_test_file(filename, fapl, new_format);
 
 /* Test deleting dataset opened through different file ID */
-        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
         if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
         if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
@@ -6776,8 +6776,8 @@ test_delete_obj_named(hid_t fapl)
         create_del_obj_named_test_file(filename, fapl, new_format);
 
 /* Test deleting attribute opened through different file ID */
-        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
         if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
         if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
