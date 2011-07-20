@@ -75,27 +75,41 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5G_init_interface
 
-/* Packages needed by this file... */
+
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* File access				*/
+#include "H5Fprivate.h"		/* File access				*/
+#include "H5FOprivate.h"        /* File objects                         */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property lists                       */
 
-/* Local macros */
+
+/****************/
+/* Local Macros */
+/****************/
+
 #define H5G_RESERVED_ATOMS	0
 
-/* Local typedefs */
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* User data for path traversal routine for "insertion file" routine */
 typedef struct {
@@ -126,10 +140,21 @@ typedef struct {
 } H5G_iter_visit_ud_t;
 
 
-/* Package variables */
+/********************/
+/* Package Typedefs */
+/********************/
 
 
-/* Local variables */
+/********************/
+/* Local Prototypes */
+/********************/
+
+static herr_t H5G_open_oid(H5G_t *grp, hid_t dxpl_id);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
 
 /* Declare a free list to manage the H5G_t struct */
 H5FL_DEFINE(H5G_t);
@@ -139,8 +164,15 @@ H5FL_DEFINE(H5G_shared_t);
 H5FL_DEFINE(H5_obj_t);
 
 
-/* Private prototypes */
-static herr_t H5G_open_oid(H5G_t *grp, hid_t dxpl_id);
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 
 /*-------------------------------------------------------------------------

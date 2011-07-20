@@ -26,15 +26,21 @@
  *
  *-------------------------------------------------------------------------
  */
+
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 
-/* Packages needed by this file... */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* File access				*/
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
@@ -42,7 +48,15 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppublic.h"		/* Property Lists                       */
 
-/* Private typedefs */
+
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /*
  * Each key field of the B-link tree that points to symbol table
@@ -53,9 +67,14 @@ typedef struct H5G_node_key_t {
 } H5G_node_key_t;
 
 
-/* Private macros */
+/********************/
+/* Package Typedefs */
+/********************/
 
-/* PRIVATE PROTOTYPES */
+
+/********************/
+/* Local Prototypes */
+/********************/
 
 /* B-tree callbacks */
 static H5RC_t *H5G_node_get_shared(const H5F_t *f, const void *_udata);
@@ -78,6 +97,11 @@ static herr_t H5G_node_decode_key(const H5B_shared_t *shared, const uint8_t *raw
 static herr_t H5G_node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key);
 static herr_t H5G_node_debug_key(FILE *stream, int indent, int fwidth,
     const void *key, const void *udata);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
 
 /* H5G inherits B-tree like properties from H5B */
 H5B_class_t H5B_SNODE[1] = {{
@@ -103,6 +127,16 @@ H5FL_DEFINE(H5G_node_t);
 
 /* Declare a free list to manage sequences of H5G_entry_t's */
 H5FL_SEQ_DEFINE(H5G_entry_t);
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 
 /*-------------------------------------------------------------------------
@@ -701,8 +735,9 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     } /* end else */
 
     /* Move entries down to make room for new entry */
+    HDassert(idx >= 0);
     HDmemmove(insert_into->entry + idx + 1, insert_into->entry + idx,
-	      (insert_into->nsyms - idx) * sizeof(H5G_entry_t));
+	      (insert_into->nsyms - (unsigned)idx) * sizeof(H5G_entry_t));
 
     /* Copy new entry into table */
     H5G_ent_copy(&(insert_into->entry[idx]), &ent, H5_COPY_SHALLOW);
@@ -1154,8 +1189,8 @@ H5G_node_init(H5F_t *f)
         /* <none> */
 
     /* Make shared B-tree info reference counted */
-    if(NULL == (f->shared->grp_btree_shared = H5RC_create(shared, H5B_shared_free)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
+    if(H5F_SET_GRP_BTREE_SHARED(f, H5RC_create(shared, H5B_shared_free)) < 0)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

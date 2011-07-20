@@ -23,22 +23,36 @@
  *
  *-------------------------------------------------------------------------
  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 
 
-/* Packages needed by this file... */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* File access				*/
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"		/* Links                                */
 #include "H5MMprivate.h"	/* Memory wrappers			*/
 
-/* Private typedefs */
+
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* Struct used by change name callback function */
 typedef struct H5G_names_t {
@@ -60,14 +74,15 @@ typedef struct H5G_gnba_iter_t {
     char *path;                 /* Name of the object */
 } H5G_gnba_iter_t;
 
-/* Private macros */
+/********************/
+/* Package Typedefs */
+/********************/
 
-/* Local variables */
 
-/* Declare extern the PQ free list for the wrapped strings */
-H5FL_BLK_EXTERN(str_buf);
+/********************/
+/* Local Prototypes */
+/********************/
 
-/* PRIVATE PROTOTYPES */
 static htri_t H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r);
 static H5RS_str_t *H5G_build_fullpath(const char *prefix, const char *name);
 #ifdef NOT_YET
@@ -76,6 +91,25 @@ static H5RS_str_t *H5G_build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, 
 static herr_t H5G_name_move_path(H5RS_str_t **path_r_ptr,
     const char *full_suffix, const char *src_path, const char *dst_path);
 static int H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/* Declare extern the PQ free list for the wrapped strings */
+H5FL_BLK_EXTERN(str_buf);
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -719,30 +753,30 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         HGOTO_DONE(SUCCEED)     /* No need to look at object, it's path is already invalid */
 
     /* Find the top file in object's mount hier. */
-    if(oloc->file->parent) {
+    if(H5F_PARENT(oloc->file)) {
         /* Check if object is in child file (for mount & unmount operations) */
-        if(names->dst_file && oloc->file->shared == names->dst_file->shared)
+        if(names->dst_file && H5F_SAME_SHARED(oloc->file, names->dst_file))
             obj_in_child = TRUE;
 
         /* Find the "top" file in the chain of mounted files */
-        top_obj_file = oloc->file->parent;
-        while(top_obj_file->parent != NULL) {
+        top_obj_file = H5F_PARENT(oloc->file);
+        while(H5F_PARENT(top_obj_file) != NULL) {
             /* Check if object is in child mount hier. (for mount & unmount operations) */
-            if(names->dst_file && top_obj_file->shared == names->dst_file->shared)
+            if(names->dst_file && H5F_SAME_SHARED(top_obj_file, names->dst_file))
                 obj_in_child = TRUE;
 
-            top_obj_file = top_obj_file->parent;
+            top_obj_file = H5F_PARENT(top_obj_file);
         } /* end while */
     } /* end if */
     else
         top_obj_file = oloc->file;
 
     /* Check if object is in top of child mount hier. (for mount & unmount operations) */
-    if(names->dst_file && top_obj_file->shared == names->dst_file->shared)
+    if(names->dst_file && H5F_SAME_SHARED(top_obj_file, names->dst_file))
         obj_in_child = TRUE;
 
     /* Check if the object is in same file mount hier. */
-    if(top_obj_file->shared != names->src_file->shared)
+    if(!H5F_SAME_SHARED(top_obj_file, names->src_file))
         HGOTO_DONE(SUCCEED)     /* No need to look at object, it's path is already invalid */
 
     switch(names->op) {
@@ -1022,8 +1056,8 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
             H5G_names_t names;          /* Structure to hold operation information for callback */
 
             /* Find top file in src location's mount hierarchy */
-            while(src_file->parent)
-                src_file = src_file->parent;
+            while(H5F_PARENT(src_file))
+                src_file = H5F_PARENT(src_file);
 
             /* Set up common information for callback */
             names.src_file = src_file;

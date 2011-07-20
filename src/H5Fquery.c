@@ -181,6 +181,55 @@ H5F_get_extpath(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_get_parent
+ *
+ * Purpose:	Retrieve the file's 'parent' pointer
+ *
+ * Return:	'parent' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol, July 19, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+H5F_t *
+H5F_get_parent(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_parent)
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->parent)
+} /* end H5F_get_parent() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_same_shared
+ *
+ * Purpose:	Determine if two files have the same shared file pointer
+ *
+ * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol, July 19, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_same_shared(const H5F_t *f1, const H5F_t *f2)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_same_shared)
+
+    HDassert(f1);
+    HDassert(f1->shared);
+    HDassert(f2);
+    HDassert(f2->shared);
+
+    FUNC_LEAVE_NOAPI(f1->shared == f2->shared)
+} /* end H5F_same_shared() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_get_fcpl
  *
  * Purpose:	Retrieve the value of a file's FCPL.
