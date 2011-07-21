@@ -965,7 +965,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
     HDassert(thing);
 
     /* Check for invalid access request */
-    if(0 == (f->intent & H5F_ACC_RDWR))
+    if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "no write intent on file")
 
 #if H5AC__TRACE_FILE_ENABLED
@@ -1332,7 +1332,7 @@ H5AC_protect(H5F_t *f,
     HDassert(H5F_addr_defined(addr));
 
     /* Check for invalid access request */
-    if(0 == (f->intent & H5F_ACC_RDWR) && rw == H5AC_WRITE)
+    if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR) && rw == H5AC_WRITE)
 	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "no write intent on file")
 
 #if H5AC__TRACE_FILE_ENABLED
