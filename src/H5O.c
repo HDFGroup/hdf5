@@ -28,7 +28,6 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 /* Interface initialization */
@@ -39,8 +38,9 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* File access				*/
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free lists                           */
+#include "H5FOprivate.h"        /* File objects                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"		/* Links				*/
 #include "H5MFprivate.h"	/* File memory management		*/
@@ -1317,7 +1317,7 @@ H5O_open(H5O_loc_t *loc)
     if(loc->holding_file)
      	loc->holding_file = FALSE;
     else
-        loc->file->nopen_objs++;
+        H5F_INCR_NOPEN_OBJS(loc->file);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1434,17 +1434,17 @@ H5O_close(H5O_loc_t *loc)
     /* Check args */
     HDassert(loc);
     HDassert(loc->file);
-    HDassert(loc->file->nopen_objs > 0);
+    HDassert(H5F_NOPEN_OBJS(loc->file) > 0);
 
     /* Decrement open-lock counters */
-    --loc->file->nopen_objs;
+    H5F_DECR_NOPEN_OBJS(loc->file);
 
 #ifdef H5O_DEBUG
     if(H5DEBUG(O)) {
-	if(loc->file->file_id < 0 && 1 == loc->file->shared->nrefs)
+	if(H5F_FILE_ID(loc->file)< 0 && 1 == H5F_NREFS(loc->file))
 	    HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n",
 		      loc->addr,
-		      (unsigned long)(loc->file->nopen_objs));
+		      (unsigned long)H5F_NOPEN_OBJS(loc->file));
 	else
 	    HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
     } /* end if */
@@ -1454,7 +1454,7 @@ H5O_close(H5O_loc_t *loc)
      * If the file open object count has reached the number of open mount points
      * (each of which has a group open in the file) attempt to close the file.
      */
-    if(loc->file->nopen_objs == loc->file->nmounts)
+    if(H5F_NOPEN_OBJS(loc->file) == H5F_NMOUNTS(loc->file))
         /* Attempt to close down the file hierarchy */
         if(H5F_try_close(loc->file) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCLOSEFILE, FAIL, "problem attempting file close")
@@ -2557,7 +2557,7 @@ H5O_loc_copy(H5O_loc_t *dst, H5O_loc_t *src, H5_copy_depth_t depth)
          * hold it open, too.
          */
         if(src->holding_file)
-            dst->file->nopen_objs++;
+            H5F_INCR_NOPEN_OBJS(dst->file);
     } else if(depth == H5_COPY_SHALLOW) {
         H5O_loc_reset(src);
     } /* end if */
@@ -2591,7 +2591,7 @@ H5O_loc_hold_file(H5O_loc_t *loc)
 
     /* If this location is not already holding its file open, do so. */
     if(!loc->holding_file) {
-        loc->file->nopen_objs++;
+        H5F_INCR_NOPEN_OBJS(loc->file);
         loc->holding_file = TRUE;
     } /* end if */
 
@@ -2626,9 +2626,9 @@ H5O_loc_free(H5O_loc_t *loc)
 
     /* If this location is holding its file open try to close the file. */
     if(loc->holding_file) {
-        loc->file->nopen_objs--;
+        H5F_DECR_NOPEN_OBJS(loc->file);
         loc->holding_file = FALSE;
-        if(loc->file->nopen_objs <= 0) {
+        if(H5F_NOPEN_OBJS(loc->file) <= 0) {
             if(H5F_try_close(loc->file) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
         } /* end if */

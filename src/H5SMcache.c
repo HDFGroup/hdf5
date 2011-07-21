@@ -17,7 +17,6 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg 	  */
 #define H5SM_PACKAGE		/*suppress error about including H5SMpkg	  */
 
 
@@ -25,7 +24,7 @@
 /* Headers */
 /***********/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* File access                          */
+#include "H5Fprivate.h"		/* File access                          */
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"        /* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -133,16 +132,16 @@ H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *udata)
     /* Verify that we're reading version 0 of the table; this is the only
      * version defined so far.
      */
-    HDassert(f->shared->sohm_vers == HDF5_SHAREDHEADER_VERSION);
+    HDassert(H5F_SOHM_VERS(f) == HDF5_SHAREDHEADER_VERSION);
 
     /* Allocate space for the master table in memory */
     if(NULL == (table = H5FL_CALLOC(H5SM_master_table_t)))
 	HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read number of indexes and version from file superblock */
-    table->num_indexes = f->shared->sohm_nindexes;
+    table->num_indexes = H5F_SOHM_NINDEXES(f);
 
-    HDassert(addr == f->shared->sohm_addr);
+    HDassert(addr == H5F_SOHM_ADDR(f));
     HDassert(addr != HADDR_UNDEF);
     HDassert(table->num_indexes > 0);
 
@@ -273,7 +272,7 @@ H5SM_table_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
         /* Verify that we're writing version 0 of the table; this is the only
          * version defined so far.
          */
-        HDassert(f->shared->sohm_vers == HDF5_SHAREDHEADER_VERSION);
+        HDassert(H5F_SOHM_VERS(f) == HDF5_SHAREDHEADER_VERSION);
 
         /* Wrap the local buffer for serialized header info */
         if(NULL == (wb = H5WB_wrap(tbl_buf, sizeof(tbl_buf))))
@@ -615,7 +614,7 @@ H5SM_list_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
         computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
         UINT32ENCODE(p, computed_chksum);
 #ifdef H5_CLEAR_MEMORY
-HDmemset(p, 0, (list->header->list_size - (p - buf)));
+HDmemset(p, 0, (list->header->list_size - (size_t)(p - buf)));
 #endif /* H5_CLEAR_MEMORY */
 
         /* Write the list to disk */
