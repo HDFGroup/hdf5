@@ -204,29 +204,6 @@ H5F_get_shared(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_parent
- *
- * Purpose:	Retrieve the file's 'parent' pointer
- *
- * Return:	'parent' on success/abort on failure (shouldn't fail)
- *
- * Programmer:	Quincey Koziol, July 19, 2011
- *
- *-------------------------------------------------------------------------
- */
-H5F_t *
-H5F_get_parent(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_parent)
-
-    HDassert(f);
-
-    FUNC_LEAVE_NOAPI(f->parent)
-} /* end H5F_get_parent() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5F_same_shared
  *
  * Purpose:	Determine if two files have the same shared file pointer
@@ -250,6 +227,98 @@ H5F_same_shared(const H5F_t *f1, const H5F_t *f2)
 
     FUNC_LEAVE_NOAPI(f1->shared == f2->shared)
 } /* end H5F_same_shared() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_nopen_objs
+ *
+ * Purpose:	Retrieve the file's 'nopen_objs' value
+ *
+ * Return:	'nopen_objs' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol, July 20, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_get_nopen_objs(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_nopen_objs)
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->nopen_objs)
+} /* end H5F_get_nopen_objs() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_file_id
+ *
+ * Purpose:	Retrieve the file's 'file_id' value
+ *
+ * Return:	'file_id' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol, July 20, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F_get_file_id(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_file_id)
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->file_id)
+} /* end H5F_get_file_id() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_parent
+ *
+ * Purpose:	Retrieve the file's 'parent' pointer
+ *
+ * Return:	'parent' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol, July 19, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+H5F_t *
+H5F_get_parent(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_parent)
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->parent)
+} /* end H5F_get_parent() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_nmounts
+ *
+ * Purpose:	Retrieve the file's 'nmounts' value
+ *
+ * Return:	'nmounts' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol, July 20, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_get_nmounts(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_nmounts)
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->nmounts)
+} /* end H5F_get_nmounts() */
 
 
 /*-------------------------------------------------------------------------
@@ -335,6 +404,78 @@ H5F_sizeof_size(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_get_sohm_addr
+ *
+ * Purpose:	Retrieve the file's 'sohm_addr' value
+ *
+ * Return:	'sohm_addr' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol, July 20, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5F_get_sohm_addr(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_sohm_addr)
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->sohm_addr)
+} /* end H5F_get_sohm_addr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_sohm_vers
+ *
+ * Purpose:	Retrieve the file's 'sohm_vers' value
+ *
+ * Return:	'sohm_vers' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol, July 20, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_get_sohm_vers(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_sohm_vers)
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->sohm_vers)
+} /* end H5F_get_sohm_vers() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_sohm_nindexes
+ *
+ * Purpose:	Retrieve the file's 'sohm_nindexes' value
+ *
+ * Return:	'sohm_nindexes' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol, July 20, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_get_sohm_nindexes(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_sohm_nindexes)
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->sohm_nindexes)
+} /* end H5F_get_sohm_nindexes() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_sym_leaf_k
  *
  * Purpose:	Replaced a macro to retrieve the symbol table leaf size,
@@ -397,6 +538,30 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
 
     FUNC_LEAVE_NOAPI(f->shared->sblock->btree_k[type->id])
 } /* end H5F_Kvalue() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_nrefs
+ *
+ * Purpose:	Retrieve the file's 'nrefs' value
+ *
+ * Return:	'nrefs' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol, July 20, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_get_nrefs(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_nrefs)
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->nrefs)
+} /* end H5F_get_nrefs() */
 
 
 /*-------------------------------------------------------------------------
