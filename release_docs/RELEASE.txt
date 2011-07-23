@@ -760,12 +760,6 @@ Bug Fixes since HDF5-1.8.0 release
 Platforms Tested
 ================
 
-    AIX 6.1                       xlc 11.1.0.3
-    (NCSA BP)                     xlC 11.1.0.3
-                                  xlf90 13.1.0.3
-                                  mpcc_r 11.1.0.3
-                                  mpxlf90_r 13.1.0.3
-
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
     (loyalty)                     g++ 4.2.1 [FreeBSD] 20070719
                                   gcc 4.6.1 20110422
@@ -840,7 +834,6 @@ Platform                          C        F90    F90      C++   zlib  SZIP
                                   parallel        parallel
 SunOS5.10 64-bit                   n        y      n        y     y     y
 SunOS5.10 32-bit                   n        y      n        y     y     y
-AIX 6.1 32- and 64-bit             n        y      n        y     y     y
 Windows XP                         n        y(3)   n(3)     y     y     y
 Windows XP x64                     n        y(3)   n(3)     y     y     y
 Windows Vista                      n        y(3)   n(3)     y     y     y
@@ -867,7 +860,6 @@ Platform                          Shared   Shared    Shared    static-  Thread-
                                   C libs   F90 libs  C++ libs  exec     safe
 SunOS 5.10 32-bit                   y        y         y         x        y
 SunOS 5.10 64-bit                   y        y         y         x        y
-AIX 6.1 32- and 64-bit              n        n         n         x	  y
 Windows XP                          y        y(3)      y         y        n
 Windows XP x64                      y        y(3)      y         y        n
 Windows Vista                       y        y(3)      y         y        y
