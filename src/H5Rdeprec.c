@@ -189,6 +189,7 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
     hid_t ret_value;
 
     FUNC_ENTER_API(H5Rdereference1, FAIL)
+    H5TRACE3("i", "iRt*x", obj_id, ref_type, _ref);
 
     /* Check args */
     if(H5G_loc(obj_id, &loc) < 0)
