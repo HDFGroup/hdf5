@@ -629,6 +629,10 @@ TOOLTEST h5diff_609.txt -d 200 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dse
 # 6.10: number smaller than smallest difference
 TOOLTEST h5diff_610.txt -d 1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4
 
+# 6.11: test (NaN == NaN) must be true based on our documentation -- XCAO
+TOOLTEST h5diff_609.txt -d "0.0001" h5diff_basic1.h5 h5diff_basic1.h5 g1/fp18 g1/fp18_COPY
+TOOLTEST h5diff_609.txt --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h5 g1/fp18 g1/fp18_COPY
+
 
 # ##############################################################################
 # # -p

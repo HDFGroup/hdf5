@@ -335,7 +335,7 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
     *-------------------------------------------------------------------------
     */
     {
-        /* epsilon = 0.0000001 = 1e-7 
+        /* epsilon = 0.0000001 = 1e-7
          * system epsilon for float : FLT_EPSILON = 1.19209E-07
          */
         float  data11[3][2] ={{0.000000f,0.0000001f},{0.0000001f, 0.00000022f},{0.0000001f,0.0000001f}};
@@ -416,7 +416,7 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
         data17[5] = 1;
 
         data18[0] = (float) sqrt( (double)-1 );
-        data18[1] = (float) sqrt( (double)-1 );
+        data18[1] = (float) sqrt( (double)-10000 );
         data18[2] = 1;
         data18[3] = 1;
         data18[4] = 1;
@@ -424,6 +424,7 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
 
         write_dset(gid1,1,dims1,"fp17",H5T_NATIVE_DOUBLE,data17);
         write_dset(gid1,1,dims1,"fp18",H5T_NATIVE_DOUBLE,data18);
+        write_dset(gid1,1,dims1,"fp18_COPY",H5T_NATIVE_DOUBLE,data18);
     }
 
     /*------------------------------------------------------------------------
@@ -932,7 +933,7 @@ int test_attributes(const char *file,
 /*-------------------------------------------------------------------------
 * Function: test_attributes_verbose_level
 *
-* Purpose: Cresting test files for testing attributes along with 
+* Purpose: Cresting test files for testing attributes along with
 * levels of verbos option
 *
 *-------------------------------------------------------------------------
@@ -1040,7 +1041,7 @@ static int test_attributes_verbose_level(const char *fname1, const char *fname2)
         goto out;
     }
 
-    
+
 
 
     /*----------------------------------------------------------------------
@@ -1121,7 +1122,7 @@ static int test_attributes_verbose_level(const char *fname1, const char *fname2)
 
    /*----------------------------------
     * CASE1 - Same attr number, all Same attr name
-    * add attr to group 
+    * add attr to group
     */
     write_attr(f1_gid,1,attr_dims,"integer1",H5T_NATIVE_INT,f1_attr_idata);
     write_attr(f1_gid,1,attr_dims,"float1",H5T_NATIVE_FLOAT,f1_attr_fdata);
@@ -1130,8 +1131,8 @@ static int test_attributes_verbose_level(const char *fname1, const char *fname2)
     write_attr(f2_gid,1,attr_dims,"float1",H5T_NATIVE_FLOAT,f2_attr_fdata);
 
    /*----------------------------------
-    * CASE2 - Same attr number, some Same attr name 
-    * add attr to dset 
+    * CASE2 - Same attr number, some Same attr name
+    * add attr to dset
     */
     write_attr(f1_did,1,attr_dims,"integer1",H5T_NATIVE_INT,f1_attr_idata);
     write_attr(f1_did,1,attr_dims,"float2",H5T_NATIVE_FLOAT,f1_attr_fdata);
@@ -1140,8 +1141,8 @@ static int test_attributes_verbose_level(const char *fname1, const char *fname2)
     write_attr(f2_did,1,attr_dims,"float3",H5T_NATIVE_FLOAT,f2_attr_fdata);
 
    /*----------------------------------
-    * CASE3 - Same attr number, all different attr name 
-    * add attr to ntype 
+    * CASE3 - Same attr number, all different attr name
+    * add attr to ntype
     */
     write_attr(f1_tid,1,attr_dims,"integer1",H5T_NATIVE_INT,f1_attr_idata);
     write_attr(f1_tid,1,attr_dims,"float2",H5T_NATIVE_FLOAT,f1_attr_fdata);
@@ -1161,11 +1162,11 @@ static int test_attributes_verbose_level(const char *fname1, const char *fname2)
 
     write_attr(f2_gid2,1,attr_dims,"integer1",H5T_NATIVE_INT,f2_attr_idata);
     write_attr(f2_gid2,1,attr_dims,"float2",H5T_NATIVE_FLOAT,f2_attr_fdata);
-    
+
 
    /*----------------------------------
     * CASE5 - Different attr number, all different attr name
-    * add attr to g3  
+    * add attr to g3
     */
     write_attr(f1_gid3,1,attr_dims,"integer10",H5T_NATIVE_INT,f1_attr_idata);
     write_attr(f1_gid3,1,attr_dims,"float11",H5T_NATIVE_FLOAT,f1_attr_fdata);
@@ -1307,10 +1308,10 @@ int test_special_datasets(const char *file,
     status = H5Sclose(sid0);
     assert(status >= 0);
 
-    /* Create a dataset with zero dimension size in one file but the other one 
+    /* Create a dataset with zero dimension size in one file but the other one
      * has a dataset with a non-zero dimension size */
     if(make_diffs) {
-        dims[1] = SPACE1_DIM2 + 4;        
+        dims[1] = SPACE1_DIM2 + 4;
     }
 
     sid = H5Screate_simple(SPACE1_RANK, dims, NULL);
@@ -2650,9 +2651,9 @@ static int test_group_recurse(const char *fname1, const char *fname2)
     }
 
     /*------------------------------
-     * external circle route test 
+     * external circle route test
      * file1/grp11 <-> file2/grp10  via elink_grp_circle link
-     */     
+     */
     /* file1 */
     status = H5Lcreate_external(fname2, "/grp11", gid10_f1, "elink_grp_circle", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
@@ -2697,7 +2698,7 @@ out:
 
 /*-------------------------------------------------------------------------
 *
-* Purpose: 
+* Purpose:
 *   For testing comparing group member objects recursively via multiple
 *   linked external links
 *
@@ -2865,7 +2866,7 @@ static int test_group_recurse2(void)
     fileid4 = H5Fcreate(GRP_RECURSE2_EXT3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
    /*-----------------------------------------------
-    * Groups 
+    * Groups
     */
     grp4 = H5Gcreate2(fileid4, "/g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (grp4 < 0)
@@ -2902,7 +2903,7 @@ static int test_group_recurse2(void)
     fileid3 = H5Fcreate(GRP_RECURSE2_EXT2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
    /*-----------------------------------------------
-    * Groups 
+    * Groups
     */
     grp2 = H5Gcreate2(fileid3, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (grp2 < 0)
@@ -2958,7 +2959,7 @@ static int test_group_recurse2(void)
     fileid2 = H5Fcreate(GRP_RECURSE2_EXT1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
    /*-----------------------------------------------
-    * Groups 
+    * Groups
     */
     grp1 = H5Gcreate2(fileid2, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (grp1 < 0)
@@ -3087,7 +3088,7 @@ static int test_exclude_obj1(const char *fname1, const char *fname2)
 
 
     /*-----------------------------------------------------------------------
-    * Datasets 
+    * Datasets
     *------------------------------------------------------------------------*/
     /* file1 */
     status = write_dset(fid1,2,dims2,"dset1",H5T_NATIVE_INT,data1);
@@ -3161,7 +3162,7 @@ out:
 *
 * Purpose: Create test files for excluding obj.
 *          different structure and name
-* Test : exclude different objs to verify the rest are same 
+* Test : exclude different objs to verify the rest are same
 *
 * Programmer: Jonathan Kim (July, 21, 2010)
 *
@@ -3232,7 +3233,7 @@ static int test_exclude_obj2(const char *fname1, const char *fname2)
 
 
     /*-----------------------------------------------------------------------
-    * Datasets 
+    * Datasets
     *------------------------------------------------------------------------*/
     /* file1 */
     status = write_dset(fid1,2,dims2,"dset10",H5T_NATIVE_INT,data1);
@@ -3307,7 +3308,7 @@ out:
 /*-------------------------------------------------------------------------
 *
 * Purpose: Create test files for multiple variable length string/string array
-*          along with fixed length string/string array types in 
+*          along with fixed length string/string array types in
 *          a compound type dataset.
 *
 * Programmer: Jonathan Kim (Oct, 26, 2010)
@@ -3493,8 +3494,8 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     /* objref */
     hsize_t    objref_dims[1]={1};
 
-    /*------------------------------------------ 
-     * compound dataset 
+    /*------------------------------------------
+     * compound dataset
      *------------------------------------------*/
     hid_t    sid_comp=0;      /* dataspace ID */
     hid_t    tid1_comp=0;      /* datatype ID */
@@ -3640,7 +3641,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     }
 
     /*-----------------------------------------------------------------------
-    * Create group 
+    * Create group
     *------------------------------------------------------------------------*/
     gid = H5Gcreate2(fid1, grp_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid < 0)
@@ -3883,7 +3884,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
-    } 
+    }
     H5Dclose(did_comp);
 
     /* Write data to compound 3 dataset buffer */
@@ -3894,7 +3895,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
-    } 
+    }
     H5Dclose(did_comp);
 
     /* Write data to compound 4 dataset buffer */
@@ -3905,7 +3906,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
-    } 
+    }
     H5Dclose(did_comp);
 
     /* Write data to compound 5 dataset buffer */
@@ -3916,7 +3917,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
-    } 
+    }
     H5Dclose(did_comp);
 
     /* Write data to compound 6 dataset buffer */
@@ -3927,7 +3928,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
-    } 
+    }
     H5Dclose(did_comp);
 
     /* Write data to compound 7 dataset buffer */
@@ -3938,7 +3939,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
-    } 
+    }
     H5Dclose(did_comp);
 
     /* Write data to compound 8 dataset buffer */
@@ -3949,7 +3950,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
-    } 
+    }
     H5Dclose(did_comp);
 
     /* Write data to compound 9 dataset buffer */
@@ -3966,7 +3967,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         fprintf(stderr, "Error: %s> H5Dwrite failed.\n", fname1);
         status = FAIL;
         goto out;
-    } 
+    }
 
 
     H5Dclose(did_comp);
@@ -4049,7 +4050,7 @@ test_enums(const char *fname)
     int         enum_val  = -1;
 
     /* The data in the two arrays cover the following cases:
-     *   
+     *
      *   V = valid enum value, I = invalid enum value
      *
      *   0:  I-I (same value)
@@ -4083,7 +4084,7 @@ test_enums(const char *fname)
     /*-----------------------------------------------------------------------
      * Create enum types
      *---------------------------------------------------------------------*/
- 
+
     tid = H5Tenum_create(H5T_NATIVE_INT);
     enum_val = 0;
     status = H5Tenum_insert(tid, "YIN", &enum_val);
@@ -4093,7 +4094,7 @@ test_enums(const char *fname)
     /*-----------------------------------------------------------------------
      * Create datasets containing enum data.
      *---------------------------------------------------------------------*/
- 
+
     status = write_dset(fid, 1, &dims, "dset1", tid, data1);
     status = write_dset(fid, 1, &dims, "dset2", tid, data2);
 
@@ -4105,7 +4106,7 @@ out:
         H5Fclose(fid);
     if(tid)
         H5Tclose(tid);
-    
+
     return status;
 }
 
