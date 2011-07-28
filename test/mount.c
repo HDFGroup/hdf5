@@ -1042,6 +1042,9 @@ test_interlink(hid_t fapl)
     /* Close IDs */
     if(H5Sclose(space) < 0) FAIL_STACK_ERROR
     if(H5Tclose(type) < 0) FAIL_STACK_ERROR
+#else /* NOT_NOW */
+    SKIPPED();
+    HDputs("    Test skipped due file pointer sharing issue (Jira 7638).");
 #endif /* NOT_NOW */
 
     /* Shut down */
