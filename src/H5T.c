@@ -5301,3 +5301,39 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_set_latest_version() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_patch_file
+ *
+ * Purpose:     Patch the top-level file pointers contained in dt to point
+ *              to f, if dt is a committed type.  This is possible because
+ *              the top-level file pointer can be closed out from under
+ *              dt while dt is contained in the shared file's cache.
+ *
+ * Return:      SUCCEED
+ *
+ * Programmer:  Neil Fortner
+ *              Thursday, July 14, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_patch_file(H5T_t *dt, H5F_t *f)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5T_patch_file, FAIL)
+
+    /* Sanity check */
+    HDassert(dt);
+    HDassert(f);
+
+    if(H5T_STATE_OPEN == dt->shared->state || H5T_STATE_NAMED == dt->shared->state) {
+        dt->oloc.file = f;
+        dt->sh_loc.file = f;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_patch_file() */
+

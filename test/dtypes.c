@@ -6811,6 +6811,162 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_delete_obj_named_fileid
+ *
+ * Purpose:	Tests that objects that use named datatypes through
+ *              different file IDs get the correct file IDs
+ *
+ * Return:	Success:	0
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July 28, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_delete_obj_named_fileid(hid_t fapl)
+{
+    hid_t filea1 = -1, filea2 = -1, fileb = -1;         /* File IDs */
+    hid_t dset_fid = -1;        /* File ID from dataset */
+    hid_t type_fid = -1;        /* File ID from datatype */
+    hid_t attr_fid = -1;        /* File ID from attribute */
+    hid_t type = -1;            /* Datatype ID */
+    hid_t attr = -1;            /* Attribute ID */
+    hid_t dset = -1;            /* Dataset ID */
+    hid_t fapl2 = -1;           /* File access property list ID */
+    hbool_t new_format;         /* Whether to use old or new format */
+    char filename[1024], filename2[1024];
+
+    TESTING("deleting objects that use named datatypes");
+
+    /* Set up filenames & FAPLs */
+    if((fapl2 = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
+    h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
+
+    /* Loop over old & new format files */
+    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+        /* Create test file, with attribute that uses committed datatype */
+        create_del_obj_named_test_file(filename, fapl, new_format);
+
+/* Test getting file ID for dataset opened through different file ID */
+        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+        /* Verify file ID from dataset matches correct file */
+        dset_fid = H5Iget_file_id(dset);
+        if(dset_fid != filea1) TEST_ERROR
+        H5Fclose(dset_fid);
+
+        /* Verify file ID from datatype (from dataset) matches correct file */
+        type = H5Dget_type(dset);
+        type_fid = H5Iget_file_id(type);
+        if(type_fid != filea1) TEST_ERROR
+        H5Fclose(type_fid);
+        H5Tclose(type);
+
+        if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+
+        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+
+        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+
+        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+        /* Verify file ID from dataset matches correct file */
+        dset_fid = H5Iget_file_id(dset);
+        if(dset_fid != filea1) TEST_ERROR
+        H5Fclose(dset_fid);
+
+        /* Verify file ID from datatype (from dataset) matches correct file */
+        type = H5Dget_type(dset);
+        type_fid = H5Iget_file_id(type);
+        if(type_fid != filea1) TEST_ERROR
+        H5Fclose(type_fid);
+        H5Tclose(type);
+
+        if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+
+        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
+
+
+        /* Create test file, with attribute that uses committed datatype */
+        create_del_obj_named_test_file(filename, fapl, new_format);
+
+/* Test getting file ID for attribute opened through different file ID */
+        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+        /* Verify file ID from dataset matches correct file */
+        attr_fid = H5Iget_file_id(attr);
+        if(attr_fid != filea1) TEST_ERROR
+        H5Fclose(attr_fid);
+
+        /* Verify file ID from datatype (from dataset) matches correct file */
+        type = H5Aget_type(attr);
+        type_fid = H5Iget_file_id(type);
+        if(type_fid != filea1) TEST_ERROR
+        H5Fclose(type_fid);
+        H5Tclose(type);
+
+        if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
+
+        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+
+        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+
+        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+        /* Verify file ID from dataset matches correct file */
+        attr_fid = H5Iget_file_id(attr);
+        if(attr_fid != filea1) TEST_ERROR
+        H5Fclose(attr_fid);
+
+        /* Verify file ID from datatype (from dataset) matches correct file */
+        type = H5Aget_type(attr);
+        type_fid = H5Iget_file_id(type);
+        if(type_fid != filea1) TEST_ERROR
+        H5Fclose(type_fid);
+        H5Tclose(type);
+
+        if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
+
+        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
+    } /* end for */
+
+    if(H5Pclose(fapl2) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Tclose(attr);
+	H5Dclose(dset);
+	H5Pclose(fapl2);
+	H5Fclose(filea1);
+	H5Fclose(filea2);
+	H5Fclose(fileb);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_delete_obj_named_fileid() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_deprec
  *
  * Purpose:	Tests deprecated API routines for datatypes.
@@ -7004,6 +7160,7 @@ main(void)
     nerrors += test_int_float_except();
     nerrors += test_named_indirect_reopen(fapl);
     nerrors += test_delete_obj_named(fapl);
+    nerrors += test_delete_obj_named_fileid(fapl);
     nerrors += test_set_order_compound(fapl);
     nerrors += test_str_create();
 #ifndef H5_NO_DEPRECATED_SYMBOLS
