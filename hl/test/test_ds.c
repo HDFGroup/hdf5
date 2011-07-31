@@ -3138,6 +3138,11 @@ static int test_simple(void)
 
     if(H5DSset_label(did,DIM0,DIM0_LABEL) < 0)
         goto out;
+
+    /* check getting a label which does not exist */
+    if(H5DSget_label(did,DIM1,dim1_label,sizeof(dim1_label)) != 0)
+        goto out;
+
     if(H5DSset_label(did,DIM1,DIM1_LABEL) < 0)
         goto out;
 
