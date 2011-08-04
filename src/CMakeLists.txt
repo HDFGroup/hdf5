@@ -614,27 +614,15 @@ INCLUDE_DIRECTORIES (${HDF5_SOURCE_DIR})
 INCLUDE_DIRECTORIES (${CMAKE_BINARY_DIR})
 
 #-----------------------------------------------------------------------------
-# When building utility executables that generate other (source) files :
-# we make use of the following variables defined in the root CMakeLists.
-# Certain systems may add /Debug or /Release to output paths
-# and we need to call the executable from inside the CMake configuration
-#-----------------------------------------------------------------------------
-#inherit EXE_EXT     from parent HDF5 cmake project
-#inherit CFG_INIT    from parent HDF5 cmake project
-
-#-----------------------------------------------------------------------------
 # Setup the H5Detect utility which generates H5Tinit with platform
 # specific type checks inside
 #-----------------------------------------------------------------------------
-SET (CMD ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}${CFG_INIT}/H5detect${EXE_EXT})
-IF (XCODE)
-  SET (CMD "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CONFIGURATION}/H5detect")
-ENDIF (XCODE)
 ADD_EXECUTABLE (H5detect ${HDF5_SRC_DIR}/H5detect.c)
 IF (MSVC)
   TARGET_LINK_LIBRARIES (H5detect "ws2_32.lib")
 ENDIF (MSVC)
 
+SET (CMD $<TARGET_FILE:H5detect>)
 ADD_CUSTOM_COMMAND (
     OUTPUT ${HDF5_BINARY_DIR}/H5Tinit.c
     COMMAND ${CMD}
@@ -642,18 +630,15 @@ ADD_CUSTOM_COMMAND (
     DEPENDS H5detect
 )
 
-SET (CMDL ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}${CFG_INIT}/H5make_libsettings${EXE_EXT})
-IF (XCODE)
-  SET (CMDL "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CONFIGURATION}/H5make_libsettings")
-ENDIF (XCODE)
 ADD_EXECUTABLE (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
 IF (MSVC)
   TARGET_LINK_LIBRARIES (H5make_libsettings "ws2_32.lib")
 ENDIF (MSVC)
 
+SET (CMD $<TARGET_FILE:H5make_libsettings>)
 ADD_CUSTOM_COMMAND (
     OUTPUT ${HDF5_BINARY_DIR}/H5lib_settings.c
-    COMMAND ${CMDL}
+    COMMAND ${CMD}
     ARGS > ${HDF5_BINARY_DIR}/H5lib_settings.c
     DEPENDS H5make_libsettings
 )

@@ -30,11 +30,17 @@
 
 /* include the pthread header */
 #ifdef H5_HAVE_THREADSAFE
+ #ifdef _WIN32
+  #ifndef H5_HAVE_WIN_THREADS
 #ifdef H5_HAVE_PTHREAD_H
 #include <pthread.h>
-#else /* H5_HAVE_PTHREAD_H */
-#define H5_HAVE_WIN_THREADS
 #endif /* H5_HAVE_PTHREAD_H */
+  #endif /* H5_HAVE_WIN_THREADS */
+ #else /* _WIN32 */
+  #ifdef H5_HAVE_PTHREAD_H
+   #include <pthread.h>
+  #endif /* H5_HAVE_PTHREAD_H */
+ #endif /* _WIN32 */
 #endif /* H5_HAVE_THREADSAFE */
 
 /*

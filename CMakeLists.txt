@@ -365,7 +365,11 @@ ENDIF (CMAKE_BUILD_TYPE MATCHES Debug)
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
 IF (CMAKE_COMPILER_IS_GNUCC)
-  SET (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS} -std=c99 -fomit-frame-pointer -finline-functions -fno-common")
+  IF (CMAKE_BUILD_TYPE MATCHES Debug)
+    SET (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS} -std=c99 -finline-functions -fno-common")
+  ELSE (CMAKE_BUILD_TYPE MATCHES Debug)
+    SET (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS} -std=c99 -fomit-frame-pointer -finline-functions -fno-common")
+  ENDIF (CMAKE_BUILD_TYPE MATCHES Debug)
 ENDIF (CMAKE_COMPILER_IS_GNUCC)
 
 #-----------------------------------------------------------------------------
@@ -451,6 +455,15 @@ SET (H5_USE_16_API_DEFAULT 0)
 IF (HDF5_USE_16_API_DEFAULT)
   SET (H5_USE_16_API_DEFAULT 1)
 ENDIF (HDF5_USE_16_API_DEFAULT)
+
+#-----------------------------------------------------------------------------
+# Option to use 1.8.x API
+#-----------------------------------------------------------------------------
+OPTION (HDF5_USE_18_API_DEFAULT "Use the HDF5 1.8.x API by default" OFF)
+SET (H5_USE_18_API_DEFAULT 0)
+IF (HDF5_USE_18_API_DEFAULT)
+  SET (H5_USE_18_API_DEFAULT 1)
+ENDIF (HDF5_USE_18_API_DEFAULT)
 
 #-----------------------------------------------------------------------------
 # Options for HDF5 Filters
@@ -586,8 +599,13 @@ IF (WIN32 AND NOT CYGWIN)
     ENDIF (HDF5_ENABLE_PARALLEL)
     SET (H5_HAVE_THREADSAFE 1)
     IF (H5_HAVE_IOEO)
-    MESSAGE (STATUS " **** Windows Threads only available in WINVER>=0x600 (Vista or Windows 7)**** ")
+      MESSAGE (STATUS " **** Windows Threads only available in WINVER>=0x600 (Vista or Windows 7) **** ")
       SET (H5_HAVE_WIN_THREADS 1)
+    ELSE (H5_HAVE_IOEO)
+      IF (NOT H5_HAVE_PTHREAD_H)
+        SET (H5_HAVE_THREADSAFE 0)
+        MESSAGE (FATAL " **** Threadsafe option requires thread library **** ")
+      ENDIF (NOT H5_HAVE_PTHREAD_H)
     ENDIF (H5_HAVE_IOEO)
   ENDIF (HDF5_ENABLE_THREADSAFE)
 ENDIF (WIN32 AND NOT CYGWIN)

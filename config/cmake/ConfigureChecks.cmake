@@ -590,7 +590,7 @@ ENDIF (NOT WINDOWS)
 #-----------------------------------------------------------------------------
 # Check if InitOnceExecuteOnce is available
 #-----------------------------------------------------------------------------
-IF (WINDOWS)
+IF (WINDOWS AND NOT HDF5_NO_IOEO_TEST)
   MESSAGE (STATUS "Checking for InitOnceExecuteOnce:")
   IF("${H5_HAVE_IOEO}" MATCHES "^${H5_HAVE_IOEO}$")
     IF (LARGEFILE)
@@ -648,7 +648,7 @@ IF (WINDOWS)
         "Return value: ${HAVE_IOEO_EXITCODE}\n")
     ENDIF("${HAVE_IOEO_EXITCODE}" EQUAL 0)
   ENDIF("${H5_HAVE_IOEO}" MATCHES "^${H5_HAVE_IOEO}$")
-ENDIF (WINDOWS)
+ENDIF (WINDOWS AND NOT HDF5_NO_IOEO_TEST)
 	
 
 #-----------------------------------------------------------------------------
