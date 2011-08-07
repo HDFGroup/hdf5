@@ -1617,6 +1617,8 @@ out:
 * Comments:
 *
 * Modifications:
+*     JIRA HDFFV-7673: Added a check to see if the label name exists, 
+*     if not then returns zero. July 30, 2011. MSB
 *
 *-------------------------------------------------------------------------
 */
@@ -1629,7 +1631,7 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     int        rank;         /* rank of dataset */
     char       **buf = NULL; /* buffer to store in the attribute */
     H5I_type_t it;           /* ID type */
-    size_t     nbytes;
+    size_t     nbytes = 0;
     size_t     copy_len;
     int        i;
 
@@ -1685,6 +1687,7 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     if ((aid = H5Aopen(did, DIMENSION_LABELS, H5P_DEFAULT)) < 0)
         goto out;
 
+
     if ((tid = H5Aget_type(aid)) < 0)
         goto out;
 
@@ -1698,26 +1701,30 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     if (H5Aread(aid, tid, buf) < 0)
         goto out;
 
-    /* get the real string length */
-    nbytes = strlen(buf[idx]);
-
-    /* compute the string length which will fit into the user's buffer */
-    copy_len = MIN(size-1, nbytes);
-
-    /* copy all/some of the name */
-    if (label)
+    /* do only if the label name exists for the dimension */
+    if (buf[idx] != NULL)
     {
-        memcpy(label, buf[idx], copy_len);
+        /* get the real string length */
+        nbytes = strlen(buf[idx]);
 
-        /* terminate the string */
-        label[copy_len] = '\0';
+	/* compute the string length which will fit into the user's buffer */
+	copy_len = MIN(size-1, nbytes);
+
+	/* copy all/some of the name */
+	if (label)
+	  {
+	    memcpy(label, buf[idx], copy_len);
+	    
+	    /* terminate the string */
+	    label[copy_len] = '\0';
+	  }
+
     }
-
     /* free all the ptr's from the H5Aread() */
     for (i = 0; i < rank; i++)
     {
         if (buf[i])
-            free(buf[i]);
+	  free(buf[i]);
     }
 
     /* close */
