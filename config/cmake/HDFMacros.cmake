@@ -389,13 +389,18 @@ ENDMACRO (HDF_SET_LIB_OPTIONS)
 
 #-------------------------------------------------------------------------------
 MACRO (TARGET_FORTRAN_WIN_PROPERTIES target addlinkflags)
-  IF (WIN32)
-    IF (MSVC)
+  IF (WIN32 AND MSVC)
+    IF (BUILD_SHARED_LIBS)
       SET_TARGET_PROPERTIES (${target}
           PROPERTIES
               COMPILE_FLAGS "/dll"
               LINK_FLAGS "/SUBSYSTEM:CONSOLE ${addlinkflags}"
       ) 
-    ENDIF (MSVC)
-  ENDIF (WIN32)
+    ELSE (BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (${target}
+          PROPERTIES
+              LINK_FLAGS "/SUBSYSTEM:CONSOLE ${addlinkflags}"
+      ) 
+    ENDIF (BUILD_SHARED_LIBS)
+  ENDIF (WIN32 AND MSVC)
 ENDMACRO (TARGET_FORTRAN_WIN_PROPERTIES)
