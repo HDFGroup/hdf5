@@ -19,6 +19,15 @@ TARGET_LINK_LIBRARIES (h5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5diff)
 
+IF (H5_HAVE_PARALLEL)
+  ADD_EXECUTABLE (ph5diff
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.c
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/ph5diff_main.c
+  )
+  TARGET_NAMING (ph5diff ${LIB_TYPE})
+  TARGET_LINK_LIBRARIES (ph5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+ENDIF (H5_HAVE_PARALLEL)
+
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###
@@ -351,7 +360,37 @@ IF (BUILD_TESTING)
       )
       SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES DEPENDS "H5DIFF-clear-${resultfile}-objects")
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    IF (H5_HAVE_PARALLEL)
+      ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
+    ENDIF (H5_HAVE_PARALLEL)
   ENDMACRO (ADD_H5_TEST file)
+
+  MACRO (ADD_PH5_TEST resultfile resultcode)
+    # If using memchecker add tests without using scripts
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (NAME PH5DIFF-${resultfile} COMMAND $<TARGET_FILE:ph5diff> ${ARGN})
+      IF (NOT ${resultcode} STREQUAL "0")
+        SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+      ENDIF (NOT ${resultcode} STREQUAL "0")
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME PH5DIFF-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:ph5diff>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.txt"
+              -D "TEST_APPEND=EXIT CODE:"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "PH5DIFF-${resultfile}")
+  ENDMACRO (ADD_PH5_TEST file)
 
 ##############################################################################
 ##############################################################################
@@ -774,7 +813,6 @@ ADD_H5_TEST (h5diff_18 1 -q ${FILE1} ${FILE2})
 # 1.8 -v and -q
 ADD_H5_TEST (h5diff_18_1 2 -v -q ${FILE1} ${FILE2})
 
-
 # ##############################################################################
 # # not comparable types
 # ##############################################################################
@@ -809,8 +847,6 @@ ADD_H5_TEST (h5diff_27 1 -v ${FILE3} ${FILE3} t1 t2)
 
 # 2.8
 ADD_H5_TEST (h5diff_28 1 -v ${FILE3} ${FILE3} l1 l2)
-
-
 
 # ##############################################################################
 # # Dataset datatypes
@@ -847,18 +883,15 @@ ADD_H5_TEST (h5diff_58 1 -v ${FILE7} ${FILE8} refreg)
 # # Error messages
 # ##############################################################################
 
-
 # 6.0: Check if the command line number of arguments is less than 3
 ADD_H5_TEST (h5diff_600 1 ${FILE1}) 
 
 # 6.1: Check if non-exist object name is specified 
 ADD_H5_TEST (h5diff_601 2 ${FILE1} ${FILE1} nono_obj)
 
-
 # ##############################################################################
 # # -d 
 # ##############################################################################
-
 
 # 6.3: negative value
 ADD_H5_TEST (h5diff_603 1 -d -4 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
@@ -911,7 +944,6 @@ ADD_H5_TEST (h5diff_618 0 -p 2 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.19: number smaller than smallest difference
 ADD_H5_TEST (h5diff_619 1 -p 0.005 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
-
 
 # ##############################################################################
 # # -n
@@ -979,8 +1011,6 @@ ADD_H5_TEST (h5diff_709 0 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_F
 # file vs file
 ADD_H5_TEST (h5diff_710 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2})
 
-
-
 # ##############################################################################
 # 8.  all dataset datatypes
 # ##############################################################################
@@ -1022,7 +1052,6 @@ ADD_H5_TEST (h5diff_203 0 -c ${FILE2} ${FILE2} g2/dset3  g2/dset4)
 ADD_H5_TEST (h5diff_204 0 -c ${FILE2} ${FILE2} g2/dset4  g2/dset5)
 
 ADD_H5_TEST (h5diff_205 0 -c ${FILE2} ${FILE2} g2/dset5  g2/dset6)
-
 
 # not comparable in compound
 ADD_H5_TEST (h5diff_206 0 -c ${FILE2} ${FILE2} g2/dset7  g2/dset8)
@@ -1119,7 +1148,6 @@ ADD_H5_TEST (h5diff_424 1 --follow-symlinks -v ${FILE18} ${FILE17} /dset2 /ext_l
 # extlink_to_softlink_to_dset1 vs extlink_to_softlink_to_dset2"
 ADD_H5_TEST (h5diff_425 1 --follow-symlinks -v ${FILE17} ${FILE17} /ext_link_to_slink1 /ext_link_to_slink2)
 
-
 # ##############################################################################
 # # Dangling links compare (--follow-symlinks and --no-dangling-links)
 # ##############################################################################
@@ -1201,7 +1229,6 @@ ADD_H5_TEST (h5diff_516 0 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE
 ADD_H5_TEST (h5diff_517 1 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
 ADD_H5_TEST (h5diff_518 0 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
 
-
 # ##############################################################################
 # # Exclude path (--exclude-path)
 # ##############################################################################
@@ -1241,8 +1268,7 @@ ADD_H5_TEST (h5diff_643 1 -v -d 5 --use-system-epsilon ${FILE1} ${FILE2} /g1/dse
 ADD_H5_TEST (h5diff_644 1 -v --use-system-epsilon -d 5 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
 ADD_H5_TEST (h5diff_645 1 -v -p 0.05 --use-system-epsilon ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
 ADD_H5_TEST (h5diff_646 1 -v --use-system-epsilon -p 0.05 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
-
-  
+ 
 ENDIF (BUILD_TESTING)
 
 ##############################################################################
@@ -1262,3 +1288,14 @@ INSTALL (
     COMPONENT
         toolsapplications
 )
+
+IF (H5_HAVE_PARALLEL)
+  INSTALL (
+      TARGETS
+          ph5diff
+      RUNTIME DESTINATION
+          ${HDF5_INSTALL_BIN_DIR}/tools
+      COMPONENT
+          toolsapplications
+  )
+ENDIF (H5_HAVE_PARALLEL)

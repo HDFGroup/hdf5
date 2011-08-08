@@ -15,6 +15,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <memory.h>
 #include "h5diff.h"
 #include "h5diff_common.h"
 #include "h5tools_utils.h"
@@ -114,5 +115,26 @@ out:
         ret = 2;
 
     return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: h5diff_exit
+ *
+ * Purpose: dismiss phdiff worker processes and exit
+ *
+ * Return: none
+ *
+ * Programmer: Albert Cheng
+ * Date: Feb 6, 2005
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void h5diff_exit(int status)
+{
+    exit(status);
 }
 

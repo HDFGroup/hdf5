@@ -17,37 +17,31 @@
 #define _PH5DIFF_H__
 
 /* Send from manager to workers */
-#define MPI_TAG_ARGS		1
-#define MPI_TAG_PRINT_TOK	2
+#define MPI_TAG_ARGS    1
+#define MPI_TAG_PRINT_TOK  2
 
 /*Sent from workers to manager */
-#define MPI_TAG_TOK_REQUEST	3
-#define MPI_TAG_DONE		4
-#define MPI_TAG_TOK_RETURN	5
-#define MPI_TAG_PRINT_DATA	6
+#define MPI_TAG_TOK_REQUEST  3
+#define MPI_TAG_DONE    4
+#define MPI_TAG_TOK_RETURN  5
+#define MPI_TAG_PRINT_DATA  6
 
 /* Operational tags used to init and complete diff */
-#define MPI_TAG_END		7
-#define MPI_TAG_PARALLEL	8
-
-H5TOOLS_DLLVAR int	g_nTasks;
-H5TOOLS_DLLVAR unsigned char g_Parallel;
-H5TOOLS_DLLVAR char    outBuff[];
-H5TOOLS_DLLVAR int	outBuffOffset;
-H5TOOLS_DLLVAR FILE *	overflow_file;
+#define MPI_TAG_END    7
+#define MPI_TAG_PARALLEL  8
 
 struct diff_mpi_args
 {
-    char	name1[256];
-    char	name2[256];
-    diff_opt_t	options;
+    char  name1[256];
+    char  name2[256];
+    diff_opt_t  options;
     diff_args_t argdata;  /* rest args */
 };
 
 struct diffs_found
 {
     hsize_t nfound;
-    int	    not_cmp;
+    int      not_cmp;
 };
 
 #ifdef H5_HAVE_PARALLEL

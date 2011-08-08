@@ -245,3 +245,32 @@ ph5diff_worker(int nID)
     }
 }
 
+/*-------------------------------------------------------------------------
+ * Function: h5diff_exit
+ *
+ * Purpose: dismiss phdiff worker processes and exit
+ *
+ * Return: none
+ *
+ * Programmer: Albert Cheng
+ * Date: Feb 6, 2005
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void h5diff_exit(int status)
+{
+    /* if in parallel mode, dismiss workers, close down MPI, then exit */
+    if((g_nTasks > 1) && g_Parallel) {
+        phdiff_dismiss_workers();
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+    if(g_Parallel)
+        MPI_Finalize();
+
+    exit(status);
+}
+

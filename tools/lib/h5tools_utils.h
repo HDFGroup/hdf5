@@ -32,6 +32,12 @@ extern "C" {
 #define PRINT_DATA_MAX_SIZE 	512
 #define OUTBUFF_SIZE 		(PRINT_DATA_MAX_SIZE*4)
 
+H5TOOLS_DLLVAR int  g_nTasks;
+H5TOOLS_DLLVAR unsigned char g_Parallel;
+H5TOOLS_DLLVAR char    outBuff[];
+H5TOOLS_DLLVAR int  outBuffOffset;
+H5TOOLS_DLLVAR FILE *   overflow_file;
+
 /*
  * begin get_option section
  */
