@@ -4,7 +4,7 @@
 ## # The following are required to uses Dart and the Cdash dashboard
 ##   ENABLE_TESTING()
 ##   INCLUDE(CTest)
-SET (CTEST_PROJECT_NAME "HDF5 Trunk")
+SET (CTEST_PROJECT_NAME "HDF5")
 
 SET (CTEST_DROP_METHOD "http")
 IF (CDASH_LOCAL)
