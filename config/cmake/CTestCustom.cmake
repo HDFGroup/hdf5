@@ -29,7 +29,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     h5test-clear-err_compat-objects
     h5test-clear-error_test-objects
     h5test-clear-links_env-objects
-    h5perform-clear-objects
+    PERFORM_h5perform-clear-objects
     hl_test-clear-objects
     hl_fortran_test-clear-objects
     ######### tools/h5copy #########
