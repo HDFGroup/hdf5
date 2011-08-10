@@ -368,28 +368,36 @@ IF (BUILD_TESTING)
   MACRO (ADD_PH5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME PH5DIFF-${resultfile} COMMAND $<TARGET_FILE:ph5diff> ${ARGN})
+      ADD_TEST (NAME PH5DIFF-${resultfile} COMMAND $<TARGET_FILE:ph5diff> ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} ${ARGN})
       IF (NOT ${resultcode} STREQUAL "0")
         SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
       ENDIF (NOT ${resultcode} STREQUAL "0")
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+      SET (last_test "PH5DIFF-${resultfile}")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME PH5DIFF-clear-${resultfile}-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove ${resultfile}_p.out ${resultfile}_p.out.err
+      )
       ADD_TEST (
           NAME PH5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=${MPIEXEC};${MPIEXEC_PREFLAGS};${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_POSTFLAGS};$<TARGET_FILE:ph5diff>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_OUTPUT=P_${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.txt"
-              -D "TEST_APPEND=EXIT CODE:"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+#              -D "TEST_APPEND=EXIT CODE: [0-9]"
+#              -D "TEST_REF_FILTER=EXIT CODE: 0"
+              -D "TEST_SKIP_COMPARE=TRUE"
+              -P "${HDF5_RESOURCES_DIR}/prunTest.cmake"
       )
+      SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES DEPENDS "PH5DIFF-clear-${resultfile}-objects")
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "PH5DIFF-${resultfile}")
   ENDMACRO (ADD_PH5_TEST file)
 
 ##############################################################################

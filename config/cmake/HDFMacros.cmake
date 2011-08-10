@@ -399,6 +399,7 @@ MACRO (TARGET_FORTRAN_WIN_PROPERTIES target addlinkflags)
     ELSE (BUILD_SHARED_LIBS)
       SET_TARGET_PROPERTIES (${target}
           PROPERTIES
+              COMPILE_FLAGS "/MD"
               LINK_FLAGS "/SUBSYSTEM:CONSOLE ${addlinkflags}"
       ) 
     ENDIF (BUILD_SHARED_LIBS)

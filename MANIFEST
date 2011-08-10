@@ -2070,6 +2070,7 @@
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/CTest.cmake
 ./config/cmake/grepTest.cmake
+./config/cmake/prunTest.cmake
 ./config/cmake/runTest.cmake
 ./config/cmake/userblockTest.cmake
 ./config/cmake/vfdTest.cmake
