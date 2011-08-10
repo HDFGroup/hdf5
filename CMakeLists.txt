@@ -371,7 +371,11 @@ ENDIF (CMAKE_BUILD_TYPE MATCHES Debug)
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
 IF (CMAKE_COMPILER_IS_GNUCC)
+  IF (CMAKE_BUILD_TYPE MATCHES Debug)
+    SET (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS} -std=c99 -finline-functions -fno-common")
+  ELSE (CMAKE_BUILD_TYPE MATCHES Debug)
   SET (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS} -std=c99 -fomit-frame-pointer -finline-functions -fno-common")
+  ENDIF (CMAKE_BUILD_TYPE MATCHES Debug)
 ENDIF (CMAKE_COMPILER_IS_GNUCC)
 
 #-----------------------------------------------------------------------------
@@ -593,6 +597,11 @@ IF (WIN32 AND NOT CYGWIN)
     IF (H5_HAVE_IOEO)
       MESSAGE (STATUS " **** Windows Threads only available in WINVER>=0x600 (Vista or Windows 7)**** ")
       SET (H5_HAVE_WIN_THREADS 1)
+    ELSE (H5_HAVE_IOEO)
+      IF (NOT H5_HAVE_PTHREAD_H)
+        SET (H5_HAVE_THREADSAFE 0)
+        MESSAGE (FATAL " **** Threadsafe option requires thread library **** ")
+      ENDIF (NOT H5_HAVE_PTHREAD_H)
     ENDIF (H5_HAVE_IOEO)
   ENDIF (HDF5_ENABLE_THREADSAFE)
 ENDIF (WIN32 AND NOT CYGWIN)
@@ -844,7 +853,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
     IF (HDF5_ENABLE_PARALLEL)
       SET (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_parallel.txt
+          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_parallel
       )
     ENDIF (HDF5_ENABLE_PARALLEL)
     INSTALL (
