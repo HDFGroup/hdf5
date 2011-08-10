@@ -502,6 +502,7 @@ done:
     hid_t H5Rdereference2(ref)
         hid_t id;       IN: Dataset reference object is in or location ID of
                             object that the dataset is located within.
+        hid_t oapl_id;  IN: Property list of the object being referenced.
         H5R_type_t ref_type;    IN: Type of reference to create
         void *ref;      IN: Reference to open.
 
@@ -532,6 +533,8 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
     /* Check args */
     if(H5G_loc(obj_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(oapl_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
     if(ref_type <= H5R_BADTYPE || ref_type >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
     if(_ref == NULL)
