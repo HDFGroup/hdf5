@@ -144,7 +144,16 @@ IF (BUILD_TESTING)
       IF (${resultcode} STREQUAL "1")
         SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
       ENDIF (${resultcode} STREQUAL "1")
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+      SET (last_test "H5LS-${resultfile}")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5LS-clear-${resultfile}-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove ${resultfile}.out ${resultfile}.out.err
+      )
       ADD_TEST (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -156,11 +165,8 @@ IF (BUILD_TESTING)
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
+      SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS "H5LS-clear-${resultfile}-objects")
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5LS-${resultfile}")
   ENDMACRO (ADD_H5_TEST file)
 
 ##############################################################################
@@ -169,8 +175,9 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
-  # Remove any output file left over from previous test run
-  ADD_TEST (
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    # Remove any output file left over from previous test run
+    ADD_TEST (
       NAME H5LS-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
@@ -280,11 +287,12 @@ IF (BUILD_TESTING)
           tvldtypes2le.out.err
           tvldtypes2be.out
           tvldtypes2be.out.err
-  )
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5LS-clearall-objects PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5LS-clearall-objects")
+    )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5LS-clearall-objects PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5LS-clearall-objects")
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
   # test the help syntax
   ADD_H5_TEST (help-1 0 -w80 -h)

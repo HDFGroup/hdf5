@@ -91,7 +91,16 @@ IF (BUILD_TESTING)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5STAT-${resultfile}")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5STAT-clear-${resultfile}-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove ${resultfile}.out ${resultfile}.out.err
+      )
       ADD_TEST (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -103,11 +112,8 @@ IF (BUILD_TESTING)
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
+      SET_TESTS_PROPERTIES (H5STAT-${resultfile} PROPERTIES DEPENDS "H5STAT-clear-${resultfile}-objects")
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5STAT-${resultfile}")
   ENDMACRO (ADD_H5_TEST file)
 
 ##############################################################################
@@ -116,8 +122,9 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
-  # Remove any output file left over from previous test run
-  ADD_TEST (
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    # Remove any output file left over from previous test run
+    ADD_TEST (
       NAME H5STAT-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
@@ -149,11 +156,12 @@ IF (BUILD_TESTING)
           h5stat_newgrat-UG.out.err
           h5stat_newgrat-UA.out
           h5stat_newgrat-UA.out.err
-  )
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5STAT-clearall-objects")
+    )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5STAT-clearall-objects")
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
 # Test for help flag
   ADD_H5_TEST (h5stat_help1 0 -h)
