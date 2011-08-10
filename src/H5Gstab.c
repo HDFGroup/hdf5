@@ -1038,6 +1038,12 @@ done:
  *              addresses in the group's stab message are invalid, and
  *              the stab message will be updated if necessary.
  *
+ *              NOTE: This function is only called when strict format
+ *              checks are disabled.  This is so that, when strict
+ *              format checks are enabled,  errors in the symbol table
+ *              messages are not fixed by this function and are instead
+ *              reported by the library.
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Neil Fortner
