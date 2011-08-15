@@ -15,11 +15,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5system.c
- *			Aug 21 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:    H5system.c
+ *      Aug 21 2006
+ *      Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:		System call wrapper implementations.
+ * Purpose:    System call wrapper implementations.
  *
  *-------------------------------------------------------------------------
  */
@@ -32,9 +32,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5private.h"    /* Generic Functions      */
+#include "H5Fprivate.h"    /* File access        */
+#include "H5MMprivate.h"  /* Memory management      */
 #include "H5Eprivate.h"
 
 
@@ -75,71 +75,71 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	HDfprintf
+ * Function:  HDfprintf
  *
- * Purpose:	Prints the optional arguments under the control of the format
- *		string FMT to the stream STREAM.  This function takes the
- *		same format as fprintf(3c) with a few added features:
+ * Purpose:  Prints the optional arguments under the control of the format
+ *    string FMT to the stream STREAM.  This function takes the
+ *    same format as fprintf(3c) with a few added features:
  *
- *		The conversion modifier `H' refers to the size of an
- *		`hsize_t' or `hssize_t' type.  For instance, "0x%018Hx"
- *		prints an `hsize_t' value as a hex number right justified and
- *		zero filled in an 18-character field.
+ *    The conversion modifier `H' refers to the size of an
+ *    `hsize_t' or `hssize_t' type.  For instance, "0x%018Hx"
+ *    prints an `hsize_t' value as a hex number right justified and
+ *    zero filled in an 18-character field.
  *
- *		The conversion `a' refers to an `haddr_t' type.
+ *    The conversion `a' refers to an `haddr_t' type.
  *
- * Return:	Success:	Number of characters printed
+ * Return:  Success:  Number of characters printed
  *
- *		Failure:	-1
+ *    Failure:  -1
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, April  9, 1998
  *
  * Modifications:
- *		Robb Matzke, 1999-07-27
- *		The `%a' format refers to an argument of `haddr_t' type
- *		instead of `haddr_t*' and the return value is correct.
+ *    Robb Matzke, 1999-07-27
+ *    The `%a' format refers to an argument of `haddr_t' type
+ *    instead of `haddr_t*' and the return value is correct.
  *-------------------------------------------------------------------------
  */
 int
 HDfprintf(FILE *stream, const char *fmt, ...)
 {
-    int		n=0, nout = 0;
-    int		fwidth, prec;
-    int		zerofill;
-    int		leftjust;
-    int		plussign;
-    int		ldspace;
-    int		prefix;
-    char	modifier[8];
-    int		conv;
-    char	*rest, format_templ[128];
-    const char	*s;
-    va_list	ap;
+    int    n=0, nout = 0;
+    int    fwidth, prec;
+    int    zerofill;
+    int    leftjust;
+    int    plussign;
+    int    ldspace;
+    int    prefix;
+    char  modifier[8];
+    int    conv;
+    char  *rest, format_templ[128];
+    const char  *s;
+    va_list  ap;
 
     assert (stream);
     assert (fmt);
 
     va_start (ap, fmt);
     while (*fmt) {
-	fwidth = prec = 0;
-	zerofill = 0;
-	leftjust = 0;
-	plussign = 0;
-	prefix = 0;
-	ldspace = 0;
-	modifier[0] = '\0';
+  fwidth = prec = 0;
+  zerofill = 0;
+  leftjust = 0;
+  plussign = 0;
+  prefix = 0;
+  ldspace = 0;
+  modifier[0] = '\0';
 
-	if ('%'==fmt[0] && '%'==fmt[1]) {
-	    HDputc ('%', stream);
-	    fmt += 2;
-	    nout++;
-	} else if ('%'==fmt[0]) {
-	    s = fmt + 1;
+  if ('%'==fmt[0] && '%'==fmt[1]) {
+      HDputc ('%', stream);
+      fmt += 2;
+      nout++;
+  } else if ('%'==fmt[0]) {
+      s = fmt + 1;
 
-	    /* Flags */
-	    while(HDstrchr ("-+ #", *s)) {
-		switch(*s) {
+      /* Flags */
+      while(HDstrchr ("-+ #", *s)) {
+    switch(*s) {
                     case '-':
                         leftjust = 1;
                         break;
@@ -155,61 +155,61 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                     case '#':
                         prefix = 1;
                         break;
-		} /* end switch */ /*lint !e744 Switch statement doesn't _need_ default */
-		s++;
-	    } /* end while */
+    } /* end switch */ /*lint !e744 Switch statement doesn't _need_ default */
+    s++;
+      } /* end while */
 
-	    /* Field width */
-	    if (HDisdigit (*s)) {
-		zerofill = ('0'==*s);
-		fwidth = (int)HDstrtol (s, &rest, 10);
-		s = rest;
-	    } else if ('*'==*s) {
-		fwidth = va_arg (ap, int);
-		if (fwidth<0) {
-		    leftjust = 1;
-		    fwidth = -fwidth;
-		}
-		s++;
-	    }
+      /* Field width */
+      if (HDisdigit (*s)) {
+    zerofill = ('0'==*s);
+    fwidth = (int)HDstrtol (s, &rest, 10);
+    s = rest;
+      } else if ('*'==*s) {
+    fwidth = va_arg (ap, int);
+    if (fwidth<0) {
+        leftjust = 1;
+        fwidth = -fwidth;
+    }
+    s++;
+      }
 
-	    /* Precision */
-	    if ('.'==*s) {
-		s++;
-		if (HDisdigit (*s)) {
-		    prec = (int)HDstrtol (s, &rest, 10);
-		    s = rest;
-		} else if ('*'==*s) {
-		    prec = va_arg (ap, int);
-		    s++;
-		}
-		if (prec<1) prec = 1;
-	    }
+      /* Precision */
+      if ('.'==*s) {
+    s++;
+    if (HDisdigit (*s)) {
+        prec = (int)HDstrtol (s, &rest, 10);
+        s = rest;
+    } else if ('*'==*s) {
+        prec = va_arg (ap, int);
+        s++;
+    }
+    if (prec<1) prec = 1;
+      }
 
-	    /* Extra type modifiers */
-	    if (HDstrchr ("ZHhlqLI", *s)) {
-		switch (*s) {
+      /* Extra type modifiers */
+      if (HDstrchr ("ZHhlqLI", *s)) {
+    switch (*s) {
                 /*lint --e{506} Don't issue warnings about constant value booleans */
                 /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true */
-		case 'H':
-		    if (sizeof(hsize_t)<sizeof(long)) {
-			modifier[0] = '\0';
-		    } else if (sizeof(hsize_t)==sizeof(long)) {
-			HDstrcpy (modifier, "l");
-		    } else {
-			HDstrcpy (modifier, H5_PRINTF_LL_WIDTH);
-		    }
-		    break;
-		case 'Z':
-		    if (sizeof(size_t)<sizeof(long)) {
-			modifier[0] = '\0';
-		    } else if (sizeof(size_t)==sizeof(long)) {
-			HDstrcpy (modifier, "l");
-		    } else {
-			HDstrcpy (modifier, H5_PRINTF_LL_WIDTH);
-		    }
-		    break;
-		default:
+    case 'H':
+        if (sizeof(hsize_t)<sizeof(long)) {
+      modifier[0] = '\0';
+        } else if (sizeof(hsize_t)==sizeof(long)) {
+      HDstrcpy (modifier, "l");
+        } else {
+      HDstrcpy (modifier, H5_PRINTF_LL_WIDTH);
+        }
+        break;
+    case 'Z':
+        if (sizeof(size_t)<sizeof(long)) {
+      modifier[0] = '\0';
+        } else if (sizeof(size_t)==sizeof(long)) {
+      HDstrcpy (modifier, "l");
+        } else {
+      HDstrcpy (modifier, H5_PRINTF_LL_WIDTH);
+        }
+        break;
+    default:
                     /* Handle 'I64' modifier for Microsoft's "__int64" type */
                     if(*s=='I' && *(s+1)=='6' && *(s+2)=='4') {
                         modifier[0] = *s;
@@ -231,144 +231,144 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                             modifier[1] = '\0';
                         } /* end else */
                     } /* end else */
-		    break;
-		}
-		s++;
-	    }
+        break;
+    }
+    s++;
+      }
 
-	    /* Conversion */
-	    conv = *s++;
+      /* Conversion */
+      conv = *s++;
 
-	    /* Create the format template */
-	    sprintf (format_templ, "%%%s%s%s%s%s",
-		     leftjust?"-":"", plussign?"+":"",
-		     ldspace?" ":"", prefix?"#":"", zerofill?"0":"");
-	    if (fwidth>0)
-		sprintf (format_templ+HDstrlen(format_templ), "%d", fwidth);
-	    if (prec>0)
-		sprintf (format_templ+HDstrlen(format_templ), ".%d", prec);
-	    if (*modifier)
-		sprintf (format_templ+HDstrlen(format_templ), "%s", modifier);
-	    sprintf (format_templ+HDstrlen(format_templ), "%c", conv);
+      /* Create the format template */
+      sprintf (format_templ, "%%%s%s%s%s%s",
+         leftjust?"-":"", plussign?"+":"",
+         ldspace?" ":"", prefix?"#":"", zerofill?"0":"");
+      if (fwidth>0)
+    sprintf (format_templ+HDstrlen(format_templ), "%d", fwidth);
+      if (prec>0)
+    sprintf (format_templ+HDstrlen(format_templ), ".%d", prec);
+      if (*modifier)
+    sprintf (format_templ+HDstrlen(format_templ), "%s", modifier);
+      sprintf (format_templ+HDstrlen(format_templ), "%c", conv);
 
 
-	    /* Conversion */
-	    switch (conv) {
-	    case 'd':
-	    case 'i':
-		if (!HDstrcmp(modifier, "h")) {
-		    short x = (short)va_arg (ap, int);
-		    n = fprintf (stream, format_templ, x);
-		} else if (!*modifier) {
-		    int x = va_arg (ap, int);
-		    n = fprintf (stream, format_templ, x);
-		} else if (!HDstrcmp (modifier, "l")) {
-		    long x = va_arg (ap, long);
-		    n = fprintf (stream, format_templ, x);
-		} else {
-		    int64_t x = va_arg(ap, int64_t);
-		    n = fprintf (stream, format_templ, x);
-		}
-		break;
+      /* Conversion */
+      switch (conv) {
+      case 'd':
+      case 'i':
+    if (!HDstrcmp(modifier, "h")) {
+        short x = (short)va_arg (ap, int);
+        n = fprintf (stream, format_templ, x);
+    } else if (!*modifier) {
+        int x = va_arg (ap, int);
+        n = fprintf (stream, format_templ, x);
+    } else if (!HDstrcmp (modifier, "l")) {
+        long x = va_arg (ap, long);
+        n = fprintf (stream, format_templ, x);
+    } else {
+        int64_t x = va_arg(ap, int64_t);
+        n = fprintf (stream, format_templ, x);
+    }
+    break;
 
-	    case 'o':
-	    case 'u':
-	    case 'x':
-	    case 'X':
-		if (!HDstrcmp (modifier, "h")) {
-		    unsigned short x = (unsigned short)va_arg (ap, unsigned int);
-		    n = fprintf (stream, format_templ, x);
-		} else if (!*modifier) {
-		    unsigned int x = va_arg (ap, unsigned int); /*lint !e732 Loss of sign not really occuring */
-		    n = fprintf (stream, format_templ, x);
-		} else if (!HDstrcmp (modifier, "l")) {
-		    unsigned long x = va_arg (ap, unsigned long); /*lint !e732 Loss of sign not really occuring */
-		    n = fprintf (stream, format_templ, x);
-		} else {
-		    uint64_t x = va_arg(ap, uint64_t); /*lint !e732 Loss of sign not really occuring */
-		    n = fprintf (stream, format_templ, x);
-		}
-		break;
+      case 'o':
+      case 'u':
+      case 'x':
+      case 'X':
+    if (!HDstrcmp (modifier, "h")) {
+        unsigned short x = (unsigned short)va_arg (ap, unsigned int);
+        n = fprintf (stream, format_templ, x);
+    } else if (!*modifier) {
+        unsigned int x = va_arg (ap, unsigned int); /*lint !e732 Loss of sign not really occuring */
+        n = fprintf (stream, format_templ, x);
+    } else if (!HDstrcmp (modifier, "l")) {
+        unsigned long x = va_arg (ap, unsigned long); /*lint !e732 Loss of sign not really occuring */
+        n = fprintf (stream, format_templ, x);
+    } else {
+        uint64_t x = va_arg(ap, uint64_t); /*lint !e732 Loss of sign not really occuring */
+        n = fprintf (stream, format_templ, x);
+    }
+    break;
 
-	    case 'f':
-	    case 'e':
-	    case 'E':
-	    case 'g':
-	    case 'G':
-		if (!HDstrcmp (modifier, "h")) {
-		    float x = (float) va_arg (ap, double);
-		    n = fprintf (stream, format_templ, x);
-		} else if (!*modifier || !HDstrcmp (modifier, "l")) {
-		    double x = va_arg (ap, double);
-		    n = fprintf (stream, format_templ, x);
-		} else {
-		    /*
-		     * Some compilers complain when `long double' and
-		     * `double' are the same thing.
-		     */
+      case 'f':
+      case 'e':
+      case 'E':
+      case 'g':
+      case 'G':
+    if (!HDstrcmp (modifier, "h")) {
+        float x = (float) va_arg (ap, double);
+        n = fprintf (stream, format_templ, x);
+    } else if (!*modifier || !HDstrcmp (modifier, "l")) {
+        double x = va_arg (ap, double);
+        n = fprintf (stream, format_templ, x);
+    } else {
+        /*
+         * Some compilers complain when `long double' and
+         * `double' are the same thing.
+         */
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-		    long double x = va_arg (ap, long double);
-		    n = fprintf (stream, format_templ, x);
+        long double x = va_arg (ap, long double);
+        n = fprintf (stream, format_templ, x);
 #else
-		    double x = va_arg (ap, double);
-		    n = fprintf (stream, format_templ, x);
+        double x = va_arg (ap, double);
+        n = fprintf (stream, format_templ, x);
 #endif
-		}
-		break;
+    }
+    break;
 
-	    case 'a':
+      case 'a':
                 {
-		    haddr_t x = va_arg (ap, haddr_t); /*lint !e732 Loss of sign not really occuring */
-		    if (H5F_addr_defined(x)) {
-			sprintf(format_templ, "%%%s%s%s%s%s",
-				leftjust?"-":"", plussign?"+":"",
-				ldspace?" ":"", prefix?"#":"",
-				zerofill?"0":"");
-			if (fwidth>0)
-			    sprintf(format_templ+HDstrlen(format_templ), "%d", fwidth);
+        haddr_t x = va_arg (ap, haddr_t); /*lint !e732 Loss of sign not really occuring */
+        if (H5F_addr_defined(x)) {
+      sprintf(format_templ, "%%%s%s%s%s%s",
+        leftjust?"-":"", plussign?"+":"",
+        ldspace?" ":"", prefix?"#":"",
+        zerofill?"0":"");
+      if (fwidth>0)
+          sprintf(format_templ+HDstrlen(format_templ), "%d", fwidth);
 
                         /*lint --e{506} Don't issue warnings about constant value booleans */
                         /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true */
-			if (sizeof(x)==H5_SIZEOF_INT) {
-			    HDstrcat(format_templ, "u");
-			} else if (sizeof(x)==H5_SIZEOF_LONG) {
-			    HDstrcat(format_templ, "lu");
-			} else if (sizeof(x)==H5_SIZEOF_LONG_LONG) {
-			    HDstrcat(format_templ, H5_PRINTF_LL_WIDTH);
-			    HDstrcat(format_templ, "u");
-			}
-			n = fprintf(stream, format_templ, x);
-		    } else {
-			HDstrcpy(format_templ, "%");
-			if (leftjust)
+      if (sizeof(x)==H5_SIZEOF_INT) {
+          HDstrcat(format_templ, "u");
+      } else if (sizeof(x)==H5_SIZEOF_LONG) {
+          HDstrcat(format_templ, "lu");
+      } else if (sizeof(x)==H5_SIZEOF_LONG_LONG) {
+          HDstrcat(format_templ, H5_PRINTF_LL_WIDTH);
+          HDstrcat(format_templ, "u");
+      }
+      n = fprintf(stream, format_templ, x);
+        } else {
+      HDstrcpy(format_templ, "%");
+      if (leftjust)
                             HDstrcat(format_templ, "-");
-			if (fwidth)
-			    sprintf(format_templ+HDstrlen(format_templ), "%d", fwidth);
-			HDstrcat(format_templ, "s");
-			fprintf(stream, format_templ, "UNDEF");
-		    }
-		}
-		break;
+      if (fwidth)
+          sprintf(format_templ+HDstrlen(format_templ), "%d", fwidth);
+      HDstrcat(format_templ, "s");
+      fprintf(stream, format_templ, "UNDEF");
+        }
+    }
+    break;
 
-	    case 'c':
+      case 'c':
                 {
-		    char x = (char)va_arg (ap, int);
-		    n = fprintf (stream, format_templ, x);
-		}
-		break;
+        char x = (char)va_arg (ap, int);
+        n = fprintf (stream, format_templ, x);
+    }
+    break;
 
-	    case 's':
-	    case 'p':
+      case 's':
+      case 'p':
                 {
-		    char *x = va_arg (ap, char*); /*lint !e64 Type mismatch not really occuring */
-		    n = fprintf (stream, format_templ, x);
-		}
-		break;
+        char *x = va_arg (ap, char*); /*lint !e64 Type mismatch not really occuring */
+        n = fprintf (stream, format_templ, x);
+    }
+    break;
 
-	    case 'n':
+      case 'n':
                 format_templ[HDstrlen(format_templ)-1] = 'u';
                 n = fprintf (stream, format_templ, nout);
-		break;
+    break;
 
             case 't':
                 {
@@ -379,18 +379,18 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 }
                 break;
 
-	    default:
-		HDfputs (format_templ, stream);
-		n = (int)HDstrlen (format_templ);
-		break;
-	    }
-	    nout += n;
-	    fmt = s;
-	} else {
-	    HDputc (*fmt, stream);
-	    fmt++;
-	    nout++;
-	}
+      default:
+    HDfputs (format_templ, stream);
+    n = (int)HDstrlen (format_templ);
+    break;
+      }
+      nout += n;
+      fmt = s;
+  } else {
+      HDputc (*fmt, stream);
+      fmt++;
+      nout++;
+  }
     }
     va_end (ap);
     return nout;
@@ -398,43 +398,43 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
 
 /*-------------------------------------------------------------------------
- * Function:	HDstrtoll
+ * Function:  HDstrtoll
  *
- * Purpose:	Converts the string S to an int64_t value according to the
- *		given BASE, which must be between 2 and 36 inclusive, or be
- *		the special value zero.
+ * Purpose:  Converts the string S to an int64_t value according to the
+ *    given BASE, which must be between 2 and 36 inclusive, or be
+ *    the special value zero.
  *
- *		The string must begin with an arbitrary amount of white space
- *		(as determined by isspace(3c)) followed by a single optional
+ *    The string must begin with an arbitrary amount of white space
+ *    (as determined by isspace(3c)) followed by a single optional
  *              `+' or `-' sign.  If BASE is zero or 16 the string may then
- *		include a `0x' or `0X' prefix, and the number will be read in
- *		base 16; otherwise a zero BASE is taken as 10 (decimal)
- *		unless the next character is a `0', in which case it is taken
- *		as 8 (octal).
+ *    include a `0x' or `0X' prefix, and the number will be read in
+ *    base 16; otherwise a zero BASE is taken as 10 (decimal)
+ *    unless the next character is a `0', in which case it is taken
+ *    as 8 (octal).
  *
- *		The remainder of the string is converted to an int64_t in the
- *		obvious manner, stopping at the first character which is not
- *		a valid digit in the given base.  (In bases above 10, the
- *		letter `A' in either upper or lower case represetns 10, `B'
- *		represents 11, and so forth, with `Z' representing 35.)
+ *    The remainder of the string is converted to an int64_t in the
+ *    obvious manner, stopping at the first character which is not
+ *    a valid digit in the given base.  (In bases above 10, the
+ *    letter `A' in either upper or lower case represetns 10, `B'
+ *    represents 11, and so forth, with `Z' representing 35.)
  *
- *		If REST is not null, the address of the first invalid
- *		character in S is stored in *REST.  If there were no digits
- *		at all, the original value of S is stored in *REST.  Thus, if
- *		*S is not `\0' but **REST is `\0' on return the entire string
- *		was valid.
+ *    If REST is not null, the address of the first invalid
+ *    character in S is stored in *REST.  If there were no digits
+ *    at all, the original value of S is stored in *REST.  Thus, if
+ *    *S is not `\0' but **REST is `\0' on return the entire string
+ *    was valid.
  *
- * Return:	Success:	The result.
+ * Return:  Success:  The result.
  *
- *		Failure:	If the input string does not contain any
- *				digits then zero is returned and REST points
- *				to the original value of S.  If an overflow
- *				or underflow occurs then the maximum or
- *				minimum possible value is returned and the
- *				global `errno' is set to ERANGE.  If BASE is
- *				incorrect then zero is returned.
+ *    Failure:  If the input string does not contain any
+ *        digits then zero is returned and REST points
+ *        to the original value of S.  If an overflow
+ *        or underflow occurs then the maximum or
+ *        minimum possible value is returned and the
+ *        global `errno' is set to ERANGE.  If BASE is
+ *        incorrect then zero is returned.
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, April  9, 1998
  *
  * Modifications:
@@ -444,13 +444,13 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 int64_t
 HDstrtoll(const char *s, const char **rest, int base)
 {
-    int64_t	sign=1, acc=0;
-    hbool_t	overflow = FALSE;
+    int64_t  sign=1, acc=0;
+    hbool_t  overflow = FALSE;
 
     errno = 0;
     if (!s || (base && (base<2 || base>36))) {
-	if (rest) *rest = s;
-	return 0;
+  if (rest) *rest = s;
+  return 0;
     }
 
     /* Skip white space */
@@ -458,51 +458,51 @@ HDstrtoll(const char *s, const char **rest, int base)
 
     /* Optional minus or plus sign */
     if ('+'==*s) {
-	s++;
+  s++;
     } else if ('-'==*s) {
-	sign = -1;
-	s++;
+  sign = -1;
+  s++;
     }
 
     /* Zero base prefix */
     if (0==base && '0'==*s && ('x'==s[1] || 'X'==s[1])) {
-	base = 16;
-	s += 2;
+  base = 16;
+  s += 2;
     } else if (0==base && '0'==*s) {
-	base = 8;
-	s++;
+  base = 8;
+  s++;
     } else if (0==base) {
-	base = 10;
+  base = 10;
     }
 
     /* Digits */
     while ((base<=10 && *s>='0' && *s<'0'+base) ||
-	   (base>10 && ((*s>='0' && *s<='9') ||
-			(*s>='a' && *s<'a'+base-10) ||
-			(*s>='A' && *s<'A'+base-10)))) {
-	if (!overflow) {
-	    int64_t digit = 0;
-	    if (*s>='0' && *s<='9') digit = *s - '0';
-	    else if (*s>='a' && *s<='z') digit = (*s-'a')+10;
-	    else digit = (*s-'A')+10;
+     (base>10 && ((*s>='0' && *s<='9') ||
+      (*s>='a' && *s<'a'+base-10) ||
+      (*s>='A' && *s<'A'+base-10)))) {
+  if (!overflow) {
+      int64_t digit = 0;
+      if (*s>='0' && *s<='9') digit = *s - '0';
+      else if (*s>='a' && *s<='z') digit = (*s-'a')+10;
+      else digit = (*s-'A')+10;
 
-	    if (acc*base+digit < acc) {
-		overflow = TRUE;
-	    } else {
-		acc = acc*base + digit;
-	    }
-	}
-	s++;
+      if (acc*base+digit < acc) {
+    overflow = TRUE;
+      } else {
+    acc = acc*base + digit;
+      }
+  }
+  s++;
     }
 
     /* Overflow */
     if (overflow) {
-	if (sign>0) {
-	    acc = ((uint64_t)1<<(8*sizeof(int64_t)-1))-1;
-	} else {
-	    acc = (int64_t)((uint64_t)1<<(8*sizeof(int64_t)-1));
-	}
-	errno = ERANGE;
+  if (sign>0) {
+      acc = ((uint64_t)1<<(8*sizeof(int64_t)-1))-1;
+  } else {
+      acc = (int64_t)((uint64_t)1<<(8*sizeof(int64_t)-1));
+  }
+  errno = ERANGE;
     }
 
     /* Return values */
@@ -513,20 +513,20 @@ HDstrtoll(const char *s, const char **rest, int base)
 
 
 /*-------------------------------------------------------------------------
- * Function:	HDrand/HDsrand
+ * Function:  HDrand/HDsrand
  *
- * Purpose:	Wrapper function for rand.  If rand_r exists on this system,
- * 		use it.
+ * Purpose:  Wrapper function for rand.  If rand_r exists on this system,
+ *     use it.
  *
- * 		Wrapper function for srand.  If rand_r is available, it will keep
- * 		track of the seed locally instead of using srand() which modifies
- * 		global state and can break other programs.
+ *     Wrapper function for srand.  If rand_r is available, it will keep
+ *     track of the seed locally instead of using srand() which modifies
+ *     global state and can break other programs.
  *
- * Return:	Success:	Random number from 0 to RAND_MAX
+ * Return:  Success:  Random number from 0 to RAND_MAX
  *
- *		Failure:	Cannot fail.
+ *    Failure:  Cannot fail.
  *
- * Programmer:	Leon Arber
+ * Programmer:  Leon Arber
  *              March 6, 2006.
  *
  *-------------------------------------------------------------------------
@@ -548,17 +548,17 @@ void HDsrand(unsigned int seed)
 
 
 /*-------------------------------------------------------------------------
- * Function:	HDremove_all
+ * Function:  HDremove_all
  *
- * Purpose:	Wrapper function for remove on VMS systems
+ * Purpose:  Wrapper function for remove on VMS systems
  *
- * 		This function deletes all versions of a file
+ *     This function deletes all versions of a file
  *
- * Return:	Success:        0;
+ * Return:  Success:        0;
  *
- *		Failure:	-1
+ *    Failure:  -1
  *
- * Programmer:	Elena Pourmal
+ * Programmer:  Elena Pourmal
  *              March 22, 2006
  *
  *-------------------------------------------------------------------------
@@ -584,13 +584,13 @@ HDremove_all(const char *fname)
 #endif
 
 /*-------------------------------------------------------------------------
- * Function:	Wgettimeofday
+ * Function:  Wgettimeofday
  *
- * Purpose:	Wrapper function for gettimeofday on Windows systems
+ * Purpose:  Wrapper function for gettimeofday on Windows systems
  *
- * 		This function can get the time as well as a timezone
+ *     This function can get the time as well as a timezone
  *
- * Return:	0
+ * Return:  0
  *
  *      This implementation is taken from the Cygwin source distribution at
  *          src/winsup/mingw/mingwex/gettimeofday.c
@@ -599,12 +599,12 @@ HDremove_all(const char *fname)
  *          Danny Smith <dannysmith@users.sourceforge.net>
  *      and released in the public domain.
  *
- * Programmer:	Scott Wegner
+ * Programmer:  Scott Wegner
  *              May 19, 2009
  *
  *-------------------------------------------------------------------------
  */
-#ifdef _WIN32
+#ifdef _WIN32 /* H5_HAVE_VISUAL_STUDIO */
 
 /* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
 #define _W32_FT_OFFSET (116444736000000000ULL)
@@ -638,6 +638,27 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
      Do not set errno on error.  */
   return 0;
 }
+
+#ifdef H5_HAVE_WINSOCK_H
+#pragma comment(lib, "advapi32.lib")
+#endif
+
+#define WloginBuffer_count 256
+static char Wlogin_buffer[WloginBuffer_count];
+
+char*
+Wgetlogin()
+{
+
+#ifdef H5_HAVE_WINSOCK_H
+    long bufferCount = WloginBuffer_count;
+    if (GetUserName(Wlogin_buffer, &bufferCount) == 0)
+        return (Wlogin_buffer);
+    else
+#endif /* H5_HAVE_WINSOCK_H */
+        return NULL;
+}
+
 #endif
 
 
@@ -645,16 +666,16 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
  * Function: H5_build_extpath
  *
  * Purpose:  To build the path for later searching of target file for external
- *		link.  This path can be either:
+ *    link.  This path can be either:
  *                  1. The absolute path of NAME
  *                      or
  *                  2. The current working directory + relative path of NAME
  *
- * Return:	Success:        0
- *		Failure:	-1
+ * Return:  Success:        0
+ *    Failure:  -1
  *
- * Programmer:	Vailin Choi
- *		April 2, 2008
+ * Programmer:  Vailin Choi
+ *    April 2, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -692,23 +713,23 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
         if(NULL == (new_name = (char *)H5MM_strdup(name)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-	/*
-	 * Windows: name[0-1] is "<drive-letter>:"
-	 * 	Get current working directory on the drive specified in NAME
-	 * Unix: does not apply
+  /*
+   * Windows: name[0-1] is "<drive-letter>:"
+   *   Get current working directory on the drive specified in NAME
+   * Unix: does not apply
          * OpenVMS: does not apply
-	 */
+   */
         if(CHECK_ABS_DRIVE(name)) {
             drive = name[0] - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
             HDstrcpy(new_name, &name[2]);
         } /* end if */
-	/*
-	 * Windows: name[0] is a '/' or '\'
-	 *	Get current drive
-	 * Unix: does not apply
+  /*
+   * Windows: name[0] is a '/' or '\'
+   *  Get current drive
+   * Unix: does not apply
          * OpenVMS: does not apply
-	 */
+   */
         else if(CHECK_ABS_PATH(name) && (0 != (drive = HDgetdrive()))) {
             sprintf(cwdpath, "%c:%c", (drive+'A'-1), name[0]);
             retcwd = cwdpath;
@@ -764,9 +785,9 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
 done:
     /* Release resources */
     if(cwdpath)
-	H5MM_xfree(cwdpath);
+  H5MM_xfree(cwdpath);
     if(new_name)
-	H5MM_xfree(new_name);
+  H5MM_xfree(new_name);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5_build_extpath() */

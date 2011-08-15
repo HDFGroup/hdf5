@@ -558,6 +558,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Performance
     -------------
+      - ifdefs added to tests around include unistd.h and function to simulate
+        getlogin() on Windows. 
+        (ADB - 2011/08/15)
       - perf_serial test added to Windows projects and check batch file. 
         (ADB - 2009/06/11)
 

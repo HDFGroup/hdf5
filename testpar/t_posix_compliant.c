@@ -40,7 +40,9 @@
  *     mpiexec -np 3 ./t_posix_compliant
  */
 
+#ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
