@@ -185,6 +185,8 @@ IF (BUILD_TESTING)
       h5diff_627.txt
       h5diff_628.txt
       h5diff_629.txt
+      h5diff_630.txt
+      h5diff_631.txt
       h5diff_640.txt
       h5diff_641.txt
       h5diff_642.txt
@@ -399,6 +401,35 @@ IF (BUILD_TESTING)
       SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES DEPENDS "PH5DIFF-clear-${resultfile}-objects")
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_PH5_TEST file)
+
+   # ADD_H5_NO_OUTPUT_TEST
+   # Purpose to verify only exitcode without output comparison
+   # Don't use this if possible; this may be removed.
+   MACRO (ADD_H5_NO_OUTPUT_TEST testname resultcode)
+    # If using memchecker add tests without using scripts
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5DIFF-clear-${testname}-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove ${testname}.out ${testname}.out.err
+      )
+      # if there was a previous test
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5DIFF-clear-${testname}-objects PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+      SET (last_test "H5DIFF-clear-${testname}-objects")
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+
+    ADD_TEST (NAME H5DIFF-${testname} COMMAND $<TARGET_FILE:h5diff> ${ARGN})
+    IF (NOT ${resultcode} STREQUAL "0")
+      SET_TESTS_PROPERTIES (H5DIFF-${testname} PROPERTIES WILL_FAIL "true")
+    ENDIF (NOT ${resultcode} STREQUAL "0")
+
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DIFF-${testname} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5DIFF-${testname}")
+  ENDMACRO (ADD_H5_NO_OUTPUT_TEST)
 
 ##############################################################################
 ##############################################################################
@@ -984,6 +1015,13 @@ ADD_H5_TEST (h5diff_628 1 -n 1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 # Disabling this test as it hangs - LRK 20090618
 # 6.29  non valid files
 #ADD_H5_TEST (h5diff_629 2 file1.h6 file2.h6)
+
+# ##############################################################################
+# # NaN
+# ##############################################################################
+# 6.30: test (NaN == NaN) must be true based on our documentation -- XCAO
+ADD_H5_TEST (h5diff_630 0 -v -d "0.0001" ${FILE1} ${FILE1} g1/fp18 g1/fp18_COPY)
+ADD_H5_TEST (h5diff_631 0 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp18 g1/fp18_COPY)
 
 # ##############################################################################
 # 7.  attributes

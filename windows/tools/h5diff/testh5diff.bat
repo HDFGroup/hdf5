@@ -528,6 +528,16 @@ rem ############################################################################
     call :testing %h5diff% file1.h6 file2.h6
     call :tooltest h5diff_629.txt file1.h6 file2.h6
 
+    rem ######################################################################
+    rem # NaN
+    rem ######################################################################
+    rem 6.30: test (NaN == NaN) must be true based on our documentation -- XCAO
+    call :testing %h5diff% -v -d "0.0001" %srcfile1% %srcfile1% g1/fp18 g1/fp18_COPY
+    call :tooltest h5diff_630.txt -v -d "0.0001" %file1% %file1% g1/fp18 g1/fp18_COPY
+    call :testing %h5diff% -v --use-system-epsilon %srcfile1% %srcfile1% g1/fp18 g1/fp18_COPY
+    call :tooltest h5diff_631.txt -v --use-system-epsilon %file1% %file1% g1/fp18 g1/fp18_COPY
+
+
     rem ########################################################################
     rem 7.  attributes
     rem ########################################################################
