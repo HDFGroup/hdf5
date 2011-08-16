@@ -566,6 +566,12 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5jam not to allow specifying an HDF5 formatted file as input 
+          file for -u (user block file) option, because the original HDF5 file 
+          will not be accessible if allows.
+        - Revised command help pages of h5jam and h5unjam. The descriptions
+          were not up to date and some were missing. 
+          HDFFV-7515 (JKM 08/15/2011)
         - Fixed h5diff to display instructive error message and exit with 1
           when mutually exclusive options (-d, -p and --use-system-epsilon)
           are used together. HDFFV-7600  (JKM 07/07/2011)

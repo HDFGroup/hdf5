@@ -1824,6 +1824,7 @@
 ./tools/h5jam/testfiles/u511.txt
 ./tools/h5jam/testfiles/u512.txt
 ./tools/h5jam/testfiles/u513.txt
+./tools/h5jam/testfiles/h5jam-ub-nohdf5.txt
 
 # test files for h5copy
 ./tools/h5copy/testfiles/h5copytst.h5

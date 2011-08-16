@@ -178,6 +178,24 @@ warn_msg(const char *fmt, ...)
     va_end(ap);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:  help_ref_msg
+ *
+ * Purpose: Print a message to refer help page 
+ *
+ * Return:  Nothing
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+help_ref_msg(FILE *output)
+{
+    HDfprintf(output, "Try '-h' or '--help' for more information or ");
+    HDfprintf(output, "see the <%s> entry in the 'HDF5 Reference Manual'.\n",h5tools_getprogname());
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    get_option

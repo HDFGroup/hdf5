@@ -123,6 +123,7 @@ H5TOOLS_DLL void     print_version(const char *progname);
 H5TOOLS_DLL void     parallel_print(const char* format, ... );
 H5TOOLS_DLL void     error_msg(const char *fmt, ...);
 H5TOOLS_DLL void     warn_msg(const char *fmt, ...);
+H5TOOLS_DLL void     help_ref_msg(FILE *output);
 H5TOOLS_DLL void     free_table(table_t *table);
 #ifdef H5DUMP_DEBUG
 H5TOOLS_DLL void     dump_tables(find_objs_t *info)

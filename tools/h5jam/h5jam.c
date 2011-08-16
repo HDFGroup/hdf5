@@ -70,20 +70,51 @@ static struct long_options l_opts[] = {
 static void
 usage (const char *prog)
 {
-  fflush (stdout);
-  fprintf (stdout,
-     "usage: %s -u user_block_file -i h5_file [-o ofile | --clobber] \n",
-     prog);
-  fprintf (stdout, "           Add 'user_block_file' to front of \n");
-  fprintf (stdout,
-     "           'h5_file', pad so 'h5_file' starts on proper\n");
-  fprintf (stdout, "           byte.\n");
-  fprintf (stdout, "\n");
-  fprintf (stdout, "       %s -h \n", prog);
-  fprintf (stdout, "           Print a usage message and exit\n");
-  fprintf (stdout, "       %s -V \n", prog);
-  fprintf (stdout, "           Print HDF5 library version and exit\n");
-
+    HDfflush (stdout);
+    HDfprintf (stdout,
+    "usage: %s -i <in_file.h5> -u <in_user_file> [-o <out_file.h5>] [--clobber]\n", prog);
+    HDfprintf (stdout, "\n");
+    HDfprintf (stdout,
+    "Adds user block to front of an HDF5 file and creates a new concatenated file.\n");
+    HDfprintf (stdout, "\n");
+    HDfprintf (stdout, 
+    "OPTIONS\n");
+    HDfprintf (stdout, 
+    "  -i in_file.h5    Specifies the input HDF5 file.\n");
+    HDfprintf (stdout, 
+    "  -u in_user_file  Specifies the file to be inserted into the user block.\n");
+    HDfprintf (stdout, 
+    "                   Can be any file format except an HDF5 format.\n");
+    HDfprintf (stdout,
+    "  -o out_file.h5   Specifies the output HDF5 file.\n");
+    HDfprintf (stdout,
+    "                   If not specified, the user block will be concatenated in\n");
+    HDfprintf (stdout,
+    "                   place to the input HDF5 file.\n");
+    HDfprintf (stdout,
+    "  --clobber        Wipes out any existing user block before concatenating\n");
+    HDfprintf (stdout,
+    "                   the given user block.\n");
+    HDfprintf (stdout,
+    "                   The size of the new user block will be the larger of;\n");
+    HDfprintf (stdout,
+    "                    - the size of existing user block in the input HDF5 file\n");
+    HDfprintf (stdout,
+    "                    - the size of user block required by new input user file\n");
+    HDfprintf (stdout,
+    "                   (size = 512 x 2N,  N is positive integer.)\n");
+    HDfprintf (stdout, "\n");
+    HDfprintf (stdout,
+    "  -h               Prints a usage message and exits.\n");
+    HDfprintf (stdout,
+    "  -V               Prints the HDF5 library version and exits.\n");
+    HDfprintf (stdout, "\n");
+    HDfprintf (stdout,
+    "Exit Status:\n");
+    HDfprintf (stdout,
+    "   0   Succeeded.\n");
+    HDfprintf (stdout,
+    "   >0  An error occurred.\n");
 }
 
 
@@ -210,22 +241,30 @@ main (int argc, const char *argv[])
 
     if (ub_file == NULL) {
         /* no user block */
-        error_msg("no user block file name\n");
-        usage (h5tools_getprogname());
+        error_msg("missing arguemnt for -u <user_file>.\n");
+        help_ref_msg(stderr);
+        leave (EXIT_FAILURE);
+    }
+
+    testval = H5Fis_hdf5 (ub_file);
+
+    if (testval > 0) {
+        error_msg("-u <user_file> cannot be HDF5 file, but it appears to be an HDF5 file.\n");
+        help_ref_msg(stderr);
         leave (EXIT_FAILURE);
     }
 
     if (input_file == NULL) {
-        /* no user block */
-        error_msg("no HDF5 file\n");
-        usage (h5tools_getprogname());
+        error_msg("missing arguemnt for -i <HDF5 file>.\n");
+        help_ref_msg(stderr);
         leave (EXIT_FAILURE);
     }
 
     testval = H5Fis_hdf5 (input_file);
 
     if (testval <= 0) {
-        error_msg("Input HDF5 file is not HDF \"%s\"\n", input_file);
+        error_msg("Input HDF5 file \"%s\" is not HDF5 format.\n", input_file);
+        help_ref_msg(stderr);
         leave (EXIT_FAILURE);
     }
 
