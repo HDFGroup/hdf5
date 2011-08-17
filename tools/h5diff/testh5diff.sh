@@ -54,7 +54,7 @@ if test -z "$srcdir"; then
 fi
 
 # source dirs
-SRC_TOOLS="$srcdir/../"
+SRC_TOOLS="$srcdir/.."
 SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 # testfiles source dirs for tools
 SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
@@ -254,6 +254,8 @@ $SRC_H5DIFF_TESTFILES/h5diff_626.txt
 $SRC_H5DIFF_TESTFILES/h5diff_627.txt
 $SRC_H5DIFF_TESTFILES/h5diff_628.txt
 $SRC_H5DIFF_TESTFILES/h5diff_629.txt
+$SRC_H5DIFF_TESTFILES/h5diff_630.txt
+$SRC_H5DIFF_TESTFILES/h5diff_631.txt
 $SRC_H5DIFF_TESTFILES/h5diff_640.txt
 $SRC_H5DIFF_TESTFILES/h5diff_641.txt
 $SRC_H5DIFF_TESTFILES/h5diff_642.txt
@@ -294,8 +296,10 @@ COPY_TESTFILES_TO_TESTDIR()
             if [ -a $tstfile ]; then
                 $CP -f $tstfile $TESTDIR
             else
-                echo "Error: FAILED to copy $tstfile"
+                echo "Error: FAILED to copy $tstfile ."
                 echo "       $tstfile doesn't exist!"
+                
+                # Comment out this to CREATE expected file
                 exit $EXIT_FAILURE
             fi
         fi
@@ -629,10 +633,6 @@ TOOLTEST h5diff_609.txt -d 200 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dse
 # 6.10: number smaller than smallest difference
 TOOLTEST h5diff_610.txt -d 1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4
 
-# 6.11: test (NaN == NaN) must be true based on our documentation -- XCAO
-TOOLTEST h5diff_609.txt -d "0.0001" h5diff_basic1.h5 h5diff_basic1.h5 g1/fp18 g1/fp18_COPY
-TOOLTEST h5diff_609.txt --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h5 g1/fp18 g1/fp18_COPY
-
 
 # ##############################################################################
 # # -p
@@ -696,6 +696,13 @@ TOOLTEST h5diff_628.txt -n 1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4
 # Disabling this test as it hangs - LRK 20090618
 # 6.29  non valid files
 #TOOLTEST h5diff_629.txt file1.h6 file2.h6
+
+# ##############################################################################
+# # NaN
+# ##############################################################################
+# 6.30: test (NaN == NaN) must be true based on our documentation -- XCAO
+TOOLTEST h5diff_630.txt -v -d "0.0001" h5diff_basic1.h5 h5diff_basic1.h5 g1/fp18 g1/fp18_COPY
+TOOLTEST h5diff_631.txt -v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h5 g1/fp18 g1/fp18_COPY
 
 
 # ##############################################################################
