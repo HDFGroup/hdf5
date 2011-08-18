@@ -462,6 +462,20 @@ ADD_TEST (NAME links_env COMMAND "${CMAKE_COMMAND}"
 )
 SET_TESTS_PROPERTIES(links_env PROPERTIES DEPENDS h5test-clear-links_env-objects)
 
+#-- Adding test for libinfo
+SET (GREP_RUNNER ${PROJECT_BINARY_DIR}/GrepRunner.cmake)
+FILE (WRITE ${GREP_RUNNER} 
+  "FILE (STRINGS \${TEST_PROGRAM} TEST_RESULT REGEX \"SUMMARY OF THE HDF5 CONFIGURATION\")
+IF (\${TEST_RESULT} STREQUAL \"0\")
+  MESSAGE (FATAL_ERROR \"Failed: The output: \${TEST_RESULT} of \${TEST_PROGRAM} did not contain SUMMARY OF THE HDF5 CONFIGURATION\")
+ELSE (\${TEST_RESULT} STREQUAL \"0\")
+  MESSAGE (STATUS \"COMMAND Result: \${TEST_RESULT}\")
+ENDIF (\${TEST_RESULT} STREQUAL \"0\")
+"
+)
+
+ADD_TEST (NAME testlibinfo COMMAND ${CMAKE_COMMAND} -D "TEST_PROGRAM=$<TARGET_FILE:${HDF5_LIB_TARGET}>" -P "${GREP_RUNNER}")
+
 ##############################################################################
 ##############################################################################
 ###                         V F D   T E S T S                              ###

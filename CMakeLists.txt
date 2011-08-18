@@ -254,11 +254,15 @@ ENDIF (WIN32 AND NOT CYGWIN)
 #-----------------------------------------------------------------------------
 OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
 SET (LIB_TYPE STATIC)
+SET (H5_ENABLE_SHARED_LIB NO)
+SET (H5_ENABLE_STATIC_LIB NO)
 IF (BUILD_SHARED_LIBS)
   SET (LIB_TYPE SHARED)
   SET (H5_BUILT_AS_DYNAMIC_LIB 1)
+  SET (H5_ENABLE_SHARED_LIB YES)
 ELSE (BUILD_SHARED_LIBS)
   SET (H5_BUILT_AS_STATIC_LIB 1)
+  SET (H5_ENABLE_STATIC_LIB YES)
   IF (NOT WIN32)
     # should this be a user setting : Everyone uses it anyway ?
     ADD_DEFINITIONS (-DPIC)
@@ -373,6 +377,14 @@ IF (CMAKE_COMPILER_IS_GNUCC)
 ENDIF (CMAKE_COMPILER_IS_GNUCC)
 
 #-----------------------------------------------------------------------------
+# Option to embed library info into executables
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_EMBEDDED_LIBINFO "embed library info into executables" ON)
+IF (HDF5_ENABLE_EMBEDDED_LIBINFO)
+  SET (H5_HAVE_EMBEDDED_LIBINFO 1)
+ENDIF (HDF5_ENABLE_EMBEDDED_LIBINFO)
+
+#-----------------------------------------------------------------------------
 # Option to allow the user to disable compiler warnings
 #-----------------------------------------------------------------------------
 OPTION (HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings" OFF)
@@ -472,6 +484,7 @@ MACRO (HDF5_SETUP_FILTERS FILTER)
   OPTION (HDF5_USE_FILTER_${FILTER} "Use the ${FILTER} Filter" ON)
   IF (HDF5_USE_FILTER_${FILTER})
     SET (H5_HAVE_FILTER_${FILTER} 1)
+    SET (FILTERS "${FILTERS} ${FILTER}")
   ENDIF (HDF5_USE_FILTER_${FILTER})
   # MESSAGE (STATUS "Filter ${FILTER} is ${HDF5_USE_FILTER_${FILTER}}")
 ENDMACRO (HDF5_SETUP_FILTERS)
@@ -532,6 +545,9 @@ IF (HDF5_ENABLE_Z_LIB_SUPPORT)
     SET (H5_HAVE_ZLIB_H 1)
     SET (H5_HAVE_LIBZ 1)
   ENDIF (NOT H5_ZLIB_HEADER)
+  IF (H5_HAVE_FILTER_DEFLATE)
+    SET (EXTERNAL_FILTERS "${EXTERNAL_FILTERS} DEFLATE")
+  ENDIF (H5_HAVE_FILTER_DEFLATE)
   SET (LINK_LIBS ${LINK_LIBS} ${ZLIB_LIBRARIES})
   INCLUDE_DIRECTORIES (${ZLIB_INCLUDE_DIRS})
   MESSAGE (STATUS "Filter ZLIB is ON")
@@ -565,8 +581,12 @@ IF (HDF5_ENABLE_SZIP_SUPPORT)
   SET (LINK_LIBS ${LINK_LIBS} ${SZIP_LIBRARIES})
   INCLUDE_DIRECTORIES (${SZIP_INCLUDE_DIRS})
   MESSAGE (STATUS "Filter SZIP is ON")
+  IF (H5_HAVE_FILTER_SZIP)
+    SET (EXTERNAL_FILTERS "${EXTERNAL_FILTERS} DECODE")
+  ENDIF (H5_HAVE_FILTER_SZIP)
   IF (HDF5_ENABLE_SZIP_ENCODING)
     SET (H5_HAVE_SZIP_ENCODER 1)
+    SET (EXTERNAL_FILTERS "${EXTERNAL_FILTERS} ENCODE")
   ENDIF (HDF5_ENABLE_SZIP_ENCODING)
 ENDIF (HDF5_ENABLE_SZIP_SUPPORT)
 
@@ -819,6 +839,19 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
       COMPONENT configinstall
   )
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
+
+#-----------------------------------------------------------------------------
+# Configure the libhdf5.settings file for the lib info
+#-----------------------------------------------------------------------------
+IF (H5_WORDS_BIGENDIAN)
+  SET (BYTESEX big-endian)
+ELSE (H5_WORDS_BIGENDIAN)
+  SET (BYTESEX little-endian)
+ENDIF (H5_WORDS_BIGENDIAN)
+CONFIGURE_FILE (
+    ${HDF5_RESOURCES_DIR}/libhdf5.settings.cmake.in 
+    ${HDF5_BINARY_DIR}/libhdf5.settings @ONLY
+)
 
 #-----------------------------------------------------------------------------
 # Add Document File(s) to CMake Install
