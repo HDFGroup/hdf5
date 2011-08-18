@@ -37,7 +37,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5HLpkg.h"		/* Local Heaps				*/
-#include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
 /****************/
@@ -72,18 +71,23 @@
 /********************/
 
 /* Metadata cache callbacks */
-static void *H5HL_prefix_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5HL_prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-    void *thing, unsigned *flags_ptr);
-static herr_t H5HL_prefix_dest(H5F_t *f, void *thing);
-static herr_t H5HL_prefix_clear(H5F_t *f, void *thing, hbool_t destroy);
-static herr_t H5HL_prefix_size(const H5F_t *f, const void *thing, size_t *size_ptr);
-static void *H5HL_datablock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5HL_datablock_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-    void *thing, unsigned *flags_ptr);
-static herr_t H5HL_datablock_dest(H5F_t *f, void *thing);
-static herr_t H5HL_datablock_clear(H5F_t *f, void *thing, hbool_t destroy);
-static herr_t H5HL_datablock_size(const H5F_t *f, const void *thing, size_t *size_ptr);
+static herr_t H5HL_prfx_get_load_size(const void *_udata, size_t *image_len);
+static void *H5HL_prfx_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
+static herr_t H5HL_prfx_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t H5HL_prfx_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
+    void *image, void *thing, unsigned *flags, haddr_t *new_addr,
+    size_t *new_len, void **new_image);
+static herr_t H5HL_prfx_free_icr(void *thing);
+
+static herr_t H5HL_dblk_get_load_size(const void *_udata, size_t *image_len);
+static void *H5HL_dblk_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
+static herr_t H5HL_dblk_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t H5HL_dblk_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
+    void *image, void *thing, unsigned *flags, haddr_t *new_addr,
+    size_t *new_len, void **new_image);
+static herr_t H5HL_dblk_free_icr(void *thing);
 
 
 /*********************/
@@ -91,24 +95,33 @@ static herr_t H5HL_datablock_size(const H5F_t *f, const void *thing, size_t *siz
 /*********************/
 
 /*
- * H5HL inherits cache-like properties from H5AC
+ * H5HL prefix inherits cache-like properties from H5AC
  */
 const H5AC_class_t H5AC_LHEAP_PRFX[1] = {{
     H5AC_LHEAP_PRFX_ID,
-    H5HL_prefix_load,
-    H5HL_prefix_flush,
-    H5HL_prefix_dest,
-    H5HL_prefix_clear,
-    H5HL_prefix_size,
+    "local heap prefix",
+    H5FD_MEM_LHEAP,
+    H5AC__CLASS_SPECULATIVE_LOAD_FLAG,
+    H5HL_prfx_get_load_size,
+    H5HL_prfx_deserialize,
+    H5HL_prfx_image_len,
+    H5HL_prfx_serialize,
+    H5HL_prfx_free_icr,
 }};
 
+/*
+ * H5HL data block inherits cache-like properties from H5AC
+ */
 const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
     H5AC_LHEAP_DBLK_ID,
-    H5HL_datablock_load,
-    H5HL_datablock_flush,
-    H5HL_datablock_dest,
-    H5HL_datablock_clear,
-    H5HL_datablock_size,
+    "local heap data block",
+    H5FD_MEM_LHEAP,
+    H5AC__CLASS_NO_FLAGS_SET,
+    H5HL_dblk_get_load_size,
+    H5HL_dblk_deserialize,
+    H5HL_dblk_image_len,
+    H5HL_dblk_serialize,
+    H5HL_dblk_free_icr,
 }};
 
 
@@ -236,58 +249,72 @@ H5HL_fl_serialize(const H5HL_t *heap)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_prefix_load
+ * Function:    H5HL_prfx_get_load_size
  *
- * Purpose:	Loads a local heap prefix from disk.
+ * Purpose:     Compute the size of the data structure on disk.
  *
- * Return:	Success:	Ptr to a local heap memory data structure.
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HL_prfx_get_load_size(const void *_udata, size_t *image_len)
+{
+    const H5HL_cache_prfx_ud_t *udata = (const H5HL_cache_prfx_ud_t *)_udata;       /* User data for callback */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_prfx_get_load_size)
+
+    /* Check arguments */
+    HDassert(udata);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = H5HL_SPEC_READ_SIZE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HL_prfx_get_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HL_prfx_deserialize
+ *
+ * Purpose:	Deserialize the data structure from disk.
+ *
+ * Return:	Success:	Ptr to a local heap prefix.
  *		Failure:	NULL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 17 1997
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Oct 11 2008
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5HL_prefix_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
+H5HL_prfx_deserialize(const void *image, size_t len, void *_udata,
+    hbool_t UNUSED *dirty)
 {
     H5HL_t *heap = NULL;            /* Local heap */
     H5HL_prfx_t *prfx = NULL;       /* Heap prefix deserialized */
     H5HL_cache_prfx_ud_t *udata = (H5HL_cache_prfx_ud_t *)_udata;       /* User data for callback */
-    uint8_t		buf[H5HL_SPEC_READ_SIZE];   /* Buffer for decoding */
-    size_t	        spec_read_size; /* Size of buffer to speculatively read in */
-    const uint8_t	*p;         /* Pointer into decoding buffer */
-    haddr_t             abs_eoa;    /* Absolute end of file address */
-    haddr_t             rel_eoa;    /* Relative end of file address */
+    const uint8_t *p;               /* Pointer into image buffer */
     H5HL_prfx_t *ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_prefix_load)
+    FUNC_ENTER_NOAPI_NOINIT(H5HL_prfx_deserialize)
 
     /* check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(len > 0);
+    HDassert(image);
     HDassert(udata);
     HDassert(udata->sizeof_size > 0);
     HDassert(udata->sizeof_addr > 0);
     HDassert(udata->sizeof_prfx > 0);
-    HDassert(udata->sizeof_prfx <= sizeof(buf));
 
-    /* Make certain we don't speculatively read off the end of the file */
-    if(HADDR_UNDEF == (abs_eoa = H5F_get_eoa(f)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to determine file size")
-
-    /* Adjust absolute EOA address to relative EOA address */
-    rel_eoa = abs_eoa - H5F_get_base_addr(f);
-
-    /* Compute the size of the speculative local heap prefix buffer */
-    H5_ASSIGN_OVERFLOW(spec_read_size, MIN(rel_eoa - addr, H5HL_SPEC_READ_SIZE), /* From: */ hsize_t, /* To: */ size_t);
-    HDassert(spec_read_size >= udata->sizeof_prfx);
-
-    /* Attempt to speculatively read both local heap prefix and heap data */
-    if(H5F_block_read(f, H5FD_MEM_LHEAP, addr, spec_read_size, dxpl_id, buf) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read local heap prefix")
-    p = buf;
+    /* Point to beginning of image buffer */
+    p = (const uint8_t *)image;
 
     /* Check magic number */
     if(HDmemcmp(p, H5HL_MAGIC, (size_t)H5HL_SIZEOF_MAGIC))
@@ -331,29 +358,26 @@ H5HL_prefix_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
             /* Note that the heap should be a single object in the cache */
             heap->single_cache_obj = TRUE;
 
-            /* Allocate space for the heap data image */
-            if(NULL == (heap->dblk_image = H5FL_BLK_MALLOC(lheap_chunk, heap->dblk_size)))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
+            /* Check if the current image from the cache is big enough to hold the heap data */
+            if(len >= (heap->prfx_size + heap->dblk_size)) {
+                /* Allocate space for the heap data image */
+                if(NULL == (heap->dblk_image = H5FL_BLK_MALLOC(lheap_chunk, heap->dblk_size)))
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
-            /* Check if the current buffer from the speculative read already has the heap data */
-            if(spec_read_size >= (heap->prfx_size + heap->dblk_size)) {
-                /* Set p to the start of the data block.  This is necessary
-                 * because there may be a gap between the used portion of the
-                 * prefix and the data block due to alignment constraints. */
-                p = buf + heap->prfx_size;
-
-                /* Copy the heap data from the speculative read buffer */
+                /* Copy the heap data from the image */
                 HDmemcpy(heap->dblk_image, p, heap->dblk_size);
-            } /* end if */
-            else {
-                /* Read the local heap data block directly into buffer */
-                if(H5F_block_read(f, H5FD_MEM_LHEAP, heap->dblk_addr, heap->dblk_size, dxpl_id, heap->dblk_image) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read heap data")
-            } /* end else */
 
-            /* Build free list */
-            if(H5HL_fl_deserialize(heap, udata->free_block) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize free list")
+                /* Build free list */
+                if(H5HL_fl_deserialize(heap, udata->free_block) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize free list")
+            } /* end if */
+            else
+                /* Make certain the length was OK on the retry */
+                HDassert(!udata->made_attempt);
+
+            /* Note that we've made one attempt at decoding the local heap already */
+            /* (useful when the length is incorrect and the cache will retry with a larger one) */
+            udata->made_attempt = TRUE;
         } /* end if */
         else
             /* Note that the heap should _NOT_ be a single object in the cache */
@@ -380,132 +404,137 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HL_prefix_load() */
+} /* end H5HL_prfx_deserialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_prefix_flush
+ * Function:	H5HL_prfx_image_len
  *
- * Purpose:	Flushes a heap from memory to disk if it's dirty.  Optionally
- *		deletes the heap from memory.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 17 1997
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HL_prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    void *thing, unsigned UNUSED *flags_ptr)
-{
-    H5HL_prfx_t *prfx = (H5HL_prfx_t *)thing;   /* Local heap prefix to flush */
-    H5WB_t *wb = NULL;                  /* Wrapped buffer for heap data */
-    uint8_t heap_buf[H5HL_SPEC_READ_SIZE]; /* Buffer for heap */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_prefix_flush)
-
-    /* check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(prfx);
-
-    if(prfx->cache_info.is_dirty) {
-        H5HL_t *heap = prfx->heap; /* Pointer to the local heap */
-        H5HL_free_t *fl = heap->freelist; /* Pointer to heap's free list */
-        uint8_t *buf;           /* Pointer to heap buffer */
-        size_t buf_size;        /* Size of buffer for encoding & writing heap info */
-        uint8_t *p;             /* Pointer into raw data buffer */
-
-        /* Wrap the local buffer for serialized heap info */
-        if(NULL == (wb = H5WB_wrap(heap_buf, sizeof(heap_buf))))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't wrap buffer")
-
-        /* Compute the size of the buffer to encode & write */
-        buf_size = heap->prfx_size;
-        if(heap->single_cache_obj)
-            buf_size += heap->dblk_size;
-
-        /* Get a pointer to a buffer that's large enough for serialized heap */
-        if(NULL == (buf = (uint8_t *)H5WB_actual(wb, buf_size)))
-            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "can't get actual buffer")
-
-        /* Serialize the heap prefix */
-        p = buf;
-        HDmemcpy(p, H5HL_MAGIC, (size_t)H5HL_SIZEOF_MAGIC);
-        p += H5HL_SIZEOF_MAGIC;
-        *p++ = H5HL_VERSION;
-        *p++ = 0;	/*reserved*/
-        *p++ = 0;	/*reserved*/
-        *p++ = 0;	/*reserved*/
-        H5F_ENCODE_LENGTH_LEN(p, heap->dblk_size, heap->sizeof_size);
-        H5F_ENCODE_LENGTH_LEN(p, fl ? fl->offset : H5HL_FREE_NULL, heap->sizeof_size);
-        H5F_addr_encode_len(heap->sizeof_addr, &p, heap->dblk_addr);
-
-        /* Check if the local heap is a single object in cache */
-        if(heap->single_cache_obj) {
-            /* Set p to the start of the data block.  This is necessary because
-             * there may be a gap between the used portion of the prefix and the
-             * data block due to alignment constraints. */
-            p = buf + heap->prfx_size;
-
-            /* Serialize the free list into the heap data's image */
-            H5HL_fl_serialize(heap);
-
-            /* Copy the heap data block into the cache image */
-            HDmemcpy(p, heap->dblk_image, heap->dblk_size);
-        } /* end if */
-
-        /* Write the prefix [and possibly the data block] to the file */
-        if(H5F_block_write(f, H5FD_MEM_LHEAP, addr, buf_size, dxpl_id, buf) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "unable to write heap header and data to file")
-
-	prfx->cache_info.is_dirty = FALSE;
-    } /* end if */
-
-    /* Should we destroy the memory version? */
-    if(destroy)
-        if(H5HL_prefix_dest(f, prfx) < 0)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap prefix")
-
-done:
-    /* Release resources */
-    if(wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HL_prefix_flush() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HL_prefix_dest
- *
- * Purpose:	Destroys a heap prefix in memory.
+ * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jan 15 2003
+ *		koziol@hdfgroup.org
+ *		Oct 11 2008
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_prefix_dest(H5F_t UNUSED *f, void *thing)
+H5HL_prfx_image_len(const void *_thing, size_t *image_len)
 {
-    H5HL_prfx_t *prfx = (H5HL_prfx_t *)thing;   /* Local heap prefix to destroy */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    const H5HL_prfx_t *prfx = (const H5HL_prfx_t *)_thing;     /* The local heap prefix */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_prefix_dest)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_prfx_image_len)
+
+    /* Check arguments */
+    HDassert(prfx);
+    HDassert(prfx->heap);
+    HDassert(image_len);
+
+    /* Report the local heap's size, including the data block, if it's contiguous w/prefix */
+    if(prfx->heap->single_cache_obj)
+        *image_len = prfx->heap->prfx_size + prfx->heap->dblk_size;
+    else
+        *image_len = prfx->heap->prfx_size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HL_prfx_image_len() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HL_prfx_serialize
+ *
+ * Purpose:	Serializes a 'in core' representation of data structure
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Oct 11 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HL_prfx_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
+    haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
+{
+    H5HL_prfx_t *prfx = (H5HL_prfx_t *)_thing; /* Pointer to the local heap prefix */
+    H5HL_t *heap;                       /* Pointer to the local heap */
+    uint8_t     *p;                     /* Pointer into raw data buffer */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_prfx_serialize)
 
     /* check arguments */
+    HDassert(image);
     HDassert(prfx);
+    HDassert(prfx->heap);
+    HDassert(flags);
 
-    /* Verify that entry is clean */
-    HDassert(prfx->cache_info.is_dirty == FALSE);
+    /* Get the pointer to the heap */
+    heap = prfx->heap;
+
+    /* Point to the cache image */
+    p = (uint8_t *)image;
+
+    /* Serialize the header */
+    HDmemcpy(p, H5HL_MAGIC, (size_t)H5HL_SIZEOF_MAGIC);
+    p += H5HL_SIZEOF_MAGIC;
+    *p++ = H5HL_VERSION;
+    *p++ = 0;	/*reserved*/
+    *p++ = 0;	/*reserved*/
+    *p++ = 0;	/*reserved*/
+    H5F_ENCODE_LENGTH_LEN(p, heap->dblk_size, heap->sizeof_size);
+    H5F_ENCODE_LENGTH_LEN(p, heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL, heap->sizeof_size);
+    H5F_addr_encode_len(heap->sizeof_addr, &p, heap->dblk_addr);
+
+    /* Check if the local heap is a single object in cache */
+    if(heap->single_cache_obj) {
+        /* Serialize the free list into the heap data's image */
+        H5HL_fl_serialize(heap);
+
+        /* Set p to the start of the data block.  This is necessary because
+         * there may be a gap between the used portion of the prefix and the
+         * data block due to alignment constraints. */
+        p = (uint8_t *)image + heap->prfx_size;
+
+        /* Copy the heap data block into the cache image */
+        HDmemcpy(p, heap->dblk_image, heap->dblk_size);
+    } /* end if */
+
+    /* Reset the cache flags for this operation */
+    *flags = 0;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5HL_prfx_serialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HL_prfx_free_icr
+ *
+ * Purpose:	Destroy/release an "in core representation" of a data
+ *              structure
+ *
+ * Return:	Success: SUCCEED
+ *              Failure: FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              October 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HL_prfx_free_icr(void *thing)
+{
+    H5HL_prfx_t *prfx = (H5HL_prfx_t *)thing;   /* Local heap prefix to destroy */
+    herr_t ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HL_prfx_free_icr)
+
+    /* Check arguments */
+    HDassert(prfx);
 
     /* Destroy local heap prefix */
     if(H5HL_prfx_dest(prfx) < 0)
@@ -513,108 +542,66 @@ H5HL_prefix_dest(H5F_t UNUSED *f, void *thing)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HL_prefix_dest() */
+} /* H5HL_prfx_free_icr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_prefix_clear
+ * Function:    H5HL_dblk_get_load_size
  *
- * Purpose:	Mark a local heap prefix in memory as non-dirty.
+ * Purpose:     Compute the size of the data structure on disk.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar 20 2003
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_prefix_clear(H5F_t UNUSED *f, void *thing, hbool_t destroy)
+H5HL_dblk_get_load_size(const void *_udata, size_t *image_len)
 {
-    H5HL_prfx_t *prfx = (H5HL_prfx_t *)thing;   /* The local heap prefix to operate on */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    const H5HL_cache_dblk_ud_t *udata = (const H5HL_cache_dblk_ud_t *)_udata;       /* User data for callback */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_prefix_clear)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_dblk_get_load_size)
 
-    /* check arguments */
-    HDassert(prfx);
+    /* Check arguments */
+    HDassert(udata);
+    HDassert(image_len);
 
-    /* Mark heap prefix as clean */
-    prfx->cache_info.is_dirty = FALSE;
-
-    if(destroy)
-        if(H5HL_prefix_dest(f, prfx) < 0)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap prefix")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HL_prefix_clear() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HL_prefix_size
- *
- * Purpose:	Compute the size in bytes of the heap prefix on disk,
- *              and return it in *len_ptr.  On failure, the value of *len_ptr
- *              is undefined.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	John Mainzer
- *		5/13/04
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HL_prefix_size(const H5F_t UNUSED *f, const void *thing, size_t *size_ptr)
-{
-    const H5HL_prfx_t *prfx = (const H5HL_prfx_t *)thing;   /* Pointer to local heap prefix to query */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_prefix_size)
-
-    /* check arguments */
-    HDassert(prfx);
-    HDassert(prfx->heap);
-    HDassert(size_ptr);
-
-    /* Calculate size of prefix in cache */
-    *size_ptr = prfx->heap->prfx_size;
-
-    /* If the heap is stored as a single object, add in the data block size also */
-    if(prfx->heap->single_cache_obj)
-        *size_ptr += prfx->heap->dblk_size;
+    /* Set the image length size */
+    *image_len = udata->heap->dblk_size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5HL_prefix_size() */
+} /* end H5HL_dblk_get_load_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_datablock_load
+ * Function:	H5HL_dblk_deserialize
  *
- * Purpose:	Loads a local heap data block from disk.
+ * Purpose:	Deserialize the data structure from disk.
  *
- * Return:	Success:	Ptr to a local heap data block memory data structure.
+ * Return:	Success:	Ptr to a local heap data block.
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
- *		Jan  5 2010
+ *		Oct 12 2008
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5HL_datablock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
+H5HL_dblk_deserialize(const void *image, size_t UNUSED len,
+    void *_udata, hbool_t UNUSED *dirty)
 {
     H5HL_dblk_t *dblk = NULL;       /* Local heap data block deserialized */
     H5HL_cache_dblk_ud_t *udata = (H5HL_cache_dblk_ud_t *)_udata;       /* User data for callback */
     H5HL_dblk_t *ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_datablock_load)
+    FUNC_ENTER_NOAPI_NOINIT(H5HL_dblk_deserialize)
 
     /* check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(image);
     HDassert(udata);
     HDassert(udata->heap);
     HDassert(!udata->heap->single_cache_obj);
@@ -628,11 +615,10 @@ H5HL_datablock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     if(NULL == udata->heap->dblk_image) {
         /* Allocate space for the heap data image */
         if(NULL == (udata->heap->dblk_image = H5FL_BLK_MALLOC(lheap_chunk, udata->heap->dblk_size)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate data block image buffer")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
-        /* Read local heap data block */
-        if(H5F_block_read(f, H5FD_MEM_LHEAP, udata->heap->dblk_addr, udata->heap->dblk_size, dxpl_id, udata->heap->dblk_image) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read local heap data block")
+        /* Copy the cache image into the heap's data image */
+        HDmemcpy(udata->heap->dblk_image, image, udata->heap->dblk_size);
 
         /* Build free list */
         if(H5HL_fl_deserialize(udata->heap, udata->free_block) < 0)
@@ -652,163 +638,113 @@ done:
 	    HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap data block")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HL_datablock_load() */
+} /* end H5HL_dblk_deserialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_datablock_flush
+ * Function:	H5HL_dblk_image_len
  *
- * Purpose:	Flushes a heap's data block from memory to disk if it's dirty.
- *              Optionally deletes the heap data block from memory.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 17 1997
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HL_datablock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    void *_thing, unsigned UNUSED * flags_ptr)
-{
-    H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_datablock_flush)
-
-    /* check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(dblk);
-    HDassert(dblk->heap);
-    HDassert(!dblk->heap->single_cache_obj);
-
-    if(dblk->cache_info.is_dirty) {
-        H5HL_t *heap = dblk->heap;      /* Pointer to the local heap */
-
-        /* Serialize the free list into the heap data's image */
-        H5HL_fl_serialize(heap);
-
-        /* Write the data block to the file */
-        if(H5F_block_write(f, H5FD_MEM_LHEAP, heap->dblk_addr, heap->dblk_size, dxpl_id, heap->dblk_image) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "unable to write heap data block to file")
-
-	dblk->cache_info.is_dirty = FALSE;
-    } /* end if */
-
-    /* Should we destroy the memory version? */
-    if(destroy)
-        if(H5HL_datablock_dest(f, dblk) < 0)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap data block")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HL_datablock_flush() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HL_datablock_dest
- *
- * Purpose:	Destroys a local heap data block in memory.
+ * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jan 15 2003
+ *		koziol@hdfgroup.org
+ *		May 20 2010
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_datablock_dest(H5F_t UNUSED *f, void *_thing)
+H5HL_dblk_image_len(const void *_thing, size_t *image_len)
 {
-    H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    const H5HL_dblk_t *dblk = (const H5HL_dblk_t *)_thing;  /* Pointer to the local heap data block */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_datablock_dest)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_dblk_image_len)
+
+    /* Check arguments */
+    HDassert(dblk);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = dblk->heap->dblk_size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HL_dblk_image_len() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HL_dblk_serialize
+ *
+ * Purpose:	Serializes a 'in core' representation of data structure
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Oct 12 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HL_dblk_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
+    haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
+{
+    H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing;  /* Pointer to the local heap data block */
+    H5HL_t      *heap = dblk->heap;             /* Pointer to the local heap */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_dblk_serialize)
 
     /* check arguments */
+    HDassert(image);
     HDassert(dblk);
+    HDassert(dblk->heap);
+    HDassert(flags);
 
-    /* Verify that entry is clean */
-    HDassert(dblk->cache_info.is_dirty == FALSE);
+    /* Serialize the free list into the heap data's image */
+    H5HL_fl_serialize(heap);
+
+    /* Copy the heap's data block into the cache's image */
+    HDmemcpy(image, heap->dblk_image, heap->dblk_size);
+
+    /* Reset the cache flags for this operation */
+    *flags = 0;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5HL_dblk_serialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HL_dblk_free_icr
+ *
+ * Purpose:	Destroy/release an "in core representation" of a data
+ *              structure
+ *
+ * Return:	Success: SUCCEED
+ *              Failure: FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              October 12, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HL_dblk_free_icr(void *thing)
+{
+    H5HL_dblk_t *dblk = (H5HL_dblk_t *)thing;   /* Local heap data block to destroy */
+    herr_t ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HL_dblk_free_icr)
+
+    /* Check arguments */
+    HDassert(dblk);
 
     /* Destroy local heap data block */
     if(H5HL_dblk_dest(dblk) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't destroy local heap data block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "unable to destroy local heap data block")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HL_datablock_dest() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HL_datablock_clear
- *
- * Purpose:	Mark a local heap data block in memory as non-dirty.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar 20 2003
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HL_datablock_clear(H5F_t *f, void *_thing, hbool_t destroy)
-{
-    H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_datablock_clear)
-
-    /* check arguments */
-    HDassert(dblk);
-
-    /* Mark local heap data block as clean */
-    dblk->cache_info.is_dirty = FALSE;
-
-    if(destroy)
-        if(H5HL_datablock_dest(f, dblk) < 0)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap data block")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HL_datablock_clear() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HL_datablock_size
- *
- * Purpose:	Compute the size in bytes of the local heap data block on disk,
- *              and return it in *len_ptr.  On failure, the value of *len_ptr
- *              is undefined.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	John Mainzer
- *		5/13/04
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HL_datablock_size(const H5F_t UNUSED *f, const void *_thing, size_t *size_ptr)
-{
-    const H5HL_dblk_t *dblk = (const H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_datablock_size)
-
-    /* check arguments */
-    HDassert(dblk);
-    HDassert(dblk->heap);
-    HDassert(size_ptr);
-
-    /* Set size of data block in cache */
-    *size_ptr = dblk->heap->dblk_size;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5HL_datablock_size() */
+} /* H5HL_dblk_free_icr() */
 

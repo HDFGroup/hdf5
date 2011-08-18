@@ -46,6 +46,8 @@
 /* Local Macros */
 /****************/
 
+#define H5HG_SPEC_READ_SIZE 4096
+
 
 /******************/
 /* Local Typedefs */
@@ -62,12 +64,14 @@
 /********************/
 
 /* Metadata cache callbacks */
-static H5HG_heap_t *H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-			 H5HG_heap_t *heap, unsigned UNUSED * flags_ptr);
-static herr_t H5HG_dest(H5F_t *f, H5HG_heap_t *heap);
-static herr_t H5HG_clear(H5F_t *f, H5HG_heap_t *heap, hbool_t destroy);
-static herr_t H5HG_size(const H5F_t *f, const H5HG_heap_t *heap, size_t *size_ptr);
+static herr_t H5HG_get_load_size(const void *udata, size_t *image_len);
+static void *H5HG_deserialize(const void *image, size_t len, void *udata,
+    hbool_t *dirty);
+static herr_t H5HG_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t H5HG_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
+    void *image, void *thing, unsigned *flags, haddr_t *new_addr,
+    size_t *new_len, void **new_image);
+static herr_t H5HG_free_icr(void *thing);
 
 
 /*********************/
@@ -79,11 +83,14 @@ static herr_t H5HG_size(const H5F_t *f, const H5HG_heap_t *heap, size_t *size_pt
  */
 const H5AC_class_t H5AC_GHEAP[1] = {{
     H5AC_GHEAP_ID,
-    (H5AC_load_func_t)H5HG_load,
-    (H5AC_flush_func_t)H5HG_flush,
-    (H5AC_dest_func_t)H5HG_dest,
-    (H5AC_clear_func_t)H5HG_clear,
-    (H5AC_size_func_t)H5HG_size,
+    "global heap",
+    H5FD_MEM_GHEAP,
+    H5AC__CLASS_SPECULATIVE_LOAD_FLAG,
+    H5HG_get_load_size,
+    H5HG_deserialize,
+    H5HG_image_len,
+    H5HG_serialize,
+    H5HG_free_icr,
 }};
 
 
@@ -99,12 +106,42 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HG_load
+ * Function:    H5HG_get_load_size
  *
- * Purpose:	Loads a global heap collection from disk.
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HG_get_load_size(const void *_udata, size_t *image_len)
+{
+    const H5F_t *f = (const H5F_t *)_udata;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_get_load_size)
+
+    /* Check arguments */
+    HDassert(f);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = H5HG_SPEC_READ_SIZE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HG_get_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HG_deserialize
+ *
+ * Purpose:	Deserialize the data structure from disk.
  *
  * Return:	Success:	Ptr to a global heap collection.
- *
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
@@ -112,31 +149,28 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-static H5HG_heap_t *
-H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
+static void *
+H5HG_deserialize(const void *image, size_t UNUSED len, void *_udata,
+    hbool_t UNUSED *dirty)
 {
     H5HG_heap_t	*heap = NULL;
+    H5F_t *f = (H5F_t *)_udata;
     uint8_t	*p;
     size_t	nalloc, need;
     size_t      max_idx = 0;            /* The maximum index seen */
     H5HG_heap_t	*ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_load)
+    FUNC_ENTER_NOAPI_NOINIT(H5HG_deserialize)
 
     /* check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(udata);
+    HDassert(image);
 
     /* Allocate space for heap */
     if(NULL == (heap = H5FL_CALLOC(H5HG_heap_t)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
     heap->shared = f->shared;
-    if(NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, (size_t)H5HG_MINSIZE)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
-    if(H5F_block_read(f, H5FD_MEM_GHEAP, addr, (size_t)H5HG_MINSIZE, dxpl_id, heap->chunk) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read global heap collection")
-    p = heap->chunk;
+
+    p = (uint8_t *)image;
 
     /* Magic number */
     if(HDmemcmp(p, H5HG_MAGIC, (size_t)H5HG_SIZEOF_MAGIC))
@@ -154,128 +188,126 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
     H5F_DECODE_LENGTH(f, p, heap->size);
     HDassert(heap->size >= H5HG_MINSIZE);
 
-    /*
-     * If we didn't read enough in the first try, then read the rest of the
-     * collection now.
-     */
-    if(heap->size > H5HG_MINSIZE) {
-	haddr_t next_addr = addr + (hsize_t)H5HG_MINSIZE;
+    /* if heap->size is more than the allocated image size, then we need to do nothing and wait for correctly sized image to come in */
+    if(heap->size <= len) {
+        /* Allocate space for the heap->chunk */
+        if(NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, (size_t)heap->size)))
+    	    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
-	if(NULL == (heap->chunk = H5FL_BLK_REALLOC(gheap_chunk, heap->chunk, heap->size)))
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
-	if(H5F_block_read(f, H5FD_MEM_GHEAP, next_addr, (heap->size - H5HG_MINSIZE), dxpl_id, heap->chunk + H5HG_MINSIZE) < 0)
-	    HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read global heap collection")
-    } /* end if */
+        /* Copy image into chunk */
+        HDmemcpy(heap->chunk, image, heap->size);
 
-    /* Decode each object */
-    p = heap->chunk + H5HG_SIZEOF_HDR(f);
-    nalloc = H5HG_NOBJS(f, heap->size);
+        /* Decode each object */
+        p = heap->chunk + H5HG_SIZEOF_HDR(f);
 
-    /* Calloc the obj array because the file format spec makes no guarantee
-     * about the order of the objects, and unused slots must be set to zero.
-     */
-    if(NULL == (heap->obj = H5FL_SEQ_CALLOC(H5HG_obj_t, nalloc)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
-
-    heap->nalloc = nalloc;
-    while(p < (heap->chunk + heap->size)) {
-	if((p + H5HG_SIZEOF_OBJHDR(f)) > (heap->chunk + heap->size)) {
-	    /*
-	     * The last bit of space is too tiny for an object header, so we
-	     * assume that it's free space.
-	     */
-	    HDassert(NULL == heap->obj[0].begin);
-	    heap->obj[0].size = ((const uint8_t *)heap->chunk + heap->size) - p;
-	    heap->obj[0].begin = p;
-	    p += heap->obj[0].size;
-	} /* end if */
-        else {
-	    unsigned idx;
-	    uint8_t *begin = p;
-
-	    UINT16DECODE(p, idx);
-
-            /* Check if we need more room to store heap objects */
-            if(idx >= heap->nalloc) {
-                size_t new_alloc;       /* New allocation number */
-                H5HG_obj_t *new_obj;	/* New array of object descriptions */
-
-                /* Determine the new number of objects to index */
-                new_alloc = MAX(heap->nalloc * 2, (idx + 1));
-                HDassert(idx < new_alloc);
-
-                /* Reallocate array of objects */
-                if(NULL == (new_obj = H5FL_SEQ_REALLOC(H5HG_obj_t, heap->obj, new_alloc)))
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
-
-                /* Clear newly allocated space */
-                HDmemset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
-
-                /* Update heap information */
-                heap->nalloc = new_alloc;
-                heap->obj = new_obj;
-                HDassert(heap->nalloc > heap->nused);
-            } /* end if */
-
-	    UINT16DECODE(p, heap->obj[idx].nrefs);
-	    p += 4; /*reserved*/
-	    H5F_DECODE_LENGTH(f, p, heap->obj[idx].size);
-	    heap->obj[idx].begin = begin;
-
-	    /*
-	     * The total storage size includes the size of the object header
-	     * and is zero padded so the next object header is properly
-	     * aligned. The entire obj array was calloc'ed, so no need to zero
-	     * the space here. The last bit of space is the free space object
-	     * whose size is never padded and already includes the object
-	     * header.
-	     */
-	    if(idx > 0) {
-		need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(heap->obj[idx].size);
-
-                if(idx > max_idx)
-                    max_idx = idx;
+        /* Calloc the obj array because the file format spec makes no guarantee
+         * about the order of the objects, and unused slots must be set to zero.
+         */
+        nalloc = H5HG_NOBJS(f, heap->size);
+        if(NULL == (heap->obj = H5FL_SEQ_CALLOC(H5HG_obj_t, nalloc)))
+    	    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
+        heap->nalloc = nalloc;
+        while(p < (heap->chunk + heap->size)) {
+	    if((p + H5HG_SIZEOF_OBJHDR(f)) > (heap->chunk + heap->size)) {
+	        /*
+	         * The last bit of space is too tiny for an object header, so we
+	         * assume that it's free space.
+	         */
+	        HDassert(NULL == heap->obj[0].begin);
+	        heap->obj[0].size = ((const uint8_t *)heap->chunk + heap->size) - p;
+	        heap->obj[0].begin = p;
+	        p += heap->obj[0].size;
 	    } /* end if */
-            else
-		need = heap->obj[idx].size;
-	    p = begin + need;
-	} /* end else */
-    } /* end while */
-    HDassert(p == heap->chunk + heap->size);
-    HDassert(H5HG_ISALIGNED(heap->obj[0].size));
+            else {
+	        unsigned idx;
+	        uint8_t *begin = p;
 
-    /* Set the next index value to use */
-    if(max_idx > 0)
-        heap->nused = max_idx + 1;
-    else
-        heap->nused = 1;
+	        UINT16DECODE(p, idx);
 
-    HDassert(max_idx < heap->nused);
+                /* Check if we need more room to store heap objects */
+                if(idx >= heap->nalloc) {
+                    size_t new_alloc;       /* New allocation number */
+                    H5HG_obj_t *new_obj;	/* New array of object descriptions */
 
-    /*
-     * Add the new heap to the CWFS list, removing some other entry if
-     * necessary to make room. We remove the right-most entry that has less
-     * free space than this heap.
-     */
-    if(!f->shared->cwfs) {
-        if(NULL == (f->shared->cwfs = (H5HG_heap_t **)H5MM_malloc(H5HG_NCWFS * sizeof(H5HG_heap_t *))))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
-        f->shared->ncwfs = 1;
-        f->shared->cwfs[0] = heap;
-    } else if(H5HG_NCWFS == f->shared->ncwfs) {
-        int i;          /* Local index variable */
+                    /* Determine the new number of objects to index */
+                    new_alloc = MAX(heap->nalloc * 2, (idx + 1));
+                    HDassert(idx < new_alloc);
 
-        for(i = H5HG_NCWFS - 1; i >= 0; --i)
-            if(f->shared->cwfs[i]->obj[0].size < heap->obj[0].size) {
-                HDmemmove(f->shared->cwfs + 1, f->shared->cwfs, i * sizeof(H5HG_heap_t *));
-                f->shared->cwfs[0] = heap;
-                break;
-            } /* end if */
-    } else {
-        HDmemmove(f->shared->cwfs + 1, f->shared->cwfs, f->shared->ncwfs * sizeof(H5HG_heap_t *));
-        f->shared->ncwfs += 1;
-        f->shared->cwfs[0] = heap;
-    } /* end else */
+                    /* Reallocate array of objects */
+                    if(NULL == (new_obj = H5FL_SEQ_REALLOC(H5HG_obj_t, heap->obj, new_alloc)))
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
+
+                    /* Clear newly allocated space */
+                    HDmemset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
+
+                    /* Update heap information */
+                    heap->nalloc = new_alloc;
+                    heap->obj = new_obj;
+                    HDassert(heap->nalloc > heap->nused);
+                } /* end if */
+
+	        UINT16DECODE(p, heap->obj[idx].nrefs);
+	        p += 4; /*reserved*/
+	        H5F_DECODE_LENGTH(f, p, heap->obj[idx].size);
+	        heap->obj[idx].begin = begin;
+	        /*
+	         * The total storage size includes the size of the object header
+	         * and is zero padded so the next object header is properly
+	         * aligned. The entire obj array was calloc'ed, so no need to zero
+	         * the space here. The last bit of space is the free space object
+	         * whose size is never padded and already includes the object
+	         * header.
+	         */
+	        if(idx > 0) {
+		    need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(heap->obj[idx].size);
+
+                    if(idx > max_idx)
+                        max_idx = idx;
+	        } /* end if */
+                else
+		    need = heap->obj[idx].size;
+	        p = begin + need;
+	    } /* end else */
+        } /* end while */
+        HDassert(p == heap->chunk + heap->size);
+        HDassert(H5HG_ISALIGNED(heap->obj[0].size));
+
+        /* Set the next index value to use */
+        if(max_idx > 0)
+            heap->nused = max_idx + 1;
+        else
+            heap->nused = 1;
+
+        HDassert(max_idx < heap->nused);
+
+        /*
+         * Add the new heap to the CWFS list, removing some other entry if
+         * necessary to make room. We remove the right-most entry that has less
+         * free space than this heap.
+         */
+        if(!f->shared->cwfs) {
+            if(NULL == (f->shared->cwfs = (H5HG_heap_t **)H5MM_malloc(H5HG_NCWFS * sizeof(H5HG_heap_t *))))
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
+            f->shared->ncwfs = 1;
+            f->shared->cwfs[0] = heap;
+        } else if(H5HG_NCWFS == f->shared->ncwfs) {
+            int i;          /* Local index variable */
+
+            for(i = H5HG_NCWFS - 1; i >= 0; --i)
+                if(f->shared->cwfs[i]->obj[0].size < heap->obj[0].size) {
+                    HDmemmove(f->shared->cwfs + 1, f->shared->cwfs, i * sizeof(H5HG_heap_t *));
+                    f->shared->cwfs[0] = heap;
+                    break;
+                } /* end if */
+        } else {
+            HDmemmove(f->shared->cwfs + 1, f->shared->cwfs, f->shared->ncwfs * sizeof(H5HG_heap_t *));
+            f->shared->ncwfs += 1;
+            f->shared->cwfs[0] = heap;
+        } /* end else */
+
+        /* Sanity check */
+        HDassert((size_t)((const uint8_t *)p - (const uint8_t *)heap->chunk) <= len);
+    } /* end if heap->size <= len */
 
     ret_value = heap;
 
@@ -285,14 +317,45 @@ done:
 	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy global heap collection")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HG_load() */
+} /* end H5HG_deserialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HG_flush
+ * Function:    H5HG_image_len
  *
- * Purpose:	Flushes a global heap collection from memory to disk if it's
- *		dirty.  Optionally deletes teh heap from memory.
+ * Purpose:     Tell the metadata cache about the actual size
+ *              of the global heap
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              mcgreevy@hdfgroup.org
+ *              July 28, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HG_image_len(const void *thing, size_t *image_len_ptr)
+{
+    const H5HG_heap_t    *heap = (const H5HG_heap_t *)thing;    /* Global heap */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_image_len)
+
+    /* Check arguments */
+    HDassert(heap);
+    HDassert(image_len_ptr);
+
+    /* Report the global heap's total size */
+    *image_len_ptr = heap->size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HG_image_len() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HG_serialize
+ *
+ * Purpose:	Serialize the data structure for writing to disk.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -302,11 +365,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HG_heap_t *heap, unsigned UNUSED * flags_ptr)
+H5HG_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
+    haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
+    H5HG_heap_t *heap = (H5HG_heap_t *)_thing;
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_flush)
+    FUNC_ENTER_NOAPI_NOINIT(H5HG_serialize)
 
     /* Check arguments */
     HDassert(f);
@@ -314,115 +380,65 @@ H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HG_heap_t *
     HDassert(H5F_addr_eq(addr, heap->addr));
     HDassert(heap);
 
-    if(heap->cache_info.is_dirty) {
-	if(H5F_block_write(f, H5FD_MEM_GHEAP, addr, heap->size, dxpl_id, heap->chunk) < 0)
-	    HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "unable to write global heap collection to file")
-	heap->cache_info.is_dirty = FALSE;
-    } /* end if */
+    /* Need to increase image size if we need to copy a bigger thing into it */
+    if(heap->size > len) {
+        /* free old image buffer */
+        H5MM_free(image);
 
-    if(destroy)
-        if(H5HG_dest(f, heap) < 0)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy global heap collection")
+        /* allocate new image buffer */
+        if(NULL == (*new_image = H5MM_malloc(heap->size)))
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "new image null after H5MM_realloc()\n")
+
+        /* copy the heap->chunk into the new image buffer */
+        HDmemcpy(*new_image, heap->chunk, heap->size);
+
+        /* set new length of image */
+        *new_len = heap->size;
+
+        /* specify in flags that image has been resized */
+        *flags = H5AC__SERIALIZE_RESIZED_FLAG;
+    } /* end if */
+    else {
+        /* copy the heap->chunk into the image buffer */
+        HDmemcpy(image, heap->chunk, heap->size);
+
+        /* Reset the cache flags for this operation */
+        *flags = 0;
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HG_flush() */
+} /* end H5HG_serialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HG_dest
+ * Function:	H5HG_free_icr
  *
- * Purpose:	Destroys a global heap collection in memory
+ * Purpose:	Destroy/release an "in core representation" of a data structure
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, January 15, 2003
+ * Programmer:	Mike McGreevy
+ *		mcgreevy@hdfgroup.org
+ *		July 28, 2008
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
-H5HG_dest(H5F_t UNUSED *f, H5HG_heap_t *heap)
+H5HG_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_dest)
+    FUNC_ENTER_NOAPI_NOINIT(H5HG_free_icr)
 
     /* Check arguments */
-    HDassert(heap);
-
-    /* Verify that node is clean */
-    HDassert(heap->cache_info.is_dirty == FALSE);
+    HDassert(thing);
 
     /* Destroy global heap collection */
-    if(H5HG_free(heap) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy global heap collection")
+    if(H5HG_free((H5HG_heap_t *)thing) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy global heap")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5HG_dest() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HG_clear
- *
- * Purpose:	Mark a global heap in memory as non-dirty.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, March 20, 2003
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HG_clear(H5F_t *f, H5HG_heap_t *heap, hbool_t destroy)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_clear)
-
-    /* Check arguments */
-    HDassert(heap);
-
-    /* Mark heap as clean */
-    heap->cache_info.is_dirty = FALSE;
-
-    if(destroy)
-        if(H5HG_dest(f, heap) < 0)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy global heap collection")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5HG_clear() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HG_size
- *
- * Purpose:	Compute the size in bytes of the specified instance of
- *              H5HG_heap_t on disk, and return it in *len_ptr.  On failure,
- *              the value of *len_ptr is undefined.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	John Mainzer
- *              5/13/04
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HG_size(const H5F_t UNUSED *f, const H5HG_heap_t *heap, size_t *size_ptr)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_size)
-
-    /* Check arguments */
-    HDassert(heap);
-    HDassert(size_ptr);
-
-    *size_ptr = heap->size;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5HG_size() */
+} /* end H5HG_free_icr() */
 

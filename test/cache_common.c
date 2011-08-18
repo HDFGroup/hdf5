@@ -14,7 +14,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  John Mainzer
- *              10/27/05
+ *              9/13/07
  *
  *		This file contains common code for tests of the cache
  *		implemented in H5C.c
@@ -23,6 +23,7 @@
 #include "H5ACprivate.h"
 #include "H5Iprivate.h"
 #include "H5MFprivate.h"
+#include "H5MMprivate.h"
 #include "cache_common.h"
 
 
@@ -62,6 +63,8 @@ hbool_t run_full_test = TRUE;
 hbool_t try_core_file_driver = FALSE;
 hbool_t core_file_driver_failed = FALSE;
 const char *failure_mssg = NULL;
+int failures = 0;
+int express_test = 0;
 
 test_entry_t pico_entries[NUM_PICO_ENTRIES];
 test_entry_t nano_entries[NUM_NANO_ENTRIES];
@@ -74,76 +77,105 @@ test_entry_t huge_entries[NUM_HUGE_ENTRIES];
 test_entry_t monster_entries[NUM_MONSTER_ENTRIES];
 test_entry_t variable_entries[NUM_VARIABLE_ENTRIES];
 
-static herr_t pico_clear(H5F_t * f, void *  thing, hbool_t dest);
-static herr_t nano_clear(H5F_t * f, void *  thing, hbool_t dest);
-static herr_t micro_clear(H5F_t * f, void *  thing, hbool_t dest);
-static herr_t tiny_clear(H5F_t * f, void *  thing, hbool_t dest);
-static herr_t small_clear(H5F_t * f, void *  thing, hbool_t dest);
-static herr_t medium_clear(H5F_t * f, void *  thing, hbool_t dest);
-static herr_t large_clear(H5F_t * f, void *  thing, hbool_t dest);
-static herr_t huge_clear(H5F_t * f, void *  thing, hbool_t dest);
-static herr_t monster_clear(H5F_t * f, void *  thing, hbool_t dest);
-static herr_t variable_clear(H5F_t * f, void *  thing, hbool_t dest);
+static herr_t pico_get_load_size(const void *udata_ptr, size_t *image_len_ptr);
+static herr_t nano_get_load_size(const void *udata_ptr, size_t *image_len_ptr);
+static herr_t micro_get_load_size(const void *udata_ptr, size_t *image_len_ptr);
+static herr_t tiny_get_load_size(const void *udata_ptr, size_t *image_len_ptr);
+static herr_t small_get_load_size(const void *udata_ptr, size_t *image_len_ptr);
+static herr_t medium_get_load_size(const void *udata_ptr, size_t *image_len_ptr);
+static herr_t large_get_load_size(const void *udata_ptr, size_t *image_len_ptr);
+static herr_t huge_get_load_size(const void *udata_ptr, size_t *image_len_ptr);
+static herr_t monster_get_load_size(const void *udata_ptr, size_t *image_len_ptr);
+static herr_t variable_get_load_size(const void *udata_ptr, size_t *image_len_ptr);
+
+static void *pico_deserialize(const void *image_ptr, size_t len, void *udata_ptr,
+    hbool_t *dirty_ptr);
+static void *nano_deserialize(const void *image_ptr, size_t len, void *udata_ptr,
+    hbool_t *dirty_ptr);
+static void *micro_deserialize(const void *image_ptr, size_t len, void *udata_ptr,
+    hbool_t *dirty_ptr);
+static void *tiny_deserialize(const void *image_ptr, size_t len, void *udata_ptr,
+    hbool_t *dirty_ptr);
+static void *small_deserialize(const void *image_ptr, size_t len, void *udata_ptr,
+    hbool_t *dirty_ptr);
+static void *medium_deserialize(const void *image_ptr, size_t len, void *udata_ptr,
+    hbool_t *dirty_ptr);
+static void *large_deserialize(const void *image_ptr, size_t len, void *udata_ptr,
+    hbool_t *dirty_ptr);
+static void *huge_deserialize(const void *image_ptr, size_t len, void *udata_ptr,
+    hbool_t *dirty_ptr);
+static void *monster_deserialize(const void *image_ptr, size_t len, void *udata_ptr,
+    hbool_t *dirty_ptr);
+static void *variable_deserialize(const void *image_ptr, size_t len, void *udata_ptr,
+    hbool_t *dirty_ptr);
+
+static herr_t pico_image_len(void *thing, size_t *image_len_ptr);
+static herr_t nano_image_len(void *thing, size_t *image_len_ptr);
+static herr_t micro_image_len(void *thing, size_t *image_len_ptr);
+static herr_t tiny_image_len(void *thing, size_t *image_len_ptr);
+static herr_t small_image_len(void *thing, size_t *image_len_ptr);
+static herr_t medium_image_len(void *thing, size_t *image_len_ptr);
+static herr_t large_image_len(void *thing, size_t *image_len_ptr);
+static herr_t huge_image_len(void *thing, size_t *image_len_ptr);
+static herr_t monster_image_len(void *thing, size_t *image_len_ptr);
+static herr_t variable_image_len(void *thing, size_t *image_len_ptr);
+
+static herr_t pico_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    size_t len, void *image_ptr, void *thing, unsigned *flags_ptr,
+    haddr_t *new_addr_ptr, size_t *new_len_ptr, void **new_image_ptr_ptr);
+static herr_t nano_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    size_t len, void *image_ptr, void *thing, unsigned *flags_ptr,
+    haddr_t *new_addr_ptr, size_t *new_len_ptr, void **new_image_ptr_ptr);
+static herr_t micro_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    size_t len, void *image_ptr, void *thing, unsigned *flags_ptr,
+    haddr_t *new_addr_ptr, size_t *new_len_ptr, void **new_image_ptr_ptr);
+static herr_t tiny_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    size_t len, void *image_ptr, void *thing, unsigned *flags_ptr,
+    haddr_t *new_addr_ptr, size_t *new_len_ptr, void **new_image_ptr_ptr);
+static herr_t small_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    size_t len, void *image_ptr, void *thing, unsigned *flags_ptr,
+    haddr_t *new_addr_ptr, size_t *new_len_ptr, void **new_image_ptr_ptr);
+static herr_t medium_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    size_t len, void *image_ptr, void *thing, unsigned *flags_ptr,
+    haddr_t *new_addr_ptr, size_t *new_len_ptr, void **new_image_ptr_ptr);
+static herr_t large_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    size_t len, void *image_ptr, void *thing, unsigned *flags_ptr,
+    haddr_t *new_addr_ptr, size_t *new_len_ptr, void **new_image_ptr_ptr);
+static herr_t huge_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    size_t len, void *image_ptr, void *thing, unsigned *flags_ptr,
+    haddr_t *new_addr_ptr, size_t *new_len_ptr, void **new_image_ptr_ptr);
+static herr_t monster_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    size_t len, void *image_ptr, void *thing, unsigned *flags_ptr,
+    haddr_t *new_addr_ptr, size_t *new_len_ptr, void **new_image_ptr_ptr);
+static herr_t variable_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    size_t len, void *image_ptr, void *thing, unsigned *flags_ptr,
+    haddr_t *new_addr_ptr, size_t *new_len_ptr, void **new_image_ptr_ptr);
+
+static herr_t pico_free_icr(void *thing);
+static herr_t nano_free_icr(void *thing);
+static herr_t micro_free_icr(void *thing);
+static herr_t tiny_free_icr(void *thing);
+static herr_t small_free_icr(void *thing);
+static herr_t medium_free_icr(void *thing);
+static herr_t large_free_icr(void *thing);
+static herr_t huge_free_icr(void *thing);
+static herr_t monster_free_icr(void *thing);
+static herr_t variable_free_icr(void *thing);
 
 
-static herr_t pico_dest(H5F_t * f, void * thing);
-static herr_t nano_dest(H5F_t * f, void * thing);
-static herr_t micro_dest(H5F_t * f, void * thing);
-static herr_t tiny_dest(H5F_t * f, void * thing);
-static herr_t small_dest(H5F_t * f, void * thing);
-static herr_t medium_dest(H5F_t * f, void * thing);
-static herr_t large_dest(H5F_t * f, void * thing);
-static herr_t huge_dest(H5F_t * f, void *  thing);
-static herr_t monster_dest(H5F_t * f, void *  thing);
-static herr_t variable_dest(H5F_t * f, void *  thing);
+/* Generic callback routines */
+static herr_t get_load_size(const void *udata_ptr, size_t *image_len_ptr,
+    int32_t entry_type);
+static void *deserialize(const void *image_ptr, size_t len, void *udata_ptr,
+    hbool_t *dirty_ptr, int32_t entry_type);
+static herr_t image_len(void *thing, size_t *image_len_ptr, int32_t entry_type);
+static herr_t serialize(haddr_t addr, size_t len, void *image_ptr, void *thing,
+    unsigned *flags_ptr, haddr_t *new_addr_ptr, size_t *new_len_ptr,
+    void **new_image_ptr_ptr, int32_t entry_type);
+static herr_t free_icr(test_entry_t *entry, int32_t entry_type);
 
 
-static herr_t pico_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                  haddr_t addr, void *thing, unsigned * flags_ptr);
-static herr_t nano_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                  haddr_t addr, void *thing, unsigned * flags_ptr);
-static herr_t micro_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                   haddr_t addr, void *thing, unsigned * flags_ptr);
-static herr_t tiny_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                  haddr_t addr, void *thing, unsigned * flags_ptr);
-static herr_t small_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                   haddr_t addr, void *thing, unsigned * flags_ptr);
-static herr_t medium_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                    haddr_t addr, void *thing, unsigned * flags_ptr);
-static herr_t large_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                   haddr_t addr, void *thing, unsigned * flags_ptr);
-static herr_t huge_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                  haddr_t addr, void *thing, unsigned * flags_ptr);
-static herr_t monster_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                     haddr_t addr, void *thing, unsigned * flags_ptr);
-static herr_t variable_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                      haddr_t addr, void *thing, unsigned * flags_ptr);
-
-
-static void * pico_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static void * nano_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static void * micro_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static void * tiny_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static void * small_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static void * medium_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static void * large_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static void * huge_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static void * monster_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static void * variable_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-
-
-static herr_t pico_size(H5F_t * f, void * thing, size_t * size_ptr);
-static herr_t nano_size(H5F_t * f, void * thing, size_t * size_ptr);
-static herr_t micro_size(H5F_t * f, void * thing, size_t * size_ptr);
-static herr_t tiny_size(H5F_t * f, void * thing, size_t * size_ptr);
-static herr_t small_size(H5F_t * f, void * thing, size_t * size_ptr);
-static herr_t medium_size(H5F_t * f, void * thing, size_t * size_ptr);
-static herr_t large_size(H5F_t * f, void * thing, size_t * size_ptr);
-static herr_t huge_size(H5F_t * f, void * thing, size_t * size_ptr);
-static herr_t monster_size(H5F_t * f, void * thing, size_t * size_ptr);
-static herr_t variable_size(H5F_t * f, void * thing, size_t * size_ptr);
-
-test_entry_t * entries[NUMBER_OF_ENTRY_TYPES] =
+test_entry_t *entries[NUMBER_OF_ENTRY_TYPES] =
 {
     pico_entries,
     nano_entries,
@@ -213,7 +245,7 @@ const haddr_t alt_base_addrs[NUMBER_OF_ENTRY_TYPES] =
     VARIABLE_ALT_BASE_ADDR
 };
 
-const char * entry_type_names[NUMBER_OF_ENTRY_TYPES] =
+const char *entry_type_names[NUMBER_OF_ENTRY_TYPES] =
 {
     "pico entries -- 1 B",
     "nano entries -- 4 B",
@@ -234,98 +266,116 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
 {
   {
     PICO_ENTRY_TYPE,
-    (H5C_load_func_t)pico_load,
-    (H5C_flush_func_t)pico_flush,
-    (H5C_dest_func_t)pico_dest,
-    (H5C_clear_func_t)pico_clear,
-    (H5C_size_func_t)pico_size
+    "pico_entry",
+    H5FD_MEM_DEFAULT,
+    H5AC__CLASS_NO_FLAGS_SET,
+    (H5C_get_load_size_func_t)pico_get_load_size,
+    (H5C_deserialize_func_t)pico_deserialize,
+    (H5C_image_len_func_t)pico_image_len,
+    (H5C_serialize_func_t)pico_serialize,
+    (H5C_free_icr_func_t)pico_free_icr,
   },
   {
     NANO_ENTRY_TYPE,
-    (H5C_load_func_t)nano_load,
-    (H5C_flush_func_t)nano_flush,
-    (H5C_dest_func_t)nano_dest,
-    (H5C_clear_func_t)nano_clear,
-    (H5C_size_func_t)nano_size
+    "nano_entry",
+    H5FD_MEM_DEFAULT,
+    H5AC__CLASS_NO_FLAGS_SET,
+    (H5C_get_load_size_func_t)nano_get_load_size,
+    (H5C_deserialize_func_t)nano_deserialize,
+    (H5C_image_len_func_t)nano_image_len,
+    (H5C_serialize_func_t)nano_serialize,
+    (H5C_free_icr_func_t)nano_free_icr,
   },
   {
     MICRO_ENTRY_TYPE,
-    (H5C_load_func_t)micro_load,
-    (H5C_flush_func_t)micro_flush,
-    (H5C_dest_func_t)micro_dest,
-    (H5C_clear_func_t)micro_clear,
-    (H5C_size_func_t)micro_size
+    "micro_entry",
+    H5FD_MEM_DEFAULT,
+    H5AC__CLASS_NO_FLAGS_SET,
+    (H5C_get_load_size_func_t)micro_get_load_size,
+    (H5C_deserialize_func_t)micro_deserialize,
+    (H5C_image_len_func_t)micro_image_len,
+    (H5C_serialize_func_t)micro_serialize,
+    (H5C_free_icr_func_t)micro_free_icr,
   },
   {
     TINY_ENTRY_TYPE,
-    (H5C_load_func_t)tiny_load,
-    (H5C_flush_func_t)tiny_flush,
-    (H5C_dest_func_t)tiny_dest,
-    (H5C_clear_func_t)tiny_clear,
-    (H5C_size_func_t)tiny_size
+    "tiny_entry",
+    H5FD_MEM_DEFAULT,
+    H5AC__CLASS_NO_FLAGS_SET,
+    (H5C_get_load_size_func_t)tiny_get_load_size,
+    (H5C_deserialize_func_t)tiny_deserialize,
+    (H5C_image_len_func_t)tiny_image_len,
+    (H5C_serialize_func_t)tiny_serialize,
+    (H5C_free_icr_func_t)tiny_free_icr,
   },
   {
     SMALL_ENTRY_TYPE,
-    (H5C_load_func_t)small_load,
-    (H5C_flush_func_t)small_flush,
-    (H5C_dest_func_t)small_dest,
-    (H5C_clear_func_t)small_clear,
-    (H5C_size_func_t)small_size
+    "small_entry",
+    H5FD_MEM_DEFAULT,
+    H5AC__CLASS_NO_FLAGS_SET,
+    (H5C_get_load_size_func_t)small_get_load_size,
+    (H5C_deserialize_func_t)small_deserialize,
+    (H5C_image_len_func_t)small_image_len,
+    (H5C_serialize_func_t)small_serialize,
+    (H5C_free_icr_func_t)small_free_icr,
   },
   {
     MEDIUM_ENTRY_TYPE,
-    (H5C_load_func_t)medium_load,
-    (H5C_flush_func_t)medium_flush,
-    (H5C_dest_func_t)medium_dest,
-    (H5C_clear_func_t)medium_clear,
-    (H5C_size_func_t)medium_size
+    "medium_entry",
+    H5FD_MEM_DEFAULT,
+    H5AC__CLASS_NO_FLAGS_SET,
+    (H5C_get_load_size_func_t)medium_get_load_size,
+    (H5C_deserialize_func_t)medium_deserialize,
+    (H5C_image_len_func_t)medium_image_len,
+    (H5C_serialize_func_t)medium_serialize,
+    (H5C_free_icr_func_t)medium_free_icr,
   },
   {
     LARGE_ENTRY_TYPE,
-    (H5C_load_func_t)large_load,
-    (H5C_flush_func_t)large_flush,
-    (H5C_dest_func_t)large_dest,
-    (H5C_clear_func_t)large_clear,
-    (H5C_size_func_t)large_size
+    "large_entry",
+    H5FD_MEM_DEFAULT,
+    H5AC__CLASS_NO_FLAGS_SET,
+    (H5C_get_load_size_func_t)large_get_load_size,
+    (H5C_deserialize_func_t)large_deserialize,
+    (H5C_image_len_func_t)large_image_len,
+    (H5C_serialize_func_t)large_serialize,
+    (H5C_free_icr_func_t)large_free_icr,
   },
   {
     HUGE_ENTRY_TYPE,
-    (H5C_load_func_t)huge_load,
-    (H5C_flush_func_t)huge_flush,
-    (H5C_dest_func_t)huge_dest,
-    (H5C_clear_func_t)huge_clear,
-    (H5C_size_func_t)huge_size
+    "huge_entry",
+    H5FD_MEM_DEFAULT,
+    H5AC__CLASS_NO_FLAGS_SET,
+    (H5C_get_load_size_func_t)huge_get_load_size,
+    (H5C_deserialize_func_t)huge_deserialize,
+    (H5C_image_len_func_t)huge_image_len,
+    (H5C_serialize_func_t)huge_serialize,
+    (H5C_free_icr_func_t)huge_free_icr,
   },
   {
     MONSTER_ENTRY_TYPE,
-    (H5C_load_func_t)monster_load,
-    (H5C_flush_func_t)monster_flush,
-    (H5C_dest_func_t)monster_dest,
-    (H5C_clear_func_t)monster_clear,
-    (H5C_size_func_t)monster_size
+    "monster_entry",
+    H5FD_MEM_DEFAULT,
+    H5AC__CLASS_NO_FLAGS_SET,
+    (H5C_get_load_size_func_t)monster_get_load_size,
+    (H5C_deserialize_func_t)monster_deserialize,
+    (H5C_image_len_func_t)monster_image_len,
+    (H5C_serialize_func_t)monster_serialize,
+    (H5C_free_icr_func_t)monster_free_icr,
   },
   {
     VARIABLE_ENTRY_TYPE,
-    (H5C_load_func_t)variable_load,
-    (H5C_flush_func_t)variable_flush,
-    (H5C_dest_func_t)variable_dest,
-    (H5C_clear_func_t)variable_clear,
-    (H5C_size_func_t)variable_size
+    "variable_entry",
+    H5FD_MEM_DEFAULT,
+    H5AC__CLASS_NO_FLAGS_SET,
+    (H5C_get_load_size_func_t)variable_get_load_size,
+    (H5C_deserialize_func_t)variable_deserialize,
+    (H5C_image_len_func_t)variable_image_len,
+    (H5C_serialize_func_t)variable_serialize,
+    (H5C_free_icr_func_t)variable_free_icr,
   }
 };
 
-static herr_t clear(H5F_t * f, void * thing, hbool_t dest);
-static herr_t destroy(H5F_t * f, void * thing);
-static herr_t flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                    haddr_t addr, void *thing, unsigned UNUSED * flags_ptr);
-static void * load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t size(H5F_t * f, void * thing, size_t * size_ptr);
-static void execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr,
-    struct flush_op *op_ptr, unsigned *flags_ptr);
-
-
-
-
 /* address translation funtions: */
 
 
@@ -344,8 +394,8 @@ static void execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr,
  */
 void
 addr_to_type_and_index(haddr_t addr,
-                       int32_t * type_ptr,
-                       int32_t * index_ptr)
+                       int32_t *type_ptr,
+                       int32_t *index_ptr)
 {
     int i;
     int32_t type;
@@ -404,52 +454,8 @@ addr_to_type_and_index(haddr_t addr,
 
 } /* addr_to_type_and_index() */
 
-
-#if 0 /* This function has never been used, but we may want it
-       * some time.  Lets keep it for now.
-       */
-/*-------------------------------------------------------------------------
- * Function:	type_and_index_to_addr
- *
- * Purpose:	Given a type and index of an entry, compute the associated
- *		addr and return that value.
- *
- * Return:	computed addr
- *
- * Programmer:	John Mainzer
- *              6/10/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-haddr_t
-type_and_index_to_addr(int32_t type,
-                       int32_t idx)
-{
-    haddr_t addr;
 
-    HDassert( ( type >= 0 ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
-    HDassert( ( idx >= 0 ) && ( idx <= max_indices[type] ) );
-
-    addr = base_addrs[type] + (((haddr_t)idx) * entry_sizes[type]);
-
-    HDassert( addr == (entries[type])[idx].addr );
-
-    if ( (entries[type])[idx].at_main_addr ) {
-
-        HDassert( addr == (entries[type])[idx].main_addr );
-
-    } else {
-
-        HDassert( addr == (entries[type])[idx].alt_addr );
-    }
-
-    return(addr);
-
-} /* type_and_index_to_addr() */
-
-#endif
+/* Call back functions: */
 
 
 /*-------------------------------------------------------------------------
@@ -473,9 +479,9 @@ type_and_index_to_addr(int32_t type,
  */
 
 herr_t
-check_write_permitted(const H5F_t UNUSED * f,
+check_write_permitted(const H5F_t UNUSED *f,
                       hid_t UNUSED dxpl_id,
-                      hbool_t * write_permitted_ptr)
+                      hbool_t *write_permitted_ptr)
 {
 
     HDassert( write_permitted_ptr );
@@ -487,693 +493,747 @@ check_write_permitted(const H5F_t UNUSED * f,
 
 
 /*-------------------------------------------------------------------------
- * Function:	clear & friends
+ * Function:	get_load_size & friends
  *
- * Purpose:	clear the entry.  The helper functions verify that the
- *		correct version of clear is being called, and then call
- *		clear proper.
- *
- * Return:	SUCCEED
- *
- * Programmer:	John Mainzer
- *              6/10/04
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t
-clear(H5F_t * f,
-      void *  thing,
-      hbool_t dest)
-{
-    test_entry_t * entry_ptr;
-    test_entry_t * base_addr;
-
-    HDassert( thing );
-
-    entry_ptr = (test_entry_t *)thing;
-    base_addr = entries[entry_ptr->type];
-
-    HDassert( entry_ptr->index >= 0 );
-    HDassert( entry_ptr->index <= max_indices[entry_ptr->type] );
-    HDassert( entry_ptr == &(base_addr[entry_ptr->index]) );
-    HDassert( entry_ptr == entry_ptr->self );
-    HDassert( entry_ptr->header.addr == entry_ptr->addr );
-    HDassert( entry_ptr->header.size == entry_ptr->size );
-    HDassert( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) ||
-	      ( entry_ptr->size == entry_sizes[entry_ptr->type] ) );
-
-    entry_ptr->header.is_dirty = FALSE;
-    entry_ptr->is_dirty = FALSE;
-
-    entry_ptr->cleared = TRUE;
-
-    if ( dest ) {
-
-        destroy(f, thing);
-
-    }
-
-    return(SUCCEED);
-
-} /* clear() */
-
-herr_t
-pico_clear(H5F_t * f, void *  thing, hbool_t dest)
-{
-    HDassert ( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
-    return(clear(f, thing, dest));
-}
-
-herr_t
-nano_clear(H5F_t * f, void *  thing, hbool_t dest)
-{
-    HDassert ( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
-    return(clear(f, thing, dest));
-}
-
-herr_t
-micro_clear(H5F_t * f, void *  thing, hbool_t dest)
-{
-    HDassert ( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
-    return(clear(f, thing, dest));
-}
-
-herr_t
-tiny_clear(H5F_t * f, void *  thing, hbool_t dest)
-{
-    HDassert ( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
-    return(clear(f, thing, dest));
-}
-
-herr_t
-small_clear(H5F_t * f, void *  thing, hbool_t dest)
-{
-    HDassert ( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
-    return(clear(f, thing, dest));
-}
-
-herr_t
-medium_clear(H5F_t * f, void *  thing, hbool_t dest)
-{
-    HDassert ( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
-    return(clear(f, thing, dest));
-}
-
-herr_t
-large_clear(H5F_t * f, void *  thing, hbool_t dest)
-{
-    HDassert ( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
-    return(clear(f, thing, dest));
-}
-
-herr_t
-huge_clear(H5F_t * f, void *  thing, hbool_t dest)
-{
-    HDassert ( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
-    return(clear(f, thing, dest));
-}
-
-herr_t
-monster_clear(H5F_t * f, void *  thing, hbool_t dest)
-{
-    HDassert ( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
-    return(clear(f, thing, dest));
-}
-
-herr_t
-variable_clear(H5F_t * f, void *  thing, hbool_t dest)
-{
-    HDassert ( ((test_entry_t *)thing)->type == VARIABLE_ENTRY_TYPE );
-    return(clear(f, thing, dest));
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function:	dest & friends
- *
- * Purpose:	Destroy the entry.  The helper functions verify that the
- *		correct version of dest is being called, and then call
- *		dest proper.
+ * Purpose:	Query the image size for loading an entry.  The helper
+ *              functions funnel into get_load_size proper.
  *
  * Return:	SUCCEED
  *
- * Programmer:	John Mainzer
- *              6/10/04
+ * Programmer:	Quincey Koziol
+ *              5/18/10
  *
  *-------------------------------------------------------------------------
  */
-
-herr_t
-destroy(H5F_t UNUSED * f,
-        void *         thing)
+static herr_t
+get_load_size(const void *udata, size_t *image_length, int32_t entry_type)
 {
-    int i;
-    test_entry_t * entry_ptr;
-    test_entry_t * base_addr;
-    test_entry_t * pinned_entry_ptr;
-    test_entry_t * pinned_base_addr;
-
-    HDassert( thing );
-
-    entry_ptr = (test_entry_t *)thing;
-    base_addr = entries[entry_ptr->type];
-
-    HDassert( entry_ptr->index >= 0 );
-    HDassert( entry_ptr->index <= max_indices[entry_ptr->type] );
-    HDassert( entry_ptr == &(base_addr[entry_ptr->index]) );
-    HDassert( entry_ptr == entry_ptr->self );
-    HDassert( entry_ptr->cache_ptr != NULL );
-    HDassert( entry_ptr->cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( ( entry_ptr->header.destroy_in_progress ) ||
-              ( entry_ptr->header.addr == entry_ptr->addr ) );
-    HDassert( entry_ptr->header.size == entry_ptr->size );
-    HDassert( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) ||
-	      ( entry_ptr->size == entry_sizes[entry_ptr->type] ) );
-
-    HDassert( !(entry_ptr->is_dirty) );
-    HDassert( !(entry_ptr->header.is_dirty) );
-
-    if ( entry_ptr->num_pins > 0 ) {
-
-	for ( i = 0; i < entry_ptr->num_pins; i++ )
-        {
-	    pinned_base_addr = entries[entry_ptr->pin_type[i]];
-	    pinned_entry_ptr = &(pinned_base_addr[entry_ptr->pin_idx[i]]);
-
-	    HDassert( 0 <= pinned_entry_ptr->type );
-            HDassert( pinned_entry_ptr->type < NUMBER_OF_ENTRY_TYPES );
-	    HDassert( pinned_entry_ptr->type == entry_ptr->pin_type[i] );
-	    HDassert( pinned_entry_ptr->index >= 0 );
-	    HDassert( pinned_entry_ptr->index <=
-		      max_indices[pinned_entry_ptr->type] );
-	    HDassert( pinned_entry_ptr->index == entry_ptr->pin_idx[i] );
-	    HDassert( pinned_entry_ptr == pinned_entry_ptr->self );
-	    HDassert( pinned_entry_ptr->header.is_pinned );
-	    HDassert( pinned_entry_ptr->is_pinned );
-	    HDassert( pinned_entry_ptr->pinning_ref_count > 0 );
-
-	    pinned_entry_ptr->pinning_ref_count--;
-
-	    if ( pinned_entry_ptr->pinning_ref_count <= 0 ) {
-
-		unpin_entry(pinned_entry_ptr->type,
-			    pinned_entry_ptr->index);
-	    }
-
-	    entry_ptr->pin_type[i] = -1;
-	    entry_ptr->pin_idx[i] = -1;
-	}
-	entry_ptr->num_pins = 0;
-    }
-
-    entry_ptr->destroyed = TRUE;
-    entry_ptr->cache_ptr = NULL;
-
-    return(SUCCEED);
-
-} /* dest() */
-
-herr_t
-pico_dest(H5F_t * f, void * thing)
-{
-    HDassert ( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
-    return(destroy(f, thing));
-}
-
-herr_t
-nano_dest(H5F_t * f, void * thing)
-{
-    HDassert ( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
-    return(destroy(f, thing));
-}
-
-herr_t
-micro_dest(H5F_t * f, void * thing)
-{
-    HDassert ( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
-    return(destroy(f, thing));
-}
-
-herr_t
-tiny_dest(H5F_t * f, void * thing)
-{
-    HDassert ( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
-    return(destroy(f, thing));
-}
-
-herr_t
-small_dest(H5F_t * f, void * thing)
-{
-    HDassert ( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
-    return(destroy(f, thing));
-}
-
-herr_t
-medium_dest(H5F_t * f, void * thing)
-{
-    HDassert ( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
-    return(destroy(f, thing));
-}
-
-herr_t
-large_dest(H5F_t * f, void * thing)
-{
-    HDassert ( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
-    return(destroy(f, thing));
-}
-
-herr_t
-huge_dest(H5F_t * f, void *  thing)
-{
-    HDassert ( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
-    return(destroy(f, thing));
-}
-
-herr_t
-monster_dest(H5F_t * f, void *  thing)
-{
-    HDassert ( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
-    return(destroy(f, thing));
-}
-
-herr_t
-variable_dest(H5F_t * f, void *  thing)
-{
-    HDassert ( ((test_entry_t *)thing)->type == VARIABLE_ENTRY_TYPE );
-    return(destroy(f, thing));
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	flush & friends
- *
- * Purpose:	flush the entry and mark it as clean.  The helper functions
- *              verify that the correct version of flush is being called,
- *		and then call flush proper.
- *
- * Return:	SUCCEED
- *
- * Programmer:	John Mainzer
- *              6/10/04
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t
-flush(H5F_t *f,
-      hid_t UNUSED dxpl_id,
-      hbool_t dest,
-      haddr_t
-#ifdef NDEBUG
-          UNUSED
-#endif /* NDEBUG */
-          addr,
-      void *thing,
-      unsigned * flags_ptr)
-{
-    int i;
-    test_entry_t * entry_ptr;
-    test_entry_t * base_addr;
-
-    HDassert( thing );
-
-    entry_ptr = (test_entry_t *)thing;
-    base_addr = entries[entry_ptr->type];
-
-    HDassert( entry_ptr->index >= 0 );
-    HDassert( entry_ptr->index <= max_indices[entry_ptr->type] );
-    HDassert( entry_ptr == &(base_addr[entry_ptr->index]) );
-    HDassert( entry_ptr == entry_ptr->self );
-    HDassert( entry_ptr->header.addr == entry_ptr->addr );
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->header.size == entry_ptr->size );
-    HDassert( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) ||
-	      ( entry_ptr->size == entry_sizes[entry_ptr->type] ) );
-    HDassert( entry_ptr->header.is_dirty == entry_ptr->is_dirty );
-    HDassert( entry_ptr->cache_ptr != NULL );
-    HDassert( entry_ptr->cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( entry_ptr->num_flush_ops >= 0 );
-    HDassert( entry_ptr->num_flush_ops < MAX_FLUSH_OPS );
-
-    if ( entry_ptr->num_flush_ops > 0 ) {
-
-        for ( i = 0; i < entry_ptr->num_flush_ops; i++ )
-	{
-            execute_flush_op(f,
-			     entry_ptr,
-			     &((entry_ptr->flush_ops)[i]),
-			     flags_ptr);
-	}
-	entry_ptr->num_flush_ops = 0;
-	entry_ptr->flush_op_self_resize_in_progress = FALSE;
-    }
-
-    entry_ptr->flushed = TRUE;
-
-    if ( ( ! write_permitted ) && ( entry_ptr->is_dirty ) ) {
-
-        pass = FALSE;
-        failure_mssg = "called flush when write_permitted is FALSE.";
-    }
-
-    if ( entry_ptr->is_dirty ) {
-
-        (entry_ptr->writes)++;
-        entry_ptr->is_dirty = FALSE;
-        entry_ptr->header.is_dirty = FALSE;
-    }
-
-    if ( dest ) {
-
-        destroy(f, thing);
-
-    }
-
-    return(SUCCEED);
-
-} /* flush() */
-
-herr_t
-pico_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-           void *thing, unsigned * flags_ptr)
-{
-    HDassert ( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
-    return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
-}
-
-herr_t
-nano_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-	   void *thing, unsigned * flags_ptr)
-{
-    HDassert ( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
-    return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
-}
-
-herr_t
-micro_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-            void *thing, unsigned * flags_ptr)
-{
-    HDassert ( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
-    return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
-}
-
-herr_t
-tiny_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-           void *thing, unsigned * flags_ptr)
-{
-    HDassert ( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
-    return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
-}
-
-herr_t
-small_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-            void *thing, unsigned * flags_ptr)
-{
-    HDassert ( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
-    return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
-}
-
-herr_t
-medium_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-             void *thing, unsigned * flags_ptr)
-{
-    HDassert ( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
-    return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
-}
-
-herr_t
-large_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-            void *thing, unsigned * flags_ptr)
-{
-    HDassert ( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
-    return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
-}
-
-herr_t
-huge_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-           void *thing, unsigned * flags_ptr)
-{
-    HDassert ( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
-    return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
-}
-
-herr_t
-monster_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-	      void *thing, unsigned * flags_ptr)
-{
-    HDassert ( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
-    return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
-}
-
-herr_t
-variable_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-	       void *thing, unsigned * flags_ptr)
-{
-    HDassert ( ((test_entry_t *)thing)->type == VARIABLE_ENTRY_TYPE );
-    return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function:	load & friends
- *
- * Purpose:	"load" the requested entry and mark it as clean.  The
- *		helper functions verify that the correct version of load
- *		 is being called, and then call load proper.
- *
- * Return:	SUCCEED
- *
- * Programmer:	John Mainzer
- *              6/10/04
- *
- *-------------------------------------------------------------------------
- */
-
-void *
-load(H5F_t UNUSED *f,
-     hid_t UNUSED dxpl_id,
-     haddr_t addr,
-     void UNUSED *udata)
-{
+    test_entry_t *entry;
+    test_entry_t *base_addr;
+    haddr_t addr = *(const haddr_t *)udata;
     int32_t type;
     int32_t idx;
-    test_entry_t * entry_ptr;
-    test_entry_t * base_addr;
 
     addr_to_type_and_index(addr, &type, &idx);
 
     base_addr = entries[type];
-    entry_ptr = &(base_addr[idx]);
+    entry = &(base_addr[idx]);
 
-    HDassert( entry_ptr->type == type );
-    HDassert( entry_ptr->type >= 0 );
-    HDassert( entry_ptr->type < NUMBER_OF_ENTRY_TYPES );
-    HDassert( entry_ptr->index == idx );
-    HDassert( entry_ptr->index >= 0 );
-    HDassert( entry_ptr->index <= max_indices[type] );
-    HDassert( entry_ptr == entry_ptr->self );
-    HDassert( entry_ptr->addr == addr );
-#if 1 /* JRM */
-    if ( ! ( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) ||
-             ( entry_ptr->size == entry_sizes[type] ) ) ) {
+    HDassert(entry->type >= 0);
+    HDassert(entry->type == type);
+    HDassert(entry->type == entry_type);
+    HDassert(entry->type < NUMBER_OF_ENTRY_TYPES);
+    HDassert(entry->index == idx);
+    HDassert(entry->index >= 0);
+    HDassert(entry->index <= max_indices[type]);
+    HDassert(entry == entry->self);
+    HDassert(entry->addr == addr);
 
-        HDfprintf(stdout, "entry type/index/size = %d/%d/%ld\n",
-                  (int)(entry_ptr->type),
-                  (int)(entry_ptr->index),
-                  (long)(entry_ptr->size));
-    }
-#endif /* JRM */
-    HDassert( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) ||
-	      ( entry_ptr->size == entry_sizes[type] ) );
+    *image_length = entry->size;
 
-    entry_ptr->loaded = TRUE;
+    return(SUCCEED);
+} /* get_load_size() */
 
-    entry_ptr->header.is_dirty = FALSE;
-    entry_ptr->is_dirty = FALSE;
-
-    (entry_ptr->reads)++;
-
-    return(entry_ptr);
-
-} /* load() */
-
-void *
-pico_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
+static herr_t
+pico_get_load_size(const void *udata, size_t *image_length)
 {
-    return(load(f, dxpl_id, addr, udata));
+    return get_load_size(udata, image_length, PICO_ENTRY_TYPE);
 }
 
-void *
-nano_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
+static herr_t
+nano_get_load_size(const void *udata, size_t *image_length)
 {
-    return(load(f, dxpl_id, addr, udata));
+    return get_load_size(udata, image_length, NANO_ENTRY_TYPE);
 }
 
-void *
-micro_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
+static herr_t
+micro_get_load_size(const void *udata, size_t *image_length)
 {
-    return(load(f, dxpl_id, addr, udata));
+    return get_load_size(udata, image_length, MICRO_ENTRY_TYPE);
 }
 
-void *
-tiny_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
+static herr_t
+tiny_get_load_size(const void *udata, size_t *image_length)
 {
-    return(load(f, dxpl_id, addr, udata));
+    return get_load_size(udata, image_length, TINY_ENTRY_TYPE);
 }
 
-void *
-small_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
+static herr_t
+small_get_load_size(const void *udata, size_t *image_length)
 {
-    return(load(f, dxpl_id, addr, udata));
+    return get_load_size(udata, image_length, SMALL_ENTRY_TYPE);
 }
 
-void *
-medium_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
+static herr_t
+medium_get_load_size(const void *udata, size_t *image_length)
 {
-    return(load(f, dxpl_id, addr, udata));
+    return get_load_size(udata, image_length, MEDIUM_ENTRY_TYPE);
 }
 
-void *
-large_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
+static herr_t
+large_get_load_size(const void *udata, size_t *image_length)
 {
-    return(load(f, dxpl_id, addr, udata));
+    return get_load_size(udata, image_length, LARGE_ENTRY_TYPE);
 }
 
-void *
-huge_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
+static herr_t
+huge_get_load_size(const void *udata, size_t *image_length)
 {
-    return(load(f, dxpl_id, addr, udata));
+    return get_load_size(udata, image_length, HUGE_ENTRY_TYPE);
 }
 
-void *
-monster_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
+static herr_t
+monster_get_load_size(const void *udata, size_t *image_length)
 {
-    return(load(f, dxpl_id, addr, udata));
+    return get_load_size(udata, image_length, MONSTER_ENTRY_TYPE);
 }
 
-void *
-variable_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
+static herr_t
+variable_get_load_size(const void *udata, size_t *image_length)
 {
-    return(load(f, dxpl_id, addr, udata));
+    return get_load_size(udata, image_length, VARIABLE_ENTRY_TYPE);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	size & friends
+ * Function:	deserialize & friends
  *
- * Purpose:	Get the size of the specified entry.  The helper functions
- *		verify that the correct version of size is being called,
- *		and then call size proper.
+ * Purpose:	deserialize the entry.  The helper functions verify that the
+ *		correct version of deserialize is being called, and then call
+ *		deserialize proper.
+ *
+ * Return:	void * (pointer to the in core representation of the entry)
+ *
+ * Programmer:	John Mainzer
+ *              9/20/07
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+deserialize(const void *image, size_t len, void *udata, hbool_t *dirty,
+    int32_t entry_type)
+{
+    test_entry_t *entry;
+    test_entry_t *base_addr;
+    haddr_t addr = *(haddr_t *)udata;
+    int32_t type;
+    int32_t idx;
+
+    addr_to_type_and_index(addr, &type, &idx);
+
+    base_addr = entries[type];
+    entry = &(base_addr[idx]);
+
+    HDassert(entry->type >= 0);
+    HDassert(entry->type == type);
+    HDassert(entry->type == entry_type);
+    HDassert(entry->type < NUMBER_OF_ENTRY_TYPES);
+    HDassert(entry->index == idx);
+    HDassert(entry->index >= 0);
+    HDassert(entry->index <= max_indices[type]);
+    HDassert(entry == entry->self);
+    HDassert(entry->addr == addr);
+    HDassert(entry->size == len);
+    HDassert((entry->type == VARIABLE_ENTRY_TYPE) || (entry->size == entry_sizes[type]));
+    HDassert(dirty != NULL);
+
+    /* for now *dirty will always be FALSE */
+    *dirty = FALSE;
+
+    /* verify that the image contains the expected data. */
+    HDassert(image != NULL);
+    if((entry->at_main_addr && entry->written_to_main_addr) ||
+            (!entry->at_main_addr && entry->written_to_alt_addr)) {
+        if((type == PICO_ENTRY_TYPE) || (type == VARIABLE_ENTRY_TYPE)) {
+            if((*((const char *)image)) != (char)(idx & 0xFF)) {
+                HDfprintf(stdout, "type = %d, idx = %d, addr = 0x%lx.\n",
+                          type, idx, (long)addr);
+                HDfprintf(stdout, "*image = 0x%x\n",
+                          (int)(*((const char *)image)));
+                HDfprintf(stdout, "expected *image = 0x%x\n",
+                          (int)(idx & 0xFF));
+            } /* end if */
+  	    HDassert((*((const char *)image)) == (char)(idx & 0xFF));
+        } /* end if */
+        else {
+            if((*(((const char *)image) + 2)) != (char)(idx & 0xFF)) {
+                HDfprintf(stdout, "type = %d, idx = %d, addr = 0x%lx.\n",
+                          type, idx, (long)addr);
+                HDfprintf(stdout, "*image = 0x%x 0x%x 0x%x\n",
+                          (int)(*((const char *)image)),
+                          (int)(*(((const char *)image) + 1)),
+                          (int)(*(((const char *)image) + 2)));
+                HDfprintf(stdout, "expected *image = 0x%x\n",
+                          (int)(idx & 0xFF),
+                          (int)((idx & 0xFF00) >> 8));
+            } /* end if */
+	    HDassert((*((const char *)image)) == (char)(type & 0xFF));
+	    HDassert((*(((const char *)image) + 1)) == (char)((idx & 0xFF00) >> 8));
+	    HDassert((*(((const char *)image) + 2)) == (char)(idx & 0xFF));
+        } /* end else */
+    } /* end if */
+
+    entry->deserialized = TRUE;
+    entry->header.is_dirty = FALSE;
+    entry->is_dirty = FALSE;
+    (entry->deserializes)++;
+
+    return((void *)entry);
+} /* deserialize() */
+
+void *
+pico_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
+{
+    return deserialize(image, len, udata, dirty, PICO_ENTRY_TYPE);
+}
+
+void *
+nano_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
+{
+    return deserialize(image, len, udata, dirty, NANO_ENTRY_TYPE);
+}
+
+void *
+micro_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
+{
+    return deserialize(image, len, udata, dirty, MICRO_ENTRY_TYPE);
+}
+
+void *
+tiny_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
+{
+    return deserialize(image, len, udata, dirty, TINY_ENTRY_TYPE);
+}
+
+void *
+small_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
+{
+    return deserialize(image, len, udata, dirty, SMALL_ENTRY_TYPE);
+}
+
+void *
+medium_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
+{
+    return deserialize(image, len, udata, dirty, MEDIUM_ENTRY_TYPE);
+}
+
+void *
+large_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
+{
+    return deserialize(image, len, udata, dirty, LARGE_ENTRY_TYPE);
+}
+
+void *
+huge_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
+{
+    return deserialize(image, len, udata, dirty, HUGE_ENTRY_TYPE);
+}
+
+void *
+monster_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
+{
+    return deserialize(image, len, udata, dirty, MONSTER_ENTRY_TYPE);
+}
+
+void *
+variable_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
+{
+    return deserialize(image, len, udata, dirty, VARIABLE_ENTRY_TYPE);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	image_len & friends
+ *
+ * Purpose:	Return the real (and possibly reduced) length of the image.
+ * 		The helper functions verify that the correct version of
+ * 		deserialize is being called, and then call deserialize
+ * 		proper.
  *
  * Return:	SUCCEED
  *
  * Programmer:	John Mainzer
- *              6/10/04
+ *              9/19/07
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-size(H5F_t UNUSED *  f,
-     void *   thing,
-     size_t * size_ptr)
+image_len(void *thing, size_t *image_length, int32_t entry_type)
 {
-    test_entry_t * entry_ptr;
-    test_entry_t * base_addr;
+    test_entry_t *entry;
+    test_entry_t *base_addr;
+    int32_t type;
+    int32_t idx;
 
-    HDassert( size_ptr );
-    HDassert( thing );
+    HDassert(thing);
+    HDassert(image_length);
 
-    entry_ptr = (test_entry_t *)thing;
-    base_addr = entries[entry_ptr->type];
+    entry = (test_entry_t *)thing;
 
-    HDassert( entry_ptr->index >= 0 );
-    HDassert( entry_ptr->index <= max_indices[entry_ptr->type] );
-    HDassert( entry_ptr == &(base_addr[entry_ptr->index]) );
-    HDassert( entry_ptr == entry_ptr->self );
-    HDassert( entry_ptr->header.addr == entry_ptr->addr );
-    HDassert( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) || \
-              ( entry_ptr->size == entry_sizes[entry_ptr->type] ) );
+    HDassert(entry->self == entry);
 
-    *size_ptr = entry_ptr->size;
+    type = entry->type;
+    idx = entry->index;
+
+    HDassert((type >= 0) && (type < NUMBER_OF_ENTRY_TYPES));
+    HDassert(type == entry_type);
+    HDassert((idx >= 0) && (idx <= max_indices[type]));
+
+    base_addr = entries[type];
+    HDassert(entry == &(base_addr[idx]));
+
+    if(type != VARIABLE_ENTRY_TYPE)
+	HDassert(entry->size == entry_sizes[type]);
+    else {
+	HDassert(entry->size <= entry_sizes[type]);
+	HDassert(entry->size > 0);
+    } /* end else */
+
+    *image_length = entry->size;
 
     return(SUCCEED);
-
-} /* size() */
+} /* image_len() */
 
 herr_t
-pico_size(H5F_t * f, void * thing, size_t * size_ptr)
+pico_image_len(void *thing, size_t *image_length)
 {
-    HDassert ( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
-    return(size(f, thing, size_ptr));
+    return image_len(thing, image_length, PICO_ENTRY_TYPE);
 }
 
 herr_t
-nano_size(H5F_t * f, void * thing, size_t * size_ptr)
+nano_image_len(void *thing, size_t *image_length)
 {
-    HDassert ( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
-    return(size(f, thing, size_ptr));
+    return image_len(thing, image_length, NANO_ENTRY_TYPE);
 }
 
 herr_t
-micro_size(H5F_t * f, void * thing, size_t * size_ptr)
+micro_image_len(void *thing, size_t *image_length)
 {
-    HDassert ( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
-    return(size(f, thing, size_ptr));
+    return image_len(thing, image_length, MICRO_ENTRY_TYPE);
 }
 
 herr_t
-tiny_size(H5F_t * f, void * thing, size_t * size_ptr)
+tiny_image_len(void *thing, size_t *image_length)
 {
-    HDassert ( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
-    return(size(f, thing, size_ptr));
+    return image_len(thing, image_length, TINY_ENTRY_TYPE);
 }
 
 herr_t
-small_size(H5F_t * f, void * thing, size_t * size_ptr)
+small_image_len(void *thing, size_t *image_length)
 {
-    HDassert ( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
-    return(size(f, thing, size_ptr));
+    return image_len(thing, image_length, SMALL_ENTRY_TYPE);
 }
 
 herr_t
-medium_size(H5F_t * f, void * thing, size_t * size_ptr)
+medium_image_len(void *thing, size_t *image_length)
 {
-    HDassert ( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
-    return(size(f, thing, size_ptr));
+    return image_len(thing, image_length, MEDIUM_ENTRY_TYPE);
 }
 
 herr_t
-large_size(H5F_t * f, void * thing, size_t * size_ptr)
+large_image_len(void *thing, size_t *image_length)
 {
-    HDassert ( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
-    return(size(f, thing, size_ptr));
+    return image_len(thing, image_length, LARGE_ENTRY_TYPE);
 }
 
 herr_t
-huge_size(H5F_t * f, void * thing, size_t * size_ptr)
+huge_image_len(void *thing, size_t *image_length)
 {
-    HDassert ( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
-    return(size(f, thing, size_ptr));
+    return image_len(thing, image_length, HUGE_ENTRY_TYPE);
 }
 
 herr_t
-monster_size(H5F_t * f, void * thing, size_t * size_ptr)
+monster_image_len(void *thing, size_t *image_length)
 {
-    HDassert ( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
-    return(size(f, thing, size_ptr));
+    return image_len(thing, image_length, MONSTER_ENTRY_TYPE);
 }
 
 herr_t
-variable_size(H5F_t * f, void * thing, size_t * size_ptr)
+variable_image_len(void *thing, size_t *image_length)
 {
-    HDassert ( ((test_entry_t *)thing)->type == VARIABLE_ENTRY_TYPE );
-    return(size(f, thing, size_ptr));
+    return image_len(thing, image_length, VARIABLE_ENTRY_TYPE);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	serialize & friends
+ *
+ * Purpose:	Serialize the supplied entry.  For now this consistes of
+ * 		loading the type and index of the entry into the first
+ * 		three bytes of the image (if it is long enough -- if not
+ * 		just load the low order byte of the index into the first
+ * 		byte of the image).
+ *
+ * 		The helper functions verify that the correct version of
+ * 		serialize is being called, and then call serialize
+ * 		proper.
+ *
+ * Return:	SUCCEED if successful, FAIL otherwise.
+ *
+ * Programmer:	John Mainzer
+ *              9/19/07
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+serialize(haddr_t addr, size_t len, void *image, void *thing,
+    unsigned *flags, haddr_t *new_addr, size_t *new_len,
+    void **new_image, int32_t entry_type)
+{
+    test_entry_t *entry;
+    test_entry_t *base_addr;
+    int32_t type;
+    int32_t idx;
+    int32_t i;
+    herr_t ret_val = SUCCEED;
+
+    HDassert(image);
+    HDassert(thing);
+    HDassert(flags);
+
+    *flags = 0;
+
+    HDassert(new_addr);
+    HDassert(new_len);
+    HDassert(new_image);
+
+    entry = (test_entry_t *)thing;
+
+    HDassert(entry->self == entry);
+    HDassert(entry->addr == addr);
+    HDassert(entry->size == len);
+
+    /* shouldn't serialize the entry unless it is dirty */
+    HDassert(entry->is_dirty);
+
+    type = entry->type;
+    idx = entry->index;
+
+    HDassert((type >= 0) && (type < NUMBER_OF_ENTRY_TYPES));
+    HDassert(type == entry_type);
+    HDassert((idx >= 0) && (idx <= max_indices[type]));
+
+    base_addr = entries[type];
+
+    HDassert(entry == &(base_addr[idx]));
+    HDassert(entry->num_flush_ops >= 0);
+    HDassert(entry->num_flush_ops < MAX_FLUSH_OPS);
+
+    if(entry->num_flush_ops > 0) {
+        for(i = 0; i < entry->num_flush_ops; i++ ) {
+            HDassert(entry->file_ptr);
+
+            execute_flush_op(entry->file_ptr, entry,
+                    &((entry->flush_ops)[i]), flags);
+        } /* end for */
+        entry->num_flush_ops = 0;
+        entry->flush_op_self_resize_in_progress = FALSE;
+
+	/* This looks wrong, but it isn't -- *flags will be modified
+	 * by execute_flush_op() only if the target is this entry --
+	 * and the flags set will accumulate over the set of calls in
+	 * the for loop.
+	 */
+	if(pass && (((*flags) & H5C__SERIALIZE_RESIZED_FLAG) != 0)) {
+	    /* re-allocate *image, and place the new pointer in
+	     * *new_image.
+	     */
+            image = H5MM_xfree(image);
+
+            HDassert(entry->type == VARIABLE_ENTRY_TYPE);
+            HDassert(entry->size > 0);
+            HDassert(entry->size <= VARIABLE_ENTRY_SIZE);
+
+            if(NULL == (image = H5MM_malloc((size_t)(entry->size)))) {
+                ret_val = FAIL;
+                pass = FALSE;
+                failure_mssg = "couldn't allocate new image.";
+            } /* end if */
+            else {
+                *new_image = image;
+                *new_len = entry->size;
+                len = entry->size;
+            } /* end else */
+	} /* end if */
+
+	if(((*flags) & H5C__SERIALIZE_MOVED_FLAG) != 0) {
+            HDassert(((*flags) | H5C__SERIALIZE_RESIZED_FLAG) != 0);
+
+	    /* place the new address in *new_addr */
+            *new_addr = entry->addr;
+	} /* end if */
+    } /* end if */
+
+    /* null out the image to avoid spurious failures */
+    HDmemset(image, 0, len);
+
+    if((type == PICO_ENTRY_TYPE) || (type == VARIABLE_ENTRY_TYPE)) {
+	HDassert(entry->size >= PICO_ENTRY_SIZE);
+	*((char *)image) = (char)((entry->index) & 0xFF);
+    } /* end if */
+    else {
+	HDassert(entry->size >= NANO_ENTRY_SIZE);
+	*((char *)image) = (char)((entry->type) & 0xFF);
+	*(((char *)image) + 1) = (char)(((entry->index) & 0xFF00) >> 8);
+	*(((char *)image) + 2) = (char)((entry->index) & 0xFF);
+    } /* end else */
+
+    /* We no longer do the actual write through an callback -- this is
+     * as close to that callback as we will get.  Hence mark the entry
+     * clean here.  If all goes well, it will be flushed shortly.
+     */
+    entry->is_dirty = FALSE;
+
+    /* since the entry is about to be written to disk, we can mark it
+     * as initialized.
+     */
+    if(entry->at_main_addr)
+	entry->written_to_main_addr = TRUE;
+    else
+	entry->written_to_alt_addr = TRUE;
+
+    /* do book keeping */
+    (entry->serializes)++;
+    entry->serialized = TRUE;
+
+    return(SUCCEED);
+} /* serialize() */
+
+herr_t
+pico_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void *image, void *thing, unsigned *flags,
+    haddr_t *new_addr, size_t *new_len, void **new_image)
+{
+    return serialize(addr, len, image, thing, flags,
+            new_addr, new_len, new_image, PICO_ENTRY_TYPE);
+}
+
+herr_t
+nano_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void *image, void *thing, unsigned *flags,
+    haddr_t *new_addr, size_t *new_len, void **new_image)
+{
+    return serialize(addr, len, image, thing, flags,
+            new_addr, new_len, new_image, NANO_ENTRY_TYPE);
+}
+
+herr_t
+micro_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void *image, void *thing, unsigned *flags,
+    haddr_t *new_addr, size_t *new_len, void **new_image)
+{
+    return serialize(addr, len, image, thing, flags,
+            new_addr, new_len, new_image, MICRO_ENTRY_TYPE);
+}
+
+herr_t
+tiny_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void *image, void *thing, unsigned *flags,
+    haddr_t *new_addr, size_t *new_len, void **new_image)
+{
+    return serialize(addr, len, image, thing, flags,
+            new_addr, new_len, new_image, TINY_ENTRY_TYPE);
+}
+
+herr_t
+small_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void *image, void *thing, unsigned *flags,
+    haddr_t *new_addr, size_t *new_len, void **new_image)
+{
+    return serialize(addr, len, image, thing, flags,
+            new_addr, new_len, new_image, SMALL_ENTRY_TYPE);
+}
+
+herr_t
+medium_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void *image, void *thing, unsigned *flags,
+    haddr_t *new_addr, size_t *new_len, void **new_image)
+{
+    return serialize(addr, len, image, thing, flags,
+            new_addr, new_len, new_image, MEDIUM_ENTRY_TYPE);
+}
+
+herr_t
+large_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void *image, void *thing, unsigned *flags,
+    haddr_t *new_addr, size_t *new_len, void **new_image)
+{
+    return serialize(addr, len, image, thing, flags,
+            new_addr, new_len, new_image, LARGE_ENTRY_TYPE);
+}
+
+herr_t
+huge_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void *image, void *thing, unsigned *flags,
+    haddr_t *new_addr, size_t *new_len, void **new_image)
+{
+    return serialize(addr, len, image, thing, flags,
+            new_addr, new_len, new_image, HUGE_ENTRY_TYPE);
+}
+
+herr_t
+monster_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void *image, void *thing, unsigned *flags,
+    haddr_t *new_addr, size_t *new_len, void **new_image)
+{
+    return serialize(addr, len, image, thing, flags,
+            new_addr, new_len, new_image, MONSTER_ENTRY_TYPE);
+}
+
+herr_t
+variable_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void *image, void *thing, unsigned *flags,
+    haddr_t *new_addr, size_t *new_len, void **new_image)
+{
+    return serialize(addr, len, image, thing, flags,
+            new_addr, new_len, new_image, VARIABLE_ENTRY_TYPE);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	free_icr & friends
+ *
+ * Purpose:	Nominally, this callback is supposed to free the
+ * 		in core representation of the entry.
+ *
+ * 		In the context of this test bed, we use it to do
+ * 		do all the processing we used to do on a destroy.
+ * 		In particular, we use it to release all the pins
+ * 		that this entry may have on other entries.
+ *
+ * 		The helper functions verify that the correct version of
+ * 		serialize is being called, and then call free_icr
+ * 		proper.
+ *
+ * Return:	SUCCEED
+ *
+ * Programmer:	John Mainzer
+ *              9/19/07
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+free_icr(test_entry_t *entry, int32_t entry_type)
+{
+    test_entry_t *base_addr;
+
+    HDassert(entry);
+
+    base_addr = entries[entry->type];
+
+    HDassert(entry->type == entry_type);
+    HDassert(entry->index >= 0);
+    HDassert(entry->index <= max_indices[entry->type]);
+    HDassert(entry == &(base_addr[entry->index]));
+    HDassert(entry == entry->self);
+    HDassert(entry->cache_ptr != NULL);
+    HDassert(entry->cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert((entry->header.destroy_in_progress) ||
+              (entry->header.addr == entry->addr));
+    HDassert(entry->header.size == entry->size);
+    HDassert((entry->type == VARIABLE_ENTRY_TYPE) ||
+	      (entry->size == entry_sizes[entry->type]));
+
+    if(entry->num_pins > 0) {
+        int i;
+
+	for(i = 0; i < entry->num_pins; i++) {
+            test_entry_t *pinned_entry;
+            test_entry_t *pinned_base_addr;
+
+	    pinned_base_addr = entries[entry->pin_type[i]];
+	    pinned_entry = &(pinned_base_addr[entry->pin_idx[i]]);
+
+	    HDassert(0 <= pinned_entry->type);
+            HDassert(pinned_entry->type < NUMBER_OF_ENTRY_TYPES);
+	    HDassert(pinned_entry->type == entry->pin_type[i]);
+	    HDassert(pinned_entry->index >= 0);
+	    HDassert(pinned_entry->index <= max_indices[pinned_entry->type]);
+	    HDassert(pinned_entry->index == entry->pin_idx[i]);
+	    HDassert(pinned_entry == pinned_entry->self);
+	    HDassert(pinned_entry->header.is_pinned);
+	    HDassert(pinned_entry->is_pinned);
+	    HDassert(pinned_entry->pinning_ref_count > 0);
+
+	    pinned_entry->pinning_ref_count--;
+
+	    if(pinned_entry->pinning_ref_count <= 0) {
+                HDassert(pinned_entry->file_ptr);
+
+		unpin_entry(pinned_entry->type, pinned_entry->index);
+	    } /* end if */
+
+	    entry->pin_type[i] = -1;
+	    entry->pin_idx[i] = -1;
+	} /* end if */
+	entry->num_pins = 0;
+    } /* end if */
+
+    entry->destroyed = TRUE;
+    entry->cache_ptr = NULL;
+
+    return(SUCCEED);
+} /* free_icr() */
+
+herr_t
+pico_free_icr(void *thing)
+{
+    return free_icr((test_entry_t *)thing, PICO_ENTRY_TYPE);
+}
+
+herr_t
+nano_free_icr(void *thing)
+{
+    return free_icr((test_entry_t *)thing, NANO_ENTRY_TYPE);
+}
+
+herr_t
+micro_free_icr(void *thing)
+{
+    return free_icr((test_entry_t *)thing, MICRO_ENTRY_TYPE);
+}
+
+herr_t
+tiny_free_icr(void *thing)
+{
+    return free_icr((test_entry_t *)thing, TINY_ENTRY_TYPE);
+}
+
+herr_t
+small_free_icr(void *thing)
+{
+    return free_icr((test_entry_t *)thing, SMALL_ENTRY_TYPE);
+}
+
+herr_t
+medium_free_icr(void *thing)
+{
+    return free_icr((test_entry_t *)thing, MEDIUM_ENTRY_TYPE);
+}
+
+herr_t
+large_free_icr(void *thing)
+{
+    return free_icr((test_entry_t *)thing, LARGE_ENTRY_TYPE);
+}
+
+herr_t
+huge_free_icr(void *thing)
+{
+    return free_icr((test_entry_t *)thing, HUGE_ENTRY_TYPE);
+}
+
+herr_t
+monster_free_icr(void *thing)
+{
+    return free_icr((test_entry_t *)thing, MONSTER_ENTRY_TYPE);
+}
+
+herr_t
+variable_free_icr(void *thing)
+{
+    return free_icr((test_entry_t *)thing, VARIABLE_ENTRY_TYPE);
+}
 
 
 /**************************************************************************/
@@ -1474,17 +1534,10 @@ execute_flush_op(H5F_t * file_ptr,
 		    HDassert( op_ptr->size <= VARIABLE_ENTRY_SIZE );
 
                     entry_ptr->size = op_ptr->size;
-		    (*flags_ptr) |= H5C_CALLBACK__SIZE_CHANGED_FLAG;
+
+		    (*flags_ptr) |= H5C__SERIALIZE_RESIZED_FLAG;
+
 		    entry_ptr->flush_op_self_resize_in_progress = TRUE;
-
-		    /* if the entry is in the process of being destroyed,
-		     * set the header size to match the entry size so as
-		     * to avoid a spurious failure in the destroy callback.
-		     */
-		    if ( entry_ptr->header.destroy_in_progress ) {
-
-			entry_ptr->header.size = entry_ptr->size;
-		    }
 
 		} else {
 
@@ -1496,8 +1549,29 @@ execute_flush_op(H5F_t * file_ptr,
 		break;
 
 	    case FLUSH_OP__MOVE:
-		move_entry(cache_ptr, op_ptr->type, op_ptr->idx,
-			     op_ptr->flag);
+		if((entry_ptr->type == op_ptr->type) &&
+                        (entry_ptr->index == op_ptr->idx)) {
+
+                    /* the flush operation is acting on the entry to
+		     * which it is attached.  Handle this here:
+		     */
+
+		    HDassert(((*flags_ptr) & H5C__SERIALIZE_RESIZED_FLAG) != 0);
+                    (*flags_ptr) |= H5C__SERIALIZE_MOVED_FLAG;
+
+		    if(op_ptr->flag) {
+                        HDassert(entry_ptr->addr == entry_ptr->alt_addr);
+                        entry_ptr->addr = entry_ptr->main_addr;
+                        entry_ptr->at_main_addr = TRUE;
+                    } /* end if */
+                    else {
+                        HDassert(entry_ptr->addr == entry_ptr->main_addr);
+                        entry_ptr->addr = entry_ptr->alt_addr;
+                        entry_ptr->at_main_addr = FALSE;
+                    } /* end else */
+		} /* end if */
+                else
+		    move_entry(cache_ptr, op_ptr->type, op_ptr->idx, op_ptr->flag);
 		break;
 
 	    default:
@@ -1617,6 +1691,8 @@ reset_entries(void)
 
             base_addr[j].self = &(base_addr[j]);
             base_addr[j].cache_ptr = NULL;
+            base_addr[j].written_to_main_addr = FALSE;
+            base_addr[j].written_to_alt_addr = FALSE;
             base_addr[j].addr = addr;
             base_addr[j].at_main_addr = TRUE;
             base_addr[j].main_addr = addr;
@@ -1624,8 +1700,8 @@ reset_entries(void)
             base_addr[j].size = entry_size;
             base_addr[j].type = i;
             base_addr[j].index = j;
-            base_addr[j].reads = 0;
-            base_addr[j].writes = 0;
+            base_addr[j].serializes = 0;
+            base_addr[j].deserializes = 0;
             base_addr[j].is_dirty = FALSE;
             base_addr[j].is_protected = FALSE;
             base_addr[j].is_read_only = FALSE;
@@ -1651,9 +1727,8 @@ reset_entries(void)
             }
 	    base_addr[j].flush_op_self_resize_in_progress = FALSE;
 
-            base_addr[j].loaded = FALSE;
-            base_addr[j].cleared = FALSE;
-            base_addr[j].flushed = FALSE;
+            base_addr[j].deserialized = FALSE;
+            base_addr[j].serialized = FALSE;
             base_addr[j].destroyed = FALSE;
 
             addr += (haddr_t)entry_size;
@@ -2027,23 +2102,20 @@ verify_entry_status(H5C_t * cache_ptr,
 
 	if ( pass ) {
 
-            if ( ( entry_ptr->loaded != expected[i].loaded ) ||
-	         ( entry_ptr->cleared != expected[i].cleared ) ||
-	         ( entry_ptr->flushed != expected[i].flushed ) ||
+            if ( ( entry_ptr->deserialized != expected[i].deserialized ) ||
+	         ( entry_ptr->serialized != expected[i].serialized ) ||
 	         ( entry_ptr->destroyed != expected[i].destroyed ) ) {
 
 	        pass = FALSE;
                 sprintf(msg,
-                        "%d entry (%d,%d) loaded = %d(%d), clrd = %d(%d), flshd = %d(%d), dest = %d(%d)\n",
+                        "%d entry (%d,%d) deserialized = %d(%d), serialized = %d(%d), dest = %d(%d)\n",
 			tag,
 		        (int)expected[i].entry_type,
 		        (int)expected[i].entry_index,
-		        (int)(entry_ptr->loaded),
-		        (int)(expected[i].loaded),
-		        (int)(entry_ptr->cleared),
-		        (int)(expected[i].cleared),
-		        (int)(entry_ptr->flushed),
-		        (int)(expected[i].flushed),
+		        (int)(entry_ptr->deserialized),
+		        (int)(expected[i].deserialized),
+		        (int)(entry_ptr->serialized),
+		        (int)(expected[i].serialized),
 		        (int)(entry_ptr->destroyed),
 		        (int)(expected[i].destroyed));
                 failure_mssg = msg;
@@ -2117,20 +2189,37 @@ verify_unprotected(void)
 } /* verify_unprotected() */
 
 
-/*-------------------------------------------------------------------------
- * Function:	setup_cache()
+/*****************************************************************************
  *
- * Purpose:	Allocate a cache of the desired size and configure it for
- *		use in the test bed.  Return a pointer to the new cache
- *		structure.
+ * Function:    setup_cache()
  *
- * Return:	Pointer to new cache, or NULL on failure.
+ * Purpose:     Open an HDF file.  This will allocate an instance and
+ * 		initialize an associated instance of H5C_t.  However,
+ * 		we want to test an instance of H5C_t, so allocate and
+ * 		initialize one with the file ID returned by the call to
+ * 		H5Fcreate().  Return a pointer to this instance of H5C_t.
  *
- * Programmer:	John Mainzer
- *              6/11/04
+ *		Observe that we open a HDF file because the cache now
+ *		writes directly to file, and we need the file I/O facilities
+ *		associated with the file.
  *
- *-------------------------------------------------------------------------
- */
+ *		To avoid tripping on error check code, must allocate enough
+ *		space in the file to hold all the test entries and their
+ *		alternates.  This is a little sticky, as the addresses of
+ *		all the test entries are determined at compile time.
+ *
+ *		Deal with this by choosing BASE_ADDR large enough that
+ *		the base address of the allocate space will be less than
+ *		or equal to BASE_ADDR, and then requesting an extra BASE_ADDR
+ *		bytes, so we don't have to wory about exceeding the allocation.
+ *
+ * Return:      Success:        Ptr to H5C_t
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  JRM -- 9/13/07
+ *
+ *****************************************************************************/
 
 H5F_t *
 setup_cache(size_t max_cache_size,
@@ -2379,7 +2468,6 @@ setup_cache(size_t max_cache_size,
     if ( pass ) {
 
         H5C_stats__reset(cache_ptr);
-
         ret_val = file_ptr;
     }
 
@@ -2394,8 +2482,11 @@ setup_cache(size_t max_cache_size,
 /*-------------------------------------------------------------------------
  * Function:	takedown_cache()
  *
- * Purpose:	Flush the specified cache and disable it.  If requested,
- *		dump stats first.  If pass is FALSE, do nothing.
+ * Purpose:	Flush the specified cache and destroy it.  If requested,
+ *		dump stats first.  Then close and delete the associate
+ *		file.
+ *
+ *		If pass is FALSE, do nothing.
  *
  * Return:	void
  *
@@ -2422,7 +2513,7 @@ takedown_cache(H5F_t * file_ptr,
 
         flush_cache(file_ptr, TRUE, FALSE, FALSE);
 
-        H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT);
+        H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT);
 
 	if ( saved_cache != NULL ) {
 
@@ -2526,8 +2617,8 @@ expunge_entry(H5F_t * file_ptr,
         HDassert( ! ( entry_ptr->header.is_pinned ) );
 	HDassert( ! ( entry_ptr->is_pinned ) );
 
-        result = H5C_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[type]), entry_ptr->addr);
+        result = H5C_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT,
+	        &(types[type]), entry_ptr->addr);
 
         if ( result < 0 ) {
 
@@ -2575,12 +2666,12 @@ flush_cache(H5F_t * file_ptr,
 
         if ( destroy_entries ) {
 
-            result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+            result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
                                      H5C__FLUSH_INVALIDATE_FLAG);
 
         } else {
 
-            result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+            result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
                                      H5C__NO_FLAGS_SET);
         }
     }
@@ -2648,8 +2739,8 @@ insert_entry(H5F_t * file_ptr,
 
 	entry_ptr->is_dirty = TRUE;
 
-        result = H5C_insert_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[type]), entry_ptr->addr, (void *)entry_ptr, flags);
+        result = H5C_insert_entry(file_ptr, H5P_DATASET_XFER_DEFAULT,
+	        &(types[type]), entry_ptr->addr, (void *)entry_ptr, flags);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.is_protected ) ||
@@ -2678,6 +2769,7 @@ insert_entry(H5F_t * file_ptr,
         }
 	HDassert( entry_ptr->cache_ptr == NULL );
 
+        entry_ptr->file_ptr = file_ptr;
         entry_ptr->cache_ptr = cache_ptr;
 
 	if ( insert_pinned ) {
@@ -2865,6 +2957,64 @@ move_entry(H5C_t * cache_ptr,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	pin_protected_entry()
+ *
+ * Purpose:	Pin the specified protected entry.
+ *
+ *		Do nothing if pass is FALSE on entry.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              5/17/06
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+pin_protected_entry(H5F_t *file_ptr, int32_t type, int32_t idx)
+{
+    herr_t result;
+    test_entry_t * base_addr;
+    test_entry_t * entry_ptr;
+
+    if(pass) {
+#ifndef NDEBUG
+        H5C_t * cache_ptr = file_ptr->shared->cache;
+#endif /* NDEBUG */
+
+        HDassert(cache_ptr);
+        HDassert((0 <= type) && (type < NUMBER_OF_ENTRY_TYPES));
+        HDassert((0 <= idx) && (idx <= max_indices[type]));
+
+        base_addr = entries[type];
+        entry_ptr = &(base_addr[idx]);
+
+        HDassert(entry_ptr->index == idx);
+        HDassert(entry_ptr->type == type);
+        HDassert(entry_ptr == entry_ptr->self);
+	HDassert(entry_ptr->cache_ptr == cache_ptr);
+        HDassert(entry_ptr->header.is_protected);
+	HDassert(!entry_ptr->header.is_pinned);
+
+        result = H5C_pin_protected_entry((void *)entry_ptr);
+
+        if((result < 0) || !entry_ptr->header.is_protected
+                || !entry_ptr->header.is_pinned
+                || (entry_ptr->header.type != &(types[type]))
+                || (entry_ptr->size != entry_ptr->header.size)
+                || (entry_ptr->addr != entry_ptr->header.addr)) {
+            pass = FALSE;
+            failure_mssg = "error in H5C_pin_protected_entry().";
+        } /* end if */
+
+	entry_ptr->is_pinned = TRUE;
+        HDassert(((entry_ptr->header).type)->id == type);
+    } /* end if */
+
+} /* pin_protected_entry() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	protect_entry()
  *
  * Purpose:	Protect the entry indicated by the type and index.
@@ -2905,8 +3055,8 @@ protect_entry(H5F_t * file_ptr,
         HDassert( entry_ptr == entry_ptr->self );
         HDassert( !(entry_ptr->is_protected) );
 
-        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[type]), entry_ptr->addr, NULL, H5C__NO_FLAGS_SET);
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+                &(types[type]), entry_ptr->addr, &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if ( ( cache_entry_ptr != (void *)entry_ptr ) ||
              ( !(entry_ptr->header.is_protected) ) ||
@@ -2945,6 +3095,7 @@ protect_entry(H5F_t * file_ptr,
 		      ( entry_ptr->cache_ptr == cache_ptr ) );
 
 	    entry_ptr->cache_ptr = cache_ptr;
+	    entry_ptr->file_ptr = file_ptr;
             entry_ptr->is_protected = TRUE;
 
         }
@@ -3001,8 +3152,8 @@ protect_entry_ro(H5F_t * file_ptr,
 		  ( ( entry_ptr->is_read_only ) &&
 		    ( entry_ptr->ro_ref_count > 0 ) ) );
 
-        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[type]), entry_ptr->addr, NULL, H5C__READ_ONLY_FLAG);
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+                &(types[type]), entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
 
         if ( ( cache_entry_ptr != (void *)entry_ptr ) ||
              ( !(entry_ptr->header.is_protected) ) ||
@@ -3021,6 +3172,7 @@ protect_entry_ro(H5F_t * file_ptr,
 		      ( entry_ptr->cache_ptr == cache_ptr ) );
 
 	    entry_ptr->cache_ptr = cache_ptr;
+	    entry_ptr->file_ptr = file_ptr;
             entry_ptr->is_protected = TRUE;
 	    entry_ptr->is_read_only = TRUE;
 	    entry_ptr->ro_ref_count++;
@@ -3145,7 +3297,7 @@ unprotect_entry(H5F_t * file_ptr,
         if(flags & H5C__DIRTIED_FLAG)
             entry_ptr->is_dirty = TRUE;
 
-        result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+        result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
                 &(types[type]), entry_ptr->addr, (void *)entry_ptr, flags);
 
         if ( ( result < 0 ) ||
@@ -3227,6 +3379,7 @@ unprotect_entry(H5F_t * file_ptr,
 
 void
 row_major_scan_forward(H5F_t * file_ptr,
+                       int32_t max_index,
                        int32_t lag,
                        hbool_t verbose,
                        hbool_t reset_stats,
@@ -3244,6 +3397,7 @@ row_major_scan_forward(H5F_t * file_ptr,
     H5C_t * cache_ptr;
     int32_t type = 0;
     int32_t idx;
+    int32_t local_max_index;
 
     if ( verbose )
         HDfprintf(stdout, "%s(): entering.\n", fcn_name);
@@ -3266,206 +3420,239 @@ row_major_scan_forward(H5F_t * file_ptr,
     {
         idx = -lag;
 
-        while ( ( pass ) && ( idx <= (max_indices[type] + lag) ) )
+        local_max_index = MIN(max_index, max_indices[type]);
+
+        while ( ( pass ) && ( idx <= (local_max_index + lag) ) )
         {
+            int32_t tmp_idx;
+
 	    if ( verbose ) {
 
                 HDfprintf(stdout, "%d:%d: ", type, idx);
 	    }
 
-            if ( ( pass ) && ( do_inserts ) && ( (idx + lag) >= 0 ) &&
-                 ( (idx + lag) <= max_indices[type] ) &&
-                 ( ((idx + lag) % 2) == 0 ) &&
-                 ( ! entry_in_cache(cache_ptr, type, (idx + lag)) ) ) {
+            tmp_idx = idx + lag;
+            if ( ( pass ) && ( do_inserts ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( (tmp_idx % 2) == 0 ) &&
+                 ( ! entry_in_cache(cache_ptr, type, tmp_idx) ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
+                    HDfprintf(stdout, "1(i, %d, %d) ", type, tmp_idx);
 
-                insert_entry(file_ptr, type, (idx + lag), H5C__NO_FLAGS_SET);
+                insert_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
             }
 
-
-            if ( ( pass ) && ( (idx + lag - 1) >= 0 ) &&
-                 ( (idx + lag - 1) <= max_indices[type] ) &&
-                 ( ( (idx + lag - 1) % 3 ) == 0 ) ) {
+            tmp_idx--;
+            if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 3 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, (idx + lag - 1));
+                    HDfprintf(stdout, "2(p, %d, %d) ", type, tmp_idx);
 
-                protect_entry(file_ptr, type, (idx + lag - 1));
+                protect_entry(file_ptr, type, tmp_idx);
             }
 
-            if ( ( pass ) && ( (idx + lag - 2) >= 0 ) &&
-                 ( (idx + lag - 2) <= max_indices[type] ) &&
-                 ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
+            tmp_idx--;
+            if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 3 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag - 2));
+                    HDfprintf(stdout, "3(u, %d, %d) ", type, tmp_idx);
 
-                unprotect_entry(file_ptr, type, idx+lag-2, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
             }
 
-
-            if ( ( pass ) && ( do_moves ) && ( (idx + lag - 2) >= 0 ) &&
-                 ( (idx + lag - 2) <= max_indices[type] ) &&
-                 ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
-
-                move_entry(cache_ptr, type, (idx + lag - 2),
-                             move_to_main_addr);
-            }
-
-
-            if ( ( pass ) && ( (idx + lag - 3) >= 0 ) &&
-                 ( (idx + lag - 3) <= max_indices[type] ) &&
-                 ( ( (idx + lag - 3) % 5 ) == 0 ) ) {
+            /* (don't decrement tmp_idx) */
+            if ( ( pass ) && ( do_moves ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 3 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, (idx + lag - 3));
+                    HDfprintf(stdout, "4(r, %d, %d, %d) ",
+			      type, tmp_idx, (int)move_to_main_addr);
 
-                protect_entry(file_ptr, type, (idx + lag - 3));
+                move_entry(cache_ptr, type, tmp_idx, move_to_main_addr);
             }
 
-            if ( ( pass ) && ( (idx + lag - 5) >= 0 ) &&
-                 ( (idx + lag - 5) <= max_indices[type] ) &&
-                 ( ( (idx + lag - 5) % 5 ) == 0 ) ) {
+            tmp_idx--;
+            if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 5 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag - 5));
+                    HDfprintf(stdout, "5(p, %d, %d) ", type, tmp_idx);
 
-                unprotect_entry(file_ptr, type, idx+lag-5, H5C__NO_FLAGS_SET);
+                protect_entry(file_ptr, type, tmp_idx);
+            }
+
+            tmp_idx -= 2;
+            if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 5 ) == 0 ) ) {
+
+                if ( verbose )
+                    HDfprintf(stdout, "6(u, %d, %d) ", type, tmp_idx);
+
+                unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
             }
 
 	    if ( do_mult_ro_protects )
 	    {
-		if ( ( pass ) && ( (idx + lag - 5) >= 0 ) &&
-		     ( (idx + lag - 5) < max_indices[type] ) &&
-		     ( (idx + lag - 5) % 9 == 0 ) ) {
+                /* (don't decrement tmp_idx) */
+		if ( ( pass ) && ( tmp_idx >= 0 ) &&
+		     ( tmp_idx < local_max_index ) &&
+		     ( tmp_idx % 9 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type,
-				  (idx + lag - 5));
+                        HDfprintf(stdout, "7(p-ro, %d, %d) ", type, tmp_idx);
 
-		    protect_entry_ro(file_ptr, type, (idx + lag - 5));
+		    protect_entry_ro(file_ptr, type, tmp_idx);
 		}
 
-		if ( ( pass ) && ( (idx + lag - 6) >= 0 ) &&
-		     ( (idx + lag - 6) < max_indices[type] ) &&
-		     ( (idx + lag - 6) % 11 == 0 ) ) {
+                tmp_idx--;
+		if ( ( pass ) && ( tmp_idx >= 0 ) &&
+		     ( tmp_idx < local_max_index ) &&
+		     ( tmp_idx % 11 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type,
-				  (idx + lag - 6));
+                        HDfprintf(stdout, "8(p-ro, %d, %d) ", type, tmp_idx);
 
-		    protect_entry_ro(file_ptr, type, (idx + lag - 6));
+		    protect_entry_ro(file_ptr, type, tmp_idx);
 		}
 
-		if ( ( pass ) && ( (idx + lag - 7) >= 0 ) &&
-		     ( (idx + lag - 7) < max_indices[type] ) &&
-		     ( (idx + lag - 7) % 13 == 0 ) ) {
+                tmp_idx--;
+		if ( ( pass ) && ( tmp_idx >= 0 ) &&
+		     ( tmp_idx < local_max_index ) &&
+		     ( tmp_idx % 13 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type,
-				  (idx + lag - 7));
+                        HDfprintf(stdout, "9(p-ro, %d, %d) ", type, tmp_idx);
 
-		    protect_entry_ro(file_ptr, type, (idx + lag - 7));
+		    protect_entry_ro(file_ptr, type, tmp_idx);
 		}
 
-		if ( ( pass ) && ( (idx + lag - 7) >= 0 ) &&
-		     ( (idx + lag - 7) < max_indices[type] ) &&
-		     ( (idx + lag - 7) % 9 == 0 ) ) {
+                /* (don't decrement tmp_idx) */
+		if ( ( pass ) && ( tmp_idx >= 0 ) &&
+		     ( tmp_idx < local_max_index ) &&
+		     ( tmp_idx % 9 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type,
-				  (idx + lag - 7));
+                        HDfprintf(stdout, "10(u-ro, %d, %d) ", type, tmp_idx);
 
-		    unprotect_entry(file_ptr, type, (idx + lag - 7), H5C__NO_FLAGS_SET);
+		    unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 		}
 
-		if ( ( pass ) && ( (idx + lag - 8) >= 0 ) &&
-		     ( (idx + lag - 8) < max_indices[type] ) &&
-		     ( (idx + lag - 8) % 11 == 0 ) ) {
+                tmp_idx--;
+		if ( ( pass ) && ( tmp_idx >= 0 ) &&
+		     ( tmp_idx < local_max_index ) &&
+		     ( tmp_idx % 11 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type,
-				  (idx + lag - 8));
+                        HDfprintf(stdout, "11(u-ro, %d, %d) ", type, tmp_idx);
 
-		    unprotect_entry(file_ptr, type, (idx + lag - 8), H5C__NO_FLAGS_SET);
+		    unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 		}
 
-		if ( ( pass ) && ( (idx + lag - 9) >= 0 ) &&
-		     ( (idx + lag - 9) < max_indices[type] ) &&
-		     ( (idx + lag - 9) % 13 == 0 ) ) {
+                tmp_idx--;
+		if ( ( pass ) && ( tmp_idx >= 0 ) &&
+		     ( tmp_idx < local_max_index ) &&
+		     ( tmp_idx % 13 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type,
-				  (idx + lag - 9));
+                        HDfprintf(stdout, "12(u-ro, %d, %d) ", type, tmp_idx);
 
-		    unprotect_entry(file_ptr, type, (idx + lag - 9), H5C__NO_FLAGS_SET);
+		    unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 		}
 	    } /* if ( do_mult_ro_protects ) */
 
-            if ( ( pass ) && ( idx >= 0 ) && ( idx <= max_indices[type] ) ) {
+            if ( ( pass ) && ( idx >= 0 ) && ( idx <= local_max_index ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, idx);
+                    HDfprintf(stdout, "13(p, %d, %d) ", type, idx);
 
                 protect_entry(file_ptr, type, idx);
             }
 
-            if ( ( pass ) && ( (idx - lag + 2) >= 0 ) &&
-                 ( (idx - lag + 2) <= max_indices[type] ) &&
-                 ( ( (idx - lag + 2) % 7 ) == 0 ) ) {
+            tmp_idx = idx - lag + 2;
+            if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 7 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag + 2));
+                    HDfprintf(stdout, "14(u, %d, %d) ", type, tmp_idx);
 
-                unprotect_entry(file_ptr, type, idx-lag+2, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
             }
 
-            if ( ( pass ) && ( (idx - lag + 1) >= 0 ) &&
-                 ( (idx - lag + 1) <= max_indices[type] ) &&
-                 ( ( (idx - lag + 1) % 7 ) == 0 ) ) {
+            tmp_idx--;
+            if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 7 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, (idx - lag + 1));
+                    HDfprintf(stdout, "15(p, %d, %d) ", type, tmp_idx);
 
-                protect_entry(file_ptr, type, (idx - lag + 1));
+                protect_entry(file_ptr, type, tmp_idx);
             }
 
 
             if ( do_destroys ) {
 
-                if ( ( pass ) && ( (idx - lag) >= 0 ) &&
-                     ( ( idx - lag) <= max_indices[type] ) ) {
+                tmp_idx = idx - lag;
+                if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                     ( tmp_idx <= local_max_index ) ) {
 
-                    switch ( (idx - lag) %4 ) {
+                    switch ( tmp_idx %4 ) {
 
                         case 0: /* we just did an insert */
-                            unprotect_entry(file_ptr, type, idx - lag, H5C__NO_FLAGS_SET);
+
+                            if ( verbose )
+                                HDfprintf(stdout, "16(u, %d, %d) ", type, tmp_idx);
+
+                            unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
                             break;
 
                         case 1:
-                            if ( (entries[type])[idx-lag].is_dirty ) {
+                            if ( (entries[type])[tmp_idx].is_dirty ) {
 
-                                unprotect_entry(file_ptr, type, idx - lag, H5C__NO_FLAGS_SET);
+                                if ( verbose )
+                                    HDfprintf(stdout, "17(u, %d, %d) ", type, tmp_idx);
+
+                                unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
                             } else {
 
-                                unprotect_entry(file_ptr, type, idx - lag,
+                                if ( verbose )
+                                    HDfprintf(stdout, "18(u, %d, %d) ", type, tmp_idx);
+
+                                unprotect_entry(file_ptr, type, tmp_idx,
                                         (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
                             }
                             break;
 
-                        case 2: /* we just did an insrt */
-                            unprotect_entry(file_ptr, type, idx - lag, H5C__DELETED_FLAG);
+                        case 2: /* we just did an insert */
+
+                            if ( verbose )
+                                HDfprintf(stdout, "19(u-del, %d, %d) ", type, tmp_idx);
+
+                            unprotect_entry(file_ptr, type, tmp_idx, H5C__DELETED_FLAG);
                             break;
 
                         case 3:
-                            if ( (entries[type])[idx-lag].is_dirty ) {
+                            if ( (entries[type])[tmp_idx].is_dirty ) {
 
-                                unprotect_entry(file_ptr, type, idx - lag, H5C__DELETED_FLAG);
+                                if ( verbose )
+                                    HDfprintf(stdout, "20(u-del, %d, %d) ", type, tmp_idx);
+
+                                unprotect_entry(file_ptr, type, tmp_idx, H5C__DELETED_FLAG);
                             } else {
 
-                                unprotect_entry(file_ptr, type, idx - lag,
+                                if ( verbose )
+                                    HDfprintf(stdout, "21(u-del, %d, %d) ", type, tmp_idx);
+
+                                unprotect_entry(file_ptr, type, tmp_idx,
                                         (dirty_destroys ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET)
                                         | H5C__DELETED_FLAG);
                             }
@@ -3479,13 +3666,14 @@ row_major_scan_forward(H5F_t * file_ptr,
 
             } else {
 
-                if ( ( pass ) && ( (idx - lag) >= 0 ) &&
-                     ( ( idx - lag) <= max_indices[type] ) ) {
+                tmp_idx = idx - lag;
+                if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                     ( tmp_idx <= local_max_index ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag));
+                        HDfprintf(stdout, "22(u, %d, %d) ", type, tmp_idx);
 
-                    unprotect_entry(file_ptr, type, idx - lag,
+                    unprotect_entry(file_ptr, type, tmp_idx,
                             (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
                 }
             }
@@ -3631,6 +3819,7 @@ hl_row_major_scan_forward(H5F_t * file_ptr,
 
 void
 row_major_scan_backward(H5F_t * file_ptr,
+                        int32_t max_index,
                         int32_t lag,
                         hbool_t verbose,
                         hbool_t reset_stats,
@@ -3648,6 +3837,7 @@ row_major_scan_backward(H5F_t * file_ptr,
     H5C_t * cache_ptr;
     int32_t type = NUMBER_OF_ENTRY_TYPES - 1;
     int32_t idx;
+    int32_t local_max_index;
 
     if ( verbose )
         HDfprintf(stdout, "%s(): Entering.\n", fcn_name);
@@ -3667,142 +3857,152 @@ row_major_scan_backward(H5F_t * file_ptr,
 
     while ( ( pass ) && ( type >= 0 ) )
     {
-        idx = max_indices[type] + lag;
+        local_max_index = MIN(max_index, max_indices[type]);
+
+        idx = local_max_index + lag;
 
         while ( ( pass ) && ( idx >= -lag ) )
         {
-            if ( ( pass ) && ( do_inserts ) && ( (idx - lag) >= 0 ) &&
-                 ( (idx - lag) <= max_indices[type] ) &&
-                 ( ((idx - lag) % 2) == 1 ) &&
-                 ( ! entry_in_cache(cache_ptr, type, (idx - lag)) ) ) {
+            int32_t tmp_idx;
+
+            tmp_idx = idx - lag;
+            if ( ( pass ) && ( do_inserts ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( (tmp_idx % 2) == 1 ) &&
+                 ( ! entry_in_cache(cache_ptr, type, tmp_idx) ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
+                    HDfprintf(stdout, "(i, %d, %d) ", type, tmp_idx);
 
-                insert_entry(file_ptr, type, (idx - lag), H5C__NO_FLAGS_SET);
+                insert_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
             }
 
-
-            if ( ( pass ) && ( (idx - lag + 1) >= 0 ) &&
-                 ( (idx - lag + 1) <= max_indices[type] ) &&
-                 ( ( (idx - lag + 1) % 3 ) == 0 ) ) {
+            tmp_idx++;
+            if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 3 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, (idx - lag + 1));
+                    HDfprintf(stdout, "(p, %d, %d) ", type, tmp_idx);
 
-                protect_entry(file_ptr, type, (idx - lag + 1));
+                protect_entry(file_ptr, type, tmp_idx);
             }
 
-            if ( ( pass ) && ( (idx - lag + 2) >= 0 ) &&
-                 ( (idx - lag + 2) <= max_indices[type] ) &&
-                 ( ( (idx - lag + 2) % 3 ) == 0 ) ) {
+            tmp_idx++;
+            if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 3 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag + 2));
+                    HDfprintf(stdout, "(u, %d, %d) ", type, tmp_idx);
 
-                unprotect_entry(file_ptr, type, idx-lag+2, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
             }
 
-
-            if ( ( pass ) && ( do_moves ) && ( (idx - lag + 2) >= 0 ) &&
-                 ( (idx - lag + 2) <= max_indices[type] ) &&
-                 ( ( (idx - lag + 2) % 3 ) == 0 ) ) {
-
-                move_entry(cache_ptr, type, (idx - lag + 2),
-                             move_to_main_addr);
-            }
-
-
-            if ( ( pass ) && ( (idx - lag + 3) >= 0 ) &&
-                 ( (idx - lag + 3) <= max_indices[type] ) &&
-                 ( ( (idx - lag + 3) % 5 ) == 0 ) ) {
+            /* (don't increment tmp_idx) */
+            if ( ( pass ) && ( do_moves ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 3 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, (idx - lag + 3));
+                    HDfprintf(stdout, "(r, %d, %d, %d) ",
+			      type, tmp_idx, (int)move_to_main_addr);
+
+                move_entry(cache_ptr, type, tmp_idx, move_to_main_addr);
+            }
+
+            tmp_idx++;
+            if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 5 ) == 0 ) ) {
+
+                if ( verbose )
+                    HDfprintf(stdout, "(p, %d, %d) ", type, tmp_idx);
 
                 protect_entry(file_ptr, type, (idx - lag + 3));
             }
 
-            if ( ( pass ) && ( (idx - lag + 5) >= 0 ) &&
-                 ( (idx - lag + 5) <= max_indices[type] ) &&
-                 ( ( (idx - lag + 5) % 5 ) == 0 ) ) {
+            tmp_idx += 2;
+            if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 5 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag + 5));
+                    HDfprintf(stdout, "(u, %d, %d) ", type, tmp_idx);
 
-                unprotect_entry(file_ptr, type, idx-lag+5, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
             }
 
+            /* (don't increment tmp_idx) */
 	    if ( do_mult_ro_protects )
 	    {
-		if ( ( pass ) && ( (idx - lag + 5) >= 0 ) &&
-		     ( (idx - lag + 5) < max_indices[type] ) &&
-		     ( (idx - lag + 5) % 9 == 0 ) ) {
+		if ( ( pass ) && ( tmp_idx >= 0 ) &&
+		     ( tmp_idx < local_max_index ) &&
+		     ( tmp_idx % 9 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type,
-				  (idx - lag + 5));
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, tmp_idx);
 
-		    protect_entry_ro(file_ptr, type, (idx - lag + 5));
+		    protect_entry_ro(file_ptr, type, tmp_idx);
 		}
 
-		if ( ( pass ) && ( (idx - lag + 6) >= 0 ) &&
-		     ( (idx - lag + 6) < max_indices[type] ) &&
-		     ( (idx - lag + 6) % 11 == 0 ) ) {
+                tmp_idx++;
+		if ( ( pass ) && ( tmp_idx >= 0 ) &&
+		     ( tmp_idx < local_max_index ) &&
+		     ( tmp_idx % 11 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type,
-				  (idx - lag + 6));
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, tmp_idx);
 
-		    protect_entry_ro(file_ptr, type, (idx - lag + 6));
+		    protect_entry_ro(file_ptr, type, tmp_idx);
 		}
 
-		if ( ( pass ) && ( (idx - lag + 7) >= 0 ) &&
-		     ( (idx - lag + 7) < max_indices[type] ) &&
-		     ( (idx - lag + 7) % 13 == 0 ) ) {
+                tmp_idx++;
+		if ( ( pass ) && ( tmp_idx >= 0 ) &&
+		     ( tmp_idx < local_max_index ) &&
+		     ( tmp_idx % 13 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type,
-				  (idx - lag + 7));
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, tmp_idx);
 
-		    protect_entry_ro(file_ptr, type, (idx - lag + 7));
+		    protect_entry_ro(file_ptr, type, tmp_idx);
 		}
 
-		if ( ( pass ) && ( (idx - lag + 7) >= 0 ) &&
-		     ( (idx - lag + 7) < max_indices[type] ) &&
-		     ( (idx - lag + 7) % 9 == 0 ) ) {
+                /* (don't increment tmp_idx) */
+		if ( ( pass ) && ( tmp_idx >= 0 ) &&
+		     ( tmp_idx < local_max_index ) &&
+		     ( tmp_idx % 9 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type,
-				  (idx - lag + 7));
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, tmp_idx);
 
-		    unprotect_entry(file_ptr, type, (idx - lag + 7), H5C__NO_FLAGS_SET);
+		    unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 		}
 
-		if ( ( pass ) && ( (idx - lag + 8) >= 0 ) &&
-		     ( (idx - lag + 8) < max_indices[type] ) &&
-		     ( (idx - lag + 8) % 11 == 0 ) ) {
+                tmp_idx++;
+		if ( ( pass ) && ( tmp_idx >= 0 ) &&
+		     ( tmp_idx < local_max_index ) &&
+		     ( tmp_idx % 11 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type,
-				  (idx - lag + 8));
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, tmp_idx);
 
-		    unprotect_entry(file_ptr, type, (idx - lag + 8), H5C__NO_FLAGS_SET);
+		    unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 		}
 
-		if ( ( pass ) && ( (idx - lag + 9) >= 0 ) &&
-		     ( (idx - lag + 9) < max_indices[type] ) &&
-		     ( (idx - lag + 9) % 13 == 0 ) ) {
+                tmp_idx++;
+		if ( ( pass ) && ( tmp_idx >= 0 ) &&
+		     ( tmp_idx < local_max_index ) &&
+		     ( tmp_idx % 13 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type,
-				  (idx - lag + 9));
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, tmp_idx);
 
-		    unprotect_entry(file_ptr, type, (idx - lag + 9), H5C__NO_FLAGS_SET);
+		    unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 		}
 	    } /* if ( do_mult_ro_protects ) */
 
-            if ( ( pass ) && ( idx >= 0 ) && ( idx <= max_indices[type] ) ) {
+            if ( ( pass ) && ( idx >= 0 ) && ( idx <= local_max_index ) ) {
 
                 if ( verbose )
                     HDfprintf(stdout, "(p, %d, %d) ", type, idx);
@@ -3810,34 +4010,35 @@ row_major_scan_backward(H5F_t * file_ptr,
                 protect_entry(file_ptr, type, idx);
             }
 
-
-            if ( ( pass ) && ( (idx + lag - 2) >= 0 ) &&
-                 ( (idx + lag - 2) <= max_indices[type] ) &&
-                 ( ( (idx + lag - 2) % 7 ) == 0 ) ) {
+            tmp_idx = idx + lag - 2;
+            if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 7 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag - 2));
+                    HDfprintf(stdout, "(u, %d, %d) ", type, tmp_idx);
 
-                unprotect_entry(file_ptr, type, idx+lag-2, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
             }
 
-            if ( ( pass ) && ( (idx + lag - 1) >= 0 ) &&
-                 ( (idx + lag - 1) <= max_indices[type] ) &&
-                 ( ( (idx + lag - 1) % 7 ) == 0 ) ) {
+            tmp_idx++;
+            if ( ( pass ) && ( tmp_idx >= 0 ) &&
+                 ( tmp_idx <= local_max_index ) &&
+                 ( ( tmp_idx % 7 ) == 0 ) ) {
 
                 if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, (idx + lag - 1));
+                    HDfprintf(stdout, "(p, %d, %d) ", type, tmp_idx);
 
-                protect_entry(file_ptr, type, (idx + lag - 1));
+                protect_entry(file_ptr, type, tmp_idx);
             }
 
 
             if ( do_destroys ) {
 
                 if ( ( pass ) && ( (idx + lag) >= 0 ) &&
-                     ( ( idx + lag) <= max_indices[type] ) ) {
+                     ( ( idx + lag) <= local_max_index ) ) {
 
-                    switch ( (idx + lag) %4 ) {
+                    switch ( (idx + lag) % 4 ) {
 
                         case 0:
                             if ( (entries[type])[idx+lag].is_dirty ) {
@@ -3866,7 +4067,7 @@ row_major_scan_backward(H5F_t * file_ptr,
                             }
                             break;
 
-                        case 3: /* we just did an insrt */
+                        case 3: /* we just did an insert */
                             unprotect_entry(file_ptr, type, idx + lag, H5C__DELETED_FLAG);
                             break;
 
@@ -3878,7 +4079,7 @@ row_major_scan_backward(H5F_t * file_ptr,
             } else {
 
                 if ( ( pass ) && ( (idx + lag) >= 0 ) &&
-                     ( ( idx + lag) <= max_indices[type] ) ) {
+                     ( ( idx + lag) <= local_max_index ) ) {
 
                     if ( verbose )
                         HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag));
@@ -4029,6 +4230,7 @@ hl_row_major_scan_backward(H5F_t * file_ptr,
 
 void
 col_major_scan_forward(H5F_t * file_ptr,
+		       int32_t max_index,
                        int32_t lag,
                        hbool_t verbose,
                        hbool_t reset_stats,
@@ -4041,13 +4243,18 @@ col_major_scan_forward(H5F_t * file_ptr,
     H5C_t * cache_ptr;
     int32_t type = 0;
     int32_t idx;
+    int32_t local_max_index[NUMBER_OF_ENTRY_TYPES];
 
     if ( verbose )
         HDfprintf(stdout, "%s: entering.\n", fcn_name);
 
     if ( pass ) {
+        int i;
 
         cache_ptr = file_ptr->shared->cache;
+
+        for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
+            local_max_index[i] = MIN(max_index, max_indices[i]);
 
         HDassert( lag > 5 );
 
@@ -4066,7 +4273,7 @@ col_major_scan_forward(H5F_t * file_ptr,
         while ( ( pass ) && ( type < NUMBER_OF_ENTRY_TYPES ) )
         {
             if ( ( pass ) && ( do_inserts ) && ( (idx + lag) >= 0 ) &&
-                 ( (idx + lag) <= max_indices[type] ) &&
+                 ( (idx + lag) <= local_max_index[type] ) &&
                  ( ((idx + lag) % 3) == 0 ) &&
                  ( ! entry_in_cache(cache_ptr, type, (idx + lag)) ) ) {
 
@@ -4076,7 +4283,9 @@ col_major_scan_forward(H5F_t * file_ptr,
                 insert_entry(file_ptr, type, (idx + lag), H5C__NO_FLAGS_SET);
             }
 
-            if ( ( pass ) && ( idx >= 0 ) && ( idx <= max_indices[type] ) ) {
+            if ( ( pass ) &&
+                 ( idx >= 0 ) &&
+                 ( idx <= local_max_index[type] ) ) {
 
                 if ( verbose )
                     HDfprintf(stdout, "(p, %d, %d) ", type, idx);
@@ -4085,7 +4294,7 @@ col_major_scan_forward(H5F_t * file_ptr,
             }
 
             if ( ( pass ) && ( (idx - lag) >= 0 ) &&
-                 ( (idx - lag) <= max_indices[type] ) ) {
+                 ( (idx - lag) <= local_max_index[type] ) ) {
 
                 if ( verbose )
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag));
@@ -4199,7 +4408,7 @@ hl_col_major_scan_forward(H5F_t * file_ptr,
                 }
 
                 if ( ( pass ) && ( i >= 0 ) &&
-                     ( i <= max_indices[type] ) ) {
+                     ( i <= local_max_index ) ) {
 
                     if ( verbose )
                         HDfprintf(stdout, "(u, %d, %d) ", type, i);
@@ -4247,6 +4456,7 @@ hl_col_major_scan_forward(H5F_t * file_ptr,
 
 void
 col_major_scan_backward(H5F_t * file_ptr,
+		        int32_t max_index,
                         int32_t lag,
                         hbool_t verbose,
                         hbool_t reset_stats,
@@ -4260,15 +4470,20 @@ col_major_scan_backward(H5F_t * file_ptr,
     int mile_stone = 1;
     int32_t type;
     int32_t idx;
+    int32_t local_max_index[NUMBER_OF_ENTRY_TYPES];
 
     if ( verbose )
         HDfprintf(stdout, "%s: entering.\n", fcn_name);
 
     if ( pass ) {
+        int i;
 
         cache_ptr = file_ptr->shared->cache;
 
         HDassert( cache_ptr != NULL );
+
+        for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
+            local_max_index[i] = MIN(max_index, max_indices[i]);
 
         HDassert( lag > 5 );
 
@@ -4278,7 +4493,7 @@ col_major_scan_backward(H5F_t * file_ptr,
         }
     }
 
-    idx = MAX_ENTRIES + lag;
+    idx = local_max_index[NUMBER_OF_ENTRY_TYPES - 1] + lag;
 
     if ( verbose ) /* 1 */
         HDfprintf(stdout, "%s: point %d.\n", fcn_name, mile_stone++);
@@ -4291,7 +4506,7 @@ col_major_scan_backward(H5F_t * file_ptr,
         while ( ( pass ) && ( type >= 0 ) )
         {
             if ( ( pass ) && ( do_inserts) && ( (idx - lag) >= 0 ) &&
-                 ( (idx - lag) <= max_indices[type] ) &&
+                 ( (idx - lag) <= local_max_index[type] ) &&
                  ( ((idx - lag) % 3) == 0 ) &&
                  ( ! entry_in_cache(cache_ptr, type, (idx - lag)) ) ) {
 
@@ -4301,7 +4516,9 @@ col_major_scan_backward(H5F_t * file_ptr,
                 insert_entry(file_ptr, type, (idx - lag), H5C__NO_FLAGS_SET);
             }
 
-            if ( ( pass ) && ( idx >= 0 ) && ( idx <= max_indices[type] ) ) {
+            if ( ( pass ) &&
+		 ( idx >= 0 ) &&
+		 ( idx <= local_max_index[type] ) ) {
 
                 if ( verbose )
                     HDfprintf(stdout, "(p, %d, %d) ", type, idx);
@@ -4310,7 +4527,7 @@ col_major_scan_backward(H5F_t * file_ptr,
             }
 
             if ( ( pass ) && ( (idx + lag) >= 0 ) &&
-                 ( (idx + lag) <= max_indices[type] ) ) {
+                 ( (idx + lag) <= local_max_index[type] ) ) {
 
                 if ( verbose )
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag));
@@ -4496,7 +4713,6 @@ check_and_validate_cache_hit_rate(hid_t file_id,
                                   int64_t min_accesses,
                                   double min_hit_rate)
 {
-    /* const char * fcn_name = "check_and_validate_cache_hit_rate()"; */
     herr_t result;
     int64_t cache_hits = 0;
     int64_t cache_accesses = 0;
@@ -4630,7 +4846,6 @@ check_and_validate_cache_size(hid_t file_id,
                               int32_t * cur_num_entries_ptr,
                               hbool_t dump_data)
 {
-    /* const char * fcn_name = "check_and_validate_cache_size()"; */
     herr_t result;
     size_t expected_max_size;
     size_t max_size;
@@ -4761,7 +4976,6 @@ validate_mdc_config(hid_t file_id,
                     hbool_t compare_init,
                     int test_num)
 {
-    /* const char * fcn_name = "validate_mdc_config()"; */
     static char msg[256];
     H5F_t * file_ptr = NULL;
     H5C_t * cache_ptr = NULL;

@@ -165,14 +165,16 @@ static herr_t H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
                                                            hbool_t  do_barrier);
 
 static herr_t H5AC_receive_and_apply_clean_list(H5F_t  * f,
-                                                hid_t    primary_dxpl_id,
-                                                hid_t    secondary_dxpl_id,
+                                                hid_t    dxpl_id,
                                                 H5AC_t * cache_ptr);
 
 static herr_t H5AC_log_moved_entry(const H5F_t * f,
                                      haddr_t old_addr,
                                      haddr_t new_addr);
 #endif /* H5_HAVE_PARALLEL */
+
+static herr_t H5AC_set_cache_config(H5AC_t * cache_ptr,
+                                     H5AC_cache_config_t *config_ptr);
 
 
 /*-------------------------------------------------------------------------
@@ -421,8 +423,6 @@ herr_t
 H5AC_create(const H5F_t *f,
             H5AC_cache_config_t *config_ptr)
 {
-    herr_t ret_value = SUCCEED;      /* Return value */
-    herr_t result;
 #ifdef H5_HAVE_PARALLEL
     char 	 prefix[H5C__PREFIX_LEN] = "";
     MPI_Comm	 mpi_comm = MPI_COMM_NULL;
@@ -430,6 +430,7 @@ H5AC_create(const H5F_t *f,
     int	 	 mpi_size = -1;
     H5AC_aux_t * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
+    herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_create, FAIL)
 
@@ -438,13 +439,6 @@ H5AC_create(const H5F_t *f,
     HDassert(config_ptr != NULL);
     HDcompile_assert(NELMTS(H5AC_entry_type_names) == H5AC_NTYPES);
     HDcompile_assert(H5C__MAX_NUM_TYPE_IDS == H5AC_NTYPES);
-
-    result = H5AC_validate_config(config_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad cache configuration");
-    }
 
 #ifdef H5_HAVE_PARALLEL
     if ( IS_H5FD_MPI(f) ) {
@@ -591,24 +585,13 @@ H5AC_create(const H5F_t *f,
     }
 #ifdef H5_HAVE_PARALLEL
     else if ( aux_ptr != NULL ) {
-
-        result = H5C_set_prefix(f->shared->cache, prefix);
-
-        if ( result != SUCCEED ) {
-
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                        "H5C_set_prefix() failed")
-        }
+        if(H5C_set_prefix(f->shared->cache, prefix) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "H5C_set_prefix() failed")
     }
 #endif /* H5_HAVE_PARALLEL */
 
-    result = H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                    "auto resize configuration failed")
-    }
+    if(H5AC_set_cache_config(f->shared->cache, config_ptr) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "auto resize configuration failed")
 
 done:
 
@@ -688,7 +671,7 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-    if ( H5C_dest(f, dxpl_id, H5AC_noblock_dxpl_id) < 0 ) {
+    if ( H5C_dest(f, dxpl_id) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache")
     }
@@ -754,8 +737,6 @@ H5AC_expunge_entry(H5F_t *f,
     HDassert(f->shared);
     HDassert(f->shared->cache);
     HDassert(type);
-    HDassert(type->clear);
-    HDassert(type->dest);
     HDassert(H5F_addr_defined(addr));
 
 #if H5AC__TRACE_FILE_ENABLED
@@ -779,7 +760,6 @@ H5AC_expunge_entry(H5F_t *f,
 
     result = H5C_expunge_entry(f,
 		               dxpl_id,
-                               H5AC_noblock_dxpl_id,
 			       type,
 			       addr);
 
@@ -934,8 +914,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
 	    aux_ptr->write_permitted = TRUE;
 
             status = H5C_flush_cache(f,
-                                     H5AC_noblock_dxpl_id,
-                                     H5AC_noblock_dxpl_id,
+                                     dxpl_id,
                                      init_flush_flags);
 
 	    aux_ptr->write_permitted = FALSE;
@@ -961,7 +940,6 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
 
     status = H5C_flush_cache(f,
 		             dxpl_id,
-                             H5AC_noblock_dxpl_id,
 			     flags);
 
     if ( status < 0 ) {
@@ -1080,7 +1058,6 @@ herr_t
 H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     void *thing, unsigned int flags)
 {
-    herr_t		result;
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t        * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
@@ -1097,8 +1074,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
     HDassert(f->shared);
     HDassert(f->shared->cache);
     HDassert(type);
-    HDassert(type->flush);
-    HDassert(type->size);
+    HDassert(type->serialize);
     HDassert(H5F_addr_defined(addr));
     HDassert(thing);
 
@@ -1124,7 +1100,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     /* Insert entry into metadata cache */
-    if(H5C_insert_entry(f, dxpl_id, H5AC_noblock_dxpl_id, type, addr, thing, flags) < 0)
+    if(H5C_insert_entry(f, dxpl_id, type, addr, thing, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5C_insert_entry() failed")
 
 #if H5AC__TRACE_FILE_ENABLED
@@ -1427,8 +1403,7 @@ H5AC_protect(H5F_t *f,
     HDassert(f->shared);
     HDassert(f->shared->cache);
     HDassert(type);
-    HDassert(type->flush);
-    HDassert(type->load);
+    HDassert(type->serialize);
     HDassert(H5F_addr_defined(addr));
 
     /* Check for invalid access request */
@@ -1476,7 +1451,6 @@ H5AC_protect(H5F_t *f,
 
     thing = H5C_protect(f,
 		        dxpl_id,
-                        H5AC_noblock_dxpl_id,
 			type,
 			addr,
 			udata,
@@ -1690,8 +1664,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     HDassert(f->shared);
     HDassert(f->shared->cache);
     HDassert(type);
-    HDassert(type->clear);
-    HDassert(type->flush);
+    HDassert(type->deserialize);
     HDassert(H5F_addr_defined(addr));
     HDassert(thing);
     HDassert( ((H5AC_info_t *)thing)->addr == addr );
@@ -1717,22 +1690,6 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     dirtied = (hbool_t)( ( (flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG ) ||
 		( ((H5AC_info_t *)thing)->dirtied ) );
     deleted = (hbool_t)( (flags & H5C__DELETED_FLAG) == H5C__DELETED_FLAG );
-
-    /* Check if the size changed out from underneath us, if we're not deleting
-     *  the entry.
-     */
-    if ( dirtied && !deleted ) {
-        size_t		curr_size = 0;
-
-        if ( (type->size)(f, thing, &curr_size) < 0 ) {
-
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, FAIL, \
-                        "Can't get size of thing")
-        }
-
-        if(((H5AC_info_t *)thing)->size != curr_size)
-            HGOTO_ERROR(H5E_CACHE, H5E_BADSIZE, FAIL, "size of entry changed")
-    }
 
 #ifdef H5_HAVE_PARALLEL
     if ( ( dirtied ) && ( ((H5AC_info_t *)thing)->is_dirty == FALSE ) &&
@@ -1760,7 +1717,6 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 
     result = H5C_unprotect(f,
 		           dxpl_id,
-                           H5AC_noblock_dxpl_id,
 			   type,
 			   addr,
 			   thing,
@@ -2126,139 +2082,48 @@ herr_t
 H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
                                   H5AC_cache_config_t *config_ptr)
 {
-    herr_t              result;
-    herr_t              ret_value = SUCCEED;      /* Return value */
-    H5C_auto_size_ctl_t internal_config;
 #if H5AC__TRACE_FILE_ENABLED
     H5AC_cache_config_t trace_config = H5AC__DEFAULT_CACHE_CONFIG;
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
+    herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_set_cache_auto_resize_config, FAIL)
 
-    HDassert( cache_ptr );
+    HDassert(cache_ptr);
 
 #if H5AC__TRACE_FILE_ENABLED
     /* Make note of the new configuration.  Don't look up the trace file
      * pointer, as that may change before we use it.
      */
-    if ( config_ptr != NULL ) {
-
+    if(config_ptr != NULL)
         trace_config = *config_ptr;
-
-    }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-    if ( ( cache_ptr == NULL )
+    if((cache_ptr == NULL)
 #ifdef H5_HAVE_PARALLEL
          ||
-         ( ( cache_ptr->aux_ptr != NULL )
-           &&
-           (
-             ((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic
-             !=
-             H5AC__H5AC_AUX_T_MAGIC
-           )
-         )
+         ((cache_ptr->aux_ptr != NULL) &&
+           (((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic != H5AC__H5AC_AUX_T_MAGIC))
 #endif /* H5_HAVE_PARALLEL */
-       ) {
-
+       )
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry.")
-    }
 
-    result = H5AC_validate_config(config_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad cache configuration");
-    }
-
-    if ( config_ptr->open_trace_file ) {
-
-	FILE * file_ptr = NULL;
-
-	if ( H5C_get_trace_file_ptr(cache_ptr, &file_ptr) < 0 ) {
-
-	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-			"H5C_get_trace_file_ptr() failed.")
-	}
-
-	if ( ( ! ( config_ptr->close_trace_file ) ) &&
-	     ( file_ptr != NULL ) ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                        "Trace file already open.")
-        }
-    }
-
-    if (
-         (
-           config_ptr->dirty_bytes_threshold
-           <
-           H5AC__MIN_DIRTY_BYTES_THRESHOLD
-         )
-         ||
-         (
-           config_ptr->dirty_bytes_threshold
-           >
-           H5AC__MAX_DIRTY_BYTES_THRESHOLD
-         )
-       ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "config_ptr->dirty_bytes_threshold out of range.")
-    }
-
-    if ( config_ptr->close_trace_file ) {
-
-	if ( H5AC_close_trace_file(cache_ptr) < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5AC_close_trace_file() failed.")
-	}
-    }
-
-    if ( config_ptr->open_trace_file ) {
-
-        if ( H5AC_open_trace_file(cache_ptr, config_ptr->trace_file_name) < 0 )
-	{
-
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                        "H5AC_open_trace_file() failed.")
-	}
-    }
-
-    if(H5AC_ext_config_2_int_config(config_ptr, &internal_config) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_ext_config_2_int_config() failed.")
-
-    if(H5C_set_cache_auto_resize_config(cache_ptr, &internal_config) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_set_cache_auto_resize_config() failed.")
-
-    if(H5C_set_evictions_enabled(cache_ptr, config_ptr->evictions_enabled) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_set_evictions_enabled() failed.")
-
-#ifdef H5_HAVE_PARALLEL
-    if ( cache_ptr->aux_ptr != NULL ) {
-
-        ((H5AC_aux_t *)(cache_ptr->aux_ptr))->dirty_bytes_threshold =
-            config_ptr->dirty_bytes_threshold;
-    }
-#endif /* H5_HAVE_PARALLEL */
+    if(H5AC_set_cache_config(cache_ptr, config_ptr) < 0 )
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't set cache configuration")
 
 done:
-
 #if H5AC__TRACE_FILE_ENABLED
     /* For the set cache auto resize config call, only the contents
      * of the config is necessary in the trace file. Write the return
      * value to catch occult errors.
      */
-    if ( ( cache_ptr != NULL ) &&
-         ( H5C_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
-         ( trace_file_ptr != NULL ) ) {
-
+    if((cache_ptr != NULL) &&
+            (H5C_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0) &&
+            (trace_file_ptr != NULL))
 	HDfprintf(trace_file_ptr,
-                  "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %f %f %d %d %d %f %f %d %d %d %d %f %d %d\n",
-		  "H5AC_set_cache_auto_resize_config",
+                  "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %d %d %f %f %d %f %f %d %d %d %d %f %d %d\n",
+		  FUNC,
 		  trace_config.version,
 		  (int)(trace_config.rpt_fcn_enabled),
 		  (int)(trace_config.open_trace_file),
@@ -2274,11 +2139,11 @@ done:
 		  (int)(trace_config.incr_mode),
 		  trace_config.lower_hr_threshold,
 		  trace_config.increment,
-		  (int)(trace_config.flash_incr_mode),
-		  trace_config.flash_multiple,
-		  trace_config.flash_threshold,
 		  (int)(trace_config.apply_max_increment),
 		  (int)(trace_config.max_increment),
+		  (int)(trace_config.flash_incr_mode),
+		  trace_config.flash_multiple,
+                  trace_config.flash_threshold,
 		  (int)(trace_config.decr_mode),
 		  trace_config.upper_hr_threshold,
 		  trace_config.decrement,
@@ -2289,12 +2154,86 @@ done:
 		  trace_config.empty_reserve,
 		  trace_config.dirty_bytes_threshold,
 		  (int)ret_value);
-    }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_set_cache_auto_resize_config() */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_set_cache_config
+ *
+ * Purpose:     Handle all configuration switches in an instance of
+ * 		H5AC_cache_config_t.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              7/7/08
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5AC_set_cache_config(H5AC_t * cache_ptr,
+                       H5AC_cache_config_t *config_ptr)
+{
+    H5C_auto_size_ctl_t internal_config;
+    herr_t              ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5AC_set_cache_config)
+
+    if((cache_ptr == NULL)
+#ifdef H5_HAVE_PARALLEL
+         ||
+         ((cache_ptr->aux_ptr != NULL)
+           &&
+           (((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic != H5AC__H5AC_AUX_T_MAGIC))
+#endif /* H5_HAVE_PARALLEL */
+            )
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry.")
+
+    if(H5AC_validate_config(config_ptr) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad cache configuration")
+
+    if(config_ptr->open_trace_file) {
+	FILE * file_ptr = NULL;
+
+	if(H5C_get_trace_file_ptr(cache_ptr, &file_ptr) < 0)
+	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't get trace file pointer")
+
+	if((!(config_ptr->close_trace_file)) && (file_ptr != NULL))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Trace file already open.")
+    } /* end if */
+
+    if((config_ptr->dirty_bytes_threshold < H5AC__MIN_DIRTY_BYTES_THRESHOLD)
+            || ( config_ptr->dirty_bytes_threshold > H5AC__MAX_DIRTY_BYTES_THRESHOLD))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->dirty_bytes_threshold out of range.")
+
+    if(config_ptr->close_trace_file && H5AC_close_trace_file(cache_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't close trace file")
+
+    if(config_ptr->open_trace_file && H5AC_open_trace_file(cache_ptr, config_ptr->trace_file_name) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't open trace file")
+
+    if(H5AC_ext_config_2_int_config(config_ptr, &internal_config) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_ext_config_2_int_config() failed.")
+
+    if(H5C_set_cache_auto_resize_config(cache_ptr, &internal_config) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_set_cache_auto_resize_config() failed.")
+
+    if(H5C_set_evictions_enabled(cache_ptr, config_ptr->evictions_enabled) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_set_evictions_enabled() failed.")
+
+#ifdef H5_HAVE_PARALLEL
+    if(cache_ptr->aux_ptr != NULL)
+        ((H5AC_aux_t *)(cache_ptr->aux_ptr))->dirty_bytes_threshold =
+            config_ptr->dirty_bytes_threshold;
+#endif /* H5_HAVE_PARALLEL */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_set_cache_config() */
 
 
 /*-------------------------------------------------------------------------
@@ -2322,45 +2261,28 @@ done:
 herr_t
 H5AC_validate_config(H5AC_cache_config_t * config_ptr)
 {
-    herr_t              result;
     H5C_auto_size_ctl_t internal_config;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_validate_config, FAIL)
 
-    if ( config_ptr == NULL ) {
-
+    if(config_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
-    }
 
-    if ( config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) {
-
+    if(config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
-    }
 
-    if ( ( config_ptr->rpt_fcn_enabled != TRUE ) &&
-         ( config_ptr->rpt_fcn_enabled != FALSE ) ) {
+    if((config_ptr->rpt_fcn_enabled != TRUE) && (config_ptr->rpt_fcn_enabled != FALSE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->rpt_fcn_enabled must be either TRUE or FALSE.")
 
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "config_ptr->rpt_fcn_enabled must be either TRUE or FALSE.")
-    }
+    if((config_ptr->open_trace_file != TRUE) && (config_ptr->open_trace_file != FALSE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->open_trace_file must be either TRUE or FALSE.")
 
-    if ( ( config_ptr->open_trace_file != TRUE ) &&
-         ( config_ptr->open_trace_file != FALSE ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "config_ptr->open_trace_file must be either TRUE or FALSE.")
-    }
-
-    if ( ( config_ptr->close_trace_file != TRUE ) &&
-         ( config_ptr->close_trace_file != FALSE ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                  "config_ptr->close_trace_file must be either TRUE or FALSE.")
-    }
+    if((config_ptr->close_trace_file != TRUE) && (config_ptr->close_trace_file != FALSE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->close_trace_file must be either TRUE or FALSE.")
 
     /* don't bother to test trace_file_name unless open_trace_file is TRUE */
-    if ( config_ptr->open_trace_file ) {
+    if(config_ptr->open_trace_file) {
         size_t	        name_len;
 
 	/* Can't really test the trace_file_name field without trying to
@@ -2368,66 +2290,59 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
 	 * sanity checks on the length of the file name.
 	 */
 	name_len = HDstrlen(config_ptr->trace_file_name);
+	if(name_len == 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->trace_file_name is empty.")
+        else if(name_len > H5AC__MAX_TRACE_FILE_NAME_LEN)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->trace_file_name too long.")
+    } /* end if */
 
-	if ( name_len == 0 ) {
+    if((config_ptr->evictions_enabled != TRUE) && (config_ptr->evictions_enabled != FALSE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->evictions_enabled must be either TRUE or FALSE.")
 
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                        "config_ptr->trace_file_name is empty.")
+    if((config_ptr->evictions_enabled == FALSE) &&
+	 ((config_ptr->incr_mode != H5C_incr__off) ||
+	   (config_ptr->flash_incr_mode != H5C_flash_incr__off) ||
+	   (config_ptr->decr_mode != H5C_decr__off)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Can't disable evictions while auto-resize is enabled.")
 
-        } else if ( name_len > H5AC__MAX_TRACE_FILE_NAME_LEN ) {
+    if(config_ptr->dirty_bytes_threshold < H5AC__MIN_DIRTY_BYTES_THRESHOLD)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirty_bytes_threshold too small.")
+    else
+        if(config_ptr->dirty_bytes_threshold > H5AC__MAX_DIRTY_BYTES_THRESHOLD)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirty_bytes_threshold too big.")
 
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                        "config_ptr->trace_file_name too long.")
-	}
-    }
+    if(H5AC_ext_config_2_int_config(config_ptr, &internal_config) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_ext_config_2_int_config() failed.")
 
-    if ( ( config_ptr->evictions_enabled != TRUE ) &&
-         ( config_ptr->evictions_enabled != FALSE ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-            "config_ptr->evictions_enabled must be either TRUE or FALSE.")
-    }
-
-    if ( ( config_ptr->evictions_enabled == FALSE ) &&
-	 ( ( config_ptr->incr_mode != H5C_incr__off ) ||
-	   ( config_ptr->flash_incr_mode != H5C_flash_incr__off ) ||
-	   ( config_ptr->decr_mode != H5C_decr__off ) ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "Can't disable evictions while auto-resize is enabled.")
-    }
-
-    if ( config_ptr->dirty_bytes_threshold < H5AC__MIN_DIRTY_BYTES_THRESHOLD ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "dirty_bytes_threshold too small.")
-    } else
-    if ( config_ptr->dirty_bytes_threshold > H5AC__MAX_DIRTY_BYTES_THRESHOLD ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "dirty_bytes_threshold too big.")
-    }
-
-    if ( H5AC_ext_config_2_int_config(config_ptr, &internal_config) !=
-         SUCCEED ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC_ext_config_2_int_config() failed.")
-    }
-
-    result = H5C_validate_resize_config(&internal_config,
-                                        H5C_RESIZE_CFG__VALIDATE_ALL);
-
-    if ( result != SUCCEED ) {
-
+    if(H5C_validate_resize_config(&internal_config, H5C_RESIZE_CFG__VALIDATE_ALL) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error(s) in new config.")
-    }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_validate_config() */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_validate_cache_config_ver()
+ *
+ * Purpose:     Return true if the supplied H5AC_cache_config_t version
+ *		number is valid, and FALSE otherwise.
+ *
+ * Return:      TRUE if the version number is valid, and FALSE otherwise.
+ *
+ * Programmer:  John Mainzer
+ *              8/13/08
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5AC_validate_cache_config_ver(int version_num)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5AC_validate_cache_config_ver)
+
+    FUNC_LEAVE_NOAPI(version_num == H5AC__CURR_CACHE_CONFIG_VERSION)
+} /* H5AC_validate_cache_config_ver() */
 
 
 /*-------------------------------------------------------------------------
@@ -3738,7 +3653,7 @@ H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
 
 	aux_ptr->write_permitted = TRUE;
 
-	result = H5C_flush_to_min_clean(f, dxpl_id, H5AC_noblock_dxpl_id);
+	result = H5C_flush_to_min_clean(f, dxpl_id);
 
 	aux_ptr->write_permitted = FALSE;
 
@@ -3764,7 +3679,6 @@ H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
     } else {
 
         if ( H5AC_receive_and_apply_clean_list(f, dxpl_id,
-                                               H5AC_noblock_dxpl_id,
                                                cache_ptr) < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
@@ -3812,8 +3726,7 @@ done:
 #ifdef H5_HAVE_PARALLEL
 static herr_t
 H5AC_receive_and_apply_clean_list(H5F_t  * f,
-                                  hid_t    primary_dxpl_id,
-                                  hid_t    secondary_dxpl_id,
+                                  hid_t    dxpl_id,
                                   H5AC_t * cache_ptr)
 {
     herr_t               ret_value = SUCCEED;    /* Return value */
@@ -3905,8 +3818,9 @@ H5AC_receive_and_apply_clean_list(H5F_t  * f,
 
 
         /* mark the indicated entries as clean */
-        if ( H5C_mark_entries_as_clean(f, primary_dxpl_id, secondary_dxpl_id,
-                           (int32_t)num_entries, &(haddr_buf_ptr[0])) < 0 ) {
+        if ( H5C_mark_entries_as_clean(f, dxpl_id,
+                                        (int32_t)num_entries,
+                                        &(haddr_buf_ptr[0])) < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                         "Can't mark entries clean.")

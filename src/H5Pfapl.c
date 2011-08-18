@@ -1386,7 +1386,7 @@ H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
     if(config_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
 
-    if(config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION)
+    if(!H5AC_validate_cache_config_ver(config_ptr->version))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
 
     /* If we ever support multiple versions of H5AC_cache_config_t, we

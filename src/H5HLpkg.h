@@ -121,6 +121,7 @@ struct H5HL_prfx_t {
 /* Callback information for loading local heap prefix from disk */
 typedef struct H5HL_cache_prfx_ud_t {
     /* Downwards */
+    hbool_t made_attempt;               /* Whether the deserialize routine was already attempted */
     size_t sizeof_size;                 /* Size of file sizes */
     size_t sizeof_addr;                 /* Size of file addresses */
     haddr_t prfx_addr;                  /* Address of prefix */

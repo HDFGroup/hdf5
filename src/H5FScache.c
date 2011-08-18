@@ -48,9 +48,6 @@
 #define H5FS_HDR_VERSION        0               /* Header */
 #define H5FS_SINFO_VERSION      0               /* Serialized sections */
 
-/* Size of stack buffer for serialized headers */
-#define H5FS_HDR_BUF_SIZE               256
-
 
 /******************/
 /* Local Typedefs */
@@ -78,16 +75,23 @@ static herr_t H5FS_sinfo_serialize_sect_cb(void *_item, void UNUSED *key, void *
 static herr_t H5FS_sinfo_serialize_node_cb(void *_item, void UNUSED *key, void *_udata);
 
 /* Metadata cache callbacks */
-static H5FS_t *H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_t *fspace, unsigned UNUSED * flags_ptr);
-static herr_t H5FS_cache_hdr_dest(H5F_t *f, H5FS_t *fspace);
-static herr_t H5FS_cache_hdr_clear(H5F_t *f, H5FS_t *fspace, hbool_t destroy);
-static herr_t H5FS_cache_hdr_size(const H5F_t *f, const H5FS_t *fspace, size_t *size_ptr);
-static H5FS_sinfo_t *H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_sinfo_t *sinfo, unsigned UNUSED * flags_ptr);
-static herr_t H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo);
-static herr_t H5FS_cache_sinfo_clear(H5F_t *f, H5FS_sinfo_t *sinfo, hbool_t destroy);
-static herr_t H5FS_cache_sinfo_size(const H5F_t *f, const H5FS_sinfo_t *sinfo, size_t *size_ptr);
+static herr_t H5FS_cache_hdr_get_load_size(const void *udata, size_t *image_len);
+static void *H5FS_cache_hdr_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
+static herr_t H5FS_cache_hdr_image_len(const void *thing, size_t *image_len);
+static herr_t H5FS_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id,
+    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
+    haddr_t *new_addr, size_t *new_len, void **new_image);
+static herr_t H5FS_cache_hdr_free_icr(void *thing);
+
+static herr_t H5FS_cache_sinfo_get_load_size(const void *udata, size_t *image_len);
+static void *H5FS_cache_sinfo_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
+static herr_t H5FS_cache_sinfo_image_len(const void *thing, size_t *image_len);
+static herr_t H5FS_cache_sinfo_serialize(const H5F_t *f, hid_t dxpl_id,
+    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
+    haddr_t *new_addr, size_t *new_len, void **new_image);
+static herr_t H5FS_cache_sinfo_free_icr(void *thing);
 
 
 /*********************/
@@ -97,21 +101,27 @@ static herr_t H5FS_cache_sinfo_size(const H5F_t *f, const H5FS_sinfo_t *sinfo, s
 /* H5FS header inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_FSPACE_HDR[1] = {{
     H5AC_FSPACE_HDR_ID,
-    (H5AC_load_func_t)H5FS_cache_hdr_load,
-    (H5AC_flush_func_t)H5FS_cache_hdr_flush,
-    (H5AC_dest_func_t)H5FS_cache_hdr_dest,
-    (H5AC_clear_func_t)H5FS_cache_hdr_clear,
-    (H5AC_size_func_t)H5FS_cache_hdr_size,
+    "Free space header",
+    H5FD_MEM_FSPACE_HDR,
+    H5AC__CLASS_NO_FLAGS_SET,
+    H5FS_cache_hdr_get_load_size,
+    H5FS_cache_hdr_deserialize,
+    H5FS_cache_hdr_image_len,
+    H5FS_cache_hdr_serialize,
+    H5FS_cache_hdr_free_icr,
 }};
 
 /* H5FS serialized sections inherit cache-like properties from H5AC */
 const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
     H5AC_FSPACE_SINFO_ID,
-    (H5AC_load_func_t)H5FS_cache_sinfo_load,
-    (H5AC_flush_func_t)H5FS_cache_sinfo_flush,
-    (H5AC_dest_func_t)H5FS_cache_sinfo_dest,
-    (H5AC_clear_func_t)H5FS_cache_sinfo_clear,
-    (H5AC_size_func_t)H5FS_cache_sinfo_size,
+    "Free space section info",
+    H5FD_MEM_FSPACE_SINFO,
+    H5AC__CLASS_NO_FLAGS_SET,
+    H5FS_cache_sinfo_get_load_size,
+    H5FS_cache_sinfo_deserialize,
+    H5FS_cache_sinfo_image_len,
+    H5FS_cache_sinfo_serialize,
+    H5FS_cache_sinfo_free_icr,
 }};
 
 
@@ -124,15 +134,43 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
 /* Local Variables */
 /*******************/
 
-/* Declare a free list to manage free space section data to/from disk */
-H5FL_BLK_DEFINE_STATIC(sect_block);
-
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_hdr_load
+ * Function:    H5FS_cache_hdr_get_load_size
  *
- * Purpose:	Loads a free space manager header from the disk.
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FS_cache_hdr_get_load_size(const void *_udata, size_t *image_len)
+{
+    const H5FS_hdr_cache_ud_t *udata = (const H5FS_hdr_cache_ud_t *)_udata; /* User data for callback */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_hdr_get_load_size)
+
+    /* Check arguments */
+    HDassert(udata);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = H5FS_HEADER_SIZE(udata->f);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FS_cache_hdr_get_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FS_cache_hdr_deserialize
+ *
+ * Purpose:     Deserialize the data structure from disk.
  *
  * Return:      Success:        Pointer to a new free space header
  *              Failure:        NULL
@@ -143,24 +181,22 @@ H5FL_BLK_DEFINE_STATIC(sect_block);
  *
  *-------------------------------------------------------------------------
  */
-static H5FS_t *
-H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
+static void *
+H5FS_cache_hdr_deserialize(const void *image, size_t UNUSED len,
+    void *_udata, hbool_t UNUSED *dirty)
 {
     H5FS_t		*fspace = NULL; /* Free space header info */
     H5FS_hdr_cache_ud_t *udata = (H5FS_hdr_cache_ud_t *)_udata; /* user data for callback */
-    H5WB_t              *wb = NULL;     /* Wrapped buffer for header data */
-    uint8_t             hdr_buf[H5FS_HDR_BUF_SIZE]; /* Buffer for header */
-    uint8_t		*hdr;           /* Pointer to header buffer */
     const uint8_t	*p;             /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned            nclasses;       /* Number of section classes */
     H5FS_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_hdr_load)
+    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_hdr_deserialize)
 
     /* Check arguments */
-    HDassert(f);
+    HDassert(image);
     HDassert(udata);
 
     /* Allocate a new free space manager */
@@ -170,19 +206,7 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* Set free space manager's internal information */
     fspace->addr = udata->addr;
 
-    /* Wrap the local buffer for serialized header info */
-    if(NULL == (wb = H5WB_wrap(hdr_buf, sizeof(hdr_buf))))
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, NULL, "can't wrap buffer")
-
-    /* Get a pointer to a buffer that's large enough for header */
-    if(NULL == (hdr = H5WB_actual(wb, fspace->hdr_size)))
-        HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, NULL, "can't get actual buffer")
-
-    /* Read header from disk */
-    if(H5F_block_read(f, H5FD_MEM_FSPACE_HDR, addr, fspace->hdr_size, dxpl_id, hdr) < 0)
-	HGOTO_ERROR(H5E_FSPACE, H5E_READERROR, NULL, "can't read free space header")
-
-    p = hdr;
+    p = (const uint8_t *)image;
 
     /* Magic number */
     if(HDmemcmp(p, H5FS_HDR_MAGIC, (size_t)H5FS_SIZEOF_MAGIC))
@@ -238,36 +262,66 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     H5F_DECODE_LENGTH(udata->f, p, fspace->alloc_sect_size);
 
     /* Compute checksum on indirect block */
-    computed_chksum = H5_checksum_metadata(hdr, (size_t)(p - (const uint8_t *)hdr), 0);
+    computed_chksum = H5_checksum_metadata(image, (size_t)(p - (const uint8_t *)image), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
 
-    HDassert((size_t)(p - (const uint8_t *)hdr) == fspace->hdr_size);
-
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
 	HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
+
+    /* Sanity check */
+    HDassert((size_t)(p - (const uint8_t *)image) <= len);
 
     /* Set return value */
     ret_value = fspace;
 
 done:
     /* Release resources */
-    if(wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_FSPACE, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value && fspace)
         if(H5FS_hdr_dest(fspace) < 0)
             HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FS_cache_hdr_load() */ /*lint !e818 Can't make udata a pointer to const */
+} /* end H5FS_cache_hdr_deserialize() */ /*lint !e818 Can't make udata a pointer to const */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_hdr_flush
+ * Function:    H5FS_cache_hdr_image_len
  *
- * Purpose:	Flushes a dirty free space header to disk.
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 20, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FS_cache_hdr_image_len(const void *_thing, size_t *image_len)
+{
+    const H5FS_t *fspace = (const H5FS_t *)_thing;    /* Pointer to free space header */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_hdr_image_len)
+
+    /* Check arguments */
+    HDassert(fspace);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = fspace->hdr_size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FS_cache_hdr_image_len() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FS_cache_hdr_serialize
+ *
+ * Purpose:     Serializes the data structure for writing to disk.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -278,215 +332,155 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_t *fspace, unsigned UNUSED * flags_ptr)
+H5FS_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
+    haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing,
+    unsigned *flags, haddr_t UNUSED *new_addr, size_t UNUSED *new_len,
+    void UNUSED **new_image)
 {
-    H5WB_t      *wb = NULL;             /* Wrapped buffer for header data */
-    uint8_t     hdr_buf[H5FS_HDR_BUF_SIZE]; /* Buffer for header */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5FS_t *fspace = (H5FS_t *)_thing;    /* Pointer to free space header */
+    uint8_t *p;                           /* Pointer into raw data buffer */
+    uint32_t metadata_chksum;             /* Computed metadata checksum value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_hdr_flush)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_hdr_serialize)
 
     /* check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(image);
     HDassert(fspace);
+    HDassert(flags);
 
-    if(fspace->cache_info.is_dirty) {
-        uint8_t	*hdr;                   /* Pointer to header buffer */
-        uint8_t *p;                     /* Pointer into raw data buffer */
-        uint32_t metadata_chksum;       /* Computed metadata checksum value */
+    /* Get temporary pointer to header */
+    p = (uint8_t *)image;
 
-        /* Wrap the local buffer for serialized header info */
-        if(NULL == (wb = H5WB_wrap(hdr_buf, sizeof(hdr_buf))))
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't wrap buffer")
+    /* Magic number */
+    HDmemcpy(p, H5FS_HDR_MAGIC, (size_t)H5FS_SIZEOF_MAGIC);
+    p += H5FS_SIZEOF_MAGIC;
 
-        /* Get a pointer to a buffer that's large enough for header */
-        if(NULL == (hdr = H5WB_actual(wb, fspace->hdr_size)))
-            HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "can't get actual buffer")
+    /* Version # */
+    *p++ = H5FS_HDR_VERSION;
 
-        /* Get temporary pointer to header */
-        p = hdr;
+    /* Client ID */
+    *p++ = fspace->client;
 
-        /* Magic number */
-        HDmemcpy(p, H5FS_HDR_MAGIC, (size_t)H5FS_SIZEOF_MAGIC);
-        p += H5FS_SIZEOF_MAGIC;
+    /* Total space tracked */
+    H5F_ENCODE_LENGTH(f, p, fspace->tot_space);
 
-        /* Version # */
-        *p++ = H5FS_HDR_VERSION;
+    /* Total # of free space sections tracked */
+    H5F_ENCODE_LENGTH(f, p, fspace->tot_sect_count);
 
-        /* Client ID */
-        *p++ = fspace->client;
+    /* # of serializable free space sections tracked */
+    H5F_ENCODE_LENGTH(f, p, fspace->serial_sect_count);
 
-        /* Total space tracked */
-        H5F_ENCODE_LENGTH(f, p, fspace->tot_space);
+    /* # of ghost free space sections tracked */
+    H5F_ENCODE_LENGTH(f, p, fspace->ghost_sect_count);
 
-        /* Total # of free space sections tracked */
-        H5F_ENCODE_LENGTH(f, p, fspace->tot_sect_count);
+    /* # of section classes */
+    UINT16ENCODE(p, fspace->nclasses);
 
-        /* # of serializable free space sections tracked */
-        H5F_ENCODE_LENGTH(f, p, fspace->serial_sect_count);
+    /* Shrink percent */
+    UINT16ENCODE(p, fspace->shrink_percent);
 
-        /* # of ghost free space sections tracked */
-        H5F_ENCODE_LENGTH(f, p, fspace->ghost_sect_count);
+    /* Expand percent */
+    UINT16ENCODE(p, fspace->expand_percent);
 
-        /* # of section classes */
-        UINT16ENCODE(p, fspace->nclasses);
+    /* Size of address space free space sections are within (log2 of actual value) */
+    UINT16ENCODE(p, fspace->max_sect_addr);
 
-        /* Shrink percent */
-        UINT16ENCODE(p, fspace->shrink_percent);
+    /* Max. size of section to track */
+    H5F_ENCODE_LENGTH(f, p, fspace->max_sect_size);
 
-        /* Expand percent */
-        UINT16ENCODE(p, fspace->expand_percent);
+    /* Address of serialized free space sections */
+    H5F_addr_encode(f, &p, fspace->sect_addr);
 
-        /* Size of address space free space sections are within (log2 of actual value) */
-        UINT16ENCODE(p, fspace->max_sect_addr);
+    /* Size of serialized free space sections */
+    H5F_ENCODE_LENGTH(f, p, fspace->sect_size);
 
-        /* Max. size of section to track */
-        H5F_ENCODE_LENGTH(f, p, fspace->max_sect_size);
+    /* Allocated size of serialized free space sections */
+    H5F_ENCODE_LENGTH(f, p, fspace->alloc_sect_size);
 
-        /* Address of serialized free space sections */
-        H5F_addr_encode(f, &p, fspace->sect_addr);
+    /* Compute checksum */
+    metadata_chksum = H5_checksum_metadata(image, (size_t)(p - (uint8_t *)image), 0);
 
-        /* Size of serialized free space sections */
-        H5F_ENCODE_LENGTH(f, p, fspace->sect_size);
+    /* Metadata checksum */
+    UINT32ENCODE(p, metadata_chksum);
 
-        /* Allocated size of serialized free space sections */
-        H5F_ENCODE_LENGTH(f, p, fspace->alloc_sect_size);
+    /* Reset the cache flags for this operation */
+    *flags = 0;
 
-        /* Compute checksum */
-        metadata_chksum = H5_checksum_metadata(hdr, (size_t)(p - (uint8_t *)hdr), 0);
+    /* Sanity check */
+    HDassert((size_t)(p - (uint8_t *)image) <= len);
 
-        /* Metadata checksum */
-        UINT32ENCODE(p, metadata_chksum);
-
-	/* Write the free space header. */
-        HDassert((size_t)(p - hdr) == fspace->hdr_size);
-	if(H5F_block_write(f, H5FD_MEM_FSPACE_HDR, addr, fspace->hdr_size, dxpl_id, hdr) < 0)
-	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFLUSH, FAIL, "unable to save free space header to disk")
-
-	fspace->cache_info.is_dirty = FALSE;
-    } /* end if */
-
-    if(destroy)
-        if(H5FS_hdr_dest(fspace) < 0)
-	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
-
-done:
-    /* Release resources */
-    if(wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_FSPACE, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FS_cache_hdr_flush() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5FS_cache_hdr_serialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_hdr_dest
+ * Function:    H5FS_cache_hdr_free_icr
  *
- * Purpose:	Destroys a free space header in memory.
+ * Purpose:     Destroy/release an "in core representation" of a data structure
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May  2 2006
+ * Programmer:  Mike McGreevy
+ *              mcgreevy@hdfgroup.org
+ *              May 29, 2008
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
-H5FS_cache_hdr_dest(H5F_t UNUSED *f, H5FS_t *fspace)
+H5FS_cache_hdr_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_hdr_dest)
+    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_hdr_free_icr)
 
     /* Check arguments */
-    HDassert(fspace);
+    HDassert(thing);
 
     /* Destroy free space header */
-    if(H5FS_hdr_dest(fspace) < 0)
+    if(H5FS_hdr_dest((H5FS_t *)thing) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FS_cache_hdr_dest() */
+} /* H5FS_cache_hdr_free_icr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_hdr_clear
+ * Function:    H5FS_cache_sinfo_get_load_size
  *
- * Purpose:	Mark a free space header in memory as non-dirty.
+ * Purpose:     Compute the size of the data structure on disk.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May  2 2006
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static herr_t
-H5FS_cache_hdr_clear(H5F_t UNUSED *f, H5FS_t *fspace, hbool_t destroy)
-{
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_hdr_clear)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(fspace);
-
-    /* Reset the dirty flag.  */
-    fspace->cache_info.is_dirty = FALSE;
-
-    if(destroy)
-        if(H5FS_hdr_dest(fspace) < 0)
-	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FS_cache_hdr_clear() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FS_cache_hdr_size
- *
- * Purpose:	Compute the size in bytes of a free space header
- *		on disk, and return it in *size_ptr.  On failure,
- *		the value of *size_ptr is undefined.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May  2 2006
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_hdr_size(const H5F_t UNUSED *f, const H5FS_t *fspace, size_t *size_ptr)
+H5FS_cache_sinfo_get_load_size(const void *_udata, size_t *image_len)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_hdr_size)
+    const H5FS_sinfo_cache_ud_t *udata = (const H5FS_sinfo_cache_ud_t *)_udata; /* user data for callback */
 
-    /* check arguments */
-    HDassert(f);
-    HDassert(fspace);
-    HDassert(size_ptr);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_sinfo_get_load_size)
 
-    /* Set size value */
-    *size_ptr = fspace->hdr_size;
+    /* Check arguments */
+    HDassert(udata);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    H5_ASSIGN_OVERFLOW(/* To: */ *image_len, /* From: */ udata->fspace->alloc_sect_size, /* From: */ hsize_t, /* To: */ size_t);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5FS_cache_hdr_size() */
+} /* end H5FS_cache_sinfo_get_load_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_sinfo_load
+ * Function:    H5FS_cache_sinfo_deserialize
  *
- * Purpose:	Loads free space sections from the disk.
+ * Purpose:     Deserialize the data structure from disk.
  *
  * Return:      Success:        Pointer to a new free space section info
  *              Failure:        NULL
@@ -497,23 +491,23 @@ H5FS_cache_hdr_size(const H5F_t UNUSED *f, const H5FS_t *fspace, size_t *size_pt
  *
  *-------------------------------------------------------------------------
  */
-static H5FS_sinfo_t *
-H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
+static void *
+H5FS_cache_sinfo_deserialize(const void *image, size_t UNUSED len,
+    void *_udata, hbool_t UNUSED *dirty)
 {
     H5FS_sinfo_t	*sinfo = NULL;  /* Free space section info */
     H5FS_sinfo_cache_ud_t *udata = (H5FS_sinfo_cache_ud_t *)_udata; /* user data for callback */
     haddr_t             fs_addr;        /* Free space header address */
     size_t              old_sect_size;  /* Old section size */
-    uint8_t		*buf = NULL;    /* Temporary buffer */
     const uint8_t	*p;             /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     H5FS_sinfo_t	*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_load)
+    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_deserialize)
 
     /* Check arguments */
-    HDassert(f);
+    HDassert(image);
     HDassert(udata);
 
     /* Allocate a new free space section info */
@@ -527,15 +521,9 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Allocate space for the buffer to serialize the sections into */
     H5_ASSIGN_OVERFLOW(/* To: */ old_sect_size, /* From: */ udata->fspace->sect_size, /* From: */ hsize_t, /* To: */ size_t);
-    if(NULL == (buf = H5FL_BLK_MALLOC(sect_block, (size_t)udata->fspace->sect_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* Read buffer from disk */
-    if(H5F_block_read(f, H5FD_MEM_FSPACE_SINFO, udata->fspace->sect_addr, (size_t)udata->fspace->sect_size, dxpl_id, buf) < 0)
-	HGOTO_ERROR(H5E_FSPACE, H5E_READERROR, NULL, "can't read free space sections")
 
     /* Deserialize free sections from buffer available */
-    p = buf;
+    p = (const uint8_t *)image;
 
     /* Magic number */
     if(HDmemcmp(p, H5FS_SINFO_MAGIC, (size_t)H5FS_SIZEOF_MAGIC))
@@ -613,10 +601,10 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
                     if(H5FS_sect_add(udata->f, udata->dxpl_id, udata->fspace, new_sect, H5FS_ADD_DESERIALIZING, NULL) < 0)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, NULL, "can't add section to free space manager")
             } /* end for */
-        } while(p < ((buf + old_sect_size) - H5FS_SIZEOF_CHKSUM));
+        } while(p < (((const uint8_t *)image + old_sect_size) - H5FS_SIZEOF_CHKSUM));
 
         /* Sanity check */
-        HDassert((size_t)(p - buf) == (old_sect_size - H5FS_SIZEOF_CHKSUM));
+        HDassert((size_t)(p - (const uint8_t *)image) == (old_sect_size - H5FS_SIZEOF_CHKSUM));
         HDassert(old_sect_size == udata->fspace->sect_size);
         HDassert(old_tot_sect_count == udata->fspace->tot_sect_count);
         HDassert(old_serial_sect_count == udata->fspace->serial_sect_count);
@@ -625,7 +613,7 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     } /* end if */
 
     /* Compute checksum on indirect block */
-    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - (const uint8_t *)buf), 0);
+    computed_chksum = H5_checksum_metadata(image, (size_t)(p - (const uint8_t *)image), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
@@ -635,20 +623,18 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 	HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Sanity check */
-    HDassert((size_t)(p - (const uint8_t *)buf) == old_sect_size);
+    HDassert((size_t)(p - (const uint8_t *)image) <= len);
 
     /* Set return value */
     ret_value = sinfo;
 
 done:
-    if(buf)
-        buf = H5FL_BLK_FREE(sect_block, buf);
     if(!ret_value && sinfo)
         if(H5FS_sinfo_dest(sinfo) < 0)
             HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space info")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FS_cache_sinfo_load() */ /*lint !e818 Can't make udata a pointer to const */
+} /* end H5FS_cache_sinfo_deserialize() */ /*lint !e818 Can't make udata a pointer to const */
 
 
 /*-------------------------------------------------------------------------
@@ -754,9 +740,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_sinfo_flush
+ * Function:    H5FS_cache_sinfo_image_len
  *
- * Purpose:	Flushes a dirty free space section info to disk.
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 20, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FS_cache_sinfo_image_len(const void *_thing, size_t *image_len)
+{
+    const H5FS_sinfo_t *sinfo = (const H5FS_sinfo_t *)_thing;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_sinfo_image_len)
+
+    /* Check arguments */
+    HDassert(sinfo);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    H5_ASSIGN_OVERFLOW(*image_len, sinfo->fspace->alloc_sect_size, hsize_t, size_t)
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FS_cache_sinfo_image_len() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FS_cache_sinfo_serialize
+ *
+ * Purpose:     Serialize the data structure for writing to disk.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -767,187 +784,108 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_sinfo_t *sinfo, unsigned UNUSED * flags_ptr)
+H5FS_cache_sinfo_serialize(const H5F_t * f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
+    haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5FS_sinfo_t *sinfo = (H5FS_sinfo_t *)_thing;       /* Pointer to section info */
+    H5FS_iter_ud_t udata;       /* User data for callbacks */
+    uint8_t *p;                 /* Pointer into raw data buffer */
+    uint32_t metadata_chksum;   /* Computed metadata checksum value */
+    unsigned bin;               /* Current bin we are on */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_flush)
+    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_serialize)
 
     /* check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(image);
     HDassert(sinfo);
     HDassert(sinfo->fspace);
     HDassert(sinfo->fspace->sect_cls);
+    HDassert(flags);
 
-    if(sinfo->cache_info.is_dirty) {
-        H5FS_iter_ud_t udata;       /* User data for callbacks */
-        uint8_t	*buf = NULL;        /* Temporary raw data buffer */
-        uint8_t *p;                 /* Pointer into raw data buffer */
-        uint32_t metadata_chksum;   /* Computed metadata checksum value */
-        unsigned bin;               /* Current bin we are on */
+    /* Sanity check address */
+    if(H5F_addr_ne(addr, sinfo->fspace->sect_addr))
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "incorrect address for free space sections")
 
-        /* Sanity check address */
-        if(H5F_addr_ne(addr, sinfo->fspace->sect_addr))
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "incorrect address for free space sections")
+    /* Point to disk image buffer */
+    p = (uint8_t *)image;
 
-        /* Allocate temporary buffer */
-        if((buf = H5FL_BLK_MALLOC(sect_block, (size_t)sinfo->fspace->sect_size)) == NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    /* Magic number */
+    HDmemcpy(p, H5FS_SINFO_MAGIC, (size_t)H5FS_SIZEOF_MAGIC);
+    p += H5FS_SIZEOF_MAGIC;
 
-        p = buf;
+    /* Version # */
+    *p++ = H5FS_SINFO_VERSION;
 
-        /* Magic number */
-        HDmemcpy(p, H5FS_SINFO_MAGIC, (size_t)H5FS_SIZEOF_MAGIC);
-        p += H5FS_SIZEOF_MAGIC;
+    /* Address of free space header for these sections */
+    H5F_addr_encode(f, &p, sinfo->fspace->addr);
 
-        /* Version # */
-        *p++ = H5FS_SINFO_VERSION;
+    /* Set up user data for iterator */
+    udata.sinfo = sinfo;
+    udata.p = &p;
+    udata.sect_cnt_size = H5V_limit_enc_size((uint64_t)sinfo->fspace->serial_sect_count);
 
-        /* Address of free space header for these sections */
-        H5F_addr_encode(f, &p, sinfo->fspace->addr);
+    /* Iterate over all the bins */
+    for(bin = 0; bin < sinfo->nbins; bin++) {
+        /* Check if there are any sections in this bin */
+        if(sinfo->bins[bin].bin_list) {
+            /* Iterate over list of section size nodes for bin */
+            if(H5SL_iterate(sinfo->bins[bin].bin_list, H5FS_sinfo_serialize_node_cb, &udata) < 0)
+                HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over section size nodes")
+        } /* end if */
+    } /* end for */
 
-        /* Set up user data for iterator */
-        udata.sinfo = sinfo;
-        udata.p = &p;
-        udata.sect_cnt_size = H5V_limit_enc_size((uint64_t)sinfo->fspace->serial_sect_count);
+    /* Compute checksum */
+    metadata_chksum = H5_checksum_metadata(image, (size_t)(p - (uint8_t *)image), 0);
 
-        /* Iterate over all the bins */
-        for(bin = 0; bin < sinfo->nbins; bin++) {
-            /* Check if there are any sections in this bin */
-            if(sinfo->bins[bin].bin_list) {
-                /* Iterate over list of section size nodes for bin */
-                if(H5SL_iterate(sinfo->bins[bin].bin_list, H5FS_sinfo_serialize_node_cb, &udata) < 0)
-                    HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over section size nodes")
-            } /* end if */
-        } /* end for */
+    /* Metadata checksum */
+    UINT32ENCODE(p, metadata_chksum);
 
-        /* Compute checksum */
-        metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
+    /* Sanity check */
+    HDassert((size_t)(p - (uint8_t *)image) == sinfo->fspace->sect_size);
+    HDassert(sinfo->fspace->sect_size <= sinfo->fspace->alloc_sect_size);
 
-        /* Metadata checksum */
-        UINT32ENCODE(p, metadata_chksum);
+    /* Sanity check */
+    HDassert((size_t)(p - (uint8_t *)image) <= len);
 
-        /* Sanity check */
-        HDassert((size_t)(p - buf) == sinfo->fspace->sect_size);
-        HDassert(sinfo->fspace->sect_size <= sinfo->fspace->alloc_sect_size);
-
-        /* Write buffer to disk */
-        if(H5F_block_write(f, H5FD_MEM_FSPACE_SINFO, sinfo->fspace->sect_addr, (size_t)sinfo->fspace->sect_size, dxpl_id, buf) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFLUSH, FAIL, "unable to save free space sections to disk")
-
-        buf = H5FL_BLK_FREE(sect_block, buf);
-
-	sinfo->cache_info.is_dirty = FALSE;
-    } /* end if */
-
-    if(destroy)
-        if(H5FS_sinfo_dest(sinfo) < 0)
-	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space section info")
+    /* Reset the cache flags for this operation */
+    *flags = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FS_cache_sinfo_flush() */
+} /* H5FS_cache_sinfo_serialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_sinfo_dest
+ * Function:    H5FS_cache_sinfo_free_icr
  *
- * Purpose:	Destroys a free space section info in memory.
+ * Purpose:     Destroy/release an "in core representation" of a data structure
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		July 31 2006
+ * Programmer:  Mike McGreevy
+ *              mcgreevy@hdfgroup.org
+ *              May 29, 2008
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
-H5FS_cache_sinfo_dest(H5F_t UNUSED *f, H5FS_sinfo_t *sinfo)
+H5FS_cache_sinfo_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_dest)
+    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_free_icr)
 
     /* Check arguments */
-    HDassert(sinfo);
+    HDassert(thing);
 
     /* Destroy free space info */
-    if(H5FS_sinfo_dest(sinfo) < 0)
+    if(H5FS_sinfo_dest((H5FS_sinfo_t *)thing) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FS_cache_sinfo_dest() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FS_cache_sinfo_clear
- *
- * Purpose:	Mark a free space section info in memory as non-dirty.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		July 31 2006
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static herr_t
-H5FS_cache_sinfo_clear(H5F_t UNUSED *f, H5FS_sinfo_t *sinfo, hbool_t destroy)
-{
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_clear)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(sinfo);
-
-    /* Reset the dirty flag.  */
-    sinfo->cache_info.is_dirty = FALSE;
-
-    if(destroy)
-        if(H5FS_sinfo_dest(sinfo) < 0)
-	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space section info")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FS_cache_sinfo_clear() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FS_cache_sinfo_size
- *
- * Purpose:	Compute the size in bytes of a free space section info
- *		on disk, and return it in *size_ptr.  On failure,
- *		the value of *size_ptr is undefined.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		July 31 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FS_cache_sinfo_size(const H5F_t UNUSED *f, const H5FS_sinfo_t *sinfo, size_t *size_ptr)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_sinfo_size)
-
-    /* check arguments */
-    HDassert(sinfo);
-    HDassert(size_ptr);
-
-    /* Set size value */
-    H5_ASSIGN_OVERFLOW(/* To: */ *size_ptr, /* From: */ sinfo->fspace->sect_size, /* From: */ hsize_t, /* To: */ size_t);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5FS_cache_sinfo_size() */
+} /* H5FS_cache_sinfo_free_icr() */
 

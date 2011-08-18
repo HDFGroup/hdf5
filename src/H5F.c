@@ -874,7 +874,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get byte number for object size")
         if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, &f->shared->btree_k[0]) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get rank for btree internal nodes")
-        if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &f->shared->sohm_nindexes)<0)
+        if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &f->shared->sohm_nindexes) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of SOHM indexes")
         HDassert(f->shared->sohm_nindexes < 255);
 
@@ -3356,7 +3356,7 @@ H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
     /* Check args */
     if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-    if((NULL == config_ptr) || (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION))
+    if((NULL == config_ptr) || !H5AC_validate_cache_config_ver(config_ptr->version))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
 
     /* Go get the resize configuration */
@@ -3396,7 +3396,7 @@ H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
     if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
-    /* set the resize configuration  */
+    /* set the resize configuration */
     if(H5AC_set_cache_auto_resize_config(file->shared->cache, config_ptr) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed.")
 

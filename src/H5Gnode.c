@@ -83,19 +83,15 @@ typedef struct H5G_node_t {
     )
 
 
-/* Size of stack buffer for serialized nodes */
-#define H5G_NODE_BUF_SIZE       512
-
-/* PRIVATE PROTOTYPES */
-static herr_t H5G_node_free(H5G_node_t *sym);
-
 /* Metadata cache callbacks */
-static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata);
-static herr_t H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-			     H5G_node_t *sym, unsigned UNUSED * flags_ptr);
-static herr_t H5G_node_dest(H5F_t *f, H5G_node_t *sym);
-static herr_t H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy);
-static herr_t H5G_node_size(const H5F_t *f, const H5G_node_t *sym, size_t *size_ptr);
+static herr_t H5G_node_get_load_size(const void *udata, size_t *image_len);
+static void *H5G_node_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
+static herr_t H5G_node_image_len(const void *thing, size_t *image_len);
+static herr_t H5G_node_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
+    size_t *new_len, void **new_image);
+static herr_t H5G_node_free_icr(void *thing);
 
 /* B-tree callbacks */
 static H5RC_t *H5G_node_get_shared(const H5F_t *f, const void *_udata);
@@ -122,11 +118,14 @@ static herr_t H5G_node_debug_key(FILE *stream, int indent, int fwidth,
 /* H5G symbol table node inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_SNODE[1] = {{
     H5AC_SNODE_ID,
-    (H5AC_load_func_t)H5G_node_load,
-    (H5AC_flush_func_t)H5G_node_flush,
-    (H5AC_dest_func_t)H5G_node_dest,
-    (H5AC_clear_func_t)H5G_node_clear,
-    (H5AC_size_func_t)H5G_node_size,
+    "symbol table node",
+    H5FD_MEM_BTREE,
+    H5AC__CLASS_NO_FLAGS_SET,
+    H5G_node_get_load_size,
+    H5G_node_deserialize,
+    H5G_node_image_len,
+    H5G_node_serialize,
+    H5G_node_free_icr,
 }};
 
 /* H5G inherits B-tree like properties from H5B */
@@ -319,63 +318,67 @@ H5G_node_free(H5G_node_t *sym)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_load
+ * Function:    H5G_node_get_load_size
  *
- * Purpose:	Loads a symbol table node from the file.
+ * Purpose:     Compute the size of the data structure on disk.
  *
- * Return:	Success:	Ptr to the new table.
- *		Failure:	NULL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jun 23 1997
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
  *
  *-------------------------------------------------------------------------
  */
-static H5G_node_t *
-H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
+static herr_t
+H5G_node_get_load_size(const void *_udata, size_t *image_len)
 {
-    H5G_node_t		   *sym = NULL;
-    H5WB_t                 *wb = NULL;     /* Wrapped buffer for node data */
-    uint8_t                 node_buf[H5G_NODE_BUF_SIZE]; /* Buffer for node */
-    uint8_t		   *node;           /* Pointer to node buffer */
-    const uint8_t	   *p;
+    const H5F_t *f = (const H5F_t *)_udata;  /* Get file pointer from user data */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_get_load_size)
+
+    /* Check arguments */
+    HDassert(f);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = H5G_NODE_SIZE(f);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_node_get_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_node_deserialize
+ *
+ * Purpose:     Deserialize the data structure from disk.
+ *
+ * Return:	Success:	Ptr to the new node.
+ *		Failure:	NULL
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Apr 14, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5G_node_deserialize(const void *image, size_t UNUSED len, void *udata,
+    hbool_t UNUSED *dirty)
+{
+    H5G_node_t *sym = NULL;     /* Pointer to the deserialized symbol table node */
+    H5F_t *f = (H5F_t *)udata;  /* Get file pointer from user data */
+    const uint8_t *p;           /* Pointer into image buffer */
     H5G_node_t *ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_load)
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_deserialize)
 
-    /*
-     * Check arguments.
-     */
+    /* check arguments */
+    HDassert(image);
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(udata);
 
-    /*
-     * Initialize variables.
-     */
-
-    /* Allocate symbol table data structures */
-    if(NULL == (sym = H5FL_CALLOC(H5G_node_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    sym->node_size = H5G_NODE_SIZE(f);
-    if(NULL == (sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t, (size_t)(2 * H5F_SYM_LEAF_K(f)))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* Wrap the local buffer for serialized node info */
-    if(NULL == (wb = H5WB_wrap(node_buf, sizeof(node_buf))))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't wrap buffer")
-
-    /* Get a pointer to a buffer that's large enough for node */
-    if(NULL == (node = H5WB_actual(wb, sym->node_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't get actual buffer")
-
-    /* Read the serialized symbol table node. */
-    if(H5F_block_read(f, H5FD_MEM_BTREE, addr, sym->node_size, dxpl_id, node) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL, "unable to read symbol table node")
-
-    /* Get temporary pointer to serialized node */
-    p = node;
+    /* Get temporary pointer to serialized symbol table node */
+    p = (const uint8_t *)image;
 
     /* magic */
     if(HDmemcmp(p, H5G_NODE_MAGIC, (size_t)H5G_NODE_SIZEOF_MAGIC))
@@ -389,6 +392,13 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
     /* reserved */
     p++;
 
+    /* Allocate symbol table data structures */
+    if(NULL == (sym = H5FL_CALLOC(H5G_node_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    sym->node_size = H5G_NODE_SIZE(f);
+    if(NULL == (sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t, (size_t)(2 * H5F_SYM_LEAF_K(f)))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
     /* number of symbols */
     UINT16DECODE(p, sym->nsyms);
 
@@ -396,219 +406,145 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
     if(H5G_ent_decode_vec(f, &p, sym->entry, sym->nsyms) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "unable to decode symbol table entries")
 
+    /* Sanity check */
+    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+
     /* Set return value */
     ret_value = sym;
 
 done:
-    /* Release resources */
-    if(wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value)
         if(sym && H5G_node_free(sym) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_node_load() */
+} /* end H5G_node_deserialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_flush
+ * Function:    H5G_node_image_len
  *
- * Purpose:	Flush a symbol table node to disk.
+ * Purpose:     Compute the size of the data structure on disk.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jun 23 1997
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 20, 2010
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_t *sym, unsigned UNUSED * flags_ptr)
+H5G_node_image_len(const void *_thing, size_t *image_len)
 {
-    H5WB_t     *wb = NULL;     /* Wrapped buffer for node data */
-    uint8_t     node_buf[H5G_NODE_BUF_SIZE]; /* Buffer for node */
-    unsigned	u;
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    const H5G_node_t *sym = (const H5G_node_t *)_thing;        /* Pointer to the Symbol Table node */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_flush)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(sym);
-
-    /*
-     * Write the symbol node to disk.
-     */
-    if(sym->cache_info.is_dirty) {
-        uint8_t	   *node;           /* Node buffer */
-        uint8_t    *p;              /* Pointer into node buffer */
-
-        /* Wrap the local buffer for serialized node info */
-        if(NULL == (wb = H5WB_wrap(node_buf, sizeof(node_buf))))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
-
-        /* Get a pointer to a buffer that's large enough for node */
-        if(NULL == (node = H5WB_actual(wb, sym->node_size)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
-
-        /* Serialize symbol table node into buffer */
-        p = node;
-
-        /* magic number */
-        HDmemcpy(p, H5G_NODE_MAGIC, (size_t)H5G_NODE_SIZEOF_MAGIC);
-        p += 4;
-
-        /* version number */
-        *p++ = H5G_NODE_VERS;
-
-        /* reserved */
-        *p++ = 0;
-
-        /* number of symbols */
-        UINT16ENCODE(p, sym->nsyms);
-
-        /* entries */
-        if(H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
-        HDmemset(p, 0, sym->node_size - (size_t)(p - node));
-
-	/* Write the serialized symbol table node. */
-        if(H5F_block_write(f, H5FD_MEM_BTREE, addr, sym->node_size, dxpl_id, node) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "unable to write symbol table node to the file")
-
-        /* Reset the node's dirty flag */
-        sym->cache_info.is_dirty = FALSE;
-    } /* end if */
-
-    /*
-     * Destroy the symbol node?	 This might happen if the node is being
-     * preempted from the cache.
-     */
-    if(destroy)
-        if(H5G_node_dest(f, sym) < 0)
-	    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node")
-
-done:
-    /* Release resources */
-    if(wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_node_flush() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_node_dest
- *
- * Purpose:	Destroy a symbol table node in memory.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jan 15 2003
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_node_dest(H5F_t UNUSED *f, H5G_node_t *sym)
-{
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_dest)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_image_len)
 
     /* Check arguments */
     HDassert(sym);
+    HDassert(image_len);
 
-    /* Verify that node is clean */
-    HDassert(sym->cache_info.is_dirty == FALSE);
+    /* Set the image length size */
+    *image_len = sym->node_size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_node_image_len() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_node_serialize
+ *
+ * Purpose:     Serialize the data structure for writing to disk.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Mar 24, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_node_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
+    haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
+{
+    H5G_node_t *sym = (H5G_node_t *)_thing;        /* Pointer to the Symbol Table node */
+    uint8_t    *p;              /* Pointer into image buffer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_serialize)
+
+    /* check arguments */
+    HDassert(image);
+    HDassert(sym);
+    HDassert(flags);
+
+    /* Set the local pointer into the serialized image */
+    p = (uint8_t *)image;
+
+    /* magic number */
+    HDmemcpy(p, H5G_NODE_MAGIC, (size_t)H5G_NODE_SIZEOF_MAGIC);
+    p += 4;
+
+    /* version number */
+    *p++ = H5G_NODE_VERS;
+
+    /* reserved */
+    *p++ = 0;
+
+    /* number of symbols */
+    UINT16ENCODE(p, sym->nsyms);
+
+    /* entries */
+    if(H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
+    HDmemset(p, 0, sym->node_size - (size_t)(p - (uint8_t *)image));
+
+    /* Reset the cache flags for this operation (metadata not resized or renamed) */
+    *flags = 0;
+
+    /* Sanity check */
+    HDassert((size_t)(p - (uint8_t *)image) <= len);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_serialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_node_free_icr
+ *
+ * Purpose:     Destroy/release an "in core representation" of a data structure
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 30, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_node_free_icr(void *thing)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_free_icr)
+
+    /* Check arguments */
+    HDassert(thing);
 
     /* Destroy symbol table node */
-    if(H5G_node_free(sym) < 0)
+    if(H5G_node_free((H5G_node_t *)thing) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_node_dest() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_node_clear
- *
- * Purpose:	Mark a symbol table node in memory as non-dirty.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar 20 2003
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_clear)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(sym);
-
-    /* Mark the node as clean */
-    sym->cache_info.is_dirty = FALSE;
-
-    /*
-     * Destroy the symbol node?	 This might happen if the node is being
-     * preempted from the cache.
-     */
-    if(destroy)
-        if(H5G_node_dest(f, sym) < 0)
-	    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_node_clear() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_node_size
- *
- * Purpose:	Compute the size in bytes of the specified instance of
- *		H5G_node_t on disk, and return it in *size_ptr.  On failure
- *		the value of size_ptr is undefined.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	John Mainzer
- *		5/13/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_node_size(const H5F_t UNUSED *f, const H5G_node_t *sym, size_t *size_ptr)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_size)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(f);
-    HDassert(size_ptr);
-
-    *size_ptr = sym->node_size;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5G_node_size() */
+} /* end H5G_node_free_icr() */
 
 
 /*-------------------------------------------------------------------------

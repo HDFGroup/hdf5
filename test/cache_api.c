@@ -34,15 +34,15 @@ extern const char *FILENAME[];
 
 /* private function declarations: */
 
-static void check_fapl_mdc_api_calls(void);
+static unsigned check_fapl_mdc_api_calls(void);
 
-static void check_file_mdc_api_calls(void);
+static unsigned check_file_mdc_api_calls(void);
 
-static void mdc_api_call_smoke_check(int express_test);
+static unsigned mdc_api_call_smoke_check(void);
 
-static void check_fapl_mdc_api_errs(void);
+static unsigned check_fapl_mdc_api_errs(void);
 
-static void check_file_mdc_api_errs(void);
+static unsigned check_file_mdc_api_errs(void);
 
 
 /**************************************************************************/
@@ -72,7 +72,7 @@ static void check_file_mdc_api_errs(void);
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_fapl_mdc_api_calls(void)
 {
     const char * fcn_name = "check_fapl_mdc_api_calls()";
@@ -492,6 +492,8 @@ check_fapl_mdc_api_calls(void)
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
+    return !pass;
+
 } /* check_fapl_mdc_api_calls() */
 
 
@@ -519,7 +521,7 @@ check_fapl_mdc_api_calls(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_file_mdc_api_calls(void)
 {
     const char * fcn_name = "check_file_mdc_api_calls()";
@@ -834,6 +836,8 @@ check_file_mdc_api_calls(void)
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
+    return !pass;
+
 } /* check_file_mdc_api_calls() */
 
 
@@ -860,8 +864,8 @@ check_file_mdc_api_calls(void)
 #define NUM_DSETS               6
 #define NUM_RANDOM_ACCESSES     200000
 
-static void
-mdc_api_call_smoke_check(int express_test)
+static unsigned
+mdc_api_call_smoke_check(void)
 {
     const char * fcn_name = "mdc_api_call_smoke_check()";
     char filename[512];
@@ -989,13 +993,13 @@ mdc_api_call_smoke_check(int express_test)
 
     TESTING("MDC API smoke check");
 
-    if ( express_test > 0 ) {
+    if ( skip_long_tests > 0 ) {
 
         SKIPPED();
 
         HDfprintf(stdout, "     Long tests disabled.\n");
 
-        return;
+        return 0;
     }
 
     pass = TRUE;
@@ -1117,7 +1121,8 @@ mdc_api_call_smoke_check(int express_test)
 
                 sprintf(dset_name, "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE,
-                                           dataspace_id, H5P_DEFAULT, properties, H5P_DEFAULT);
+				            dataspace_id, H5P_DEFAULT,
+					    properties, H5P_DEFAULT);
 
                 if ( dataset_ids[i] < 0 ) {
 
@@ -1622,6 +1627,8 @@ mdc_api_call_smoke_check(int express_test)
     if ( ! pass )
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
+
+    return !pass;
 
 } /* mdc_api_call_smoke_check() */
 
@@ -3007,7 +3014,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_fapl_mdc_api_errs(void)
 {
     const char * fcn_name = "check_fapl_mdc_api_errs()";
@@ -3057,7 +3064,7 @@ check_fapl_mdc_api_errs(void)
 
     scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
     if ( ( pass ) &&
-         ( ( H5Pget_mdc_config(fapl_id, &scratch) < 0 ) ||
+         ( ( H5Pget_mdc_config(fapl_id, &scratch) < 0) ||
            ( !CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE) ) ) ) {
 
         pass = FALSE;
@@ -3159,6 +3166,8 @@ check_fapl_mdc_api_errs(void)
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
+    return !pass;
+
 } /* check_fapl_mdc_api_errs() */
 
 
@@ -3178,7 +3187,7 @@ check_fapl_mdc_api_errs(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_file_mdc_api_errs(void)
 {
     const char * fcn_name = "check_file_mdc_api_errs()";
@@ -3496,6 +3505,8 @@ check_file_mdc_api_errs(void)
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
                   fcn_name, failure_mssg);
 
+    return !pass;
+
 } /* check_file_mdc_api_errs() */
 
 
@@ -3519,28 +3530,44 @@ check_file_mdc_api_errs(void)
 int
 main(void)
 {
-    int express_test;
+    unsigned nerrs = 0;
 
     H5open();
 
     express_test = GetTestExpress();
 
+    if ( express_test >= 3 ) {
+
+        skip_long_tests = TRUE;
+
+    } else {
+
+        skip_long_tests = FALSE;
+    }
+
+    printf("===================================\n");
+    printf("Cache API tests\n");
+    printf("        express_test = %d\n", express_test);
+    printf("        skip_long_tests = %d\n", (int)skip_long_tests);
+    printf("===================================\n");
+
+
 #if 1
-    check_fapl_mdc_api_calls();
+    nerrs += check_fapl_mdc_api_calls();
 #endif
 #if 1
-    check_file_mdc_api_calls();
+    nerrs += check_file_mdc_api_calls();
 #endif
 #if 1
-    mdc_api_call_smoke_check(express_test);
+    nerrs += mdc_api_call_smoke_check();
 #endif
 #if 1
-    check_fapl_mdc_api_errs();
+    nerrs += check_fapl_mdc_api_errs();
 #endif
 #if 1
-    check_file_mdc_api_errs();
+    nerrs += check_file_mdc_api_errs();
 #endif
 
-    return(0);
+    return( nerrs > 0 );
 
 } /* main() */
