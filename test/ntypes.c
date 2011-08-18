@@ -331,7 +331,7 @@ test_compound_dtype2(hid_t file)
             temp_point->st.c2 = (short)(i + j);
             temp_point->st.l2 = (i * 5 + j * 50) * n;
             temp_point->st.ll2 = (i * 10 + j * 100) * n;
-            temp_point->l = (unsigned long long)((i * 100 + j * 1000) * n);
+            temp_point->l = (unsigned long long)((i * 40 + j * 400) * n);
         } /* end for */
     } /* end for */
 
