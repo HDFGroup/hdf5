@@ -441,7 +441,7 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 	      dblock->blk_off_size);
 
     /* Allocate space for the free space markers */
-    if(NULL == (marker = H5MM_calloc(dblock->size)))
+    if(NULL == (marker = (uint8_t *)H5MM_calloc(dblock->size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize the free space information for the heap */

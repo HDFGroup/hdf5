@@ -353,8 +353,8 @@ H5G_node_get_load_size(const void *_udata, size_t *image_len)
  *
  * Purpose:     Deserialize the data structure from disk.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:	Success:	Ptr to the new node.
+ *		Failure:	NULL
  *
  * Programmer:  Quincey Koziol
  *              koziol@hdfgroup.org
@@ -437,7 +437,7 @@ done:
 static herr_t
 H5G_node_image_len(const void *_thing, size_t *image_len)
 {
-    H5G_node_t *sym = (H5G_node_t *)_thing;        /* Pointer to the Symbol Table node */
+    const H5G_node_t *sym = (const H5G_node_t *)_thing;        /* Pointer to the Symbol Table node */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_image_len)
 

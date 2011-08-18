@@ -42,12 +42,6 @@
 /* Package Private Macros */
 /**************************/
 
-/* Set speculative read size for header message */
-#define H5HF_SPEC_READ_SIZE(f) (    \
-    H5HF_HDR_SIZE(f)                \
-    + 50                           \
-)
-
 /* Size of signature information (on disk) */
 #define H5HF_SIZEOF_MAGIC               4
 
@@ -67,13 +61,13 @@
     )
 
 /* Size of doubling-table information */
-#define H5HF_DTABLE_INFO_SIZE(h) (                                            \
+#define H5HF_DTABLE_INFO_SIZE(sizeof_addr, sizeof_size) (                     \
     2   /* Width of table (i.e. # of columns) */                              \
-    + (h)->sizeof_size /* Starting block size */                              \
-    + (h)->sizeof_size /* Maximum direct block size */                        \
+    + sizeof_size /* Starting block size */                                   \
+    + sizeof_size /* Maximum direct block size */                             \
     + 2 /* Max. size of heap (log2 of actual value - i.e. the # of bits) */   \
     + 2 /* Starting # of rows in root indirect block */                       \
-    + (h)->sizeof_addr /* File address of table managed */                    \
+    + sizeof_addr /* File address of table managed */                         \
     + 2 /* Current # of rows in root indirect block */                        \
     )
 
@@ -82,7 +76,7 @@
 #define H5HF_HDR_FLAGS_CHECKSUM_DBLOCKS 0x02    /* checksum direct blocks */
 
 /* Size of fractal heap header */
-#define H5HF_HDR_SIZE(f) (                                                    \
+#define H5HF_HDR_SIZE(sizeof_addr, sizeof_size) (                             \
     /* General metadata fields */                                             \
     H5HF_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
@@ -95,75 +89,37 @@
                                                                               \
     /* "Huge" object fields */                                                \
     + 4 /* Max. size of "managed" object */                                   \
-    + H5F_SIZEOF_SIZE(f) /* Next ID for "huge" object */                      \
-    + H5F_SIZEOF_ADDR(f) /* File address of "huge" object tracker B-tree  */  \
+    + sizeof_size /* Next ID for "huge" object */                             \
+    + sizeof_addr /* File address of "huge" object tracker B-tree  */         \
                                                                               \
     /* "Managed" object free space fields */                                  \
-    + H5F_SIZEOF_SIZE(f) /* Total man. free space */                          \
-    + H5F_SIZEOF_ADDR(f) /* File address of free section header */            \
+    + sizeof_size /* Total man. free space */                                 \
+    + sizeof_addr /* File address of free section header */                   \
                                                                               \
     /* Statistics fields */                                                   \
-    + H5F_SIZEOF_SIZE(f) /* Size of man. space in heap */                     \
-    + H5F_SIZEOF_SIZE(f) /* Size of man. space iterator offset in heap */     \
-    + H5F_SIZEOF_SIZE(f) /* Size of alloacted man. space in heap */           \
-    + H5F_SIZEOF_SIZE(f) /* Number of man. objects in heap */                 \
-    + H5F_SIZEOF_SIZE(f) /* Size of huge space in heap */                     \
-    + H5F_SIZEOF_SIZE(f) /* Number of huge objects in heap */                 \
-    + H5F_SIZEOF_SIZE(f) /* Size of tiny space in heap */                     \
-    + H5F_SIZEOF_SIZE(f) /* Number of tiny objects in heap */                 \
+    + sizeof_size /* Size of man. space in heap */                            \
+    + sizeof_size /* Size of man. space iterator offset in heap */            \
+    + sizeof_size /* Size of alloacted man. space in heap */                  \
+    + sizeof_size /* Number of man. objects in heap */                        \
+    + sizeof_size /* Size of huge space in heap */                            \
+    + sizeof_size /* Number of huge objects in heap */                        \
+    + sizeof_size /* Size of tiny space in heap */                            \
+    + sizeof_size /* Number of tiny objects in heap */                        \
                                                                               \
     /* "Managed" object doubling table info */                                \
-    + 2   /* Width of table (i.e. # of columns) */                            \
-    + H5F_SIZEOF_SIZE(f) /* Starting block size */                            \
-    + H5F_SIZEOF_SIZE(f) /* Maximum direct block size */                      \
-    + 2 /* Max. size of heap (log2 of actual value - i.e. the # of bits) */   \
-    + 2 /* Starting # of rows in root indirect block */                       \
-    + H5F_SIZEOF_ADDR(f) /* File address of table managed */                  \
-    + 2 /* Current # of rows in root indirect block */                        \
+    + H5HF_DTABLE_INFO_SIZE(sizeof_addr, sizeof_size) /* Size of managed obj. doubling-table info */ \
     )
 
 /* Size of the fractal heap header on disk */
 /* (this is the fixed-len portion, the variable-len I/O filter information
  *      follows this information, if there are I/O filters for the heap)
  */
-#define H5HF_HEADER_SIZE(h)     (                                             \
-    /* General metadata fields */                                             \
-    H5HF_METADATA_PREFIX_SIZE(TRUE)                                           \
-                                                                              \
-    /* Fractal Heap Header specific fields */                                 \
-                                                                              \
-    /* General heap information */                                            \
-    + 2 /* Heap ID len */                                                     \
-    + 2 /* I/O filters' encoded len */                                        \
-    + 1 /* Status flags */                                                    \
-                                                                              \
-    /* "Huge" object fields */                                                \
-    + 4 /* Max. size of "managed" object */                                   \
-    + (h)->sizeof_size /* Next ID for "huge" object */                        \
-    + (h)->sizeof_addr /* File address of "huge" object tracker B-tree  */    \
-                                                                              \
-    /* "Managed" object free space fields */                                  \
-    + (h)->sizeof_size /* Total man. free space */                            \
-    + (h)->sizeof_addr /* File address of free section header */              \
-                                                                              \
-    /* Statistics fields */                                                   \
-    + (h)->sizeof_size /* Size of man. space in heap */                       \
-    + (h)->sizeof_size /* Size of man. space iterator offset in heap */       \
-    + (h)->sizeof_size /* Size of alloacted man. space in heap */             \
-    + (h)->sizeof_size /* Number of man. objects in heap */                   \
-    + (h)->sizeof_size /* Size of huge space in heap */                       \
-    + (h)->sizeof_size /* Number of huge objects in heap */                   \
-    + (h)->sizeof_size /* Size of tiny space in heap */                       \
-    + (h)->sizeof_size /* Number of tiny objects in heap */                   \
-                                                                              \
-    /* "Managed" object doubling table info */                                \
-    + H5HF_DTABLE_INFO_SIZE(h) /* Size of managed obj. doubling-table info */ \
-    )
+#define H5HF_HEADER_SIZE(h)   H5HF_HDR_SIZE((h)->sizeof_addr, (h)->sizeof_size)
 
 /* Size of overhead for a direct block */
 #define H5HF_MAN_ABS_DIRECT_OVERHEAD(h) (                                     \
     /* General metadata fields */                                             \
-    H5HF_METADATA_PREFIX_SIZE(h->checksum_dblocks)                            \
+    (size_t)H5HF_METADATA_PREFIX_SIZE(h->checksum_dblocks)                    \
                                                                               \
     /* Fractal heap managed, absolutely mapped direct block specific fields */ \
     + (h)->sizeof_addr          /* File address of heap owning the block */   \

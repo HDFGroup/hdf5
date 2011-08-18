@@ -303,7 +303,7 @@ done:
 static herr_t
 H5FS_cache_hdr_image_len(const void *_thing, size_t *image_len)
 {
-    H5FS_t *fspace = (H5FS_t *)_thing;    /* Pointer to free space header */
+    const H5FS_t *fspace = (const H5FS_t *)_thing;    /* Pointer to free space header */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_hdr_image_len)
 
@@ -755,7 +755,7 @@ done:
 static herr_t
 H5FS_cache_sinfo_image_len(const void *_thing, size_t *image_len)
 {
-    H5FS_sinfo_t *sinfo = (H5FS_sinfo_t *)_thing;
+    const H5FS_sinfo_t *sinfo = (const H5FS_sinfo_t *)_thing;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_sinfo_image_len)
 
@@ -764,7 +764,7 @@ H5FS_cache_sinfo_image_len(const void *_thing, size_t *image_len)
     HDassert(image_len);
 
     /* Set the image length size */
-    *image_len = sinfo->fspace->alloc_sect_size;
+    H5_ASSIGN_OVERFLOW(*image_len, sinfo->fspace->alloc_sect_size, hsize_t, size_t)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FS_cache_sinfo_image_len() */

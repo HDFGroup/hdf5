@@ -201,7 +201,7 @@ typedef struct test_entry_t
                                          * entry resides, or NULL if the entry
                                          * is not in a file.
                                          */
-    H5C_t              * cache_ptr;	/* pointer to the cache in which
+    H5C_t               * cache_ptr;	/* pointer to the cache in which
 					 * the entry resides, or NULL if the
 					 * entry is not in cache.
 					 */
@@ -456,9 +456,9 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
 
 #define XLATE_EXT_TO_INT_MDC_CONFIG(i, e)                           \
 {                                                                   \
-    (i).version                = H5C__CURR_AUTO_SIZE_CTL_VER;      \
+    (i).version                = H5C__CURR_AUTO_SIZE_CTL_VER;       \
     if ( (e).rpt_fcn_enabled )                                      \
-        (i).rpt_fcn            = H5C_def_auto_resize_rpt_fcn;      \
+        (i).rpt_fcn            = H5C_def_auto_resize_rpt_fcn;       \
     else                                                            \
         (i).rpt_fcn            = NULL;                              \
     (i).set_initial_size       = (e).set_initial_size;              \

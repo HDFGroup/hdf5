@@ -152,13 +152,14 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
 static herr_t
 H5HL_fl_deserialize(H5HL_t *heap, hsize_t free_block)
 {
-    H5HL_free_t *fl, *tail = NULL;      /* Heap free block nodes */
+    H5HL_free_t *fl = NULL, *tail = NULL;      /* Heap free block nodes */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HL_fl_deserialize)
 
     /* check arguments */
     HDassert(heap);
+    HDassert(!heap->freelist);
 
     /* Build free list */
     while(H5HL_FREE_NULL != free_block) {
@@ -175,13 +176,6 @@ H5HL_fl_deserialize(H5HL_t *heap, hsize_t free_block)
         fl->prev = tail;
         fl->next = NULL;
 
-        /* Insert node into list */
-        if(tail)
-            tail->next = fl;
-        tail = fl;
-        if(!heap->freelist)
-            heap->freelist = fl;
-
         /* Decode offset of next free block */
         p = heap->dblk_image + free_block;
         H5F_DECODE_LENGTH_LEN(p, free_block, heap->sizeof_size);
@@ -192,9 +186,21 @@ H5HL_fl_deserialize(H5HL_t *heap, hsize_t free_block)
         H5F_DECODE_LENGTH_LEN(p, fl->size, heap->sizeof_size);
         if((fl->offset + fl->size) > heap->dblk_size)
             HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "bad heap free list")
+
+        /* Append node onto list */
+        if(tail)
+            tail->next = fl;
+        else
+            heap->freelist = fl;
+        tail = fl;
+        fl = NULL;
     } /* end while */
 
 done:
+    if(ret_value < 0)
+        if(fl)
+            fl = H5FL_FREE(H5HL_free_t, fl);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL_fl_deserialize() */
 
@@ -278,8 +284,8 @@ H5HL_prfx_get_load_size(const void *_udata, size_t *image_len)
  *
  * Purpose:	Deserialize the data structure from disk.
  *
- * Return:	Success:	SUCCESS
- *		Failure:	FAIL
+ * Return:	Success:	Ptr to a local heap prefix.
+ *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -324,11 +330,11 @@ H5HL_prfx_deserialize(const void *image, size_t len, void *_udata,
 
     /* Allocate space in memory for the heap */
     if(NULL == (heap = H5HL_new(udata->sizeof_size, udata->sizeof_addr, udata->sizeof_prfx)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate local heap structure")
 
     /* Allocate the heap prefix */
     if(NULL == (prfx = H5HL_prfx_new(heap)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate local heap prefix")
 
     /* Store the prefix's address & length */
     heap->prfx_addr = udata->prfx_addr;
@@ -488,6 +494,11 @@ H5HL_prfx_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED 
         /* Serialize the free list into the heap data's image */
         H5HL_fl_serialize(heap);
 
+        /* Set p to the start of the data block.  This is necessary because
+         * there may be a gap between the used portion of the prefix and the
+         * data block due to alignment constraints. */
+        p = (uint8_t *)image + heap->prfx_size;
+
         /* Copy the heap data block into the cache image */
         HDmemcpy(p, heap->dblk_image, heap->dblk_size);
     } /* end if */
@@ -570,8 +581,8 @@ H5HL_dblk_get_load_size(const void *_udata, size_t *image_len)
  *
  * Purpose:	Deserialize the data structure from disk.
  *
- * Return:	Success:	SUCCESS
- *		Failure:	FAIL
+ * Return:	Success:	Ptr to a local heap data block.
+ *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -585,7 +596,7 @@ H5HL_dblk_deserialize(const void *image, size_t UNUSED len,
 {
     H5HL_dblk_t *dblk = NULL;       /* Local heap data block deserialized */
     H5HL_cache_dblk_ud_t *udata = (H5HL_cache_dblk_ud_t *)_udata;       /* User data for callback */
-    H5HL_dblk_t *ret_value = NULL;  /* Return value */
+    H5HL_dblk_t *ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HL_dblk_deserialize)
 

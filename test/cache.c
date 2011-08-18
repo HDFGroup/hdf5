@@ -3391,8 +3391,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-			          H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
 
         if ( result < 0 ) {
 
@@ -3403,8 +3402,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -3415,8 +3413,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                H5C__FLUSH_CLEAR_ONLY_FLAG);
+        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_CLEAR_ONLY_FLAG);
 
         if ( result < 0 ) {
 
@@ -3428,8 +3425,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                H5C__FLUSH_MARKED_ENTRIES_FLAG);
+        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_MARKED_ENTRIES_FLAG);
 
         if ( result < 0 ) {
 
@@ -5176,8 +5172,7 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
     /* clean up the cache to prep for the next test */
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -5409,8 +5404,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
     /* clean up the cache to prep for the next test */
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -5528,8 +5522,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  },
           {
@@ -5556,8 +5550,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -5574,8 +5568,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -5635,8 +5629,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  },
           {
@@ -5663,8 +5657,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           }
 	};
@@ -5681,8 +5675,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -5739,8 +5733,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -5757,8 +5751,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -5817,8 +5811,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           }
 	};
@@ -5835,8 +5829,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -5902,8 +5896,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -5920,8 +5914,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -6019,8 +6013,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -6037,8 +6031,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -6132,8 +6126,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -6150,8 +6144,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -6243,8 +6237,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -6261,8 +6255,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -6357,8 +6351,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -6375,8 +6369,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  },
 	  {
@@ -6389,8 +6383,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -6453,8 +6447,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           }
 	};
@@ -6471,8 +6465,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  },
 	  {
@@ -6485,8 +6479,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  }
 	};
@@ -6548,8 +6542,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -6566,8 +6560,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  },
 	  {
@@ -6580,8 +6574,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -6643,8 +6637,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           }
 	};
@@ -6661,8 +6655,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  },
 	  {
@@ -6675,8 +6669,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  }
 	};
@@ -6738,8 +6732,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -6756,8 +6750,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  },
 	  {
@@ -6770,8 +6764,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -6865,8 +6859,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -6883,8 +6877,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  },
 	  {
@@ -6897,8 +6891,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -7004,8 +6998,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
           {
@@ -7032,8 +7026,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
           },
           {
@@ -7060,8 +7054,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
           {
@@ -7088,8 +7082,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -7106,8 +7100,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ TRUE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  },
 	  {
@@ -7120,8 +7114,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ TRUE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  },
 	  {
@@ -7134,8 +7128,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  },
 	  {
@@ -7148,8 +7142,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -7215,8 +7209,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
           {
@@ -7243,8 +7237,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
           {
@@ -7271,8 +7265,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
           {
@@ -7299,8 +7293,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
           },
           {
@@ -7327,8 +7321,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
           {
@@ -7355,8 +7349,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -7373,8 +7367,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  },
 	  {
@@ -7387,8 +7381,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  },
 	  {
@@ -7401,8 +7395,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  },
 	  {
@@ -7415,8 +7409,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -7481,8 +7475,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
           {
@@ -7509,8 +7503,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
           {
@@ -7537,8 +7531,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
           {
@@ -7565,8 +7559,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ TRUE
           },
           {
@@ -7593,8 +7587,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
           {
@@ -7621,8 +7615,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           }
 	};
@@ -7639,8 +7633,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  },
 	  {
@@ -7653,8 +7647,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  },
 	  {
@@ -7667,8 +7661,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  },
 	  {
@@ -7681,8 +7675,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  }
 	};
@@ -7743,8 +7737,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -7771,8 +7765,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -7799,8 +7793,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -7817,8 +7811,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -7876,8 +7870,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -7904,8 +7898,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -7932,8 +7926,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           }
 	};
@@ -7950,8 +7944,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -8079,8 +8073,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8107,8 +8101,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8135,8 +8129,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8163,8 +8157,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8191,8 +8185,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8219,8 +8213,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8247,8 +8241,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8275,8 +8269,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8303,8 +8297,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8331,8 +8325,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -8349,8 +8343,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  },
 	  {
@@ -8363,8 +8357,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  },
 	  {
@@ -8377,8 +8371,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  }
 
@@ -8513,8 +8507,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -8541,8 +8535,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -8569,8 +8563,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -8597,8 +8591,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -8625,8 +8619,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -8653,8 +8647,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -8681,8 +8675,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -8709,8 +8703,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -8737,8 +8731,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -8765,8 +8759,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           }
 	};
@@ -8783,8 +8777,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  },
 	  {
@@ -8797,8 +8791,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  },
 	  {
@@ -8811,8 +8805,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  }
 
@@ -8872,8 +8866,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8900,8 +8894,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8928,8 +8922,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8956,8 +8950,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
 	  {
@@ -8984,8 +8978,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           }
 	};
@@ -9002,8 +8996,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -9064,8 +9058,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -9092,8 +9086,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -9120,8 +9114,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -9148,8 +9142,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
 	  {
@@ -9176,8 +9170,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_flushed   = */ TRUE,
+	    /* expected_deserialized = */ TRUE,
+	    /* expected_serialized = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           }
 	};
@@ -9194,8 +9188,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* is_dirty	          = */ FALSE,
 	    /* is_protected       = */ FALSE,
 	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
+	    /* expected_deserialized = */ FALSE,
+	    /* expected_serialized = */ FALSE,
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
@@ -9600,8 +9594,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
     /* clean up the cache to prep for the next test */
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                 H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -9871,15 +9864,15 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	 *          (VET, 9) is pinned by (VET, 5), and (VET, 7)
 	 */
 	create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 1,
-			                VARIABLE_ENTRY_TYPE, 0);
+			               VARIABLE_ENTRY_TYPE, 0);
 	create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 3,
-			                VARIABLE_ENTRY_TYPE, 0);
+			               VARIABLE_ENTRY_TYPE, 0);
 	create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 5,
-			                VARIABLE_ENTRY_TYPE, 0);
+			               VARIABLE_ENTRY_TYPE, 0);
 	create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 5,
-			                VARIABLE_ENTRY_TYPE, 9);
+			               VARIABLE_ENTRY_TYPE, 9);
 	create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 7,
-			                VARIABLE_ENTRY_TYPE, 9);
+			               VARIABLE_ENTRY_TYPE, 9);
 
 	/* Next, set up the flush operations:
 	 *
@@ -9897,7 +9890,6 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	 *
 	 *          (VET, 9) dirties (VET, 8)
 	 */
-
         add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__DIRTY,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
         add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__RESIZE,
@@ -10806,8 +10798,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -12111,13 +12102,13 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
      * This yields a total of 256 tests.
      *
      * The tests and their expected results are given in the spec table
-     * below.  The values assigned to the expected_flushed,
+     * below.  The values assigned to the expected_serialized,
      * and expected_destroyed fields are somewhat arcane, so the following
      * overview may be useful.
      *
      * In addition to simply checking to see if the test case runs,
      * we also check to see if the desired operations take place on the
-     * cache entry.  Thus expected_flushed is set to TRUE if we
+     * cache entry.  Thus expected_serialized is set to TRUE if we
      * we expect the entry to be flushed, and expected_destroyed is set
      * to TRUE if we expect the entry to be destroyed.
      *
@@ -12594,8 +12585,7 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
     /* clean up the cache to prep for the next test */
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -12804,8 +12794,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -15842,8 +15831,7 @@ check_flush_protected_err(void)
 
         protect_entry(file_ptr, 0, 0);
 
-        if ( H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET)
-             >= 0 ) {
+        if ( H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET) >= 0 ) {
 
             pass = FALSE;
             failure_mssg = "flush succeeded on cache with protected entry.\n";
@@ -15852,8 +15840,7 @@ check_flush_protected_err(void)
 
             unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
-            if ( H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET)
-                 < 0 ) {
+            if ( H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET) < 0 ) {
 
                 pass = FALSE;
                 failure_mssg = "flush failed after unprotect.\n";
@@ -28256,7 +28243,6 @@ main(void)
 	printf("\n");
     }
 
-#if 1
     nerrs += smoke_check_1();
     nerrs += smoke_check_2();
     nerrs += smoke_check_3();
@@ -28267,10 +28253,8 @@ main(void)
     nerrs += smoke_check_8();
     nerrs += smoke_check_9();
     nerrs += smoke_check_10();
-#endif
-#if 1
     nerrs += write_permitted_check();
-#endif
+
     /* for shorter tests, the overhead of using the core file driver doesn't
      * seem to allow us to realize any significant time saveings.  Thus
      * set try_core_file_driver to FALSE for the remaining tests.

@@ -446,7 +446,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
      */
     switch(cparam->id_len) {
         case 0: /* Set the length of heap IDs to just enough to hold the offset & length of 'normal' objects in the heap */
-            hdr->id_len = 1 + hdr->heap_off_size + hdr->heap_len_size;
+            hdr->id_len = (unsigned)1 + hdr->heap_off_size + hdr->heap_len_size;
             break;
 
         case 1: /* Set the length of heap IDs to just enough to hold the information needed to directly access 'huge' objects in the heap */
@@ -1233,7 +1233,7 @@ H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr)
 
         /* Walk backwards through entries, until we find one that has a child */
         /* (Skip direct block that will be deleted, if we find it) */
-        tmp_entry = curr_entry;
+        tmp_entry = (int)curr_entry;
         while(tmp_entry >= 0 &&
                 (H5F_addr_eq(iblock->ents[tmp_entry].addr, dblock_addr) ||
                     !H5F_addr_defined(iblock->ents[tmp_entry].addr)))
@@ -1268,7 +1268,8 @@ H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr)
         else {
             unsigned row;           /* Row for entry */
 
-            curr_entry = tmp_entry;
+            HDassert(tmp_entry >= 0);
+            curr_entry = (unsigned)tmp_entry;
 
             /* Check if entry is for a direct block */
             row = curr_entry / hdr->man_dtable.cparam.width;

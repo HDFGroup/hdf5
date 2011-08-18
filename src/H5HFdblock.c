@@ -575,6 +575,7 @@ H5HF_man_dblock_locate(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off,
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object")
         HDassert(row < iblock->nrows);        /* child must be smaller than parent */
     } /* end while */
+    HDassert(obj_off >= iblock->block_off);
 
     /* Set return parameters */
     if(ret_entry)

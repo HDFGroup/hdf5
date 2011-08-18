@@ -141,8 +141,8 @@ H5HG_get_load_size(const void *_udata, size_t *image_len)
  *
  * Purpose:	Deserialize the data structure from disk.
  *
- * Return:	Success:	SUCCESS
- *		Failure:	FAIL
+ * Return:	Success:	Ptr to a global heap collection.
+ *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998

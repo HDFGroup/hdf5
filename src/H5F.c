@@ -936,7 +936,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	 * The cache might be created with a different number of elements and
 	 * the access property list should be updated to reflect that.
 	 */
-	if(H5AC_create(f, (H5AC_cache_config_t *)&(f->shared->mdc_initCacheCfg)) < 0)
+	if(H5AC_create(f, &(f->shared->mdc_initCacheCfg)) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create metadata cache")
 
         /* Create the file's "open object" information */
@@ -3510,7 +3510,7 @@ H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
 
     /* Go get the resize configuration */
-    if(H5AC_get_cache_auto_resize_config(file->shared->cache, (H5AC_cache_config_t *)config_ptr) < 0)
+    if(H5AC_get_cache_auto_resize_config(file->shared->cache, config_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_auto_resize_config() failed.")
 
 done:
@@ -3546,8 +3546,8 @@ H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
     if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
-    /* pass the resize configuration to the modified cache as well. */
-    if(H5AC_set_cache_auto_resize_config(file->shared->cache, (H5AC_cache_config_t *)config_ptr) < 0)
+    /* set the resize configuration */
+    if(H5AC_set_cache_auto_resize_config(file->shared->cache, config_ptr) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed.")
 
 done:

@@ -128,7 +128,8 @@ H5B_get_load_size(const void *_udata, size_t *image_len)
  *
  * Purpose:     Deserialize the data structure from disk.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:	Success:	Pointer to a new B-tree node.
+ *		Failure:	NULL
  *
  * Programmer:  Quincey Koziol
  *              koziol@hdfgroup.org
@@ -244,7 +245,7 @@ done:
 static herr_t
 H5B_image_len(const void *_thing, size_t *image_len)
 {
-    H5B_t *bt = (H5B_t *)_thing;        /* Pointer to the B-tree node */
+    const H5B_t *bt = (const H5B_t *)_thing;        /* Pointer to the B-tree node */
     H5B_shared_t *shared;       /* Pointer to shared B-tree info */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_image_len)

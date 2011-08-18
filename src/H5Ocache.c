@@ -66,14 +66,14 @@
 /********************/
 
 /* Metadata cache callbacks */
-static herr_t H5O_cache_get_load_size(const void *_udata, size_t *image_len);
-static void *H5O_cache_deserialize(const void *image, size_t len,
+static herr_t H5O_cache_prfx_get_load_size(const void *_udata, size_t *image_len);
+static void *H5O_cache_prfx_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5O_cache_image_len(const void *thing, size_t *image_len);
-static herr_t H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+static herr_t H5O_cache_prfx_image_len(const void *thing, size_t *image_len);
+static herr_t H5O_cache_prfx_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
-static herr_t H5O_cache_free_icr(void *thing);
+static herr_t H5O_cache_prfx_free_icr(void *thing);
 
 static herr_t H5O_cache_chk_get_load_size(const void *_udata, size_t *image_len);
 static void *H5O_cache_chk_deserialize(const void *image, size_t len,
@@ -105,14 +105,14 @@ static herr_t H5O_add_cont_msg(H5O_cont_msgs_t *cont_msg_info,
 /* H5O object header prefix inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_OHDR[1] = {{
     H5AC_OHDR_ID,
-    "object header",
+    "object header prefix",
     H5FD_MEM_OHDR,
     H5AC__CLASS_SPECULATIVE_LOAD_FLAG,
-    H5O_cache_get_load_size,
-    H5O_cache_deserialize,
-    H5O_cache_image_len,
-    H5O_cache_serialize,
-    H5O_cache_free_icr,
+    H5O_cache_prfx_get_load_size,
+    H5O_cache_prfx_deserialize,
+    H5O_cache_prfx_image_len,
+    H5O_cache_prfx_serialize,
+    H5O_cache_prfx_free_icr,
 }};
 
 /* H5O object header chunk inherits cache-like properties from H5AC */
@@ -150,7 +150,7 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_cache_get_load_size
+ * Function:    H5O_cache_prfx_get_load_size
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -163,11 +163,11 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_get_load_size(const void *_udata, size_t *image_len)
+H5O_cache_prfx_get_load_size(const void *_udata, size_t *image_len)
 {
     const H5O_cache_ud_t *udata = (const H5O_cache_ud_t *)_udata;       /* User data for callback */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cache_get_load_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cache_prfx_get_load_size)
 
     /* Check arguments */
     HDassert(udata);
@@ -177,11 +177,11 @@ H5O_cache_get_load_size(const void *_udata, size_t *image_len)
     *image_len = H5O_SPEC_READ_SIZE;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_cache_get_load_size() */
+} /* end H5O_cache_prfx_get_load_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_cache_deserialize
+ * Function:	H5O_cache_prfx_deserialize
  *
  * Purpose:	Deserializes an object header prefix + first chunk
  *
@@ -195,7 +195,7 @@ H5O_cache_get_load_size(const void *_udata, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_cache_deserialize(const void *image, size_t len, void *_udata,
+H5O_cache_prfx_deserialize(const void *image, size_t len, void *_udata,
     hbool_t *dirty)
 {
     H5O_t		*oh = NULL;     /* Object header info */
@@ -204,7 +204,7 @@ H5O_cache_deserialize(const void *image, size_t len, void *_udata,
     size_t              prefix_size;    /* Size of object header prefix */
     H5O_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_cache_deserialize)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_cache_prfx_deserialize)
 
     /* Check arguments */
     HDassert(len > 0);
@@ -362,11 +362,11 @@ done:
 	    HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header data")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_cache_deserialize() */
+} /* end H5O_cache_prfx_deserialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_cache_image_len
+ * Function:	H5O_cache_prfx_image_len
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -379,11 +379,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_image_len(const void *thing, size_t *image_len)
+H5O_cache_prfx_image_len(const void *thing, size_t *image_len)
 {
     const H5O_t		*oh = (const H5O_t *)thing;     /* The object header */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cache_image_len)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cache_prfx_image_len)
 
     /* Check arguments */
     HDassert(oh);
@@ -396,11 +396,11 @@ H5O_cache_image_len(const void *thing, size_t *image_len)
        *image_len = oh->chunk[0].size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_cache_image_len() */
+} /* end H5O_cache_prfx_image_len() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_cache_serialize
+ * Function:	H5O_cache_prfx_serialize
  *
  * Purpose:	Serializes an object header prefix+first chunk
  *
@@ -413,7 +413,7 @@ H5O_cache_image_len(const void *thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
+H5O_cache_prfx_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
     size_t UNUSED len, void *image, void *_thing, unsigned *flags,
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
@@ -421,13 +421,17 @@ H5O_cache_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
     uint8_t     *p;                     /* Pointer into raw data buffer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_cache_serialize, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_cache_prfx_serialize)
 
     /* check arguments */
     HDassert(f);
     HDassert(image);
     HDassert(oh);
     HDassert(flags);
+
+#ifdef H5O_DEBUG
+H5O_assert(oh);
+#endif /* H5O_DEBUG */
 
     /* Get temporary pointer to chunk zero's buffer */
     p = oh->chunk[0].image;
@@ -442,8 +446,8 @@ H5O_cache_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
         HDassert(oh->chunk[0].size >= (size_t)H5O_SIZEOF_HDR(oh));
         chunk0_size = oh->chunk[0].size - (size_t)H5O_SIZEOF_HDR(oh);
 
-        /* Magic number */
-        HDmemcpy(p, H5O_HDR_MAGIC, (size_t)H5O_SIZEOF_MAGIC);
+        /* Verify magic number */
+        HDassert(!HDmemcmp(p, H5O_HDR_MAGIC, H5O_SIZEOF_MAGIC));
         p += H5O_SIZEOF_MAGIC;
 
         /* Version */
@@ -528,11 +532,11 @@ H5O_cache_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_cache_serialize() */
+} /* H5O_cache_prfx_serialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_cache_free_icr
+ * Function:	H5O_cache_prfx_free_icr
  *
  * Purpose:	Destroy/release an "in core representation" of a data
  *              structure
@@ -547,12 +551,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_free_icr(void *thing)
+H5O_cache_prfx_free_icr(void *thing)
 {
     H5O_t *oh = (H5O_t *)thing;         /* Object header to destroy */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_cache_free_icr)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_cache_prfx_free_icr)
 
     /* Check arguments */
     HDassert(oh);
@@ -564,7 +568,7 @@ H5O_cache_free_icr(void *thing)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_cache_free_icr() */
+} /* H5O_cache_prfx_free_icr() */
 
 
 /*-------------------------------------------------------------------------
@@ -632,7 +636,7 @@ H5O_cache_chk_deserialize(const void *image, size_t len, void *_udata,
     if(NULL == (chk_proxy = H5FL_CALLOC(H5O_chunk_proxy_t)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed")
 
-    /* Check if we are still decoding the object header  */
+    /* Check if we are still decoding the object header */
     /* (as opposed to bringing a piece of it back from the file) */
     if(udata->decoding) {
         /* Sanity check */
@@ -731,7 +735,7 @@ H5O_cache_chk_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     H5O_chunk_proxy_t *chk_proxy = (H5O_chunk_proxy_t *)_thing;  /* Pointer to the object header chunk proxy */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_cache_chk_serialize, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_cache_chk_serialize)
 
     /* check arguments */
     HDassert(f);

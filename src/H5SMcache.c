@@ -143,8 +143,8 @@ H5SM_table_get_load_size(const void *_udata, size_t *image_len)
  *
  * Purpose:	Deserialize the data structure from disk.
  *
- * Return:	Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:	Success:	Pointer to a new shared message master table
+ *		Failure:	NULL
  *
  * Programmer:	James Laird
  *		November 6, 2006
@@ -444,8 +444,8 @@ H5SM_list_get_load_size(const void *_udata, size_t *image_len)
  *
  * Purpose:	Deserialize the data structure from disk.
  *
- * Return:	Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:	Success:	Pointer to a new shared message list
+ *		Failure:	NULL
  *
  * Programmer:	James Laird
  *		November 6, 2006

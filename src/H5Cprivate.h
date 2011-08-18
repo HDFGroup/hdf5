@@ -121,7 +121,7 @@ typedef struct H5C_t H5C_t;
  *
  * flags:  Flags indicating class-specific behavior.
  *
- * get_load_size: Pointer to the 'get load size' function.
+ * GET_LOAD_SIZE: Pointer to the 'get load size' function.
  *
  * 	This function must be able to determing the size of a disk image for
  *      a metadata cache entry, given the 'udata' that will be passed to the
@@ -154,7 +154,7 @@ typedef struct H5C_t H5C_t;
  *      the value pointed to by the image_len_ptr.
  *
  *
- * deserialize: Pointer to the deserialize function.
+ * DESERIALIZE: Pointer to the deserialize function.
  *
  * 	This function must be able to read an on disk image of a metadata
  * 	cache entry, allocate and load the equivalent in core representation,
@@ -219,7 +219,7 @@ typedef struct H5C_t H5C_t;
  *      update its on disk image length accordingly.
  *
  *
- * image_len: Pointer to the image length callback.
+ * IMAGE_LEN: Pointer to the image length callback.
  *
  *	In the best of all possible worlds, we would not have this callback.
  *	It exists to allow clients to reduce the size of the on disk image of
@@ -248,7 +248,7 @@ typedef struct H5C_t H5C_t;
  *      the value pointed to by the image_len_ptr.
  *
  *
- * serialize: Pointer to the serialize callback.
+ * SERIALIZE: Pointer to the serialize callback.
  *
  *	The serialize callback is invoked by the metadata cache whenever
  *	it needs a current on disk image of the metadata entry for purposes
@@ -383,7 +383,7 @@ typedef struct H5C_t H5C_t;
  *	routines.
  *
  *
- * free_icr: Pointer to the free ICR Callback.
+ * FREE_ICR: Pointer to the free ICR Callback.
  *
  *	The free ICR callback is invoked by the metadata cache when it
  *	wishes to evict an entry, and needs the client to free the memory
@@ -427,8 +427,8 @@ typedef void *(*H5C_deserialize_func_t)(const void *image_ptr,
 typedef herr_t (*H5C_image_len_func_t)(const void *thing,
                                         size_t *image_len_ptr);
 
-#define H5C__SERIALIZE_RESIZED_FLAG	0x1
-#define H5C__SERIALIZE_MOVED_FLAG	0x2
+#define H5C__SERIALIZE_RESIZED_FLAG	((unsigned)0x1)
+#define H5C__SERIALIZE_MOVED_FLAG	((unsigned)0x2)
 
 typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f,
 		                        hid_t dxpl_id,
@@ -443,9 +443,9 @@ typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f,
 
 typedef herr_t (*H5C_free_icr_func_t)(void *thing);
 
-#define H5C__CLASS_NO_FLAGS_SET			0x0
-#define H5C__CLASS_SPECULATIVE_LOAD_FLAG	0x1
-#define H5C__CLASS_COMPRESSED_FLAG		0x2
+#define H5C__CLASS_NO_FLAGS_SET			((unsigned)0x0)
+#define H5C__CLASS_SPECULATIVE_LOAD_FLAG	((unsigned)0x1)
+#define H5C__CLASS_COMPRESSED_FLAG		((unsigned)0x2)
 
 typedef struct H5C_class_t {
     int					id;
@@ -1404,7 +1404,7 @@ H5_DLL herr_t H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
 
 
 H5_DLL herr_t H5C_flush_to_min_clean(H5F_t * f,
-		                     hid_t    dxpl_id);
+		                     hid_t   dxpl_id);
 
 H5_DLL herr_t H5C_get_cache_auto_resize_config(const H5C_t * cache_ptr,
                                                H5C_auto_size_ctl_t *config_ptr);

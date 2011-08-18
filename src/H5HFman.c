@@ -147,11 +147,12 @@ H5HF_man_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t obj_size, const void *obj
     /* Lock direct block */
     if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, sec_node->u.single.parent, sec_node->u.single.par_entry, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load fractal heap direct block")
+    HDassert(dblock->parent == sec_node->u.single.parent);
 
     /* Insert object into block */
 
     /* Get the offset of the object within the block */
-    blk_off = sec_node->sect_info.addr - dblock->block_off;
+    blk_off = (size_t)(sec_node->sect_info.addr - dblock->block_off);
 
     /* Sanity checks */
     HDassert(sec_node->sect_info.size >= obj_size);
@@ -299,6 +300,7 @@ H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap direct block")
         } /* end if */
+        HDassert(dblock->parent == iblock);
 
         /* Unlock indirect block */
         if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
@@ -307,6 +309,7 @@ H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
     } /* end else */
 
     /* Compute offset of object within block */
+    HDassert(obj_off >= dblock->block_off);
     HDassert((obj_off - dblock->block_off) < (hsize_t)dblock_size);
     blk_off = (size_t)(obj_off - dblock->block_off);
 

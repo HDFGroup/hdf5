@@ -216,10 +216,6 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register(pclass, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_CONFIG_SIZE, &mdc_initCacheCfg, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the initial journaling configuration */
-    if(H5P_register(pclass, H5F_ACS_JNL_INIT_CONFIG_NAME, H5F_ACS_JNL_INIT_CONFIG_SIZE, &initJnlCfg, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
     /* Register the size of raw data chunk cache (elements) */
     if(H5P_register(pclass, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE, &rdcc_nelmts, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -286,6 +282,10 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the 'use the latest version of the format' flag */
     if(H5P_register(pclass, H5F_ACS_LATEST_FORMAT_NAME, H5F_ACS_LATEST_FORMAT_SIZE, &latest_format, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the initial journaling configuration */
+    if(H5P_register(pclass, H5F_ACS_JNL_INIT_CONFIG_NAME, H5F_ACS_JNL_INIT_CONFIG_SIZE, &initJnlCfg, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:

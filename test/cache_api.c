@@ -148,7 +148,7 @@ check_fapl_mdc_api_calls(void)
 
         scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
 
-        result = H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&scratch);
+        result = H5Pget_mdc_config(fapl_id, &scratch);
 
         if ( result < 0 ) {
 
@@ -169,7 +169,7 @@ check_fapl_mdc_api_calls(void)
 
     if ( pass ) {
 
-        result = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&mod_config);
+        result = H5Pset_mdc_config(fapl_id, &mod_config);
 
         if ( result < 0 ) {
 
@@ -182,7 +182,7 @@ check_fapl_mdc_api_calls(void)
 
         scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
 
-        result = H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&scratch);
+        result = H5Pget_mdc_config(fapl_id, &scratch);
 
         if ( result < 0 ) {
 
@@ -294,7 +294,7 @@ check_fapl_mdc_api_calls(void)
 
         scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
 
-        result = H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&scratch);
+        result = H5Pget_mdc_config(fapl_id, &scratch);
 
         if ( result < 0 ) {
 
@@ -352,7 +352,7 @@ check_fapl_mdc_api_calls(void)
 
     if ( pass ) {
 
-        result = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&mod_config);
+        result = H5Pset_mdc_config(fapl_id, &mod_config);
 
         if ( result < 0 ) {
 
@@ -443,7 +443,7 @@ check_fapl_mdc_api_calls(void)
 
         scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
 
-        result = H5Pget_mdc_config(test_fapl_id, (H5AC_cache_config_t *)&scratch);
+        result = H5Pget_mdc_config(test_fapl_id, &scratch);
 
         if ( result < 0 ) {
 
@@ -709,7 +709,7 @@ check_file_mdc_api_calls(void)
     /* set alternate config 1 */
     if ( pass ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_1) < 0 ) {
+        if ( H5Fset_mdc_config(file_id, &mod_config_1) < 0 ) {
 
             pass = FALSE;
             failure_mssg = "H5Fset_mdc_config() failed 1.\n";
@@ -722,7 +722,7 @@ check_file_mdc_api_calls(void)
     /* set alternate config 2 */
     if ( pass ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_2) < 0 ) {
+        if ( H5Fset_mdc_config(file_id, &mod_config_2) < 0 ) {
 
             pass = FALSE;
             failure_mssg = "H5Fset_mdc_config() failed 2.\n";
@@ -735,7 +735,7 @@ check_file_mdc_api_calls(void)
     /* set alternate config 3 */
     if ( pass ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_3) < 0 ) {
+        if ( H5Fset_mdc_config(file_id, &mod_config_3) < 0 ) {
 
             pass = FALSE;
             failure_mssg = "H5Fset_mdc_config() failed 3.\n";
@@ -748,7 +748,7 @@ check_file_mdc_api_calls(void)
     /* set alternate config 4 */
     if ( pass ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_4) < 0 ) {
+        if ( H5Fset_mdc_config(file_id, &mod_config_4) < 0 ) {
 
             pass = FALSE;
             failure_mssg = "H5Fset_mdc_config() failed 4.\n";
@@ -1049,7 +1049,7 @@ mdc_api_call_smoke_check(void)
     /* set alternate config 1 */
     if ( pass ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_1) < 0 ) {
+        if ( H5Fset_mdc_config(file_id, &mod_config_1) < 0 ) {
 
             pass = FALSE;
             failure_mssg = "H5Fset_mdc_config() failed 1.\n";
@@ -1283,7 +1283,7 @@ mdc_api_call_smoke_check(void)
     /* set alternate config 2 */
     if ( pass ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_2) < 0 ) {
+        if ( H5Fset_mdc_config(file_id, &mod_config_2) < 0 ) {
 
             pass = FALSE;
             failure_mssg = "H5Fset_mdc_config() failed 2.\n";
@@ -1434,7 +1434,7 @@ mdc_api_call_smoke_check(void)
     /* set alternate config 3 */
     if ( pass ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_3) < 0 ) {
+        if ( H5Fset_mdc_config(file_id, &mod_config_3) < 0 ) {
 
             pass = FALSE;
             failure_mssg = "H5Fset_mdc_config() failed 3.\n";
@@ -3038,7 +3038,7 @@ check_fapl_mdc_api_errs(void)
     if  ( pass ) {
 
         H5E_BEGIN_TRY {
-	    result = H5Pget_mdc_config(-1, (H5AC_cache_config_t *)&scratch);
+	    result = H5Pget_mdc_config(-1, &scratch);
 	} H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3065,7 +3065,7 @@ check_fapl_mdc_api_errs(void)
 
     scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
     if ( ( pass ) &&
-         ( ( H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&scratch) < 0) ||
+         ( ( H5Pget_mdc_config(fapl_id, &scratch) < 0) ||
            ( !CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE) ) ) ) {
 
         pass = FALSE;
@@ -3091,7 +3091,7 @@ check_fapl_mdc_api_errs(void)
     if  ( pass ) {
 
         H5E_BEGIN_TRY {
-            result = H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&scratch);
+            result = H5Pget_mdc_config(fapl_id, &scratch);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3109,7 +3109,7 @@ check_fapl_mdc_api_errs(void)
     if ( pass ) {
 
         H5E_BEGIN_TRY {
-            result = H5Pset_mdc_config(-1, (H5AC_cache_config_t *)&default_config);
+            result = H5Pset_mdc_config(-1, &default_config);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3136,7 +3136,7 @@ check_fapl_mdc_api_errs(void)
     while ( ( pass ) && ( i < NUM_INVALID_CONFIGS ) )
     {
         H5E_BEGIN_TRY {
-            result = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&(invalid_configs[i]));
+            result = H5Pset_mdc_config(fapl_id, &(invalid_configs[i]));
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3154,7 +3154,7 @@ check_fapl_mdc_api_errs(void)
      */
     scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
     if ( ( pass ) &&
-         ( ( H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&scratch) < 0 ) ||
+         ( ( H5Pget_mdc_config(fapl_id, &scratch) < 0 ) ||
            ( !CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE) ) ) ) {
 
         pass = FALSE;
@@ -3260,7 +3260,7 @@ check_file_mdc_api_errs(void)
 	}
 
         H5E_BEGIN_TRY {
-            result = H5Fget_mdc_config(-1, (H5AC_cache_config_t *)&scratch);
+            result = H5Fget_mdc_config(-1, &scratch);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3297,7 +3297,7 @@ check_file_mdc_api_errs(void)
 	}
 
         H5E_BEGIN_TRY {
-            result = H5Fget_mdc_config(file_id, (H5AC_cache_config_t *)&scratch);
+            result = H5Fget_mdc_config(file_id, &scratch);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3319,7 +3319,7 @@ check_file_mdc_api_errs(void)
 	}
 
         H5E_BEGIN_TRY {
-            result = H5Fset_mdc_config(-1, (H5AC_cache_config_t *)&default_config);
+            result = H5Fset_mdc_config(-1, &default_config);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3358,7 +3358,7 @@ check_file_mdc_api_errs(void)
 	}
 
         H5E_BEGIN_TRY {
-            result = H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&(invalid_configs[i]));
+            result = H5Fset_mdc_config(file_id, &(invalid_configs[i]));
         } H5E_END_TRY;
 
         if ( result >= 0 ) {

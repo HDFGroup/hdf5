@@ -29,6 +29,9 @@ fi
 # Figure out compiler flags
 . $srcdir/config/gnu-flags
 
+H5_CFLAGS="$H5_CFLAGS -D_DARWIN_C_SOURCE"
+
+
 # The default Fortran 90 compiler
 if test "X-" = "X-$FC"; then
     # Assume Absoft compiler

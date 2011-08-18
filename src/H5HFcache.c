@@ -51,6 +51,12 @@
 #define H5HF_DBLOCK_VERSION     0               /* Direct block */
 #define H5HF_IBLOCK_VERSION     0               /* Indirect block */
 
+/* Set speculative read size for header message */
+#define H5HF_SPEC_READ_SIZE(f) (    				\
+    H5HF_HDR_SIZE(H5F_SIZEOF_ADDR(f), H5F_SIZEOF_SIZE(f))       \
+    + 50                           				\
+)
+
 
 /******************/
 /* Local Typedefs */
@@ -293,8 +299,8 @@ H5HF_cache_hdr_get_load_size(const void *_udata, size_t *image_len)
  *
  * Purpose:	Deserialize the data structure from disk.
  *
- * Return:	Success:	SUCCESS
- *		Failure:	FAIL
+ * Return:	Success:	Pointer to a new fractal heap header
+ *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -379,7 +385,7 @@ H5HF_cache_hdr_deserialize(const void *image, size_t UNUSED len,
 
     /* Check for I/O filter information to decode */
     if(hdr->filter_len > 0) {
-        ptrdiff_t filter_info_off;     /* Offset in header of filter information */
+        ptrdiff_t filter_info_off;  /* Offset in header of filter information */
         size_t filter_info_size;    /* Size of filter information */
         H5O_pline_t *pline;         /* Pipeline information from the header on disk */
 
@@ -545,8 +551,8 @@ H5HF_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     /* (bit 0: "huge" object IDs have wrapped) */
     /* (bit 1: checksum direct blocks) */
     heap_flags = 0;
-    heap_flags |= (hdr->huge_ids_wrapped ?  H5HF_HDR_FLAGS_HUGE_ID_WRAPPED : 0);
-    heap_flags |= (hdr->checksum_dblocks ?  H5HF_HDR_FLAGS_CHECKSUM_DBLOCKS : 0);
+    heap_flags = (uint8_t)(heap_flags | (hdr->huge_ids_wrapped ?  H5HF_HDR_FLAGS_HUGE_ID_WRAPPED : 0));
+    heap_flags = (uint8_t)(heap_flags | (hdr->checksum_dblocks ?  H5HF_HDR_FLAGS_CHECKSUM_DBLOCKS : 0));
     *p++ = heap_flags;
 
     /* "Huge" object information */
@@ -676,7 +682,6 @@ H5HF_cache_iblock_get_load_size(const void *_udata, size_t *image_len)
  * Purpose:	Loads a fractal heap indirect block from the disk.
  *
  * Return:	Success:	Pointer to a new fractal heap indirect block
- *
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -838,7 +843,7 @@ H5HF_cache_iblock_deserialize(const void *image, size_t UNUSED len,
 
         /* Allocate & initialize child indirect block pointer array */
         if(NULL == (iblock->child_iblocks = H5FL_SEQ_CALLOC(H5HF_indirect_ptr_t, (size_t)(indir_rows * hdr->man_dtable.cparam.width))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for block entries")
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "memory allocation failed for block entries")
     } /* end if */
     else
         iblock->child_iblocks = NULL;
@@ -875,7 +880,7 @@ done:
 static herr_t
 H5HF_cache_iblock_image_len(const void *_thing, size_t *image_len)
 {
-    H5HF_indirect_t *iblock = (H5HF_indirect_t *)_thing;
+    const H5HF_indirect_t *iblock = (const H5HF_indirect_t *)_thing;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_iblock_image_len)
 
@@ -1079,13 +1084,7 @@ H5HF_cache_dblock_get_load_size(const void *_udata, size_t *image_len)
  * 		associated in core representation of the fractal heap
  * 		direct block.
  *
- * 		Note that this function is a heavily re-worked version
- * 		of the old H5HF_cache_dblock_load() routine, which had
- * 		to be replaced convert the fractal heap to use the new
- * 		journaling version of the cache.
- *
  * Return:	Success:	Pointer to a new fractal heap direct block
- *
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -1248,6 +1247,10 @@ H5HF_cache_dblock_deserialize(const void *image, size_t len, void *_udata,
     ret_value = dblock;
 
 done:
+    if(!ret_value && dblock)
+        if(H5HF_man_dblock_dest(dblock) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap direct block")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_cache_dblock_deserialize() */
 
@@ -1268,7 +1271,7 @@ done:
 static herr_t
 H5HF_cache_dblock_image_len(const void *_thing, size_t *image_len)
 {
-    H5HF_direct_t *dblock = (H5HF_direct_t *)_thing;
+    const H5HF_direct_t *dblock = (const H5HF_direct_t *)_thing;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_dblock_image_len)
 
@@ -1371,6 +1374,7 @@ H5HF_cache_dblock_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
 
     /* Check for I/O filters on this heap */
     if(hdr->filter_len > 0) {
+        haddr_t new_dblock_addr = HADDR_UNDEF;  /* New address for direct block */
         H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
         size_t nbytes;                      /* Number of bytes used */
         unsigned filter_mask;               /* Filter mask for block */
@@ -1415,22 +1419,17 @@ H5HF_cache_dblock_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
 
                 /* Allocate space for the compressed direct block */
-                if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
+                if(HADDR_UNDEF == (new_dblock_addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 
-                *flags |= H5AC__SERIALIZE_RESIZED_FLAG;
-		*new_len = write_size;
-
                 /* Let the metadata cache know, if the block moved */
-                if(!H5F_addr_eq(hdr->man_dtable.table_addr, addr)) {
-		    *flags |= H5AC__SERIALIZE_MOVED_FLAG;
-		    *new_addr = addr;
-		} /* end if */
+                if(!H5F_addr_eq(addr, new_dblock_addr)) {
+                    *new_addr = new_dblock_addr;
+                    *flags |= H5AC__SERIALIZE_MOVED_FLAG;
+                } /* end if */
 
-                /* Update information about compressed direct block's
-		 * location & size
-		 */
-                hdr->man_dtable.table_addr = addr;
+                /* Update information about compressed direct block's location & size */
+                hdr->man_dtable.table_addr = new_dblock_addr;
                 hdr->pline_root_direct_size = write_size;
 
                 /* Note that heap header was modified */
@@ -1468,22 +1467,17 @@ H5HF_cache_dblock_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
 
                 /* Allocate space for the compressed direct block */
-                if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
+                if(HADDR_UNDEF == (new_dblock_addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 
-                *flags |= H5AC__SERIALIZE_RESIZED_FLAG;
-		*new_len = write_size;
-
                 /* Let the metadata cache know, if the block moved */
-                if(!H5F_addr_eq(par_iblock->ents[par_entry].addr, addr)) {
+                if(!H5F_addr_eq(addr, new_dblock_addr)) {
+		    *new_addr = new_dblock_addr;
 		    *flags |= H5AC__SERIALIZE_MOVED_FLAG;
-		    *new_addr = addr;
 		} /* end if */
 
-                /* Update information about compressed direct
-		 * block's location & size
-		 */
-                par_iblock->ents[par_entry].addr = addr;
+                /* Update information about compressed direct block's location & size */
+                par_iblock->ents[par_entry].addr = new_dblock_addr;
                 par_iblock->filt_ents[par_entry].size = write_size;
 
                 /* Note that parent was modified */
@@ -1495,6 +1489,12 @@ H5HF_cache_dblock_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
                 if(H5HF_iblock_dirty(par_iblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
         } /* end else */
+
+        /* Let the metadata cache know, if the block changed size */
+        if(len != write_size) {
+            *new_len = write_size;
+            *flags |= H5AC__SERIALIZE_RESIZED_FLAG;
+        } /* end if */
     } /* end if */
     else {
         write_buf = dblock->blk;

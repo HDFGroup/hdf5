@@ -20,20 +20,17 @@
 
 #include "h5test.h"
 #include "testpar.h"
+
+#define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
+#define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
+#define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
+
+#include "H5ACpkg.h"
+#include "H5Cpkg.h"
+#include "H5Fpkg.h"
 #include "H5Iprivate.h"
 #include "H5MFprivate.h"
 
-#define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
-
-#include "H5Cpkg.h"
-
-#define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
-
-#include "H5ACpkg.h"
-
-#define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
-
-#include "H5Fpkg.h"
 
 #define BASE_ADDR               (haddr_t)1024
 
@@ -41,12 +38,6 @@
 int     	nerrors = 0;
 int		failures = 0;
 hbool_t		verbose = TRUE; /* used to control error messages */
-#if 1
-/* So far we haven't needed this, but that may change.
- * Keep it around for now
- */
-hid_t noblock_dxpl_id=(-1);
-#endif
 
 #define NFILENAME 2
 #define PARATESTFILE filenames[0]
@@ -2710,7 +2701,7 @@ lock_entry(H5F_t * file_ptr,
 
 	HDassert( ! (entry_ptr->locked) );
 
-        cache_entry_ptr = H5AC_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        cache_entry_ptr = (H5C_cache_entry_t *)H5AC_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
                                         &(types[0]), entry_ptr->base_addr,
                                         &entry_ptr->base_addr, H5AC_WRITE);
 
@@ -3291,125 +3282,6 @@ setup_cache_for_test(hid_t * fid_ptr,
     return(success);
 
 } /* setup_cache_for_test() */
-
-
-/*****************************************************************************
- *
- * Function:	setup_noblock_dxpl_id()
- *
- * Purpose:	Setup the noblock_dxpl_id global.  Increment nerrors if
- *		errors are detected.  Do nothing if nerrors is non-zero
- *		on entry.
- *
- * Return:	void.
- *
- * Programmer:	JRM -- 1/5/06
- *
- * Modifications:
- *
- *		None.
- *
- *****************************************************************************/
-/* So far we haven't needed this, but that may change.
- * Keep it around for now
- */
-#if 0
-void
-setup_noblock_dxpl_id(void)
-{
-    const char * fcn_name = "setup_noblock_dxpl_id()";
-    H5P_genclass_t  *xfer_pclass;   /* Dataset transfer property list
-                                     * class object
-                                     */
-    H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
-    unsigned block_before_meta_write; /* "block before meta write"
-                                       * property value
-                                       */
-    unsigned library_internal = 1;  /* "library internal" property value */
-    H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
-
-    /* Sanity check */
-    HDassert(H5P_CLS_DATASET_XFER_g!=(-1));
-
-    /* Get the dataset transfer property list class object */
-    if ( ( nerrors == 0 ) &&
-         ( NULL == (xfer_pclass = H5I_object(H5P_CLS_DATASET_XFER_g)) ) ) {
-
-        nerrors++;
-        if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: can't get property list class.\n",
-                      world_mpi_rank, fcn_name);
-        }
-    }
-
-    /* Get an ID for the non-blocking, collective H5AC dxpl */
-    if ( ( nerrors == 0 ) &&
-         ( (noblock_dxpl_id = H5P_create_id(xfer_pclass)) < 0 ) ) {
-
-        nerrors++;
-        if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: can't register property list.\n",
-                      world_mpi_rank, fcn_name);
-        }
-    }
-
-    /* Get the property list object */
-    if ( ( nerrors == 0 ) &&
-         ( NULL == (xfer_plist = H5I_object(H5AC_noblock_dxpl_id)) ) ) {
-
-        nerrors++;
-        if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: can't get new property list object.\n",
-                      world_mpi_rank, fcn_name);
-        }
-    }
-
-    /* Insert 'block before metadata write' property */
-    block_before_meta_write=0;
-    if ( ( nerrors == 0 ) &&
-         ( H5P_insert(xfer_plist, H5AC_BLOCK_BEFORE_META_WRITE_NAME,
-                      H5AC_BLOCK_BEFORE_META_WRITE_SIZE,
-                      &block_before_meta_write,
-                      NULL, NULL, NULL, NULL, NULL, NULL) < 0 ) ) {
-
-        nerrors++;
-        if ( verbose ) {
-            HDfprintf(stdout,
-                      "%d:%s: can't insert metadata cache dxpl property 1.\n",
-                      world_mpi_rank, fcn_name);
-        }
-    }
-
-    /* Insert 'library internal' property */
-    if ( ( nerrors == 0 ) &&
-         ( H5P_insert(xfer_plist, H5AC_LIBRARY_INTERNAL_NAME,
-                      H5AC_LIBRARY_INTERNAL_SIZE, &library_internal,
-                      NULL, NULL, NULL, NULL, NULL, NULL ) < 0 ) ) {
-
-        nerrors++;
-        if ( verbose ) {
-            HDfprintf(stdout,
-                      "%d:%s: can't insert metadata cache dxpl property 2.\n",
-                      world_mpi_rank, fcn_name);
-        }
-    }
-
-    /* Set the transfer mode */
-    xfer_mode = H5FD_MPIO_COLLECTIVE;
-    if ( ( nerrors == 0 ) &&
-         ( H5P_set(xfer_plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0 ) ) {
-
-        nerrors++;
-        if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: unable to set value.\n", world_mpi_rank,
-                      fcn_name);
-        }
-    }
-
-    return(success);
-
-} /* setup_noblock_dxpl_id() */
-#endif
 
 
 /*****************************************************************************

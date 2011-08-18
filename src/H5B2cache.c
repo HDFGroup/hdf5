@@ -298,7 +298,7 @@ done:
 static herr_t
 H5B2_cache_hdr_image_len(const void *_thing, size_t *image_len)
 {
-    H5B2_t *bt2 = (H5B2_t *)_thing;      /* Pointer to the B-tree header */
+    const H5B2_t *bt2 = (const H5B2_t *)_thing;      /* Pointer to the B-tree header */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_hdr_image_len)
 
@@ -610,7 +610,7 @@ done:
 static herr_t
 H5B2_cache_int_image_len(const void *_thing, size_t *image_len)
 {
-    H5B2_internal_t *internal = (H5B2_internal_t *)_thing;      /* Pointer to the B-tree internal node */
+    const H5B2_internal_t *internal = (const H5B2_internal_t *)_thing;      /* Pointer to the B-tree internal node */
     H5B2_shared_t *shared;      /* Shared B-tree information */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_int_image_len)
@@ -918,7 +918,7 @@ done:
 static herr_t
 H5B2_cache_leaf_image_len(const void *_thing, size_t *image_len)
 {
-    H5B2_leaf_t *leaf = (H5B2_leaf_t *)_thing;      /* Pointer to the B-tree leaf node  */
+    const H5B2_leaf_t *leaf = (const H5B2_leaf_t *)_thing;      /* Pointer to the B-tree leaf node  */
     H5B2_shared_t *shared;      /* Shared B-tree information */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_leaf_image_len)

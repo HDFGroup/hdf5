@@ -3429,7 +3429,7 @@ H5B2_assert_leaf(H5B2_shared_t *shared, H5B2_leaf_t *leaf)
     unsigned u,v;       /* Local index variables */
 
     /* General sanity checking on node */
-    HDassert(leaf->nrec<=shared->split_leaf_nrec);
+    HDassert(leaf->nrec <= hdr->node_info->split_nrec);
 
     /* Sanity checking on records */
     for(u=0; u<leaf->nrec; u++)
@@ -3459,7 +3459,7 @@ H5B2_assert_leaf2(H5B2_shared_t *shared, H5B2_leaf_t *leaf, H5B2_leaf_t *leaf2)
     unsigned u,v;       /* Local index variables */
 
     /* General sanity checking on node */
-    HDassert(leaf->nrec<=shared->split_leaf_nrec);
+    HDassert(leaf->nrec <= hdr->node_info->split_nrec);
 
     /* Sanity checking on records */
     for(u=0; u<leaf->nrec; u++) {
@@ -3492,7 +3492,7 @@ H5B2_assert_internal(hsize_t parent_all_nrec, H5B2_shared_t *shared, H5B2_intern
     unsigned u,v;               /* Local index variables */
 
     /* General sanity checking on node */
-    HDassert(internal->nrec<=shared->split_int_nrec);
+    HDassert(internal->nrec <= hdr->node_info->split_nrec);
 
     /* Sanity checking on records */
     for(u=0; u<internal->nrec; u++)
@@ -3538,7 +3538,7 @@ H5B2_assert_internal2(hsize_t parent_all_nrec, H5B2_shared_t *shared, H5B2_inter
     unsigned u,v;       /* Local index variables */
 
     /* General sanity checking on node */
-    HDassert(internal->nrec<=shared->split_int_nrec);
+    HDassert(internal->nrec <= hdr->node_info->split_nrec);
 
     /* Sanity checking on records */
     for(u=0; u<internal->nrec; u++)
