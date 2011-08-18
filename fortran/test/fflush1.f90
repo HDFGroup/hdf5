@@ -1,3 +1,15 @@
+!****h* root/fortran/test/fflush1.f90
+!
+! NAME
+!  FFLUSH1EXAMPLE
+!
+! FUNCTION
+!  This is the first half of a two-part test that makes sure
+!  that a file can be read after an application crashes as long
+!  as the file was flushed first.  We simulate by exit the 
+!  the program using stop statement
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,12 +25,7 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-! Purpose:	This is the first half of a two-part test that makes sure
-!		that a file can be read after an application crashes as long
-!		as the file was flushed first.  We simulate by exit the
-!              the program using stop statement
-!
+!*****
 
      PROGRAM FFLUSH1EXAMPLE
 

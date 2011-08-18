@@ -1,3 +1,18 @@
+!****h* ROBODoc/H5O
+!
+! NAME
+!  MODULE H5O
+!
+! FILE
+!  fortran/src/H5Off.f90
+!
+! PURPOSE
+!  This file contains Fortran interfaces for H5O functions. It includes
+!  all the functions that are independent on whether the Fortran 2003 functions
+!  are enabled or disabled.
+!
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,39 +28,43 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+! NOTES
+!                         *** IMPORTANT ***
+!  If you add a new H5O function you must add the function name to the
+!  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+!  This is needed for Windows based operating systems.
 !
-! This file contains Fortran90 interfaces for H5O functions.
-!
+!*****
+
 MODULE H5O
 
   USE H5GLOBAL
 
 CONTAINS
 
-!----------------------------------------------------------------------
-! Name:		h5olink_f
+!****s* H5O/h5olink_f
 !
-! Purpose:  	Creates a hard link to an object in an HDF5 file.
+! NAME
+!  h5olink_f
 !
-! Inputs:
-!      object_id     - Object to be linked.
-!      new_loc_id    - File or group identifier specifying location at which object is to be linked.
-!      new_link_name - Name of link to be created, relative to new_loc_id.
-! Outputs:
-!      hdferr:       - error code
-!	                Success:  0
-!			Failure: -1
-! Optional parameters:
-!      lcpl_id       - Link creation property list identifier.
-!      lapl_id       - Link access property list identifier.
+! PURPOSE
+!  Creates a hard link to an object in an HDF5 file.
+! INPUTS
+!  object_id 	 - Object to be linked.
+!  new_loc_id 	 - File or group identifier specifying location at which object is to be linked.
+!  new_link_name - Name of link to be created, relative to new_loc_id.
+! OUTPUTS
+!  hdferr:       - error code
+!                   Success:  0
+!                   Failure: -1
+! OPTIONAL PARAMETERS
+!  lcpl_id 	 - Link creation property list identifier.
+!  lapl_id 	 - Link access property list identifier.
+! AUTHOR
+!  M. Scot Breitenfeld
+!  April 21, 2008
 !
-! Programmer:	M.S. Breitenfeld
-!		April 21, 2008
-!
-! Modifications: N/A
-!
-!----------------------------------------------------------------------
-
+! SOURCE
   SUBROUTINE h5olink_f(object_id, new_loc_id, new_link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: object_id  ! Object to be linked
@@ -57,6 +76,7 @@ CONTAINS
                                           !   Failure: -1
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id ! Link creation property list identifier.
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link creation property list identifier.
+!*****
     INTEGER(HID_T) :: lapl_id_default
     INTEGER(HID_T) :: lcpl_id_default
 
@@ -91,29 +111,28 @@ CONTAINS
 
   END SUBROUTINE h5olink_f
 
-!----------------------------------------------------------------------
-! Name:		h5oopen_f
+!****s* H5O/h5oopen_f
 !
-! Purpose:  	Opens an object in an HDF5 file by location identifier and path name.O
+! NAME
+!  h5oopen_f
+! PURPOSE
+!  Opens an object in an HDF5 file by location identifier and path name.
 !
-! Inputs:
-!           loc_id - File or group identifier
-!             name - Path to the object, relative to loc_id.
-! Outputs:
-!           obj_id - Object identifier for the opened object
-!      hdferr:     - error code
-!	                Success:  0
-!			Failure: -1
-! Optional parameters:
-!          lapl_id - Access property list identifier for the link pointing to the object
+! INPUTS
+!  loc_id 	 - File or group identifier
+!  name 	 - Path to the object, relative to loc_id.
+! OUTPUTS
+!  obj_id 	 - Object identifier for the opened object
+!  hdferr:       - error code
+!                   Success:  0
+!                   Failure: -1
+! OPTIONAL PARAMETERS
+!  lapl_id 	 - Access property list identifier for the link pointing to the object
 !
-! Programmer:	M.S. Breitenfeld
-!		April 18, 2008
-!
-! Modifications: N/A
-!
-!----------------------------------------------------------------------
-
+! AUTHOR
+!  M. Scot Breitenfeld
+!  April 18, 2008
+! SOURCE
   SUBROUTINE h5oopen_f(loc_id, name, obj_id, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier
@@ -123,12 +142,10 @@ CONTAINS
                                           !   Success:  0
                                           !   Failure: -1
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Attribute access property list
+!*****
     INTEGER(HID_T) :: lapl_id_default
-
     INTEGER(SIZE_T) :: namelen
 
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
        INTEGER FUNCTION h5oopen_c(loc_id, name, namelen, lapl_id_default, obj_id)
          USE H5GLOBAL
@@ -152,36 +169,71 @@ CONTAINS
     hdferr = h5oopen_c(loc_id, name, namelen, lapl_id_default, obj_id)
 
   END SUBROUTINE h5oopen_f
+!
+!****s* H5O/h5oclose_f
+!
+! NAME
+!  h5oclose_f
+!
+! PURPOSE
+!  Closes an object in an HDF5 file.
+!
+! INPUTS
+!  object_id     - Object identifier
+! OUTPUTS
+!  hdferr 	 - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  December 17, 2008
+!
+! SOURCE
+  SUBROUTINE h5oclose_f(object_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: object_id
+    INTEGER,        INTENT(OUT) :: hdferr
+!*****
+    INTERFACE
+       INTEGER FUNCTION h5oclose_c(object_id)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$OBJECTIBUTES C,reference,decorate,alias:'H5OCLOSE_C'::h5oclose_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN) :: object_id
+       END FUNCTION h5oclose_c
+    END INTERFACE
 
-!----------------------------------------------------------------------
-! Name:		h5oopen_by_addr_f
-!
-! Purpose:  	Opens an object using its address within an HDF5 file.
-!
-! Inputs:
-!           loc_id - File or group identifier
-!             addr - Object’s address in the file
-! Outputs:
-!           obj_id - Object identifier for the opened object
-!      hdferr:     - error code
-!	                Success:  0
-!			Failure: -1
-!
-! Programmer:	M. Scot Breitenfeld
-!		September 14, 2009
-!
-! Modifications: N/A
-!
-!----------------------------------------------------------------------
+    hdferr = h5oclose_c(object_id)
+  END SUBROUTINE h5oclose_f
 
+!
+!****s* H5O/h5open_by_addr_f
+! NAME		
+!  h5oopen_by_addr_f 
+!
+! PURPOSE
+!  Opens an object using its address within an HDF5 file. 
+!
+! INPUTS  
+!    loc_id - File or group identifier
+!    addr   - Object’s address in the file
+! OUTPUTS: 
+!    obj_id - Object identifier for the opened object
+!    hdferr - Returns 0 if successful and -1 if fails
+!
+! AUTHOR	
+!  M. Scot Breitenfeld
+!  September 14, 2009
+! 
+! SOURCE
   SUBROUTINE h5oopen_by_addr_f(loc_id, addr, obj_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier
     INTEGER(HADDR_T), INTENT(IN) :: addr  ! Object’s address in the file
     INTEGER(HID_T), INTENT(OUT) :: obj_id ! Object identifier for the opened object
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code
-                                          !   Success:  0
-                                          !   Failure: -1
+    INTEGER, INTENT(OUT) :: hdferr        ! Error code:
+                                          ! 0 on success and -1 on failure
+!*****
     INTERFACE
        INTEGER FUNCTION h5oopen_by_addr_c(loc_id, addr, obj_id)
          USE H5GLOBAL
@@ -199,3 +251,4 @@ CONTAINS
   END SUBROUTINE h5oopen_by_addr_f
 
 END MODULE H5O
+

@@ -35,8 +35,21 @@ else
    AM_LDFLAGS+=-static
 endif
 
+# Check if the compiler supports the Fortran 2003 standard
+# which should include the intrinsic module iso_c_binding
+if FORTRAN_2003_CONDITIONAL_F
+   ff_PREFIX = F03
+else
+   ff_PREFIX = F90
+endif
+
 # Our main targets, the tests themselves
 TEST_PROG=fortranlib_test fflush1 fflush2 fortranlib_test_1_8
+
+if FORTRAN_2003_CONDITIONAL_F
+   TEST_PROG += fortranlib_test_F03
+endif
+
 check_PROGRAMS=$(TEST_PROG)
 
 libh5test_fortran_la_SOURCES= tf.f90 t.c
@@ -51,8 +64,14 @@ fortranlib_test_SOURCES = fortranlib_test.f90 \
         tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90
 
 fortranlib_test_1_8_SOURCES = fortranlib_test_1_8.f90 \
-        tH5F.f90 tH5O.f90 tH5A_1_8.f90  tH5G_1_8.f90
- 
+        tH5F.f90 tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90
+
+if FORTRAN_2003_CONDITIONAL_F
+   fortranlib_test_F03_SOURCES = fortranlib_test_F03.f90 \
+	tH5F.f90 tH5E_F03.f90 tH5L_F03.f90 tH5P_F03.f90 tH5T_F03.f90
+endif
+
+
 fflush1_SOURCES=fflush1.f90
 fflush2_SOURCES=fflush2.f90
 

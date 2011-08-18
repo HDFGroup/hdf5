@@ -1,4 +1,9 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/****h* H5Ff/H5Ff
+ * PURPOSE
+ *   This file contains C stubs for H5F Fortran APIs
+ *
+ * COPYRIGHT
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -11,29 +16,37 @@
  * is linked from the top-level documents page.  It can also be found at     *
  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
  * access to either file, you may request a copy from help@hdfgroup.org.     *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/* This files contains C stubs for H5F Fortran APIs */
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ ******
+*/
 
 #include "H5f90.h"
 #include "H5Eprivate.h"
 
-/*----------------------------------------------------------------------------
- * Name:        h5fcreate_c
- * Purpose:     Call H5Fcreate to create the file
- * Inputs:      name - name of the file
+/****if* H5Ff/h5fcreate_c
+ * NAME
+ *        h5fcreate_c
+ * PURPOSE
+ *     Call H5Fcreate to create the file
+ * INPUTS
+ *      name - name of the file
  *              namelen - name length
  *              access_flags - file access  flags
  *              crt_pr  - identifier of creation property list
  *              acc_prp - identifier of access property list
- * Outputs:     file_id - file identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * OUTPUTS
+ *     file_id - file identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Monday, July 26, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, hid_t_f *acc_prp, hid_t_f *file_id)
+/******/
 {
      int ret_value = -1;
      char *c_name;
@@ -80,20 +93,26 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
      return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5fflush_c
- * Purpose:     Call H5Fflush to flush the object
- * Inputs:      object_id - identifier of either a file, a dataset,
+/****if* H5Ff/h5fflush_c
+ * NAME
+ *        h5fflush_c
+ * PURPOSE
+ *     Call H5Fflush to flush the object
+ * INPUTS
+ *      object_id - identifier of either a file, a dataset,
  *                          a group, an attribute or a named data type
  *              scope - integer to specify the flushing action, either
  *                      H5F_SCOPE_GLOBAL or H5F_SCOPE_LOCAL
- * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Xiangyang Su
  *              Friday, November 5, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5fflush_c (hid_t_f *object_id, int_f *scope)
+/******/
 {
      int ret_value = -1;
      hid_t c_file_id;
@@ -115,21 +134,27 @@ nh5fflush_c (hid_t_f *object_id, int_f *scope)
 }
 
 
-/*----------------------------------------------------------------------------
- * Name:        h5fmount_c
- * Purpose:     Call H5Fmount to mount the file
- * Inputs:      loc_id - Identifier for file or group
+/****if* H5Ff/h5fmount_c
+ * NAME
+ *        h5fmount_c
+ * PURPOSE
+ *     Call H5Fmount to mount the file
+ * INPUTS
+ *      loc_id - Identifier for file or group
  *              dsetname - name of dataset
  *              namelen - dsetname length
  *              file_id - file identifier for the file to be mounted
  *              acc_prp - identifier of access property list
- * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Xiangyang Su
  *              Monday, October 25, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+*/
 int_f
 nh5fmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, hid_t_f *acc_prp)
+/******/
 {
      int ret_value = -1;
      char *c_name;
@@ -167,19 +192,25 @@ nh5fmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, h
      return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5funmount_c
- * Purpose:     Call H5Funmount to unmount the file
- * Inputs:      loc_id - Identifier for file or group
+/****if* H5Ff/h5funmount_c
+ * NAME
+ *        h5funmount_c
+ * PURPOSE
+ *     Call H5Funmount to unmount the file
+ * INPUTS
+ *      loc_id - Identifier for file or group
  *              dsetname - name of dataset
  *              namelen - dsetname length
- * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Xiangyang Su
  *              Monday, October 25, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5funmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
+/******/
 {
      int ret_value = -1;
      char *c_name;
@@ -209,21 +240,28 @@ nh5funmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
 
 
 
-/*----------------------------------------------------------------------------
- * Name:        h5fopen_c
- * Purpose:     Call H5Fopen to open the file
- * Inputs:      name - name of the file
+/****if* H5Ff/h5fopen_c
+ * NAME
+ *        h5fopen_c
+ * PURPOSE
+ *     Call H5Fopen to open the file
+ * INPUTS
+ *      name - name of the file
  *              namelen - name length
  *              access_flags - file access  flags
  *              acc_prp - identifier of access property list
- * Outputs:     file_id - file identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * OUTPUTS
+ *     file_id - file identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Tuesday, August 3, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hid_t_f *file_id)
+/******/
 {
      int ret_value = -1;
      char *c_name;
@@ -265,18 +303,25 @@ nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hi
      return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5freopen_c
- * Purpose:     Call H5Freopen to open the file
- * Inputs:      file_id1 - file identifier
- * Outputs:     file_id2 - file identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
+/****if* H5Ff/h5freopen_c
+ * NAME
+ *        h5freopen_c
+ * PURPOSE
+ *     Call H5Freopen to open the file
+ * INPUTS
+ *      file_id1 - file identifier
+ * OUTPUTS
+ *     file_id2 - file identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Xiangyang Su
  *              Wednesday, November 3, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5freopen_c (hid_t_f *file_id1, hid_t_f *file_id2)
+/******/
 {
      int ret_value = -1;
      hid_t c_file_id1, c_file_id2;
@@ -291,18 +336,25 @@ nh5freopen_c (hid_t_f *file_id1, hid_t_f *file_id2)
      return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5fget_create_plist_c
- * Purpose:     Call H5Fget_create_plist to get the file creation property list
- * Inputs:      file_id - file identifier
- * Outputs:     prop_id - creation property list identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal, Xiangyang Su
+/****if* H5Ff/h5fget_create_plist_c
+ * NAME
+ *        h5fget_create_plist_c
+ * PURPOSE
+ *     Call H5Fget_create_plist to get the file creation property list
+ * INPUTS
+ *      file_id - file identifier
+ * OUTPUTS
+ *     prop_id - creation property list identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal, Xiangyang Su
  *              Wednesday, November 3, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5fget_create_plist_c (hid_t_f *file_id, hid_t_f *prop_id)
+/******/
 {
      int ret_value = -1;
      hid_t c_file_id, c_prop_id;
@@ -317,18 +369,27 @@ nh5fget_create_plist_c (hid_t_f *file_id, hid_t_f *prop_id)
      return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5fget_access_plist_c
- * Purpose:     Call H5Fget_access_plist to get the file access property list
- * Inputs:      file_id - file identifier
- * Outputs:     access_id - access property list identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+/****if* H5Ff/h5fget_access_plist_c
+ * NAME
+ *        h5fget_access_plist_c
+ * PURPOSE
+ *     Call H5Fget_access_plist to get the file access property list
+ * INPUTS
+ *      file_id - file identifier
+ * OUTPUTS
+ *     access_id - access property list identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Monday, September 30, 2002
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 int_f
 nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id)
+/******/
 {
      int ret_value = -1;
      hid_t c_file_id, c_access_id;
@@ -343,20 +404,29 @@ nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id)
      return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5fis_hdf5_c
- * Purpose:     Call H5Fis_hdf5 to determone if the file is an HDF5 file
- * Inputs:      name - name of the file
+/****if* H5Ff/h5fis_hdf5_c
+ * NAME
+ *        h5fis_hdf5_c
+ * PURPOSE
+ *     Call H5Fis_hdf5 to determone if the file is an HDF5 file
+ * INPUTS
+ *      name - name of the file
  *              namelen - name length
- * Outputs:     flag - 0 if file is not HDF5 file , positive if a file
+ * OUTPUTS
+ *     flag - 0 if file is not HDF5 file , positive if a file
  *                     is an HDF5 file, and negative on failure.
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Tuesday, August 3, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 int_f
 nh5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
+/******/
 {
      int ret_value = -1;
      char *c_name;
@@ -380,18 +450,26 @@ nh5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
      HDfree(c_name);
      return ret_value;
 }
-/*----------------------------------------------------------------------------
- * Name:        h5fclose_c
- * Purpose:     Call H5Fclose to close the file
- * Inputs:      file_id - identifier of the file to be closed
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+/****if* H5Ff/h5fclose_c
+ * NAME
+ *        h5fclose_c
+ * PURPOSE
+ *     Call H5Fclose to close the file
+ * INPUTS
+ *      file_id - identifier of the file to be closed
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Monday, July 26, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5fclose_c ( hid_t_f *file_id )
+/******/
 {
   int ret_value = 0;
   hid_t c_file_id;
@@ -400,22 +478,30 @@ nh5fclose_c ( hid_t_f *file_id )
   if ( H5Fclose(c_file_id) < 0  ) ret_value = -1;
   return ret_value;
 }
-/*----------------------------------------------------------------------------
- * Name:        h5fget_obj_count_c
- * Purpose:     Call H5Fget_obj_count to get number of open objects within a file
- * Inputs:      file_id - identifier of the file to be closed
+/****if* H5Ff/h5fget_obj_count_c
+ * NAME
+ *        h5fget_obj_count_c
+ * PURPOSE
+ *     Call H5Fget_obj_count to get number of open objects within a file
+ * INPUTS
+ *      file_id - identifier of the file to be closed
  *              obj_type - type of the object
- * Returns:     obj_count - number of objects
+ * RETURNS
+ *     obj_count - number of objects
  *              0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * AUTHOR
+ *  Elena Pourmal
  *              Monday, September 30, 2002
- * Modifications:
+ * HISTORY
+ *
  *              Changed type of obj_count to size_t_f
  *              Thursday, September 25, 2008
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 
 int_f
 nh5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, size_t_f * obj_count)
+/******/
 {
   int ret_value = 0;
   hid_t c_file_id;
@@ -429,23 +515,32 @@ nh5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, size_t_f * obj_count)
   *obj_count = (size_t_f)c_obj_count;
   return ret_value;
 }
-/*----------------------------------------------------------------------------
- * Name:        h5fget_obj_ids_c
- * Purpose:     Call H5Fget_obj_count to get number of open objects within a file
- * Inputs:      file_id - identifier of the file to be closed
- *              obj_type - type of the object
- * Returns:     obj_ids  - iarray of open objects identifiers
+/****if* H5Ff/h5fget_obj_ids_c
+ * NAME
+ *  h5fget_obj_ids_c
+ * PURPOSE
+ *  Call H5Fget_obj_count to get number of open objects within a file
+ * INPUTS
+ *  file_id  - identifier of the file to be closed
+ *  obj_type - type of the object
+ * RETURNS
+ *  obj_ids  - iarray of open objects identifiers
  *              0 on success, -1 on failure
- * Programmer:  Elena Pourmal
- *              Monday, September 30, 2002
- * Modifications:
- *              Changed type of max_obj to size_t_f; added parameter for the
- *              number of open objects
- *              Thursday, September 25, 2008 EIP
- *---------------------------------------------------------------------------*/
+ * AUTHOR
+ *  Elena Pourmal
+ *  Monday, September 30, 2002
+ * HISTORY
+ *
+ *  Changed type of max_obj to size_t_f; added parameter for the
+ *  number of open objects
+ *  Thursday, September 25, 2008 EIP
+ *	
+ * SOURCE
+*/
 int_f
-nh5fget_obj_ids_c(hid_t_f *file_id, int_f *obj_type, size_t_f *max_objs,
+nh5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, size_t_f *max_objs, 
     hid_t_f *obj_ids, size_t_f *num_objs)
+/******/
 {
     int ret_value = 0;
     hid_t c_file_id;
@@ -472,20 +567,25 @@ nh5fget_obj_ids_c(hid_t_f *file_id, int_f *obj_type, size_t_f *max_objs,
     return ret_value;
 }
 
-
-/*----------------------------------------------------------------------------
- * Name:        h5fget_freespace_c
- * Purpose:     Call H5Fget_freespace to get amount of free space within a file
- * Inputs:      file_id - identifier of the file to query
- * Returns:     free_space  - amount of free space in file
+/****if* H5Ff/h5fget_freespace_c
+ * NAME
+ *        h5fget_freespace_c
+ * PURPOSE
+ *     Call H5Fget_freespace to get amount of free space within a file
+ * INPUTS
+ *      file_id - identifier of the file to query
+ * RETURNS
+ *     free_space  - amount of free space in file
  *              0 on success, -1 on failure
- * Programmer:  Quincey Koziol
+ * AUTHOR
+ *  Quincey Koziol
  *              Tuesday, October 7, 2003
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 
 int_f
 nh5fget_freespace_c ( hid_t_f *file_id , hssize_t_f *free_space)
+/******/
 {
   int ret_value = 0;
   hid_t c_file_id;
@@ -497,20 +597,27 @@ nh5fget_freespace_c ( hid_t_f *file_id , hssize_t_f *free_space)
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5fget_name_c
- * Purpose:     Call H5Fget_name to get file's name
- * Inputs:      obj_id - object identifier
+/****if* H5Ff/h5fget_name_c
+ * NAME
+ *        h5fget_name_c
+ * PURPOSE
+ *     Call H5Fget_name to get file's name
+ * INPUTS
+ *      obj_id - object identifier
  *              buflen -size of the buffer
- * Outputs:     buf - buffer to hold the name
+ * OUTPUTS
+ *     buf - buffer to hold the name
  *              size - size of the file's name
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Tuesday, July 6, 2004
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
+/******/
 {
     char *c_buf = NULL;           /* Buffer to hold C string */
     ssize_t size_c = -1;
@@ -539,18 +646,25 @@ done:
       return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5fget_filesize_c
- * Purpose:     Call H5Fget_filesize to get file size
- * Inputs:      file_id - file identifier
- * Outputs:     size - size of the file
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+/****if* H5Ff/h5fget_filesize_c
+ * NAME
+ *        h5fget_filesize_c
+ * PURPOSE
+ *     Call H5Fget_filesize to get file size
+ * INPUTS
+ *      file_id - file identifier
+ * OUTPUTS
+ *     size - size of the file
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, July 7, 2004
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size)
+/******/
 {
     hsize_t size_c;
     herr_t ret_value=0;          /* Return value */

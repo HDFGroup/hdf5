@@ -155,6 +155,7 @@ dnl EXTERNAL_FILTERS equals all external filters. Default none.
 dnl MPE: whether MPE option is enabled. Default no.
 dnl STATIC_EXEC: whether static-exec is enabled. Default no.
 dnl HDF_FORTRAN: whether Fortran is enabled. Default no.
+dnl HDF_FORTRAN2003: whether Fortran 2003 is enabled. Default no.
 dnl FC: Fortran compiler.
 dnl HDF_CXX: whether C++ is enabled. Default no.
 dnl CXX: C++ compiler.
@@ -175,7 +176,9 @@ AC_SUBST(EXTERNAL_FILTERS)
 AC_SUBST(MPE) MPE=no
 AC_SUBST(STATIC_EXEC) STATIC_EXEC=no
 AC_SUBST(HDF_FORTRAN) HDF_FORTRAN=no
+AC_SUBST(HDF_FORTRAN2003) HDF_FORTRAN2003=no
 AC_SUBST(FC) HDF_FORTRAN=no
+AC_SUBST(FC2003) HDF_FORTRAN2003=no
 AC_SUBST(HDF_CXX) HDF_CXX=no
 AC_SUBST(CXX) HDF_CXX=no
 AC_SUBST(HDF5_HL) HDF5_HL=yes
@@ -370,17 +373,39 @@ AC_SUBST([HDF5_INTERFACES]) HDF5_INTERFACES=""
 AC_MSG_CHECKING([if Fortran interface enabled])
 AC_ARG_ENABLE([fortran],
               [AC_HELP_STRING([--enable-fortran],
-                              [Compile the Fortran interface [default=no]])],
+                              [Compile the Fortran 77/90/95 interface [default=no]])],
               [HDF_FORTRAN=$enableval])
 
+dnl ----------------------------------------------------------------------
+dnl Check if they would like the Fortran 2003 interface compiled
+dnl
+AC_ARG_ENABLE([fortran2003],
+              [AC_HELP_STRING([--enable-fortran2003],
+                              [Compile the Fortran 2003 interface [default=no]])],
+              [HDF_FORTRAN2003=$enableval])
 
 HAVE_SIZEOF="no"
-FORTRAN_DEFAULT_REALisDBLE="no"	
+FORTRAN_DEFAULT_REALisDBLE="no"
+
+dnl If FORTRAN 2003 interface enabled then mark that the general 
+dnl Fortran interface is also enabled
+
+if test "X$HDF_FORTRAN2003" = "Xyes"; then
+ AC_SUBST(FC) HDF_FORTRAN=yes
+fi
+
+AC_SUBST([HAVE_FORTRAN_2003])
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   echo "yes"
 
   HDF5_INTERFACES="$HDF5_INTERFACES fortran"
+
+  dnl --------------------------------------------------------------------
+  dnl Default for FORTRAN 2003 compliant compilers
+  dnl
+  HAVE_FORTRAN_2003="no"
+  HAVE_ISO_C_BINDING="no"
 
   dnl --------------------------------------------------------------------
   dnl HDF5 integer variables for the H5fortran_types.f90 file.
@@ -441,8 +466,8 @@ dnl  ], AC_MSG_RESULT(yes),
 dnl     AC_MSG_RESULT(no)
 dnl     AM_FCFLAGS="$AM_FCFLAGS_saved")
 
-dnl --------------------------------------------------------------------
-dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
+  dnl --------------------------------------------------------------------
+  dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
 
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic SIZEOF])
   AC_TRY_RUN([ 
@@ -453,10 +478,8 @@ dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
      	HAVE_SIZEOF="yes"],
        AC_MSG_RESULT(no))
 
-
-dnl Check to see if -r8 was specified to determine if we need to
-dnl compile the DOUBLE PRECISION interfaces.
-
+  dnl Check to see if -r8 was specified to determine if we need to
+  dnl compile the DOUBLE PRECISION interfaces.
 
   AC_MSG_CHECKING([if Fortran default REAL is DOUBLE PRECISION])
   
@@ -485,6 +508,94 @@ dnl compile the DOUBLE PRECISION interfaces.
    AC_MSG_RESULT(no), 
    [AC_MSG_RESULT(yes) 
        FORTRAN_DEFAULT_REALisDBLE="yes"])
+
+  if test "X$HDF_FORTRAN2003" = "Xyes"; then
+
+  dnl Checking if the compiler supports the ISO_C_BINDING module, if it does
+  dnl not then don't bother checking any other fortran 2003 features and
+  dnl disable fortran 2003.
+
+      	AC_MSG_CHECKING([if Fortran compiler supports ISO_C_BINDING module])
+	
+    	AC_TRY_COMPILE(,[
+      	    USE iso_c_binding
+	], [AC_MSG_RESULT(yes)
+     	HAVE_ISO_C_BINDING="yes"] ,
+     	AC_MSG_RESULT(no))
+		
+	if test "X$HAVE_ISO_C_BINDING" = "Xyes"; then
+
+                AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003 HDF])
+    		HAVE_FORTRAN_2003="no"
+
+                dnl Sun compiler
+	  	if (${FC} -V 2>&1 | grep 'Sun Fortran') > /dev/null; then
+	            vers=[`${FC} -V 2>&1 | sed -rn '\|Fortran 95 | s|.* ([0-9.]+) .*|\1|p' | sed -e 's/[^0-9]//g'`]
+                    if test -n "$vers" && test "$vers" -ge 86; then
+	  	      HAVE_FORTRAN_2003="yes"
+	  	      echo $HAVE_FORTRAN_2003
+                    else
+	  	      echo $HAVE_FORTRAN_2003
+	  	      AC_MSG_WARN([Only Sun Fortran Compiler, Version >= 8.6 supported; disabling Fortran 2003 features])
+	  	  fi
+	  	fi
+
+                dnl Intel compiler
+		if (${FC} -V 2>&1 | grep '^Intel(R) Fortran') > /dev/null; then
+	          vers=[`${FC} -v 2>&1 | sed -e 's/[^0-9]//g'`]
+                  if test -n "$vers" && test "$vers" -ge 101; then
+		     HAVE_FORTRAN_2003="yes"
+		     echo $HAVE_FORTRAN_2003
+                  else
+		    echo $HAVE_FORTRAN_2003
+		    AC_MSG_WARN([Only Intel Fortran Compiler, Version > 10.1 supported; disabling Fortran 2003 features])
+		  fi
+                fi
+
+                dnl g95 compiler
+		if (${FC} -dumpversion 2>&1 | grep 'G95') > /dev/null; then
+	          vers=[`${FC} -dumpversion 2>&1 | grep -o '[^ ]*!' | sed -e 's/[^0-9]//g'`]
+                  if test -n "$vers" && test "$vers" -ge 90; then
+		     HAVE_FORTRAN_2003="yes"
+		     echo $HAVE_FORTRAN_2003
+                  else
+		    echo $HAVE_FORTRAN_2003
+		    AC_MSG_WARN([Only G95 Fortran Compiler, Version > .9 supported; disabling Fortran 2003 features])
+		  fi
+		fi
+
+                dnl gfortran
+                if (${FC} --version 2>&1 | grep 'GNU Fortran') > /dev/null; then
+                  vers_major=[`${FC} --version 2>&1 | grep 'GNU Fortran (' | grep -o ' [0-9]*\.' | sed -e 's/[^0-9]//g'`]
+                  vers_minor=[`${FC} --version 2>&1 | grep 'GNU Fortran (' | grep -o '\.[0-9]*\.' | sed -e 's/[^0-9]//g'`]
+
+                  if test -n "$vers_major" && test -n "$vers_minor" && test "$vers_major" -ge 4 && test "$vers_minor" -ge 1; then
+		     HAVE_FORTRAN_2003="yes"
+		     echo $HAVE_FORTRAN_2003
+                  else
+		    echo $HAVE_FORTRAN_2003
+		    AC_MSG_WARN([Only GNU Fortran Compiler, Version > 4.1.0 supported; disabling Fortran 2003 features])
+		  fi
+		fi
+
+               dnl The Portland Group
+               if (${FC} -V 2>&1 | grep 'Portland Group') > /dev/null; then
+                  vers=[`${FC} -V 2>&1 | grep 'pgf' | grep -o '[^ ]*[^  ]\.[^ ]' | sed -e 's/[^0-9]//g'`]
+                  if test -n "$vers" && test "$vers" -ge 104; then
+		     HAVE_FORTRAN_2003="yes"
+		     echo $HAVE_FORTRAN_2003
+                  else
+		    echo $HAVE_FORTRAN_2003
+		    AC_MSG_WARN([Only The Portland Group Compiler, Version > 10.4-0 supported; disabling Fortran 2003 features])
+		  fi
+                
+               fi
+	
+
+        fi
+
+  fi
+
   dnl Change back to the C language
   AC_LANG_POP(Fortran)
 else
@@ -493,6 +604,7 @@ else
 fi
 
 AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_2003_CONDITIONAL_F], [test "X$HAVE_FORTRAN_2003" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_DEFAULT_REALisDBLE_F], [test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"])
 
 dnl ----------------------------------------------------------------------
@@ -781,7 +893,7 @@ dnl Furthermore, the name of the compiler might tell us how to run the
 dnl resulting executable. For `mpif90' the executable should be run with
 dnl `mpiexec' from the same directory as mpif90 if it exists.
 dnl
-if test "X$HDF_FORTRAN" = "Xyes"; then
+if test "X$HDF_FORTRAN" = "Xyes" ; then
   dnl Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
