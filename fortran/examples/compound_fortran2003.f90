@@ -186,7 +186,7 @@ PROGRAM main
   !
   CALL H5Tcreate_f(H5T_COMPOUND_F, H5OFFSETOF(C_LOC(s3(1)),C_LOC(s3(2))),s3_tid, hdferr)
 
-  CALL H5Tinsert_f(s3_tid, "b_name", 0, h5kind_to_type(r_k4,H5_REAL_KIND), hdferr)
+  CALL H5Tinsert_f(s3_tid, "b_name", 0_size_t, h5kind_to_type(r_k4,H5_REAL_KIND), hdferr)
   !
   ! Read field b from s1 dataset. Field in the file is found by its name.
   !
