@@ -7160,8 +7160,10 @@ main(void)
     nerrors += test_latest();
     nerrors += test_int_float_except();
     nerrors += test_named_indirect_reopen(fapl);
+#ifndef H5_CANNOT_OPEN_TWICE
     nerrors += test_delete_obj_named(fapl);
     nerrors += test_delete_obj_named_fileid(fapl);
+#endif /*H5_CANNOT_OPEN_TWICE*/
     nerrors += test_set_order_compound(fapl);
     nerrors += test_str_create();
 #ifndef H5_NO_DEPRECATED_SYMBOLS
