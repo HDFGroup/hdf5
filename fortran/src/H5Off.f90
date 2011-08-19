@@ -197,7 +197,7 @@ CONTAINS
        INTEGER FUNCTION h5oclose_c(object_id)
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$OBJECTIBUTES C,reference,decorate,alias:'H5OCLOSE_C'::h5oclose_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OCLOSE_C'::h5oclose_c
          !DEC$ENDIF
          INTEGER(HID_T), INTENT(IN) :: object_id
        END FUNCTION h5oclose_c
