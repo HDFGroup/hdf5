@@ -285,6 +285,8 @@ New Features
             unlimited dims to contiguous. (PC -- 2011/07/15)
      - h5diff: "--delta" option considers two NaN of the same type are different, which is wrong
             based on http://www.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Diff. (PC -- 2011/07/15)
+     - h5repack: added macro to handle failure in H5Dread/write when memory allocation failed
+            inside the library. (PC -- 2011/08/19)
 
     
     High-Level APIs:

@@ -31,8 +31,27 @@
 * macros
 *-------------------------------------------------------------------------
 */
-#define USERBLOCK_XFER_SIZE     512     /* size of buffer/# of bytes to xfer at a time when copying userblock */
 
+/* size of buffer/# of bytes to xfer at a time when copying userblock */
+#define USERBLOCK_XFER_SIZE     512     
+
+/* check H5Dread()/H5Dwrite() error, e.g. memory allocation error inside the library. */
+#define CHECK_H5DRW_ERROR(_fun, _did, _mtid, _msid, _fsid, _pid, _buf)  {  \
+    H5E_BEGIN_TRY {  \
+        if(_fun(_did, _mtid, _msid, _fsid, _pid, _buf) < 0) {  \
+            int _err_num = 0; \
+            char *_msg = NULL; \
+            H5Ewalk2(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, &_err_num); \
+            _msg = H5Eget_major(_err_num); \
+            if (_msg) { \
+                error_msg("%s %s -- %s\n", #_fun, "failed", _msg); \
+                free(_msg); \
+            } \
+            goto error; \
+        } \
+    } H5E_END_TRY; \
+}
+   
 /*-------------------------------------------------------------------------
 * local functions
 *-------------------------------------------------------------------------
@@ -43,6 +62,16 @@ static int   copy_user_block(const char *infile, const char *outfile, hsize_t si
 #if defined (H5REPACK_DEBUG_USER_BLOCK)
 static void  print_user_block(const char *filename, hid_t fid);
 #endif
+static herr_t walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void *udata);
+
+/* get the major number from the error stack. */
+static herr_t walk_error_callback(UNUSED unsigned n, const H5E_error2_t *err_desc, void *udata)
+{
+    if (err_desc) 
+        *((int *)udata) = err_desc->maj_num;
+        
+    return 0;
+}
 
 /*-------------------------------------------------------------------------
 * Function: copy_objects
@@ -847,11 +876,10 @@ int do_copy_objects(hid_t fidin,
                                 buf = HDmalloc(need);
 
                             if(buf != NULL) {
-                                if(H5Dread(dset_in, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-                                    goto error;
-                                if(H5Dwrite(dset_out, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-                                    goto error;
-
+                               /* read/write: use the macro to check error, e.g. memory allocation error inside the library. */
+                                CHECK_H5DRW_ERROR(H5Dread, dset_in, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+                                CHECK_H5DRW_ERROR(H5Dwrite, dset_out, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+                               
                                 /* Check if we have VL data in the dataset's
                                  * datatype that must be reclaimed */
                                 if(TRUE == H5Tdetect_class(wtype_id, H5T_VLEN))
@@ -930,11 +958,9 @@ int do_copy_objects(hid_t fidin,
                                         hs_nelmts = 1;
                                     } /* rank */
 
-                                    /* read/write */
-                                    if (H5Dread(dset_in, wtype_id, sm_space, f_space_id, H5P_DEFAULT, sm_buf) < 0)
-                                        goto error;
-                                    if (H5Dwrite(dset_out, wtype_id, sm_space, f_space_id, H5P_DEFAULT, sm_buf) < 0)
-                                        goto error;
+                                    /* read/write: use the macro to check error, e.g. memory allocation error inside the library. */
+                                    CHECK_H5DRW_ERROR(H5Dread, dset_in, wtype_id, sm_space, f_space_id, H5P_DEFAULT, sm_buf);
+                                    CHECK_H5DRW_ERROR(H5Dwrite, dset_out, wtype_id, sm_space, f_space_id, H5P_DEFAULT, sm_buf);
 
                                     /* reclaim any VL memory, if necessary */
                                     if(vl_data)
