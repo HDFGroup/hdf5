@@ -69,15 +69,56 @@ static struct long_options l_opts[] = {
 static void
 usage(const char *prog)
 {
-    fflush(stdout);
-    fprintf(stdout, "usage: %s -i h5_file -o user_block_file_out -o h5_file_out [-d | --delete]\n", prog);
-    fprintf(stdout, "           Extract user block from 'h5_file' into 'user_block_file'\n");
-    fprintf(stdout, "           and HDF5 file into 'h5_file_out'\n");
-
-    fprintf(stdout, "       %s -h\n",prog);
-    fprintf(stdout, "           Print a usage message and exit\n");
-    fprintf(stdout, "       %s -V \n", prog);
-    fprintf(stdout, "           Print HDF5 library version and exit\n");
+    HDfflush(stdout);
+    HDfprintf(stdout,
+    "usage: %s -i <in_file.h5>  [-o <out_file.h5> ] [-u <out_user_file> | --delete]\n", prog);
+    HDfprintf(stdout, "\n");
+    HDfprintf(stdout,
+    "Splits user file and HDF5 file into two files: user block data and HDF5 data.\n");
+    HDfprintf(stdout, "\n");
+    HDfprintf(stdout,
+    "OPTIONS\n");
+    HDfprintf(stdout,
+    "  -i in_file.h5   Specifies the HDF5 as input.  If the input HDF5 file\n");
+    HDfprintf(stdout,
+    "                  contains no user block, exit with an error message.\n");
+    HDfprintf(stdout,
+    "  -o out_file.h5  Specifies output HDF5 file without a user block.\n");
+    HDfprintf(stdout,
+    "                  If not specified, the user block will be removed from the\n");
+    HDfprintf(stdout,
+    "                  input HDF5 file.\n");
+    HDfprintf(stdout,
+    "  -u out_user_file\n");
+    HDfprintf(stdout,
+    "                  Specifies the output file containing the data from the\n");
+    HDfprintf(stdout,
+    "                  user block.\n");
+    HDfprintf(stdout,
+    "                  Cannot be used with --delete option.\n");
+    HDfprintf(stdout,
+    "  --delete        Remove the user block from the input HDF5 file. The content\n");
+    HDfprintf(stdout,
+    "                  of the user block is discarded.\n");
+    HDfprintf(stdout,
+    "                  Cannot be used with the -u option.\n");
+    HDfprintf(stdout, "\n");
+    HDfprintf(stdout,
+    "  -h              Prints a usage message and exits.\n");
+    HDfprintf(stdout,
+    "  -V              Prints the HDF5 library version and exits.\n");
+    HDfprintf(stdout, "\n");
+    HDfprintf(stdout,
+    "  If neither --delete nor -u is specified, the user block from the input file\n");
+    HDfprintf(stdout,
+    "  will be displayed to stdout.\n");
+    HDfprintf(stdout, "\n");
+    HDfprintf(stdout,
+    "Exit Status:\n");
+    HDfprintf(stdout,
+    "  0      Succeeded.\n");
+    HDfprintf(stdout,
+    "  >0    An error occurred.\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -203,10 +244,18 @@ main(int argc, const char *argv[])
 
     parse_command_line(argc, argv);
 
+    if (input_file == NULL) {
+        /* no user block */
+        error_msg("missing arguemnt for HDF5 file input.\n");
+        help_ref_msg(stderr);
+        leave (EXIT_FAILURE);
+    }
+
     testval = H5Fis_hdf5(input_file);
 
     if (testval <= 0) {
-        error_msg("Input HDF5 file is not HDF \"%s\"\n", input_file);
+        error_msg("Input HDF5 file \"%s\" is not HDF\n", input_file);
+        help_ref_msg (stderr);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }

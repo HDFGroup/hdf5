@@ -83,6 +83,7 @@ $SRC_H5JAM_TESTFILES/u512.txt
 $SRC_H5JAM_TESTFILES/u513.txt
 $SRC_H5JAM_TESTFILES/h5jam-help.txt
 $SRC_H5JAM_TESTFILES/h5unjam-help.txt
+$SRC_H5JAM_TESTFILES/h5jam-ub-nohdf5.txt
 "
 
 #
@@ -115,8 +116,7 @@ COPY_TESTFILES_TO_TESTDIR()
 #
 TESTING() {
    SPACES="                                                               "
-   echo "Testing $* $SPACES"
-   #echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -446,6 +446,51 @@ UNJAMTEST () {
 }
 
 
+#
+# TOOLTEST_OUTPUT < JAM | UNJAM > expect-output.txt exit-code options
+#
+# Only verify stdout/stderr output from h5jam and j5unjam
+#
+
+TOOLTEST_OUTPUT() {
+    if [ "$1" == "JAM" ]; then
+        TOOLCMD=$JAM_BIN/$JAM
+    elif [ "$1" == "UNJAM" ]; then
+        TOOLCMD=$JAM_BIN/$UNJAM
+    fi
+    shift
+    expect="$TESTDIR/$1"
+    actual="$TESTDIR/`basename $1 .ls`.out"
+    actual_err="$TESTDIR/`basename $1 .ls`.err"
+    shift
+    retvalexpect=$1
+    shift
+
+    TESTING h5jam $@
+    (
+        cd $TESTDIR
+        $TOOLCMD "$@"
+    ) >$actual 2>$actual_err
+
+    # combine stderr to stdout for output compare 
+    cat $actual_err >> $actual
+
+    if [ ! -f $expect ]; then
+	    # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
+	    rm -f $actual $actual_err
+    elif $CMP $expect $actual; then
+        echo " PASSED"
+	    rm -f $actual $actual_err
+    else
+        echo "*FAILED*"
+	    echo "    Expected result differs from actual result"
+	    nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+}
+
 ##############################################################################
 ##############################################################################
 ###			  T H E   T E S T S                                ###
@@ -454,7 +499,15 @@ UNJAMTEST () {
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
 
-# test start
+#-------------------------------
+# Testing h5jam
+#-------------------------------
+# help page
+TOOLTEST_OUTPUT JAM h5jam-help.txt 0 -h
+
+# don't allow HDF5 format file as an user block file
+TOOLTEST_OUTPUT JAM h5jam-ub-nohdf5.txt 1 -i tall.h5 -u tall.h5 -o tall-tmp.h5
+
 JAMTEST $TESTDIR/u10.txt $TESTDIR/tall.h5 ta2.h5
 CHECKFILE $TESTDIR/tall.h5 ta2.h5
 CLEANUP ta2.h5
@@ -567,6 +620,12 @@ SETUP $TESTDIR/twithub513.h5 tay9.h5
 JAMTEST $TESTDIR/u513.txt tay9.h5 --clobber
 CHECKFILE $TESTDIR/tall.h5 tay9.h5
 CLEANUP tay9.h5
+
+#---------------------------------
+# Testing h5unjam 
+#---------------------------------
+# help page
+TOOLTEST_OUTPUT UNJAM h5unjam-help.txt 0 -h
 
 SETUP $TESTDIR/twithub.h5 tai1.h5
 UNJAMTEST tai1.h5 o10.txt taa1.h5
