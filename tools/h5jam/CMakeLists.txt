@@ -105,7 +105,7 @@ IF (BUILD_TESTING)
       ADD_TEST (NAME H5JAM-${expectfile} COMMAND $<TARGET_FILE:h5jam> ${ARGN})
       IF (NOT "${resultcode}" STREQUAL "0")
         SET_TESTS_PROPERTIES (H5JAM-${expectfile} PROPERTIES WILL_FAIL "true")
-      ENDIF ("${resultcode}" STREQUAL "0")
+      ENDIF (NOT "${resultcode}" STREQUAL "0")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5JAM-${expectfile}
@@ -131,7 +131,7 @@ IF (BUILD_TESTING)
       ADD_TEST (NAME H5JAM-UNJAM-${expectfile} COMMAND $<TARGET_FILE:h5unjam> ${ARGN})
       IF (NOT "${resultcode}" STREQUAL "0")
         SET_TESTS_PROPERTIES (H5JAM-UNJAM-${expectfile} PROPERTIES WILL_FAIL "true")
-      ENDIF ("${resultcode}" STREQUAL "0")
+      ENDIF (NOT "${resultcode}" STREQUAL "0")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5JAM-UNJAM-${expectfile}
