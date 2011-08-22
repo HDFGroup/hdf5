@@ -705,3 +705,83 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_flush_mounts() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_traverse_mount
+ *
+ * Purpose:	If LNK is a mount point then copy the entry for the root
+ *		group of the mounted file into LNK.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, October  6, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_traverse_mount(H5O_loc_t *oloc/*in,out*/)
+{
+    H5F_t *parent = oloc->file,         /* File of object */
+        *child = NULL;                  /* Child file */
+    unsigned	lt, rt, md = 0;         /* Binary search indices */
+    int cmp;
+    H5O_loc_t	*mnt_oloc = NULL;       /* Object location for mount points */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_traverse_mount, FAIL)
+
+    /* Sanity check */
+    HDassert(oloc);
+
+    /*
+     * The loop is necessary because we might have file1 mounted at the root
+     * of file2, which is mounted somewhere in file3.
+     */
+    do {
+	/*
+	 * Use a binary search to find the potential mount point in the mount
+	 * table for the parent
+	 */
+	lt = 0;
+	rt = parent->shared->mtab.nmounts;
+	cmp = -1;
+	while(lt < rt && cmp) {
+	    md = (lt + rt) / 2;
+	    mnt_oloc = H5G_oloc(parent->shared->mtab.child[md].group);
+	    cmp = H5F_addr_cmp(oloc->addr, mnt_oloc->addr);
+	    if(cmp < 0)
+		rt = md;
+	    else
+		lt = md + 1;
+	} /* end while */
+
+        /* Copy root info over to ENT */
+        if(0 == cmp) {
+            /* Get the child file */
+            child = parent->shared->mtab.child[md].file;
+
+            /* Get the location for the root group in the child's file */
+            mnt_oloc = H5G_oloc(child->shared->root_grp);
+
+            /* Release the mount point */
+            if(H5O_loc_free(oloc) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to free object location")
+
+            /* Copy the entry for the root group */
+            if(H5O_loc_copy(oloc, mnt_oloc, H5_COPY_DEEP) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "unable to copy object location")
+
+            /* In case the shared root group info points to a different file handle
+             * than the child, modify oloc */
+            oloc->file = child;
+
+            /* Switch to child's file */
+            parent = child;
+        } /* end if */
+    } while(!cmp);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_traverse_mount() */
+

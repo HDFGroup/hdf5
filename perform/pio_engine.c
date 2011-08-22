@@ -22,7 +22,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <errno.h>
 
 #include "hdf5.h"

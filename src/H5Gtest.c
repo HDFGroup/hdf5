@@ -428,15 +428,15 @@ H5G_new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     else
         *corder_count = 0;
 
+    /* Reset metadata tag in dxpl_id */
+    H5_END_TAG(FAIL);
+
 done:
     /* Release resources */
     if(bt2_name && H5B2_close(bt2_name, H5AC_dxpl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
     if(bt2_corder && H5B2_close(bt2_corder, H5AC_dxpl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
-
-    /* Reset metadata tag in dxpl_id */
-    H5_END_TAG(FAIL);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5G_new_dense_info_test() */

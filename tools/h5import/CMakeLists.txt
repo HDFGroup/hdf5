@@ -54,7 +54,7 @@ IF (BUILD_TESTING)
       txtuin32.txt
       txtin16.txt
       txtin32.txt
-      in64.txt
+      textpfe64.txt
       txtstr.txt
   )
   SET (HDF5_REFERENCE_TEST_FILES
@@ -73,7 +73,7 @@ IF (BUILD_TESTING)
       txtuin16.h5
       txtuin32.h5
       txtstr.h5
-      test15.h5
+      textpfe.h5
   )
 
   FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
@@ -116,27 +116,33 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
   MACRO (ADD_H5_TEST testname importfile conffile testfile)
-    ADD_TEST (
-        NAME H5IMPORT-${testname}-clear-objects
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-            ${testfile}
-            ${testfile}.new
-            ${testfile}.new.err
-            ${testfile}.out
-            ${testfile}.out.err
-    )
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5IMPORT-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5IMPORT-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ${testfile}
+              ${testfile}.new
+              ${testfile}.new.err
+              ${testfile}.out
+              ${testfile}.out.err
+      )
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5IMPORT-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+      SET (last_test "H5IMPORT-${testname}-clear-objects")
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+
     ADD_TEST (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c testfiles/${conffile} -o ${testfile})
-    SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-${testname}-clear-objects)
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
     SET (last_test "H5IMPORT-${testname}")
 
     # If using memchecker add tests without using scripts
     IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
-          NAME H5IMPORT-H5DUMP-${testname}
+          NAME H5IMPORT-H5DMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${testfile}"
@@ -147,9 +153,9 @@ IF (BUILD_TESTING)
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-H5DUMP-${testname} PROPERTIES DEPENDS H5IMPORT-${testname})
+      SET_TESTS_PROPERTIES (H5IMPORT-H5DMP-${testname} PROPERTIES DEPENDS H5IMPORT-${testname})
       ADD_TEST (
-          NAME H5IMPORT-H5DUMP_CMP-${testname}
+          NAME H5IMPORT-H5DMP_CMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=testfiles/${testfile}"
@@ -160,8 +166,8 @@ IF (BUILD_TESTING)
               -D "TEST_REFERENCE=${testfile}.new"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-H5DUMP_CMP-${testname} PROPERTIES DEPENDS H5IMPORT-H5DUMP-${testname})
-      SET (last_test "H5IMPORT-H5DUMP_CMP-${testname}")
+      SET_TESTS_PROPERTIES (H5IMPORT-H5DMP_CMP-${testname} PROPERTIES DEPENDS H5IMPORT-H5DMP-${testname})
+      SET (last_test "H5IMPORT-H5DMP_CMP-${testname}")
     ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_TEST testname resultcode testfile vparam srcname dstname)
 
@@ -187,9 +193,12 @@ IF (BUILD_TESTING)
           txtin32.txt
           ${HDF5_REFERENCE_TEST_FILES}
   )
+  SET (last_test "H5IMPORT-clear-objects")
 
   ADD_TEST (NAME H5IMPORT-h5importtest COMMAND $<TARGET_FILE:h5importtest>)
-  SET_TESTS_PROPERTIES (H5IMPORT-h5importtest PROPERTIES DEPENDS H5IMPORT-clear-objects)
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5IMPORT-h5importtest PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
   SET (last_test "H5IMPORT-h5importtest")
 
   # ----- TESTING "ASCII I32 rank 3 - Output BE " ;
@@ -238,7 +247,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (BINARY_I8_EOF binin8w.bin binin8w.conf binin8w.h5)
 
   # ----- TESTING "ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE " 
-  ADD_H5_TEST (ASCII_F64_R1 in64.txt textpfe.conf test15.h5)
+  ADD_H5_TEST (ASCII_F64_R1 textpfe64.txt textpfe.conf textpfe.h5)
 
 ENDIF (BUILD_TESTING)
 

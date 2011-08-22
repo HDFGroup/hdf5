@@ -29,7 +29,6 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/* Suppress error about including H5Fpkg  */
 #define H5HL_PACKAGE		/* Suppress error about including H5HLpkg */
 
 
@@ -38,7 +37,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"             /* File access				*/
+#include "H5Fprivate.h"         /* File access				*/
 #include "H5HLpkg.h"		/* Local Heaps				*/
 #include "H5MFprivate.h"	/* File memory management		*/
 

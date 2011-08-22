@@ -1,0 +1,637 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Lff.f90</title>
+<!-- Source: ./src/H5Lff.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5L"></a>
+<a name="robo49"></a><h2>H5L</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  MODULE <strong>H5L</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran interfaces for <strong>H5L</strong> functions. It includes
+  all the functions that are independent on whether the Fortran 2003 functions
+  are enabled or disabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <strong>H5L</strong> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5L2fh5lcopy5ff"></a>
+<a name="robo178"></a><h2>h5lcopy_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo49">H5L</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5lcopy_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Copies a link from one location to another.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  src_loc_id    - Location identifier of the source link
+  src_name      - Name of the link to be copied
+  dest_loc_id   - Location identifier specifying the destination of the copy
+  dest_name     - Name to be assigned to the NEW copy
+  loc_id        - Identifier of the file or group containing the object
+  name          - Name of the link to delete
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lcpl_id       - Link creation property list identifier
+  lapl_id       - Link access property list identifier
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 27, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5lcopy_f</strong><span class="sign">(</span>src_loc_id<span class="sign">,</span> src_name<span class="sign">,</span> dest_loc_id<span class="sign">,</span> dest_name<span class="sign">,</span> hdferr<span class="sign">,</span> <span class="sign">&amp;</span>
+       lcpl_id<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> src_loc_id  <span class="sign">!</span> Location identifier of the source link
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> src_name   <span class="sign">!</span> Name of the link to be copied
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dest_loc_id <span class="sign">!</span> Location identifier specifying the destination of the copy
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dest_name <span class="sign">!</span> Name to be assigned to the NEW copy
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code<span class="sign">:</span>
+                                          <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lcpl_id <span class="sign">!</span> Link creation property list identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list identifier
+</pre>
+
+<hr />
+<a name="H5L2fH5Lcreate5fexternal5ff"></a>
+<a name="robo179"></a><h2>H5Lcreate_external_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo49">H5L</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Lcreate_external_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a soft link to an object in a different file.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  file_name     - Name of the file containing the target object. Neither the file nor the target object is
+  required to exist. May be the file the link is being created in.
+  obj_name      - Path within the target file to the target object.
+  link_loc_id   - The file or group identifier for the new link.
+  link_name     - The name of the new link.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lcpl_id       - Link creation property list identifier.
+  lapl_id       - Link access property list identifier.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 27, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5lcreate_external_f<span class="sign">(</span>file_name<span class="sign">,</span> obj_name<span class="sign">,</span> link_loc_id<span class="sign">,</span> link_name<span class="sign">,</span> hdferr<span class="sign">,</span> lcpl_id<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> file_name <span class="sign">!</span> Name of the file containing the target object<span class="sign">.</span> Neither
+                                              <span class="sign">!</span> the file nor the target object is required to exist<span class="sign">.</span>
+                                              <span class="sign">!</span> May be the file the link is being created in<span class="sign">.</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_name  <span class="sign">!</span> Name of the target object<span class="sign">,</span> which must already exist<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_loc_id <span class="sign">!</span> The file or group identifier <span class="keyword">for</span> the new link<span class="sign">.</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_name <span class="sign">!</span> The name of the new link<span class="sign">.</span>
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code<span class="sign">:</span>
+                                          <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lcpl_id <span class="sign">!</span> Link creation property list identifier<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list identifier<span class="sign">.</span>
+</pre>
+
+<hr />
+<a name="H5L2fH5Lcreate5fhard5ff"></a>
+<a name="robo180"></a><h2>H5Lcreate_hard_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo49">H5L</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Lcreate_hard_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a hard link to an object.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_loc_id    - The file or group identifier for the target object.
+  obj_name      - Name of the target object, which must already exist.
+  link_loc_id   - The file or group identifier for the new link.
+  link_name     - The name of the new link.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lcpl_id       - Link creation property list identifier.
+  lapl_id       - Link access property list identifier.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 27, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5lcreate_hard_f<span class="sign">(</span>obj_loc_id<span class="sign">,</span> obj_name<span class="sign">,</span> link_loc_id<span class="sign">,</span> link_name<span class="sign">,</span> hdferr<span class="sign">,</span> lcpl_id<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_loc_id  <span class="sign">!</span> The file or group identifier <span class="keyword">for</span> the target object<span class="sign">.</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_name  <span class="sign">!</span> Name of the target object<span class="sign">,</span> which must already exist<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_loc_id <span class="sign">!</span> The file or group identifier <span class="keyword">for</span> the new link<span class="sign">.</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_name <span class="sign">!</span> The name of the new link<span class="sign">.</span>
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code<span class="sign">:</span>
+                                          <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span>   lcpl_id         <span class="sign">!</span> Link creation property list identifier<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span>   lapl_id         <span class="sign">!</span> Link access property list identifier<span class="sign">.</span>
+</pre>
+
+<hr />
+<a name="H5L2fH5Lcreate5fsoft5ff"></a>
+<a name="robo181"></a><h2>H5Lcreate_soft_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo49">H5L</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Lcreate_soft_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a soft link to an object.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  target_path   - Path to the target object, which is not required to exist.
+  link_loc_id   - The file or group identifier for the new link.
+  link_name     - The name of the new link.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lcpl_id       - Link creation property list identifier.
+  lapl_id       - Link access property list identifier.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 20, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5lcreate_soft_f<span class="sign">(</span>target_path<span class="sign">,</span> link_loc_id<span class="sign">,</span> link_name<span class="sign">,</span> hdferr<span class="sign">,</span> lcpl_id<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> target_path   <span class="sign">!</span> Path to the target object<span class="sign">,</span> which is not required to exist<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_loc_id     <span class="sign">!</span> The file or group identifier <span class="keyword">for</span> the new link<span class="sign">.</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_name     <span class="sign">!</span> The name of the new link<span class="sign">.</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr                <span class="sign">!</span> Error code<span class="sign">:</span>
+                                                  <span class="sign">!</span>   0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lcpl_id <span class="sign">!</span> Link creation property list identifier<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list identifier<span class="sign">.</span>
+</pre>
+
+<hr />
+<a name="H5L2fh5ldelete5fby5fidx5ff"></a>
+<a name="robo182"></a><h2>h5ldelete_by_idx_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo49">H5L</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5ldelete_by_idx_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Removes the nth link in a group.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - File or group identifier specifying location of subject group
+  group_name    - Name of subject group
+  index_field   - Type of index; Possible values are:
+                    H5_INDEX_UNKNOWN_F = -1  - Unknown index type
+                    H5_INDEX_NAME_F          - Index on names
+                    H5_INDEX_CRT_ORDER_F     - Index on creation order
+                    H5_INDEX_N_F             - Number of indices defined
+
+  order         - Order within field or index; Possible values are:
+                    H5_ITER_UNKNOWN_F   - Unknown order
+                    H5_ITER_INC_F       - Increasing order
+                    H5_ITER_DEC_F       - Decreasing order
+                    H5_ITER_NATIVE_F    - No particular order, whatever is fastest
+                    H5_ITER_N_F         - Number of iteration orders
+
+  n             - Link for which to retrieve information
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Link access property list
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 29, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5ldelete_by_idx_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> group_name<span class="sign">,</span> index_field<span class="sign">,</span> order<span class="sign">,</span> n<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id       <span class="sign">!</span> Identifer <span class="keyword">for</span> object to which attribute is attached
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> group_name <span class="sign">!</span> Name of object<span class="sign">,</span> relative to location<span class="sign">,</span>
+                                               <span class="sign">!</span>  from which attribute is to be removed
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> index_field         <span class="sign">!</span> Type of index<span class="sign">;</span> Possible values are<span class="sign">:</span>
+                                               <span class="sign">!</span>    H5_INDEX_UNKNOWN_F   <span class="sign">-</span> Unknown index type
+                                               <span class="sign">!</span>    H5_INDEX_NAME_F      <span class="sign">-</span> Index on names
+                                               <span class="sign">!</span>    H5_INDEX_CRT_ORDER_F <span class="sign">-</span> Index on creation order
+                                               <span class="sign">!</span>    H5_INDEX_N_F              <span class="sign">-</span> Number of indices defined
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> order               <span class="sign">!</span> Order in which to iterate over index<span class="sign">;</span> Possible values are<span class="sign">:</span>
+                                               <span class="sign">!</span>    H5_ITER_UNKNOWN_F  <span class="sign">-</span> Unknown order
+                                               <span class="sign">!</span>    H5_ITER_INC_F      <span class="sign">-</span> Increasing order
+                                               <span class="sign">!</span>    H5_ITER_DEC_F      <span class="sign">-</span> Decreasing order
+                                               <span class="sign">!</span>    H5_ITER_NATIVE_F   <span class="sign">-</span> No particular order<span class="sign">,</span> whatever is fastest
+                                               <span class="sign">!</span>    H5_ITER_N_F     <span class="sign">-</span> Number of iteration orders
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> n      <span class="sign">!</span> Offset within index
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code<span class="sign">:</span>
+                                           <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id     <span class="sign">!</span> Link access property list
+</pre>
+
+<hr />
+<a name="H5L2fh5ldelete5ff"></a>
+<a name="robo183"></a><h2>h5ldelete_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo49">H5L</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5ldelete_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Removes a link from a group.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Identifier of the file or group containing the object
+  name          - Name of the link to delete
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Link access property list identifier
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5ldelete_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id  <span class="sign">!</span> Identifier of the file or group containing the object
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span> Name of the link to delete
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code<span class="sign">:</span>
+                                          <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list identifier
+</pre>
+
+<hr />
+<a name="H5L2fH5Lexists5ff"></a>
+<a name="robo184"></a><h2>H5Lexists_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo49">H5L</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Lexists_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Check if a link with a particular name exists in a group.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Identifier of the file or group to query.
+  name          - Link name to check
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  link_exists   - link exists status (.TRUE.,.FALSE.)
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Link access property list identifier.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 29, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5lexists_f<span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> link_exists<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id  <span class="sign">!</span> Identifier of the file or group to query<span class="sign">.</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span> Link name to check<span class="sign">.</span>
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_exists   <span class="sign">!</span> <span class="sign">.</span>TRUE<span class="sign">.</span> <span class="keyword">if</span> exists<span class="sign">,</span> <span class="sign">.</span>FALSE<span class="sign">.</span> otherwise
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code<span class="sign">:</span>
+                                          <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id
+                                          <span class="sign">!</span> Link access property list identifier<span class="sign">.</span>
+</pre>
+
+<hr />
+<a name="H5L2fh5lget5finfo5fby5fidx5ff"></a>
+<a name="robo185"></a><h2>h5lget_info_by_idx_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo49">H5L</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5lget_info_by_idx_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves metadata for a link in a group, according to the order within a field or index.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - File or group identifier specifying location of subject group
+  group_name    - Name of subject group
+  index_field   - Index or field which determines the order
+  order         - Order within field or index
+  n             - Link for which to retrieve information
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>            NOTE: In C these are defined as a structure: H5L_info_t
+  corder_valid  - Indicates whether the creation order data is valid for this attribute
+  corder        - Is a positive integer containing the creation order of the attribute
+  cset          - Indicates the character set used for the attributeâ€™s name 
+ address        - If the link is a hard link, address specifies the file address that the link points to
+ val_size       - If the link is a symbolic link, val_size will be the length of the link value, e.g., 
+                  the length of the name of the pointed-to object with a null terminator.
+ hdferr         - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Link access property list
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 29, 2008
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>   Changed the link_type names to match those in C (bug 1720) from,
+   H5L_LINK_HARD_F, H5L_LINK_SOFT_F,H5L_LINK_EXTERNAL_F,H5L_LINK_ERROR_F
+   to
+   H5L_TYPE_HARD_F, H5L_TYPE_SOFT_F,H5L_TYPE_EXTERNAL_F,H5L_TYPE_ERROR_F
+   MSB January 8, 2010.  
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5lget_info_by_idx_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> group_name<span class="sign">,</span> index_field<span class="sign">,</span> order<span class="sign">,</span> n<span class="sign">,</span> <span class="sign">&amp;</span>
+       link_type<span class="sign">,</span> f_corder_valid<span class="sign">,</span> corder<span class="sign">,</span> cset<span class="sign">,</span> address<span class="sign">,</span> val_size<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id       <span class="sign">!</span> File or group identifier specifying location of subject group  
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> group_name <span class="sign">!</span> Name of subject group
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> index_field  <span class="sign">!</span> Index or field which determines the order
+                                        <span class="sign">!</span>    H5_INDEX_UNKNOWN_F   <span class="sign">-</span> Unknown index type
+                                        <span class="sign">!</span>    H5_INDEX_NAME_F      <span class="sign">-</span> Index on names
+                                        <span class="sign">!</span>    H5_INDEX_CRT_ORDER_F <span class="sign">-</span> Index on creation order
+                                        <span class="sign">!</span>    H5_INDEX_N_F             <span class="sign">-</span> Number of indices defined
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> order        <span class="sign">!</span> Order in which to iterate over index<span class="sign">;</span> Possible values are<span class="sign">:</span>
+                                        <span class="sign">!</span>    H5_ITER_UNKNOWN_F  <span class="sign">-</span> Unknown order
+                                        <span class="sign">!</span>    H5_ITER_INC_F      <span class="sign">-</span> Increasing order
+                                        <span class="sign">!</span>    H5_ITER_DEC_F      <span class="sign">-</span> Decreasing order
+                                        <span class="sign">!</span>    H5_ITER_NATIVE_F   <span class="sign">-</span> No particular order<span class="sign">,</span> whatever is fastest
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> n   <span class="sign">!</span> Attribute<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s position in index
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_type <span class="sign">!</span> Specifies the link class<span class="sign">:</span>
+                                      <span class="sign">!</span>  H5L_TYPE_HARD_F      <span class="sign">-</span> Hard link
+                                      <span class="sign">!</span>  H5L_TYPE_SOFT_F      <span class="sign">-</span> Soft link
+                                      <span class="sign">!</span>  H5L_TYPE_EXTERNAL_F  <span class="sign">-</span> External link
+                                      <span class="sign">!</span>  H5L_TYPE_ERROR _F    <span class="sign">-</span> Error
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> f_corder_valid <span class="sign">!</span> Indicates whether the creation order data is valid <span class="keyword">for</span> this attribute 
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> corder         <span class="sign">!</span> Is a positive integer containing the creation order of the attribute
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> cset           <span class="sign">!</span> Indicates the character set used <span class="keyword">for</span> the attribute<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s name
+    INTEGER<span class="sign">(</span>HADDR_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> address  <span class="sign">!</span> If the link is a hard link<span class="sign">,</span> address specifies the file address that the link points to
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> val_size  <span class="sign">!</span> If the link is a symbolic link<span class="sign">,</span> val_size will be the length of the link value<span class="sign">,</span> e<span class="sign">.</span>g<span class="sign">.</span><span class="sign">,</span> 
+                                              <span class="sign">!</span> the length of the name of the pointed<span class="sign">-</span>to object with a null terminator<span class="sign">.</span> 
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code<span class="sign">:</span>
+                                         <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id  <span class="sign">!</span> Link access property list
+</pre>
+
+<hr />
+<a name="H5L2fh5lget5finfo5ff"></a>
+<a name="robo186"></a><h2>h5lget_info_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo49">H5L</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5lget_info_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns information about a link.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  link_loc_id   - File or group identifier.
+  link_name     - Name of the link for which information is being sought
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>            NOTE: In C these are contained in the structure H5L_info_t
+
+  cset          - indicates the character set used for linkâ€™s name.
+  corder        - specifies the linkâ€™s creation order position.
+  corder_valid  - indicates whether the value in corder is valid.
+  link_type     - specifies the link class:
+                    H5L_TYPE_HARD_F     - Hard link
+                    H5L_TYPE_SOFT_F     - Soft link
+                    H5L_TYPE_EXTERNAL_F - External link
+                    H5L_TYPE_ERROR_ F   - Error
+  address       - If the link is a hard link, address specifies the file address that the link points to
+  val_size      - If the link is a symbolic link, val_size will be the length of the link value, e.g., 
+                  the length of the name of the pointed-to object with a null terminator. 
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Link access property list
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 29, 2008
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>   Changed the link_type names to match those in C (bug 1720) from,
+   H5L_LINK_HARD_F, H5L_LINK_SOFT_F,H5L_LINK_EXTERNAL_F,H5L_LINK_ERROR_F
+   to
+   H5L_TYPE_HARD_F, H5L_TYPE_SOFT_F,H5L_TYPE_EXTERNAL_F,H5L_TYPE_ERROR_F
+   MSB January 8, 2010.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5lget_info_f</strong><span class="sign">(</span>link_loc_id<span class="sign">,</span> link_name<span class="sign">,</span> <span class="sign">&amp;</span>
+       cset<span class="sign">,</span> corder<span class="sign">,</span> f_corder_valid<span class="sign">,</span> link_type<span class="sign">,</span> address<span class="sign">,</span> val_size<span class="sign">,</span> <span class="sign">&amp;</span>
+       hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_loc_id <span class="sign">!</span> File or group identifier<span class="sign">.</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_name <span class="sign">!</span> Name of the link <span class="keyword">for</span> which information is being sought
+
+<span class="sign">!</span> OUTPUTS  NOTE<span class="sign">:</span> In C these are contained in the structure H5L_info_t
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> cset <span class="sign">!</span> Indicates the character set used <span class="keyword">for</span> the link<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s name<span class="sign">.</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> corder <span class="sign">!</span> Specifies the link<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s creation order position<span class="sign">.</span>
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> f_corder_valid <span class="sign">!</span> Indicates whether the value in corder is valid<span class="sign">.</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_type <span class="sign">!</span> Specifies the link class<span class="sign">:</span>
+                                      <span class="sign">!</span>  H5L_TYPE_HARD_F      <span class="sign">-</span> Hard link
+                                      <span class="sign">!</span>  H5L_TYPE_SOFT_F      <span class="sign">-</span> Soft link
+                                      <span class="sign">!</span>  H5L_TYPE_EXTERNAL_F  <span class="sign">-</span> External link
+                                      <span class="sign">!</span>  H5L_TYPE_ERROR _F    <span class="sign">-</span> Error
+    INTEGER<span class="sign">(</span>HADDR_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> address <span class="sign">!</span> If the link is a hard link<span class="sign">,</span> address specifies the file address that the link points to
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> val_size <span class="sign">!</span> If the link is a symbolic link<span class="sign">,</span> val_size will be the length of the link value<span class="sign">,</span> e<span class="sign">.</span>g<span class="sign">.</span><span class="sign">,</span> 
+                                             <span class="sign">!</span> the length of the name of the pointed<span class="sign">-</span>to object with a null terminator<span class="sign">.</span> 
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code<span class="sign">:</span>
+                                         <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id  <span class="sign">!</span> Link access property list
+</pre>
+
+<hr />
+<a name="H5L2fh5lget5fname5fby5fidx5ff"></a>
+<a name="robo187"></a><h2>h5lget_name_by_idx_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo49">H5L</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5lget_name_by_idx_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves name of the nth link in a group, according to the order within a specified field or index.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - File or group identifier specifying location of subject group
+  group_name    - Name of subject group
+  index_field   - Index or field which determines the order
+  order         - Order within field or index
+  n             - Link for which to retrieve information
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  name          - Buffer in which link value is returned
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - List access property list identifier.
+  size          - Maximum number of characters of link value to be returned.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  March 10, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5lget_name_by_idx_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> group_name<span class="sign">,</span> index_field<span class="sign">,</span> order<span class="sign">,</span> n<span class="sign">,</span> <span class="sign">&amp;</span>
+        name<span class="sign">,</span> hdferr<span class="sign">,</span> size<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id       <span class="sign">!</span> File or group identifier specifying location of subject group
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> group_name <span class="sign">!</span> Name of subject group
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> index_field  <span class="sign">!</span> Index or field which determines the order
+                                        <span class="sign">!</span>    H5_INDEX_UNKNOWN_F   <span class="sign">-</span> Unknown index type
+                                        <span class="sign">!</span>    H5_INDEX_NAME_F      <span class="sign">-</span> Index on names
+                                        <span class="sign">!</span>    H5_INDEX_CRT_ORDER_F <span class="sign">-</span> Index on creation order
+                                        <span class="sign">!</span>    H5_INDEX_N_F             <span class="sign">-</span> Number of indices defined
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> order        <span class="sign">!</span> Order in which to iterate over index<span class="sign">;</span> Possible values are<span class="sign">:</span>
+                                        <span class="sign">!</span>    H5_ITER_UNKNOWN_F  <span class="sign">-</span> Unknown order
+                                        <span class="sign">!</span>    H5_ITER_INC_F      <span class="sign">-</span> Increasing order
+                                        <span class="sign">!</span>    H5_ITER_DEC_F      <span class="sign">-</span> Decreasing order
+                                        <span class="sign">!</span>    H5_ITER_NATIVE_F   <span class="sign">-</span> No particular order<span class="sign">,</span> whatever is fastest
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> n   <span class="sign">!</span> Attribute<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s position in index
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name <span class="sign">!</span> Buffer in which link value is returned
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code<span class="sign">:</span>
+                                          <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+</pre>
+
+<hr />
+<a name="H5L2fh5lis5fregistered5ff"></a>
+<a name="robo188"></a><h2>h5lis_registered_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo49">H5L</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5lis_registered_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines whether a class of user-defined links is registered.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  link_cls_id   - User-defined link class identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  registered    - .TRUE.  - if the link class has been registered
+                  .FALSE. - if it is unregistered
+  hdferr        - Error code
+  Success:  0
+  Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 29, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5lis_registered_f</strong><span class="sign">(</span>link_cls_id<span class="sign">,</span> registered<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_cls_id  <span class="sign">!</span> User<span class="sign">-</span>defined link class identifier
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> registered  <span class="sign">!</span> <span class="sign">.</span>TRUE<span class="sign">.</span> <span class="sign">-</span> <span class="keyword">if</span> the link class has been registered and
+                                        <span class="sign">!</span> <span class="sign">.</span>FALSE<span class="sign">.</span> <span class="sign">-</span> <span class="keyword">if</span> it is unregistered
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr      <span class="sign">!</span> Error code<span class="sign">:</span>
+                                        <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+</pre>
+
+<hr />
+<a name="H5L2fh5lmove5ff"></a>
+<a name="robo191"></a><h2>h5lmove_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo49">H5L</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5lmove_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Renames a link within an <a href="./HDF5_f90.html#robo76">HDF5</a> file.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  src_loc_id    - Original file or group identifier.
+  src_name      - Original link name.
+  dest_loc_id   - Destination file or group identifier.
+  dest_name     - NEW link name.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Error code:
+                   0 on success and -1 on failure
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lcpl_id       - Link creation property list identifier to be associated WITH the NEW link.
+  lapl_id       - Link access property list identifier to be associated WITH the NEW link.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  March 3, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5lmove_f</strong><span class="sign">(</span>src_loc_id<span class="sign">,</span> src_name<span class="sign">,</span> dest_loc_id<span class="sign">,</span> dest_name<span class="sign">,</span> hdferr<span class="sign">,</span> lcpl_id<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> src_loc_id  <span class="sign">!</span> Original file or group identifier<span class="sign">.</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> src_name  <span class="sign">!</span> Original link name<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dest_loc_id <span class="sign">!</span> Destination file or group identifier<span class="sign">.</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dest_name <span class="sign">!</span> NEW link name<span class="sign">.</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr     <span class="sign">!</span> Error code<span class="sign">:</span>
+                                              <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lcpl_id <span class="sign">!</span> Link creation property list identifier
+                                                    <span class="sign">!</span> to be associated WITH the NEW link<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list identifier
+                                                    <span class="sign">!</span> to be associated WITH the NEW link<span class="sign">.</span>
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Lff.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

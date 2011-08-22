@@ -531,6 +531,9 @@ struct subset_t {
 extern "C" {
 #endif
 
+H5TOOLS_DLLVAR int     packed_bits_num;       /* number of packed bits to display */
+H5TOOLS_DLLVAR int     packed_data_offset;    /* offset of packed bits to display */
+H5TOOLS_DLLVAR unsigned long long packed_data_mask;  /* mask in which packed bits to display */
 H5TOOLS_DLLVAR FILE   *rawdatastream;       /* output stream for raw data */
 H5TOOLS_DLLVAR int     bin_output;          /* binary output */
 H5TOOLS_DLLVAR int     bin_form;            /* binary form */
@@ -556,6 +559,7 @@ H5TOOLS_DLL hid_t    h5tools_get_big_endian_type(hid_t type);
 
 H5TOOLS_DLL htri_t   h5tools_detect_vlen(hid_t tid);
 H5TOOLS_DLL htri_t   h5tools_detect_vlen_str(hid_t tid);
+H5TOOLS_DLL hbool_t   h5tools_is_obj_same(hid_t loc_id1, const char *name1, hid_t loc_id2, const char *name2);
 
 H5TOOLS_DLL void     h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t container,
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,

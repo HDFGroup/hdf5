@@ -43,17 +43,6 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDpkg.h"		/* File Drivers				*/
-#include "H5FDcore.h"		/* Files stored entirely in memory	*/
-#include "H5FDfamily.h"		/* File families 			*/
-#include "H5FDlog.h"        	/* sec2 driver with I/O logging (for debugging) */
-#include "H5FDmpi.h"            /* MPI-based file drivers		*/
-#include "H5FDmulti.h"		/* Usage-partitioned file family	*/
-#include "H5FDsec2.h"		/* POSIX unbuffered file I/O		*/
-#include "H5FDstdio.h"		/* Standard C buffered I/O		*/
-#ifdef H5_HAVE_WINDOWS
-#include "H5FDwindows.h"        /* Windows buffered I/O     */
-#endif
-#include "H5FDdirect.h"		/* Direct file I/O			*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -108,7 +97,7 @@ static herr_t H5FD_free_cls(H5FD_class_t *cls);
  * object and the file is closed and re-opened, the 'fileno' value will
  * be different.
  */
-static unsigned long file_serial_no;
+static unsigned long H5FD_file_serial_no_g;
 
 
 /*-------------------------------------------------------------------------
@@ -164,7 +153,7 @@ H5FD_init_interface(void)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Reset the file serial numbers */
-    file_serial_no = 0;
+    H5FD_file_serial_no_g = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -201,26 +190,6 @@ H5FD_term_interface(void)
     if(H5_interface_initialize_g) {
 	if((n=H5I_nmembers(H5I_VFL))!=0) {
 	    H5I_clear_type(H5I_VFL, FALSE, FALSE);
-
-            /* Reset the VFL drivers, if they've been closed */
-            if(H5I_nmembers(H5I_VFL)==0) {
-                H5FD_sec2_term();
-#ifdef H5_HAVE_DIRECT
-                H5FD_direct_term();
-#endif
-                H5FD_log_term();
-                H5FD_stdio_term();
-#ifdef H5_HAVE_WINDOWS
-                H5FD_windows_term();
-#endif
-                H5FD_family_term();
-                H5FD_core_term();
-                H5FD_multi_term();
-#ifdef H5_HAVE_PARALLEL
-                H5FD_mpio_term();
-                H5FD_mpiposix_term();
-#endif /* H5_HAVE_PARALLEL */
-            } /* end if */
 	} else {
 	    H5I_dec_type_ref(H5I_VFL);
 	    H5_interface_initialize_g = 0;
@@ -252,11 +221,24 @@ H5FD_term_interface(void)
 static herr_t
 H5FD_free_cls(H5FD_class_t *cls)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_free_cls)
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5FD_free_cls)
+
+    /* Sanity check */
+    HDassert(cls);
+
+    /* If the file driver has a terminate callback, call it to give the file
+     * driver a chance to free singletons or other resources which will become
+     * invalid once the class structure is freed.
+     */
+    if(cls->terminate && cls->terminate() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEOBJ, FAIL, "virtual file driver '%s' did not terminate cleanly", cls->name)
 
     H5MM_xfree(cls);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_free_cls() */
 
 
@@ -1104,11 +1086,11 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver")
 
     /* Increment the global serial number & assign it to this H5FD_t object */
-    if(++file_serial_no == 0) {
+    if(++H5FD_file_serial_no_g == 0) {
         /* (Just error out if we wrap around for now...) */
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to get file serial number")
     } /* end if */
-    file->fileno = file_serial_no;
+    file->fileno = H5FD_file_serial_no_g;
 
     /* Start with base address set to 0 */
     /* (This will be changed later, when the superblock is located) */

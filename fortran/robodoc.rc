@@ -1,0 +1,73 @@
+items:
+ NAME
+ COPYRIGHT
+ SYNOPSIS
+ USAGE 
+ FUNCTION
+ DESCRIPTION
+ PURPOSE
+ AUTHOR 
+ CREATION DATE
+ MODIFICATION HISTORY
+ HISTORY 
+ INPUTS 
+ ARGUMENTS
+ OPTIONS 
+ PARAMETERS
+ SWITCHES
+ OUTPUTS 
+ SIDE EFFECTS
+ RESULT
+ RETURN VALUE 
+ EXAMPLE
+ NOTES
+ DIAGNOSTICS 
+ WARNINGS 
+ ERRORS
+ BUGS
+ TODO
+ IDEAS 
+ PORTABILITY
+ SEE ALSO 
+ METHODS
+ NEW METHODS
+ ATTRIBUTES
+ NEW ATTRIBUTES
+ TAGS
+ DERIVED FROM
+ DERIVED BY 
+ USES
+ CHILDREN 
+ USED BY
+ PARENTS
+ COMMANDS
+ SOURCE
+ CONTAINS SUBROUTINES
+ OPTIONAL PARAMETERS
+ FILE
+ignore items:
+ COPYRIGHT
+headertypes:
+ s Subroutines robo_subroutines
+options:
+    --nogeneratedwith	
+    --src ./
+    --doc ./doc/DevelGuide
+    --html
+    --multidoc
+    --index
+    --tabsize 8
+    --sections
+    --sectionnameonly
+    --documenttitle "HDF5 FORTRAN Developer's Guide"
+    --cmode		
+ignore files:
+    .svn
+    *~
+    *.o
+    *e
+    *.mod
+accept files:
+    *.c
+    *.f90
+    *.h

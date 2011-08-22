@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump --xml --use-dtd --xml-dtd=http://somewhere.net tempty.h5'
-#############################
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://somewhere.net">
 <HDF5-File>

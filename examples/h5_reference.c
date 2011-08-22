@@ -128,7 +128,7 @@ main(void) {
    /*
     *  Get datatype of the dataset "B"
     */
-   did_b = H5Rdereference(did_r, H5R_OBJECT, &rbuf[1]);
+   did_b = H5Rdereference2(did_r, H5P_DEFAULT, H5R_OBJECT, &rbuf[1]);
    tid_b = H5Dget_type(did_b);
    if(H5Tequal(tid_b, H5T_NATIVE_FLOAT))
      printf("Datatype of the dataset is H5T_NATIVE_FLOAT.\n");

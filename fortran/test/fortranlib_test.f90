@@ -1,3 +1,12 @@
+!****h* root/fortran/test/fortranlib_test.f90
+!
+! NAME
+!  fortranlib_test.f90
+!
+! FUNCTION
+!  Basic testing of Fortran API's functionality.
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,10 +22,8 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-!    Testing Fortran functionality.
-!
+!*****
+
 PROGRAM fortranlibtest
 
   USE HDF5
@@ -142,7 +149,7 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL test_select_bounds(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Selection bounds test ', total_error)
-
+  
 !     write(*,*)
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing DATATYPE interface               '

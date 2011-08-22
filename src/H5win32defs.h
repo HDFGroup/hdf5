@@ -53,11 +53,13 @@ struct timezone {
 #ifdef __cplusplus
         extern "C" {
 #endif /* __cplusplus */
-H5_DLL int Wgettimeofday(struct timeval *tv, struct timezone *tz);
+        H5_DLL int Wgettimeofday(struct timeval *tv, struct timezone *tz);
+        H5_DLL char* Wgetlogin();
 #ifdef __cplusplus
         }
 #endif /* __cplusplus */
 #define HDgettimeofday(V,Z) Wgettimeofday(V,Z)
+#define HDgetlogin() Wgetlogin()
 
 #define HDgetdrive()        _getdrive()
 #define HDlseek(F,O,W)      _lseeki64(F,O,W)

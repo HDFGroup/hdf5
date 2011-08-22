@@ -3664,7 +3664,18 @@ test_nbit_compound_2(hid_t file)
     /* Check that the values read are the same as the values written
      * Use mask for checking the significant bits, ignoring the padding bits
      */
-    i_mask = ~((unsigned)~0 << (precision[0] + offset[0])) & ((unsigned)~0 << offset[0]);
+    /* The original code 
+     *   i_mask = ~((unsigned)~0 << (precision[0] + offset[0])) & ((unsigned)~0 << offset[0]);
+     * left shift a 32-bit integer for 32-bit.  The result is undefined by C language.  A user
+     * discovered it using clang compiler with -fcatch-undefined-behavior option (see Issue 7674
+     * in Jira).  So I changed it in a funny way as below to avoid it. SLU - 2011/8/11
+     */
+    if(sizeof(unsigned) > 4)
+        i_mask = ~((unsigned)~0 << (precision[0] + offset[0])) & ((unsigned)~0 << offset[0]);
+    else {
+        i_mask = 0xffffffff;
+        i_mask = i_mask & ((unsigned)~0 << offset[0]);
+    }
     c_mask = ~((unsigned)~0 << (precision[1] + offset[1])) & ((unsigned)~0 << offset[1]);
     s_mask = ~((unsigned)~0 << (precision[2] + offset[2])) & ((unsigned)~0 << offset[2]);
     b_mask = ~((unsigned)~0 << (precision[4] + offset[4])) & ((unsigned)~0 << offset[4]);

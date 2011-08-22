@@ -450,16 +450,9 @@
 /* Define if the metadata trace file code is to be compiled in */
 /* #undef H5_METADATA_TRACE_FILE */
 
-/* Define if your system can handle complicated MPI derived datatype
-   correctly. */
-#define H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS 1
-
 /* Define if your system's `MPI_File_set_size' function works for files over
    2GB. */
 #define H5_MPI_FILE_SET_SIZE_BIG 1
-
-/* Define if your system can handle special collective IO properly. */
-#define H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS 1
 
 /* Define if we can violate pointer alignment restrictions */
 #define H5_NO_ALIGNMENT_RESTRICTIONS 1
@@ -480,13 +473,13 @@
 #define H5_PACKAGE_NAME "HDF5"
 
 /* Define to the full name and version of this package. */
-#define H5_PACKAGE_STRING "HDF5 1.9.81"
+#define H5_PACKAGE_STRING "HDF5 1.9.89"
 
 /* Define to the one symbol short name of this package. */
 #define H5_PACKAGE_TARNAME "hdf5"
 
 /* Define to the version of this package. */
-#define H5_PACKAGE_VERSION "1.9.81"
+#define H5_PACKAGE_VERSION "1.9.89"
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #define H5_PRINTF_LL_WIDTH "I64"
@@ -643,7 +636,7 @@
 /* #undef H5_USING_MEMCHECKER */
 
 /* Version number of package */
-#define H5_VERSION "1.9.81"
+#define H5_VERSION "1.9.89"
 
 /* Define if vsnprintf() returns the correct value for formatted strings that
    don't fit into size allowed */

@@ -694,6 +694,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
     int         desc_len;       /* Actual length of description when formatted */
 #endif /* H5_HAVE_VASPRINTF */
     char        *tmp = NULL;      /* Buffer to place formatted description in */
+    hbool_t     va_started = FALSE; /* Whether the variable argument list is open */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     /*
@@ -718,6 +719,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 
     /* Start the variable-argument parsing */
     va_start(ap, fmt);
+    va_started = TRUE;
 
 #ifdef H5_HAVE_VASPRINTF
     /* Use the vasprintf() routine, since it does what we're trying to do below */
@@ -759,13 +761,13 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
     } /* end while */
 #endif /* H5_HAVE_VASPRINTF */
 
-    va_end(ap);
-
     /* Push the error on the stack */
     if(H5E_push_stack(estack, file, func, line, cls_id, maj_id, min_id, tmp) < 0)
         HGOTO_DONE(FAIL)
 
 done:
+    if(va_started)
+        va_end(ap);
     if(tmp)
         H5MM_xfree(tmp);
 

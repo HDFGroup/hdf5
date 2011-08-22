@@ -547,7 +547,7 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t UNUSED aapl_id)
 
     /* Read in attribute from object header */
     if(NULL == (attr = H5O_attr_open_by_name(loc.oloc, attr_name, H5AC_ind_dxpl_id)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from object header")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from object header for attribute: '%s'", attr_name)
 
     /* Finish initializing attribute */
     if(H5A_open_common(&loc, attr) < 0)
@@ -1267,6 +1267,10 @@ H5Aget_type(hid_t attr_id)
     /* check arguments */
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
+    /* Patch the datatype's "top level" file pointer */
+    if(H5T_patch_file(attr->shared->dt, attr->oloc.file) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to patch datatype's file pointer")
 
     /*
      * Copy the attribute's datatype.  If the type is a named type then

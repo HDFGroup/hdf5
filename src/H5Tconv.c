@@ -2614,6 +2614,15 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
      * a native integer type as an index into the `val2dst'. The values of
      * that array are the index numbers in the destination type or negative
      * if the entry is unused.
+     *
+     * (This optimized algorithm doesn't work when the byte orders are different.  
+     * The code such as "n = *((int*)(src->shared->u.enumer.value+i*src->shared->size));"
+     * can change the value significantly. i.g. if the source value is big-endian 0x0000000f,
+     * executing the casting on little-endian machine will get a big number 0x0f000000.
+     * Then it can't meet the condition 
+     * "if(src->shared->u.enumer.nmembs<2 || (double)length/src->shared->u.enumer.nmembs<1.2)"
+     * Because this is the optimized code, we won't fix it. It should still work in some 
+     * situations. SLU - 2011/5/24) 
      */
     if (1==src->shared->size || sizeof(short)==src->shared->size || sizeof(int)==src->shared->size) {
 	for (i=0; i<src->shared->u.enumer.nmembs; i++) {
@@ -2697,6 +2706,12 @@ done:
  *		then convert one value at each memory location advancing
  *		BUF_STRIDE bytes each time; otherwise assume both source and
  *		destination values are packed.
+ *              
+ *              Raymond Lu, 2011-05-26
+ *              When overflow happened, the old way was to fill in the destination
+ *              with 0xff.  The new default way is to convert the source value
+ *              to the destination.  If the user sets the property through 
+ *              H5Pset_enum_conv_overflow, the library still uses the old way.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2706,6 +2721,11 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 {
     uint8_t	*buf = (uint8_t*)_buf;	/*cast for pointer arithmetic	*/
     H5T_t	*src = NULL, *dst = NULL;	/*src and dst datatypes	*/
+    H5T_t	*src_super = NULL, *dst_super = NULL;	/*parent types for src and dst*/
+    hid_t	src_super_id = NULL, dst_super_id = NULL;	/*parent type IDs for src and dst*/
+    size_t      src_super_size, dst_super_size; /*size of parent types for src and dst*/
+    H5T_path_t	*tpath;			/*type conversion info	*/
+    void        *tmp_buf = NULL;     /*small conversion buffer */
     uint8_t	*s = NULL, *d = NULL;	/*src and dst BUF pointers	*/
     int	src_delta, dst_delta;	/*conversion strides		*/
     int	n;			/*src value cast as native int	*/
@@ -2713,6 +2733,7 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     H5P_genplist_t      *plist;         /*property list pointer         */
     H5T_conv_cb_t       cb_struct;      /*conversion callback structure */
     H5T_conv_ret_t      except_ret;     /*return of callback function   */
+    hbool_t             conv_overflow = TRUE; /* library's default behavior when overflow happens */
     size_t	i;			/*counters			*/
     herr_t      ret_value = SUCCEED;    /* Return value                 */
 
@@ -2793,9 +2814,52 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if(H5P_get(plist, H5D_XFER_CONV_CB_NAME, &cb_struct) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get conversion exception callback")
 
+            /* Get the property of overflow handling */
+            if(H5P_get(plist, H5D_XFER_CONV_ENUM_OVERFLOW_NAME, &conv_overflow) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get conversion exception callback")
+
+            /* Preparation for converting the data when overflow happens */
+	    if(conv_overflow) {
+		/* Retrieve base type for the source type */
+		if(NULL == (src_super = H5T_get_super(src)))
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "unable to get base type for the source type")
+
+		/* Retrieve base type for the destination type */
+		if(NULL == (dst_super = H5T_get_super(dst)))
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "unable to get base type for the destination type")
+
+		/* Find the conversion function */
+		if(NULL == (tpath = H5T_path_find(src_super, dst_super, NULL, NULL, dxpl_id, FALSE)))
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to find convert path between src and dst types")
+
+                /* The conversion function needs the type IDs */
+		if((src_super_id = H5I_register(H5I_DATATYPE, src_super, FALSE)) < 0) 
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type")
+
+		if((dst_super_id = H5I_register(H5I_DATATYPE, dst_super, FALSE)) < 0) 
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type")
+
+		/* Get the size of the base types of src & dst */
+		if(!(src_super_size = H5T_get_size(src_super)))
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "unable to get type size")
+
+		if(!(dst_super_size = H5T_get_size(dst_super)))
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "unable to get type size")
+
+                /* Conversion buffer for overflowing data */
+		if(!(tmp_buf = HDmalloc(MAX(src_super_size, dst_super_size))))
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to allocate buffer")
+	    }
+
             for(i = 0; i < nelmts; i++, s += src_delta, d += dst_delta) {
                 if(priv->length) {
                     /* Use O(1) lookup */
+                    /* (The casting won't work when the byte orders are different. i.g. if the source value
+                     * is big-endian 0x0000000f, the direct casting "n = *((int*)s);" will make it a big
+                     * number 0x0f000000 on little-endian machine. But we won't fix it because it's an 
+                     * optimization code. Please also see the comment in the H5T_conv_enum_init() function.
+                     * SLU - 2011/5/24)
+                     */ 
                     if(1 == src->shared->size)
                         n = *((signed char*)s);
                     else if(sizeof(short) == src->shared->size)
@@ -2812,7 +2876,17 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
-                            HDmemset(d, 0xff, dst->shared->size);
+			    if(conv_overflow) {
+                                /* Copy the source data to a small buffer, convert it, then copy it back to the 
+                                 * destination */
+				HDmemcpy(tmp_buf, s, src_super_size);
+				if(H5T_convert(tpath, src_super_id, dst_super_id, 1, (size_t)0, (size_t)0, 
+                                    tmp_buf, NULL, dxpl_id) < 0)
+				    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
+				HDmemcpy(d, tmp_buf, dst_super_size);
+			    } else
+                                /* Fill the destination with 0xff if we don't convert it */
+				HDmemset(d, 0xff, dst->shared->size);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                     } else {
@@ -2845,7 +2919,18 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
-                            HDmemset(d, 0xff, dst->shared->size);
+			    if(conv_overflow) {
+                                /* Copy the source data to a small buffer, convert it, then copy it back to the 
+                                 * destination */
+			        HDmemcpy(tmp_buf, s, src_super_size);
+			        if(H5T_convert(tpath, src_super_id, dst_super_id, 1, (size_t)0, (size_t)0, 
+                                    tmp_buf, NULL, dxpl_id) < 0)
+				    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
+			        HDmemcpy(d, tmp_buf, dst_super_size);
+                            } else
+                                /* Fill the destination with 0xff if we don't convert it */
+                                HDmemset(d, 0xff, dst->shared->size);
+
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                     } /* end if */
@@ -2856,6 +2941,19 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     } /* end else */
                 }
             }
+
+            /* Close the type IDs.  Have to use public function here */
+	    if(conv_overflow) {
+                /* Disable the error stack for these two public functions. Otherwise they would
+                 * clear it */
+                H5E_BEGIN_TRY {
+                    H5Tclose(src_super_id);
+                    H5Tclose(dst_super_id);
+                } H5E_END_TRY;
+
+		HDfree(tmp_buf);
+            }
+
             break;
 
         default:

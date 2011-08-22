@@ -13,7 +13,9 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
@@ -23,6 +25,11 @@
 #include "hdf5.h"
 
 /* Local macros */
+#ifdef _MSC_VER /* H5_HAVE_VISUAL_STUDIO */
+#define HDgetlogin()           Wgetlogin()
+#else /* H5_HAVE_VISUAL_STUDIO */
+#define HDgetlogin()            getlogin()
+#endif /* H5_HAVE_VISUAL_STUDIO */
 
 /*
  * HDF Boolean type.
@@ -115,13 +122,13 @@ static hid_t create_fapl(MPI_Comm comm, MPI_Info info, int acc_type )
 
     /* set parallel access with communicator, using MPI-I/O driver */
     if (acc_type == FACC_MPIO) {
-	ret = H5Pset_fapl_mpio(fapl, comm, info);
+    ret = H5Pset_fapl_mpio(fapl, comm, info);
         assert(ret>=0);
     } /* end if */
 
     /* set parallel access with communicator, using MPI-posix driver */
     if (acc_type == FACC_MPIPOSIX) {
-	ret = H5Pset_fapl_mpiposix(fapl, comm, use_gpfs);
+      ret = H5Pset_fapl_mpiposix(fapl, comm, use_gpfs);
         assert(ret>=0);
     } /* end if */
 
@@ -312,7 +319,7 @@ int main(int argc, char *argv[])
         char *login;    /* Pointer to login name */
 
         /* Get the login name for this user */
-        login=getlogin();
+        login=HDgetlogin();
         if(login==NULL)
             login=DEFAULT_USERNAME;
 

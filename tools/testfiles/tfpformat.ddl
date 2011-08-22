@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -m %.7f tfpformat.h5'
-#############################
 HDF5 "tfpformat.h5" {
 GROUP "/" {
    DATASET "double" {

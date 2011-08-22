@@ -1,3 +1,15 @@
+!****h* root/fortran/test/fflush2.f90
+!
+! NAME
+!  fflush2.f90
+!
+! FUNCTION
+!  This is the second half of a two-part test that makes sure
+!  that a file can be read after an application crashes as long
+!  as the file was flushed first.  This half tries to read the
+!  file created by the first half.
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,12 +25,7 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-! Purpose:	This is the second half of a two-part test that makes sure
-!		that a file can be read after an application crashes as long
-!		as the file was flushed first.  This half tries to read the
-!		file created by the first half.
-!
+!*****
 
      PROGRAM FFLUSH2EXAMPLE
 
@@ -89,7 +96,6 @@
               write(*,*) "Cannot modify filename"
               CALL h5_exit_f (1)
           endif
-	  print *, "filename=", filename, "fix_filename=", fix_filename
      CALL h5fopen_f(fix_filename, H5F_ACC_RDONLY_F, file_id, error)
           CALL check("h5fopen_f",error,total_error)
 
@@ -135,7 +141,6 @@
      !In case error happens, exit.
      !
      IF (error == -1) CALL h5_exit_f (1)
-
      !
      !Close the datatype
      !

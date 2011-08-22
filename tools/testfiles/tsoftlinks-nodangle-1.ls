@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5'
-#############################
 dset1                    Dataset {4, 2}
 dset2                    Dataset {4, 2}
 dtype                    Type

@@ -3423,7 +3423,7 @@ int write_dset_in(hid_t loc_id,
     /* create 1D attributes with dimension [2], 2 elements */
     hsize_t    dims[1]={2};
     hsize_t    dims1r[1]={2};
-    char       buf1[2][2]= {"ab","de"};        /* string */
+    char       buf1[2][3]= {"ab","de"};        /* string */
     char       buf2[2]= {1,2};                 /* bitfield, opaque */
     s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
     hobj_ref_t buf4[2];                        /* reference */
@@ -3437,7 +3437,7 @@ int write_dset_in(hid_t loc_id,
     /* create 2D attributes with dimension [3][2], 6 elements */
     hsize_t    dims2[2]={3,2};
     hsize_t    dims2r[2]={1,1};
-    char       buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};         /* string */
+    char       buf12[6][3]= {"ab","cd","ef","gh","ij","kl"};         /* string */
     char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
     s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
     hobj_ref_t buf42[1][1];                                          /* reference */
@@ -3449,7 +3449,7 @@ int write_dset_in(hid_t loc_id,
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t    dims3[3]={4,3,2};
     hsize_t    dims3r[3]={1,1,1};
-    char       buf13[24][2]= {"ab","cd","ef","gh","ij","kl","mn","pq",
+    char       buf13[24][3]= {"ab","cd","ef","gh","ij","kl","mn","pq",
         "rs","tu","vw","xz","AB","CD","EF","GH",
         "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
     char       buf23[4][3][2];    /* bitfield, opaque */
@@ -4296,7 +4296,7 @@ int write_attr_in(hid_t loc_id,
 
     /* create 1D attributes with dimension [2], 2 elements */
     hsize_t    dims[1]={2};
-    char       buf1[2][2]= {"ab","de"};        /* string */
+    char       buf1[2][3]= {"ab","de"};        /* string */
     char       buf2[2]= {1,2};                 /* bitfield, opaque */
     s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
     hobj_ref_t buf4[2];                        /* reference */
@@ -4309,7 +4309,7 @@ int write_attr_in(hid_t loc_id,
 
     /* create 2D attributes with dimension [3][2], 6 elements */
     hsize_t    dims2[2]={3,2};
-    char       buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};         /* string */
+    char       buf12[6][3]= {"ab","cd","ef","gh","ij","kl"};         /* string */
     char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
     s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
     hobj_ref_t buf42[3][2];                                          /* reference */
@@ -4321,7 +4321,7 @@ int write_attr_in(hid_t loc_id,
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t    dims3[3]={4,3,2};
-    char       buf13[24][2]= {"ab","cd","ef","gh","ij","kl","mn","pq",
+    char       buf13[24][3]= {"ab","cd","ef","gh","ij","kl","mn","pq",
         "rs","tu","vw","xz","AB","CD","EF","GH",
         "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
     char       buf23[4][3][2];    /* bitfield, opaque */
@@ -6656,49 +6656,49 @@ static herr_t make_complex_attr_references(hid_t loc_id)
 
 out:
     /* release resources */
-    if (objgid < 0)
+    if (objgid > 0)
         H5Gclose(objgid);
-    if (objsid < 0)
+    if (objsid > 0)
         H5Sclose(objsid);
-    if (objdid < 0)
+    if (objdid > 0)
         H5Dclose(objdid);
-    if (objtid < 0)
+    if (objtid > 0)
         H5Tclose(objtid);
 
-    if (main_gid < 0)
+    if (main_gid > 0)
         H5Gclose(main_gid);
-    if (main_sid < 0)
+    if (main_sid > 0)
         H5Sclose(main_sid);
-    if (main_did < 0)
+    if (main_did > 0)
         H5Dclose(main_did);
     /* comp obj ref */
-    if (comp_objref_tid < 0)
+    if (comp_objref_tid > 0)
         H5Tclose(comp_objref_tid);
-    if (comp_objref_aid < 0)
+    if (comp_objref_aid > 0)
         H5Aclose(comp_objref_aid);
-    if (comp_objref_attr_sid < 0)
+    if (comp_objref_attr_sid > 0)
         H5Sclose(comp_objref_attr_sid);
     /* comp region ref */
-    if (comp_regref_tid < 0)
+    if (comp_regref_tid > 0)
         H5Tclose(comp_regref_tid);
-    if (comp_regref_aid < 0)
+    if (comp_regref_aid > 0)
         H5Aclose(comp_regref_aid);
-    if (comp_regref_attr_sid < 0)
+    if (comp_regref_attr_sid > 0)
         H5Sclose(comp_regref_attr_sid);
     /* vlen obj ref */
-    if (vlen_objref_attr_id < 0);
-        H5Aclose (vlen_objref_attr_id);
-    if (vlen_objref_attr_sid < 0);
-        H5Sclose (vlen_objref_attr_sid);
-    if (vlen_objref_attr_tid < 0);
-        H5Tclose (vlen_objref_attr_tid);
+    if (vlen_objref_attr_id > 0)
+        H5Aclose(vlen_objref_attr_id);
+    if (vlen_objref_attr_sid > 0)
+        H5Sclose(vlen_objref_attr_sid);
+    if (vlen_objref_attr_tid > 0)
+        H5Tclose(vlen_objref_attr_tid);
     /* vlen region ref */
-    if (vlen_regref_attr_id < 0);
-        H5Aclose (vlen_regref_attr_id);
-    if (vlen_regref_attr_sid < 0);
-        H5Sclose (vlen_regref_attr_sid);
-    if (vlen_regref_attr_tid < 0);
-        H5Tclose (vlen_regref_attr_tid);
+    if (vlen_regref_attr_id > 0)
+        H5Aclose(vlen_regref_attr_id);
+    if (vlen_regref_attr_sid > 0)
+        H5Sclose(vlen_regref_attr_sid);
+    if (vlen_regref_attr_tid > 0)
+        H5Tclose(vlen_regref_attr_tid);
 
     return ret;
 }

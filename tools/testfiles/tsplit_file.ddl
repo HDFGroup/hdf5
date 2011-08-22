@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump --filedriver=split tsplit_file'
-#############################
 HDF5 "tsplit_file" {
 GROUP "/" {
    ATTRIBUTE "Metadata" {

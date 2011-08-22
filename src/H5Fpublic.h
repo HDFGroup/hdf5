@@ -122,18 +122,27 @@ typedef struct H5F_info2_t {
  * Types of allocation requests. The values larger than H5FD_MEM_DEFAULT
  * should not change other than adding new types to the end. These numbers
  * might appear in files.
+ *
+ * Note: please change the log VFD flavors array if you change this
+ * enumeration.
  */
 typedef enum H5F_mem_t {
-    H5FD_MEM_NOLIST	= -1,			/*must be negative*/
-    H5FD_MEM_DEFAULT	= 0,			/*must be zero*/
-    H5FD_MEM_SUPER      = 1,
-    H5FD_MEM_BTREE      = 2,
-    H5FD_MEM_DRAW       = 3,
-    H5FD_MEM_GHEAP      = 4,
-    H5FD_MEM_LHEAP      = 5,
-    H5FD_MEM_OHDR       = 6,
+    H5FD_MEM_NOLIST     = -1,   /* Data should not appear in the free list.
+                                 * Must be negative.
+                                 */
+    H5FD_MEM_DEFAULT    = 0,    /* Value not yet set.  Can also be the
+                                 * datatype set in a larger allocation
+                                 * that will be suballocated by the library.
+                                 * Must be zero.
+                                 */
+    H5FD_MEM_SUPER      = 1,    /* Superblock data */
+    H5FD_MEM_BTREE      = 2,    /* B-tree data */
+    H5FD_MEM_DRAW       = 3,    /* Raw data (content of datasets, etc.) */
+    H5FD_MEM_GHEAP      = 4,    /* Global heap data */
+    H5FD_MEM_LHEAP      = 5,    /* Local heap data */
+    H5FD_MEM_OHDR       = 6,    /* Object header data */
 
-    H5FD_MEM_NTYPES				/*must be last*/
+    H5FD_MEM_NTYPES             /* Sentinel value - must be last */
 } H5F_mem_t;
 
 /* Free space section information */

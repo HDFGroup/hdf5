@@ -17,19 +17,34 @@
  *	       Friday, September 19, 1997
  *
  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 
 
-/* Packages needed by this file... */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* File access				*/
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5MMprivate.h"	/* Memory management			*/
 
-/* Private typedefs */
+
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
 /* User data for finding link information from B-tree */
 typedef struct {
     /* downward */
@@ -74,7 +89,31 @@ typedef struct H5G_bt_it_lbi_t {
     hbool_t     found;      	/*whether we found the link                  */
 } H5G_bt_it_lbi_t;
 
-/* Private prototypes */
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -714,6 +753,9 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
     hbool_t udata_valid = FALSE;        /* Whether iteration information is valid */
     ssize_t ret_value;          /* Return value */
 
+    /* Portably clear udata struct (before FUNC_ENTER) */
+    HDmemset(&udata, 0, sizeof(udata));
+
     FUNC_ENTER_NOAPI(H5G_stab_get_name_by_idx, FAIL)
 
     /* Sanity check */
@@ -995,6 +1037,12 @@ done:
  *              provided, the addresses in alt_stab will be tried if the
  *              addresses in the group's stab message are invalid, and
  *              the stab message will be updated if necessary.
+ *
+ *              NOTE: This function is only called when strict format
+ *              checks are disabled.  This is so that, when strict
+ *              format checks are enabled,  errors in the symbol table
+ *              messages are not fixed by this function and are instead
+ *              reported by the library.
  *
  * Return:	Non-negative on success/Negative on failure
  *

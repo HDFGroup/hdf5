@@ -26,9 +26,9 @@ SET (H5_DEP_EXECUTABLES
 
 IF (BUILD_TESTING)
   # --------------------------------------------------------------------
-  # Copy all the HDF5 files from the test directory into the source directory
+  # Copy all the test files from source directory to test directory
   # --------------------------------------------------------------------
-  SET (HDF5_REFERENCE_FILES
+  SET (LIST_EXPECT_OUTPUT_FILES
       help-1.ls
       help-2.ls
       help-3.ls
@@ -83,7 +83,7 @@ IF (BUILD_TESTING)
       tvldtypes2le.ls
       tvldtypes2be.ls
   )
-  SET (HDF5_REFERENCE_TEST_FILES
+  SET (LIST_HDF5_TEST_FILES
       tall.h5
       tarray1.h5
       tattr2.h5
@@ -107,27 +107,29 @@ IF (BUILD_TESTING)
       tvldtypes1.h5
   )
 
-  FOREACH (ls_file ${HDF5_REFERENCE_FILES})
-    SET (lsdest "${PROJECT_BINARY_DIR}/${ls_file}")
-    #MESSAGE (STATUS " Translating ${ls_file}")
+  # copy the list of expected output files
+  FOREACH (out_file ${LIST_EXPECT_OUTPUT_FILES})
+    SET (out_dest "${PROJECT_BINARY_DIR}/${out_file}")
+    #MESSAGE (STATUS " Translating ${out_file}")
     ADD_CUSTOM_COMMAND (
         TARGET     h5ls
         POST_BUILD
-        COMMAND    ${XLATE_UTILITY}
-        ARGS       ${HDF5_TOOLS_SRC_DIR}/testfiles/${ls_file} ${lsdest} -l3
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${out_file} ${out_dest}
     )
-  ENDFOREACH (ls_file ${HDF5_REFERENCE_FILES})
+  ENDFOREACH (out_file ${LIST_EXPECT_OUTPUT_FILES})
 
-  FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    SET (dest "${PROJECT_BINARY_DIR}/${h5_file}")
+  # copy the list of hdf5 test files
+  FOREACH (h5_file ${LIST_HDF5_TEST_FILES})
+    SET (h5_dest "${PROJECT_BINARY_DIR}/${h5_file}")
     #MESSAGE (STATUS " Copying ${h5_file}")
     ADD_CUSTOM_COMMAND (
         TARGET     h5ls
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file} ${dest}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file} ${h5_dest}
     )
-  ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  ENDFOREACH (h5_file ${LIST_HDF5_TEST_FILES})
   
 ##############################################################################
 ##############################################################################
@@ -142,7 +144,16 @@ IF (BUILD_TESTING)
       IF (${resultcode} STREQUAL "1")
         SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
       ENDIF (${resultcode} STREQUAL "1")
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+      SET (last_test "H5LS-${resultfile}")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5LS-clear-${resultfile}-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove ${resultfile}.out ${resultfile}.out.err
+      )
       ADD_TEST (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -154,11 +165,8 @@ IF (BUILD_TESTING)
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
+      SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS "H5LS-clear-${resultfile}-objects")
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5LS-${resultfile}")
   ENDMACRO (ADD_H5_TEST file)
 
 ##############################################################################
@@ -167,8 +175,9 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
-  # Remove any output file left over from previous test run
-  ADD_TEST (
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    # Remove any output file left over from previous test run
+    ADD_TEST (
       NAME H5LS-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
@@ -278,11 +287,12 @@ IF (BUILD_TESTING)
           tvldtypes2le.out.err
           tvldtypes2be.out
           tvldtypes2be.out.err
-  )
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5LS-clearall-objects PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5LS-clearall-objects")
+    )
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5LS-clearall-objects PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5LS-clearall-objects")
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
   # test the help syntax
   ADD_H5_TEST (help-1 0 -w80 -h)
@@ -387,15 +397,15 @@ IF (BUILD_TESTING)
   # test for non-existing file
   ADD_H5_TEST (nosuchfile 1 nosuchfile.h5)
 
-  IF (WORDS_BIGENDIAN)
+  IF (H5_WORDS_BIGENDIAN)
     # test for variable length data types in verbose mode
     ADD_H5_TEST (tvldtypes2be 0 -v tvldtypes1.h5)
     # test for dataset region references data types in verbose mode
     ADD_H5_TEST (tdataregbe 0 -v tdatareg.h5)
-  ELSE (WORDS_BIGENDIAN)
+  ELSE (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tvldtypes2le 0 -v tvldtypes1.h5)
     ADD_H5_TEST (tdataregle 0 -v tdatareg.h5)
-  ENDIF (WORDS_BIGENDIAN)
+  ENDIF (H5_WORDS_BIGENDIAN)
 
 ENDIF (BUILD_TESTING)
 

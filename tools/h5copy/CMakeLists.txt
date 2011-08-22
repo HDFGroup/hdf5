@@ -70,13 +70,6 @@ IF (BUILD_TESTING)
     )
   ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
   
-  ADD_CUSTOM_COMMAND (
-      TARGET     h5copy
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copytst.h5 ${PROJECT_BINARY_DIR}/h5copytst.h5
-  )
-  
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -131,10 +124,10 @@ IF (BUILD_TESTING)
   MACRO (ADD_H5LS_TEST file filetest)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME H5COPY-H5LS_${file}-${filetest} COMMAND $<TARGET_FILE:h5ls> -Svr ./testfiles/${file}.out.h5)
+      ADD_TEST (NAME H5COPY-h5ls_${file}-${filetest} COMMAND $<TARGET_FILE:h5ls> -Svr ./testfiles/${file}.out.h5)
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
-          NAME H5COPY-H5LS_${file}-${filetest}
+          NAME H5COPY-h5ls_${file}-${filetest}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=-Svr;./testfiles/${file}.out.h5"
@@ -147,9 +140,9 @@ IF (BUILD_TESTING)
       )
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
     IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5COPY-H5LS_${file}-${filetest} PROPERTIES DEPENDS ${last_test})
+      SET_TESTS_PROPERTIES (H5COPY-h5ls_${file}-${filetest} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5COPY-H5LS_${file}-${filetest}")
+    SET (last_test "H5COPY-h5ls_${file}-${filetest}")
   ENDMACRO (ADD_H5LS_TEST)
 
   #
@@ -159,7 +152,7 @@ IF (BUILD_TESTING)
   MACRO (ADD_H5_CMP_TEST testname resultcode infile outfile vparam sparam srcname dparam dstname)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME H5COPY-CMP-${testname} COMMAND $<TARGET_FILE:h5copy> -i ${infile} -o ./testfiles/${outfile} ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
+      ADD_TEST (NAME H5COPY-CMP-${testname} COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${outfile} ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
       IF (${resultcode} STREQUAL "1")
         SET_TESTS_PROPERTIES (H5COPY-CMP-${testname} PROPERTIES WILL_FAIL "true")
       ENDIF (${resultcode} STREQUAL "1")
@@ -168,7 +161,7 @@ IF (BUILD_TESTING)
           NAME H5COPY-CMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-              -D "TEST_ARGS=-i;${infile};-o;./testfiles/${outfile};${vparam};${sparam};${srcname};${dparam};${dstname}"
+              -D "TEST_ARGS=-i;./testfiles/${infile};-o;./testfiles/${outfile};${vparam};${sparam};${srcname};${dparam};${dstname}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=./testfiles/${testname}.out.out"
               -D "TEST_EXPECT=${resultcode}"

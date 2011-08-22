@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -n tfcontents1.h5'
-#############################
 HDF5 "tfcontents1.h5" {
 FILE_CONTENTS {
  datatype   /#5616

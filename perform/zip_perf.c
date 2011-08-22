@@ -66,9 +66,9 @@
 #endif
 
 /* internal variables */
-static const char *prog;
-static const char *option_prefix;
-static char *filename;
+static const char *prog=NULL;
+static const char *option_prefix=NULL;
+static char *filename=NULL;
 static int compress_percent = 0;
 static int compress_level = Z_DEFAULT_COMPRESSION;
 static int output, random_test = FALSE;
@@ -175,6 +175,7 @@ cleanup(void)
 {
     if (!getenv("HDF5_NOCLEANUP"))
         unlink(filename);
+    free(filename);
 }
 
 static void
@@ -292,10 +293,11 @@ uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
  * Programmer:  Bill Wendling, 06. June 2002
  * Modifications:
  */
+#define ZIP_PERF_FILE "zip_perf.data"
 static void
 get_unique_name(void)
 {
-    const char *prefix = NULL, *tmpl = "zip_perf.data";
+    const char *prefix = NULL;
     const char *env = getenv("HDF5_PREFIX");
 
     if (env)
@@ -305,19 +307,20 @@ get_unique_name(void)
         prefix = option_prefix;
 
     if (prefix)
-	/* 2 = 1 for '/' + 1 for null terminator */
-	filename = (char *) HDmalloc(strlen(prefix) + strlen(tmpl) + 2);
+        /* 2 = 1 for '/' + 1 for null terminator */
+        filename = (char *) HDmalloc(strlen(prefix) + strlen(ZIP_PERF_FILE) + 2);
     else
-	filename = (char *) HDmalloc(strlen(tmpl) + 1);
+        filename = (char *) HDmalloc(strlen(ZIP_PERF_FILE) + 1);
 
     if (!filename)
         error("out of memory");
 
+    filename[0] = 0;
     if (prefix){
-	strcpy(filename, prefix);
-	strcat(filename, "/");
+        strcpy(filename, prefix);
+        strcat(filename, "/");
     }
-    strcat(filename, tmpl);
+    strcat(filename, ZIP_PERF_FILE);
 }
 
 /*

@@ -234,11 +234,11 @@ hsize_t diff_array( void *_mem1,
     size = H5Tget_size( m_type );
     type_class = H5Tget_class(m_type);
 
-    /* Fast comparison first for atomic type by memcmp(). 
+    /* Fast comparison first for atomic type by memcmp().
      * It is OK not to list non-atomic type here because it will not be caught
-     * by the confition, but it gives more clarity for code planning 
+     * by the condition, but it gives more clarity for code planning
      */
-    if (type_class != H5T_REFERENCE && 
+    if (type_class != H5T_REFERENCE &&
         type_class != H5T_COMPOUND &&
         type_class != H5T_STRING &&
         type_class != H5T_VLEN &&
@@ -269,7 +269,6 @@ hsize_t diff_array( void *_mem1,
     */
 
     case H5T_FLOAT:
-
         if (H5Tequal(m_type, H5T_NATIVE_FLOAT))
             nfound=diff_float(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
         else if (H5Tequal(m_type, H5T_NATIVE_DOUBLE))
@@ -427,11 +426,11 @@ hsize_t diff_datum(void       *_mem1,
     type_size = H5Tget_size( m_type );
     type_class = H5Tget_class(m_type);
 
-    /* Fast comparison first for atomic type by memcmp(). 
+    /* Fast comparison first for atomic type by memcmp().
      * It is OK not to list non-atomic type here because it will not be caught
-     * by the confition, but it gives more clarity for code planning 
+     * by the confition, but it gives more clarity for code planning
      */
-    if (type_class != H5T_REFERENCE && 
+    if (type_class != H5T_REFERENCE &&
         type_class != H5T_COMPOUND &&
         type_class != H5T_STRING &&
         type_class != H5T_VLEN &&
@@ -513,10 +512,10 @@ hsize_t diff_datum(void       *_mem1,
                 size2 = H5Tget_size(m_type);
             }
 
-            /* 
+            /*
              * compare for shorter string
-             * TODO: this code need to be improved to handle the difference 
-             *       of length of strings. 
+             * TODO: this code need to be improved to handle the difference
+             *       of length of strings.
              *       For now mimic the previous way.
              */
             if(size1 < size2)
@@ -621,12 +620,43 @@ hsize_t diff_datum(void       *_mem1,
             char enum_name1[1024];
             char enum_name2[1024];
 
+            herr_t err1;
+            herr_t err2;
+
             /* disable error reporting */
             H5E_BEGIN_TRY {
 
-                if ((H5Tenum_nameof(m_type, mem1, enum_name1, sizeof enum_name1) >= 0) &&
-                    (H5Tenum_nameof(m_type, mem2, enum_name2, sizeof enum_name2) >= 0))
+                /* If the enum value cannot be converted to a string
+                 * it is set to an error string for later output.
+                 */
+                err1 = H5Tenum_nameof(m_type, mem1, enum_name1, sizeof enum_name1);
+                if(err1 < 0)
+                    strcpy(enum_name1, "**INVALID VALUE**");
+
+                err2 = H5Tenum_nameof(m_type, mem2, enum_name2, sizeof enum_name2);
+                if(err2 < 0)
+                    strcpy(enum_name2, "**INVALID VALUE**");
+
+                if(err1 < 0 || err2 < 0)
                 {
+                    /* One or more bad enum values */
+
+                    /* If the two values cannot be converted to a string
+                     * (probably due to them being invalid enum values),
+                     * don't attempt to convert them - just report errors.
+                     */
+                    nfound += 1;
+                    if ( print_data(options) )
+                    {
+                        print_pos(ph,0,i,acc,pos,rank,dims,obj1,obj2);
+                        parallel_print(SPACES);
+                        parallel_print(S_FORMAT,enum_name1,enum_name2);
+                    }
+                }
+                else
+                {
+                    /* Both enum values were valid */
+
                     if (HDstrcmp(enum_name1,enum_name2)!=0)
                     {
                         nfound=1;
@@ -730,9 +760,9 @@ hsize_t diff_datum(void       *_mem1,
                 hid_t  region1_id;
                 hid_t  region2_id;
 
-                if ((obj1_id = H5Rdereference(container1_id, H5R_DATASET_REGION, _mem1))<0)
+                if ((obj1_id = H5Rdereference2(container1_id, H5P_DEFAULT, H5R_DATASET_REGION, _mem1))<0)
                     ret= -1;
-                if ((obj2_id = H5Rdereference(container2_id, H5R_DATASET_REGION, _mem2))<0)
+                if ((obj2_id = H5Rdereference2(container2_id, H5P_DEFAULT, H5R_DATASET_REGION, _mem2))<0)
                     ret= -1;
                 if ((region1_id = H5Rget_region(container1_id, H5R_DATASET_REGION, _mem1))<0)
                     ret= -1;
@@ -781,9 +811,9 @@ hsize_t diff_datum(void       *_mem1,
                     return 0;
                 }
 
-                if((obj1_id = H5Rdereference(container1_id, H5R_OBJECT, _mem1)) < 0)
+                if((obj1_id = H5Rdereference2(container1_id, H5P_DEFAULT, H5R_OBJECT, _mem1)) < 0)
                     ret = -1;
-                if((obj2_id = H5Rdereference(container2_id, H5R_OBJECT, _mem2)) < 0)
+                if((obj2_id = H5Rdereference2(container2_id, H5P_DEFAULT, H5R_OBJECT, _mem2)) < 0)
                     ret = -1;
                 if(ret == -1) {
                     options->err_stat = 1;
@@ -1915,8 +1945,8 @@ hsize_t diff_datum(void       *_mem1,
                     }
 
                 }
-                /* one is NaN, assume difference */
-                else if ( isnan1==1 || isnan2==1)
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
                 {
                     if ( print_data(options) )
                     {
@@ -1978,8 +2008,8 @@ hsize_t diff_datum(void       *_mem1,
                         }
 
                 }
-                /* one is NaN, assume difference */
-                else if ( isnan1==1 || isnan2==1)
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
                 {
                     if ( print_data(options) )
                     {
@@ -2044,8 +2074,8 @@ hsize_t diff_datum(void       *_mem1,
                         }
 
                 }
-                /* one is NaN, assume difference */
-                else if ( isnan1==1 || isnan2==1)
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
                 {
                     if ( print_data(options) )
                     {
@@ -2100,7 +2130,6 @@ hsize_t diff_datum(void       *_mem1,
             */
             if (options->d && !options->p)
             {
-
                /*-------------------------------------------------------------------------
                 * detect NaNs
                 *-------------------------------------------------------------------------
@@ -2127,8 +2156,8 @@ hsize_t diff_datum(void       *_mem1,
                     }
 
                 }
-                /* one is NaN, assume difference */
-                else if ( isnan1==1 || isnan2==1)
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
                 {
                     if ( print_data(options) )
                     {
@@ -2192,8 +2221,8 @@ hsize_t diff_datum(void       *_mem1,
                         }
 
                 }
-                /* one is NaN, assume difference */
-                else if ( isnan1==1 || isnan2==1)
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
                 {
                     if ( print_data(options) )
                     {
@@ -2258,8 +2287,8 @@ hsize_t diff_datum(void       *_mem1,
                         }
 
                 }
-                /* one is NaN, assume difference */
-                else if ( isnan1==1 || isnan2==1)
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
                 {
                     if ( print_data(options) )
                     {
@@ -2268,7 +2297,6 @@ hsize_t diff_datum(void       *_mem1,
                         parallel_print(F_FORMAT,temp1_double,temp2_double,ABS(temp1_double-temp2_double));
                     }
                     nfound++;
-
                 }
             }
 
@@ -2342,8 +2370,18 @@ hsize_t diff_datum(void       *_mem1,
                         }
                         nfound++;
                     }
-
                 } /* NaN */
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
+                {
+                    if ( print_data(options) )
+                    {
+                        print_pos(ph,0,i,acc,pos,rank,dims,obj1,obj2);
+                        parallel_print(SPACES);
+                        parallel_print(F_FORMAT,temp1_double,temp2_double,ABS(temp1_double-temp2_double));
+                    }
+                    nfound++;
+                }
             }
 
            /*-------------------------------------------------------------------------
@@ -2397,7 +2435,18 @@ hsize_t diff_datum(void       *_mem1,
                         }
 
                 } /* NaN */
-            }
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
+                {
+                    if ( print_data(options) )
+                    {
+                        print_pos(ph,0,i,acc,pos,rank,dims,obj1,obj2);
+                        parallel_print(SPACES);
+                        parallel_print(F_FORMAT,temp1_double,temp2_double,ABS(temp1_double-temp2_double));
+                    }
+                    nfound++;
+                }
+           }
 
            /*-------------------------------------------------------------------------
             * -d and -p
@@ -2451,6 +2500,17 @@ hsize_t diff_datum(void       *_mem1,
                         }
 
                 } /* NaN */
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
+                {
+                    if ( print_data(options) )
+                    {
+                        print_pos(ph,0,i,acc,pos,rank,dims,obj1,obj2);
+                        parallel_print(SPACES);
+                        parallel_print(F_FORMAT,temp1_double,temp2_double,ABS(temp1_double-temp2_double));
+                    }
+                    nfound++;
+                }
             }
 
            /*-------------------------------------------------------------------------
@@ -2942,8 +3002,8 @@ hsize_t diff_float(unsigned char *mem1,
                     nfound++;
                 }
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3014,8 +3074,8 @@ hsize_t diff_float(unsigned char *mem1,
                         nfound++;
                     }
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3089,8 +3149,8 @@ hsize_t diff_float(unsigned char *mem1,
                     }
 
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3179,7 +3239,6 @@ hsize_t diff_double(unsigned char *mem1,
     int         isnan1=0;
     int         isnan2=0;
 
-
  /*-------------------------------------------------------------------------
   * -d and !-p
   *-------------------------------------------------------------------------
@@ -3216,8 +3275,8 @@ hsize_t diff_double(unsigned char *mem1,
                     nfound++;
                 }
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3288,8 +3347,8 @@ hsize_t diff_double(unsigned char *mem1,
                         nfound++;
                     }
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3363,8 +3422,8 @@ hsize_t diff_double(unsigned char *mem1,
                     }
 
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3499,8 +3558,8 @@ hsize_t diff_ldouble(unsigned char *mem1,
                     nfound++;
                 }
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3571,8 +3630,8 @@ hsize_t diff_ldouble(unsigned char *mem1,
                         nfound++;
                     }
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3646,8 +3705,8 @@ hsize_t diff_ldouble(unsigned char *mem1,
                     }
 
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -6076,13 +6135,13 @@ static void set_comp_members(hid_t tid, mcomp_t *members)
     members->flags = HDcalloc(members->n, sizeof(unsigned char));
     members->offsets = HDcalloc(members->n, sizeof(size_t));
     members->m = HDcalloc(members->n, sizeof(mcomp_t *));
-   
-    for (i=0; i< members->n; i++) 
+
+    for (i=0; i< members->n; i++)
     {
          members->ids[i] = H5Tget_member_type( tid, i );
          members->flags[i] = H5Tis_variable_str( members->ids[i] );
          members->offsets[i] = H5Tget_member_offset( tid, i );
-         if (H5Tget_class( members->ids[i])==H5T_COMPOUND) 
+         if (H5Tget_class( members->ids[i])==H5T_COMPOUND)
          {
               members->m[i] = (mcomp_t *)HDmalloc(sizeof(mcomp_t));
               set_comp_members(members->ids[i], members->m[i]);
@@ -6095,16 +6154,16 @@ static void set_comp_members(hid_t tid, mcomp_t *members)
  * added to improve performance for compound datasets
  * clean and close compound members.
  */
-static void free_comp_members(mcomp_t *members) 
+static void free_comp_members(mcomp_t *members)
 {
     int i;
 
     if (!members || members->n<=0 || !members->ids)
         return;
 
-    for (i=0; i<members->n; i++) 
+    for (i=0; i<members->n; i++)
     {
-        if (members->m[i]) 
+        if (members->m[i])
         {
             free_comp_members(members->m[i]);
             HDfree(members->m[i]);

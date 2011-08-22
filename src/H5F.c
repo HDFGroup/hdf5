@@ -35,19 +35,6 @@
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 
-/* Predefined file drivers */
-#include "H5FDcore.h"		/*temporary in-memory files		*/
-#include "H5FDfamily.h"		/*family of files			*/
-#include "H5FDlog.h"            /* sec2 driver with logging, for debugging */
-#include "H5FDmpi.h"            /* MPI-based file drivers		*/
-#include "H5FDmulti.h"		/*multiple files partitioned by mem usage */
-#include "H5FDsec2.h"		/*Posix unbuffered I/O			*/
-#include "H5FDstdio.h"		/* Standard C buffered I/O		*/
-#ifdef H5_HAVE_WINDOWS
-#include "H5FDwindows.h"        /* Windows buffered I/O     */
-#endif
-#include "H5FDdirect.h"         /*Linux direct I/O			*/
-
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
 typedef struct H5F_olist_t {
     H5I_type_t obj_type;        /* Type of object to look for */
@@ -936,7 +923,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
          *      merged into the trunk and journaling is enabled, at least until
          *      we make it work. - QAK)
          */
-        f->shared->use_tmp_space = !(IS_H5FD_MPI(f));
+        f->shared->use_tmp_space = !H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI);
 
 	/*
 	 * Create a metadata cache with the specified number of elements.
@@ -3012,4 +2999,150 @@ H5Fclear_elink_file_cache(hid_t file_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclear_elink_file_cache() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_grp_btree_shared
+ *
+ * Purpose:     Set the grp_btree_shared field with a valid ref-count pointer.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              7/19/11
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_grp_btree_shared(H5F_t *f, H5RC_t *rc)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_set_grp_btree_shared)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(rc);
+
+    f->shared->grp_btree_shared = rc;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_grp_btree_shared() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_sohm_addr
+ *
+ * Purpose:     Set the sohm_addr field with a new value.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              7/20/11
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_sohm_addr(H5F_t *f, haddr_t addr)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_set_sohm_addr)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    f->shared->sohm_addr = addr;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_sohm_addr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_sohm_vers
+ *
+ * Purpose:     Set the sohm_vers field with a new value.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              7/20/11
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_sohm_vers(H5F_t *f, unsigned vers)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_set_sohm_vers)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    f->shared->sohm_vers = vers;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_sohm_vers() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_sohm_nindexes
+ *
+ * Purpose:     Set the sohm_nindexes field with a new value.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              7/20/11
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_sohm_nindexes(H5F_t *f, unsigned nindexes)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_set_sohm_nindexes)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    f->shared->sohm_nindexes = nindexes;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_sohm_nindexes() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_store_msg_crt_idx
+ *
+ * Purpose:     Set the store_msg_crt_idx field with a new value.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              7/20/11
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_set_store_msg_crt_idx)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    f->shared->store_msg_crt_idx = flag;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_store_msg_crt_idx() */
 

@@ -523,6 +523,10 @@ H5Dget_type(hid_t dset_id)
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
+    /* Patch the datatype's "top level" file pointer */
+    if(H5T_patch_file(dset->shared->type, dset->oloc.file) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to patch datatype's file pointer")
+
     /* Copy the dataset's datatype */
     if(NULL == (dt = H5T_copy(dset->shared->type, H5T_COPY_REOPEN)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy datatype")

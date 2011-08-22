@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5'
-#############################
 HDF5 "tdset.h5" {
 DATASET "dset1" {
    DATATYPE  H5T_STD_I32BE

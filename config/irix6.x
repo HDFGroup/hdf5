@@ -171,26 +171,6 @@ hdf5_cv_ulong_to_fp_bottom_bit_accurate=${hdf5_cv_ulong_to_fp_bottom_bit_accurat
 hdf5_cv_ldouble_to_integer_accurate=${hdf5_cv_ldouble_to_integer_accurate='no'}
 hdf5_cv_integer_to_ldouble_accurate=${hdf5_cv_integer_to_ldouble_accurate='no'}
 
-# For IRIX 6.5, any version that is older than MIPSpro 7.3.1.3m, 
-# the MPI derived datatype is not working.
-# Versions 7.4.2m or newer work.
-# Up to version 7.4.4m, it cannot handle collective IO with non-contribution 
-# of some processes.
-# Fix $hdf5_cv_mpi_complex_derived_datatype_works if it is not set and is using cc.
-if [ -z "$hdf5_cv_mpi_complex_derived_datatype_works" -a $CC_BASENAME = cc ]; then
-    ccversion=`$CC -version 2>&1 | sed -e 's/.*Version //p'`
-    ccversion1=`echo $ccversion | cut -f1 -d.`
-    ccversion2=`echo $ccversion | cut -f2 -d.`
-    # Assume all versions 7.4.* or newer are okay
-    # and assume ccversion2 is never larger than 99.
-    ccversionval=`expr $ccversion1 \* 100 + $ccversion2`
-    hdf5_cv_mpi_special_collective_io_works='no'
-    if [ $ccversionval -lt 704 ]; then
-        hdf5_cv_mpi_complex_derived_datatype_works='no'
-#        hdf5_cv_mpi_special_collective_io_works='no'
-    fi
-fi
-
 # Set flag to generate alternate code for H5V_log2_gen, to avoid
 # problems with the MIPSpro compiler 7.30 and IRIX64 6.5 (ie. other
 # combinations might work, but haven't been tested)

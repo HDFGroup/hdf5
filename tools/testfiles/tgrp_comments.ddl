@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tgrp_comments.h5'
-#############################
 HDF5 "tgrp_comments.h5" {
 GROUP "/" {
    GROUP "g1" {

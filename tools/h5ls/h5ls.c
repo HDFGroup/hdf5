@@ -846,15 +846,15 @@ display_enum_type(hid_t type, int ind)
             for (j=0; j<dst_size; j++)
                 printf("%02x", value[i*dst_size+j]);
         } else if (H5T_SGN_NONE==H5Tget_sign(native)) {
- 	    /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
- 	     *strangely, unless use another pointer "copy".*/
- 	    copy = value+i*dst_size;
+       /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
+        *strangely, unless use another pointer "copy".*/
+       copy = value+i*dst_size;
             HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"u",
             *((unsigned long long*)((void*)copy)));
         } else {
- 	    /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
- 	     *strangely, unless use another pointer "copy".*/
- 	    copy = value+i*dst_size;
+       /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
+        *strangely, unless use another pointer "copy".*/
+       copy = value+i*dst_size;
             HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"d",
             *((long long*)((void*)copy)));
         }
@@ -1838,10 +1838,11 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
              * H5Oget_comment again with the correct value.
              * If the call to H5Oget_comment returned an error, skip this block */
             if (cmt_bufsize > 0) {
-                comment = (char *)HDmalloc((size_t)cmt_bufsize); /* new_size including null terminator */
+                comment = (char *)HDmalloc((size_t)cmt_bufsize + 1); /* new_size including null terminator */
                 if(comment) {
                     cmt_bufsize = H5Oget_comment(obj, comment, cmt_bufsize);
                     if(cmt_bufsize > 0) {
+                        comment[cmt_bufsize] = 0;
                         printf("    %-10s \"", "Comment:");
                         display_string(stdout, comment, FALSE);
                         puts("\"");

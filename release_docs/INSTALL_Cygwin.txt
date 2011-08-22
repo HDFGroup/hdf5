@@ -181,7 +181,7 @@ Install HDF5 on Cygwin
        example, if users want to configure HDF5 C/C++/Fortran 
        library with szip library enabled, with zlib library at 
        /cygdrive/c/usr/, and install HDF5 into directory 
-       /cygdrive/c/hdf5 using gcc/g++ as C/C++ compiler and g95
+       /cygdrive/c/hdf5 using gcc/g++ as C/C++ compiler and gfortran
        as fortran compiler
      
            $ ./configure

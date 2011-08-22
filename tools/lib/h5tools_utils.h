@@ -32,6 +32,12 @@ extern "C" {
 #define PRINT_DATA_MAX_SIZE 	512
 #define OUTBUFF_SIZE 		(PRINT_DATA_MAX_SIZE*4)
 
+H5TOOLS_DLLVAR int  g_nTasks;
+H5TOOLS_DLLVAR unsigned char g_Parallel;
+H5TOOLS_DLLVAR char    outBuff[];
+H5TOOLS_DLLVAR int  outBuffOffset;
+H5TOOLS_DLLVAR FILE *   overflow_file;
+
 /*
  * begin get_option section
  */
@@ -117,6 +123,7 @@ H5TOOLS_DLL void     print_version(const char *progname);
 H5TOOLS_DLL void     parallel_print(const char* format, ... );
 H5TOOLS_DLL void     error_msg(const char *fmt, ...);
 H5TOOLS_DLL void     warn_msg(const char *fmt, ...);
+H5TOOLS_DLL void     help_ref_msg(FILE *output);
 H5TOOLS_DLL void     free_table(table_t *table);
 #ifdef H5DUMP_DEBUG
 H5TOOLS_DLL void     dump_tables(find_objs_t *info)

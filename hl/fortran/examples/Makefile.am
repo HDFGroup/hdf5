@@ -31,10 +31,10 @@ endif
 # be run.
 # We don't tell automake about these programs so that it doesn't try to
 # compile them with the regular fortran compiler.
-TEST_PROG=exlite
+TEST_PROG=exlite ex_ds1
 
 # List files to be installed here
-INSTALL_FILES= exlite.f90
+INSTALL_FILES= exlite.f90 ex_ds1.f90
 INSTALL_SCRIPT_FILES = run-hlfortran-ex.sh
 
 # Mark this directory as part of the Fortran API (this affects output

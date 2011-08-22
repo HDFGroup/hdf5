@@ -1,96 +1,97 @@
 <-p 0x1> is not a valid option
 usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]] 
-  file1                    File name of the first HDF5 file
-  file2                    File name of the second HDF5 file
-  [obj1]                   Name of an HDF5 object, in absolute path
-  [obj2]                   Name of an HDF5 object, in absolute path
+  file1             File name of the first HDF5 file
+  file2             File name of the second HDF5 file
+  [obj1]            Name of an HDF5 object, in absolute path
+  [obj2]            Name of an HDF5 object, in absolute path
 
   OPTIONS
-   -h, --help              Print a usage message and exit.
-   -V, --version           Print version number and exit.
-   -r, --report            Report mode. Print differences.
-   -v --verbose            Verbose mode. Print differences information and list
-                           of objects.
-   -vN --verbose=N         Verbose mode with level. Print differences and list
-                           of objects.
-                           Level of detail depends on value of N:
-                            0 : Identical to '-v' or '--verbose'.
-                            1 : All level 0 information plus one-line attribute
-                                status summary.
-                            2 : All level 1 information plus extended attribute
-                                status report.
-   -q, --quiet             Quiet mode. Do not produce output.
-   --follow-symlinks       Follow symbolic links (soft links and external links)
-                           and compare the links' target objects.
-                           If symbolic link(s) with the same name exist in the
-                           files being compared, then determine whether the 
-                           target of each link is an existing object (dataset,
-                           group, or named datatype) or the link is a dangling
-                           link (a soft or external link pointing to a target
-                           object that does not yet exist).
-                           - If both symbolic links are dangling links, they
-                             are treated as being the same; by default, h5diff
-                             returns an exit code of 0. If, however, 
-                             --no-dangling-links is used with --follow-symlinks,
-                             this situation is treated as an error and h5diff 
-                             returns an exit code of 2.
-                           - If only one of the two links is a dangling link,
-                             they are treated as being different and h5diff 
-                             returns an exit code of 1. If, however, 
-                             --no-dangling-links is used with --follow-symlinks,
-                             this situation is treated as an error and h5diff 
-                             returns an exit code of 2.
-                           - If both symbolic links point to existing objects,
-                             h5diff compares the two objects.
-                           If any symbolic link specified in the call to h5diff
-                           does not exist, h5diff treats it as an error and
-                           returns an exit code of 2.
-   --no-dangling-links     Must be used with --follow-symlinks option;
-                           otherwise, h5diff shows error message and returns
-                           an exit code of 2.
-                           Check for any symbolic links (soft links or external
-                           links) that do not resolve to an existing object
-                           (dataset, group, or named datatype).  If any
-                           dangling link is found, this situation is treated as
-                           an error and h5diff returns an exit code of 2.
-   -c, --compare           List objects that are not comparable
-   -N, --nan               Avoid NaNs detection
-   -n C, --count=C         Print differences up to C number, C is a positive
-                           integer.
-   -d D, --delta=D         Print difference if (|a-b| > D), D is a positive
-                           number.
-   -p R, --relative=R      Print difference if (|(a-b)/b| > R), R is a positive
-                           number.
-   --use-system-epsilon    Print difference if (|a-b| > EPSILON), EPSILON is
-                           a system epsilon value.
-                           If the system epsilon is not defined, the below
-                           one of the following predefined values will be used:
-                             FLT_EPSILON = 1.19209E-07 for floating-point type
-                             DBL_EPSILON = 2.22045E-16 for double percision type
-   --exclude-path "path"   Exclude the specified path to an object when
-                           comparing files or groups. If a group is excluded,
-                           all member objects will also be excluded.
-                           The specified path is excluded wherever it occurs.
-                           This flexibility enables the same option to exclude
-                           either objects that exist only in one file or
-                           common objects that are known to differ.
+   -h, --help
+         Print a usage message and exit.
+   -V, --version
+         Print version number and exit.
+   -r, --report
+         Report mode. Print differences.
+   -v --verbose
+         Verbose mode. Print differences information and list of objects.
+   -vN --verbose=N
+         Verbose mode with level. Print differences and list of objects.
+         Level of detail depends on value of N:
+          0 : Identical to '-v' or '--verbose'.
+          1 : All level 0 information plus one-line attribute
+              status summary.
+          2 : All level 1 information plus extended attribute
+              status report.
+   -q, --quiet
+         Quiet mode. Do not produce output.
+   --follow-symlinks
+         Follow symbolic links (soft links and external links and compare the)
+         links' target objects.
+         If symbolic link(s) with the same name exist in the files being
+         compared, then determine whether the target of each link is an existing
+         object (dataset, group, or named datatype) or the link is a dangling
+         link (a soft or external link pointing to a target object that does
+         not yet exist).
+         - If both symbolic links are dangling links, they are treated as being
+           the same; by default, h5diff returns an exit code of 0.
+           If, however, --no-dangling-links is used with --follow-symlinks,
+           this situation is treated as an error and h5diff returns an
+           exit code of 2.
+         - If only one of the two links is a dangling link,they are treated as
+           being different and h5diff returns an exit code of 1.
+           If, however, --no-dangling-links is used with --follow-symlinks,
+           this situation is treated as an error and h5diff returns an
+           exit code of 2.
+         - If both symbolic links point to existing objects, h5diff compares the
+           two objects.
+         If any symbolic link specified in the call to h5diff does not exist,
+         h5diff treats it as an error and returns an exit code of 2.
+   --no-dangling-links
+         Must be used with --follow-symlinks option; otherwise, h5diff shows
+         error message and returns an exit code of 2.
+         Check for any symbolic links (soft links or external links) that do not
+         resolve to an existing object (dataset, group, or named datatype).
+         If any dangling link is found, this situation is treated as an error
+         and h5diff returns an exit code of 2.
+   -c, --compare
+         List objects that are not comparable
+   -N, --nan
+         Avoid NaNs detection
+   -n C, --count=C
+         Print differences up to C. C must be a positive integer.
+   -d D, --delta=D
+         Print difference if (|a-b| > D). D must be a positive number.
+         Can not use with '-p' or '--use-system-epsilon'.
+   -p R, --relative=R
+         Print difference if (|(a-b)/b| > R). R must be a positive number.
+         Can not use with '-d' or '--use-system-epsilon'.
+   --use-system-epsilon
+         Print difference if (|a-b| > EPSILON), EPSILON is system defined value.
+         If the system epsilon is not defined,one of the following predefined
+         values will be used:
+           FLT_EPSILON = 1.19209E-07 for floating-point type
+           DBL_EPSILON = 2.22045E-16 for double precision type
+         Can not use with '-p' or '-d'.
+   --exclude-path "path" 
+         Exclude the specified path to an object when comparing files or groups.
+         If a group is excluded, all member objects will also be excluded.
+         The specified path is excluded wherever it occurs.
+         This flexibility enables the same option to exclude either objects that
+         exist only in one file or common objects that are known to differ.
 
-                           When comparing files, "path" is the absolute path to
-                           the excluded object; when comparing groups, "path" is
-                           similar to the relative path from the group to the
-                           excluded object. This "path" can be taken from the
-                           first section of the output of the --verbose option.
-                           For example, if you are comparing the group /groupA
-                           in two files and you want to exclude
-                           /groupA/groupB/groupC in both files, the exclude
-                           option would read as follows:
-                             --exclude-path "/groupB/groupC"
+         When comparing files, "path" is the absolute path to the excluded;
+         object; when comparing groups, "path" is similar to the relative
+         path from the group to the excluded object. This "path" can be
+         taken from the first section of the output of the --verbose option.
+         For example, if you are comparing the group /groupA in two files and
+         you want to exclude /groupA/groupB/groupC in both files, the exclude
+         option would read as follows:
+           --exclude-path "/groupB/groupC"
 
-                           If there are multiple paths to an object, only the
-                           specified path(s) will be excluded; the comparison
-                           will include any path not explicitly excluded.
-                           This option can be used repeatedly to exclude
-                           multiple paths.
+         If there are multiple paths to an object, only the specified path(s)
+         will be excluded; the comparison will include any path not explicitly
+         excluded.
+         This option can be used repeatedly to exclude multiple paths.
 
  Modes of output:
   Default mode: print the number of differences found and where they occured

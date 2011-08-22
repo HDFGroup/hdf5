@@ -141,14 +141,18 @@ IF (BUILD_TESTING)
                   ${PROJECT_BINARY_DIR}/${resultfile}.out
                   ${PROJECT_BINARY_DIR}/${resultfile}.out.err
       )
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5MKGRP-clear-${resultfile}${resultoption} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
       ADD_TEST (
           NAME H5MKGRP-${resultfile}${resultoption}
           COMMAND $<TARGET_FILE:h5mkgrp> ${resultoption} ${PROJECT_BINARY_DIR}/../testfiles/${resultfile}.h5 ${ARGN}
       )
       SET_TESTS_PROPERTIES (H5MKGRP-${resultfile}${resultoption} PROPERTIES DEPENDS H5MKGRP-clear-${resultfile}${resultoption})
+      SET (last_test "H5MKGRP-${resultfile}${resultoption}")
       IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
         ADD_TEST (
-            NAME H5MKGRP-H5LS-${resultfile}${resultoption}
+            NAME H5MKGRP-h5ls-${resultfile}${resultoption}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
                 -D "TEST_ARGS:STRING=-v;-r;../testfiles/${resultfile}.h5"
@@ -159,7 +163,8 @@ IF (BUILD_TESTING)
                 -D "TEST_REFERENCE=${resultfile}.ls"
                 -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
         )
-        SET_TESTS_PROPERTIES (H5MKGRP-H5LS-${resultfile}${resultoption} PROPERTIES DEPENDS H5MKGRP-${resultfile}${resultoption})
+        SET_TESTS_PROPERTIES (H5MKGRP-h5ls-${resultfile}${resultoption} PROPERTIES DEPENDS H5MKGRP-${resultfile}${resultoption})
+        SET (last_test "H5MKGRP-h5ls-${resultfile}${resultoption}")
       ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
     ELSE (NOT ${resultoption} STREQUAL " ")
       ADD_TEST (
@@ -170,14 +175,18 @@ IF (BUILD_TESTING)
                   ${PROJECT_BINARY_DIR}/${resultfile}.out
                   ${PROJECT_BINARY_DIR}/${resultfile}.out.err
       )
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5MKGRP-clear-${resultfile} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
       ADD_TEST (
           NAME H5MKGRP-${resultfile}
           COMMAND $<TARGET_FILE:h5mkgrp> ${PROJECT_BINARY_DIR}/../testfiles/${resultfile}.h5 ${ARGN}
       )
       SET_TESTS_PROPERTIES (H5MKGRP-${resultfile} PROPERTIES DEPENDS H5MKGRP-clear-${resultfile})
+      SET (last_test "H5MKGRP-${resultfile}")
       IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
         ADD_TEST (
-            NAME H5MKGRP-H5LS-${resultfile}
+            NAME H5MKGRP-h5ls-${resultfile}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
                 -D "TEST_ARGS:STRING=-v;-r;../testfiles/${resultfile}.h5"
@@ -188,7 +197,8 @@ IF (BUILD_TESTING)
                 -D "TEST_REFERENCE=${resultfile}.ls"
                 -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
         )
-        SET_TESTS_PROPERTIES (H5MKGRP-H5LS-${resultfile} PROPERTIES DEPENDS H5MKGRP-${resultfile})
+        SET_TESTS_PROPERTIES (H5MKGRP-h5ls-${resultfile} PROPERTIES DEPENDS H5MKGRP-${resultfile})
+        SET (last_test "H5MKGRP-h5ls-${resultfile}")
       ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
     ENDIF (NOT ${resultoption} STREQUAL " ")
   ENDMACRO (ADD_H5_TEST resultfile resultcode resultoption)

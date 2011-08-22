@@ -110,6 +110,15 @@ CHECK_FORTRAN_FEATURE(RealIsNotDouble
   FORTRAN_DEFAULT_REAL_NOT_DOUBLE
 )
 
+CHECK_FORTRAN_FEATURE(iso_c_binding
+  "
+       PROGRAM main
+            USE iso_c_binding
+       END PROGRAM
+  "
+  FORTRAN_HAVE_ISO_C_BINDING
+)
+
 #-----------------------------------------------------------------------------
 # Add debug information (intel Fortran : JB)
 #-----------------------------------------------------------------------------

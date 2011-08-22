@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -y taindices.h5'
-#############################
 HDF5 "taindices.h5" {
 GROUP "/" {
    DATASET "1d" {

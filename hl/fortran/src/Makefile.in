@@ -94,8 +94,8 @@ am__base_list = \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5hl_fortran_la_DEPENDENCIES = $(LIBH5_HL) $(LIBH5F)
-am_libhdf5hl_fortran_la_OBJECTS = H5LTfc.lo H5IMfc.lo H5IMcc.lo \
-	H5TBfc.lo H5LTff.lo H5IMff.lo H5TBff.lo
+am_libhdf5hl_fortran_la_OBJECTS = H5DSfc.lo H5LTfc.lo H5IMfc.lo \
+	H5IMcc.lo H5TBfc.lo H5DSff.lo H5LTff.lo H5IMff.lo H5TBff.lo
 libhdf5hl_fortran_la_OBJECTS = $(am_libhdf5hl_fortran_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
@@ -216,6 +216,7 @@ F9XMODEXT = @F9XMODEXT@
 F9XMODFLAG = @F9XMODFLAG@
 F9XSUFFIXFLAG = @F9XSUFFIXFLAG@
 FC = @FC@
+FC2003 = @FC2003@
 FCFLAGS = @FCFLAGS@
 FCFLAGS_f90 = @FCFLAGS_f90@
 FCLIBS = @FCLIBS@
@@ -236,10 +237,12 @@ H5_LONE_COLON = @H5_LONE_COLON@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
+HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
+HDF_FORTRAN2003 = @HDF_FORTRAN2003@
 HID_T = @HID_T@
 HL = @HL@
 HL_FOR = @HL_FOR@
@@ -433,7 +436,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 # Add libtool shared library version numbers to the HDF5 library
 # See libtool versioning documentation online.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 71
+LT_VERS_REVISION = 79
 LT_VERS_AGE = 0
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_builddir)/hl/src \
          -I$(top_srcdir)/fortran/src -I$(top_builddir)/fortran/src
@@ -451,8 +454,8 @@ libhdf5hl_fortran_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVI
 #endif
 
 # List sources to include in the HDF5 HL Fortran library.
-libhdf5hl_fortran_la_SOURCES = H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c H5LTff.f90  \
-                H5IMff.f90 H5TBff.f90
+libhdf5hl_fortran_la_SOURCES = H5DSfc.c H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c \
+	H5DSff.f90 H5LTff.f90 H5IMff.f90 H5TBff.f90
 
 
 # HDF5 HL Fortran library depends on HDF5 HL Library and HDF5 Fortran Library.
@@ -547,6 +550,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5DSfc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IMcc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IMfc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LTfc.Plo@am__quote@
@@ -851,6 +855,7 @@ uninstall-local:
 # determining this automagically (like we do with the C files). So, when
 # doing a parallel make, some modules could be made way before the
 # modules they depend upon are actually made. *sigh*
+H5DSff.lo:          $(srcdir)/H5DSff.f90
 H5LTff.lo:          $(srcdir)/H5LTff.f90
 H5IMff.lo:          $(srcdir)/H5IMff.f90
 H5TBff.lo:          $(srcdir)/H5TBff.f90

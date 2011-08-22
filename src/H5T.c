@@ -1588,9 +1588,9 @@ H5Tcreate(H5T_class_t type, size_t size)
     FUNC_ENTER_API(H5Tcreate, FAIL)
     H5TRACE2("i", "Ttz", type, size);
 
-    /* check args */
-    if(size == 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid size")
+    /* check args. We support string (fixed-size or variable-length) now. */
+    if(size <= 0 && size != H5T_VARIABLE)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size must be positive")
 
     /* create the type */
     if(NULL == (dt = H5T_create(type, size)))
@@ -2155,8 +2155,6 @@ H5Tset_size(hid_t type_id, size_t size)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
     if(H5T_REFERENCE == dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype")
-    if(size == 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't adjust size to 0")
 
     /* Modify the datatype */
     if(H5T_set_size(dt, size) < 0)
@@ -2970,7 +2968,9 @@ done:
  *		Friday, December  5, 1997
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              19 May 2011
+ *              We support fixed size or variable-length string now.
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -2986,6 +2986,22 @@ H5T_create(H5T_class_t type, size_t size)
         case H5T_FLOAT:
         case H5T_TIME:
         case H5T_STRING:
+            {
+                H5T_t *origin_dt = NULL;
+
+		if(NULL == (origin_dt = (H5T_t *)H5I_object(H5T_C_S1)))
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, NULL, "can't get structure for string type")
+
+		/* Copy the default string datatype */
+		if(NULL == (dt = H5T_copy(origin_dt, H5T_COPY_TRANSIENT)))
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy");
+
+		/* Modify the datatype */
+		if(H5T_set_size(dt, size) < 0)
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to set size for string type")
+            }
+            break;
+
         case H5T_BITFIELD:
             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL, "type class is not appropriate - use H5Tcopy()")
 
@@ -3045,7 +3061,9 @@ H5T_create(H5T_class_t type, size_t size)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, NULL, "unknown data type class")
     } /* end switch */
 
-    dt->shared->size = size;
+    /* Set the size except VL string */
+    if(H5T_STRING != type || H5T_VARIABLE != size)
+        dt->shared->size = size;
 
     /* Set return value */
     ret_value = dt;
@@ -3594,6 +3612,11 @@ H5T_close(H5T_t *dt)
                 if(H5O_close(&dt->oloc) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close")
             } /* end if */
+            else
+                /* Free object location (i.e. "unhold" the file if appropriate)
+                 */
+                if(H5O_loc_free(&(dt->oloc)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
         } /* end if */
 
         /* Free the group hier. path since we're not calling H5T_free*/
@@ -5277,4 +5300,40 @@ H5T_set_latest_version(H5T_t *dt)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_set_latest_version() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_patch_file
+ *
+ * Purpose:     Patch the top-level file pointers contained in dt to point
+ *              to f, if dt is a committed type.  This is possible because
+ *              the top-level file pointer can be closed out from under
+ *              dt while dt is contained in the shared file's cache.
+ *
+ * Return:      SUCCEED
+ *
+ * Programmer:  Neil Fortner
+ *              Thursday, July 14, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_patch_file(H5T_t *dt, H5F_t *f)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5T_patch_file, FAIL)
+
+    /* Sanity check */
+    HDassert(dt);
+    HDassert(f);
+
+    if(H5T_STATE_OPEN == dt->shared->state || H5T_STATE_NAMED == dt->shared->state) {
+        dt->oloc.file = f;
+        dt->sh_loc.file = f;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_patch_file() */
 

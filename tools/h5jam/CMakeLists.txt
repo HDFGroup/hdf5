@@ -56,6 +56,9 @@ IF (BUILD_TESTING)
       u511.txt
       u512.txt
       u513.txt
+      h5jam-help.txt
+      h5unjam-help.txt
+      h5jam-ub-nohdf5.txt
   )
   SET (HDF5_REFERENCE_TEST_FILES
       tall.h5
@@ -92,6 +95,58 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
+  # ============================================================
+  # TEST_H5JAM_OUTPUT
+  # For the purpose to verify only output & exitcode from h5jam
+  #
+  MACRO (TEST_H5JAM_OUTPUT expectfile resultcode)
+    # If using memchecker add tests without using scripts
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (NAME H5JAM-${expectfile} COMMAND $<TARGET_FILE:h5jam> ${ARGN})
+      IF (NOT "${resultcode}" STREQUAL "0")
+        SET_TESTS_PROPERTIES (H5JAM-${expectfile} PROPERTIES WILL_FAIL "true")
+      ENDIF (NOT "${resultcode}" STREQUAL "0")
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5JAM-${expectfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5jam>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${expectfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=testfiles/${expectfile}.txt"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (TEST_H5JAM_OUTPUT)
+
+  # ============================================================
+  # TEST_H5UNJAM_OUTPUT
+  # For the purpose to verify only output & exitcode from h5unjam
+  #
+  MACRO (TEST_H5UNJAM_OUTPUT expectfile resultcode)
+    # If using memchecker add tests without using scripts
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (NAME H5JAM-UNJAM-${expectfile} COMMAND $<TARGET_FILE:h5unjam> ${ARGN})
+      IF (NOT "${resultcode}" STREQUAL "0")
+        SET_TESTS_PROPERTIES (H5JAM-UNJAM-${expectfile} PROPERTIES WILL_FAIL "true")
+      ENDIF (NOT "${resultcode}" STREQUAL "0")
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5JAM-UNJAM-${expectfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5unjam>"
+              -D "TEST_ARGS=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=${expectfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=testfiles/${expectfile}.txt"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (TEST_H5UNJAM_OUTPUT)
+
   MACRO (CLEANUP testname)
     ADD_TEST (
         NAME H5JAM-CLEANUP-${testname}-clear-objects
@@ -119,7 +174,7 @@ IF (BUILD_TESTING)
         SET_TESTS_PROPERTIES (H5JAM-CHECKFILE-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
       ENDIF (NOT "${last_test}" STREQUAL "")
       ADD_TEST (
-          NAME H5JAM-CHECKFILE-H5DUMP-${testname}
+          NAME H5JAM-CHECKFILE-H5DMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=testfiles/${expected}"
@@ -130,9 +185,9 @@ IF (BUILD_TESTING)
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5JAM-CHECKFILE-H5DUMP-${testname} PROPERTIES DEPENDS H5JAM-CHECKFILE-${testname}-clear-objects)
+      SET_TESTS_PROPERTIES (H5JAM-CHECKFILE-H5DMP-${testname} PROPERTIES DEPENDS H5JAM-CHECKFILE-${testname}-clear-objects)
       ADD_TEST (
-          NAME H5JAM-CHECKFILE-H5DUMP_CMP-${testname}
+          NAME H5JAM-CHECKFILE-H5DMP_CMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${actual}"
@@ -143,8 +198,8 @@ IF (BUILD_TESTING)
               -D "TEST_REFERENCE=${expected}.new"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5JAM-CHECKFILE-H5DUMP_CMP-${testname} PROPERTIES DEPENDS H5JAM-CHECKFILE-H5DUMP-${testname})
-      SET (last_test "H5JAM-CHECKFILE-H5DUMP_CMP-${testname}")
+      SET_TESTS_PROPERTIES (H5JAM-CHECKFILE-H5DMP_CMP-${testname} PROPERTIES DEPENDS H5JAM-CHECKFILE-H5DMP-${testname})
+      SET (last_test "H5JAM-CHECKFILE-H5DMP_CMP-${testname}")
     ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO(CHECKFILE testname expected actual)
 
@@ -309,6 +364,15 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
+#-------------------------------
+# Testing h5jam
+#-------------------------------
+  # help page
+  TEST_H5JAM_OUTPUT(h5jam-help 0 -h)
+
+  # don't allow HDF5 format file as an user block file
+  TEST_H5JAM_OUTPUT(h5jam-ub-nohdf5 1 -i testfiles/tall.h5 -u testfiles/tall.h5 -o tall-tmp.h5)
+
   JAMTEST (tall_u10 u10.txt tall.h5 ta2.h5)
   CHECKFILE (tall_u10 tall.h5 ta2.h5)
 #  CLEANUP (tall_u10 ta2.h5)
@@ -421,6 +485,12 @@ IF (BUILD_TESTING)
   JAMTEST (N_twithub513_u513_c u513.txt tay9.h5 NONE --clobber)
   CHECKFILE (N_twithub513_u513_c tall.h5 tay9.h5)
 #  CLEANUP (N_twithub513_u513_c tay9.h5)
+
+#-------------------------------
+# Testing h5unjam
+#-------------------------------
+  # help page
+  TEST_H5UNJAM_OUTPUT(h5unjam-help 0 -h)
 
   SETUP (twithub_tall twithub.h5 tai1.h5)
   UNJAMTEST (twithub_tall tai1.h5 o10.txt taa1.h5)

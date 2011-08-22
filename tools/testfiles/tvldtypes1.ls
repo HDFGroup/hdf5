@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -w80 -r -d tvldtypes1.h5'
-#############################
 /                        Group
 /Dataset1.0              Dataset {4}
     Data:

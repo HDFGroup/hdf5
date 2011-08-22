@@ -146,10 +146,9 @@ H5L_build_name(char *prefix, char *file_name, char **full_name/*out*/)
 
     /* Copy the prefix into the buffer */
     HDstrcpy(*full_name, prefix);
-#ifndef H5_VMS
+
     if (!CHECK_DELIMITER(prefix[prefix_len-1]))
         HDstrcat(*full_name, DIR_SEPS);
-#endif
 
     /* Add the external link's filename to the prefix supplied */
     HDstrcat(*full_name, file_name);

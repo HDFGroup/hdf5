@@ -30,11 +30,17 @@
 
 /* include the pthread header */
 #ifdef H5_HAVE_THREADSAFE
+ #ifdef _WIN32
+  #ifndef H5_HAVE_WIN_THREADS
 #ifdef H5_HAVE_PTHREAD_H
 #include <pthread.h>
-#else /* H5_HAVE_PTHREAD_H */
-#define H5_HAVE_WIN_THREADS
 #endif /* H5_HAVE_PTHREAD_H */
+  #endif /* H5_HAVE_WIN_THREADS */
+ #else /* _WIN32 */
+  #ifdef H5_HAVE_PTHREAD_H
+   #include <pthread.h>
+  #endif /* H5_HAVE_PTHREAD_H */
+ #endif /* _WIN32 */
 #endif /* H5_HAVE_THREADSAFE */
 
 /*
@@ -1475,13 +1481,13 @@ extern char *strdup(const char *s);
 
 /* OpenVMS pathname: <disk name>$<partition>:[path]<file name>
  *     i.g. SYS$SYSUSERS:[LU.HDF5.SRC]H5system.c */
-#define		DIR_SEPC	'.'
-#define		DIR_SEPS	"."
+#define         DIR_SEPC        ']'
+#define         DIR_SEPS        "]"
 #define         CHECK_DELIMITER(SS)             (SS == DIR_SEPC)
 #define         CHECK_ABSOLUTE(NAME)            (strrchr(NAME, ':') && strrchr(NAME, '['))
-#define 	CHECK_ABS_DRIVE(NAME)           (0)
-#define 	CHECK_ABS_PATH(NAME)    	(0)
-#define         GET_LAST_DELIMITER(NAME, ptr)   ptr = strrchr(NAME, ']');
+#define         CHECK_ABS_DRIVE(NAME)           (0)
+#define         CHECK_ABS_PATH(NAME)            (0)
+#define         GET_LAST_DELIMITER(NAME, ptr)   ptr = strrchr(NAME, DIR_SEPC);
 
 #else
 

@@ -20,8 +20,16 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     error_test       #uses runTest.cmake
     err_compat       #uses runTest.cmake
     links_env        #uses runTest.cmake
+    h5test-clear-testhdf5-objects
     h5test-clear-objects
-    h5perform-clear-objects
+    h5test-clear-cache-objects
+    h5test-clear-cache_api-objects
+    h5test-clear-cache_tagging-objects
+    h5test-clear-ttsafe-objects
+    h5test-clear-err_compat-objects
+    h5test-clear-error_test-objects
+    h5test-clear-links_env-objects
+    PERFORM_h5perform-clear-objects
     hl_test-clear-objects
     hl_fortran_test-clear-objects
     ######### tools/h5copy #########
@@ -41,22 +49,6 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP-XML-clearall-objects
     ######### tools/h5import #########
     H5IMPORT-clear-objects
-    H5IMPORT-ASCII_F32-clear-objects
-    H5IMPORT-ASCII_UI16-clear-objects
-    H5IMPORT-ASCII_UI32-clear-objects
-    H5IMPORT-ASCII_I8-clear-objects
-    H5IMPORT-ASCII_I16-clear-objects
-    H5IMPORT-ASCII_I32-clear-objects
-    H5IMPORT-ASCII_F64_R1-clear-objects
-    H5IMPORT-BINARY_I8_EOF-clear-objects
-    H5IMPORT-STR-clear-objects
-    H5IMPORT-BINARY_UI32-clear-objects
-    H5IMPORT-BINARY_UI16-clear-objects
-    H5IMPORT-BINARY_I32-clear-objects
-    H5IMPORT-BINARY_I8-clear-objects
-    H5IMPORT-BINARY_I16-clear-objects
-    H5IMPORT-BINARY_F64-clear-objects
-    H5IMPORT-ASCII_F64-clear-objects
     ######### tools/h5jam #########
     H5JAM-SETUP-N_twithub_u10_c-clear-objects
     H5JAM-SETUP-N_twithub_u10_c
@@ -222,40 +214,40 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5MKGRP_CMP-clear-h5mkgrp_version
     H5MKGRP-clear-h5mkgrp_single
     H5MKGRP-h5mkgrp_single                              #uses runTest.cmake
-    H5MKGRP-H5LS-h5mkgrp_single                         #uses runTest.cmake
+    H5MKGRP-h5ls-h5mkgrp_single                         #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_single-v
     H5MKGRP-h5mkgrp_single-v                            #uses runTest.cmake
-    H5MKGRP-H5LS-h5mkgrp_single-v                       #uses runTest.cmake
+    H5MKGRP-h5ls-h5mkgrp_single-v                       #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_single-p
     H5MKGRP-h5mkgrp_single-p                            #uses runTest.cmake
-    H5MKGRP-H5LS-h5mkgrp_single-p                       #uses runTest.cmake
+    H5MKGRP-h5ls-h5mkgrp_single-p                       #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_single_latest-l
     H5MKGRP-h5mkgrp_single_latest-l                     #uses runTest.cmake
-    H5MKGRP-H5LS-h5mkgrp_single_latest-l                #uses runTest.cmake
+    H5MKGRP-h5ls-h5mkgrp_single_latest-l                #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_several
     H5MKGRP-h5mkgrp_several                             #uses runTest.cmake
-    H5MKGRP-H5LS-h5mkgrp_several                        #uses runTest.cmake
+    H5MKGRP-h5ls-h5mkgrp_several                        #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_several-v
     H5MKGRP-h5mkgrp_several-v                           #uses runTest.cmake
-    H5MKGRP-H5LS-h5mkgrp_several-v                      #uses runTest.cmake
+    H5MKGRP-h5ls-h5mkgrp_several-v                      #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_several-p
     H5MKGRP-h5mkgrp_several-p                           #uses runTest.cmake
-    H5MKGRP-H5LS-h5mkgrp_several-p                      #uses runTest.cmake
+    H5MKGRP-h5ls-h5mkgrp_several-p                      #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_several_latest-l
     H5MKGRP-h5mkgrp_several_latest-l                    #uses runTest.cmake
-    H5MKGRP-H5LS-h5mkgrp_several_latest-l               #uses runTest.cmake
+    H5MKGRP-h5ls-h5mkgrp_several_latest-l               #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_nested-p
     H5MKGRP-h5mkgrp_nested-p                            #uses runTest.cmake
-    H5MKGRP-H5LS-h5mkgrp_nested-p                       #uses runTest.cmake
+    H5MKGRP-h5ls-h5mkgrp_nested-p                       #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_nested_latest-lp
     H5MKGRP-h5mkgrp_nested_latest-lp                    #uses runTest.cmake
-    H5MKGRP-H5LS-h5mkgrp_nested_latest-lp               #uses runTest.cmake
+    H5MKGRP-h5ls-h5mkgrp_nested_latest-lp               #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_nested_mult-p
     H5MKGRP-h5mkgrp_nested_mult-p                       #uses runTest.cmake
-    H5MKGRP-H5LS-h5mkgrp_nested_mult-p                  #uses runTest.cmake
+    H5MKGRP-h5ls-h5mkgrp_nested_mult-p                  #uses runTest.cmake
     H5MKGRP-clear-h5mkgrp_nested_mult_latest-lp
     H5MKGRP-h5mkgrp_nested_mult_latest-lp               #uses runTest.cmake
-    H5MKGRP-H5LS-h5mkgrp_nested_mult_latest-lp          #uses runTest.cmake
+    H5MKGRP-h5ls-h5mkgrp_nested_mult_latest-lp          #uses runTest.cmake
     ######### examples #########
     EXAMPLES-clear-objects
     cpp_ex-clear-objects

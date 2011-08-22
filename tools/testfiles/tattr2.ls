@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -w80 -v -S tattr2.h5'
-#############################
 Opened "tattr2.h5" with sec2 driver.
 dset                     Dataset {2/2}
     Attribute: array     {2}

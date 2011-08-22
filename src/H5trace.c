@@ -2206,6 +2206,62 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                 } /* end else */
                 break;
 
+            case 'U':
+                switch(type[1]) {
+                    case 'l':
+                        if(ptr) {
+                            if(vp) {
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                                if(asize_idx >= 0 && asize[asize_idx] >= 0) {
+                                    unsigned long *p = (unsigned long *)vp;
+
+                                    fprintf(out, " {");
+                                    for(i = 0; i < asize[asize_idx]; i++)
+                                        HDfprintf(out, "%s%lu", i?", ":"", p[i]);
+                                    fprintf(out, "}");
+                                } /* end if */
+                            } /* end if */
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            unsigned long iul = va_arg(ap, unsigned long); /*lint !e732 Loss of sign not really occuring */
+
+                            fprintf(out, "%lu", iul);
+                            asize[argno] = iul;
+                        } /* end else */
+                        break;
+
+                    case 'L':
+                        if(ptr) {
+                            if(vp) {
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                                if(asize_idx >= 0 && asize[asize_idx] >= 0) {
+                                    unsigned long long *p = (unsigned long long *)vp;
+
+                                    fprintf(out, " {");
+                                    for(i = 0; i < asize[asize_idx]; i++)
+                                        HDfprintf(out, "%s%llu", i?", ":"", p[i]);
+                                    fprintf(out, "}");
+                                } /* end if */
+                            } /* end if */
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            unsigned long long iull = va_arg(ap, unsigned long long); /*lint !e732 Loss of sign not really occuring */
+
+                            fprintf(out, "%llu", iull);
+                            asize[argno] = iull;
+                        } /* end else */
+                        break;
+
+                    default:
+                        fprintf (out, "BADTYPE(U%c)", type[1]);
+                        goto error;
+                } /* end switch */
+                break;
+
             case 'x':
                 if(ptr) {
                     if(vp) {

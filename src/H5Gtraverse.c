@@ -23,15 +23,21 @@
  *
  *-------------------------------------------------------------------------
  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 
 
-/* Packages needed by this file... */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* File access				*/
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs					*/
@@ -40,7 +46,15 @@
 #include "H5Ppublic.h"		/* Property Lists			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
-/* Private typedefs */
+
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* User data for path traversal routine */
 typedef struct {
@@ -52,11 +66,15 @@ typedef struct {
     hbool_t exists;             /* Indicate if object exists */
 } H5G_trav_slink_t;
 
-/* Private macros */
 
-/* Local variables */
+/********************/
+/* Package Typedefs */
+/********************/
 
-/* PRIVATE PROTOTYPES */
+
+/********************/
+/* Local Prototypes */
+/********************/
 static herr_t H5G_traverse_slink_cb(H5G_loc_t *grp_loc, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -66,10 +84,25 @@ static herr_t H5G_traverse_ud(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
 static herr_t H5G_traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc/*in,out*/, unsigned target, size_t *nlinks/*in,out*/,
     hbool_t *obj_exists, hid_t lapl_id, hid_t dxpl_id);
-static herr_t H5G_traverse_mount(H5G_loc_t *loc/*in,out*/);
 static herr_t H5G_traverse_real(const H5G_loc_t *loc, const char *name,
     unsigned target, size_t *nlinks, H5G_traverse_t op, void *op_data,
     hid_t lapl_id, hid_t dxpl_id);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -347,86 +380,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_traverse_mount
- *
- * Purpose:	If LNK is a mount point then copy the entry for the root
- *		group of the mounted file into LNK.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, October  6, 1998
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_traverse_mount(H5G_loc_t *obj_loc/*in,out*/)
-{
-    H5F_t	*parent = obj_loc->oloc->file,      /* File of object */
-            *child = NULL;                      /* Child file */
-    unsigned	lt, rt, md = 0;                 /* Binary search indices */
-    int cmp;
-    H5O_loc_t	*oloc = NULL;           /* Object location for mount points */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_traverse_mount, FAIL)
-
-    /* Sanity check */
-    HDassert(obj_loc);
-
-    /*
-     * The loop is necessary because we might have file1 mounted at the root
-     * of file2, which is mounted somewhere in file3.
-     */
-    do {
-	/*
-	 * Use a binary search to find the potential mount point in the mount
-	 * table for the parent
-	 */
-	lt = 0;
-	rt = parent->shared->mtab.nmounts;
-	cmp = -1;
-	while(lt < rt && cmp) {
-	    md = (lt + rt) / 2;
-	    oloc = H5G_oloc(parent->shared->mtab.child[md].group);
-	    cmp = H5F_addr_cmp(obj_loc->oloc->addr, oloc->addr);
-	    if(cmp < 0)
-		rt = md;
-	    else
-		lt = md + 1;
-	} /* end while */
-
-	/* Copy root info over to ENT */
-    if(0 == cmp) {
-        /* Get the child file */
-        child = parent->shared->mtab.child[md].file;
-
-        /* Get the location for the root group in the child's file */
-        oloc = H5G_oloc(child->shared->root_grp);
-
-        /* Release the mount point */
-        if(H5O_loc_free(obj_loc->oloc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to free object location")
-
-        /* Copy the entry for the root group */
-        if(H5O_loc_copy(obj_loc->oloc, oloc, H5_COPY_DEEP) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "unable to copy object location")
-
-        /* In case the shared root group info points to a different file handle
-         * than the child, modify obj_loc */
-        obj_loc->oloc->file = child;
-
-        /* Switch to child's file */
-        parent = child;
-    } /* end if */
-    } while(!cmp);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_traverse_mount() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5G_traverse_special
  *
  * Purpose:	Handle traversing special link situations
@@ -493,7 +446,7 @@ H5G_traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
      */
     if(H5F_addr_defined(obj_loc->oloc->addr) &&
             (0 == (target & H5G_TARGET_MOUNT) || !last_comp)) {
-        if(H5G_traverse_mount(obj_loc/*in,out*/) < 0)
+        if(H5F_traverse_mount(obj_loc->oloc/*in,out*/) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "mount point traversal failed")
     } /* end if */
 
@@ -786,13 +739,16 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 
                 /* Reset any non-default object header messages */
                 if(ginfo != &def_ginfo)
-                    if(H5O_msg_reset(H5O_GINFO_ID, ginfo) < 0)
+                    /* (Casting away const OK - QAK) */
+                    if(H5O_msg_reset(H5O_GINFO_ID, (void *)ginfo) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset group info message")
                 if(linfo != &def_linfo)
-                    if(H5O_msg_reset(H5O_LINFO_ID, linfo) < 0)
+                    /* (Casting away const OK - QAK) */
+                    if(H5O_msg_reset(H5O_LINFO_ID, (void *)linfo) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset link info message")
                 if(pline != &def_pline)
-                    if(H5O_msg_reset(H5O_PLINE_ID, pline) < 0)
+                    /* (Casting away const OK - QAK) */
+                    if(H5O_msg_reset(H5O_PLINE_ID, (void *)pline) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset I/O pipeline message")
             } /* end if */
             else
