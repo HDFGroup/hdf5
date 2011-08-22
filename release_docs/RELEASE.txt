@@ -113,6 +113,8 @@ Bug Fixes since HDF5-1.8.7
 
     Library
     -------
+    - Corrected mismatched function name typo of h5pget_dxpl_mpio_c and
+      h5pfill_value_defined_c. HDFFV-7641 (AKC 2011/08/22)
     - Corrected internal error in library where objects that use named
       datatypes and were accessed from two different file IDs could confuse
       the two and cause erroneous failures.  This addresses Jira issue #7638.
