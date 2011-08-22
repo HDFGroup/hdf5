@@ -281,12 +281,6 @@ New Features
             (INF is treated as an number instead of NaN) (PC -- 2009/07/28)
      - h5diff: add option "--use-system-epsilon" to print difference if (|a-b| > EPSILON)
             Change default to use strict equality (PC -- 2009/09/12)
-     - h5repack: h5repack failed to copy dataset if the layout is changed from chunked with 
-            unlimited dims to contiguous. (PC -- 2011/07/15)
-     - h5diff: "--delta" option considers two NaN of the same type are different, which is wrong
-            based on http://www.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Diff. (PC -- 2011/07/15)
-     - h5repack: added macro to handle failure in H5Dread/write when memory allocation failed
-            inside the library. (PC -- 2011/08/19)
 
     
     High-Level APIs:
@@ -568,12 +562,20 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5repack: added macro to handle failure in H5Dread/write when memory 
+          allocation failed inside the library. (PC -- 2011/08/19)
         - Fixed h5jam not to allow specifying an HDF5 formatted file as input 
           file for -u (user block file) option, because the original HDF5 file 
-          will not be accessible if allows.
+          will not be accessible if allows. HDFFV-5941 (JKM 08/15/2011)
         - Revised command help pages of h5jam and h5unjam. The descriptions
           were not up to date and some were missing. 
           HDFFV-7515 (JKM 08/15/2011)
+        - h5repack: h5repack failed to copy dataset if the layout is changed 
+          from chunked with unlimited dims to contiguous. HDFFV-7649 
+          (PC -- 2011/07/15)
+        - h5diff: "--delta" option considers two NaN of the same type are 
+          different, which is wrong based on h5diff description in Reference
+          Manual. HDFFV-7656  (PC -- 2011/07/15)
         - Fixed h5diff to display instructive error message and exit with 1
           when mutually exclusive options (-d, -p and --use-system-epsilon)
           are used together. HDFFV-7600  (JKM 07/07/2011)
