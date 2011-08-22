@@ -43,7 +43,7 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5EA, H5EAcache, H5EAdbg, H5EAdblkpage, H5EAdblock, H5EAhdr, H5EAiblock, H5EAint,"+-
         "H5EAsblock, H5EAstat, H5EAtest, H5E, H5Edeprec, H5Eint,"+-
         "H5FA, H5FAcache, H5FAdbg, H5FAdblkpage, H5FAdblock, H5FAhdr, H5FAstat, H5FAtest,"+-
-        "H5Faccum, H5F, H5Fdbg, H5Fdeprec, H5FD, H5FDcore, H5FDdirect, H5FDfamily, H5FDint, H5FDlog, "+-
+        "H5Faccum, H5F, H5Fcwfs, H5Fdbg, H5Fdeprec, H5FD, H5FDcore, H5FDdirect, H5FDfamily, H5FDint, H5FDlog, "+-
         "H5FDmpi, H5FDmpio, H5FDmpiposix, H5FDmulti, H5FDsec2, H5FDspace, H5FDstdio, H5FDwindows,"+-
         "H5Fefc, H5Ffake, H5Fio, H5FL, H5Fmount, H5Fmpi, H5FO, H5Fquery, H5FS, H5FScache, H5FSdbg,"+-
         "H5Fsfile, H5FSsection, H5FSstat, H5FStest, H5Fsuper, H5Fsuper_cache, H5Ftest,"+-
