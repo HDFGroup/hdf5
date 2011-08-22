@@ -106,10 +106,6 @@ Bug Fixes since HDF5-1.8.7
       used to build the library.
     - On linux we now link to the bsd_compat library, as per the gcc
       manual, since we define _BSD_SOURCE.
-     - h5repack: h5repack failed to copy dataset if the layout is changed from chunked with 
-            unlimited dims to contiguous. (PC -- 2011/07/15)
-     - h5diff: "--delta" option considers two NaN of the same type are different, which is wrong
-            based on http://www.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Diff. (PC -- 2011/07/15)
 
     Library
     -------
@@ -148,6 +144,12 @@ Bug Fixes since HDF5-1.8.7
       xsi:schemaLocation="http://hdfgroup.org/HDF5/XML/schema/HDF5-File 
       http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd">
       (ADB - 2011/08/10)
+    - h5repack: h5repack failed to copy dataset if the layout is changed 
+      from chunked with unlimited dims to contiguous. HDFFV-7649 
+      (PC -- 2011/07/15)
+    - h5diff: "--delta" option considers two NaN of the same type are 
+      different, which is wrong based on h5diff description in Reference
+      Manual. HDFFV-7656  (PC -- 2011/07/15)
     - Fixed h5diff to display instructive error message and exit with 1
       when mutually exclusive options (-d, -p and --use-system-epsilon)
       are used together. HDFFV-7600  (JKM 07/07/2011)
