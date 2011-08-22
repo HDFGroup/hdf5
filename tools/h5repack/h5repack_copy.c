@@ -40,13 +40,10 @@
     H5E_BEGIN_TRY {  \
         if(_fun(_did, _mtid, _msid, _fsid, _pid, _buf) < 0) {  \
             int _err_num = 0; \
-            char *_msg = NULL; \
+            char _msg[80]; \
             H5Ewalk2(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, &_err_num); \
-            _msg = H5Eget_major(_err_num); \
-            if (_msg) { \
-                error_msg("%s %s -- %s\n", #_fun, "failed", _msg); \
-                free(_msg); \
-            } \
+            H5Eget_msg(_err_num, NULL, _msg, 80); \
+            error_msg("%s %s -- %s\n", #_fun, "failed", _msg); \
             goto error; \
         } \
     } H5E_END_TRY; \
