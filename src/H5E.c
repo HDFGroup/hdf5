@@ -1338,7 +1338,8 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Epush2, FAIL)
-    H5TRACE7("e","issIuiis",err_stack,file,func,line,maj_id,min_id,fmt);
+    H5TRACE8("e", "i*s*sIuiii*s", err_stack, file, func, line, cls_id, maj_id,
+             min_id, fmt);
 
     if(err_stack == H5E_DEFAULT)
     	estack = NULL;
