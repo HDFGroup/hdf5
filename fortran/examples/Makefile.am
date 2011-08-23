@@ -42,7 +42,6 @@ INSTALL_FILES=dsetexample.f90 fileexample.f90 rwdsetexample.f90           \
      hyperslab.f90 selectele.f90 grpit.f90 refobjexample.f90              \
      refregexample.f90 mountexample.f90  compound.f90 ph5example.f90
 INSTALL_SCRIPT_FILES = run-fortran-ex.sh
-INSTALL_SCRIPT_FILES = run-fortran-ex.sh
 
 
 # Add attention tests for Fortran 2003 features
