@@ -6423,16 +6423,16 @@ $as_echo_n "checking if Fortran compiler version compatible with Fortran 2003 HD
       vers_major=`${FC} -V 2>&1 | grep 'pgf' | grep -o ' [0-9]*\.' | sed -e 's/[^0-9]//g'`
       vers_minor=`${FC} -V 2>&1 | grep 'pgf' | grep -o '\.[0-9]*\-' | sed -e 's/[^0-9]//g'`
 
-      if test -n "$vers_major" && test "$vers_major" -gt 10; then
+      if test -n "$vers_major" && test "$vers_major" -gt 11; then
         HAVE_FORTRAN_2003="yes"
         echo $HAVE_FORTRAN_2003
       else
-        if test -n "$vers_major" && test "$vers_major" = 10 &&  test -n "$vers_minor" && test "$vers_minor" -gt 4; then
+        if test -n "$vers_major" && test "$vers_major" = 11 &&  test -n "$vers_minor" && test "$vers_minor" -gt 6; then
           HAVE_FORTRAN_2003="yes"
           echo $HAVE_FORTRAN_2003
         else
           echo $HAVE_FORTRAN_2003
-          as_fn_error $? "Only The Portland Group Compiler, Version >= 10.4-0 F2003 supported; remove --enable-fortran2003" "$LINENO" 5
+          as_fn_error $? "Only The Portland Group Compiler, Version >= 11.7-0 F2003 supported; remove --enable-fortran2003" "$LINENO" 5
         fi
       fi
     fi
