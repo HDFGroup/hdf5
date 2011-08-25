@@ -529,11 +529,10 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
     AC_MSG_CHECKING([if Fortran compiler supports ISO_C_BINDING module])
 	
-    AC_TRY_COMPILE(,[
-      	 USE iso_c_binding
-    ], [AC_MSG_RESULT(yes)
-    HAVE_ISO_C_BINDING="yes"], 
-    AC_MSG_RESULT(no))
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[USE iso_c_binding])], 
+                      [AC_MSG_RESULT(yes) 
+                       HAVE_ISO_C_BINDING=[yes]],
+                      [AC_MSG_RESULT(no)])
 
     if test "X$HAVE_ISO_C_BINDING" = "Xno"; then
       AC_MSG_ERROR([Fortran compiler does not have ISO_C_BINDING; unsupported Fortran 2003 compiler, remove --enable-fortran2003])
