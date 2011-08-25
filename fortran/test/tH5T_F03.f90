@@ -202,7 +202,8 @@ SUBROUTINE test_array_compound_atomic(total_error)
   !  Check the 1st field's offset 
   CALL H5Tget_member_offset_f(tid2, 0, off, error)
   CALL check("H5Tget_member_offset_f", error, total_error)
-  CALL VERIFY("H5Tget_member_offset_f",INT(off),0, total_error)    
+  CALL VERIFY("H5Tget_member_offset_f",INT(off),0, total_error) 
+
 
   ! Check the 1st field's datatype 
   CALL H5Tget_member_type_f(tid2, 0, mtid, error)
@@ -223,7 +224,7 @@ SUBROUTINE test_array_compound_atomic(total_error)
   !  Check the 2nd field's offset 
   CALL H5Tget_member_offset_f(tid2, 1, off, error)
   CALL check("H5Tget_member_offset_f", error, total_error)
-  CALL VERIFY("H5Tget_member_offset_f",INT(off),H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%f)), total_error)    
+  CALL VERIFY("H5Tget_member_offset_f",INT(off),INT(H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%f))), total_error)    
 
   ! Check the 2nd field's datatype 
   CALL H5Tget_member_type_f(tid2, 1, mtid, error)
@@ -516,7 +517,7 @@ END SUBROUTINE test_array_compound_atomic
     !  Check the 2nd field's offset 
     CALL H5Tget_member_offset_f(tid2, 1, off, error)
     CALL check("H5Tget_member_offset_f", error, total_error)
-    CALL VERIFY("H5Tget_member_offset_f",INT(off),H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%f)), total_error) 
+    CALL VERIFY("H5Tget_member_offset_f",INT(off),INT(H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%f))), total_error) 
 
     !  Check the 2nd field's datatype 
     CALL H5Tget_member_type_f(tid2, 1, mtid, error)
@@ -550,7 +551,7 @@ END SUBROUTINE test_array_compound_atomic
     CALL H5Tget_member_offset_f(tid2, 2, off, error)
     CALL check("H5Tget_member_offset_f", error, total_error)
     CALL VERIFY("H5Tget_member_offset_f",INT(off),&
-         H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%c(1))), total_error) 
+         INT(H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%c(1)))), total_error) 
 
     !  Check the 3rd field's datatype 
     CALL H5Tget_member_type_f(tid2, 2, mtid2, error)
@@ -1916,6 +1917,7 @@ SUBROUTINE t_objref(total_error)
      !
      ! Get the length of the name and name
      !
+     name(:) = ' ' ! initialize string to blanks
      CALL H5Iget_name_f(obj, name, 80_size_t, name_size, error)
      CALL check("H5Iget_name_f",error, total_error)
      !
@@ -2102,9 +2104,10 @@ SUBROUTINE t_regref(total_error)
      !
      ! Get the object's name
      !
+     name(:) = ' ' ! initialize string to blanks
      CALL H5Iget_name_f(dset2, name, 80_size_t, size, error)
      CALL check("H5Iget_name_f",error, total_error)
-     CALL VERIFY("H5Iget_name_f", size, LEN_TRIM(name), total_error)
+     CALL VERIFY("H5Iget_name_f", INT(size), LEN_TRIM(name), total_error)
      CALL verifystring("H5Iget_name_f",name(1:size),TRIM(name), total_error)
      !
      ! Allocate space for the read buffer.
@@ -2390,7 +2393,7 @@ SUBROUTINE t_vlstring(total_error)
   CALL check("H5Dget_space_f",error, total_error)
   CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error) 
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
-  CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(1)), dim0, total_error)
+  CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(1)), INT(dim0), total_error)
 
   ALLOCATE(rdata(1:dims(1)))
 
