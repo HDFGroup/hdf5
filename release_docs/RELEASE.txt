@@ -103,9 +103,12 @@ Bug Fixes since HDF5-1.8.7
       compiled into h5dump. Please refer to the h5dump reference manual for 
       usage of the packed bits feature. (MAM - 2011/06/23)
     - Configure now uses the same flags and symbols in its tests that are
-      used to build the library.
+      used to build the library. (DER - 2011/05/24)
     - On linux we now link to the bsd_compat library, as per the gcc
-      manual, since we define _BSD_SOURCE.
+      manual, since we define _BSD_SOURCE. (DER - 2011/05/24)
+    - Fixed a bug in the bin/trace Perl script where API functions
+      that take a variable number of arguments were not processed for
+      trace statement fixup. (DER - 2011/08/25) 
 
     Library
     -------
@@ -124,7 +127,10 @@ Bug Fixes since HDF5-1.8.7
       created with v1.6 library. (SLU - 2011/6/22) 
     - When a dataset had filters and reading data failed, the error message 
       didn't say which filter isn't registered. It's fixed now. (SLU - 2011/6/3)
-  
+    - H5Epush2() now has correct trace functionality (related to the
+      bin/trace Perl script bug noted in the configure section).
+      (DER 2011/08/25)
+
     Parallel Library
     ----------------
     - None
