@@ -217,6 +217,7 @@ Notes: This short instruction is written for users who want to quickly build
       
       NOTE: We have just introduced the packaging capability and it has not been 
             extensively tested. Please send us comments on how it can be improved.
+            See NSIS note 8 of this document.
            
    6. The files that support building HDF5 with CMake are all the files in the 
       config/cmake folder, the CMakeLists.txt files in each source folder, and 
@@ -226,6 +227,15 @@ Notes: This short instruction is written for users who want to quickly build
 
    7. More information about using CMake can be found at the KitWare site, 
       www.cmake.org.
+      
+   8. Nullsoft Scriptable Install System
+      The Nullsoft Scriptable Install System (NSIS) is an open source installation 
+      system. It was created by the WinAmp authors to distribute that application, 
+      but it is now a general-purpose system which anyone might use. NSIS installers 
+      recognize /S for silent installation and /D=dir to specify the 
+      "output directory", which is where the program will be installed. These 
+      options are case-sensitive, so be sure to type them in upper case. 
+
 
 
 ************************************************************************
