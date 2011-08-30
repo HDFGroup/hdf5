@@ -214,6 +214,7 @@
 ./fortran/src/README_DEVELOPEMENT   _DO_NOT_DISTRIBUTE_
 ./fortran/src/h5fc.in
 ./fortran/src/hdf5_fortrandll.def
+./fortran/src/phdf5_fortrandll.def
 
 ./fortran/test/Makefile.am
 ./fortran/test/Makefile.in
@@ -2037,6 +2038,7 @@
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/CTest.cmake
 ./config/cmake/grepTest.cmake
+./config/cmake/prunTest.cmake
 ./config/cmake/runTest.cmake
 ./config/cmake/userblockTest.cmake
 ./config/cmake/vfdTest.cmake
