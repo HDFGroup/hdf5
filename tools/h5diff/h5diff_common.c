@@ -129,27 +129,27 @@ void parse_command_line(int argc,
                  * short opt 
                  */
                 if (!strcmp (argv[i], "-v"))  /* no arg */
-	        	{
+            {
                     opt_ind--;
                     options->m_verbose_level = 0;
                     break;
-        		}
+            }
                 else if (!strncmp (argv[i], "-v", 2))
-        		{
+            {
                     options->m_verbose_level = atoi(&argv[i][2]);
                     break;
-        		}		
+            }    
 
                 /* 
                  * long opt 
                  */
                 if (!strcmp (argv[i], "--verbose"))  /* no arg */
-	        	{
+            {
                     options->m_verbose_level = 0;
                     break;
-        		}
-        		else if ( !strncmp (argv[i], "--verbose", 9) && argv[i][9]=='=')
-        		{
+            }
+            else if ( !strncmp (argv[i], "--verbose", 9) && argv[i][9]=='=')
+            {
                     options->m_verbose_level = atoi(&argv[i][10]);
                     break;
                 }
@@ -592,35 +592,3 @@ void usage(void)
  printf("  '/g1/dset1' and '/g1/dset2' in the same file\n");
  printf("\n");
 }
-
-
-/*-------------------------------------------------------------------------
- * Function: h5diff_exit
- *
- * Purpose: dismiss phdiff worker processes and exit
- *
- * Return: none
- *
- * Programmer: Albert Cheng
- * Date: Feb 6, 2005
- *
- * Comments:
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void h5diff_exit(int status)
-{
-#ifdef H5_HAVE_PARALLEL
-    /* if in parallel mode, dismiss workers, close down MPI, then exit */
-    if((g_nTasks > 1) && g_Parallel) {
-        phdiff_dismiss_workers();
-        MPI_Barrier(MPI_COMM_WORLD);
-    }
-    if(g_Parallel)
-        MPI_Finalize();
-#endif
-    exit(status);
-}
-
