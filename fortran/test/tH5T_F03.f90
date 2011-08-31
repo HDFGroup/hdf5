@@ -2422,6 +2422,257 @@ SUBROUTINE t_vlstring(total_error)
 
 END SUBROUTINE t_vlstring
 
+SUBROUTINE t_vlstring_readwrite(total_error)
+
+! test writing and reading vl string using h5dread_f and h5dwrite_f, C_LOC and C_F_POINTER
+
+  USE HDF5
+  USE ISO_C_BINDING
+
+  IMPLICIT NONE
+
+  INTEGER, INTENT(INOUT) :: total_error
+
+  CHARACTER(LEN=19), PARAMETER :: filename  = "t_vlstringrw_F03.h5"
+  CHARACTER(LEN=3) , PARAMETER :: dataset   = "DS1"
+  CHARACTER(LEN=3) , PARAMETER :: dataset2D = "DS2"
+
+  INTEGER(HSIZE_T) , PARAMETER :: dim0 = 4
+  INTEGER(HSIZE_T) , PARAMETER :: dim1 = 2
+  INTEGER(SIZE_T)  , PARAMETER :: sdim = 7
+  INTEGER(HID_T)               :: file, filetype, space, dset ! Handles
+  INTEGER(HSIZE_T), DIMENSION(1:1) :: dims = (/dim0/)
+  INTEGER(HSIZE_T), DIMENSION(1:2) :: dims2D = (/dim1,dim0/)
+  INTEGER(HSIZE_T), DIMENSION(1:2) :: maxdims
+  
+  TYPE(C_PTR), DIMENSION(1:dim0), TARGET :: wdata
+  CHARACTER(len=7, KIND=c_char), DIMENSION(1:1), TARGET :: A = "123456"//C_NULL_CHAR
+  CHARACTER(len=5, KIND=c_char), DIMENSION(1:1), TARGET :: B = "7890"//C_NULL_CHAR
+  CHARACTER(len=4, KIND=c_char), DIMENSION(1:1), TARGET :: C = "abc"//C_NULL_CHAR
+  CHARACTER(len=3, KIND=c_char), DIMENSION(1:1), TARGET :: D = "df"//C_NULL_CHAR
+
+  TYPE(C_PTR), DIMENSION(1:dim1,1:dim0), TARGET :: wdata2D
+  
+  CHARACTER(len=7, KIND=c_char), DIMENSION(1:1), TARGET :: A11 = "A(1,1)"//C_NULL_CHAR
+  CHARACTER(len=4, KIND=c_char), DIMENSION(1:1), TARGET :: A12 = "A12"//C_NULL_CHAR
+  CHARACTER(len=5, KIND=c_char), DIMENSION(1:1), TARGET :: A13 = "A_13"//C_NULL_CHAR
+  CHARACTER(len=8, KIND=c_char), DIMENSION(1:1), TARGET :: A14 = "A_{1,4}"//C_NULL_CHAR
+  CHARACTER(len=8, KIND=c_char), DIMENSION(1:1), TARGET :: A21 = "A_{2,1}"//C_NULL_CHAR
+  CHARACTER(len=5, KIND=c_char), DIMENSION(1:1), TARGET :: A22 = "A_22"//C_NULL_CHAR
+  CHARACTER(len=4, KIND=c_char), DIMENSION(1:1), TARGET :: A23 = "A23"//C_NULL_CHAR
+  CHARACTER(len=7, KIND=c_char), DIMENSION(1:1), TARGET :: A24 = "A(2,4)"//C_NULL_CHAR
+
+  TYPE(C_PTR), DIMENSION(:), ALLOCATABLE, TARGET :: rdata ! Read buffer
+  TYPE(C_PTR), DIMENSION(:,:), ALLOCATABLE, TARGET :: rdata2D ! Read 2D buffer
+  CHARACTER(len=8, kind=c_char), POINTER :: data ! A pointer to a Fortran string
+  CHARACTER(len=8, kind=c_char), DIMENSION(1:4) :: data_w ! A pointer to a Fortran string
+  CHARACTER(len=8, kind=c_char), DIMENSION(1:dim1,1:dim0) :: data2D_w ! A pointer to a Fortran string
+  TYPE(C_PTR) :: f_ptr
+  INTEGER :: i, j, len
+  INTEGER :: error
+
+  ! Initialize array of C pointers
+
+  wdata(1) = C_LOC(A(1))
+  wdata(2) = C_LOC(B(1))
+  wdata(3) = C_LOC(C(1))
+  wdata(4) = C_LOC(D(1))
+
+  data_w(1) = A(1)
+  data_w(2) = B(1)
+  data_w(3) = C(1)
+  data_w(4) = D(1)
+
+  wdata2D(1,1) = C_LOC(A11(1))
+  wdata2D(1,2) = C_LOC(A12(1))
+  wdata2D(1,3) = C_LOC(A13(1))
+  wdata2D(1,4) = C_LOC(A14(1))
+  wdata2D(2,1) = C_LOC(A21(1))
+  wdata2D(2,2) = C_LOC(A22(1))
+  wdata2D(2,3) = C_LOC(A23(1))
+  wdata2D(2,4) = C_LOC(A24(1))
+
+  data2D_w(1,1) = A11(1)
+  data2D_w(1,2) = A12(1)
+  data2D_w(1,3) = A13(1)
+  data2D_w(1,4) = A14(1)
+  data2D_w(2,1) = A21(1)
+  data2D_w(2,2) = A22(1)
+  data2D_w(2,3) = A23(1)
+  data2D_w(2,4) = A24(1)
+
+  !
+  ! Create a new file using the default properties.
+  !
+  CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file, error)
+  CALL check("h5fcreate_f",error, total_error)
+  !
+  ! Create file and memory datatypes.  For this test we will save
+  ! the strings as C variable length strings, H5T_STRING is defined
+  ! as a variable length string.
+  !
+  CALL H5Tcopy_f(H5T_STRING, filetype, error)
+  CALL check("H5Tcopy_f",error, total_error)
+  !
+  ! Create dataspace.
+  !
+  CALL h5screate_simple_f(1, dims, space, error)
+  CALL check("h5screate_simple_f",error, total_error)
+  !
+  ! Create the dataset and write the variable-length string data to
+  ! it.
+  !
+  CALL h5dcreate_f(file, dataset, filetype, space, dset, error)
+  CALL check("h5dcreate_f",error, total_error)
+
+  f_ptr = C_LOC(wdata(1))
+  CALL h5dwrite_f(dset, filetype, f_ptr, error)
+  CALL check("h5dwrite_f",error, total_error)
+
+  !
+  ! Close and release resources.
+  !
+  CALL h5dclose_f(dset , error)
+  CALL check("h5dclose_f",error, total_error)
+  CALL h5sclose_f(space, error)
+  CALL check("h5sclose_f",error, total_error)
+
+  !
+  ! Create dataspace.
+  !
+  CALL h5screate_simple_f(2, dims2D, space, error)
+  CALL check("h5screate_simple_f",error, total_error)
+  !
+  ! Create the dataset and write the variable-length string data to
+  ! it.
+  !
+  CALL h5dcreate_f(file, dataset2D, filetype, space, dset, error)
+  CALL check("h5dcreate_f",error, total_error)
+
+  f_ptr = C_LOC(wdata2D(1,1))
+  CALL h5dwrite_f(dset, filetype, f_ptr, error)
+  CALL check("h5dwrite_f",error, total_error)
+
+  !
+  ! Close and release resources.
+  !
+  CALL h5dclose_f(dset , error)
+  CALL check("h5dclose_f",error, total_error)
+  CALL h5sclose_f(space, error)
+  CALL check("h5sclose_f",error, total_error)
+
+  CALL H5Tclose_f(filetype, error)
+  CALL check("h5tclose_f",error, total_error)
+  CALL h5fclose_f(file , error)
+  CALL check("h5fclose_f",error, total_error)
+
+  !
+  ! Now we begin the read section of this test.
+  !
+  !
+  ! Open file and dataset.
+  !
+  CALL h5fopen_f(filename, H5F_ACC_RDONLY_F, file, error)
+  CALL check("h5fopen_f",error, total_error)
+  CALL h5dopen_f(file, dataset, dset, error)
+  CALL check("h5dopen_f",error, total_error)
+  !
+  ! Get the datatype.
+  !
+  CALL H5Dget_type_f(dset, filetype, error)
+  CALL check("H5Dget_type_f",error, total_error)
+  !
+  ! Get dataspace and allocate memory for read buffer.
+  !
+  CALL H5Dget_space_f(dset, space, error)
+  CALL check("H5Dget_space_f",error, total_error)
+
+  CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error) 
+  CALL check("H5Sget_simple_extent_dims_f",error, total_error)
+  ALLOCATE(rdata(1:dims(1)))
+  !
+  ! Read the data.
+  !
+  
+  f_ptr = C_LOC(rdata(1))
+  CALL h5dread_f(dset, H5T_STRING, f_ptr, error)
+  CALL check("H5Dread_f",error, total_error)
+
+  !
+  ! Check the data.
+  !
+  DO i = 1, dims(1)
+     CALL C_F_POINTER(rdata(i), data)
+     len = 0
+     DO
+        IF(DATA(len+1:len+1).EQ.C_NULL_CHAR.OR.len.GE.8) EXIT
+        len = len + 1
+     ENDDO
+     CALL verifystring("h5dread_f",data(1:len), data_w(i)(1:len), total_error)
+  END DO
+
+  DEALLOCATE(rdata)
+  CALL h5dclose_f(dset , error)
+  CALL check("h5dclose_f",error, total_error)
+  CALL h5sclose_f(space, error)
+  CALL check("h5sclose_f",error, total_error)
+  !
+  ! Test reading in 2D dataset
+  !
+  CALL h5dopen_f(file, dataset2D, dset, error)
+  CALL check("h5dopen_f",error, total_error)
+  !
+  ! Get the datatype.
+  !
+  CALL H5Dget_type_f(dset, filetype, error)
+  CALL check("H5Dget_type_f",error, total_error)
+  !
+  ! Get dataspace and allocate memory for read buffer.
+  !
+  CALL H5Dget_space_f(dset, space, error)
+  CALL check("H5Dget_space_f",error, total_error)
+
+
+  CALL H5Sget_simple_extent_dims_f(space, dims2D, maxdims, error) 
+  CALL check("H5Sget_simple_extent_dims_f",error, total_error)
+  ALLOCATE(rdata2D(1:dims2D(1),1:dims2D(2)))
+
+  !
+  ! Read the data.
+  !
+  
+  f_ptr = C_LOC(rdata2D(1,1))
+  CALL h5dread_f(dset, H5T_STRING, f_ptr, error)
+  CALL check("H5Dread_f",error, total_error)
+
+  !
+  ! Check the data.
+  !
+  DO i = 1, dims2D(1)
+     DO j = 1, dims2D(2)
+        CALL C_F_POINTER(rdata2D(i,j), DATA)
+        len = 0
+        DO
+           IF(DATA(len+1:len+1).EQ.C_NULL_CHAR.OR.len.GE.8) EXIT
+           len = len + 1
+        ENDDO
+        CALL verifystring("h5dread_f",DATA(1:len), data2D_w(i,j)(1:len), total_error)
+     ENDDO
+  END DO
+
+  DEALLOCATE(rdata2D)
+  CALL h5dclose_f(dset , error)
+  CALL check("h5dclose_f",error, total_error)
+  CALL h5sclose_f(space, error)
+  CALL check("h5sclose_f",error, total_error)
+
+  CALL H5Tclose_f(filetype, error)
+  CALL check("h5tclose_f",error, total_error)
+  CALL h5fclose_f(file , error)
+  CALL check("h5fclose_f",error, total_error)
+
+END SUBROUTINE t_vlstring_readwrite
+
 
 SUBROUTINE t_string(total_error)
 
@@ -2529,7 +2780,7 @@ SUBROUTINE t_string(total_error)
   CALL check("H5Dread_f",error, total_error)
 
   DO i = 1, dims(1)
-     CALL verifystring("h5dopen_f",TRIM(rdata(i)),TRIM(wdata(i)) , total_error)
+     CALL verifystring("h5dread_f",TRIM(rdata(i)),TRIM(wdata(i)) , total_error)
   END DO
 
   DEALLOCATE(rdata)

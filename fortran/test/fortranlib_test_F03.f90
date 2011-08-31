@@ -109,6 +109,10 @@ PROGRAM fortranlibtest_F03
   CALL write_test_status(ret_total_error, ' Testing writing/reading variable-string datatypes, using C_LOC', total_error)
 
   ret_total_error = 0
+  CALL t_vlstring_readwrite(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing variable-string write/read, using h5dwrite_f/h5dread_f', total_error)
+
+  ret_total_error = 0
   CALL t_string(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing writing/reading string datatypes, using C_LOC', total_error)
 
