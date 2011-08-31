@@ -620,6 +620,13 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
         fi
       fi
     fi
+
+    dnl A valid F2003 compiler version was not found, return error message and exit
+    if test "X$HAVE_FORTRAN_2003" = "Xno"; then
+      echo $HAVE_FORTRAN_2003
+      AC_MSG_ERROR([Failed to find a supported F2003 compiler; remove --enable-fortran2003])
+    fi
+
   fi
 fi
 
