@@ -92,6 +92,8 @@ Support for New Platforms, Languages, and Compilers
 ===================================================
     - None
 
+     - h5repack: added macro to handle failure in H5Dread/write when memory allocation failed
+            inside the library. (PC -- 2011/08/19)
 
 Bug Fixes since HDF5-1.8.7
 ==========================
