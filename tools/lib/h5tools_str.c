@@ -647,6 +647,14 @@ h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch)
  *
  *  PVN, 28 March 2006
  *  added H5T_NATIVE_LDOUBLE case
+ * 
+ *  Raymond Lu, 2011-09-01
+ *  CLANG compiler complained about the line (about 800):
+ *  	tempint = (tempint >> packed_data_offset) & packed_data_mask;
+ *  The right shift may cause undefined behavior if PACKED_DATA_OFFSET is 
+ *  32-bit or more. For every kind of native integers, I changed the code 
+ *  to make it zero if PACKED_DATA_OFFSET is greater than or equal to the
+ *  size of integer.
  *-------------------------------------------------------------------------
  */
 char *
@@ -802,14 +810,20 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     else if (H5Tequal(type, H5T_NATIVE_INT)) {
         HDmemcpy(&tempint, vp, sizeof(int));
         if(packed_bits_num) {
-            tempint = (tempint >> packed_data_offset) & packed_data_mask;
+            if(packed_data_offset >= 8*sizeof(int))
+                tempint = 0;
+            else
+                tempint = (tempint >> packed_data_offset) & packed_data_mask;
         }
         h5tools_str_append(str, OPT(info->fmt_int, "%d"), tempint);
     }
     else if (H5Tequal(type, H5T_NATIVE_UINT)) {
         HDmemcpy(&tempuint, vp, sizeof(unsigned int));
         if(packed_bits_num) {
-            tempuint = (tempuint >> packed_data_offset) & packed_data_mask;
+            if(packed_data_offset >= 8*sizeof(unsigned int))
+                tempuint = 0;
+            else
+                tempuint = (tempuint >> packed_data_offset) & packed_data_mask;
         }
         h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
     }
@@ -817,7 +831,10 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         signed char        tempchar;
         HDmemcpy(&tempchar, cp_vp, sizeof(char));
         if(packed_bits_num) {
-            tempchar = (tempchar >> packed_data_offset) & packed_data_mask;
+            if(packed_data_offset >= 8*sizeof(char))
+                tempchar = 0;
+            else
+                tempchar = (tempchar >> packed_data_offset) & packed_data_mask;
         }
         h5tools_str_append(str, OPT(info->fmt_schar, "%hhd"), tempchar);
     }
@@ -825,7 +842,10 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         unsigned char      tempuchar;
         HDmemcpy(&tempuchar, ucp_vp, sizeof(unsigned char));
         if(packed_bits_num) {
-            tempuchar = (tempuchar >> packed_data_offset) & packed_data_mask;
+            if(packed_data_offset >= 8*sizeof(unsigned char))
+                tempuchar = 0;
+            else
+                tempuchar = (tempuchar >> packed_data_offset) & packed_data_mask;
         }
         h5tools_str_append(str, OPT(info->fmt_uchar, "%u"), tempuchar);
     }
@@ -834,7 +854,10 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
         HDmemcpy(&tempshort, vp, sizeof(short));
         if(packed_bits_num) {
-            tempshort = (tempshort >> packed_data_offset) & packed_data_mask;
+            if(packed_data_offset >= 8*sizeof(short))
+                tempshort = 0;
+            else
+                tempshort = (tempshort >> packed_data_offset) & packed_data_mask;
         }
         h5tools_str_append(str, OPT(info->fmt_short, "%d"), tempshort);
     }
@@ -843,35 +866,50 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
         HDmemcpy(&tempushort, vp, sizeof(unsigned short));
         if(packed_bits_num) {
-            tempushort = (tempushort >> packed_data_offset) & packed_data_mask;
+            if(packed_data_offset >= 8*sizeof(unsigned short))
+                tempushort = 0;
+            else
+                tempushort = (tempushort >> packed_data_offset) & packed_data_mask;
         }
         h5tools_str_append(str, OPT(info->fmt_ushort, "%u"), tempushort);
     }
     else if (H5Tequal(type, H5T_NATIVE_LONG)) {
         HDmemcpy(&templong, vp, sizeof(long));
         if(packed_bits_num) {
-            templong = (templong >> packed_data_offset) & packed_data_mask;
+            if(packed_data_offset >= 8*sizeof(long))
+                templong = 0;
+            else
+                templong = (templong >> packed_data_offset) & packed_data_mask;
         }
         h5tools_str_append(str, OPT(info->fmt_long, "%ld"), templong);
     }
     else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
         HDmemcpy(&tempulong, vp, sizeof(unsigned long));
         if(packed_bits_num) {
-            tempulong = (tempulong >> packed_data_offset) & packed_data_mask;
+            if(packed_data_offset >= 8*sizeof(unsigned long))
+                tempulong = 0;
+            else
+                tempulong = (tempulong >> packed_data_offset) & packed_data_mask;
         }
         h5tools_str_append(str, OPT(info->fmt_ulong, "%lu"), tempulong);
     }
     else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
         HDmemcpy(&templlong, vp, sizeof(long long));
         if(packed_bits_num) {
-            templlong = (templlong >> packed_data_offset) & packed_data_mask;
+            if(packed_data_offset >= 8*sizeof(long long))
+                templlong = 0;
+            else
+                templlong = (templlong >> packed_data_offset) & packed_data_mask;
         }
         h5tools_str_append(str, OPT(info->fmt_llong, fmt_llong), templlong);
     }
     else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
         HDmemcpy(&tempullong, vp, sizeof(unsigned long long));
         if(packed_bits_num) {
-            tempullong = (tempullong >> packed_data_offset) & packed_data_mask;
+            if(packed_data_offset >= 8*sizeof(unsigned long long))
+                tempullong = 0;
+            else
+                tempullong = (tempullong >> packed_data_offset) & packed_data_mask;
         }
         h5tools_str_append(str, OPT(info->fmt_ullong, fmt_ullong), tempullong);
     }
