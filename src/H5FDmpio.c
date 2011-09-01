@@ -940,7 +940,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     MPI_Info                    info_dup=MPI_INFO_NULL;
     H5FD_t			*ret_value;     /* Return value */
 #ifndef H5_HAVE_MPI_GET_SIZE
-    struct stat                 stat_buf;
+    h5_stat_t                 stat_buf;
 #endif
 
     FUNC_ENTER_NOAPI(H5FD_mpio_open, NULL)
