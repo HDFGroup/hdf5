@@ -127,6 +127,12 @@ H5TS_pthread_first_thread_init(void)
 {
     H5_g.H5_libinit_g = FALSE;
 
+#ifdef _WIN32
+# ifdef PTW32_STATIC_LIB
+    pthread_win32_process_attach_np();
+# endif
+#endif
+
     /* initialize global API mutex lock */
     pthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
     pthread_cond_init(&H5_g.init_lock.cond_var, NULL);
