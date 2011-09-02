@@ -304,6 +304,15 @@ Bug Fixes since HDF5-1.8.0 release
     Library
     -------
 
+      - CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
+            discovered 3 problems in tests and tools' library (Issue 7674):
+              1. In dsets.c, left shifting an unsigned int for 32 bits or more
+                 caused undefined behavior.
+              2. In dt_arith.c, the INIT_INTEGER macro definition has an overflow
+                 when the value is negative minimal and is being subtracted one.
+              3. In tools/lib/h5tools_str.c, right shifting an int value for 32 bits
+                 or more caused undefined behavior.
+            All the problems have been corrected. (SLU - 2011/9/2)
       - In v1.6 library, there was EOA for the whole MULTI file saved in the 
             super block.  We took it out in v1.8 library because it's meaningless 
             for the MULTI file.  v1.8 library saves the EOA for the metadata file, 
