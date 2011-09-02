@@ -114,6 +114,15 @@ Bug Fixes since HDF5-1.8.7
 
     Library
     -------
+    - CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
+      discovered 3 problems in tests and tools' library (Issue 7674):
+        1. In dsets.c, left shifting an unsigned int for 32 bits or more
+           caused undefined behavior.
+        2. In dt_arith.c, the INIT_INTEGER macro definition has an overflow
+           when the value is negative minimal and is being subtracted one.
+        3. In tools/lib/h5tools_str.c, right shifting an int value for 32 bits 
+           or more caused undefined behavior.
+      All the problems have been corrected. (SLU - 2011/9/2)
     - Corrected mismatched function name typo of h5pget_dxpl_mpio_c and
       h5pfill_value_defined_c. HDFFV-7641 (AKC 2011/08/22)
     - Corrected internal error in library where objects that use named
