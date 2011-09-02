@@ -112,6 +112,8 @@ $SRC_H5DIFF_TESTFILES/h5diff_exclude1-2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_exclude2-1.h5
 $SRC_H5DIFF_TESTFILES/h5diff_exclude2-2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_comp_vl_strs.h5
+$SRC_H5DIFF_TESTFILES/compounds_array_vlen1.h5
+$SRC_H5DIFF_TESTFILES/compounds_array_vlen2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_attr_v_level1.h5
 $SRC_H5DIFF_TESTFILES/h5diff_attr_v_level2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_enum_invalid_values.h5
@@ -227,6 +229,7 @@ $SRC_H5DIFF_TESTFILES/h5diff_516.txt
 $SRC_H5DIFF_TESTFILES/h5diff_517.txt
 $SRC_H5DIFF_TESTFILES/h5diff_518.txt
 $SRC_H5DIFF_TESTFILES/h5diff_530.txt
+$SRC_H5DIFF_TESTFILES/h5diff_540.txt
 $SRC_H5DIFF_TESTFILES/h5diff_600.txt
 $SRC_H5DIFF_TESTFILES/h5diff_601.txt
 $SRC_H5DIFF_TESTFILES/h5diff_603.txt
@@ -989,9 +992,14 @@ TOOLTEST h5diff_484.txt -v --exclude-path "/dset3" h5diff_exclude1-1.h5 h5diff_e
 TOOLTEST h5diff_530.txt -v  h5diff_comp_vl_strs.h5 h5diff_comp_vl_strs.h5 /group /group_copy
 
 # ##############################################################################
+# # Test container types (array,vlen) with multiple nested compound types
+# # Complex compound types in dataset and attribute
+# ##############################################################################
+TOOLTEST h5diff_540.txt -v compounds_array_vlen1.h5 compounds_array_vlen2.h5
+
+# ##############################################################################
 # # Test mutually exclusive options 
 # ##############################################################################
-#
 # Test with -d , -p and --use-system-epsilon. 
 TOOLTEST h5diff_640.txt -v -d 5 -p 0.05 --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
 TOOLTEST h5diff_641.txt -v -d 5 -p 0.05 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4

@@ -59,6 +59,8 @@ set srcexclude1_2=h5diff_exclude1-2.h5
 set srcexclude2_1=h5diff_exclude2-1.h5
 set srcexclude2_2=h5diff_exclude2-2.h5
 set src_comp_vl_strs=h5diff_comp_vl_strs.h5
+set src_COMPS_ARRAY_VLEN1=compounds_array_vlen1.h5
+set src_COMPS_ARRAY_VLEN2=compounds_array_vlen2.h5
 set src_ATTR_VERBOSE_LEVEL_FILE1=h5diff_attr_v_level1.h5
 set src_ATTR_VERBOSE_LEVEL_FILE2=h5diff_attr_v_level2.h5
 
@@ -93,6 +95,8 @@ set exclude1_2=%indir%\h5diff_exclude1-2.h5
 set exclude2_1=%indir%\h5diff_exclude2-1.h5
 set exclude2_2=%indir%\h5diff_exclude2-2.h5
 set comp_vl_strs=%indir%\h5diff_comp_vl_strs.h5
+set COMPS_ARRAY_VLEN1=%indir%\compounds_array_vlen1.h5
+set COMPS_ARRAY_VLEN2=%indir%\compounds_array_vlen2.h5
 set ATTR_VERBOSE_LEVEL_FILE1=%indir%\h5diff_attr_v_level1.h5
 set ATTR_VERBOSE_LEVEL_FILE2=%indir%\h5diff_attr_v_level2.h5
 
@@ -928,6 +932,13 @@ rem ############################################################################
     rem #######################################################################
     call :testing %h5diff% -v %src_comp_vl_strs% %src_comp_vl_strs% /group /group_copy
     call :tooltest h5diff_530.txt -v  %comp_vl_strs% %comp_vl_strs% /group /group_copy
+
+    rem # #####################################################################
+    rem # # Test container types (array,vlen) with multiple nested compound types
+    rem # # Complex compound types in dataset and attribute
+    rem # #####################################################################
+    call :testing %h5diff% -v %src_COMPS_ARRAY_VLEN1% %src_COMPS_ARRAY_VLEN2%
+    call :tooltest h5diff_540.txt -v %COMPS_ARRAY_VLEN1% %COMPS_ARRAY_VLEN2%
 
     rem #######################################################################
     rem # Test mutually exclusive options 

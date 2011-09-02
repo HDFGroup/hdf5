@@ -77,6 +77,9 @@
 #define ATTR_VERBOSE_LEVEL_FILE2 "h5diff_attr_v_level2.h5"
 /* file containing valid/invalid enum value mix */
 #define ENUM_INVALID_VALUES "h5diff_enum_invalid_values.h5"
+/* file with container types (array,vlen) with multiple compounds */
+#define COMPS_COMPLEX1   "compounds_array_vlen1.h5"
+#define COMPS_COMPLEX2   "compounds_array_vlen2.h5"
 
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
@@ -134,6 +137,10 @@ static int test_exclude_obj2(const char *fname1, const char *fname2);
 static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new);
 static int test_attributes_verbose_level(const char *fname1, const char *fname2);
 static int test_enums(const char *fname);
+static void test_comps_array (const char *fname, const char *dset, const char *attr,int diff, int is_file_new);
+static void test_comps_vlen (const char *fname, const char *dset,const char *attr, int diff, int is_file_new);
+static void test_comps_array_vlen (const char *fname, const char *dset, const char *attr, int diff, int is_file_new);
+static void test_comps_vlen_arry (const char *fname, const char *dset,const char *attr, int diff, int is_file_new);
 
 /* called by test_attributes() and test_datasets() */
 static void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
@@ -206,6 +213,21 @@ int main(void)
      * from the basic type testing).
      */
     test_enums(ENUM_INVALID_VALUES);
+
+    /* -------------------------------------------------
+     * Create test files with dataset and attribute with container types 
+     * (array, vlen) with multiple nested compound types.
+     */
+    /* file1 */
+    test_comps_array(COMPS_COMPLEX1,"dset1", "attr1", 0, 1);
+    test_comps_vlen(COMPS_COMPLEX1,"dset2", "attr2", 0, 0);
+    test_comps_array_vlen(COMPS_COMPLEX1,"dset3", "attr3", 0, 0);
+    test_comps_vlen_arry(COMPS_COMPLEX1,"dset4", "attr4", 0, 0);
+    /* file2 */
+    test_comps_array(COMPS_COMPLEX2,"dset1", "attr1", 5, 1);
+    test_comps_vlen(COMPS_COMPLEX2,"dset2", "attr2",5, 0);
+    test_comps_array_vlen(COMPS_COMPLEX2,"dset3", "attr3", 5, 0);
+    test_comps_vlen_arry(COMPS_COMPLEX2,"dset4", "attr4", 5, 0);
 
     return 0;
 }
@@ -940,7 +962,6 @@ int test_attributes(const char *file,
 */
 static int test_attributes_verbose_level(const char *fname1, const char *fname2)
 {
-    int i;
     herr_t  status = SUCCEED;
     hid_t   fid1, fid2;
     hid_t   f1_gid, f2_gid;
@@ -2713,18 +2734,15 @@ static int test_group_recurse2(void)
     hid_t       grp1=0, grp2;
     hid_t       grp3=0;
     hid_t       grp4=0;
-    hid_t       tid;
     hid_t       dset1, dset2;
     hid_t       datatype, dataspace;   /* handles */
     hid_t       fileid2;
     hid_t       fileid3;
     hid_t       fileid4;
-    hid_t       fileid4_1;
     hsize_t     dimsf[2];              /* dataset dimensions */
     herr_t      status=0;
     int data1[4][2] = {{0,0},{1,1},{2,2},{3,3}};
     int data2[4][2] = {{0,0},{0,1},{0,2},{3,3}};
-    int         i, j;
 
    /*-----------------------------------------------------------------------
     * FILE 1
@@ -4108,6 +4126,545 @@ out:
         H5Tclose(tid);
 
     return status;
+}
+
+/*-------------------------------------------------------------------------
+*
+* Purpose: 
+*   Create test files with dataset and attribute with container types 
+*   (array, vlen) with multiple nested compound types.
+*
+* Function: test_comps_array()
+*  - type: compound->array->compound
+*
+* Function: test_comps_vlen()
+*  - type: compound->vlen->compound
+*
+* Function: test_comps_array_vlen()
+*  - type: compound->array->compound->vlen->compound
+*
+* Function: test_comps_vlen_arry()
+*  - type: compound->vlen->compound->array->compound
+*
+* Programmer: Jonathan Kim (Sep, 1, 2011)
+*
+*-------------------------------------------------------------------------*/
+#define SDIM_DSET 2
+#define SDIM_CMPD_ARRAY 2
+
+static void test_comps_array (const char *fname, const char *dset, const char *attr,int diff, int is_file_new)
+{
+    /* sub compound 2 */
+    typedef struct {        
+        int i2;
+        float f2;
+    } cmpd2_t;
+
+    /* top compound 1 */
+    typedef struct {
+        int i1;
+        cmpd2_t cmpd2[SDIM_CMPD_ARRAY];
+    } cmpd1_t;
+
+    cmpd1_t wdata[SDIM_DSET];   /* dataset with compound1 */
+
+    hid_t  fid;  /* HDF5 File IDs  */
+    hid_t  did_dset; /* Dataset ID   */
+    hid_t  sid_dset;       /* Dataset space ID   */
+    hid_t  tid_cmpd1;       /* Compound1 type ID   */
+    hid_t  tid_arry1;       /* Array type ID in compound1   */
+    hid_t  tid_cmpd2;       /* Compound2 type ID   */
+    hid_t  tid_attr;
+    hsize_t  sdims_dset[] = {SDIM_DSET};
+    hsize_t  sdims_cmpd_arry[] = {SDIM_CMPD_ARRAY};
+    int     i,j;       
+    herr_t  ret;  /* Generic return value  */
+
+    /* Initialize array data to write */
+    for(i=0; i < SDIM_DSET; i++)
+    {
+        wdata[i].i1 = i;
+        for(j=0; j < SDIM_CMPD_ARRAY; j++) 
+        {
+            wdata[i].cmpd2[j].i2 = i*10 + diff;
+            wdata[i].cmpd2[j].f2 = (float)(i*10.5) + diff;
+        } /* end for */
+    }
+
+   /*-----------------------------------------------------------------------
+    * Create file(s)
+    *------------------------------------------------------------------------*/
+    if (is_file_new == 1)
+        fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    else
+        fid = H5Fopen (fname, H5F_ACC_RDWR, H5P_DEFAULT);
+
+
+    /* -------------------------------
+     * Create a sub compound2 datatype  */
+    tid_cmpd2 = H5Tcreate(H5T_COMPOUND, sizeof(cmpd2_t));
+
+    /* Insert integer field */
+    ret = H5Tinsert(tid_cmpd2, "int2", HOFFSET(cmpd2_t, i2), H5T_NATIVE_INT);
+    assert(ret >= 0);
+
+    /* Insert float field */
+    ret = H5Tinsert(tid_cmpd2, "float2", HOFFSET(cmpd2_t, f2), H5T_NATIVE_FLOAT);
+    assert(ret >= 0);
+
+    /*-----------------------------------
+     * Create a top compound1.
+     */
+    tid_cmpd1 = H5Tcreate (H5T_COMPOUND, sizeof(cmpd1_t));
+
+    ret = H5Tinsert(tid_cmpd1, "int1", HOFFSET(cmpd1_t, i1), H5T_NATIVE_INT);
+    assert(ret >= 0);
+
+    /* Create an array datatype */
+    tid_arry1 = H5Tarray_create2(tid_cmpd2, 1, sdims_cmpd_arry);
+    /* insert the array */
+    ret = H5Tinsert(tid_cmpd1, "array_cmpd1", HOFFSET(cmpd1_t, cmpd2), tid_arry1);
+    assert(ret >= 0);
+
+
+    /* -------------------
+     * Create a dataset 
+     */
+    /* Create dataspace for datasets */
+    sid_dset = H5Screate_simple(1, sdims_dset, NULL);
+
+    did_dset = H5Dcreate2(fid, dset, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Write dataset to disk */
+    ret = H5Dwrite(did_dset, tid_cmpd1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    assert(ret >= 0);
+
+    /*-----------------------------------
+     * Create an attribute in root group
+     */
+    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
+    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
+    assert(ret >= 0);
+
+    /* ----------------
+     * Close Dataset */
+    ret = H5Aclose(tid_attr);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_arry1);
+    assert(ret >= 0);
+    ret = H5Dclose(did_dset);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd1);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd2);
+    assert(ret >= 0);
+    ret = H5Sclose(sid_dset);
+    assert(ret >= 0);
+    ret = H5Fclose(fid);
+    assert(ret >= 0);
+}
+
+
+
+static void test_comps_vlen (const char * fname, const char *dset, const char *attr, int diff, int is_file_new)
+{
+    /* sub compound 2 */
+    typedef struct {       
+        int i2;
+        float f2;
+    } cmpd2_t;
+
+    /* top compound 1 */
+    typedef struct { 
+        int i1;
+        hvl_t vl;   /* VL information for compound2 */
+    } cmpd1_t;
+
+    cmpd1_t wdata[SDIM_DSET];   /* Dataset for compound1 */ 
+
+    hid_t  fid;  /* HDF5 File ID */
+    hid_t  did_dset; /* dataset ID   */
+    hid_t  sid_dset;  /* dataset space ID */
+    hid_t  tid_cmpd2; /* compound2 type ID */
+    hid_t  tid_cmpd1; /* compound1 type ID */
+    hid_t  tid_cmpd1_vlen;
+    hsize_t  sdims_dset[] = {SDIM_DSET};
+
+    unsigned       i,j;        /* counting variables */
+    herr_t  ret;  /* Generic return value  */
+
+    /* Allocate and initialize VL data to write */
+    for(i=0; i<SDIM_DSET; i++)
+    {
+        wdata[i].i1 = i;
+        wdata[i].vl.p = malloc((i+1)*sizeof(cmpd2_t));
+        wdata[i].vl.len = i+1;
+        for(j=0; j<(i+1); j++)
+        {
+            ((cmpd2_t *)wdata[i].vl.p)[j].i2 = i*10 + diff;
+            ((cmpd2_t *)wdata[i].vl.p)[j].f2 = (float)(i*10.5) + diff;
+        } /* end for */
+    } /* end for */
+
+    /*-----------------------------------------------------------------------
+     * Create file(s)
+     *------------------------------------------------------------------------*/
+    if (is_file_new == 1)
+        fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    else
+        fid = H5Fopen (fname, H5F_ACC_RDWR, H5P_DEFAULT);
+
+    /* -----------------------------
+     * Create sub compound2 type */
+    tid_cmpd2 = H5Tcreate(H5T_COMPOUND, sizeof(cmpd2_t));
+
+    /* Insert fields */
+    ret = H5Tinsert(tid_cmpd2, "int2", HOFFSET(cmpd2_t, i2), H5T_NATIVE_INT);
+    assert(ret >= 0);
+    ret = H5Tinsert(tid_cmpd2, "float2", HOFFSET(cmpd2_t, f2), H5T_NATIVE_FLOAT);
+    assert(ret >= 0);
+
+    /* ---------------------------
+     * Create top compound1 type */
+    tid_cmpd1 = H5Tcreate(H5T_COMPOUND, sizeof(cmpd1_t));
+    /* Insert fields */
+    ret = H5Tinsert(tid_cmpd1, "int1", HOFFSET(cmpd1_t, i1), H5T_NATIVE_INT);
+    assert(ret >= 0);
+    /* Create a VL datatype */
+    tid_cmpd1_vlen = H5Tvlen_create(tid_cmpd2);
+
+    ret = H5Tinsert(tid_cmpd1, "vlen_cmpd1", HOFFSET(cmpd1_t, vl), tid_cmpd1_vlen);
+    assert(ret >= 0);
+
+    /* -------------------------------
+     * Create dataset with compound1 
+     */
+    /* Create dataspace for dataset */
+    sid_dset = H5Screate_simple(1, sdims_dset, NULL);
+
+    /* Create a dataset */
+    did_dset = H5Dcreate2(fid, dset, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Write dataset to disk */
+    ret = H5Dwrite(did_dset, tid_cmpd1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    assert(ret >= 0);
+
+    /* Reclaim the write VL data */
+    ret = H5Dvlen_reclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
+    assert(ret >= 0);
+
+    /*-----------------------------------
+     * Create an attribute in root group
+     */
+    /* TODO: creating vlen with compound type doesn't work for attribute now. 
+     * so add this later when it's fixed 
+    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
+    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
+    assert(ret >= 0);
+    */
+
+    /* ----------------
+     * Close IDs */
+    ret = H5Dclose(did_dset);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd2);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd1);
+    assert(ret >= 0);
+    ret = H5Sclose(sid_dset);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd1_vlen);
+    assert(ret >= 0);
+    ret = H5Fclose(fid);
+    assert(ret >= 0);
+}
+
+
+static void test_comps_array_vlen (const char * fname, const char *dset,const char *attr, int diff, int is_file_new)
+{
+    typedef struct {       
+        int i3;
+        float f3;
+    } cmpd3_t;
+ 
+    typedef struct {        /* Typedef for compound datatype */
+        int i2;
+        hvl_t vl;   /* VL information to write */
+    } cmpd2_t;
+
+    typedef struct {
+        int i1;
+        cmpd2_t cmpd2[SDIM_CMPD_ARRAY];
+    } cmpd1_t;
+
+    cmpd1_t wdata[SDIM_DSET];   /* Information to write */
+    hid_t  fid;  /* HDF5 File IDs  */
+    hid_t  did_dset; /* Dataset ID   */
+    hid_t  sid_dset;       /* Dataspace ID   */
+    hid_t  tid_cmpd1;       /* Compound1 Datatype ID   */
+    hid_t  tid_arry1;       /* Array Datatype ID   */
+    hid_t  tid_cmpd2;       /* Compound2 Datatype ID   */
+    hid_t  tid_cmpd2_vlen;
+    hid_t  tid_cmpd3;       /* Compound3 Datatype ID   */
+    hsize_t  sdims_dset[] = {SDIM_DSET};
+    hsize_t  sdims_arry[] = {SDIM_CMPD_ARRAY};
+    int        i,j,k;        /* counting variables */
+    herr_t  ret;  /* Generic return value  */
+
+
+
+    /* Initialize array data to write in compound1 */
+    for(i=0; i < SDIM_DSET; i++)
+    {
+        wdata[i].i1 = i;
+        /* Allocate and initialize VL data to write in compound2 */
+        for(j=0; j < SDIM_CMPD_ARRAY; j++) 
+        {
+            wdata[i].cmpd2[j].i2 = j*10;
+            wdata[i].cmpd2[j].vl.p = malloc((j+1)*sizeof(cmpd3_t));
+            wdata[i].cmpd2[j].vl.len = j+1;
+            for(k=0; k<(j+1); k++) 
+            {
+                /* Initialize data of compound3 */
+                ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].i3 = j*10 + diff;
+                ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].f3 = (float)(j*10.5) + diff;
+            } /* end for */
+        } /* end for */
+    }
+
+    /*-----------------------------------------------------------------------
+     * Create file(s)
+     *------------------------------------------------------------------------*/
+    if (is_file_new == 1)
+        fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    else
+        fid = H5Fopen (fname, H5F_ACC_RDWR, H5P_DEFAULT);
+
+    /* Create dataspace for datasets */
+    sid_dset = H5Screate_simple(1, sdims_dset, NULL);
+
+    /*-------------------------------------
+     * Create a sub compound3 datatype  */
+    tid_cmpd3 = H5Tcreate(H5T_COMPOUND, sizeof(cmpd3_t));
+
+    /* Insert integer field */
+    ret = H5Tinsert(tid_cmpd3, "int", HOFFSET(cmpd3_t, i3), H5T_NATIVE_INT);
+    assert(ret >= 0);
+
+    /* Insert float field */
+    ret = H5Tinsert(tid_cmpd3, "float", HOFFSET(cmpd3_t, f3), H5T_NATIVE_FLOAT);
+    assert(ret >= 0);
+
+
+    /*-------------------------------------
+     * Create a sub compound2 datatype  */
+    tid_cmpd2 = H5Tcreate(H5T_COMPOUND, sizeof(cmpd2_t));
+
+    /* Insert integer field */
+    ret = H5Tinsert(tid_cmpd2, "int", HOFFSET(cmpd2_t, i2), H5T_NATIVE_INT);
+    assert(ret >= 0);
+    /* Create a VL datatype */
+    tid_cmpd2_vlen = H5Tvlen_create(tid_cmpd3);
+    ret = H5Tinsert(tid_cmpd2, "vlen", HOFFSET(cmpd2_t, vl), tid_cmpd2_vlen);
+    assert(ret >= 0);
+
+
+    /*-----------------------------------
+     * Create a top compound1 datatype for dataset.
+     */
+    tid_cmpd1 = H5Tcreate (H5T_COMPOUND, sizeof(cmpd1_t));
+
+    /* Create an array datatype */
+    tid_arry1 = H5Tarray_create2(tid_cmpd2, 1, sdims_arry);
+    /* insert the array */
+    H5Tinsert(tid_cmpd1, "array_comp", HOFFSET(cmpd1_t, cmpd2), tid_arry1);
+
+
+    /* ----------------------
+     * Create a dataset */
+    did_dset = H5Dcreate2(fid, dset, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Write dataset to disk */
+    ret = H5Dwrite(did_dset, tid_cmpd1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    assert(ret >= 0);
+
+    /* Reclaim the write VL data */
+    ret = H5Dvlen_reclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
+    assert(ret >= 0);
+
+    /*-----------------------------------
+     * Create an attribute in root group
+     */
+    /* TODO: creating vlen with compound type doesn't work for attribute now. 
+     * so add this later when it's fixed
+    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
+    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
+    assert(ret >= 0);
+    */
+
+    /*-------------------
+     * Close IDs */
+    ret = H5Tclose(tid_arry1);
+    assert(ret >= 0);
+    ret = H5Dclose(did_dset);
+    assert(ret >= 0);
+    ret = H5Sclose(sid_dset);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd3);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd2);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd2_vlen);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd1);
+    assert(ret >= 0);
+    ret = H5Fclose(fid);
+    assert(ret >= 0);
+}
+
+
+static void test_comps_vlen_arry (const char * fname, const char *dset, const char *attr, int diff, int is_file_new)
+{
+    /* sub compound 3 */
+    typedef struct {       
+        int i3;
+        float f3;
+    } cmpd3_t;
+
+    /* sub compound 2 */
+    typedef struct {       
+        int i2;
+        cmpd3_t cmpd3[SDIM_CMPD_ARRAY];
+    } cmpd2_t;
+
+    /* top compound 1 */
+    typedef struct { 
+        int i1;
+        hvl_t vl;   /* VL information for compound2 */
+    } cmpd1_t;
+
+    cmpd1_t wdata[SDIM_DSET];   /* Dataset for compound1 */
+
+    hid_t  fid;  /* HDF5 File ID */
+    hid_t  did_dset; /* dataset ID   */
+    hid_t  sid_dset;  /* dataset space ID */
+    hid_t  tid_cmpd3; /* compound3 type ID */
+    hid_t  tid_cmpd2; /* compound2 type ID */
+    hid_t  tid_cmpd2_arry;
+    hid_t  tid_cmpd1; /* compound1 type ID */
+    hid_t  tid_cmpd1_vlen;
+    hsize_t  sdims_dset[] = {SDIM_DSET};
+    hsize_t  sdims_cmpd_arry[] = {SDIM_CMPD_ARRAY};
+
+    unsigned       i,j,k;        /* counting variables */
+    herr_t  ret;  /* Generic return value  */
+
+    /* Allocate and initialize VL data to write */
+    for(i=0; i<SDIM_DSET; i++)
+    {
+        /* compound 1 data */
+        wdata[i].i1 = i;
+        wdata[i].vl.p = malloc((i+1)*sizeof(cmpd2_t));
+        wdata[i].vl.len = i+1;
+        for(j=0; j<(i+1); j++)
+        {
+            /* compound2 data */
+            ((cmpd2_t *)wdata[i].vl.p)[j].i2 = i*10 + diff;
+            for (k=0; k < SDIM_CMPD_ARRAY; k++)
+            {
+                /* compound 3 data */
+                ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].i3 = k*10.5 + diff;
+                ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].f3 = (float)(k*10.5) + diff;
+            }
+        } /* end for */
+    } /* end for */
+
+    /*-----------------------------------------------------------------------
+     * Create file(s)
+     *------------------------------------------------------------------------*/
+    if (is_file_new == 1)
+        fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    else
+        fid = H5Fopen (fname, H5F_ACC_RDWR, H5P_DEFAULT);
+
+    /* -----------------------------
+     * Create sub compound3 type */
+    tid_cmpd3 = H5Tcreate(H5T_COMPOUND, sizeof(cmpd3_t));
+
+    /* Insert fields */
+    ret = H5Tinsert(tid_cmpd3, "int3", HOFFSET(cmpd3_t, i3), H5T_NATIVE_INT);
+    assert(ret >= 0);
+    ret = H5Tinsert(tid_cmpd3, "float3", HOFFSET(cmpd3_t, f3), H5T_NATIVE_FLOAT);
+    assert(ret >= 0);
+
+    /* -----------------------------
+     * Create sub compound2 type */
+    tid_cmpd2 = H5Tcreate(H5T_COMPOUND, sizeof(cmpd2_t));
+
+    ret = H5Tinsert(tid_cmpd2, "int2", HOFFSET(cmpd2_t, i2), H5T_NATIVE_INT);
+    assert(ret >= 0);
+
+    tid_cmpd2_arry = H5Tarray_create2(tid_cmpd3, 1, sdims_cmpd_arry);
+    ret = H5Tinsert(tid_cmpd2, "array_cmpd2", HOFFSET(cmpd2_t, cmpd3), tid_cmpd2_arry);
+    assert(ret >= 0);
+
+    /* ---------------------------
+     * Create top compound1 type
+     */
+    /* Create a VL datatype */
+    tid_cmpd1 = H5Tcreate(H5T_COMPOUND, sizeof(cmpd1_t));
+    /* Insert fields */
+    ret = H5Tinsert(tid_cmpd1, "int1", HOFFSET(cmpd1_t, i1), H5T_NATIVE_INT);
+    assert(ret >= 0);
+    tid_cmpd1_vlen = H5Tvlen_create(tid_cmpd2);
+    ret = H5Tinsert(tid_cmpd1, "vlen_cmpd1", HOFFSET(cmpd1_t, vl), tid_cmpd1_vlen);
+    assert(ret >= 0);
+
+    /* -------------------------------
+     * Create dataset with compound1 
+     */
+    /* Create dataspace for dataset */
+    sid_dset = H5Screate_simple(1, sdims_dset, NULL);
+
+    /* Create a dataset */
+    did_dset = H5Dcreate2(fid, dset, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Write dataset to disk */
+    ret = H5Dwrite(did_dset, tid_cmpd1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    assert(ret >= 0);
+
+    /* Reclaim the write VL data */
+    ret = H5Dvlen_reclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
+    assert(ret >= 0);
+
+    /*-----------------------------------
+     * Create an attribute in root group
+     */
+    /* TODO: creating vlen with compound type doesn't work for attribute now.
+     * so add this later when it's fixed
+    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
+    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
+    assert(ret >= 0);
+    */
+
+    /* ----------------
+     * Close IDs */
+    ret = H5Dclose(did_dset);
+    assert(ret >= 0);
+    ret = H5Sclose(sid_dset);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd3);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd2_arry);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd2);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd1_vlen);
+    assert(ret >= 0);
+    ret = H5Tclose(tid_cmpd1);
+    assert(ret >= 0);
+    ret = H5Fclose(fid);
+    assert(ret >= 0);
 }
 
 

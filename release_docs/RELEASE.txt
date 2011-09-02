@@ -571,6 +571,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: fixed segfault over dataset with container types
+          (array,lven) with multiple nested compound types. 
+          (ex: compound->array->compound, compound->vlen->compound)
+          HDFFV-7712  JKM (09/01/2011)
         - h5repack: added macro to handle failure in H5Dread/write when memory 
           allocation failed inside the library. (PC -- 2011/08/19)
         - Fixed h5jam not to allow specifying an HDF5 formatted file as input 
