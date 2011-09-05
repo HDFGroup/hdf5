@@ -85,13 +85,13 @@ MODULE H5O_PROVISIONAL
   
 
   TYPE, BIND(C) :: H5O_info_t
-     INTEGER(HADDR_T) ::  fileno ! File number that object is located in
-                                   ! unsigned long
-     INTEGER(HADDR_T) :: addr    ! Object address in file  
-     INTEGER :: TYPE             ! Basic object type (group, dataset, etc.) 
-                                   ! H5O_type_t          type
-     INTEGER(c_int) :: rc        ! Reference count of object
-                                   ! unsigned rc
+     INTEGER(c_long) ::  fileno ! File number that object is located in
+                                ! unsigned long
+     INTEGER(HADDR_T) :: addr   ! Object address in file  
+     INTEGER(c_int) :: TYPE     ! Basic object type (group, dataset, etc.) 
+                                ! H5O_type_t type which is type enum
+     INTEGER(c_int) :: rc       ! Reference count of object
+                                ! unsigned rc
      INTEGER(c_int) :: atime    ! Access time
      INTEGER(c_int) :: mtime    ! Modification time
      INTEGER(c_int) :: ctime    ! Change time
@@ -241,7 +241,7 @@ CONTAINS
          CHARACTER(LEN=*), INTENT(IN)  :: name
          INTEGER(SIZE_T) , INTENT(IN)  :: namelen
          INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
-         TYPE(C_PTR),value                   :: object_info
+         TYPE(C_PTR),value             :: object_info
 
        END FUNCTION h5oget_info_by_name_c
     END INTERFACE
