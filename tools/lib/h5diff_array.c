@@ -186,8 +186,8 @@ static int my_isnan(dtype_t type, void *val);
  * XCAO, 11/10/2010
  * added to improve performance for compound datasets
  */
-static void set_comp_members(hid_t tid, mcomp_t *members);
-static void free_comp_members(mcomp_t *members);
+static void get_member_types(hid_t tid, mcomp_t *members);
+static void close_member_types(mcomp_t *members);
 
 
 
@@ -318,7 +318,7 @@ hsize_t diff_array( void *_mem1,
     case H5T_VLEN:
     case H5T_REFERENCE:
         HDmemset(&members, 0, sizeof (mcomp_t));
-        set_comp_members(m_type, &members);
+        get_member_types(m_type, &members);
         for ( i = 0; i < nelmts; i++)
         {
             nfound+=diff_datum(
@@ -338,11 +338,11 @@ hsize_t diff_array( void *_mem1,
                 &ph, &members);
             if (options->n && nfound>=options->count)
             {
-                free_comp_members(&members);
+                close_member_types(&members);
                 return nfound;
             }
         } /* i */
-        free_comp_members(&members);
+        close_member_types(&members);
     } /* switch */
 
     return nfound;
@@ -726,7 +726,7 @@ hsize_t diff_datum(void       *_mem1,
                    obj2,
                    container1_id,
                    container2_id,
-                   ph, NULL);
+                   ph, members);
            }
             H5Tclose(memb_type);
         }
@@ -873,7 +873,7 @@ hsize_t diff_datum(void       *_mem1,
             obj2,
             container1_id,
             container2_id,
-            ph, NULL);
+            ph, members);
 
         H5Tclose(memb_type);
 
@@ -6117,36 +6117,46 @@ static void h5diff_print_char(char ch)
  * added to improve performance for compound datasets
  * set up compound datatype structures.
  */
-static void set_comp_members(hid_t tid, mcomp_t *members)
+static void get_member_types(hid_t tid, mcomp_t *members)
 {
     int i;
+    int tclass;
 
     if (tid <=0 || !members)
         return;
 
-    if (H5Tget_class(tid) != H5T_COMPOUND)
-        return;
-
-    members->n = H5Tget_nmembers( tid );
-    if (members->n <=0)
-        return;
-
-    members->ids = HDcalloc(members->n, sizeof(hid_t));
-    members->flags = HDcalloc(members->n, sizeof(unsigned char));
-    members->offsets = HDcalloc(members->n, sizeof(size_t));
-    members->m = HDcalloc(members->n, sizeof(mcomp_t *));
-
-    for (i=0; i< members->n; i++)
+    tclass = H5Tget_class(tid);
+    if (tclass == H5T_ARRAY || tclass == H5T_VLEN)
     {
-         members->ids[i] = H5Tget_member_type( tid, i );
-         members->flags[i] = H5Tis_variable_str( members->ids[i] );
-         members->offsets[i] = H5Tget_member_offset( tid, i );
-         if (H5Tget_class( members->ids[i])==H5T_COMPOUND)
-         {
-              members->m[i] = (mcomp_t *)HDmalloc(sizeof(mcomp_t));
-              set_comp_members(members->ids[i], members->m[i]);
-         }
+        hid_t base_tid = H5Tget_super(tid);
+        get_member_types(base_tid, members);
+        H5Tclose(base_tid);
+    } 
+    else if (tclass == H5T_COMPOUND) 
+    {
+        members->n = H5Tget_nmembers( tid );
+        if (members->n <=0)
+            return;
+
+        members->ids = HDcalloc(members->n, sizeof(hid_t));
+        members->flags = HDcalloc(members->n, sizeof(unsigned char));
+        members->offsets = HDcalloc(members->n, sizeof(size_t));
+        members->m = HDcalloc(members->n, sizeof(mcomp_t *));
+
+        for (i=0; i< members->n; i++)
+        {
+             members->ids[i] = H5Tget_member_type( tid, i );
+             members->flags[i] = H5Tis_variable_str( members->ids[i] );
+             members->offsets[i] = H5Tget_member_offset( tid, i );
+             members->m[i] = (mcomp_t *)HDmalloc(sizeof(mcomp_t));
+             HDmemset(members->m[i], 0, sizeof(mcomp_t));
+             get_member_types(members->ids[i], members->m[i]);
+        }  
     }
+     
+   return;
+
+
 }
 
 /*-------------------------------------------------------------------------
@@ -6154,7 +6164,7 @@ static void set_comp_members(hid_t tid, mcomp_t *members)
  * added to improve performance for compound datasets
  * clean and close compound members.
  */
-static void free_comp_members(mcomp_t *members)
+static void close_member_types(mcomp_t *members)
 {
     int i;
 
@@ -6165,7 +6175,7 @@ static void free_comp_members(mcomp_t *members)
     {
         if (members->m[i])
         {
-            free_comp_members(members->m[i]);
+            close_member_types(members->m[i]);
             HDfree(members->m[i]);
         }
         H5Tclose(members->ids[i]);

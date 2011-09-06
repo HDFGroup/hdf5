@@ -148,6 +148,10 @@ Bug Fixes since HDF5-1.8.7
 
     Tools
     -----
+    - h5diff: fixed segfault over dataset with container types
+      (array,lven) along with multiple nested compound types. 
+      (ex: compound->array->compound, compound->vlen->compound)
+      HDFFV-7712  JKM (09/01/2011)
     - Fixed h5jam not to allow specifying an HDF5 formatted file as input 
       file for -u (user block file) option, because the original HDF5 file 
       will not be accessible if allows. HDFFV-5941 (JKM 08/19/2011)
