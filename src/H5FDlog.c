@@ -85,7 +85,7 @@ typedef struct H5FD_log_t {
     haddr_t	pos;			/*current file I/O position	*/
     H5FD_file_op_t	op;		/*last operation		*/
     char	filename[H5FD_MAX_FILENAME_LEN];     /* Copy of file name from open operation */
-#ifndef _WIN32
+#ifndef H5_HAVE_WIN32_API
     /*
      * On most systems the combination of device and i-node number uniquely
      * identify a file.
@@ -98,7 +98,7 @@ typedef struct H5FD_log_t {
 #endif /*H5_VMS*/
 #else
     /*
-     * On _WIN32 the low-order word of a unique identifier associated with the
+     * On H5_HAVE_WIN32_API the low-order word of a unique identifier associated with the
      * file and the volume serial number uniquely identify a file. This number
      * (which, both? -rpm) may change when the system is restarted or when the
      * file is opened. After a process opens a file, the identifier is
@@ -473,7 +473,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_log_fapl_t	*fa;    /* File access property list information */
     int		fd = (-1);      /* File descriptor */
     int		o_flags;        /* Flags for open() call */
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
     HFILE filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
@@ -570,12 +570,12 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5_ASSIGN_OVERFLOW(file->eof, sb.st_size, h5_stat_size_t, haddr_t);
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
     filehandle = _get_osfhandle(fd);
     (void)GetFileInformationByHandle((HANDLE)filehandle, &fileinfo);
     file->fileindexhi = fileinfo.nFileIndexHigh;
     file->fileindexlo = fileinfo.nFileIndexLow;
-#else /* _WIN32 */
+#else /* H5_HAVE_WIN32_API */
     file->device = sb.st_dev;
 #ifdef H5_VMS
     file->inode[0] = sb.st_ino[0];
@@ -585,7 +585,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     file->inode = sb.st_ino;
 #endif /*H5_VMS*/
 
-#endif /* _WIN32 */
+#endif /* H5_HAVE_WIN32_API */
 
     /* Retain a copy of the name used to open the file, for possible error reporting */
     HDstrncpy(file->filename, name, sizeof(file->filename));
@@ -825,7 +825,7 @@ H5FD_log_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_log_cmp)
 
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
     if(f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)
     if(f1->fileindexhi > f2->fileindexhi) HGOTO_DONE(1)
 
@@ -1474,7 +1474,7 @@ H5FD_log_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
 
     /* Extend the file to make sure it's large enough */
     if(!H5F_addr_eq(file->eoa, file->eof)) {
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
         HFILE filehandle;   /* Windows file handle */
         LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
 
@@ -1487,7 +1487,7 @@ H5FD_log_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
         (void)SetFilePointer((HANDLE)filehandle, li.LowPart, &li.HighPart, FILE_BEGIN);
         if(SetEndOfFile((HANDLE)filehandle) == 0)
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
-#else /* _WIN32 */
+#else /* H5_HAVE_WIN32_API */
 #ifdef H5_VMS
         /* Reset seek offset to the beginning of the file, so that the file isn't
          * re-extended later.  This may happen on Open VMS. */
@@ -1497,7 +1497,7 @@ H5FD_log_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
 
         if(-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
-#endif /* _WIN32 */
+#endif /* H5_HAVE_WIN32_API */
 
         /* Log information about the truncate */
         if(file->fa.flags & H5FD_LOG_NUM_TRUNCATE)

@@ -14,9 +14,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* private headers */
-#include "H5private.h"		/*library                 		*/
-#include "H5Eprivate.h"		/*error handling          		*/
-#include "H5MMprivate.h"	/*memory management functions		*/
+#include "H5private.h"    /*library                     */
+#include "H5Eprivate.h"    /*error handling              */
+#include "H5MMprivate.h"  /*memory management functions    */
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -127,7 +127,7 @@ H5TS_pthread_first_thread_init(void)
 {
     H5_g.H5_libinit_g = FALSE;
 
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
 # ifdef PTW32_STATIC_LIB
     pthread_win32_process_attach_np();
 # endif
@@ -177,7 +177,7 @@ H5TS_pthread_first_thread_init(void)
 herr_t
 H5TS_mutex_lock(H5TS_mutex_t *mutex)
 {
-#ifdef	H5_HAVE_WIN_THREADS
+#ifdef  H5_HAVE_WIN_THREADS
     EnterCriticalSection( &mutex->CriticalSection); 
     return 0;
 #else /* H5_HAVE_WIN_THREADS */
@@ -232,7 +232,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 herr_t
 H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 {
-#ifdef	H5_HAVE_WIN_THREADS
+#ifdef  H5_HAVE_WIN_THREADS
     /* Releases ownership of the specified critical section object. */
     LeaveCriticalSection(&mutex->CriticalSection);
     return 0; 
@@ -291,7 +291,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 herr_t
 H5TS_cancel_count_inc(void)
 {
-#ifdef	H5_HAVE_WIN_THREADS
+#ifdef  H5_HAVE_WIN_THREADS
     /* unsupported; just return 0 */
     return SUCCEED;
 #else /* H5_HAVE_WIN_THREADS */
@@ -302,25 +302,25 @@ H5TS_cancel_count_inc(void)
 
     if (!cancel_counter) {
         /*
-	 * First time thread calls library - create new counter and associate
+   * First time thread calls library - create new counter and associate
          * with key
          */
-	cancel_counter = (H5TS_cancel_t *)H5MM_calloc(sizeof(H5TS_cancel_t));
+  cancel_counter = (H5TS_cancel_t *)H5MM_calloc(sizeof(H5TS_cancel_t));
 
-	if (!cancel_counter) {
-	    H5E_push_stack(NULL, "H5TS_cancel_count_inc",
-		     __FILE__, __LINE__, H5E_ERR_CLS_g, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed");
-	    return FAIL;
-	}
+  if (!cancel_counter) {
+      H5E_push_stack(NULL, "H5TS_cancel_count_inc",
+         __FILE__, __LINE__, H5E_ERR_CLS_g, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed");
+      return FAIL;
+  }
 
         ret_value = pthread_setspecific(H5TS_cancel_key_g,
-					(void *)cancel_counter);
+          (void *)cancel_counter);
     }
 
     if (cancel_counter->cancel_count == 0)
         /* thread entering library */
         ret_value = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,
-					   &cancel_counter->previous_state);
+             &cancel_counter->previous_state);
 
     ++cancel_counter->cancel_count;
 
@@ -358,7 +358,7 @@ H5TS_cancel_count_inc(void)
 herr_t
 H5TS_cancel_count_dec(void)
 {
-#ifdef	H5_HAVE_WIN_THREADS 
+#ifdef  H5_HAVE_WIN_THREADS 
     /* unsupported; will just return 0 */
     return SUCCEED;
 #else /* H5_HAVE_WIN_THREADS */
@@ -397,7 +397,7 @@ H5TS_create_thread(void * func, H5TS_attr_t * attr, void*udata)
 {
     H5TS_thread_t ret_value;
 
-#ifdef	H5_HAVE_WIN_THREADS 
+#ifdef  H5_HAVE_WIN_THREADS 
 
     ret_value = CreateThread(NULL, 0, func, udata, 0, NULL);
 
@@ -411,4 +411,4 @@ H5TS_create_thread(void * func, H5TS_attr_t * attr, void*udata)
 
 } /* H5TS_create_thread */
 
-#endif	/* H5_HAVE_THREADSAFE */
+#endif  /* H5_HAVE_THREADSAFE */

@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include "H5private.h"
 
-#ifdef WIN32
+#ifdef H5_HAVE_WIN32_API
 #define OPEN_FLAGS "wb"
 #else
 #define OPEN_FLAGS "w"

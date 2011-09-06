@@ -6,6 +6,12 @@
 /* Define if the Windows virtual file driver should be compiled */
 #cmakedefine H5_HAVE_WINDOWS @H5_HAVE_WINDOWS@
 
+/* Define if on the Windows platform and default WIN32 API */
+#cmakedefine H5_HAVE_WIN32_API @H5_HAVE_WIN32_API@
+
+/* Define if using a Windows compiler (i.e. Visual Studio) */
+#cmakedefine H5_HAVE_VISUAL_STUDIO @H5_HAVE_VISUAL_STUDIO@
+
 /* Define if the Windows virtual file driver should use buffered IO functions */
 /* #undef WINDOWS_USE_STDIO */
 

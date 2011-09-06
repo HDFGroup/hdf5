@@ -17,7 +17,7 @@
  * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.ed>
  *              Thursday, July 11, 2002
  *
- * Purpose:	This is a "combination" MPI-2 and posix I/O driver.
+ * Purpose:  This is a "combination" MPI-2 and posix I/O driver.
  *              It uses MPI for coordinating the actions of several processes
  *              and posix I/O calls to do the actual I/O to the disk.
  *
@@ -34,17 +34,17 @@
  */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5FD_mpiposix_init_interface
+#define H5_INTERFACE_INIT_FUNC  H5FD_mpiposix_init_interface
 
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5FDprivate.h"	/* File drivers				*/
-#include "H5FDmpi.h"            /* MPI-based file drivers		*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5private.h"    /* Generic Functions      */
+#include "H5ACprivate.h"  /* Metadata cache      */
+#include "H5Eprivate.h"    /* Error handling        */
+#include "H5Fprivate.h"    /* File access        */
+#include "H5FDprivate.h"  /* File drivers        */
+#include "H5FDmpi.h"            /* MPI-based file drivers    */
+#include "H5Iprivate.h"    /* IDs            */
+#include "H5MMprivate.h"  /* Memory management      */
 #include "H5Pprivate.h"         /* Property lists                       */
 
 /* Features:
@@ -72,9 +72,9 @@
 static hid_t H5FD_MPIPOSIX_g = 0;
 
 /* File operations */
-#define OP_UNKNOWN	0
-#define OP_READ		1
-#define OP_WRITE	2
+#define OP_UNKNOWN  0
+#define OP_READ    1
+#define OP_WRITE  2
 
 /*
  * The description of a file belonging to this driver.
@@ -84,31 +84,31 @@ static hid_t H5FD_MPIPOSIX_g = 0;
  * doesn't bother to keep it updated since it's an expensive operation.
  */
 typedef struct H5FD_mpiposix_t {
-    H5FD_t	pub;		/*public stuff, must be first		*/
-    int		fd;		/*the unix file handle		        */
-    MPI_Comm	comm;		/*communicator				*/
+    H5FD_t  pub;    /*public stuff, must be first    */
+    int    fd;    /*the unix file handle            */
+    MPI_Comm  comm;    /*communicator        */
     int         mpi_rank;       /* This process's rank                  */
     int         mpi_size;       /* Total number of processes            */
-    haddr_t	eof;		/*end-of-file marker			*/
-    haddr_t	eoa;		/*end-of-address marker			*/
-    haddr_t	last_eoa;	/* Last known end-of-address marker	*/
-    haddr_t	pos;		/* Current file I/O position	        */
-    int		op;		/* Last file I/O operation		*/
-    hsize_t	naccess;	/* Number of (write) accesses to file   */
+    haddr_t  eof;    /*end-of-file marker      */
+    haddr_t  eoa;    /*end-of-address marker      */
+    haddr_t  last_eoa;  /* Last known end-of-address marker  */
+    haddr_t  pos;    /* Current file I/O position          */
+    int    op;    /* Last file I/O operation    */
+    hsize_t  naccess;  /* Number of (write) accesses to file   */
 #ifdef H5_HAVE_GPFS
     size_t      blksize;        /* Block size of file system            */
 #endif
     hbool_t     use_gpfs;       /* Use GPFS to write things             */
-#ifndef _WIN32
+#ifndef H5_HAVE_WIN32_API
     /*
      * On most systems the combination of device and i-node number uniquely
      * identify a file.
      */
-    dev_t	device;		/*file device number		*/
-    ino_t	inode;		/*file i-node number		*/
+    dev_t  device;    /*file device number    */
+    ino_t  inode;    /*file i-node number    */
 #else
     /*
-     * On _WIN32 the low-order word of a unique identifier associated with the
+     * On H5_HAVE_WIN32_API the low-order word of a unique identifier associated with the
      * file and the volume serial number uniquely identify a file. This number
      * (which, both? -rpm) may change when the system is restarted or when the
      * file is opened. After a process opens a file, the identifier is
@@ -126,52 +126,52 @@ typedef struct H5FD_mpiposix_t {
  * some macros here so we don't have to have conditional compilations later
  * throughout the code.
  *
- * file_offset_t:	The datatype for file offsets, the second argument of
- *			the lseek() or lseek64() call.
+ * file_offset_t:  The datatype for file offsets, the second argument of
+ *      the lseek() or lseek64() call.
  *
- * file_seek:		The function which adjusts the current file position,
- *			either lseek() or lseek64().
+ * file_seek:    The function which adjusts the current file position,
+ *      either lseek() or lseek64().
  */
 /* adding for windows NT file system support. */
 
 #ifdef H5_HAVE_LSEEK64
-#   define file_offset_t	off64_t
-#   define file_seek		lseek64
-#   define file_truncate	ftruncate64
-#elif defined (_WIN32)
+#   define file_offset_t  off64_t
+#   define file_seek    lseek64
+#   define file_truncate  ftruncate64
+#elif defined (H5_HAVE_WIN32_API)
 # /*MSVC*/
 #   define file_offset_t __int64
 #   define file_seek _lseeki64
-#   define file_truncate	_ftruncatei64
+#   define file_truncate  _ftruncatei64
 #else
-#   define file_offset_t	off_t
-#   define file_seek		HDlseek
-#   define file_truncate	HDftruncate
+#   define file_offset_t  off_t
+#   define file_seek    HDlseek
+#   define file_truncate  HDftruncate
 #endif
 
 /*
  * These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
  *
- * ADDR_OVERFLOW:	Checks whether a file address of type `haddr_t'
- *			is too large to be represented by the second argument
- *			of the file seek function.
+ * ADDR_OVERFLOW:  Checks whether a file address of type `haddr_t'
+ *      is too large to be represented by the second argument
+ *      of the file seek function.
  *
- * SIZE_OVERFLOW:	Checks whether a buffer size of type `hsize_t' is too
- *			large to be represented by the `size_t' type.
+ * SIZE_OVERFLOW:  Checks whether a buffer size of type `hsize_t' is too
+ *      large to be represented by the `size_t' type.
  *
- * REGION_OVERFLOW:	Checks whether an address and size pair describe data
- *			which can be addressed entirely by the second
- *			argument of the file seek function.
+ * REGION_OVERFLOW:  Checks whether an address and size pair describe data
+ *      which can be addressed entirely by the second
+ *      argument of the file seek function.
  */
 #define MAXADDR (((haddr_t)1<<(8*sizeof(file_offset_t)-1))-1)
-#define ADDR_OVERFLOW(A)	(HADDR_UNDEF==(A) ||			      \
-				 ((A) & ~(haddr_t)MAXADDR))
-#define SIZE_OVERFLOW(Z)	((Z) & ~(hsize_t)MAXADDR)
-#define REGION_OVERFLOW(A,Z)	(ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) ||      \
-				 sizeof(file_offset_t)<sizeof(size_t) ||      \
-                                 HADDR_UNDEF==(A)+(Z) ||		      \
-				 (file_offset_t)((A)+(Z))<(file_offset_t)(A))
+#define ADDR_OVERFLOW(A)  (HADDR_UNDEF==(A) ||            \
+         ((A) & ~(haddr_t)MAXADDR))
+#define SIZE_OVERFLOW(Z)  ((Z) & ~(hsize_t)MAXADDR)
+#define REGION_OVERFLOW(A,Z)  (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) ||      \
+         sizeof(file_offset_t)<sizeof(size_t) ||      \
+                                 HADDR_UNDEF==(A)+(Z) ||          \
+         (file_offset_t)((A)+(Z))<(file_offset_t)(A))
 
 /* Callbacks */
 static herr_t H5FD_mpiposix_term(void);
@@ -179,7 +179,7 @@ static void *H5FD_mpiposix_fapl_get(H5FD_t *_file);
 static void *H5FD_mpiposix_fapl_copy(const void *_old_fa);
 static herr_t H5FD_mpiposix_fapl_free(void *_fa);
 static H5FD_t *H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
-			      haddr_t maxaddr);
+            haddr_t maxaddr);
 static herr_t H5FD_mpiposix_close(H5FD_t *_file);
 static int H5FD_mpiposix_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_mpiposix_query(const H5FD_t *_f1, unsigned long *flags);
@@ -199,44 +199,44 @@ static MPI_Comm H5FD_mpiposix_communicator(const H5FD_t *_file);
 /* MPIPOSIX-specific file access properties */
 typedef struct H5FD_mpiposix_fapl_t {
     hbool_t             use_gpfs;       /*use GPFS hints                */
-    MPI_Comm		comm;		/*communicator			*/
+    MPI_Comm    comm;    /*communicator      */
 } H5FD_mpiposix_fapl_t;
 
 /* The MPIPOSIX file driver information */
 static const H5FD_class_mpi_t H5FD_mpiposix_g = {
     {   /* Start of superclass information */
-    "mpiposix",					/*name			*/
-    MAXADDR,					/*maxaddr		*/
-    H5F_CLOSE_SEMI,				/* fc_degree		*/
+    "mpiposix",          /*name      */
+    MAXADDR,          /*maxaddr    */
+    H5F_CLOSE_SEMI,        /* fc_degree    */
     H5FD_mpiposix_term,                         /*terminate             */
-    NULL,					/*sb_size		*/
-    NULL,					/*sb_encode		*/
-    NULL,					/*sb_decode		*/
-    sizeof(H5FD_mpiposix_fapl_t),		/*fapl_size		*/
-    H5FD_mpiposix_fapl_get,			/*fapl_get		*/
-    H5FD_mpiposix_fapl_copy,			/*fapl_copy		*/
-    H5FD_mpiposix_fapl_free, 			/*fapl_free		*/
-    0,						/*dxpl_size		*/
-    NULL,					/*dxpl_copy		*/
-    NULL,					/*dxpl_free		*/
-    H5FD_mpiposix_open,				/*open			*/
-    H5FD_mpiposix_close,			/*close			*/
-    H5FD_mpiposix_cmp,			        /*cmp			*/
-    H5FD_mpiposix_query,		        /*query			*/
-    NULL,					/*get_type_map		*/
-    NULL,					/*alloc			*/
-    NULL,					/*free			*/
-    H5FD_mpiposix_get_eoa,			/*get_eoa		*/
-    H5FD_mpiposix_set_eoa, 			/*set_eoa		*/
-    H5FD_mpiposix_get_eof,			/*get_eof		*/
+    NULL,          /*sb_size    */
+    NULL,          /*sb_encode    */
+    NULL,          /*sb_decode    */
+    sizeof(H5FD_mpiposix_fapl_t),    /*fapl_size    */
+    H5FD_mpiposix_fapl_get,      /*fapl_get    */
+    H5FD_mpiposix_fapl_copy,      /*fapl_copy    */
+    H5FD_mpiposix_fapl_free,       /*fapl_free    */
+    0,            /*dxpl_size    */
+    NULL,          /*dxpl_copy    */
+    NULL,          /*dxpl_free    */
+    H5FD_mpiposix_open,        /*open      */
+    H5FD_mpiposix_close,      /*close      */
+    H5FD_mpiposix_cmp,              /*cmp      */
+    H5FD_mpiposix_query,            /*query      */
+    NULL,          /*get_type_map    */
+    NULL,          /*alloc      */
+    NULL,          /*free      */
+    H5FD_mpiposix_get_eoa,      /*get_eoa    */
+    H5FD_mpiposix_set_eoa,       /*set_eoa    */
+    H5FD_mpiposix_get_eof,      /*get_eof    */
     H5FD_mpiposix_get_handle,                   /*get_handle            */
-    H5FD_mpiposix_read,				/*read			*/
-    H5FD_mpiposix_write,			/*write			*/
-    NULL,					/*flush			*/
-    H5FD_mpiposix_truncate,			/*truncate		*/
+    H5FD_mpiposix_read,        /*read      */
+    H5FD_mpiposix_write,      /*write      */
+    NULL,          /*flush      */
+    H5FD_mpiposix_truncate,      /*truncate    */
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
-    H5FD_FLMAP_SINGLE 				/*fl_map		*/
+    H5FD_FLMAP_SINGLE         /*fl_map    */
     },  /* End of superclass information */
     H5FD_mpiposix_mpi_rank,                     /*get_rank              */
     H5FD_mpiposix_mpi_size,                     /*get_size              */
@@ -267,16 +267,16 @@ H5FD_mpiposix_init_interface(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_init
+ * Function:  H5FD_mpiposix_init
  *
- * Purpose:	Initialize this driver by registering the driver with the
- *		library.
+ * Purpose:  Initialize this driver by registering the driver with the
+ *    library.
  *
- * Return:	Success:	The driver ID for the mpiposix driver.
+ * Return:  Success:  The driver ID for the mpiposix driver.
  *
- *		Failure:	Negative.
+ *    Failure:  Negative.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:
@@ -302,9 +302,9 @@ done:
 
 
 /*---------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_term
+ * Function:  H5FD_mpiposix_term
  *
- * Purpose:	Shut down the VFD
+ * Purpose:  Shut down the VFD
  *
  * Returns:     Non-negative on success or negative on failure
  *
@@ -326,43 +326,43 @@ H5FD_mpiposix_term(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_fapl_mpiposix
+ * Function:  H5Pset_fapl_mpiposix
  *
- * Purpose:	Store the user supplied MPI communicator COMM in
- *		the file access property list FAPL_ID which can then be used
- *		to create and/or open the file.  This function is available
- *		only in the parallel HDF5 library and is not collective.
+ * Purpose:  Store the user supplied MPI communicator COMM in
+ *    the file access property list FAPL_ID which can then be used
+ *    to create and/or open the file.  This function is available
+ *    only in the parallel HDF5 library and is not collective.
  *
- *		comm is the MPI communicator to be used for file open as
- *		defined in MPI_FILE_OPEN of MPI-2. This function makes a
- *		duplicate of comm. Any modification to comm after this function
- *		call returns has no effect on the access property list.
+ *    comm is the MPI communicator to be used for file open as
+ *    defined in MPI_FILE_OPEN of MPI-2. This function makes a
+ *    duplicate of comm. Any modification to comm after this function
+ *    call returns has no effect on the access property list.
  *
  *              If fapl_id has previously set comm value, it will be replaced
  *              and the old communicator is freed.
  *
- * Return:	Success:	Non-negative
- * 		Failure:	Negative
+ * Return:  Success:  Non-negative
+ *     Failure:  Negative
  *
- * Programmer:	Quincey Koziol
- *		Thursday, July 11, 2002
+ * Programmer:  Quincey Koziol
+ *    Thursday, July 11, 2002
  *
  * Modifications:
- *		Albert Cheng, 2003-04-24
- *		Modified the description of the function that it now stores
- *		a duplicate of the communicator.  Free the old duplicate if
- *		previously set.  (Work is actually done by H5P_set_driver.)
+ *    Albert Cheng, 2003-04-24
+ *    Modified the description of the function that it now stores
+ *    a duplicate of the communicator.  Free the old duplicate if
+ *    previously set.  (Work is actually done by H5P_set_driver.)
  *
- *		Bill Wendling, 2003-05-01
- *		Modified to take an extra flag indicating that we should
- *		use the GPFS hints (if available) for this file.
+ *    Bill Wendling, 2003-05-01
+ *    Modified to take an extra flag indicating that we should
+ *    use the GPFS hints (if available) for this file.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm, hbool_t use_gpfs)
 {
-    H5FD_mpiposix_fapl_t	fa;
+    H5FD_mpiposix_fapl_t  fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
@@ -373,7 +373,7 @@ H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm, hbool_t use_gpfs)
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list")
     if (MPI_COMM_NULL == comm)
-	HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid communicator")
+  HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid communicator")
 
     /* Initialize driver specific properties */
     fa.comm = comm;
@@ -388,29 +388,29 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_fapl_mpiposix
+ * Function:  H5Pget_fapl_mpiposix
  *
- * Purpose:	If the file access property list is set to the H5FD_MPIPOSIX
- *		driver then this function returns a duplicate of the MPI
- *		communicator through the comm pointer. It is the responsibility
- *		of the application to free the returned communicator.
+ * Purpose:  If the file access property list is set to the H5FD_MPIPOSIX
+ *    driver then this function returns a duplicate of the MPI
+ *    communicator through the comm pointer. It is the responsibility
+ *    of the application to free the returned communicator.
  *
- * Return:	Success:	Non-negative with the communicator and
- *				information returned through the COMM
- *				argument if non-null.  Since it is a duplicate
- *				of the stored object, future modifications to
- *				the access property list do not affect it and
- *				it is the responsibility of the application to
- *				free it.
+ * Return:  Success:  Non-negative with the communicator and
+ *        information returned through the COMM
+ *        argument if non-null.  Since it is a duplicate
+ *        of the stored object, future modifications to
+ *        the access property list do not affect it and
+ *        it is the responsibility of the application to
+ *        free it.
  *
- * 		Failure:	Negative
+ *     Failure:  Negative
  *
- * Programmer:	Quincey Koziol
- *		Thursday, July 11, 2002
+ * Programmer:  Quincey Koziol
+ *    Thursday, July 11, 2002
  *
  * Modifications:
- *		Albert Cheng, 2003-04-24
- *		Return duplicate of the stored communicator.
+ *    Albert Cheng, 2003-04-24
+ *    Return duplicate of the stored communicator.
  *
  *              Bill Wendling, 2003-05-01
  *              Return the USE_GPFS flag.
@@ -420,9 +420,9 @@ done:
 herr_t
 H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/, hbool_t *use_gpfs/*out*/)
 {
-    H5FD_mpiposix_fapl_t	*fa;
+    H5FD_mpiposix_fapl_t  *fa;
     H5P_genplist_t *plist;      /* Property list pointer */
-    int		mpi_code;		/* mpi return code */
+    int    mpi_code;    /* mpi return code */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(H5Pget_fapl_mpiposix, FAIL)
@@ -437,8 +437,8 @@ H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/, hbool_t *use_gpfs/*ou
 
     /* Get MPI Communicator */
     if (comm){
-	if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(fa->comm, comm)))
-	    HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code)
+  if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(fa->comm, comm)))
+      HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code)
     }
 
     if (use_gpfs)
@@ -450,32 +450,32 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_fapl_get
+ * Function:  H5FD_mpiposix_fapl_get
  *
- * Purpose:	Returns a file access property list which could be used to
- *		create another file the same as this one.
+ * Purpose:  Returns a file access property list which could be used to
+ *    create another file the same as this one.
  *
- * Return:	Success:	Ptr to new file access property list with all
- *				fields copied from the file pointer.
+ * Return:  Success:  Ptr to new file access property list with all
+ *        fields copied from the file pointer.
  *
- *		Failure:	NULL
+ *    Failure:  NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:
- * 		Albert Cheng, 2003-04-24
- * 		Duplicate the communicator object so that the new
- * 		property list is insulated from the old one.
+ *     Albert Cheng, 2003-04-24
+ *     Duplicate the communicator object so that the new
+ *     property list is insulated from the old one.
  *
  *-------------------------------------------------------------------------
  */
 static void *
 H5FD_mpiposix_fapl_get(H5FD_t *_file)
 {
-    H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
+    H5FD_mpiposix_t  *file = (H5FD_mpiposix_t*)_file;
     H5FD_mpiposix_fapl_t *fa = NULL;
-    int		mpi_code;	/* MPI return code */
+    int    mpi_code;  /* MPI return code */
     void        *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_get, NULL)
@@ -488,7 +488,7 @@ H5FD_mpiposix_fapl_get(H5FD_t *_file)
 
     /* Duplicate the communicator. */
     if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(file->comm, &fa->comm)))
-	HMPI_GOTO_ERROR(NULL, "MPI_Comm_dup failed", mpi_code)
+  HMPI_GOTO_ERROR(NULL, "MPI_Comm_dup failed", mpi_code)
 
     fa->use_gpfs = file->use_gpfs;
 
@@ -501,15 +501,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_fapl_copy
+ * Function:  H5FD_mpiposix_fapl_copy
  *
- * Purpose:	Copies the mpiposix-specific file access properties.
+ * Purpose:  Copies the mpiposix-specific file access properties.
  *
- * Return:	Success:	Ptr to a new property list
+ * Return:  Success:  Ptr to a new property list
  *
- *		Failure:	NULL
+ *    Failure:  NULL
  *
- * Programmer:	Albert Cheng
+ * Programmer:  Albert Cheng
  *              Apr 24, 2003
  *
  * Modifications:
@@ -519,10 +519,10 @@ done:
 static void *
 H5FD_mpiposix_fapl_copy(const void *_old_fa)
 {
-    void		*ret_value = NULL;
+    void    *ret_value = NULL;
     const H5FD_mpiposix_fapl_t *old_fa = (const H5FD_mpiposix_fapl_t*)_old_fa;
-    H5FD_mpiposix_fapl_t	*new_fa = NULL;
-    int		mpi_code;	/* MPI return code */
+    H5FD_mpiposix_fapl_t  *new_fa = NULL;
+    int    mpi_code;  /* MPI return code */
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_copy, NULL)
 
@@ -534,16 +534,16 @@ H5FD_mpiposix_fapl_copy(const void *_old_fa)
 
     /* Duplicate communicator. */
     if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(old_fa->comm, &new_fa->comm)))
-	HMPI_GOTO_ERROR(NULL, "MPI_Comm_dup failed", mpi_code)
+  HMPI_GOTO_ERROR(NULL, "MPI_Comm_dup failed", mpi_code)
 
     new_fa->use_gpfs = old_fa->use_gpfs;
     ret_value = new_fa;
 
 done:
     if (NULL == ret_value){
-	/* cleanup */
-	if (new_fa)
-	    H5MM_xfree(new_fa);
+  /* cleanup */
+  if (new_fa)
+      H5MM_xfree(new_fa);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -551,15 +551,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_fapl_free
+ * Function:  H5FD_mpiposix_fapl_free
  *
- * Purpose:	Frees the mpiposix-specific file access properties.
+ * Purpose:  Frees the mpiposix-specific file access properties.
  *
- * Return:	Success:	0
+ * Return:  Success:  0
  *
- *		Failure:	-1
+ *    Failure:  -1
  *
- * Programmer:	Albert Cheng
+ * Programmer:  Albert Cheng
  *              Apr 24, 2003
  *
  * Modifications:
@@ -569,8 +569,8 @@ done:
 static herr_t
 H5FD_mpiposix_fapl_free(void *_fa)
 {
-    herr_t		ret_value = SUCCEED;
-    H5FD_mpiposix_fapl_t	*fa = (H5FD_mpiposix_fapl_t*)_fa;
+    herr_t    ret_value = SUCCEED;
+    H5FD_mpiposix_fapl_t  *fa = (H5FD_mpiposix_fapl_t*)_fa;
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_free, FAIL)
     assert(fa);
@@ -589,11 +589,11 @@ done:
  * Function:    H5FD_mpiposix_open
  *
  * Purpose:     Opens a file with name NAME.  The FLAGS are a bit field with
- *		purpose similar to the second argument of open(2) and which
- *		are defined in H5Fpublic.h. The file access property list
- *		FAPL_ID contains the properties driver properties and MAXADDR
- *		is the largest address which this file will be expected to
- *		access.  This is collective.
+ *    purpose similar to the second argument of open(2) and which
+ *    are defined in H5Fpublic.h. The file access property list
+ *    FAPL_ID contains the properties driver properties and MAXADDR
+ *    is the largest address which this file will be expected to
+ *    access.  This is collective.
  *
  * Return:      Success:        A new file pointer.
  *              Failure:        NULL
@@ -602,27 +602,27 @@ done:
  *              Thursday, July 11, 2002
  *
  * Modifications:
- * 		Albert Cheng, 2003-04-24
- * 		Duplicate the communicator so that file is insulated from the
- * 		old one.
+ *     Albert Cheng, 2003-04-24
+ *     Duplicate the communicator so that file is insulated from the
+ *     old one.
  *
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
 H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
-	       haddr_t maxaddr)
+         haddr_t maxaddr)
 {
-    H5FD_mpiposix_t		*file=NULL;     /* New MPIPOSIX file struct */
+    H5FD_mpiposix_t    *file=NULL;     /* New MPIPOSIX file struct */
     int                         o_flags;        /* Flags for file open call */
-    int			        fd=(-1);        /* File handle for file opened */
-    int				mpi_rank;       /* MPI rank of this process */
-    int				mpi_size;       /* Total number of MPI processes */
-    int				mpi_code;	/* mpi return code */
-    const H5FD_mpiposix_fapl_t	*fa=NULL;       /* MPIPOSIX file access property list information */
-    H5FD_mpiposix_fapl_t	_fa;            /* Private copy of default file access property list information */
+    int              fd=(-1);        /* File handle for file opened */
+    int        mpi_rank;       /* MPI rank of this process */
+    int        mpi_size;       /* Total number of MPI processes */
+    int        mpi_code;  /* mpi return code */
+    const H5FD_mpiposix_fapl_t  *fa=NULL;       /* MPIPOSIX file access property list information */
+    H5FD_mpiposix_fapl_t  _fa;            /* Private copy of default file access property list information */
     H5P_genplist_t              *plist;         /* Property list pointer */
     h5_stat_t                   sb;             /* Portable 'stat' struct */
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
     HFILE filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
     int results;
@@ -644,18 +644,18 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
     if (H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_MPIPOSIX!=H5P_get_driver(plist)) {
-	_fa.comm = MPI_COMM_SELF; /*default*/
+  _fa.comm = MPI_COMM_SELF; /*default*/
         _fa.use_gpfs = FALSE;
-	fa = &_fa;
+  fa = &_fa;
     } /* end if */
     else {
-	fa = H5P_get_driver_info(plist);
-	assert(fa);
+  fa = H5P_get_driver_info(plist);
+  assert(fa);
     } /* end else */
 
     /* Duplicate the communicator for use by this file. */
     if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(fa->comm, &comm_dup)))
-	HMPI_GOTO_ERROR(NULL, "MPI_Comm_dup failed", mpi_code)
+  HMPI_GOTO_ERROR(NULL, "MPI_Comm_dup failed", mpi_code)
 
     /* Get the MPI rank of this process and the total number of processes */
     if (MPI_SUCCESS != (mpi_code=MPI_Comm_rank (comm_dup, &mpi_rank)))
@@ -756,7 +756,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     file->fd = fd;
     file->eof = sb.st_size;
 
-    /* for _WIN32 support. _WIN32 'stat' does not have st_blksize and st_blksize
+    /* for H5_HAVE_WIN32_API support. H5_HAVE_WIN32_API 'stat' does not have st_blksize and st_blksize
        is only used for the H5_HAVE_GPFS case */
 #ifdef H5_HAVE_GPFS
     file->blksize = sb.st_blksize;
@@ -775,7 +775,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     file->op = OP_UNKNOWN;
 
     /* Set the information for the file's device and inode */
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
     filehandle = _get_osfhandle(fd);
     results = GetFileInformationByHandle((HANDLE)filehandle, &fileinfo);
     file->fileindexhi = fileinfo.nFileIndexHigh;
@@ -794,8 +794,8 @@ done:
         /* Close the file if it was left open */
         if(fd!=(-1))
             HDclose(fd);
-	if (MPI_COMM_NULL != comm_dup)
-	    MPI_Comm_free(&comm_dup);
+  if (MPI_COMM_NULL != comm_dup)
+      MPI_Comm_free(&comm_dup);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -807,21 +807,21 @@ done:
  *
  * Purpose:     Closes a file.
  *
- * Return:      Success:	Non-negative
- * 		Failure:	Negative
+ * Return:      Success:  Non-negative
+ *     Failure:  Negative
  *
  * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:
- * 		Albert Cheng, 2003-04-24
- *		Free the communicator stored.
+ *     Albert Cheng, 2003-04-24
+ *    Free the communicator stored.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD_mpiposix_close(H5FD_t *_file)
 {
-    H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
+    H5FD_mpiposix_t  *file = (H5FD_mpiposix_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_close, FAIL)
@@ -845,16 +845,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_cmp
+ * Function:  H5FD_mpiposix_cmp
  *
- * Purpose:	Compares two files belonging to this driver using an
- *		arbitrary (but consistent) ordering.
+ * Purpose:  Compares two files belonging to this driver using an
+ *    arbitrary (but consistent) ordering.
  *
- * Return:	Success:	A value like strcmp()
- *		Failure:	never fails (arguments were checked by the
- *				caller).
+ * Return:  Success:  A value like strcmp()
+ *    Failure:  never fails (arguments were checked by the
+ *        caller).
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:
@@ -864,13 +864,13 @@ done:
 static int
 H5FD_mpiposix_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
-    const H5FD_mpiposix_t	*f1 = (const H5FD_mpiposix_t*)_f1;
-    const H5FD_mpiposix_t	*f2 = (const H5FD_mpiposix_t*)_f2;
+    const H5FD_mpiposix_t  *f1 = (const H5FD_mpiposix_t*)_f1;
+    const H5FD_mpiposix_t  *f2 = (const H5FD_mpiposix_t*)_f2;
     int ret_value=0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_mpiposix_cmp)
 
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
     if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)
     if (f1->fileindexhi > f2->fileindexhi) HGOTO_DONE(1)
 
@@ -900,15 +900,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_query
+ * Function:  H5FD_mpiposix_query
  *
- * Purpose:	Set the flags that this VFL driver is capable of supporting.
+ * Purpose:  Set the flags that this VFL driver is capable of supporting.
  *              (listed in H5FDpublic.h)
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:  Success:  non-negative
+ *    Failure:  negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:
@@ -916,8 +916,8 @@ done:
  *              John Mainzer -- 9/21/05
  *              Modified code to turn off the
  *              H5FD_FEAT_ACCUMULATE_METADATA_WRITE flag.
- *		With the movement of all cache writes to process 0,
- *		this flag has become problematic in PHDF5.
+ *    With the movement of all cache writes to process 0,
+ *    this flag has become problematic in PHDF5.
  *
  *-------------------------------------------------------------------------
  */
@@ -943,16 +943,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_get_eoa
+ * Function:  H5FD_mpiposix_get_eoa
  *
- * Purpose:	Gets the end-of-address marker for the file. The EOA marker
- *		is the first address past the last byte allocated in the
- *		format address space.
+ * Purpose:  Gets the end-of-address marker for the file. The EOA marker
+ *    is the first address past the last byte allocated in the
+ *    format address space.
  *
- * Return:	Success:	The end-of-address marker.
- *		Failure:	HADDR_UNDEF
+ * Return:  Success:  The end-of-address marker.
+ *    Failure:  HADDR_UNDEF
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:
@@ -982,16 +982,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_set_eoa
+ * Function:  H5FD_mpiposix_set_eoa
  *
- * Purpose:	Set the end-of-address marker for the file. This function is
- *		called shortly after an existing HDF5 file is opened in order
- *		to tell the driver where the end of the HDF5 data is located.
+ * Purpose:  Set the end-of-address marker for the file. This function is
+ *    called shortly after an existing HDF5 file is opened in order
+ *    to tell the driver where the end of the HDF5 data is located.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:  Success:  non-negative
+ *    Failure:  negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:
@@ -1004,7 +1004,7 @@ done:
 static herr_t
 H5FD_mpiposix_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
 {
-    H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
+    H5FD_mpiposix_t  *file = (H5FD_mpiposix_t*)_file;
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_set_eoa, FAIL)
@@ -1020,21 +1020,21 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_get_eof
+ * Function:  H5FD_mpiposix_get_eof
  *
- * Purpose:	Gets the end-of-file marker for the file. The EOF marker
- *		is the real size of the file.
+ * Purpose:  Gets the end-of-file marker for the file. The EOF marker
+ *    is the real size of the file.
  *
- *		The MPIPOSIX driver doesn't bother keeping this field updated
- *		since that's a relatively expensive operation. Fortunately
- *		the library only needs the EOF just after the file is opened
- *		in order to determine whether the file is empty, truncated,
- *		or okay.
+ *    The MPIPOSIX driver doesn't bother keeping this field updated
+ *    since that's a relatively expensive operation. Fortunately
+ *    the library only needs the EOF just after the file is opened
+ *    in order to determine whether the file is empty, truncated,
+ *    or okay.
  *
- * Return:	Success:	The end-of-address marker.
- *		Failure:	HADDR_UNDEF
+ * Return:  Success:  The end-of-address marker.
+ *    Failure:  HADDR_UNDEF
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:
@@ -1044,7 +1044,7 @@ done:
 static haddr_t
 H5FD_mpiposix_get_eof(const H5FD_t *_file)
 {
-    const H5FD_mpiposix_t	*file = (const H5FD_mpiposix_t*)_file;
+    const H5FD_mpiposix_t  *file = (const H5FD_mpiposix_t*)_file;
     haddr_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_get_eof, HADDR_UNDEF)
@@ -1093,21 +1093,21 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_read
+ * Function:  H5FD_mpiposix_read
  *
- * Purpose:	Reads SIZE bytes of data from FILE beginning at address ADDR
- *		into buffer BUF according to data transfer properties in
- *		DXPL_ID using potentially complex file and buffer types to
- *		effect the transfer.
+ * Purpose:  Reads SIZE bytes of data from FILE beginning at address ADDR
+ *    into buffer BUF according to data transfer properties in
+ *    DXPL_ID using potentially complex file and buffer types to
+ *    effect the transfer.
  *
- *		Reading past the end of the file returns zeros instead of
- *		failing.
+ *    Reading past the end of the file returns zeros instead of
+ *    failing.
  *
- * Return:	Success:	Non-negative. Result is stored in caller-supplied
- *				buffer BUF.
- *		Failure:	Negative, Contents of buffer BUF are undefined.
+ * Return:  Success:  Non-negative. Result is stored in caller-supplied
+ *        buffer BUF.
+ *    Failure:  Negative, Contents of buffer BUF are undefined.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:
@@ -1116,11 +1116,11 @@ done:
  */
 static herr_t
 H5FD_mpiposix_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr, size_t size,
-	       void *buf/*out*/)
+         void *buf/*out*/)
 {
-    H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
-    ssize_t	        nbytes;         /* Number of bytes read each I/O call */
-    herr_t             	ret_value=SUCCEED;
+    H5FD_mpiposix_t  *file = (H5FD_mpiposix_t*)_file;
+    ssize_t          nbytes;         /* Number of bytes read each I/O call */
+    herr_t               ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_read, FAIL)
 
@@ -1189,17 +1189,17 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_write
+ * Function:  H5FD_mpiposix_write
  *
- * Purpose:	Writes SIZE bytes of data to FILE beginning at address ADDR
- *		from buffer BUF according to data transfer properties in
- *		DXPL_ID using potentially complex file and buffer types to
- *		effect the transfer.
+ * Purpose:  Writes SIZE bytes of data to FILE beginning at address ADDR
+ *    from buffer BUF according to data transfer properties in
+ *    DXPL_ID using potentially complex file and buffer types to
+ *    effect the transfer.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:  Success:  non-negative
+ *    Failure:  negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:
@@ -1214,15 +1214,15 @@ done:
  */
 static herr_t
 H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
-		size_t size, const void *buf)
+    size_t size, const void *buf)
 {
-    H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
+    H5FD_mpiposix_t  *file = (H5FD_mpiposix_t*)_file;
 #if 0 /* JRM */
-    int			mpi_code;	/* MPI return code */
+    int      mpi_code;  /* MPI return code */
 #endif /* JRM */
-    ssize_t	        nbytes;         /* Number of bytes written each I/O call */
+    ssize_t          nbytes;         /* Number of bytes written each I/O call */
     H5P_genplist_t      *plist;         /* Property list pointer */
-    herr_t             	ret_value=SUCCEED;      /* Return value */
+    herr_t               ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_write, FAIL)
 
@@ -1251,10 +1251,10 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      * writes between processes, but we should really just flag an error
      * whenever any process other than process 0 attempts to write
      * metadata.
-     * 						-- JRM 9/1/05
+     *             -- JRM 9/1/05
      */
     if(type!=H5FD_MEM_DRAW) {
-        unsigned		block_before_meta_write=0;      /* Whether to block before a metadata write */
+        unsigned    block_before_meta_write=0;      /* Whether to block before a metadata write */
 
         /* Check if we need to syncronize all processes before attempting metadata write
          * (Prevents race condition where the process writing the metadata goes ahead
@@ -1352,11 +1352,11 @@ done:
     } /* end if */
 #if 0 /* JRM */
         /* Since metadata writes are now done by process 0 only, this broadcast
-	 * is no longer needed.  I leave it in and commented out to remind us
-	 * that we need to re-work this function to reflect this reallity.
-	 *
-	 *                                          -- JRM 9/1/05
-	 */
+   * is no longer needed.  I leave it in and commented out to remind us
+   * that we need to re-work this function to reflect this reallity.
+   *
+   *                                          -- JRM 9/1/05
+   */
 
     /* Guard against getting into metadata broadcast in failure cases */
     else {
@@ -1375,11 +1375,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpiposix_truncate
  *
- * Purpose:	Makes sure that the true file size is the same (or larger)
- *		than the end-of-address.
+ * Purpose:  Makes sure that the true file size is the same (or larger)
+ *    than the end-of-address.
  *
- * Return:      Success:	Non-negative
- * 		Failure:	Negative
+ * Return:      Success:  Non-negative
+ *     Failure:  Negative
  *
  * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
@@ -1389,12 +1389,12 @@ done:
 static herr_t
 H5FD_mpiposix_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
 {
-    H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
-#ifdef _WIN32
+    H5FD_mpiposix_t  *file = (H5FD_mpiposix_t*)_file;
+#ifdef H5_HAVE_WIN32_API
     HFILE filehandle;   /* Windows file handle */
     LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
-#endif /* _WIN32 */
-    int			mpi_code;	/* MPI return code */
+#endif /* H5_HAVE_WIN32_API */
+    int      mpi_code;  /* MPI return code */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_truncate, FAIL)
@@ -1406,7 +1406,7 @@ H5FD_mpiposix_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closi
     if(file->eoa > file->last_eoa) {
         /* Use the round-robin process to truncate (extend) the file */
         if(file->mpi_rank == H5_PAR_META_WRITE) {
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
             /* Map the posix file handle to a Windows file handle */
             filehandle = _get_osfhandle(file->fd);
 
@@ -1416,10 +1416,10 @@ H5FD_mpiposix_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closi
             SetFilePointer((HANDLE)filehandle, li.LowPart, &li.HighPart, FILE_BEGIN);
             if(SetEndOfFile((HANDLE)filehandle) == 0)
                 HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
-#else /* _WIN32 */
+#else /* H5_HAVE_WIN32_API */
             if(-1==file_truncate(file->fd, (file_offset_t)file->eoa))
                 HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
-#endif /* _WIN32 */
+#endif /* H5_HAVE_WIN32_API */
         } /* end if */
 
         /* Don't let any proc return until all have extended the file.
@@ -1446,14 +1446,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_mpi_rank
+ * Function:  H5FD_mpiposix_mpi_rank
  *
- * Purpose:	Returns the MPI rank for a process
+ * Purpose:  Returns the MPI rank for a process
  *
- * Return:	Success: non-negative
- *		Failure: negative
+ * Return:  Success: non-negative
+ *    Failure: negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:
@@ -1480,14 +1480,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_mpi_size
+ * Function:  H5FD_mpiposix_mpi_size
  *
- * Purpose:	Returns the number of MPI processes
+ * Purpose:  Returns the number of MPI processes
  *
- * Return:	Success: non-negative
- *		Failure: negative
+ * Return:  Success: non-negative
+ *    Failure: negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:
@@ -1514,15 +1514,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_communicator
+ * Function:  H5FD_mpiposix_communicator
  *
- * Purpose:	Returns the MPI communicator for the file.
+ * Purpose:  Returns the MPI communicator for the file.
  *
- * Return:	Success:	The communicator
+ * Return:  Success:  The communicator
  *
- *		Failure:	NULL
+ *    Failure:  NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
  * Modifications:

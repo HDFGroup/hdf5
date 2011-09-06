@@ -303,7 +303,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
-
+      - #ifdef _WIN32 instances changed to #ifdef H5_HAVE_WIN32_API and added
+            H5_HAVE_VISUAL_STUDIO checks where necessary. CMake only as configure
+            never set _WIN32.
       - CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
             discovered 3 problems in tests and tools' library (Issue 7674):
               1. In dsets.c, left shifting an unsigned int for 32 bits or more

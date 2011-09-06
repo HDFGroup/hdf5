@@ -53,7 +53,7 @@ typedef struct H5FD_core_t {
     hbool_t	backing_store;		/*write to file name on flush	*/
     int		fd;			/*backing store file descriptor	*/
     /* Information for determining uniqueness of a file with a backing store */
-#ifndef _WIN32
+#ifndef H5_HAVE_WIN32_API
     /*
      * On most systems the combination of device and i-node number uniquely
      * identify a file.
@@ -66,7 +66,7 @@ typedef struct H5FD_core_t {
 #endif /*H5_VMS*/
 #else
     /*
-     * On _WIN32 the low-order word of a unique identifier associated with the
+     * On H5_HAVE_WIN32_API the low-order word of a unique identifier associated with the
      * file and the volume serial number uniquely identify a file. This number
      * (which, both? -rpm) may change when the system is restarted or when the
      * file is opened. After a process opens a file, the identifier is
@@ -416,7 +416,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_core_t		*file=NULL;
     H5FD_core_fapl_t	*fa=NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
     HFILE filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
@@ -473,12 +473,12 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
 
     if(fd >= 0) {
         /* Retrieve information for determining uniqueness of file */
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
         filehandle = _get_osfhandle(fd);
         (void)GetFileInformationByHandle((HANDLE)filehandle, &fileinfo);
         file->fileindexhi = fileinfo.nFileIndexHigh;
         file->fileindexlo = fileinfo.nFileIndexLow;
-#else /* _WIN32 */
+#else /* H5_HAVE_WIN32_API */
         file->device = sb.st_dev;
 #ifdef H5_VMS
         file->inode[0] = sb.st_ino[0];
@@ -488,7 +488,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
         file->inode = sb.st_ino;
 #endif /* H5_VMS */
 
-#endif /* _WIN32 */
+#endif /* H5_HAVE_WIN32_API */
     } /* end if */
 
     /* If an existing file is opened, load the whole file into memory. */
@@ -598,7 +598,7 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     if(f1->fd >= 0 && f2->fd >= 0) {
         /* Compare low level file information for backing store */
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
         if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)
         if (f1->fileindexhi > f2->fileindexhi) HGOTO_DONE(1)
 
@@ -626,7 +626,7 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
         if(HDmemcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))>0) HGOTO_DONE(1)
 #endif /* H5_VMS */
 
-#endif /*_WIN32*/
+#endif /*H5_HAVE_WIN32_API*/
     } /* end if */
     else {
         if (NULL==f1->name && NULL==f2->name) {

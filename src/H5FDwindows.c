@@ -81,7 +81,7 @@ typedef struct H5FD_windows_t {
     int		op;				/*last operation				*/
 	unsigned write_access;	/*flag to indicate the file was opened with write access */
     /*
-     * On _WIN32 the low-order word of a unique identifier associated with the
+     * On H5_HAVE_WIN32_API the low-order word of a unique identifier associated with the
      * file and the volume serial number uniquely identify a file. This number
      * may change when the system is restarted or when the
      * file is opened. After a process opens a file, the identifier is
