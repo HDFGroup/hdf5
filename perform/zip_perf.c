@@ -413,7 +413,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
     register unsigned u;
     h5_stat_t stat_buf;
 
-    if (stat("/dev/urandom", &stat_buf) == 0) {
+    if (HDstat("/dev/urandom", &stat_buf) == 0) {
         uLongf len = src_len;
         Bytef *buf = src;
         int fd = HDopen("/dev/urandom", O_RDONLY, 0);
