@@ -39,29 +39,29 @@
 
 #ifdef H5_HAVE_GETTIMEOFDAY
 
-#define	START_TIMER(time_tests, start_time, vrfy_msg)			\
-	{								\
-            int result;							\
-            if ( time_tests ) {						\
-                    result = HDgettimeofday(&(start_time), NULL);	\
-                    VRFY( (result == 0), (vrfy_msg));			\
-            }								\
-	}
+#define  START_TIMER(time_tests, start_time, vrfy_msg)      \
+  {                \
+            int result;              \
+            if ( time_tests ) {            \
+                    result = HDgettimeofday(&(start_time), NULL);  \
+                    VRFY( (result == 0), (vrfy_msg));      \
+            }                \
+  }
 
-#define STOP_TIMER_AND_UPDATE(time_tests, end_time, vrfy_msg, times)	\
-        {								\
-            int result;							\
-            long long delta_usecs;					\
-            if ( time_tests ) {						\
-                result = HDgettimeofday(&(end_time), NULL);		\
-                VRFY( (result == 0), (vrfy_msg));			\
-                delta_usecs = 						\
-                   (1000000 * (timeval_b.tv_sec - timeval_a.tv_sec)) +	\
-                   (timeval_b.tv_usec - timeval_a.tv_usec);		\
-                HDassert( delta_usecs >= 0L );				\
-                (times) += delta_usecs;					\
-            }								\
-	}
+#define STOP_TIMER_AND_UPDATE(time_tests, end_time, vrfy_msg, times)  \
+        {                \
+            int result;              \
+            long long delta_usecs;          \
+            if ( time_tests ) {            \
+                result = HDgettimeofday(&(end_time), NULL);    \
+                VRFY( (result == 0), (vrfy_msg));      \
+                delta_usecs =             \
+                   (1000000 * (timeval_b.tv_sec - timeval_a.tv_sec)) +  \
+                   (timeval_b.tv_usec - timeval_a.tv_usec);    \
+                HDassert( delta_usecs >= 0L );        \
+                (times) += delta_usecs;          \
+            }                \
+  }
 
 #else /* H5_HAVE_GETTIMEOFDAY */
 
@@ -78,31 +78,31 @@
  * the chunked dataset case.
  */
 
-#define SHAPE_SAME_TEST_ALIGNMENT	((hsize_t)(4 * 1024 * 1024))
+#define SHAPE_SAME_TEST_ALIGNMENT  ((hsize_t)(4 * 1024 * 1024))
 
 
 /*-------------------------------------------------------------------------
- * Function:	contig_hyperslab_dr_pio_test__run_test()
+ * Function:  contig_hyperslab_dr_pio_test__run_test()
  *
- * Purpose:	Test I/O to/from hyperslab selections of different rank in
- *		the parallel.
+ * Purpose:  Test I/O to/from hyperslab selections of different rank in
+ *    the parallel.
  *
- * Return:	void
+ * Return:  void
  *
- * Programmer:	JRM -- 9/18/09
+ * Programmer:  JRM -- 9/18/09
  *
  * Modifications:
  *
- *		JRM -- 9/16/10
- *		Added express_test parameter.  Use it to control whether 
- *		we set up the chunks so that no chunk is shared between 
- *		processes, and also whether we set an alignment when we 
- *		create the test file.
+ *    JRM -- 9/16/10
+ *    Added express_test parameter.  Use it to control whether 
+ *    we set up the chunks so that no chunk is shared between 
+ *    processes, and also whether we set an alignment when we 
+ *    create the test file.
  *
  *-------------------------------------------------------------------------
  */
 
-#define PAR_SS_DR_MAX_RANK	5
+#define PAR_SS_DR_MAX_RANK  5
 #define CONTIG_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 0
 
 static void
@@ -119,17 +119,17 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     const char *fcnName = "contig_hyperslab_dr_pio_test__run_test()";
 #endif /* CONTIG_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG */
     const char *filename;
-    hbool_t	use_gpfs = FALSE;   /* Use GPFS hints */
-    hbool_t	mis_match = FALSE;
-    int		i, j, k, l;
-    size_t	n;
+    hbool_t  use_gpfs = FALSE;   /* Use GPFS hints */
+    hbool_t  mis_match = FALSE;
+    int    i, j, k, l;
+    size_t  n;
     int         mrc;
-    int		mpi_size = -1;
+    int    mpi_size = -1;
     int         mpi_rank = -1;
     size_t      start_index;
     size_t      stop_index;
     const int   test_max_rank = 5;  /* must update code if this changes */
-    uint32_t	expected_value;
+    uint32_t  expected_value;
     uint32_t  * small_ds_buf_0 = NULL;
     uint32_t  * small_ds_buf_1 = NULL;
     uint32_t  * small_ds_buf_2 = NULL;
@@ -141,22 +141,22 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     uint32_t  * ptr_0;
     uint32_t  * ptr_1;
     MPI_Comm    mpi_comm = MPI_COMM_NULL;
-    MPI_Info	mpi_info = MPI_INFO_NULL;
-    hid_t       fid;			/* HDF5 file ID */
-    hid_t	acc_tpl;		/* File access templates */
-    hid_t	xfer_plist = H5P_DEFAULT;
+    MPI_Info  mpi_info = MPI_INFO_NULL;
+    hid_t       fid;      /* HDF5 file ID */
+    hid_t  acc_tpl;    /* File access templates */
+    hid_t  xfer_plist = H5P_DEFAULT;
     hid_t       full_mem_small_ds_sid;
     hid_t       full_file_small_ds_sid;
     hid_t       mem_small_ds_sid;
     hid_t       file_small_ds_sid;
-    hid_t	small_ds_slice_sid;
+    hid_t  small_ds_slice_sid;
     hid_t       full_mem_large_ds_sid;
     hid_t       full_file_large_ds_sid;
     hid_t       mem_large_ds_sid;
     hid_t       file_large_ds_sid;
     hid_t       file_large_ds_process_slice_sid;
     hid_t       mem_large_ds_process_slice_sid;
-    hid_t	large_ds_slice_sid;
+    hid_t  large_ds_slice_sid;
     hid_t       small_ds_dcpl_id = H5P_DEFAULT;
     hid_t       large_ds_dcpl_id = H5P_DEFAULT;
     hid_t       small_dataset;     /* Dataset ID                   */
@@ -176,7 +176,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     hsize_t   * count_ptr = NULL;
     hsize_t   * block_ptr = NULL;
     htri_t      check;          /* Shape comparison return value */
-    herr_t	ret;		/* Generic return value */
+    herr_t  ret;    /* Generic return value */
 
     HDassert( edge_size >= 6 );
     HDassert( edge_size >= chunk_edge_size );
@@ -228,7 +228,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     VRFY((small_ds_buf_2 != NULL), "malloc of small_ds_buf_2 succeeded");
 
     small_ds_slice_buf = 
-	(uint32_t *)HDmalloc(sizeof(uint32_t) * small_ds_slice_size);
+  (uint32_t *)HDmalloc(sizeof(uint32_t) * small_ds_slice_size);
     VRFY((small_ds_slice_buf != NULL), "malloc of small_ds_slice_buf succeeded");
 
     large_ds_buf_0 = (uint32_t *)HDmalloc(sizeof(uint32_t) * large_ds_size);
@@ -241,7 +241,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     VRFY((large_ds_buf_2 != NULL), "malloc of large_ds_buf_2 succeeded");
 
     large_ds_slice_buf = 
-	(uint32_t *)HDmalloc(sizeof(uint32_t) * large_ds_slice_size);
+  (uint32_t *)HDmalloc(sizeof(uint32_t) * large_ds_slice_size);
     VRFY((large_ds_slice_buf != NULL), "malloc of large_ds_slice_buf succeeded");
 
     /* initialize the buffers */
@@ -323,7 +323,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
     mem_small_ds_sid = H5Screate_simple(small_rank, dims, NULL);
     VRFY((mem_small_ds_sid != 0), 
-	 "H5Screate_simple() mem_small_ds_sid succeeded");
+   "H5Screate_simple() mem_small_ds_sid succeeded");
 
     file_small_ds_sid = H5Screate_simple(small_rank, dims, NULL);
     VRFY((file_small_ds_sid != 0), 
@@ -372,7 +372,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
     if ( chunk_edge_size > 0 ) {
 
         /* Under Lustre (and perhaps other parallel file systems?) we get 
-	 * locking delays when two or more processes attempt to access the 
+   * locking delays when two or more processes attempt to access the 
          * same file system block.
          *
          * To minimize this problem, I have changed chunk_dims[0] 
@@ -804,7 +804,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                 mis_match = FALSE;
                 ptr_1 = small_ds_slice_buf;
                 expected_value = (uint32_t)(
-			(i * edge_size * edge_size * edge_size * edge_size) +
+      (i * edge_size * edge_size * edge_size * edge_size) +
                         (j * edge_size * edge_size * edge_size) +
                         (k * edge_size * edge_size) +
                         (l * edge_size));
@@ -1260,7 +1260,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                 ptr_1 = small_ds_buf_1;
 
                 expected_value = (uint32_t)(
-			(i * edge_size * edge_size * edge_size * edge_size) +
+      (i * edge_size * edge_size * edge_size * edge_size) +
                         (j * edge_size * edge_size * edge_size) +
                         (k * edge_size * edge_size) +
                         (l * edge_size));
@@ -1435,7 +1435,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                                file_large_ds_process_slice_sid,
                                xfer_plist,
                                large_ds_buf_2);
-		VRFY((ret != FAIL), "H5Dwrite() to zero large ds suceeded");
+    VRFY((ret != FAIL), "H5Dwrite() to zero large ds suceeded");
 
 
                 /* select the portion of the in memory large cube to which we
@@ -1453,7 +1453,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                                           stride_ptr,
                                           count_ptr,
                                           block_ptr);
-		VRFY((ret != FAIL), 
+    VRFY((ret != FAIL), 
                      "H5Sselect_hyperslab() target large ds slice succeeded");
 
 
@@ -1464,7 +1464,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                  */
                 check = H5S_select_shape_same_test(mem_small_ds_sid,
                                                    file_large_ds_sid);
-		VRFY((check == TRUE), "H5S_select_shape_same_test passed");
+    VRFY((check == TRUE), "H5S_select_shape_same_test passed");
 
 
                 /* write the small data set slice from memory to the 
@@ -1486,7 +1486,7 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
                                file_large_ds_sid,
                                xfer_plist,
                                small_ds_buf_0);
-		VRFY((ret != FAIL), 
+    VRFY((ret != FAIL), 
                       "H5Dwrite of small ds slice to large ds succeeded");
 
 
@@ -1629,28 +1629,28 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 
 
 /*-------------------------------------------------------------------------
- * Function:	contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
+ * Function:  contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
  *
- * Purpose:	Test I/O to/from hyperslab selections of different rank in
- *		the parallel case.
+ * Purpose:  Test I/O to/from hyperslab selections of different rank in
+ *    the parallel case.
  *
- * Return:	void
+ * Return:  void
  *
- * Programmer:	JRM -- 9/18/09
+ * Programmer:  JRM -- 9/18/09
  *
  * Modifications:
  *
- *  		Modified function to take a sample of the run times
- *		of the different tests, and skip some of them if 
- *		run times are too long.  
+ *      Modified function to take a sample of the run times
+ *    of the different tests, and skip some of them if 
+ *    run times are too long.  
  *
- *		We need to do this because Lustre runns very slowly
- *		if two or more processes are banging on the same 
- *		block of memory.
- *						JRM -- 9/10/10
+ *    We need to do this because Lustre runns very slowly
+ *    if two or more processes are banging on the same 
+ *    block of memory.
+ *            JRM -- 9/10/10
  *              Break this one big test into 4 smaller tests according
  *              to {independent,collective}x{contigous,chunked} datasets.
- *		AKC -- 2010/01/14
+ *    AKC -- 2010/01/14
  *
  *-------------------------------------------------------------------------
  */
@@ -1658,34 +1658,34 @@ contig_hyperslab_dr_pio_test__run_test(const int test_num,
 void
 contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 {
-    int	        test_num = 0;
-    int		edge_size = 10;
-    int		chunk_edge_size = 0;
-    int	        small_rank;
-    int	        large_rank;
-    int		skips[4] = {0, 0, 0, 0};
-    int		skip_counters[4] = {0, 0, 0, 0};
-    int		tests_skiped[4] = {0, 0, 0, 0};
-    int		mpi_result;
-    hid_t	dset_type = H5T_NATIVE_UINT;
+    int          test_num = 0;
+    int    edge_size = 10;
+    int    chunk_edge_size = 0;
+    int          small_rank;
+    int          large_rank;
+    int    skips[4] = {0, 0, 0, 0};
+    int    skip_counters[4] = {0, 0, 0, 0};
+    int    tests_skiped[4] = {0, 0, 0, 0};
+    int    mpi_result;
+    hid_t  dset_type = H5T_NATIVE_UINT;
 #ifdef H5_HAVE_GETTIMEOFDAY
-    hbool_t	time_tests = TRUE;
-    hbool_t	display_skips = FALSE;
-    int		local_express_test;
-    int		express_test;
-    int		i;
-    int		samples = 0;
-    int		sample_size = 1;
-    int		mpi_size = -1;
+    hbool_t  time_tests = TRUE;
+    hbool_t  display_skips = FALSE;
+    int    local_express_test;
+    int    express_test;
+    int    i;
+    int    samples = 0;
+    int    sample_size = 1;
+    int    mpi_size = -1;
     int         mpi_rank = -1;
-    int		local_skips[4];
-    const int	ind_contig_idx = 0;
-    const int	col_contig_idx = 1;
-    const int	ind_chunked_idx = 2;
-    const int	col_chunked_idx = 3;
-    const int	test_types = 4;
+    int    local_skips[4];
+    const int  ind_contig_idx = 0;
+    const int  col_contig_idx = 1;
+    const int  ind_chunked_idx = 2;
+    const int  col_chunked_idx = 3;
+    const int  test_types = 4;
     long long   max_test_time = 3000000; /* for one test */
-    long long	sample_times[4] = {0, 0, 0, 0};
+    long long  sample_times[4] = {0, 0, 0, 0};
     struct timeval timeval_a;
     struct timeval timeval_b;
 #endif /* H5_HAVE_GETTIMEOFDAY */
@@ -1706,15 +1706,15 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
     for ( large_rank = 3; large_rank <= PAR_SS_DR_MAX_RANK; large_rank++ ) {
 
         for ( small_rank = 2; small_rank < large_rank; small_rank++ ) {
-	  switch(sstest_type){
-	  case IND_CONTIG:
-	    /* contiguous data set, independent I/O */
+    switch(sstest_type){
+    case IND_CONTIG:
+      /* contiguous data set, independent I/O */
             chunk_edge_size = 0;
             if ( skip_counters[ind_contig_idx] < skips[ind_contig_idx] ) {
 
                 skip_counters[ind_contig_idx]++;
                 tests_skiped[ind_contig_idx]++;
-		printf("Test skipped\n");
+    printf("Test skipped\n");
             } else {
                 skip_counters[ind_contig_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(0) succeeds.");
@@ -1731,17 +1731,17 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
                                       sample_times[col_contig_idx]);
             }
             test_num++;
-	    break;
-	    /* end of case IND_CONTIG */
+      break;
+      /* end of case IND_CONTIG */
 
-	  case COL_CONTIG:
-	    /* contiguous data set, collective I/O */
+    case COL_CONTIG:
+      /* contiguous data set, collective I/O */
             chunk_edge_size = 0;
             if ( skip_counters[col_contig_idx] < skips[col_contig_idx] ) {
 
                 skip_counters[col_contig_idx]++;
                 tests_skiped[col_contig_idx]++;
-		printf("Test skipped\n");
+    printf("Test skipped\n");
             } else {
                 skip_counters[col_contig_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(2) succeeds.");
@@ -1758,17 +1758,17 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
                                       sample_times[ind_contig_idx]);
             }
             test_num++;
-	    break;
-	    /* end of case COL_CONTIG */
+      break;
+      /* end of case COL_CONTIG */
 
-	  case IND_CHUNKED:
-	    /* chunked data set, independent I/O */
+    case IND_CHUNKED:
+      /* chunked data set, independent I/O */
             chunk_edge_size = 5;
             if ( skip_counters[ind_chunked_idx] < skips[ind_chunked_idx] ) {
 
                 skip_counters[ind_chunked_idx]++;
                 tests_skiped[ind_chunked_idx]++;
-		printf("Test skipped\n");
+    printf("Test skipped\n");
             } else {
                 skip_counters[ind_chunked_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(4) succeeds.");
@@ -1785,17 +1785,17 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
                                       sample_times[col_chunked_idx]);
             }
             test_num++;
-	    break;
-	    /* end of case IND_CHUNKED */
+      break;
+      /* end of case IND_CHUNKED */
 
-	  case COL_CHUNKED:
-	    /* chunked data set, collective I/O */
+    case COL_CHUNKED:
+      /* chunked data set, collective I/O */
             chunk_edge_size = 5;
             if ( skip_counters[col_chunked_idx] < skips[col_chunked_idx] ) {
 
                 skip_counters[col_chunked_idx]++;
                 tests_skiped[col_chunked_idx]++;
-		printf("Test skipped\n");
+    printf("Test skipped\n");
             } else {
                 skip_counters[col_chunked_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(6) succeeds.");
@@ -1812,9 +1812,9 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
                                       sample_times[ind_chunked_idx]);
             }
             test_num++;
-	    break;
-	    /* end of case COL_CHUNKED */
-	  } /* end of switch(sstest_type) */
+      break;
+      /* end of case COL_CHUNKED */
+    } /* end of switch(sstest_type) */
 
 #ifdef H5_HAVE_GETTIMEOFDAY
             if ( time_tests ) {
@@ -1895,23 +1895,23 @@ contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 /****************************************************************
 **
 **  checker_board_hyperslab_dr_pio_test__select_checker_board():  
-**	Given a data space of tgt_rank, and dimensions:
+**  Given a data space of tgt_rank, and dimensions:
 **
-**		(mpi_size + 1), edge_size, ... , edge_size
+**    (mpi_size + 1), edge_size, ... , edge_size
 **
-**	edge_size, and a checker_edge_size, select a checker
-**	board selection of a sel_rank (sel_rank < tgt_rank) 
-**	dimensional slice through the data space parallel to the 
+**  edge_size, and a checker_edge_size, select a checker
+**  board selection of a sel_rank (sel_rank < tgt_rank) 
+**  dimensional slice through the data space parallel to the 
 **      sel_rank fastest changing indicies, with origin (in the
-**	higher indicies) as indicated by the start array.
+**  higher indicies) as indicated by the start array.
 **
-**	Note that this function, like all its relatives, is
-**	hard coded to presume a maximum data space rank of 5.
-**	While this maximum is declared as a constant, increasing
-**	it will require extensive coding in addition to changing
+**  Note that this function, like all its relatives, is
+**  hard coded to presume a maximum data space rank of 5.
+**  While this maximum is declared as a constant, increasing
+**  it will require extensive coding in addition to changing
 **      the value of the constant.
 **
-**					JRM -- 10/8/09
+**          JRM -- 10/8/09
 **
 ****************************************************************/
 
@@ -1928,22 +1928,22 @@ checker_board_hyperslab_dr_pio_test__select_checker_board(
                                  hsize_t sel_start[])
 {
 #if CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__SELECT_CHECKER_BOARD__DEBUG 
-    const char *	fcnName = 
-			"checker_board_hyperslab_dr_pio_test__select_checker_board():";
+    const char *  fcnName = 
+      "checker_board_hyperslab_dr_pio_test__select_checker_board():";
 #endif 
-    hbool_t		first_selection = TRUE;
+    hbool_t    first_selection = TRUE;
     int                 i, j, k, l, m;
-    int			n_cube_offset;
-    int			sel_offset;
-    const int		test_max_rank = PAR_SS_DR_MAX_RANK;  /* must update code if */
+    int      n_cube_offset;
+    int      sel_offset;
+    const int    test_max_rank = PAR_SS_DR_MAX_RANK;  /* must update code if */
                                                              /* this changes        */
-    hsize_t		base_count;
+    hsize_t    base_count;
     hsize_t             offset_count;
-    hsize_t     	start[PAR_SS_DR_MAX_RANK];
-    hsize_t     	stride[PAR_SS_DR_MAX_RANK];
-    hsize_t     	count[PAR_SS_DR_MAX_RANK];
-    hsize_t     	block[PAR_SS_DR_MAX_RANK];
-    herr_t      	ret;            /* Generic return value */
+    hsize_t       start[PAR_SS_DR_MAX_RANK];
+    hsize_t       stride[PAR_SS_DR_MAX_RANK];
+    hsize_t       count[PAR_SS_DR_MAX_RANK];
+    hsize_t       block[PAR_SS_DR_MAX_RANK];
+    herr_t        ret;            /* Generic return value */
 
     HDassert( edge_size >= 6 );
     HDassert( 0 < checker_edge_size );
@@ -2239,55 +2239,55 @@ checker_board_hyperslab_dr_pio_test__select_checker_board(
 **
 **  checker_board_hyperslab_dr_pio_test__verify_data(): 
 **
-**	Examine the supplied buffer to see if it contains the 
-**	expected data.  Return TRUE if it does, and FALSE 
+**  Examine the supplied buffer to see if it contains the 
+**  expected data.  Return TRUE if it does, and FALSE 
 **      otherwise.
 **
-**	The supplied buffer is presumed to this process's slice 
-**	of the target data set.  Each such slice will be an
-**	n-cube of rank (rank -1) and the supplied edge_size with
-**	origin (mpi_rank, 0, ... , 0) in the target data set.
+**  The supplied buffer is presumed to this process's slice 
+**  of the target data set.  Each such slice will be an
+**  n-cube of rank (rank -1) and the supplied edge_size with
+**  origin (mpi_rank, 0, ... , 0) in the target data set.
 **
-**	Further, the buffer is presumed to be the result of reading
-**	or writing a checker board selection of an m (1 <= m < 
+**  Further, the buffer is presumed to be the result of reading
+**  or writing a checker board selection of an m (1 <= m < 
 **      rank) dimensional slice through this processes slice
-**	of the target data set.  Also, this slice must be parallel
-**	to the fastest changing indicies.  
+**  of the target data set.  Also, this slice must be parallel
+**  to the fastest changing indicies.  
 **
-**	It is further presumed that the buffer was zeroed before
-**	the read/write, and that the full target data set (i.e.
-**	the buffer/data set for all processes) was initialized
+**  It is further presumed that the buffer was zeroed before
+**  the read/write, and that the full target data set (i.e.
+**  the buffer/data set for all processes) was initialized
 **      with the natural numbers listed in order from the origin 
-**	along the fastest changing axis.
+**  along the fastest changing axis.
 **
 **      Thus for a 20x10x10 dataset, the value stored in location
-**	(x, y, z) (assuming that z is the fastest changing index
-**	and x the slowest) is assumed to be:
+**  (x, y, z) (assuming that z is the fastest changing index
+**  and x the slowest) is assumed to be:
 **
-**		(10 * 10 * x) + (10 * y) + z
+**    (10 * 10 * x) + (10 * y) + z
 **
-**	Further, supposing that this is process 10, this process's 
-**	slice of the dataset would be a 10 x 10 2-cube with origin
-**	(10, 0, 0) in the data set, and would be initialize (prior
-**	to the checkerboard selection) as follows:
+**  Further, supposing that this is process 10, this process's 
+**  slice of the dataset would be a 10 x 10 2-cube with origin
+**  (10, 0, 0) in the data set, and would be initialize (prior
+**  to the checkerboard selection) as follows:
 **
-**		1000, 1001, 1002, ... 1008, 1009
-**		1010, 1011, 1012, ... 1018, 1019
-**		  .     .     .         .     .
-**		  .     .     .         .     .
-**		  .     .     .         .     .
-**		1090, 1091, 1092, ... 1098, 1099
+**    1000, 1001, 1002, ... 1008, 1009
+**    1010, 1011, 1012, ... 1018, 1019
+**      .     .     .         .     .
+**      .     .     .         .     .
+**      .     .     .         .     .
+**    1090, 1091, 1092, ... 1098, 1099
 **
-**	In the case of a read from the processors slice of another
-**	data set of different rank, the values expected will have
-**	to be adjusted accordingly.  This is done via the 
-**	first_expected_val parameter.
+**  In the case of a read from the processors slice of another
+**  data set of different rank, the values expected will have
+**  to be adjusted accordingly.  This is done via the 
+**  first_expected_val parameter.
 **
-**	Finally, the function presumes that the first element 
-**	of the buffer resides either at the origin of either
-**	a selected or an unselected checker.  (Translation:
-**	if partial checkers appear in the buffer, they will
-**	intersect the edges of the n-cube oposite the origin.)
+**  Finally, the function presumes that the first element 
+**  of the buffer resides either at the origin of either
+**  a selected or an unselected checker.  (Translation:
+**  if partial checkers appear in the buffer, they will
+**  intersect the edges of the n-cube oposite the origin.)
 **
 ****************************************************************/
 
@@ -2302,8 +2302,8 @@ checker_board_hyperslab_dr_pio_test__verify_data(uint32_t * buf_ptr,
                                                  hbool_t buf_starts_in_checker)
 {
 #if CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__VERIFY_DATA__DEBUG
-    const char *	fcnName = 
-			"checker_board_hyperslab_dr_pio_test__verify_data():";
+    const char *  fcnName = 
+      "checker_board_hyperslab_dr_pio_test__verify_data():";
 #endif
     hbool_t good_data = TRUE;
     hbool_t in_checker;
@@ -2324,7 +2324,7 @@ checker_board_hyperslab_dr_pio_test__verify_data(uint32_t * buf_ptr,
 
 #if CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__VERIFY_DATA__DEBUG 
 
-    int		mpi_rank;
+    int    mpi_rank;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     HDfprintf(stdout, "%s mpi_rank = %d.\n", fcnName, mpi_rank);
@@ -2452,27 +2452,27 @@ checker_board_hyperslab_dr_pio_test__verify_data(uint32_t * buf_ptr,
 
 
 /*-------------------------------------------------------------------------
- * Function:	checker_board_hyperslab_dr_pio_test__run_test()
+ * Function:  checker_board_hyperslab_dr_pio_test__run_test()
  *
- * Purpose:	Test I/O to/from checkerboard selections of hyperslabs of 
- *		different rank in the parallel.
+ * Purpose:  Test I/O to/from checkerboard selections of hyperslabs of 
+ *    different rank in the parallel.
  *
- * Return:	void
+ * Return:  void
  *
- * Programmer:	JRM -- 10/10/09
+ * Programmer:  JRM -- 10/10/09
  *
  * Modifications:
  *
- *		JRM -- 9/16/10
- *		Added the express_test parameter.  Use it to control 
- *		whether we set an alignment, and whether we allocate
- *		chunks such that no two processes will normally touch
- *		the same chunk.
+ *    JRM -- 9/16/10
+ *    Added the express_test parameter.  Use it to control 
+ *    whether we set an alignment, and whether we allocate
+ *    chunks such that no two processes will normally touch
+ *    the same chunk.
  *
  *-------------------------------------------------------------------------
  */
 
-#define PAR_SS_DR_MAX_RANK	5
+#define PAR_SS_DR_MAX_RANK  5
 #define CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 0
 
 static void
@@ -2490,18 +2490,18 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     const char *fcnName = "checker_board_hyperslab_dr_pio_test__run_test()";
 #endif /* CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG */
     const char *filename;
-    hbool_t	use_gpfs = FALSE;   /* Use GPFS hints */
-    hbool_t	data_ok = FALSE;
-    hbool_t	mis_match = FALSE;
-    int		i, j, k, l;
+    hbool_t  use_gpfs = FALSE;   /* Use GPFS hints */
+    hbool_t  data_ok = FALSE;
+    hbool_t  mis_match = FALSE;
+    int    i, j, k, l;
     size_t      u;
     int         mrc;
     size_t      start_index;
     size_t      stop_index;
-    int		small_ds_offset;
+    int    small_ds_offset;
     int         large_ds_offset;
     const int   test_max_rank = 5;  /* must update code if this changes */
-    uint32_t	expected_value;
+    uint32_t  expected_value;
     uint32_t  * small_ds_buf_0 = NULL;
     uint32_t  * small_ds_buf_1 = NULL;
     uint32_t  * small_ds_buf_2 = NULL;
@@ -2512,19 +2512,19 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     uint32_t  * large_ds_slice_buf = NULL;
     uint32_t  * ptr_0;
     uint32_t  * ptr_1;
-    int		mpi_rank;
-    int		mpi_size;
+    int    mpi_rank;
+    int    mpi_size;
     MPI_Comm    mpi_comm = MPI_COMM_NULL;
-    MPI_Info	mpi_info = MPI_INFO_NULL;
-    hid_t       fid;			/* HDF5 file ID */
-    hid_t	acc_tpl;		/* File access templates */
-    hid_t	xfer_plist = H5P_DEFAULT;
+    MPI_Info  mpi_info = MPI_INFO_NULL;
+    hid_t       fid;      /* HDF5 file ID */
+    hid_t  acc_tpl;    /* File access templates */
+    hid_t  xfer_plist = H5P_DEFAULT;
     hid_t       full_mem_small_ds_sid;
     hid_t       full_file_small_ds_sid;
     hid_t       mem_small_ds_sid;
     hid_t       file_small_ds_sid_0;
     hid_t       file_small_ds_sid_1;
-    hid_t	small_ds_slice_sid;
+    hid_t  small_ds_slice_sid;
     hid_t       full_mem_large_ds_sid;
     hid_t       full_file_large_ds_sid;
     hid_t       mem_large_ds_sid;
@@ -2532,7 +2532,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     hid_t       file_large_ds_sid_1;
     hid_t       file_large_ds_process_slice_sid;
     hid_t       mem_large_ds_process_slice_sid;
-    hid_t	large_ds_slice_sid;
+    hid_t  large_ds_slice_sid;
     hid_t       small_ds_dcpl_id = H5P_DEFAULT;
     hid_t       large_ds_dcpl_id = H5P_DEFAULT;
     hid_t       small_dataset;     /* Dataset ID                   */
@@ -2549,7 +2549,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     hsize_t     block[PAR_SS_DR_MAX_RANK];
     hsize_t     sel_start[PAR_SS_DR_MAX_RANK];
     htri_t      check;          /* Shape comparison return value */
-    herr_t	ret;		/* Generic return value */
+    herr_t  ret;    /* Generic return value */
 
     HDassert( edge_size >= 6 );
     HDassert( edge_size >= chunk_edge_size );
@@ -2604,7 +2604,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     VRFY((small_ds_buf_2 != NULL), "malloc of small_ds_buf_2 succeeded");
 
     small_ds_slice_buf = 
-	(uint32_t *)HDmalloc(sizeof(uint32_t) * small_ds_slice_size);
+  (uint32_t *)HDmalloc(sizeof(uint32_t) * small_ds_slice_size);
     VRFY((small_ds_slice_buf != NULL), "malloc of small_ds_slice_buf succeeded");
 
     large_ds_buf_0 = (uint32_t *)HDmalloc(sizeof(uint32_t) * large_ds_size);
@@ -2617,7 +2617,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     VRFY((large_ds_buf_2 != NULL), "malloc of large_ds_buf_2 succeeded");
 
     large_ds_slice_buf = 
-	(uint32_t *)HDmalloc(sizeof(uint32_t) * large_ds_slice_size);
+  (uint32_t *)HDmalloc(sizeof(uint32_t) * large_ds_slice_size);
     VRFY((large_ds_slice_buf != NULL), "malloc of large_ds_slice_buf succeeded");
 
     /* initialize the buffers */
@@ -2703,7 +2703,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
     mem_small_ds_sid = H5Screate_simple(small_rank, dims, NULL);
     VRFY((mem_small_ds_sid != 0), 
-	 "H5Screate_simple() mem_small_ds_sid succeeded");
+   "H5Screate_simple() mem_small_ds_sid succeeded");
 
     file_small_ds_sid_0 = H5Screate_simple(small_rank, dims, NULL);
     VRFY((file_small_ds_sid_0 != 0), 
@@ -2760,7 +2760,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
     if ( chunk_edge_size > 0 ) {
 
         /* Under Lustre (and perhaps other parallel file systems?) we get 
-	 * locking delays when two or more processes attempt to access the 
+   * locking delays when two or more processes attempt to access the 
          * same file system block.
          *
          * To minimize this problem, I have changed chunk_dims[0] 
@@ -3081,7 +3081,7 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
               fcnName, mpi_rank);
     ptr_0 = small_ds_slice_buf;
     for ( i = 0; i < (int)small_ds_slice_size; i++ ) {
-	HDfprintf(stdout, "%d ", (int)(*ptr_0));
+  HDfprintf(stdout, "%d ", (int)(*ptr_0));
         ptr_0++;
     }
     HDfprintf(stdout, "\n");
@@ -3219,14 +3219,14 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
                 VRFY((ret >= 0), "H5Dread() slice from large ds succeeded.");
 
 #if CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 
-		HDfprintf(stdout, "%s:%d: H5Dread() returns.\n", 
+    HDfprintf(stdout, "%s:%d: H5Dread() returns.\n", 
                           fcnName, mpi_rank);
 #endif 
 
                 /* verify that expected data is retrieved */
 
                 expected_value = (uint32_t)
-			((i * edge_size * edge_size * edge_size * edge_size) +
+      ((i * edge_size * edge_size * edge_size * edge_size) +
                          (j * edge_size * edge_size * edge_size) +
                          (k * edge_size * edge_size) +
                          (l * edge_size));
@@ -3430,11 +3430,11 @@ checker_board_hyperslab_dr_pio_test__run_test(const int test_num,
 
 #if CHECKER_BOARD_HYPERSLAB_DR_PIO_TEST__RUN_TEST__DEBUG 
 {
-int		m, n;
+int    m, n;
 
-		HDfprintf(stdout, "%s:%d: expected_value = %d.\n", 
+    HDfprintf(stdout, "%s:%d: expected_value = %d.\n", 
                           fcnName, mpi_rank, expected_value);
-		HDfprintf(stdout, "%s:%d: start/stop index = %d/%d.\n",
+    HDfprintf(stdout, "%s:%d: start/stop index = %d/%d.\n",
                           fcnName, mpi_rank, start_index, stop_index);
                 n = 0;
                 for ( m = 0; m < large_ds_size; m ++ ) {
@@ -3459,8 +3459,8 @@ int		m, n;
 
                     if ( *ptr_1 != 0 ) {
 
-			data_ok = FALSE;
-		    }
+      data_ok = FALSE;
+        }
 
                     /* zero out the value for the next pass */
                     *ptr_1 = 0;
@@ -3491,8 +3491,8 @@ int		m, n;
 
                     if ( *ptr_1 != 0 ) {
 
-			data_ok = FALSE;
-		    }
+      data_ok = FALSE;
+        }
 
                     /* zero out the value for the next pass */
                     *ptr_1 = 0;
@@ -3745,7 +3745,7 @@ int		m, n;
                 mis_match = FALSE;
 
                 expected_value = (uint32_t)(
-			(i * edge_size * edge_size * edge_size * edge_size) +
+      (i * edge_size * edge_size * edge_size * edge_size) +
                         (j * edge_size * edge_size * edge_size) +
                         (k * edge_size * edge_size) +
                         (l * edge_size));
@@ -3949,7 +3949,7 @@ int		m, n;
                                file_large_ds_sid_0,
                                xfer_plist,
                                large_ds_buf_2);
-		VRFY((ret != FAIL), "H5Dwrite() to zero large ds suceeded");
+    VRFY((ret != FAIL), "H5Dwrite() to zero large ds suceeded");
 
 
                 /* select the portion of the in memory large cube to which we
@@ -3986,7 +3986,7 @@ int		m, n;
                  */
                 check = H5S_select_shape_same_test(mem_small_ds_sid,
                                                    file_large_ds_sid_1);
-		VRFY((check == TRUE), "H5S_select_shape_same_test passed");
+    VRFY((check == TRUE), "H5S_select_shape_same_test passed");
 
 
                 /* write the small data set slice from memory to the 
@@ -4007,7 +4007,7 @@ int		m, n;
                                file_large_ds_sid_1,
                                xfer_plist,
                                small_ds_buf_0);
-		VRFY((ret != FAIL), 
+    VRFY((ret != FAIL), 
                       "H5Dwrite of small ds slice to large ds succeeded");
 
 
@@ -4167,28 +4167,28 @@ int		m, n;
 
 
 /*-------------------------------------------------------------------------
- * Function:	checker_board_hyperslab_dr_pio_test()
+ * Function:  checker_board_hyperslab_dr_pio_test()
  *
- * Purpose:	Test I/O to/from hyperslab selections of different rank in
- *		the parallel case.
+ * Purpose:  Test I/O to/from hyperslab selections of different rank in
+ *    the parallel case.
  *
- * Return:	void
+ * Return:  void
  *
- * Programmer:	JRM -- 9/18/09
+ * Programmer:  JRM -- 9/18/09
  *
  * Modifications:
  *
- *  		Modified function to take a sample of the run times
- *		of the different tests, and skip some of them if 
- *		run times are too long.  
+ *      Modified function to take a sample of the run times
+ *    of the different tests, and skip some of them if 
+ *    run times are too long.  
  *
- *		We need to do this because Lustre runns very slowly
- *		if two or more processes are banging on the same 
- *		block of memory.
- *						JRM -- 9/10/10
- *      	Break this one big test into 4 smaller tests according
- *      	to {independent,collective}x{contigous,chunked} datasets.
- *		AKC -- 2010/01/17
+ *    We need to do this because Lustre runns very slowly
+ *    if two or more processes are banging on the same 
+ *    block of memory.
+ *            JRM -- 9/10/10
+ *        Break this one big test into 4 smaller tests according
+ *        to {independent,collective}x{contigous,chunked} datasets.
+ *    AKC -- 2010/01/17
  *
  *-------------------------------------------------------------------------
  */
@@ -4196,20 +4196,20 @@ int		m, n;
 void
 checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 {
-    int	        test_num = 0;
-    int		edge_size = 10;
+    int          test_num = 0;
+    int    edge_size = 10;
     int         checker_edge_size = 3;
-    int		chunk_edge_size = 0;
-    int	        small_rank = 3;
-    int	        large_rank = 4;
+    int    chunk_edge_size = 0;
+    int          small_rank = 3;
+    int          large_rank = 4;
     int         skips[4] = {0, 0, 0, 0};
     int         skip_counters[4] = {0, 0, 0, 0};
     int         tests_skiped[4] = {0, 0, 0, 0};
-    int		mpi_result;
-    hid_t	dset_type = H5T_NATIVE_UINT;
+    int    mpi_result;
+    hid_t  dset_type = H5T_NATIVE_UINT;
 #ifdef H5_HAVE_GETTIMEOFDAY
     hbool_t     time_tests = TRUE;
-    hbool_t	display_skips = FALSE;
+    hbool_t  display_skips = FALSE;
     int         local_express_test;
     int         express_test;
     int         i;
@@ -4256,15 +4256,15 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
     for ( large_rank = 3; large_rank <= PAR_SS_DR_MAX_RANK; large_rank++ ) {
 
         for ( small_rank = 2; small_rank < large_rank; small_rank++ ) {
-	  switch(sstest_type){
-	  case IND_CONTIG:
+    switch(sstest_type){
+    case IND_CONTIG:
             /* contiguous data set, independent I/O */
             chunk_edge_size = 0;
             if ( skip_counters[ind_contig_idx] < skips[ind_contig_idx] ) {
 
                 skip_counters[ind_contig_idx]++;
                 tests_skiped[ind_contig_idx]++;
-		printf("Test skipped\n");
+    printf("Test skipped\n");
             } else {
                 skip_counters[ind_contig_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(0) succeeds.");
@@ -4284,17 +4284,17 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
             }
             test_num++;
-	    break;
-	    /* end of case IND_CONTIG */
+      break;
+      /* end of case IND_CONTIG */
 
-	  case COL_CONTIG:
+    case COL_CONTIG:
             /* contiguous data set, collective I/O */
             chunk_edge_size = 0;
             if ( skip_counters[col_contig_idx] < skips[col_contig_idx] ) {
 
                 skip_counters[col_contig_idx]++;
                 tests_skiped[col_contig_idx]++;
-		printf("Test skipped\n");
+    printf("Test skipped\n");
             } else {
                 skip_counters[col_contig_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(2) succeeds.");
@@ -4314,17 +4314,17 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
             }
             test_num++;
-	    break;
-	    /* end of case COL_CONTIG */
+      break;
+      /* end of case COL_CONTIG */
 
-	  case IND_CHUNKED:
+    case IND_CHUNKED:
             /* chunked data set, independent I/O */
             chunk_edge_size = 5;
             if ( skip_counters[ind_chunked_idx] < skips[ind_chunked_idx] ) {
 
                 skip_counters[ind_chunked_idx]++;
                 tests_skiped[ind_chunked_idx]++;
-		printf("Test skipped\n");
+    printf("Test skipped\n");
             } else {
                 skip_counters[ind_chunked_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(4) succeeds.");
@@ -4344,17 +4344,17 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
             }
             test_num++;
-	    break;
-	    /* end of case IND_CHUNKED */
+      break;
+      /* end of case IND_CHUNKED */
 
-	  case COL_CHUNKED:
+    case COL_CHUNKED:
             /* chunked data set, collective I/O */
             chunk_edge_size = 5;
             if ( skip_counters[col_chunked_idx] < skips[col_chunked_idx] ) {
 
                 skip_counters[col_chunked_idx]++;
                 tests_skiped[col_chunked_idx]++;
-		printf("Test skipped\n");
+    printf("Test skipped\n");
             } else {
                 skip_counters[col_chunked_idx] = 0;
                 START_TIMER(time_tests, timeval_a, "HDgettimeofday(6) succeeds.");
@@ -4374,9 +4374,9 @@ checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type)
 
             }
             test_num++;
-	    break;
-	    /* end of case COL_CHUNKED */
-	  } /* end of switch(sstest_type) */
+      break;
+      /* end of case COL_CHUNKED */
+    } /* end of switch(sstest_type) */
 
 #ifdef H5_HAVE_GETTIMEOFDAY
             if ( time_tests ) {
@@ -4469,15 +4469,15 @@ int dim0;
 int dim1;
 int chunkdim0;
 int chunkdim1;
-int nerrors = 0;			/* errors count */
-int ndatasets = 300;			/* number of datasets to create*/
+int nerrors = 0;      /* errors count */
+int ndatasets = 300;      /* number of datasets to create*/
 int ngroups = 512;                      /* number of groups to create in root
                                          * group. */
-int facc_type = FACC_MPIO;		/*Test file access type */
+int facc_type = FACC_MPIO;    /*Test file access type */
 int dxfer_coll_type = DXFER_COLLECTIVE_IO;
 
-H5E_auto2_t old_func;		        /* previous error handler */
-void *old_client_data;			/* previous error handler arg.*/
+H5E_auto2_t old_func;            /* previous error handler */
+void *old_client_data;      /* previous error handler arg.*/
 
 /* other option flags */
 
@@ -4489,10 +4489,10 @@ void *old_client_data;			/* previous error handler arg.*/
 #define NFILENAME 2
 #define PARATESTFILE filenames[0]
 const char *FILENAME[NFILENAME]={
-	    "ShapeSameTest",
-	    NULL};
-char	filenames[NFILENAME][PATH_MAX];
-hid_t	fapl;				/* file access property list */
+      "ShapeSameTest",
+      NULL};
+char  filenames[NFILENAME][PATH_MAX];
+hid_t  fapl;        /* file access property list */
 
 #ifdef USE_PAUSE
 /* pause the process for a moment to allow debugger to attach if desired. */
@@ -4505,7 +4505,7 @@ void pause_proc(void)
 {
 
     int pid;
-    h5_stat_t	statbuf;
+    h5_stat_t  statbuf;
     char greenlight[] = "go";
     int maxloop = 10;
     int loops = 0;
@@ -4522,15 +4522,15 @@ void pause_proc(void)
     MPI_Get_processor_name(mpi_name, &mpi_namelen);
 
     if (MAINPROCESS)
-	while ((stat(greenlight, &statbuf) == -1) && loops < maxloop){
-	    if (!loops++){
-		printf("Proc %d (%*s, %d): to debug, attach %d\n",
-		    mpi_rank, mpi_namelen, mpi_name, pid, pid);
-	    }
-	    printf("waiting(%ds) for file %s ...\n", time_int, greenlight);
-	    fflush(stdout);
-	    sleep(time_int);
-	}
+  while ((HDstat(greenlight, &statbuf) == -1) && loops < maxloop){
+      if (!loops++){
+    printf("Proc %d (%*s, %d): to debug, attach %d\n",
+        mpi_rank, mpi_namelen, mpi_name, pid, pid);
+      }
+      printf("waiting(%ds) for file %s ...\n", time_int, greenlight);
+      fflush(stdout);
+      sleep(time_int);
+  }
     MPI_Barrier(MPI_COMM_WORLD);
 }
 
@@ -4542,7 +4542,7 @@ int MPI_Init(int *argc, char ***argv)
     pause_proc();
     return (ret_code);
 }
-#endif	/* USE_PAUSE */
+#endif  /* USE_PAUSE */
 
 
 /*
@@ -4552,16 +4552,16 @@ static void
 usage(void)
 {
     printf("    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
-	"[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
+  "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
     printf("\t-m<n_datasets>"
-	"\tset number of datasets for the multiple dataset test\n");
+  "\tset number of datasets for the multiple dataset test\n");
     printf("\t-n<n_groups>"
         "\tset number of groups for the multiple group test\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-2\t\tuse Split-file together with MPIO\n");
     printf("\t-p\t\tuse combo MPI-POSIX driver\n");
     printf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n",
-	ROW_FACTOR, COL_FACTOR);
+  ROW_FACTOR, COL_FACTOR);
     printf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
     printf("\n");
 }
@@ -4573,7 +4573,7 @@ usage(void)
 static int
 parse_options(int argc, char **argv)
 {
-    int mpi_size, mpi_rank;				/* mpi variables */
+    int mpi_size, mpi_rank;        /* mpi variables */
 
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -4584,110 +4584,110 @@ parse_options(int argc, char **argv)
     chunkdim1 = (dim1+9)/10;
 
     while (--argc){
-	if (**(++argv) != '-'){
-	    break;
-	}else{
-	    switch(*(*argv+1)){
-		case 'm':   ndatasets = atoi((*argv+1)+1);
-			    if (ndatasets < 0){
-				nerrors++;
-				return(1);
-			    }
-			    break;
-	        case 'n':   ngroups = atoi((*argv+1)+1);
-		            if (ngroups < 0){
+  if (**(++argv) != '-'){
+      break;
+  }else{
+      switch(*(*argv+1)){
+    case 'm':   ndatasets = atoi((*argv+1)+1);
+          if (ndatasets < 0){
+        nerrors++;
+        return(1);
+          }
+          break;
+          case 'n':   ngroups = atoi((*argv+1)+1);
+                if (ngroups < 0){
                                 nerrors++;
                                 return(1);
-			    }
+          }
                             break;
-		case 'f':   if (--argc < 1) {
-				nerrors++;
-				return(1);
-			    }
-			    if (**(++argv) == '-') {
-				nerrors++;
-				return(1);
-			    }
-			    paraprefix = *argv;
-			    break;
-		case 'p':   /* Use the MPI-POSIX driver access */
-			    facc_type = FACC_MPIPOSIX;
-			    break;
-		case 'i':   /* Collective MPI-IO access with independent IO  */
-			    dxfer_coll_type = DXFER_INDEPENDENT_IO;
-			    break;
-		case '2':   /* Use the split-file driver with MPIO access */
-			    /* Can use $HDF5_METAPREFIX to define the */
-			    /* meta-file-prefix. */
-			    facc_type = FACC_MPIO | FACC_SPLIT;
-			    break;
-		case 'd':   /* dimensizes */
-			    if (--argc < 2){
-				nerrors++;
-				return(1);
-			    }
-			    dim0 = atoi(*(++argv))*mpi_size;
-			    argc--;
-			    dim1 = atoi(*(++argv))*mpi_size;
-			    /* set default chunkdim sizes too */
-			    chunkdim0 = (dim0+9)/10;
-			    chunkdim1 = (dim1+9)/10;
-			    break;
-		case 'c':   /* chunk dimensions */
-			    if (--argc < 2){
-				nerrors++;
-				return(1);
-			    }
-			    chunkdim0 = atoi(*(++argv));
-			    argc--;
-			    chunkdim1 = atoi(*(++argv));
-			    break;
-		case 'h':   /* print help message--return with nerrors set */
-			    return(1);
-		default:    printf("Illegal option(%s)\n", *argv);
-			    nerrors++;
-			    return(1);
-	    }
-	}
+    case 'f':   if (--argc < 1) {
+        nerrors++;
+        return(1);
+          }
+          if (**(++argv) == '-') {
+        nerrors++;
+        return(1);
+          }
+          paraprefix = *argv;
+          break;
+    case 'p':   /* Use the MPI-POSIX driver access */
+          facc_type = FACC_MPIPOSIX;
+          break;
+    case 'i':   /* Collective MPI-IO access with independent IO  */
+          dxfer_coll_type = DXFER_INDEPENDENT_IO;
+          break;
+    case '2':   /* Use the split-file driver with MPIO access */
+          /* Can use $HDF5_METAPREFIX to define the */
+          /* meta-file-prefix. */
+          facc_type = FACC_MPIO | FACC_SPLIT;
+          break;
+    case 'd':   /* dimensizes */
+          if (--argc < 2){
+        nerrors++;
+        return(1);
+          }
+          dim0 = atoi(*(++argv))*mpi_size;
+          argc--;
+          dim1 = atoi(*(++argv))*mpi_size;
+          /* set default chunkdim sizes too */
+          chunkdim0 = (dim0+9)/10;
+          chunkdim1 = (dim1+9)/10;
+          break;
+    case 'c':   /* chunk dimensions */
+          if (--argc < 2){
+        nerrors++;
+        return(1);
+          }
+          chunkdim0 = atoi(*(++argv));
+          argc--;
+          chunkdim1 = atoi(*(++argv));
+          break;
+    case 'h':   /* print help message--return with nerrors set */
+          return(1);
+    default:    printf("Illegal option(%s)\n", *argv);
+          nerrors++;
+          return(1);
+      }
+  }
     } /*while*/
 
     /* check validity of dimension and chunk sizes */
     if (dim0 <= 0 || dim1 <= 0){
-	printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
-	nerrors++;
-	return(1);
+  printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
+  nerrors++;
+  return(1);
     }
     if (chunkdim0 <= 0 || chunkdim1 <= 0){
-	printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
-	nerrors++;
-	return(1);
+  printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
+  nerrors++;
+  return(1);
     }
 
     /* Make sure datasets can be divided into equal portions by the processes */
     if ((dim0 % mpi_size) || (dim1 % mpi_size)){
-	if (MAINPROCESS)
-	    printf("dim0(%d) and dim1(%d) must be multiples of processes(%d)\n",
-		    dim0, dim1, mpi_size);
-	nerrors++;
-	return(1);
+  if (MAINPROCESS)
+      printf("dim0(%d) and dim1(%d) must be multiples of processes(%d)\n",
+        dim0, dim1, mpi_size);
+  nerrors++;
+  return(1);
     }
 
     /* compose the test filenames */
     {
-	int i, n;
+  int i, n;
 
-	n = sizeof(FILENAME)/sizeof(FILENAME[0]) - 1;	/* exclude the NULL */
+  n = sizeof(FILENAME)/sizeof(FILENAME[0]) - 1;  /* exclude the NULL */
 
-	for (i=0; i < n; i++)
-	    if (h5_fixname(FILENAME[i],fapl,filenames[i],sizeof(filenames[i]))
-		== NULL){
-		printf("h5_fixname failed\n");
-		nerrors++;
-		return(1);
-	    }
-	printf("Test filenames are:\n");
-	for (i=0; i < n; i++)
-	    printf("    %s\n", filenames[i]);
+  for (i=0; i < n; i++)
+      if (h5_fixname(FILENAME[i],fapl,filenames[i],sizeof(filenames[i]))
+    == NULL){
+    printf("h5_fixname failed\n");
+    nerrors++;
+    return(1);
+      }
+  printf("Test filenames are:\n");
+  for (i=0; i < n; i++)
+      printf("    %s\n", filenames[i]);
     }
 
     return(0);
@@ -4703,7 +4703,7 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
 {
     hid_t ret_pl = -1;
     herr_t ret;                 /* generic return value */
-    int mpi_rank;		/* mpi variables */
+    int mpi_rank;    /* mpi variables */
 
     /* need the rank for error checking macros */
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -4712,39 +4712,39 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
     VRFY((ret_pl >= 0), "H5P_FILE_ACCESS");
 
     if (l_facc_type == FACC_DEFAULT)
-	return (ret_pl);
+  return (ret_pl);
 
     if (l_facc_type == FACC_MPIO){
-	/* set Parallel access with communicator */
-	ret = H5Pset_fapl_mpio(ret_pl, comm, info);
-	VRFY((ret >= 0), "");
-	return(ret_pl);
+  /* set Parallel access with communicator */
+  ret = H5Pset_fapl_mpio(ret_pl, comm, info);
+  VRFY((ret >= 0), "");
+  return(ret_pl);
     }
 
     if (l_facc_type == (FACC_MPIO | FACC_SPLIT)){
-	hid_t mpio_pl;
+  hid_t mpio_pl;
 
-	mpio_pl = H5Pcreate (H5P_FILE_ACCESS);
-	VRFY((mpio_pl >= 0), "");
-	/* set Parallel access with communicator */
-	ret = H5Pset_fapl_mpio(mpio_pl, comm, info);
-	VRFY((ret >= 0), "");
+  mpio_pl = H5Pcreate (H5P_FILE_ACCESS);
+  VRFY((mpio_pl >= 0), "");
+  /* set Parallel access with communicator */
+  ret = H5Pset_fapl_mpio(mpio_pl, comm, info);
+  VRFY((ret >= 0), "");
 
-	/* setup file access template */
-	ret_pl = H5Pcreate (H5P_FILE_ACCESS);
-	VRFY((ret_pl >= 0), "");
-	/* set Parallel access with communicator */
-	ret = H5Pset_fapl_split(ret_pl, ".meta", mpio_pl, ".raw", mpio_pl);
-	VRFY((ret >= 0), "H5Pset_fapl_split succeeded");
-	H5Pclose(mpio_pl);
-	return(ret_pl);
+  /* setup file access template */
+  ret_pl = H5Pcreate (H5P_FILE_ACCESS);
+  VRFY((ret_pl >= 0), "");
+  /* set Parallel access with communicator */
+  ret = H5Pset_fapl_split(ret_pl, ".meta", mpio_pl, ".raw", mpio_pl);
+  VRFY((ret >= 0), "H5Pset_fapl_split succeeded");
+  H5Pclose(mpio_pl);
+  return(ret_pl);
     }
 
     if (l_facc_type == FACC_MPIPOSIX) {
-	/* set Parallel access with communicator */
-	ret = H5Pset_fapl_mpiposix(ret_pl, comm, use_gpfs);
-	VRFY((ret >= 0), "H5Pset_fapl_mpiposix succeeded");
-	return(ret_pl);
+  /* set Parallel access with communicator */
+  ret = H5Pset_fapl_mpiposix(ret_pl, comm, use_gpfs);
+  VRFY((ret >= 0), "H5Pset_fapl_mpiposix succeeded");
+  return(ret_pl);
     }
 
     /* unknown file access types */
@@ -4812,7 +4812,7 @@ sschecker4(void)
 
 int main(int argc, char **argv)
 {
-    int mpi_size, mpi_rank;				/* mpi variables */
+    int mpi_size, mpi_rank;        /* mpi variables */
     H5Ptest_param_t ndsets_params, ngroups_params;
     H5Ptest_param_t collngroups_params;
     H5Ptest_param_t io_mode_confusion_params;
@@ -4830,9 +4830,9 @@ int main(int argc, char **argv)
     dim1 = COL_FACTOR*mpi_size;
 
     if (MAINPROCESS){
-	printf("===================================\n");
-	printf("Shape Same Tests Start\n");
-	printf("===================================\n");
+  printf("===================================\n");
+  printf("Shape Same Tests Start\n");
+  printf("===================================\n");
     }
 
     /* Attempt to turn off atexit post processing so that in case errors
@@ -4841,7 +4841,7 @@ int main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-	printf("Failed to turn off atexit processing. Continue.\n", mpi_rank);
+  printf("Failed to turn off atexit processing. Continue.\n", mpi_rank);
     };
     H5open();
     h5_show_hostname();
@@ -4851,23 +4851,23 @@ int main(int argc, char **argv)
 
     /* Shape Same tests using contigous hyperslab */
     AddTest("sscontig1", sscontig1, NULL,
-	"Shape Same, contigous hyperslab, ind IO, contig datasets", PARATESTFILE);
+  "Shape Same, contigous hyperslab, ind IO, contig datasets", PARATESTFILE);
     AddTest("sscontig2", sscontig2, NULL,
-	"Shape Same, contigous hyperslab, col IO, contig datasets", PARATESTFILE);
+  "Shape Same, contigous hyperslab, col IO, contig datasets", PARATESTFILE);
     AddTest("sscontig3", sscontig3, NULL,
-	"Shape Same, contigous hyperslab, ind IO, chunked datasets", PARATESTFILE);
+  "Shape Same, contigous hyperslab, ind IO, chunked datasets", PARATESTFILE);
     AddTest("sscontig4", sscontig4, NULL,
-	"Shape Same, contigous hyperslab, col IO, chunked datasets", PARATESTFILE);
+  "Shape Same, contigous hyperslab, col IO, chunked datasets", PARATESTFILE);
 
     /* Shape Same tests using checker board hyperslab */
     AddTest("sschecker1", sschecker1, NULL,
-	"Shape Same, checker hyperslab, ind IO, contig datasets", PARATESTFILE);
+  "Shape Same, checker hyperslab, ind IO, contig datasets", PARATESTFILE);
     AddTest("sschecker2", sschecker2, NULL,
-	"Shape Same, checker hyperslab, col IO, contig datasets", PARATESTFILE);
+  "Shape Same, checker hyperslab, col IO, contig datasets", PARATESTFILE);
     AddTest("sschecker3", sschecker3, NULL,
-	"Shape Same, checker hyperslab, ind IO, chunked datasets", PARATESTFILE);
+  "Shape Same, checker hyperslab, ind IO, chunked datasets", PARATESTFILE);
     AddTest("sschecker4", sschecker4, NULL,
-	"Shape Same, checker hyperslab, col IO, chunked datasets", PARATESTFILE);
+  "Shape Same, checker hyperslab, col IO, chunked datasets", PARATESTFILE);
 
     /* Display testing information */
     TestInfo(argv[0]);
@@ -4880,15 +4880,15 @@ int main(int argc, char **argv)
     TestParseCmdLine(argc, argv);
 
     if (facc_type == FACC_MPIPOSIX && MAINPROCESS){
-	printf("===================================\n"
-	       "   Using MPIPOSIX driver\n"
-	       "===================================\n");
+  printf("===================================\n"
+         "   Using MPIPOSIX driver\n"
+         "===================================\n");
     }
 
     if (dxfer_coll_type == DXFER_INDEPENDENT_IO && MAINPROCESS){
-	printf("===================================\n"
-	       "   Using Independent I/O with file set view to replace collective I/O \n"
-	       "===================================\n");
+  printf("===================================\n"
+         "   Using Independent I/O with file set view to replace collective I/O \n"
+         "===================================\n");
     }
 
 
@@ -4913,16 +4913,16 @@ int main(int argc, char **argv)
     {
         int temp;
         MPI_Allreduce(&nerrors, &temp, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-	nerrors=temp;
+  nerrors=temp;
     }
 
-    if (MAINPROCESS){		/* only process 0 reports */
-	printf("===================================\n");
-	if (nerrors)
-	    printf("***PHDF5 tests detected %d errors***\n", nerrors);
-	else
-	    printf("PHDF5 tests finished with no errors\n");
-	printf("===================================\n");
+    if (MAINPROCESS){    /* only process 0 reports */
+  printf("===================================\n");
+  if (nerrors)
+      printf("***PHDF5 tests detected %d errors***\n", nerrors);
+  else
+      printf("PHDF5 tests finished with no errors\n");
+  printf("===================================\n");
     }
     /* close HDF5 library */
     H5close();
