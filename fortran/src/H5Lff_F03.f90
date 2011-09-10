@@ -51,7 +51,7 @@ CONTAINS
 ! PURPOSE
 !  Iterates through links in a group.
 !
-! INPUTS
+! Inputs:
 !  group_id 	 - Identifier specifying subject group
 !  index_type 	 - Type of index which determines the order
 !  order 	 - Order within index
@@ -59,7 +59,7 @@ CONTAINS
 !  op 	         - Callback function passing data regarding the link to the calling application
 !  op_data 	 - User-defined pointer to data required by the application for its processing of the link
 !
-! OUTPUTS
+! Outputs:
 !  idx 	         - Position at which an interrupted iteration may be restarted
 !  hdferr        - Error code:
 !                    Success:  0
@@ -68,7 +68,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  July 8, 2008
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5literate_f(group_id, index_type, order, idx, op, op_data, return_value, hdferr)
     USE ISO_C_BINDING
     IMPLICIT NONE
@@ -131,7 +131,7 @@ CONTAINS
 ! PURPOSE
 !  Iterates through links in a group.
 !
-! INPUTS
+! Inputs:
 !  loc_id 	 - File or group identifier specifying location of subject group
 !  group_name 	 - Name of subject group
 !  index_type 	 - Type of index which determines the order
@@ -140,19 +140,19 @@ CONTAINS
 !  op 	         - Callback function passing data regarding the link to the calling application
 !  op_data 	 - User-defined pointer to data required by the application for its processing of the link
 !
-! OUTPUTS
+! Outputs:
 !  idx 	    - Position at which an interrupted iteration may be restarted
 !  hdferr   - Error code:
 !               Success:  0
 !               Failure: -1
-! OPTIONAL PARAMETERS
+! Optional parameters:
 !  lapl_id  - Link access property list
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  Augest 18, 2008
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, idx, op, op_data, return_value, hdferr, lapl_id)
     USE ISO_C_BINDING
     IMPLICIT NONE

@@ -1129,17 +1129,17 @@ CONTAINS
 !  converting from file datatype and dataspace to memory
 !  datatype and dataspace.
 !
-! INPUTS
+! Inputs:
 !		dset_id		- dataset identifier
 !		mem_type_id	- memory type identifier
 !		dims		- 1-dim array of size 7; dims(k) has the size
 !				- of k-th dimension of the buf array
-! OUTPUTS
+! Outputs:
 !		buf		- buffer to read data in
 !		hdferr:		- error code
 !				 	Success:  0
 !				 	Failure: -1
-! OPTIONAL PARAMETERS
+! Optional parameters:
 !		mem_space_id	- memory dataspace identifier
 !		file_space_id 	- file dataspace identifier
 !		xfer_prp	- trasfer property list identifier
@@ -2142,12 +2142,12 @@ CONTAINS
 !  are assumed to have the same datatype.
 !  Only one-dimesional buffers are supported.
 !
-! INPUTS
+! Inputs:
 !		fill_value	- fill value
 !		space_id	- memory space selection identifier
 !		buf		- data buffer iin memory ro apply selection to
 !				- of k-th dimension of the buf array
-! OUTPUTS
+! Outputs:
 !		hdferr:		- error code
 !				 	Success:  0
 !				 	Failure: -1
@@ -2193,12 +2193,12 @@ CONTAINS
 !  are assumed to have the same datatype.
 !  Only one-dimesional buffers are supported.
 !
-! INPUTS
+! Inputs:
 !		fill_value	- fill value
 !		space_id	- memory space selection identifier
 !		buf		- data buffer iin memory ro apply selection to
 !				- of k-th dimension of the buf array
-! OUTPUTS
+! Outputs:
 !		hdferr:		- error code
 !				 	Success:  0
 !				 	Failure: -1
@@ -2243,12 +2243,12 @@ CONTAINS
 !  are assumed to have the same datatype.
 !  Only one-dimesional buffers are supported.
 !
-! INPUTS
+! Inputs:
 !		fill_value	- fill value
 !		space_id	- memory space selection identifier
 !		buf		- data buffer iin memory ro apply selection to
 !				- of k-th dimension of the buf array
-! OUTPUTS
+! Outputs:
 !		hdferr:		- error code
 !				 	Success:  0
 !				 	Failure: -1
@@ -2285,14 +2285,14 @@ CONTAINS
 ! PURPOSE 
 !  Reclaims VL datatype memory buffers. 
 !
-! INPUTS
+! Inputs:
 !
 !  type_id  - Identifier of the datatype. 
 !  space_id - Identifier of the dataspace. 
 !  plist_id - Identifier of the property list used to create the buffer. 
 !       buf - Pointer to the buffer to be reclaimed. 
 !
-! OUTPUTS
+! Outputs:
 !  hdferr   - error code
 !	        Success:  0
 !		Failure: -1
@@ -2301,7 +2301,7 @@ CONTAINS
 ! M. Scot Breitenfeld
 ! January 11, 2011
 !
-! SOURCE
+! Signature:
   SUBROUTINE H5Dvlen_reclaim_f(type_id, space_id, plist_id, buf, hdferr)
 
     USE ISO_C_BINDING

@@ -112,7 +112,7 @@ CONTAINS
 ! PURPOSE
 !  Recursively visits all objects starting from a specified object.
 !
-! INPUTS
+! Inputs:
 !  group_id 	 - Identifier of the group at which the recursive iteration begins
 !  index_type 	 - Type of index; valid values include:
 !                    H5_INDEX_NAME_F
@@ -124,7 +124,7 @@ CONTAINS
 !  op 	         - Callback function passing data regarding the group to the calling application
 !  op_data 	 - User-defined pointer to data required by the application for its processing of the group
 !
-! OUTPUTS
+! Outputs:
 !  idx 	         - returns the return value of the first operator that returns a positive value, or 
 !                  zero if all members were processed with no operator returning non-zero.
 !  hdferr 	 - error code:
@@ -133,7 +133,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  November 19, 2008
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5ovisit_f(group_id, index_type, order, op, op_data, return_value, hdferr)
     USE ISO_C_BINDING
     IMPLICIT NONE
@@ -193,22 +193,22 @@ CONTAINS
 ! PURPOSE
 !  Retrieves the metadata for an object, identifying the object by location and relative name.
 !
-! INPUTS
+! Inputs:
 !  loc_id 	  - File or group identifier specifying location of group in which object 
 !                   is located.
 !  name 	  - Name of group, relative to loc_id
 !
-! OUTPUTS  NOTE: In C it is defined as a structure: H5O_info_t
+! Outputs:  NOTE: In C it is defined as a structure: H5O_info_t
 !    **** NEED TO MAKE THIS DERIVED DATATYPE ****
 !  hdferr 	  - Returns 0 if successful and -1 if fails
-! OPTIONAL PARAMETERS
+! Optional parameters:
 !  lapl_id 	  - Link access property list
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  December 1, 2008
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5oget_info_by_name_f(loc_id, name, &
        object_info, hdferr, lapl_id)
    !    f_corder_valid, corder, cset, data_size, hdferr, lapl_id)

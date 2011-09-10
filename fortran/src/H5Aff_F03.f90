@@ -634,12 +634,12 @@ CONTAINS
 ! PURPOSE
 !  Reads an attribute.
 !
-! INPUTS
+! Inputs:
 !  attr_id 	 - attribute identifier
 !  memtype_id 	 - attribute memory type identifier
 !  dims 	 - 1D array of size 7, stores sizes of the
 !   	         - buf array dimensions.
-! OUTPUTS
+! Outputs:
 !  buf 	         - buffer to read attribute data in
 !  hdferr 	 - Returns 0 if successful and -1 if fails
 ! AUTHOR

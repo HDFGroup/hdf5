@@ -191,11 +191,11 @@ CONTAINS
 ! PURPOSE
 !  Sets(gets) fill value for a dataset creation property list
 !
-! INPUTS
+! Inputs:
 !  prp_id 	 - dataset creation property list identifier
 !  type_id 	 - datatype identifier for fill value
 !  fillvalue 	 - fill value
-! OUTPUTS
+! Outputs:
 !  type_id       - datatype identifier for fill value
 !  fillvalue	 - fill value
 !  hdferr:	 - error code
@@ -219,7 +219,7 @@ CONTAINS
 !  h5pset(get)fill_value_f function is overloaded to support
 !  INTEGER, REAL, DOUBLE PRECISION and CHARACTER dtatypes.
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5pset_fill_value_integer(prp_id, type_id, fillvalue, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -382,18 +382,18 @@ CONTAINS
 ! PURPOSE
 !  Sets a property list value
 !
-! INPUTS
+! Inputs:
 !  prp_id 	 - iproperty list identifier to modify
 !  name 	 - name of property to modify
 !  value 	 - value to set property to
-! OUTPUTS
+! Outputs:
 !  hdferr:       - error code
 !                   Success:  0
 !                   Failure: -1
 ! AUTHOR
 !  Elena Pourmal
 !  October 9, 2002
-! SOURCE
+! Signature:
   SUBROUTINE h5pset_integer(prp_id, name, value, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -421,18 +421,18 @@ CONTAINS
 ! PURPOSE
 !  Sets a property list value
 !
-! INPUTS
+! Inputs:
 !  prp_id 	 - iproperty list identifier to modify
 !  name 	 - name of property to modify
 !  value 	 - value to set property to
-! OUTPUTS
+! Outputs:
 !  hdferr:	 - error code
 !                   Success:  0
 !                    Failure: -1
 ! AUTHOR
 !  Elena Pourmal
 !  October 9, 2002
-! SOURCE
+! Signature:
   SUBROUTINE h5pset_real(prp_id, name, value, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -460,21 +460,21 @@ CONTAINS
 ! PURPOSE
 !  Sets a property list value
 !
-! INPUTS
+! Inputs:
 !  prp_id 	 - iproperty list identifier to modify
 !  name 	 - name of property to modify
 !  value 	 - value to set property to
-! OUTPUTS
+! Outputs:
 !  hdferr:	 - error code
 !                   Success:  0
 !                   Failure: -1
-! OPTIONAL PARAMETERS
+! Optional parameters:
 !  NONE
 !
 ! AUTHOR
 !  Elena Pourmal
 !  October 9, 2002
-! SOURCE
+! Signature:
   SUBROUTINE h5pset_char(prp_id, name, value, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -522,10 +522,10 @@ CONTAINS
 ! PURPOSE
 !  Gets a property list value
 !
-! INPUTS
+! Inputs:
 !  prp_id 	 - iproperty list identifier to modify
 !  name 	 - name of property to modify
-! OUTPUTS
+! Outputs:
 !  value 	 - value of property
 !  hdferr:	 - error code
 !                   Success:  0
@@ -533,7 +533,7 @@ CONTAINS
 ! AUTHOR
 !  Elena Pourmal
 !  October 9, 2002
-! SOURCE
+! Signature:
   SUBROUTINE h5pget_integer(prp_id, name, value, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -561,10 +561,10 @@ CONTAINS
 ! PURPOSE
 !  Gets a property list value
 !
-! INPUTS
+! Inputs:
 !  prp_id 	 - iproperty list identifier to modify
 !  name 	 - name of property to modify
-! OUTPUTS
+! Outputs:
 !  value 	 - value of property
 !  hdferr:	 - error code
 !                   Success:  0
@@ -573,7 +573,7 @@ CONTAINS
 ! AUTHOR
 !  Elena Pourmal
 !  October 9, 2002
-! SOURCE
+! Signature:
   SUBROUTINE h5pget_real(prp_id, name, value, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -600,10 +600,10 @@ CONTAINS
 ! PURPOSE
 !  Gets a property list value
 !
-! INPUTS
+! Inputs:
 !  prp_id 	 - iproperty list identifier to modify
 !  name 	 - name of property to modify
-! OUTPUTS
+! Outputs:
 !  value 	 - value of property
 !  hdferr:	 - error code
 !                   Success:  0
@@ -612,7 +612,7 @@ CONTAINS
 !
 !  Elena Pourmal
 !  October 9, 2002
-! SOURCE
+! Signature:
   SUBROUTINE h5pget_char(prp_id, name, value, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -685,14 +685,14 @@ CONTAINS
 ! PURPOSE
 !  Registers a permanent property with a property list class.
 !
-! INPUTS
+! Inputs:
 !  class 	 - property list class to register
 !                  permanent property within
 !  name 	 - name of property to register
 !  size 	 - size of property in bytes
 !  value 	 - default value for property in newly
 !                  created property lists
-! OUTPUTS
+! Outputs:
 !  hdferr:	 - error code
 !                   Success:  0
 !                   Failure: -1
@@ -700,7 +700,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 10, 2002
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5pregister_integer(class, name, size, value, hdferr)
     USE ISO_C_BINDING
     IMPLICIT NONE
@@ -729,21 +729,21 @@ CONTAINS
 ! PURPOSE
 !  Registers a permanent property with a property list class.
 !
-! INPUTS
+! Inputs:
 !  class 	 - property list class to register
 !                  permanent property within
 !  name 	 - name of property to register
 !  size 	 - size of property in bytes
 !  value 	 - default value for property in newly
 !                  created property lists
-! OUTPUTS
+! Outputs:
 !  hdferr:	 - error code
 !                   Success:  0
 !                   Failure: -1
 ! AUTHOR
 !  Elena Pourmal
 !  October 10, 2002
-! SOURCE
+! Signature:
   SUBROUTINE h5pregister_real(class, name, size, value, hdferr)
     USE ISO_C_BINDING
     IMPLICIT NONE
@@ -772,14 +772,14 @@ CONTAINS
 ! PURPOSE
 !  Registers a permanent property with a property list class.
 !
-! INPUTS
+! Inputs:
 !  class 	 - property list class to register
 !                  permanent property within
 !  name 	 - name of property to register
 !  size 	 - size of property in bytes
 !  value 	 - default value for property in newly
 !                  created property lists
-! OUTPUTS
+! Outputs:
 !  hdferr:	 - error code
 !                   Success:  0
 !                   Failure: -1
@@ -787,7 +787,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 10, 2002
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5pregister_char(class, name, size, value, hdferr)
     USE ISO_C_BINDING
     IMPLICIT NONE
@@ -834,21 +834,21 @@ CONTAINS
 ! PURPOSE
 !  Registers a permanent property with a property list class.
 !
-! INPUTS
+! Inputs:
 !  class 	 - property list class to register
 !                  permanent property within
 !  name 	 - name of property to register
 !  size 	 - size of property in bytes
 !  value 	 - default value for property in newly
 !                  created property lists
-! OUTPUTS
+! Outputs:
 !  hdferr:	 - error code
 !                   Success:  0
 !                   Failure: -1
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  June 24, 2008
-! SOURCE
+! Signature:
   SUBROUTINE h5pregister_ptr(class, name, size, value, hdferr)
     USE ISO_C_BINDING
     IMPLICIT NONE
@@ -873,12 +873,12 @@ CONTAINS
 ! PURPOSE
 !  Registers a temporary property with a property list class.
 !
-! INPUTS
+! Inputs:
 !  plist 	 - property list identifier
 !  name 	 - name of property to insert
 !  size 	 - size of property in bytes
 !  value 	 - initial value for the property
-! OUTPUTS
+! Outputs:
 !  hdferr:	 - error code
 !                   Success:  0
 !                   Failure: -1
@@ -886,7 +886,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 10, 2002
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5pinsert_integer(plist, name, size, value, hdferr)
     USE iso_c_binding
     IMPLICIT NONE
@@ -914,20 +914,20 @@ CONTAINS
 ! PURPOSE
 !  Registers a temporary property with a property list class.
 !
-! INPUTS
+! Inputs:
 !  plist 	 - property list identifier
 !                  permanent property within
 !  name 	 - name of property to insert
 !  size 	 - size of property in bytes
 !  value 	 - initial value for the property
-! OUTPUTS
+! Outputs:
 !  hdferr:	 - error code
 !                   Success:  0
 !                   Failure: -1
 ! AUTHOR
 !  Elena Pourmal
 !  October 10, 2002
-! SOURCE
+! Signature:
   SUBROUTINE h5pinsert_real(plist, name, size, value, hdferr)
     USE iso_c_binding
     IMPLICIT NONE
@@ -956,20 +956,20 @@ CONTAINS
 ! PURPOSE
 !  Registers a temporary property with a property list class.
 !
-! INPUTS
+! Inputs:
 !  plist 	 - property list identifier
 !                  permanent property within
 !  name 	 - name of property to insert
 !  size 	 - size of property in bytes
 !  value 	 - initial value for the property
-! OUTPUTS
+! Outputs:
 !  hdferr:	 - error code
 !                   Success:  0
 !                   Failure: -1
 ! AUTHOR
 !  Elena Pourmal
 !  October 10, 2002
-! SOURCE
+! Signature:
   SUBROUTINE h5pinsert_char(plist, name, size, value, hdferr)
     USE iso_c_binding
     IMPLICIT NONE
@@ -1018,20 +1018,20 @@ CONTAINS
 ! PURPOSE
 !  Registers a temporary property with a property list class.
 !
-! INPUTS
+! Inputs:
 !  plist 	 - property list identifier
 !                  permanent property within
 !  name 	 - name of property to insert
 !  size 	 - size of property in bytes
 !  value 	 - initial value for the property
-! OUTPUTS
+! Outputs:
 !  hdferr:	 - error code
 !                   Success:  0
 !                   Failure: -1
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  June 24, 2008
-! SOURCE
+! Signature:
   SUBROUTINE h5pinsert_ptr(plist, name, size, value, hdferr)
     USE iso_c_binding
     IMPLICIT NONE
@@ -1056,7 +1056,7 @@ CONTAINS
 ! PURPOSE
 !  Create a new property list class
 !
-! INPUTS
+! Inputs:
 !  parent 	 - Property list identifier of the parent class
 !                  Possible values include:
 !                   H5P_ROOT_F
@@ -1066,13 +1066,13 @@ CONTAINS
 !                   H5P_DATASET_XFER_F
 !                   H5P_FILE_MOUNT_F
 !  name 	 - name of the class we are creating
-! OUTPUTS
+! Outputs:
 !  class 	 - porperty list class identifier
 !  hdferr:	 - error code
 !
 !  Success: 0
 !  Failure: -1
-! OPTIONAL PARAMETERS
+! Optional parameters:
 !  H5P_cls_create_func_t (create) - Callback routine called when a property list is created
 !  create_data 	                  - User pointer to any class creation information needed
 !  H5P_cls_copy_func_t   (copy)   - Callback routine called when a property list is copied
@@ -1088,7 +1088,7 @@ CONTAINS
 !  Added callback arguments
 !  M. Scot Breitenfeld, July 3, 2008
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5pcreate_class_f(parent, name, class, hdferr, create, create_data, copy, copy_data, close, close_data)
     USE iso_c_binding
     IMPLICIT NONE

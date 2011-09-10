@@ -133,10 +133,10 @@ CONTAINS
 ! PURPOSE
 !  Creates reference to the object
 !
-! INPUTS
+! Inputs:
 !  loc_id    - location identifier
 !  name      - name of the object at the specified location
-! OUTPUTS
+! Outputs:
 !  ref 	     - reference to the specified object
 !  hdferr:   - error code
 !               Success:  0
@@ -153,7 +153,7 @@ CONTAINS
 ! NOTES
 !  This is a module procedure for the h5rcreate_f subroutine.
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5rcreate_object_f(loc_id, name, ref, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -183,11 +183,11 @@ CONTAINS
 ! PURPOSE
 !  Creates reference to the dataset region
 !
-! INPUTS
+! Inputs:
 !  loc_id 	 - location identifier
 !  name 	 - name of the dataset at the specified location
 !  space_id 	 - dataspace identifier that describes selected region
-! OUTPUTS
+! Outputs:
 !  ref 	         - reference to the dataset region
 !  hdferr:	 - error code
 !                   Success:  0
@@ -205,7 +205,7 @@ CONTAINS
 ! NOTES
 !  This is a module procedure for the h5rcreate_f subroutine.
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5rcreate_region_f(loc_id, name, space_id, ref, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -256,13 +256,13 @@ CONTAINS
 ! PURPOSE
 !  Creates a reference.
 !
-! INPUTS
+! Inputs:
 !  loc_id     - location identifier
 !  name	      - name of the dataset at the specified location
 !  ref_type   - type of reference:
 !                H5R_OBJECT
 !                H5T_STD_REF_DSETREG
-! OUTPUTS
+! Outputs:
 !  ref	      - reference created by the function call.
 !  hdferr     - error code
 !		   Success:  0
@@ -278,7 +278,7 @@ CONTAINS
 !  This is a module procedure for the h5rcreate_f
 !  subroutine where the output is a pointer.
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5rcreate_ptr_f(loc_id, name, ref_type, ref, hdferr, space_id)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -307,11 +307,11 @@ CONTAINS
 ! PURPOSE
 !  Opens the HDF5 object referenced
 !
-! INPUTS
+! Inputs:
 !  dset_id  - identifier of the dataset containing
 !             reference
 !  ref 	    - reference to open
-! OUTPUTS
+! Outputs:
 !  obj_id   - object_identifier
 !  hdferr:  - error code
 !              Success:  0
@@ -328,7 +328,7 @@ CONTAINS
 ! NOTES
 !  This is a module procedure for the h5rdereference_f subroutine.
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5rdereference_object_f(obj_id, ref, ref_obj_id, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -352,11 +352,11 @@ CONTAINS
 ! PURPOSE
 !  Opens the dataset region
 !
-! INPUTS
+! Inputs:
 !  dset_id 	 - identifier of the dataset containing
 !                  reference to teh regions
 !  ref 	         - reference to open
-! OUTPUTS
+! Outputs:
 !  obj_id 	 - dataspace identifier
 !  hdferr:	 - error code
 !                   Success:  0
@@ -374,7 +374,7 @@ CONTAINS
 ! NOTES
 !  This is a module procedure for the h5rdereference_f subroutine.
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5rdereference_region_f(obj_id, ref, ref_obj_id, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -398,12 +398,12 @@ CONTAINS
 ! PURPOSE
 !  Opens the HDF5 object referenced.
 !
-! INPUTS
+! Inputs:
 !  obj_id     - valid identifier for the file containing the
 !               referenced object or any object in that file.
 !  ref_type   - the reference type of ref.
 !  ref        - Reference to open.
-! OUTPUTS
+! Outputs:
 !  ref_obj_id - identifier of referenced object
 !  hdferr     - error code
 !		 Success:  0
@@ -416,7 +416,7 @@ CONTAINS
 !  This is a module procedure for the h5rdereference_f
 !  subroutine using pointers.
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5rdereference_ptr_f(obj_id, ref_type, ref, ref_obj_id, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -440,25 +440,25 @@ CONTAINS
 ! PURPOSE
 !  Retrieves a name of a referenced object.
 !
-! INPUTS
+! Inputs:
 !  loc_id    - Identifier for the dataset containing the reference or for the group that dataset is in.
 !  ref 	     - An object or dataset region reference.
 !
-! OUTPUTS
+! Outputs:
 !  name      - A name associated with the referenced object or dataset region.
 !
 !  hdferr:   - error code
 !               Success:  0
 !               Failure: -1
 !
-! OPTIONAL PARAMETERS
+! Optional parameters:
 !  size     - The size of the name buffer.
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  March 28, 2008
 !
-! SOURCES
+! Signature:S
   SUBROUTINE h5rget_name_object_f(loc_id,  ref, name, hdferr, size)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -495,25 +495,25 @@ CONTAINS
 ! PURPOSE
 !  Retrieves a name of a dataset region.
 !
-! INPUTS
+! Inputs:
 !  loc_id  - Identifier for the dataset containing the reference or
 !            for the group that dataset is in.
 !  ref 	   - An object or dataset region reference.
 !
-! OUTPUTS
+! Outputs:
 !  name    - A name associated with the referenced object or dataset region.
 !  hdferr  - error code
 !              Success:  0
 !              Failure: -1
 !
-! OPTIONAL PARAMETERS
+! Optional parameters:
 !  size    - The size of the name buffer.
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  March 28, 2008
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5rget_name_region_f(loc_id, ref, name, hdferr, size)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -548,27 +548,27 @@ CONTAINS
   ! PURPOSE
   !  Retrieves a name of a referenced object.
   !
-  ! INPUTS
+  ! Inputs:
   !  loc_id   - Identifier for the dataset containing the reference or
   !             for the group that dataset is in.
   !  ref_type - Type of reference.
   !  ref      - An object or dataset region reference.
   !
-  ! OUTPUTS
+  ! Outputs:
   !  name     - A name associated with the referenced object or dataset ptr.
   !
   !  hdferr   - error code
   !		  Success:  0
   !		  Failure: -1
   !
-  ! OPTIONAL PARAMETERS
+  ! Optional parameters:
   !   size   - The size of the name buffer.
   !
   ! AUTHOR
   !  M. Scot Breitenfeld
   !  March 28, 2008
   !
-  ! SOURCE
+  ! Signature:
   SUBROUTINE h5rget_name_ptr_f(loc_id, ref_type, ref, name, hdferr, size)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -601,13 +601,13 @@ CONTAINS
   ! PURPOSE
   !  Retrieves the type of object that an object reference points to.
   !
-  ! INPUTS
+  ! Inputs:
   !  loc_id   - Identifier for the dataset containing the reference or
   !             for the group that dataset is in.
   !  ref_type - Type of reference to query.
   !  ref      - Reference to query.
   !
-  ! OUTPUTS
+  ! Outputs:
   !  obj_type - Type of referenced object. 
   !               H5G_UNKNOWN_F (-1)
   !               H5G_LINK_F      0
@@ -623,7 +623,7 @@ CONTAINS
   !  M. Scot Breitenfeld
   !  Decemeber 17, 2008
   !
-  ! SOURCE
+  ! Signature:
   SUBROUTINE h5rget_obj_type_f(loc_id, ref_type, ref, obj_type, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE

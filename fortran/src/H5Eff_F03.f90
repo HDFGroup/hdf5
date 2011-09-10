@@ -66,7 +66,7 @@ CONTAINS
 ! PURPOSE
 !  Returns settings for automatic error stack traversal function and its data.
 !
-! INPUTS
+! Inputs:
 !  printflag   - Flag to turn automatic error printing on or off;
 !                possible values are:
 !                  printon (1)
@@ -75,14 +75,14 @@ CONTAINS
 !  func        - Function to be called upon an error condition.
 !  client_data - Data passed to the error function
 !  
-! OUTPUTS
+! Outputs:
 !  hdferr      - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  July 10, 2009
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5eset_auto_f(printflag, hdferr, estack_id, func, client_data)
     USE ISO_C_BINDING
     INTEGER       , INTENT(IN)            :: printflag
@@ -129,9 +129,9 @@ CONTAINS
 ! PURPOSE
 !  Returns the settings for the automatic error stack traversal function and its data.
 !
-! INPUTS
+! Inputs:
 !  estack_id    - Error stack identifier. H5E_DEFAULT_F indicates the current stack.
-! OUTPUTS
+! Outputs:
 !  func         - The function currently set to be called upon an error condition.
 !  client_data  - Data currently set to be passed to the error function.
 !  hdferr       - Returns 0 if successful and -1 if fails.
@@ -140,7 +140,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  July 10, 2009
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5eget_auto_f(estack_id, op, client_data, hdferr)
     USE ISO_C_BINDING
     IMPLICIT NONE
