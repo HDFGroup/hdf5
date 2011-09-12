@@ -25,6 +25,11 @@
 #include "hdf5.h"
 
 /* Local macros */
+#ifdef H5_HAVE_VISUAL_STUDIO
+#define HDgetlogin()           Wgetlogin()
+#else /* H5_HAVE_VISUAL_STUDIO */
+#define HDgetlogin()            getlogin()
+#endif /* H5_HAVE_VISUAL_STUDIO */
 
 /*
  * HDF Boolean type.

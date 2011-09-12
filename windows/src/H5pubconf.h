@@ -9,6 +9,12 @@
 /* Define if the Windows virtual file driver should be compiled */
 #define H5_HAVE_WINDOWS 1
 
+/* Define if on the Windows platform */
+#define H5_HAVE_WIN32_API 1
+
+/* Define if using a Windows compiler (i.e. Visual Studio) */
+#define H5_HAVE_VISUAL_STUDIO 1
+
 /* Define if the Windows virtual file driver should use buffered IO functions */
 /* #undef WINDOWS_USE_STDIO */
 

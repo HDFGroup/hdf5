@@ -303,10 +303,10 @@
  * The Visual Studio project files will not be supported in the next major release of 1.10.
  */
 
-#if defined(_WIN32)
+#if defined(H5_HAVE_WIN32_API)
 
 #if defined(_HDF5DLL_)
-#pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
+#pragma warning(disable: 4273)  /* Disable the dll linkage warnings */
 #define H5_DLL __declspec(dllexport)
 #define H5_DLLVAR extern __declspec(dllexport)
 #elif defined(_HDF5USEDLL_)
@@ -318,7 +318,7 @@
 #endif /* _HDF5DLL_ */
 
 #if defined(_HDF5TESTDLL_)
-#pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
+#pragma warning(disable: 4273)  /* Disable the dll linkage warnings */
 #define H5TEST_DLL __declspec(dllexport)
 #define H5TEST_DLLVAR extern __declspec(dllexport)
 #elif defined(_HDF5TESTUSEDLL_)
@@ -330,7 +330,7 @@
 #endif /* _HDF5TESTDLL_ */
 
 #if defined(_HDF5TOOLSDLL_)
-#pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
+#pragma warning(disable: 4273)  /* Disable the dll linkage warnings */
 #define H5TOOLS_DLL __declspec(dllexport)
 #define H5TOOLS_DLLVAR extern __declspec(dllexport)
 #elif defined(_HDF5TOOLSUSEDLL_)
@@ -342,7 +342,7 @@
 #endif /* _HDF5TOOLSDLL_ */
 
 #if defined(_HDF5_HLDLL_EXPORTS_)
-#pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
+#pragma warning(disable: 4273)  /* Disable the dll linkage warnings */
 #define H5_HLDLL __declspec(dllexport)
 #elif defined(_HDF5USEHLDLL_)
 #define H5_HLDLL __declspec(dllimport)
@@ -351,7 +351,7 @@
 #endif /* _HDF5_HLDLL_EXPORTS */
 
 #if defined(HDF5_HL_CPPDLL_EXPORTS)
-#pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
+#pragma warning(disable: 4273)  /* Disable the dll linkage warnings */
 #define H5_HLCPPDLL __declspec(dllexport)
 #elif defined(HDF5USE_HLCPPDLL)
 #define H5_HLCPPDLL __declspec(dllimport)
@@ -360,7 +360,7 @@
 #endif /*HDF5_HL_CPPDLL_EXPORTS*/
 
 #if defined(HDF5_HL_F90CSTUBDLL_EXPORTS)
-#pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
+#pragma warning(disable: 4273)  /* Disable the dll linkage warnings */
 #define HDF5_HL_F90CSTUBDLL __declspec(dllexport)
 #elif defined(HDF5USE_HLF90CSTUBDLL)
 #define HDF5_HL_F90CSTUBDLL __declspec(dllimport)
@@ -370,7 +370,7 @@
 
 
 #if defined(HDF5FORT_CSTUB_DLL_EXPORTS)
-#pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
+#pragma warning(disable: 4273)  /* Disable the dll linkage warnings */
 #define H5_FCDLL __declspec(dllexport)
 #define H5_FCDLLVAR extern __declspec(dllexport)
 #elif defined(HDF5FORT_CSTUB_USEDLL)
@@ -382,7 +382,7 @@
 #endif /* _HDF5_FORTRANDLL_EXPORTS_ */
 
 #if defined(HDF5FORTTEST_CSTUB_DLL_EXPORTS)
-#pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
+#pragma warning(disable: 4273)  /* Disable the dll linkage warnings */
 #define H5_FCTESTDLL __declspec(dllexport)
 #define H5_FCTESTDLLVAR extern __declspec(dllexport)
 #elif defined(HDF5FORTTEST_CSTUB_USEDLL)
@@ -402,7 +402,7 @@
 #define H5_DLLCPP
 #endif /* HDF5_CPPDLL_EXPORTS */
 
-#else /*_WIN32*/
+#else /*H5_HAVE_WIN32_API*/
 #define H5_DLL
 #define H5_HLDLL
 #define H5_HLCPPDLL
@@ -417,7 +417,7 @@
 #define H5_FCDLLVAR extern
 #define H5_FCTESTDLL
 #define H5_FCTESTDLLVAR extern
-#endif
+#endif /*H5_HAVE_WIN32_API*/
 
 #endif /* H5API_ADPT_H */
 
