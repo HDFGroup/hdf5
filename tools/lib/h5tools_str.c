@@ -836,7 +836,11 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             else
                 tempchar = (tempchar >> packed_data_offset) & packed_data_mask;
         }
+#ifdef H5_VMS
+        h5tools_str_append(str, OPT(info->fmt_schar, "%hd"), tempchar);
+#else
         h5tools_str_append(str, OPT(info->fmt_schar, "%hhd"), tempchar);
+#endif      
     }
     else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
         unsigned char      tempuchar;
