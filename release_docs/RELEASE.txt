@@ -573,6 +573,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+         - Fixed h5repack to update values of references(object and region) of 
+           attributes in h5repack for 1) references, 2) ARRAY of references, 
+           3) VLEN of references, and 4) COMPOUND of references. 
+           (JIRA HDF5 5932) PC -2011/09/14
         - h5diff: fixed segfault over dataset with container types
           (array,lven) with multiple nested compound types. 
           (ex: compound->array->compound, compound->vlen->compound)
@@ -721,10 +725,7 @@ Bug Fixes since HDF5-1.8.0 release
         - h5dump: when doing binary output (-b), the stdout printing of attributes 
            was done incorrectly. Removed printing of attributes when doing binary 
            output. PVN - 2008/06/05
-         - Fixed h5repack to update values of references(object and region) of 
-           attributes in h5repack for 1) references, 2) ARRAY of references, 
-           3) VLEN of references, and 4) COMPOUND of references. (see JIRA HDF5 5932) 
-           PC -2011/09/14
+
 
     High-Level APIs:
      ------
