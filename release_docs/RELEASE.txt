@@ -702,7 +702,7 @@ Bug Fixes since HDF5-1.8.0 release
             (NAF - 2008/10/15)
         - Fixed unnecessary indentation of committed datatypes in h5dump.
             (NAF - 2008/10/15)
-  - Fixed bugs in h5stat:segmemtation fault when printing groups and
+        - Fixed bugs in h5stat:segmemtation fault when printing groups and
           print warning message when traversal of objects is unsuccessful.
           (see bug #1253) (VC- 2008/10/13)
         - Fixed bug in h5ls that prevented relative group listings (like
@@ -721,6 +721,10 @@ Bug Fixes since HDF5-1.8.0 release
         - h5dump: when doing binary output (-b), the stdout printing of attributes 
            was done incorrectly. Removed printing of attributes when doing binary 
            output. PVN - 2008/06/05
+         - Fixed h5repack to update values of references(object and region) of 
+           attributes in h5repack for 1) references, 2) ARRAY of references, 
+           3) VLEN of references, and 4) COMPOUND of references. (see JIRA HDF5 5932) 
+           PC -2011/09/14
 
     High-Level APIs:
      ------
