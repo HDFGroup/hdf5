@@ -796,11 +796,9 @@ TOOLTEST1 tfamily%05d.h5
 # test various references (bug 1814 and 1726)
 TOOLTEST h5repack_refs.h5
 
-# test attribute with various references (bug 1797)
+# test attribute with various references (bug1797 / HDFFV-5932)
 # the references in attribute of compund or vlen datatype 
-# TODO: include this test when code portion is completed.
-SKIP h5repack_attr_refs.h5
-#TOOLTEST h5repack_attr_refs.h5 
+TOOLTEST h5repack_attr_refs.h5 
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."
