@@ -702,16 +702,16 @@ static int copy_refs_attr(hid_t loc_in,
                 		if (ref_comp_size[j] == H5R_OBJ_REF_BUF_SIZE) {
                 			int idx = i*msize+H5Tget_member_offset( mtype_id, (unsigned)ref_comp_index[j]);
                 			hobj_ref_t ref_out;
-                			if (update_ref_value(attr_id, H5R_OBJECT, (hobj_ref_t *)(buf+idx), fidout, &ref_out, travt)<0)
+                			if (update_ref_value(attr_id, H5R_OBJECT, (hobj_ref_t *)(((char *)buf)+idx), fidout, &ref_out, travt)<0)
                 				continue;
-                			HDmemcpy(buf+idx, &ref_out, ref_comp_size[j]);
+                			HDmemcpy(((char *)buf)+idx, &ref_out, ref_comp_size[j]);
                  		} /* if */
                 		else if (ref_comp_size[j] == H5R_DSET_REG_REF_BUF_SIZE) {
                 			int idx = i*msize+H5Tget_member_offset( mtype_id, (unsigned)ref_comp_index[j]);
                 			hdset_reg_ref_t ref_out;
-                			if (update_ref_value(attr_id, H5R_DATASET_REGION, (hdset_reg_ref_t *)(buf+idx), fidout, &ref_out, travt)<0)
+                			if (update_ref_value(attr_id, H5R_DATASET_REGION, (hdset_reg_ref_t *)(((char *)buf)+idx), fidout, &ref_out, travt)<0)
                 				continue;
-                			HDmemcpy(buf+idx, &ref_out, ref_comp_size[j]);
+                			HDmemcpy(((char *)buf)+idx, &ref_out, ref_comp_size[j]);
                  		} /* else if */
                 	} /* j */
                 } /* i */
