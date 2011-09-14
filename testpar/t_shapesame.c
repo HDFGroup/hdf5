@@ -2251,7 +2251,7 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
      * test level.  Note that any value in excess of 4880 will cause all
      * sub tests to be skipped.
      */
-    int         max_skips_tbl[4] = {0, 4, 32, 256};
+    int         max_skips_tbl[4] = {0, 4, 64, 1024};
     hid_t	dset_type = H5T_NATIVE_UINT;
     int64_t	total_tests = 0;
     int64_t	tests_run = 0;
@@ -4534,7 +4534,7 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
      * test level.  Note that any value in excess of 4880 will cause all
      * sub tests to be skipped.
      */
-    int         max_skips_tbl[4] = {0, 4, 32, 256};
+    int         max_skips_tbl[4] = {0, 4, 64, 1024};
     int64_t     total_tests = 0;
     int64_t     tests_run = 0;
     int64_t     tests_skipped = 0;
