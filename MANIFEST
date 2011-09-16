@@ -1899,8 +1899,8 @@
 ./tools/h5diff/testfiles/h5diff_enum_invalid_values.h5
 ./tools/h5diff/testfiles/compounds_array_vlen1.h5
 ./tools/h5diff/testfiles/compounds_array_vlen2.h5
-./tools/h5diff/testfiles/non_comparables1.h
-./tools/h5diff/testfiles/non_comparables2.h
+./tools/h5diff/testfiles/non_comparables1.h5
+./tools/h5diff/testfiles/non_comparables2.h5
 
 #test files for h5repack
 ./tools/h5repack/testfiles/h5repack_fill.h5
