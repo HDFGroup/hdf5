@@ -1,0 +1,15 @@
+Not comparable: </g1/dset1> is of class H5T_INTEGER and </g1/dset1> is of class H5T_STRING
+attribute: <attr of </g1/dset1>> and <attr of </g1/dset1>>
+3 differences found
+dataset: </g1/dset1> and </g1/dset1>
+3 differences found
+dataset: </g1/dset2> and </g1/dset2>
+3 differences found
+Not comparable: <attr1> is of class H5T_INTEGER and <attr1> is of class H5T_STRING
+attribute: <attr2 of </g2/dset1>> and <attr2 of </g2/dset1>>
+3 differences found
+dataset: </g2/dset1> and </g2/dset1>
+6 differences found
+dataset: </g2/dset2> and </g2/dset2>
+3 differences found
+EXIT CODE: 1

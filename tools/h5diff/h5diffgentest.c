@@ -80,6 +80,9 @@
 /* file with container types (array,vlen) with multiple compounds */
 #define COMPS_COMPLEX1   "compounds_array_vlen1.h5"
 #define COMPS_COMPLEX2   "compounds_array_vlen2.h5"
+/* non-comparable dataset and attribute */
+#define NON_COMPARBLES1 "non_comparables1.h5"
+#define NON_COMPARBLES2 "non_comparables2.h5"
 
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
@@ -141,6 +144,7 @@ static void test_comps_array (const char *fname, const char *dset, const char *a
 static void test_comps_vlen (const char *fname, const char *dset,const char *attr, int diff, int is_file_new);
 static void test_comps_array_vlen (const char *fname, const char *dset, const char *attr, int diff, int is_file_new);
 static void test_comps_vlen_arry (const char *fname, const char *dset,const char *attr, int diff, int is_file_new);
+static void test_non_comparables (const char *fname, int diff);
 
 /* called by test_attributes() and test_datasets() */
 static void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
@@ -228,6 +232,14 @@ int main(void)
     test_comps_vlen(COMPS_COMPLEX2,"dset2", "attr2",5, 0);
     test_comps_array_vlen(COMPS_COMPLEX2,"dset3", "attr3", 5, 0);
     test_comps_vlen_arry(COMPS_COMPLEX2,"dset4", "attr4", 5, 0);
+
+    /*-------------------------------------------------
+     * Create test files with non-comparable dataset and attributes with 
+     * comparable datasets and attributes.  All the comparables should display 
+     * differences.
+     */
+    test_non_comparables(NON_COMPARBLES1,0);
+    test_non_comparables(NON_COMPARBLES2,5);
 
     return 0;
 }
@@ -4667,6 +4679,187 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
     assert(ret >= 0);
 }
 
+
+/*-------------------------------------------------------------------------
+* Function: test_non_comparables
+*
+* Purpose: 
+*   Create test files with non-comparable dataset and attributes with 
+*   comparable datasets and attributes.  All the comparables should display 
+*   differences.
+*
+*-------------------------------------------------------------------------*/
+#define DIM_ARRY 3
+static void test_non_comparables (const char * fname, int make_diffs)
+{
+    hid_t   fid=0;
+    hid_t   gid1=0;
+    hid_t   gid2=0;
+    hid_t   did1=0;
+    hid_t   did2=0;
+    hid_t   sid1=0;
+    hid_t   tid_dset1=0;
+    hid_t   tid_attr1=0;
+    hsize_t dims1[1] = {DIM_ARRY};
+    int data1[DIM_ARRY] = {0,0,0};
+    int data2[DIM_ARRY] = {1,1,1};
+    char data1_str[DIM_ARRY][STR_SIZE]= {"ab","cd","ef"};
+    herr_t  status = SUCCEED;
+    int i;
+    void *dset_data_ptr1=NULL;
+    void *dset_data_ptr2=NULL;
+    void *dset_data_ptr3=NULL;
+    void *attr_data_ptr1=NULL;
+    void *attr_data_ptr2=NULL;
+    void *attr_data_ptr3=NULL;
+
+    /* init */
+    tid_dset1=H5Tcopy(H5T_NATIVE_INT);
+    dset_data_ptr1=(int*)&data1;
+    dset_data_ptr2=(int*)&data1;
+    dset_data_ptr3=(int*)&data1;
+    tid_attr1=H5Tcopy(H5T_NATIVE_INT);
+    attr_data_ptr1=(int*)&data1;
+    attr_data_ptr3=(int*)&data1;
+
+    if (make_diffs)
+    {
+        /* ------------
+         * group1 */
+        tid_dset1=H5Tcopy(H5T_C_S1);
+        H5Tset_size(tid_dset1, (size_t)STR_SIZE);
+        dset_data_ptr1=(char*)&data1_str;
+        dset_data_ptr2=(int*)&data2;
+        attr_data_ptr1=(int*)&data2;
+
+        /* ----------- 
+         * group2 
+         */
+        dset_data_ptr3=(int*)&data2;
+        /* attr1 */
+        tid_attr1=H5Tcopy(H5T_C_S1);
+        H5Tset_size(tid_attr1, (size_t)STR_SIZE);
+        attr_data_ptr2=(char*)&data1_str;
+        /* attr2 */
+        attr_data_ptr3=(int*)&data2;
+    }
+
+
+   /*-----------------------------------------------------------------------
+    * Create file(s)
+    *------------------------------------------------------------------------*/
+    fid = H5Fcreate (fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Groups
+    *------------------------------------------------------------------------*/
+    gid1 = H5Gcreate2(fid, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname);
+        status = FAIL;
+        goto out;
+    }
+
+    gid2 = H5Gcreate2(fid, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Datasets in /g1
+    *------------------------------------------------------------------------*/
+    if((sid1 = H5Screate_simple(1, dims1, NULL)) < 0)
+         goto out;
+
+    /*  dset1 */
+    if((did1 = H5Dcreate2(gid1, "dset1", tid_dset1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", "dset1");
+        status = FAIL;
+        goto out;
+    }
+
+    if(H5Dwrite(did1, tid_dset1, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data_ptr1) < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", "dset1");
+        status = FAIL;
+        goto out;
+    }
+    write_attr(did1,1,dims1,"attr", H5T_NATIVE_INT, attr_data_ptr1);
+
+    /*  dset2 */
+    status = write_dset(gid1, 1, dims1,"dset2", H5T_NATIVE_INT, dset_data_ptr2);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname);
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Datasets in /g2
+    *------------------------------------------------------------------------*/
+    /*  dset1 */
+    if((did2 = H5Dcreate2(gid2, "dset1", H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", "dset1");
+        status = FAIL;
+        goto out;
+    }
+
+    if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data_ptr3) < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", "dset1");
+        status = FAIL;
+        goto out;
+    }
+    /* attr1 */
+    write_attr(did2,1,dims1,"attr1", tid_attr1, attr_data_ptr2);
+
+    /* attr2 */
+    write_attr(did2,1,dims1,"attr2", H5T_NATIVE_INT, attr_data_ptr3);
+
+    /*  dset2 */
+    status = write_dset(gid2, 1, dims1,"dset2", H5T_NATIVE_INT, dset_data_ptr3);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname);
+        goto out;
+    }
+
+    
+
+out:
+    
+    /*-----------------------------------------------------------------------
+    * Close IDs
+    *-----------------------------------------------------------------------*/
+    if(fid)
+        H5Fclose(fid);
+    if(gid1)
+        H5Gclose(gid1);
+    if(gid2)
+        H5Gclose(gid2);
+    if(did1)
+        H5Dclose(did1);
+    if(did2)
+        H5Dclose(did2);
+    if(sid1)
+        H5Sclose(sid1);
+    if(tid_dset1)
+        H5Tclose(tid_dset1);
+    if(tid_attr1)
+        H5Tclose(tid_attr1);
+}
 
 /*-------------------------------------------------------------------------
 * Function: write_attr_in

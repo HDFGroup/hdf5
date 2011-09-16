@@ -573,6 +573,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+         - Fixed h5diff to display all the comparable object and attribute 
+           regardless of non-comparables. HDFFV-7693 (JKM 09/16/2011)
          - Fixed h5repack to update values of references(object and region) of 
            attributes in h5repack for 1) references, 2) ARRAY of references, 
            3) VLEN of references, and 4) COMPOUND of references. 

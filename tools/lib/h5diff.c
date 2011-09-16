@@ -1952,8 +1952,8 @@ hsize_t diff(hid_t file1_id,
             else
             {
                 nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
-                /* print info if compatible and difference found  */
-                if (!options->not_cmp && nfound)
+                /* print info if difference found  */
+                if (nfound)
                 {
                     do_print_objname("dataset", path1, path2, options);
                     print_found(nfound);	

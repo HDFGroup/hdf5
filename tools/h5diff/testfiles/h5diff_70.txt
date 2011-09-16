@@ -2028,5 +2028,5 @@ position        vlen3D of </g1> vlen3D of </g1> difference
 --------------------------------
 Some objects are not comparable
 --------------------------------
-Use -c for a list of objects.
+Use -c for a list of objects without details of differences.
 EXIT CODE: 1
