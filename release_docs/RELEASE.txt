@@ -151,6 +151,10 @@ Bug Fixes since HDF5-1.8.7
 
     Tools
     -----
+    - Fixed h5repack to update values of references(object and region) of 
+      attributes in h5repack for 1) references, 2) ARRAY of references, 
+      3) VLEN of references, and 4) COMPOUND of references. 
+      (HDFFV-5932) PC -2011/09/14
     - h5diff: fixed segfault over dataset with container types
       (array,lven) along with multiple nested compound types. 
       (ex: compound->array->compound, compound->vlen->compound)

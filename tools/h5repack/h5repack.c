@@ -105,7 +105,7 @@ int h5repack_init (pack_opt_t *options,
     return (options_table_init(&(options->op_tbl)));
 }
 
-
+
 /*-------------------------------------------------------------------------
 * Function: h5repack_end
 *
@@ -119,7 +119,7 @@ int h5repack_end  (pack_opt_t *options)
     return options_table_free(options->op_tbl);
 }
 
-
+
 /*-------------------------------------------------------------------------
 * Function: h5repack_addfilter
 *
@@ -167,7 +167,7 @@ int h5repack_addfilter(const char* str,
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
 * Function: h5repack_addlayout
 *
@@ -233,9 +233,9 @@ int h5repack_addlayout(const char* str,
     return 0;
 }
 
-/* Note: The below copy_named_datatype(), named_datatype_free(), copy_attr() 
- * were located in h5repack_copy.c as static prior to bugfix1726. 
- * Made shared functions as copy_attr() was needed in h5repack_refs.c. 
+/* Note: The below copy_named_datatype(), named_datatype_free(), copy_attr()
+ * were located in h5repack_copy.c as static prior to bugfix1726.
+ * Made shared functions as copy_attr() was needed in h5repack_refs.c.
  * However copy_attr() may be obsoleted when H5Acopy is available and put back
  * others to static in h5repack_copy.c.
  */
@@ -266,21 +266,21 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_hea
     if(H5Oget_info(type_in, &oinfo) < 0)
         goto error;
 
-    if(*named_dt_head_p) 
+    if(*named_dt_head_p)
     {
         /* Stack already exists, search for the datatype */
         while(dt && dt->addr_in != oinfo.addr)
             dt = dt->next;
 
         dt_ret = dt;
-    } 
-    else 
+    }
+    else
     {
         /* Create the stack */
         size_t  i;
 
         for(i=0; i<travt->nobjs; i++)
-            if(travt->objs[i].type == H5TRAV_TYPE_NAMED_DATATYPE) 
+            if(travt->objs[i].type == H5TRAV_TYPE_NAMED_DATATYPE)
             {
                 /* Push onto the stack */
                 if(NULL == (dt = (named_dt_t *) HDmalloc(sizeof(named_dt_t))))
@@ -293,7 +293,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_hea
                 dt->id_out = -1;
 
                 /* Check if this type is the one requested */
-                if(oinfo.addr == dt->addr_in) 
+                if(oinfo.addr == dt->addr_in)
                 {
                     HDassert(!dt_ret);
                     dt_ret = dt;
@@ -303,7 +303,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_hea
 
     /* Handle the case that the requested datatype was not found.  This is
      * possible if the datatype was committed anonymously in the input file. */
-    if(!dt_ret) 
+    if(!dt_ret)
     {
         /* Push the new datatype onto the stack */
         if(NULL == (dt_ret = (named_dt_t *) HDmalloc(sizeof(named_dt_t))))
@@ -318,7 +318,7 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_hea
 
     /* If the requested datatype does not yet exist in the output file, copy it
      * anonymously */
-    if(dt_ret->id_out < 0) 
+    if(dt_ret->id_out < 0)
     {
         if (options->use_native==1)
             dt_ret->id_out = h5tools_get_native_type(type_in);
@@ -360,7 +360,7 @@ int named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err)
 {
     named_dt_t *dt = *named_dt_head_p;
 
-    while(dt) 
+    while(dt)
     {
         /* Pop the datatype off the stack and free it */
         if(H5Tclose(dt->id_out) < 0 && !ignore_err)
@@ -413,6 +413,8 @@ int copy_attr(hid_t loc_in,
     H5O_info_t oinfo;             /* object info */
     int        j;
     unsigned   u;
+    hbool_t    is_ref=0;
+    H5T_class_t type_class = -1;
 
     if(H5Oget_info(loc_in, &oinfo) < 0)
         goto error;
@@ -446,7 +448,7 @@ int copy_attr(hid_t loc_in,
 
             /* Copy named dt */
             if((wtype_id = copy_named_datatype(ftype_id, fidout, named_dt_head_p,
-                    travt, options)) < 0) 
+                    travt, options)) < 0)
             {
                 H5Fclose(fidout);
                 goto error;
@@ -461,6 +463,7 @@ int copy_attr(hid_t loc_in,
             else
                 wtype_id = H5Tcopy(ftype_id);
         } /* end else */
+
 
         /* get the dataspace handle  */
         if((space_id = H5Aget_space(attr_id)) < 0)
@@ -478,15 +481,37 @@ int copy_attr(hid_t loc_in,
             goto error;
 
         /*-------------------------------------------------------------------------
-        * object references are a special case
-        * we cannot just copy the buffers, but instead we recreate the reference
-        * this is done on a second sweep of the file that just copies
-        * the referenced objects
+        * object references are a special case. We cannot just copy the buffers,
+        * but instead we recreate the reference.
+        * This is done on a second sweep of the file that just copies the referenced
+        * objects at copy_refs_attr()
         *-------------------------------------------------------------------------
         */
+        type_class = H5Tget_class(wtype_id);
+        is_ref = (type_class == H5T_REFERENCE);
+        if (type_class == H5T_VLEN ||type_class == H5T_ARRAY ) {
+        	hid_t base_type = -1;
+        	base_type = H5Tget_super(ftype_id);
+        	is_ref = (is_ref || (H5Tget_class(base_type)==H5T_REFERENCE));
+        	H5Tclose(base_type);
+        }
 
-        if(H5T_REFERENCE == H5Tget_class(wtype_id)) {
-            ;
+        if (type_class == H5T_COMPOUND) {
+        	int nmembers = H5Tget_nmembers(wtype_id) ;
+        	for (j=0; j<nmembers; j++) {
+        		hid_t mtid = H5Tget_member_type( wtype_id, j );
+        		H5T_class_t mtclass = H5Tget_class(mtid);
+        		H5Tclose(mtid);
+
+        		if (mtclass==H5T_REFERENCE) {
+        			is_ref = 1;
+        			break;
+        		}
+        	} /* for (j=0; i<nmembers; j++) */
+        } /* if (type_class == H5T_COMPOUND) */
+
+        if(is_ref) {
+            ; /* handled by copy_refs_attr() */
         }
         else {
             /*-------------------------------------------------------------------------
@@ -602,20 +627,20 @@ static int check_options(pack_opt_t *options)
             switch (options->layout_g)
             {
             case H5D_COMPACT:
-                strcpy(slayout,"compact");
+                HDstrcpy(slayout,"compact");
                 break;
             case H5D_CONTIGUOUS:
-                strcpy(slayout,"contiguous");
+                HDstrcpy(slayout,"contiguous");
                 break;
             case H5D_CHUNKED:
-                strcpy(slayout,"chunked");
+                HDstrcpy(slayout,"chunked");
                 break;
             case H5D_LAYOUT_ERROR:
             case H5D_NLAYOUTS:
                 error_msg("invalid layout\n");
                 return -1;
             default:
-                strcpy(slayout,"invalid layout\n");
+                HDstrcpy(slayout,"invalid layout\n");
                 return -1;
             }
             printf(" Apply %s layout to all\n", slayout);
