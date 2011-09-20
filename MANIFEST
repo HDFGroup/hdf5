@@ -1766,6 +1766,7 @@
 ./tools/h5repack/testfiles/h5repack_filters.h5
 ./tools/h5repack/testfiles/h5repack_soffset.h5
 ./tools/h5repack/testfiles/h5repack_attr.h5
+./tools/h5repack/testfiles/h5repack_attr_refs.h5
 ./tools/h5repack/testfiles/h5repack_early.h5
 ./tools/h5repack/testfiles/h5repack_layout.h5
 ./tools/h5repack/testfiles/h5repack_layouto.h5
