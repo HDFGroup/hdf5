@@ -54,7 +54,8 @@ TOOLTEST() {
 ##############################################################################
 ##############################################################################
 
-# testphdf5 test using the MPI-POSIX VFL driver
+# Invoke the regular h5diff testing script, with the -p parameter to indicate
+#       that it should run the parallel version of the tests
 TOOLTEST -p
 
 # no need to print any message since this is just a shell to invoke

@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -v tdatareg.h5'
-#############################
 Opened "tdatareg.h5" with sec2 driver.
 Dataset1                 Dataset {4/4}
     Location:  1:1284

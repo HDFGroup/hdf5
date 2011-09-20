@@ -22,6 +22,16 @@
 #define MAX_FILENAME 1024
 
 /*-------------------------------------------------------------------------
+ * This is used to pass multiple args into diff().
+ * Passing this instead of several each arg provides smoother extensibility 
+ * through its members along with MPI code for ph5diff
+ * as it doesn't require interface change.
+ *------------------------------------------------------------------------*/
+typedef struct {
+    h5trav_type_t   type;
+    hbool_t is_same_trgobj;
+} diff_args_t;
+/*-------------------------------------------------------------------------
  * command line options
  *-------------------------------------------------------------------------
  */
@@ -36,6 +46,7 @@ typedef struct {
     int      m_quiet;               /* quiet mide: no output at all */
     int      m_report;              /* report mode: print the data */
     int      m_verbose;             /* verbose mode: print the data, list of objcets, warnings */
+    int      m_verbose_level;       /* control verbose details */
     int      d;                     /* delta, absolute value to compare */
     double   delta;                 /* delta value */
     int      p;                     /* relative error to compare*/
@@ -71,6 +82,13 @@ H5TOOLS_DLL hsize_t  h5diff(const char *fname1,
                 const char *objname2,
                 diff_opt_t *options);
 
+H5TOOLS_DLL hsize_t diff( hid_t      file1_id,
+              const char *path1,
+              hid_t      file2_id,
+              const char *path2,
+              diff_opt_t *options,
+              diff_args_t *argdata);
+
 #ifdef H5_HAVE_PARALLEL
 H5TOOLS_DLL void phdiff_dismiss_workers(void);
 H5TOOLS_DLL void print_manager_output(void);
@@ -99,13 +117,6 @@ hsize_t diff_datasetid( hid_t dset1_id,
                         const char *obj1_name,
                         const char *obj2_name,
                         diff_opt_t *options);
-
-hsize_t diff( hid_t      file1_id,
-              const char *path1,
-              hid_t      file2_id,
-              const char *path2,
-              diff_opt_t *options,
-              h5trav_type_t  type );
 
 hsize_t diff_compare( hid_t file1_id,
                       const char *file1_name,
@@ -169,7 +180,8 @@ const char* get_class(H5T_class_t tclass);
 const char* get_sign(H5T_sign_t sign);
 void        print_dimensions (int rank, hsize_t *dims);
 int         print_objname(diff_opt_t *options, hsize_t nfound);
-void        do_print_objname (const char *OBJ, const char *path1, const char *path2);
+void        do_print_objname (const char *OBJ, const char *path1, const char *path2, diff_opt_t * opts);
+void        do_print_attrname (const char *attr, const char *path1, const char *path2);
 
 
 /*-------------------------------------------------------------------------

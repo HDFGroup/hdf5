@@ -6,6 +6,12 @@
 /* Define if the Windows virtual file driver should be compiled */
 #cmakedefine H5_HAVE_WINDOWS @H5_HAVE_WINDOWS@
 
+/* Define if on the Windows platform and default WIN32 API */
+#cmakedefine H5_HAVE_WIN32_API @H5_HAVE_WIN32_API@
+
+/* Define if using a Windows compiler (i.e. Visual Studio) */
+#cmakedefine H5_HAVE_VISUAL_STUDIO @H5_HAVE_VISUAL_STUDIO@
+
 /* Define if the Windows virtual file driver should use buffered IO functions */
 /* #undef WINDOWS_USE_STDIO */
 
@@ -209,9 +215,6 @@
 /* Define to 1 if you have the <gpfs.h> header file. */
 #cmakedefine H5_HAVE_GPFS_H @H5_HAVE_GPFS_H@
 
-/* Define if h5dump packed bits feature is enabled */
-#cmakedefine H5_HAVE_H5DUMP_PACKED_BITS @H5_HAVE_H5DUMP_PACKED_BITS@
-
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
@@ -293,6 +296,9 @@
 
 /* Define to 1 if you have the <pthread.h> header file. */
 #cmakedefine H5_HAVE_PTHREAD_H @H5_HAVE_PTHREAD_H@
+
+/* Define to 1 if you have the 'InitOnceExecuteOnce' function. */
+#cmakedefine H5_HAVE_WIN_THREADS @H5_HAVE_WIN_THREADS@
 
 /* Define to 1 if you have the `random' function. */
 #cmakedefine H5_HAVE_RANDOM @H5_HAVE_RANDOM@
@@ -514,16 +520,9 @@
 /* Define if the metadata trace file code is to be compiled in */
 #cmakedefine H5_METADATA_TRACE_FILE @H5_METADATA_TRACE_FILE@
 
-/* Define if your system can handle complicated MPI derived datatype
-   correctly. */
-#cmakedefine H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS @H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS@
-
 /* Define if your system's `MPI_File_set_size' function works for files over
    2GB. */
 #cmakedefine H5_MPI_FILE_SET_SIZE_BIG @H5_MPI_FILE_SET_SIZE_BIG@
-
-/* Define if your system can handle special collective IO properly. */
-#cmakedefine H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS @H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS@
 
 /* Define if we can violate pointer alignment restrictions */
 #cmakedefine H5_NO_ALIGNMENT_RESTRICTIONS @H5_NO_ALIGNMENT_RESTRICTIONS@
@@ -729,6 +728,9 @@
 /* Define using v1.6 public API symbols by default */
 #cmakedefine H5_USE_16_API_DEFAULT @H5_USE_16_API_DEFAULT@
 
+/* Define using v1.8 public API symbols by default */
+#cmakedefine H5_USE_18_API_DEFAULT @H5_USE_18_API_DEFAULT@
+
 /* Define if a memory checking tool will be used on the library, to cause
    library to be very picky about memory operations and also disable the
    internal free list manager code. */
@@ -758,6 +760,8 @@
 #  define WORDS_BIGENDIAN 1
 # endif
 #endif
+
+#cmakedefine WORDS_BIGENDIAN @H5_WORDS_BIGENDIANR@
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #cmakedefine _FILE_OFFSET_BITS

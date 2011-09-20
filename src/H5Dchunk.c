@@ -386,8 +386,9 @@ done:
 static herr_t
 H5D_chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
 {
-    const H5T_t *type = dset->shared->type;     /* Convenience pointer to dataset's datatype */
-    hsize_t max_dim[H5O_LAYOUT_NDIMS];          /* Maximum size of data in elements */
+    const H5T_t *type = dset->shared->type;      /* Convenience pointer to dataset's datatype */
+    hsize_t max_dims[H5O_LAYOUT_NDIMS];          /* Maximum size of data in elements */
+    hsize_t dims[H5O_LAYOUT_NDIMS];              /* Dimension size of data in elements */
     uint64_t chunk_size;        /* Size of chunk in bytes */
     int ndims;                  /* Rank of dataspace */
     unsigned u;                 /* Local index variable */
@@ -421,7 +422,7 @@ H5D_chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
     dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] = (uint32_t)H5T_GET_SIZE(type);
 
     /* Get local copy of dataset dimensions (for sanity checking) */
-    if(H5S_get_simple_extent_dims(dset->shared->space, NULL, max_dim) < 0)
+    if(H5S_get_simple_extent_dims(dset->shared->space, dims, max_dims) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to query maximum dimensions")
 
     /* Sanity check dimensions */
@@ -432,9 +433,10 @@ H5D_chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
 
         /*
          * The chunk size of a dimension with a fixed size cannot exceed
-         * the maximum dimension size
+         * the maximum dimension size. If any dimension size is zero, there
+         * will be no such restriction.
          */
-        if(max_dim[u] != H5S_UNLIMITED && max_dim[u] < dset->shared->layout.u.chunk.dim[u])
+        if(dims[u] && max_dims[u] != H5S_UNLIMITED && max_dims[u] < dset->shared->layout.u.chunk.dim[u])
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size must be <= maximum dimension size for fixed-sized dimensions")
     } /* end for */
 
@@ -3245,7 +3247,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
 
 #ifdef H5_HAVE_PARALLEL
     /* Retrieve MPI parameters */
-    if(IS_H5FD_MPI(dset->oloc.file)) {
+    if(H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI)) {
         /* Get the MPI communicator */
         if(MPI_COMM_NULL == (mpi_comm = H5F_mpi_get_comm(dset->oloc.file)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator")
@@ -3570,6 +3572,7 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     void        *chunk;	                /* The file chunk  */
     H5D_chunk_ud_t chk_udata;           /* User data for locking chunk */
     uint32_t    bytes_accessed;         /* Bytes accessed in chunk */
+    hbool_t     chunk_iter_init = FALSE; /* Whether the chunk iterator has been initialized */
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -3635,16 +3638,11 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     /* Create a selection iterator for scattering the elements to memory buffer */
     if(H5S_select_iter_init(&chunk_iter, udata->chunk_space, layout->u.chunk.dim[rank]) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunk selection information")
+    chunk_iter_init = TRUE;
 
     /* Scatter the data into memory */
-    if(H5D_scatter_mem(udata->fb_info.fill_buf, udata->chunk_space, &chunk_iter, (size_t)sel_nelmts, io_info->dxpl_cache, chunk/*out*/) < 0) {
-        H5S_SELECT_ITER_RELEASE(&chunk_iter);
+    if(H5D_scatter_mem(udata->fb_info.fill_buf, udata->chunk_space, &chunk_iter, (size_t)sel_nelmts, io_info->dxpl_cache, chunk/*out*/) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed")
-    } /* end if */
-
-    /* Release the selection iterator */
-    if(H5S_SELECT_ITER_RELEASE(&chunk_iter) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
 
 
     /* The number of bytes accessed in the chunk */
@@ -3657,6 +3655,10 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to unlock raw data chunk")
 
 done:
+    /* Release the selection iterator */
+    if(chunk_iter_init && H5S_SELECT_ITER_RELEASE(&chunk_iter) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_chunk_prune_fill */
 

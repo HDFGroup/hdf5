@@ -22,17 +22,12 @@
 #ifndef H5FDmulti_H
 #define H5FDmulti_H
 
-#include "H5Ipublic.h"
-#include "H5Ppublic.h"             /* Property lists */
-#include "H5Fpublic.h"
-
 #define H5FD_MULTI	(H5FD_multi_init())
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 H5_DLL hid_t H5FD_multi_init(void);
-H5_DLL void H5FD_multi_term(void);
 H5_DLL herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
 			 const hid_t *memb_fapl, const char * const *memb_name,
 			 const haddr_t *memb_addr, hbool_t relax);
@@ -50,3 +45,4 @@ H5_DLL herr_t H5Pset_fapl_split(hid_t fapl, const char *meta_ext,
 #endif
 
 #endif
+

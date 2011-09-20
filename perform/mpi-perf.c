@@ -55,10 +55,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <errno.h>
 #include <string.h>
-#include <sys/time.h>
+#if defined(H5_TIME_WITH_SYS_TIME)
+#   include <sys/time.h>
+#   include <time.h>
+#elif defined(H5_HAVE_SYS_TIME_H)
+#   include <sys/time.h>
+#else
+#   include <time.h>
+#endif
 #include <mpi.h>
 #ifndef MPI_FILE_NULL           /*MPIO may be defined in mpi.h already       */
 #   include <mpio.h>
@@ -299,7 +308,7 @@ die_jar_jar_die:
 #if H5_HAVE_SETENV
 /* no setenv or unsetenv */
     /* clear the environment variable if it was set earlier */
-    if	(opt_pvfstab_set){
+    if  (opt_pvfstab_set){
             unsetenv("PVFSTAB_FILE");
     }
 #endif

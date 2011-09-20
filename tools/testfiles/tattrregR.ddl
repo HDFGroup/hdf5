@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -R tattrreg.h5'
-#############################
 HDF5 "tattrreg.h5" {
 GROUP "/" {
    DATASET "Dataset1" {

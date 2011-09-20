@@ -228,7 +228,7 @@ static void gent_compressed(hid_t loc_id)
 /*-------------------------------------------------------------------------
  * Function:    gent_named_vl
  *
- * Purpose:     Generate a variable lenght named datatype for a dataset in 
+ * Purpose:     Generate a variable lenght named datatype for a dataset in
                 LOC_ID
  *
  *-------------------------------------------------------------------------
@@ -420,6 +420,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     hsize_t dims2[1]={2};
     int data[3] = {10,20,30};
     int status;
+
     /*---------------------
      * create obj references to the previously created objects.
      * Passing -1 as reference is an object.*/
@@ -642,12 +643,12 @@ out:
 /*-------------------------------------------------------------------------
  * Function: Test_Obj_Copy
  *
- * Purpose: Testing with various objects 
+ * Purpose: Testing with various objects
  *
  *------------------------------------------------------------------------*/
 static void Test_Obj_Copy()
 {
-    hid_t fid=0;    
+    hid_t fid=0;
 
     /* Create source file */
     fid = H5Fcreate(HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -680,14 +681,14 @@ static void Test_Ref_Copy()
 {
     hid_t fid=0;
     herr_t status;
-    
+
     fid = H5Fcreate (HDF_FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid < 0)
     {
         fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_FILE2);
         goto out;
     }
-    
+
     /* add object reference */
     status = gen_obj_ref(fid);
     if (status < 0)
@@ -847,7 +848,7 @@ static void Test_Extlink_Copy()
     hid_t fid1=0;
     hid_t fid2=0;
     herr_t status;
-    
+
     fid1 = H5Fcreate (HDF_EXT_SRC_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0)
     {
@@ -861,7 +862,7 @@ static void Test_Extlink_Copy()
         fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_EXT_TRG_FILE);
         goto out;
     }
-    
+
     /* add links to source external link file */
     status = gen_extlink_src(fid1);
     if (status < 0)

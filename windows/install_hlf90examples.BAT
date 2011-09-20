@@ -23,16 +23,12 @@ cd hl/fortran/examples
 
 mkdir HLf90examplesRELEASE
 mkdir HLf90examplesRELEASEDLL
-mkdir HLf90examplesDEBUG
-mkdir HLf90examplesDEBUGDLL
 
 cd ex_lite
-copy debug\ex_lite.exe ..\HLf90examplesDEBUG\
 copy release\ex_lite.exe ..\HLf90examplesRELEASE\
 cd ..
 
 cd ex_litedll
-copy debug\ex_litedll.exe ..\HLf90examplesDEBUGDLL\
 copy release\ex_litedll.exe ..\HLf90examplesRELEASEDLL\
 cd ..
 

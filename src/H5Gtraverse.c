@@ -23,23 +23,38 @@
  *
  *-------------------------------------------------------------------------
  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 
 
-/* Packages needed by this file... */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* File access				*/
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs					*/
 #include "H5Lprivate.h"		/* Links				*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppublic.h"		/* Property Lists			*/
+#include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
-/* Private typedefs */
+
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* User data for path traversal routine */
 typedef struct {
@@ -51,13 +66,15 @@ typedef struct {
     hbool_t exists;             /* Indicate if object exists */
 } H5G_trav_slink_t;
 
-/* Private macros */
 
-/* Local variables */
-static char *H5G_comp_g = NULL;                 /*component buffer      */
-static size_t H5G_comp_alloc_g = 0;             /*sizeof component buffer */
+/********************/
+/* Package Typedefs */
+/********************/
 
-/* PRIVATE PROTOTYPES */
+
+/********************/
+/* Local Prototypes */
+/********************/
 static herr_t H5G_traverse_slink_cb(H5G_loc_t *grp_loc, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -67,38 +84,25 @@ static herr_t H5G_traverse_ud(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
 static herr_t H5G_traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc/*in,out*/, unsigned target, size_t *nlinks/*in,out*/,
     hbool_t *obj_exists, hid_t lapl_id, hid_t dxpl_id);
-static herr_t H5G_traverse_mount(H5G_loc_t *loc/*in,out*/);
 static herr_t H5G_traverse_real(const H5G_loc_t *loc, const char *name,
     unsigned target, size_t *nlinks, H5G_traverse_t op, void *op_data,
     hid_t lapl_id, hid_t dxpl_id);
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_traverse_term_interface
- *
- * Purpose:	Terminates part  of the H5G interface - free the global
- *              component buffer.
- *
- * Return:	Success:	Non-negative.
- *
- * 		Failure:	Negative.
- *
- * Programmer:	Quincey Koziol
- *		Monday, September	26, 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_traverse_term_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_traverse_term_interface)
 
-    /* Free the global component buffer */
-    H5G_comp_g = (char *)H5MM_xfree(H5G_comp_g);
-    H5G_comp_alloc_g = 0;
+/*********************/
+/* Package Variables */
+/*********************/
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_traverse_term_interface() */
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -376,86 +380,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_traverse_mount
- *
- * Purpose:	If LNK is a mount point then copy the entry for the root
- *		group of the mounted file into LNK.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, October  6, 1998
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_traverse_mount(H5G_loc_t *obj_loc/*in,out*/)
-{
-    H5F_t	*parent = obj_loc->oloc->file,      /* File of object */
-            *child = NULL;                      /* Child file */
-    unsigned	lt, rt, md = 0;                 /* Binary search indices */
-    int cmp;
-    H5O_loc_t	*oloc = NULL;           /* Object location for mount points */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_traverse_mount, FAIL)
-
-    /* Sanity check */
-    HDassert(obj_loc);
-
-    /*
-     * The loop is necessary because we might have file1 mounted at the root
-     * of file2, which is mounted somewhere in file3.
-     */
-    do {
-	/*
-	 * Use a binary search to find the potential mount point in the mount
-	 * table for the parent
-	 */
-	lt = 0;
-	rt = parent->shared->mtab.nmounts;
-	cmp = -1;
-	while(lt < rt && cmp) {
-	    md = (lt + rt) / 2;
-	    oloc = H5G_oloc(parent->shared->mtab.child[md].group);
-	    cmp = H5F_addr_cmp(obj_loc->oloc->addr, oloc->addr);
-	    if(cmp < 0)
-		rt = md;
-	    else
-		lt = md + 1;
-	} /* end while */
-
-	/* Copy root info over to ENT */
-    if(0 == cmp) {
-        /* Get the child file */
-        child = parent->shared->mtab.child[md].file;
-
-        /* Get the location for the root group in the child's file */
-        oloc = H5G_oloc(child->shared->root_grp);
-
-        /* Release the mount point */
-        if(H5O_loc_free(obj_loc->oloc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to free object location")
-
-        /* Copy the entry for the root group */
-        if(H5O_loc_copy(obj_loc->oloc, oloc, H5_COPY_DEEP) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "unable to copy object location")
-
-        /* In case the shared root group info points to a different file handle
-         * than the child, modify obj_loc */
-        obj_loc->oloc->file = child;
-
-        /* Switch to child's file */
-        parent = child;
-    } /* end if */
-    } while(!cmp);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_traverse_mount() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5G_traverse_special
  *
  * Purpose:	Handle traversing special link situations
@@ -522,7 +446,7 @@ H5G_traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
      */
     if(H5F_addr_defined(obj_loc->oloc->addr) &&
             (0 == (target & H5G_TARGET_MOUNT) || !last_comp)) {
-        if(H5G_traverse_mount(obj_loc/*in,out*/) < 0)
+        if(H5F_traverse_mount(obj_loc->oloc/*in,out*/) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "mount point traversal failed")
     } /* end if */
 
@@ -570,8 +494,11 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
     H5O_link_t          lnk;            /* Link information for object  */
     hbool_t link_valid = FALSE;         /* Flag to indicate that the link information is valid */
     hbool_t obj_loc_valid = FALSE;      /* Flag to indicate that the object location is valid */
-    H5G_own_loc_t own_loc=H5G_OWN_NONE; /* Enum to indicate whether callback took ownership of locations*/
+    H5G_own_loc_t own_loc = H5G_OWN_NONE; /* Enum to indicate whether callback took ownership of locations*/
     hbool_t group_copy = FALSE;         /* Flag to indicate that the group entry is copied */
+    char                comp_buf[1024];     /* Temporary buffer for path components */
+    char                *comp;          /* Pointer to buffer for path components */
+    H5WB_t              *wb = NULL;     /* Wrapped buffer for temporary buffer */
     hbool_t last_comp = FALSE;          /* Flag to indicate that a component is the last component in the name */
     herr_t              ret_value = SUCCEED;       /* Return value */
 
@@ -596,8 +523,8 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         HDassert(root_grp);
 
         /* Set the location entry to the root group's info */
-        loc.oloc=&(root_grp->oloc);
-        loc.path=&(root_grp->path);
+        loc.oloc = &(root_grp->oloc);
+        loc.path = &(root_grp->path);
     } /* end if */
     else {
         loc.oloc = _loc->oloc;
@@ -625,17 +552,13 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
     if(H5G_loc_reset(&obj_loc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset location")
 
-    /* Check for needing a larger buffer for the individual path name components */
-    if((HDstrlen(name) + 1) > H5G_comp_alloc_g) {
-        char *new_comp;                 /* New component buffer */
-        size_t new_alloc;               /* New component buffer size */
+    /* Wrap the local buffer for serialized header info */
+    if(NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
 
-        new_alloc = MAX3(1024, (2 * H5G_comp_alloc_g), (HDstrlen(name) + 1));
-        if(NULL == (new_comp = (char *)H5MM_realloc(H5G_comp_g, new_alloc)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "unable to allocate component buffer")
-        H5G_comp_g = new_comp;
-        H5G_comp_alloc_g = new_alloc;
-    } /* end if */
+    /* Get a pointer to a buffer that's large enough  */
+    if(NULL == (comp = (char *)H5WB_actual(wb, (HDstrlen(name) + 1))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
     /* Traverse the path */
     while((name = H5G_component(name, &nchars)) && *name) {
@@ -647,13 +570,13 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 	 * Copy the component name into a null-terminated buffer so
 	 * we can pass it down to the other symbol table functions.
 	 */
-	HDmemcpy(H5G_comp_g, name, nchars);
-	H5G_comp_g[nchars] = '\0';
+	HDmemcpy(comp, name, nchars);
+	comp[nchars] = '\0';
 
 	/*
 	 * The special name `.' is a no-op.
 	 */
-	if('.' == H5G_comp_g[0] && !H5G_comp_g[1]) {
+	if('.' == comp[0] && !comp[1]) {
 	    name += nchars;
 	    continue;
 	} /* end if */
@@ -669,7 +592,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         } /* end if */
 
         /* Get information for object in current group */
-        if((lookup_status = H5G_obj_lookup(grp_loc.oloc, H5G_comp_g, &lnk/*out*/, dxpl_id)) < 0)
+        if((lookup_status = H5G_obj_lookup(grp_loc.oloc, comp, &lnk/*out*/, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't look up component")
         obj_exists = FALSE;
 
@@ -677,7 +600,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         if(lookup_status) {
             /* Sanity check link and indicate it's valid */
             HDassert(lnk.type >= H5L_TYPE_HARD);
-            HDassert(!HDstrcmp(H5G_comp_g, lnk.name));
+            HDassert(!HDstrcmp(comp, lnk.name));
             link_valid = TRUE;
 
             /* Build object location from the link */
@@ -714,7 +637,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
             } /* end else */
 
             /* Call 'operator' routine */
-            if((op)(&grp_loc, H5G_comp_g, cb_lnk, cb_loc, op_data, &own_loc) < 0)
+            if((op)(&grp_loc, comp, cb_lnk, cb_loc, op_data, &own_loc) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CALLBACK, FAIL, "traversal operator failed")
 
             HGOTO_DONE(SUCCEED)
@@ -796,7 +719,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 
                 /* Insert new group into current group's symbol table */
-                if(H5G_loc_insert(&grp_loc, H5G_comp_g, &obj_loc, H5O_TYPE_GROUP, &gcrt_info, dxpl_id) < 0)
+                if(H5G_loc_insert(&grp_loc, comp, &obj_loc, H5O_TYPE_GROUP, &gcrt_info, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert intermediate group")
 
                 /* Decrement refcount on intermediate group's object header in memory */
@@ -816,13 +739,16 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 
                 /* Reset any non-default object header messages */
                 if(ginfo != &def_ginfo)
-                    if(H5O_msg_reset(H5O_GINFO_ID, ginfo) < 0)
+                    /* (Casting away const OK - QAK) */
+                    if(H5O_msg_reset(H5O_GINFO_ID, (void *)ginfo) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset group info message")
                 if(linfo != &def_linfo)
-                    if(H5O_msg_reset(H5O_LINFO_ID, linfo) < 0)
+                    /* (Casting away const OK - QAK) */
+                    if(H5O_msg_reset(H5O_LINFO_ID, (void *)linfo) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset link info message")
                 if(pline != &def_pline)
-                    if(H5O_msg_reset(H5O_PLINE_ID, pline) < 0)
+                    /* (Casting away const OK - QAK) */
+                    if(H5O_msg_reset(H5O_PLINE_ID, (void *)pline) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset I/O pipeline message")
             } /* end if */
             else
@@ -876,6 +802,10 @@ done:
     if(link_valid)
         if(H5O_msg_reset(H5O_LINK_ID, &lnk) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset link message")
+
+    /* Release temporary component buffer */
+    if(wb && H5WB_unwrap(wb) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer")
 
    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_traverse_real() */

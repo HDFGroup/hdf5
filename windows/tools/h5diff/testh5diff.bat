@@ -59,6 +59,10 @@ set srcexclude1_2=h5diff_exclude1-2.h5
 set srcexclude2_1=h5diff_exclude2-1.h5
 set srcexclude2_2=h5diff_exclude2-2.h5
 set src_comp_vl_strs=h5diff_comp_vl_strs.h5
+set src_COMPS_ARRAY_VLEN1=compounds_array_vlen1.h5
+set src_COMPS_ARRAY_VLEN2=compounds_array_vlen2.h5
+set src_ATTR_VERBOSE_LEVEL_FILE1=h5diff_attr_v_level1.h5
+set src_ATTR_VERBOSE_LEVEL_FILE2=h5diff_attr_v_level2.h5
 
 set file1=%indir%\h5diff_basic1.h5
 set file2=%indir%\h5diff_basic2.h5
@@ -91,6 +95,10 @@ set exclude1_2=%indir%\h5diff_exclude1-2.h5
 set exclude2_1=%indir%\h5diff_exclude2-1.h5
 set exclude2_2=%indir%\h5diff_exclude2-2.h5
 set comp_vl_strs=%indir%\h5diff_comp_vl_strs.h5
+set COMPS_ARRAY_VLEN1=%indir%\compounds_array_vlen1.h5
+set COMPS_ARRAY_VLEN2=%indir%\compounds_array_vlen2.h5
+set ATTR_VERBOSE_LEVEL_FILE1=%indir%\h5diff_attr_v_level1.h5
+set ATTR_VERBOSE_LEVEL_FILE2=%indir%\h5diff_attr_v_level2.h5
 
 
 rem The tool name
@@ -293,12 +301,12 @@ rem ############################################################################
     call :tooltest h5diff_17.txt -v %file1% %file2% 
 
     rem 1.71 test 32-bit INFINITY
-    call :testing %h5diff% -v %srcfile1% %srcfile1% /g1/fp19
-    call :tooltest h5diff_171.txt -v %file1% %file1% /g1/fp19 
+    call :testing %h5diff% -v %srcfile1% %srcfile1% /g1/fp19 /g1/fp19_COPY
+    call :tooltest h5diff_171.txt -v %file1% %file1% /g1/fp19 /g1/fp19_COPY
 
     rem 1.72 test 64-bit INFINITY
-    call :testing %h5diff% -v %srcfile1% %srcfile1% /g1/fp20
-    call :tooltest h5diff_172.txt -v %file1% %file1% /g1/fp20 
+    call :testing %h5diff% -v %srcfile1% %srcfile1% /g1/fp20 /g1/fp20_COPY
+    call :tooltest h5diff_172.txt -v %file1% %file1% /g1/fp20 /g1/fp20_COPY
 
     rem 1.8 quiet mode 
     call :testing %h5diff% -q %srcfile1% %srcfile2%
@@ -524,11 +532,65 @@ rem ############################################################################
     call :testing %h5diff% file1.h6 file2.h6
     call :tooltest h5diff_629.txt file1.h6 file2.h6
 
+    rem ######################################################################
+    rem # NaN
+    rem ######################################################################
+    rem 6.30: test (NaN == NaN) must be true based on our documentation -- XCAO
+    call :testing %h5diff% -v -d "0.0001" %srcfile1% %srcfile1% g1/fp18 g1/fp18_COPY
+    call :tooltest h5diff_630.txt -v -d "0.0001" %file1% %file1% g1/fp18 g1/fp18_COPY
+    call :testing %h5diff% -v --use-system-epsilon %srcfile1% %srcfile1% g1/fp18 g1/fp18_COPY
+    call :tooltest h5diff_631.txt -v --use-system-epsilon %file1% %file1% g1/fp18 g1/fp18_COPY
+
+
     rem ########################################################################
     rem 7.  attributes
     rem ########################################################################
     call :testing %h5diff% -v  %srcfile5% %srcfile6%
     call :tooltest h5diff_70.txt -v %file5% %file6%
+
+    rem ##################################################
+    rem  attrs with verbose option level
+    rem ##################################################
+    call :testing %h5diff% -v1 %srcfile5% %srcfile6%
+    call :tooltest h5diff_700.txt -v1 %file5% %file6%
+
+    call :testing %h5diff% -v2 %srcfile5% %srcfile6%
+    call :tooltest h5diff_701.txt -v2 %file5% %file6% 
+
+    call :testing %h5diff%  --verbose=1 %srcfile5% %srcfile6%
+    call :tooltest h5diff_702.txt --verbose=1 %file5% %file6% 
+
+    call :testing %h5diff% --verbose=2 %srcfile5% %srcfile6%
+    call :tooltest h5diff_703.txt --verbose=2 %file5% %file6% 
+
+    rem same attr number , all same attr name
+    call :testing %h5diff% -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2% /g
+    call :tooltest h5diff_704.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2% /g
+
+    rem same attr number , some same attr name
+    call :testing %h5diff%  -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2% /dset
+    call :tooltest h5diff_705.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2% /dset
+
+    rem same attr number , all different attr name
+    call :testing %h5diff% -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2% /ntype
+    call :tooltest h5diff_706.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2% /ntype
+
+    rem different attr number , same attr name (intersected)
+    call :testing %h5diff% -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2% /g2
+    call :tooltest h5diff_707.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2% /g2
+
+    rem different attr number , all different attr name 
+    call :testing %h5diff% -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2% /g3
+    call :tooltest h5diff_708.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2% /g3
+
+    rem when no attributes exist in both objects
+    call :testing %h5diff% -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2% /g4
+    call :tooltest h5diff_709.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2% /g4
+
+    rem file vs file
+    call :testing %h5diff% -v2 %src_ATTR_VERBOSE_LEVEL_FILE1% %src_ATTR_VERBOSE_LEVEL_FILE2%
+    call :tooltest h5diff_710.txt -v2 %ATTR_VERBOSE_LEVEL_FILE1% %ATTR_VERBOSE_LEVEL_FILE2%
+
 
     rem #######################################################################
     rem 8.  all dataset datatypes
@@ -554,13 +616,23 @@ rem ############################################################################
 
     rem 11. floating point comparison
     rem Not tested on Windows due to difference in formatting of scientific 
-    rem notation  --SJW 8/23/07
-    call :testing h5diff_101.txt -v %srcfile1% %srcfile1% g1/d1  g1/d2
+    rem notation (101, 102)  --SJW 8/23/07
+    call :testing %h5diff% -v %srcfile1% %srcfile1% g1/d1  g1/d2
     rem call :tooltest h5diff_101.txt -v %file1% %file1% g1/d1  g1/d2
     call :results -SKIP-
 
     call :testing %h5diff% -v  %srcfile1% %srcfile1%  g1/fp1 g1/fp2
     rem call :tooltest h5diff_102.txt -v %file1% %file1% g1/fp1 g1/fp2
+    call :results -SKIP-
+
+    rem Not tested on Windows due to difference in formatting of scientific 
+    rem notation with other OS. printf("%g") (103, 104)  
+    call :testing %h5diff% -v --use-system-epsilon %srcfile1% %srcfile1% g1/d1  g1/d2
+    rem call :tooltest h5diff_103.txt -v --use-system-epsilon %file1% %file1% g1/d1  g1/d2
+    call :results -SKIP-
+
+    call :testing %h5diff% -v --use-system-epsilon %srcfile1% %srcfile1%  g1/fp1 g1/fp2
+    rem call :tooltest h5diff_102.txt -v --use-system-epsilon %file1% %file1% g1/fp1 g1/fp2
     call :results -SKIP-
 
     rem   New option added #1368(E1)  - ADB 2/5/2009
@@ -826,9 +898,9 @@ rem ############################################################################
     call :tooltest h5diff_518.txt -v --follow-symlinks %grp_recurse1_ext% %grp_recurse2_ext1% /g1
 
 
-    rem ##############################################################################
+    rem #######################################################################
     rem # Exclude objects (--exclude-path)
-    rem ##############################################################################
+    rem #######################################################################
     rem #-------------------------------------------------
     rem # Same structure, same names and different value.
 
@@ -855,12 +927,45 @@ rem ############################################################################
     call :testing %h5diff% -v --exclude-path "/dset3" %srcexclude1_1% %srcexclude1_2% /group1
     call :tooltest h5diff_484.txt -v --exclude-path "/dset3"  %exclude1_1% %exclude1_2% /group1
 
-    rem ##############################################################################
+    rem #######################################################################
     rem # diff various multiple vlen and fixed strings in a compound type dataset
-    rem ##############################################################################
-    call :testing %h5diff% -v %src_comp_vl_strs% %src_comp_vl_strs%
-    call :tooltest h5diff_530.txt -v  %comp_vl_strs% %comp_vl_strs%
+    rem #######################################################################
+    call :testing %h5diff% -v %src_comp_vl_strs% %src_comp_vl_strs% /group /group_copy
+    call :tooltest h5diff_530.txt -v  %comp_vl_strs% %comp_vl_strs% /group /group_copy
 
+    rem # #####################################################################
+    rem # # Test container types (array,vlen) with multiple nested compound types
+    rem # # Complex compound types in dataset and attribute
+    rem # #####################################################################
+    call :testing %h5diff% -v %src_COMPS_ARRAY_VLEN1% %src_COMPS_ARRAY_VLEN2%
+    call :tooltest h5diff_540.txt -v %COMPS_ARRAY_VLEN1% %COMPS_ARRAY_VLEN2%
+
+    rem #######################################################################
+    rem # Test mutually exclusive options 
+    rem #######################################################################
+
+    rem ------------------------------------------------------
+    rem Test with -d , -p and --use-system-epsilon. 
+    call :testing %h5diff% -v -d 5 -p 0.05 --use-system-epsilon %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_640.txt -v -d 5 -p 0.05 --use-system-epsilon %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v -d 5 -p 0.05 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_641.txt -v -d 5 -p 0.05 %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v -p 0.05 -d 5 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_642.txt -v -p 0.05 -d 5 %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v -d 5 --use-system-epsilon %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_643.txt -v -d 5 --use-system-epsilon %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v --use-system-epsilon -d 5 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_644.txt -v --use-system-epsilon -d 5 %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v -p 0.05 --use-system-epsilon %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_645.txt -v -p 0.05 --use-system-epsilon %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v --use-system-epsilon -p 0.05 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_646.txt -v --use-system-epsilon -p 0.05 %file1% %file2% /g1/dset3 /g1/dset4
 	
     rem #######################################################################
     rem # END

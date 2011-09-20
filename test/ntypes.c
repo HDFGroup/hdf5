@@ -331,7 +331,7 @@ test_compound_dtype2(hid_t file)
             temp_point->st.c2 = (short)(i + j);
             temp_point->st.l2 = (i * 5 + j * 50) * n;
             temp_point->st.ll2 = (i * 10 + j * 100) * n;
-            temp_point->l = (unsigned long long)((i * 100 + j * 1000) * n);
+            temp_point->l = (unsigned long long)((i * 40 + j * 400) * n);
         } /* end for */
     } /* end for */
 
@@ -2187,7 +2187,7 @@ test_refer_dtype(hid_t file)
         TEST_ERROR;
 
     /* Open datatype object */
-    if((tid1 = H5Rdereference(dataset, H5R_OBJECT, rbuf)) < 0)
+    if((tid1 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, rbuf)) < 0)
         TEST_ERROR;
 
     /* Verify correct datatype */
@@ -2372,7 +2372,7 @@ test_refer_dtype2(hid_t file)
         TEST_ERROR;
 
     /* Try to open objects */
-    if((dset2 = H5Rdereference(dset1, H5R_DATASET_REGION, &rbuf)) < 0)
+    if((dset2 = H5Rdereference2(dset1, H5P_DEFAULT, H5R_DATASET_REGION, &rbuf)) < 0)
         TEST_ERROR;
 
     /* Check what H5Rget_obj_type2 function returns */
@@ -2892,6 +2892,10 @@ main(void)
 
     if(H5Fclose(file) < 0)
         goto error;
+
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+
     if(nerrors)
         goto error;
 

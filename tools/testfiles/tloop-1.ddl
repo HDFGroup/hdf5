@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tloop.h5'
-#############################
 HDF5 "tloop.h5" {
 GROUP "/" {
    GROUP "g1" {

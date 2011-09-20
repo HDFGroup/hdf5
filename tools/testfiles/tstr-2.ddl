@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tstr2.h5'
-#############################
 HDF5 "tstr2.h5" {
 GROUP "/" {
    GROUP "g1" {

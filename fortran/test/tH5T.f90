@@ -1,3 +1,12 @@
+!****h* root/fortran/test/tH5T.f90
+!
+! NAME
+!  tH5T.f90
+!
+! FUNCTION
+!  Basic testing of Fortran H5T APIs.
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,6 +22,11 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+! CONTAINS SUBROUTINES
+!  compoundtest, basic_data_type_test, enumtest, test_derived_flt
+!
+!*****
+
     SUBROUTINE compoundtest(cleanup, total_error)
 !
 ! This program creates a dataset that is one dimensional array of
@@ -822,7 +836,7 @@
     INTEGER, DIMENSION(2) :: data
     INTEGER(HSIZE_T), DIMENSION(7) :: dims
     INTEGER :: order1, order2
-    INTEGER(SIZE_T) :: type_size1, type_size2
+!    INTEGER(SIZE_T) :: type_size1, type_size2
     INTEGER :: class
 
     dims(1) = 2
@@ -946,7 +960,7 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
   INTEGER, INTENT(OUT) :: total_error
   INTEGER(hid_t) :: file=-1, tid1=-1, tid2=-1
   INTEGER(hid_t) :: dxpl_id=-1
-  INTEGER(size_t) :: spos, epos, esize, mpos, msize, size
+  INTEGER(size_t) :: spos, epos, esize, mpos, msize
 
   CHARACTER(LEN=15), PARAMETER :: filename="h5t_derived_flt"
   CHARACTER(LEN=80) :: fix_filename

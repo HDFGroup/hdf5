@@ -9,6 +9,12 @@
 /* Define if the Windows virtual file driver should be compiled */
 #define H5_HAVE_WINDOWS 1
 
+/* Define if on the Windows platform */
+#define H5_HAVE_WIN32_API 1
+
+/* Define if using a Windows compiler (i.e. Visual Studio) */
+#define H5_HAVE_VISUAL_STUDIO 1
+
 /* Define if the Windows virtual file driver should use buffered IO functions */
 /* #undef WINDOWS_USE_STDIO */
 
@@ -54,6 +60,10 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #define H5_FC_FUNC_(name,NAME) NAME
 
+/* LAHEY compiler for C identifiers containing underscores. */
+/* #define H5_FC_FUNC(name,NAME) name ## _ */
+/* #define H5_FC_FUNC_(name,NAME) name ## _ */
+
 /* Define if your system can handle overflow converting floating-point to
    integer values. */
 #define H5_FP_TO_INTEGER_OVERFLOW_WORKS 1
@@ -67,7 +77,7 @@
 /* #undef H5_FP_TO_ULLONG_RIGHT_MAXIMUM 1 */
 
 /* Define if gettimeofday() populates the tz pointer passed in */
-/* #undef H5_GETTIMEOFDAY_GIVES_TZ */
+#define H5_GETTIMEOFDAY_GIVES_TZ 1
 
 /* Define to 1 if you have the `alarm' function. */
 /* #undef H5_HAVE_ALARM */
@@ -108,6 +118,7 @@
 /* #undef H5_HAVE_FEATURES_H */
 
 /* Define if support for deflate (zlib) filter is enabled */
+#define H5_HAVE_FILTER_DEFLATE 1
 
 /* Define if support for Fletcher32 checksum is enabled */
 #define H5_HAVE_FILTER_FLETCHER32 1
@@ -164,7 +175,7 @@
 /* #undef H5_HAVE_GETTEXTINFO */
 
 /* Define to 1 if you have the `gettimeofday' function. */
-/* #undef H5_HAVE_GETTIMEOFDAY */
+#define H5_HAVE_GETTIMEOFDAY 1
 
 /* Define to 1 if you have the `get_fpc_csr' function. */
 /* #undef H5_HAVE_GET_FPC_CSR */
@@ -229,9 +240,6 @@
 
 /* Define to 1 if you have the `lseek64' function. */
 /* #undef H5_HAVE_LSEEK64 */
-
-/* Define to 1 if you have the <memory.h> header file. */
-#define H5_HAVE_MEMORY_H 1
 
 /* Define if we have MPE support */
 /* #undef H5_HAVE_MPE */
@@ -309,7 +317,7 @@
 /* #undef H5_HAVE_STRUCT_TEXT_INFO */
 
 /* Define if `struct timezone' is defined */
-/* #undef H5_HAVE_STRUCT_TIMEZONE */
+#define H5_HAVE_STRUCT_TIMEZONE 1
 
 /* Define to 1 if `tm_zone' is member of `struct tm'. */
 /* #undef H5_HAVE_STRUCT_TM_TM_ZONE */
@@ -448,16 +456,9 @@
 /* Define if the metadata trace file code is to be compiled in */
 /* #undef H5_METADATA_TRACE_FILE */
 
-/* Define if your system can handle complicated MPI derived datatype
-   correctly. */
-#define H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS 1
-
 /* Define if your system's `MPI_File_set_size' function works for files over
    2GB. */
 #define H5_MPI_FILE_SET_SIZE_BIG 1
-
-/* Define if your system can handle special collective IO properly. */
-#define H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS 1
 
 /* Define if we can violate pointer alignment restrictions */
 #define H5_NO_ALIGNMENT_RESTRICTIONS 1
@@ -478,13 +479,13 @@
 #define H5_PACKAGE_NAME "HDF5"
 
 /* Define to the full name and version of this package. */
-#define H5_PACKAGE_STRING "HDF5 1.9.80"
+#define H5_PACKAGE_STRING "HDF5 1.9.92"
 
 /* Define to the one symbol short name of this package. */
 #define H5_PACKAGE_TARNAME "hdf5"
 
 /* Define to the version of this package. */
-#define H5_PACKAGE_VERSION "1.9.80"
+#define H5_PACKAGE_VERSION "1.9.92"
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #define H5_PRINTF_LL_WIDTH "I64"
@@ -641,7 +642,7 @@
 /* #undef H5_USING_MEMCHECKER */
 
 /* Version number of package */
-#define H5_VERSION "1.9.80"
+#define H5_VERSION "1.9.92"
 
 /* Define if vsnprintf() returns the correct value for formatted strings that
    don't fit into size allowed */

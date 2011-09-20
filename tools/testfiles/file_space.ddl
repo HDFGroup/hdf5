@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -B file_space.h5'
-#############################
 HDF5 "file_space.h5" {
 SUPER_BLOCK {
    SUPERBLOCK_VERSION 2

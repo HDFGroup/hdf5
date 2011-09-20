@@ -4,21 +4,20 @@ PROJECT (HDF5_HL_F90_EXAMPLES C CXX Fortran)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
-LINK_DIRECTORIES (
+INCLUDE_DIRECTORIES (
     ${CMAKE_Fortran_MODULE_DIRECTORY}
-    ${HDF5_HL_F90_BINARY_DIR}
     ${HDF5_F90_BINARY_DIR}
-    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+    ${HDF5_F90_SRC_DIR}/src
 )
 
 SET (examples
     exlite
+    ex_ds1
 )
 
 FOREACH (example ${examples})
   ADD_EXECUTABLE (hl_f90_ex_${example} ${HDF5_HL_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
-  H5_NAMING (hl_f90_ex_${example} ${LIB_TYPE})
+  TARGET_NAMING (hl_f90_ex_${example} ${LIB_TYPE})
   TARGET_FORTRAN_WIN_PROPERTIES (hl_f90_ex_${example} "")
   TARGET_LINK_LIBRARIES (hl_f90_ex_${example} 
       ${HDF5_HL_F90_LIB_TARGET}

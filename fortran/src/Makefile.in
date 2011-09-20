@@ -96,27 +96,38 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libhdf5_fortran_la_LIBADD =
+libhdf5_fortran_la_DEPENDENCIES = $(LIBHDF5)
 am__libhdf5_fortran_la_SOURCES_DIST = H5f90global.f90 \
-	H5fortran_types.f90 H5_ff.f90 H5Aff.f90 H5Dff.f90 H5Eff.f90 \
-	H5Fff.f90 H5Gff.f90 H5Iff.f90 H5Lff.f90 H5Off.f90 H5Pff.f90 \
-	H5Rff.f90 H5Sff.f90 H5Tff.f90 H5Zff.f90 \
+	H5fortran_types.f90 H5_ff$(F_STATUS).f90 H5_ff.f90 H5Aff.f90 \
+	H5Dff.f90 H5Eff.f90 H5Fff.f90 H5Gff.f90 H5Iff.f90 H5Lff.f90 \
+	H5Off.f90 H5Pff.f90 H5Rff.f90 H5Sff.f90 H5Tff.f90 H5Zff.f90 \
 	H5_DBLE_Interface$(F_DBLE).f90 H5f90kit.c H5_f.c H5Af.c H5Df.c \
 	H5Ef.c H5Ff.c H5Gf.c H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c \
-	H5Tf.c H5Zf.c HDF5.f90 H5FDmpiof.c HDF5mpio.f90 H5FDmpioff.f90
+	H5Tf.c H5Zf.c H5Aff$(F_STATUS).f90 H5Dff$(F_STATUS).f90 \
+	H5Eff$(F_STATUS).f90 H5Lff$(F_STATUS).f90 H5Off$(F_STATUS).f90 \
+	H5Pff$(F_STATUS).f90 H5Rff$(F_STATUS).f90 H5Tff$(F_STATUS).f90 \
+	HDF5.f90 H5FDmpiof.c HDF5mpio.f90 H5FDmpioff.f90
 @BUILD_PARALLEL_CONDITIONAL_FALSE@am__objects_1 = HDF5.lo
 @BUILD_PARALLEL_CONDITIONAL_TRUE@am__objects_1 = H5FDmpiof.lo \
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	HDF5mpio.lo H5FDmpioff.lo
 am_libhdf5_fortran_la_OBJECTS = H5f90global.lo H5fortran_types.lo \
-	H5_ff.lo H5Aff.lo H5Dff.lo H5Eff.lo H5Fff.lo H5Gff.lo H5Iff.lo \
-	H5Lff.lo H5Off.lo H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo \
-	H5_DBLE_Interface$(F_DBLE).lo H5f90kit.lo H5_f.lo H5Af.lo \
-	H5Df.lo H5Ef.lo H5Ff.lo H5Gf.lo H5If.lo H5Lf.lo H5Of.lo \
-	H5Pf.lo H5Rf.lo H5Sf.lo H5Tf.lo H5Zf.lo $(am__objects_1)
+	H5_ff$(F_STATUS).lo H5_ff.lo H5Aff.lo H5Dff.lo H5Eff.lo \
+	H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo H5Off.lo H5Pff.lo H5Rff.lo \
+	H5Sff.lo H5Tff.lo H5Zff.lo H5_DBLE_Interface$(F_DBLE).lo \
+	H5f90kit.lo H5_f.lo H5Af.lo H5Df.lo H5Ef.lo H5Ff.lo H5Gf.lo \
+	H5If.lo H5Lf.lo H5Of.lo H5Pf.lo H5Rf.lo H5Sf.lo H5Tf.lo \
+	H5Zf.lo H5Aff$(F_STATUS).lo H5Dff$(F_STATUS).lo \
+	H5Eff$(F_STATUS).lo H5Lff$(F_STATUS).lo H5Off$(F_STATUS).lo \
+	H5Pff$(F_STATUS).lo H5Rff$(F_STATUS).lo H5Tff$(F_STATUS).lo \
+	$(am__objects_1)
 libhdf5_fortran_la_OBJECTS = $(am_libhdf5_fortran_la_OBJECTS)
-libhdf5_fortran_la_LINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
-	$(libhdf5_fortran_la_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_lt = $(am__v_lt_$(V))
+am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
+am__v_lt_0 = --silent
+libhdf5_fortran_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=FC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(FCLD) \
+	$(AM_FCFLAGS) $(FCFLAGS) $(libhdf5_fortran_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
 PROGRAMS = $(noinst_PROGRAMS)
 am_H5fortran_detect_OBJECTS = H5fortran_detect.$(OBJEXT)
 H5fortran_detect_OBJECTS = $(am_H5fortran_detect_OBJECTS)
@@ -138,20 +149,39 @@ am__depfiles_maybe = depfiles
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
+AM_V_CC = $(am__v_CC_$(V))
+am__v_CC_ = $(am__v_CC_$(AM_DEFAULT_VERBOSITY))
+am__v_CC_0 = @echo "  CC    " $@;
+AM_V_at = $(am__v_at_$(V))
+am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
+am__v_at_0 = @
 CCLD = $(CC)
-LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
+LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_CCLD = $(am__v_CCLD_$(V))
+am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
+am__v_CCLD_0 = @echo "  CCLD  " $@;
 FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
-LTFCCOMPILE = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+LTFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+AM_V_FC = $(am__v_FC_$(V))
+am__v_FC_ = $(am__v_FC_$(AM_DEFAULT_VERBOSITY))
+am__v_FC_0 = @echo "  FC    " $@;
 FCLD = $(FC)
-FCLINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
+FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_FCLD = $(am__v_FCLD_$(V))
+am__v_FCLD_ = $(am__v_FCLD_$(AM_DEFAULT_VERBOSITY))
+am__v_FCLD_0 = @echo "  FCLD  " $@;
+AM_V_GEN = $(am__v_GEN_$(V))
+am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
+am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(libhdf5_fortran_la_SOURCES) $(H5fortran_detect_SOURCES) \
 	H5match_types.c $(H5test_kind_SOURCES)
 DIST_SOURCES = $(am__libhdf5_fortran_la_SOURCES_DIST) \
@@ -170,14 +200,17 @@ AMTAR = @AMTAR@
 # but which should not be exported to h5cc for building other programs.
 # AM_CFLAGS is an automake construct which should be used by Makefiles 
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
+# This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
 AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@ -I$(top_srcdir)/src \
 	-I$(top_srcdir)/fortran/src
-AM_LDFLAGS = @AM_LDFLAGS@ $(am__append_1)
+AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@ $(am__append_1)
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
+AS = @AS@
 
 # Set the paths for AFS installs of autotools for Linux machines
 # Ideally, these tools should never be needed during the build.
@@ -225,6 +258,7 @@ F9XMODEXT = @F9XMODEXT@
 F9XMODFLAG = @F9XMODFLAG@
 F9XSUFFIXFLAG = @F9XSUFFIXFLAG@
 FC = @FC@
+FC2003 = @FC2003@
 FCFLAGS = @FCFLAGS@
 FCFLAGS_f90 = @FCFLAGS_f90@
 FCLIBS = @FCLIBS@
@@ -237,15 +271,20 @@ GREP = @GREP@
 H5_CFLAGS = @H5_CFLAGS@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
+H5_CXX_SHARED = @H5_CXX_SHARED@
 H5_FCFLAGS = @H5_FCFLAGS@
+H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
+H5_LDFLAGS = @H5_LDFLAGS@
 H5_LONE_COLON = @H5_LONE_COLON@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
+HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
+HDF_FORTRAN2003 = @HDF_FORTRAN2003@
 HID_T = @HID_T@
 HL = @HL@
 HL_FOR = @HL_FOR@
@@ -439,7 +478,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 # Add libtool shared library version numbers to the HDF5 library
 # See libtool versioning documentation online.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 70
+LT_VERS_REVISION = 82
 LT_VERS_AGE = 0
 
 # Include src directory in both Fortran and C flags (C compiler is used
@@ -456,6 +495,11 @@ libhdf5_fortran_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISI
 
 # Include HDF5.f90 if parallel is disabled, HDF5mpiof*  if parallel is enabled
 @BUILD_PARALLEL_CONDITIONAL_TRUE@PARALLEL_COND_SRC = H5FDmpiof.c HDF5mpio.f90 H5FDmpioff.f90
+@FORTRAN_2003_CONDITIONAL_F_FALSE@F_STATUS = _F90
+
+# Check if the compiler supports the Fortran 2003 standard
+# which should include the intrinsic module iso_c_binding
+@FORTRAN_2003_CONDITIONAL_F_TRUE@F_STATUS = _F03
 @FORTRAN_DEFAULT_REALisDBLE_F_FALSE@F_DBLE = Include
 
 #   Condition for including/excluding the DBLE interfaces for when the 
@@ -466,15 +510,19 @@ libhdf5_fortran_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISI
 @FORTRAN_DEFAULT_REALisDBLE_F_TRUE@F_DBLE = Exclude
 
 # Source files for the library.
-libhdf5_fortran_la_SOURCES = H5f90global.f90          \
-         H5fortran_types.f90 H5_ff.f90 H5Aff.f90 H5Dff.f90 H5Eff.f90    \
-         H5Fff.f90 H5Gff.f90 H5Iff.f90 H5Lff.f90 H5Off.f90 H5Pff.f90 H5Rff.f90 H5Sff.f90    \
-         H5Tff.f90 H5Zff.f90                                            \
-	 H5_DBLE_Interface$(F_DBLE).f90 \
-         H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
-         H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c        \
-         $(PARALLEL_COND_SRC)
+libhdf5_fortran_la_SOURCES = H5f90global.f90 \
+          H5fortran_types.f90 H5_ff$(F_STATUS).f90 H5_ff.f90 H5Aff.f90 H5Dff.f90 H5Eff.f90    \
+          H5Fff.f90 H5Gff.f90 H5Iff.f90 H5Lff.f90 H5Off.f90 H5Pff.f90 H5Rff.f90 H5Sff.f90    \
+          H5Tff.f90 H5Zff.f90                                            \
+	  H5_DBLE_Interface$(F_DBLE).f90 \
+          H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
+          H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c        \
+	  H5Aff$(F_STATUS).f90 H5Dff$(F_STATUS).f90 H5Eff$(F_STATUS).f90 H5Lff$(F_STATUS).f90 \
+	  H5Off$(F_STATUS).f90 H5Pff$(F_STATUS).f90 H5Rff$(F_STATUS).f90 H5Tff$(F_STATUS).f90 $(PARALLEL_COND_SRC)
 
+
+# HDF5 Fortran library depends on HDF5 Library.
+libhdf5_fortran_la_LIBADD = $(LIBHDF5)
 
 # h5fc is generated during configure.
 # Remove it only when distclean.
@@ -593,7 +641,7 @@ clean-libLTLIBRARIES:
 	  rm -f "$${dir}/so_locations"; \
 	done
 libhdf5_fortran.la: $(libhdf5_fortran_la_OBJECTS) $(libhdf5_fortran_la_DEPENDENCIES) 
-	$(libhdf5_fortran_la_LINK) -rpath $(libdir) $(libhdf5_fortran_la_OBJECTS) $(libhdf5_fortran_la_LIBADD) $(LIBS)
+	$(AM_V_FCLD)$(libhdf5_fortran_la_LINK) -rpath $(libdir) $(libhdf5_fortran_la_OBJECTS) $(libhdf5_fortran_la_LIBADD) $(LIBS)
 
 clean-noinstPROGRAMS:
 	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -605,13 +653,13 @@ clean-noinstPROGRAMS:
 	rm -f $$list
 H5fortran_detect$(EXEEXT): $(H5fortran_detect_OBJECTS) $(H5fortran_detect_DEPENDENCIES) 
 	@rm -f H5fortran_detect$(EXEEXT)
-	$(FCLINK) $(H5fortran_detect_OBJECTS) $(H5fortran_detect_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(FCLINK) $(H5fortran_detect_OBJECTS) $(H5fortran_detect_LDADD) $(LIBS)
 H5match_types$(EXEEXT): $(H5match_types_OBJECTS) $(H5match_types_DEPENDENCIES) 
 	@rm -f H5match_types$(EXEEXT)
-	$(LINK) $(H5match_types_OBJECTS) $(H5match_types_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(H5match_types_OBJECTS) $(H5match_types_LDADD) $(LIBS)
 H5test_kind$(EXEEXT): $(H5test_kind_OBJECTS) $(H5test_kind_DEPENDENCIES) 
 	@rm -f H5test_kind$(EXEEXT)
-	$(FCLINK) $(H5test_kind_OBJECTS) $(H5test_kind_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(FCLINK) $(H5test_kind_OBJECTS) $(H5test_kind_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -638,45 +686,55 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5match_types.Po@am__quote@
 
 .c.o:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 .f90.o:
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
 .f90.obj:
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) `$(CYGPATH_W) '$<'`
 
 .f90.lo:
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(LTFCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
 H5test_kind.o: $(srcdir)/H5test_kind.f90
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind.o $(FCFLAGS_f90) `test -f '$(srcdir)/H5test_kind.f90' || echo '$(srcdir)/'`$(srcdir)/H5test_kind.f90
 
 H5test_kind.obj: $(srcdir)/H5test_kind.f90
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind.obj $(FCFLAGS_f90) `if test -f '$(srcdir)/H5test_kind.f90'; then $(CYGPATH_W) '$(srcdir)/H5test_kind.f90'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/H5test_kind.f90'; fi`
 
 H5test_kind_SIZEOF.o: $(srcdir)/H5test_kind_SIZEOF.f90
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind_SIZEOF.o $(FCFLAGS_f90) `test -f '$(srcdir)/H5test_kind_SIZEOF.f90' || echo '$(srcdir)/'`$(srcdir)/H5test_kind_SIZEOF.f90
 
 H5test_kind_SIZEOF.obj: $(srcdir)/H5test_kind_SIZEOF.f90
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind_SIZEOF.obj $(FCFLAGS_f90) `if test -f '$(srcdir)/H5test_kind_SIZEOF.f90'; then $(CYGPATH_W) '$(srcdir)/H5test_kind_SIZEOF.f90'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/H5test_kind_SIZEOF.f90'; fi`
 
 mostlyclean-libtool:
@@ -980,10 +1038,19 @@ H5f90global.lo:      $(srcdir)/H5f90global.f90 H5fortran_types.lo
 H5fortran_types.lo:  H5fortran_types.f90
 H5fortran_detect.lo: H5fortran_detect.f90
 H5test_kind.lo:      $(srcdir)/H5test_kind.f90
+H5_ff$(F_STATUS).lo: $(srcdir)/H5_ff$(F_STATUS).f90 H5f90global.lo
+H5_ff.lo:            $(srcdir)/H5_ff.f90 H5f90global.lo H5_ff$(F_STATUS).lo
 H5test_kind_SIZEOF.lo:      $(srcdir)/H5test_kind_SIZEOF.f90
-H5_ff.lo:            $(srcdir)/H5_ff.f90 H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.f90 H5f90global.lo
 H5Dff.lo:            $(srcdir)/H5Dff.f90 H5f90global.lo
+H5Aff$(F_STATUS).lo:  $(srcdir)/H5Aff$(F_STATUS).f90 H5f90global.lo
+H5Dff$(F_STATUS).lo:  $(srcdir)/H5Dff$(F_STATUS).f90 H5f90global.lo
+H5Eff$(F_STATUS).lo:  $(srcdir)/H5Eff$(F_STATUS).f90 H5f90global.lo
+H5Lff$(F_STATUS).lo:  $(srcdir)/H5Lff$(F_STATUS).f90 H5f90global.lo
+H5Off$(F_STATUS).lo:  $(srcdir)/H5Off$(F_STATUS).f90 H5f90global.lo
+H5Pff$(F_STATUS).lo:  $(srcdir)/H5Pff$(F_STATUS).f90 H5f90global.lo
+H5Rff$(F_STATUS).lo:  $(srcdir)/H5Rff$(F_STATUS).f90 H5f90global.lo
+H5Tff$(F_STATUS).lo:  $(srcdir)/H5Tff$(F_STATUS).f90 H5f90global.lo
 H5Eff.lo:            $(srcdir)/H5Eff.f90 H5f90global.lo
 H5Fff.lo:            $(srcdir)/H5Fff.f90 H5f90global.lo
 H5Gff.lo:            $(srcdir)/H5Gff.f90 H5f90global.lo
@@ -995,16 +1062,23 @@ H5Rff.lo:            $(srcdir)/H5Rff.f90 H5f90global.lo
 H5Sff.lo:            $(srcdir)/H5Sff.f90 H5f90global.lo
 H5Tff.lo:            $(srcdir)/H5Tff.f90 H5f90global.lo
 H5Zff.lo:            $(srcdir)/H5Zff.f90 H5f90global.lo
-H5_DBLE_Interface$(F_DBLE).lo:  $(srcdir)/H5_DBLE_Interface$(F_DBLE).f90 H5Aff.lo H5Dff.lo H5Pff.lo
-
-HDF5.lo:             $(srcdir)/HDF5.f90 H5f90global.lo H5Aff.lo      \
-                     H5Dff.lo H5Eff.lo H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo \
-                     H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo \
-                     H5_DBLE_Interface$(F_DBLE).lo
+H5_DBLE_Interface$(F_DBLE).lo:  $(srcdir)/H5_DBLE_Interface$(F_DBLE).f90 H5Aff$(F_STATUS).lo H5Dff$(F_STATUS).lo H5Eff$(F_STATUS).lo H5Pff$(F_STATUS).lo
+HDF5.lo:             $(srcdir)/HDF5.f90 H5f90global.lo H5Aff.lo H5Aff$(F_STATUS).lo \
+                     H5Dff.lo H5Dff$(F_STATUS).lo  \
+                     H5Eff.lo H5Eff$(F_STATUS).lo \
+		     H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo H5Lff$(F_STATUS).lo \
+	             H5Off.lo H5Off$(F_STATUS).lo H5Pff.lo H5Pff$(F_STATUS).lo H5Rff$(F_STATUS).lo H5Rff.lo \
+                     H5Sff.lo H5Tff.lo H5Tff$(F_STATUS).lo H5Zff.lo \
+                     H5_DBLE_Interface$(F_DBLE).lo 
 H5FDmpioff.lo:       $(srcdir)/H5FDmpioff.f90 H5f90global.lo
-HDF5mpio.lo:         $(srcdir)/H5FDmpioff.f90 H5f90global.lo H5Aff.lo  \
-                     H5Dff.lo H5Eff.lo H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo  \
-                     H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo H5_DBLE_Interface$(F_DBLE).lo H5FDmpioff.lo
+HDF5mpio.lo:         $(srcdir)/H5FDmpioff.f90 H5f90global.lo \
+		     H5Aff.lo H5Aff$(F_STATUS).lo \
+                     H5Dff.lo H5Dff$(F_STATUS).lo \
+		     H5Eff.lo H5Eff$(F_STATUS).lo \
+                     H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo H5Lff$(F_STATUS).lo \
+		     H5Off.lo H5Off$(F_STATUS).lo H5Pff.lo H5Pff$(F_STATUS).lo H5Rff$(F_STATUS).lo H5Rff.lo \
+                     H5Sff.lo H5Tff.lo H5Tff$(F_STATUS).lo H5Zff.lo \
+	             H5_DBLE_Interface$(F_DBLE).lo H5FDmpioff.lo
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

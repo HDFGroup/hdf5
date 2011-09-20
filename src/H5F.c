@@ -35,19 +35,6 @@
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 
-/* Predefined file drivers */
-#include "H5FDcore.h"		/*temporary in-memory files		*/
-#include "H5FDfamily.h"		/*family of files			*/
-#include "H5FDlog.h"            /* sec2 driver with logging, for debugging */
-#include "H5FDmpi.h"            /* MPI-based file drivers		*/
-#include "H5FDmulti.h"		/*multiple files partitioned by mem usage */
-#include "H5FDsec2.h"		/*Posix unbuffered I/O			*/
-#include "H5FDstdio.h"		/* Standard C buffered I/O		*/
-#ifdef H5_HAVE_WINDOWS
-#include "H5FDwindows.h"        /* Windows buffered I/O     */
-#endif
-#include "H5FDdirect.h"         /*Linux direct I/O			*/
-
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
 typedef struct H5F_olist_t {
     H5I_type_t obj_type;        /* Type of object to look for */
@@ -292,6 +279,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     H5P_genplist_t *new_plist;              /* New property list */
     H5P_genplist_t *old_plist;              /* Old property list */
     void		*driver_info=NULL;
+    unsigned            efc_size = 0;
     hid_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5F_get_access_plist, FAIL)
@@ -330,6 +318,10 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' cache size")
     if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
+    if(f->shared->efc)
+        efc_size = H5F_efc_max_nfiles(f->shared->efc);
+    if(H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set elink file cache size")
 
     /*
      * Since we're resetting the driver ID and info, close them if they
@@ -840,6 +832,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
     } /* end if */
     else {
         H5P_genplist_t *plist;          /* Property list */
+        unsigned        efc_size;       /* External file cache size */
         size_t u;                       /* Local index variable */
 
         HDassert(lf != NULL);
@@ -902,6 +895,11 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         if(H5P_get(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(f->shared->sdata_aggr.alloc_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'small data' cache size")
         f->shared->sdata_aggr.feature_flag = H5FD_FEAT_AGGREGATE_SMALLDATA;
+        if(H5P_get(plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get elink file cache size")
+        if(efc_size > 0)
+            if(NULL == (f->shared->efc = H5F_efc_create(efc_size)))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create external file cache")
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
@@ -923,7 +921,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
          *      merged into the trunk and journaling is enabled, at least until
          *      we make it work. - QAK)
          */
-        f->shared->use_tmp_space = !(IS_H5FD_MPI(f));
+        f->shared->use_tmp_space = !H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI);
 
 	/*
 	 * Create a metadata cache with the specified number of elements.
@@ -995,8 +993,15 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
          * the caller requested a flush.
          */
         if((f->shared->flags & H5F_ACC_RDWR) && flush)
-            if(H5F_flush(f, dxpl_id) < 0)
+            if(H5F_flush(f, dxpl_id, TRUE) < 0)
                 HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+
+        /* Release the external file cache */
+        if(f->shared->efc) {
+            if(H5F_efc_destroy(f->shared->efc) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't destroy external file cache")
+            f->shared->efc = NULL;
+        } /* end if */
 
         /* Release objects that depend on the superblock being initialized */
         if(f->shared->sblock) {
@@ -1035,13 +1040,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
          * the memory associated with it.
          */
         if(f->shared->root_grp) {
-            /* Free the ID to name buffer */
-            if(H5G_free_grp_name(f->shared->root_grp) < 0)
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
-
-            /* Free the memory for the root group */
-            if(H5G_free(f->shared->root_grp) < 0)
+            /* Free the root group */
+            if(H5G_root_free(f->shared->root_grp) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
             f->shared->root_grp = NULL;
@@ -1639,7 +1639,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
         } /* end if */
         else {
             /* Call the flush routine, for this file */
-            if(H5F_flush(f, H5AC_dxpl_id) < 0)
+            if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
         } /* end else */
     } /* end if */
@@ -1663,7 +1663,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_flush(H5F_t *f, hid_t dxpl_id)
+H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing)
 {
     herr_t   ret_value = SUCCEED;       /* Return value */
 
@@ -1698,7 +1698,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id)
         HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
 
     /* Flush file buffers to disk. */
-    if(H5FD_flush(f->shared->lf, dxpl_id, FALSE) < 0)
+    if(H5FD_flush(f->shared->lf, dxpl_id, closing) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
 
@@ -1903,6 +1903,13 @@ H5F_try_close(H5F_t *f)
     if(H5F_close_mounts(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't unmount child files")
 
+    /* If there is more than one reference to the shared file struct and the
+     * file has an external file cache, we should see if it can be closed.  This
+     * can happen if a cycle is formed with external file caches */
+    if(f->shared->efc && (f->shared->nrefs > 1))
+        if(H5F_efc_try_close(f) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't attempt to close EFC")
+
     /* Delay flush until the shared file struct is closed, in H5F_dest.  If the
      * application called H5Fclose, it would have been flushed in that function
      * (unless it will have been flushed in H5F_dest anyways). */
@@ -1965,7 +1972,7 @@ H5Fclose(hid_t file_id)
         if((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
         if(nref == 1)
-            if(H5F_flush(f, H5AC_dxpl_id) < 0)
+            if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
@@ -2928,4 +2935,187 @@ H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_free_sections() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fclear_elink_file_cache
+ *
+ * Purpose:     Releases the external file cache associated with the
+ *              provided file, potentially closing any cached files
+ *              unless they are held open from somewhere\ else.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *
+ * Programmer:  Neil Fortner; December 30, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fclear_elink_file_cache(hid_t file_id)
+{
+    H5F_t         *file;        /* File */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(H5Fclear_elink_file_cache, FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    /* Check args */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+
+    /* Release the EFC */
+    if(file->shared->efc)
+        if(H5F_efc_release(file->shared->efc) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fclear_elink_file_cache() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_grp_btree_shared
+ *
+ * Purpose:     Set the grp_btree_shared field with a valid ref-count pointer.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              7/19/11
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_grp_btree_shared(H5F_t *f, H5RC_t *rc)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_set_grp_btree_shared)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(rc);
+
+    f->shared->grp_btree_shared = rc;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_grp_btree_shared() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_sohm_addr
+ *
+ * Purpose:     Set the sohm_addr field with a new value.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              7/20/11
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_sohm_addr(H5F_t *f, haddr_t addr)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_set_sohm_addr)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    f->shared->sohm_addr = addr;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_sohm_addr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_sohm_vers
+ *
+ * Purpose:     Set the sohm_vers field with a new value.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              7/20/11
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_sohm_vers(H5F_t *f, unsigned vers)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_set_sohm_vers)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    f->shared->sohm_vers = vers;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_sohm_vers() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_sohm_nindexes
+ *
+ * Purpose:     Set the sohm_nindexes field with a new value.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              7/20/11
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_sohm_nindexes(H5F_t *f, unsigned nindexes)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_set_sohm_nindexes)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    f->shared->sohm_nindexes = nindexes;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_sohm_nindexes() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_store_msg_crt_idx
+ *
+ * Purpose:     Set the store_msg_crt_idx field with a new value.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              7/20/11
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_set_store_msg_crt_idx)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    f->shared->store_msg_crt_idx = flag;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_store_msg_crt_idx() */
 

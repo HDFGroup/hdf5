@@ -65,7 +65,7 @@
 #define H5_FP_TO_ULLONG_RIGHT_MAXIMUM 1
 
 /* Define if gettimeofday() populates the tz pointer passed in */
-#define H5_GETTIMEOFDAY_GIVES_TZ 1
+/* #define H5_GETTIMEOFDAY_GIVES_TZ 1 */
 
 /* Define to 1 if you have the `alarm' function. */
 #define H5_HAVE_ALARM 1
@@ -238,9 +238,6 @@
 /* Define to 1 if you have the `lstat' function. */
 /* #define H5_HAVE_LSTAT 1 */
 
-/* Define to 1 if you have the <memory.h> header file. */
-#define H5_HAVE_MEMORY_H 1
-
 /* Define if we have MPE support */
 /* #undef H5_HAVE_MPE */
 
@@ -314,7 +311,7 @@
 /* #undef H5_HAVE_STRUCT_TEXT_INFO */
 
 /* Define if `struct timezone' is defined */
-#define H5_HAVE_STRUCT_TIMEZONE 1
+/* #define H5_HAVE_STRUCT_TIMEZONE 1 */
 
 /* Define to 1 if `tm_zone' is member of `struct tm'. */
 #define H5_HAVE_STRUCT_TM_TM_ZONE 1
@@ -377,7 +374,7 @@
 #define H5_HAVE_TMPFILE 1
 
 /* Define if `tm_gmtoff' is a member of `struct tm' */
-#define H5_HAVE_TM_GMTOFF 1
+/* #define H5_HAVE_TM_GMTOFF 1 */
 
 /* Define to 1 if your `struct tm' has `tm_zone'. Deprecated, use
    `HAVE_STRUCT_TM_TM_ZONE' instead. */
@@ -459,16 +456,9 @@
 /* Define if the metadata trace file code is to be compiled in */
 /* #undef H5_METADATA_TRACE_FILE */
 
-/* Define if your system can handle complicated MPI derived datatype
-   correctly. */
-/* #undef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS */
-
 /* Define if your system's `MPI_File_set_size' function works for files over
    2GB. */
 /* #undef H5_MPI_FILE_SET_SIZE_BIG */
-
-/* Define if your system can handle special collective IO properly. */
-/* #undef H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS */
 
 /* Define if we can violate pointer alignment restrictions */
 #define H5_NO_ALIGNMENT_RESTRICTIONS 1
@@ -489,13 +479,13 @@
 #define H5_PACKAGE_NAME "HDF5"
 
 /* Define to the full name and version of this package. */
-#define H5_PACKAGE_STRING "HDF5 1.9.80"
+#define H5_PACKAGE_STRING "HDF5 1.9.92"
 
 /* Define to the one symbol short name of this package. */
 #define H5_PACKAGE_TARNAME "hdf5"
 
 /* Define to the version of this package. */
-#define H5_PACKAGE_VERSION "1.9.80"
+#define H5_PACKAGE_VERSION "1.9.92"
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #define H5_PRINTF_LL_WIDTH "ll"
@@ -651,7 +641,7 @@
 /* #undef H5_USING_MEMCHECKER */
 
 /* Version number of package */
-#define H5_VERSION "1.9.80"
+#define H5_VERSION "1.9.92"
 
 /* Define if vsnprintf() returns the correct value for formatted strings that
    don't fit into size allowed */

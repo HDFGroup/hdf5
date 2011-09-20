@@ -75,27 +75,41 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5G_init_interface
 
-/* Packages needed by this file... */
+
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* File access				*/
+#include "H5Fprivate.h"		/* File access				*/
+#include "H5FOprivate.h"        /* File objects                         */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property lists                       */
 
-/* Local macros */
+
+/****************/
+/* Local Macros */
+/****************/
+
 #define H5G_RESERVED_ATOMS	0
 
-/* Local typedefs */
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* User data for path traversal routine for "insertion file" routine */
 typedef struct {
@@ -126,10 +140,21 @@ typedef struct {
 } H5G_iter_visit_ud_t;
 
 
-/* Package variables */
+/********************/
+/* Package Typedefs */
+/********************/
 
 
-/* Local variables */
+/********************/
+/* Local Prototypes */
+/********************/
+
+static herr_t H5G_open_oid(H5G_t *grp, hid_t dxpl_id);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
 
 /* Declare a free list to manage the H5G_t struct */
 H5FL_DEFINE(H5G_t);
@@ -139,8 +164,15 @@ H5FL_DEFINE(H5G_shared_t);
 H5FL_DEFINE(H5_obj_t);
 
 
-/* Private prototypes */
-static herr_t H5G_open_oid(H5G_t *grp, hid_t dxpl_id);
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -843,9 +875,6 @@ H5G_term_interface(void)
 	    /* Destroy the group object id group */
 	    H5I_dec_type_ref(H5I_GROUP);
 
-            /* Free the global component buffer */
-            H5G_traverse_term_interface();
-
 	    /* Mark closed */
 	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
@@ -1184,9 +1213,14 @@ H5G_close(H5G_t *grp)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
 
         /* Check reference count for this object in the top file */
-        if(H5FO_top_count(grp->oloc.file, grp->oloc.addr) == 0)
+        if(H5FO_top_count(grp->oloc.file, grp->oloc.addr) == 0) {
             if(H5O_close(&(grp->oloc)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")
+        } /* end if */
+        else
+            /* Free object location (i.e. "unhold" the file if appropriate) */
+            if(H5O_loc_free(&(grp->oloc)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
 
         /* If this group is a mount point and the mount point is the last open
          * reference to the group, then attempt to close down the file hierarchy
@@ -1208,38 +1242,6 @@ H5G_close(H5G_t *grp)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_close() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5G_free
- *
- * Purpose:	Free memory used by an H5G_t struct (and its H5G_shared_t).
- *          Does not close the group or decrement the reference count.
- *          Used to free memory used by the root group.
- *
- * Return:  Success:    Non-negative
- *	        Failure:    Negative
- *
- * Programmer:  James Laird
- *              Tuesday, September 7, 2004
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_free(H5G_t *grp)
-{
-    herr_t      ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_free, FAIL)
-
-    HDassert(grp && grp->shared);
-
-    grp->shared = H5FL_FREE(H5G_shared_t, grp->shared);
-    grp = H5FL_FREE(H5G_t, grp);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -1312,40 +1314,6 @@ H5G_fileof(H5G_t *grp)
 
     FUNC_LEAVE_NOAPI(grp->oloc.file)
 } /* end H5G_fileof() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_free_grp_name
- *
- * Purpose:	Free the 'ID to name' buffers.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: August 22, 2002
- *
- * Comments: Used now only on the root group close, in H5F_close()
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_free_grp_name(H5G_t *grp)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_free_grp_name, FAIL)
-
-    /* Check args */
-    HDassert(grp && grp->shared);
-    HDassert(grp->shared->fo_count > 0);
-
-    /* Free the path */
-    H5G_name_free(&(grp->path));
-
-done:
-     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_free_grp_name() */
 
 
 /*-------------------------------------------------------------------------
@@ -1800,6 +1768,9 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5G_loc_t	start_loc;          /* Location of starting group */
     unsigned    rc;		    /* Reference count of object    */
     herr_t      ret_value;          /* Return value */
+
+    /* Portably clear udata struct (before FUNC_ENTER) */
+    HDmemset(&udata, 0, sizeof(udata));
 
     FUNC_ENTER_NOAPI(H5G_visit, FAIL)
 

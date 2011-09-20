@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tattrreg.h5'
-#############################
 HDF5 "tattrreg.h5" {
 GROUP "/" {
    DATASET "Dataset1" {
@@ -9,7 +6,7 @@ GROUP "/" {
       DATA {
       }
       ATTRIBUTE "Attribute1" {
-         DATATYPE  H5T_REFERENCE
+         DATATYPE  H5T_REFERENCE { H5T_STD_REF_DSETREG }
          DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
          DATA {
          (0): DATASET /Dataset2 {(2,2)-(7,7)}, DATASET /Dataset2 {(6,9),

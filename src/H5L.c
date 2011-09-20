@@ -17,7 +17,6 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
 #define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
 
@@ -32,7 +31,7 @@
 #include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Gpkg.h"             /* Groups                               */
-#include "H5Fpkg.h"             /* File access                          */
+#include "H5Fprivate.h"		/* File access                          */
 #include "H5Iprivate.h"         /* IDs                                  */
 #include "H5Lpkg.h"             /* Links                                */
 #include "H5MMprivate.h"        /* Memory management                    */
@@ -1697,7 +1696,7 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
         } /* end if */
         else {
             /* Check that both objects are in same file */
-            if(grp_loc->oloc->file->shared != udata->file->shared)
+            if(!H5F_SAME_SHARED(grp_loc->oloc->file, udata->file))
                 HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "interfile hard links are not allowed")
         } /* end else */
     } /* end if */
@@ -1776,7 +1775,7 @@ done:
         oloc.file = grp_loc->oloc->file;
         oloc.addr = udata->lnk->u.hard.addr;
 
-        /* Decrement refcount on superblock extension's object header in memory */
+        /* Decrement refcount on new object's object header in memory */
         if(H5O_dec_rc_by_loc(&oloc, udata->dxpl_id) < 0)
            HDONE_ERROR(H5E_LINK, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
     } /* end if */
@@ -2429,7 +2428,7 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     /* Check for crossing file boundaries with a new hard link */
     if(udata->lnk->type == H5L_TYPE_HARD) {
         /* Check that both objects are in same file */
-        if(grp_loc->oloc->file->shared != udata->file->shared)
+        if(!H5F_SAME_SHARED(grp_loc->oloc->file, udata->file))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "moving a link across files is not allowed")
     } /* end if */
 

@@ -95,8 +95,8 @@ rem on it for sending parameters.  --SJW 9/6/07
     if "%nerrors%"=="0" (
 		echo.All Fortran library tests passed.
 	) else (
-        echo.** FAILED Fortran Library tests.
+        echo.** FAILED Fortran library tests.
     )
-        
+
     popd
     endlocal & exit /b %nerrors%

@@ -121,7 +121,7 @@ static int without_hardware_g = 0;
     TYPE value2 = 0;                                                                            \
                                                                                                 \
     /* Allocate buffers */                                                                      \
-    NELMTS=(SRC_PREC-1)*3+1;                                                                    \
+    NELMTS=SRC_PREC*3;                                                                          \
     BUF = (unsigned char*)aligned_malloc(NELMTS*MAX(SRC_SIZE, DST_SIZE));                       \
     SAVED = (unsigned char*)aligned_malloc(NELMTS*MAX(SRC_SIZE, DST_SIZE));                     \
     HDmemset(BUF, 0, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                           \
@@ -132,7 +132,7 @@ static int without_hardware_g = 0;
                                                                                                 \
     /*positive values, ascending order. VALUE1 starts from 00000001, to 00000010, until 10000000*/ \
     /*VALUE2 ascends from 00000000, to 00000011, 00000111,...,  until 11111111.*/               \
-    for(n=0; n<SRC_PREC-1; n++) {                                                               \
+    for(n=0; n<SRC_PREC; n++) {                                                                 \
         if(value1<=SRC_MAX && value1>=SRC_MIN) {                                                \
             memcpy(buf_p, &value1, SRC_SIZE);                                                   \
             memcpy(saved_p, &value1, SRC_SIZE);                                                 \
@@ -146,20 +146,26 @@ static int without_hardware_g = 0;
             saved_p += SRC_SIZE;                                                                \
         }                                                                                       \
                                                                                                 \
-        value1 <<= 1;                                                                           \
-        value2 = (value1 - 1) | value1;                                                         \
+        if(n<SRC_PREC-2) {                                                                      \
+            value1 <<= 1;                                                                       \
+            value2 = (value1 - 1) | value1;                                                     \
+        } else if(n==SRC_PREC-2) { /*to avoid overflow of negative values for signed integer*/  \
+            value1 <<= 1;                                                                       \
+            value2 = (~value1) | value1;                                                        \
+        }                                                                                       \
     }                                                                                           \
                                                                                                 \
     /* negative values for signed; descending positive values for unsigned */                   \
     /* VALUE2 descends from 11111111 to 11111110, 11111100, ..., until 10000000. */             \
-    for(n=0; n<SRC_PREC; n++) {                                                                 \
+    for(n=0; n<SRC_PREC-1; n++) {                                                               \
         if(value2<=SRC_MAX && value2>=SRC_MIN) {                                                \
             memcpy(buf_p, &value2, SRC_SIZE);                                                   \
             memcpy(saved_p, &value2, SRC_SIZE);                                                 \
             buf_p += SRC_SIZE;                                                                  \
             saved_p += SRC_SIZE;                                                                \
         }                                                                                       \
-        value2 <<= 1;                                                                           \
+        if(n<SRC_PREC-1)                                                                        \
+            value2 <<= 1;                                                                       \
     }                                                                                           \
 }
 

@@ -19,6 +19,24 @@
 # Thursday, July 20, 2006
 #
 
+# The build (current) directory might be different than the source directory.
+if test -z "$srcdir"; then
+    srcdir=.
+fi
+
+# source dirs
+SRC_TOOLS="$srcdir/.."
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+# testfiles source dirs for tools
+SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DIFF_TESTFILES="$SRC_TOOLS/h5diff/testfiles"
+SRC_H5COPY_TESTFILES="$SRC_TOOLS/h5copy/testfiles"
+SRC_H5REPACK_TESTFILES="$SRC_TOOLS/h5repack/testfiles"
+SRC_H5JAM_TESTFILES="$SRC_TOOLS/h5jam/testfiles"
+SRC_H5STAT_TESTFILES="$SRC_TOOLS/h5stat/testfiles"
+SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
+
 TESTNAME=h5copy
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
@@ -29,6 +47,31 @@ HDF_FILE2=h5copy_ref.h5
 HDF_EXT_SRC_FILE=h5copy_extlinks_src.h5
 HDF_EXT_TRG_FILE=h5copy_extlinks_trg.h5
 
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+# List of files that will be copied over to local test dir
+LIST_HDF5_TEST_FILES="
+$SRC_H5COPY_TESTFILES/$HDF_FILE1
+$SRC_H5COPY_TESTFILES/$HDF_FILE2
+$SRC_H5COPY_TESTFILES/$HDF_EXT_SRC_FILE
+$SRC_H5COPY_TESTFILES/$HDF_EXT_TRG_FILE
+"
+
+# List of expect files that will be copied over to local test dir
+LIST_OTHER_TEST_FILES="
+$SRC_H5COPY_TESTFILES/h5copy_extlinks_src.out.ls
+$SRC_H5COPY_TESTFILES/h5copy_ref.out.ls
+$SRC_H5COPY_TESTFILES/h5copytst.out.ls
+$SRC_H5COPY_TESTFILES/h5copy_misc1.out
+"
+
 H5COPY=h5copy               # The tool name
 H5COPY_BIN=`pwd`/$H5COPY    # The path of the tool binary
 H5DIFF=h5diff               # The h5diff tool name 
@@ -38,19 +81,14 @@ H5LS_ARGS=-Svr              # Arguments to the h5ls tool
 H5LS_BIN=`pwd`/../h5ls/$H5LS # The path of the h5ls tool binary
 CMP='cmp -s'
 DIFF='diff -c'
+CP='cp'
 
 nerrors=0
 verbose=yes
 h5haveexitcode=yes	    # default is yes
 
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-    srcdir=.
-fi
-INDIR=$srcdir/testfiles
-OUTDIR=./testfiles
-
-test -d $OUTDIR || mkdir $OUTDIR
+TESTDIR=./testfiles
+test -d $TESTDIR || mkdir $TESTDIR
 
 # RUNSERIAL is used. Check if it can return exit code from executalbe correctly.
 if [ -n "$RUNSERIAL_NOEXITCODE" ]; then
@@ -58,6 +96,31 @@ if [ -n "$RUNSERIAL_NOEXITCODE" ]; then
     echo "***Warning*** Exit code checking is skipped."
     h5haveexitcode=no
 fi
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            if [ -a $tstfile ]; then
+                $CP -f $tstfile $TESTDIR
+            else
+                echo "Error: FAILED to copy $tstfile."
+                echo "       $tstfile doesn't exist!"
+                exit $EXIT_FAILURE
+            fi
+        fi
+    done
+}
 
 # Print a "SKIP" message
 SKIP() {
@@ -100,6 +163,9 @@ VERIFY_OUTPUT()
     echo "Verifying output files $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
+# Source in the output filter function definitions.
+. $srcdir/../../bin/output_filter.sh
+
 # Run a test and print PASS or *FAIL*. If h5copy can complete
 # with exit status 0, consider it pass. If a test fails then increment
 # the `nerrors' global variable.
@@ -112,6 +178,8 @@ VERIFY_OUTPUT()
 
 TOOLTEST() 
 {
+    actualout="$TESTDIR/tooltest.actualout"
+    actualerr="$TESTDIR/tooltest.actualerr"
      runh5diff=yes
      if [ "$1" = -i ]; then
       inputfile=$2
@@ -130,19 +198,19 @@ TOOLTEST()
     echo " output for '$H5COPY $@'"
     echo "#############################"
     $RUNSERIAL $H5COPY_BIN $@
-    ) > output.out
+    ) > $actualout 2> $actualerr
     RET=$?
     if [ $RET != 0 ]; then
         echo "*FAILED*"
         echo "failed result is:"
-        cat output.out
+        cat $actualout
         nerrors="`expr $nerrors + 1`"
     else
         echo " PASSED"
 
         # Clean up output file
         if test -z "$HDF5_NOCLEANUP"; then
-           rm -f output.out
+           rm -f $actualout $actualerr
         fi
     fi
     
@@ -181,9 +249,11 @@ CMP_OUTPUT()
 
 TOOLTEST_FAIL() 
 {
-    expectout="$INDIR/$1"
-    actualout="$OUTDIR/$1.out"
-    actualerr="$OUTDIR/$1.err"
+    expectout="$TESTDIR/$1"
+    actualout="$TESTDIR/$1.actualout"
+    actualerr="$TESTDIR/$1.actualerr"
+    actualout_sav=${actualout}-sav
+    actualerr_sav=${actualerr}-sav
     shift
     if [ "$1" = -i ]; then
       inputfile=$2
@@ -199,7 +269,13 @@ TOOLTEST_FAIL()
     #echo "#############################"
     $RUNSERIAL $H5COPY_BIN $@
     ) > $actualout 2> $actualerr
+
     RET=$?
+    # save actualout and actualerr in case they are needed later.
+    cp $actualout $actualout_sav
+    STDOUT_FILTER $actualout
+    cp $actualerr $actualerr_sav
+    STDERR_FILTER $actualerr
     if [ $RET != 0 ]; then
         echo " PASSED"
         # Verifying output text from h5copy
@@ -219,7 +295,7 @@ TOOLTEST_FAIL()
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-       rm -f $actualout $actualerr
+       rm -f $actualout $actualerr $actualout_sav $actualerr_sav
     fi
 }
 
@@ -259,8 +335,8 @@ H5DIFFTEST_FAIL()
 #
 H5LSTEST() 
 {
-    expect="$INDIR/`basename $1 .h5`.ls"
-    actual="$OUTDIR/`basename $1 .h5`.out"
+    expect="$TESTDIR/`basename $1 .h5`.ls"
+    actual="$TESTDIR/`basename $1 .h5`.ls.actualout"
 
     # Stderr is included in stdout so that the diff can detect
     # any unexpected output from that stream too.
@@ -302,8 +378,8 @@ H5LSTEST()
 # <none>
 COPY_OBJECTS() 
 {
-    TESTFILE="$INDIR/$HDF_FILE1"
-    FILEOUT="$OUTDIR/`basename $HDF_FILE1 .h5`.out.h5"
+    TESTFILE="$TESTDIR/$HDF_FILE1"
+    FILEOUT="$TESTDIR/`basename $HDF_FILE1 .h5`.out.h5"
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
@@ -362,8 +438,8 @@ COPY_OBJECTS()
 # <none>
 COPY_REFERENCES() 
 {
-    TESTFILE="$INDIR/$HDF_FILE2"
-    FILEOUT="$OUTDIR/`basename $HDF_FILE2 .h5`.out.h5"
+    TESTFILE="$TESTDIR/$HDF_FILE2"
+    FILEOUT="$TESTDIR/`basename $HDF_FILE2 .h5`.out.h5"
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
@@ -388,8 +464,8 @@ COPY_REFERENCES()
 # <none>
 COPY_EXT_LINKS() 
 {
-    TESTFILE="$INDIR/$HDF_EXT_SRC_FILE"
-    FILEOUT="$OUTDIR/`basename $HDF_EXT_SRC_FILE .h5`.out.h5"
+    TESTFILE="$TESTDIR/$HDF_EXT_SRC_FILE"
+    FILEOUT="$TESTDIR/`basename $HDF_EXT_SRC_FILE .h5`.out.h5"
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
@@ -401,13 +477,13 @@ COPY_EXT_LINKS()
     TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_dset -d /copy2_dset
 
     echo "Test copying dangling external link (no obj) directly without -f ext"
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_1
+    TOOLTEST -v -i $TESTFILE -o $FILEOUT -s /group_ext/extlink_notyet1 -d /copy_dangle1_1
 
     echo "Test copying dangling external link (no obj) directly with -f ext"
     TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2
 
     echo "Test copying dangling external link (no file) directly without -f ext"
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_1
+    TOOLTEST -v -i $TESTFILE -o $FILEOUT -s /group_ext/extlink_notyet2 -d /copy_dangle2_1
 
     echo "Test copying dangling external link (no file) directly with -f ext"
     TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2
@@ -416,7 +492,7 @@ COPY_EXT_LINKS()
     TOOLTEST -v -i $TESTFILE -o $FILEOUT -s /group_ext -d /copy1_group
 
     echo "Test copying a group contains external links with -f ext"
-    TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -f ext -s /group_ext -d /copy2_group
+    TOOLTEST -f ext -v -i $TESTFILE -o $FILEOUT -s /group_ext -d /copy2_group
 
     # Verify that the file created above is correct
     H5LSTEST $FILEOUT
@@ -434,14 +510,23 @@ COPY_EXT_LINKS()
 # <none>
 TEST_MISC() 
 {
-    TESTFILE="$HDF_FILE1"
-    FILEOUT="$OUTDIR/`basename $HDF_FILE1 .h5`.out.h5"
+    TESTFILE="$TESTDIR/$HDF_FILE1"
+    FILEOUT="$TESTDIR/`basename $HDF_FILE1 .h5`.out.h5"
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
 
     echo "Test copying object into group which doesn't exist, without -p"
     TOOLTEST_FAIL h5copy_misc1.out -v -i $TESTFILE -o $FILEOUT -s /simple  -d /g1/g2/simple
+
+    echo "Test copying objects to the same file "
+    rm -f $FILEOUT
+    # create temporary test file ($FILEOUT) with some objects
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /simple -d /simple 
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /grp_dsets  -d /grp_dsets
+    # actual test cases
+    TOOLTEST -i $FILEOUT -o $FILEOUT -v -s /simple -d /simple_cp
+    TOOLTEST -i $FILEOUT -o $FILEOUT -v -s /grp_dsets  -d /grp_dsets_cp
 
     # Remove output file created, if the "no cleanup" environment variable is
     #   not defined
@@ -453,7 +538,10 @@ TEST_MISC()
 ##############################################################################
 ###           T H E   T E S T S                                            ###
 ##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
 
+# Start tests
 COPY_OBJECTS 
 COPY_REFERENCES
 COPY_EXT_LINKS

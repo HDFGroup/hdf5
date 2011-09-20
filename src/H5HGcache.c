@@ -28,7 +28,6 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5HG_PACKAGE		/*suppress error about including H5HGpkg  */
 
 
@@ -37,7 +36,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"             /* File access				*/
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5HGpkg.h"		/* Global heaps				*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -131,7 +130,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
     /* Read the initial 4k page */
     if(NULL == (heap = H5FL_CALLOC(H5HG_heap_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    heap->shared = f->shared;
+    heap->shared = H5F_SHARED(f);
     if(NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, (size_t)H5HG_MINSIZE)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     if(H5F_block_read(f, H5FD_MEM_GHEAP, addr, (size_t)H5HG_MINSIZE, dxpl_id, heap->chunk) < 0)
@@ -252,30 +251,9 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 
     HDassert(max_idx < heap->nused);
 
-    /*
-     * Add the new heap to the CWFS list, removing some other entry if
-     * necessary to make room. We remove the right-most entry that has less
-     * free space than this heap.
-     */
-    if(!f->shared->cwfs) {
-        if(NULL == (f->shared->cwfs = (H5HG_heap_t **)H5MM_malloc(H5HG_NCWFS * sizeof(H5HG_heap_t *))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-        f->shared->ncwfs = 1;
-        f->shared->cwfs[0] = heap;
-    } else if(H5HG_NCWFS == f->shared->ncwfs) {
-        int i;          /* Local index variable */
-
-        for(i = H5HG_NCWFS - 1; i >= 0; --i)
-            if(f->shared->cwfs[i]->obj[0].size < heap->obj[0].size) {
-                HDmemmove(f->shared->cwfs + 1, f->shared->cwfs, i * sizeof(H5HG_heap_t *));
-                f->shared->cwfs[0] = heap;
-                break;
-            } /* end if */
-    } else {
-        HDmemmove(f->shared->cwfs + 1, f->shared->cwfs, f->shared->ncwfs * sizeof(H5HG_heap_t *));
-        f->shared->ncwfs += 1;
-        f->shared->cwfs[0] = heap;
-    } /* end else */
+    /* Add the new heap to the CWFS list for the file */
+    if(H5F_cwfs_add(f, heap) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "unable to add global heap collection to file's CWFS")
 
     ret_value = heap;
 

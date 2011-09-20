@@ -74,111 +74,110 @@
 
 struct path_info
 {
-  char group[MAX_GROUPS_IN_PATH][MAX_PATH_NAME_LENGTH];
-  int count;
+    char group[MAX_GROUPS_IN_PATH][MAX_PATH_NAME_LENGTH];
+    int count;
 };
 
 struct Input
 {
-  struct path_info path;
-  int inputClass;
-  int inputSize;
-  int rank;
-  hsize_t* sizeOfDimension;
-  int outputClass;
-  int outputSize;
-  int outputArchitecture;
-  int outputByteOrder;
-  hsize_t* sizeOfChunk;
-  hsize_t* maxsizeOfDimension;
-  int compressionType;
-  int compressionParam;
-  char *externFilename;
-  VOIDP data;
-  int configOptionVector[NUM_KEYS];
+    struct path_info path;
+    int inputClass;
+    int inputSize;
+    int rank;
+    hsize_t* sizeOfDimension;
+    int outputClass;
+    int outputSize;
+    int outputArchitecture;
+    int outputByteOrder;
+    hsize_t* sizeOfChunk;
+    hsize_t* maxsizeOfDimension;
+    int compressionType;
+    int compressionParam;
+    char *externFilename;
+    VOIDP data;
+    int configOptionVector[NUM_KEYS];
 };
 
 struct infilesformat
 {
-  char datafile[255];
-  char configfile[255];
-  struct Input in;
-  int config; /* Configfile present? No - 0. Yes - 1 */
+    char datafile[255];
+    char configfile[255];
+    struct Input in;
+    int config; /* Configfile present? No - 0. Yes - 1 */
 };
 
 struct Options
 {
-  struct infilesformat  infiles[30];  /* structure to hold the list of input file names. Limited to 30*/
-  char   outfile[256];  /* output file name */
-  int    fcount;       /* number of input files */
+    struct infilesformat  infiles[30];  /* structure to hold the list of input file names. Limited to 30*/
+    char   outfile[256];  /* output file name */
+    int    fcount;       /* number of input files */
 };
 
 char keytable[NUM_KEYS][30] = {
-  "PATH",
-  "INPUT-CLASS",
-  "INPUT-SIZE",
-  "RANK",
-  "DIMENSION-SIZES",
-  "OUTPUT-CLASS",
-  "OUTPUT-SIZE",
-  "OUTPUT-ARCHITECTURE",
-  "OUTPUT-BYTE-ORDER",
-  "CHUNKED-DIMENSION-SIZES",
-  "COMPRESSION-TYPE",
-  "COMPRESSION-PARAM",
-  "EXTERNAL-STORAGE",
-  "MAXIMUM-DIMENSIONS"
+        "PATH",
+        "INPUT-CLASS",
+        "INPUT-SIZE",
+        "RANK",
+        "DIMENSION-SIZES",
+        "OUTPUT-CLASS",
+        "OUTPUT-SIZE",
+        "OUTPUT-ARCHITECTURE",
+        "OUTPUT-BYTE-ORDER",
+        "CHUNKED-DIMENSION-SIZES",
+        "COMPRESSION-TYPE",
+        "COMPRESSION-PARAM",
+        "EXTERNAL-STORAGE",
+        "MAXIMUM-DIMENSIONS"
 };
 
 static int  state_table[15][8] =
 {
-  /* token ordering:
-     FILNAME      OPT_o   OPT_c  OPT_h  OPT_d  OPT_p  OPT_t  OPT_s   */
+    /* token ordering: FILNAME      OPT_o   OPT_c  OPT_h  OPT_d  OPT_p  OPT_t  OPT_s   */
 
-  /* state 0: start */
-  {1, ERR, ERR, 6, ERR, ERR, ERR, ERR},
+    /* state 0: start */
+    {1, ERR, ERR, 6, ERR, ERR, ERR, ERR},
 
-  /* state 1: input files */
-  {ERR, ERR, 2, ERR, 7, ERR, ERR, ERR},
+    /* state 1: input files */
+    {ERR, ERR, 2, ERR, 7, ERR, ERR, ERR},
 
-  /* state 2: -c[onfigfile] */
-  {3, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    /* state 2: -c[onfigfile] */
+    {3, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
 
-  /* state 3: configfile */
-  {1, 4, ERR, ERR, ERR, ERR, ERR, ERR},
+    /* state 3: configfile */
+    {1, 4, ERR, ERR, ERR, ERR, ERR, ERR},
 
-  /* state 4: -o[utfile] */
-  {5, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    /* state 4: -o[utfile] */
+    {5, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
 
-  /* state 5: outfile */
-  {ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    /* state 5: outfile */
+    {ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
 
-  /* state 6: -h[elp] */
-  {ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    /* state 6: -h[elp] */
+    {ERR, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
 
-  /* state 7: -d[ims] */
-  {8, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    /* state 7: -d[ims] */
+    {8, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
 
-  /* state 8: dimensions */
-  {1, 4, ERR, ERR, ERR, 9, 11, 13},
+    /* state 8: dimensions */
+    {1, 4, ERR, ERR, ERR, 9, 11, 13},
 
-  /* state 9: -p[ath] */
-  {10, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    /* state 9: -p[ath] */
+    {10, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
 
-  /* state 10: path name */
-  {1, 4, ERR, ERR, ERR, ERR, 11, 13},
+    /* state 10: path name */
+    {1, 4, ERR, ERR, ERR, ERR, 11, 13},
 
-  /* state 11: -t[ype] */
-  {12, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    /* state 11: -t[ype] */
+    {12, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
 
-  /* state 12: data type */
-  {1, 4, ERR, ERR, ERR, ERR, ERR, 13},
+    /* state 12: data type */
+    {1, 4, ERR, ERR, ERR, ERR, ERR, 13},
 
-  /* state 13: -s[ize] */
-  {14, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
+    /* state 13: -s[ize] */
+    {14, ERR, ERR, ERR, ERR, ERR, ERR, ERR},
 
-  /* state 14: data size */
-  {1, 4, ERR, ERR, ERR, ERR, ERR, ERR}
+    /* state 14: data size */
+    {1, 4, ERR, ERR, ERR, ERR, ERR, ERR}
 
 };
 
@@ -193,39 +192,39 @@ void  help(char *);
 
 static int  gtoken(char *s);
 static int  process(struct Options *opt);
-static int  processConfigurationFile(char *infile, struct Input *in, FILE **strm);
+static int  processConfigurationFile(char *infile, struct Input *in);
 static int  mapKeywordToIndex(char *key);
 static int  parsePathInfo(struct path_info *path, char *strm);
 static int  parseDimensions(struct Input *in, char *strm);
 static int  getInputSize(struct Input *in, int ival);
 static int  getInputClass(struct Input *in, char * strm);
 static int  InputClassStrToInt(char *temp);
-static int  getRank(struct Input *in, FILE** strm);
-static int  getDimensionSizes(struct Input *in, FILE** strm);
-static int  getOutputSize(struct Input *in, FILE** strm);
-static int  getOutputClass(struct Input *in, FILE** strm);
+static int  getRank(struct Input *in, FILE *strm);
+static int  getDimensionSizes(struct Input *in, FILE *strm);
+static int  getOutputSize(struct Input *in, FILE *strm);
+static int  getOutputClass(struct Input *in, FILE *strm);
 static int  OutputClassStrToInt(char *temp);
-static int  getOutputArchitecture(struct Input *in, FILE** strm);
+static int  getOutputArchitecture(struct Input *in, FILE *strm);
 static int  OutputArchStrToInt(char *temp);
-static int  getOutputByteOrder(struct Input *in, FILE** strm);
+static int  getOutputByteOrder(struct Input *in, FILE *strm);
 static int  OutputByteOrderStrToInt(char *temp);
-static int  getChunkedDimensionSizes(struct Input *in, FILE **strm);
-static int  getCompressionType(struct Input *in, FILE** strm);
+static int  getChunkedDimensionSizes(struct Input *in, FILE *strm);
+static int  getCompressionType(struct Input *in, FILE *strm);
 static int  CompressionTypeStrToInt(char *temp);
-static int  getCompressionParameter(struct Input *in, FILE** strm);
-static int  getExternalFilename(struct Input *in, FILE** strm);
-static int  getMaximumDimensionSizes(struct Input *in, FILE **strm);
-static int  processDataFile(char *infile, struct Input *in, FILE **strm, hid_t file_id);
-static int  readIntegerData(FILE **strm, struct Input *in);
-static int  readFloatData(FILE **strm, struct Input *in);
+static int  getCompressionParameter(struct Input *in, FILE *strm);
+static int  getExternalFilename(struct Input *in, FILE *strm);
+static int  getMaximumDimensionSizes(struct Input *in, FILE *strm);
+static int  processDataFile(char *infile, struct Input *in, hid_t file_id);
+static int  readIntegerData(FILE *strm, struct Input *in);
+static int  readFloatData(FILE *strm, struct Input *in);
 static int  allocateIntegerStorage(struct Input *in);
 static int  allocateFloatStorage(struct Input *in);
 hid_t       createOutputDataType(struct Input *in);
 hid_t       createInputDataType(struct Input *in);
-static int  readUIntegerData(FILE **strm, struct Input *in);
+static int  readUIntegerData(FILE *strm, struct Input *in);
 static int  allocateUIntegerStorage(struct Input *in);
-static int  validateConfigurationParameters(struct Input * in);
-static int  processStrData(FILE **strm, struct Input *in, hid_t file_id);
+static int  validateConfigurationParameters(struct Input *in);
+static int  processStrData(FILE *strm, struct Input *in, hid_t file_id);
 
 #endif  /* H5IMPORT_H__ */
 

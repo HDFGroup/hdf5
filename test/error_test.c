@@ -20,11 +20,12 @@
  * Purpose:	Tests the error API routines.
  */
 #include "h5test.h"
+#include "H5srcdir.h"
 
 #ifdef H5_USE_16_API
 int main(void)
 {
-    printf("Test skipped because backward compatbility with v1.6 is configured in\n");
+    HDfprintf(stderr, "Test skipped because backward compatbility with v1.6 is configured in\n");
     return 0;
 }
 #else /* H5_USE_16_API */
@@ -33,6 +34,8 @@ const char *FILENAME[] = {
     "errors",
     NULL
 };
+
+#define DATAFILE "filter_error"
 
 #define DIM0    100
 #define DIM1    200
@@ -74,6 +77,8 @@ hid_t   ERR_MIN_GETNUM;
 #define MSG_SIZE                64
 #define LONG_DESC_SIZE          8192
 
+#define DSET_FILTER_NAME    "dataset_with_filter"
+
 static herr_t custom_print_cb(unsigned n, const H5E_error2_t *err_desc,
     void *client_data);
 
@@ -102,8 +107,7 @@ test_error(hid_t file)
     H5E_auto2_t         old_func;
     void                *old_data;
 
-    TESTING("error API based on data I/O");
-    printf("\n");
+    HDfprintf(stderr, "\nTesting error API based on data I/O\n");
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -359,8 +363,9 @@ test_long_desc(void)
     /* Push an error with a long description */
     if(H5Epush(H5E_DEFAULT, __FILE__, test_FUNC, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, format, long_desc) < 0) TEST_ERROR;
 
-    /* Create the string that should be in the description */
-    HDsnprintf(full_desc, LONG_DESC_SIZE + 128, format, long_desc);
+    /* Create the string that should be in the description. Must use HDsnprintf here
+     * because snprintf is _snprintf on Windows */
+    HDsnprintf(full_desc, (size_t)(LONG_DESC_SIZE + 128), format, long_desc);
 
     /* Make certain that the description is correct */
     if(H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, long_desc_cb, full_desc) < 0) TEST_ERROR;
@@ -401,12 +406,12 @@ static herr_t
 dump_error(hid_t estack)
 {
     /* Print errors in library default way */
-    fprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
+    HDfprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
     if(H5Eprint2(estack, stderr) < 0)
         TEST_ERROR;
 
     /* Customized way to print errors */
-    fprintf(stderr, "\n********* Print error stack in customized way *********\n");
+    HDfprintf(stderr, "\n********* Print error stack in customized way *********\n");
     if(H5Ewalk2(estack, H5E_WALK_UPWARD, custom_print_cb, stderr) < 0)
         TEST_ERROR;
 
@@ -450,12 +455,12 @@ custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void* client_data)
     if(H5Eget_msg(err_desc->min_num, NULL, min, MSG_SIZE) < 0)
         TEST_ERROR;
 
-    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
+    HDfprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
 	     indent, "", n, err_desc->file_name,
 	     err_desc->func_name, err_desc->line);
-    fprintf(stream, "%*sclass: %s\n", indent * 2, "", cls);
-    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
-    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
+    HDfprintf(stream, "%*sclass: %s\n", indent * 2, "", cls);
+    HDfprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
+    HDfprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
 
     return 0;
 
@@ -534,7 +539,6 @@ test_copy(void)
     const char *err_func = "test_copy";      /* Function name for pushing error */
     const char *err_msg = "Error message";     /* Error message for pushing error */
     int         err_num;             /* Number of errors on stack */
-    int         err_num_copy;        /* Number of errors on stack copy */
     hid_t       estack_id;           /* Error stack ID */
     herr_t      ret;                 /* Generic return value */
 
@@ -618,6 +622,57 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_filter_error
+ *
+ * Purpose:	Make sure the error message prints out the filter name
+ *              when the existent file is opened but the filter isn't 
+ *              registered. The existent file was created with 
+ *              gen_filters.c. 
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *		2 June 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_filter_error(const char *fname)
+{
+    const char *pathname = H5_get_srcdir_filename(fname); /* Corrected test file name */
+    hid_t       file, dataset;         /* handles */
+    int         buf[20];
+
+    HDfprintf(stderr, "\nTesting error message during data reading when filter isn't registered\n");
+
+    /* Open the file */
+    if((file = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Open the regular dataset */
+    if((dataset = H5Dopen2(file, DSET_FILTER_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) >= 0)
+	TEST_ERROR;
+
+    /* Close/release resources */
+    if(H5Dclose(dataset) < 0)
+        TEST_ERROR
+
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    return 0;
+
+error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test error API.
@@ -635,7 +690,7 @@ main(void)
     char		filename[1024];
     const char          *FUNC_main = "main";
 
-    fprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
+    HDfprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
 
     /* Initialize errors */
     if(init_error() < 0)
@@ -689,17 +744,25 @@ main(void)
     if(test_copy() < 0) TEST_ERROR;
 
     if(H5Fclose(file) < 0) TEST_ERROR;
-    h5_cleanup(FILENAME, fapl);
 
     /* Close error information */
     if(close_error() < 0)
         TEST_ERROR;
 
-    printf("All error API tests passed.\n");
+    /* Test error message during data reading when filter isn't registered 
+     * Use default FAPL to avoid some VFD drivers by the check-vfd test because
+     * the test file was pre-generated. */
+    h5_fixname(DATAFILE, H5P_DEFAULT, filename, sizeof filename);
+    if(test_filter_error(filename) < 0)
+        TEST_ERROR;
+
+    h5_cleanup(FILENAME, fapl);
+
+    HDfprintf(stderr, "\nAll error API tests passed.\n");
     return 0;
 
 error:
-    printf("***** ERROR TEST FAILED! *****\n");
+    HDfprintf(stderr, "\n***** ERROR TEST FAILED (real problem)! *****\n");
     return 1;
 }
 #endif /* H5_USE_16_API */

@@ -178,6 +178,24 @@ warn_msg(const char *fmt, ...)
     va_end(ap);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:  help_ref_msg
+ *
+ * Purpose: Print a message to refer help page 
+ *
+ * Return:  Nothing
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+help_ref_msg(FILE *output)
+{
+    HDfprintf(output, "Try '-h' or '--help' for more information or ");
+    HDfprintf(output, "see the <%s> entry in the 'HDF5 Reference Manual'.\n",h5tools_getprogname());
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    get_option
@@ -231,8 +249,11 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
                 if (l_opts[i].has_arg != no_arg) {
                     if (arg[len] == '=') {
                         opt_arg = &arg[len + 1];
-                    } else if (opt_ind < (argc - 1) && argv[opt_ind + 1][0] != '-') {
-                        opt_arg = argv[++opt_ind];
+                    }
+                    else if (l_opts[i].has_arg != optional_arg) {
+                        if (opt_ind < (argc - 1)) 
+                            if (argv[opt_ind + 1][0] != '-')
+                                opt_arg = argv[++opt_ind];
                     } else if (l_opts[i].has_arg == require_arg) {
                         if (opt_err)
                             HDfprintf(stderr,
@@ -782,10 +803,14 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
      * follow object in other file
      */
     if(link_info->linfo.type == H5L_TYPE_EXTERNAL) {
-        fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_sec2(fapl);
-        lapl = H5Pcreate(H5P_LINK_ACCESS);
-        H5Pset_elink_fapl(lapl, fapl);
+        if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            goto out;
+        if(H5Pset_fapl_sec2(fapl) < 0)
+            goto out;
+        if((lapl = H5Pcreate(H5P_LINK_ACCESS)) < 0)
+            goto out;
+        if(H5Pset_elink_fapl(lapl, fapl) < 0)
+            goto out;
     } /* end if */
 
     /* Check for retrieving object info */

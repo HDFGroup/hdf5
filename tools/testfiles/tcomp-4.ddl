@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tcompound_complex.h5'
-#############################
 HDF5 "tcompound_complex.h5" {
 GROUP "/" {
    DATASET "CompoundComplex" {

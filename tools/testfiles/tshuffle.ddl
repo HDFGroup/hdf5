@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -H -p -d shuffle tfilters.h5'
-#############################
 HDF5 "tfilters.h5" {
 DATASET "shuffle" {
    DATATYPE  H5T_STD_I32LE

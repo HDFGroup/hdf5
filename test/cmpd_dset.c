@@ -2208,6 +2208,9 @@ main (int argc, char *argv[])
     puts("Testing compound member ordering:");
     nerrors += test_ooo_order(fname);
 
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl_id) < 0 ? 1 : 0);
+
     if (nerrors) {
         printf("***** %u FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");

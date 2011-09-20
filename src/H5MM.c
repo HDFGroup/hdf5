@@ -110,7 +110,8 @@ H5MM_calloc(size_t size)
  *		H5MM_realloc (NULL, 0)	  <==> NULL
  *
  * Return:	Success:	Ptr to new memory or NULL if the memory
- *				was freed.
+ *				was freed or HDrealloc couldn't allocate
+ *				memory.
  *
  *		Failure:	NULL
  *
@@ -130,17 +131,14 @@ H5MM_realloc(void *mem, size_t size)
 
     if(NULL == mem) {
 	if(0 == size)
-            mem = NULL;
+            ret_value = NULL;
         else
-            mem = H5MM_malloc(size);
+            ret_value = H5MM_malloc(size);
     } /* end if */
     else if(0 == size)
-	mem = H5MM_xfree(mem);
+	ret_value = H5MM_xfree(mem);
     else
-	mem = HDrealloc(mem, size);
-
-    /* Set return value */
-    ret_value = mem;
+	ret_value = HDrealloc(mem, size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_realloc() */

@@ -402,13 +402,13 @@ rem <none>
     call :tooltest -f ext -i %testfile% -o %fileout% -v -s /group_ext/extlink_dset -d /copy2_dset
 
     echo.Test copying dangling external link (no obj) directly without -f ext
-    call :tooltest -i %testfile% -o %fileout% -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_1
+    call :tooltest -v -i %testfile% -o %fileout% -s /group_ext/extlink_notyet1 -d /copy_dangle1_1
 
     echo.Test copying dangling external link (no obj) directly with -f ext
     call :tooltest -f ext -i %testfile% -o %fileout% -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2
 
     echo.Test copying dangling external link (no file) directly without -f ext
-    call :tooltest -i %testfile% -o %fileout% -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_1
+    call :tooltest -v -i %testfile% -o %fileout% -s /group_ext/extlink_notyet2 -d /copy_dangle2_1
 
     echo.Test copying dangling external link (no file) directly with -f ext
     call :tooltest -f ext -i %testfile% -o %fileout% -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2

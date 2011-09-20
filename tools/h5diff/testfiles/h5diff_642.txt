@@ -1,0 +1,4 @@
+h5diff error: -d, -p and --use-system-epsilon options are mutually-exclusive;
+use no more than one.
+Try '-h' or '--help' option for more information or see the h5diff entry in the 'HDF5 Reference Manual'.
+EXIT CODE: 1

@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -H --sort_by=creation_order --sort_order=ascending torderattr.h5'
-#############################
 HDF5 "torderattr.h5" {
 GROUP "/" {
    ATTRIBUTE "a" {

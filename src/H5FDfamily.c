@@ -88,6 +88,7 @@ typedef struct H5FD_family_dxpl_t {
 } H5FD_family_dxpl_t;
 
 /* Callback prototypes */
+static herr_t H5FD_family_term(void);
 static void *H5FD_family_fapl_get(H5FD_t *_file);
 static void *H5FD_family_fapl_copy(const void *_old_fa);
 static herr_t H5FD_family_fapl_free(void *_fa);
@@ -119,6 +120,7 @@ static const H5FD_class_t H5FD_family_g = {
     "family",					/*name			*/
     HADDR_MAX,					/*maxaddr		*/
     H5F_CLOSE_WEAK,				/*fc_degree		*/
+    H5FD_family_term,                           /*terminate             */
     H5FD_family_sb_size,			/*sb_size		*/
     H5FD_family_sb_encode,			/*sb_encode		*/
     H5FD_family_sb_decode,			/*sb_decode		*/
@@ -212,16 +214,14 @@ done:
  *
  * Purpose:	Shut down the VFD
  *
- * Return:	<none>
+ * Returns:     Non-negative on success or negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Friday, Jan 30, 2004
  *
- * Modification:
- *
  *---------------------------------------------------------------------------
  */
-void
+static herr_t
 H5FD_family_term(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_family_term)
@@ -229,7 +229,7 @@ H5FD_family_term(void)
     /* Reset VFL ID */
     H5FD_FAMILY_g=0;
 
-    FUNC_LEAVE_NOAPI_VOID
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_family_term() */
 
 
@@ -628,7 +628,7 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_family_sb_encode)
 
     /* Name and version number */
-    HDstrncpy(name, "NCSAfami", (size_t)8);
+    HDstrncpy(name, "NCSAfami", (size_t)9);
     name[8] = '\0';
 
     /* Store member file size.  Use the member file size from the property here.
@@ -690,9 +690,9 @@ H5FD_family_sb_decode(H5FD_t *_file, const char UNUSED *name, const unsigned cha
 
     /* Check if member size from file access property is correct */
     if(msize != file->pmem_size) {
-        char                err_msg[128];
+        char err_msg[128];
 
-        sprintf(err_msg, "Family member size should be %lu.  But the size from file access property is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
+        HDsnprintf(err_msg, sizeof(err_msg), "Family member size should be %lu.  But the size from file access property is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
     } /* end if */
 
@@ -806,14 +806,14 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     file->flags = flags;
 
     /* Check that names are unique */
-    sprintf(memb_name, name, 0);
-    sprintf(temp, name, 1);
+    HDsnprintf(memb_name, sizeof(memb_name), name, 0);
+    HDsnprintf(temp, sizeof(temp), name, 1);
     if(!HDstrcmp(memb_name, temp))
         HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file names not unique")
 
     /* Open all the family members */
     while(1) {
-        sprintf(memb_name, name, file->nmembs);
+        HDsnprintf(memb_name, sizeof(memb_name), name, file->nmembs);
 
         /* Enlarge member array */
         if(file->nmembs >= file->amembs) {
@@ -957,18 +957,18 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
     const H5FD_family_t	*f1 = (const H5FD_family_t*)_f1;
     const H5FD_family_t	*f2 = (const H5FD_family_t*)_f2;
-    int ret_value=(H5FD_VFD_DEFAULT);
+    int ret_value = 0;
 
-    FUNC_ENTER_NOAPI(H5FD_family_cmp, H5FD_VFD_DEFAULT)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_family_cmp)
 
-    assert(f1->nmembs>=1 && f1->memb[0]);
-    assert(f2->nmembs>=1 && f2->memb[0]);
+    HDassert(f1->nmembs >= 1 && f1->memb[0]);
+    HDassert(f2->nmembs >= 1 && f2->memb[0]);
 
-    ret_value= H5FDcmp(f1->memb[0], f2->memb[0]);
+    ret_value = H5FDcmp(f1->memb[0], f2->memb[0]);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_family_cmp() */
 
 
 /*-------------------------------------------------------------------------
@@ -1094,7 +1094,7 @@ H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
         /* Create another file if necessary */
         if(u >= file->nmembs || !file->memb[u]) {
             file->nmembs = MAX(file->nmembs, u+1);
-            sprintf(memb_name, file->name, u);
+            HDsnprintf(memb_name, sizeof(memb_name), file->name, u);
             H5E_BEGIN_TRY {
                 H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
                 file->memb[u] = H5FDopen(memb_name, file->flags | H5F_ACC_CREAT,

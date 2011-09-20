@@ -184,6 +184,9 @@ main(void)
     }
     PASSED();
 
+    /* Verify symbol table messages are cached */
+    if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR
+
     /* All looks good */
     puts("All modification time tests passed.");
     h5_cleanup(FILENAME, fapl);

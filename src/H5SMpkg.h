@@ -83,7 +83,7 @@
     H5SM_METADATA_PREFIX_SIZE                                                 \
                                                                               \
     /* Indices */                                                             \
-    + ((f)->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f))                \
+    + (H5F_SOHM_NINDEXES(f) * H5SM_INDEX_HEADER_SIZE(f))                      \
     )
 
 #define H5SM_LIST_SIZE(f, num_mesg) (                                         \

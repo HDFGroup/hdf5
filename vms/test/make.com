@@ -152,6 +152,12 @@ $ link earray, -
        libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
+       Creating efc test
+$ ccc  efc
+$ link efc, -
+       libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$!
+$ type sys$input
        Creating enum test
 $ ccc  enum
 $ link enum, -

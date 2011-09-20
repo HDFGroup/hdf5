@@ -2,15 +2,6 @@ cmake_minimum_required (VERSION 2.8)
 PROJECT (HDF5_F90_SRC C CXX Fortran)
 
 #-----------------------------------------------------------------------------
-# When building utility executables that generate other (source) files :
-# we make use of the following variables defined in the root CMakeLists.
-# Certain systems may add /Debug or /Release to output paths
-# and we need to call the executable from inside the CMake configuration
-#-----------------------------------------------------------------------------
-#inherit EXE_EXT     from parent HDF5 cmake project
-#inherit CFG_INIT    from parent HDF5 cmake project
-
-#-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
 # H5test_kind(_SIZEOF).f90 used to generate H5fortran_detect.f90
 # H5fortran_detect.f90     used to generate H5fort_type_defines.h
@@ -39,7 +30,7 @@ IF (WIN32 AND MSVC)
 ENDIF (WIN32 AND MSVC)
 SET_TARGET_PROPERTIES (H5test_FortranHavekind PROPERTIES LINKER_LANGUAGE Fortran)
 
-SET (CMD ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}${CFG_INIT}/H5test_FortranHavekind${EXE_EXT})
+SET (CMD $<TARGET_FILE:H5test_FortranHavekind>)
 ADD_CUSTOM_COMMAND (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5fortran_detect.f90
     COMMAND ${CMD}
@@ -63,9 +54,9 @@ IF (WIN32 AND MSVC)
           LINK_FLAGS "/SUBSYSTEM:CONSOLE"
   )
 ENDIF (WIN32 AND MSVC)
-SET_TARGET_PROPERTIES (H5test_FortranHavekind PROPERTIES LINKER_LANGUAGE Fortran)
+SET_TARGET_PROPERTIES (H5fortran_detect PROPERTIES LINKER_LANGUAGE Fortran)
 
-SET (CMD ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}${CFG_INIT}/H5fortran_detect${EXE_EXT})
+SET (CMD $<TARGET_FILE:H5fortran_detect>)
 ADD_CUSTOM_COMMAND (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
     COMMAND ${CMD}
@@ -74,12 +65,13 @@ ADD_CUSTOM_COMMAND (
     DEPENDS H5fortran_detect
 )
 
+INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY})
 #-----------------------------------------------------------------------------
 ADD_EXECUTABLE (H5match_types
     ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
     ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
 )
-SET (CMD ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}${CFG_INIT}/H5match_types${EXE_EXT})
+SET (CMD $<TARGET_FILE:H5match_types>)
 ADD_CUSTOM_COMMAND (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
            ${HDF5_F90_BINARY_DIR}/H5fortran_types.f90
@@ -128,6 +120,17 @@ SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF
 H5_SET_LIB_OPTIONS (${HDF5_F90_C_LIB_TARGET} ${HDF5_F90_C_LIB_NAME} ${LIB_TYPE})
 
 #-----------------------------------------------------------------------------
+# Fortran 2003 standard
+#-----------------------------------------------------------------------------
+IF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+  # default real is 4 bytes, so include double signatures
+  SET (F_STATUS "_F03")
+ELSE (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+  # default real is 8 bytes, so exclude double signatures
+  SET (F_STATUS "_F90")
+ENDIF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+
+#-----------------------------------------------------------------------------
 # Fortran Real Size
 #-----------------------------------------------------------------------------
 IF (FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
@@ -147,6 +150,7 @@ SET (f90_F_SRCS
 
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90global.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5_ff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5_ff.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff.f90
@@ -161,6 +165,14 @@ SET (f90_F_SRCS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Sff.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Tff.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zff.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Eff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Lff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Off${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Pff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Rff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Tff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5_DBLE_Interface${F_DBLE}.f90
 )
 
@@ -188,16 +200,20 @@ SET (SHARED_LINK_FLAGS " ")
 IF (WIN32 AND NOT CYGWIN)
   IF (BUILD_SHARED_LIBS)
     SET_PROPERTY (TARGET ${HDF5_F90_LIB_TARGET}
-	    APPEND PROPERTY COMPILE_DEFINITIONS
-		    BUILD_HDF5_DLL
-	)
+      APPEND PROPERTY COMPILE_DEFINITIONS
+        BUILD_HDF5_DLL
+    )
     IF (MSVC)
-      SET (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def")
+      IF (H5_HAVE_PARALLEL)
+        SET (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_F90_SRC_SOURCE_DIR}/phdf5_fortrandll.def")
+      ELSE (H5_HAVE_PARALLEL)
+        SET (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def")
+      ENDIF (H5_HAVE_PARALLEL)
     ENDIF (MSVC)
   ENDIF (BUILD_SHARED_LIBS)
   SET_PROPERTY (TARGET ${HDF5_F90_LIB_TARGET}
       APPEND PROPERTY COMPILE_DEFINITIONS
-  	    HDF5F90_WINDOWS
+        HDF5F90_WINDOWS
   )
 ENDIF (WIN32 AND NOT CYGWIN)
 TARGET_FORTRAN_WIN_PROPERTIES (${HDF5_F90_LIB_TARGET} ${SHARED_LINK_FLAGS})

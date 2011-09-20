@@ -105,9 +105,14 @@ usage (void)
 usage: %s [OPTIONS] [OBJECTS...]\n\
   OPTIONS\n\
    -h, -?, --help  Print a usage message and exit\n\
-   -a, --address   Print addresses for raw data\n\
+   -a, --address   Print raw data address.  If dataset is contiguous, address\n\
+                   is offset in file of beginning of raw data. If chunked,\n\
+                   returned list of addresses indicates offset of each chunk.\n\
+                   Must be used with -v, --verbose option.\n\
+                   Provides no information for non-dataset objects.\n\
    -d, --data      Print the values of datasets\n\
-   -e, --errors    Show all HDF5 error reporting\n\
+   --enable-error-stack\n\
+                   Prints messages from the HDF5 error stack as they occur.\n\
    --follow-symlinks\n\
                    Follow symbolic links (soft links and external links)\n\
                    to display target object information.\n\
@@ -152,7 +157,9 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
     updated to use the replacement option.\n\
 \n\
    -E or --external   Follow external links.\n\
-                      Replaced by --follow-symlinks.\n",
+                      Replaced by --follow-symlinks.\n\
+   -e, --errors       Show all HDF5 error reporting\n\
+                      Replaced by --enable-error-stack.\n",
      h5tools_getprogname());
 }
 
@@ -839,15 +846,15 @@ display_enum_type(hid_t type, int ind)
             for (j=0; j<dst_size; j++)
                 printf("%02x", value[i*dst_size+j]);
         } else if (H5T_SGN_NONE==H5Tget_sign(native)) {
- 	    /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
- 	     *strangely, unless use another pointer "copy".*/
- 	    copy = value+i*dst_size;
+       /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
+        *strangely, unless use another pointer "copy".*/
+       copy = value+i*dst_size;
             HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"u",
             *((unsigned long long*)((void*)copy)));
         } else {
- 	    /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
- 	     *strangely, unless use another pointer "copy".*/
- 	    copy = value+i*dst_size;
+       /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
+        *strangely, unless use another pointer "copy".*/
+       copy = value+i*dst_size;
             HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"d",
             *((long long*)((void*)copy)));
         }
@@ -1449,6 +1456,13 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
            p_type = h5tools_get_native_type(type);
 
         if(p_type >= 0) {
+            /* VL data special information */
+            unsigned int        vl_data = 0; /* contains VL datatypes */
+
+            /* Check if we have VL data in the dataset's datatype */
+            if (h5tools_detect_vlen(p_type) == TRUE)
+                vl_data = TRUE;
+
             temp_need= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
             assert(temp_need == (hsize_t)((size_t)temp_need));
             need = (size_t)temp_need;
@@ -1456,6 +1470,11 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
             assert(buf);
             if(H5Aread(attr, p_type, buf) >= 0)
                h5tools_dump_mem(stdout, &info, attr, p_type, space, buf, -1);
+
+            /* Reclaim any VL memory, if necessary */
+            if (vl_data)
+                H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
+
             free(buf);
             H5Tclose(p_type);
         } /* end if */
@@ -1819,10 +1838,11 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
              * H5Oget_comment again with the correct value.
              * If the call to H5Oget_comment returned an error, skip this block */
             if (cmt_bufsize > 0) {
-                comment = (char *)HDmalloc((size_t)cmt_bufsize); /* new_size including null terminator */
+                comment = (char *)HDmalloc((size_t)cmt_bufsize + 1); /* new_size including null terminator */
                 if(comment) {
                     cmt_bufsize = H5Oget_comment(obj, comment, cmt_bufsize);
                     if(cmt_bufsize > 0) {
+                        comment[cmt_bufsize] = 0;
                         printf("    %-10s \"", "Comment:");
                         display_string(stdout, comment, FALSE);
                         puts("\"");
@@ -2279,6 +2299,9 @@ main(int argc, const char *argv[])
             address_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--data")) {
             data_g = TRUE;
+        } else if(!HDstrcmp(argv[argno], "--enable-error-stack")) {
+            show_errors_g = TRUE;
+        /* deprecated --errors */
         } else if(!HDstrcmp(argv[argno], "--errors")) {
             show_errors_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--follow-symlinks")) {
@@ -2364,6 +2387,7 @@ main(int argc, const char *argv[])
                         data_g = TRUE;
                         break;
 
+                    /* deprecated -e */
                     case 'e': /* --errors */
                         show_errors_g = TRUE;
                         break;

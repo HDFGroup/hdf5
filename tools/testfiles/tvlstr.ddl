@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tvlstr.h5'
-#############################
 HDF5 "tvlstr.h5" {
 GROUP "/" {
    ATTRIBUTE "test_scalar" {

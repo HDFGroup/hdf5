@@ -43,13 +43,17 @@ SET (examples
 
 FOREACH (example ${examples})
   ADD_EXECUTABLE (hl_ex_${example} ${HDF5_HL_EXAMPLES_SOURCE_DIR}/${example}.c)
-  H5_NAMING (hl_ex_${example} ${LIB_TYPE})
+  TARGET_NAMING (hl_ex_${example} ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (hl_ex_${example} ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
 
   IF (BUILD_TESTING)
     ADD_TEST (NAME hl_ex_${example} COMMAND $<TARGET_FILE:hl_ex_${example}>)
   ENDIF (BUILD_TESTING)
 ENDFOREACH (example ${examples})
+
+IF (BUILD_TESTING)
+  SET_TESTS_PROPERTIES (hl_ex_ex_lite2 PROPERTIES DEPENDS hl_ex_ex_lite1)
+ENDIF (BUILD_TESTING)
 
 IF (BUILD_TESTING)
   SET (HDF5_TEST_FILES

@@ -287,6 +287,8 @@ H5_DLL herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low,
     H5F_libver_t high);
 H5_DLL herr_t H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low,
     H5F_libver_t *high);
+H5_DLL herr_t H5Pset_elink_file_cache_size(hid_t plist_id, unsigned efc_size);
+H5_DLL herr_t H5Pget_elink_file_cache_size(hid_t plist_id, unsigned *efc_size);
 
 /* Dataset creation property list (DCPL) routines */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
@@ -355,6 +357,8 @@ H5_DLL herr_t H5Pset_hyper_vector_size(hid_t fapl_id, size_t size);
 H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size/*out*/);
 H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void* operate_data);
 H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void** operate_data);
+H5_DLL herr_t H5Pset_enum_conv_overflow(hid_t plist_id, hbool_t conv_overflow);
+H5_DLL herr_t H5Pget_enum_conv_overflow(hid_t plist_id, hbool_t *conv_overflow/*out*/);
 H5_DLL herr_t H5Pset_aligned_mem(hid_t plist_id, hbool_t aligned_mem);
 H5_DLL herr_t H5Pget_aligned_mem(hid_t plist_id, hbool_t *aligned_mem/*out*/);
 

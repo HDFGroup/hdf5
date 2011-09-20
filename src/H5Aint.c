@@ -232,9 +232,12 @@ H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_index_t idx_type,
     /* Correct # of attributes in table */
     atable->nattrs = udata.curr_attr;
 
-    /* Sort attribute table in correct iteration order */
-    if(H5A_attr_sort_table(atable, idx_type, order) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSORT, FAIL, "error sorting attribute table")
+    /* Don't sort an empty table. */
+    if(atable->nattrs > 0) {
+        /* Sort attribute table in correct iteration order */
+        if(H5A_attr_sort_table(atable, idx_type, order) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTSORT, FAIL, "error sorting attribute table")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -888,8 +891,9 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset datatype sharing")
     } /* end else */
 
-    /* Copy the dataspace for the attribute */
-    attr_dst->shared->ds = H5S_copy(attr_src->shared->ds, FALSE, FALSE);
+    /* Copy the dataspace for the attribute. Make sure the maximal dimension is also copied.
+     * Otherwise the comparison in the test may complain about it. SLU 2011/4/12 */
+    attr_dst->shared->ds = H5S_copy(attr_src->shared->ds, FALSE, TRUE);
     HDassert(attr_dst->shared->ds);
 
     /* Reset the dataspace's sharing in the source file before trying to share

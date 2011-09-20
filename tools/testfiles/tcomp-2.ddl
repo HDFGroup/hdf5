@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5'
-#############################
 HDF5 "tcompound.h5" {
 DATATYPE "/type1" H5T_COMPOUND {
    H5T_STD_I32BE "int_name";

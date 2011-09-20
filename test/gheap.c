@@ -545,6 +545,10 @@ main (void)
     nerrors += test_3(fapl);
     nerrors += test_4(fapl);
     nerrors += test_ooo_indices(fapl);
+
+    /* Verify symbol table messages are cached */
+    nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+
     if (nerrors) goto error;
 
     puts("All global heap tests passed.");

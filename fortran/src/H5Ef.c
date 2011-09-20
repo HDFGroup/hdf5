@@ -1,4 +1,9 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/****h* H5Ef/H5Ef
+ * PURPOSE
+ *   This file contains C stubs for H5E Fortran APIs
+ *
+ * COPYRIGHT
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -11,53 +16,70 @@
  * is linked from the top-level documents page.  It can also be found at     *
  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
  * access to either file, you may request a copy from help@hdfgroup.org.     *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/* This files contains C stubs for H5E Fortran APIs */
-
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ ******
+*/
 #include "H5f90.h"
 #include "H5Eprivate.h"
 
-/*----------------------------------------------------------------------------
- * Name:        h5eclear_c
- * Purpose:     Call H5Eclear to clear the error stack for the current thread
- * Inputs:
- * Outputs:
- * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Wednesday, March 29, 2000
- * Modifications:
- *---------------------------------------------------------------------------*/
-
+/****if* H5Ef/h5eclear_c
+ * NAME
+ *  h5eclear_c
+ * PURPOSE
+ *  Call H5Eclear to clear the error stack for the current thread
+ * INPUTS
+ *
+ * OUTPUTS
+ *
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  Xiangyang Su
+ *  Wednesday, March 29, 2000
+ * HISTORY
+ *
+ * SOURCE
+*/
 int_f
-nh5eclear_c(void)
+nh5eclear_c(hid_t_f *estack_id )
+/******/
 {
-    int_f ret_value = 0;
+  int_f ret_value = 0;
 
-    /*
-     * Call H5Eclear function.
-     */
-    if(H5Eclear2(H5E_DEFAULT) < 0)
-        HGOTO_DONE(FAIL)
+  /*
+   * Call H5Eclear function.
+   */
+  if(H5Eclear2((hid_t)*estack_id) < 0)
+      HGOTO_DONE(FAIL)
 
 done:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5eprint_c1
- * Purpose:     Call H5Eprint to print the error stack in a default manner.
- * Inputs:      name - file name
- *              namelen - length of name
- * Outputs:
- * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Wednesday, March 29, 2000
- * Modifications: Bug fix: Added call to close the file with the error messages
- *                EP 11/26/01
- *---------------------------------------------------------------------------*/
+/****if* H5Ef/h5eprint_c1
+ * NAME
+ *  h5eprint_c1
+ * PURPOSE
+ *  Call H5Eprint to print the error stack in a default manner.
+ * INPUTS
+ *  name    - file name
+ *  namelen - length of name
+ * OUTPUTS
+ *
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  Xiangyang Su
+ *  Wednesday, March 29, 2000
+ * HISTORY
+ *  Bug fix: Added call to close the file with the error messages
+ *  EP 11/26/01
+ * SOURCE
+*/
 int_f
 nh5eprint_c1(_fcd name, int_f* namelen)
+/******/
 {
     FILE *file = NULL;
     char *c_name = NULL;
@@ -83,20 +105,27 @@ done:
     return ret_value;
 }
 
-
-/*----------------------------------------------------------------------------
- * Name:        h5eprint_c2
- * Purpose:     Call H5Eprint to print the error stack to stderr
- *              in a default manner.
- * Inputs:
- * Outputs:
- * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Wednesday, March 29, 2000
- * Modifications:
- *---------------------------------------------------------------------------*/
+/****if* H5Ef/h5eprint_c2
+ * NAME
+ *  h5eprint_c2
+ * PURPOSE
+ *  Call H5Eprint to print the error stack to stderr
+ *  in a default manner.
+ * INPUTS
+ *
+ * OUTPUTS
+ *
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  Xiangyang Su
+ *  Wednesday, March 29, 2000
+ *
+ * SOURCE
+*/
 int_f
 nh5eprint_c2(void)
+/******/
 {
     int_f ret_value = 0;
 
@@ -110,19 +139,28 @@ done:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5eget_major_c
- * Purpose:     Call H5Eget_major to get a character string
- *              describing an error specified by a major error number.
- * Inputs:      error_no - Major error number
- * Outputs:     name - character string describing the error
- * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Wednesday, March 29, 2000
- * Modifications:
- *---------------------------------------------------------------------------*/
+/****if* H5Ef/h5eget_major_c
+ * NAME
+ *  h5eget_major_c
+ * PURPOSE
+ *  Call H5Eget_major to get a character string
+ *  describing an error specified by a major error number.
+ * INPUTS
+ *  error_no - Major error number
+ * OUTPUTS
+ *  name - character string describing the error
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  Xiangyang Su
+ *  Wednesday, March 29, 2000
+ * HISTORY
+ *
+ * SOURCE
+*/
 int_f
 nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
+/******/
 {
     char *c_name = NULL;
     size_t c_namelen = (size_t)*namelen;
@@ -149,19 +187,28 @@ done:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5eget_minor_c
- * Purpose:     Call H5Eget_minor to get a character string
- *              describing an error specified by a minor error number.
- * Inputs:      error_no - Major error number
- * Outputs:     name - character string describing the error
- * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Wednesday, March 29, 2000
- * Modifications:
- *---------------------------------------------------------------------------*/
+/****if* H5Ef/h5eget_minor_c
+ * NAME
+ *  h5eget_minor_c
+ * PURPOSE
+ *  Call H5Eget_minor to get a character string
+ *  describing an error specified by a minor error number.
+ * INPUTS
+ *  error_no - Major error number
+ * OUTPUTS
+ *  name - character string describing the error
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  Xiangyang Su
+ *  Wednesday, March 29, 2000
+ * HISTORY
+ *
+ * SOURCE
+*/
 int_f
 nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
+/******/
 {
     char *c_name = NULL;
     size_t c_namelen = (size_t)*namelen;
@@ -188,18 +235,27 @@ done:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5eset_auto_c
- * Purpose:     Call H5Eset_auto to turn automatic error printing on or off.
- * Inputs:      printflag - flag to turn automatic error printing on or off.
- * Outputs:
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
- *              Friday, November 17, 2000
- * Modifications:  major bug fix. Function never disabled printing.
- *---------------------------------------------------------------------------*/
+/****if* H5Ef/h5eset_auto_c
+ * NAME
+ *  h5eset_auto_c
+ * PURPOSE
+ *  Call H5Eset_auto to turn automatic error printing on or off.
+ * INPUTS
+ *  printflag - flag to turn automatic error printing on or off.
+ * OUTPUTS
+ *
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
+ *  Friday, November 17, 2000
+ * HISTORY
+ *  Major bug fix: Function never disabled printing.
+ * SOURCE
+*/
 int_f
 nh5eset_auto_c(int_f* printflag)
+/******/
 {
     herr_t status = -1;
     int_f ret_value = 0;
@@ -213,5 +269,201 @@ nh5eset_auto_c(int_f* printflag)
 
 done:
     return ret_value;
+}
+
+
+/****if* H5Ef/h5eset_auto2_c
+ * NAME
+ *   h5eset_auto2_c
+ * PURPOSE
+ *   Calls H5Eset_auto2
+ * INPUTS
+ *   estack_id    - Error stack identifier.
+ *   func 	 - Function to be called upon an error condition.
+ *   client_data - Data passed to the error function.
+ *   
+ * RETURNS
+ *   0 on success, -1 on failure
+ * AUTHOR
+ *   M. Scot Breitenfeld
+ *   July 22, 2009
+ * SOURCE
+*/
+/* int_f */
+/* nh5eset_auto2_c(hid_t_f *estack_id, H5E_auto2_t *func, void *client_data) */
+/* /\******\/ */
+/* { */
+/*   int ret_val = -1; */
+/*   herr_t status = -1; */
+
+/*   status = H5Eset_auto2((hid_t)*estack_id, *func, client_data); */
+/*   if (status >= 0) ret_val = 0; */
+/*   return ret_val; */
+/* } */
+
+int_f
+nh5eset_auto2_c(int_f *printflag, hid_t_f *estack_id, H5E_auto2_t func, void *client_data)
+/******/
+{
+  int ret_val = -1;
+  herr_t status = -1;
+
+  if (*printflag == 1 && *estack_id == -1)
+    status = H5Eset_auto2(H5E_DEFAULT, H5Eprint2, stderr);
+  else if (*printflag == 1)
+    status = H5Eset_auto2((hid_t)*estack_id, func, client_data);
+  else if (*printflag == 0)
+    status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+  if (status >= 0) ret_val = 0;
+
+  return ret_val;
+}
+
+
+int_f
+H5Eget_auto3(void **client_data)
+{
+  int *i;
+
+  i = (int*)client_data;
+
+  *i = 1000;
+  printf(" Buffer In (C) = %d \n", *i);
+  
+  return 0;
+
+}
+
+int_f nprocess_buffer(hid_t_f *estack_id, void **buffer)
+{
+  int status;
+  int *i;
+  H5E_auto2_t func_c;
+
+   status = H5Eget_auto2((hid_t)*estack_id, &func_c, buffer);
+/*    status = H5Eget_auto3(buffer); */
+  
+  i = (int*)buffer;
+
+  printf(" Buffer In (C) = %d \n", *i);
+  return;
+}
+/****if* H5Ef/h5eget_auto_c
+ * NAME
+ *  h5eget_auto_c
+ * PURPOSE
+ *  Calls H5Eget_auto2
+ * INPUTS
+ *  estack_id    - Error stack identifier
+ * OUTPUTS
+ *  func          - The function currently set to be called upon an error condition.
+ *  client_data  - Data currently set to be passed to the error function.
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
+ *  July 10, 2009
+ * NOTE
+ *  if func is the default H5Eprint or H5Eprint2 then need to use the Fortran callback function
+ *  associated  with H5Eprint*.
+ * SOURCE
+*/
+int_f
+nh5eget_auto_c(hid_t_f *estack_id, H5E_auto2_t *func, void **client_data, int_f *ret_func)
+/******/
+{
+  int ret_val = -1;
+  herr_t status = -1;
+  hid_t dataset;
+  H5E_auto2_t func_c;
+  void *client_data_c=NULL;
+  void **data_c;
+  int *i;
+
+/*    status = H5Eget_auto3(client_data); */
+/*     i = (int*)client_data; */
+
+/*    printf(" Buffer In (C3) = %d \n", *i); */
+  
+/*    return 0; */
+
+/*   *ret_func = -1; */
+
+   status = H5Eget_auto2((hid_t)*estack_id, &func_c, &client_data_c);
+
+/*   status = H5Eget_auto2((hid_t)*estack_id, &func_c, client_data); */
+
+      i = (int*)*client_data;
+
+/*     *i = 1000; */
+
+
+/*   i = (int*)client_data_c; */
+/* *i = 100; */
+
+/*      *client_data = client_data_c; */
+/*    *data_c = client_data_c; */
+
+    printf("aa %d \n",*((int*)client_data_c));
+/*    printf("bb %d \n",**((int**)client_data)); */
+/*   printf("cc %d \n",**((int**)data_c)); */
+  
+/*   printf("a %p \n",client_data_c); */
+/*    printf("b %p \n",*client_data); */
+/*   printf("c %p \n",*data_c); */
+  
+/*    i = (int*)client_data_c; */
+/*    **client_data = *((int*)client_data_c);*/
+
+/*    *i = 200; */
+
+/*   if(client_data == NULL) */
+/*     printf("error \n"); */
+
+/*   if(func == NULL) */
+/*     printf("error \n"); */
+
+/* #ifdef H5_USE_16_API */
+/*   if (func == (H5E_auto_t)H5Eprint)  */
+/*     *ret_func = 0; */
+/* #else /\* H5_USE_16_API *\/ */
+/*   if (func == (H5E_auto2_t)H5Eprint2) */
+/*     *ret_func = 0; */
+/* #endif /\* H5_USE_16_API *\/ */
+
+/* #ifdef H5_USE_16_API */
+/*   if (func == (H5E_auto_t)H5Eprint) */
+/*     *ret_func = 0; */
+/* #else /\* H5_USE_16_API *\/ */
+/*   if (func == (H5E_auto2_t)H5Eprint2) */
+/*     *ret_func = 0; */ /* printf("%p %p \n",func,(H5E_auto2_t)H5Eprint2); */
+/* #endif /\* H5_USE_16_API *\/ */
+
+/*   printf(" ret %d \n", ret_val); */
+  if (status >= 0) ret_val = 0;
+  ret_func = 0;
+  return ret_val;
+}
+
+void*
+nh5eget_auto_c2(hid_t_f *estack_id, H5E_auto2_t *func, int_f *ret_func)
+/******/
+{
+  int ret_val = -1;
+  herr_t status = -1;
+  hid_t dataset;
+  H5E_auto2_t func_c;
+  void *client_data_c=NULL;
+  void **data_c;
+  int *i;
+
+  status = H5Eget_auto2((hid_t)*estack_id, &func_c, &client_data_c);
+
+   printf("a %p \n",client_data_c);
+
+
+  if (status >= 0) ret_val = 0;
+  ret_func = 0;
+  return client_data_c;
 }
 

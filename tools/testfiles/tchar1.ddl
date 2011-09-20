@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -r tchar.h5'
-#############################
 HDF5 "tchar.h5" {
 GROUP "/" {
    DATASET "Dataset1" {

@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -H -p -d chunked tfilters.h5'
-#############################
 HDF5 "tfilters.h5" {
 DATASET "chunked" {
 COMMENT "This is a dataset with chunked storage"

@@ -28,10 +28,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <errno.h>
 #include <string.h>
-#include <sys/time.h>
+#if defined(H5_TIME_WITH_SYS_TIME)
+#   include <sys/time.h>
+#   include <time.h>
+#elif defined(H5_HAVE_SYS_TIME_H)
+#   include <sys/time.h>
+#else
+#   include <time.h>
+#endif
 #include <mpi.h>
 #ifndef MPI_FILE_NULL           /*MPIO may be defined in mpi.h already       */
 #   include <mpio.h>
@@ -45,30 +54,30 @@
 #define H5FATAL 1
 #define VRFY(val, mesg, fatal) do {                                            \
     if (!val) {                                                                \
-	printf("Proc %d: ", mynod);					       \
+  	printf("Proc %d: ", mynod);                 \
         printf("*** Assertion failed (%s) at line %4d in %s\n",                \
-	    mesg, (int)__LINE__, __FILE__);     			       \
-	if (fatal){							       \
-	    fflush(stdout);						       \
-	    goto die_jar_jar_die;					       \
-	}								       \
+      mesg, (int)__LINE__, __FILE__);                  \
+  	if (fatal){                     \
+      fflush(stdout);                   \
+      goto die_jar_jar_die;                 \
+  	}                       \
     }                                                                          \
 } while(0)
 #define RANK 1
-hsize_t dims[RANK];   	/* dataset dim sizes */
+hsize_t dims[RANK];     /* dataset dim sizes */
 hsize_t block[RANK], stride[RANK], count[RANK];
 hssize_t start[RANK];
 hid_t fid;                  /* HDF5 file ID */
-hid_t acc_tpl;		/* File access templates */
-hid_t sid;   		/* Dataspace ID */
-hid_t file_dataspace;	/* File dataspace ID */
-hid_t mem_dataspace;	/* memory dataspace ID */
-hid_t dataset;		/* Dataset ID */
-hsize_t opt_alignment	= 1;
-hsize_t opt_threshold	= 1;
-int	opt_split_vfd	= 0;
-char	*meta_ext, *raw_ext;	/* holds the meta and raw file extension if */
-				/* opt_split_vfd is set */
+hid_t acc_tpl;    /* File access templates */
+hid_t sid;       /* Dataspace ID */
+hid_t file_dataspace;  /* File dataspace ID */
+hid_t mem_dataspace;  /* memory dataspace ID */
+hid_t dataset;    /* Dataset ID */
+hsize_t opt_alignment  = 1;
+hsize_t opt_threshold  = 1;
+int  opt_split_vfd  = 0;
+char  *meta_ext, *raw_ext;  /* holds the meta and raw file extension if */
+        /* opt_split_vfd is set */
 
 
 /* DEFAULT VALUES FOR OPTIONS */
@@ -105,7 +114,7 @@ int main(int argc, char **argv)
     MPI_File fh;
     MPI_Status status;
     int nchars;
-    herr_t ret;         	/* Generic return value */
+    herr_t ret;           /* Generic return value */
 
     /* startup MPI and determine the rank of this process */
     MPI_Init(&argc,&argv);
@@ -155,38 +164,38 @@ int main(int argc, char **argv)
 
     /* setup file access template with parallel IO access. */
     if (opt_split_vfd){
-	hid_t mpio_pl;
+  	hid_t mpio_pl;
 
-	mpio_pl = H5Pcreate (H5P_FILE_ACCESS);
-	VRFY((acc_tpl >= 0), "", H5FATAL);
-	ret = H5Pset_fapl_mpio(mpio_pl, MPI_COMM_WORLD, MPI_INFO_NULL);
-	VRFY((ret >= 0), "", H5FATAL);
+  	mpio_pl = H5Pcreate (H5P_FILE_ACCESS);
+  	VRFY((acc_tpl >= 0), "", H5FATAL);
+  	ret = H5Pset_fapl_mpio(mpio_pl, MPI_COMM_WORLD, MPI_INFO_NULL);
+  	VRFY((ret >= 0), "", H5FATAL);
 
-	/* set optional allocation alignment */
-	if (opt_alignment*opt_threshold != 1){
-	    ret = H5Pset_alignment(acc_tpl, opt_threshold, opt_alignment );
-	    VRFY((ret >= 0), "H5Pset_alignment succeeded", !H5FATAL);
-	}
+  	/* set optional allocation alignment */
+  	if (opt_alignment*opt_threshold != 1){
+      	ret = H5Pset_alignment(acc_tpl, opt_threshold, opt_alignment );
+      	VRFY((ret >= 0), "H5Pset_alignment succeeded", !H5FATAL);
+  	}
 
-	/* setup file access template */
-	acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
-	VRFY((acc_tpl >= 0), "", H5FATAL);
-	ret = H5Pset_fapl_split(acc_tpl, meta_ext, mpio_pl, raw_ext, mpio_pl);
-	VRFY((ret >= 0), "H5Pset_fapl_split succeeded", H5FATAL);
-	ret = H5Pclose(mpio_pl);
-	VRFY((ret >= 0), "H5Pclose mpio_pl succeeded", H5FATAL);
+  	/* setup file access template */
+  	acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+  	VRFY((acc_tpl >= 0), "", H5FATAL);
+  	ret = H5Pset_fapl_split(acc_tpl, meta_ext, mpio_pl, raw_ext, mpio_pl);
+  	VRFY((ret >= 0), "H5Pset_fapl_split succeeded", H5FATAL);
+  	ret = H5Pclose(mpio_pl);
+  	VRFY((ret >= 0), "H5Pclose mpio_pl succeeded", H5FATAL);
     }else{
-	/* setup file access template */
-	acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
-	VRFY((acc_tpl >= 0), "", H5FATAL);
-	ret = H5Pset_fapl_mpio(acc_tpl, MPI_COMM_WORLD, MPI_INFO_NULL);
-	VRFY((ret >= 0), "", H5FATAL);
+  	/* setup file access template */
+  	acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+  	VRFY((acc_tpl >= 0), "", H5FATAL);
+  	ret = H5Pset_fapl_mpio(acc_tpl, MPI_COMM_WORLD, MPI_INFO_NULL);
+  	VRFY((ret >= 0), "", H5FATAL);
 
-	/* set optional allocation alignment */
-	if (opt_alignment*opt_threshold != 1){
-	    ret = H5Pset_alignment(acc_tpl, opt_threshold, opt_alignment );
-	    VRFY((ret >= 0), "H5Pset_alignment succeeded", !H5FATAL);
-	}
+  	/* set optional allocation alignment */
+  	if (opt_alignment*opt_threshold != 1){
+  	    ret = H5Pset_alignment(acc_tpl, opt_threshold, opt_alignment );
+      	VRFY((ret >= 0), "H5Pset_alignment succeeded", !H5FATAL);
+  	}
     }
 
     /* create the parallel file */
@@ -198,7 +207,7 @@ int main(int argc, char **argv)
     sid = H5Screate_simple(RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded", H5FATAL);
     dataset = H5Dcreate2(fid, "Dataset1", H5T_NATIVE_CHAR, sid,
-			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      		H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dcreate2 succeeded", H5FATAL);
 
     /* create the memory dataspace and the file dataspace */
@@ -366,7 +375,7 @@ die_jar_jar_die:
 #if H5_HAVE_SETENV
 /* no setenv or unsetenv */
     /* clear the environment variable if it was set earlier */
-    if	(opt_pvfstab_set){
+    if  (opt_pvfstab_set){
             unsetenv("PVFSTAB_FILE");
     }
 #endif

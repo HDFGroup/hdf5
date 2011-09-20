@@ -69,7 +69,15 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__EXEEXT_1 = tstlite$(EXEEXT) tstimage$(EXEEXT) tsttable$(EXEEXT)
+am__EXEEXT_1 = tstds$(EXEEXT) tstlite$(EXEEXT) tstimage$(EXEEXT) \
+	tsttable$(EXEEXT)
+am_tstds_OBJECTS = tstds.$(OBJEXT)
+tstds_OBJECTS = $(am_tstds_OBJECTS)
+tstds_LDADD = $(LDADD)
+tstds_DEPENDENCIES = $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL) $(LIBHDF5)
+AM_V_lt = $(am__v_lt_$(V))
+am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
+am__v_lt_0 = --silent
 am_tstimage_OBJECTS = tstimage.$(OBJEXT)
 tstimage_OBJECTS = $(am_tstimage_OBJECTS)
 tstimage_LDADD = $(LDADD)
@@ -84,14 +92,27 @@ tsttable_LDADD = $(LDADD)
 tsttable_DEPENDENCIES = $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL) $(LIBHDF5)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
-LTFCCOMPILE = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+LTFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+AM_V_FC = $(am__v_FC_$(V))
+am__v_FC_ = $(am__v_FC_$(AM_DEFAULT_VERBOSITY))
+am__v_FC_0 = @echo "  FC    " $@;
+AM_V_at = $(am__v_at_$(V))
+am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
+am__v_at_0 = @
 FCLD = $(FC)
-FCLINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
-SOURCES = $(tstimage_SOURCES) $(tstlite_SOURCES) $(tsttable_SOURCES)
-DIST_SOURCES = $(tstimage_SOURCES) $(tstlite_SOURCES) \
+FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_FCLD = $(am__v_FCLD_$(V))
+am__v_FCLD_ = $(am__v_FCLD_$(AM_DEFAULT_VERBOSITY))
+am__v_FCLD_0 = @echo "  FCLD  " $@;
+AM_V_GEN = $(am__v_GEN_$(V))
+am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
+am__v_GEN_0 = @echo "  GEN   " $@;
+SOURCES = $(tstds_SOURCES) $(tstimage_SOURCES) $(tstlite_SOURCES) \
+	$(tsttable_SOURCES)
+DIST_SOURCES = $(tstds_SOURCES) $(tstimage_SOURCES) $(tstlite_SOURCES) \
 	$(tsttable_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -106,17 +127,20 @@ AMTAR = @AMTAR@
 # but which should not be exported to h5cc for building other programs.
 # AM_CFLAGS is an automake construct which should be used by Makefiles 
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
+# This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
 AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
 	-I$(top_builddir)/src -I$(top_srcdir)/hl/src
 AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
+AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@ -I$(top_builddir)/fortran/src \
 	-I$(top_builddir)/hl/fortran/src \
 	$(F9XMODFLAG)$(top_builddir)/fortran/src \
 	$(F9XMODFLAG)$(top_builddir)/hl/fortran/src
-AM_LDFLAGS = @AM_LDFLAGS@ $(am__append_1)
+AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@ $(am__append_1)
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
+AS = @AS@
 
 # Set the paths for AFS installs of autotools for Linux machines
 # Ideally, these tools should never be needed during the build.
@@ -164,6 +188,7 @@ F9XMODEXT = @F9XMODEXT@
 F9XMODFLAG = @F9XMODFLAG@
 F9XSUFFIXFLAG = @F9XSUFFIXFLAG@
 FC = @FC@
+FC2003 = @FC2003@
 FCFLAGS = @FCFLAGS@
 FCFLAGS_f90 = @FCFLAGS_f90@
 FCLIBS = @FCLIBS@
@@ -176,15 +201,20 @@ GREP = @GREP@
 H5_CFLAGS = @H5_CFLAGS@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
+H5_CXX_SHARED = @H5_CXX_SHARED@
 H5_FCFLAGS = @H5_FCFLAGS@
+H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
+H5_LDFLAGS = @H5_LDFLAGS@
 H5_LONE_COLON = @H5_LONE_COLON@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
+HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
+HDF_FORTRAN2003 = @HDF_FORTRAN2003@
 HID_T = @HID_T@
 HL = @HL@
 HL_FOR = @HL_FOR@
@@ -376,13 +406,14 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # Temporary files.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog dsetf[1-4].h5 f1img.h5 \
-	f1tab.h5
+	f1tab.h5 tstds.h5
 
 # Our main target, the test programs
-TEST_PROG = tstlite tstimage tsttable
+TEST_PROG = tstds tstlite tstimage tsttable
 LDADD = $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL)  $(LIBHDF5)
 
 # Source files for the programs
+tstds_SOURCES = tstds.f90
 tstlite_SOURCES = tstlite.f90
 tstimage_SOURCES = tstimage.f90
 tsttable_SOURCES = tsttable.f90
@@ -449,15 +480,18 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+tstds$(EXEEXT): $(tstds_OBJECTS) $(tstds_DEPENDENCIES) 
+	@rm -f tstds$(EXEEXT)
+	$(AM_V_FCLD)$(FCLINK) $(tstds_OBJECTS) $(tstds_LDADD) $(LIBS)
 tstimage$(EXEEXT): $(tstimage_OBJECTS) $(tstimage_DEPENDENCIES) 
 	@rm -f tstimage$(EXEEXT)
-	$(FCLINK) $(tstimage_OBJECTS) $(tstimage_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(FCLINK) $(tstimage_OBJECTS) $(tstimage_LDADD) $(LIBS)
 tstlite$(EXEEXT): $(tstlite_OBJECTS) $(tstlite_DEPENDENCIES) 
 	@rm -f tstlite$(EXEEXT)
-	$(FCLINK) $(tstlite_OBJECTS) $(tstlite_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(FCLINK) $(tstlite_OBJECTS) $(tstlite_LDADD) $(LIBS)
 tsttable$(EXEEXT): $(tsttable_OBJECTS) $(tsttable_DEPENDENCIES) 
 	@rm -f tsttable$(EXEEXT)
-	$(FCLINK) $(tsttable_OBJECTS) $(tsttable_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(FCLINK) $(tsttable_OBJECTS) $(tsttable_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -466,12 +500,15 @@ distclean-compile:
 	-rm -f *.tab.c
 
 .f90.o:
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
 .f90.obj:
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) `$(CYGPATH_W) '$<'`
 
 .f90.lo:
+	$(AM_V_FC) @AM_BACKSLASH@
 	$(LTFCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
 mostlyclean-libtool:
