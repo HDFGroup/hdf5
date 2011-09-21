@@ -117,6 +117,8 @@ $SRC_H5DIFF_TESTFILES/compounds_array_vlen2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_attr_v_level1.h5
 $SRC_H5DIFF_TESTFILES/h5diff_attr_v_level2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_enum_invalid_values.h5
+$SRC_H5DIFF_TESTFILES/non_comparables1.h5
+$SRC_H5DIFF_TESTFILES/non_comparables2.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -149,6 +151,9 @@ $SRC_H5DIFF_TESTFILES/h5diff_205.txt
 $SRC_H5DIFF_TESTFILES/h5diff_206.txt
 $SRC_H5DIFF_TESTFILES/h5diff_207.txt
 $SRC_H5DIFF_TESTFILES/h5diff_208.txt
+$SRC_H5DIFF_TESTFILES/h5diff_220.txt
+$SRC_H5DIFF_TESTFILES/h5diff_221.txt
+$SRC_H5DIFF_TESTFILES/h5diff_222.txt
 $SRC_H5DIFF_TESTFILES/h5diff_21.txt
 $SRC_H5DIFF_TESTFILES/h5diff_22.txt
 $SRC_H5DIFF_TESTFILES/h5diff_23.txt
@@ -793,6 +798,18 @@ TOOLTEST h5diff_207.txt -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset8  g2/dset9
 
 # not comparable in dataspace of zero dimension size
 TOOLTEST h5diff_208.txt -c h5diff_dset_zero_dim_size1.h5 h5diff_dset_zero_dim_size2.h5 
+
+# non-comparable dataset with comparable attribute, and other comparable datasets.
+# All the comparables should display differences.
+TOOLTEST h5diff_220.txt -c non_comparables1.h5 non_comparables2.h5 /g1
+
+# comparable dataset with non-comparable attribute and other comparable attributes.
+# All the comparables should display differences.
+TOOLTEST h5diff_221.txt -c non_comparables1.h5 non_comparables2.h5 /g2
+
+# entire file
+# All the comparables should display differences.
+TOOLTEST h5diff_222.txt -c non_comparables1.h5 non_comparables2.h5
 
 # ##############################################################################
 # # Links compare without --follow-symlinks nor --no-dangling-links
