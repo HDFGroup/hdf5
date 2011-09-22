@@ -441,7 +441,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
             f->shared->fs_threshold != H5F_FREE_SPACE_THRESHOLD_DEF)
         super_vers = HDF5_SUPERBLOCK_VERSION_2;
     /* Bump superblock version if the 'avoid truncate' feature is enabled */
-    else if(f->shared->avoid_truncate)
+    else if(H5F_AVOID_TRUNCATE(f))
         super_vers = HDF5_SUPERBLOCK_VERSION_2;
     /* Check for non-default indexed storage B-tree internal 'K' value
      * and set the version # of the superblock to 1 if it is a non-default
@@ -546,7 +546,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     } /* end if */
     /* Files that avoid truncation calls need to store the 'EOA' value in the
         superblock extension */
-    else if (f->shared->avoid_truncate)
+    else if (H5F_AVOID_TRUNCATE(f))
         need_ext = TRUE;
     /* If we're going to use a version of the superblock format which allows
      *  for the superblock extension, check for non-default values to store
@@ -640,7 +640,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
         } /* end if */
  
         /* Check if we need to store the 'EOA' value in the superblock extension */
-        if (f->shared->avoid_truncate) {
+        if (H5F_AVOID_TRUNCATE(f)) {
             haddr_t eoa; /* 'EOA' value */
 
             if(HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)))

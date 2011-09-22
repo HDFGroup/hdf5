@@ -472,7 +472,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
         HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, "truncated file")
 
 #ifdef H5_HAVE_PARALLEL
-    if (f->shared->avoid_truncate)
+    if (H5F_AVOID_TRUNCATE(f))
         sblock->eof_in_file = stored_eof - sblock->base_addr;
 #endif /* H5_HAVE_PARALLEL */
 
@@ -803,7 +803,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
             H5F_addr_encode(f, &p, sblock->ext_addr);
 
             /* Encode the end-of-file address */
-            if(f->shared->avoid_truncate) {
+            if(H5F_AVOID_TRUNCATE(f)) {
                 /* If we're avoiding truncating the file, then the current
                 value of the 'EOF' address will reflect the file's size, so
                 we can use it here directly. Note, however, that if 

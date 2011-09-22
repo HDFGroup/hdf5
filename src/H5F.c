@@ -1006,7 +1006,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
      * as otherwise we use the EOA value rather than EOF value when writing
      * out the superblock.
      */
-    if (f->shared->avoid_truncate)
+    if (H5F_AVOID_TRUNCATE(f))
         if((f->shared->flags & H5F_ACC_RDWR) && flush)
             if (f->shared->sblock->eof_in_file != H5FD_get_eof(f->shared->lf))
                 if (H5F_super_dirty(f) < 0)
@@ -1085,7 +1085,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list")
 
-        if (!f->shared->avoid_truncate) {
+        if (!H5F_AVOID_TRUNCATE(f)) {
             /* Only truncate the file on an orderly close, with write-access */
             if(f->closing && (H5F_ACC_RDWR & H5F_INTENT(f))) {
                 /* Truncate the file to the current allocated size */

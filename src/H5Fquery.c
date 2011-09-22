@@ -1073,3 +1073,31 @@ H5F_use_tmp_space(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->use_tmp_space)
 } /* end H5F_use_tmp_space() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_avoid_truncate
+ *
+ * Purpose:     Quick and dirty routine to determine if the library
+ *              is avoiding truncating this file.
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:      TRUE/FALSE on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:  Mike McGreevy
+ *              April 25, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_avoid_truncate(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_avoid_truncate)
+    
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->avoid_truncate);
+} /* end H5F_avoid_truncate() */
+

@@ -192,7 +192,6 @@ static herr_t H5FD_mpiposix_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, 
         size_t size, void *buf);
 static herr_t H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
         size_t size, const void *buf);
-static herr_t H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing);
 static herr_t H5FD_mpiposix_coordinate(H5FD_t *_file, hid_t UNUSED dxpl_id, H5FD_coord_t op, void * udata);
 static herr_t H5FD_mpiposix_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static int H5FD_mpiposix_mpi_rank(const H5FD_t *_file);
@@ -235,7 +234,7 @@ static const H5FD_class_mpi_t H5FD_mpiposix_g = {
     H5FD_mpiposix_get_handle,                   /*get_handle            */
     H5FD_mpiposix_read,				/*read			*/
     H5FD_mpiposix_write,			/*write			*/
-    H5FD_mpiposix_flush,            /*flush */
+    NULL,          /*flush      */
     H5FD_mpiposix_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
@@ -1385,57 +1384,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpiposix_write() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_mpiposix_flush
- *
- * Purpose:     Makes sure that all data is on disk.  This is collective.
- *
- * Return:      Success: Non-negative
- *
- *              Failure: Negative
- *
- * Programmer:  Mike McGreevy
- *              January 30, 1998
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
-{
-    H5FD_mpiposix_t *file = (H5FD_mpiposix_t*)_file;
-    int mpi_code; /* mpi return code */
-    herr_t              ret_value = SUCCEED;
-    haddr_t max_eof;    /* End-of-file value */
-
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_flush, FAIL)
-
-    HDassert(file);
-    HDassert(H5FD_MPIPOSIX == file->pub.driver_id);
-
-    /* This fuction doesn't do anything but sync the 'EOF' value
-     * amongst all processes. So, it's entirely misnamed. Yay! 
-     * However, I need a good place (whilst collective) in the file driver
-     * layer to synchronize the 'EOF' value across processes after all data
-     * has hit disk. The MPIO file driver's flush callback was a nice
-     * place to do it but since the MPIPOSIX didn't (previously) have need
-     * for a flush callback, I created one to do just the sync task. 
-     * In the future, we may want to create another file driver member 
-     * function outside of the _flush call to do this?
-     */
-
-    /* Find the maximum 'EOF' value amongst all processes' locally tracked copies */
-    if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&(file->local_eof), &max_eof, 1, HADDR_AS_MPI_TYPE, MPI_MAX, file->comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-
-    /* Synchronize actual eof amongst all processes with max value reported */
-    file->eof = max_eof;
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_mpiposix_flush() */
 
 
 /*-------------------------------------------------------------------------
