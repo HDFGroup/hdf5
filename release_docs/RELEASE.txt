@@ -1,4 +1,4 @@
-HDF5 version 1.9.89 currently under development
+HDF5 version 1.9.92 currently under development
 ================================================================================
 
 
@@ -281,12 +281,6 @@ New Features
             (INF is treated as an number instead of NaN) (PC -- 2009/07/28)
      - h5diff: add option "--use-system-epsilon" to print difference if (|a-b| > EPSILON)
             Change default to use strict equality (PC -- 2009/09/12)
-     - h5repack: h5repack failed to copy dataset if the layout is changed from chunked with 
-            unlimited dims to contiguous. (PC -- 2011/07/15)
-     - h5diff: "--delta" option considers two NaN of the same type are different, which is wrong
-            based on http://www.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Diff. (PC -- 2011/07/15)
-     - h5repack: added macro to handle failure in H5Dread/write when memory allocation failed
-            inside the library. (PC -- 2011/08/19)
 
     
     High-Level APIs:
@@ -309,7 +303,18 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
-
+      - #ifdef _WIN32 instances changed to #ifdef H5_HAVE_WIN32_API and added
+            H5_HAVE_VISUAL_STUDIO checks where necessary. CMake only as configure
+            never set _WIN32.
+      - CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
+            discovered 3 problems in tests and tools' library (Issue 7674):
+              1. In dsets.c, left shifting an unsigned int for 32 bits or more
+                 caused undefined behavior.
+              2. In dt_arith.c, the INIT_INTEGER macro definition has an overflow
+                 when the value is negative minimal and is being subtracted one.
+              3. In tools/lib/h5tools_str.c, right shifting an int value for 32 bits
+                 or more caused undefined behavior.
+            All the problems have been corrected. (SLU - 2011/9/2)
       - In v1.6 library, there was EOA for the whole MULTI file saved in the 
             super block.  We took it out in v1.8 library because it's meaningless 
             for the MULTI file.  v1.8 library saves the EOA for the metadata file, 
@@ -568,12 +573,30 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+         - Fixed h5diff to display all the comparable object and attribute 
+           regardless of non-comparables. HDFFV-7693 (JKM 09/16/2011)
+         - Fixed h5repack to update values of references(object and region) of 
+           attributes in h5repack for 1) references, 2) ARRAY of references, 
+           3) VLEN of references, and 4) COMPOUND of references. 
+           (JIRA HDF5 5932) PC -2011/09/14
+        - h5diff: fixed segfault over dataset with container types
+          (array,lven) with multiple nested compound types. 
+          (ex: compound->array->compound, compound->vlen->compound)
+          HDFFV-7712  JKM (09/01/2011)
+        - h5repack: added macro to handle failure in H5Dread/write when memory 
+          allocation failed inside the library. (PC -- 2011/08/19)
         - Fixed h5jam not to allow specifying an HDF5 formatted file as input 
           file for -u (user block file) option, because the original HDF5 file 
-          will not be accessible if allows.
+          will not be accessible if allows. HDFFV-5941 (JKM 08/15/2011)
         - Revised command help pages of h5jam and h5unjam. The descriptions
           were not up to date and some were missing. 
           HDFFV-7515 (JKM 08/15/2011)
+        - h5repack: h5repack failed to copy dataset if the layout is changed 
+          from chunked with unlimited dims to contiguous. HDFFV-7649 
+          (PC -- 2011/07/15)
+        - h5diff: "--delta" option considers two NaN of the same type are 
+          different, which is wrong based on h5diff description in Reference
+          Manual. HDFFV-7656  (PC -- 2011/07/15)
         - Fixed h5diff to display instructive error message and exit with 1
           when mutually exclusive options (-d, -p and --use-system-epsilon)
           are used together. HDFFV-7600  (JKM 07/07/2011)
@@ -685,7 +708,7 @@ Bug Fixes since HDF5-1.8.0 release
             (NAF - 2008/10/15)
         - Fixed unnecessary indentation of committed datatypes in h5dump.
             (NAF - 2008/10/15)
-  - Fixed bugs in h5stat:segmemtation fault when printing groups and
+        - Fixed bugs in h5stat:segmemtation fault when printing groups and
           print warning message when traversal of objects is unsuccessful.
           (see bug #1253) (VC- 2008/10/13)
         - Fixed bug in h5ls that prevented relative group listings (like
@@ -704,6 +727,7 @@ Bug Fixes since HDF5-1.8.0 release
         - h5dump: when doing binary output (-b), the stdout printing of attributes 
            was done incorrectly. Removed printing of attributes when doing binary 
            output. PVN - 2008/06/05
+
 
     High-Level APIs:
      ------

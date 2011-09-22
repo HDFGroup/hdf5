@@ -313,19 +313,21 @@ hsize_t diff_datasetid( hid_t did1,
     * check for different signed/unsigned types
     *-------------------------------------------------------------------------
     */
-
-    sign1=H5Tget_sign(m_tid1);
-    sign2=H5Tget_sign(m_tid2);
-    if ( sign1 != sign2 )
+    if (can_compare)
     {
-        if ((options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
+        sign1=H5Tget_sign(m_tid1);
+        sign2=H5Tget_sign(m_tid2);
+        if ( sign1 != sign2 )
         {
-            parallel_print("Not comparable: <%s> has sign %s ", obj1_name, get_sign(sign1));
-            parallel_print("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
+            if ((options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
+            {
+                parallel_print("Not comparable: <%s> has sign %s ", obj1_name, get_sign(sign1));
+                parallel_print("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
+            }
+    
+            can_compare=0;
+            options->not_cmp=1;
         }
-
-        can_compare=0;
-        options->not_cmp=1;
     }
 
     /* Check if type is either VLEN-data or VLEN-string to reclaim any
@@ -333,16 +335,16 @@ hsize_t diff_datasetid( hid_t did1,
     if( TRUE == h5tools_detect_vlen(m_tid1) )
         vl_data = TRUE;
 
-    /*-------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
     * only attempt to compare if possible
     *-------------------------------------------------------------------------
     */
     if(can_compare) /* it is possible to compare */
     {
 
-        /*-------------------------------------------------------------------------
+        /*-----------------------------------------------------------------
         * get number of elements
-        *-------------------------------------------------------------------------
+        *------------------------------------------------------------------
         */
         nelmts1 = 1;
         for(i = 0; i < rank1; i++)
@@ -354,9 +356,9 @@ hsize_t diff_datasetid( hid_t did1,
 
         HDassert(nelmts1 == nelmts2);
 
-        /*-------------------------------------------------------------------------
+        /*-----------------------------------------------------------------
         * "upgrade" the smaller memory size
-        *-------------------------------------------------------------------------
+        *------------------------------------------------------------------
         */
 
         if(m_size1 != m_size2) {
@@ -386,9 +388,9 @@ hsize_t diff_datasetid( hid_t did1,
             name2 = diff_basename(obj2_name);
 
 
-        /*-------------------------------------------------------------------------
+        /*----------------------------------------------------------------
         * read/compare
-        *-------------------------------------------------------------------------
+        *-----------------------------------------------------------------
         */
         need = (size_t)(nelmts1 * m_size1);  /* bytes needed */
         if(need < H5TOOLS_MALLOCSIZE) {

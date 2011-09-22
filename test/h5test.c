@@ -17,11 +17,11 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, November 19, 1998
  *
- * Purpose:	Provides support functions for most of the hdf5 tests cases.
+ * Purpose:  Provides support functions for most of the hdf5 tests cases.
  *
  */
 
-#undef NDEBUG			/*override -DNDEBUG			*/
+#undef NDEBUG      /*override -DNDEBUG      */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "h5test.h"
@@ -32,35 +32,33 @@
 #define H5G_TESTING
 #include "H5Gpkg.h"
 
-#ifdef H5_HAVE_WINSOCK_H
+#ifdef H5_HAVE_WIN32_API
 #include <process.h>
-#include <direct.h>
-#include <winsock2.h>
-#endif  /* H5_HAVE_WINSOCK_H */
+#endif  /* H5_HAVE_WIN32_API */
 
 /*
  * Define these environment variables or constants to influence functions in
  * this test support library.  The environment variable is used in preference
  * to the cpp constant.  If neither is defined then use some default value.
  *
- * HDF5_DRIVER:		This string describes what low level file driver to
- *			use for HDF5 file access.  The first word in the
- *			value is the name of the driver and subsequent data
- *			is interpreted according to the driver.  See
- *			h5_fileaccess() for details.
+ * HDF5_DRIVER:    This string describes what low level file driver to
+ *      use for HDF5 file access.  The first word in the
+ *      value is the name of the driver and subsequent data
+ *      is interpreted according to the driver.  See
+ *      h5_fileaccess() for details.
  *
- * HDF5_PREFIX:		A string to add to the beginning of all serial test
- *			file names.  This can be used to run tests in a
- *			different file system (e.g., "/tmp" or "/tmp/myname").
- *			The prefix will be separated from the base file name
- *			by a slash. See h5_fixname() for details.
+ * HDF5_PREFIX:    A string to add to the beginning of all serial test
+ *      file names.  This can be used to run tests in a
+ *      different file system (e.g., "/tmp" or "/tmp/myname").
+ *      The prefix will be separated from the base file name
+ *      by a slash. See h5_fixname() for details.
  *
- * HDF5_PARAPREFIX:	A string to add to the beginning of all parallel test
- *			file names.  This can be used to tell MPIO what driver
- *			to use (e.g., "gfs:", "ufs:", or "nfs:") or to use a
- *			different file system (e.g., "/tmp" or "/tmp/myname").
- *			The prefix will be separated from the base file name
- *			by a slash. See h5_fixname() for details.
+ * HDF5_PARAPREFIX:  A string to add to the beginning of all parallel test
+ *      file names.  This can be used to tell MPIO what driver
+ *      to use (e.g., "gfs:", "ufs:", or "nfs:") or to use a
+ *      different file system (e.g., "/tmp" or "/tmp/myname").
+ *      The prefix will be separated from the base file name
+ *      by a slash. See h5_fixname() for details.
  *
  */
 /*
@@ -72,7 +70,7 @@
 #ifndef HDF5_PARAPREFIX
 #define HDF5_PARAPREFIX ""
 #endif
-char	*paraprefix = NULL;	/* for command line option para-prefix */
+char  *paraprefix = NULL;  /* for command line option para-prefix */
 #ifdef H5_HAVE_PARALLEL
 MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
 #endif
@@ -84,13 +82,13 @@ MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
  * These are the letters that are appended to the file name when generating
  * names for the split and multi drivers. They are:
  *
- * 	m: All meta data when using the split driver.
- *	s: The userblock, superblock, and driver info block
- *	b: B-tree nodes
- *	r: Dataset raw data
- *	g: Global heap
- *	l: local heap (object names)
- *	o: object headers
+ *   m: All meta data when using the split driver.
+ *  s: The userblock, superblock, and driver info block
+ *  b: B-tree nodes
+ *  r: Dataset raw data
+ *  g: Global heap
+ *  l: local heap (object names)
+ *  o: object headers
  */
 static const char *multi_letters = "msbrglo";
 
@@ -98,16 +96,16 @@ static herr_t h5_errors(hid_t estack, void *client_data);
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5_errors
+ * Function:  h5_errors
  *
- * Purpose:	Displays the error stack after printing "*FAILED*".
+ * Purpose:  Displays the error stack after printing "*FAILED*".
  *
- * Return:	Success:	0
+ * Return:  Success:  0
  *
- *		Failure:	-1
+ *    Failure:  -1
  *
- * Programmer:	Robb Matzke
- *		Wednesday, March  4, 1998
+ * Programmer:  Robb Matzke
+ *    Wednesday, March  4, 1998
  *
  * Modifications:
  *
@@ -123,50 +121,50 @@ h5_errors(hid_t estack, void UNUSED *client_data)
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5_cleanup
+ * Function:  h5_cleanup
  *
- * Purpose:	Cleanup temporary test files.
- *		base_name contains the list of test file names.
- *		The file access property list is also closed.
+ * Purpose:  Cleanup temporary test files.
+ *    base_name contains the list of test file names.
+ *    The file access property list is also closed.
  *
- * Return:	Non-zero if cleanup actions were performed; zero otherwise.
+ * Return:  Non-zero if cleanup actions were performed; zero otherwise.
  *
- * Programmer:	Albert Cheng
+ * Programmer:  Albert Cheng
  *              May 28, 1998
  *
  * Modifications:
- *		Albert Cheng, 2000-09-09
- *		Added the explicite base_name argument to replace the
- *		global variable FILENAME.
+ *    Albert Cheng, 2000-09-09
+ *    Added the explicite base_name argument to replace the
+ *    global variable FILENAME.
  *
  *-------------------------------------------------------------------------
  */
 int
 h5_cleanup(const char *base_name[], hid_t fapl)
 {
-    char	filename[1024];
-    char	temp[2048];
-    int		i, j;
-    int		retval=0;
-    hid_t	driver;
+    char  filename[1024];
+    char  temp[2048];
+    int    i, j;
+    int    retval=0;
+    hid_t  driver;
 
     if (GetTestCleanup()){
-	for (i = 0; base_name[i]; i++) {
-	    if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
-		continue;
+  for (i = 0; base_name[i]; i++) {
+      if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
+    continue;
 
             driver = H5Pget_driver(fapl);
 
-	    if (driver == H5FD_FAMILY) {
-		for (j = 0; /*void*/; j++) {
-		    HDsnprintf(temp, sizeof temp, filename, j);
+      if (driver == H5FD_FAMILY) {
+    for (j = 0; /*void*/; j++) {
+        HDsnprintf(temp, sizeof temp, filename, j);
 
-		    if (HDaccess(temp, F_OK) < 0)
+        if (HDaccess(temp, F_OK) < 0)
                         break;
 
-		    HDremove(temp);
-		}
-	    } else if (driver == H5FD_CORE) {
+        HDremove(temp);
+    }
+      } else if (driver == H5FD_CORE) {
                 hbool_t backing;        /* Whether the core file has backing store */
 
                 H5Pget_fapl_core(fapl,NULL,&backing);
@@ -175,21 +173,21 @@ h5_cleanup(const char *base_name[], hid_t fapl)
                 if(backing)
                     HDremove(filename);
 
-	    } else if (driver == H5FD_MULTI) {
-		H5FD_mem_t mt;
-		assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
+      } else if (driver == H5FD_MULTI) {
+    H5FD_mem_t mt;
+    assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
 
-		for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
-		    HDsnprintf(temp, sizeof temp, "%s-%c.h5",
-			       filename, multi_letters[mt]);
-		    HDremove(temp); /*don't care if it fails*/
-		}
-	    } else {
-		HDremove(filename);
-	    }
-	}
+    for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+        HDsnprintf(temp, sizeof temp, "%s-%c.h5",
+             filename, multi_letters[mt]);
+        HDremove(temp); /*don't care if it fails*/
+    }
+      } else {
+    HDremove(filename);
+      }
+  }
 
-	retval = 1;
+  retval = 1;
     }
 
     H5Pclose(fapl);
@@ -198,13 +196,13 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5_reset
+ * Function:  h5_reset
  *
- * Purpose:	Reset the library by closing it.
+ * Purpose:  Reset the library by closing it.
  *
- * Return:	void
+ * Return:  void
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, November 20, 1998
  *
  * Modifications:
@@ -230,7 +228,7 @@ h5_reset(void)
  */
 #ifdef OLD_WAY
 {
-    char	filename[1024];
+    char  filename[1024];
 
     /*
      * Cause the library to emit some diagnostics early so they don't
@@ -238,12 +236,12 @@ h5_reset(void)
      */
     sprintf(filename, "/tmp/h5emit-%05d.h5", HDgetpid());
     H5E_BEGIN_TRY {
-	hid_t file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
-			       H5P_DEFAULT);
-	hid_t grp = H5Gcreate2(file, "emit", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	H5Gclose(grp);
-	H5Fclose(file);
-	HDunlink(filename);
+  hid_t file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
+             H5P_DEFAULT);
+  hid_t grp = H5Gcreate2(file, "emit", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  H5Gclose(grp);
+  H5Fclose(file);
+  HDunlink(filename);
     } H5E_END_TRY;
 }
 #endif /* OLD_WAY */
@@ -251,34 +249,34 @@ h5_reset(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5_fixname
+ * Function:  h5_fixname
  *
- * Purpose:	Create a file name from a file base name like `test' and
- *		return it through the FULLNAME (at most SIZE characters
- *		counting the null terminator). The full name is created by
- *		prepending the contents of HDF5_PREFIX (separated from the
- *		base name by a slash) and appending a file extension based on
- *		the driver supplied, resulting in something like
- *		`ufs:/u/matzke/test.h5'.
+ * Purpose:  Create a file name from a file base name like `test' and
+ *    return it through the FULLNAME (at most SIZE characters
+ *    counting the null terminator). The full name is created by
+ *    prepending the contents of HDF5_PREFIX (separated from the
+ *    base name by a slash) and appending a file extension based on
+ *    the driver supplied, resulting in something like
+ *    `ufs:/u/matzke/test.h5'.
  *
- * Return:	Success:	The FULLNAME pointer.
+ * Return:  Success:  The FULLNAME pointer.
  *
- *		Failure:	NULL if BASENAME or FULLNAME is the null
- *				pointer or if FULLNAME isn't large enough for
- *				the result.
+ *    Failure:  NULL if BASENAME or FULLNAME is the null
+ *        pointer or if FULLNAME isn't large enough for
+ *        the result.
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, November 19, 1998
  *
  * Modifications:
- *		Robb Matzke, 1999-08-03
- *		Modified to use the virtual file layer.
+ *    Robb Matzke, 1999-08-03
+ *    Modified to use the virtual file layer.
  *
- *		Albert Cheng, 2000-01-25
- *		Added prefix for parallel test files.
+ *    Albert Cheng, 2000-01-25
+ *    Added prefix for parallel test files.
  *
- * 		Albert Cheng, 2003-05-08
- *		Changed the default parallel prefix back to NULL but added
+ *     Albert Cheng, 2003-05-08
+ *    Changed the default parallel prefix back to NULL but added
  *              an explanation remark of $HDF5_PARAPREFIX.
  *-------------------------------------------------------------------------
  */
@@ -290,7 +288,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     char           *ptr, last = '\0';
     size_t          i, j;
     hid_t           driver = -1;
-    int		    isppdriver = 0;	/* if the driver is MPI parallel */
+    int        isppdriver = 0;  /* if the driver is MPI parallel */
 
     if (!base_name || !fullname || size < 1)
         return NULL;
@@ -299,20 +297,20 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
     /* figure out the suffix */
     if (H5P_DEFAULT != fapl) {
-	if ((driver = H5Pget_driver(fapl)) < 0)
+  if ((driver = H5Pget_driver(fapl)) < 0)
             return NULL;
 
-	if (H5FD_FAMILY == driver)
-	    suffix = "%05d.h5";
-	else if (H5FD_MULTI == driver)
-	    suffix = NULL;
+  if (H5FD_FAMILY == driver)
+      suffix = "%05d.h5";
+  else if (H5FD_MULTI == driver)
+      suffix = NULL;
     }
 
     /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
      * could be of value -1 if it is not defined.
      */
     isppdriver = H5P_DEFAULT != fapl &&
-	(H5FD_MPIO==driver || H5FD_MPIPOSIX==driver);
+  (H5FD_MPIO==driver || H5FD_MPIPOSIX==driver);
 
     /* Check HDF5_NOCLEANUP environment setting.
      * (The #ifdef is needed to prevent compile failure in case MPI is not
@@ -320,12 +318,12 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
      */
     if (isppdriver){
 #ifdef H5_HAVE_PARALLEL
-	if (getenv_all(MPI_COMM_WORLD, 0, "HDF5_NOCLEANUP"))
-	    SetTestNoCleanup();
+  if (getenv_all(MPI_COMM_WORLD, 0, "HDF5_NOCLEANUP"))
+      SetTestNoCleanup();
 #endif  /* H5_HAVE_PARALLEL */
     }else{
-	if (HDgetenv("HDF5_NOCLEANUP"))
-	    SetTestNoCleanup();
+  if (HDgetenv("HDF5_NOCLEANUP"))
+      SetTestNoCleanup();
     }
 
     /* Check what prefix to use for test files. Process HDF5_PARAPREFIX and
@@ -336,52 +334,52 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
      */
     if (isppdriver){
 #ifdef H5_HAVE_PARALLEL
-	/*
+  /*
          * For parallel:
          *      First use command line option, then the environment
          *      variable, then try the constant
-	 */
+   */
         static int explained = 0;
 
-	prefix = (paraprefix ? paraprefix : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX"));
+  prefix = (paraprefix ? paraprefix : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX"));
 
-	if (!prefix && !explained) {
-	    /* print hint by process 0 once. */
-	    int mpi_rank;
+  if (!prefix && !explained) {
+      /* print hint by process 0 once. */
+      int mpi_rank;
 
-	    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+      MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-	    if (mpi_rank == 0)
-		printf("*** Hint ***\n"
-		   "You can use environment variable HDF5_PARAPREFIX to "
-		   "run parallel test files in a\n"
-		   "different directory or to add file type prefix. E.g.,\n"
-		   "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
-		   "   export HDF5_PARAPREFIX\n"
-		   "*** End of Hint ***\n");
+      if (mpi_rank == 0)
+    printf("*** Hint ***\n"
+       "You can use environment variable HDF5_PARAPREFIX to "
+       "run parallel test files in a\n"
+       "different directory or to add file type prefix. E.g.,\n"
+       "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
+       "   export HDF5_PARAPREFIX\n"
+       "*** End of Hint ***\n");
 
-	    explained = TRUE;
+      explained = TRUE;
 #ifdef HDF5_PARAPREFIX
             prefix = HDF5_PARAPREFIX;
 #endif  /* HDF5_PARAPREFIX */
-	}
+  }
 #endif  /* H5_HAVE_PARALLEL */
     } else {
-	/*
+  /*
          * For serial:
          *      First use the environment variable, then try the constant
-	 */
-	prefix = HDgetenv("HDF5_PREFIX");
+   */
+  prefix = HDgetenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
-	if (!prefix)
+  if (!prefix)
             prefix = HDF5_PREFIX;
 #endif  /* HDF5_PREFIX */
     }
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-	if (isppdriver){
+  if (isppdriver){
             /* This is a parallel system */
             char *subdir;
 
@@ -441,18 +439,18 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
                 return NULL;
         }
     } else if (HDstrlen(base_name) >= size) {
-	/* Buffer is too small */
-	return NULL;
+  /* Buffer is too small */
+  return NULL;
     } else {
-	HDstrcpy(fullname, base_name);
+  HDstrcpy(fullname, base_name);
    }
 
     /* Append a suffix */
     if (suffix) {
-	if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
+  if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
             return NULL;
 
-	HDstrcat(fullname, suffix);
+  HDstrcat(fullname, suffix);
     }
 
     /* Remove any double slashes in the filename */
@@ -468,19 +466,19 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5_rmprefix
+ * Function:  h5_rmprefix
  *
- * Purpose:	This "removes" the MPIO driver prefix part of the file name
- *		by returning a pointer that points at the non-prefix component
+ * Purpose:  This "removes" the MPIO driver prefix part of the file name
+ *    by returning a pointer that points at the non-prefix component
  *              part of the file name.  E.g.,
- *		    Input			Return
- *		    pfs:/scratch1/dataX		/scratch1/dataX
- *		    /scratch2/dataY         	/scratch2/dataY
- *		Note that there is no change to the original file name.
+ *        Input      Return
+ *        pfs:/scratch1/dataX    /scratch1/dataX
+ *        /scratch2/dataY           /scratch2/dataY
+ *    Note that there is no change to the original file name.
  *
- * Return:	Success:	a pointer at the non-prefix part.
+ * Return:  Success:  a pointer at the non-prefix part.
  *
- * Programmer:	Albert Cheng; Jun  1, 2006
+ * Programmer:  Albert Cheng; Jun  1, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -490,26 +488,26 @@ h5_rmprefix(const char *filename)
     const char *ret_ptr;
 
     if ((ret_ptr = HDstrstr(filename, ":")) == NULL)
-	ret_ptr = filename;
+  ret_ptr = filename;
     else
-	ret_ptr++;
+  ret_ptr++;
 
     return(ret_ptr);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5_fileaccess
+ * Function:  h5_fileaccess
  *
- * Purpose:	Returns a file access template which is the default template
- *		but with a file driver set according to the constant or
- *		environment variable HDF5_DRIVER
+ * Purpose:  Returns a file access template which is the default template
+ *    but with a file driver set according to the constant or
+ *    environment variable HDF5_DRIVER
  *
- * Return:	Success:	A file access property list
+ * Return:  Success:  A file access property list
  *
- *		Failure:	-1
+ *    Failure:  -1
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, November 19, 1998
  *
  * Modifications:
@@ -519,8 +517,8 @@ h5_rmprefix(const char *filename)
 hid_t
 h5_fileaccess(void)
 {
-    const char	*val = NULL;
-    const char	*name;
+    const char  *val = NULL;
+    const char  *name;
     char s[1024];
     hid_t fapl = -1;
 
@@ -538,53 +536,53 @@ h5_fileaccess(void)
     if (NULL==(name=HDstrtok(s, " \t\n\r"))) return fapl;
 
     if (!HDstrcmp(name, "sec2")) {
-	/* Unix read() and write() system calls */
-	if (H5Pset_fapl_sec2(fapl)<0) return -1;
+  /* Unix read() and write() system calls */
+  if (H5Pset_fapl_sec2(fapl)<0) return -1;
     } else if (!HDstrcmp(name, "stdio")) {
-	/* Standard C fread() and fwrite() system calls */
-	if (H5Pset_fapl_stdio(fapl)<0) return -1;
+  /* Standard C fread() and fwrite() system calls */
+  if (H5Pset_fapl_stdio(fapl)<0) return -1;
     } else if (!HDstrcmp(name, "core")) {
-	/* In-core temporary file with 1MB increment */
-	if (H5Pset_fapl_core(fapl, (size_t)1, TRUE)<0) return -1;
+  /* In-core temporary file with 1MB increment */
+  if (H5Pset_fapl_core(fapl, (size_t)1, TRUE)<0) return -1;
     } else if (!HDstrcmp(name, "split")) {
-	/* Split meta data and raw data each using default driver */
-	if (H5Pset_fapl_split(fapl,
-			      "-m.h5", H5P_DEFAULT,
-			      "-r.h5", H5P_DEFAULT)<0)
-	    return -1;
+  /* Split meta data and raw data each using default driver */
+  if (H5Pset_fapl_split(fapl,
+            "-m.h5", H5P_DEFAULT,
+            "-r.h5", H5P_DEFAULT)<0)
+      return -1;
     } else if (!HDstrcmp(name, "multi")) {
-	/* Multi-file driver, general case of the split driver */
-	H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
-	hid_t memb_fapl[H5FD_MEM_NTYPES];
-	const char *memb_name[H5FD_MEM_NTYPES];
-	char sv[H5FD_MEM_NTYPES][1024];
-	haddr_t memb_addr[H5FD_MEM_NTYPES];
-        H5FD_mem_t	mt;
+  /* Multi-file driver, general case of the split driver */
+  H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
+  hid_t memb_fapl[H5FD_MEM_NTYPES];
+  const char *memb_name[H5FD_MEM_NTYPES];
+  char sv[H5FD_MEM_NTYPES][1024];
+  haddr_t memb_addr[H5FD_MEM_NTYPES];
+        H5FD_mem_t  mt;
 
-	HDmemset(memb_map, 0, sizeof memb_map);
-	HDmemset(memb_fapl, 0, sizeof memb_fapl);
-	HDmemset(memb_name, 0, sizeof memb_name);
-	HDmemset(memb_addr, 0, sizeof memb_addr);
+  HDmemset(memb_map, 0, sizeof memb_map);
+  HDmemset(memb_fapl, 0, sizeof memb_fapl);
+  HDmemset(memb_name, 0, sizeof memb_name);
+  HDmemset(memb_addr, 0, sizeof memb_addr);
 
-	HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-	for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
-	    memb_fapl[mt] = H5P_DEFAULT;
-	    sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
-	    memb_name[mt] = sv[mt];
-	    memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
-	} /* end for */
+  HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
+  for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+      memb_fapl[mt] = H5P_DEFAULT;
+      sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+      memb_name[mt] = sv[mt];
+      memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
+  } /* end for */
 
-	if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
-			      memb_addr, FALSE)<0) {
-	    return -1;
-	}
+  if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
+            memb_addr, FALSE)<0) {
+      return -1;
+  }
     } else if (!HDstrcmp(name, "family")) {
         hsize_t fam_size = 100*1024*1024; /*100 MB*/
 
-	/* Family of files, each 1MB and using the default driver */
-	if ((val=HDstrtok(NULL, " \t\n\r")))
-	    fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024);
-	if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
+  /* Family of files, each 1MB and using the default driver */
+  if ((val=HDstrtok(NULL, " \t\n\r")))
+      fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024);
+  if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
             return -1;
     } else if (!HDstrcmp(name, "log")) {
         unsigned log_flags = H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC;
@@ -594,20 +592,20 @@ h5_fileaccess(void)
             log_flags = (unsigned)HDstrtol(val, NULL, 0);
 
         if (H5Pset_fapl_log(fapl, NULL, log_flags, (size_t)0) < 0)
-	    return -1;
+      return -1;
     } else if (!HDstrcmp(name, "direct")) {
 #ifdef H5_HAVE_DIRECT
-	/* Linux direct read() and write() system calls.  Set memory boundary, file block size,
-	 * and copy buffer size to the default values. */
-	if (H5Pset_fapl_direct(fapl, 1024, 4096, 8*4096)<0) return -1;
+  /* Linux direct read() and write() system calls.  Set memory boundary, file block size,
+   * and copy buffer size to the default values. */
+  if (H5Pset_fapl_direct(fapl, 1024, 4096, 8*4096)<0) return -1;
 #endif
     } else if(!HDstrcmp(name, "latest")) {
-	/* use the latest format */
-	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+  /* use the latest format */
+  if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             return -1;
     } else {
-	/* Unknown driver */
-	return -1;
+  /* Unknown driver */
+  return -1;
     }
 
     return fapl;
@@ -615,13 +613,13 @@ h5_fileaccess(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5_no_hwconv
+ * Function:  h5_no_hwconv
  *
- * Purpose:	Turn off hardware data type conversions.
+ * Purpose:  Turn off hardware data type conversions.
  *
- * Return:	void
+ * Return:  void
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, November 20, 1998
  *
  * Modifications:
@@ -636,13 +634,13 @@ h5_no_hwconv(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5_show_hostname
+ * Function:  h5_show_hostname
  *
- * Purpose:	Show hostname.  Show process ID if in MPI environment.
+ * Purpose:  Show hostname.  Show process ID if in MPI environment.
  *
- * Return:	void
+ * Return:  void
  *
- * Programmer:	Albert Cheng
+ * Programmer:  Albert Cheng
  *              2002/04/22
  *
  * Modifications:
@@ -652,8 +650,8 @@ h5_no_hwconv(void)
 void
 h5_show_hostname(void)
 {
-    char	hostname[80];
-#ifdef H5_HAVE_WINSOCK_H
+    char  hostname[80];
+#ifdef H5_HAVE_WIN32_API
      WSADATA wsaData;
      int err;
 #endif
@@ -661,21 +659,21 @@ h5_show_hostname(void)
     /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
     {
-	int mpi_rank, mpi_initialized;
+  int mpi_rank, mpi_initialized;
 
-	MPI_Initialized(&mpi_initialized);
-	if (mpi_initialized){
-	    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-	    printf("MPI-process %d.", mpi_rank);
-	}else
-	    printf("thread 0.");
+  MPI_Initialized(&mpi_initialized);
+  if (mpi_initialized){
+      MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+      printf("MPI-process %d.", mpi_rank);
+  }else
+      printf("thread 0.");
     }
 #elif defined(H5_HAVE_THREADSAFE)
     printf("thread %lu.", HDpthread_self_ulong());
 #else
     printf("thread 0.");
 #endif
-#ifdef H5_HAVE_WINSOCK_H
+#ifdef H5_HAVE_WIN32_API
 
    err = WSAStartup( MAKEWORD(2,2), &wsaData );
    if ( err != 0 ) {
@@ -699,13 +697,13 @@ h5_show_hostname(void)
 #endif
 #ifdef H5_HAVE_GETHOSTNAME
     if (gethostname(hostname, (size_t)80) < 0)
-	printf(" gethostname failed\n");
+  printf(" gethostname failed\n");
     else
-	printf(" hostname=%s\n", hostname);
+  printf(" hostname=%s\n", hostname);
 #else
     printf(" gethostname not supported\n");
 #endif
-#ifdef H5_HAVE_WINSOCK_H
+#ifdef H5_HAVE_WIN32_API
     WSACleanup();
 #endif
 }
@@ -728,8 +726,8 @@ h5_show_hostname(void)
 int
 h5_set_info_object(void)
 {
-    char	*envp;			/* environment pointer */
-    int		ret_value=0;
+    char  *envp;      /* environment pointer */
+    int    ret_value=0;
 
     /* handle any MPI INFO hints via $HDF5_MPI_INFO */
     if ((envp = getenv("HDF5_MPI_INFO")) != NULL){
@@ -816,39 +814,39 @@ h5_set_info_object(void)
 void
 h5_dump_info_object(MPI_Info info)
 {
-    char	key[MPI_MAX_INFO_KEY+1];
-    char	value[MPI_MAX_INFO_VAL+1];
-    int  	flag;
-    int		i, nkeys;
+    char  key[MPI_MAX_INFO_KEY+1];
+    char  value[MPI_MAX_INFO_VAL+1];
+    int    flag;
+    int    i, nkeys;
 
     printf("Dumping MPI Info Object(%d) (up to %d bytes per item):\n", (int)info,
-	MPI_MAX_INFO_VAL);
+  MPI_MAX_INFO_VAL);
     if (info==MPI_INFO_NULL){
-	printf("object is MPI_INFO_NULL\n");
+  printf("object is MPI_INFO_NULL\n");
     }
     else {
-	MPI_Info_get_nkeys(info, &nkeys);
-	printf("object has %d items\n", nkeys);
-	for (i=0; i<nkeys; i++){
-	    MPI_Info_get_nthkey(info, i, key);
-	    MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
-	    printf("%s=%s\n", key, value);
-	}
+  MPI_Info_get_nkeys(info, &nkeys);
+  printf("object has %d items\n", nkeys);
+  for (i=0; i<nkeys; i++){
+      MPI_Info_get_nthkey(info, i, key);
+      MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
+      printf("%s=%s\n", key, value);
+  }
 
     }
 }
-#endif	/* H5_HAVE_PARALLEL */
+#endif  /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5_get_file_size
+ * Function:  h5_get_file_size
  *
- * Purpose:	Get the current size of a file (in bytes)
+ * Purpose:  Get the current size of a file (in bytes)
  *
- * Return:	Success:	Size of file in bytes
- *		Failure:	-1
+ * Return:  Success:  Size of file in bytes
+ *    Failure:  -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, March 22, 2003
  *
  *-------------------------------------------------------------------------
@@ -857,8 +855,8 @@ h5_stat_size_t
 h5_get_file_size(const char *filename, hid_t fapl)
 {
     char temp[2048];    /* Temporary buffer for file names */
-    h5_stat_t	sb;     /* Structure for querying file info */
-	int j = 0;
+    h5_stat_t  sb;     /* Structure for querying file info */
+  int j = 0;
 
     if(fapl == H5P_DEFAULT) {
         /* Get the file's statistics */
@@ -866,7 +864,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
             return((h5_stat_size_t)sb.st_size);
     } /* end if */
     else {
-        hid_t	driver;         /* VFD used for file */
+        hid_t  driver;         /* VFD used for file */
 
         /* Get the driver used when creating the file */
         if((driver = H5Pget_driver(fapl)) < 0)
@@ -950,26 +948,26 @@ h5_get_file_size(const char *filename, hid_t fapl)
 int
 print_func(const char *format, ...)
 {
-	va_list arglist;
-	int ret_value;
+  va_list arglist;
+  int ret_value;
 
-	va_start(arglist, format);
-	ret_value = vprintf(format, arglist);
-	va_end(arglist);
-	return ret_value;
+  va_start(arglist, format);
+  ret_value = vprintf(format, arglist);
+  va_end(arglist);
+  return ret_value;
 }
 
 #ifdef H5_HAVE_FILTER_SZIP
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5_szip_can_encode
+ * Function:  h5_szip_can_encode
  *
- * Purpose:	Retrieve the filter config flags for szip, tell if
+ * Purpose:  Retrieve the filter config flags for szip, tell if
  *              encoder is available.
  *
- * Return:	1:  decode+encode is enabled
- *		0:  only decode is enabled
+ * Return:  1:  decode+encode is enabled
+ *    0:  only decode is enabled
  *              -1: other
  *
  * Programmer:
@@ -1008,28 +1006,28 @@ int h5_szip_can_encode(void )
 
 #ifdef H5_HAVE_PARALLEL
 /*-------------------------------------------------------------------------
- * Function:	getenv_all
+ * Function:  getenv_all
  *
- * Purpose:	Used to get the environment that the root MPI task has.
- * 		name specifies which environment variable to look for
- * 		val is the string to which the value of that environment
- * 		variable will be copied.
+ * Purpose:  Used to get the environment that the root MPI task has.
+ *     name specifies which environment variable to look for
+ *     val is the string to which the value of that environment
+ *     variable will be copied.
  *
- * 		NOTE: The pointer returned by this function is only
- * 		valid until the next call to getenv_all and the data
- * 		stored there must be copied somewhere else before any
- * 		further calls to getenv_all take place.
+ *     NOTE: The pointer returned by this function is only
+ *     valid until the next call to getenv_all and the data
+ *     stored there must be copied somewhere else before any
+ *     further calls to getenv_all take place.
  *
- * Return:	pointer to a string containing the value of the environment variable
- * 		NULL if the varialbe doesn't exist in task 'root's environment.
+ * Return:  pointer to a string containing the value of the environment variable
+ *     NULL if the varialbe doesn't exist in task 'root's environment.
  *
- * Programmer:	Leon Arber
+ * Programmer:  Leon Arber
  *              4/4/05
  *
  * Modifications:
- *		Use original getenv if MPI is not initialized. This happens
- *		one uses the PHDF5 library to build a serial nature code.
- *		Albert 2006/04/07
+ *    Use original getenv if MPI is not initialized. This happens
+ *    one uses the PHDF5 library to build a serial nature code.
+ *    Albert 2006/04/07
  *
  *-------------------------------------------------------------------------
  */
@@ -1044,48 +1042,48 @@ getenv_all(MPI_Comm comm, int root, const char* name)
 
     MPI_Initialized(&mpi_initialized);
     if(!mpi_initialized) {
-	/* use original getenv */
-	if(env)
-	    HDfree(env);
-	env = HDgetenv(name);
+  /* use original getenv */
+  if(env)
+      HDfree(env);
+  env = HDgetenv(name);
     } /* end if */
     else {
-	MPI_Comm_rank(comm, &mpi_rank);
-	MPI_Comm_size(comm, &mpi_size);
-	assert(root < mpi_size);
+  MPI_Comm_rank(comm, &mpi_rank);
+  MPI_Comm_size(comm, &mpi_size);
+  assert(root < mpi_size);
 
-	/* The root task does the getenv call
-	 * and sends the result to the other tasks */
-	if(mpi_rank == root) {
-	    env = HDgetenv(name);
-	    if(env) {
-		len = HDstrlen(env);
-		MPI_Bcast(&len, 1, MPI_INT, root, comm);
-		MPI_Bcast(env, len, MPI_CHAR, root, comm);
-	    }
-	    else {
-		/* len -1 indicates that the variable was not in the environment */
-		len = -1;
-		MPI_Bcast(&len, 1, MPI_INT, root, comm);
-	    }
-	}
-	else {
-	    MPI_Bcast(&len, 1, MPI_INT, root, comm);
-	    if(len >= 0) {
-		if(env == NULL)
-		    env = (char*) HDmalloc(len+1);
-		else if(strlen(env) < len)
-		    env = (char*) HDrealloc(env, len+1);
+  /* The root task does the getenv call
+   * and sends the result to the other tasks */
+  if(mpi_rank == root) {
+      env = HDgetenv(name);
+      if(env) {
+    len = HDstrlen(env);
+    MPI_Bcast(&len, 1, MPI_INT, root, comm);
+    MPI_Bcast(env, len, MPI_CHAR, root, comm);
+      }
+      else {
+    /* len -1 indicates that the variable was not in the environment */
+    len = -1;
+    MPI_Bcast(&len, 1, MPI_INT, root, comm);
+      }
+  }
+  else {
+      MPI_Bcast(&len, 1, MPI_INT, root, comm);
+      if(len >= 0) {
+    if(env == NULL)
+        env = (char*) HDmalloc(len+1);
+    else if(strlen(env) < len)
+        env = (char*) HDrealloc(env, len+1);
 
-		MPI_Bcast(env, len, MPI_CHAR, root, comm);
-		env[len] = '\0';
-	    }
-	    else {
-		if(env)
-		    HDfree(env);
-		env = NULL;
-	    }
-	}
+    MPI_Bcast(env, len, MPI_CHAR, root, comm);
+    env[len] = '\0';
+      }
+      else {
+    if(env)
+        HDfree(env);
+    env = NULL;
+      }
+  }
     }
 
 #ifndef NDEBUG

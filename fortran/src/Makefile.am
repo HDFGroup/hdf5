@@ -194,9 +194,9 @@ H5f90global.lo:      $(srcdir)/H5f90global.f90 H5fortran_types.lo
 H5fortran_types.lo:  H5fortran_types.f90
 H5fortran_detect.lo: H5fortran_detect.f90
 H5test_kind.lo:      $(srcdir)/H5test_kind.f90
+H5test_kind_SIZEOF.lo: $(srcdir)/H5test_kind_SIZEOF.f90
 H5_ff$(F_STATUS).lo: $(srcdir)/H5_ff$(F_STATUS).f90 H5f90global.lo
 H5_ff.lo:            $(srcdir)/H5_ff.f90 H5f90global.lo H5_ff$(F_STATUS).lo
-H5test_kind_SIZEOF.lo:      $(srcdir)/H5test_kind_SIZEOF.f90
 H5Aff.lo:            $(srcdir)/H5Aff.f90 H5f90global.lo
 H5Dff.lo:            $(srcdir)/H5Dff.f90 H5f90global.lo
 H5Aff$(F_STATUS).lo:  $(srcdir)/H5Aff$(F_STATUS).f90 H5f90global.lo
@@ -219,7 +219,7 @@ H5Sff.lo:            $(srcdir)/H5Sff.f90 H5f90global.lo
 H5Tff.lo:            $(srcdir)/H5Tff.f90 H5f90global.lo
 H5Zff.lo:            $(srcdir)/H5Zff.f90 H5f90global.lo
 H5_DBLE_Interface$(F_DBLE).lo:  $(srcdir)/H5_DBLE_Interface$(F_DBLE).f90 H5Aff$(F_STATUS).lo H5Dff$(F_STATUS).lo H5Eff$(F_STATUS).lo H5Pff$(F_STATUS).lo
-HDF5.lo:             $(srcdir)/HDF5.f90 H5f90global.lo H5Aff.lo H5Aff$(F_STATUS).lo \
+HDF5.lo:             $(srcdir)/HDF5.f90 H5f90global.lo H5_ff$(F_STATUS).lo H5_ff.lo H5Aff.lo H5Aff$(F_STATUS).lo \
                      H5Dff.lo H5Dff$(F_STATUS).lo  \
                      H5Eff.lo H5Eff$(F_STATUS).lo \
 		     H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo H5Lff$(F_STATUS).lo \
@@ -227,7 +227,7 @@ HDF5.lo:             $(srcdir)/HDF5.f90 H5f90global.lo H5Aff.lo H5Aff$(F_STATUS)
                      H5Sff.lo H5Tff.lo H5Tff$(F_STATUS).lo H5Zff.lo \
                      H5_DBLE_Interface$(F_DBLE).lo 
 H5FDmpioff.lo:       $(srcdir)/H5FDmpioff.f90 H5f90global.lo
-HDF5mpio.lo:         $(srcdir)/H5FDmpioff.f90 H5f90global.lo \
+HDF5mpio.lo:         $(srcdir)/H5FDmpioff.f90 H5f90global.lo H5_ff$(F_STATUS).lo H5_ff.lo \
 		     H5Aff.lo H5Aff$(F_STATUS).lo \
                      H5Dff.lo H5Dff$(F_STATUS).lo \
 		     H5Eff.lo H5Eff$(F_STATUS).lo \

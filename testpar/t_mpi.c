@@ -206,7 +206,7 @@ test_mpio_gb_file(char *filename)
     MPI_Offset  mpi_off;
     MPI_Offset  mpi_off_old;
     MPI_Status  mpi_stat;
-    struct stat stat_buf;
+    h5_stat_t stat_buf;
     int is_signed, sizeof_mpi_offset;
 
     nerrs = 0;
@@ -395,7 +395,7 @@ test_mpio_gb_file(char *filename)
             mrc = MPI_File_get_size(fh, &size);
 	    VRFY((mrc==MPI_SUCCESS), "");
 
-            mrc=stat(filename, &stat_buf);
+            mrc=HDstat(filename, &stat_buf);
 	    VRFY((mrc==0), "");
 
             /* Hopefully this casting is safe */

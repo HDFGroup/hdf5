@@ -219,6 +219,9 @@ sub rewrite_func ($$$$$) {
     my %names;
 
     for $arg (@args) {
+      if($arg=~/\w*\.{3}\w*/){
+        next;
+      }
       unless ($arg=~/^(([a-z_A-Z]\w*\s+)+\**)
 	      ([a-z_A-Z]\w*)(\[.*?\])?
 	      (\s*\/\*\s*(in|out|in_out)\s*\*\/)?\s*$/x) {

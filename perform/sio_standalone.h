@@ -129,11 +129,11 @@
 #define HDfgetc(F)              fgetc(F)
 #define HDfgetpos(F,P)          fgetpos(F,P)
 #define HDfgets(S,N,F)          fgets(S,N,F)
-#ifdef _WIN32 /* H5_HAVE_VISUAL_STUDIO */
+#ifdef H5_HAVE_WIN32_API
 #define HDfileno(F)             _fileno(F)
-#else /* H5_HAVE_VISUAL_STUDIO */
+#else /* H5_HAVE_WIN32_API */
 #define HDfileno(F)             fileno(F)
-#endif /* H5_HAVE_VISUAL_STUDIO */
+#endif /* H5_HAVE_WIN32_API */
 #define HDfloor(X)              floor(X)
 #define HDfmod(X,Y)             fmod(X,Y)
 #define HDfopen(S,M)            fopen(S,M)
@@ -169,7 +169,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
  * For Unix, if off_t is not 64bit big, try use the pseudo-standard
  * xxx64 versions if available.
  */
-#ifdef _WIN32 /* H5_HAVE_VISUAL_STUDIO */
+#ifdef H5_HAVE_WIN32_API
     #define HDfstat(F,B)        _fstati64(F,B)
     #define HDlstat(S,B)        _lstati64(S,B)
     #define HDstat(S,B)         _stati64(S,B)
@@ -202,7 +202,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDgetgrgid(G)           getgrgid(G)
 #define HDgetgrnam(S)           getgrnam(S)
 #define HDgetgroups(Z,G)        getgroups(Z,G)
-#ifdef _MSC_VER /* H5_HAVE_VISUAL_STUDIO */
+#ifdef H5_HAVE_VISUAL_STUDIO
 #define HDgetlogin()            Wgetlogin()
 #else /* H5_HAVE_VISUAL_STUDIO */
 #define HDgetlogin()            getlogin()
@@ -239,7 +239,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDlog(X)                log(X)
 #define HDlog10(X)              log10(X)
 #define HDlongjmp(J,N)          longjmp(J,N)
-#ifdef _WIN32 /* H5_HAVE_VISUAL_STUDIO */
+#ifdef H5_HAVE_WIN32_API
     #define HDlseek(F,O,W)  _lseeki64(F,O,W)
 #else
     #ifdef H5_HAVE_LSEEK64
@@ -264,16 +264,16 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 /*
  * The (void*) cast just avoids a compiler warning in H5_HAVE_VISUAL_STUDIO
  */
-#ifdef _WIN32 /* H5_HAVE_VISUAL_STUDIO */
+#ifdef H5_HAVE_VISUAL_STUDIO
 #define HDmemset(X,C,Z)         memset((void*)(X),C,Z)
 #else /* H5_HAVE_VISUAL_STUDIO */
 #define HDmemset(X,C,Z)         memset(X,C,Z)
 #endif /* H5_HAVE_VISUAL_STUDIO */
-#ifdef _WIN32 /* H5_HAVE_VISUAL_STUDIO */
+#ifdef H5_HAVE_WIN32_API
 #define HDmkdir(S,M)            _mkdir(S)
-#else /* H5_HAVE_VISUAL_STUDIO */
+#else /* H5_HAVE_WIN32_API */
 #define HDmkdir(S,M)            mkdir(S,M)
-#endif /* H5_HAVE_VISUAL_STUDIO */
+#endif /* H5_HAVE_WIN32_API */
 #define HDmkfifo(S,M)           mkfifo(S,M)
 #define HDmktime(T)             mktime(T)
 #define HDmodf(X,Y)             modf(X,Y)
@@ -354,7 +354,7 @@ int HDremove_all(const char * fname);
 #define HDsin(X)                sin(X)
 #define HDsinh(X)               sinh(X)
 #define HDsleep(N)              sleep(N)
-#ifdef _WIN32 /* H5_HAVE_VISUAL_STUDIO */
+#ifdef H5_HAVE_WIN32_API
 #define HDsnprintf              _snprintf /*varargs*/
 #else
 #define HDsnprintf              snprintf /*varargs*/
@@ -419,7 +419,7 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDumask(N)              umask(N)
 #define HDuname(S)              uname(S)
 #define HDungetc(C,F)           ungetc(C,F)
-#ifdef _WIN32 /* H5_HAVE_VISUAL_STUDIO */
+#ifdef H5_HAVE_WIN32_API
 #define HDunlink(S)             _unlink(S)
 #else
 #define HDunlink(S)             unlink(S)
@@ -432,7 +432,7 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDvfprintf(F,FMT,A)     vfprintf(F,FMT,A)
 #define HDvprintf(FMT,A)        vprintf(FMT,A)
 #define HDvsprintf(S,FMT,A)     vsprintf(S,FMT,A)
-#ifdef _WIN32 /* H5_HAVE_VISUAL_STUDIO */
+#ifdef H5_HAVE_WIN32_API
 #   define HDvsnprintf(S,N,FMT,A) _vsnprintf(S,N,FMT,A)
 #else
 #   define HDvsnprintf(S,N,FMT,A) vsnprintf(S,N,FMT,A)
@@ -447,9 +447,9 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
  * And now for a couple non-Posix functions...  Watch out for systems that
  * define these in terms of macros.
  */
-#ifdef _WIN32 /* H5_HAVE_VISUAL_STUDIO */
+#ifdef H5_HAVE_WIN32_API
 #define HDstrdup(S)    _strdup(S)
-#else /* H5_HAVE_VISUAL_STUDIO */
+#else /* H5_HAVE_WIN32_API */
 
 #if !defined strdup && !defined H5_HAVE_STRDUP
 extern char *strdup(const char *s);
@@ -457,7 +457,7 @@ extern char *strdup(const char *s);
 
 #define HDstrdup(S)     strdup(S)
 
-#endif /* H5_HAVE_VISUAL_STUDIO */
+#endif /* H5_HAVE_WIN32_API */
 
 /*
  * HDF Boolean type.

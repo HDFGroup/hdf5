@@ -79,6 +79,9 @@ IF (BUILD_TESTING)
       h5diff_206.txt
       h5diff_207.txt
       h5diff_208.txt
+      h5diff_220.txt
+      h5diff_221.txt
+      h5diff_222.txt
       h5diff_21.txt
       h5diff_22.txt
       h5diff_23.txt
@@ -158,6 +161,7 @@ IF (BUILD_TESTING)
       h5diff_517.txt
       h5diff_518.txt
       h5diff_530.txt
+      h5diff_540.txt
       h5diff_600.txt
       h5diff_601.txt
       h5diff_603.txt
@@ -245,6 +249,10 @@ IF (BUILD_TESTING)
       h5diff_comp_vl_strs.h5
       h5diff_attr_v_level1.h5
       h5diff_attr_v_level2.h5
+      compounds_array_vlen1.h5
+      compounds_array_vlen2.h5
+      non_comparables1.h5
+      non_comparables2.h5
   )
 
   FOREACH (txt_file ${HDF5_REFERENCE_FILES})
@@ -477,6 +485,9 @@ IF (BUILD_TESTING)
   SET (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
   # compound type with multiple vlen string types
   SET (COMP_VL_STRS_FILE h5diff_comp_vl_strs.h5)
+  # container types (array,vlen) with multiple nested compound types
+  SET (COMPS_ARRAY_VLEN_FILE1 compounds_array_vlen1.h5)
+  SET (COMPS_ARRAY_VLEN_FILE2 compounds_array_vlen2.h5)
   # attrs with verbose option level
   SET (ATTR_VERBOSE_LEVEL_FILE1 h5diff_attr_v_level1.h5)
   SET (ATTR_VERBOSE_LEVEL_FILE2 h5diff_attr_v_level2.h5)
@@ -545,6 +556,12 @@ IF (BUILD_TESTING)
           h5diff_207.out.err
           h5diff_208.out
           h5diff_208.out.err
+          h5diff_220.out
+          h5diff_220.out.err
+          h5diff_221.out
+          h5diff_221.out.err
+          h5diff_222.out
+          h5diff_222.out.err
           h5diff_21.out
           h5diff_21.out.err
           h5diff_22.out
@@ -703,6 +720,8 @@ IF (BUILD_TESTING)
           h5diff_518.out.err
           h5diff_530.out
           h5diff_530.out.err
+          h5diff_540.out
+          h5diff_540.out.err
           h5diff_600.out
           h5diff_600.out.err
           h5diff_601.out
@@ -1107,6 +1126,18 @@ ADD_H5_TEST (h5diff_207 0 -c ${FILE2} ${FILE2} g2/dset8  g2/dset9)
 # not comparable in dataspace of zero dimension size
 ADD_H5_TEST (h5diff_208 0 -c ${FILE19} ${FILE20}) 
 
+# non-comparable dataset with comparable attribute, and other comparable datasets. 
+# All the rest comparables should display differences.
+ADD_H5_TEST (h5diff_220 1 -c non_comparables1.h5 non_comparables2.h5 /g1)
+
+# comparable dataset with non-comparable attribute and other comparable attributes.
+# All the rest comparables should display differences.
+ADD_H5_TEST (h5diff_221 1 -c non_comparables1.h5 non_comparables2.h5 /g2)
+
+# entire file
+# All the rest comparables should display differences
+ADD_H5_TEST (h5diff_222 1 -c non_comparables1.h5 non_comparables2.h5)
+
 # ##############################################################################
 # # Links compare without --follow-symlinks nor --no-dangling-links
 # ##############################################################################
@@ -1301,6 +1332,12 @@ ADD_H5_TEST (h5diff_484 0 -v --exclude-path "/dset3" ${EXCLUDE_FILE1_1} ${EXCLUD
 # # diff various multiple vlen and fixed strings in a compound type dataset
 # ##############################################################################
 ADD_H5_TEST (h5diff_530 0 -v  ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group /group_copy)
+
+# ##############################################################################
+# # Test container types (array,vlen) with multiple nested compound types
+# # Complex compound types in dataset and attribute
+# ##############################################################################
+ADD_H5_TEST (h5diff_540 1 -v ${COMPS_ARRAY_VLEN_FILE1} ${COMPS_ARRAY_VLEN_FILE2})
 
 # ##############################################################################
 # # Test mutually exclusive options 

@@ -76,9 +76,9 @@ const char *FILENAME[] = {
 static herr_t
 test_sec2(void)
 {
-	hid_t        file            = -1;
-	hid_t        fapl            = -1;
-	hid_t        access_fapl     = -1;
+  hid_t        file            = -1;
+  hid_t        fapl            = -1;
+  hid_t        access_fapl     = -1;
     char         filename[1024];
     int          *fhandle        = NULL;
     hsize_t      file_size       = 0;
@@ -157,18 +157,18 @@ test_direct(void)
 {
 #ifdef H5_HAVE_DIRECT
     hid_t       file=(-1), fapl, access_fapl = -1;
-    hid_t	dset1=-1, dset2=-1, space1=-1, space2=-1;
+    hid_t  dset1=-1, dset2=-1, space1=-1, space2=-1;
     char        filename[1024];
     int         *fhandle=NULL;
     hsize_t     file_size;
-    hsize_t	dims1[2], dims2[1];
-    size_t	mbound;
-    size_t	fbsize;
-    size_t	cbsize;
-    int		*points, *check, *p1, *p2;
-    int		wdata2[DSET2_DIM] = {11,12,13,14};
-    int		rdata2[DSET2_DIM];
-    int		i, j, n;
+    hsize_t  dims1[2], dims2[1];
+    size_t  mbound;
+    size_t  fbsize;
+    size_t  cbsize;
+    int    *points, *check, *p1, *p2;
+    int    wdata2[DSET2_DIM] = {11,12,13,14};
+    int    rdata2[DSET2_DIM];
+    int    i, j, n;
 #endif /*H5_HAVE_DIRECT*/
 
     TESTING("DIRECT I/O file driver");
@@ -189,10 +189,10 @@ test_direct(void)
     if(H5Pget_fapl_direct(fapl, &mbound, &fbsize, &cbsize) < 0)
         TEST_ERROR;
     if(mbound != MBOUNDARY || fbsize != FBSIZE || cbsize != CBSIZE)
-	TEST_ERROR;
+  TEST_ERROR;
 
     if(H5Pset_alignment(fapl, (hsize_t)THRESHOLD, (hsize_t)FBSIZE) < 0)
-	TEST_ERROR;
+  TEST_ERROR;
 
     H5E_BEGIN_TRY {
         file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -200,7 +200,7 @@ test_direct(void)
     if(file<0) {
         H5Pclose (fapl);
         SKIPPED();
-        printf("	Probably the file system doesn't support Direct I/O\n");
+        printf("  Probably the file system doesn't support Direct I/O\n");
         return 0;
     }
 
@@ -244,8 +244,8 @@ test_direct(void)
     /* Initialize the dset1 */
     p1 = points;
     for(i = n = 0; i < DSET1_DIM1; i++)
-	for(j = 0; j < DSET1_DIM2; j++)
-	    *p1++ = n++;
+  for(j = 0; j < DSET1_DIM2; j++)
+      *p1++ = n++;
 
     /* Create the data space1 */
     dims1[0] = DSET1_DIM1;
@@ -275,13 +275,13 @@ test_direct(void)
     p1 = points;
     p2 = check;
     for(i = 0; i < DSET1_DIM1; i++)
-	for(j = 0; j < DSET1_DIM2; j++)
-	    if(*p1++ != *p2++) {
-		H5_FAILED();
-		printf("    Read different values than written in data set 1.\n");
-		printf("    At index %d,%d\n", i, j);
-        	TEST_ERROR;
-	    } /* end if */
+  for(j = 0; j < DSET1_DIM2; j++)
+      if(*p1++ != *p2++) {
+    H5_FAILED();
+    printf("    Read different values than written in data set 1.\n");
+    printf("    At index %d,%d\n", i, j);
+          TEST_ERROR;
+      } /* end if */
 
     /* Create the data space2. For data set 2, memory address and data size are not aligned. */
     dims2[0] = DSET2_DIM;
@@ -308,12 +308,12 @@ test_direct(void)
 
     /* Check that the values read are the same as the values written */
     for(i = 0; i < DSET2_DIM; i++)
-	if(wdata2[i] != rdata2[i]) {
-	    H5_FAILED();
-	    printf("    Read different values than written in data set 2.\n");
-	    printf("    At index %d\n", i);
+  if(wdata2[i] != rdata2[i]) {
+      H5_FAILED();
+      printf("    Read different values than written in data set 2.\n");
+      printf("    At index %d\n", i);
             TEST_ERROR;
-	} /* end if */
+  } /* end if */
 
     if(H5Sclose(space1) < 0)
         TEST_ERROR;
@@ -326,9 +326,9 @@ test_direct(void)
     if(H5Fclose(file) < 0)
         TEST_ERROR;
     if(points)
-	free(points);
+  free(points);
     if(check)
-	free(check);
+  free(check);
 
     h5_cleanup(FILENAME, fapl);
     PASSED();
@@ -368,10 +368,10 @@ test_core(void)
     char        filename[1024];
     void        *fhandle=NULL;
     hsize_t     file_size;
-    int		*points, *check, *p1, *p2;
-    hid_t	dset1=-1, space1=-1;
-    hsize_t	dims1[2];
-    int		i, j, n;
+    int    *points, *check, *p1, *p2;
+    hid_t  dset1=-1, space1=-1;
+    hsize_t  dims1[2];
+    int    i, j, n;
 
     TESTING("CORE file driver");
 
@@ -433,8 +433,8 @@ test_core(void)
     /* Initialize the dset1 */
     p1 = points;
     for(i = n = 0; i < DSET1_DIM1; i++)
-	for(j = 0; j < DSET1_DIM2; j++)
-	    *p1++ = n++;
+  for(j = 0; j < DSET1_DIM2; j++)
+      *p1++ = n++;
 
     /* Create the data space1 */
     dims1[0] = DSET1_DIM1;
@@ -464,13 +464,13 @@ test_core(void)
     p1 = points;
     p2 = check;
     for(i = 0; i < DSET1_DIM1; i++)
-	for(j = 0; j < DSET1_DIM2; j++)
-	    if(*p1++ != *p2++) {
-		H5_FAILED();
-		printf("    Read different values than written in data set 1.\n");
-		printf("    At index %d,%d\n", i, j);
-        	TEST_ERROR;
-	    } /* end if */
+  for(j = 0; j < DSET1_DIM2; j++)
+      if(*p1++ != *p2++) {
+    H5_FAILED();
+    printf("    Read different values than written in data set 1.\n");
+    printf("    At index %d,%d\n", i, j);
+          TEST_ERROR;
+      } /* end if */
 
     if(H5Dclose(dset1) < 0)
         TEST_ERROR;
@@ -502,7 +502,7 @@ test_core(void)
 
     /* Reallocate memory for reading buffer. */
     if(check)
-	free(check);
+  free(check);
 
     check = (int*)malloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
 
@@ -514,13 +514,13 @@ test_core(void)
     p1 = points;
     p2 = check;
     for(i = 0; i < DSET1_DIM1; i++)
-	for(j = 0; j < DSET1_DIM2; j++)
-	    if(*p1++ != *p2++) {
-		H5_FAILED();
-		printf("    Read different values than written in data set 1.\n");
-		printf("    At index %d,%d\n", i, j);
-        	TEST_ERROR;
-	    } /* end if */
+  for(j = 0; j < DSET1_DIM2; j++)
+      if(*p1++ != *p2++) {
+    H5_FAILED();
+    printf("    Read different values than written in data set 1.\n");
+    printf("    At index %d,%d\n", i, j);
+          TEST_ERROR;
+      } /* end if */
 
     /* Check file size API */
     if(H5Fget_filesize(file, &file_size) < 0)
@@ -538,9 +538,9 @@ test_core(void)
     if(H5Fclose(file) < 0)
         TEST_ERROR;
     if(points)
-	free(points);
+  free(points);
     if(check)
-	free(check);
+  free(check);
 
     h5_cleanup(FILENAME, fapl);
 
@@ -1397,7 +1397,6 @@ test_stdio(void)
     FILE         *fhandle        = NULL;
     hsize_t      file_size       = 0;
 
-
     TESTING("STDIO file driver");
 
     /* Set property list and file name for STDIO driver. */
@@ -1470,7 +1469,7 @@ error:
 static herr_t
 test_windows(void)
 {
-#ifdef _WIN32
+#ifdef H5_HAVE_WINDOWS
 
     hid_t        file            = -1;
     hid_t        fapl            = -1;
@@ -1479,16 +1478,16 @@ test_windows(void)
     int          *fhandle        = NULL;
     hsize_t      file_size       = 0;
 
-#endif /*_WIN32*/
+#endif /*H5_HAVE_WINDOWS*/
 
     TESTING("WINDOWS file driver");
 
-#ifndef _WIN32
+#ifndef H5_HAVE_WINDOWS
 
     SKIPPED();
     return 0;
 
-#else /*_WIN32*/
+#else /* H5_HAVE_WINDOWS */
 
     /* Set property list and file name for WINDOWS driver. */
     fapl = h5_fileaccess();
@@ -1541,7 +1540,7 @@ error:
     } H5E_END_TRY;
     return -1;
 
-#endif /*_WIN32*/
+#endif /* H5_HAVE_WINDOWS */
 }
 
 
@@ -1580,9 +1579,9 @@ main(void)
     nerrors += test_windows() < 0        ? 1 : 0;
 
     if(nerrors) {
-	printf("***** %d Virtual File Driver TEST%s FAILED! *****\n",
-		nerrors, nerrors > 1 ? "S" : "");
-	return 1;
+  printf("***** %d Virtual File Driver TEST%s FAILED! *****\n",
+    nerrors, nerrors > 1 ? "S" : "");
+  return 1;
     }
 
     printf("All Virtual File Driver tests passed.\n");

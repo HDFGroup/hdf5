@@ -29,7 +29,7 @@
 ! NOTES
 !                         *** IMPORTANT ***
 !  If you add a new H5P function you must add the function name to the
-!  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+!  Windows dll file '*hdf5_fortrandll.def' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !*****
 
@@ -209,58 +209,6 @@ CONTAINS
     hdferr = h5pget_fill_value_real_c(prp_id, type_id, fillvalue)
   END SUBROUTINE h5pget_fill_value_real
 
-
-  SUBROUTINE h5pset_fill_value_double(prp_id, type_id, fillvalue, &
-       hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
-                                          ! of fillvalue datatype
-                                          ! (in memory)
-    DOUBLE PRECISION, INTENT(IN) :: fillvalue   ! Fillvalue
-    INTEGER, INTENT(OUT) :: hdferr  ! Error code
-
-    INTERFACE
-       INTEGER FUNCTION h5pset_fill_value_double_c(prp_id, type_id, fillvalue)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FILL_VALUE_DOUBLE_C'::h5pset_fill_value_double_c
-         !DEC$ENDIF
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         INTEGER(HID_T), INTENT(IN) :: type_id
-         DOUBLE PRECISION, INTENT(IN) :: fillvalue
-       END FUNCTION h5pset_fill_value_double_c
-    END INTERFACE
-
-    hdferr = h5pset_fill_value_double_c(prp_id, type_id, fillvalue)
-  END SUBROUTINE h5pset_fill_value_double
-
-
-  SUBROUTINE h5pget_fill_value_double(prp_id, type_id, fillvalue, &
-       hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
-                                          ! of fillvalue datatype
-                                          ! (in memory)
-    DOUBLE PRECISION, INTENT(IN) :: fillvalue   ! Fillvalue
-    INTEGER, INTENT(OUT) :: hdferr  ! Error code
-
-    INTERFACE
-       INTEGER FUNCTION h5pget_fill_value_double_c(prp_id, type_id, fillvalue)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_FILL_VALUE_DOUBLE_C'::h5pget_fill_value_double_c
-         !DEC$ENDIF
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         INTEGER(HID_T), INTENT(IN) :: type_id
-         DOUBLE PRECISION :: fillvalue
-       END FUNCTION h5pget_fill_value_double_c
-    END INTERFACE
-
-    hdferr = h5pget_fill_value_double_c(prp_id, type_id, fillvalue)
-  END SUBROUTINE h5pget_fill_value_double
-
   SUBROUTINE h5pset_fill_value_char(prp_id, type_id, fillvalue, &
        hdferr)
     IMPLICIT NONE
@@ -409,54 +357,6 @@ CONTAINS
     name_len = LEN(name)
     hdferr = h5pset_real_c(prp_id, name , name_len, value)
   END SUBROUTINE h5pset_real
-
-!
-!****s* H5P (F90)/h5pset_double
-!
-! NAME
-!  h5pset_double
-!
-! PURPOSE
-!  Sets a property list value
-!
-! INPUTS
-!  prp_id 	 - iproperty list identifier to modify
-!  name 	 - name of property to modify
-!  value 	 - value to set property to
-! OUTPUTS
-!  hdferr:	 - error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  October 9, 2002
-! SOURCE
-  SUBROUTINE h5pset_double(prp_id, name, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name    ! Name of property to modify
-    DOUBLE PRECISION,   INTENT(IN) :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-!*****
-    INTEGER :: name_len
-
-    INTERFACE
-       INTEGER FUNCTION h5pset_double_c(prp_id, name, name_len, value)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_DOUBLE_C'::h5pset_double_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
-         INTEGER, INTENT(IN)         :: name_len
-         DOUBLE PRECISION, INTENT(IN) :: value
-       END FUNCTION h5pset_double_c
-    END INTERFACE
-
-    name_len = LEN(name)
-    hdferr = h5pset_double_c(prp_id, name , name_len, value)
-  END SUBROUTINE h5pset_double
 
 !****s* H5P (F90)/h5pset_char
 !
@@ -607,54 +507,6 @@ CONTAINS
     name_len = LEN(name)
     hdferr = h5pget_real_c(prp_id, name , name_len, value)
   END SUBROUTINE h5pget_real
-
-!****s* H5P (F90)/h5pget_double
-!
-! NAME
-!  h5pget_double
-!
-! PURPOSE
-!  Gets a property list value
-!
-! INPUTS
-!  prp_id 	 - iproperty list identifier to modify
-!  name 	 - name of property to modify
-! OUTPUTS
-!  value 	 - value of property
-!  hdferr	 - error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  October 9, 2002
-!
-! SOURCE
-  SUBROUTINE h5pget_double(prp_id, name, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name     ! Name of property to modify
-    DOUBLE PRECISION,   INTENT(OUT) :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr           ! Error code
-!*****
-    INTEGER :: name_len
-
-    INTERFACE
-       INTEGER FUNCTION h5pget_double_c(prp_id, name, name_len, value)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_DOUBLE_C'::h5pget_double_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
-         INTEGER, INTENT(IN)         :: name_len
-         DOUBLE PRECISION, INTENT(OUT) :: value
-       END FUNCTION h5pget_double_c
-    END INTERFACE
-
-    name_len = LEN(name)
-    hdferr = h5pget_double_c(prp_id, name , name_len, value)
-  END SUBROUTINE h5pget_double
 
 !
 !****s* H5P (F90)/h5pget_char
@@ -819,60 +671,6 @@ CONTAINS
   END SUBROUTINE h5pregister_real
 
 !
-!****s* H5P (F90)/h5pregister_double
-!
-! NAME
-!  h5pregister_double
-!
-! PURPOSE
-!  Registers a permanent property with a property list class.
-!
-! INPUTS
-!  class 	 - property list class to register
-!                  permanent property within
-!  name 	 - name of property to register
-!  size 	 - size of property in bytes
-!  value 	 - default value for property in newly
-!                  created property lists
-! OUTPUTS
-!  hdferr	 - error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  October 10, 2002
-!
-! SOURCE
-  SUBROUTINE h5pregister_double(class, name, size, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: class     ! Property list class identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name    ! Name of property to register
-    INTEGER(SIZE_T), INTENT(IN) :: size     ! Size of the property value
-    DOUBLE PRECISION,   INTENT(IN) :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-!*****
-    INTEGER :: name_len
-
-    INTERFACE
-       INTEGER FUNCTION h5pregister_double_c(class, name, name_len, size, value)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PREGISTER_DOUBLE_C'::h5pregister_double_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
-         INTEGER(HID_T), INTENT(IN) :: class
-         CHARACTER(LEN=*), INTENT(IN) :: name
-         INTEGER, INTENT(IN)         :: name_len
-         INTEGER(SIZE_T), INTENT(IN) :: size
-         DOUBLE PRECISION, INTENT(IN) :: value
-       END FUNCTION h5pregister_double_c
-    END INTERFACE
-
-    name_len = LEN(name)
-    hdferr = h5pregister_double_c(class, name , name_len, size, value)
-  END SUBROUTINE h5pregister_double
-
-!
 !****s* H5P (F90)/h5pregister_char
 !
 ! NAME
@@ -1032,57 +830,6 @@ CONTAINS
     hdferr = h5pinsert_real_c(plist, name , name_len, size, value)
   END SUBROUTINE h5pinsert_real
 
-!****s* H5P (F90)/h5pinsert_double
-!
-! NAME
-!
-!  h5pinsert_double
-!
-! PURPOSE
-!  Registers a temporary property with a property list class.
-!
-! INPUTS
-!  plist 	 - property list identifier
-!                  permanent property within
-!  name 	 - name of property to insert
-!  size 	 - size of property in bytes
-!  value 	 - initial value for the property
-! OUTPUTS
-!  hdferr	 - error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  October 10, 2002
-! SOURCE
-  SUBROUTINE h5pinsert_double(plist, name, size, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert
-    INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value
-    DOUBLE PRECISION, INTENT(IN) :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code
-!*****
-    INTEGER :: name_len
-
-    INTERFACE
-       INTEGER FUNCTION h5pinsert_double_c(plist, name, name_len, size, value)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PINSERT_DOUBLE_C'::h5pinsert_double_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
-         INTEGER(HID_T), INTENT(IN) :: plist
-         CHARACTER(LEN=*), INTENT(IN) :: name
-         INTEGER, INTENT(IN)         :: name_len
-         INTEGER(SIZE_T), INTENT(IN) :: size
-         DOUBLE PRECISION, INTENT(IN) :: value
-       END FUNCTION h5pinsert_double_c
-    END INTERFACE
-
-    name_len = LEN(name)
-    hdferr = h5pinsert_double_c(plist, name , name_len, size, value)
-  END SUBROUTINE h5pinsert_double
 
 !
 !****s* H5P (F90)/h5pinsert_char

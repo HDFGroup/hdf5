@@ -380,9 +380,8 @@ hsize_t diff_attr(hid_t loc1_id,
         *----------------------------------------------------------------------
         */
 
-        if(msize1 != msize2 ||
-                diff_can_type(ftype1_id, ftype2_id, rank1, rank2, dims1,
-                    dims2, NULL, NULL, name1, name2, options, 0) != 1)
+        if( diff_can_type(ftype1_id, ftype2_id, rank1, rank2, dims1, dims2,
+                          NULL, NULL, name1, name2, options, 0) != 1 )
         {
             if(H5Tclose(ftype1_id) < 0)
                 goto error;
@@ -452,8 +451,8 @@ hsize_t diff_attr(hid_t loc1_id,
             nfound = diff_array(buf1, buf2, nelmts1, (hsize_t)0, rank1, dims1,
                 options, np1, np2, mtype1_id, attr1_id, attr2_id);
 
-                /* not comparable, no display the different number */
-                if(!options->not_cmp && nfound) {
+                /* print info if compatible and difference found */
+                if(nfound) {
                     do_print_attrname("attribute", np1, np2);
                     print_found(nfound);
                 } /* end if */

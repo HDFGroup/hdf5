@@ -9,6 +9,12 @@
 /* Define if the Windows virtual file driver should be compiled */
 #define H5_HAVE_WINDOWS 1
 
+/* Define if on the Windows platform */
+#define H5_HAVE_WIN32_API 1
+
+/* Define if using a Windows compiler (i.e. Visual Studio) */
+#define H5_HAVE_VISUAL_STUDIO 1
+
 /* Define if the Windows virtual file driver should use buffered IO functions */
 /* #undef WINDOWS_USE_STDIO */
 
@@ -473,13 +479,13 @@
 #define H5_PACKAGE_NAME "HDF5"
 
 /* Define to the full name and version of this package. */
-#define H5_PACKAGE_STRING "HDF5 1.9.89"
+#define H5_PACKAGE_STRING "HDF5 1.9.92"
 
 /* Define to the one symbol short name of this package. */
 #define H5_PACKAGE_TARNAME "hdf5"
 
 /* Define to the version of this package. */
-#define H5_PACKAGE_VERSION "1.9.89"
+#define H5_PACKAGE_VERSION "1.9.92"
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #define H5_PRINTF_LL_WIDTH "I64"
@@ -636,7 +642,7 @@
 /* #undef H5_USING_MEMCHECKER */
 
 /* Version number of package */
-#define H5_VERSION "1.9.89"
+#define H5_VERSION "1.9.92"
 
 /* Define if vsnprintf() returns the correct value for formatted strings that
    don't fit into size allowed */

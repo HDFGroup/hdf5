@@ -42,18 +42,18 @@ CONTAINS
 ! PURPOSE
 !  Computes the offset in memory
 !
-! INPUTS
+! Inputs:
 !  start - starting pointer address
 !  end 	 - ending pointer address
 !
-! OUTPUTS
+! Outputs:
 !  offset - offset
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  Augest 25, 2008
 !
-! SOURCE
+! Signature:
   FUNCTION h5offsetof(start,end) RESULT(offset)
     USE, INTRINSIC :: ISO_C_BINDING
     USE H5GLOBAL

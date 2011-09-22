@@ -604,7 +604,7 @@ HDremove_all(const char *fname)
  *
  *-------------------------------------------------------------------------
  */
-#ifdef _WIN32 /* H5_HAVE_VISUAL_STUDIO */
+#ifdef H5_HAVE_VISUAL_STUDIO
 
 /* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
 #define _W32_FT_OFFSET (116444736000000000ULL)

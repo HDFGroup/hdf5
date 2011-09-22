@@ -321,7 +321,10 @@ void parse_command_line(int argc,
              printf("--------------------------------\n");
              printf("Some objects are not comparable\n");
              printf("--------------------------------\n");
-             printf("Use -c for a list of objects.\n");
+             if (options->m_verbose)
+                 printf("Use -c for a list of objects without details of differences.\n");
+             else
+                 printf("Use -c for a list of objects.\n");
          }
 
 

@@ -53,7 +53,7 @@ CONTAINS
 ! PURPOSE
 !  Converts data from between specified datatypes.
 !
-! INPUTS
+! Inputs:
 !  src_id     - Identifier for the source datatype.
 !  dst_id     - Identifier for the destination datatype.
 !  nelmts     - Size of array buf.
@@ -61,7 +61,7 @@ CONTAINS
 !  background - Optional background buffer.
 !  plist_id   -	Dataset transfer property list identifier.
 !
-! OUTPUTS
+! Outputs:
 !  buf 	      - Array containing post-conversion values.
 !  hdferr     - error code:
 !                 0 on success and -1 on failure
@@ -69,7 +69,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  Decemember 8, 2008
 !
-! SOURCE
+! Signature:
   SUBROUTINE h5tconvert_f(src_id, dst_id, nelmts, buf, hdferr, background, plist_id)
     USE ISO_C_BINDING
     IMPLICIT NONE

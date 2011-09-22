@@ -25,7 +25,7 @@
 /* Name of tool */
 #define PROGRAMNAME "h5import"
 
-#ifdef WIN32
+#ifdef H5_HAVE_WIN32_API
 #define READ_OPEN_FLAGS "rb"
 #else
 #define READ_OPEN_FLAGS "r"
@@ -309,7 +309,7 @@ static int processDataFile(char *infile, struct Input *in, hid_t file_id)
     const char *err11 = "Error in reading string data.\n";
 
     /*-------------------------------------------------------------------------
-     * special case for opening binary classes in WIN32
+     * special case for opening binary classes in H5_HAVE_WIN32_API
      * "FP" denotes a floating point binary file,
      * "IN" denotes a signed integer binary file,
      * "UIN" denotes an unsigned integer binary file,

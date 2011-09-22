@@ -20,6 +20,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     error_test       #uses runTest.cmake
     err_compat       #uses runTest.cmake
     links_env        #uses runTest.cmake
+    testlibinfo      #uses grepTest.cmake
     h5test-clear-testhdf5-objects
     h5test-clear-objects
     h5test-clear-cache-objects
