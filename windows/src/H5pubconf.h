@@ -41,7 +41,7 @@
 #define H5_CXX_HAVE_OFFSETOF 1
 
 /* Define the default virtual file driver to compile */
-#define H5_DEFAULT_VFD H5FD_WINDOWS
+#define H5_DEFAULT_VFD H5FD_SEC2
 
 /* Define if `dev_t' is a scalar */
 #define H5_DEV_T_IS_SCALAR 1
