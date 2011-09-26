@@ -281,6 +281,17 @@ IF (BUILD_STATIC_EXECS)
 ENDIF (BUILD_STATIC_EXECS)
 
 #-----------------------------------------------------------------------------
+# Option to Build Static PIC
+#-----------------------------------------------------------------------------
+OPTION (BUILD_STATIC_PIC "Build Static PIC" OFF)
+IF (BUILD_STATIC_PIC)
+  IF (NOT WIN32)
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+  ENDIF (NOT WIN32)
+ENDIF (BUILD_STATIC_PIC)
+
+#-----------------------------------------------------------------------------
 # Option to use code coverage
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
