@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Dff_F90.f90</title>
+<!-- Source: ./src/H5Dff_F90.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5D2028F9029"></a>
+<a name="robo33"></a><h2>H5D (F90)</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  H5D_PROVISIONAL
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran 90 interfaces for <a href="./H5Dff_f90.html#robo31">H5D</a> functions. It contains
+  the same functions as <a href="./H5Dff_F03_f90.html#robo_top_of_doc">H5Dff_F03.f90</a> but excludes the Fortran 2003 functions
+  and the interface listings. This file will be compiled instead of <a href="./H5Dff_F03_f90.html#robo_top_of_doc">H5Dff_F03.f90</a>
+  if Fortran 2003 functions are not enabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  (1) The maximum rank of an array allowed in Fortran is 7, therefore
+  we only provide an interface for arrays up to and including rank 7.
+
+  (2) Unfortunately we are using a generic interface and one of the factors
+  used in determining the proper routine to select is that of the array
+  rank being passed, therefore we can not create just one subroutine for
+  each array type (integer, real, etc...) of various ranks and then use a
+  rank 1 array of assumed size in the just one subroutine,
+  (i.e. integer, dimension(*) :: ... )
+  (i.e. real   , dimension(*) :: ... ) etc...
+
+  (3)
+                         *** IMPORTANT ***
+  If you add a new <a href="./H5Dff_f90.html#robo31">H5D</a> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5D2fh5dread5ff"></a>
+<a name="robo124"></a><h2>h5dread_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="./H5Dff_f90.html#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dread_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Reads raw data from the specified dataset into buf,
+  converting from file datatype and dataspace to memory
+  datatype and dataspace.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dset_id       - dataset identifier
+  mem_type_id   - memory type identifier
+  dims          - 1-dim array of size 7; dims(k) has the size
+                  of k-th dimension of the buf array
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  buf     - buffer to read data in
+  hdferr: - error code
+             Success:  0
+             Failure: -1
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  mem_space_id  - memory dataspace identifier
+  file_space_id - file dataspace identifier
+  xfer_prp      - trasfer property list identifier
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+
+  dims parameter was added to make code portable;
+  n parameter was replaced with dims parameter in
+  the h5dwrite_reference_obj and h5dwrite_reference_dsetreg
+  functions.  April 2, 2001
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  This function is overloaded to read INTEGER,
+  REAL, DOUBLE PRECISION and CHARACTER buffers
+  up to 7 dimensions, and one dimensional buffers
+  of the TYPE(hobj_ref_t_f) and TYPE(hdset_reg_ref_t_f) types.
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Dff_F90.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

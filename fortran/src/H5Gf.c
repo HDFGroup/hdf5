@@ -1,4 +1,9 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/****h* H5Gf/H5Gf
+ * PURPOSE
+ *   This file contains C stubs for H5G Fortran APIs
+ *
+ * COPYRIGHT
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -11,32 +16,42 @@
  * is linked from the top-level documents page.  It can also be found at     *
  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
  * access to either file, you may request a copy from help@hdfgroup.org.     *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/* This files contains C stubs for H5G Fortran APIs */
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ ******
+*/
 
 #include "H5f90.h"
 #include "H5Eprivate.h"
 
-/*----------------------------------------------------------------------------
- * Name:        h5gcreate_c
- * Purpose:     Call H5Gcreate to create a group
- * Inputs:      loc_id - file or group identifier
+/****if* H5Gf/h5gcreate_c
+ * NAME
+ *        h5gcreate_c
+ * PURPOSE
+ *     Call H5Gcreate to create a group
+ * INPUTS
+ *      loc_id - file or group identifier
  *              name - name of the group
  *              namelen - name length
  *              size_hint - length of names in the group
- * Outputs:     grp_id - group identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * OUTPUTS
+ *     grp_id - group identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, August 5, 1999
- * Modifications:
+ * HISTORY
+ *
  *              Changed to call H5Gcreate2 because H5Gcreate flip-flops and
  *              H5Gcreate1 can be compiled out of the library
  *              QAK - 2007/08/23
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5gcreate_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,
 	     hid_t_f *grp_id, hid_t_f *lcpl_id, hid_t_f *gcpl_id, hid_t_f *gapl_id )
+/******/
 {
     hid_t c_gcpl_id = -1;          /* Group creation property list */
     char *c_name = NULL;
@@ -81,21 +96,29 @@ DONE:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5gopen_c
- * Purpose:     Call H5Gopen to open a dataset
- * Inputs:      loc_id - file or group identifier
+/****if* H5Gf/h5gopen_c
+ * NAME
+ *        h5gopen_c
+ * PURPOSE
+ *     Call H5Gopen to open a dataset
+ * INPUTS
+ *      loc_id - file or group identifier
  *              name - name of the group
  *              namelen - name length
  *              gapl_id - Group access property list identifier
- * Outputs:     grp_id - group identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * OUTPUTS
+ *     grp_id - group identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, August 5, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ *
+ * SOURCE
+*/
 int_f
 nh5gopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *gapl_id, hid_t_f *grp_id)
+/******/
 {
      char *c_name = NULL;
      hid_t c_grp_id;
@@ -123,25 +146,32 @@ DONE:
      return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5gget_obj_info_idx_c
- * Purpose:     Call H5Gget_obj_info to return name and the type of group
+/****if* H5Gf/h5gget_obj_info_idx_c
+ * NAME
+ *        h5gget_obj_info_idx_c
+ * PURPOSE
+ *     Call H5Gget_obj_info to return name and the type of group
  *              member
- * Inputs:      loc_id - file or group identifier
+ * INPUTS
+ *      loc_id - file or group identifier
  *              name - name of the group
  *              namelen - name length
  *              idx - index of the group member
- * Outputs:     obj_name - buffer to store member's name
+ * OUTPUTS
+ *     obj_name - buffer to store member's name
  *              obj_namelen - length of the buffer
  *              obj_type - type of the object
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, August 5, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx,
     _fcd obj_name, int_f *obj_namelen, int_f *obj_type)
+/******/
 {
     H5O_info_t oinfo;
     hid_t c_loc_id = (hid_t)*loc_id;
@@ -199,20 +229,27 @@ DONE:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5gn_members_c
- * Purpose:     Call H5Gget_info_by_name to find number of objects in the group
- * Inputs:      loc_id - file or group identifier
+/****if* H5Gf/h5gn_members_c
+ * NAME
+ *        h5gn_members_c
+ * PURPOSE
+ *     Call H5Gget_info_by_name to find number of objects in the group
+ * INPUTS
+ *      loc_id - file or group identifier
  *              name - name of the group
  *              namelen - name length
- * Outputs:     nmemebers - number of members
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * OUTPUTS
+ *     nmemebers - number of members
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, August 5, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5gn_members_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
+/******/
 {
     char *c_name = NULL;
     H5G_info_t ginfo;
@@ -237,18 +274,24 @@ DONE:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5gclose_c
- * Purpose:     Call H5Gclose to close the group
- * Inputs:      grp_id - identifier of the group to be closed
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+/****if* H5Gf/h5gclose_c
+ * NAME
+ *        h5gclose_c
+ * PURPOSE
+ *     Call H5Gclose to close the group
+ * INPUTS
+ *      grp_id - identifier of the group to be closed
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, August 5, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 
 int_f
 nh5gclose_c(hid_t_f *grp_id)
+/******/
 {
     int ret_value = 0;
 
@@ -258,25 +301,31 @@ nh5gclose_c(hid_t_f *grp_id)
 }
 
 
-/*----------------------------------------------------------------------------
- * Name:        h5glink_c
- * Purpose:     Call H5Glink to link the specified type
- * Inputs:      loc_id - identifier of file or group
+/****if* H5Gf/h5glink_c
+ * NAME
+ *        h5glink_c
+ * PURPOSE
+ *     Call H5Glink to link the specified type
+ * INPUTS
+ *      loc_id - identifier of file or group
  *              link_type - link type
  *              current_name - name of the existing object for hard link,
  *                             anything for the soft link
  *              current_namelen - current name lenghth
  *              new_name - new name for the object
  *              new_namelen - new_name lenghth
- * Returns:     0 on success, -1 on failure
- * Programmer:  Mingshi Chen
- *              Friday, August 6, 1999
- * Modifications: Elena Pourmal
- *---------------------------------------------------------------------------*/
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Mingshi Chen
+ *  Friday, August 6, 1999
+ * SOURCE
+*/
 
 int_f
 nh5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name,
     int_f *current_namelen, _fcd new_name, int_f *new_namelen)
+/******/
 {
     char *c_current_name = NULL, *c_new_name = NULL;
     int ret_value = -1;
@@ -317,10 +366,13 @@ DONE:
     return ret_value ;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5glink2_c
- * Purpose:     Call H5Glink2 to link the specified type
- * Inputs:      cur_loc_id - identifier of file or group
+/****if* H5Gf/h5glink2_c
+ * NAME
+ *        h5glink2_c
+ * PURPOSE
+ *     Call H5Glink2 to link the specified type
+ * INPUTS
+ *      cur_loc_id - identifier of file or group
  *              cur_name - name of the existing object for hard link releative
  *                         to cur_loc_id location,
  *                         anything for the soft link
@@ -330,15 +382,20 @@ DONE:
  *              new_name - new name for the object releative to the new_loc_id
  *                         location
  *              new_namelen - new_name lenghth
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, September 25, 2002
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5glink2_c(hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen,
     int_f *link_type, hid_t_f *new_loc_id, _fcd new_name, int_f *new_namelen)
+/******/
 {
     char *c_cur_name = NULL, *c_new_name = NULL;
     int ret_value = -1;
@@ -378,19 +435,25 @@ DONE:
     return ret_value ;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5gunlink_c
- * Purpose:     Call H5Gunlink to remove  the specified name
- * Inputs:      loc_id - identifier of file or group
+/****if* H5Gf/h5gunlink_c
+ * NAME
+ *        h5gunlink_c
+ * PURPOSE
+ *     Call H5Gunlink to remove  the specified name
+ * INPUTS
+ *      loc_id - identifier of file or group
  *              name - name of the object to unlink
- * Returns:     0 on success, -1 on failure
- * Programmer:  Mingshi Chen
- *              Friday, August 6, 1999
- * Modifications: Elena Pourmal
- *---------------------------------------------------------------------------*/
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Mingshi Chen
+ *  Friday, August 6, 1999
+ * SOURCE
+*/
 
 int_f
 nh5gunlink_c(hid_t_f *loc_id, _fcd name, int_f *namelen)
+/******/
 {
     char *c_name = NULL;
     int ret_value = -1;
@@ -414,22 +477,28 @@ DONE:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5gmove_c
- * Purpose:     Call H5Gmove to rename an object within an HDF5 file
- * Inputs:      loc_id - identifier of file or group
+/****if* H5Gf/h5gmove_c
+ * NAME
+ *        h5gmove_c
+ * PURPOSE
+ *     Call H5Gmove to rename an object within an HDF5 file
+ * INPUTS
+ *      loc_id - identifier of file or group
  *              src_name - name of the original object
  *              src_namelen - original name lenghth
  *              dst_name - new name for the object
  *              dst_namelen - new name lenghth
- * Returns:     0 on success, -1 on failure
- * Programmer:  Mingshi Chen
- *              Friday, August 6, 1999
- * Modifications: Elena Pourmal
- *---------------------------------------------------------------------------*/
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Mingshi Chen
+ *  Friday, August 6, 1999
+ * SOURCE
+*/
 
 int_f
 nh5gmove_c(hid_t_f *loc_id, _fcd src_name, int_f *src_namelen, _fcd dst_name, int_f*dst_namelen)
+/******/
 {
     char *c_src_name = NULL, *c_dst_name = NULL;
     int ret_value = -1;
@@ -458,23 +527,30 @@ DONE:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5gmove2_c
- * Purpose:     Call H5Gmove2 to rename an object within an HDF5 file
- * Inputs:      src_loc_id - identifier of file or group
+/****if* H5Gf/h5gmove2_c
+ * NAME
+ *        h5gmove2_c
+ * PURPOSE
+ *     Call H5Gmove2 to rename an object within an HDF5 file
+ * INPUTS
+ *      src_loc_id - identifier of file or group
  *              src_name - name of the original object relative to src_loc_id
  *              src_namelen - original name lenghth
  *              dst_loc_id - new location identifier
  *              dst_name - new name for the object relative to dst_loc_id
  *              dst_namelen - new name lenghth
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
- *              Wednesday, September 25, 2002
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
+ *  Wednesday, September 25, 2002
+ *
+ * SOURCE
+*/
 
 int_f
 nh5gmove2_c(hid_t_f *src_loc_id, _fcd src_name, int_f *src_namelen, hid_t_f *dst_loc_id, _fcd dst_name, int_f*dst_namelen)
+/******/
 {
     char *c_src_name = NULL, *c_dst_name = NULL;
     int ret_value = -1;
@@ -503,23 +579,30 @@ DONE:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5gget_linkval_c
- * Purpose:     Call H5Gget_linkval to return the name of object
- * Inputs:      loc_id - identifier of file or group
+/****if* H5Gf/h5gget_linkval_c
+ * NAME
+ *        h5gget_linkval_c
+ * PURPOSE
+ *     Call H5Gget_linkval to return the name of object
+ * INPUTS
+ *      loc_id - identifier of file or group
  *              name - name of the object that symbolic link points to
  *              namelen - the name lenghth
  *              size - lenghth of retrurned value
- * Outputs:     value - name to be returned
- * Returns:     0 on success, -1 on failure
- * Programmer:  Mingshi Chen
- *              Friday, August 6, 1999
- * Modifications: Elena Pourmal
- *---------------------------------------------------------------------------*/
+ * OUTPUTS
+ *     value - name to be returned
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Mingshi Chen
+ *  Friday, August 6, 1999
+ * SOURCE
+*/
 
 int_f
 nh5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size,
     _fcd value)
+/******/
 {
     char *c_name = NULL;
     char *c_value = NULL;
@@ -560,23 +643,30 @@ DONE:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5gset_comment_c
- * Purpose:     Call H5Oset_comment_by_name to set comments for the specified object
- * Inputs:      loc_id - identifier of file or group
+/****if* H5Gf/h5gset_comment_c
+ * NAME
+ *        h5gset_comment_c
+ * PURPOSE
+ *     Call H5Oset_comment_by_name to set comments for the specified object
+ * INPUTS
+ *      loc_id - identifier of file or group
  *              name - name of object whose comment is to be set or reset
  *              namelen - the name lenghth
  *              comment - the new comment
  *              commentlen - new comment lenghth
- * Returns:     0 on success, -1 on failure
- * Programmer:  Mingshi Chen
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Mingshi Chen
  *              Friday, August 6, 1999
- * Modifications: Elena Pourmal
- *---------------------------------------------------------------------------*/
-
+ * HISTORY
+ * Elena Pourmal
+ * SOURCE
+*/
 int_f
 nh5gset_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment,
     int_f *commentlen)
+/******/
 {
     char *c_name = NULL, *c_comment = NULL;
     int ret_value = -1;
@@ -604,23 +694,28 @@ DONE:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5gget_comment_c
- * Purpose:     Call H5Oget_comment_by_name to retrieve comments for the specified object
- * Inputs:      loc_id - identifier of file or group
+/****if* H5Gf/h5gget_comment_c
+ * NAME
+ *        h5gget_comment_c
+ * PURPOSE
+ *     Call H5Oget_comment_by_name to retrieve comments for the specified object
+ * INPUTS
+ *      loc_id - identifier of file or group
  *              name - name of object whose comment is to be set or reset
  *              namelen - the name lenghth
  *              bufsize - at most bufsize characters
  *              comment - the new comment
- * Returns:     0 on success, -1 on failure
- * Programmer:  Mingshi Chen
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Mingshi Chen
  *              Friday, August 6, 1999
- * Modifications: Elena Pourmal
- *---------------------------------------------------------------------------*/
-
+ * SOURCE
+*/
 int_f
 nh5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize,
     _fcd comment)
+/******/
 {
     char *c_name = NULL, *c_comment = NULL;
     size_t c_bufsize;
@@ -661,22 +756,29 @@ DONE:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5gcreate_anon_c
- * Purpose:     Call H5Gcreate_anon
- * Inputs:
+/****if* H5Gf/h5gcreate_anon_c
+ * NAME
+ *        h5gcreate_anon_c
+ * PURPOSE
+ *     Call H5Gcreate_anon
+ * INPUTS
+ *
  *              loc_id  - Location identifier
  *              gcpl_id - Group creation property list identifier
  *              gapl_id - Group access property list identifier
  *
- * Outputs:     grp_id - group identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
- *              February 15, 2008
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * OUTPUTS
+ *     grp_id - group identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
+ *  February 15, 2008
+ * SOURCE
+*/
 int_f
 nh5gcreate_anon_c(hid_t_f *loc_id, hid_t_f *gcpl_id, hid_t_f *gapl_id, hid_t_f *grp_id)
+/******/
 {
 
   int_f ret_value=0;          /* Return value */
@@ -688,20 +790,27 @@ done:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5gget_create_plist_c
- * Purpose:     Call H5Gget_create_plist
- * Inputs:
+/****if* H5Gf/h5gget_create_plist_c
+ * NAME
+ *        h5gget_create_plist_c
+ * PURPOSE
+ *     Call H5Gget_create_plist
+ * INPUTS
+ *
  *              grp_id - group identifier
  *
- * Outputs:     gcpl_id - Group creation property list identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
- *              February 15, 2008
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * OUTPUTS
+ *     gcpl_id - Group creation property list identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
+ *  February 15, 2008
+ * SOURCE
+*/
 int_f
 nh5gget_create_plist_c(hid_t_f *grp_id, hid_t_f *gcpl_id )
+/******/
 {
   int_f ret_value=0; /* Return value */
 
@@ -713,11 +822,15 @@ done:
 }
 
 
-/*----------------------------------------------------------------------------
- * Name:      h5gget_info_c
- * Purpose:   Call H5Gget_info
- * Inputs:    group_id - Group identifier
- * Outputs:
+/****if* H5Gf/h5gget_info_c
+ * NAME
+ *      h5gget_info_c
+ * PURPOSE
+ *   Call H5Gget_info
+ * INPUTS
+ *    group_id - Group identifier
+ * OUTPUTS
+ *
  *            storage_type - Type of storage for links in group:
  *                             H5G_STORAGE_TYPE_COMPACT: Compact storage
  *                             H5G_STORAGE_TYPE_DENSE: Indexed storage
@@ -727,16 +840,21 @@ done:
  *              max_corder - Current maximum creation order value for group
  *                 mounted - Whether group has a file mounted on it (0 = false, 1 = true)
  *
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
  *              February 15, 2008
- * Modifications:
+ * HISTORY
+ *
  *          - Added 'mounted' paramater
- *            M.S. Breitenfeld
+ *            M. Scot Breitenfeld
  *            July 16, 2008
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5gget_info_c (hid_t_f *group_id, int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted )
+/******/
 {
 
     int_f ret_value = 0;          /* Return value */
@@ -761,10 +879,13 @@ done:
 }
 
 
-/*----------------------------------------------------------------------------
- * Name:      h5gget_info_by_idx_c
- * Purpose:   Call H5Gget_info_by_idx
- * Inputs:
+/****if* H5Gf/h5gget_info_by_idx_c
+ * NAME
+ *      h5gget_info_by_idx_c
+ * PURPOSE
+ *   Call H5Gget_info_by_idx
+ * INPUTS
+ *
  *          loc_id - File or group identifier
  *      group_name - Name of group containing group for which information is to be retrieved
  *   group_namelen - name length
@@ -772,7 +893,8 @@ done:
  *           order - Order of the count in the index
  *               n - Position in the index of the group for which information is retrieved
  *         lapl_id - Link access property list
- * Outputs:
+ * OUTPUTS
+ *
  *            storage_type - Type of storage for links in group:
  *                             H5G_STORAGE_TYPE_COMPACT: Compact storage
  *                             H5G_STORAGE_TYPE_DENSE: Indexed storage
@@ -782,19 +904,23 @@ done:
  *              max_corder - Current maximum creation order value for group
  *                 mounted - Whether group has a file mounted on it (0 = false, 1 = true)
  *
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
  *              February 18, 2008
- * Modifications:
+ * HISTORY
+ *
  *          - Added 'mounted' paramater
- *            M.S. Breitenfeld
+ *            M. Scot Breitenfeld
  *            July 16, 2008
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 		      int_f *index_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id,
 		      int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted )
-
+/******/
 {
   char *c_group_name = NULL;          /* Buffer to hold group name C string */
   int_f ret_value = 0;          /* Return value */
@@ -826,15 +952,19 @@ nh5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:      h5gget_info_by_name_c
- * Purpose:   Call H5Gget_info_by_name
- * Inputs:
+/****if* H5Gf/h5gget_info_by_name_c
+ * NAME
+ *      h5gget_info_by_name_c
+ * PURPOSE
+ *   Call H5Gget_info_by_name
+ * INPUTS
+ *
  *          loc_id - File or group identifier
  *      group_name - Name of group containing group for which information is to be retrieved
  *   group_namelen - name length
  *         lapl_id - Link access property list
- * Outputs:
+ * OUTPUTS
+ *
  *            storage_type - Type of storage for links in group:
  *                             H5G_STORAGE_TYPE_COMPACT: Compact storage
  *                             H5G_STORAGE_TYPE_DENSE: Indexed storage
@@ -844,18 +974,22 @@ nh5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
  *              max_corder - Current maximum creation order value for group
  *                 mounted - Whether group has a file mounted on it (0 = false, 1 = true)
  *
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
  *              February 18, 2008
- * Modifications:
+ * HISTORY
+ *
  *          - Added 'mounted' paramater
- *            M.S. Breitenfeld
+ *            M. Scot Breitenfeld
  *            July 16, 2008
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, hid_t_f *lapl_id,
 		       int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted)
-
+/******/
 {
   char *c_group_name = NULL;          /* Buffer to hold group name C string */
   int_f ret_value = 0;          /* Return value */
@@ -885,4 +1019,3 @@ nh5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen
     HDfree(c_group_name);
   return ret_value;
 }
-

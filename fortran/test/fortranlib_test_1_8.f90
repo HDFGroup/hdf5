@@ -1,3 +1,12 @@
+!****h* root/fortran/test/fortranlib_test_1_8.f90
+!
+! NAME
+!  fortranlib_test_1_8.f90
+!
+! FUNCTION
+!  Basic testing of Fortran API's introduced in 1.8 release.
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,10 +22,8 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-!    Testing Fortran wrappers introduced in 1.8 release.
-!
+!*****
+
 PROGRAM fortranlibtest
 
   USE HDF5
@@ -81,20 +88,22 @@ PROGRAM fortranlibtest
        total_error)
 
   ret_total_error = 0
-  CALL test_genprop_basic_class(cleanup, ret_total_error)
-  CALL write_test_status(ret_total_error, &
-       ' Testing basic generic properties', &
-       total_error)
-
-  ret_total_error = 0
   CALL test_h5s_encode(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, &
        ' Testing dataspace encoding and decoding', &
        total_error)
 
+  ret_total_error = 0
+  CALL test_nbit(cleanup, ret_total_error )
+  CALL write_test_status(ret_total_error, &
+       ' Testing nbit filter', &
+       total_error)
 
-
-!  CALL test_hard_query(group_total_error)
+  ret_total_error = 0
+  CALL test_scaleoffset(cleanup, ret_total_error )
+  CALL write_test_status(ret_total_error, &
+       ' Testing scaleoffset filter', &
+       total_error)
 
   WRITE(*,*)
 
@@ -128,7 +137,6 @@ SUBROUTINE dtransform(cleanup, total_error)
   CHARACTER(LEN=30) :: ptrgetTest_big
 
   INTEGER(SIZE_T) :: size
-
 
   CALL H5Fcreate_f("dtransform.h5", H5F_ACC_TRUNC_F, file_id, error)
   CALL check("dtransform.H5Fcreate_f", error, total_error)
@@ -193,10 +201,6 @@ SUBROUTINE test_genprop_basic_class(cleanup, total_error)
   INTEGER :: error
   INTEGER :: size
   LOGICAL :: flag
-
-  !/* Output message about test being performed */
-
-  !WRITE(*,*) "Testing Basic Generic Property List Class Creation Functionality"
 
   ! /* Create a new generic class, derived from the root of the class hierarchy */
   CALL H5Pcreate_class_f(H5P_ROOT_F, CLASS1_NAME, cid1, error)
@@ -277,13 +281,10 @@ SUBROUTINE test_h5s_encode(cleanup, total_error)
   INTEGER :: rank	!/* LOGICAL rank of dataspace	*/
   INTEGER(size_t) :: sbuf_size=0, scalar_size=0
 
-! Make sure the size is large, need variable length in fortran 2003
+! Make sure the size is large
   CHARACTER(LEN=288) :: sbuf
   CHARACTER(LEN=288) :: scalar_buf
-! F2003  CHARACTER(LEN=:), ALLOCATABLE :: sbuf
 
-!    unsigned char       *sbuf=NULL, *null_sbuf=NULL, *scalar_buf=NULL;
-!    hsize_t		tdims[4];	/* Dimension array to test with */
   INTEGER(hsize_t) :: n ! /* Number of dataspace elements */
 
   INTEGER(hsize_t), DIMENSION(1:3) :: start = (/0, 0, 0/)
@@ -292,20 +293,14 @@ SUBROUTINE test_h5s_encode(cleanup, total_error)
   INTEGER(hsize_t), DIMENSION(1:3) :: BLOCK = (/1, 3, 1/)
 
   INTEGER :: space_type
-
-!    H5S_sel_type        sel_type;
-!    hssize_t            nblocks;
   !
-  !Dataset dimensions
+  ! Dataset dimensions
   !
   INTEGER, PARAMETER :: SPACE1_DIM1= 3,  SPACE1_DIM2=15, SPACE1_DIM3=13
 
   INTEGER(HSIZE_T), DIMENSION(1:3) :: dims1 = (/SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3/)
   INTEGER :: SPACE1_RANK = 3
   INTEGER :: error
-
-  !/* Output message about test being performed */
-  !WRITE(*,*) "Testing Dataspace Encoding and Decoding"
 
   !/*-------------------------------------------------------------------------
   ! * Test encoding and decoding of simple dataspace and hyperslab selection.
@@ -326,7 +321,6 @@ SUBROUTINE test_h5s_encode(cleanup, total_error)
   CALL H5Sencode_f(sid1, sbuf, sbuf_size, error)
   CALL check("H5Sencode", error, total_error)
 
-  ! In fortran 2003 we can allocate the needed character size here
 
   ! /* Try decoding bogus buffer */
 
@@ -347,23 +341,6 @@ SUBROUTINE test_h5s_encode(cleanup, total_error)
   CALL VERIFY("h5sget_simple_extent_npoints_f", INT(n), SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3, &
        total_error)
 
-!!$
-!!$    rank = H5Sget_simple_extent_ndims(decoded_sid1);
-!!$    CHECK(rank, FAIL, "H5Sget_simple_extent_ndims");
-!!$    VERIFY(rank, SPACE1_RANK, "H5Sget_simple_extent_ndims");
-!!$
-!!$    rank = H5Sget_simple_extent_dims(decoded_sid1, tdims, NULL);
-!!$    CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
-!!$    VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0,
-!!$	   "H5Sget_simple_extent_dims");
-!!$
-!!$    /* Verify hyperslabe selection */
-!!$    sel_type = H5Sget_select_type(decoded_sid1);
-!!$    VERIFY(sel_type, H5S_SEL_HYPERSLABS, "H5Sget_select_type");
-!!$
-!!$    nblocks = H5Sget_select_hyper_nblocks(decoded_sid1);
-!!$    VERIFY(nblocks, 2*2*2, "H5Sget_select_hyper_nblocks");
-!!$
   !
   !Close the dataspace for the dataset.
   !
@@ -423,3 +400,289 @@ SUBROUTINE test_h5s_encode(cleanup, total_error)
 
 END SUBROUTINE test_h5s_encode
 
+!-------------------------------------------------------------------------
+! Function:    test_nbit
+!
+! Purpose:     Tests (real) datatype for nbit filter
+!
+! Return:      Success:        0
+!              Failure:        >0
+!
+! Programmer:  M. Scot Breitenfeld
+!              Decemeber 7, 2010
+!
+! Modifications:
+!
+!-------------------------------------------------------------------------
+!
+
+SUBROUTINE test_nbit(cleanup, total_error )
+
+  USE HDF5
+
+  IMPLICIT NONE
+  INTEGER, PARAMETER :: wp = KIND(1.0)
+  LOGICAL, INTENT(IN)  :: cleanup
+  INTEGER, INTENT(INOUT) :: total_error
+  INTEGER(hid_t) :: file
+  
+  INTEGER(hid_t) :: dataset, datatype, space, dc
+  INTEGER(hsize_t), DIMENSION(1:2) :: dims = (/2,5/)
+  INTEGER(hsize_t), DIMENSION(1:2) :: chunk_dim = (/2,5/)
+  ! orig_data[] are initialized to be within the range that can be represented by
+  ! dataset datatype (no precision loss during datatype conversion)
+  !
+  REAL(kind=wp), DIMENSION(1:2,1:5) :: orig_data = RESHAPE( (/188384.00, 19.103516, -1.0831790e9, -84.242188, &
+       5.2045898, -49140.000, 2350.2500, -3.2110596e-1, 6.4998865e-5, -0.0000000/) , (/2,5/) )
+  REAL(kind=wp), DIMENSION(1:2,1:5) :: new_data
+  INTEGER(size_t) :: PRECISION, offset
+  INTEGER :: error
+  LOGICAL :: status
+  INTEGER*8 :: ii
+  INTEGER(size_t) :: i, j
+
+
+  ! check to see if filter is available
+  CALL H5Zfilter_avail_f(H5Z_FILTER_NBIT_F, status, error)
+  IF(.NOT.status)THEN ! We don't have H5Z_FILTER_NBIT_F filter
+     total_error = -1     ! so return
+     RETURN
+  ENDIF
+
+  CALL H5Fcreate_f("nbit.h5", H5F_ACC_TRUNC_F, file, error)
+  CALL check("H5Fcreate_f", error, total_error)
+
+  ! Define dataset datatype (integer), and set precision, offset
+  CALL H5Tcopy_f(H5T_IEEE_F32BE, datatype, error)
+  CALL CHECK(" H5Tcopy_f", error, total_error)
+  CALL H5Tset_fields_f(datatype, 26_size_t, 20_size_t, 6_size_t, 7_size_t, 13_size_t, error)
+  CALL CHECK(" H5Tset_fields_f", error, total_error)
+  offset = 7
+  CALL H5Tset_offset_f(datatype, offset, error)
+  CALL CHECK(" H5Tset_offset_f", error, total_error)
+  PRECISION = 20
+  CALL H5Tset_precision_f(datatype,PRECISION, error)
+  CALL CHECK(" H5Tset_precision_f", error, total_error)
+  
+  CALL H5Tset_size_f(datatype, 4_size_t, error)
+  CALL CHECK(" H5Tset_size_f", error, total_error)
+  
+  CALL H5Tset_ebias_f(datatype, 31_size_t, error)
+  CALL CHECK(" H5Tset_ebias_f", error, total_error)
+ 
+  ! Create the data space 
+  CALL H5Screate_simple_f(2, dims, space, error)
+  CALL CHECK(" H5Screate_simple_f", error, total_error)
+
+  ! USE nbit filter
+  CALL H5Pcreate_f(H5P_DATASET_CREATE_F, dc, error)
+  CALL CHECK(" H5Pcreate_f", error, total_error)
+
+  CALL H5Pset_chunk_f(dc, 2, chunk_dim, error)
+  CALL CHECK(" H5Pset_chunk_f", error, total_error)
+  CALL H5Pset_nbit_f(dc, error)
+  CALL CHECK(" H5Pset_nbit_f", error, total_error)
+
+  ! Create the dataset
+  CALL  H5Dcreate_f(file, "nbit_real", datatype, &
+       space, dataset, error, dc)
+  CALL CHECK(" H5Dcreate_f", error, total_error)
+
+  !----------------------------------------------------------------------
+  ! STEP 1: Test nbit by setting up a chunked dataset and writing
+  ! to it.
+  !----------------------------------------------------------------------
+  !
+  CALL H5Dwrite_f(dataset, H5T_NATIVE_REAL, orig_data, dims, error)
+  CALL CHECK(" H5Dwrite_f", error, total_error)
+
+  !----------------------------------------------------------------------
+  ! STEP 2: Try to read the data we just wrote.
+  !----------------------------------------------------------------------
+  !  
+  CALL H5Dread_f(dataset, H5T_NATIVE_REAL, new_data, dims, error)
+  CALL CHECK(" H5Dread_f", error, total_error)
+
+  ! Check that the values read are the same as the values written
+  ! Assume size of long long = size of double
+  !
+  i_loop: DO i = 1, dims(1)
+     j_loop: DO j = 1, dims(2)
+        IF(.NOT.(orig_data(i,j).EQ.orig_data(i,j))) CYCLE  ! skip IF value is NaN
+        IF(new_data(i,j) .NE. orig_data(i,j))THEN
+           total_error = total_error + 1
+           WRITE(*,'("    Read different values than written.")')
+           WRITE(*,'("    At index ", 2(1X,I0))') i, j
+           EXIT i_loop
+        END IF
+     ENDDO j_loop
+  ENDDO i_loop
+
+  !----------------------------------------------------------------------
+  ! Cleanup
+  !----------------------------------------------------------------------
+  !
+  CALL H5Tclose_f(datatype, error)
+  CALL CHECK(" H5Tclose_f", error, total_error)
+  CALL H5Pclose_f(dc, error)
+  CALL CHECK(" H5Pclose_f", error, total_error)
+  CALL H5Sclose_f(space, error)
+  CALL CHECK(" H5Sclose_f", error, total_error)
+  CALL H5Dclose_f(dataset, error)
+  CALL CHECK(" H5Dclose_f", error, total_error)
+  CALL H5Fclose_f(file, error)
+  CALL CHECK(" H5Fclose_f", error, total_error)
+
+END SUBROUTINE test_nbit
+
+!-------------------------------------------------------------------------
+! Function:    test_scaleoffset
+!
+! Purpose:     Tests the integer datatype for scaleoffset filter
+!              with fill value set
+!
+! Return:      Success:        0
+!              Failure:        >0
+!
+! Programmer:  M. Scot Breitenfeld
+!              Decemeber 11, 2010
+!
+! Modifications:
+!
+!-------------------------------------------------------------------------
+!
+
+SUBROUTINE test_scaleoffset(cleanup, total_error )
+
+  USE HDF5
+
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN)  :: cleanup
+  INTEGER, INTENT(INOUT) :: total_error
+  INTEGER(hid_t) :: file
+
+  INTEGER(hid_t)   :: dataset, datatype, space, mspace, dc
+  INTEGER(hsize_t), DIMENSION(1:2) :: dims = (/2, 5/)
+  INTEGER(hsize_t), DIMENSION(1:2) :: chunk_dim = (/2, 5/)
+  INTEGER, DIMENSION(1:2,1:5) :: orig_data
+  INTEGER, DIMENSION(1:2,1:5) :: new_data
+  INTEGER(hsize_t), DIMENSION(1:2) :: start  ! Start of hyperslab 
+  INTEGER(hsize_t), DIMENSION(1:2) :: stride ! Stride of hyperslab
+  INTEGER(hsize_t), DIMENSION(1:2) :: count  ! BLOCK count
+  INTEGER(hsize_t), DIMENSION(1:2) :: BLOCK  ! BLOCK sizes
+  INTEGER :: fillval
+  INTEGER(size_t) :: j
+  REAL :: x
+  INTEGER :: error
+  LOGICAL :: status
+
+  ! check to see if filter is available
+  CALL H5Zfilter_avail_f(H5Z_FILTER_SCALEOFFSET_F, status, error)
+  IF(.NOT.status)THEN ! We don't have H5Z_FILTER_SCALEOFFSET_F filter
+     total_error = -1       ! so return
+     RETURN
+  ENDIF
+
+  CALL H5Fcreate_f("h5scaleoffset.h5", H5F_ACC_TRUNC_F, file, error)
+  CALL check("H5Fcreate_f", error, total_error)
+
+  CALL H5Tcopy_f(H5T_NATIVE_INTEGER, datatype, error)
+  CALL CHECK(" H5Tcopy_f", error, total_error)
+
+  ! Set order of dataset datatype
+  CALL H5Tset_order_f(datatype, H5T_ORDER_BE_F, error)
+  CALL CHECK(" H5Tset_order_f", error, total_error)
+
+  ! Create the data space for the dataset
+  CALL H5Screate_simple_f(2, dims, space, error)
+  CALL CHECK(" H5Screate_simple_f", error, total_error)
+
+  ! Create the dataset property list  
+  CALL H5Pcreate_f(H5P_DATASET_CREATE_F, dc, error)
+  CALL CHECK(" H5Pcreate_f", error, total_error)
+
+  ! Set fill value 
+  fillval = 10000
+  CALL H5Pset_fill_value_f(dc, H5T_NATIVE_INTEGER, fillval, error)
+  CALL CHECK(" H5Pset_fill_value_f", error, total_error)
+
+  ! Set up to use scaleoffset filter, let library calculate minbits
+  CALL H5Pset_chunk_f(dc, 2, chunk_dim, error)
+  CALL CHECK(" H5Pset_chunk_f", error, total_error)
+  
+  CALL H5Pset_scaleoffset_f(dc, H5Z_SO_INT_F, H5Z_SO_INT_MINBITS_DEFAULT_F, error)
+  CALL CHECK(" H5Pset_scaleoffset_f", error, total_error)
+  
+  ! Create the dataset
+  CALL  H5Dcreate_f(file, "scaleoffset_int", datatype, &
+       space, dataset, error, dc)
+  CALL CHECK(" H5Dcreate_f", error, total_error)
+
+  ! Create the memory data space
+  CALL H5Screate_simple_f(2, dims, mspace, error)
+  CALL CHECK(" H5Screate_simple_f", error, total_error)
+
+  ! Select hyperslab for data to write, using 1x5 blocks,
+  ! (1,1) stride and (1,1) count starting at the position (0,0)
+     
+  start(1:2) = (/0,0/)
+  stride(1:2) = (/1,1/)
+  COUNT(1:2) = (/1,1/)
+  BLOCK(1:2) = (/1,5/)
+
+  CALL H5Sselect_hyperslab_f(mspace, H5S_SELECT_SET_F, start, &
+       count, error, stride, BLOCK)
+  CALL CHECK(" H5Sselect_hyperslab_f", error, total_error)
+
+  CALL RANDOM_SEED()
+  ! Initialize data of hyperslab
+  DO j = 1, dims(2)
+     CALL RANDOM_NUMBER(x)
+     orig_data(1,j) = INT(x*10000.)
+     IF(MOD(j,2).EQ.0)THEN
+        orig_data(1,j) = - orig_data(1,j)
+     ENDIF
+  ENDDO
+
+  !----------------------------------------------------------------------
+  ! STEP 1: Test scaleoffset by setting up a chunked dataset and writing
+  ! to it.
+  !----------------------------------------------------------------------
+  
+  ! Only data in the hyperslab will be written, other value should be fill value 
+  CALL H5Dwrite_f(dataset, H5T_NATIVE_INTEGER, orig_data, dims, error, mspace, mspace, H5P_DEFAULT_F)
+  CALL CHECK(" H5Dwrite_f", error, total_error)
+
+  !----------------------------------------------------------------------
+  ! STEP 2: Try to read the data we just wrote.
+  !----------------------------------------------------------------------
+     
+  ! Read the dataset back
+  
+  CALL H5Dread_f(dataset, H5T_NATIVE_INTEGER, new_data, dims, error, mspace, mspace, H5P_DEFAULT_F)
+  CALL CHECK(" H5Dread_f", error, total_error)
+
+  ! Check that the values read are the same as the values written 
+  DO j = 1, dims(2)
+     IF(new_data(1,j) .NE. orig_data(1,j))THEN
+        total_error = total_error + 1
+        WRITE(*,'("    Read different values than written.")')
+        WRITE(*,'("    At index ", 2(1X,I0))') 1, j
+        EXIT
+     ENDIF
+  ENDDO
+  !----------------------------------------------------------------------
+  ! Cleanup
+  !----------------------------------------------------------------------
+  CALL H5Tclose_f(datatype, error)
+  CALL CHECK(" H5Tclose_f", error, total_error)
+  CALL H5Pclose_f(dc, error)
+  CALL CHECK(" H5Pclose_f", error, total_error)
+  CALL H5Sclose_f(space, error)
+  CALL CHECK(" H5Sclose_f", error, total_error)
+  CALL H5Dclose_f(dataset, error)
+  CALL CHECK(" H5Dclose_f", error, total_error)
+  CALL H5Fclose_f(file, error)
+  CALL CHECK(" H5Fclose_f", error, total_error)
+
+END SUBROUTINE test_scaleoffset

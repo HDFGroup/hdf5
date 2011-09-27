@@ -1,0 +1,1102 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Aff.f90</title>
+<!-- Source: ./src/H5Aff.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5A"></a>
+<a name="robo27"></a><h2>H5A</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  MODULE <strong>H5A</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran interfaces for <strong>H5A</strong> functions. It includes
+  all the functions that are independent on whether the Fortran 2003 functions
+  are enabled or disabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <strong>H5A</strong> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5A2fh5aclose5ff"></a>
+<a name="robo85"></a><h2>h5aclose_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aclose_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Closes the specified attribute.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  attr_id  - attribute identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr   - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces are added for
+  called C functions (it is needed for Windows
+  port).  February 27, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aclose_f</strong><span class="sign">(</span>attr_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id  <span class="sign">!</span> Attribute identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5A2fh5acreate5fby5fname5ff"></a>
+<a name="robo86"></a><h2>h5acreate_by_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5acreate_by_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates an attribute attached to a specified object
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Location or object identifier; may be dataset or group
+  obj_name      - Name, relative to loc_id, of object that attribute is to be attached to
+  attr_name     - Attribute name
+  type_id       - Attribute datatype identifier
+  space_id      - Attribute dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  attr          - an attribute identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  acpl_id       - Attribute creation property list identifier (Currently not used.)
+  aapl_id       - Attribute access property list identifier (Currently not used.)
+  lapl_id       - Link access property list
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5acreate_by_name_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> obj_name<span class="sign">,</span> attr_name<span class="sign">,</span> type_id<span class="sign">,</span> space_id<span class="sign">,</span> attr<span class="sign">,</span> hdferr<span class="sign">,</span> <span class="sign">&amp;</span>
+       acpl_id<span class="sign">,</span> aapl_id<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> loc_id
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> obj_name
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> attr_name
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> type_id
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> space_id
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span>   INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr
+    INTEGER<span class="sign">,</span>          INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr
+
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> OPTIONAL <span class="sign">:</span><span class="sign">:</span> acpl_id
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> OPTIONAL <span class="sign">:</span><span class="sign">:</span> aapl_id
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> OPTIONAL <span class="sign">:</span><span class="sign">:</span> lapl_id
+</pre>
+
+<hr />
+<a name="H5A2fh5acreate5ff"></a>
+<a name="robo87"></a><h2>h5acreate_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5acreate_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a dataset as an attribute of a group, dataset, or named datatype
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - identifier of an object (group, dataset,
+                  or named datatype) attribute is attached to
+  name          - attribute name
+  type_id       - attribute datatype identifier
+  space_id      - attribute dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  attr_id       - attribute identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  acpl_id       - Attribute creation property list identifier
+  appl_id       - Attribute access property list identifier
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces are added for
+  called C functions (it is needed for Windows
+  port).  February 27, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5acreate_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> type_id<span class="sign">,</span> space_id<span class="sign">,</span> attr_id<span class="sign">,</span> <span class="sign">&amp;</span>
+                                 hdferr<span class="sign">,</span> acpl_id<span class="sign">,</span> aapl_id <span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> Object identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Attribute name
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id  <span class="sign">!</span> Attribute datatype identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Attribute dataspace identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id <span class="sign">!</span> Attribute identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code<span class="sign">:</span>
+                                           <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+</pre>
+
+<hr />
+<a name="H5A2fh5adelete5fby5fidx5ff"></a>
+<a name="robo88"></a><h2>h5adelete_by_idx_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5adelete_by_idx_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Deletes an attribute from an object according to index order
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Location or object identifier; may be dataset or group
+  obj_name      - Name of object, relative to location, from which attribute is to be removed
+  idx_type      - Type of index; Possible values are:
+                   H5_INDEX_UNKNOWN_F = -1  - Unknown index type
+                   H5_INDEX_NAME_F          - Index on names
+                   H5_INDEX_CRT_ORDER_F     - Index on creation order
+                   H5_INDEX_N_F             - Number of indices defined
+
+  order         - Order in which to iterate over index; Possible values are:
+                   H5_ITER_UNKNOWN_F    - Unknown order
+                   H5_ITER_INC_F        - Increasing order
+                   H5_ITER_DEC_F        - Decreasing order
+                   H5_ITER_NATIVE_F     - No particular order, whatever is fastest
+                   H5_ITER_N_F          - Number of iteration orders
+
+  n             - Offset within index
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Link access property list
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5adelete_by_idx_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> obj_name<span class="sign">,</span> idx_type<span class="sign">,</span> order<span class="sign">,</span> n<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id      <span class="sign">!</span> Identifer <span class="keyword">for</span> object to which attribute is attached
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_name  <span class="sign">!</span> Name of object<span class="sign">,</span> relative to location<span class="sign">,</span>
+                                              <span class="sign">!</span>  from which attribute is to be removed
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> idx_type           <span class="sign">!</span> Type of index<span class="sign">;</span> Possible values are<span class="sign">:</span>
+                                              <span class="sign">!</span>    H5_INDEX_UNKNOWN_F   <span class="sign">-</span> Unknown index type
+                                              <span class="sign">!</span>    H5_INDEX_NAME_F      <span class="sign">-</span> Index on names
+                                              <span class="sign">!</span>    H5_INDEX_CRT_ORDER_F <span class="sign">-</span> Index on creation order
+                                              <span class="sign">!</span>    H5_INDEX_N_F       <span class="sign">-</span> Number of indices defined
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> order              <span class="sign">!</span> Order in which to iterate over index<span class="sign">;</span> Possible values are<span class="sign">:</span>
+                                              <span class="sign">!</span>    H5_ITER_UNKNOWN_F  <span class="sign">-</span> Unknown order
+                                              <span class="sign">!</span>    H5_ITER_INC_F      <span class="sign">-</span> Increasing order
+                                              <span class="sign">!</span>    H5_ITER_DEC_F      <span class="sign">-</span> Decreasing order
+                                              <span class="sign">!</span>    H5_ITER_NATIVE_F   <span class="sign">-</span> No particular order<span class="sign">,</span> whatever is fastest
+                                              <span class="sign">!</span>    H5_ITER_N_F      <span class="sign">-</span> Number of iteration orders
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> n         <span class="sign">!</span> Offset within index
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code<span class="sign">:</span>
+                                           <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list
+</pre>
+
+<hr />
+<a name="H5A2fh5adelete5fby5fname5ff"></a>
+<a name="robo89"></a><h2>h5adelete_by_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5adelete_by_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Removes an attribute from a specified location
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Identifer for object to which attribute is attached
+  obj_name      - Name of attribute to open
+  attr_name     - Attribute access property list
+  lapl_id       - Link access property list
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5adelete_by_name_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> obj_name<span class="sign">,</span> attr_name<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id      <span class="sign">!</span> Identifer <span class="keyword">for</span> object to which attribute is attached
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_name  <span class="sign">!</span> Name of object<span class="sign">,</span> relative to location<span class="sign">,</span>
+                                              <span class="sign">!</span>  from which attribute is to be removed
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_name <span class="sign">!</span> Name of attribute to delete
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr            <span class="sign">!</span> Error code<span class="sign">:</span>
+                                              <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list
+</pre>
+
+<hr />
+<a name="H5A2fh5adelete5ff"></a>
+<a name="robo90"></a><h2>h5adelete_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5adelete_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Deletes an attribute of an object (group, dataset or
+  named datatype)
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - object identifier
+  name          - attribute name
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces are added for
+  called C functions (it is needed for Windows
+  port).  February 27, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5adelete_f</strong><span class="sign">(</span>obj_id<span class="sign">,</span> name<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id  <span class="sign">!</span> Object identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span> Attribute name
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5A2fH5Aexists5fby5fname5ff"></a>
+<a name="robo91"></a><h2>H5Aexists_by_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Aexists_by_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines whether an attribute with a given name exists on an object
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Location identifier
+  obj_name      - Object name either relative to loc_id, absolute from the fileâ€™s root group, or '.' (a dot)
+  attr_name     - Attribute name
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  attr_exists   - attribute exists status
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Link access property list identifier
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5aexists_by_name_f<span class="sign">(</span>loc_id<span class="sign">,</span> obj_name<span class="sign">,</span> attr_name<span class="sign">,</span> attr_exists<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id     <span class="sign">!</span> Location identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_name <span class="sign">!</span> Object name either relative to loc_id<span class="sign">,</span>
+                                             <span class="sign">!</span> absolute from the file<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s root group<span class="sign">,</span> or <span class="squote">'.'</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_name <span class="sign">!</span> Attribute name
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_exists <span class="sign">!</span> <span class="sign">.</span>TRUE<span class="sign">.</span> <span class="keyword">if</span> exists<span class="sign">,</span> <span class="sign">.</span>FALSE<span class="sign">.</span> otherwise
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr      <span class="sign">!</span> Error code<span class="sign">:</span>
+                                        <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list identifier
+</pre>
+
+<hr />
+<a name="H5A2fH5Aexists5ff"></a>
+<a name="robo92"></a><h2>H5Aexists_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Aexists_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines whether an attribute with a given name exists on an object
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - Object identifier
+  attr_name     - Attribute name
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  attr_exists   - attribute exists status
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5aexists_f<span class="sign">(</span>obj_id<span class="sign">,</span> attr_name<span class="sign">,</span> attr_exists<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id      <span class="sign">!</span> Object identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_name <span class="sign">!</span> Attribute name
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_exists  <span class="sign">!</span> <span class="sign">.</span>TRUE<span class="sign">.</span> <span class="keyword">if</span> exists<span class="sign">,</span> <span class="sign">.</span>FALSE<span class="sign">.</span> otherwise
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code<span class="sign">:</span>
+                                         <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+</pre>
+
+<hr />
+<a name="H5A2fh5aget5fcreate5fplist5ff"></a>
+<a name="robo93"></a><h2>h5aget_create_plist_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aget_create_plist_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets an attribute creation property list identifier
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  attr_id          - Identifier of the attribute
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  creation_prop_id - Identifier for the attributeâ€™s creation property
+  hdferr           - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aget_create_plist_f</strong><span class="sign">(</span>attr_id<span class="sign">,</span> creation_prop_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id  <span class="sign">!</span> Identifier of the attribute
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> creation_prop_id   <span class="sign">!</span> Identifier <span class="keyword">for</span> the attribute<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s creation property
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code
+                                         <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+</pre>
+
+<hr />
+<a name="H5A2fh5aget5finfo5fby5fidx5ff"></a>
+<a name="robo94"></a><h2>h5aget_info_by_idx_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aget_info_by_idx_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves attribute information, by attribute index position
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Location of object to which attribute is attached
+  obj_name      - Name of object to which attribute is attached, relative to location
+  idx_type      - Type of index
+  order         - Index traversal order
+  n             - Attributeâ€™s position in index
+
+ OUTPUTS  NOTE: In C it is defined as a structure: H5A_info_t
+  corder_valid  - indicates whether the creation order data is valid for this attribute
+  corder        - is a positive integer containing the creation order of the attribute
+  cset          - indicates the character set used for the attributeâ€™s name
+  data_size     - indicates the size, in the number of characters, of the attribute
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Link access property list
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aget_info_by_idx_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> obj_name<span class="sign">,</span> idx_type<span class="sign">,</span> order<span class="sign">,</span> n<span class="sign">,</span> <span class="sign">&amp;</span>
+       f_corder_valid<span class="sign">,</span> corder<span class="sign">,</span> cset<span class="sign">,</span> data_size<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id      <span class="sign">!</span> Object identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_name  <span class="sign">!</span> Name of object to which attribute is attached
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> idx_type           <span class="sign">!</span> Type of index<span class="sign">;</span> Possible values are<span class="sign">:</span>
+                                              <span class="sign">!</span>    H5_INDEX_UNKNOWN_F   <span class="sign">-</span> Unknown index type
+                                              <span class="sign">!</span>    H5_INDEX_NAME_F      <span class="sign">-</span> Index on names
+                                              <span class="sign">!</span>    H5_INDEX_CRT_ORDER_F <span class="sign">-</span> Index on creation order
+                                              <span class="sign">!</span>    H5_INDEX_N_F       <span class="sign">-</span> Number of indices defined
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> order              <span class="sign">!</span> Order in which to iterate over index<span class="sign">;</span> Possible values are<span class="sign">:</span>
+                                              <span class="sign">!</span>    H5_ITER_UNKNOWN_F  <span class="sign">-</span> Unknown order
+                                              <span class="sign">!</span>    H5_ITER_INC_F      <span class="sign">-</span> Increasing order
+                                              <span class="sign">!</span>    H5_ITER_DEC_F      <span class="sign">-</span> Decreasing order
+                                              <span class="sign">!</span>    H5_ITER_NATIVE_F   <span class="sign">-</span> No particular order<span class="sign">,</span> whatever is fastest
+
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> n         <span class="sign">!</span> Attribute<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s position in index
+
+
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> f_corder_valid <span class="sign">!</span> Indicates whether the creation order data is valid <span class="keyword">for</span> this attribute
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> corder <span class="sign">!</span> Is a positive integer containing the creation order of the attribute
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> cset   <span class="sign">!</span> Indicates the character set used <span class="keyword">for</span> the attribute<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s name
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> data_size <span class="sign">!</span> Indicates the size<span class="sign">,</span> in the number of characters<span class="sign">,</span> of the attribute
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code<span class="sign">:</span>
+                                         <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id  <span class="sign">!</span> Link access property list
+</pre>
+
+<hr />
+<a name="H5A2fh5aget5finfo5fby5fname5ff"></a>
+<a name="robo95"></a><h2>h5aget_info_by_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aget_info_by_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves attribute information, by attribute name
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Location of object to which attribute is attached
+  obj_name      - Name of object to which attribute is attached, relative to location
+  attr_name     - Attribute name
+
+ OUTPUTS  NOTE: In C it is defined as a structure: H5A_info_t
+  corder_valid  - indicates whether the creation order data is valid for this attribute
+  corder        - is a positive integer containing the creation order of the attribute
+  cset          - indicates the character set used for the attributeâ€™s name
+  data_size     - indicates the size, in the number of characters, of the attribute
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Link access property list
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aget_info_by_name_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> obj_name<span class="sign">,</span> attr_name<span class="sign">,</span> <span class="sign">&amp;</span>
+       f_corder_valid<span class="sign">,</span> corder<span class="sign">,</span> cset<span class="sign">,</span> data_size<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id    <span class="sign">!</span> Object identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_name <span class="sign">!</span> Name of object to which attribute is attached
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_name <span class="sign">!</span> Attribute name
+
+
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> f_corder_valid <span class="sign">!</span> Indicates whether the creation order data is valid <span class="keyword">for</span> this attribute
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> corder <span class="sign">!</span> Is a positive integer containing the creation order of the attribute
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> cset <span class="sign">!</span> Indicates the character set used <span class="keyword">for</span> the attribute<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s name
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> data_size   <span class="sign">!</span> Indicates the size<span class="sign">,</span> in the number of characters<span class="sign">,</span> of the attribute
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code<span class="sign">:</span>
+                                           <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id  <span class="sign">!</span> Link access property list
+</pre>
+
+<hr />
+<a name="H5A2fh5aget5finfo5ff"></a>
+<a name="robo96"></a><h2>h5aget_info_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aget_info_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves attribute information, by attribute identifier
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  attr_id       - attribute identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  NOTE: In C it is defined as a structure: H5A_info_t
+
+  corder_valid  - indicates whether the creation order data is valid for this attribute
+  corder        - is a positive integer containing the creation order of the attribute
+  cset          - indicates the character set used for the attributeâ€™s name
+  data_size     - indicates the size, in the number of characters, of the attribute
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aget_info_f</strong><span class="sign">(</span>attr_id<span class="sign">,</span> f_corder_valid<span class="sign">,</span> corder<span class="sign">,</span> cset<span class="sign">,</span> data_size<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id  <span class="sign">!</span> Attribute identifier
+
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> f_corder_valid <span class="sign">!</span> Indicates whether the creation order data is valid <span class="keyword">for</span> this attribute
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> corder <span class="sign">!</span> Is a positive integer containing the creation order of the attribute
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> cset   <span class="sign">!</span> Indicates the character set used <span class="keyword">for</span> the attribute<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s name
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> data_size <span class="sign">!</span> Indicates the size<span class="sign">,</span> in the number of characters<span class="sign">,</span> of the attribute
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code<span class="sign">:</span>
+                                         <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+</pre>
+
+<hr />
+<a name="H5A2fh5aget5fname5fby5fidx5ff"></a>
+<a name="robo97"></a><h2>h5aget_name_by_idx_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aget_name_by_idx_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets an attribute name, by attribute index position.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Location of object to which attribute is attached
+  obj_name      - Name of object to which attribute is attached, relative to location
+  idx_type      - Type of index; Possible values are:
+                   H5_INDEX_UNKNOWN_F = -1  - Unknown index type
+                   H5_INDEX_NAME_F          - Index on names
+                   H5_INDEX_CRT_ORDER_F     - Index on creation order
+                   H5_INDEX_N_F             - Number of indices defined
+
+  order         - Order in which to iterate over index; Possible values are:
+                   H5_ITER_UNKNOWN_F    - Unknown order
+                   H5_ITER_INC_F        - Increasing order
+                   H5_ITER_DEC_F        - Decreasing order
+                   H5_ITER_NATIVE_F     - No particular order, whatever is fastest
+                   H5_ITER_N_F          - Number of iteration orders
+  order         - Index traversal order
+  n             - Attributeâ€™s position in index
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  name          - Attribute name
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Link access property list
+  size          - Size, in bytes, of attribute name
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aget_name_by_idx_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> obj_name<span class="sign">,</span> idx_type<span class="sign">,</span> order<span class="sign">,</span> <span class="sign">&amp;</span>
+       n<span class="sign">,</span> name<span class="sign">,</span> hdferr<span class="sign">,</span> size<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id      <span class="sign">!</span> Identifer <span class="keyword">for</span> object to which attribute is attached
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_name  <span class="sign">!</span> Name of object<span class="sign">,</span> relative to location<span class="sign">,</span>
+                                              <span class="sign">!</span>  from which attribute is to be removed <span class="sign">*</span>TEST<span class="sign">*</span> check NULL
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> idx_type <span class="sign">!</span> Type of index<span class="sign">;</span> Possible values are<span class="sign">:</span>
+                                    <span class="sign">!</span>    H5_INDEX_UNKNOWN_F   <span class="sign">-</span> Unknown index type
+                                    <span class="sign">!</span>    H5_INDEX_NAME_F       <span class="sign">-</span> Index on names
+                                    <span class="sign">!</span>    H5_INDEX_CRT_ORDER_F  <span class="sign">-</span> Index on creation order
+                                    <span class="sign">!</span>    H5_INDEX_N_F         <span class="sign">-</span> Number of indices defined
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> order    <span class="sign">!</span> Order in which to iterate over index<span class="sign">;</span> Possible values are<span class="sign">:</span>
+                                    <span class="sign">!</span>    H5_ITER_UNKNOWN_F   <span class="sign">-</span> Unknown order
+                                    <span class="sign">!</span>    H5_ITER_INC_F      <span class="sign">-</span> Increasing order
+                                    <span class="sign">!</span>    H5_ITER_DEC_F       <span class="sign">-</span> Decreasing order
+                                    <span class="sign">!</span>    H5_ITER_NATIVE_F    <span class="sign">-</span> No particular order<span class="sign">,</span> whatever is fastest
+                                    <span class="sign">!</span>    H5_ITER_N_F        <span class="sign">-</span> Number of iteration orders
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> n <span class="sign">!</span>  Attribute<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s position in index
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name <span class="sign">!</span> Attribute name
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr    <span class="sign">!</span> Error code<span class="sign">:</span>
+                                      <span class="sign">!</span> Returns attribute name size<span class="sign">,</span>
+                                      <span class="sign">!</span> <span class="sign">-</span>1 <span class="keyword">if</span> fail
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size  <span class="sign">!</span> Indicates the size<span class="sign">,</span> in the number of characters<span class="sign">,</span> 
+                                                    <span class="sign">!</span> of the attribute
+</pre>
+
+<hr />
+<a name="H5A2fh5aget5fname5ff"></a>
+<a name="robo98"></a><h2>h5aget_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aget_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets an attribute name.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  attr_id       - attribute identifier
+  size          - size of a buffer to read name in
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  buf           - buffer to read name in
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces are added for
+  called C functions (it is needed for Windows
+  port).  February 27, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aget_name_f</strong><span class="sign">(</span>attr_id<span class="sign">,</span> size<span class="sign">,</span> buf<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id  <span class="sign">!</span> Attribute identifier
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size    <span class="sign">!</span> Buffer size
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>INOUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> buf <span class="sign">!</span> Buffer to hold attribute name
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr <span class="sign">!</span> Error code<span class="sign">:</span>
+                                   <span class="sign">!</span> name length is successful<span class="sign">,</span> <span class="sign">-</span>1 <span class="keyword">if</span> fail
+</pre>
+
+<hr />
+<a name="H5A2fh5aget5fnum5fattrs5ff"></a>
+<a name="robo99"></a><h2>h5aget_num_attrs_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aget_num_attrs_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines the number of attributes attached to an object.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - object (group, dataset, or named datatype)
+  identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  attr_num      - number of attributes attached to the object
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces are added for
+  called C functions (it is needed for Windows
+  port).  February 27, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aget_num_attrs_f</strong><span class="sign">(</span>obj_id<span class="sign">,</span> attr_num<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id  <span class="sign">!</span> Object identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_num      <span class="sign">!</span> Number of attributes of the object
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5A2fh5aget5fspace5ff"></a>
+<a name="robo100"></a><h2>h5aget_space_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aget_space_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets a copy of the dataspace for an attribute.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  attr_id       - attribute identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  space_id      - attribite dataspace identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces are added for
+  called C functions (it is needed for Windows
+  port).  February 27, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aget_space_f</strong><span class="sign">(</span>attr_id<span class="sign">,</span> space_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id   <span class="sign">!</span> Attribute identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Attribute dataspace identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5A2fh5aget5fstorage5fsize5ff"></a>
+<a name="robo101"></a><h2>h5aget_storage_size_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aget_storage_size_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the amount of storage required for an attribute.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  attr_id       - attribute identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  size          - attribute storage size
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aget_storage_size_f</strong><span class="sign">(</span>attr_id<span class="sign">,</span> size<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id  <span class="sign">!</span> Attribute identifier
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size  <span class="sign">!</span> Attribute storage requirement
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5A2fh5aget5ftype5ff"></a>
+<a name="robo102"></a><h2>h5aget_type_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aget_type_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets an attribute datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  attr_id       - attribute identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  type_id       - attribute datatype identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces are added for
+  called C functions (it is needed for Windows
+  port).  February 27, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aget_type_f</strong><span class="sign">(</span>attr_id<span class="sign">,</span> type_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id  <span class="sign">!</span> Attribute identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Attribute datatype identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5A2fh5aopen5fby5fidx5ff"></a>
+<a name="robo103"></a><h2>h5aopen_by_idx_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aopen_by_idx_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens an existing attribute that is attached to an object specified by location and name
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Location of object to which attribute is attached
+  obj_name      - Name of object to which attribute is attached, relative to location
+  idx_type      - Type of index
+  order         - Index traversal order
+  n             - Attributeâ€™s position in index
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  aapl_id       - Attribute access property list
+  lapl_id       - Link access property list
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aopen_by_idx_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> obj_name<span class="sign">,</span> idx_type<span class="sign">,</span> order<span class="sign">,</span> n<span class="sign">,</span> attr_id<span class="sign">,</span> hdferr<span class="sign">,</span> aapl_id<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id      <span class="sign">!</span> Object identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_name  <span class="sign">!</span> Name of object to which attribute is attached
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> idx_type           <span class="sign">!</span> Type of index<span class="sign">;</span> Possible values are<span class="sign">:</span>
+                                              <span class="sign">!</span>    H5_INDEX_UNKNOWN_F   <span class="sign">-</span> Unknown index type
+                                              <span class="sign">!</span>    H5_INDEX_NAME_F      <span class="sign">-</span> Index on names
+                                              <span class="sign">!</span>    H5_INDEX_CRT_ORDER_F <span class="sign">-</span> Index on creation order
+                                              <span class="sign">!</span>    H5_INDEX_N_F       <span class="sign">-</span> Number of indices defined
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> order              <span class="sign">!</span> Order in which to iterate over index<span class="sign">;</span> Possible values are<span class="sign">:</span>
+                                              <span class="sign">!</span>    H5_ITER_UNKNOWN_F  <span class="sign">-</span> Unknown order
+                                              <span class="sign">!</span>    H5_ITER_INC_F      <span class="sign">-</span> Increasing order
+                                              <span class="sign">!</span>    H5_ITER_DEC_F      <span class="sign">-</span> Decreasing order
+                                              <span class="sign">!</span>    H5_ITER_NATIVE_F   <span class="sign">-</span> No particular order<span class="sign">,</span> whatever is fastest
+
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> n       <span class="sign">!</span> Attribute<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s position in index
+
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id  <span class="sign">!</span> Attribute identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code<span class="sign">:</span>
+                                            <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> aapl_id  <span class="sign">!</span> Attribute access property list
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id  <span class="sign">!</span> Link access property list
+</pre>
+
+<hr />
+<a name="H5A2fH5Aopen5fby5fname5ff"></a>
+<a name="robo104"></a><h2>H5Aopen_by_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Aopen_by_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens an attribute for an object by object name and attribute name.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Location from which to find object to which attribute is attached
+  obj_name      - Object name either relative to loc_id, absolute from the fileâ€™s root group, or '.' (a dot)
+  attr_name     - Attribute name
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  attr_id       - attribute identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  aapl_id       - Attribute access property list (Currently unused; should be passed in as H5P_DEFAULT.)
+  lapl_id       - Link access property list identifier
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5aopen_by_name_f<span class="sign">(</span>loc_id<span class="sign">,</span> obj_name<span class="sign">,</span> attr_name<span class="sign">,</span> attr_id<span class="sign">,</span> hdferr<span class="sign">,</span> aapl_id<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id    <span class="sign">!</span> Location identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_name <span class="sign">!</span> Object name either relative to loc_id<span class="sign">,</span>
+                                             <span class="sign">!</span> absolute from the file<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s root group<span class="sign">,</span> or <span class="squote">'.'</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_name <span class="sign">!</span> Attribute name
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id <span class="sign">!</span> Attribute identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code<span class="sign">:</span>
+                                           <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> aapl_id <span class="sign">!</span> Attribute access property list
+                                                    <span class="sign">!</span> <span class="sign">(</span>Currently unused<span class="sign">;</span> should be passed in as H5P_DEFAULT_F<span class="sign">)</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list identifier
+</pre>
+
+<hr />
+<a name="H5A2fh5aopen5ff"></a>
+<a name="robo105"></a><h2>h5aopen_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aopen_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens an attribute for an object specified by object
+  identifier and attribute name
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - Identifer for object to which attribute is attached
+  attr_name     - Name of attribute to open
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  attr_id       - attribute identifier
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  aapl_id       - Attribute access property list
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aopen_f</strong><span class="sign">(</span>obj_id<span class="sign">,</span> attr_name<span class="sign">,</span> attr_id<span class="sign">,</span> hdferr<span class="sign">,</span> aapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id      <span class="sign">!</span> Object identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_name <span class="sign">!</span> Attribute name
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id    <span class="sign">!</span> Attribute identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr            <span class="sign">!</span> Error code
+                                              <span class="sign">!</span>   Success<span class="sign">:</span>  0
+                                              <span class="sign">!</span>   Failure<span class="sign">:</span> <span class="sign">-</span>1
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> aapl_id     <span class="sign">!</span> Attribute access property list
+</pre>
+
+<hr />
+<a name="H5A2fh5aopen5fidx5ff"></a>
+<a name="robo106"></a><h2>h5aopen_idx_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aopen_idx_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens the attribute specified by its index.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - identifier of a group, dataset, or named
+                  datatype an attribute to be attached to
+  index         - index of the attribute to open (zero-based)
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  attr_id       - attribute identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces are added for
+  called C functions (it is needed for Windows
+  port).  February 27, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aopen_idx_f</strong><span class="sign">(</span>obj_id<span class="sign">,</span> index<span class="sign">,</span> attr_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id    <span class="sign">!</span> Object identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> index            <span class="sign">!</span> Attribute index
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id  <span class="sign">!</span> Attribute identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5A2fh5aopen5fname5ff"></a>
+<a name="robo107"></a><h2>h5aopen_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aopen_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens an attribute specified by name.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - identifier of a group, dataset, or named
+                  datatype atttribute to be attached to
+  name          - attribute name
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  attr_id       - attribute identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces are added for
+  called C functions (it is needed for Windows
+  port).  February 27, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5aopen_name_f</strong><span class="sign">(</span>obj_id<span class="sign">,</span> name<span class="sign">,</span> attr_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id    <span class="sign">!</span> Object identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name    <span class="sign">!</span> Attribute name
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> attr_id  <span class="sign">!</span> Attribute identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5A2fh5arename5fby5fname5ff"></a>
+<a name="robo109"></a><h2>h5arename_by_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5arename_by_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Renames an attribute
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Location or object identifier; may be dataset or group
+  obj_name      - Name of object, relative to location,
+                  whose attribute is to be renamed
+  old_attr_name - Prior attribute name
+  new_attr_name - New attribute name
+  lapl_id       - Link access property list identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5arename_by_name_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> obj_name<span class="sign">,</span> old_attr_name<span class="sign">,</span> new_attr_name<span class="sign">,</span> <span class="sign">&amp;</span>
+        hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id    <span class="sign">!</span> Object identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_name  <span class="sign">!</span> Name of object<span class="sign">,</span> relative to location<span class="sign">,</span>
+                                              <span class="sign">!</span>  whose attribute is to be renamed
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> old_attr_name <span class="sign">!</span> Prior attribute name
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> new_attr_name <span class="sign">!</span> New attribute name
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code<span class="sign">:</span>
+                                         <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list identifier
+</pre>
+
+<hr />
+<a name="H5A2fh5arename5ff"></a>
+<a name="robo110"></a><h2>h5arename_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo27">H5A</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5arename_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Renames an attribute
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Location or object identifier; may be dataset or group
+  old_attr_name - Prior attribute name
+  new_attr_name - New attribute name
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  January, 2008
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  N/A
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5arename_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> old_attr_name<span class="sign">,</span> new_attr_name<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id    <span class="sign">!</span> Object identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> old_attr_name <span class="sign">!</span> Prior attribute name
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> new_attr_name <span class="sign">!</span> New attribute name
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code<span class="sign">:</span>
+                                         <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Aff.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

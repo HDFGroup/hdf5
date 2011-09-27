@@ -120,6 +120,17 @@ SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF
 H5_SET_LIB_OPTIONS (${HDF5_F90_C_LIB_TARGET} ${HDF5_F90_C_LIB_NAME} ${LIB_TYPE})
 
 #-----------------------------------------------------------------------------
+# Fortran 2003 standard
+#-----------------------------------------------------------------------------
+IF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+  # default real is 4 bytes, so include double signatures
+  SET (F_STATUS "_F03")
+ELSE (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+  # default real is 8 bytes, so exclude double signatures
+  SET (F_STATUS "_F90")
+ENDIF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+
+#-----------------------------------------------------------------------------
 # Fortran Real Size
 #-----------------------------------------------------------------------------
 IF (FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
@@ -139,6 +150,7 @@ SET (f90_F_SRCS
 
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90global.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5_ff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5_ff.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff.f90
@@ -153,6 +165,14 @@ SET (f90_F_SRCS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Sff.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Tff.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zff.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Eff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Lff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Off${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Pff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Rff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Tff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5_DBLE_Interface${F_DBLE}.f90
 )
 
