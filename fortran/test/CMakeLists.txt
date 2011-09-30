@@ -99,6 +99,31 @@ SET_TARGET_PROPERTIES (testhdf5_fortran_1_8 PROPERTIES LINKER_LANGUAGE Fortran)
 
 ADD_TEST (NAME testhdf5_fortran_1_8 COMMAND $<TARGET_FILE:testhdf5_fortran_1_8>)
 
+#-- Adding test for fortranlib_test_F03
+IF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+  ADD_EXECUTABLE (fortranlib_test_F03
+      fortranlib_test_F03.f90
+      tH5F.f90
+      tH5E_F03.f90
+      tH5L_F03.f90
+      tH5P_F03.f90
+      tH5T_F03.f90
+  )
+  TARGET_NAMING (fortranlib_test_F03 ${LIB_TYPE})
+  TARGET_FORTRAN_WIN_PROPERTIES (fortranlib_test_F03 "")
+  TARGET_LINK_LIBRARIES (fortranlib_test_F03 
+      ${HDF5_F90_TEST_LIB_TARGET}
+      ${HDF5_F90_LIB_TARGET}
+      ${HDF5_LIB_TARGET}
+  )
+  IF (WIN32 AND MSVC)
+    TARGET_LINK_LIBRARIES (fortranlib_test_F03 "ws2_32.lib")
+  ENDIF (WIN32 AND MSVC)
+  SET_TARGET_PROPERTIES (fortranlib_test_F03 PROPERTIES LINKER_LANGUAGE Fortran)
+
+  ADD_TEST (NAME fortranlib_test_F03 COMMAND $<TARGET_FILE:fortranlib_test_F03>)
+ENDIF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+
 #-- Adding test for fflush1
 ADD_EXECUTABLE (fflush1 fflush1.f90)
 TARGET_NAMING (fflush1 ${LIB_TYPE})
