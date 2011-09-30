@@ -159,12 +159,11 @@ int main(void)
 {
   int FoundIntSize[4];
   int FoundIntSizeKind[4];
-  int FoundRealSize[4];
-  int FoundRealSizeKind[4];
+  int FoundRealSize[3];
+  int FoundRealSizeKind[3];
   int i,j,flag;
   char chrA[20],chrB[20];
   int H5_C_HAS_REAL_NATIVE_16;
-  int H5_C_HAS_REAL_NATIVE_12;
 
   /* Open target files */
   c_header = fopen(CFILE, "w");
@@ -172,8 +171,6 @@ int main(void)
 
   /* Default is C has 16 byte float */
   H5_C_HAS_REAL_NATIVE_16 = 1;
-  /* Default is C has 12 byte float */
-  H5_C_HAS_REAL_NATIVE_12 = 1;
 
   /* Write copyright, boilerplate to both files */
   initCfile();
@@ -265,21 +262,6 @@ int main(void)
      return -1;
    }
 #endif /*H5_FORTRAN_HAS_REAL_NATIVE_8_KIND*/
-
-
-#if defined H5_FORTRAN_HAS_REAL_NATIVE_12_KIND || defined H5_FORTRAN_HAS_REAL_12_KIND
-  if(sizeof(long double) == 12)
-    writeFloatTypedef("long double", 12);
-  else if(sizeof(double) == 12)
-   writeFloatTypedef("double", 12);
-  else if(sizeof(float) == 12)
-   writeFloatTypedef("float", 12);
-  else /*C has no 12 byte float so disable it in Fortran*/
-   { printf("warning: Fortran REAL is 12 bytes, no corresponding C floating type\n");
-     printf("         Disabling Fortran 12 byte REALs\n");
-     H5_C_HAS_REAL_NATIVE_12 = 0;
-   }
-#endif /*H5_FORTRAN_HAS_REAL_NATIVE_12_KIND*/
 
 #if defined H5_FORTRAN_HAS_REAL_NATIVE_16_KIND || defined H5_FORTRAN_HAS_REAL_16_KIND
   if(sizeof(long double) == 16)
@@ -439,7 +421,7 @@ int main(void)
 	}
     }
 
-  /* real_4, real_8, real_12, real_16 */
+  /* real_4, real_8, real_16 */
 
 /* Defined different KINDs of reals:                          */
 /* if the REAL kind is not available then we assign           */
@@ -448,8 +430,7 @@ int main(void)
 
     FoundRealSize[0] = -4;
     FoundRealSize[1] = -8;
-    FoundRealSize[2] = -12;
-    FoundRealSize[3] = -16;
+    FoundRealSize[2] = -16;
 
 #if defined H5_FORTRAN_HAS_REAL_4_KIND
     FoundRealSize[0] = 4;
@@ -459,20 +440,15 @@ int main(void)
     FoundRealSize[1] = 8;
     FoundRealSizeKind[1] = H5_FORTRAN_HAS_REAL_8_KIND;
 #endif
-#if defined H5_FORTRAN_HAS_REAL_12_KIND
-    if(H5_C_HAS_REAL_NATIVE_12 != 0) {
-      FoundRealSize[2] = 12;
-      FoundRealSizeKind[2] = H5_FORTRAN_HAS_REAL_12_KIND;
-    }
-#endif
+
 #if defined H5_FORTRAN_HAS_REAL_16_KIND
     if(H5_C_HAS_REAL_NATIVE_16 != 0) {
-      FoundRealSize[3] = 16;
-      FoundRealSizeKind[3] = H5_FORTRAN_HAS_REAL_16_KIND;
+      FoundRealSize[2] = 16;
+      FoundRealSizeKind[2] = H5_FORTRAN_HAS_REAL_16_KIND;
     }
 #endif
 
-    for(i=0;i<4;i++) {
+    for(i=0;i<3;i++) {
       if( FoundRealSize[i] > 0) /* Found the real type */
 	{
 	  sprintf(chrA, "Fortran_REAL_%d", FoundRealSize[i]);
@@ -482,7 +458,7 @@ int main(void)
       else  /* Did not find the real type */
 	{
 	  flag = 0; /* flag indicating if found the next highest */
-	  for(j=i+1;j<4;j++)  /* search for next highest */
+	  for(j=i+1;j<3;j++)  /* search for next highest */
 	    {
 	      if( FoundRealSize[j] > 0) /* Found the next highest */
 		{
@@ -501,7 +477,7 @@ int main(void)
 	    }
 	  if(flag == 0) /* No higher one found, so find next lowest */
 	    {
-	      for(j=2;j>-1;j--)  /* Search for next lowest */
+	      for(j=1;j>-1;j--)  /* Search for next lowest */
 		{
 		  if( FoundRealSize[j] > 0) /* Found the next lowest */
 		    {
@@ -545,10 +521,6 @@ int main(void)
 #if defined H5_FORTRAN_HAS_REAL_NATIVE_16_KIND
     if(H5_C_HAS_REAL_NATIVE_16 != 0) {
       writeFloatToFiles("Fortran_REAL", "real_f", 16, H5_FORTRAN_HAS_REAL_NATIVE_16_KIND);
-    }
-#elif defined H5_FORTRAN_HAS_REAL_NATIVE_12_KIND
-    if(H5_C_HAS_REAL_NATIVE_12 != 0) {
-      writeFloatToFiles("Fortran_REAL", "real_f", 12, H5_FORTRAN_HAS_REAL_NATIVE_12_KIND);
     }
 #elif defined H5_FORTRAN_HAS_REAL_NATIVE_8_KIND
     writeFloatToFiles("Fortran_REAL", "real_f", 8, H5_FORTRAN_HAS_REAL_NATIVE_8_KIND);
