@@ -236,6 +236,53 @@ Notes: This short instruction is written for users who want to quickly build
       "output directory", which is where the program will be installed. These 
       options are case-sensitive, so be sure to type them in upper case. 
 
+                                                                         
+========================================================================
+          All options for HDF5 C/C++ Libraries with CMake
+========================================================================
+OPTION (HDF5_Enable_Clear_File_Buffers "Securely clear file buffers before writing to file" ON)
+OPTION (HDF5_Enable_Instrument "Instrument The library" HDF5_Enable_Instrument)
+OPTION (HDF5_STRICT_FORMAT_CHECKS "Whether to perform strict file format checks" OFF)
+OPTION (HDF5_METADATA_TRACE_FILE "Enable metadata trace file collection" OFF)
+OPTION (HDF5_WANT_DATA_ACCURACY "IF data accuracy is guaranteed during data conversions" ON)
+OPTION (HDF5_WANT_DCONV_EXCEPTION "exception handling functions is checked during data conversions" ON)
+OPTION (HDF5_ENABLE_CODESTACK "Enable the function stack tracing (for developer debugging)." OFF)
+OPTION (HDF5_ENABLE_HSIZET "Enable datasets larger than memory" ON)
+OPTION (HDF5_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
+OPTION (HDF5_ENABLE_GPFS "Enable GPFS hints for the MPI/POSIX file driver" OFF)
+IF (APPLE) OPTION (HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path" OFF)
+IF (WIN32 AND NOT CYGWIN) OPTION (HDF_LEGACY_NAMING "Use Legacy Names for Libraries and Programs" OFF)
+OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
+OPTION (BUILD_STATIC_EXECS "Build Static Executabless" OFF)
+OPTION (BUILD_STATIC_PIC "Build Static PIC" OFF)
+OPTION (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
+OPTION (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
+OPTION (HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols" ON)
+OPTION (HDF5_ENABLE_TRACE "Enable API tracing capability" ON)
+OPTION (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
+OPTION (HDF5_ENABLE_EMBEDDED_LIBINFO "embed library info into executables" ON)
+OPTION (HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings" OFF)
+OPTION (HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
+OPTION (HDF5_USE_16_API_DEFAULT "Use the HDF5 1.6.x API by default" OFF)
+OPTION (HDF5_USE_18_API_DEFAULT "Use the HDF5 1.8.x API by default" OFF)
+OPTION (HDF5_USE_FILTER_${FILTER} "Use the ${FILTER} Filter" ON)
+OPTION (HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building" "NO")
+OPTION (ZLIB_USE_EXTERNAL "Use External Library Building for ZLIB" 0)
+OPTION (SZIP_USE_EXTERNAL "Use External Library Building for SZIP" 0)
+OPTION (HDF5_ENABLE_Z_LIB_SUPPORT "Enable Zlib Filters" OFF)
+OPTION (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" OFF)
+IF (HDF5_ENABLE_SZIP_SUPPORT) OPTION (HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding" OFF)
+OPTION (HDF5_PACKAGE_EXTLIBS "CPACK - include external libraries" OFF)
+IF (WIN32 AND NOT CYGWIN) OPTION (HDF5_ENABLE_THREADSAFE "Enable Threadsafety" OFF)
+OPTION (BUILD_TESTING "Build HDF5 Unit Testing" OFF)
+OPTION (HDF5_TEST_VFD "Execute tests with different VFDs" OFF)
+IF (HDF5_TEST_VFD) OPTION (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON)
+OPTION (HDF5_BUILD_FORTRAN "Build FORTRAN support" OFF)
+IF (HDF5_BUILD_FORTRAN) OPTION (HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" OFF)
+OPTION (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" OFF)
+OPTION (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" OFF)
+OPTION (HDF5_BUILD_TOOLS  "Build HDF5 Tools" OFF)
+OPTION (HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" OFF)
 
 
 ************************************************************************
