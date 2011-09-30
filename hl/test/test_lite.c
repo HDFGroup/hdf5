@@ -1373,16 +1373,16 @@ static int test_variables(void)
 
     if(H5Tis_variable_str(dtype))
         goto out;
-
+    
     if(H5Tclose(dtype)<0)
         goto out;
-
+    
     if((dtype = H5LTtext_to_dtype("H5T_VLEN { H5T_VLEN { H5T_STD_I32BE } }", H5LT_DDL))<0)
         goto out;
-
+    
     if(H5Tis_variable_str(dtype))
         goto out;
-
+    
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
     dt_str = (char*)calloc(str_len, sizeof(char));
@@ -1393,10 +1393,10 @@ static int test_variables(void)
         goto out;
     }
     free(dt_str);
-
+    
     if(H5Tclose(dtype)<0)
         goto out;
-
+    
     PASSED();
     return 0;
 
@@ -1527,6 +1527,111 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+* subroutine for test_text_dtype(): test_compound_bug(). Test case for 
+* issue 7701.
+*-------------------------------------------------------------------------
+*/
+static int test_compound_bug(void)
+{
+    hid_t       dtype;
+    H5T_class_t type_class;
+    int         nmembs;
+    char*       memb_name = NULL;
+    char*       dt_str;
+    size_t      str_len;
+    char text[] = "H5T_COMPOUND { H5T_STD_I32LE \"state_________________________________________________________________________________\"; H5T_STD_I32LE \"desc_________________________________________________________________________________________\"; H5T_VLEN { H5T_COMPOUND { H5T_ENUM { H5T_STD_I16LE; \"ZERO\" 0; \"ONE\" 1; \"TWO\" 2;  \"THREE\" 3; } \"type____\"; H5T_STD_I32LE \"sub_______________________________________________________________________________________________________________\"; H5T_STRING { STRSIZE H5T_VARIABLE; STRPAD H5T_STR_SPACEPAD; CSET H5T_CSET_ASCII; CTYPE H5T_C_S1; } \"sub_desc\"; H5T_STD_I32LE \"final___________________________________________________________________________________________________\"; } } \"sub\"; }";
+    char text2[] =
+     "H5T_COMPOUND {\n"
+     "  H5T_STD_I16LE \"state___________________________"
+         "__________________________________________________"
+         "____\" : 0;\n"
+     "  H5T_STD_I16LE \"desc____________________________"
+         "__________________________________________________"
+         "___________\" : 2;\n"
+     "  H5T_VLEN { H5T_COMPOUND {\n"
+     "    H5T_ENUM { H5T_STD_I16LE; \"ZERO\" 0; \"ONE\" "
+         "1; \"TWO\" 2;  \"THREE\" 3; } \"type____\" : 0;\n"
+     "    H5T_STD_I32LE \"sub___________________________"
+         "__________________________________________________"
+         "__________________________________1\" : 4;\n"
+     "    H5T_STRING { STRSIZE H5T_VARIABLE; STRPAD H5T_"
+         "STR_SPACEPAD; CSET H5T_CSET_ASCII; CTYPE H5T_C_S1;"
+         " } \"sub_desc\" : 8;\n"
+     "    H5T_STD_I32LE \"final_________________________"
+         "__________________________________________________"
+         "________________________\" : 16;\n"
+     "  } } \"sub\" : 8;\n"
+     "}\n";
+
+    TESTING3("        text for compound type of bug fix");
+
+    if((dtype = H5LTtext_to_dtype(text, H5LT_DDL))<0)
+        goto out;
+
+    if((type_class = H5Tget_class(dtype))<0)
+        goto out;
+    if(type_class != H5T_COMPOUND)
+        goto out;
+
+    if((memb_name = H5Tget_member_name(dtype, 2)) == NULL)
+        goto out;
+    if(strcmp(memb_name, "sub"))
+        goto out;
+    free(memb_name);
+
+    if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
+        goto out;
+
+    dt_str = (char*)calloc(str_len, sizeof(char));
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+        goto out;
+    free(dt_str);
+
+    if(H5Tclose(dtype)<0)
+        goto out;
+
+
+    /* Test similar datatype in another format */
+    if((dtype = H5LTtext_to_dtype(text2, H5LT_DDL))<0)
+        goto out;
+
+    if((type_class = H5Tget_class(dtype))<0)
+        goto out;
+    if(type_class != H5T_COMPOUND)
+        goto out;
+
+    if((nmembs = H5Tget_nmembers(dtype))<0)
+        goto out;
+    if(nmembs != 3)
+        goto out;
+
+    if((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
+        goto out;
+    if(strcmp(memb_name, "desc_________________________________________________________________________________________"))
+        goto out;
+    free(memb_name);
+
+    if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
+        goto out;
+
+    dt_str = (char*)calloc(str_len, sizeof(char));
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+        goto out;
+
+    free(dt_str);
+
+    if(H5Tclose(dtype)<0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
 * subroutine for test_text_dtype(): test_complicated_compound().
 *-------------------------------------------------------------------------
 */
@@ -1633,6 +1738,9 @@ static int test_text_dtype(void)
         goto out;
 
     if(test_compounds()<0)
+        goto out;
+
+    if(test_compound_bug()<0)
         goto out;
 
     if(test_complicated_compound()<0)
