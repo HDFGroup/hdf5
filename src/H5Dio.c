@@ -340,7 +340,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 #ifdef H5_HAVE_PARALLEL
     /* Collective access is not permissible without a MPI based VFD */
     if(dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE && 
-      !(H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI)))
+            !(H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI)))
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only")
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -603,7 +603,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
         HDassert(projected_mem_space);
         HDassert(adj_buf);
-            
+
         /* Switch to using projected memory dataspace & adjusted buffer */
         mem_space = projected_mem_space;
         buf = adj_buf;
@@ -950,6 +950,9 @@ H5D_ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
     const H5S_t *file_space, const H5S_t *mem_space,
     const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm)
 {
+    H5P_genplist_t *dx_plist;       /* Data transer property list */
+    H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode; /* performed chunk optimization */
+    H5D_mpio_actual_io_mode_t actual_io_mode; /* performed io mode */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_ioinfo_adjust)
@@ -962,6 +965,20 @@ H5D_ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
     HDassert(type_info);
     HDassert(type_info->tpath);
     HDassert(io_info);
+
+    /* Get the dataset transfer property list */
+    if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+
+    /* Reset the actual io mode properties to the default values in case
+     * the dxpl was previously used in a collective I/O operation.
+     */
+    actual_chunk_opt_mode = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
+    actual_io_mode = H5D_MPIO_NO_COLLECTIVE;
+    if(H5P_set(dx_plist, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, &actual_chunk_opt_mode) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set actual chunk opt mode property")
+    if(H5P_set(dx_plist, H5D_MPIO_ACTUAL_IO_MODE_NAME, &actual_io_mode) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set actual io mode property")
 
     /* Make any parallel I/O adjustments */
     if(io_info->using_mpi_vfd) {
@@ -995,12 +1012,6 @@ H5D_ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
              * mark it so that we remember to revert the change.
              */
             if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE) {
-                H5P_genplist_t *dx_plist;           /* Data transer property list */
-
-                /* Get the dataset transfer property list */
-                if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
-
                 /* Change the xfer_mode to independent for handling the I/O */
                 io_info->dxpl_cache->xfer_mode = H5FD_MPIO_INDEPENDENT;
                 if(H5P_set(dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &io_info->dxpl_cache->xfer_mode) < 0)

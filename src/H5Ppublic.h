@@ -120,6 +120,38 @@ typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 /* Define property list iteration function type */
 typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 
+/* Actual IO mode property */
+typedef enum H5D_mpio_actual_chunk_opt_mode_t {
+    /* The default value, H5D_MPIO_NO_CHUNK_OPTIMIZATION, is used for all I/O
+     * operations that do not use chunk optimizations, including non-collective
+     * I/O and contiguous collective I/O.
+     */
+    H5D_MPIO_NO_CHUNK_OPTIMIZATION = 0,
+    H5D_MPIO_LINK_CHUNK,
+    H5D_MPIO_MULTI_CHUNK,
+    H5D_MPIO_MULTI_CHUNK_NO_OPT
+}  H5D_mpio_actual_chunk_opt_mode_t;
+
+typedef enum H5D_mpio_actual_io_mode_t {
+    /* The following four values are conveniently defined as a bit field so that
+     * we can switch from the default to indpendent or collective and then to
+     * mixed without having to check the original value. 
+     * 
+     * NO_COLLECTIVE means that either collective I/O wasn't requested or that 
+     * no I/O took place.
+     *
+     * CHUNK_INDEPENDENT means that collective I/O was requested, but the
+     * chunk optimization scheme chose independent I/O for each chunk.
+     */
+    H5D_MPIO_NO_COLLECTIVE = 0x0,
+    H5D_MPIO_CHUNK_INDEPENDENT = 0x1,
+    H5D_MPIO_CHUNK_COLLECTIVE = 0x2,
+    H5D_MPIO_CHUNK_MIXED = 0x1 | 0x2,
+
+    /* The contiguous case is separate from the bit field. */
+    H5D_MPIO_CONTIGUOUS_COLLECTIVE = 0x4
+} H5D_mpio_actual_io_mode_t; 
+
 /********************/
 /* Public Variables */
 /********************/
@@ -359,6 +391,10 @@ H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void
 H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void** operate_data);
 H5_DLL herr_t H5Pset_enum_conv_overflow(hid_t plist_id, hbool_t conv_overflow);
 H5_DLL herr_t H5Pget_enum_conv_overflow(hid_t plist_id, hbool_t *conv_overflow/*out*/);
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5Pget_mpio_actual_chunk_opt_mode(hid_t plist_id, H5D_mpio_actual_chunk_opt_mode_t *actual_chunk_opt_mode);
+H5_DLL herr_t H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_mode);
+#endif /* H5_HAVE_PARALLEL */
 
 /* Link creation property list (LCPL) routines */
 H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd);
