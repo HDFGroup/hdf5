@@ -100,6 +100,9 @@ Bug Fixes since HDF5-1.8.7
 
     Configuration
     -------------
+    - In Windows platform, the default VFD, was Windows VFD, is restored back
+      to the SEC2, aka POSIX, VFD.  The Windows VFD is deprecated. HDFFV-7740
+      (AKC 2011/09/26)
     - The --enable-h5dump-packed-bits configure option has been removed,
       as the h5dump code that this option conditionally enabled is now always
       compiled into h5dump. Please refer to the h5dump reference manual for 
