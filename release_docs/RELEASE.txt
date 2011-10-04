@@ -303,6 +303,7 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+
       - #ifdef _WIN32 instances changed to #ifdef H5_HAVE_WIN32_API and added
             H5_HAVE_VISUAL_STUDIO checks where necessary. CMake only as configure
             never set _WIN32.
@@ -508,6 +509,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - In Windows platform, the default VFD, was Windows VFD, is restored back
+      to the SEC2, aka POSIX, VFD.  The Windows VFD is deprecated. HDFFV-7740
+      (AKC 2011/09/26)
     - Removed config/ibm-aix6.x. All IBM-AIX settings are in one file,
       ibm-aix. (AKC - 2011/4/14)
     - Shared C libraries are no longer disabled on Mac when Fortran
