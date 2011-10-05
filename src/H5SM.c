@@ -73,7 +73,7 @@ static herr_t H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned *cache_flags, void ** /*out*/ encoded_mesg);
 static herr_t H5SM_type_to_flag(unsigned type_id, unsigned *type_flag);
 static herr_t H5SM_read_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence,
-    hbool_t *oh_modified, void *_udata);
+    unsigned *oh_modified, void *_udata);
 static herr_t H5SM_read_mesg_fh_cb(const void *obj, size_t obj_len, void *_udata);
 static herr_t H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
                H5O_t * open_oh, hid_t dxpl_id, size_t *encoding_size /*out*/,
@@ -2158,7 +2158,7 @@ done:
  */
 static herr_t
 H5SM_read_iter_op(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
-    hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
+    unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5SM_read_udata_t *udata = (H5SM_read_udata_t *) _udata;
     herr_t ret_value = H5_ITER_CONT;
