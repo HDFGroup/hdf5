@@ -333,7 +333,7 @@ CONTAINS
        RETURN
     ENDIF
 
-    f_ptr = C_LOC(chr)
+    f_ptr = C_LOC(chr(1)(1:1))
 
     hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)
 
@@ -504,7 +504,7 @@ CONTAINS
        chr(i) = value(i:i)
     ENDDO
 
-    f_ptr = C_LOC(chr)
+    f_ptr = C_LOC(chr(1)(1:1))
 
     name_len = LEN(name)
     hdferr = h5pget_c(prp_id, name, name_len, f_ptr)
@@ -634,7 +634,7 @@ CONTAINS
        hdferr = -1
        RETURN
     ENDIF
-    f_ptr = C_LOC(chr)
+    f_ptr = C_LOC(chr(1)(1:1))
 
     name_len = LEN(name)
     hdferr = h5pget_c(prp_id, name, name_len, f_ptr)
@@ -818,7 +818,7 @@ CONTAINS
        chr(i) = value(i:i)
     ENDDO
 
-    f_ptr = C_LOC(chr)
+    f_ptr = C_LOC(chr(1)(1:1))
 
     name_len = LEN(name)
     hdferr = h5pregister_c(class, name, name_len, size, f_ptr)
@@ -1000,7 +1000,7 @@ CONTAINS
        chr(i) = value(i:i)
     ENDDO
 
-    f_ptr = C_LOC(chr)
+    f_ptr = C_LOC(chr(1)(1:1))
 
     name_len = LEN(name)
     hdferr = h5pinsert_c(plist, name , name_len, size, f_ptr)

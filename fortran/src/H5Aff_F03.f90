@@ -201,8 +201,8 @@ CONTAINS
          DIMENSION(dims(1)), TARGET :: buf  ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
-
-    f_ptr = C_LOC(buf)
+    
+    f_ptr = C_LOC(buf(1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_integer_1
@@ -221,7 +221,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -238,7 +238,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -257,7 +257,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -276,7 +276,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -295,7 +295,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_integer_6
@@ -313,7 +313,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -348,7 +348,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -368,7 +368,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -388,7 +388,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_real_3
@@ -407,7 +407,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_real_4
@@ -445,7 +445,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_real_6
@@ -463,7 +463,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_real_7
@@ -692,7 +692,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_1
@@ -709,7 +709,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_2
@@ -727,7 +727,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_3
@@ -745,7 +745,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_4
@@ -763,7 +763,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_5
@@ -781,7 +781,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_6
@@ -799,7 +799,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_7
@@ -833,7 +833,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_1
@@ -851,7 +851,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_2
@@ -870,7 +870,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_3
@@ -888,7 +888,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_4
@@ -906,7 +906,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_5
@@ -924,7 +924,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_6
@@ -942,7 +942,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_7
