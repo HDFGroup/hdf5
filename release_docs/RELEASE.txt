@@ -150,7 +150,12 @@ Bug Fixes since HDF5-1.8.7
 
     Parallel Library
     ----------------
-    - None
+    - Special Collective IO (IO when some processes do not contribute to the
+      IO) and Complex Derived Datatype MPI functionalities are no longer
+      conditionally enabled in the library by configure. They are always
+      enabled in order to take advantage of performance boosts from these
+      behaviors. Older MPI implementations that do not allow for these
+      functionalities can no longer by used by HDF5. (MAM - 2011/07/08).
 
     Tools
     -----
