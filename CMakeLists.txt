@@ -250,6 +250,16 @@ IF (WIN32 AND NOT CYGWIN)
 ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
+# Option to enable use of stdio instead of posix io
+#-----------------------------------------------------------------------------
+IF (WIN32)
+  OPTION (HDF5_ENABLE_WINDOWS_STDIO "Enable use of stdio instead of posix io" OFF)
+  IF (HDF5_ENABLE_WINDOWS_STDIO)
+    SET (H5_WINDOWS_USE_STDIO 1)   
+  ENDIF (HDF5_ENABLE_WINDOWS_STDIO)
+ENDIF (WIN32)
+
+#-----------------------------------------------------------------------------
 # Option to Build Shared/Static libs, default is static
 #-----------------------------------------------------------------------------
 OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
