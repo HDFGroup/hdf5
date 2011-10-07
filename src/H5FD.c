@@ -1085,6 +1085,15 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if(H5FD_query(file, &(file->feature_flags)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver")
 
+    /* Initialize the memory alignment fiels, unless H5FD_FEAT_ALIGNED_MEM is
+     * set, in which case the fields should have been filled in by the driver's
+     * open call */
+    if(!(file->feature_flags & H5FD_FEAT_ALIGNED_MEM)) {
+        file->must_align = FALSE;
+        file->mboundary = 0;
+        file->mbsize = 0;
+    } /* end if */
+
     /* Increment the global serial number & assign it to this H5FD_t object */
     if(++H5FD_file_serial_no_g == 0) {
         /* (Just error out if we wrap around for now...) */

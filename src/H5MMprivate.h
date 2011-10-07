@@ -30,6 +30,9 @@
 
 #include "H5MMpublic.h"
 
+/* Public headers needed by this file */
+#include "H5FDpublic.h"
+
 /* Private headers needed by this file */
 #include "H5private.h"
 
@@ -50,5 +53,8 @@ H5_DLL void *H5MM_realloc(void *mem, size_t size);
 H5_DLL char *H5MM_xstrdup(const char *s);
 H5_DLL char *H5MM_strdup(const char *s);
 H5_DLL void *H5MM_xfree(void *mem);
+H5_DLL void *H5MM_aligned_malloc(size_t size, H5FD_t *lf, hid_t dxpl_id);
+H5_DLL void *H5MM_aligned_realloc(void *mem, size_t old_size, size_t new_size,
+    H5FD_t *lf, hid_t dxpl_id);
 
 #endif

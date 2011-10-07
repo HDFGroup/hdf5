@@ -53,12 +53,14 @@
 #define CONFIG_BLOCK_FILE       0x0040u
 #define CONFIG_ALIGN_BUF        0x0080u
 #define CONFIG_PAD_BUF          0x0100u
-#define CONFIG_BY_CHUNK         0x0200u
+#define CONFIG_INTERN_MALLOC    0x0200u
+#define CONFIG_BY_CHUNK         0x0400u
 #define CONFIG_ALL              (CONFIG_COMPRESS + CONFIG_CACHE                \
                                 + CONFIG_EARLY_ALLOC + CONFIG_CHUNK            \
                                 + CONFIG_TCONV + CONFIG_ALIGN_FILE             \
                                 + CONFIG_BLOCK_FILE + CONFIG_ALIGN_BUF         \
-                                + CONFIG_PAD_BUF + CONFIG_BY_CHUNK)
+                                + CONFIG_PAD_BUF + CONFIG_INTERN_MALLOC        \
+                                + CONFIG_BY_CHUNK)
 
 const char *FILENAME[] = {
     "sec2_file",         /*0*/
@@ -446,7 +448,8 @@ static int test_direct2(void )
     hid_t       mspace = -1;
     hid_t       fapl = -1;
     hid_t       dcpl = -1;
-    hid_t       dxpl = -1;
+    hid_t       dxpl_write = -1;
+    hid_t       dxpl_read = -1;
     hsize_t     dims[1];                        /* Dataset's dimensions */
     hsize_t     cdims[1];                       /* Chunk dimensions */
     hsize_t     start[1];                       /* Hyperslab start */
@@ -454,7 +457,6 @@ static int test_direct2(void )
     int         *wbuf;                          /* Write buffer */
     hsize_t     buf_used_elems;                 /* Number of valid elements in the buffer */
     size_t      buf_alloc_size;                 /* Buffer allocated size */
-    hbool_t     aligned_mem;                    /* Whether the buffer is aligned */
     unsigned    config;                         /* Test configuration (bit flags) */
     unsigned    i;                              /* Local index */
     char        err_msg[1024];
@@ -481,6 +483,9 @@ static int test_direct2(void )
         if(!(config & CONFIG_CHUNK) && (config & CONFIG_COMPRESS
                 || config & CONFIG_BY_CHUNK))
             continue;
+        if((config & CONFIG_INTERN_MALLOC) && ((config & CONFIG_ALIGN_BUF)
+                || (config & CONFIG_PAD_BUF)))
+            continue;
 
         /* Generate error message */
         (void)sprintf(err_msg, "Config: %X", config);
@@ -506,7 +511,9 @@ static int test_direct2(void )
         /* Create property lists */
         if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
             FAIL_PUTS_ERROR(err_msg);
-        if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        if((dxpl_read = H5Pcreate(H5P_DATASET_XFER)) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+        if((dxpl_write = H5Pcreate(H5P_DATASET_XFER)) < 0)
             FAIL_PUTS_ERROR(err_msg);
 
         /* Determine dataset size, and if it's chunked */
@@ -555,17 +562,17 @@ static int test_direct2(void )
             buf_alloc_size = buf_used_elems * sizeof(int);
 
         /* Allocate buffers */
-        if(config & CONFIG_ALIGN_BUF) {
+        if(config & CONFIG_INTERN_MALLOC) {
+            if(NULL == (wbuf = (int *)H5MMaligned_malloc(buf_alloc_size, file, dxpl_write)))
+                FAIL_PUTS_ERROR(err_msg);
+            if(NULL == (rbuf = (int *)H5MMaligned_malloc(buf_alloc_size, file, dxpl_read)))
+                FAIL_PUTS_ERROR(err_msg);
+        } /* end if */
+        else if(config & CONFIG_ALIGN_BUF) {
             if(0 != HDposix_memalign((void **)&wbuf, MBOUNDARY, buf_alloc_size))
                 FAIL_PUTS_ERROR(err_msg);
             if(0 != HDposix_memalign((void **)&rbuf, MBOUNDARY, buf_alloc_size))
                 FAIL_PUTS_ERROR(err_msg);
-
-            /* If the buffer is aligned and padded, we can mark it as aligned
-             * for direct use by the direct I/O driver */
-            if(config & CONFIG_PAD_BUF)
-                if(H5Pset_aligned_mem(dxpl, TRUE) < 0)
-                    FAIL_PUTS_ERROR(err_msg);
         } /* end if */
         else {
             if(NULL == (wbuf = (int *)HDmalloc(buf_alloc_size)))
@@ -588,12 +595,12 @@ static int test_direct2(void )
                     FAIL_PUTS_ERROR(err_msg);
 
                 /* Write */
-                if(H5Dwrite(dset, H5T_NATIVE_INT, mspace, space, dxpl, wbuf)
+                if(H5Dwrite(dset, H5T_NATIVE_INT, mspace, space, dxpl_write, wbuf)
                         < 0)
                     FAIL_PUTS_ERROR(err_msg);
             } /* end for */
         else
-            if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
+            if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_write, wbuf) < 0)
                 FAIL_PUTS_ERROR(err_msg);
 
         /* Flush file */
@@ -610,7 +617,7 @@ static int test_direct2(void )
                     FAIL_PUTS_ERROR(err_msg);
 
                 /* Read data */
-                if(H5Dread(dset, H5T_NATIVE_INT, mspace, space, dxpl, rbuf)
+                if(H5Dread(dset, H5T_NATIVE_INT, mspace, space, dxpl_read, rbuf)
                         < 0)
                     FAIL_PUTS_ERROR(err_msg);
 
@@ -621,7 +628,7 @@ static int test_direct2(void )
             } /* end for */
         else {
             /* Read data */
-            if(H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
+            if(H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_read, rbuf) < 0)
                 FAIL_PUTS_ERROR(err_msg);
 
             /* Verify correctness of read data */
@@ -630,22 +637,20 @@ static int test_direct2(void )
                     FAIL_PUTS_ERROR(err_msg);
         } /* end else */
 
-        /* Verify that the dxpl still contains the original aligned_mem setting
-         */
-        if(H5Pget_aligned_mem(dxpl, &aligned_mem) < 0)
-            FAIL_PUTS_ERROR(err_msg);
-        if(config & CONFIG_ALIGN_BUF && config & CONFIG_PAD_BUF) {
-            if(!aligned_mem)
+        /* Close */
+        if(config & CONFIG_INTERN_MALLOC) {
+            if(H5MMaligned_free(wbuf, file, dxpl_write) < 0)
+                FAIL_PUTS_ERROR(err_msg);
+            if(H5MMaligned_free(rbuf, file, dxpl_read) < 0)
                 FAIL_PUTS_ERROR(err_msg);
         } /* end if */
-        else
-            if(aligned_mem)
-                FAIL_PUTS_ERROR(err_msg);
-
-        /* Close */
-        HDfree(wbuf);
-        HDfree(rbuf);
-        if(H5Pclose(dxpl) < 0)
+        else {
+            HDfree(wbuf);
+            HDfree(rbuf);
+        } /* end else */
+        if(H5Pclose(dxpl_write) < 0)
+            FAIL_PUTS_ERROR(err_msg);
+        if(H5Pclose(dxpl_read) < 0)
             FAIL_PUTS_ERROR(err_msg);
         if(H5Pclose(dcpl) < 0)
             FAIL_PUTS_ERROR(err_msg);

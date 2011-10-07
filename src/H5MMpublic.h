@@ -31,10 +31,23 @@
 
 /* Public headers needed by this file */
 #include "H5public.h"
+#include "H5Ipublic.h"
+
+/*******************/
+/* Public Typedefs */
+/*******************/
 
 /* These typedefs are currently used for VL datatype allocation/freeing */
 typedef void *(*H5MM_allocate_t)(size_t size, void *alloc_info);
 typedef void (*H5MM_free_t)(void *mem, void *free_info);
+
+/*********************/
+/* Public Prototypes */
+/*********************/
+
+/* Functions operating on aligned memory buffers */
+H5_DLL void *H5MMaligned_malloc(size_t size, hid_t loc_id, hid_t dxpl_id);
+H5_DLL herr_t H5MMaligned_free(void *mem, hid_t loc_id, hid_t dxpl_id);
 
 #ifdef __cplusplus
 extern "C" {

@@ -28,8 +28,11 @@
 
 
 #include "H5private.h"
+#include "H5Dprivate.h"
 #include "H5Eprivate.h"
+#include "H5Iprivate.h"
 #include "H5MMprivate.h"
+#include "H5Pprivate.h"
 
 #ifndef NDEBUG
 
@@ -246,3 +249,250 @@ H5MM_xfree(void *mem)
 
     FUNC_LEAVE_NOAPI(NULL);
 } /* end H5MM_xfree() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MM_aligned_malloc
+ *
+ * Purpose:     Allocate a block of memory of at least size bytes,
+ *              following the alignment restrictions specified by the file
+ *              driver in lf.  Marks the buffer as aligned on dxpl_id.
+ *
+ * Return:      Success:        Ptr to new memory
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              Sep  21 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5MM_aligned_malloc(size_t size, H5FD_t *lf, hid_t dxpl_id)
+{
+    void *ret_value;  /* Return value */
+
+    FUNC_ENTER_NOAPI(H5MM_aligned_malloc, NULL);
+
+    HDassert(size);
+    HDassert(lf);
+    HDassert(lf->feature_flags & H5FD_FEAT_ALIGNED_MEM);
+
+    /* Check if we actually have to align the memory */
+    if(lf->must_align) {
+        H5P_genplist_t          *dx_plist = NULL; /* Data transer property list */
+        hbool_t                 aligned_mem = TRUE; /* Aligned memory property */
+        H5D_aligned_mem_buf_t   aligned_mem_buf; /* Aligned memory buffer */
+
+        /* Allocate the memory block */
+        if(0 != HDposix_memalign(&ret_value, lf->mboundary,
+                (((size - 1) / lf->mbsize) + 1) * lf->mbsize))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+        /* Get the dataset transfer property list */
+        if(dxpl_id >= 0) {
+            if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id))) {
+                H5MM_free(ret_value);
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataset creation property list")
+            } /* end if */
+
+            /* Mark on the DXPL that the memory buffer is aligned */
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0) {
+                H5MM_free(ret_value);
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
+            } /* end if */
+            aligned_mem_buf.buf = ret_value;
+            aligned_mem_buf.size = size;
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_BUF_NAME, &aligned_mem_buf)
+                    < 0) {
+                H5MM_free(ret_value);
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
+            } /* end if */
+        } /* end if */
+    } /* end if */
+    else
+        if(NULL == (ret_value = H5MM_malloc(size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5MM_aligned_malloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MM_aligned_realloc
+ *
+ * Purpose:     Reallocate a block of memory of at least size bytes,
+ *              following the alignment restrictions specified by the file
+ *              driver in lf.  Marks the buffer as aligned on dxpl_id.
+ *
+ * Return:      Success:        Ptr to new memory
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              Sep  21 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5MM_aligned_realloc(void *mem, size_t old_size, size_t new_size, H5FD_t *lf, hid_t dxpl_id)
+{
+    void *ret_value;  /* Return value */
+
+    FUNC_ENTER_NOAPI(H5MM_aligned_realloc, NULL);
+
+    HDassert(lf);
+
+    /* Check if we must align memory */
+    if(lf->must_align) {
+        if(NULL == mem) {
+            if(0 == new_size)
+                ret_value = NULL;
+            else
+                ret_value = H5MM_aligned_malloc(new_size, lf, dxpl_id);
+        } /* end if */
+        else if(0 == new_size) {
+            H5MM_free(mem);
+            ret_value = NULL;
+        } /* end if */
+        else if((((new_size - 1) / lf->mbsize) + 1) * lf->mbsize
+                == (((old_size - 1) / lf->mbsize) + 1) * lf->mbsize)
+            /* New allocation is in the same memory block size, no need to
+             * realloc */
+            ret_value = mem;
+        else {
+            /* Reallocate a block of a different size */
+            /* Should we call standard H5MM_realloc with aligned size if
+             * new_size < old_size?  Is realloc guaranteed to preserve the
+             * aligned property of the original buffer in this case?  -NAF */
+            if(NULL == (ret_value = H5MM_aligned_malloc(new_size, lf, dxpl_id)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            HDmemcpy(ret_value, mem, MIN(old_size, new_size));
+            H5MM_free(mem);
+        } /* end else */
+    } /* end if */
+    else
+        ret_value = H5MM_realloc(mem, new_size);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5MM_aligned_realloc */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MMaligned_malloc
+ *
+ * Purpose:     Allocate a block of memory of at least size bytes,
+ *              following the alignment restrictions for the file
+ *              containing loc_id.  Marks the buffer as aligned on
+ *              dxpl_id.  The buffer must be freed by H5MMaligned_free,
+ *              using the same dxpl_id.
+ *
+ * Return:      Success:        Ptr to new memory
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              Sep  29 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5MMaligned_malloc(size_t size, hid_t loc_id, hid_t dxpl_id)
+{
+    H5G_loc_t    loc;           /* Location of object in file */
+    void        *ret_value;     /* Return value */
+
+    FUNC_ENTER_API(H5MMaligned_malloc, NULL);
+    H5TRACE3("*x", "zii", size, loc_id, dxpl_id);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a location")
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = -1;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not xfer parms")
+
+    /* Call the internal routine, but only if the file driver uses aligned
+     * buffers */
+    if(H5F_HAS_FEATURE(loc.oloc->file, H5FD_FEAT_ALIGNED_MEM))
+        ret_value = H5MM_aligned_malloc(size, H5F_LF(loc.oloc->file), dxpl_id);
+    else
+        ret_value = H5MM_malloc(size);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* end H5MMaligned_malloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MMaligned_free
+ *
+ * Purpose:     Free a block of memory allocated with H5MMaligned_malloc.
+ *              Removes the aligned buffer associated with dxpl_id.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  Neil Fortner
+ *              Sep  29 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MMaligned_free(void *mem, hid_t loc_id, hid_t dxpl_id)
+{
+    H5G_loc_t    loc;           /* Location of object in file */
+    herr_t       ret_value = 0; /* Return value */
+
+    FUNC_ENTER_API(H5MMaligned_free, FAIL);
+    H5TRACE3("e", "*xii", mem, loc_id, dxpl_id);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    /* Mark the dxpl as unaligned.  Do this first so if it fails mem is not
+     * freed. */
+    if(H5F_HAS_FEATURE(loc.oloc->file, H5FD_FEAT_ALIGNED_MEM)
+            && H5P_DEFAULT != dxpl_id) {
+        H5P_genplist_t          *dx_plist = NULL; /* Data transer property list */
+        hbool_t                 aligned_mem = FALSE; /* Aligned memory property */
+        H5D_aligned_mem_buf_t   aligned_mem_buf; /* Aligned memory buffer */
+
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+        /* Get the dataset transfer property list */
+        if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+
+        /* Mark on the DXPL that the memory buffer is unaligned */
+        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        aligned_mem_buf.buf = NULL;
+        aligned_mem_buf.size = 0;
+        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_BUF_NAME, &aligned_mem_buf)
+                < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+    } /* end if */
+
+    /* Free the memory */
+    H5MM_free(mem);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* end H5MMaligned_free() */
+

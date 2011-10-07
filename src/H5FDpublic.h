@@ -222,6 +222,11 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * instead of the default H5D_ALLOC_TIME_LATE
      */
 #define H5FD_FEAT_ALLOCATE_EARLY        0x00000200
+    /*
+     * Defining the H5FD_FEAT_ALIGNED_MEM for a VFL driver means that
+     * the driver benefits from aligned memory allocation
+     */
+#define H5FD_FEAT_ALIGNED_MEM           0x00000400
 
 /* Forward declaration */
 typedef struct H5FD_t H5FD_t;
@@ -289,6 +294,11 @@ struct H5FD_t {
     /* Space allocation management fields */
     hsize_t             threshold;      /* Threshold for alignment  */
     hsize_t             alignment;      /* Allocation alignment     */
+
+    /* Memory allocation management fields */
+    hbool_t             must_align;     /* Whether memory blocks should be aligned for this file */
+    size_t              mboundary;      /* Memory block starting postitions must be aligned to a multiple of this */
+    size_t              mbsize;         /* Memory block sizes must be a multiple of this */
 };
 
 #ifdef __cplusplus

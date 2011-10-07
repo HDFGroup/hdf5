@@ -77,7 +77,7 @@ typedef struct H5FD_direct_t {
     haddr_t     eof;                    /*end of file; current file size*/
     haddr_t     pos;                    /*current file I/O position     */
     int         op;                     /*last operation                */
-    H5FD_direct_fapl_t  fa;             /*file access properties        */
+    size_t      cbsize;                 /*maximal buffer size for copying user data  */
     void        *block_buf;             /*single fbsize size buffer     */
 #ifndef H5_HAVE_WIN32_API
     /*
@@ -420,12 +420,23 @@ static void *
 H5FD_direct_fapl_get(H5FD_t *_file)
 {
     H5FD_direct_t       *file = (H5FD_direct_t*)_file;
+    H5FD_direct_fapl_t  *fa = NULL;
     void *ret_value;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_direct_fapl_get, NULL)
 
+    /* Allocate new driver fapl object */
+    if(NULL == (fa = (H5FD_direct_fapl_t *)H5MM_malloc(sizeof(H5FD_direct_fapl_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Set the values */
+    fa->mboundary = file->pub.mboundary;
+    fa->fbsize = file->pub.mbsize;
+    fa->cbsize = file->cbsize;
+    fa->must_align = file->pub.must_align;
+
     /* Set return value */
-    ret_value= H5FD_direct_fapl_copy(&(file->fa));
+    ret_value = fa;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -561,44 +572,44 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     file->inode = sb.st_ino;
 #endif /*H5_VMS*/
 #endif /*H5_HAVE_WIN32_API*/
-    file->fa.mboundary = fa->mboundary;
-    file->fa.fbsize = fa->fbsize;
-    file->fa.cbsize = fa->cbsize;
+    file->pub.mboundary = fa->mboundary;
+    file->pub.mbsize = fa->fbsize;
+    file->cbsize = fa->cbsize;
 
     /* Try to decide if data alignment is required.  The reason to check it here
      * is to handle correctly the case that the file is in a different file system
      * than the one where the program is running.
      */
     buf1 = (int*)HDmalloc(sizeof(int));
-    if(HDposix_memalign((void **)&buf2, file->fa.mboundary, file->fa.fbsize) != 0)
+    if(HDposix_memalign((void **)&buf2, file->pub.mboundary, file->pub.mbsize) != 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "HDposix_memalign failed")
 
     if(o_flags & O_CREAT) {
         if(write(file->fd, (void*)buf1, sizeof(int))<0) {
-            if(write(file->fd, (void*)buf2, file->fa.fbsize)<0)
+            if(write(file->fd, (void*)buf2, file->pub.mbsize)<0)
                 HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "file system may not support Direct I/O")
             else
-                file->fa.must_align = TRUE;
+                file->pub.must_align = TRUE;
         } else {
-            file->fa.must_align = FALSE;
+            file->pub.must_align = FALSE;
             file_truncate(file->fd, (file_offset_t)0);
         }
     } else {
         if(read(file->fd, (void*)buf1, sizeof(int))<0) {
-            if(read(file->fd, (void*)buf2, file->fa.fbsize)<0)
+            if(read(file->fd, (void*)buf2, file->pub.mbsize)<0)
                 HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "file system may not support Direct I/O")
             else
-                file->fa.must_align = TRUE;
+                file->pub.must_align = TRUE;
         } else {
             if(o_flags & O_RDWR) {
                 if(file_seek(file->fd, (file_offset_t)0, SEEK_SET) < 0)
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, NULL, "unable to seek to proper position")
                 if(write(file->fd, (void *)buf1, sizeof(int))<0)
-                    file->fa.must_align = TRUE;
+                    file->pub.must_align = TRUE;
                 else
-                    file->fa.must_align = FALSE;
+                    file->pub.must_align = FALSE;
             } else
-                file->fa.must_align = FALSE;
+                file->pub.must_align = FALSE;
         }
     }
 
@@ -749,6 +760,7 @@ H5FD_direct_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
         *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
         *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+        *flags|=H5FD_FEAT_ALIGNED_MEM;      /* Library should try to align memory buffers */
     }
 
 done:
@@ -951,14 +963,14 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id,
     /* If the system doesn't require data to be aligned, read the data in
      * the same way as sec2 driver.
      */
-    _must_align = file->fa.must_align;
+    _must_align = file->pub.must_align;
 
     /* Get the memory boundary for alignment, file system block size, and maximal
      * copy buffer size.
      */
-    _boundary = file->fa.mboundary;
-    _fbsize = file->fa.fbsize;
-    _cbsize = file->fa.cbsize;
+    _boundary = file->pub.mboundary;
+    _fbsize = file->pub.mbsize;
+    _cbsize = file->cbsize;
 
     /* Determine whether we can use the simpler "aligned read" algorithm which
      * reads directly from the file.  Otherwise, we must allocate a temporary
@@ -1183,14 +1195,14 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
     /* If the system doesn't require data to be aligned, read the data in
      * the same way as sec2 driver.
      */
-    _must_align = file->fa.must_align;
+    _must_align = file->pub.must_align;
 
     /* Get the memory boundary for alignment, file system block size, and maximal
      * copy buffer size.
      */
-    _boundary = file->fa.mboundary;
-    _fbsize = file->fa.fbsize;
-    _cbsize = file->fa.cbsize;
+    _boundary = file->pub.mboundary;
+    _fbsize = file->pub.mbsize;
+    _cbsize = file->cbsize;
 
     /* Determine which algorithm we should use to write the data.
      * Method 0: Write the buffer directly to the file.
@@ -1538,7 +1550,7 @@ H5FD_direct_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
     }
-    else if (file->fa.must_align){
+    else if (file->pub.must_align){
         /*Even though eof is equal to eoa, file is still truncated because Direct I/O
          *write introduces some extra data for alignment.
          */
@@ -1549,73 +1561,5 @@ H5FD_direct_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_direct_truncate() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_direct_malloc
- *
- * Purpose:     Allocates a buffer in such a way that will maximize the
- *              performance of a subsequent direct read or write call
- *              using this buffer.  Marks on dxpl_id that the buffer has
- *              been allocated in this manner.
- *
- * Return:      Success:        Pointer to allocated space.
- *
- *              Failure:        NULL
- *
- * Programmer:  Neil Fortner
- *              Monday, 1 November 2010
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5FD_direct_malloc(const H5FD_t *_file, hid_t dxpl_id, size_t size)
-{
-    const H5FD_direct_t *file = (const H5FD_direct_t*)_file;
-    void *ret_value;  /* Return value */
-
-    FUNC_ENTER_NOAPI(H5FD_direct_malloc, NULL)
-
-    HDassert(size);
-
-    /* Check if we actually have to align the memory */
-    if(file->fa.must_align) {
-        H5P_genplist_t          *dx_plist = NULL; /* Data transer property list */
-        hbool_t                 aligned_mem = TRUE; /* Aligned memory property */
-        H5D_aligned_mem_buf_t   aligned_mem_buf; /* Aligned memory buffer */
-
-        /* Allocate the memory block */
-        if(0 != HDposix_memalign(&ret_value, file->fa.mboundary,
-                (((size - 1) / file->fa.fbsize) + 1) * file->fa.fbsize))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-        /* Get the dataset transfer property list */
-        if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id))) {
-            H5MM_free(ret_value);
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataset creation property list")
-        } /* end if */
-
-        /* Mark on the DXPL that the memory buffer is aligned */
-        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0) {
-            H5MM_free(ret_value);
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to wet value")
-        } /* end if */
-        aligned_mem_buf.buf = ret_value;
-        aligned_mem_buf.size = size;
-        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_BUF_NAME, &aligned_mem_buf)
-                < 0) {
-            H5MM_free(ret_value);
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
-        } /* end if */
-    } /* end if */
-    else
-        if(NULL == (ret_value = H5MM_malloc(size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_direct_malloc */
 #endif /* H5_HAVE_DIRECT */
 
