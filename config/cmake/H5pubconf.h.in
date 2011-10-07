@@ -273,6 +273,9 @@
 /* Define to 1 if you have the `lstat' function. */
 #cmakedefine H5_HAVE_LSTAT @H5_HAVE_LSTAT@
 
+/* Define to 1 if you have the <mach/mach_time.h> header file. */
+#cmakedefine H5_HAVE_MACH_MACH_TIME_H @H5_HAVE_MACH_MACH_TIME_H@
+
 /* Define to 1 if you have the <memory.h> header file. */
 #cmakedefine H5_HAVE_MEMORY_H @H5_HAVE_MEMORY_H@
 
