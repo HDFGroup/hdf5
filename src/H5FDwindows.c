@@ -13,21 +13,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Scott Wegner <swegner@hdfgroup.org>
- *				Based on code by Robb Matzke
- *				May 24, 2007
- *
- * Purpose:	We would like to create a driver specifically for Windows
- *			to utilize the Win32 API, and reduce the maintenence demands
- *			for the other file drivers.  Our other motivation is that
- *			the Windows system calls of the existing sec2 driver differ
- *			from those on other platforms, and are not 64-bit compatible.
- *			From the start, this will have the structure very similar
- *			to our sec2 driver, but make system calls more similar to
- *			our stdio driver.
- */
-
 #include "H5private.h"      /* Generic Functions        */
 #include "H5Eprivate.h"     /* Error handling           */
 #include "H5Fprivate.h"     /* File access              */
@@ -43,11 +28,11 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_fapl_windows
+ * Function:    H5Pset_fapl_windows
  *
- * Purpose:	Modify the file access property list to use the H5FD_WINDOWS
- *		driver defined in this source file.  There are no driver
- *		specific properties.
+ * Purpose: Modify the file access property list to use the H5FD_WINDOWS
+ *          driver defined in this source file.  There are no driver
+ *          specific properties.
  *
  * NOTE: The Windows VFD was merely a merge of the SEC2 and STDIO drivers
  *       so it has been retired.  Selecting the Windows VFD will actually
@@ -55,11 +40,10 @@
  *       the H5FD_WINDOWS symbol).
  *
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:  Non-negative on success/Negative on failure
  *
- * Programmer:	Scott Wegner
- *				Based on code by Robb Matzke
- *				Thursday, May 24 2007
+ * Programmer:  Dana Robinson
+ *              October 10, 2011
  *
  *-------------------------------------------------------------------------
  */
