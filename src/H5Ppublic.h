@@ -389,8 +389,6 @@ H5_DLL herr_t H5Pset_hyper_vector_size(hid_t fapl_id, size_t size);
 H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size/*out*/);
 H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void* operate_data);
 H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void** operate_data);
-H5_DLL herr_t H5Pset_enum_conv_overflow(hid_t plist_id, hbool_t conv_overflow);
-H5_DLL herr_t H5Pget_enum_conv_overflow(hid_t plist_id, hbool_t *conv_overflow/*out*/);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Pget_mpio_actual_chunk_opt_mode(hid_t plist_id, H5D_mpio_actual_chunk_opt_mode_t *actual_chunk_opt_mode);
 H5_DLL herr_t H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_mode);

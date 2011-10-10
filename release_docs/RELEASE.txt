@@ -95,10 +95,6 @@ New Features
       H5Rdereference (Issue 2763).  It's called H5Rdereference2 now.  The former
       H5Rdereference function has been deprecated to H5Rdereference1. (SLU -
       2011/7/18)
-    - The library added two new dataset transfer property to control whether
-      to fill 0xff in the destination data or convert to the destination data
-      when overflow happens to ENUM data (Issue 7579).  The two new functions
-      are H5Pset(get)_enum_conv_overflow. (SLU - 2011/05/27) 
     - H5Tcreate now supports string type (fixed-length and variable-length).
       (SLU - 2011/05/20)
     - Added ability to cache files opened through external links.  Added new
