@@ -92,19 +92,19 @@ Support for New Platforms, Languages, and Compilers
 ===================================================
     - None
 
-     - h5repack: added macro to handle failure in H5Dread/write when memory allocation failed
-            inside the library. (PC -- 2011/08/19)
+     - h5repack: added macro to handle a failure in H5Dread/write when memory allocation failed
+       inside the library. (PC -- 2011/08/19)
 
 Bug Fixes since HDF5-1.8.7
 ==========================
 
     Configuration
     -------------
-    - In Windows platform, the default VFD, was Windows VFD, is restored back
-      to the SEC2, aka POSIX, VFD.  The Windows VFD is deprecated. HDFFV-7740
+    - In the Windows platform, the default VFD was changed from the Windows VFD
+      back to the POSIX (aka SEC2) VFD. The Windows VFD is deprecated. HDFFV-7740
       (AKC 2011/09/26)
-    - The --enable-h5dump-packed-bits configure option has been removed,
-      as the h5dump code that this option conditionally enabled is now always
+    - The --enable-h5dump-packed-bits configure option has been removed.
+      The h5dump code that this option conditionally enabled is now always
       compiled into h5dump. Please refer to the h5dump reference manual for 
       usage of the packed bits feature. (MAM - 2011/06/23)
     - Configure now uses the same flags and symbols in its tests that are
@@ -117,41 +117,41 @@ Bug Fixes since HDF5-1.8.7
 
     Library
     -------
-    - #ifdef _WIN32 instances changed to #ifdef H5_HAVE_WIN32_API and added
-            H5_HAVE_VISUAL_STUDIO checks where necessary. CMake only as configure
-            never set _WIN32.
+    - #ifdef _WIN32 instances have been changed to #ifdef H5_HAVE_WIN32_API. 
+      H5_HAVE_VISUAL_STUDIO checks have been added where necessary. This is in 
+      CMake only as configure never sets _WIN32. (ADB - 2011/09/12)
     - CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
       discovered 3 problems in tests and tools' library (Issue 7674):
         1. In dsets.c, left shifting an unsigned int for 32 bits or more
            caused undefined behavior.
         2. In dt_arith.c, the INIT_INTEGER macro definition has an overflow
-           when the value is negative minimal and is being subtracted one.
+           when the value is a negative minimal and is being subtracted from one.
         3. In tools/lib/h5tools_str.c, right shifting an int value for 32 bits 
            or more caused undefined behavior.
       All the problems have been corrected. (SLU - 2011/9/2)
     - Corrected mismatched function name typo of h5pget_dxpl_mpio_c and
       h5pfill_value_defined_c. HDFFV-7641 (AKC 2011/08/22)
-    - Corrected internal error in library where objects that use named
-      datatypes and were accessed from two different file IDs could confuse
+    - Corrected an internal error in the library where objects that use committed 
+      (named) datatypes and were accessed from two different file IDs could confuse
       the two and cause erroneous failures.  This addresses Jira issue #7638.
       (QAK - 2011/07/18)
-    - In v1.6 library, there was EOA for the whole MULTI file saved in the 
-      super block.  We took it out in v1.8 library because it's meaningless 
-      for the MULTI file.  v1.8 library saves the EOA for the metadata file, 
-      instead. But this caused some backward compatibility problem.
-      v1.8 library couldn't open the file created with v1.6 library.  We
+    - In v1.6 of the library, there was an EOA for the whole MULTI file saved in the 
+      super block.  We took it out in v1.8 of the library because it's meaningless 
+      for the MULTI file. v1.8 of the library saves the EOA for the metadata file 
+      instead, but this caused a backward compatibility problem.
+      A v1.8 library couldn't open the file created with the v1.6 library. We
       fixed the problem by checking the EOA value to detect the file
       created with v1.6 library. (SLU - 2011/6/22) 
     - When a dataset had filters and reading data failed, the error message 
-      didn't say which filter isn't registered. It's fixed now. (SLU - 2011/6/3)
-    - H5Epush2() now has correct trace functionality (related to the
+      didn't say which filter wasn't registered. It's fixed now. (SLU - 2011/6/3)
+    - H5Epush2() now has the correct trace functionality (this is related to the
       bin/trace Perl script bug noted in the configure section).
       (DER 2011/08/25)
 
     Parallel Library
     ----------------
-    - Special Collective IO (IO when some processes do not contribute to the
-      IO) and Complex Derived Datatype MPI functionalities are no longer
+    - The Special Collective IO (IO when some processes do not contribute to the
+      IO) and the Complex Derived Datatype MPI functionalities are no longer
       conditionally enabled in the library by configure. They are always
       enabled in order to take advantage of performance boosts from these
       behaviors. Older MPI implementations that do not allow for these
@@ -159,53 +159,56 @@ Bug Fixes since HDF5-1.8.7
 
     Tools
     -----
-    - Fixed h5diff to display all the comparable object and attribute 
+    - Fixed h5diff to display all the comparable objects and attributes 
       regardless of detecting non-comparables. HDFFV-7693 (JKM 09/16/2011)
-    - Fixed h5repack to update values of references(object and region) of 
-      attributes in h5repack for 1) references, 2) ARRAY of references, 
-      3) VLEN of references, and 4) COMPOUND of references. 
-      (HDFFV-5932) PC -2011/09/14
-    - h5diff: fixed segfault over dataset with container types
-      (array,lven) along with multiple nested compound types. 
-      (ex: compound->array->compound, compound->vlen->compound)
-      HDFFV-7712  JKM (09/01/2011)
-    - Fixed h5jam not to allow specifying an HDF5 formatted file as input 
-      file for -u (user block file) option, because the original HDF5 file 
-      will not be accessible if allows. HDFFV-5941 (JKM 08/19/2011)
-    - Revised command help pages of h5jam and h5unjam. The descriptions
+    - Fixed h5repack to update the values of references(object and region) of 
+      attributes in h5repack for 1) references, 2) arrays of references, 
+      3) variable-length references, and 4) compound references. 
+      HDFFV-5932. (PC -2011/09/14)
+    - h5diff: fixed a segfault over a dataset with container types 
+      array and variable-length (vlen) along with multiple nested compound types. 
+      Example: compound->array->compound, compound->vlen->compound.
+      HDFFV-7712. (JKM 09/01/2011)
+    - Fixed h5jam to not to allow the specifying of an HDF5 formatted file as 
+      an input file for the -u (user block file) option. The original HDF5 file 
+      would not be accessible if this behavior was allowed. 
+      HDFFV-5941 (JKM 08/19/2011)
+    - Revised the command help pages of h5jam and h5unjam. The descriptions
       were not up to date and some were missing. 
       HDFFV-7515 (JKM 08/15/2011)
-    - Fixed h5dump to correct schema location: 
+    - Fixed h5dump to correct the schema location: 
       <hdf5:HDF5-File 
       xmlns:hdf5="http://hdfgroup.org/HDF5/XML/schema/HDF5-File" 
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
       xsi:schemaLocation="http://hdfgroup.org/HDF5/XML/schema/HDF5-File 
       http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd">
       (ADB - 2011/08/10)
-    - h5repack: h5repack failed to copy dataset if the layout is changed 
-      from chunked with unlimited dims to contiguous. HDFFV-7649 
+    - h5repack: h5repack failed to copy a dataset if the layout is changed 
+      from chunked with unlimited dimensions to contiguous. HDFFV-7649 
       (PC -- 2011/07/15)
-    - h5diff: "--delta" option considers two NaN of the same type are 
-      different, which is wrong based on h5diff description in Reference
-      Manual. HDFFV-7656  (PC -- 2011/07/15)
-    - Fixed h5diff to display instructive error message and exit with 1
-      when mutually exclusive options (-d, -p and --use-system-epsilon)
-      are used together. HDFFV-7600  (JKM 07/07/2011)
-    - Fixed h5dump to display the first line of each element into correct
-      position for multiple dimention array type.
-      Before this fix, the first line of each element in array were
+    - Fixed h5diff: the "--delta" option considers two NaN of the same type 
+      are different. This is wrong based on the h5diff description in the 
+      Reference Manual. HDFFV-7656 (PC -- 2011/07/15)
+    - Fixed h5diff to display an instructive error message and exit with
+      an instructive error message when mutually exclusive options 
+      (-d, -p and --use-system-epsilon) are used together. 
+      HDFFV-7600  (JKM 07/07/2011)
+    - Fixed h5dump so that it displays the first line of each element in correct
+      position for multiple dimention array types. Before this fix, 
+      the first line of each element in an array was
       displayed after the last line of previous element without
       moving to the next line (+indentation).
-      Bug #HDFFV-5878  (JKM 06/15/2011)
-    - Fixed h5dump to display correct value for H5T_STD_I8LE dataset
-      on a system (ppc64, linux, Big-Endian, clustering). 
-      Bug #HDFFV-7594  (ABERT & JKM 05/12/2011)
-    - Fixed h5diff to compare file itself correctly. Previously h5diff
-      reported either different or not compatible in certain cases even
-      comparing file itself. This fix also improve performance when
-      comparing same target objects through verifying the obj&file
-      addresses before comparing the details in the objects (ex: datasets
-      or attributes) Bug #HDFFV-5928  (XCAO & JKM 05/06/2011)
+      HDFFV-5878  (JKM 06/15/2011)
+    - Fixed h5dump so that it will display the correct value for 
+      H5T_STD_I8LE datasets on the Blue-gene system (ppc64, linux, Big-Endian, 
+      clustering). HDFFV-7594 (AKC & JKM 05/12/2011)
+    - Fixed h5diff to compare a file to itself correctly. Previously h5diff
+      reported either the files were different or not compatible in certain 
+      cases even when comparing a file to itself. This fix also improves 
+      performance when comparing the same target objects through verifying 
+      the object and file addresses before comparing the details 
+      in the objects. Examples of details are datasets and attributes. 
+      HDFFV-5928. (XCAO & JKM 05/06/2011)
 
     F90 API
     ------
