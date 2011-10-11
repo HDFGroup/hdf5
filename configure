@@ -5011,10 +5011,10 @@ fi
 
 
 if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xno"; then
-  echo "yes"
+  echo "no"
   as_fn_error $? "--enable-fortran must be used with --enable-fortran2003" "$LINENO" 5
 else
-  echo "no"
+  echo "yes"
 fi
 
 HAVE_SIZEOF="no"
@@ -5028,7 +5028,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   HDF5_INTERFACES="$HDF5_INTERFACES fortran"
 
         HAVE_FORTRAN_2003="no"
-  HAVE_ISO_C_BINDING="no"
+  HAVE_F2003_REQUIREMENTS="no"
 
 
 
@@ -6334,111 +6334,40 @@ fi
   if test "X$HDF_FORTRAN2003" = "Xyes"; then
 
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports ISO_C_BINDING module" >&5
-$as_echo_n "checking if Fortran compiler supports ISO_C_BINDING module... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler version compatible with Fortran 2003 HDF" >&5
+$as_echo_n "checking if Fortran compiler version compatible with Fortran 2003 HDF... " >&6; }
+    HAVE_FORTRAN_2003="no"
 
     cat > conftest.$ac_ext <<_ACEOF
       program main
-USE iso_c_binding
+
+
+	USE iso_c_binding
+	IMPLICIT NONE
+	TYPE(C_PTR) :: ptr
+	TYPE(C_FUNPTR) :: funptr
+	CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
+
+	ptr = C_LOC(ichr(1:1))
+
+
       end
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-                       HAVE_ISO_C_BINDING=yes
+        HAVE_F2003_REQUIREMENTS=yes
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
-    if test "X$HAVE_ISO_C_BINDING" = "Xno"; then
-      as_fn_error $? "Fortran compiler does not have ISO_C_BINDING; unsupported Fortran 2003 compiler, remove --enable-fortran2003" "$LINENO" 5
-    fi
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler version compatible with Fortran 2003 HDF" >&5
-$as_echo_n "checking if Fortran compiler version compatible with Fortran 2003 HDF... " >&6; }
-    HAVE_FORTRAN_2003="no"
-
-        if (${FC} -V 2>&1 | grep 'Sun Fortran') > /dev/null; then
-      vers=`${FC} -V 2>&1 | sed -rn '\|Fortran 95 | s|.* ([0-9.]+) .*|\1|p' | sed -e 's/[^0-9]//g'`
-      if test -n "$vers" && test "$vers" -ge 86; then
-	HAVE_FORTRAN_2003="yes"
-        echo $HAVE_FORTRAN_2003
-      else
-        echo $HAVE_FORTRAN_2003
-	as_fn_error $? "Only Sun Fortran Compiler, Version >= 8.6 F2003 supported;  remove --enable-fortran2003" "$LINENO" 5
-      fi
-    fi
-
-        if (${FC} -V 2>&1 | grep '^Intel(R) Fortran') > /dev/null; then
-      vers_major=`${FC} -v 2>&1 | grep -o ' [0-9]*\.' | sed -e 's/[^0-9]//g'`
-      vers_minor=`${FC} -v 2>&1 | grep -o '\.[0-9]*[.? ?]' | sed -e 's/[^0-9]//g'`
-      if test -n "$vers_major" && test "$vers_major" -gt 10; then
-        HAVE_FORTRAN_2003="yes"
-        echo $HAVE_FORTRAN_2003
-      else
-        if test -n "$vers_major" && test "$vers_major" = 10 &&  test -n "$vers_minor" && test "$vers_minor" -ge 1; then
-          HAVE_FORTRAN_2003="yes"
-          echo $HAVE_FORTRAN_2003
-        else
-          echo $HAVE_FORTRAN_2003
-          as_fn_error $? "Only Intel Fortran Compiler, Version >= 10.1 F2003 supported; remove --enable-fortran2003" "$LINENO" 5
+    if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
+          as_fn_error $? "Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003" "$LINENO" 5
+    else
+      HAVE_FORTRAN_2003="yes"
         fi
-      fi
-    fi
-
-        if (${FC} -dumpversion 2>&1 | grep 'G95') > /dev/null; then
-      vers=`${FC} -dumpversion 2>&1 | grep -o '[^ ]*!' | sed -e 's/[^0-9]//g'`
-      if test -n "$vers" && test "$vers" -ge 90; then
-        HAVE_FORTRAN_2003="yes"
-        echo $HAVE_FORTRAN_2003
-      else
-        echo $HAVE_FORTRAN_2003
-        as_fn_error $? "Only G95 Fortran Compiler, Version >= .9 F2003 supported; remove --enable-fortran2003" "$LINENO" 5
-      fi
-    fi
-
-        if (${FC} --version 2>&1 | grep 'GNU Fortran') > /dev/null; then
-      vers_major=`${FC} --version 2>&1 | grep 'GNU Fortran (' | grep -o ') [0-9]*\.' | sed -e 's/[^0-9]//g'`
-      vers_minor=`${FC} --version 2>&1 | grep 'GNU Fortran (' | grep -o '\.[0-9]*\.' | sed -e 's/[^0-9]//g'`
-
-      if test -n "$vers_major" && test "$vers_major" -gt 4; then
-        HAVE_FORTRAN_2003="yes"
-        echo $HAVE_FORTRAN_2003
-      else
-        if test -n "$vers_major" && test "$vers_major" = 4 &&  test -n "$vers_minor" && test "$vers_minor" -gt 1; then
-          HAVE_FORTRAN_2003="yes"
-          echo $HAVE_FORTRAN_2003
-        else
-          echo $HAVE_FORTRAN_2003
-          as_fn_error $? "Only GNU Fortran Compiler, Version > 4.1.0 F2003 supported; remove --enable-fortran2003" "$LINENO" 5
-        fi
-      fi
-    fi
-
-        if (${FC} -V 2>&1 | grep 'Portland Group') > /dev/null; then
-      vers_major=`${FC} -V 2>&1 | grep 'pgf' | grep -o ' [0-9]*\.' | sed -e 's/[^0-9]//g'`
-      vers_minor=`${FC} -V 2>&1 | grep 'pgf' | grep -o '\.[0-9]*\-' | sed -e 's/[^0-9]//g'`
-
-      if test -n "$vers_major" && test "$vers_major" -gt 11; then
-        HAVE_FORTRAN_2003="yes"
-        echo $HAVE_FORTRAN_2003
-      else
-        if test -n "$vers_major" && test "$vers_major" = 11 &&  test -n "$vers_minor" && test "$vers_minor" -gt 6; then
-          HAVE_FORTRAN_2003="yes"
-          echo $HAVE_FORTRAN_2003
-        else
-          echo $HAVE_FORTRAN_2003
-          as_fn_error $? "Only The Portland Group Compiler, Version >= 11.7-0 F2003 supported; remove --enable-fortran2003" "$LINENO" 5
-        fi
-      fi
-    fi
-
-        if test "X$HAVE_FORTRAN_2003" = "Xno"; then
-      echo $HAVE_FORTRAN_2003
-      as_fn_error $? "Failed to find a supported F2003 compiler; remove --enable-fortran2003" "$LINENO" 5
-    fi
 
   fi
 fi
