@@ -33,8 +33,9 @@ typedef __int64             h5_stat_size_t;
 #define HDdup(F)            _dup(F)
 #define HDfdopen(N,S)       _fdopen(N,S)
 #define HDfileno(F)         _fileno(F)
-#define HDftruncate(F,L)    _chsize_s(F,L)
+#define HDfseek(F,O,W)      _fseeki64(F,O,W)
 #define HDfstat(F,B)        _fstati64(F,B)
+#define HDftruncate(F,L)    _chsize_s(F,L)
 #define HDisatty(F)         _isatty(F)
 #define HDgetcwd(S,Z)       _getcwd(S,Z)
 #define HDgetdcwd(D,S,Z)    _getdcwd(D,S,Z)
@@ -43,6 +44,9 @@ typedef __int64             h5_stat_size_t;
 #define HDlstat(S,B)        _lstati64(S,B)
 #define HDmkdir(S,M)        _mkdir(S)
 #define HDoff_t             __int64
+/* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
+ * transformations when performing I/O.
+ */
 #define HDopen(S,F,M)       _open(S,F|_O_BINARY,M)
 #define HDread(F,M,Z)       _read(F,M,Z)
 #define HDsetvbuf(F,S,M,Z)  setvbuf(F,S,M,(Z>1?Z:2))
