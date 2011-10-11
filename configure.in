@@ -1344,11 +1344,14 @@ AC_HEADER_STDC
 AC_HEADER_TIME
 
 dnl ----------------------------------------------------------------------
-dnl Check for these two functions before <sys/time.h> is checked for, otherwise
-dnl they are not detected correctly on Solaris [2.6].
+dnl Check for these two functions before the time headers are checked
+dnl for, otherwise they are not detected correctly on Solaris (the
+dnl configure test will fail due to multiply-defined symbols).
 dnl
 AC_CHECK_FUNCS(difftime)
 AC_CHECK_FUNCS(gettimeofday, [have_gettime="yes"], [have_gettime="no"])
+AC_SEARCH_LIBS([clock_gettime], [rt posix4])
+AC_CHECK_FUNCS([clock_gettime],[have_clock_gettime="yes"],[have_clock_gettime="no"])
 
 dnl Unix
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
@@ -2072,6 +2075,12 @@ esac
 if test "X$THREADSAFE" = "Xyes"; then
   AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
 fi
+
+dnl ----------------------------------------------------------------------
+dnl Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
+dnl to be done after any POSIX/BSD defines to ensure that the test gets
+dnl the correct POSIX level on linux.
+AC_CHECK_DECL(CLOCK_MONOTONIC,[have_clock_monotonic="yes"],[have_clock_monotonic="no"],[[#include <time.h>]])
 
 dnl ----------------------------------------------------------------------
 dnl How does one figure out the local time zone?  Anyone know of a

@@ -1,10 +1,27 @@
-/* windows/src/H5pubconf.h. Adapted from generated Linux src/H5pubconf.h   */
-/* src/H5config.h.  Generated from H5config.h.in by configure.  */
-/* src/H5config.h.in.  Generated from configure.in by autoheader.  */
-
-/*
- * Windows Specific Definitions
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+ * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+ 
+/* NOTE: This file is created by hand from the Linux src/H5pubconf.h file.
+ * Most Windows builds are handled by CMake which generates its own 
+ * H5pubconf.h file so this file can easily get out of date.  Please notify
+ * Dana Robinson <derobins@hdfgroup.org> if the settings here have issues.
  */
+
+/********************************
+ * Windows Specific Definitions *
+ ********************************/
 
 /* Define if the Windows virtual file driver should be compiled */
 #define H5_HAVE_WINDOWS 1
@@ -15,16 +32,12 @@
 /* Define if using a Windows compiler (i.e. Visual Studio) */
 #define H5_HAVE_VISUAL_STUDIO 1
 
-/* Define if the Windows virtual file driver should use buffered IO functions */
-/* #undef WINDOWS_USE_STDIO */
+/***************************************
+ * End of Windows Specific Definitions *
+ ***************************************/
 
-/* Define the maximum write size for the Windows file driver.  Larger writes
-   will be split into many writes.  Safe values are 1 <= WINDOWS_MAX_BUF <= 2GB-1. */
-#define WINDOWS_MAX_BUF (1024 * 1024 * 1024)
-
-/*
- * End of Windows Specific Definitions
- */
+/* Define if building universal (internal helper macro) */
+/* #undef H5_AC_APPLE_UNIVERSAL_BUILD */
  
 /* Define if your system generates wrong code for log2 routine. */
 /* #undef H5_BAD_LOG2_CODE_GENERATED */
@@ -74,7 +87,7 @@
 
 /* Define if your system has right maximum convert floating-point to unsigned
    long long values. */
-/* #undef H5_FP_TO_ULLONG_RIGHT_MAXIMUM 1 */
+/* #undef H5_FP_TO_ULLONG_RIGHT_MAXIMUM */
 
 /* Define if gettimeofday() populates the tz pointer passed in */
 #define H5_GETTIMEOFDAY_GIVES_TZ 1
@@ -95,6 +108,9 @@
 /* Define if the compiler understand the __func__ keyword */
 /* #undef H5_HAVE_C99_FUNC */
 
+/* Define to 1 if you have the `clock_gettime' function. */
+/* #undef H5_HAVE_CLOCK_GETTIME */
+
 /* Define if the function stack tracing code is to be compiled in */
 /* #undef H5_HAVE_CODESTACK */
 
@@ -113,6 +129,9 @@
 
 /* Define to 1 if you have the <dmalloc.h> header file. */
 /* #undef H5_HAVE_DMALLOC_H */
+
+/* Define if library information should be embedded in the executables */
+/* #undef H5_HAVE_EMBEDDED_LIBINFO */
 
 /* Define to 1 if you have the <features.h> header file. */
 /* #undef H5_HAVE_FEATURES_H */
@@ -144,17 +163,23 @@
 /* Define to 1 if you have the `frexpl' function. */
 /* #undef H5_HAVE_FREXPL */
 
-/* Define to 1 if you have the `fseek64' function. */
-/* #undef H5_HAVE_FSEEK64 */
-
 /* Define to 1 if you have the `fseeko' function. */
 /* #undef H5_HAVE_FSEEKO */
+
+/* Define to 1 if you have the `fseek64' function. */
+/* #undef H5_HAVE_FSEEKO64 */
 
 /* Define to 1 if you have the `fstat64' function. */
 /* #undef H5_HAVE_FSTAT64 */
 
 /* Define to 1 if you have the `ftello' function. */
 /* #undef H5_HAVE_FTELLO */
+
+/* Define to 1 if you have the `ftello64' function. */
+/* #undef H5_HAVE_FTELLO64 */
+
+/* Define to 1 if you have the `ftruncate64' function. */
+/* #undef H5_HAVE_FTRUNCATE64 */
 
 /* Define if the compiler understand the __FUNCTION__ keyword */
 #define H5_HAVE_FUNCTION 1
@@ -169,7 +194,7 @@
 /* #undef H5_HAVE_GETPWUID */
 
 /* Define to 1 if you have the `getrusage' function. */
-/* #define H5_HAVE_GETRUSAGE 1 */
+/* #undef H5_HAVE_GETRUSAGE */
 
 /* Define to 1 if you have the `gettextinfo' function. */
 /* #undef H5_HAVE_GETTEXTINFO */
@@ -241,6 +266,15 @@
 /* Define to 1 if you have the `lseek64' function. */
 /* #undef H5_HAVE_LSEEK64 */
 
+/* Define to 1 if you have the `lstat' function. */
+/* #undef H5_HAVE_LSTAT */
+
+/* Define to 1 if you have the <mach/mach_time.h> header file. */
+/* #undef H5_HAVE_MACH_MACH_TIME_H */
+
+/* Define to 1 if you have the <memory.h> header file. */
+/* #undef H5_HAVE_MEMORY_H */
+
 /* Define if we have MPE support */
 /* #undef H5_HAVE_MPE */
 
@@ -274,14 +308,17 @@
 /* Define to 1 if you have the `setsysinfo' function. */
 /* #undef H5_HAVE_SETSYSINFO */
 
-/* Define to 1 if you have the `sigaction' function. */
-/* #undef H5_HAVE_SIGACTION */
-
 /* Define to 1 if you have the `siglongjmp' function. */
 /* #undef H5_HAVE_SIGLONGJMP */
 
 /* Define to 1 if you have the `signal' function. */
 #define H5_HAVE_SIGNAL 1
+
+/* Define to 1 if you have the `sigprocmask' function. */
+/* #undef H5_HAVE_SIGPROCMASK */
+
+/* Define to 1 if you have the `sigsetjmp' function. */
+/* #undef H5_HAVE_SIGSETJMP */
 
 /* Define to 1 if you have the `snprintf' function. */
 /* #undef H5_HAVE_SNPRINTF */
@@ -324,6 +361,9 @@
 
 /* Define if `struct videoconfig' is defined */
 /* #undef H5_HAVE_STRUCT_VIDEOCONFIG */
+
+/* Define to 1 if you have the `symlink' function. */
+/* #undef H5_HAVE_SYMLINK */
 
 /* Define to 1 if you have the `system' function. */
 #define H5_HAVE_SYSTEM 1
@@ -438,6 +478,10 @@
    values correctly. */
 #define H5_LDOUBLE_TO_LLONG_ACCURATE 1
 
+/* Define if your system converts long double to (unsigned) long values with
+   special algorithm. */
+/* #undef H5_LDOUBLE_TO_LONG_SPECIAL */
+
 /* Define if your system can convert long double to unsigned int values
    correctly. */
 #define H5_LDOUBLE_TO_UINT_ACCURATE 1
@@ -448,6 +492,10 @@
 /* Define if your system can convert (unsigned) long long to long double
    values correctly. */
 #define H5_LLONG_TO_LDOUBLE_CORRECT 1
+
+/* Define if your system can convert (unsigned) long to long double values
+   with special algorithm. */
+/* #undef H5_LONG_TO_LDOUBLE_SPECIAL */
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
@@ -483,6 +531,9 @@
 
 /* Define to the one symbol short name of this package. */
 #define H5_PACKAGE_TARNAME "hdf5"
+
+/* Define to the home page for this package. */
+#define H5_PACKAGE_URL ""
 
 /* Define to the version of this package. */
 #define H5_PACKAGE_VERSION "1.9.95"
@@ -553,6 +604,13 @@
 /* The size of `off_t', as computed by sizeof. */
 #define H5_SIZEOF_OFF_T 4
 
+/* The size of `ptrdiff_t', as computed by sizeof. */
+#ifndef _WIN64
+#define H5_SIZEOF_PTRDIFF_T 4
+#else
+#define H5_SIZEOF_PTRDIFF_T 8
+#endif /* _WIN64 */
+
 /* The size of `short', as computed by sizeof. */
 #define H5_SIZEOF_SHORT 2
 
@@ -602,6 +660,9 @@
 /* The size of `uint_least8_t', as computed by sizeof. */
 #define H5_SIZEOF_UINT_LEAST8_T 0
 
+/* The size of `unsigned', as computed by sizeof. */
+#define H5_SIZEOF_UNSIGNED 4
+
 /* The size of `__int64', as computed by sizeof. */
 #define H5_SIZEOF___INT64 8
 
@@ -628,6 +689,10 @@
 /* Define if your system can convert unsigned long long to long double with
    correct precision. */
 #define H5_ULLONG_TO_LDOUBLE_PRECISION 1
+
+/* Define if your system accurately converting unsigned long to float values.
+   */
+/* #undef H5_ULONG_TO_FLOAT_ACCURATE */
 
 /* Define if your system can accurately convert unsigned (long) long values to
    floating-point values. */
@@ -658,6 +723,12 @@
    first (like Motorola and SPARC, unlike Intel and VAX). */
 /* #undef H5_WORDS_BIGENDIAN */
 
+/* Number of bits in a file offset, on hosts where this is settable. */
+/* #undef H5__FILE_OFFSET_BITS */
+
+/* Define for large files, on AIX-style hosts. */
+/* #undef H5__LARGE_FILES */
+
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef H5_const */
 
@@ -670,8 +741,15 @@
 /* Define to `long int' if <sys/types.h> does not define. */
 /* #undef H5_off_t */
 
+/* Define to `long' if <sys/types.h> does not define. */
+/* #undef H5_ptrdiff_t */
+
 /* Define to `unsigned long' if <sys/types.h> does not define. */
 /* #undef H5_size_t */
 
 /* Define to `long' if <sys/types.h> does not define. */
+#ifndef _WIN64
 #define H5_ssize_t long
+#else
+#define H5_ssize_t long long
+#endif /* _WIN64 */
