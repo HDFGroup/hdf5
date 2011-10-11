@@ -541,28 +541,28 @@
 #define H5_SIZEOF_INT8_T 1
 
 /* The size of `int_fast16_t', as computed by sizeof. */
-/* #define H5_SIZEOF_INT_FAST16_T 4 */
+/* #define H5_SIZEOF_INT_FAST16_T 0 */
 
 /* The size of `int_fast32_t', as computed by sizeof. */
-/* #define H5_SIZEOF_INT_FAST32_T 4 */
+/* #define H5_SIZEOF_INT_FAST32_T 0 */
 
 /* The size of `int_fast64_t', as computed by sizeof. */
-/* #define H5_SIZEOF_INT_FAST64_T 8 */
+/* #define H5_SIZEOF_INT_FAST64_T 0 */
 
 /* The size of `int_fast8_t', as computed by sizeof. */
-/* #define H5_SIZEOF_INT_FAST8_T 1 */
+/* #define H5_SIZEOF_INT_FAST8_T 0 */
 
 /* The size of `int_least16_t', as computed by sizeof. */
-/* #define H5_SIZEOF_INT_LEAST16_T 2 */
+/* #define H5_SIZEOF_INT_LEAST16_T 0 */
 
 /* The size of `int_least32_t', as computed by sizeof. */
-/* #define H5_SIZEOF_INT_LEAST32_T 4 */
+/* #define H5_SIZEOF_INT_LEAST32_T 0 */
 
 /* The size of `int_least64_t', as computed by sizeof. */
-/* #define H5_SIZEOF_INT_LEAST64_T 8 */
+/* #define H5_SIZEOF_INT_LEAST64_T 0 */
 
 /* The size of `int_least8_t', as computed by sizeof. */
-/* #define H5_SIZEOF_INT_LEAST8_T 1 */
+/* #define H5_SIZEOF_INT_LEAST8_T 0 */
 
 /* The size of `long', as computed by sizeof. */
 #define H5_SIZEOF_LONG 4
@@ -577,7 +577,7 @@
 #define H5_SIZEOF_OFF64_T 0
 
 /* The size of `off_t', as computed by sizeof. */
-#define H5_SIZEOF_OFF_T 8
+#define H5_SIZEOF_OFF_T 4
 
 /* The size of `ptrdiff_t', as computed by sizeof. */
 #define H5_SIZEOF_PTRDIFF_T 4
@@ -604,28 +604,28 @@
 #define H5_SIZEOF_UINT8_T 1
 
 /* The size of `uint_fast16_t', as computed by sizeof. */
-/* #define H5_SIZEOF_UINT_FAST16_T 4 */
+/* #define H5_SIZEOF_UINT_FAST16_T 0 */
 
 /* The size of `uint_fast32_t', as computed by sizeof. */
-/* #define H5_SIZEOF_UINT_FAST32_T 4 */
+/* #define H5_SIZEOF_UINT_FAST32_T 0 */
 
 /* The size of `uint_fast64_t', as computed by sizeof. */
-/* #define H5_SIZEOF_UINT_FAST64_T 8 */
+/* #define H5_SIZEOF_UINT_FAST64_T 0 */
 
 /* The size of `uint_fast8_t', as computed by sizeof. */
-/* #define H5_SIZEOF_UINT_FAST8_T 1 */
+/* #define H5_SIZEOF_UINT_FAST8_T 0 */
 
 /* The size of `uint_least16_t', as computed by sizeof. */
-/* #define H5_SIZEOF_UINT_LEAST16_T 2 */
+/* #define H5_SIZEOF_UINT_LEAST16_T 0 */
 
 /* The size of `uint_least32_t', as computed by sizeof. */
-/* #define H5_SIZEOF_UINT_LEAST32_T 4 */
+/* #define H5_SIZEOF_UINT_LEAST32_T 0 */
 
 /* The size of `uint_least64_t', as computed by sizeof. */
-/* #define H5_SIZEOF_UINT_LEAST64_T 8 */
+/* #define H5_SIZEOF_UINT_LEAST64_T 0 */
 
 /* The size of `uint_least8_t', as computed by sizeof. */
-/* #define H5_SIZEOF_UINT_LEAST8_T 1 */
+/* #define H5_SIZEOF_UINT_LEAST8_T 0 */
 
 /* The size of `unsigned', as computed by sizeof. */
 #define H5_SIZEOF_UNSIGNED 4
