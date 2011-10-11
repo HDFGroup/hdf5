@@ -80,7 +80,7 @@
  */
 H5TEST_DLLVAR char *paraprefix;
 #ifdef H5_HAVE_PARALLEL
-extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
+H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #endif
 
 /*
