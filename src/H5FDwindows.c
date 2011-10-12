@@ -28,65 +28,6 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_windows_init
- *
- * Purpose:     Initialize this driver by registering the driver with the
- *              library.  Note that this really initializes the underlying
- *              SEC2 driver.
- *
- * Return:      Success:    The driver ID for the windows(sec2) driver.
- *              Failure:    Negative.
- *
- * Programmer:  Dana Robinson
- *              October 12, 2011
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5FD_windows_init(void)
-{
-    hid_t ret_value;            /* Return value */
-
-    FUNC_ENTER_NOAPI(H5FD_windows_init, FAIL)
-
-    if(H5I_VFL != H5I_get_type(H5FD_SEC2_g))
-        H5FD_SEC2_g = H5FD_register(&H5FD_sec2_g, sizeof(H5FD_class_t), FALSE);
-
-    /* Set return value */
-    ret_value = H5FD_SEC2_g;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_sec2_init() */
-
-
-/*---------------------------------------------------------------------------
- * Function:    H5FD_windows_term
- *
- * Purpose:     Shut down the VFD.  Note that this really shuts down the
- *              underlying SEC2 driver.
- *
- * Returns:     <none>
- *
- * Programmer:  Dana Robinson
- *              October 12, 2011
- *
- *---------------------------------------------------------------------------
- */
-void
-H5FD_windows_term(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_windows_term)
-
-    /* Reset VFL ID */
-    H5FD_SEC2_g = 0;
-
-    FUNC_LEAVE_NOAPI_VOID
-} /* end H5FD_windows_term() */
-
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_windows
  *
  * Purpose: Modify the file access property list to use the H5FD_WINDOWS
