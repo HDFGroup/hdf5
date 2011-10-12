@@ -1434,7 +1434,7 @@ H5Pget_mpio_actual_chunk_opt_mode(hid_t plist_id, H5D_mpio_actual_chunk_opt_mode
     herr_t ret_value = SUCCEED;   /* return value */
     
     FUNC_ENTER_API(H5Pget_mpio_actual_chunk_opt_mode, FAIL)
-    H5TRACE2("e","ix", plist_id, actual_chunk_opt_mode);
+    H5TRACE2("e", "i*Do", plist_id, actual_chunk_opt_mode);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -1463,13 +1463,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t * actual_io_mode)
+H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_mode)
 {
     H5P_genplist_t     *plist;
     herr_t ret_value = SUCCEED;   /* return value */
     
     FUNC_ENTER_API(H5Pget_mpio_actual_io_mode, FAIL)
-    H5TRACE2("e","ix", plist_id, actual_io_mode);
+    H5TRACE2("e", "i*Di", plist_id, actual_io_mode);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
