@@ -65,7 +65,9 @@ New Features
  
     Parallel Library
     ----------------
-    - None
+    - Added new H5Pget_mpio_actual_chunk_opt_mode and
+        H5Pget_mpio_actual_io_mode API routines for querying whether/how
+        a collective I/O operation completed.  (QAK - 2011/10/12)
  
     Tools
     -----
