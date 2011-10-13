@@ -5,9 +5,9 @@
 !
 ! PURPOSE
 !  This file contains Fortran 90 and Fortran 2003 interfaces for H5O functions.
-!  It contains the same functions as H5Off_DEPRECIATE.f90 but includes the
+!  It contains the same functions as H5Off_F90.f90 but includes the
 !  Fortran 2003 functions and the interface listings. This file will be compiled
-!  instead of H5Off_DEPRECIATE.f90 if Fortran 2003 functions are enabled.
+!  instead of H5Off_F90.f90 if Fortran 2003 functions are enabled.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -36,16 +36,18 @@
 MODULE H5O_PROVISIONAL
 
   USE H5GLOBAL
-  USE ISO_C_BINDING
+  USE, INTRINSIC :: ISO_C_BINDING
 
   IMPLICIT NONE
 
-
+!****t* H5T (F03)/h5o_info_t
+!
+! Fortran2003 Derived Type:
+!
   enum, bind(c)
      enumerator :: H5O_TYPE_UNKNOWN_F = -1
      enumerator :: H5O_TYPE_GROUP_F, H5O_TYPE_DATASET_F, H5O_TYPE_NAMED_DATATYPE_F, H5O_TYPE_NTYPES_F
   end enum
-
 
   TYPE, BIND(C) :: space_t
      INTEGER(hsize_t) :: total ! Total space for storing object header in file
@@ -53,23 +55,19 @@ MODULE H5O_PROVISIONAL
      INTEGER(hsize_t) :: mesg  ! Space within header for actual message information
      INTEGER(hsize_t) :: free  ! Free space within object header
   END TYPE space_t
-  
+
   TYPE, BIND(C) :: mesg_t
      INTEGER(c_int64_t) :: present ! Flags to indicate presence of message type in header 
      INTEGER(c_int64_t) :: shared  ! Flags to indicate message type is shared in header
   END TYPE mesg_t
   
   TYPE, BIND(C) :: hdr_t
-     INTEGER(c_int) :: version ! Version number of header format in file
-                                 ! unsigned version 
-     INTEGER(c_int) :: nmesgs  ! Number of object header messages
-                                 ! unsigned nmesgs 
-     INTEGER(c_int) :: nchunks ! Number of object header chunks 
-                                 ! unsigned nchunks
-     INTEGER(c_int) :: flags   ! Object header status flags
-                                 ! unsigned flags
-     TYPE(space_t) :: space
-     TYPE(mesg_t) :: mesg
+     INTEGER :: version ! Version number of header format in file
+     INTEGER :: nmesgs  ! Number of object header messages
+     INTEGER :: nchunks ! Number of object header chunks
+     INTEGER :: flags   ! Object header status flags
+     TYPE(space_t)  :: space   
+     TYPE(mesg_t)   :: mesg
   END TYPE hdr_t
 
   ! Extra metadata storage for obj & attributes
@@ -83,28 +81,29 @@ MODULE H5O_PROVISIONAL
      TYPE(H5_ih_info_t) :: attr ! v2 B-tree & heap for attributes
   ENDTYPE meta_size_t
   
+  TYPE, BIND(C) :: h5o_info_t
+     INTEGER(c_long)  :: fileno     ! File number that object is located in
+     INTEGER(HADDR_T) :: addr       ! Object address in file  
+     INTEGER          :: type       ! Basic object type (group, dataset, etc.) 
+     INTEGER          :: rc         ! Reference count of object
 
-  TYPE, BIND(C) :: H5O_info_t
-     INTEGER(c_long) ::  fileno ! File number that object is located in
-                                ! unsigned long
-     INTEGER(HADDR_T) :: addr   ! Object address in file  
-     INTEGER(c_int) :: TYPE     ! Basic object type (group, dataset, etc.) 
-                                ! H5O_type_t type which is type enum
-     INTEGER(c_int) :: rc       ! Reference count of object
-                                ! unsigned rc
-     INTEGER(c_int) :: atime    ! Access time
-     INTEGER(c_int) :: mtime    ! Modification time
-     INTEGER(c_int) :: ctime    ! Change time
-     INTEGER(c_int) :: btime    ! Birth time
-     INTEGER(hsize_t) :: num_attrs ! # of attributes attached to object
+     INTEGER, DIMENSION(8) :: atime ! Access time         !    -- NOTE --
+     INTEGER, DIMENSION(8) :: mtime ! Modification time   ! Returns an integer array    
+     INTEGER, DIMENSION(8) :: ctime ! Change time         ! as specified in the Fortran 
+     INTEGER, DIMENSION(8) :: btime ! Birth time          ! intrinsic DATE_AND_TIME(VALUES)
+
+     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
 
      TYPE(hdr_t) :: hdr
+
      TYPE(meta_size_t) :: meta_size
-  END TYPE H5O_info_t
+  END TYPE h5o_info_t
+
+!*****
 
 CONTAINS
 
-!****s* H5O (F03)/h5ovisit_f
+!****s* H5O (F03)/h5ovisit_f_F03
 !
 ! NAME
 !  h5ovisit_f
@@ -113,53 +112,43 @@ CONTAINS
 !  Recursively visits all objects starting from a specified object.
 !
 ! Inputs:
-!  group_id 	 - Identifier of the group at which the recursive iteration begins
-!  index_type 	 - Type of index; valid values include:
-!                    H5_INDEX_NAME_F
-!                    H5_INDEX_CRT_ORDER_F
-!  order 	 - Order in which index is traversed; valid values include:
-!                    H5_ITER_DEC_F
-!                    H5_ITER_INC_F
-!                    H5_ITER_NATIVE_F
-!  op 	         - Callback function passing data regarding the group to the calling application
-!  op_data 	 - User-defined pointer to data required by the application for its processing of the group
+!  group_id   - Identifier of the group at which the recursive iteration begins
+!  index_type - Type of index; valid values include:
+!                H5_INDEX_NAME_F
+!                H5_INDEX_CRT_ORDER_F
+!  order      - Order in which index is traversed; valid values include:
+!                H5_ITER_DEC_F
+!                H5_ITER_INC_F
+!                H5_ITER_NATIVE_F
+!  op 	      - Callback function passing data regarding the group to the calling application
+!  op_data    - User-defined pointer to data required by the application for its processing of the group
 !
 ! Outputs:
-!  idx 	         - returns the return value of the first operator that returns a positive value, or 
-!                  zero if all members were processed with no operator returning non-zero.
-!  hdferr 	 - error code:
-!                    0 on success and -1 on failure
+!  return_value - returns the return value of the first operator that returns a positive value, or 
+!                 zero if all members were processed with no operator returning non-zero.
+!  hdferr       - Returns 0 if successful and -1 if fails
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  November 19, 2008
 !
-! Signature:
+! Fortran2003 Interface:
   SUBROUTINE h5ovisit_f(group_id, index_type, order, op, op_data, return_value, hdferr)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: group_id
     INTEGER, INTENT(IN) :: index_type 
     INTEGER, INTENT(IN) :: order
+
+    TYPE(C_FUNPTR):: op
+    TYPE(C_PTR)   :: op_data
+    INTEGER, INTENT(OUT) :: return_value
+    INTEGER, INTENT(OUT) :: hdferr
+!*****
 !!$    INTEGER(HSIZE_T), INTENT(INOUT) :: idx  ! IN : Iteration position at which to start
 !!$                                            ! OUT: Position at which an interrupted iteration may be restarted
-
-    TYPE(C_FUNPTR):: op      ! Callback function passing data regarding the link to the calling application
-    TYPE(C_PTR)   :: op_data ! User-defined pointer to data required by the application for its processing of the link
-
-    INTEGER, INTENT(OUT) :: return_value ! Success:   The return value of the first operator that
- 				         !            returns non-zero, or zero if all members were
- 				         !            processed with no operator returning non-zero.
-
- 		                         ! Failure:   Negative if something goes wrong within the
- 				         !            library, or the negative value returned by one
- 				         !            of the operators.
-
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-                                         ! 0 on success and -1 on failure
-!*****
     INTERFACE
        INTEGER FUNCTION h5ovisit_c(group_id, index_type, order, op, op_data)
-         USE ISO_C_BINDING
+         USE, INTRINSIC :: ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OVISIT_C'::h5ovisit_c
@@ -182,10 +171,8 @@ CONTAINS
 
   END SUBROUTINE h5ovisit_f
 
-
-
 !
-!!$!****s* H5O/h5oget_info_by_name_f
+!!$!****s* H5O (F03)/h5oget_info_by_name_f_F03
 !
 ! NAME
 !  h5oget_info_by_name_f
@@ -208,20 +195,15 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  December 1, 2008
 !
-! Signature:
+! Fortran2003 Interface:
   SUBROUTINE h5oget_info_by_name_f(loc_id, name, &
        object_info, hdferr, lapl_id)
-   !    f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
 
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)  :: loc_id
     CHARACTER(LEN=*), INTENT(IN)  :: name
     TYPE(C_PTR)                   :: object_info
-!!$    LOGICAL         , INTENT(OUT)           :: f_corder_valid
-!!$    INTEGER         , INTENT(OUT)           :: corder
-!!$    INTEGER         , INTENT(OUT)           :: cset
-!!$    INTEGER(HSIZE_T), INTENT(OUT)           :: data_size
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
 !*****
@@ -254,9 +236,6 @@ CONTAINS
     hdferr = H5Oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, &
          object_info)
 
-
-!!$    f_corder_valid =.FALSE.
-!!$    IF (corder_valid .EQ. 1) f_corder_valid =.TRUE.
 
   END SUBROUTINE H5Oget_info_by_name_f
 
