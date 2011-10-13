@@ -756,7 +756,17 @@ Bug Fixes since HDF5-1.8.0 release
            was not correctly returning the dimension array. (PVN - 2009/3/23)
       - Lite: the h5ltread_dataset_string_f and h5ltget_attribute_string_f functions 
            had memory problems with the g95 fortran compiler. (PVN � 5/13/2009) 1522
-
+      - Added Fortran wrappers for Dimension Scale APIs. HDFFV-3797
+          h5dsset_scale_f
+          h5dsattach_scale_f
+          h5dsdetach_scale_f
+          h5dsis_attached_f
+          h5dsis_scale_f
+          h5dsset_label_f
+          h5dsget_label_f
+          h5dsget_scale_name_f
+          h5dsget_num_scales_f
+                  EIP for SB - 2011/101/3
 
 
 
