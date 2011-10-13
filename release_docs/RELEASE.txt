@@ -225,7 +225,17 @@ Bug Fixes since HDF5-1.8.7
 
     Fortran High-Level APIs:
     ------
-    - None
+    - Added Fortran wrappers for Dimension Scale APIs. HDFFV-3797
+      h5dsset_scale_f
+      h5dsattach_scale_f
+      h5dsdetach_scale_f
+      h5dsis_attached_f
+      h5dsis_scale_f
+      h5dsset_label_f
+      h5dsget_label_f
+      h5dsget_scale_name_f
+      h5dsget_num_scales_f
+                  EIP for SB - 2011/101/3 
 
 
 Platforms Tested
