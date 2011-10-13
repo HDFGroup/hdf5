@@ -134,11 +134,15 @@ H5FL_SEQ_DEFINE(H5A_t_ptr);
  *              24 June 2008
  *              Changed the table of attribute objects to be the table of
  *              pointers to attribute objects for the ease of operation.
+ *
+ *	Vailin Choi; September 2011
+ *	Change "oh_modified" from boolean to unsigned
+ *	(See H5Oprivate.h for possible flags)
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned sequence, hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
+    unsigned sequence, unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5A_compact_bt_ud_t *udata = (H5A_compact_bt_ud_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */

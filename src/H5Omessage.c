@@ -75,7 +75,7 @@ typedef struct {
 
 static herr_t H5O_msg_reset_real(const H5O_msg_class_t *type, void *native);
 static herr_t H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned sequence, hbool_t *oh_modified, void *_udata/*in,out*/);
+    unsigned sequence, unsigned *oh_modified, void *_udata/*in,out*/);
 static herr_t H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
     const H5O_msg_class_t *type, const void *mesg, unsigned mesg_flags,
     unsigned update_flags);
@@ -1059,11 +1059,15 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Sep  6 2005
  *
+ * Modifications:
+ *	Vailin Choi; Sept 2011
+ *	Indicate that the object header is modified and might possibly need
+ *	to condense messages in the object header 
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
-    hbool_t *oh_modified, void *_udata/*in,out*/)
+    unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     htri_t try_remove = FALSE;         /* Whether to try removing a message */
@@ -1097,8 +1101,8 @@ H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
         if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, udata->adj_link) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to release message")
 
-        /* Indicate that the object header was modified */
-        *oh_modified = TRUE;
+        /* Indicate that the object header was modified & might need to condense messages in object header */
+        *oh_modified = H5O_MODIFY_CONDENSE;
 
         /* Break out now, if we've found the correct message */
         if(udata->sequence == H5O_FIRST || udata->sequence != H5O_ALL)
@@ -1266,6 +1270,12 @@ done:
  *      C. Negative causes the iterator to immediately return that value,
  *          indicating failure.
  *
+ * Modifications:
+ *	Vailin Choi; September 2011
+ *	Change "oh_modified" from boolean to unsigned so as to know:
+ *	1) object header is just modified
+ *	2) object header is modified and possibly need to condense messages there
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1275,7 +1285,7 @@ H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
     H5O_mesg_t         *idx_msg;        /* Pointer to current message */
     unsigned		idx;            /* Absolute index of current message in all messages */
     unsigned		sequence;       /* Relative index of current message for messages of type */
-    hbool_t             oh_modified = FALSE;    /* Whether the callback modified the object header */
+    unsigned		oh_modified = 0;    /* Whether the callback modified the object header */
     herr_t              ret_value = H5_ITER_CONT;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_msg_iterate_real)
@@ -1315,13 +1325,15 @@ H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
 done:
     /* Check if object message was modified */
     if(oh_modified) {
-        /* Try to condense object header info */
+        /* Try to condense object header info if the flag indicates so */
         /* (Since this routine is used to remove messages from an
          *  object header, the header will be condensed after each
          *  message removal)
          */
-        if(H5O_condense_header(f, oh, dxpl_id) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't pack object header")
+	if(oh_modified & H5O_MODIFY_CONDENSE) {
+	    if(H5O_condense_header(f, oh, dxpl_id) < 0)
+		HDONE_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't pack object header")
+	}
 
         /* Mark object header as changed */
         if(H5O_touch_oh(f, dxpl_id, oh, FALSE) < 0)

@@ -570,13 +570,18 @@ typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
 
 /* Typedef for "internal library" iteration operations */
 typedef herr_t (*H5O_lib_operator_t)(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned sequence, hbool_t *oh_modified/*out*/, void *operator_data/*in,out*/);
+    unsigned sequence, unsigned *oh_modified/*out*/, void *operator_data/*in,out*/);
 
 /* Some syntactic sugar to make the compiler happy with two different kinds of iterator callbacks */
 typedef enum H5O_mesg_operator_type_t {
     H5O_MESG_OP_APP,            /* Application callback */
     H5O_MESG_OP_LIB             /* Library internal callback */
 } H5O_mesg_operator_type_t;
+
+/* To indicate that the object header is just modified */
+#define H5O_MODIFY		0x01
+/* To indicate that the object header is modified and might possibly need to condense messages */
+#define H5O_MODIFY_CONDENSE	0x02
 
 typedef struct {
     H5O_mesg_operator_type_t op_type;

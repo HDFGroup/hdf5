@@ -169,11 +169,15 @@ static htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr,
  *		koziol@hdfgroup.org
  *		Dec  4 2006
  *
+ * Modifications:
+ *      Vailin Choi; Sept 2011
+ *      Indicate that the object header is modified and might possibly need
+ *      to condense messages in the object header
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, hbool_t *oh_modified, void *_udata/*in,out*/)
+    unsigned UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_cvt_t *udata = (H5O_iter_cvt_t *)_udata;   /* Operator user data */
     H5A_t *attr = (H5A_t *)mesg->native;        /* Pointer to attribute to insert */
@@ -199,7 +203,7 @@ H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
 
     /* Indicate that the object header was modified */
-    *oh_modified = TRUE;
+    *oh_modified = H5O_MODIFY_CONDENSE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -415,11 +419,15 @@ done:
  *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
+ * Modifications:
+ *	Vailin Choi; September 2011
+ *      Change oh_modified from boolean to unsigned
+ *      (See H5Oprivate.h for possible flags)
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
-    hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
+    unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_opn_t *udata = (H5O_iter_opn_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -842,11 +850,16 @@ done:
  *              4 June 2008
  *              Took out the data copying part because the attribute data
  *              is shared between attribute handle and object header.
+ *
+ * Modifications:
+ *      Vailin Choi; Sept 2011
+ *      Indicate that the object header is modified but does not need to
+ *	condense messages in the object header
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, hbool_t *oh_modified, void *_udata/*in,out*/)
+    unsigned UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_wrt_t *udata = (H5O_iter_wrt_t *)_udata;   /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
@@ -895,7 +908,7 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, H5_ITER_ERROR, "unable to update attribute in shared storage")
 
         /* Indicate that the object header was modified */
-        *oh_modified = TRUE;
+        *oh_modified = H5O_MODIFY;
 
         /* Indicate that the attribute was found */
         udata->found = TRUE;
@@ -1001,11 +1014,15 @@ done:
  *		koziol@hdfgroup.org
  *		Dec  5 2006
  *
+ * Modifications:
+ *      Vailin Choi; September 2011
+ *      Change "oh_modified" from boolean to unsigned
+ *      (See H5Oprivate.h for possible flags)
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_attr_rename_chk_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
+    unsigned UNUSED sequence, unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -1047,11 +1064,15 @@ H5O_attr_rename_chk_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
  *		koziol@hdfgroup.org
  *		Dec  5 2006
  *
+ * Modifications:
+ *      Vailin Choi; Sept 2011
+ *      Indicate that the object header is modified and might possibly need
+ *      to condense messages in the object header
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, hbool_t *oh_modified, void *_udata/*in,out*/)
+    unsigned UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
@@ -1125,6 +1146,8 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
                 if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, FALSE) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to release previous attribute")
 
+		*oh_modified = H5O_MODIFY_CONDENSE;
+
                 /* Append renamed attribute to object header */
                 /* (Don't let it become shared) */
                 if(H5O_msg_append_real(udata->f, udata->dxpl_id, oh, H5O_MSG_ATTR, (mesg->flags | H5O_MSG_FLAG_DONTSHARE), 0, attr) < 0)
@@ -1139,7 +1162,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         } /* end else */
 
         /* Indicate that the object header was modified */
-        *oh_modified = TRUE;
+        *oh_modified |= H5O_MODIFY;
 
         /* Indicate that we found an existing attribute with the old name */
         udata->found = TRUE;
@@ -1507,11 +1530,15 @@ done:
  *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
+ * Modifications:
+ *      Vailin Choi; Sept 2011
+ *      Indicate that the object header is modified and might possibly need
+ *      to condense messages in the object header
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, hbool_t *oh_modified, void *_udata/*in,out*/)
+    unsigned UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
@@ -1530,7 +1557,7 @@ H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
 
         /* Indicate that the object header was modified */
-        *oh_modified = TRUE;
+        *oh_modified = H5O_MODIFY_CONDENSE;
 
         /* Indicate that this message is the attribute to be deleted */
         udata->found = TRUE;
@@ -1786,11 +1813,15 @@ done:
  *		koziol@hdfgroup.org
  *		Dec 11 2006
  *
+ * Modifications:
+ *      Vailin Choi; September 2011
+ *      Change "oh_modified" from boolean to unsigned
+ *      (See H5Oprivate.h for possible flags)
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_attr_exists_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
+    unsigned UNUSED sequence, unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
