@@ -345,8 +345,10 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    /* Deep copy the log filename */
-    fa.logfile = H5MM_xstrdup(logfile);
+    /* This shallow copy is correct! The string will be properly 
+     * copied deep down in the H5P code. 
+     */
+    fa.logfile = (char *)logfile;
 
     fa.flags = flags;
     fa.buf_size = buf_size;
