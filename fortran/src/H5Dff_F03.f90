@@ -5,9 +5,9 @@
 !
 ! PURPOSE
 !  This file contains Fortran 90 and Fortran 2003 interfaces for H5D functions.
-!  It contains the same functions as H5Dff_DEPRECIATE.f90 but includes the
+!  It contains the same functions as H5Dff_F90.f90 but includes the
 !  Fortran 2003 functions and the interface listings. This file will be compiled
-!  instead of H5Dff_DEPRECIATE.f90 if Fortran 2003 functions are enabled.
+!  instead of H5Dff_F90.f90 if Fortran 2003 functions are enabled.
 !
 ! COPYRIGHT
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -37,8 +37,8 @@
 !  (i.e. integer, dimension(*) :: ... )
 !  (i.e. real   , dimension(*) :: ... ) etc...
 !
-!  (3) Could not place the USE ISO_C_BINDING in the module header because it may
-!  conflict with the USE ISO_C_BINDING included in the user's program. Moved
+!  (3) Could not place the USE, INTRINSIC :: ISO_C_BINDING in the module header because it may
+!  conflict with the USE, INTRINSIC :: ISO_C_BINDING included in the user's program. Moved
 !  the statement instead to each subroutine.
 !
 !
@@ -71,7 +71,7 @@
 !  CHARACTER(LEN=1), TARGET :: chr
 !  or
 !  CHARACTER, TARGET :: chr
-!  (B)
+!  
 !                         *** IMPORTANT ***
 !  If you add a new H5D function you must add the function name to the
 !  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
@@ -225,7 +225,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -258,7 +258,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_reference_dsetreg(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -321,7 +321,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_integer_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -352,7 +352,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_integer_1(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -385,7 +385,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_integer_2(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -417,7 +417,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_integer_3(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -449,7 +449,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_integer_4(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -481,7 +481,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_integer_5(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -514,7 +514,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_integer_6(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -547,7 +547,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_integer_7(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -580,7 +580,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -598,7 +598,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_scalar_fix(dset_id, mem_type_id, buf, buf_len, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -631,7 +631,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_1(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -664,7 +664,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_2(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -698,7 +698,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_3(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -732,7 +732,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_4(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -765,7 +765,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_5(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -797,7 +797,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_6(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -831,7 +831,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_7(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -866,7 +866,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_real_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -897,7 +897,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_real_1(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -929,7 +929,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_real_2(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -962,7 +962,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_real_3(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -994,7 +994,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_real_4(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1026,7 +1026,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_real_5(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1058,7 +1058,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_real_6(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1090,7 +1090,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_real_7(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1167,7 +1167,7 @@ CONTAINS
 !
   SUBROUTINE h5dread_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1200,7 +1200,7 @@ CONTAINS
 
   SUBROUTINE h5dread_reference_dsetreg(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1265,7 +1265,7 @@ CONTAINS
 
   SUBROUTINE h5dread_integer_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1297,7 +1297,7 @@ CONTAINS
 
   SUBROUTINE h5dread_integer_1(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1329,7 +1329,7 @@ CONTAINS
 
   SUBROUTINE h5dread_integer_2(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1361,7 +1361,7 @@ CONTAINS
 
   SUBROUTINE h5dread_integer_3(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1394,7 +1394,7 @@ CONTAINS
 
   SUBROUTINE h5dread_integer_4(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1426,7 +1426,7 @@ CONTAINS
 
   SUBROUTINE h5dread_integer_5(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1459,7 +1459,7 @@ CONTAINS
 
   SUBROUTINE h5dread_integer_6(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1491,7 +1491,7 @@ CONTAINS
 
   SUBROUTINE h5dread_integer_7(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1523,7 +1523,7 @@ CONTAINS
 
   SUBROUTINE h5dread_char_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id         ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id   ! Memory datatype identifier
@@ -1545,7 +1545,7 @@ CONTAINS
 
   SUBROUTINE h5dread_char_scalar_fix(dset_id, mem_type_id, buf, buf_len, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1579,7 +1579,7 @@ CONTAINS
 
   SUBROUTINE h5dread_char_1(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1612,7 +1612,7 @@ CONTAINS
 
   SUBROUTINE h5dread_char_2(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1646,7 +1646,7 @@ CONTAINS
 
   SUBROUTINE h5dread_char_3(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1679,7 +1679,7 @@ CONTAINS
 
   SUBROUTINE h5dread_char_4(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1714,7 +1714,7 @@ CONTAINS
   SUBROUTINE h5dread_char_5(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
 
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1748,7 +1748,7 @@ CONTAINS
 
   SUBROUTINE h5dread_char_6(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1783,7 +1783,7 @@ CONTAINS
   SUBROUTINE h5dread_char_7(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
 
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1818,7 +1818,7 @@ CONTAINS
   SUBROUTINE h5dread_real_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
 
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1849,7 +1849,7 @@ CONTAINS
 
   SUBROUTINE h5dread_real_1(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1881,7 +1881,7 @@ CONTAINS
 
   SUBROUTINE h5dread_real_2(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1913,7 +1913,7 @@ CONTAINS
 
   SUBROUTINE h5dread_real_3(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1945,7 +1945,7 @@ CONTAINS
 
   SUBROUTINE h5dread_real_4(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1977,7 +1977,7 @@ CONTAINS
 
   SUBROUTINE h5dread_real_5(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2010,7 +2010,7 @@ CONTAINS
   SUBROUTINE h5dread_real_6(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
 
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2042,7 +2042,7 @@ CONTAINS
 
   SUBROUTINE h5dread_real_7(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2073,13 +2073,49 @@ CONTAINS
 
   END SUBROUTINE h5dread_real_7
 
+!****s* H5D (F03)/h5dwrite_f_F03
+!
+! NAME		
+!  h5dwrite_f_F03
+!
+! PURPOSE
+!  Writes raw data from a dataset into a buffer. 
+!
+! Inputs:
+!  dset_id	 - Identifier of the dataset to write to.
+!  mem_type_id	 - Identifier of the memory datatype.
+!  buf		 - Buffer with data to be written to the file.
+!  
+! Outputs:
+!  hdferr        - Returns 0 if successful and -1 if fails
+!
+! Optional parameters:
+!  mem_space_id	 - Identifier of the memory dataspace.
+!  file_space_id - Identifier of the dataset's dataspace in the file.
+!  xfer_prp	 - Identifier of a transfer property list for this I/O operation.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  September 17, 2011
+!
+! Fortran2003 Interface:
+!!  SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, hdferr, &
+!!                        mem_space_id, file_space_id, xfer_prp)
+!!    INTEGER(HID_T), INTENT(IN)              :: dset_id
+!!    INTEGER(HID_T), INTENT(IN)              :: mem_type_id
+!!    TYPE(C_PTR)   , INTENT(IN)              :: buf
+!!    INTEGER       , INTENT(OUT)             :: hdferr
+!!    INTEGER(HID_T), INTENT(IN)   , OPTIONAL :: mem_space_id
+!!    INTEGER(HID_T), INTENT(IN)   , OPTIONAL :: file_space_id
+!!    INTEGER(HID_T), INTENT(IN)   , OPTIONAL :: xfer_prp
+!*****
   SUBROUTINE h5dwrite_ptr(dset_id, mem_type_id, buf, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-    TYPE(C_PTR), INTENT(INOUT) :: buf
+    TYPE(C_PTR), INTENT(IN) :: buf
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
@@ -2101,7 +2137,42 @@ CONTAINS
          file_space_id_default, xfer_prp_default, buf)
 
   END SUBROUTINE h5dwrite_ptr
-
+!****s* H5D (F03)/h5dread_f_F03
+!
+! NAME		
+!  h5dread_f_F03
+!
+! PURPOSE
+!  Reads raw data from a dataset into a buffer. 
+!
+! Inputs:
+!  dset_id	 - Identifier of the dataset read from.
+!  mem_type_id	 - Identifier of the memory datatype.
+!  
+! Outputs:
+!  buf		 - Buffer to receive data read from file.
+!  hdferr        - Returns 0 if successful and -1 if fails
+!
+! Optional parameters:
+!  mem_space_id	 - Identifier of the memory dataspace.
+!  file_space_id - Identifier of the dataset's dataspace in the file.
+!  xfer_prp	 - Identifier of a transfer property list for this I/O operation.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  September 17, 2011
+!
+! Fortran2003 Interface:
+!!  SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, hdferr, &
+!!                       mem_space_id, file_space_id, xfer_prp)
+!!    INTEGER(HID_T), INTENT(IN)              :: dset_id
+!!    INTEGER(HID_T), INTENT(IN)              :: mem_type_id
+!!    TYPE(C_PTR)   , INTENT(INOUT)           :: buf
+!!    INTEGER       , INTENT(OUT)             :: hdferr
+!!    INTEGER(HID_T), INTENT(IN)   , OPTIONAL :: mem_space_id
+!!    INTEGER(HID_T), INTENT(IN)   , OPTIONAL :: file_space_id
+!!    INTEGER(HID_T), INTENT(IN)   , OPTIONAL :: xfer_prp
+!*****
   SUBROUTINE h5dread_ptr(dset_id, mem_type_id, buf, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
     USE, INTRINSIC :: ISO_C_BINDING
@@ -2158,7 +2229,7 @@ CONTAINS
 !
 
   SUBROUTINE h5dfill_integer(fill_value, space_id, buf,  hdferr)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER, INTENT(IN), TARGET :: fill_value  ! Fill value
     INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -2208,7 +2279,7 @@ CONTAINS
 !  March 12, 2003
 !
   SUBROUTINE h5dfill_real(fill_valuer, space_id, buf,  hdferr)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     REAL, INTENT(IN), TARGET :: fill_valuer  ! Fill value
     INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -2257,7 +2328,7 @@ CONTAINS
 !  March 12, 2003
 !
   SUBROUTINE h5dfill_char(fill_value, space_id, buf,  hdferr)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     CHARACTER, INTENT(IN), TARGET :: fill_value  ! Fill value
     INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -2278,9 +2349,9 @@ CONTAINS
 
   END SUBROUTINE h5dfill_char
 !
-!****s* H5D/h5dvlen_reclaim
+!****s* H5D (F03)/h5dvlen_reclaim_f
 ! NAME
-!  h5dvlen_reclaim
+!  h5dvlen_reclaim_f
 !
 ! PURPOSE 
 !  Reclaims VL datatype memory buffers. 
@@ -2290,28 +2361,24 @@ CONTAINS
 !  type_id  - Identifier of the datatype. 
 !  space_id - Identifier of the dataspace. 
 !  plist_id - Identifier of the property list used to create the buffer. 
-!       buf - Pointer to the buffer to be reclaimed. 
+!  buf      - Pointer to the buffer to be reclaimed. 
 !
 ! Outputs:
-!  hdferr   - error code
-!	        Success:  0
-!		Failure: -1
+!  hdferr   - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 ! M. Scot Breitenfeld
 ! January 11, 2011
 !
-! Signature:
-  SUBROUTINE H5Dvlen_reclaim_f(type_id, space_id, plist_id, buf, hdferr)
-
-    USE ISO_C_BINDING
+! Fortran2003 Interface:
+  SUBROUTINE h5dvlen_reclaim_f(type_id, space_id, plist_id, buf, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
-
-    INTEGER(HID_T), INTENT(IN) :: type_id   ! Identifier of the datatype. 
-    INTEGER(HID_T), INTENT(IN) :: space_id  ! Identifier of the dataspace. 
-    INTEGER(HID_T), INTENT(IN) :: plist_id  ! Identifier of the property list used to create the buffer. 
-    TYPE(C_PTR), INTENT(INOUT) :: buf       ! Pointer to the buffer to be reclaimed. 
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code.
+    INTEGER(HID_T), INTENT(IN)    :: type_id
+    INTEGER(HID_T), INTENT(IN)    :: space_id
+    INTEGER(HID_T), INTENT(IN)    :: plist_id
+    TYPE(C_PTR)   , INTENT(INOUT) :: buf
+    INTEGER       , INTENT(OUT)   :: hdferr
 !*****
 
     INTERFACE

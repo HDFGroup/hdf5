@@ -5,9 +5,9 @@
 !
 ! PURPOSE
 !  This file contains Fortran 90 and Fortran 2003 interfaces for H5T functions.
-!  It contains the same functions as H5Tff_DEPRECIATE.f90 but includes the
+!  It contains the same functions as H5Tff_F90.f90 but includes the
 !  Fortran 2003 functions and the interface listings. This file will be compiled
-!  instead of H5Tff_DEPRECIATE.f90 if Fortran 2003 functions are enabled.
+!  instead of H5Tff_F90.f90 if Fortran 2003 functions are enabled.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -36,16 +36,20 @@
 MODULE H5T_PROVISIONAL
 
   USE H5GLOBAL
-  USE ISO_C_BINDING
+  USE, INTRINSIC :: ISO_C_BINDING
 
+!****t* H5T (F03)/hvl_t
+! Fortran2003 Derived Type:
   TYPE hvl_t
      INTEGER(size_t) :: len ! Length of VL data (in base type units)
      TYPE(C_PTR) :: p       ! Pointer to VL data
   END TYPE hvl_t
 
+!*****
+
 CONTAINS
 
-!****s* H5T (F03)/H5Tconvert_f
+!****s* H5T (F03)/H5Tconvert_f_F03
 !
 ! NAME
 !  H5Tconvert_f
@@ -69,9 +73,9 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  Decemember 8, 2008
 !
-! Signature:
+! Fortran2003 Interface:
   SUBROUTINE h5tconvert_f(src_id, dst_id, nelmts, buf, hdferr, background, plist_id)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T) , INTENT(IN)               :: src_id
     INTEGER(HID_T) , INTENT(IN)               :: dst_id
@@ -86,7 +90,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5tconvert_c(src_id, dst_id, nelmts, buf, background, plist_id)
-         USE ISO_C_BINDING
+         USE, INTRINSIC :: ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TCONVERT_C'::H5Tconvert_c
