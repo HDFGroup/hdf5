@@ -688,6 +688,18 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     if(H5SL_insert(cpy_info->map_list, addr_map, &(addr_map->src_obj_pos)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
 
+    /* Set metadata tag for destination object's object header */
+    H5_BEGIN_TAG(dxpl_id, oloc_dst->addr, FAIL);
+
+    /* Insert destination object header in cache.  Insert before post copy loop
+     * so anything that references this object header can find it.  Insert
+     * pinned so we can continue using oh_dst. */
+    if(H5AC_insert_entry(oloc_dst->file, dxpl_id, H5AC_OHDR, oloc_dst->addr,  oh_dst, H5AC__PIN_ENTRY_FLAG) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
+
+    /* Reset metadata tag */
+    H5_END_TAG(FAIL);
+
     /* "post copy" loop over messages, to fix up any messages which require a complete
      * object header for destination object
      */
@@ -738,16 +750,10 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         oh_dst->nlink += (unsigned)addr_map->inc_ref_count;
     } /* end if */
 
-    /* Set metadata tag for destination object's object header */
-    H5_BEGIN_TAG(dxpl_id, oloc_dst->addr, FAIL);
-
-    /* Insert destination object header in cache */
-    if(H5AC_insert_entry(oloc_dst->file, dxpl_id, H5AC_OHDR, oloc_dst->addr, oh_dst, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
+    /* Unpin oh_dst */
+    if(H5AC_unpin_entry(oh_dst) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, FAIL, "can't unpin object header")
     oh_dst = NULL;
-
-    /* Reset metadat tag */
-    H5_END_TAG(FAIL);
 
     /* Retag all copied metadata to apply the destination object's tag */
     if(H5AC_retag_copied_metadata(oloc_dst->file, oloc_dst->addr) < 0)

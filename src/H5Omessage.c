@@ -419,7 +419,7 @@ H5O_msg_write_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *ty
          * XXX: This doesn't handle freeing extra space in object header from
          *      a message shrinking.
          */
-        if((status = H5SM_try_share(f, dxpl_id, ((mesg_flags & H5O_MSG_FLAG_SHARED) ? NULL : oh), idx_msg->type->id, mesg, &mesg_flags)) < 0)
+        if((status = H5SM_try_share(f, dxpl_id, ((mesg_flags & H5O_MSG_FLAG_SHARED) ? NULL : oh), FALSE, idx_msg->type->id, mesg, &mesg_flags)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "error while trying to share message")
         if(status == FALSE && (mesg_flags & H5O_MSG_FLAG_SHARED))
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "message changed sharing status")
@@ -1536,6 +1536,10 @@ H5O_msg_can_share(unsigned type_id, const void *mesg)
         ret_value = (type->share_flags & H5O_SHARE_IS_SHARABLE) ? TRUE : FALSE;
     } /* end else */
 
+    /* If the message is shareable, both copy_file and post_copy_file must be
+     * defined */
+    HDassert((type->post_copy_file && type->copy_file) || ret_value == FALSE);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_can_share() */
 
@@ -1918,7 +1922,7 @@ H5O_msg_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     } /* end if */
     else {
         /* Attempt to share message */
-        if(H5SM_try_share(f, dxpl_id, oh, type->id, native, mesg_flags) < 0)
+        if(H5SM_try_share(f, dxpl_id, oh, FALSE, type->id, native, mesg_flags) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
     } /* end else */
 

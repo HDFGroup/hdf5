@@ -1748,7 +1748,150 @@ error:
     	H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
-} /* end test_copy_named_datatype_vl */
+} /* end test_copy_named_datatype_vl_vl */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_named_datatype_attr_self
+ *
+ * Purpose:     Create name datatype in SRC file, with an attribute that
+ *              uses that named datatype as its datatype, and copy it to
+ *              DST file
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil
+ *              Friday, March 11, 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_named_datatype_attr_self(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
+{
+    hid_t fid_src = -1, fid_dst = -1;   /* File IDs */
+    hid_t tid = -1, tid2 = -1;          /* Datatype IDs */
+    hid_t aid = -1;                     /* Attribute ID */
+    hid_t sid = -1;                     /* Dataspace ID */
+    hsize_t dims[2] = {3, 4};           /* Dataspace dimensions */
+    H5O_info_t oinfo, oinfo2;           /* Object info */
+    H5G_info_t ginfo;                   /* Group info */
+    char                src_filename[NAME_BUF_SIZE];
+    char                dst_filename[NAME_BUF_SIZE];
+
+    TESTING("H5Ocopy(): named datatype with self-referential attribute");
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
+
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+
+    /* create named datatype */
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
+
+    /* create attribute */
+    if((aid = H5Acreate2(tid, "attr_self", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* attach other attributes to the dataset */
+    if(test_copy_attach_attributes(tid, tid) < 0) TEST_ERROR
+
+    /* close the attribute */
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
+
+    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* copy the datatype from SRC to DST */
+    if(H5Ocopy(fid_src, NAME_DATATYPE_SIMPLE, fid_dst, NAME_DATATYPE_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the source datatype */
+    if((tid = H5Topen2(fid_src, NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* open the copied datatype */
+    if((tid2 = H5Topen2(fid_dst, NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Compare the datatypes */
+    if(H5Tequal(tid, tid2) != TRUE) TEST_ERROR
+
+    /* close the source datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* open the destination attribute */
+    if((aid = H5Aopen(tid2, "attr_self", H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* open the destination attribute's datatype */
+    if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
+
+    /* verify that the attribute's datatype is committed */
+    if(H5Tcommitted(tid) != TRUE) TEST_ERROR
+
+    /* verify that the addresses of the datatypes are the same */
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(H5Oget_info(tid2, &oinfo2) < 0) TEST_ERROR
+    if(oinfo.fileno != oinfo2.fileno || oinfo.addr != oinfo2.addr)
+        FAIL_PUTS_ERROR("destination attribute does not use the same committed datatype")
+
+    /* Verify that there are only 2 links int he destination root group */
+    if(H5Gget_info(fid_dst, &ginfo) < 0)
+    if(ginfo.nlinks != 2)
+        FAIL_PUTS_ERROR("unexpected number of links in destination root group")
+
+    /* close the attribute */
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* close the datatypes */
+    if(H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Tclose(tid2);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Aclose(aid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_named_datatype_attr_self */
 
 
 /*-------------------------------------------------------------------------
@@ -7803,7 +7946,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Neil Fortner
- *              Wednesday, March 31, 2005
+ *              Wednesday, March 31, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -8333,7 +8476,7 @@ main(void)
             }
             else {
                 puts("Testing without dense attributes:");
-                num_attributes_g = MAX(min_dense, 2) - 1;
+                num_attributes_g = MAX(min_dense, 2) - 2;
             }
         } /* end if */
         else {
@@ -8343,6 +8486,7 @@ main(void)
         } /* end else */
 
         /* The tests... */
+        nerrors += test_copy_named_datatype_attr_self(fcpl_src, fcpl_dst, my_fapl);
         nerrors += test_copy_dataset_simple(fcpl_src, fcpl_dst, my_fapl);
         nerrors += test_copy_dataset_simple_samefile(fcpl_src, my_fapl);
         nerrors += test_copy_dataset_simple_empty(fcpl_src, fcpl_dst, my_fapl);

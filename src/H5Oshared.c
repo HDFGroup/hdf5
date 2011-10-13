@@ -285,7 +285,7 @@ H5O_shared_link_adj(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         } /* end if */
         /* Check for incrementing reference count on message */
         else if(adjust > 0) {
-            if(H5SM_try_share(f, dxpl_id, open_oh, type->id, shared, NULL) < 0)
+            if(H5SM_try_share(f, dxpl_id, open_oh, FALSE, type->id, shared, NULL) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "error trying to share message")
         } /* end if */
     } /* end else */
@@ -610,7 +610,11 @@ H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst,
     /* Committed shared messages create a shared message at the destination
      * and also copy the committed object that they point to.
      *
-     * SOHMs try to share the destination message.
+     * Other messages simulate sharing the destination message to determine how
+     * it will eventually be shared (if at all), but do not actually share the
+     * message until "post copy".  The "H5O_shared_t" part of the message will
+     * be updated (to allow calculation of the final size) but the message is
+     * not actually shared.
      */
     if(shared_src->type == H5O_SHARE_TYPE_COMMITTED) {
         H5O_loc_t dst_oloc;
@@ -628,20 +632,15 @@ H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst,
         H5O_UPDATE_SHARED(shared_dst, H5O_SHARE_TYPE_COMMITTED, file_dst, mesg_type->id, 0, dst_oloc.addr)
     } /* end if */
     else {
-        /* Try to share new message in the destination file. */
-        /* Message is always shared in heap in dest. file because the dest.
-         *      object header doesn't quite exist yet - JML
-         */
-
+        /* Simulate trying to share new message in the destination file. */
         /* Set copied metadata tag */
         H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, FAIL);
 
-        if(H5SM_try_share(file_dst, dxpl_id, NULL, mesg_type->id, _native_dst, NULL) < 0)
+        if(H5SM_try_share(file_dst, dxpl_id, NULL, TRUE, mesg_type->id, _native_dst, NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to determine if message should be shared")
 
         /* Reset metadata tag */
         H5_END_TAG(FAIL);
-
     } /* end else */
 
 done:
@@ -687,12 +686,8 @@ H5O_shared_post_copy_file(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *mesg)
     /* save the type id for later use */
     msg_type_id = old_sh_mesg->msg_type_id;
 
-    /* Remove the old message from the SOHM storage */
-    if(H5SM_delete(f, dxpl_id, oh, old_sh_mesg) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to find attribute information for object")
-
     /* Add the new message */
-    if((shared_mesg = H5SM_try_share(f, dxpl_id, oh, msg_type_id, mesg, NULL)) == 0)
+    if((shared_mesg = H5SM_try_share(f, dxpl_id, oh, FALSE, msg_type_id, mesg, NULL)) == 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "message changed sharing status")
     else if(shared_mesg < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't share message")
@@ -700,7 +695,6 @@ H5O_shared_post_copy_file(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *mesg)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_post_copy_file() */
-
 
 
 /*-------------------------------------------------------------------------
