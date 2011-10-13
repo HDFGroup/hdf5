@@ -27,6 +27,57 @@ H5_FCDLL void HD5packFstring(char *src, char *dest, size_t len);
 #endif /*H5_VMS*/
 
 /*
+ * Storage info struct used by H5O_info_t and H5F_info_t 
+ * interoperable with Fortran.
+ */
+typedef struct H5_ih_info_t_f {
+    hsize_t     index_size;     /* btree and/or list */
+    hsize_t     heap_size;
+} H5_ih_info_t_f;
+
+/* Information struct for object header metadata (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx) 
+ *  interoperable with Fortran.
+ */
+typedef struct H5O_hdr_info_t_f {
+    int_f version;		/* Version number of header format in file */
+    int_f nmesgs;		/* Number of object header messages */
+    int_f nchunks;		/* Number of object header chunks */
+    int_f flags;                /* Object header status flags */
+    struct {
+        hsize_t total;		/* Total space for storing object header in file */
+        hsize_t meta;		/* Space within header for object header metadata information */
+        hsize_t mesg;		/* Space within header for actual message information */
+        hsize_t free;		/* Free space within object header */
+    } space;
+    struct {
+        uint64_t present;	/* Flags to indicate presence of message type in header */
+        uint64_t shared;	/* Flags to indicate message type is shared in header */
+    } mesg;
+} H5O_hdr_info_t_f;
+
+/* Information struct for object (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx) 
+ *  interoperable with Fortran.
+ */
+typedef struct H5O_info_t_f {
+    unsigned long 	fileno;		/* File number that object is located in */
+    haddr_t_f 		addr;		/* Object address in file	*/
+    int_f 		type;		/* Basic object type (group, dataset, etc.) */
+    int_f 		rc;		/* Reference count of object    */
+    int_f	        atime[8];	/* Access time			*/
+    int_f		mtime[8];	/* Modification time		*/
+    int_f		ctime[8];	/* Change time			*/
+    int_f		btime[8];	/* Birth time			*/
+    hsize_t 		num_attrs;	/* # of attributes attached to object */
+    H5O_hdr_info_t_f    hdr;            /* Object header information */
+    /* Extra metadata storage for obj & attributes */
+    struct {
+        H5_ih_info_t_f   obj;             /* v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets */
+        H5_ih_info_t_f   attr;            /* v2 B-tree & heap for attributes */
+    } meta_size;
+} H5O_info_t_f;
+
+
+/*
  *  Functions from H5Ff.c
  */
 #define nh5fcreate_c              H5_FC_FUNC_(h5fcreate_c, H5FCREATE_C)
@@ -766,7 +817,7 @@ H5_FCDLL int_f nh5olink_c (hid_t_f *object_id, hid_t_f *new_loc_id, _fcd name, s
 			   hid_t_f *lcpl_id, hid_t_f *lapl_id);
 H5_FCDLL int_f nh5ovisit_c (hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate_t op, void *op_data);
 H5_FCDLL int_f nh5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen,hid_t_f *lapl_id,
-				       H5O_info_t *object_info);
+				       H5O_info_t_f *object_info);
 /*
  * Functions from H5Pf.c
  */
@@ -1144,8 +1195,6 @@ H5_FCDLL int_f nh5iis_valid_c(hid_t_f *obj_id, int_f *c_valid);
 #define nh5eget_minor_c H5_FC_FUNC_(h5eget_minor_c, H5EGET_MINOR_C)
 #define nh5eset_auto_c  H5_FC_FUNC_(h5eset_auto_c, H5ESET_AUTO_C)
 #define nh5eset_auto2_c  H5_FC_FUNC_(h5eset_auto2_c, H5ESET_AUTO2_C)
-#define nh5eget_auto_c  H5_FC_FUNC_(h5eget_auto_c, H5EGET_AUTO_C)
-#define nh5eget_auto_c2  H5_FC_FUNC_(h5eget_auto_c2, H5EGET_AUTO_C2)
 #define nprocess_buffer  H5_FC_FUNC_(process_buffer, PROCESS_BUFFER)
 
 
@@ -1156,8 +1205,6 @@ H5_FCDLL int_f nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen);
 H5_FCDLL int_f nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen);
 H5_FCDLL int_f nh5eset_auto_c(int_f* printflag);
 H5_FCDLL int_f nh5eset_auto2_c(int_f* printflag, hid_t_f *estack_id, H5E_auto2_t func, void *client_data);
-H5_FCDLL int_f nh5eget_auto_c(hid_t_f *estack_id, H5E_auto2_t *func, void **client_data, int_f* ret_func);
-H5_FCDLL void* nh5eget_auto_c2(hid_t_f *estack_id, H5E_auto2_t *func, int_f* ret_func);
 H5_FCDLL int_f nprocess_buffer(hid_t_f *estack_id,void **buffer);
 
 /*
