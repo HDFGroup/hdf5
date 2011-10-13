@@ -37,7 +37,8 @@ $ ! h5dump tests
 $ !
 $
 $
-$ 
+$ ! Test for signed/unsigned datasets 
+$ CALL TOOLTEST packedbits.ddl "packedbits.h5"
 $ ! Test for displaying groups
 $ CALL TOOLTEST tgroup-1.ddl "tgroup.h5"
 $ ! Test for displaying the selected groups
@@ -57,8 +58,10 @@ $ CALL TOOLTEST tnamed_dtype_attr.ddl "tnamed_dtype_attr.h5"
 $
 $ ! Test for displaying soft links
 $ CALL TOOLTEST tslink-1.ddl "tslink.h5"
+$ CALL TOOLTEST tudlink-1.ddl "tudlink.h5"
 $ ! Test for displaying the selected link
 $ CALL TOOLTEST tslink-2.ddl "-l slink2 tslink.h5"
+$ CALL TOOLTEST tudlink-2.ddl "-l udlink2 tudlink.h5"
 $
 $ ! Tests for hard links
 $ CALL TOOLTEST thlink-1.ddl "thlink.h5"
@@ -106,12 +109,15 @@ $ CALL TOOLTEST tvlstr.ddl "tvlstr.h5"
 $
 $ ! Test for files with array data
 $ CALL TOOLTEST tarray1.ddl "tarray1.h5"
+# ! Added for bug# 2092 - tarray1_big.h
+$ CALL TOOLTEST tarray1_big.ddl "-"""R""" tarray1_big.h5"
 $ CALL TOOLTEST tarray2.ddl "tarray2.h5"
 $ CALL TOOLTEST tarray3.ddl "tarray3.h5"
 $ CALL TOOLTEST tarray4.ddl "tarray4.h5"
 $ CALL TOOLTEST tarray5.ddl "tarray5.h5"
 $ CALL TOOLTEST tarray6.ddl "tarray6.h5"
 $ CALL TOOLTEST tarray7.ddl "tarray7.h5"
+$ CALL TOOLTEST tarray8.ddl "tarray8.h5"
 $
 $ ! Test for files with empty data
 $ CALL TOOLTEST tempty.ddl "tempty.h5"
@@ -183,14 +189,39 @@ $
 $ ! Array indices print/not print
 $ CALL TOOLTEST tindicesyes.ddl "taindices.h5"
 $ CALL TOOLTEST tindicesno.ddl "-y taindices.h5"
+$
+$ ! Array indices with subsetting
+$ ! 1D case
+$ CALL TOOLTEST tindicessub1.ddl "-d 1d -s 1 -S 10 -c 2 -k 3 taindices.h5"
+$ ! 2D case
+$ CALL TOOLTEST tindicessub2.ddl "-d 2d -s 1,2 -S 3,3 -c 3,2 -k 2,2 taindices.h5"
+$ ! 3D case
+$ CALL TOOLTEST tindicessub3.ddl "-d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2 -k 1,2,2 taindices.h5"
+$ ! 4D case
+$ CALL TOOLTEST tindicessub4.ddl "-d 4d -s 0,0,1,2 -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2 taindices.h5"
+$
+$ ! Exceed the dimensions for subsetting
+$ CALL TOOLTEST texceedsubstart.ddl "-d 1d -s 1,3 taindices.h5"
+$ CALL TOOLTEST texceedsubcount.ddl "-d 1d -c 1,3 taindices.h5"
+$ CALL TOOLTEST texceedsubstride.ddl "-d 1d -S 1,3 taindices.h5"
+$ CALL TOOLTEST texceedsubblock.ddl "-d 1d -k 1,3 taindices.h5"
+
 $ ! User defined
 $ CALL TOOLTEST tuserfilter.ddl "-"""H"""  -p -d myfilter  tfilters.h5"
-$    
+$ ! Test for displaying objects with very long names. The error message says:
+$ ! %DIFF-F-READERR, error reading DISK$USER:[HDFGROUP.1_8_VMS_9_30.TOOLS.TESTFILES]TLONGLINKS.DDL;1
+$ ! -RMS-W-RTB, 66573 byte record too large for user's buffer
+$ ! %RMS-E-EOF, end of file detected 
+$! CALL TOOLTEST tlonglinks.ddl "tlonglinks.h5"
+$ ! Dimensions over 4GB, print boundary
+$ CALL TOOLTEST tbigdims.ddl "-d dset4gb -s 4294967284 -c 22 tbigdims.h5"
+$ ! Hyperslab read
+$ CALL TOOLTEST thyperslab.ddl "thyperslab.h5"
 $ ! Test for displaying dataset and attribute of null space
 $ CALL TOOLTEST tnullspace.ddl "tnullspace.h5"
 $
-$ ! Test for displaying objects with very long names
-$ !CALL TOOLTEST tlonglinks.ddl "tlonglinks.h5"
+$ ! Test for displaying dataset and attribute of space with 0 dimension size
+$ CALL TOOLTEST zerodim.ddl "zerodim.h5"
 $
 $ ! Test for long double (some systems do not have long double)
 $ ! CALL TOOLTEST tldouble.ddl "tldouble.h5"
@@ -205,6 +236,9 @@ $ CALL TOOLTEST1 tbin4.ddl "-d double   -o out4.bin -b """FILE""" tbinary.h5"
 $
 $ ! Test for dataset region references
 $ CALL TOOLTEST tdatareg.ddl "tdatareg.h5"
+$ CALL TOOLTEST tdataregR.ddl "-"""R""" tdatareg.h5"
+$ CALL TOOLTEST tattrreg.ddl "tattrreg.h5"
+$ CALL TOOLTEST tattrregR.ddl "-"""R""" tattrreg.h5"
 $
 $ ! tests for group creation order "1" tracked, "2" name, root tracked
 $ CALL TOOLTEST tordergr1.ddl "--group=1 --sort_by=creation_order --sort_order=ascending tordergr.h5"
@@ -219,6 +253,18 @@ $ CALL TOOLTEST torderattr2.ddl "-"""H""" --sort_by=name --sort_order=descending
 $ CALL TOOLTEST torderattr3.ddl "-"""H""" --sort_by=creation_order --sort_order=ascending torderattr.h5"
 $ CALL TOOLTEST torderattr4.ddl "-"""H""" --sort_by=creation_order --sort_order=descending torderattr.h5"
 $
+$ ! Test for floating point user defined printf format
+$ CALL TOOLTEST tfpformat.ddl "-m %.7f tfpformat.h5"
+$ ! Test for traversal of external links
+$ CALL TOOLTEST textlinksrc.ddl "textlinksrc.h5"
+$ CALL TOOLTEST textlinkfar.ddl "textlinkfar.h5"
+$ ! Test for danglng external links 
+$ CALL TOOLTEST textlink.ddl "textlink.h5"
+$ ! Test for error stack display (BZ2048)
+$ CALL TOOLTEST filter_fail.ddl "--enable-error-stack filter_fail.h5"
+$ ! Test for -o -y for dataset with attributes
+$ CALL TOOLTEST tall-6.ddl "-y -o data -d /g1/g1.1/dset1.1.1 tall.h5"
+$
 $ ! Test for dataset packed bits
 $ ! Limits:
 $ ! Maximum number of packed bits is 8 (for now).
@@ -227,8 +273,45 @@ $ ! Maximun Offset is 7 (Maximum size - 1).
 $ ! Maximum Offset+Length is 8 (Maximum size).
 $ ! Test Normal operation on both signed and unsigned int datasets.
 $ ! Their rawdata output should be the same.
+$ CALL TOOLTEST tpbitsSignedWhole.ddl "-d /"""DS08BITS""" -"""M""" 0,8 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedWhole.ddl "-d /"""DU08BITS""" -"""M""" 0,8 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedIntWhole.ddl "-d /"""DS16BITS""" -"""M""" 0,16 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedIntWhole.ddl "-d /"""DU16BITS""" -"""M""" 0,16 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedLongWhole.ddl "-d /"""DS32BITS""" -"""M""" 0,32 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedLongWhole.ddl "-d /"""DU32BITS""" -"""M""" 0,32 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedLongLongWhole.ddl "-d /"""DS64BITS""" -"""M""" 0,64 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedLongLongWhole.ddl "-d /"""DU64BITS""" -"""M""" 0,64 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedLongLongWhole63.ddl "-d /"""DS64BITS""" -"""M""" 0,63 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedLongLongWhole63.ddl "-d /"""DU64BITS""" -"""M""" 0,63 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedLongLongWhole1.ddl "-d /"""DS64BITS""" -"""M""" 1,63 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedLongLongWhole1.ddl "-d /"""DU64BITS""" -"""M""" 1,63 packedbits.h5"
+$ ! Half sections
+$ CALL TOOLTEST tpbitsSigned4.ddl "-d /"""DS08BITS""" -"""M""" 0,4,4,4 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsigned4.ddl "-d /"""DU08BITS""" -"""M""" 0,4,4,4 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedInt8.ddl "-d /"""DS16BITS""" -"""M""" 0,8,8,8 packedbits.h5" 
+$ CALL TOOLTEST tpbitsUnsignedInt8.ddl "-d /"""DU16BITS""" -"""M""" 0,8,8,8 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedLong16.ddl "-d /"""DS32BITS""" -"""M""" 0,16,16,16 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedLong16.ddl "-d /"""DU32BITS""" -"""M""" 0,16,16,16 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedLongLong32.ddl "-d /"""DS64BITS""" -"""M""" 0,32,32,32 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedLongLong32.ddl "-d /"""DU64BITS""" -"""M""" 0,32,32,32 packedbits.h5"
+$ ! Quarter sections 
+$ CALL TOOLTEST tpbitsSigned2.ddl "-d /"""DS08BITS""" -"""M""" 0,2,2,2,4,2,6,2 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsigned2.ddl "-d /"""DU08BITS""" -"""M""" 0,2,2,2,4,2,6,2 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedInt4.ddl "-d /"""DS16BITS""" -"""M""" 0,4,4,4,8,4,12,4 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedInt4.ddl "-d /"""DU16BITS""" -"""M""" 0,4,4,4,8,4,12,4 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedLong8.ddl "-d /"""DS32BITS""" -"""M""" 0,8,8,8,16,8,24,8 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedLong8.ddl "-d /"""DU32BITS""" -"""M""" 0,8,8,8,16,8,24,8 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedLongLong16.ddl "-d /"""DS64BITS""" -"""M""" 0,16,16,16,32,16,48,16 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedLongLong16.ddl "-d /"""DU64BITS""" -"""M""" 0,16,16,16,32,16,48,16 packedbits.h5"
+$ ! Begin and end
 $ CALL TOOLTEST tpbitsSigned.ddl "-d /"""DS08BITS""" -"""M""" 0,2,2,6 packedbits.h5"
 $ CALL TOOLTEST tpbitsUnsigned.ddl "-d /"""DU08BITS""" -"""M""" 0,2,2,6 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedInt.ddl "-d /"""DS16BITS""" -"""M""" 0,2,10,6 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedInt.ddl "-d /"""DU16BITS""" -"""M""" 0,2,10,6 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedLong.ddl "-d /"""DS32BITS""" -"""M""" 0,2,26,6 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedLong.ddl "-d /"""DU32BITS""" -"""M""" 0,2,26,6 packedbits.h5"
+$ CALL TOOLTEST tpbitsSignedLongLong.ddl "-d /"""DS64BITS""" -"""M""" 0,2,58,6 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsignedLongLong.ddl "-d /"""DU64BITS""" -"""M""" 0,2,58,6 packedbits.h5"
 $ ! Overlapped packed bits.
 $ CALL TOOLTEST tpbitsOverlapped.ddl "-d /"""DS08BITS""" -"""M""" 0,1,1,1,2,1,0,3 packedbits.h5"
 $ ! Maximum number of packed bits.
@@ -241,13 +324,19 @@ $ ! Test Error handling.
 $ ! Too many packed bits requested. Max is 8 for now.
 $ CALL TOOLTEST tpbitsMaxExceeded.ddl "-d /"""DS08BITS""" -"""M""" 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5"
 $ ! Offset too large. Max is 7 (8-1) for now.
-$ CALL TOOLTEST tpbitsOffsetExceeded.ddl "-d /"""DS08BITS""" -"""M""" 8,1 packedbits.h5"
+$ CALL TOOLTEST tpbitsOffsetExceeded.ddl "-d /"""DS08BITS""" -"""M""" 64,1 packedbits.h5"
+$ CALL TOOLTEST tpbitsCharOffsetExceeded.ddl "-d /"""DS08BITS""" -"""M""" 8,1 packedbits.h5"
+$ CALL TOOLTEST tpbitsIntOffsetExceeded.ddl "-d /"""DS16BITS""" -"""M""" 16,1 packedbits.h5"
+$ CALL TOOLTEST tpbitsLongOffsetExceeded.ddl "-d /"""DS32BITS""" -"""M""" 32,1 packedbits.h5"
 $ ! Bad offset, must not be negative.
 $ CALL TOOLTEST tpbitsOffsetNegative.ddl "-d /"""DS08BITS""" -"""M""" -1,1 packedbits.h5"
 $ ! Bad length, must not be positive.
 $ CALL TOOLTEST tpbitsLengthPositive.ddl "-d /"""DS08BITS""" -"""M""" 4,0 packedbits.h5"
 $ ! Offset+Length is too large. Max is 8 for now.
-$ CALL TOOLTEST tpbitsLengthExceeded.ddl "-d /"""DS08BITS""" -"""M""" 2,7 packedbits.h5"
+$ CALL TOOLTEST tpbitsLengthExceeded.ddl "-d /"""DS08BITS""" -"""M""" 37,28 packedbits.h5"
+$ CALL TOOLTEST tpbitsCharLengthExceeded.ddl "-d /"""DS08BITS""" -"""M""" 2,7 packedbits.h5"
+$ CALL TOOLTEST tpbitsIntLengthExceeded.ddl "-d /"""DS16BITS""" -"""M""" 10,7 packedbits.h5"
+$ CALL TOOLTEST tpbitsLongLengthExceeded.ddl "-d /"""DS32BITS""" -"""M""" 26,7 packedbits.h5"
 $ ! Incomplete pair of packed bits request.
 $ CALL TOOLTEST tpbitsIncomplete.ddl "-d /"""DS08BITS""" -"""M""" 0,2,2,1,0,2,2, packedbits.h5"
 $
@@ -266,9 +355,9 @@ $ !
 $ 
 $ define/nolog sys$output 'actual'
 $ define/nolog sys$error  'actual_err'
-$ write  sys$output "#############################"
-$ write  sys$output "Expected output for 'h5dump ''P2''"
-$ write  sys$output "#############################"
+$! write  sys$output "#############################"
+$! write  sys$output "Expected output for 'h5dump ''P2''"
+$! write  sys$output "#############################"
 $ ON ERROR THEN CONTINUE
 $ h5dump 'P2
 $ deassign sys$output
