@@ -151,14 +151,11 @@ ENDIF (WIN32)
 #
 IF (WINDOWS)
   SET (H5_HAVE_WINDOWS 1)
-#  SET (H5_WINDOWS_USE_STDIO 0)
   # ----------------------------------------------------------------------
   # Set the flag to indicate that the machine has window style pathname,
   # that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
   # (This flag should be _unset_ for all machines, except for Windows)
-  #
   SET (H5_HAVE_WINDOW_PATH 1)
-  SET (WINDOWS_MAX_BUF (1024 * 1024 * 1024))
   SET (LINK_LIBS ${LINK_LIBS} "kernel32")
 ENDIF (WINDOWS)
 SET (H5_DEFAULT_VFD H5FD_SEC2)
