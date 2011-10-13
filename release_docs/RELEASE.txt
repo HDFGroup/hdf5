@@ -210,7 +210,10 @@ Bug Fixes since HDF5-1.8.7
 
     F90 API
     ------
-    - None
+    - Modified the h5open_f and h5close_f subroutines to not to call H5open and
+      H5close correspodningly. While the H5open call just adds overhead, the H5close
+      call called by an Fortran application shuts down the HDF5 library making 
+      it unaccessible to the application. HDFFV-915 (EIP & SB - 2011/10/13)
 
     C++ API
     ------
