@@ -56,12 +56,24 @@ New Features
 
     Configuration
     -------------
-    - None
+    - Added checks for clock_gettime and mach/mach_time.h to both configure and
+      CMake.  This will support the move from gettimeofday to clock_gettime's
+      monotonic timer in the profiling code in a future release.
+      (DER - 2011/10/12)
     
     Library
     -------
     - H5Tcreate now supports string type (fixed-length and variable-length).
       (SLU - 2011/05/20)
+    - The Windows VFD code has been removed with the exception of the functions
+      which set it (H5Pset_fapl_windows, for example).  Setting the Windows
+      VFD now really sets the SEC2 VFD.  The WINDOWS_MAX_BUF and
+      WINDOWS_USE_STDIO configuration options and #defines have also been
+      removed.  See HDFFV-7740 and 7744.
+      
+      NOTE: Since the Windows VFD was a clone of the SEC2 VFD, this change
+      should be transparent to users.
+      (DER - 2011/10/12)
  
     Parallel Library
     ----------------
@@ -98,9 +110,6 @@ Bug Fixes since HDF5-1.8.7
 
     Configuration
     -------------
-    - In the Windows platform, the default VFD was changed from the Windows VFD
-      back to the POSIX (aka SEC2) VFD. The Windows VFD is deprecated. HDFFV-7740
-      (AKC 2011/09/26)
     - The --enable-h5dump-packed-bits configure option has been removed.
       The h5dump code that this option conditionally enabled is now always
       compiled into h5dump. Please refer to the h5dump reference manual for 
@@ -111,7 +120,11 @@ Bug Fixes since HDF5-1.8.7
       manual, since we define _BSD_SOURCE. (DER - 2011/05/24)
     - Fixed a bug in the bin/trace Perl script where API functions
       that take a variable number of arguments were not processed for
-      trace statement fixup. (DER - 2011/08/25) 
+      trace statement fixup. (DER - 2011/08/25)
+    - The Windows and VMS versions of H5pubconf.h were brought into sync with
+      the linux/posix version. (DER - 2011/10/12)
+    - Changed the size of H5_SIZEOF_OFF_T to 4 bytes (was 8) in the VMS
+      h5pubconf.h based on the output of a test program.  (DER - 2011/10/12)
 
     Library
     -------
@@ -155,6 +168,15 @@ Bug Fixes since HDF5-1.8.7
     - H5Epush2() now has the correct trace functionality (this is related to the
       bin/trace Perl script bug noted in the configure section).
       (DER 2011/08/25)
+    - Converted post-checks for appropriate POSIX I/O sizes to pre-checks in
+      order to avoid platform-specific/undefined behavior.  (DER - 2011/10/12)
+    - Corrected some Windows behavior in the SEC2 and log VFDs.  This mainly
+      involved data type correctness fixes, Windows API call error checks and
+      adding the volume serial number to the VFD cmp functions.
+      (DER 2011/10/12)
+    - Added generic VFD I/O types to the SEC2 and log VFDs to ensure correct
+      I/O sizes (and remove compiler warnings) between Windows and true POSIX
+      systems.  (DER - 2011/10/12)
 
     Parallel Library
     ----------------
@@ -525,7 +547,16 @@ Known Problems
   bit or large file issues.  The basic STDIO VFD test is known to fail on
   64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
   10.7.0.  The STDIO VFD test has been disabled while we investigate and
-  a fix should appear in 1.8.8.
+  a fix should appear in a future release, possibly 1.8.9.
+  
+* The links test can fail under the stdio VFD due to some issues with external
+  links.  This will be investigated and fixed in a future release.  See JIRA
+  issue HDFFV-7768 for more information.  DER - 10/14/2011
+  
+* h5diff can report inconsistent results when comparing datasets of enum type
+  that contain invalid values.  This is due to how enum types are handled in
+  the library and will be addressed in the next release.  See JIRA issue
+  HDFFV-7527.  DER - 10/14/2011
 
   ======== Original tools/h5ls/testh5ls.sh =========
   TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
