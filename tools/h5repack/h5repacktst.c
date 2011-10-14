@@ -17,6 +17,7 @@
 #include "h5test.h"
 #include "h5diff.h"
 #include "h5tools.h"
+#include "h5tools_utils.h"
 
 #define GOERROR  {H5_FAILED(); goto error;}
 

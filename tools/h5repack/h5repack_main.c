@@ -106,6 +106,10 @@ int main(int argc, const char **argv)
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
+    /* update hyperslab buffer size from H5TOOLS_BUFSIZE env if exist */
+    if ( h5tools_getenv_update_hyperslab_bufsize() < 0)
+        exit(EXIT_FAILURE);
+
     /* initialize options  */
     h5repack_init(&options, 0, 0, (hsize_t)0);
 
