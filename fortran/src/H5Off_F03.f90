@@ -83,7 +83,7 @@ MODULE H5O_PROVISIONAL
   
   TYPE, BIND(C) :: h5o_info_t
      INTEGER(c_long)  :: fileno     ! File number that object is located in
-     INTEGER(HADDR_T) :: addr       ! Object address in file  
+     INTEGER(haddr_t) :: addr       ! Object address in file  
      INTEGER          :: type       ! Basic object type (group, dataset, etc.) 
      INTEGER          :: rc         ! Reference count of object
 
@@ -112,7 +112,7 @@ CONTAINS
 !  Recursively visits all objects starting from a specified object.
 !
 ! Inputs:
-!  group_id   - Identifier of the group at which the recursive iteration begins
+!  object_id  - Identifier of the object at which the recursive iteration begins.
 !  index_type - Type of index; valid values include:
 !                H5_INDEX_NAME_F
 !                H5_INDEX_CRT_ORDER_F
@@ -132,10 +132,10 @@ CONTAINS
 !  November 19, 2008
 !
 ! Fortran2003 Interface:
-  SUBROUTINE h5ovisit_f(group_id, index_type, order, op, op_data, return_value, hdferr)
+  SUBROUTINE h5ovisit_f(object_id, index_type, order, op, op_data, return_value, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: group_id
+    INTEGER(HID_T), INTENT(IN) :: object_id
     INTEGER, INTENT(IN) :: index_type 
     INTEGER, INTENT(IN) :: order
 
@@ -144,16 +144,15 @@ CONTAINS
     INTEGER, INTENT(OUT) :: return_value
     INTEGER, INTENT(OUT) :: hdferr
 !*****
-!!$    INTEGER(HSIZE_T), INTENT(INOUT) :: idx  ! IN : Iteration position at which to start
-!!$                                            ! OUT: Position at which an interrupted iteration may be restarted
+
     INTERFACE
-       INTEGER FUNCTION h5ovisit_c(group_id, index_type, order, op, op_data)
+       INTEGER FUNCTION h5ovisit_c(object_id, index_type, order, op, op_data)
          USE, INTRINSIC :: ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OVISIT_C'::h5ovisit_c
          !DEC$ENDIF
-         INTEGER(HID_T), INTENT(IN) :: group_id
+         INTEGER(HID_T), INTENT(IN) :: object_id
          INTEGER, INTENT(IN) :: index_type
          INTEGER, INTENT(IN) :: order
          TYPE(C_FUNPTR), VALUE :: op
@@ -161,7 +160,7 @@ CONTAINS
        END FUNCTION h5ovisit_c
     END INTERFACE
 
-    return_value = h5ovisit_c(group_id, index_type, order, op, op_data)
+    return_value = h5ovisit_c(object_id, index_type, order, op, op_data)
 
     IF(return_value.GE.0)THEN
        hdferr = 0
