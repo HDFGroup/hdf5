@@ -408,11 +408,14 @@ H5O_SHARED_POST_COPY_FILE(const H5O_loc_t *oloc_src, const void *mesg_src,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy native message to another file")
 #endif /* H5O_SHARED_POST_COPY_FILE_REAL */
 
-    /* update only shared message after the post copy */
-    if(H5O_msg_is_shared(shared_dst->msg_type_id, mesg_dst)) {
+    /* Update only shared message after the post copy.  Do not update committed
+     * messages as they have already been dealt with in the copy pass.
+     * (Move copy of target of committed messages to post copy? -NAF) */
+    if(shared_dst->type == H5O_SHARE_TYPE_SOHM
+            || shared_dst->type == H5O_SHARE_TYPE_HERE) {
         if(H5O_shared_post_copy_file(oloc_dst->file, dxpl_id, cpy_info->oh_dst, mesg_dst) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to fix shared message in post copy")
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

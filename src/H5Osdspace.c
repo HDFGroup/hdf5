@@ -77,7 +77,7 @@ const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     NULL,		    	/*can share method		*/
     H5O_sdspace_pre_copy_file,	/* pre copy native value to file */
     H5O_sdspace_shared_copy_file,/* copy native value to file    */
-    NULL,			/* post copy native value to file    */
+    H5O_sdspace_shared_post_copy_file,/* post copy native value to file    */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
     H5O_sdspace_shared_debug	/* debug the message		    	*/

@@ -403,7 +403,7 @@ H5O_ainfo_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
  */
 static void *
 H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
-    hbool_t *recompute_size, H5O_copy_t *cpy_info, void UNUSED *udata, hid_t dxpl_id)
+    hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void UNUSED *udata, hid_t dxpl_id)
 {
     H5O_ainfo_t *ainfo_src = (H5O_ainfo_t *)mesg_src;
     H5O_ainfo_t *ainfo_dst = NULL;
@@ -430,9 +430,6 @@ H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
 
         if(H5A_dense_create(file_dst, dxpl_id, ainfo_dst) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
-
-        if((H5A_dense_copy_file_all(file_src, ainfo_src, file_dst, ainfo_dst, recompute_size, cpy_info, dxpl_id)) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
     } /* end if */
 
     /* Set return value */
@@ -452,7 +449,7 @@ done:
  *
  * Purpose:     Finish copying a message from between files.
  *              We have to copy the values of a reference attribute in the
- *              post copy because H5O_post_copy_file() fails at the case that
+ *              post copy because H5O_post_copy_file() fails in the case that
  *              an object may have a reference attribute that points to the
  *              object itself.
  *
@@ -475,10 +472,10 @@ H5O_ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     HDassert(ainfo_src);
 
     if(H5F_addr_defined(ainfo_src->fheap_addr)) {
-        if ( H5A_dense_post_copy_file_all(src_oloc, ainfo_src, dst_oloc,
-            (H5O_ainfo_t *)mesg_dst, dxpl_id, cpy_info) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't copy attribute")
-    }
+        if(H5A_dense_post_copy_file_all(src_oloc, ainfo_src, dst_oloc,
+                (H5O_ainfo_t *)mesg_dst, dxpl_id, cpy_info) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't copy attribute")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

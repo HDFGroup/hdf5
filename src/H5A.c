@@ -451,9 +451,9 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     /* Check if any of the pieces should be (or are already) shared in the
      * SOHM table
      */
-    if(H5SM_try_share(attr->oloc.file, dxpl_id, NULL, H5O_DTYPE_ID, attr->shared->dt, NULL) < 0)
+    if(H5SM_try_share(attr->oloc.file, dxpl_id, NULL, FALSE, H5O_DTYPE_ID, attr->shared->dt, NULL) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share datatype failed")
-    if(H5SM_try_share(attr->oloc.file, dxpl_id, NULL, H5O_SDSPACE_ID, attr->shared->ds, NULL) < 0)
+    if(H5SM_try_share(attr->oloc.file, dxpl_id, NULL, FALSE, H5O_SDSPACE_ID, attr->shared->ds, NULL) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share dataspace failed")
 
     /* Check whether datatype is committed & increment ref count
