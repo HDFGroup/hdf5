@@ -41,6 +41,7 @@ MODULE H5LIB
                          !       pre-Fortran 2003 - empty module
                          !       Forttran 2003    - contains functions
   USE H5GLOBAL
+
 CONTAINS
 !****s* H5LIB/h5open_f
 !
@@ -50,10 +51,9 @@ CONTAINS
 ! PURPOSE
 !  Initializes HDF5 Fortran interface.
 !
-! OUTPUTS
-!  error - error code
-!            Success:  0
-!            Failure: -1
+! Outputs:
+!  error - Returns 0 if successful and -1 if fails
+!
 ! AUTHOR
 !  Elena Pourmal
 !  August 12, 1999
@@ -66,7 +66,7 @@ CONTAINS
 ! Removed call to h5open_c since this may cause a problem for an
 ! application that uses HDF5 library outside HDF5 Fortran APIs.
 !          October 13, 2011
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5open_f(error)
     USE H5GLOBAL
     IMPLICIT NONE
@@ -165,15 +165,12 @@ CONTAINS
 ! PURPOSE
 !  Closes HDF5 Fortran interface.
 !
-! OUTPUTS
-!  error - error code
-!            Success:  0
-!            Failure: -1
+! Outputs:
+!  error - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  Elena Pourmal
 !  August 12, 1999
-
 !
 ! HISTORY
 !  Explicit Fortran interfaces were added for
@@ -183,7 +180,7 @@ CONTAINS
 ! Removed call to h5close_c since this may cause a problem for an
 ! application that uses HDF5 library outside HDF5 Fortran APIs.
 !          October 13, 2011
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5close_f(error)
     USE H5GLOBAL
     IMPLICIT NONE
@@ -209,7 +206,7 @@ CONTAINS
     error_1 = h5close_types_c(predef_types, PREDEF_TYPES_LEN, &
          floating_types, FLOATING_TYPES_LEN, &
          integer_types, INTEGER_TYPES_LEN )
-    error = error_1 
+    error = error_1
 
   END SUBROUTINE h5close_f
 
@@ -221,19 +218,17 @@ CONTAINS
 ! PURPOSE
 !  Returns the HDF5 LIbrary release number
 !
-! OUTPUTS
-!  majnum		- major version of the library
-!  minum		- minor version of the library
-!  relnum		- release version of the library
-!  error		- error code
-!                           Success:  0
-!                           Failure: -1
+! Outputs:
+!  majnum - major version of the library
+!  minum  - minor version of the library
+!  relnum - release version of the library
+!  error  - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  Elena Pourmal
 !  September 24, 2002
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5get_libversion_f(majnum, minnum, relnum, error)
     USE H5GLOBAL
     IMPLICIT NONE
@@ -260,24 +255,23 @@ CONTAINS
 ! PURPOSE
 !  Verifies that library versions are consistent.
 !
-! INPUTS
-!  majnum		- major version of the library
-!  minum		- minor version of the library
-!  relnum		- release version of the library
-! OUTPUTS
-!  error		- error code
-!                          Success:  0
-!                          Failure:  application aborts
+! Inputs:
+!  majnum - major version of the library
+!  minum  - minor version of the library
+!  relnum - release version of the library
+!
+! Outputs:
+!  error - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  Elena Pourmal
 !  September 24, 2002
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5check_version_f(majnum, minnum, relnum, error)
     USE H5GLOBAL
     IMPLICIT NONE
-    INTEGER, INTENT(IN) :: majnum, minnum, relnum
+    INTEGER, INTENT(IN)  :: majnum, minnum, relnum
     INTEGER, INTENT(OUT) :: error
 !*****
     INTERFACE
@@ -300,16 +294,14 @@ CONTAINS
 ! PURPOSE
 !  Garbage collects on all free-lists of all types.
 !
-! OUTPUTS
-!  error  - error code
-!             Success:  0
-!             Failure: -1
+! Outputs:
+!  error - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  Elena Pourmal
 !  September 24, 2002
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5garbage_collect_f(error)
     USE H5GLOBAL
     IMPLICIT NONE
@@ -334,16 +326,14 @@ CONTAINS
 ! PURPOSE
 !  Instructs library not to install atexit cleanup routine.
 !
-! OUTPUTS
-!  error  - error code
-!             Success:  0
-!             Failure: -1
+! Outputs:
+!  error - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  Elena Pourmal
 !  September 24, 2002
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5dont_atexit_f(error)
     USE H5GLOBAL
     IMPLICIT NONE
@@ -369,19 +359,19 @@ CONTAINS
 ! PURPOSE
 !  Converts the KIND to the correct HDF type
 !
-! INPUTS
+! Inputs:
 !  kind    - Fortran KIND parameter
 !  flag    - whether KIND is of type INTEGER or REAL:
 !              H5_INTEGER_KIND - integer
 !              H5_REAL_KIND    - real
-! OUTPUTS
+! Outputs:
 !  h5_type - returns the type
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
-!  Augest 25, 2008
+!  August 25, 2008
 !
-! SOURCE
+! Fortran90 Interface:
   INTEGER(HID_T) FUNCTION h5kind_to_type(kind, flag) RESULT(h5_type)
     USE H5GLOBAL
     IMPLICIT NONE

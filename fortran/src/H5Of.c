@@ -240,12 +240,13 @@ nh5oopen_by_addr_c (hid_t_f *loc_id, haddr_t_f *addr, hid_t_f *obj_id)
 */
 int_f
 nh5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id,
-			H5O_info_t *object_info)
+			H5O_info_t_f *object_info)
 /******/
 {
   char *c_name = NULL;          /* Buffer to hold C string */
   int_f ret_value = 0;          /* Return value */
   H5O_info_t Oinfo;
+  struct tm *ts;
   
   /*
    * Convert FORTRAN name to C name
@@ -261,27 +262,73 @@ nh5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *
     HGOTO_DONE(FAIL);
 
   object_info->fileno    = Oinfo.fileno;
-  object_info->addr      = Oinfo.addr;
-  object_info->type      = Oinfo.type;
-  object_info->rc        = Oinfo.rc;
-  object_info->atime     = Oinfo.atime;
-  object_info->mtime     = Oinfo.mtime;
-  object_info->ctime     = Oinfo.ctime;
-  object_info->btime     = Oinfo.btime;
-  object_info->num_attrs = Oinfo.num_attrs;
+  object_info->addr      = (haddr_t_f)Oinfo.addr;
+ 
 
+  object_info->type      = (int_f)Oinfo.type;
+  object_info->rc        = (int_f)Oinfo.rc;
 
-/*      printf("fileno %d %d\n",object_info->fileno, Oinfo.fileno); */
-/*   printf("string %d %d\n",object_info.rc, Oinfo.rc); */
-  
-/*   printf("atime %lld %lld\n",(long long int)object_info.atime, (long long int)Oinfo.atime); */
-/*   printf("atime %lld %lld\n",(long long int)object_info.mtime, (long long int)Oinfo.mtime); */
-/*   printf("atime %lld %lld\n",(long long int)object_info.ctime, (long long int)Oinfo.ctime); */
-/*   printf("atime %lld %lld\n",(long long int)object_info.btime, (long long int)Oinfo.btime); */
-/*   printf("string %f %f\n",object_info.addr, Oinfo.addr); */
-/*   printf("num_attrs %d %d\n",object_info.num_attrs, Oinfo.num_attrs); */
-/*   printf("num_attrs %f %f\n",object_info.hdr.version, Oinfo.hdr.version); */
+  ts = gmtime(&Oinfo.atime);
 
+  object_info->atime[0]     = (int_f)ts->tm_year+1900; /* year starts at 1900 */
+  object_info->atime[1]     = (int_f)ts->tm_mon+1; /* month starts at 0 in C */
+  object_info->atime[2]     = (int_f)ts->tm_mday;
+/*   object_info->atime[3]     = (int_f)ts->tm_gmtoff; /\* convert from seconds to minutes *\/ */
+  object_info->atime[4]     = (int_f)ts->tm_hour;
+  object_info->atime[5]     = (int_f)ts->tm_min;
+  object_info->atime[6]     = (int_f)ts->tm_sec;
+  object_info->atime[7]     = -32767; /* millisecond is not available, assign it -HUGE(0) */
+
+  ts = gmtime(&Oinfo.btime);
+
+  object_info->btime[0]     = (int_f)ts->tm_year+1900; /* year starts at 1900 */
+  object_info->btime[1]     = (int_f)ts->tm_mon+1; /* month starts at 0 in C */
+  object_info->btime[2]     = (int_f)ts->tm_mday;
+/*   object_info->btime[3]     = (int_f)ts->tm_gmtoff/60; /\* convert from seconds to minutes *\/ */
+  object_info->btime[4]     = (int_f)ts->tm_hour;
+  object_info->btime[5]     = (int_f)ts->tm_min;
+  object_info->btime[6]     = (int_f)ts->tm_sec;
+  object_info->btime[7]     = -32767; /* millisecond is not available, assign it -HUGE(0) */
+
+  ts = gmtime(&Oinfo.ctime);
+
+  object_info->ctime[0]     = (int_f)ts->tm_year+1900; /* year starts at 1900 */
+  object_info->ctime[1]     = (int_f)ts->tm_mon+1; /* month starts at 0 in C */
+  object_info->ctime[2]     = (int_f)ts->tm_mday;
+/*   object_info->ctime[3]     = (int_f)ts->tm_gmtoff/60; /\* convert from seconds to minutes *\/ */
+  object_info->ctime[4]     = (int_f)ts->tm_hour;
+  object_info->ctime[5]     = (int_f)ts->tm_min;
+  object_info->ctime[6]     = (int_f)ts->tm_sec;
+  object_info->ctime[7]     = -32767; /* millisecond is not available, assign it -HUGE(0) */
+
+  ts = gmtime(&Oinfo.mtime);
+
+  object_info->mtime[0]     = (int_f)ts->tm_year+1900; /* year starts at 1900 */
+  object_info->mtime[1]     = (int_f)ts->tm_mon+1; /* month starts at 0 in C */
+  object_info->mtime[2]     = (int_f)ts->tm_mday;
+/*   object_info->mtime[3]     = (int_f)ts->tm_gmtoff/60; /\* convert from seconds to minutes *\/ */
+  object_info->mtime[4]     = (int_f)ts->tm_hour;
+  object_info->mtime[5]     = (int_f)ts->tm_min;
+  object_info->mtime[6]     = (int_f)ts->tm_sec;
+  object_info->mtime[7]     = -32767; /* millisecond is not available, assign it -HUGE(0) */
+
+  object_info->num_attrs = (hsize_t_f)Oinfo.num_attrs;
+
+  object_info->hdr.version = (int_f)Oinfo.hdr.version;
+  object_info->hdr.nmesgs  = (int_f)Oinfo.hdr.nmesgs;
+  object_info->hdr.nchunks = (int_f)Oinfo.hdr.nchunks;
+  object_info->hdr.flags   = (int_f)Oinfo.hdr.flags;
+
+  object_info->hdr.space.total = (hsize_t_f)Oinfo.hdr.space.total;
+  object_info->hdr.space.meta  = (hsize_t_f)Oinfo.hdr.space.meta;
+  object_info->hdr.space.mesg  = (hsize_t_f)Oinfo.hdr.space.mesg;
+  object_info->hdr.space.free  = (hsize_t_f)Oinfo.hdr.space.free;
+
+  object_info->hdr.mesg.present = Oinfo.hdr.mesg.present;
+  object_info->hdr.mesg.shared  = Oinfo.hdr.mesg.shared;
+
+  object_info->meta_size.obj.index_size = (hsize_t_f)Oinfo.meta_size.obj.index_size;
+  object_info->meta_size.obj.heap_size  = (hsize_t_f)Oinfo.meta_size.obj.heap_size;
 
  done:
   return ret_value;
