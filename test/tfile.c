@@ -3057,48 +3057,47 @@ test_filespace_compatible(void)
 
 /****************************************************************
 **
-**  test_libver_bounds():
-**	Verify that a file created with "LATEST, LATEST" can be
-**      opened later, with no setting.  (Further testing welcome)
+**  test_libver_bounds_real():
+**      Verify that a file created and modified with the
+**      specified libver bounds has the specified object header
+**      versions for the right objects.
 **
 ****************************************************************/
 static void
-test_libver_bounds(void)
+test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
+    H5F_libver_t libver_mod, unsigned oh_vers_mod)
 {
     hid_t       file, group;            /* Handles */
     hid_t       fapl;                   /* File access property list */
     H5O_info_t  oinfo;                  /* Object info */
-    herr_t	ret;                    /* Return value */
-
-    /* Output message about test being performed */
-    MESSAGE(5, ("Testing setting library version bounds\n"));
+    herr_t      ret;                    /* Return value */
 
     /*
-     * Create a new file using the default properties.
+     * Create a new file using the creation properties.
      */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
-    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    ret = H5Pset_libver_bounds(fapl, libver_create, H5F_LIBVER_LATEST);
     CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     file = H5Fcreate("tfile5.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(file, FAIL, "H5Fcreate");
 
     /*
-     * Make sure the root group has the latest object header version (2)
+     * Make sure the root group has the correct object header version
      */
     ret = H5Oget_info_by_name(file, "/", &oinfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, 2, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.version, oh_vers_create, "H5Oget_info_by_name");
 
     /*
-     * Reopen the file and make sure the root group still has the latest version
+     * Reopen the file and make sure the root group still has the correct version
      */
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
 
-    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST);
+    ret = H5Pset_libver_bounds(fapl, libver_mod, H5F_LIBVER_LATEST);
     CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     file = H5Fopen("tfile5.h5", H5F_ACC_RDWR, fapl);
@@ -3106,46 +3105,65 @@ test_libver_bounds(void)
 
     ret = H5Oget_info_by_name(file, "/", &oinfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, 2, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.version, oh_vers_create, "H5Oget_info_by_name");
 
     /*
-     * Create a group named "G1" in the file, and make sure it has the earliest
-     * object header version (1)
+     * Create a group named "G1" in the file, and make sure it has the correct
+     * object header version
      */
     group = H5Gcreate2(file, "/G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(group, FAIL, "H5Gcreate");
 
     ret = H5Oget_info(group, &oinfo);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, 1, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.version, oh_vers_mod, "H5Oget_info_by_name");
 
     ret = H5Gclose(group);
     CHECK(ret, FAIL, "H5Gclose");
 
     /*
      * Create a group named "/G1/G3" in the file, and make sure it has the
-     * earliest object header version (1)
+     * correct object header version
      */
     group = H5Gcreate2(file, "/G1/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(group, FAIL, "H5Gcreate");
 
     ret = H5Oget_info(group, &oinfo);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, 1, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.version, oh_vers_mod, "H5Oget_info_by_name");
 
     ret = H5Gclose(group);
     CHECK(ret, FAIL, "H5Gclose");
 
     /*
-     * Make sure the root group still has the latest object header version (2)
+     * Make sure the root group still has the correct object header version
      */
     ret = H5Oget_info_by_name(file, "/", &oinfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, 2, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.version, oh_vers_create, "H5Oget_info_by_name");
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-} /* test_libver_bounds() */
+} /* end test_libver_bounds_real() */
+
+/****************************************************************
+**
+**  test_libver_bounds():
+**      Verify that a file created and modified with various
+**      libver bounds is handled correctly.  (Further testing
+**      welcome)
+**
+****************************************************************/
+static void
+test_libver_bounds(void)
+{
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing setting library version bounds\n"));
+
+    /* Run the tests */
+    test_libver_bounds_real(H5F_LIBVER_EARLIEST, 1, H5F_LIBVER_LATEST, 2);
+    test_libver_bounds_real(H5F_LIBVER_LATEST, 2, H5F_LIBVER_EARLIEST, 1);
+} /* end test_libver_bounds() */
 
 /****************************************************************
 **
