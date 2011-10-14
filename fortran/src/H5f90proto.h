@@ -1144,8 +1144,6 @@ H5_FCDLL int_f nh5iis_valid_c(hid_t_f *obj_id, int_f *c_valid);
 #define nh5eget_minor_c H5_FC_FUNC_(h5eget_minor_c, H5EGET_MINOR_C)
 #define nh5eset_auto_c  H5_FC_FUNC_(h5eset_auto_c, H5ESET_AUTO_C)
 #define nh5eset_auto2_c  H5_FC_FUNC_(h5eset_auto2_c, H5ESET_AUTO2_C)
-#define nh5eget_auto_c  H5_FC_FUNC_(h5eget_auto_c, H5EGET_AUTO_C)
-#define nh5eget_auto_c2  H5_FC_FUNC_(h5eget_auto_c2, H5EGET_AUTO_C2)
 #define nprocess_buffer  H5_FC_FUNC_(process_buffer, PROCESS_BUFFER)
 
 
@@ -1156,8 +1154,6 @@ H5_FCDLL int_f nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen);
 H5_FCDLL int_f nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen);
 H5_FCDLL int_f nh5eset_auto_c(int_f* printflag);
 H5_FCDLL int_f nh5eset_auto2_c(int_f* printflag, hid_t_f *estack_id, H5E_auto2_t func, void *client_data);
-H5_FCDLL int_f nh5eget_auto_c(hid_t_f *estack_id, H5E_auto2_t *func, void **client_data, int_f* ret_func);
-H5_FCDLL void* nh5eget_auto_c2(hid_t_f *estack_id, H5E_auto2_t *func, int_f* ret_func);
 H5_FCDLL int_f nprocess_buffer(hid_t_f *estack_id,void **buffer);
 
 /*

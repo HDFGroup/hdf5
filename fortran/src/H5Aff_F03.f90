@@ -173,6 +173,57 @@ MODULE H5A_PROVISIONAL
 
 CONTAINS
 
+!****s* H5A (F03)/h5awrite_f_F90
+!
+! NAME
+!  h5awrite_f_F90
+!
+! PURPOSE
+!  Writes an attribute.
+!
+! Inputs:
+!  attr_id     - Attribute identifier
+!  memtype_id  - Attribute datatype identifier  (in memory)
+!  dims        - Array to hold corresponding dimension sizes of data buffer buf;
+!                dim(k) has value of the k-th dimension of buffer buf;
+!                values are ignored if buf is a scalar
+!  buf 	       - Data buffer; may be a scalar or an array
+!
+! Outputs:
+!  hdferr      - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  Elena Pourmal
+!  August 12, 1999
+!
+! HISTORY
+!  Explicit Fortran interfaces are added for
+!  called C functions (it is needed for Windows
+!  port).  February 27, 2001
+!
+!  dims parameter was added to make code portable;
+!  Aprile 4, 2001
+!
+!  Changed buf intent to INOUT to be consistant
+!  with how the C functions handles it. The pg
+!  compiler will return 0 if a buf value is not set.
+!  February, 2008
+!
+! NOTES
+!  This function is overloaded to write INTEGER,
+!  REAL, DOUBLE PRECISION and CHARACTER buffers
+!  up to 7 dimensions.
+!
+! Fortran90 Interface:
+!!  SUBROUTINE h5awrite_f(attr_id, memtype_id, buf, dims, hdferr) 
+!!    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
+!!    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
+!!    TYPE            , INTENT(IN)               :: buf
+!!    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+!!    INTEGER         , INTENT(OUT)              :: hdferr
+!*****
+
+
   SUBROUTINE h5awrite_integer_scalar(attr_id, memtype_id, buf, dims, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
@@ -201,8 +252,8 @@ CONTAINS
          DIMENSION(dims(1)), TARGET :: buf  ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
-
-    f_ptr = C_LOC(buf)
+    
+    f_ptr = C_LOC(buf(1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_integer_1
@@ -221,7 +272,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -238,7 +289,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -257,7 +308,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -276,7 +327,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -295,7 +346,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_integer_6
@@ -313,7 +364,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -348,7 +399,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -368,7 +419,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
@@ -388,7 +439,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_real_3
@@ -407,7 +458,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_real_4
@@ -445,7 +496,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_real_6
@@ -463,7 +514,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_real_7
@@ -499,8 +550,6 @@ CONTAINS
     hdferr = h5awrite_f_c(attr_id, memtype_id, f_ptr)
 
   END SUBROUTINE h5awrite_char_scalar_fix
-
-
 
   SUBROUTINE h5awrite_char_1(attr_id, memtype_id, buf, dims, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
@@ -626,22 +675,75 @@ CONTAINS
 
   END SUBROUTINE h5awrite_char_7
 
-!****s* H5A (F03)/h5aread_f
+!****s* H5A (F03)/h5awrite_f_F03
 !
 ! NAME
-!  h5aread_f
+!  h5awrite_f_F03
+!
+! PURPOSE
+!  Writes an attribute.
+!
+! Inputs:
+!  attr_id     - Attribute identifier
+!  memtype_id  - Attribute datatype identifier  (in memory)
+!  buf 	       - Data buffer; may be a scalar or an array
+!
+! Outputs:
+!  hdferr      - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  Elena Pourmal
+!  August 12, 1999
+!
+! HISTORY
+!  Explicit Fortran interfaces are added for
+!  called C functions (it is needed for Windows
+!  port).  February 27, 2001
+!
+! NOTES
+!  This function is overloaded to write INTEGER,
+!  REAL, DOUBLE PRECISION and CHARACTER buffers
+!  up to 7 dimensions.
+!
+! Fortran2003 Interface:
+!!  SUBROUTINE h5awrite_f(attr_id, memtype_id, buf, hdferr) 
+!!    INTEGER(HID_T)  , INTENT(IN)  :: attr_id
+!!    INTEGER(HID_T)  , INTENT(IN)  :: memtype_id
+!!    TYPE(C_PTR)     , INTENT(IN)  :: buf
+!!    INTEGER         , INTENT(OUT) :: hdferr
+!*****
+
+  SUBROUTINE h5awrite_ptr(attr_id, mem_type_id, buf, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id     ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+    TYPE(C_PTR), INTENT(IN), TARGET :: buf
+    INTEGER, INTENT(OUT) :: hdferr            ! Error code
+
+    hdferr = h5awrite_f_c(attr_id, mem_type_id, buf)
+
+  END SUBROUTINE h5awrite_ptr
+
+!****s* H5A (F03)/h5aread_f_F90
+!
+! NAME
+!  h5aread_f_F90
 !
 ! PURPOSE
 !  Reads an attribute.
 !
 ! Inputs:
-!  attr_id 	 - attribute identifier
-!  memtype_id 	 - attribute memory type identifier
-!  dims 	 - 1D array of size 7, stores sizes of the
-!   	         - buf array dimensions.
+!  attr_id     - Attribute identifier
+!  memtype_id  - Attribute datatype identifier  (in memory)
+!  dims        - Array to hold corresponding dimension sizes of data buffer buf;
+!                dim(k) has value of the k-th dimension of buffer buf;
+!                values are ignored if buf is a scalar
+!
 ! Outputs:
-!  buf 	         - buffer to read attribute data in
-!  hdferr 	 - Returns 0 if successful and -1 if fails
+!  buf 	       - Data buffer; may be a scalar or an array
+!  hdferr      - Returns 0 if successful and -1 if fails
+!
 ! AUTHOR
 !  Elena Pourmal
 !  August 12, 1999
@@ -663,7 +765,13 @@ CONTAINS
 !  This function is overloaded to write INTEGER,
 !  REAL, DOUBLE PRECISION and CHARACTER buffers
 !  up to 7 dimensions.
-!
+! Fortran90 Interface:
+!!  SUBROUTINE h5aread_f(attr_id, memtype_id, buf, dims, hdferr) 
+!!    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
+!!    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
+!!    TYPE            , INTENT(INOUT)            :: buf
+!!    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+!!    INTEGER         , INTENT(OUT)              :: hdferr
 !*****
   SUBROUTINE h5aread_integer_scalar(attr_id, memtype_id, buf, dims, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
@@ -692,7 +800,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_1
@@ -709,7 +817,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_2
@@ -727,7 +835,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_3
@@ -745,7 +853,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_4
@@ -763,7 +871,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_5
@@ -781,7 +889,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_6
@@ -799,7 +907,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_integer_7
@@ -833,7 +941,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_1
@@ -851,7 +959,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_2
@@ -870,7 +978,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_3
@@ -888,7 +996,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_4
@@ -906,7 +1014,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_5
@@ -924,7 +1032,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_6
@@ -942,7 +1050,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
     TYPE(C_PTR) :: f_ptr
 
-    f_ptr = C_LOC(buf)
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     hdferr = h5aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_real_7
@@ -1103,24 +1211,58 @@ CONTAINS
 
   END SUBROUTINE h5aread_char_7
 
-  SUBROUTINE h5awrite_ptr(attr_id, mem_type_id, buf, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id     ! Attribute identifier
-    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-    TYPE(C_PTR), INTENT(IN), TARGET :: buf
-    INTEGER, INTENT(OUT) :: hdferr            ! Error code
 
-    hdferr = h5awrite_f_c(attr_id, mem_type_id, buf)
-
-  END SUBROUTINE h5awrite_ptr
+!****s* H5A (F03)/h5aread_f_F03
+!
+! NAME
+!  h5aread_f_F03
+!
+! PURPOSE
+!  Reads an attribute.
+!
+! Inputs:
+!  attr_id     - Attribute identifier
+!  memtype_id  - Attribute datatype identifier  (in memory)
+!
+! Outputs:
+!  buf 	       - Data buffer; may be a scalar or an array
+!  hdferr      - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  Elena Pourmal
+!  August 12, 1999
+!
+! HISTORY
+!  Explicit Fortran interfaces are added for
+!  called C functions (it is needed for Windows
+!  port).  February 27, 2001
+!
+!  dims parameter was added to make code portable;
+!  Aprile 4, 2001
+!
+!  Changed buf intent to INOUT to be consistant
+!  with how the C functions handles it. The pg
+!  compiler will return 0 if a buf value is not set.
+!  February, 2008
+!
+! NOTES
+!  This function is overloaded to write INTEGER,
+!  REAL, DOUBLE PRECISION and CHARACTER buffers
+!  up to 7 dimensions.
+! Fortran2003 Interface:
+!!  SUBROUTINE h5aread_f(attr_id, memtype_id, buf, hdferr) 
+!!    INTEGER(HID_T)  , INTENT(IN)    :: attr_id
+!!    INTEGER(HID_T)  , INTENT(IN)    :: memtype_id
+!!    TYPE(C_PTR)     , INTENT(INOUT) :: buf
+!!    INTEGER         , INTENT(OUT)   :: hdferr
+!*****
 
   SUBROUTINE h5aread_ptr(attr_id, mem_type_id, buf, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id     ! Attribute identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-    TYPE(C_PTR), INTENT(IN), TARGET :: buf
+    TYPE(C_PTR), INTENT(INOUT), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr            ! Error code
 
     hdferr = h5aread_f_c(attr_id, mem_type_id, buf)

@@ -465,6 +465,7 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
   ! /* Try to read data from the attribute */
   ! /* (shouldn't fail, but should leave buffer alone) */
   value(1) = 103
+  data_dims(1) = 1
   CALL h5aread_f(attr, H5T_NATIVE_INTEGER, value, data_dims, error)
   CALL check("h5aread_f",error,total_error)
   CALL verify("h5aread_f",value(1),103,total_error)
@@ -2169,7 +2170,6 @@ SUBROUTINE test_attr_dense_open( fcpl, fapl, total_error)
   ! /* Close attribute */
   CALL h5aclose_f(attr, error)
   CALL check("h5aclose_f",error,total_error)
-
 
   ! /* Close dataspace */
   CALL h5sclose_f(sid, error)
