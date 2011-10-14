@@ -1116,7 +1116,7 @@ getenv_all(MPI_Comm comm, int root, const char* name)
  *-------------------------------------------------------------------------
  */
 hid_t
-h5_make_local_copy(char *origfilename, char *local_copy_name)
+h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 {
     int fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
     ssize_t nread;                      /* Number of bytes read in */

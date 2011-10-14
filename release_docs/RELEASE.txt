@@ -115,6 +115,9 @@ Bug Fixes since HDF5-1.8.7
 
     Library
     -------
+    - Corrected error when loading local heaps from the file, which could
+      cause the size of the local heap's data block to increase dramatically.
+      This addresses Jira issue #7767.  (QAK - 2011/10/14)
     - The first part fix for HDFFV-7640: does not need to do
       H5O_move_msgs_forward() when writing attributes.
       Tests are checked into the performance suite.
