@@ -9,9 +9,9 @@
 ! PURPOSE
 !
 !  This file contains Fortran 90 and Fortran 2003 interfaces for H5L functions.
-!  It contains the same functions as H5Lff_DEPRECIATE.f90 but includes the
+!  It contains the same functions as H5Lff_F90.f90 but includes the
 !  Fortran 2003 functions and the interface listings. This file will be compiled
-!  instead of H5Lff_DEPRECIATE.f90 if Fortran 2003 functions are enabled.
+!  instead of H5Lff_F90.f90 if Fortran 2003 functions are enabled.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -40,6 +40,37 @@
 MODULE H5L_PROVISIONAL
 
   USE H5GLOBAL
+  USE ISO_C_BINDING
+
+  IMPLICIT NONE
+
+!****t* H5L (F03)/h5l_info_t
+!
+! Fortran2003 Derived Type:
+!
+  TYPE, bind(c) :: union_t
+     INTEGER(haddr_t) :: address
+     INTEGER(size_t)  :: val_size
+  END TYPE union_t
+
+  TYPE, bind(c) :: h5l_info_t
+     INTEGER(c_int) :: type ! H5L_type_t     type
+!       LOGICAL(c_bool) :: corder_valid ! hbool_t        corder_valid
+     INTEGER(c_int64_t) :: corder ! int64_t        corder;
+     INTEGER(c_int) :: cset ! H5T_cset_t     cset;
+     TYPE(union_t) :: u
+  END TYPE h5l_info_t
+
+!*****
+
+!type specifies the link class. Valid values include the following:
+!     	H5L_TYPE_HARD 	Hard link
+!     	H5L_TYPE_SOFT 	Soft link
+!     	H5L_TYPE_EXTERNAL     	External link
+!     	H5L_TYPE_ERROR 	Error 
+!cset specifies the character set in which the link name is encoded. Valid values include the following:
+!     	H5T_CSET_ASCII 	US ASCII
+!     	H5T_CSET_UTF8     	UTF-8 Unicode encoding 
 
 CONTAINS
 
@@ -52,54 +83,50 @@ CONTAINS
 !  Iterates through links in a group.
 !
 ! Inputs:
-!  group_id 	 - Identifier specifying subject group
-!  index_type 	 - Type of index which determines the order
-!  order 	 - Order within index
-!  idx 	         - Iteration position at which to start
-!  op 	         - Callback function passing data regarding the link to the calling application
-!  op_data 	 - User-defined pointer to data required by the application for its processing of the link
+!  group_id   - Identifier specifying subject group
+!  index_type - Type of index which determines the order:
+!                H5_INDEX_NAME_F      - Alpha-numeric index on name
+!                H5_INDEX_CRT_ORDER_F - Index on creation order
+!  order      - Order within index:
+!                H5_ITER_INC_F    - Increasing order
+!                H5_ITER_DEC_F    - Decreasing order
+!                H5_ITER_NATIVE_F - Fastest available order
+!  idx 	      - IN: Iteration position at which to start
+!  op 	      - Callback function passing data regarding the link to the calling application
+!  op_data    - User-defined pointer to data required by the application for its processing of the link
 !
 ! Outputs:
-!  idx 	         - Position at which an interrupted iteration may be restarted
-!  hdferr        - Error code:
-!                    Success:  0
-!                    Failure: -1
+!  idx 	        - OUT: Position at which an interrupted iteration may be restarted
+!  return_value - Success: The return value of the first operator that
+! 			   returns non-zero, or zero if all members were
+! 			   processed with no operator returning non-zero.
+!
+! 		  Failure: Negative if something goes wrong within the
+! 			   library, or the negative value returned by one
+! 			   of the operators.
+!
+!  hdferr     - Returns 0 if successful and -1 if fails
+!
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  July 8, 2008
 !
-! Signature:
+! Fortran2003 Interface:
   SUBROUTINE h5literate_f(group_id, index_type, order, idx, op, op_data, return_value, hdferr)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: group_id  ! Identifier specifying subject group
-    INTEGER, INTENT(IN) :: index_type       ! Type of index which determines the order:
-                                                ! H5_INDEX_NAME_F - Alpha-numeric index on name
-                                                ! H5_INDEX_CRT_ORDER_F - Index on creation order
-    INTEGER, INTENT(IN) :: order            ! Order within index:
-                                                ! H5_ITER_INC_F - Increasing order
-                                                ! H5_ITER_DEC_F - Decreasing order
-                                                ! H5_ITER_NATIVE_F - Fastest available order
-    INTEGER(HSIZE_T), INTENT(INOUT) :: idx  ! IN : Iteration position at which to start
-                                            ! OUT: Position at which an interrupted iteration may be restarted
-
-    TYPE(C_FUNPTR):: op      ! Callback function passing data regarding the link to the calling application
-    TYPE(C_PTR)   :: op_data ! User-defined pointer to data required by the application for its processing of the link
-
-    INTEGER, INTENT(OUT) :: return_value ! Success:   The return value of the first operator that
- 				         !            returns non-zero, or zero if all members were
- 				         !            processed with no operator returning non-zero.
-
- 		                         ! Failure:   Negative if something goes wrong within the
- 				         !            library, or the negative value returned by one
- 				         !            of the operators.
-
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-                                         ! 0 on success and -1 on failure
+    INTEGER(HID_T)  , INTENT(IN)    :: group_id
+    INTEGER         , INTENT(IN)    :: index_type
+    INTEGER         , INTENT(IN)    :: order
+    INTEGER(HSIZE_T), INTENT(INOUT) :: idx
+    TYPE(C_FUNPTR)  , INTENT(IN)    :: op
+    TYPE(C_PTR)     , INTENT(IN)    :: op_data
+    INTEGER         , INTENT(OUT)   :: return_value
+    INTEGER         , INTENT(OUT)   :: hdferr
 !*****
     INTERFACE
        INTEGER FUNCTION h5literate_c(group_id, index_type, order, idx, op, op_data)
-         USE ISO_C_BINDING
+         USE, INTRINSIC :: ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LITERATE_C'::h5literate_c
@@ -132,87 +159,80 @@ CONTAINS
 !  Iterates through links in a group.
 !
 ! Inputs:
-!  loc_id 	 - File or group identifier specifying location of subject group
-!  group_name 	 - Name of subject group
-!  index_type 	 - Type of index which determines the order
-!  order 	 - Order within index
-!  idx 	         - Iteration position at which to start
-!  op 	         - Callback function passing data regarding the link to the calling application
-!  op_data 	 - User-defined pointer to data required by the application for its processing of the link
+!  loc_id     - File or group identifier specifying location of subject group
+!  group_name - Name of subject group
+!  index_type - Type of index which determines the order:
+!                H5_INDEX_NAME_F      - Alpha-numeric index on name
+!                H5_INDEX_CRT_ORDER_F - Index on creation order
+!  order      - Order within index:
+!                H5_ITER_INC_F    - Increasing order
+!                H5_ITER_DEC_F    - Decreasing order
+!                H5_ITER_NATIVE_F - Fastest available order
+!  idx 	      - IN: Iteration position at which to start
+!  op 	      - Callback function passing data regarding the link to the calling application
+!  op_data    - User-defined pointer to data required by the application for its processing of the link
 !
 ! Outputs:
-!  idx 	    - Position at which an interrupted iteration may be restarted
-!  hdferr   - Error code:
-!               Success:  0
-!               Failure: -1
+!  idx 	        - OUT: Position at which an interrupted iteration may be restarted
+!  return_value - Success: The return value of the first operator that
+! 			   returns non-zero, or zero if all members were
+! 			   processed with no operator returning non-zero.
+!
+! 		  Failure: Negative if something goes wrong within the
+! 			   library, or the negative value returned by one
+! 			   of the operators.
+!
+!  hdferr        - Returns 0 if successful and -1 if fails
+!
 ! Optional parameters:
-!  lapl_id  - Link access property list
+!  lapl_id    - Link access property list
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  Augest 18, 2008
 !
-! Signature:
+! Fortran2003 Interface:
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, idx, op, op_data, return_value, hdferr, lapl_id)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id    ! Identifier specifying subject group
-    CHARACTER(LEN=*) :: group_name          ! Name of subject group
-    INTEGER, INTENT(IN) :: index_type       ! Type of index which determines the order:
-                                                ! H5_INDEX_NAME_F - Alpha-numeric index on name
-                                                ! H5_INDEX_CRT_ORDER_F - Index on creation order
-    INTEGER, INTENT(IN) :: order            ! Order within index:
-                                                ! H5_ITER_INC_F - Increasing order
-                                                ! H5_ITER_DEC_F - Decreasing order
-                                                ! H5_ITER_NATIVE_F - Fastest available order
-    INTEGER(HSIZE_T), INTENT(INOUT) :: idx  ! IN : Iteration position at which to start
-                                            ! OUT: Position at which an interrupted iteration may be restarted
-
-    TYPE(C_FUNPTR):: op      ! Callback function passing data regarding the link to the calling application
-    TYPE(C_PTR)   :: op_data ! User-defined pointer to data required by the application for its processing of the link
-
-    INTEGER, INTENT(OUT) :: return_value ! Success:   The return value of the first operator that
- 				         !            returns non-zero, or zero if all members were
- 				         !            processed with no operator returning non-zero.
-
- 		                         ! Failure:   Negative if something goes wrong within the
- 				         !            library, or the negative value returned by one
- 				         !            of the operators.
-
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-                                         ! 0 on success and -1 on failure
-
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list
+    INTEGER(HID_T)  , INTENT(IN)           :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)           :: group_name 
+    INTEGER         , INTENT(IN)           :: index_type
+    INTEGER         , INTENT(IN)           :: order
+    INTEGER(HSIZE_T), INTENT(INOUT)        :: idx
+    TYPE(C_FUNPTR)  , INTENT(IN)           :: op  
+    TYPE(C_PTR)     , INTENT(IN)           :: op_data
+    INTEGER         , INTENT(OUT)          :: return_value
+    INTEGER         , INTENT(OUT)          :: hdferr
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
 !*****
     INTEGER(HID_T) :: lapl_id_default
     INTEGER(SIZE_T) :: namelen
 
     INTERFACE
-       INTEGER FUNCTION h5literate_by_name_c(loc_id, name, namelen, index_type, order, idx, op, op_data, lapl_id_default)
-         USE ISO_C_BINDING
+       INTEGER FUNCTION  h5literate_by_name_c(loc_id, name, namelen, index_type, order, idx, op, op_data, lapl_id_default)
+         USE, INTRINSIC :: ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LITERATE_BY_NAME_C'::h5literate_by_name_c
          !DEC$ENDIF
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*) :: name
-         INTEGER(SIZE_T) :: namelen
-         INTEGER, INTENT(IN) :: index_type
-         INTEGER, INTENT(IN) :: order
+         INTEGER(HID_T)  , INTENT(IN) :: loc_id
+         CHARACTER(LEN=*), INTENT(IN) :: name
+         INTEGER(SIZE_T) , INTENT(IN) :: namelen
+         INTEGER         , INTENT(IN) :: index_type
+         INTEGER         , INTENT(IN) :: order
          INTEGER(HSIZE_T), INTENT(INOUT) :: idx
          TYPE(C_FUNPTR), VALUE :: op
          TYPE(C_PTR), VALUE :: op_data
-         INTEGER(HID_T) :: lapl_id_default
+         INTEGER(HID_T)  , INTENT(IN) :: lapl_id_default
        END FUNCTION
-!  h5literate_by_name_c
     END INTERFACE
 
     namelen  = LEN(group_name)
-
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    return_value = h5literate_by_name_c(loc_id, group_name, namelen, index_type, order, idx, op, op_data,lapl_id_default)
+    return_value = h5literate_by_name_c(loc_id, group_name, namelen, index_type, order, idx, op, op_data, lapl_id_default)
 
     IF(return_value.GE.0)THEN
        hdferr = 0
