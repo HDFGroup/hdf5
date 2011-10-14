@@ -56,6 +56,10 @@ New Features
 
     Configuration
     -------------
+    - Added --enable-fortran2003 flag to enable Fortran2003 support 
+      in the HDF5 Fortran library. The flag should be used along with the
+      --enable-fortran flag and takes affect only when Fortran compiler 
+      is Fortran2003 compliant.         (EIP - 2011/11/14)
     - Added checks for clock_gettime and mach/mach_time.h to both configure and
       CMake.  This will support the move from gettimeofday to clock_gettime's
       monotonic timer in the profiling code in a future release.
@@ -87,11 +91,53 @@ New Features
 
     High-Level APIs
     ---------------
-    - None
+    - Added Fortran wrappers for Dimension Scale APIs. (HDFFV-3797)
+      h5dsset_scale_f
+      h5dsattach_scale_f
+      h5dsdetach_scale_f
+      h5dsis_attached_f
+      h5dsis_scale_f
+      h5dsset_label_f
+      h5dsget_label_f
+      h5dsget_scale_name_f
+      h5dsget_num_scales_f
+                  (EIP for SB - 2011/10/13) 
 
-    F90 API
+    Fortran API
     -------
-     - None
+    HDF5 Fortran library was enhanced to support Fortran 2003 standard. 
+    The following features are available when the HDF5 library is configured
+    using --enable-fortran --enable-fortran2003 configure flags AND
+    if fortran compiler is Fortran2003 compliant:
+
+     - Subroutines overloaded with the C_PTR derived type:
+         h5pget_f
+         h5pget_fill_value_f
+         h5pinsert_f
+         h5pregister_f
+         h5pset_f
+         h5pset_fill_value_f
+         h5rcreate_f
+         h5rderefrence_f
+         h5rget_name_f
+         h5rget_obj_type_f
+     - Subroutines overloaded with the C_PTR derived type 
+       and simplified signatures: 
+         h5aread_f
+         h5awrite_f
+         h5dread_f
+         h5dwrite_f
+     - New subroutines
+         h5dvlen_reclaim_f
+         h5literate_by_name_f
+         h5literate_f
+         h5ovisit_f
+         h5tconvert_f
+
+     - Subroutines with additional optional parameters:
+         h5pcreate_class_f
+                   (EIP - 2011/10/14)
+ 
 
     C++ API
     -------
@@ -257,17 +303,7 @@ Bug Fixes since HDF5-1.8.7
 
     Fortran High-Level APIs:
     ------
-    - Added Fortran wrappers for Dimension Scale APIs. HDFFV-3797
-      h5dsset_scale_f
-      h5dsattach_scale_f
-      h5dsdetach_scale_f
-      h5dsis_attached_f
-      h5dsis_scale_f
-      h5dsset_label_f
-      h5dsget_label_f
-      h5dsget_scale_name_f
-      h5dsget_num_scales_f
-                  EIP for SB - 2011/101/3 
+    - None
 
 
 Platforms Tested
