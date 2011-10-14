@@ -3067,6 +3067,7 @@ test_libver_bounds(void)
 {
     hid_t       file, group;            /* Handles */
     hid_t       fapl;                   /* File access property list */
+    H5O_info_t  oinfo;                  /* Object info */
     herr_t	ret;                    /* Return value */
 
     /* Output message about test being performed */
@@ -3084,6 +3085,16 @@ test_libver_bounds(void)
     file = H5Fcreate("tfile5.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(file, FAIL, "H5Fcreate");
 
+    /*
+     * Make sure the root group has the latest object header version (2)
+     */
+    ret = H5Oget_info_by_name(file, "/", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.version, 2, "H5Oget_info_by_name");
+
+    /*
+     * Reopen the file and make sure the root group still has the latest version
+     */
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
 
@@ -3093,23 +3104,44 @@ test_libver_bounds(void)
     file = H5Fopen("tfile5.h5", H5F_ACC_RDWR, fapl);
     CHECK(file, FAIL, "H5Fopen");
 
+    ret = H5Oget_info_by_name(file, "/", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.version, 2, "H5Oget_info_by_name");
+
     /*
-     * Create a group named "G1" in the file.
+     * Create a group named "G1" in the file, and make sure it has the earliest
+     * object header version (1)
      */
     group = H5Gcreate2(file, "/G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(group, FAIL, "H5Gcreate");
 
+    ret = H5Oget_info(group, &oinfo);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.version, 1, "H5Oget_info_by_name");
+
     ret = H5Gclose(group);
     CHECK(ret, FAIL, "H5Gclose");
 
     /*
-     * Create a group named "/G1/G3" in the file.
+     * Create a group named "/G1/G3" in the file, and make sure it has the
+     * earliest object header version (1)
      */
     group = H5Gcreate2(file, "/G1/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(group, FAIL, "H5Gcreate");
 
+    ret = H5Oget_info(group, &oinfo);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.version, 1, "H5Oget_info_by_name");
+
     ret = H5Gclose(group);
     CHECK(ret, FAIL, "H5Gclose");
+
+    /*
+     * Make sure the root group still has the latest object header version (2)
+     */
+    ret = H5Oget_info_by_name(file, "/", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.version, 2, "H5Oget_info_by_name");
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
