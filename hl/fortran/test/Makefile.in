@@ -418,7 +418,8 @@ tstlite_SOURCES = tstlite.f90
 tstimage_SOURCES = tstimage.f90
 tsttable_SOURCES = tsttable.f90
 
-# Mark this directory as part of the Fortran API
+# Mark this directory as part of the Fortran API (this affects output
+# from tests in conclude.am)
 FORTRAN_API = yes
 
 # Automake needs to be taught how to build lib, progs, and tests targets.

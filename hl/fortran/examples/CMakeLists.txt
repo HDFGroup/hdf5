@@ -12,6 +12,7 @@ INCLUDE_DIRECTORIES (
 
 SET (examples
     exlite
+    ex_ds1
 )
 
 FOREACH (example ${examples})
