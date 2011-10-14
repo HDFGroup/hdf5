@@ -115,6 +115,10 @@ Bug Fixes since HDF5-1.8.7
 
     Library
     -------
+    - The first part fix for HDFFV-7640: does not need to do
+      H5O_move_msgs_forward() when writing attributes.
+      Tests are checked into the performance suite.
+      (VC - 2011/10/13)
     - Fixed a bug that occurred when using H5Ocopy on a committed datatype
       containing an attribute using that committed datatype.
       (NAF - 2011/10/13 - Issue 5854)
