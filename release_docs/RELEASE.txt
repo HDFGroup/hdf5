@@ -104,7 +104,7 @@ New Features
                   (EIP for SB - 2011/10/13) 
 
     Fortran API
-    -------
+    -----------
     HDF5 Fortran library was enhanced to support Fortran 2003 standard. 
     The following features are available when the HDF5 library is configured
     using --enable-fortran --enable-fortran2003 configure flags AND
@@ -147,9 +147,6 @@ New Features
 Support for New Platforms, Languages, and Compilers
 ===================================================
     - None
-
-     - h5repack: added macro to handle a failure in H5Dread/write when memory allocation failed
-       inside the library. (PC -- 2011/08/19)
 
 Bug Fixes since HDF5-1.8.7
 ==========================
@@ -285,9 +282,11 @@ Bug Fixes since HDF5-1.8.7
       the object and file addresses before comparing the details 
       in the objects. Examples of details are datasets and attributes. 
       HDFFV-5928. (XCAO & JKM 05/06/2011)
+    - h5repack: added macro to handle a failure in H5Dread/write when memory
+      allocation failed inside the library. (PC -- 2011/08/19)
 
     F90 API
-    ------
+    -------
     - Modified the h5open_f and h5close_f subroutines to not to call H5open and
       H5close correspodningly. While the H5open call just adds overhead, the H5close
       call called by an Fortran application shuts down the HDF5 library making 
@@ -309,6 +308,12 @@ Bug Fixes since HDF5-1.8.7
 Platforms Tested
 ================
 The following platforms and compilers have been tested for this release.
+
+    AIX 6.1                       xlc 11.1.0.3
+    (NCSA BP)                     xlC 11.1.0.3
+                                  xlf90 13.1.0.3
+                                  mpcc_r 11.1.0.3
+                                  mpxlf90_r 13.1.0.3
 
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
     (loyalty)                     g++ 4.2.1 [FreeBSD] 20070719
@@ -349,7 +354,7 @@ The following platforms and compilers have been tested for this release.
                                       gcc 4.1.2 and gfortran 4.1.2
 
     SGI ProPack 7 Linux           Intel(R) C++ Version 11.1 20100806
-    2.6.32.19-0.3.1.1982.0.PTF-   Intel(R) Fortran Version 11.1 20100806
+    2.6.32.24-0.2.1.2230.2.PTF-   Intel(R) Fortran Version 11.1 20100806
     default #1 SMP                SGI MPT 2.01
     SGI Altix UV
     (NCSA ember)
@@ -379,17 +384,13 @@ The following platforms and compilers have been tested for this release.
 
     Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
 
-    Mac OS X 10.6.3 (Intel 64-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1
-    Darwin Kernel Version 10.3.1  GNU Fortran (GCC) 4.5.0 20090910  
-                                  Intel C, C++ and Fortran compilers 11.1 20100806
+    Mac OS X 10.7.0 (Intel 64-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1
+    Darwin Kernel Version 10.7.0  GNU Fortran (GCC) 4.6.0 20101106 (experimental)
+                                  Intel C, C++ and Fortran compilers 12.0.1.122 20101110
 
-    Mac OS X 10.6.4 (Intel 32-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1
-    Darwin Kernel Version 10.4.0  GNU Fortran (GCC) 4.6.0 20101106
-                                  Intel C, C++ and Fortran compilers 12.0.0 20101110
-
-    Mac OS X 10.6.4 (Intel 64-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (Apple Inc. build 5659)
-    Darwin Kernel Version 10.6.0   GNU Fortran (GCC) 4.5.0 20090910 
-                                   Intel C, C++ and Fortran compilers 11.1 20100806
+    Mac OS X 10.7.0 (Intel 32-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (Apple Inc. build 5666) (dot 3)
+    Darwin Kernel Version 10.7.0  GNU Fortran (GCC) version 4.4.0 20090123 (experimental) 
+							[trunk revision 143587]
 
     Fedora 12 2.6.32.16-150.fc12.ppc64 #1 SMP ppc64 GNU/Linux
                                   gcc (GCC) 4.4.4 20100630 (Red Hat 4.4.4-10)
@@ -432,7 +433,7 @@ The following platforms and compilers have been tested for this release.
                                   HP C++ V7.3-009
 
 Tested Configuration Features Summary
-========================================
+=====================================
 
     In the tables below
           y   = tested 
@@ -453,15 +454,16 @@ Windows XP x64                             n        y(4)   n        y     y     
 Windows Vista                              n        y(4)   n        y     y     y
 Windows Vista x64                          n        y(4)   n        y     y     y
 OpenVMS Alpha                              n        y      n        y     y     n
-Mac OS X 10.6 Intel                        n        y      n        y     y     y
-FreeBSD 8.2-STABLE 32- and 64-bit          n        x      n        x     y     y
+Mac OS X 10.7 Intel 32-bit                 n        y      n        y     y     y
+Mac OS X 10.7 Intel 64-bit                 n        y      n        y     y     y
+AIX 6.1 32- and 64-bit                     y        y      y        y     y     y
+FreeBSD 8.2-STABLE 32&64 bit               n        x      n        x     y     y
 CentOS 5.5 Linux 2.6.18-194 i686 GNU (1)W  y        y(2)   y        y     y     y
 CentOS 5.5 Linux 2.6.18-194 i686 Intel  W  n        y      n        y     y     n
 CentOS 5.5 Linux 2.6.18-194 i686 PGI    W  n        y      n        y     y     n
 CentOS 5.5 Linux 2.6.16 x86_64 GNU (1)  W  y        y(3)   y        y     y     y
 CentOS 5.5 Linux 2.6.16 x86_64 Intel    W  n        y      n        y     y     n
 CentOS 5.5 Linux 2.6.16 x86_64 PGI      W  n        y      n        y     y     y
-RedHat EL4 2.6.18 Xeon Lustre           C  y        y      y        y     y     n
 Fedora 12 Linux 2.6.32.16-150.fc12.ppc64   n        y      n        y     y     y
 SGI Linux 2.6.32.19                        y        y      y        y     y     y
 
@@ -475,15 +477,16 @@ Windows XP x64                             y       y(4)      y         n
 Windows Vista                              y       y(4)      y         y
 Windows Vista x64                          y       y(4)      y         y
 OpenVMS Alpha                              n       n         n         n
-Mac OS X 10.6                              y(5)    n         y         n        
-FreeBSD 8.2-STABLE 32- and 64-bit          y       x         x         y
+Mac OS X 10.7 Intel 32-bit                 y(5)    n         y         n        
+Mac OS X 10.7 Intel 64-bit                 y(5)    n         y         n        
+AIX 6.1 32- and 64-bit                     n       n         n         y        
+FreeBSD 8.2-STABLE 32&64 bit               y       x         x         y        
 CentOS 5.5 Linux 2.6.18-128 i686 GNU (1)W  y       y(2)      y         y        
 CentOS 5.5 Linux 2.6.18-128 i686 Intel  W  y       y         y         n        
 CentOS 5.5 Linux 2.6.18-128 i686 PGI    W  y       y         y         n        
 CentOS 5.5 Linux 2.6.16 x86_64 GNU (1)  W  y       y         y         y        
 CentOS 5.5 Linux 2.6.16 x86_64 Intel    W  y       y         y         n        
 CentOS 5.5 Linux 2.6.16 x86_64 PGI      W  y       y         y         n        
-RedHat EL4 2.6.18 Xeon Lustre           C  y       y         y         n
 Fedora 12 Linux 2.6.32.16-150.fc12.ppc64   y       y         y         y 
 SGI Linux 2.6.32.19                        y       y         y         y 
 
@@ -498,22 +501,25 @@ SGI Linux 2.6.32.19                        y       y         y         y
 
 Known Problems
 ==============
-* After the shared library support is fixed for some bugs, it is discovered
-  that "make prefix=XXX install" no longer work for shared libraries. It
+* After the shared library support was fixed for some bugs, it was discovered
+  that "make prefix=XXX install" no longer works for shared libraries. It
   still works correctly for static libraries. Therefore, if you want to
-  install the HDF5 shared libraries in location such as /usr/local/hdf5,
-  you need to specify it via the --prefix option during configure time.
-  E.g, ./configure --prefix=/usr/local/hdf5 ...
+  install the HDF5 shared libraries in a location such as /usr/local/hdf5,
+  you need to specify the location via the --prefix option during configure 
+  time. E.g, ./configure --prefix=/usr/local/hdf5 ...
   (AKC - 2011/05/07 HDFFV-7583)
 
 * The parallel test, t_shapesame, in testpar/, may run for a long time and may
-  get terminated by the alarm signal.  If that happens, one can increase the
+  be terminated by the alarm signal.  If that happens, one can increase the
   alarm seconds (default is 1200 seconds = 20 minutes) by setting the
   environment variable, $HDF5_ALARM_SECONDS, to a larger value such as 3600
-  which means 60 minutes = 1 hour.  Beware that the t_shapesame test may fail
-  in some systems (see the "While working on the 1.8.6 release..." problem
-  below).  If it does, it will waste more time if $HDF5_ALARM_SECONDS is set
+  (60 minutes).  Note that the t_shapesame test may fail in some systems 
+  (see the "While working on the 1.8.6 release..." problem below).  If 
+  it does, it will waste more time if $HDF5_ALARM_SECONDS is set
   to a larger value. (AKC - 2011/05/07)
+
+* The C++ and FORTRAN bindings are not currently working on FreeBSD.
+  (QAK - 2011/04/26)
 
 * Shared Fortran libraries are not quite working on AIX. While they are
   generated when --enable-shared is specified, the fortran and hl/fortran
@@ -526,7 +532,7 @@ Known Problems
   sometimes fails in the perform directory due to the attempt to remove the
   executable of h5perf or h5perf_serial by two "parallel" commands. This error
   has no consequence on the functionality of the HDF5 library or install. It
-  is fixed in the next release. AKC - 2011/01/25  ??????? 4.18.2011. sent question to albert re: has this been fixed in 1.8.7?????????????????????????
+  is fixed in the next release. AKC - 2011/01/25
 
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can
   occur when reading from a dataset in parallel shortly after it has been
@@ -578,21 +584,6 @@ Known Problems
   a non-zero for this particular test, therefore it concludes the test has
   failed when it receives 0 from yod.  Skip all the "failing" test for now
   by changing them as following.
-  
-* The STDIO VFD does not work on some architectures, possibly due to 32/64
-  bit or large file issues.  The basic STDIO VFD test is known to fail on
-  64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
-  10.7.0.  The STDIO VFD test has been disabled while we investigate and
-  a fix should appear in a future release, possibly 1.8.9.
-  
-* The links test can fail under the stdio VFD due to some issues with external
-  links.  This will be investigated and fixed in a future release.  See JIRA
-  issue HDFFV-7768 for more information.  DER - 10/14/2011
-  
-* h5diff can report inconsistent results when comparing datasets of enum type
-  that contain invalid values.  This is due to how enum types are handled in
-  the library and will be addressed in the next release.  See JIRA issue
-  HDFFV-7527.  DER - 10/14/2011
 
   ======== Original tools/h5ls/testh5ls.sh =========
   TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
@@ -614,6 +605,21 @@ Known Problems
   echo SKIP H5LSTEST $FILEOUT
   ==================================================
   AKC - 2008/11/10
+  
+* The STDIO VFD does not work on some architectures, possibly due to 32/64
+  bit or large file issues.  The basic STDIO VFD test is known to fail on
+  64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
+  10.7.0.  The STDIO VFD test has been disabled while we investigate and
+  a fix should appear in a future release, possibly 1.8.9.
+  
+* The links test can fail under the stdio VFD due to some issues with external
+  links.  This will be investigated and fixed in a future release.  See JIRA
+  issue HDFFV-7768 for more information.  DER - 10/14/2011
+  
+* h5diff can report inconsistent results when comparing datasets of enum type
+  that contain invalid values.  This is due to how enum types are handled in
+  the library and will be addressed in the next release.  See JIRA issue
+  HDFFV-7527.  DER - 10/14/2011
 
 * For Red Storm, a Cray XT3 system, the yod command sometimes gives the
   message,  "yod allocation delayed for node recovery".  This interferes with
