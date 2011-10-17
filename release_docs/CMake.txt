@@ -218,6 +218,9 @@ Notes: This short instruction is written for users who want to quickly build
       NOTE: We have just introduced the packaging capability and it has not been 
             extensively tested. Please send us comments on how it can be improved.
             See NSIS note 8 of this document.
+            Also, if you are using a VS Express version or do not want to enable
+            the packaging components, set HDF5_NO_PACKAGES to ON (on the command
+            line add -DHDF5_NO_PACKAGES:BOOL=ON)
            
    6. The files that support building HDF5 with CMake are all the files in the 
       config/cmake folder, the CMakeLists.txt files in each source folder, and 
@@ -283,6 +286,7 @@ OPTION (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" OFF)
 OPTION (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" OFF)
 OPTION (HDF5_BUILD_TOOLS  "Build HDF5 Tools" OFF)
 OPTION (HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" OFF)
+OPTION (DHDF5_NO_PACKAGES "Do not include CPack Packaging" OFF)
 
 
 ************************************************************************

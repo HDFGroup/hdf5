@@ -69,6 +69,9 @@ Preconditions:
       Note: We have attempted to mirror our Autoconf configuration files for
             maintainence reasons. We will maintain the current VS2008 project
             files for the 1.8 product.
+            Also, if you are using a VS Express version or do not want to enable
+            the packaging components, set HDF5_NO_PACKAGES to ON (on the command
+            line add -DHDF5_NO_PACKAGES:BOOL=ON)
       Warning: The instructions in this file are not compatible with CMake.
             Follow the instructions in CMake.txt, dot not use any files from
             the WINDOWS subfolder.
