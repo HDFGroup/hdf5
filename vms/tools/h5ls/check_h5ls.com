@@ -50,15 +50,57 @@ $! test simple command
 $ CALL TOOLTEST tall-1.ls "-w80 tall.h5"
 $ CALL TOOLTEST tall-2.ls "-w80 -r -d tall.h5"
 $ CALL TOOLTEST tgroup.ls "-w80 tgroup.h5"
+$ CALL TOOLTEST tgroup-3.ls "-w80 tgroup.h5/g1"
 
 $! test for displaying groups
 $ CALL TOOLTEST tgroup-1.ls "-w80 -r -g tgroup.h5"
+$ CALL TOOLTEST tgroup-2.ls "-w80 -g tgroup.h5/g1"
+
+$! test for files with groups that have long comments
+$ CALL TOOLTEST tgrp_comments.ls "-w80 -v -g tgrp_comments.h5/glongcomment"
 
 $! test for displaying simple space datasets
 $ CALL TOOLTEST tdset-1.ls "-w80 -r -d tdset.h5"
 
 $! test for displaying soft links
 $ CALL TOOLTEST tslink-1.ls "-w80 -r tslink.h5"
+
+$! test for displaying more soft links with --follow-symlinks
+$ CALL TOOLTEST tsoftlinks-1.ls "--follow-symlinks tsoftlinks.h5"
+$ CALL TOOLTEST tsoftlinks-2.ls "--follow-symlinks -r tsoftlinks.h5"
+$ CALL TOOLTEST tsoftlinks-3.ls "--follow-symlinks tsoftlinks.h5/group1"
+$ CALL TOOLTEST tsoftlinks-4.ls "--follow-symlinks -r tsoftlinks.h5/group1"
+$ CALL TOOLTEST tsoftlinks-5.ls "--follow-symlinks tsoftlinks.h5/soft_dset1"
+        
+$! test for displaying external and user-defined links with --follow-symlinks
+$ CALL TOOLTEST textlink-1.ls "-w80 -r textlink.h5"
+$ CALL TOOLTEST textlinksrc-1.ls "-w80 --follow-symlinks -r textlinksrc.h5"
+$ CALL TOOLTEST textlinksrc-2.ls "-w80 --follow-symlinks -rv textlinksrc.h5/ext_link5"
+$ CALL TOOLTEST textlinksrc-3.ls "-w80 --follow-symlinks -r textlinksrc.h5/ext_link1"
+$ CALL TOOLTEST textlinksrc-4.ls "-w80 -r textlinksrc.h5"
+$ CALL TOOLTEST textlinksrc-5.ls "-w80 -r textlinksrc.h5/ext_link1"
+$ CALL TOOLTEST textlinksrc-6.ls "-w80 --follow-symlinks textlinksrc.h5"
+$ CALL TOOLTEST textlinksrc-7.ls "-w80 --follow-symlinks textlinksrc.h5/ext_link1"
+$ CALL TOOLTEST tudlink-1.ls "-w80 -r tudlink.h5"
+        
+$! test for displaying external links with -E
+$! the option -E will be depriciated but keep it for backward compatibility
+$ CALL TOOLTEST textlinksrc-1-old.ls "-w80 -"""E"""r textlinksrc.h5"
+$ CALL TOOLTEST textlinksrc-2-old.ls "-w80 -"""E"""rv textlinksrc.h5/ext_link5"
+$ CALL TOOLTEST textlinksrc-3-old.ls "-w80 -"""E"""r textlinksrc.h5/ext_link1"
+$ CALL TOOLTEST textlinksrc-6-old.ls "-w80 -"""E""" textlinksrc.h5"
+$ CALL TOOLTEST textlinksrc-7-old.ls "-w80 -"""E""" textlinksrc.h5/ext_link1"
+
+$! tests for no-dangling-links 
+$! if this option is given on dangling link, h5ls should return exit code 1
+$! when used alone , expect to print out help and return exit code 1
+$ CALL TOOLTEST textlinksrc-nodangle-1.ls "-w80 --no-dangling-links textlinksrc.h5"
+$! external dangling link - expected exit code 1
+$ CALL TOOLTEST textlinksrc-nodangle-2.ls "-w80 --follow-symlinks --no-dangling-links textlinksrc.h5"
+$! soft dangling link - expected exit code 1
+$ CALL TOOLTEST tsoftlinks-nodangle-1.ls "-w80 --follow-symlinks --no-dangling-links tsoftlinks.h5"
+$! when used file with no dangling links - expected exit code 0
+$ CALL TOOLTEST thlinks-nodangle-1.ls "-w80 --follow-symlinks --no-dangling-links thlink.h5"
 
 $! tests for hard links
 $ CALL TOOLTEST thlink-1.ls "-w80 thlink.h5"
@@ -68,6 +110,9 @@ $ CALL TOOLTEST tcomp-1.ls "-w80 -r -d tcompound.h5"
 
 $!test for the nested compound type
 $ CALL TOOLTEST tnestcomp-1.ls "-w80 -r -d tnestedcomp.h5"
+$ CALL TOOLTEST tnestcomp-2.ls "-w80 -r -d -"""S""" tnestedcomp.h5"
+$ CALL TOOLTEST tnestcomp-3.ls "-w80 -r -d -l tnestedcomp.h5"
+$ CALL TOOLTEST tnestcomp-4.ls "-w80 -r -d -l -"""S""" tnestedcomp.h5"
 
 $! test for loop detection
 $ CALL TOOLTEST tloop-1.ls "-w80 -r -d tloop.h5"
@@ -98,7 +143,16 @@ $! UNIX shell script does replacement on the fly in the actual output
 $! file; I do not know what can I do on VMS EIP 07/27/06
 $ CALL TOOLTEST tattr2.ls "-w80 -v -"""S""" tattr2.h5"
 
-$
+$! tests for error handling.
+$! test for non-existing file
+$ CALL TOOLTEST nosuchfile.ls "nosuchfile.h5"
+
+$! test for variable length data types in verbose mode
+$ CALL TOOLTEST tvldtypes2le.ls "-v tvldtypes1.h5"
+
+$! test for dataset region references data types in verbose mode
+$ CALL TOOLTEST tdataregle.ls "-v tdatareg.h5"
+
 $ 
 $TOOLTEST: SUBROUTINE
 $
@@ -113,9 +167,9 @@ $ ! Run the test and save output in the 'actual' file
 $ !
 $ define/nolog sys$output 'actual'
 $ define/nolog sys$error  'actual_err'
-$ write  sys$output "#############################"
-$ write  sys$output " output for 'h5ls ''P2''"
-$ write  sys$output "#############################"
+$ ! write  sys$output "#############################"
+$ ! write  sys$output " output for 'h5ls ''P2''"
+$ ! write  sys$output "#############################"
 $ ON ERROR THEN CONTINUE
 $ h5ls 'P2
 $ deassign sys$output
