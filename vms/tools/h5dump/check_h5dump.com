@@ -109,7 +109,7 @@ $ CALL TOOLTEST tvlstr.ddl "tvlstr.h5"
 $
 $ ! Test for files with array data
 $ CALL TOOLTEST tarray1.ddl "tarray1.h5"
-# ! Added for bug# 2092 - tarray1_big.h
+$ ! Added for bug# 2092 - tarray1_big.h
 $ CALL TOOLTEST tarray1_big.ddl "-"""R""" tarray1_big.h5"
 $ CALL TOOLTEST tarray2.ddl "tarray2.h5"
 $ CALL TOOLTEST tarray3.ddl "tarray3.h5"
@@ -192,13 +192,13 @@ $ CALL TOOLTEST tindicesno.ddl "-y taindices.h5"
 $
 $ ! Array indices with subsetting
 $ ! 1D case
-$ CALL TOOLTEST tindicessub1.ddl "-d 1d -s 1 -S 10 -c 2 -k 3 taindices.h5"
+$ CALL TOOLTEST tindicessub1.ddl "-d 1d -s 1 -"""S""" 10 -c 2 -k 3 taindices.h5"
 $ ! 2D case
-$ CALL TOOLTEST tindicessub2.ddl "-d 2d -s 1,2 -S 3,3 -c 3,2 -k 2,2 taindices.h5"
+$ CALL TOOLTEST tindicessub2.ddl "-d 2d -s 1,2 -"""S""" 3,3 -c 3,2 -k 2,2 taindices.h5"
 $ ! 3D case
-$ CALL TOOLTEST tindicessub3.ddl "-d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2 -k 1,2,2 taindices.h5"
+$ CALL TOOLTEST tindicessub3.ddl "-d 3d -s 0,1,2 -"""S""" 1,3,3 -c 2,2,2 -k 1,2,2 taindices.h5"
 $ ! 4D case
-$ CALL TOOLTEST tindicessub4.ddl "-d 4d -s 0,0,1,2 -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2 taindices.h5"
+$ CALL TOOLTEST tindicessub4.ddl "-d 4d -s 0,0,1,2 -c 2,2,3,2 -"""S""" 1,1,3,3 -k 1,1,2,2 taindices.h5"
 $
 $ ! Exceed the dimensions for subsetting
 $ CALL TOOLTEST texceedsubstart.ddl "-d 1d -s 1,3 taindices.h5"
