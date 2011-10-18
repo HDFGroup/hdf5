@@ -129,8 +129,8 @@ H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_o
     FUNC_ENTER_NOAPI_NOINIT(H5O_mtime_new_decode);
 
     /* check args */
-    assert(f);
-    assert(p);
+    HDassert(f);
+    HDassert(p);
 
     /* decode */
     if(*p++ != H5O_MTIME_VERSION)
@@ -290,9 +290,9 @@ H5O_mtime_new_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p,
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_new_encode);
 
     /* check args */
-    assert(f);
-    assert(p);
-    assert(mesg);
+    HDassert(f);
+    HDassert(p);
+    HDassert(mesg);
 
     /* Version */
     *p++ = H5O_MTIME_VERSION;
@@ -333,9 +333,9 @@ H5O_mtime_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, con
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_encode);
 
     /* check args */
-    assert(f);
-    assert(p);
-    assert(mesg);
+    HDassert(f);
+    HDassert(p);
+    HDassert(mesg);
 
     /* encode */
     tm = HDgmtime(mesg);
@@ -375,7 +375,7 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_NOAPI_NOINIT(H5O_mtime_copy);
 
     /* check args */
-    assert(mesg);
+    HDassert(mesg);
     if (!dest && NULL==(dest = H5FL_MALLOC(time_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
@@ -416,8 +416,8 @@ H5O_mtime_new_size(const H5F_t UNUSED * f, hbool_t UNUSED disable_shared, const 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_new_size);
 
     /* check args */
-    assert(f);
-    assert(mesg);
+    HDassert(f);
+    HDassert(mesg);
 
     FUNC_LEAVE_NOAPI(8);
 } /* end H5O_mtime_new_size() */
@@ -449,8 +449,8 @@ H5O_mtime_size(const H5F_t UNUSED * f, hbool_t UNUSED disable_shared, const void
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_size);
 
     /* check args */
-    assert(f);
-    assert(mesg);
+    HDassert(f);
+    HDassert(mesg);
 
     FUNC_LEAVE_NOAPI(16);
 }
@@ -533,17 +533,17 @@ H5O_mtime_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_debug);
 
     /* check args */
-    assert(f);
-    assert(mesg);
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(mesg);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
     /* debug */
     tm = HDlocaltime(mesg);
 
     HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Time:", buf);
 
     FUNC_LEAVE_NOAPI(SUCCEED);
