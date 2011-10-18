@@ -970,7 +970,7 @@ H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         cpy_info.preserve_null = TRUE;
 
     /* Create a skip list to keep track of which objects are copied */
-    if((cpy_info.map_list = H5SL_create(H5SL_TYPE_OBJ)) == NULL)
+    if((cpy_info.map_list = H5SL_create(H5SL_TYPE_OBJ, NULL)) == NULL)
         HGOTO_ERROR(H5E_SLIST, H5E_CANTCREATE, FAIL, "cannot make skip list")
 
     /* copy the object from the source file to the destination file */

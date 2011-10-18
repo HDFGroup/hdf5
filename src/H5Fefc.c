@@ -184,7 +184,7 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
     } /* end if */
     else {
         HDassert(efc->nfiles == 0);
-        if(NULL == (efc->slist = H5SL_create(H5SL_TYPE_STR)))
+        if(NULL == (efc->slist = H5SL_create(H5SL_TYPE_STR, NULL)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create skip list")
     } /* end else */
 

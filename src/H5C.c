@@ -1013,7 +1013,7 @@ H5C_create(size_t		      max_cache_size,
                     "memory allocation failed")
     }
 
-    if ( (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR)) == NULL ) {
+    if ( (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)) == NULL ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list.")
     }
@@ -5058,7 +5058,7 @@ H5C_dump_cache(H5C_t * cache_ptr,
     HDassert(cache_name != NULL );
 
     /* First, create a skip list */
-    slist_ptr = H5SL_create(H5SL_TYPE_HADDR);
+    slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL);
 
     if ( slist_ptr == NULL ) {
 

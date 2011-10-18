@@ -691,7 +691,7 @@ H5D_chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
     else {
         /* Initialize skip list for chunk selections */
         if(NULL == dataset->shared->cache.chunk.sel_chunks) {
-            if(NULL == (dataset->shared->cache.chunk.sel_chunks = H5SL_create(H5SL_TYPE_HSIZE)))
+            if(NULL == (dataset->shared->cache.chunk.sel_chunks = H5SL_create(H5SL_TYPE_HSIZE, NULL)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for chunk selections")
         } /* end if */
         fm->sel_chunks = dataset->shared->cache.chunk.sel_chunks;
