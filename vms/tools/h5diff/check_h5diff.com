@@ -57,19 +57,28 @@ $!# 1.5 with -d
 $ CALL TOOLTEST h5diff_15.txt " --report --delta=5 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 1.6.1 with -p (int)
-$ CALL TOOLTEST h5diff_16_1.txt "-v -p 0.02 h5diff_basic1.h5 h5diff_basic1.h5 g1/dset5 g1/dset6"
+$ CALL TOOLTEST h5diff_16_1.txt "-v -p """0.02""" h5diff_basic1.h5 h5diff_basic1.h5 g1/dset5 g1/dset6"
 $!
 $!# 1.6.2 with -p (unsigned long long)
 $ CALL TOOLTEST h5diff_16_2.txt "--verbose --relative=0.02 h5diff_basic1.h5 h5diff_basic1.h5 g1/dset7 g1/dset8"
 $!
-$!# 1.6.3 with -p (int)
-$ CALL TOOLTEST h5diff_16_3.txt "-v -p 0.02 h5diff_basic1.h5 h5diff_basic1.h5 g1/dset9 g1/dset10"
+$!# 1.6.3 with -p (double)
+$ CALL TOOLTEST h5diff_16_3.txt "-v -p """0.02""" h5diff_basic1.h5 h5diff_basic1.h5 g1/dset9 g1/dset10"
 $!
 $!# 1.7 verbose mode
 $ CALL TOOLTEST h5diff_17.txt "-v h5diff_basic1.h5 h5diff_basic2.h5"  
 $!
+$!# 1.7 test 32-bit INFINITY
+$ CALL TOOLTEST h5diff_171.txt "-v h5diff_basic1.h5 h5diff_basic1.h5 /g1/fp19 /g1/fp19_"""COPY""""
+$!    
+$!# 1.7 test 64-bit INFINITY
+$ CALL TOOLTEST h5diff_172.txt "-v h5diff_basic1.h5 h5diff_basic1.h5 /g1/fp20 /g1/fp20_"""COPY""""
+$!    
 $!# 1.8 quiet mode 
 $ CALL TOOLTEST h5diff_18.txt "-q h5diff_basic1.h5 h5diff_basic2.h5"
+$!
+$!# 1.8 -v and -q
+$ CALL TOOLTEST h5diff_18_1.txt "-v -q h5diff_basic1.h5 h5diff_basic2.h5"
 $!
 $!
 $!# ##############################################################################
@@ -107,7 +116,12 @@ $!
 $!# 2.8
 $ CALL TOOLTEST h5diff_28.txt "-v h5diff_types.h5 h5diff_types.h5 l1 l2"
 $!
-$!
+$!# ##############################################################################
+$!# # Enum value tests (may become more comprehensive in the future)
+$!# ##############################################################################
+$!# 3.0
+$!# test enum types which may have invalid values
+$CALL TOOLTEST h5diff_30.txt "-v h5diff_enum_invalid_values.h5 h5diff_enum_invalid_values.h5 dset1 dset2"
 $!
 $!# ##############################################################################
 $!# # Dataset types
@@ -147,6 +161,9 @@ $!
 $!
 $!# 6.0: Check if the command line number of arguments is less than 3
 $ CALL TOOLTEST h5diff_600.txt "h5diff_basic1.h5" 
+$!
+$!# 6.1: Check if non-exist object name is specified 
+$ CALL TOOLTEST h5diff_601.txt "h5diff_basic1.h5 h5diff_basic1.h5 nono_obj"
 $!
 $!# ##############################################################################
 $!# # -d 
@@ -200,13 +217,13 @@ $!# 6.16: string
 $! CALL TOOLTEST h5diff_616.txt "-p """0.21""" h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.17: repeated option
-$ CALL TOOLTEST h5diff_617.txt "-p 0.21 -p 0.22 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_617.txt "-p """0.21""" -p """0.22""" h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.18: number larger than biggest difference
 $ CALL TOOLTEST h5diff_618.txt "-p 2 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.19: number smaller than smallest difference
-$ CALL TOOLTEST h5diff_619.txt "-p 0.005 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_619.txt "-p """0.005""" h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!
 $!
@@ -247,10 +264,47 @@ $! Disable this test as C script does
 $! CALL TOOLTEST h5diff_629.txt "file1.h6 file2.h6"
 $!
 $!# ##############################################################################
+$!# # NaN
+$!# ##############################################################################
+$!# 6.30: test (NaN == NaN) must be true based on our documentation -- XCAO
+$ CALL TOOLTEST h5diff_630.txt "-v -d """0.0001""" h5diff_basic1.h5 h5diff_basic1.h5 g1/fp18 g1/fp18_"""COPY""""
+$ CALL TOOLTEST h5diff_631.txt "-v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h5 g1/fp18 g1/fp18_"""COPY""""
+$!
+$!# ##############################################################################
 $!# 7.  attributes
 $!# ##############################################################################
 $!
 $ CALL TOOLTEST h5diff_70.txt "-v h5diff_attr1.h5 h5diff_attr2.h5"
+$!
+$!# ##################################################
+$!#  attrs with verbose option level
+$!# ##################################################
+$!
+$ CALL TOOLTEST h5diff_700.txt "-v1 h5diff_attr1.h5 h5diff_attr2.h5"
+$ CALL TOOLTEST h5diff_701.txt "-v2 h5diff_attr1.h5 h5diff_attr2.h5"
+$ CALL TOOLTEST h5diff_702.txt "--verbose=1 h5diff_attr1.h5 h5diff_attr2.h5"
+$ CALL TOOLTEST h5diff_703.txt "--verbose=2 h5diff_attr1.h5 h5diff_attr2.h5"
+$!
+$!# same attr number , all same attr name
+$ CALL TOOLTEST h5diff_704.txt "-v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /g"
+$!
+$!# same attr number , some same attr name
+$ CALL TOOLTEST h5diff_705.txt "-v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /dset"
+$!
+$!# same attr number , all different attr name
+$ CALL TOOLTEST h5diff_706.txt "-v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /ntype"
+$!
+$!# different attr number , same attr name (intersected)
+$ CALL TOOLTEST h5diff_707.txt "-v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /g2"
+$!
+$!# different attr number , all different attr name 
+$ CALL TOOLTEST h5diff_708.txt "-v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /g3"
+$!
+$!# when no attributes exist in both objects
+$ CALL TOOLTEST h5diff_709.txt "-v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /g4"
+$!
+$!# file vs file
+$ CALL TOOLTEST h5diff_710.txt "-v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5"
 $!
 $!# ##############################################################################
 $!# 8.  all dataset datatypes
@@ -269,7 +323,238 @@ $! 11. floating point comparison
 $ CALL TOOLTEST h5diff_101.txt "-v h5diff_basic1.h5 h5diff_basic1.h5 g1/d1  g1/d2"
 $ CALL TOOLTEST h5diff_102.txt "-v h5diff_basic1.h5 h5diff_basic1.h5 g1/fp1  g1/fp2"
 $!
+$!# with --use-system-epsilon for double value 
+$ CALL TOOLTEST h5diff_103.txt "-v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h5 g1/d1  g1/d2"
+
+$!# with --use-system-epsilon for float value
+$ CALL TOOLTEST h5diff_104.txt "-v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h5 g1/fp1 g1/fp2"
+
+
+$!# not comparable -c flag
+$ CALL TOOLTEST h5diff_200.txt "h5diff_basic2.h5 h5diff_basic2.h5 g2/dset1  g2/dset2"
+$ CALL TOOLTEST h5diff_201.txt "-c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset1  g2/dset2"
+$ CALL TOOLTEST h5diff_202.txt "-c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset2  g2/dset3"
+$ CALL TOOLTEST h5diff_203.txt "-c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset3  g2/dset4"
+$ CALL TOOLTEST h5diff_204.txt "-c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset4  g2/dset5"
+$ CALL TOOLTEST h5diff_205.txt "-c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset5  g2/dset6"
+
+$!# not comparable in compound
+$ CALL TOOLTEST h5diff_206.txt "-c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset7  g2/dset8"
+$ CALL TOOLTEST h5diff_207.txt "-c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset8  g2/dset9"
+
+$!# not comparable in dataspace of zero dimension size
+$ CALL TOOLTEST h5diff_208.txt "-c h5diff_dset_zero_dim_size1.h5 h5diff_dset_zero_dim_size2.h5"
 $!
+$!# non-comparable dataset with comparable attribute, and other comparable datasets.
+$!# All the comparables should display differences.
+$ CALL TOOLTEST h5diff_220.txt "-c non_comparables1.h5 non_comparables2.h5 /g1"
+$!
+$!# comparable dataset with non-comparable attribute and other comparable attributes.
+$!# All the comparables should display differences.
+$ CALL TOOLTEST h5diff_221.txt "-c non_comparables1.h5 non_comparables2.h5 /g2"
+$!
+$!# entire file
+$!# All the comparables should display differences.
+$ CALL TOOLTEST h5diff_222.txt "-c non_comparables1.h5 non_comparables2.h5"
+$!
+$!# ##############################################################################
+$!# # Links compare without --follow-symlinks nor --no-dangling-links
+$!# ##############################################################################
+$!# test for bug1749
+$ CALL TOOLTEST h5diff_300.txt "-v h5diff_links.h5 h5diff_links.h5 /link_g1 /link_g2"
+$!
+$!# ##############################################################################
+$!# # Links compare with --follow-symlinks Only
+$!# ##############################################################################
+$!# soft links file to file
+$ CALL TOOLTEST h5diff_400.txt "--follow-symlinks -v h5diff_softlinks.h5 h5diff_softlinks.h5"
+$!
+$!# softlink vs dset"
+$ CALL TOOLTEST h5diff_401.txt "--follow-symlinks -v h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_dset1_1 /target_dset2"
+$!# dset vs softlink"
+$ CALL TOOLTEST h5diff_402.txt "--follow-symlinks -v h5diff_softlinks.h5 h5diff_softlinks.h5 /target_dset2 /softlink_dset1_1"
+$!# softlink vs softlink"
+$ CALL TOOLTEST h5diff_403.txt "--follow-symlinks -v h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_dset1_1 /softlink_dset2"
+$!# extlink vs extlink (FILE)"
+$ CALL TOOLTEST h5diff_404.txt "--follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_src.h5"
+$!
+$!# extlink vs dset"
+$ CALL TOOLTEST h5diff_405.txt "--follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_trg.h5 /ext_link_dset1 /target_group2/x_dset"
+$!# dset vs extlink"
+$ CALL TOOLTEST h5diff_406.txt "--follow-symlinks -v h5diff_extlink_trg.h5 h5diff_extlink_src.h5 /target_group2/x_dset /ext_link_dset1"
+$!# extlink vs extlink"
+$ CALL TOOLTEST h5diff_407.txt "--follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset1 /ext_link_dset2"
+$!# softlink vs extlink"
+$ CALL TOOLTEST h5diff_408.txt "--follow-symlinks -v h5diff_softlinks.h5 h5diff_extlink_src.h5 /softlink_dset1_1 /ext_link_dset2"
+$!# extlink vs softlink "
+$ CALL TOOLTEST h5diff_409.txt "--follow-symlinks -v h5diff_extlink_src.h5 h5diff_softlinks.h5 /ext_link_dset2 /softlink_dset1_1"
+$!# linked_softlink vs linked_softlink (FILE)"
+$ CALL TOOLTEST h5diff_410.txt "--follow-symlinks -v h5diff_linked_softlink.h5 h5diff_linked_softlink.h5"
+$!
+$!# dset2 vs linked_softlink_dset1"
+$ CALL TOOLTEST h5diff_411.txt "--follow-symlinks -v h5diff_linked_softlink.h5 h5diff_linked_softlink.h5 /target_dset2 /softlink1_to_slink2"
+$!# linked_softlink_dset1 vs dset2"
+$ CALL TOOLTEST h5diff_412.txt "--follow-symlinks -v h5diff_linked_softlink.h5 h5diff_linked_softlink.h5 /softlink1_to_slink2 /target_dset2"
+$!# linked_softlink_to_dset1 vs linked_softlink_to_dset2"
+$ CALL TOOLTEST h5diff_413.txt "--follow-symlinks -v h5diff_linked_softlink.h5 h5diff_linked_softlink.h5 /softlink1_to_slink2 /softlink2_to_slink2"
+$!# group vs linked_softlink_group1"
+$ CALL TOOLTEST h5diff_414.txt "--follow-symlinks -v h5diff_linked_softlink.h5 h5diff_linked_softlink.h5 /target_group /softlink3_to_slink2"
+$!
+$!# linked_softlink_group1 vs group"
+$ CALL TOOLTEST h5diff_415.txt "--follow-symlinks -v h5diff_linked_softlink.h5 h5diff_linked_softlink.h5 /softlink3_to_slink2 /target_group"
+$!
+$!# linked_softlink_to_group1 vs linked_softlink_to_group2"
+$ CALL TOOLTEST h5diff_416.txt "--follow-symlinks -v h5diff_linked_softlink.h5 h5diff_linked_softlink.h5 /softlink3_to_slink2 /softlink4_to_slink2"
+$!
+$!# non-exist-softlink vs softlink"
+$ CALL TOOLTEST h5diff_417.txt "--follow-symlinks -v h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_noexist /softlink_dset2"
+$!
+$!# softlink vs non-exist-softlink"
+$ CALL TOOLTEST h5diff_418.txt "--follow-symlinks -v h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_dset2 /softlink_noexist"
+$!
+$!# non-exist-extlink_file vs extlink"
+$ CALL TOOLTEST h5diff_419.txt "--follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_noexist2 /ext_link_dset2"
+$!
+$!# exlink vs non-exist-extlink_file"
+$ CALL TOOLTEST h5diff_420.txt "--follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset2 /ext_link_noexist2"
+$!
+$!# extlink vs non-exist-extlink_obj"
+$ CALL TOOLTEST h5diff_421.txt "--follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset2 /ext_link_noexist1"
+$!
+$!# non-exist-extlink_obj vs extlink"
+$ CALL TOOLTEST h5diff_422.txt "--follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_noexist1 /ext_link_dset2"
+$!
+$!# extlink_to_softlink_to_dset1 vs dset2"
+$ CALL TOOLTEST h5diff_423.txt "--follow-symlinks -v h5diff_ext2softlink_src.h5 h5diff_ext2softlink_trg.h5 /ext_link_to_slink1 /dset2"
+$!
+$!# dset2 vs extlink_to_softlink_to_dset1"
+$ CALL TOOLTEST h5diff_424.txt "--follow-symlinks -v h5diff_ext2softlink_trg.h5 h5diff_ext2softlink_src.h5 /dset2 /ext_link_to_slink1"
+$!
+$!# extlink_to_softlink_to_dset1 vs extlink_to_softlink_to_dset2"
+$ CALL TOOLTEST h5diff_425.txt "--follow-symlinks -v h5diff_ext2softlink_src.h5 h5diff_ext2softlink_src.h5 /ext_link_to_slink1 /ext_link_to_slink2"
+$!
+$!# ##############################################################################
+$!# # Dangling links compare (--follow-symlinks and --no-dangling-links)
+$!# ##############################################################################
+$!# dangling links --follow-symlinks (FILE to FILE)
+$ CALL TOOLTEST h5diff_450.txt  "--follow-symlinks -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5"
+
+$!# dangling links --follow-symlinks and --no-dangling-links (FILE to FILE)
+$ CALL TOOLTEST h5diff_451.txt  "--follow-symlinks -v --no-dangling-links  h5diff_danglelinks1.h5 h5diff_danglelinks2.h5"
+
+$!# try --no-dangling-links without --follow-symlinks options
+$ CALL TOOLTEST h5diff_452.txt  "--no-dangling-links  h5diff_softlinks.h5 h5diff_softlinks.h5"
+
+$!# dangling link found for soft links (FILE to FILE)
+$ CALL TOOLTEST h5diff_453.txt  "--follow-symlinks -v --no-dangling-links  h5diff_softlinks.h5 h5diff_softlinks.h5"
+
+$!# dangling link found for soft links (obj to obj)
+$ CALL TOOLTEST h5diff_454.txt  "--follow-symlinks -v --no-dangling-links  h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_dset2 /softlink_noexist" 
+$!# dangling link found for soft links (obj to obj) Both dangle links
+$ CALL TOOLTEST h5diff_455.txt  "--follow-symlinks -v --no-dangling-links  h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_noexist /softlink_noexist" 
+$!# dangling link found for ext links (FILE to FILE)
+$ CALL TOOLTEST h5diff_456.txt  "--follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5" 
+$!# dangling link found for ext links (obj to obj). target file exist
+$ CALL TOOLTEST h5diff_457.txt  "--follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset1 /ext_link_noexist1" 
+$!# dangling link found for ext links (obj to obj). target file NOT exist
+$ CALL TOOLTEST h5diff_458.txt  "--follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset1 /ext_link_noexist2"  
+$!# dangling link found for ext links (obj to obj). Both dangle links
+$ CALL TOOLTEST h5diff_459.txt  "--follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_noexist1 /ext_link_noexist2"
+$!
+$!# ##############################################################################
+$!# # test for group diff recursivly
+$!# ##############################################################################
+$!# root 
+$ CALL TOOLTEST h5diff_500.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 / /"
+$ CALL TOOLTEST h5diff_501.txt "-v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 / /"
+
+$!# root vs group (It doesn't work on VMS.  Debug it in the future)
+$! CALL TOOLTEST h5diff_502.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 / /grp1/grp2/grp3"
+
+$!# group vs group (same name and structure)
+$ CALL TOOLTEST h5diff_503.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1 /grp1"
+
+$!# group vs group (different name and structure)
+$ CALL TOOLTEST h5diff_504.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1/grp2 /grp1/grp2/grp3"
+
+$!# groups vs soft-link
+$ CALL TOOLTEST h5diff_505.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1 /slink_grp1"
+$ CALL TOOLTEST h5diff_506.txt "-v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1/grp2 /slink_grp2"
+
+$!# groups vs ext-link
+$ CALL TOOLTEST h5diff_507.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1 /elink_grp1" 
+$ CALL TOOLTEST h5diff_508.txt "-v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1 /elink_grp1"
+
+$!# soft-link vs ext-link 
+$ CALL TOOLTEST h5diff_509.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp1 /elink_grp1TOOLTEST h5diff_510.txt -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp1 /elink_grp1"
+
+$!# circled ext links
+$ CALL TOOLTEST h5diff_511.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp10 /grp11"
+$ CALL TOOLTEST h5diff_512.txt "-v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp10 /grp11"
+
+$!# circled soft2ext-link vs soft2ext-link
+$ CALL TOOLTEST h5diff_513.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp10 /slink_grp11"
+$ CALL TOOLTEST h5diff_514.txt "-v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp10 /slink_grp11"
+$!
+$!###############################################################################
+$!# Test for group recursive diff via multi-linked external links 
+$!# With follow-symlinks, file h5diff_grp_recurse_ext1.h5 and h5diff_grp_recurse_ext2-1.h5 should
+$!# be same with the external links.
+$!###############################################################################
+$!# file vs file
+$ CALL TOOLTEST h5diff_515.txt "-v h5diff_grp_recurse_ext1.h5 h5diff_grp_recurse_ext2-1.h5"
+$ CALL TOOLTEST h5diff_516.txt "-v --follow-symlinks h5diff_grp_recurse_ext1.h5 h5diff_grp_recurse_ext2-1.h5"
+$!# group vs group
+$ CALL TOOLTEST h5diff_517.txt "-v h5diff_grp_recurse_ext1.h5 h5diff_grp_recurse_ext2-1.h5 /g1"
+$ CALL TOOLTEST h5diff_518.txt "-v --follow-symlinks h5diff_grp_recurse_ext1.h5 h5diff_grp_recurse_ext2-1.h5 /g1"
+
+$!# ##############################################################################
+$!# # Exclude objects (--exclude-path)
+$!# ##############################################################################
+$!#
+$!# Same structure, same names and different value.
+$!#
+$!# Exclude the object with different value. Expect return - same
+$ CALL TOOLTEST h5diff_480.txt "-v --exclude-path /group1/dset3 h5diff_exclude1-1.h5 h5diff_exclude1-2.h5"
+$!# Verify different by not excluding. Expect return - diff
+$ CALL TOOLTEST h5diff_481.txt "-v h5diff_exclude1-1.h5 h5diff_exclude1-2.h5"
+
+$!#
+$!# Different structure, different names. 
+$!#
+$!# Exclude all the different objects. Expect return - sameTOOLTEST h5diff_482.txt -v --exclude-path "/group1" --exclude-path "/dset1" h5diff_exclude2-1.h5 h5diff_exclude2-2.h5
+$!# Exclude only some different objects. Expect return - diff
+$ CALL TOOLTEST h5diff_483.txt "-v --exclude-path "/group1" h5diff_exclude2-1.h5 h5diff_exclude2-2.h5"
+
+$!# Exclude from group compare
+$ CALL TOOLTEST h5diff_484.txt "-v --exclude-path "/dset3" h5diff_exclude1-1.h5 h5diff_exclude1-2.h5 /group1"
+
+$!# ##############################################################################
+$!# # diff various multiple vlen and fixed strings in a compound type dataset
+$!# ############################################################################## 
+$ CALL TOOLTEST h5diff_530.txt "-v  h5diff_comp_vl_strs.h5 h5diff_comp_vl_strs.h5 /group /group_copy"
+
+$!# ##############################################################################
+$!# # Test container types (array,vlen) with multiple nested compound types
+$!# # Complex compound types in dataset and attribute
+$!# ##############################################################################
+$ CALL TOOLTEST h5diff_540.txt "-v compounds_array_vlen1.h5 compounds_array_vlen2.h5"
+$!
+$!# ##############################################################################
+$!# # Test mutually exclusive options 
+$!# ##############################################################################
+$!# Test with -d , -p and --use-system-epsilon. 
+$ CALL TOOLTEST h5diff_640.txt "-v -d 5 -p """0.05""" --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4"
+$ CALL TOOLTEST h5diff_641.txt "-v -d 5 -p """0.05""" h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4"
+$ CALL TOOLTEST h5diff_642.txt "-v -p """0.05""" -d 5 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4"
+$ CALL TOOLTEST h5diff_643.txt "-v -d 5 --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4"
+$ CALL TOOLTEST h5diff_644.txt "-v --use-system-epsilon -d 5 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4"
+$ CALL TOOLTEST h5diff_645.txt "-v -p """0.05""" --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4"
+$ CALL TOOLTEST h5diff_646.txt "-v --use-system-epsilon -p """0.05""" h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4"
+$!
+$!# ##############################################################################
+$!# # END
+$!# ##############################################################################
 $!
 $TOOLTEST: SUBROUTINE
 $
