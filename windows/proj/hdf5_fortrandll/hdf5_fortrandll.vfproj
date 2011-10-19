@@ -60,15 +60,15 @@
     <File RelativePath="..\..\..\fortran\src\H5Tff.f90"/>
     <File RelativePath="..\..\..\fortran\src\H5Zff.f90"/>
     <File RelativePath="..\..\..\fortran\src\HDF5.f90"/>
-        <File RelativePath="..\..\..\fortran\src\H5Aff_F90.f90"/>
-        <File RelativePath="..\..\..\fortran\src\H5Dff_F90.f90"/>
-        <File RelativePath="..\..\..\fortran\src\H5Eff_F90.f90"/>
-        <File RelativePath="..\..\..\fortran\src\H5Lff_F90.f90"/>
-        <File RelativePath="..\..\..\fortran\src\H5Off_F90.f90"/>
-        <File RelativePath="..\..\..\fortran\src\H5Pff_F90.f90"/>
-        <File RelativePath="..\..\..\fortran\src\H5Rff_F90.f90"/>
-        <File RelativePath="..\..\..\fortran\src\H5Tff_F90.f90"/>
-        <File RelativePath="..\..\..\fortran\src\H5_DBLE_Interface_F90.f90"/>
+    <File RelativePath="..\..\..\fortran\src\H5Aff_F90.f90"/>
+    <File RelativePath="..\..\..\fortran\src\H5Dff_F90.f90"/>
+    <File RelativePath="..\..\..\fortran\src\H5Eff_F90.f90"/>
+    <File RelativePath="..\..\..\fortran\src\H5Lff_F90.f90"/>
+    <File RelativePath="..\..\..\fortran\src\H5Off_F90.f90"/>
+    <File RelativePath="..\..\..\fortran\src\H5Pff_F90.f90"/>
+    <File RelativePath="..\..\..\fortran\src\H5Rff_F90.f90"/>
+    <File RelativePath="..\..\..\fortran\src\H5Tff_F90.f90"/>
+    <File RelativePath="..\..\..\fortran\src\H5_DBLE_InterfaceInternal.f90"/>
     </Filter>
     <Filter Name="Header Files" Filter="h;hpp;hxx;hm;inl;fi;fd"/>
     <Filter Name="Resource Files" Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/></Files>
