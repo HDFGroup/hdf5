@@ -298,7 +298,8 @@ Bug Fixes since HDF5-1.8.7
 
     High-Level APIs:
     ------
-    - None
+    - Fixed the H5LTdtype_to_text function.  It had some memory problems when 
+      dealing with some complicated data types. HDFFVI-7701 (SLU - 2011/10/19)
 
     Fortran High-Level APIs:
     ------
