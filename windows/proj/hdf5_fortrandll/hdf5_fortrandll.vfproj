@@ -68,7 +68,7 @@
     <File RelativePath="..\..\..\fortran\src\H5Pff_F90.f90"/>
     <File RelativePath="..\..\..\fortran\src\H5Rff_F90.f90"/>
     <File RelativePath="..\..\..\fortran\src\H5Tff_F90.f90"/>
-    <File RelativePath="..\..\..\fortran\src\H5_DBLE_InterfaceInternal.f90"/>
+    <File RelativePath="..\..\..\fortran\src\H5_DBLE_InterfaceInclude.f90"/>
     </Filter>
     <Filter Name="Header Files" Filter="h;hpp;hxx;hm;inl;fi;fd"/>
     <Filter Name="Resource Files" Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/></Files>
