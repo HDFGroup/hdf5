@@ -101,7 +101,7 @@ New Features
       h5dsget_label_f
       h5dsget_scale_name_f
       h5dsget_num_scales_f
-                  (EIP for SB - 2011/10/13) 
+                  (EIP for SB - 2011/10/13)
 
     Fortran API
     -----------
@@ -133,6 +133,8 @@ New Features
          h5literate_f
          h5ovisit_f
          h5tconvert_f
+	 h5pset_nbit_f
+	 h5pset_scaleoffset_f
 
      - Subroutines with additional optional parameters:
          h5pcreate_class_f
@@ -291,6 +293,16 @@ Bug Fixes since HDF5-1.8.7
       H5close correspodningly. While the H5open call just adds overhead, the H5close
       call called by an Fortran application shuts down the HDF5 library making 
       it unaccessible to the application. HDFFV-915 (EIP & SB - 2011/10/13)
+    - Fixed h5tget_tag_f where the length of the C string was used to repack the C
+      string into the fortran string leading to memory corruption in the calling 
+      program. (SB -- 2011/7/26)
+    - Added defined constants:
+        H5T_ORDER_MIXED_F (HDFFV-2767)
+        H5Z_SO_FLOAT_DSCALE_F
+        H5Z_SO_FLOAT_ESCALE_F
+        H5Z_SO_INT_F
+        H5Z_SO_INT_MINBITS_DEFAULT_F
+    
 
     C++ API
     ------
@@ -298,6 +310,11 @@ Bug Fixes since HDF5-1.8.7
 
     High-Level APIs:
     ------
+    - Fixed dimscale bug where if you create a dimscale, attach two datasets to it, 
+      and then unattach them, you get an error if they are unattached in order, 
+      but no error if you unattach them in reverse order. HDFFV-7605 (SB - 2011/6/7)
+    - Fixed H5DSset_label seg faulting when retrieving the length of a dimension label
+      that was not set. HDFFV-7673 (SB -- 2011/8/7)
     - Fixed the H5LTdtype_to_text function.  It had some memory problems when 
       dealing with some complicated data types. HDFFVI-7701 (SLU - 2011/10/19)
 
