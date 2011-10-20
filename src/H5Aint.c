@@ -1006,6 +1006,10 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     if(H5A_set_version(file_dst, attr_dst) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, NULL, "unable to update attribute version")
 
+    /* Recompute the destination attribute's size, if it's a different version */
+    if(attr_src->shared->version != attr_dst->shared->version)
+        *recompute_size = TRUE;
+
     /* Set return value */
     ret_value = attr_dst;
 
