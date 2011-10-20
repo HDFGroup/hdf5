@@ -1364,7 +1364,6 @@
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
 # h5dump packed bits validation
-./tools/testfiles/tnofilename-with-packed-bits.ddl
 ./tools/testfiles/tpbitsLengthPositive.ddl
 ./tools/testfiles/tpbitsMaxExceeded.ddl
 ./tools/testfiles/tpbitsSigned.ddl
