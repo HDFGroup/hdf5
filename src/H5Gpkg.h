@@ -252,7 +252,7 @@ typedef struct H5G_bt_it_cpy_t {
     const H5O_loc_t *src_oloc;  /* Source object location */
     haddr_t     src_heap_addr;  /* Heap address of the source symbol table  */
     H5F_t       *dst_file;      /* File of destination group */
-    H5O_stab_t  *dst_stab;      /* Symbol table message for destination group */
+    const H5O_stab_t *dst_stab; /* Symbol table message for destination group */
     H5O_copy_t  *cpy_info;      /* Information for copy operation */
 } H5G_bt_it_cpy_t;
 
@@ -416,9 +416,9 @@ H5_DLL herr_t H5G_stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size
 H5_DLL herr_t H5G_stab_insert(const H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *obj_lnk, H5O_type_t obj_type, const void *crt_info,
     hid_t dxpl_id);
-H5_DLL herr_t H5G_stab_insert_real(H5F_t *f, H5O_stab_t *stab, const char *name,
-    H5O_link_t *obj_lnk, H5O_type_t obj_type, const void *crt_info,
-    hid_t dxpl_id);
+H5_DLL herr_t H5G_stab_insert_real(H5F_t *f, const H5O_stab_t *stab,
+    const char *name, H5O_link_t *obj_lnk, H5O_type_t obj_type,
+    const void *crt_info, hid_t dxpl_id);
 H5_DLL herr_t H5G_stab_delete(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab);
 H5_DLL herr_t H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
     hsize_t skip, hsize_t *last_lnk, H5G_lib_iterate_t op, void *op_data);

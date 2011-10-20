@@ -110,11 +110,13 @@ typedef struct H5O_t H5O_t;
 
 /* Set the fields in a shared message structure */
 #define H5O_UPDATE_SHARED(SH_MESG, SH_TYPE, F, MSG_TYPE, CRT_IDX, OH_ADDR)    \
-    (SH_MESG)->type = (SH_TYPE);                                              \
-    (SH_MESG)->file = (F);                                                    \
-    (SH_MESG)->msg_type_id = (MSG_TYPE);                                      \
-    (SH_MESG)->u.loc.index = (CRT_IDX);                                       \
-    (SH_MESG)->u.loc.oh_addr = (OH_ADDR);
+    {                                                                         \
+        (SH_MESG)->type = (SH_TYPE);                                          \
+        (SH_MESG)->file = (F);                                                \
+        (SH_MESG)->msg_type_id = (MSG_TYPE);                                  \
+        (SH_MESG)->u.loc.index = (CRT_IDX);                                   \
+        (SH_MESG)->u.loc.oh_addr = (OH_ADDR);                                 \
+    } /* end block */
 
 
 /* Fractal heap ID type for shared message & attribute heap IDs. */

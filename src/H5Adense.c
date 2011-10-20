@@ -470,7 +470,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
             mesg_flags |= H5O_MSG_FLAG_SHARED;
         else {
             /* Should this attribute be written as a SOHM? */
-            if(H5SM_try_share(f, dxpl_id, NULL, FALSE, H5O_ATTR_ID, attr, &mesg_flags) < 0)
+            if(H5SM_try_share(f, dxpl_id, NULL, 0, H5O_ATTR_ID, attr, &mesg_flags) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
 
             /* Attributes can't be "unique be shareable" yet */

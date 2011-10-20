@@ -8507,7 +8507,6 @@ main(void)
         } /* end else */
 
         /* The tests... */
-        nerrors += test_copy_named_datatype_attr_self(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
         nerrors += test_copy_dataset_simple(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
         nerrors += test_copy_dataset_simple_samefile(fcpl_src, src_fapl);
         nerrors += test_copy_dataset_simple_empty(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
@@ -8533,6 +8532,8 @@ main(void)
 #endif /* H5_CANNOT_OPEN_TWICE */
         nerrors += test_copy_exist(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
         nerrors += test_copy_path(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
+
+        nerrors += test_copy_named_datatype_attr_self(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
 
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
                     H5O_COPY_WITHOUT_ATTR_FLAG,

@@ -689,13 +689,6 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     if(H5SL_insert(cpy_info->map_list, addr_map, &(addr_map->src_obj_pos)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
 
-    /* Insert destination object header in cache.  Insert before post copy loop
-     * so anything that references this object header can find it.  Insert
-     * pinned so we can continue using oh_dst. */
-    if(H5AC_insert_entry(oloc_dst->file, dxpl_id, H5AC_OHDR, oloc_dst->addr,  oh_dst, H5AC__PIN_ENTRY_FLAG) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
-    inserted = TRUE;
-
     /* "post copy" loop over messages, to fix up any messages which require a complete
      * object header for destination object
      */
@@ -746,10 +739,11 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         oh_dst->nlink += (unsigned)addr_map->inc_ref_count;
     } /* end if */
 
-    /* Unpin oh_dst */
-    if(H5AC_unpin_entry(oh_dst) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "can't unpin object header")
+    /* Insert destination object header in cache */
+    if(H5AC_insert_entry(oloc_dst->file, dxpl_id, H5AC_OHDR, oloc_dst->addr, oh_dst, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
     oh_dst = NULL;
+    inserted = TRUE;
 
     /* Set obj_type and udata, if requested */
     if(obj_type) {
@@ -768,17 +762,11 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     /* Free destination object header on failure */
-    if(ret_value < 0 && oh_dst) {
-        if(inserted) {
-            if(H5AC_unpin_entry(oh_dst) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "can't unpin object header")
-        } /* end if */
-        else {
-            if(H5O_free(oh_dst) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
-            if(H5O_loc_reset(oloc_dst) < 0)
-                HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
-        } /* end else */
+    if(ret_value < 0 && oh_dst && !inserted) {
+        if(H5O_free(oh_dst) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
+        if(H5O_loc_reset(oloc_dst) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
