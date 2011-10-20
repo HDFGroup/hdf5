@@ -419,7 +419,7 @@ H5O_msg_write_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *ty
          * XXX: This doesn't handle freeing extra space in object header from
          *      a message shrinking.
          */
-        if((status = H5SM_try_share(f, dxpl_id, ((mesg_flags & H5O_MSG_FLAG_SHARED) ? NULL : oh), FALSE, idx_msg->type->id, mesg, &mesg_flags)) < 0)
+        if((status = H5SM_try_share(f, dxpl_id, ((mesg_flags & H5O_MSG_FLAG_SHARED) ? NULL : oh), 0, idx_msg->type->id, mesg, &mesg_flags)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "error while trying to share message")
         if(status == FALSE && (mesg_flags & H5O_MSG_FLAG_SHARED))
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "message changed sharing status")
@@ -1922,7 +1922,7 @@ H5O_msg_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     } /* end if */
     else {
         /* Attempt to share message */
-        if(H5SM_try_share(f, dxpl_id, oh, FALSE, type->id, native, mesg_flags) < 0)
+        if(H5SM_try_share(f, dxpl_id, oh, 0, type->id, native, mesg_flags) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
     } /* end else */
 

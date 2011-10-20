@@ -385,8 +385,9 @@ static H5_inline herr_t
 H5O_SHARED_POST_COPY_FILE(const H5O_loc_t *oloc_src, const void *mesg_src,
     H5O_loc_t *oloc_dst, void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
-    const H5O_shared_t  *shared_dst = (const H5O_shared_t *)mesg_dst; /* Alias to shared info in native source */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    const H5O_shared_t  *shared_src = (const H5O_shared_t *)mesg_src; /* Alias to shared info in native source */
+    H5O_shared_t        *shared_dst = (H5O_shared_t *)mesg_dst; /* Alias to shared info in native destination */
+    herr_t              ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_SHARED_POST_COPY_FILE)
 
@@ -394,6 +395,7 @@ H5O_SHARED_POST_COPY_FILE(const H5O_loc_t *oloc_src, const void *mesg_src,
     HDassert(oloc_dst->file);
     HDassert(mesg_src);
     HDassert(mesg_dst);
+    HDassert(cpy_info);
 
 #ifndef H5O_SHARED_TYPE
 #error "Need to define H5O_SHARED_TYPE macro!"
@@ -408,14 +410,17 @@ H5O_SHARED_POST_COPY_FILE(const H5O_loc_t *oloc_src, const void *mesg_src,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy native message to another file")
 #endif /* H5O_SHARED_POST_COPY_FILE_REAL */
 
-    /* Update only shared message after the post copy.  Do not update committed
-     * messages as they have already been dealt with in the copy pass.
-     * (Move copy of target of committed messages to post copy? -NAF) */
-    if(shared_dst->type == H5O_SHARE_TYPE_SOHM
-            || shared_dst->type == H5O_SHARE_TYPE_HERE) {
-        if(H5O_shared_post_copy_file(oloc_dst->file, dxpl_id, cpy_info->oh_dst, mesg_dst) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to fix shared message in post copy")
-    } /* end if */
+    /* Update shared message after the post copy - will short circuit in
+     * production if the DEFER pass determined it will not be shared; debug mode
+     * verifies that it is indeed the case */
+    if(H5O_shared_post_copy_file(oloc_dst->file, H5O_SHARED_TYPE,
+            shared_src, shared_dst, dxpl_id, cpy_info) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to fix shared message in post copy")
+
+    /* Make sure that if the the source or destination is committed, both are
+     * committed */
+    HDassert((shared_src->type == H5O_SHARE_TYPE_COMMITTED)
+            == (shared_dst->type == H5O_SHARE_TYPE_COMMITTED));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -477,8 +477,8 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
 
         /* Create the v2 B-tree index */
         bt2_cparam.cls = H5SM_INDEX;
-        bt2_cparam.node_size = (size_t)H5SM_B2_NODE_SIZE;
-        bt2_cparam.rrec_size = (size_t)H5SM_SOHM_ENTRY_SIZE(f);
+        bt2_cparam.node_size = (uint32_t)H5SM_B2_NODE_SIZE;
+        bt2_cparam.rrec_size = (uint32_t)H5SM_SOHM_ENTRY_SIZE(f);
         bt2_cparam.split_percent = H5SM_B2_SPLIT_PERCENT;
         bt2_cparam.merge_percent = H5SM_B2_MERGE_PERCENT;
         if(NULL == (bt2 = H5B2_create(f, dxpl_id, &bt2_cparam, f)))
@@ -720,8 +720,8 @@ H5SM_convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header,
 
     /* Create the new v2 B-tree for tracking the messages */
     bt2_cparam.cls = H5SM_INDEX;
-    bt2_cparam.node_size = (size_t)H5SM_B2_NODE_SIZE;
-    bt2_cparam.rrec_size = (size_t)H5SM_SOHM_ENTRY_SIZE(f);
+    bt2_cparam.node_size = (uint32_t)H5SM_B2_NODE_SIZE;
+    bt2_cparam.rrec_size = (uint32_t)H5SM_SOHM_ENTRY_SIZE(f);
     bt2_cparam.split_percent = H5SM_B2_SPLIT_PERCENT;
     bt2_cparam.merge_percent = H5SM_B2_MERGE_PERCENT;
     if(NULL == (bt2 = H5B2_create(f, dxpl_id, &bt2_cparam, f)))
@@ -988,9 +988,11 @@ done:
  *              header it needs (which can cause an error if that OH is
  *              already protected!).
  *
- *              The DEFER flag indicates whether the sharing operation
- *              should actually occur, or whether this is just a set up call
- *              for a future sharing operation.
+ *              DEFER_FLAGS indicates whether the sharing operation should
+ *              actually occur, or whether this is just a set up call for a
+ *              future sharing operation.  In the latter case this argument
+ *              should be H5SM_DEFER.  If the message was previously deferred
+ *              this argument should be H5SM_WAS_DEFERRED.
  *
  *              MESG_FLAGS will have the H5O_MSG_FLAG_SHAREABLE or
  *              H5O_MSG_FLAG_SHARED flag set if one is appropriate.  This is
@@ -1029,7 +1031,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, hbool_t defer,
+H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned defer_flags,
     unsigned type_id, void *mesg, unsigned *mesg_flags)
 {
     H5SM_master_table_t *table = NULL;
@@ -1037,9 +1039,25 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, hbool_t defer,
     unsigned            cache_flags = H5AC__NO_FLAGS_SET;
     ssize_t             index_num;
     htri_t              tri_ret;
+#ifndef NDEBUG
+    unsigned            deferred_type = -1u;
+#endif
     htri_t              ret_value = TRUE;
 
     FUNC_ENTER_NOAPI_TAG(H5SM_try_share, dxpl_id, H5AC__SOHM_TAG, FAIL)
+
+    /* If we previously deferred this operation, the saved message type should
+     * be the same as the one we get here.  In debug mode, we make sure this
+     * holds true; otherwise we can leave now if it wasn't shared in the DEFER
+     * pass. */
+    if(defer_flags & H5SM_WAS_DEFERRED)
+#ifndef NDEBUG
+        deferred_type = ((H5O_shared_t *)mesg)->type;
+#else /* NDEBUG */
+        if((((H5O_shared_t *)mesg)->type != H5O_SHARE_TYPE_HERE)
+                && (((H5O_shared_t *)mesg)->type != H5O_SHARE_TYPE_SOHM))
+            HGOTO_DONE(FALSE);
+#endif /* NDEBUG */
 
     /* "trivial" sharing checks */
     if(mesg_flags && (*mesg_flags & H5O_MSG_FLAG_DONTSHARE))
@@ -1075,20 +1093,31 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, hbool_t defer,
      * message to become shared (if it is unique, it will not be shared).
      */
     if(H5SM_write_mesg(f, dxpl_id, open_oh, &(table->indexes[index_num]),
-            defer, type_id, mesg, &cache_flags) < 0)
+            (defer_flags & H5SM_DEFER) != 0, type_id, mesg, &cache_flags) < 0)
 	HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "can't write shared message")
 
     /* Set flags if this message was "written" without error and wasn't a
      * 'defer' attempt; it is now either fully shared or "shareable".
      */
-    if(mesg_flags && !defer) {
+    if(mesg_flags && !(defer_flags & H5SM_DEFER)) {
         if(((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_HERE)
             *mesg_flags |= H5O_MSG_FLAG_SHAREABLE;
-        else
+        else {
+            HDassert(((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_SOHM);
             *mesg_flags |= H5O_MSG_FLAG_SHARED;
+        } /* end else */
     } /* end if */
 
 done:
+    HDassert(!ret_value || ((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_HERE
+            || ((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_SOHM);
+#ifndef NDEBUG
+    /* If we previously deferred this operation, make sure the saved message
+     * type is the same as the one we get here. */
+    if(defer_flags & H5SM_WAS_DEFERRED)
+        HDassert(deferred_type == ((H5O_shared_t *)mesg)->type);
+#endif /* NDEBUG */
+
     /* Release the master SOHM table */
     if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, H5F_SOHM_ADDR(f), table, cache_flags) < 0)
 	HDONE_ERROR(H5E_SOHM, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM master table")
@@ -1347,9 +1376,9 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
          *      We will insert it in the index but not modify the original
          *              message.
          *      If it can't be shared in an object header location, we will
-         *              insert it in the heap.  Note that we assume there will
-         *              be an "open_oh" available when it is time to call
-         *              H5SM_write_mesg with defer flag disabled.
+         *              insert it in the heap.  Note that we will only share
+         *              the message in the object header if there is an
+         *              "open_oh" available.
          *
          * If 'defer' flag is not set:
          *      Insert it in the index but don't modify the original message.
@@ -1357,7 +1386,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
          *              no object header location available, insert it in the
          *              heap.
          */
-        if(share_in_ohdr && (defer || open_oh)) {
+        if(share_in_ohdr && open_oh) {
             /* Set up shared component info */
             shared.type = H5O_SHARE_TYPE_HERE;
 
@@ -1589,7 +1618,7 @@ H5SM_find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *e
      * Also record the first empty position we find.
      */
     for(x = 0; x < list->header->list_max; x++) {
-        if(key && (list->messages[x].location != H5SM_NO_LOC) &&
+        if((list->messages[x].location != H5SM_NO_LOC) &&
                 (0 == H5SM_message_compare(key, &(list->messages[x]))))
             HGOTO_DONE(x)
         else if(empty_pos && list->messages[x].location == H5SM_NO_LOC) {
@@ -1944,14 +1973,14 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
         /* Get index conversion limits */
-        sohm_l2b = table->indexes[0].list_max;
-        sohm_b2l = table->indexes[0].btree_min;
+        sohm_l2b = (unsigned)table->indexes[0].list_max;
+        sohm_b2l = (unsigned)table->indexes[0].btree_min;
 
         /* Iterate through all indices */
         for(u = 0; u < table->num_indexes; ++u) {
             /* Pack information about the individual SOHM index */
             index_flags[u] = table->indexes[u].mesg_types;
-            minsizes[u] = table->indexes[u].min_mesg_size;
+            minsizes[u] = (unsigned)table->indexes[u].min_mesg_size;
 
             /* Sanity check */
             HDassert(sohm_l2b == table->indexes[u].list_max);

@@ -259,7 +259,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_insert_real(H5F_t *f, H5O_stab_t *stab, const char *name,
+H5G_stab_insert_real(H5F_t *f, const H5O_stab_t *stab, const char *name,
     H5O_link_t *obj_lnk, H5O_type_t obj_type, const void *crt_info,
     hid_t dxpl_id)
 {

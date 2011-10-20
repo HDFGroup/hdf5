@@ -788,7 +788,7 @@ H5O_attr_update_shared(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5A_t *attr,
 
     /* Store new version of message as a SOHM */
     /* (should always work, since we're not changing the size of the attribute) */
-    if((shared_mesg = H5SM_try_share(f, dxpl_id, oh, FALSE, H5O_ATTR_ID, attr, NULL)) == 0)
+    if((shared_mesg = H5SM_try_share(f, dxpl_id, oh, 0, H5O_ATTR_ID, attr, NULL)) == 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "attribute changed sharing status")
     else if(shared_mesg < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't share attribute")

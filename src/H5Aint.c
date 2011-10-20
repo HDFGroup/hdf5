@@ -851,7 +851,8 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     HDassert(attr_dst->shared->name);
 
     /* Copy attribute's datatype */
-    /* (Start destination datatype as transient, even if source is named) */
+    /* If source is named, we will keep dst as named, but we will not actually
+     * copy the target and update the message until post copy */
     if(NULL == (attr_dst->shared->dt = H5T_copy(attr_src->shared->dt, H5T_COPY_ALL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "cannot copy datatype")
 
@@ -879,13 +880,13 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     if(H5O_msg_reset_share(H5O_SDSPACE_ID, attr_dst->shared->ds) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset dataspace sharing")
 
-    /* Try to share both the datatype and dataset.  This does nothing if the
-     * datatype is committed or sharing is disabled.
+    /* Simulate trying to share both the datatype and dataset, to determine the
+     * final size of the messages.  This does nothing if the datatype is
+     * committed or sharing is disabled.
      */
-    /* Use try_share_virtual and move try_share to post copy? -NAF */
-    if(H5SM_try_share(file_dst, dxpl_id, NULL, FALSE, H5O_DTYPE_ID, attr_dst->shared->dt, NULL) < 0)
+    if(H5SM_try_share(file_dst, dxpl_id, NULL, H5SM_DEFER, H5O_DTYPE_ID, attr_dst->shared->dt, NULL) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "can't share attribute datatype")
-    if(H5SM_try_share(file_dst, dxpl_id, NULL, FALSE, H5O_SDSPACE_ID, attr_dst->shared->ds, NULL) < 0)
+    if(H5SM_try_share(file_dst, dxpl_id, NULL, H5SM_DEFER, H5O_SDSPACE_ID, attr_dst->shared->ds, NULL) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "can't share attribute dataspace")
 
     /* Compute the sizes of the datatype and dataspace. This is their raw
@@ -1099,6 +1100,14 @@ H5A_attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
         /* Update shared message info from named datatype info */
         H5T_update_shared(attr_dst->shared->dt);
     } /* end if */
+
+    /* Try to share both the datatype and dataset.  This does nothing if the
+     * datatype is committed or sharing is disabled.
+     */
+    if(H5SM_try_share(file_dst, dxpl_id, NULL, H5SM_WAS_DEFERRED, H5O_DTYPE_ID, attr_dst->shared->dt, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "can't share attribute datatype")
+    if(H5SM_try_share(file_dst, dxpl_id, NULL, H5SM_WAS_DEFERRED, H5O_SDSPACE_ID, attr_dst->shared->ds, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "can't share attribute dataspace")
 
     /* Only need to fix reference attribute with real data being copied to
      *  another file.

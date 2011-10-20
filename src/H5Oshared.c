@@ -285,7 +285,7 @@ H5O_shared_link_adj(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         } /* end if */
         /* Check for incrementing reference count on message */
         else if(adjust > 0) {
-            if(H5SM_try_share(f, dxpl_id, open_oh, FALSE, type->id, shared, NULL) < 0)
+            if(H5SM_try_share(f, dxpl_id, open_oh, 0, type->id, shared, NULL) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "error trying to share message")
         } /* end if */
     } /* end else */
@@ -484,7 +484,7 @@ H5O_shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
     if(sh_mesg->type == H5O_SHARE_TYPE_COMMITTED) {
         ret_value = (size_t)1 +		/*version			*/
             (size_t)1 +			/*the type field		*/
-            H5F_SIZEOF_ADDR(f);		/*sharing by another obj hdr	*/
+            (size_t)H5F_SIZEOF_ADDR(f);	/*sharing by another obj hdr	*/
     } /* end if */
     else {
         HDassert(sh_mesg->type == H5O_SHARE_TYPE_SOHM);
@@ -616,32 +616,21 @@ H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst,
      * be updated (to allow calculation of the final size) but the message is
      * not actually shared.
      */
-    if(shared_src->type == H5O_SHARE_TYPE_COMMITTED) {
-        H5O_loc_t dst_oloc;
-        H5O_loc_t src_oloc;
-
-        /* Copy the shared object from source to destination */
-        dst_oloc.file = file_dst;
-        src_oloc.file = file_src;
-        src_oloc.addr = shared_src->u.loc.oh_addr;
-        if(H5O_copy_header_map(&src_oloc, &dst_oloc, dxpl_id, cpy_info, FALSE,
-                NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
-
-        /* Set up destination message's shared info */
-        H5O_UPDATE_SHARED(shared_dst, H5O_SHARE_TYPE_COMMITTED, file_dst, mesg_type->id, 0, dst_oloc.addr)
-    } /* end if */
-    else {
+    if(shared_src->type != H5O_SHARE_TYPE_COMMITTED) {
         /* Simulate trying to share new message in the destination file. */
         /* Set copied metadata tag */
         H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, FAIL);
 
-        if(H5SM_try_share(file_dst, dxpl_id, NULL, TRUE, mesg_type->id, _native_dst, NULL) < 0)
+        if(H5SM_try_share(file_dst, dxpl_id, NULL, H5SM_DEFER, mesg_type->id, _native_dst, NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to determine if message should be shared")
 
         /* Reset metadata tag */
         H5_END_TAG(FAIL);
-    } /* end else */
+    } /* end if */
+    else
+        /* Mark the message as committed - as it will be committed in post copy
+         */
+        H5O_UPDATE_SHARED(shared_dst, H5O_SHARE_TYPE_COMMITTED, file_dst, mesg_type->id, 0, HADDR_UNDEF)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -667,30 +656,40 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_shared_post_copy_file(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *mesg)
+H5O_shared_post_copy_file(H5F_t *f, const H5O_msg_class_t *mesg_type,
+    const H5O_shared_t *shared_src, H5O_shared_t *shared_dst, hid_t dxpl_id,
+    H5O_copy_t *cpy_info)
 {
-    H5O_shared_t *old_sh_mesg;
-    htri_t shared_mesg;                 /* Whether the message should be shared */
-    unsigned msg_type_id;               /* Message's type ID */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_shared_post_copy_file)
 
     /* check args */
     HDassert(f);
-    HDassert(mesg);
+    HDassert(shared_src);
+    HDassert(shared_dst);
 
-    /* the old shared message */
-    old_sh_mesg = (H5O_shared_t *) mesg;
+    /* Copy the target of committed messages, try to share others */
+    if(shared_src->type == H5O_SHARE_TYPE_COMMITTED) {
+        H5O_loc_t dst_oloc;
+        H5O_loc_t src_oloc;
 
-    /* save the type id for later use */
-    msg_type_id = old_sh_mesg->msg_type_id;
+        /* Copy the shared object from source to destination */
+        dst_oloc.file = f;
+        src_oloc.file = shared_src->file;
+        src_oloc.addr = shared_src->u.loc.oh_addr;
+        if(H5O_copy_header_map(&src_oloc, &dst_oloc, dxpl_id, cpy_info, FALSE,
+                NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
-    /* Add the new message */
-    if((shared_mesg = H5SM_try_share(f, dxpl_id, oh, FALSE, msg_type_id, mesg, NULL)) == 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "message changed sharing status")
-    else if(shared_mesg < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't share message")
+        /* Set up destination message's shared info */
+        H5O_UPDATE_SHARED(shared_dst, H5O_SHARE_TYPE_COMMITTED, f, mesg_type->id, 0, dst_oloc.addr)
+    } /* end if */
+    else
+        /* Share the message */
+        if(H5SM_try_share(f, dxpl_id, NULL, H5SM_WAS_DEFERRED, mesg_type->id,
+                shared_dst, NULL) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't share message")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
