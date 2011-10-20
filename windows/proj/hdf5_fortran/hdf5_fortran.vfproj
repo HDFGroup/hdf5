@@ -44,6 +44,7 @@
     <Filter Name="Source Files" Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp">
     <File RelativePath="..\..\..\fortran\src\H5_DBLE_InterfaceInclude.f90"/>
     <File RelativePath="..\..\..\fortran\src\H5_ff.f90"/>
+    <File RelativePath="..\..\..\fortran\src\H5_ff_F90.f90"/>
     <File RelativePath="..\..\..\fortran\src\H5Aff.f90"/>
     <File RelativePath="..\..\..\fortran\src\H5Dff.f90"/>
     <File RelativePath="..\..\..\fortran\src\H5Eff.f90"/>

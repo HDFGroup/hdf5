@@ -404,7 +404,6 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   #-- Copy all the HDF5 files from the test directory into the source directory
   SET (HDF5_REFERENCE_PBITS
-      tnofilename-with-packed-bits.ddl
       tpbitsArray.ddl
       tpbitsCompound.ddl
       tpbitsIncomplete.ddl
@@ -1266,8 +1265,6 @@ IF (BUILD_TESTING)
       NAME H5DUMP_PACKED_BITS-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
-          tnofilename-with-packed-bits.out
-          tnofilename-with-packed-bits.out.err
           tpbitsArray.out
           tpbitsArray.out.err
           tpbitsCompound.out
@@ -1381,7 +1378,7 @@ IF (BUILD_TESTING)
 
   # test failure handling
   # Missing file name
-  ADD_H5_TEST (tnofilename-with-packed-bits 1)
+  ADD_H5_TEST (tnofilename 1)
   # Limits:
   # Maximum number of packed bits is 8 (for now).
   # Maximum integer size is 8*sizeof(long long).

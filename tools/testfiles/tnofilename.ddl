@@ -25,6 +25,12 @@ usage: h5dump [OPTIONS] file
      -m T, --format=T     Set the floating point output format
      -q Q, --sort_by=Q    Sort groups and attributes by index Q
      -z Z, --sort_order=Z Sort groups and attributes by order Z
+     -M L, --packedbits=L Print packed bits as unsigned integers, using mask
+                          format L for an integer dataset specified with
+                          option -d. L is a list of offset,length values,
+                          separated by commas. Offset is the beginning bit in
+                          the data value and length is the number of bits of
+                          the mask.
      -R, --region         Print dataset pointed by region references
      -x, --xml            Output in XML using Schema
      -u, --use-dtd        Output in XML using DTD
@@ -71,7 +77,7 @@ usage: h5dump [OPTIONS] file
 
   1) Attribute foo of the group /bar_none in file quux.h5
 
-     	h5dump -a /bar_none/foo quux.h5
+      h5dump -a /bar_none/foo quux.h5
 
   2) Selecting a subset from dataset /foo in file quux.h5
 
@@ -81,4 +87,8 @@ usage: h5dump [OPTIONS] file
         using a little-endian type
 
       h5dump -d /dset -b LE -o out.bin quux.h5
+
+  4) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset
+
+      h5dump -d /dset -M 0,1,4,3 quux.h5
 

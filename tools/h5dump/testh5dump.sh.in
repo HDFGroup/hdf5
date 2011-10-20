@@ -280,7 +280,6 @@ $SRC_H5DUMP_TESTFILES/tvlstr.ddl
 $SRC_H5DUMP_TESTFILES/tvms.ddl
 $SRC_H5DUMP_TESTFILES/h5dump-help.txt
 $SRC_H5DUMP_TESTFILES/out3.h5import
-$SRC_H5DUMP_TESTFILES/tnofilename-with-packed-bits.ddl
 $SRC_H5DUMP_TESTFILES/tpbitsArray.ddl
 $SRC_H5DUMP_TESTFILES/tpbitsCompound.ddl
 $SRC_H5DUMP_TESTFILES/tpbitsIncomplete.ddl
@@ -482,8 +481,8 @@ TOOLTEST() {
     # Run test.
     TESTING $DUMPER $@
     (
-	  cd $TESTDIR
-  	  $RUNSERIAL $DUMPER_BIN $@
+    cd $TESTDIR
+      $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.
@@ -493,7 +492,7 @@ TOOLTEST() {
     STDERR_FILTER $actual_err
     cat $actual_err >> $actual
 
-	if [ ! -f $expect ]; then
+  if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
      echo " CREATED"
      cp $actual $expect
@@ -502,13 +501,13 @@ TOOLTEST() {
     else
      echo "*FAILED*"
      echo "    Expected result (*.ddl) differs from actual result (*.out)"
-	 nerrors="`expr $nerrors + 1`"
-	 test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+   nerrors="`expr $nerrors + 1`"
+   test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	 rm -f $actual $actual_err $actual_sav $actual_err_sav $actual_ext
+   rm -f $actual $actual_err $actual_sav $actual_err_sav $actual_ext
     fi
 
 }
@@ -615,15 +614,15 @@ TOOLTEST3() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	 rm -f $actual $actual_err $actual_sav $actual_err_sav
+   rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
 
 }
 
 # Print a "SKIP" message
 SKIP() {
-	 TESTING $DUMPER $@
-	  echo  " -SKIP-"
+   TESTING $DUMPER $@
+    echo  " -SKIP-"
 }
   
 # Print a line-line message left justified in a field of 70 characters
@@ -640,8 +639,8 @@ DIFFTEST()
 {
     PRINT_H5DIFF  $@
     (
-	cd $TESTDIR
-	$RUNSERIAL $H5DIFF_BIN "$@" -q
+  cd $TESTDIR
+  $RUNSERIAL $H5DIFF_BIN "$@" -q
     )
     RET=$?
     if [ $RET != 0 ] ; then
@@ -673,8 +672,8 @@ IMPORTTEST()
 
     PRINT_H5IMPORT  $@
     (
-	cd $TESTDIR
-	$RUNSERIAL $H5IMPORT_BIN "$@" 
+  cd $TESTDIR
+  $RUNSERIAL $H5IMPORT_BIN "$@" 
     )
     RET=$?
     if [ $RET != 0 ] ; then
@@ -689,7 +688,7 @@ IMPORTTEST()
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                            ###
+###        T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
 # prepare for test
@@ -810,7 +809,7 @@ TOOLTEST tchar1.ddl -r tchar.h5
 
 # test failure handling
 # Missing file name
-TOOLTEST tnofilename-with-packed-bits.ddl
+TOOLTEST tnofilename.ddl
 
 # rev. 2004
 
