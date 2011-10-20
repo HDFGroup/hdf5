@@ -302,7 +302,11 @@ Bug Fixes since HDF5-1.8.7
         H5Z_SO_FLOAT_ESCALE_F
         H5Z_SO_INT_F
         H5Z_SO_INT_MINBITS_DEFAULT_F
-    
+        H5O_TYPE_UNKNOWN_F
+        H5O_TYPE_GROUP_F
+        H5O_TYPE_DATASET_F
+        H5O_TYPE_NAMED_DATATYPE_F
+        H5O_TYPE_NTYPES_F
 
     C++ API
     ------
