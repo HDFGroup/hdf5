@@ -173,6 +173,9 @@ Bug Fixes since HDF5-1.8.7
 
     Library
     -------
+    - Correct error when copying attributes between files which are using
+      different versions of the file format.  This addresses Jira issue #7718.
+      (QAK - 2011/10/20)
     - Corrected error when loading local heaps from the file, which could
       cause the size of the local heap's data block to increase dramatically.
       This addresses Jira issue #7767.  (QAK - 2011/10/14)
