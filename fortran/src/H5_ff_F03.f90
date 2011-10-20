@@ -53,6 +53,9 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  Augest 25, 2008
 !
+! ACKNOWLEDGEMENTS
+!  Joe Krahn
+!
 ! Fortran2003 Interface:
   FUNCTION h5offsetof(start,end) RESULT(offset)
     USE, INTRINSIC :: ISO_C_BINDING

@@ -40,15 +40,15 @@ MODULE H5O_PROVISIONAL
 
   IMPLICIT NONE
 
-!****t* H5T (F03)/h5o_info_t
-!
-! Fortran2003 Derived Type:
-!
   enum, bind(c)
      enumerator :: H5O_TYPE_UNKNOWN_F = -1
      enumerator :: H5O_TYPE_GROUP_F, H5O_TYPE_DATASET_F, H5O_TYPE_NAMED_DATATYPE_F, H5O_TYPE_NTYPES_F
   end enum
 
+!****t* H5T (F03)/h5o_info_t
+!
+! Fortran2003 Derived Type:
+!
   TYPE, BIND(C) :: space_t
      INTEGER(hsize_t) :: total ! Total space for storing object header in file
      INTEGER(hsize_t) :: meta  ! Space within header for object header metadata information
@@ -171,7 +171,7 @@ CONTAINS
   END SUBROUTINE h5ovisit_f
 
 !
-!!$!****s* H5O (F03)/h5oget_info_by_name_f_F03
+!****s* H5O (F03)/h5oget_info_by_name_f_F03
 !
 ! NAME
 !  h5oget_info_by_name_f
@@ -195,8 +195,7 @@ CONTAINS
 !  December 1, 2008
 !
 ! Fortran2003 Interface:
-  SUBROUTINE h5oget_info_by_name_f(loc_id, name, &
-       object_info, hdferr, lapl_id)
+  SUBROUTINE h5oget_info_by_name_f(loc_id, name, object_info, hdferr, lapl_id)
 
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE

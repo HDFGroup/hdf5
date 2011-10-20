@@ -361,11 +361,11 @@ CONTAINS
 !
 ! Inputs:
 !  kind    - Fortran KIND parameter
-!  flag    - whether KIND is of type INTEGER or REAL:
+!  flag    - Whether KIND is of type INTEGER or REAL:
 !              H5_INTEGER_KIND - integer
 !              H5_REAL_KIND    - real
 ! Outputs:
-!  h5_type - returns the type
+!  h5_type - Returns the type
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
