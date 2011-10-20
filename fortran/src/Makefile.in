@@ -478,7 +478,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 # Add libtool shared library version numbers to the HDF5 library
 # See libtool versioning documentation online.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 86
+LT_VERS_REVISION = 85
 LT_VERS_AGE = 0
 
 # Include src directory in both Fortran and C flags (C compiler is used
@@ -989,7 +989,6 @@ clean-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
 	  $(RM) *.$(F9XMODEXT);                                         \
 	fi
-	$(RM) $(DESTDIR)$(includedir)/H5f90i*.h
 
 install-data-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
