@@ -40,15 +40,15 @@ MODULE H5O_PROVISIONAL
 
   IMPLICIT NONE
 
-!****t* H5T (F03)/h5o_info_t
-!
-! Fortran2003 Derived Type:
-!
   enum, bind(c)
      enumerator :: H5O_TYPE_UNKNOWN_F = -1
      enumerator :: H5O_TYPE_GROUP_F, H5O_TYPE_DATASET_F, H5O_TYPE_NAMED_DATATYPE_F, H5O_TYPE_NTYPES_F
   end enum
 
+!****t* H5T (F03)/h5o_info_t
+!
+! Fortran2003 Derived Type:
+!
   TYPE, BIND(C) :: space_t
      INTEGER(hsize_t) :: total ! Total space for storing object header in file
      INTEGER(hsize_t) :: meta  ! Space within header for object header metadata information
@@ -170,8 +170,7 @@ CONTAINS
 
   END SUBROUTINE h5ovisit_f
 
-!
-!!$!****s* H5O (F03)/h5oget_info_by_name_f_F03
+!****s* H5O (F03)/h5oget_info_by_name_f_F03
 !
 ! NAME
 !  h5oget_info_by_name_f
@@ -180,35 +179,36 @@ CONTAINS
 !  Retrieves the metadata for an object, identifying the object by location and relative name.
 !
 ! Inputs:
-!  loc_id 	  - File or group identifier specifying location of group in which object 
-!                   is located.
-!  name 	  - Name of group, relative to loc_id
+!  loc_id      - File or group identifier specifying location of group 
+!                in which object is located.
+!  name        - Name of group, relative to loc_id
 !
-! Outputs:  NOTE: In C it is defined as a structure: H5O_info_t
-!    **** NEED TO MAKE THIS DERIVED DATATYPE ****
-!  hdferr 	  - Returns 0 if successful and -1 if fails
+! Outputs:  
+!  object_info - Buffer in which to return object information
+!  hdferr      - Returns 0 if successful and -1 if fails
+!
 ! Optional parameters:
-!  lapl_id 	  - Link access property list
+!  lapl_id     - Link access property list
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  December 1, 2008
 !
 ! Fortran2003 Interface:
-  SUBROUTINE h5oget_info_by_name_f(loc_id, name, &
-       object_info, hdferr, lapl_id)
+  SUBROUTINE h5oget_info_by_name_f(loc_id, name, object_info, hdferr, lapl_id)
 
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
-    INTEGER(HID_T)  , INTENT(IN)  :: loc_id
-    CHARACTER(LEN=*), INTENT(IN)  :: name
-    TYPE(C_PTR)                   :: object_info
+    INTEGER(HID_T)  , INTENT(IN)            :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)            :: name
+    TYPE(h5o_info_t), INTENT(OUT), TARGET   :: object_info
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
 !*****
     INTEGER         :: corder_valid
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
+    TYPE(C_PTR)     :: ptr
     
     INTERFACE
        INTEGER FUNCTION h5oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, &
@@ -232,9 +232,9 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = H5Oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, &
-         object_info)
+    ptr = C_LOC(object_info)
 
+    hdferr = H5Oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, ptr)
 
   END SUBROUTINE H5Oget_info_by_name_f
 
