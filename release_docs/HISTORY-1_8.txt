@@ -3,6 +3,7 @@ HDF5 History
 
 This file contains development history of HDF5 1.8 branch
 
+9.      Release Information for hdf5-1.8.8
 8.      Release Information for hdf5-1.8.7
 7.      Release Information for hdf5-1.8.6
 6.      Release Information for hdf5-1.8.5
@@ -13,6 +14,13 @@ This file contains development history of HDF5 1.8 branch
 1.      Release Information for hdf5-1.8.0
 
 [Search on the string '%%%%' for per-release section breaks.]
+
+%%%%1.8.8%%%%   
+
+
+<NOTE: Copy the RELEASE.txt from the 1.8.8 Release Branch HERE when
+it's finalized!>
+
 
 %%%%1.8.7%%%%   
 

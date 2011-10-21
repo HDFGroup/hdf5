@@ -4,22 +4,22 @@ HDF5 version 1.8.9-snap0 currently under development
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.7 and 
-HDF5 1.8.8-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.8-*. 
+This document describes the differences between HDF5-1.8.8 and 
+HDF5 1.8.9-*, and contains information on the platforms tested and 
+known problems in HDF5-1.8.9-*. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
-Links to the HDF5 1.8.8 source code, documentation, and additional materials
+Links to the HDF5 1.8.9 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.8 release can be obtained from:
+The HDF5 1.8.9 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.8 can be accessed directly at this location: 
+User documentation for 1.8.9 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
@@ -30,8 +30,8 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.8 (current 
-release) versus Release 1.8.7":
+from Release to Release" document, in the section "Release 1.8.9 (current 
+release) versus Release 1.8.8":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -45,7 +45,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
-- Bug Fixes since HDF5-1.8.7
+- Bug Fixes since HDF5-1.8.8
 - Platforms Tested
 - Supported Configuration Features Summary
 - Known Problems
@@ -56,34 +56,15 @@ New Features
 
     Configuration
     -------------
-    - Added --enable-fortran2003 flag to enable Fortran2003 support 
-      in the HDF5 Fortran library. The flag should be used along with the
-      --enable-fortran flag and takes affect only when Fortran compiler 
-      is Fortran2003 compliant.         (EIP - 2011/11/14)
-    - Added checks for clock_gettime and mach/mach_time.h to both configure and
-      CMake.  This will support the move from gettimeofday to clock_gettime's
-      monotonic timer in the profiling code in a future release.
-      (DER - 2011/10/12)
+    - None
     
     Library
     -------
-    - H5Tcreate now supports string type (fixed-length and variable-length).
-      (SLU - 2011/05/20)
-    - The Windows VFD code has been removed with the exception of the functions
-      which set it (H5Pset_fapl_windows, for example).  Setting the Windows
-      VFD now really sets the SEC2 VFD.  The WINDOWS_MAX_BUF and
-      WINDOWS_USE_STDIO configuration options and #defines have also been
-      removed.  See HDFFV-7740 and 7744.
-      
-      NOTE: Since the Windows VFD was a clone of the SEC2 VFD, this change
-      should be transparent to users.
-      (DER - 2011/10/12)
+    - None
  
     Parallel Library
     ----------------
-    - Added new H5Pget_mpio_actual_chunk_opt_mode and
-        H5Pget_mpio_actual_io_mode API routines for querying whether/how
-        a collective I/O operation completed.  (QAK - 2011/10/12)
+    - None
  
     Tools
     -----
@@ -91,55 +72,11 @@ New Features
 
     High-Level APIs
     ---------------
-    - Added Fortran wrappers for Dimension Scale APIs. (HDFFV-3797)
-      h5dsset_scale_f
-      h5dsattach_scale_f
-      h5dsdetach_scale_f
-      h5dsis_attached_f
-      h5dsis_scale_f
-      h5dsset_label_f
-      h5dsget_label_f
-      h5dsget_scale_name_f
-      h5dsget_num_scales_f
-                  (EIP for SB - 2011/10/13)
+    - None
 
     Fortran API
     -----------
-    HDF5 Fortran library was enhanced to support Fortran 2003 standard. 
-    The following features are available when the HDF5 library is configured
-    using --enable-fortran --enable-fortran2003 configure flags AND
-    if fortran compiler is Fortran2003 compliant:
-
-     - Subroutines overloaded with the C_PTR derived type:
-         h5pget_f
-         h5pget_fill_value_f
-         h5pinsert_f
-         h5pregister_f
-         h5pset_f
-         h5pset_fill_value_f
-         h5rcreate_f
-         h5rderefrence_f
-         h5rget_name_f
-         h5rget_obj_type_f
-     - Subroutines overloaded with the C_PTR derived type 
-       and simplified signatures: 
-         h5aread_f
-         h5awrite_f
-         h5dread_f
-         h5dwrite_f
-     - New subroutines
-         h5dvlen_reclaim_f
-         h5literate_by_name_f
-         h5literate_f
-         h5ovisit_f
-         h5tconvert_f
-	 h5pset_nbit_f
-	 h5pset_scaleoffset_f
-
-     - Subroutines with additional optional parameters:
-         h5pcreate_class_f
-                   (EIP - 2011/10/14)
- 
+    - None
 
     C++ API
     -------
@@ -150,166 +87,28 @@ Support for New Platforms, Languages, and Compilers
 ===================================================
     - None
 
-Bug Fixes since HDF5-1.8.7
+Bug Fixes since HDF5-1.8.8
 ==========================
 
     Configuration
     -------------
-    - The --enable-h5dump-packed-bits configure option has been removed.
-      The h5dump code that this option conditionally enabled is now always
-      compiled into h5dump. Please refer to the h5dump reference manual for 
-      usage of the packed bits feature. (MAM - 2011/06/23)
-    - Configure now uses the same flags and symbols in its tests that are
-      used to build the library. (DER - 2011/05/24)
-    - On linux we now link to the bsd_compat library, as per the gcc
-      manual, since we define _BSD_SOURCE. (DER - 2011/05/24)
-    - Fixed a bug in the bin/trace Perl script where API functions
-      that take a variable number of arguments were not processed for
-      trace statement fixup. (DER - 2011/08/25)
-    - The Windows and VMS versions of H5pubconf.h were brought into sync with
-      the linux/posix version. (DER - 2011/10/12)
-    - Changed the size of H5_SIZEOF_OFF_T to 4 bytes (was 8) in the VMS
-      h5pubconf.h based on the output of a test program.  (DER - 2011/10/12)
+    - None
 
     Library
     -------
-    - Correct error when copying attributes between files which are using
-      different versions of the file format.  This addresses Jira issue #7718.
-      (QAK - 2011/10/20)
-    - Corrected error when loading local heaps from the file, which could
-      cause the size of the local heap's data block to increase dramatically.
-      This addresses Jira issue #7767.  (QAK - 2011/10/14)
-    - The first part fix for HDFFV-7640: does not need to do
-      H5O_move_msgs_forward() when writing attributes.
-      Tests are checked into the performance suite.
-      (VC - 2011/10/13)
-    - Fixed a bug that occurred when using H5Ocopy on a committed datatype
-      containing an attribute using that committed datatype.
-      (NAF - 2011/10/13 - Issue 5854)
-    - #ifdef _WIN32 instances have been changed to #ifdef H5_HAVE_WIN32_API. 
-      H5_HAVE_VISUAL_STUDIO checks have been added where necessary. This is in 
-      CMake only as configure never sets _WIN32. (ADB - 2011/09/12)
-    - CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
-      discovered 3 problems in tests and tools' library (Issue 7674):
-        1. In dsets.c, left shifting an unsigned int for 32 bits or more
-           caused undefined behavior.
-        2. In dt_arith.c, the INIT_INTEGER macro definition has an overflow
-           when the value is a negative minimal and is being subtracted from one.
-        3. In tools/lib/h5tools_str.c, right shifting an int value for 32 bits 
-           or more caused undefined behavior.
-      All the problems have been corrected. (SLU - 2011/9/2)
-    - Corrected mismatched function name typo of h5pget_dxpl_mpio_c and
-      h5pfill_value_defined_c. HDFFV-7641 (AKC 2011/08/22)
-    - Corrected an internal error in the library where objects that use committed 
-      (named) datatypes and were accessed from two different file IDs could confuse
-      the two and cause erroneous failures.  This addresses Jira issue #7638.
-      (QAK - 2011/07/18)
-    - In v1.6 of the library, there was an EOA for the whole MULTI file saved in the 
-      super block.  We took it out in v1.8 of the library because it's meaningless 
-      for the MULTI file. v1.8 of the library saves the EOA for the metadata file 
-      instead, but this caused a backward compatibility problem.
-      A v1.8 library couldn't open the file created with the v1.6 library. We
-      fixed the problem by checking the EOA value to detect the file
-      created with v1.6 library. (SLU - 2011/6/22) 
-    - When a dataset had filters and reading data failed, the error message 
-      didn't say which filter wasn't registered. It's fixed now. (SLU - 2011/6/3)
-    - H5Epush2() now has the correct trace functionality (this is related to the
-      bin/trace Perl script bug noted in the configure section).
-      (DER 2011/08/25)
-    - Converted post-checks for appropriate POSIX I/O sizes to pre-checks in
-      order to avoid platform-specific/undefined behavior.  (DER - 2011/10/12)
-    - Corrected some Windows behavior in the SEC2 and log VFDs.  This mainly
-      involved data type correctness fixes, Windows API call error checks and
-      adding the volume serial number to the VFD cmp functions.
-      (DER 2011/10/12)
-    - Added generic VFD I/O types to the SEC2 and log VFDs to ensure correct
-      I/O sizes (and remove compiler warnings) between Windows and true POSIX
-      systems.  (DER - 2011/10/12)
+    - None
 
     Parallel Library
     ----------------
-    - The Special Collective IO (IO when some processes do not contribute to the
-      IO) and the Complex Derived Datatype MPI functionalities are no longer
-      conditionally enabled in the library by configure. They are always
-      enabled in order to take advantage of performance boosts from these
-      behaviors. Older MPI implementations that do not allow for these
-      functionalities can no longer by used by HDF5. (MAM - 2011/07/08).
+    - None
 
     Tools
     -----
-    - Fixed h5diff to display all the comparable objects and attributes 
-      regardless of detecting non-comparables. HDFFV-7693 (JKM 09/16/2011)
-    - Fixed h5repack to update the values of references(object and region) of 
-      attributes in h5repack for 1) references, 2) arrays of references, 
-      3) variable-length references, and 4) compound references. 
-      HDFFV-5932. (PC -2011/09/14)
-    - h5diff: fixed a segfault over a dataset with container types 
-      array and variable-length (vlen) along with multiple nested compound types. 
-      Example: compound->array->compound, compound->vlen->compound.
-      HDFFV-7712. (JKM 09/01/2011)
-    - Fixed h5jam to not to allow the specifying of an HDF5 formatted file as 
-      an input file for the -u (user block file) option. The original HDF5 file 
-      would not be accessible if this behavior was allowed. 
-      HDFFV-5941 (JKM 08/19/2011)
-    - Revised the command help pages of h5jam and h5unjam. The descriptions
-      were not up to date and some were missing. 
-      HDFFV-7515 (JKM 08/15/2011)
-    - Fixed h5dump to correct the schema location: 
-      <hdf5:HDF5-File 
-      xmlns:hdf5="http://hdfgroup.org/HDF5/XML/schema/HDF5-File" 
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-      xsi:schemaLocation="http://hdfgroup.org/HDF5/XML/schema/HDF5-File 
-      http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd">
-      (ADB - 2011/08/10)
-    - h5repack: h5repack failed to copy a dataset if the layout is changed 
-      from chunked with unlimited dimensions to contiguous. HDFFV-7649 
-      (PC -- 2011/07/15)
-    - Fixed h5diff: the "--delta" option considers two NaN of the same type 
-      are different. This is wrong based on the h5diff description in the 
-      Reference Manual. HDFFV-7656 (PC -- 2011/07/15)
-    - Fixed h5diff to display an instructive error message and exit with
-      an instructive error message when mutually exclusive options 
-      (-d, -p and --use-system-epsilon) are used together. 
-      HDFFV-7600  (JKM 07/07/2011)
-    - Fixed h5dump so that it displays the first line of each element in correct
-      position for multiple dimention array types. Before this fix, 
-      the first line of each element in an array was
-      displayed after the last line of previous element without
-      moving to the next line (+indentation).
-      HDFFV-5878  (JKM 06/15/2011)
-    - Fixed h5dump so that it will display the correct value for 
-      H5T_STD_I8LE datasets on the Blue-gene system (ppc64, linux, Big-Endian, 
-      clustering). HDFFV-7594 (AKC & JKM 05/12/2011)
-    - Fixed h5diff to compare a file to itself correctly. Previously h5diff
-      reported either the files were different or not compatible in certain 
-      cases even when comparing a file to itself. This fix also improves 
-      performance when comparing the same target objects through verifying 
-      the object and file addresses before comparing the details 
-      in the objects. Examples of details are datasets and attributes. 
-      HDFFV-5928. (XCAO & JKM 05/06/2011)
-    - h5repack: added macro to handle a failure in H5Dread/write when memory
-      allocation failed inside the library. (PC -- 2011/08/19)
+    - None
 
     F90 API
     -------
-    - Modified the h5open_f and h5close_f subroutines to not to call H5open and
-      H5close correspodningly. While the H5open call just adds overhead, the H5close
-      call called by an Fortran application shuts down the HDF5 library making 
-      it unaccessible to the application. HDFFV-915 (EIP & SB - 2011/10/13)
-    - Fixed h5tget_tag_f where the length of the C string was used to repack the C
-      string into the fortran string leading to memory corruption in the calling 
-      program. (SB -- 2011/7/26)
-    - Added defined constants:
-        H5T_ORDER_MIXED_F (HDFFV-2767)
-        H5Z_SO_FLOAT_DSCALE_F
-        H5Z_SO_FLOAT_ESCALE_F
-        H5Z_SO_INT_F
-        H5Z_SO_INT_MINBITS_DEFAULT_F
-        H5O_TYPE_UNKNOWN_F
-        H5O_TYPE_GROUP_F
-        H5O_TYPE_DATASET_F
-        H5O_TYPE_NAMED_DATATYPE_F
-        H5O_TYPE_NTYPES_F
+    - None
 
     C++ API
     ------
@@ -317,13 +116,7 @@ Bug Fixes since HDF5-1.8.7
 
     High-Level APIs:
     ------
-    - Fixed dimscale bug where if you create a dimscale, attach two datasets to it, 
-      and then unattach them, you get an error if they are unattached in order, 
-      but no error if you unattach them in reverse order. HDFFV-7605 (SB - 2011/6/7)
-    - Fixed H5DSset_label seg faulting when retrieving the length of a dimension label
-      that was not set. HDFFV-7673 (SB -- 2011/8/7)
-    - Fixed the H5LTdtype_to_text function.  It had some memory problems when 
-      dealing with some complicated data types. HDFFVI-7701 (SLU - 2011/10/19)
+    - None
 
     Fortran High-Level APIs:
     ------
