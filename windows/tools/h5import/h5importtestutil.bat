@@ -104,25 +104,25 @@ goto main
     rem On Windows, echo gives a carriage return, so we store the TESTING params
     rem and call TESTING from TOOLTEST.  --SJW 8/27/07
     set testing=ASCII I32 rank 3 - Output BE 
-    call :tooltest %srcdir%\testfiles\in32.txt -c %srcdir%\testfiles\txtin32.conf -o txtin32.h5
+    call :tooltest %srcdir%\testfiles\txtin16.txt -c %srcdir%\testfiles\txtin32.conf -o txtin32.h5
 
     set testing=ASCII I16 rank 3 - Output LE - CHUNKED - extended
-    call :tooltest %srcdir%\testfiles\in16.txt -c %srcdir%\testfiles\txtin16.conf -o txtin16.h5
+    call :tooltest %srcdir%\testfiles\txtin16.txt -c %srcdir%\testfiles\txtin16.conf -o txtin16.h5
 
     set testing=ASCII I8 - rank 3 - Output I16 LE-Chunked+Extended+Compressed
-    call :tooltest %srcdir%\testfiles\in16.txt -c %srcdir%\testfiles\txtin8.conf  -o txtin8.h5
+    call :tooltest %srcdir%\testfiles\txtin16.txt -c %srcdir%\testfiles\txtin8.conf  -o txtin8.h5
 
     set testing=ASCII UI32 - rank 3 - Output BE
-    call :tooltest %srcdir%\testfiles\in1.txt -c %srcdir%\testfiles\txtuin32.conf -o txtuin32.h5
+    call :tooltest %srcdir%\testfiles\txtin32.txt -c %srcdir%\testfiles\txtuin32.conf -o txtuin32.h5
 
     set testing=ASCII UI16 - rank 2 - Output LE+Chunked+Compressed
-    call :tooltest %srcdir%\testfiles\in1.txt -c %srcdir%\testfiles\txtuin16.conf -o txtuin16.h5
+    call :tooltest %srcdir%\testfiles\txtuin32.txt -c %srcdir%\testfiles\txtuin16.conf -o txtuin16.h5
 
     set testing=ASCII F32 - rank 3 - Output LE
-    call :tooltest %srcdir%\testfiles\fp1.txt -c %srcdir%\testfiles\txtfp32.conf -o txtfp32.h5
+    call :tooltest %srcdir%\testfiles\txtfp32.txt -c %srcdir%\testfiles\txtfp32.conf -o txtfp32.h5
 
     set testing=ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed
-    call :tooltest %srcdir%\testfiles\fp2.txt -c %srcdir%\testfiles\txtfp64.conf -o txtfp64.h5
+    call :tooltest %srcdir%\testfiles\txtfp64.txt -c %srcdir%\testfiles\txtfp64.conf -o txtfp64.h5
 
     set testing=BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed
     call :tooltest binfp64.bin -c %srcdir%\testfiles\binfp64.conf -o binfp64.h5
@@ -143,13 +143,13 @@ goto main
     call :tooltest binuin32.bin -c %srcdir%\testfiles\binuin32.conf -o binuin32.h5
 
     set testing=STR 
-    call :tooltest %srcdir%\testfiles\str.txt -c %srcdir%\testfiles\txtstr.conf -o txtstr.h5
+    call :tooltest %srcdir%\testfiles\txtstr.txt -c %srcdir%\testfiles\txtstr.conf -o txtstr.h5
 
     set testing=BINARY I8 CR LF EOF"
     call :tooltest binin8w.bin -c %srcdir%\testfiles\binin8w.conf -o binin8w.h5
     
     set testing=ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE 
-    call :tooltest %srcdir%\testfiles\in64.txt -c %srcdir%\testfiles\textpfe.conf -o textpfe.h5
+    call :tooltest %srcdir%\testfiles\textpfe64.txt -c %srcdir%\testfiles\textpfe.conf -o textpfe.h5
 
 
     del /f *.txt *.bin *.h5
