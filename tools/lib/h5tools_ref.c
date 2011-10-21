@@ -114,7 +114,7 @@ init_ref_path_table(void)
     HDassert(thefile > 0);
 
     /* Create skip list to store reference path information */
-    if((ref_path_table = H5SL_create(H5SL_TYPE_HADDR))==NULL)
+    if((ref_path_table = H5SL_create(H5SL_TYPE_HADDR, NULL))==NULL)
         return (-1);
 
     /* Iterate over objects in this file */
