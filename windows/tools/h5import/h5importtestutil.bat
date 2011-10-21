@@ -145,7 +145,7 @@ goto main
     set testing=STR 
     call :tooltest %srcdir%\testfiles\txtstr.txt -c %srcdir%\testfiles\txtstr.conf -o txtstr.h5
 
-    set testing=BINARY I8 CR LF EOF"
+    set testing=BINARY I8 CR LF EOF
     call :tooltest binin8w.bin -c %srcdir%\testfiles\binin8w.conf -o binin8w.h5
     
     set testing=ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE 
