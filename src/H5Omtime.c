@@ -105,8 +105,11 @@ H5FL_DEFINE(time_t);
 /*-------------------------------------------------------------------------
  * Function:	H5O_mtime_new_decode
  *
- * Purpose:	Decode a new modification time message and return a pointer to a
- *		new time_t value.
+ * Purpose:     Decode a new modification time message and return a pointer to
+ *              a new time_t value.
+ *
+ *              The new modification time message format was added due to the
+ *              performance overhead of the old format.
  *
  * Return:	Success:	Ptr to new message in native struct.
  *
@@ -158,8 +161,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5O_mtime_decode
  *
- * Purpose:	Decode a modification time message and return a pointer to a
- *		new time_t value.
+ * Purpose:     Decode a modification time message and return a pointer to a
+ *              new time_t value.
+ *
+ *              The new modification time message format was added due to the
+ *              performance overhead of the old format.
  *
  * Return:	Success:	Ptr to new message in native struct.
  *
