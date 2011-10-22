@@ -2362,7 +2362,6 @@ H5D_mark(H5D_t *dataset, hid_t dxpl_id, unsigned flags)
     if(flags & H5D_MARK_LAYOUT)
         dataset->shared->layout_dirty = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_mark() */
 
