@@ -268,45 +268,45 @@ nh5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *
   object_info->type      = (int_f)Oinfo.type;
   object_info->rc        = (int_f)Oinfo.rc;
 
-  ts = gmtime(&Oinfo.atime);
+  ts = HDgmtime(&Oinfo.atime);
 
   object_info->atime[0]     = (int_f)ts->tm_year+1900; /* year starts at 1900 */
   object_info->atime[1]     = (int_f)ts->tm_mon+1; /* month starts at 0 in C */
   object_info->atime[2]     = (int_f)ts->tm_mday;
-/*   object_info->atime[3]     = (int_f)ts->tm_gmtoff; /\* convert from seconds to minutes *\/ */
+  object_info->atime[3]     = 0; /* time is expressed as UTC (or GMT timezone) */
   object_info->atime[4]     = (int_f)ts->tm_hour;
   object_info->atime[5]     = (int_f)ts->tm_min;
   object_info->atime[6]     = (int_f)ts->tm_sec;
   object_info->atime[7]     = -32767; /* millisecond is not available, assign it -HUGE(0) */
 
-  ts = gmtime(&Oinfo.btime);
+  ts = HDgmtime(&Oinfo.btime);
 
   object_info->btime[0]     = (int_f)ts->tm_year+1900; /* year starts at 1900 */
   object_info->btime[1]     = (int_f)ts->tm_mon+1; /* month starts at 0 in C */
   object_info->btime[2]     = (int_f)ts->tm_mday;
-/*   object_info->btime[3]     = (int_f)ts->tm_gmtoff/60; /\* convert from seconds to minutes *\/ */
+  object_info->btime[3]     = 0; /* time is expressed as UTC (or GMT timezone) */
   object_info->btime[4]     = (int_f)ts->tm_hour;
   object_info->btime[5]     = (int_f)ts->tm_min;
   object_info->btime[6]     = (int_f)ts->tm_sec;
   object_info->btime[7]     = -32767; /* millisecond is not available, assign it -HUGE(0) */
 
-  ts = gmtime(&Oinfo.ctime);
+  ts = HDgmtime(&Oinfo.ctime);
 
   object_info->ctime[0]     = (int_f)ts->tm_year+1900; /* year starts at 1900 */
   object_info->ctime[1]     = (int_f)ts->tm_mon+1; /* month starts at 0 in C */
   object_info->ctime[2]     = (int_f)ts->tm_mday;
-/*   object_info->ctime[3]     = (int_f)ts->tm_gmtoff/60; /\* convert from seconds to minutes *\/ */
+  object_info->ctime[3]     = 0; /* time is expressed as UTC (or GMT timezone) */
   object_info->ctime[4]     = (int_f)ts->tm_hour;
   object_info->ctime[5]     = (int_f)ts->tm_min;
   object_info->ctime[6]     = (int_f)ts->tm_sec;
   object_info->ctime[7]     = -32767; /* millisecond is not available, assign it -HUGE(0) */
 
-  ts = gmtime(&Oinfo.mtime);
+  ts = HDgmtime(&Oinfo.mtime);
 
   object_info->mtime[0]     = (int_f)ts->tm_year+1900; /* year starts at 1900 */
   object_info->mtime[1]     = (int_f)ts->tm_mon+1; /* month starts at 0 in C */
   object_info->mtime[2]     = (int_f)ts->tm_mday;
-/*   object_info->mtime[3]     = (int_f)ts->tm_gmtoff/60; /\* convert from seconds to minutes *\/ */
+  object_info->mtime[3]     = 0; /* time is expressed as UTC (or GMT timezone) */
   object_info->mtime[4]     = (int_f)ts->tm_hour;
   object_info->mtime[5]     = (int_f)ts->tm_min;
   object_info->mtime[6]     = (int_f)ts->tm_sec;
