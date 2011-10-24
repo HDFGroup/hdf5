@@ -799,7 +799,8 @@ TOOLTEST h5diff_207.txt -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset8  g2/dset9
 # not comparable in dataspace of zero dimension size
 TOOLTEST h5diff_208.txt -c h5diff_dset_zero_dim_size1.h5 h5diff_dset_zero_dim_size2.h5 
 
-# non-comparable dataset with comparable attribute, and other comparable datasets.
+# non-comparable dataset with comparable attribute, and other comparable datasets. 
+# Also test non-compatible attributes with different type, dimention, rank.
 # All the comparables should display differences.
 TOOLTEST h5diff_220.txt -c non_comparables1.h5 non_comparables2.h5 /g1
 
