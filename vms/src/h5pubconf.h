@@ -577,7 +577,7 @@
 #define H5_SIZEOF_OFF64_T 0
 
 /* The size of `off_t', as computed by sizeof. */
-#define H5_SIZEOF_OFF_T 4
+#define H5_SIZEOF_OFF_T 8
 
 /* The size of `ptrdiff_t', as computed by sizeof. */
 #define H5_SIZEOF_PTRDIFF_T 4
