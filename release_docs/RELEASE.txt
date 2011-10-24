@@ -624,24 +624,27 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
-         - Fixed h5diff to display all the comparable object and attribute 
-           regardless of non-comparables. HDFFV-7693 (JKM 09/16/2011)
-         - Fixed h5repack to update values of references(object and region) of 
-           attributes in h5repack for 1) references, 2) ARRAY of references, 
-           3) VLEN of references, and 4) COMPOUND of references. 
-           (JIRA HDF5 5932) PC -2011/09/14
+        - h5diff: fixed segfault over non-comparable attribute with different 
+          dimention or rank, along with '-c' option to display details.
+          HDFFV-7770 (JKM 2011/10/24)
+        - Fixed h5diff to display all the comparable object and attribute 
+          regardless of non-comparables. HDFFV-7693 (JKM 2011/09/16)
+        - Fixed h5repack to update values of references(object and region) of 
+          attributes in h5repack for 1) references, 2) ARRAY of references, 
+          3) VLEN of references, and 4) COMPOUND of references. 
+          (JIRA HDF5 5932) PC -2011/09/14
         - h5diff: fixed segfault over dataset with container types
           (array,lven) with multiple nested compound types. 
           (ex: compound->array->compound, compound->vlen->compound)
-          HDFFV-7712  JKM (09/01/2011)
+          HDFFV-7712  JKM (2011/09/01)
         - h5repack: added macro to handle failure in H5Dread/write when memory 
           allocation failed inside the library. (PC -- 2011/08/19)
         - Fixed h5jam not to allow specifying an HDF5 formatted file as input 
           file for -u (user block file) option, because the original HDF5 file 
-          will not be accessible if allows. HDFFV-5941 (JKM 08/15/2011)
+          will not be accessible if allows. HDFFV-5941 (JKM 2011/08/15)
         - Revised command help pages of h5jam and h5unjam. The descriptions
           were not up to date and some were missing. 
-          HDFFV-7515 (JKM 08/15/2011)
+          HDFFV-7515 (JKM 2011/08/15)
         - h5repack: h5repack failed to copy dataset if the layout is changed 
           from chunked with unlimited dims to contiguous. HDFFV-7649 
           (PC -- 2011/07/15)
@@ -650,29 +653,29 @@ Bug Fixes since HDF5-1.8.0 release
           Manual. HDFFV-7656  (PC -- 2011/07/15)
         - Fixed h5diff to display instructive error message and exit with 1
           when mutually exclusive options (-d, -p and --use-system-epsilon)
-          are used together. HDFFV-7600  (JKM 07/07/2011)
+          are used together. HDFFV-7600  (JKM 2011/07/07)
         - Fixed h5dump to display the first line of each element into correct 
           position for multiple dimention array type.
           Before this fix, the first line of each element in array were 
           displayed after the last line of previous element without
           moving to the next line (+indentation). 
-          Bug #HDFFV-5878  (JKM 06/15/2011)
+          Bug #HDFFV-5878  (JKM 2011/06/15)
         - Fixed h5dump to display correct value for H5T_STD_I8LE dataset
           on a system (ppc64, linux, Big-Endian, clustering). 
-          Bug #HDFFV-7594  (ABERT & JKM 05/12/2011)
+          Bug #HDFFV-7594  (ABERT & JKM 2011/05/12)
         - Fixed h5diff to compare file itself correctly. Previously h5diff
           reported either different or not compatible in certain cases even
           comparing file itself. This fix also improve performance when
           comparing same target objects through verifying the obj&file
           addresses before comparing the details in the objects (ex: datasets
-          or attributes) Bug #HDFFV-5928  (XCAO & JKM 05/06/2011)
+          or attributes) Bug #HDFFV-5928  (XCAO & JKM 2011/05/06)
         - Updated h5dump test case script to prevent entire test failure upon 
           source directory is read-only. Bug# HDFFV-4342 (JKM 2011/4/12)
         - Fixed h5dump displaying incorrect values for H5T_STD_I8BE type data in
           attribute on Big-Endian machine. H5T_STD_I8BE is unsigned 8bit type,
           so h5dump is supposed to display -2 instead of 254. It worked 
           correctly on Little-Endian system , but not on Big-Endian system.  
-          Bug #HDFFV-4358 (JKM 04/08/2011)
+          Bug #HDFFV-4358 (JKM 2011/04/08)
         - Updated to unify option name to '--enable-error-stack' for printing 
           HDF5 error stack messages for HDF5 tools. h5ls and h5dump for now.
           For h5ls, this replaces "-e/--errors" option, which is deprecated. 

@@ -1131,6 +1131,7 @@ ADD_H5_TEST (h5diff_208 0 -c ${FILE19} ${FILE20})
 ADD_H5_TEST (h5diff_220 1 -c non_comparables1.h5 non_comparables2.h5 /g1)
 
 # comparable dataset with non-comparable attribute and other comparable attributes.
+# Also test non-compatible attributes with different type, dimention, rank.
 # All the rest comparables should display differences.
 ADD_H5_TEST (h5diff_221 1 -c non_comparables1.h5 non_comparables2.h5 /g2)
 

@@ -4701,9 +4701,14 @@ static void test_non_comparables (const char * fname, int make_diffs)
     hid_t   sid1=0;
     hid_t   tid_dset1=0;
     hid_t   tid_attr1=0;
-    hsize_t dims1[1] = {DIM_ARRY};
+    hsize_t dims1_1[1] = {DIM_ARRY};
+    hsize_t dims1_2[1] = {DIM_ARRY+1};
+    hsize_t dims2[2] = {DIM_ARRY, 1};
     int data1[DIM_ARRY] = {0,0,0};
     int data2[DIM_ARRY] = {1,1,1};
+    int data3[DIM_ARRY+1] = {1,1,1,1};
+    int data1_dim2[DIM_ARRY][1] = {0,0,0};
+    int rank_attr;
     char data1_str[DIM_ARRY][STR_SIZE]= {"ab","cd","ef"};
     herr_t  status = SUCCEED;
     int i;
@@ -4713,6 +4718,9 @@ static void test_non_comparables (const char * fname, int make_diffs)
     void *attr_data_ptr1=NULL;
     void *attr_data_ptr2=NULL;
     void *attr_data_ptr3=NULL;
+    void *attr_data_ptr4=NULL;
+    void *attr2_dim_ptr=NULL;
+    void *attr3_dim_ptr=NULL;
 
     /* init */
     tid_dset1=H5Tcopy(H5T_NATIVE_INT);
@@ -4722,6 +4730,10 @@ static void test_non_comparables (const char * fname, int make_diffs)
     tid_attr1=H5Tcopy(H5T_NATIVE_INT);
     attr_data_ptr1=(int*)&data1;
     attr_data_ptr3=(int*)&data1;
+    attr_data_ptr4=(int*)&data1;
+    attr2_dim_ptr=(hsize_t*)&dims1_1;
+    attr3_dim_ptr=(hsize_t*)&dims1_1;
+    rank_attr=1;
 
     if (make_diffs)
     {
@@ -4737,12 +4749,22 @@ static void test_non_comparables (const char * fname, int make_diffs)
          * group2 
          */
         dset_data_ptr3=(int*)&data2;
-        /* attr1 */
+        /* dset1/attr1 */
         tid_attr1=H5Tcopy(H5T_C_S1);
         H5Tset_size(tid_attr1, (size_t)STR_SIZE);
         attr_data_ptr2=(char*)&data1_str;
-        /* attr2 */
-        attr_data_ptr3=(int*)&data2;
+
+        /* dset1/attr2 */
+        attr2_dim_ptr=(hsize_t*)&dims1_2;
+
+        /* dset1/attr3 */
+        attr_data_ptr3=(int*)&data1_dim2;
+        attr3_dim_ptr=(hsize_t*)&dims2;
+        rank_attr=2;
+
+        /* dset1/attr4 */
+        attr_data_ptr4=(int*)&data2;
+
     }
 
 
@@ -4779,7 +4801,7 @@ static void test_non_comparables (const char * fname, int make_diffs)
     /*-----------------------------------------------------------------------
     * Datasets in /g1
     *------------------------------------------------------------------------*/
-    if((sid1 = H5Screate_simple(1, dims1, NULL)) < 0)
+    if((sid1 = H5Screate_simple(1, dims1_1, NULL)) < 0)
          goto out;
 
     /*  dset1 */
@@ -4796,10 +4818,10 @@ static void test_non_comparables (const char * fname, int make_diffs)
         status = FAIL;
         goto out;
     }
-    write_attr(did1,1,dims1,"attr", H5T_NATIVE_INT, attr_data_ptr1);
+    write_attr(did1,1,dims1_1,"attr", H5T_NATIVE_INT, attr_data_ptr1);
 
     /*  dset2 */
-    status = write_dset(gid1, 1, dims1,"dset2", H5T_NATIVE_INT, dset_data_ptr2);
+    status = write_dset(gid1, 1, dims1_1,"dset2", H5T_NATIVE_INT, dset_data_ptr2);
     if (status == FAIL)
     {
         fprintf(stderr, "Error: %s> write_dset failed\n", fname);
@@ -4809,7 +4831,8 @@ static void test_non_comparables (const char * fname, int make_diffs)
     /*-----------------------------------------------------------------------
     * Datasets in /g2
     *------------------------------------------------------------------------*/
-    /*  dset1 */
+    /* ---------
+     *  dset1 */
     if((did2 = H5Dcreate2(gid2, "dset1", H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     {
         fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", "dset1");
@@ -4823,14 +4846,22 @@ static void test_non_comparables (const char * fname, int make_diffs)
         status = FAIL;
         goto out;
     }
-    /* attr1 */
-    write_attr(did2,1,dims1,"attr1", tid_attr1, attr_data_ptr2);
+    /* attr1 - non-compatible : different type */
+    write_attr(did2,1,dims1_1,"attr1", tid_attr1, attr_data_ptr2);
 
-    /* attr2 */
-    write_attr(did2,1,dims1,"attr2", H5T_NATIVE_INT, attr_data_ptr3);
 
-    /*  dset2 */
-    status = write_dset(gid2, 1, dims1,"dset2", H5T_NATIVE_INT, dset_data_ptr3);
+    /* attr2 - non-compatible : same rank, different dimention */
+    write_attr(did2,1, attr2_dim_ptr,"attr2", H5T_NATIVE_INT, data3);
+
+    /* attr3 - non-compatible : different rank */
+    write_attr(did2, rank_attr,attr3_dim_ptr,"attr3", H5T_NATIVE_INT, attr_data_ptr3);
+
+    /* attr4 - compatible : different data values */
+    write_attr(did2,1,dims1_1,"attr4", H5T_NATIVE_INT, attr_data_ptr4);
+
+    /*----------
+     * dset2 */
+    status = write_dset(gid2, 1, dims1_1,"dset2", H5T_NATIVE_INT, dset_data_ptr3);
     if (status == FAIL)
     {
         fprintf(stderr, "Error: %s> write_dset failed\n", fname);
