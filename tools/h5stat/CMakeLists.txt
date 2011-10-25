@@ -16,6 +16,8 @@ TARGET_LINK_LIBRARIES (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5stat)
 
+set_target_properties(h5stat PROPERTIES FOLDER tools)
+
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###

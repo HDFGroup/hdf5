@@ -28,6 +28,8 @@ IF (H5_HAVE_PARALLEL)
   TARGET_LINK_LIBRARIES (ph5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 ENDIF (H5_HAVE_PARALLEL)
 
+set_target_properties(h5diff PROPERTIES FOLDER tools)
+
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###

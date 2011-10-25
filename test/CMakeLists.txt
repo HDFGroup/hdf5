@@ -176,6 +176,7 @@ ADD_TEST (
 )
 ADD_TEST (NAME testhdf5 COMMAND $<TARGET_FILE:testhdf5>)
 SET_TESTS_PROPERTIES(testhdf5 PROPERTIES DEPENDS h5test-clear-testhdf5-objects)
+
   
 ##############################################################################
 ##############################################################################
@@ -312,6 +313,7 @@ FOREACH (test ${H5_TESTS})
 ENDFOREACH (test ${H5_TESTS})
 
 SET_TESTS_PROPERTIES(flush2 PROPERTIES DEPENDS flush1)
+
 
 ##############################################################################
 ##############################################################################
@@ -628,4 +630,18 @@ IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
   ENDFOREACH (gen ${H5_GENERATORS})
 
 ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
+
+#-- Put the tests in a solution folder in Visual Studio
+set_target_properties(hdf5_test     PROPERTIES FOLDER libraries)
+FOREACH (test ${H5_TESTS})
+  set_target_properties(${test}     PROPERTIES FOLDER test)
+ENDFOREACH (test ${H5_TESTS})
+set_target_properties(testhdf5      PROPERTIES FOLDER test)
+set_target_properties(cache         PROPERTIES FOLDER test)
+set_target_properties(cache_api     PROPERTIES FOLDER test)
+set_target_properties(cache_tagging PROPERTIES FOLDER test)
+set_target_properties(ttsafe        PROPERTIES FOLDER test)
+set_target_properties(err_compat    PROPERTIES FOLDER test)
+set_target_properties(error_test    PROPERTIES FOLDER test)
+set_target_properties(links_env     PROPERTIES FOLDER test)
 

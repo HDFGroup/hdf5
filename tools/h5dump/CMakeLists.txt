@@ -16,6 +16,8 @@ TARGET_LINK_LIBRARIES (h5dump  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5dump)
 
+set_target_properties(h5dump PROPERTIES FOLDER tools)
+
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###

@@ -220,6 +220,11 @@ ELSE (NOT HDF5_EXTERNALLY_CONFIGURED)
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 
 #-----------------------------------------------------------------------------
+# Allow Visual Studio solution directories
+#-----------------------------------------------------------------------------
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+#-----------------------------------------------------------------------------
 # Targets built within this project are exported at Install time for use
 # by other projects using FindHDF5. 
 #-----------------------------------------------------------------------------

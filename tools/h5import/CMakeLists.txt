@@ -16,6 +16,8 @@ TARGET_LINK_LIBRARIES (h5import  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5import)
 
+set_target_properties(h5import PROPERTIES FOLDER tools)
+
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###
@@ -29,6 +31,7 @@ IF (BUILD_TESTING)
   ADD_EXECUTABLE (h5importtest ${HDF5_TOOLS_H5IMPORT_SOURCE_DIR}/h5importtest.c)
   TARGET_NAMING (h5importtest ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (h5importtest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+  set_target_properties(h5importtest PROPERTIES FOLDER tools)
 
   SET (HDF5_REFERENCE_CONF_FILES
       binfp64.conf

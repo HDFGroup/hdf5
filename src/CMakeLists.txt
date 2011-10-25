@@ -841,3 +841,8 @@ IF (HDF5_EXPORTED_TARGETS)
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT libraries
   )
 ENDIF (HDF5_EXPORTED_TARGETS)
+
+#-----------------------------------------------------------------------------
+# Add projects to Visual Studio solution files
+#-----------------------------------------------------------------------------
+set_target_properties(hdf5 PROPERTIES FOLDER libraries)

@@ -183,3 +183,11 @@ IF (H5_HAVE_PARALLEL)
     ADD_TEST (NAME PERFORM_mpi-perf COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:mpi-perf>)
   ENDIF (NOT WIN32)
 ENDIF (H5_HAVE_PARALLEL)
+
+#-- Put the tests in a solution folder in Visual Studio
+set_target_properties(h5perf_serial PROPERTIES FOLDER perform)
+set_target_properties(chunk         PROPERTIES FOLDER perform)
+set_target_properties(iopipe        PROPERTIES FOLDER perform)
+set_target_properties(overhead      PROPERTIES FOLDER perform)
+set_target_properties(perf_meta     PROPERTIES FOLDER perform)
+set_target_properties(zip_perf      PROPERTIES FOLDER perform)

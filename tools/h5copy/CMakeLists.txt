@@ -16,6 +16,8 @@ TARGET_LINK_LIBRARIES (h5copy  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5copy)
 
+set_target_properties(h5copy PROPERTIES FOLDER tools)
+
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###

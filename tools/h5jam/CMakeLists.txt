@@ -33,6 +33,10 @@ SET (H5_DEP_EXECUTABLES
     h5unjam
 )
 
+FOREACH (tool ${H5_DEP_EXECUTABLES})
+  set_target_properties(${tool} PROPERTIES FOLDER tools)
+ENDFOREACH (tool ${H5_DEP_EXECUTABLES})
+
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###
