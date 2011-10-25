@@ -69,11 +69,27 @@ PROJECT (HDF5 C CXX)
 #   # Add the sub project
 #   ADD_SUBDIRECTORY(Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
+
 IF (BUILD_SHARED_LIBS)
   SET (BUILD_NAME_EXT "SHARED")
 ELSE (BUILD_SHARED_LIBS)
   SET (BUILD_NAME_EXT "STATIC")
 ENDIF (BUILD_SHARED_LIBS)
+
+#-----------------------------------------------------------------------------
+# Allow Visual Studio solution directories
+#-----------------------------------------------------------------------------
+# Provide a way for Visual Studio Express users to turn OFF the new FOLDER
+# organization feature. Default to ON for non-Express users. Express users must
+# explicitly turn off this option to build HDF5 in the Express IDE...
+#
+OPTION (HDF5_USE_FOLDERS "Enable folder grouping of projects in IDEs." ON)
+MARK_AS_ADVANCED (HDF5_USE_FOLDERS)
+IF (HDF5_USE_FOLDERS)
+  SET_PROPERTY (GLOBAL PROPERTY USE_FOLDERS ON)
+ENDIF (HDF5_USE_FOLDERS)
+OPTION (HDF5_NO_PACKAGES "CPACK - Disable packaging" OFF)
+MARK_AS_ADVANCED (HDF5_NO_PACKAGES)
 
 #-----------------------------------------------------------------------------
 # Set the core names of all the libraries
@@ -218,11 +234,6 @@ ELSE (NOT HDF5_EXTERNALLY_CONFIGURED)
     SET (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
   ENDIF (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
-
-#-----------------------------------------------------------------------------
-# Allow Visual Studio solution directories
-#-----------------------------------------------------------------------------
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #-----------------------------------------------------------------------------
 # Targets built within this project are exported at Install time for use
@@ -612,7 +623,6 @@ ENDIF (HDF5_ENABLE_SZIP_SUPPORT)
 OPTION (HDF5_PACKAGE_EXTLIBS "CPACK - include external libraries" OFF)
 IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   IF (HDF5_PACKAGE_EXTLIBS)
-    SET (HDF5_NO_PACKAGES OFF CACHE BOOL "CPACK - Disable packaging" FORCE)
     IF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
       PACKAGE_ZLIB_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT} ${LIB_TYPE})
     ENDIF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)

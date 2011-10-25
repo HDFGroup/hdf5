@@ -25,6 +25,7 @@ FOREACH (example ${examples})
       ${HDF5_LIB_TARGET}
   )
   SET_TARGET_PROPERTIES (hl_f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
+  SET_TARGET_PROPERTIES (hl_f90_ex_${example} PROPERTIES FOLDER examples/hl/fortran)
 
   IF (BUILD_TESTING)
     ADD_TEST (NAME hl_f90_ex_${example} COMMAND $<TARGET_FILE:hl_f90_ex_${example}>)

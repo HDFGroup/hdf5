@@ -18,6 +18,7 @@ TARGET_LINK_LIBRARIES (
 )
 SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_CPP_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_HL_CPP_LIB_TARGET} ${HDF5_HL_CPP_LIB_NAME} ${LIB_TYPE})
+SET_TARGET_PROPERTIES (${HDF5_HL_CPP_LIB_TARGET} PROPERTIES FOLDER libraries/hl)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install 

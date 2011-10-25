@@ -19,6 +19,7 @@ SET (h5perf_serial_SRCS
 ADD_EXECUTABLE (h5perf_serial ${h5perf_serial_SRCS})
 TARGET_NAMING (h5perf_serial ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5perf_serial ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+SET_TARGET_PROPERTIES (h5perf_serial PROPERTIES FOLDER perform)
 
 IF (HDF5_BUILD_PERFORM_STANDALONE)
   #-- Adding test for h5perf_serial_alone
@@ -33,6 +34,7 @@ IF (HDF5_BUILD_PERFORM_STANDALONE)
   )
   TARGET_NAMING (h5perf_serial_alone ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (h5perf_serial_alone ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+  SET_TARGET_PROPERTIES (h5perf_serial_alone PROPERTIES FOLDER perform)
 ENDIF (HDF5_BUILD_PERFORM_STANDALONE)
 
 #-- Adding test for chunk
@@ -42,6 +44,7 @@ SET (chunk_SRCS
 ADD_EXECUTABLE(chunk ${chunk_SRCS})
 TARGET_NAMING (chunk ${LIB_TYPE})
 TARGET_LINK_LIBRARIES(chunk ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+SET_TARGET_PROPERTIES (chunk PROPERTIES FOLDER perform)
 
 #-- Adding test for iopipe
 SET (iopipe_SRCS
@@ -50,6 +53,7 @@ SET (iopipe_SRCS
 ADD_EXECUTABLE (iopipe ${iopipe_SRCS})
 TARGET_NAMING (iopipe ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (iopipe ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+SET_TARGET_PROPERTIES (iopipe PROPERTIES FOLDER perform)
 
 #-- Adding test for overhead
 SET (overhead_SRCS
@@ -58,6 +62,7 @@ SET (overhead_SRCS
 ADD_EXECUTABLE (overhead ${overhead_SRCS})
 TARGET_NAMING (overhead ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (overhead ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+SET_TARGET_PROPERTIES (overhead PROPERTIES FOLDER perform)
 
 #-- Adding test for perf_meta
 SET (perf_meta_SRCS
@@ -66,6 +71,7 @@ SET (perf_meta_SRCS
 ADD_EXECUTABLE (perf_meta ${perf_meta_SRCS})
 TARGET_NAMING (perf_meta ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (perf_meta ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+SET_TARGET_PROPERTIES (perf_meta PROPERTIES FOLDER perform)
 
 #-- Adding test for zip_perf
 SET (zip_perf_SRCS
@@ -74,6 +80,7 @@ SET (zip_perf_SRCS
 ADD_EXECUTABLE (zip_perf ${zip_perf_SRCS})
 TARGET_NAMING (zip_perf ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (zip_perf ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+SET_TARGET_PROPERTIES (zip_perf PROPERTIES FOLDER perform)
 
 IF (H5_HAVE_PARALLEL)
   #-- Adding test for h5perf
@@ -85,6 +92,7 @@ IF (H5_HAVE_PARALLEL)
   ADD_EXECUTABLE (h5perf ${h5perf_SRCS})
   TARGET_NAMING (h5perf ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (h5perf ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+  SET_TARGET_PROPERTIES (h5perf PROPERTIES FOLDER perform)
 
   IF (HDF5_BUILD_PERFORM_STANDALONE)
     #-- Adding test for h5perf
@@ -99,6 +107,7 @@ IF (H5_HAVE_PARALLEL)
     )
     TARGET_NAMING (h5perf_alone ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5perf_alone ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+    SET_TARGET_PROPERTIES (h5perf_alone PROPERTIES FOLDER perform)
   ENDIF (HDF5_BUILD_PERFORM_STANDALONE)
 
   #-- Adding test for benchpar
@@ -108,6 +117,7 @@ IF (H5_HAVE_PARALLEL)
   ADD_EXECUTABLE (benchpar ${benchpar_SRCS})
   TARGET_NAMING (benchpar ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (benchpar ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+  SET_TARGET_PROPERTIES (benchpar PROPERTIES FOLDER perform)
 
   #-- Adding test for mpi-perf
   IF (NOT WIN32)
@@ -117,6 +127,7 @@ IF (H5_HAVE_PARALLEL)
     ADD_EXECUTABLE (mpi-perf ${mpi-perf_SRCS})
     TARGET_NAMING (mpi-perf ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (mpi-perf ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+    SET_TARGET_PROPERTIES (mpi-perf PROPERTIES FOLDER perform)
   ENDIF (NOT WIN32)
 ENDIF (H5_HAVE_PARALLEL)
 
@@ -183,11 +194,3 @@ IF (H5_HAVE_PARALLEL)
     ADD_TEST (NAME PERFORM_mpi-perf COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} $<TARGET_FILE:mpi-perf>)
   ENDIF (NOT WIN32)
 ENDIF (H5_HAVE_PARALLEL)
-
-#-- Put the tests in a solution folder in Visual Studio
-set_target_properties(h5perf_serial PROPERTIES FOLDER perform)
-set_target_properties(chunk         PROPERTIES FOLDER perform)
-set_target_properties(iopipe        PROPERTIES FOLDER perform)
-set_target_properties(overhead      PROPERTIES FOLDER perform)
-set_target_properties(perf_meta     PROPERTIES FOLDER perform)
-set_target_properties(zip_perf      PROPERTIES FOLDER perform)

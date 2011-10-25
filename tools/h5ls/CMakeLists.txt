@@ -13,12 +13,11 @@ INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 ADD_EXECUTABLE (h5ls ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
 TARGET_NAMING (h5ls ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5ls  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+SET_TARGET_PROPERTIES (h5ls PROPERTIES FOLDER tools)
 
 SET (H5_DEP_EXECUTABLES
     h5ls
 )
-
-set_target_properties(h5ls PROPERTIES FOLDER tools)
 
 ##############################################################################
 ##############################################################################

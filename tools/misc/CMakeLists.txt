@@ -14,17 +14,17 @@ INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 ADD_EXECUTABLE (h5debug ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5debug.c)
 TARGET_NAMING (h5debug ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5debug ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
-set_target_properties(h5debug PROPERTIES FOLDER tools)
+SET_TARGET_PROPERTIES (h5debug PROPERTIES FOLDER tools)
 
 ADD_EXECUTABLE (h5repart ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5repart.c)
 TARGET_NAMING (h5repart ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5repart ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
-set_target_properties(h5repart PROPERTIES FOLDER tools)
+SET_TARGET_PROPERTIES (h5repart PROPERTIES FOLDER tools)
 
 ADD_EXECUTABLE (h5mkgrp ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5mkgrp.c)
 TARGET_NAMING (h5mkgrp ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5mkgrp  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
-set_target_properties(h5mkgrp PROPERTIES FOLDER tools)
+SET_TARGET_PROPERTIES (h5mkgrp PROPERTIES FOLDER tools)
 
 SET (H5_DEP_EXECUTABLES
     h5debug
@@ -46,13 +46,14 @@ IF (BUILD_TESTING)
     ADD_EXECUTABLE (h5repart_gentest ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5repart_gentest.c)
     TARGET_NAMING (h5repart_gentest ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5repart_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+    SET_TARGET_PROPERTIES (h5repart_gentest PROPERTIES FOLDER generator/tools)
     #ADD_TEST (NAME h5repart_gentest COMMAND $<TARGET_FILE:h5repart_gentest>)
   ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
   ADD_EXECUTABLE (h5repart_test ${HDF5_TOOLS_MISC_SOURCE_DIR}/repart_test.c)
   TARGET_NAMING (h5repart_test ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (h5repart_test ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
-  set_target_properties(h5repart_test PROPERTIES FOLDER tools)
+  SET_TARGET_PROPERTIES (h5repart_test PROPERTIES FOLDER tools)
   
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the test directory into the source directory

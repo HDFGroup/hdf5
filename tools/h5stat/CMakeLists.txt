@@ -13,10 +13,9 @@ INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 ADD_EXECUTABLE (h5stat ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat.c)
 TARGET_NAMING (h5stat ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+SET_TARGET_PROPERTIES (h5stat PROPERTIES FOLDER tools)
 
 SET (H5_DEP_EXECUTABLES h5stat)
-
-set_target_properties(h5stat PROPERTIES FOLDER tools)
 
 ##############################################################################
 ##############################################################################
@@ -32,6 +31,7 @@ IF (BUILD_TESTING)
     ADD_EXECUTABLE (h5stat_gentest ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat_gentest.c)
     TARGET_NAMING (h5stat_gentest ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5stat_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+    SET_TARGET_PROPERTIES (h5stat_gentest PROPERTIES FOLDER generator/tools)
     
     #ADD_TEST (NAME h5stat_gentest COMMAND $<TARGET_FILE:h5stat_gentest>)
   ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)

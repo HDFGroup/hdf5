@@ -52,6 +52,7 @@ FOREACH (example ${examples})
       ${HDF5_LIB_TARGET}
   )
   SET_TARGET_PROPERTIES (f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
+  SET_TARGET_PROPERTIES (f90_ex_${example} PROPERTIES FOLDER examples/fortran)
 
   IF (BUILD_TESTING)
     ADD_TEST (NAME f90_ex_${example} COMMAND $<TARGET_FILE:f90_ex_${example}>)
@@ -78,6 +79,7 @@ FOREACH (example ${F2003_examples})
       ${HDF5_LIB_TARGET}
   )
   SET_TARGET_PROPERTIES (f03_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
+  SET_TARGET_PROPERTIES (f03_ex_${example} PROPERTIES FOLDER examples/fortran03)
 
   IF (BUILD_TESTING)
     ADD_TEST (NAME f03_ex_${example} COMMAND $<TARGET_FILE:f03_ex_${example}>)
@@ -106,6 +108,7 @@ IF (H5_HAVE_PARALLEL)
       ${HDF5_LIB_TARGET}
   )
   SET_TARGET_PROPERTIES (f90_ex_ph5example PROPERTIES LINKER_LANGUAGE Fortran)
+  SET_TARGET_PROPERTIES (f90_ex_ph5example PROPERTIES FOLDER examples/fortran)
 
   IF (BUILD_TESTING)
     ADD_TEST (NAME f90_ex_ph5example COMMAND $<TARGET_FILE:f90_ex_ph5example>)

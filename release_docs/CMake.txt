@@ -154,6 +154,12 @@ Notes: This short instruction is written for users who want to quickly build
                cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 9 2008" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF ..
 
+      2.3  On Windows, if you are using a VS Express version you must be sure that the 
+           following two options are correctly set/unset:
+           
+           HDF5_NO_PACKAGES:BOOL=ON
+           HDF5_USE_FOLDERS:BOOL=OFF
+           
    3. Build HDF5
    
       On Windows, you can build HDF5 using either the Visual Studio Environment 
@@ -286,7 +292,8 @@ OPTION (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" OFF)
 OPTION (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" OFF)
 OPTION (HDF5_BUILD_TOOLS  "Build HDF5 Tools" OFF)
 OPTION (HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" OFF)
-OPTION (DHDF5_NO_PACKAGES "Do not include CPack Packaging" OFF)
+OPTION (HDF5_NO_PACKAGES "Do not include CPack Packaging" OFF)
+OPTION (HDF5_USE_FOLDERS "Do not include CPack Packaging" OFF)
 
 
 ************************************************************************

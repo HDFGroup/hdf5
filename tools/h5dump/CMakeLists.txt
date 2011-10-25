@@ -13,10 +13,9 @@ INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 ADD_EXECUTABLE (h5dump ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dump.c)
 TARGET_NAMING (h5dump ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5dump  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+SET_TARGET_PROPERTIES (h5dump PROPERTIES FOLDER tools)
 
 SET (H5_DEP_EXECUTABLES h5dump)
-
-set_target_properties(h5dump PROPERTIES FOLDER tools)
 
 ##############################################################################
 ##############################################################################
@@ -32,6 +31,7 @@ IF (BUILD_TESTING)
     ADD_EXECUTABLE (h5dumpgentest ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dumpgentest.c)
     TARGET_NAMING (h5dumpgentest ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5dumpgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+    SET_TARGET_PROPERTIES (h5dumpgentest PROPERTIES FOLDER generator/tools)
     
     #ADD_TEST (NAME h5dumpgentest COMMAND $<TARGET_FILE:h5dumpgentest>)
   ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)

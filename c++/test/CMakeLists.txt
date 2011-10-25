@@ -42,6 +42,7 @@ TARGET_LINK_LIBRARIES (cpp_testhdf5
     ${HDF5_LIB_TARGET}
     ${HDF5_TEST_LIB_TARGET}
 )
+SET_TARGET_PROPERTIES (cpp_testhdf5 PROPERTIES FOLDER test/cpp)
 
 ADD_TEST (NAME cpp_testhdf5 COMMAND $<TARGET_FILE:cpp_testhdf5>)
 
