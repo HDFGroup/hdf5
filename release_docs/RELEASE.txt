@@ -785,6 +785,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     High-Level APIs:
      ------
+      - Fixed the H5LTdtype_to_text function.  It had some memory problems when
+        dealing with some complicated data types. HDFFVI-7701 (SLU - 2011/10/19)
+
       - Fixed a bug in H5DSattach_scale, H5DSis_attached and H5DSdetach_scale
         caused by using H5Tget_native_type function to determine the native
         type for reading REFERENCE_LIST attribute. The bug was exposed
