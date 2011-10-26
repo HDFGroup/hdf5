@@ -523,6 +523,12 @@ test_compound_1(void)
     if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof(complex_t))) < 0)
         goto error;
 
+    /* Try to shrink and expand the size */
+    if(H5Tset_size(complex_id, sizeof(double)) < 0)
+        goto error;
+    if(H5Tset_size(complex_id, sizeof(complex_t)) < 0)
+        goto error;
+
     /* Attempt to add the new compound datatype as a field within itself */
     H5E_BEGIN_TRY {
         ret=H5Tinsert(complex_id, "compound", (size_t)0, complex_id);
@@ -538,6 +544,14 @@ test_compound_1(void)
         goto error;
 
     /* Test some functions that aren't supposed to work for compound type */
+    /* Tries to shrink the size and trail the last member */
+    H5E_BEGIN_TRY {
+        ret=H5Tset_size(complex_id, sizeof(double));
+    } H5E_END_TRY;
+    if (ret>=0) {
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
+    } /* end if */
+
     H5E_BEGIN_TRY {
         size=H5Tget_precision(complex_id);
     } H5E_END_TRY;

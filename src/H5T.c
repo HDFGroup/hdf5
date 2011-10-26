@@ -3712,7 +3712,7 @@ H5T_set_size(H5T_t *dt, size_t size)
             case H5T_COMPOUND:
                 /* If decreasing size, check the last member isn't being cut. */
                 if(size<dt->shared->size) {
-                    int         num_membs;
+                    int         num_membs = 0;
                     unsigned    i, max_index=0;
                     size_t      memb_offset, max_offset=0;
                     size_t      max_size;
@@ -3720,18 +3720,20 @@ H5T_set_size(H5T_t *dt, size_t size)
                     if((num_membs = H5T_get_nmembers(dt))<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get number of members");
 
-                    for(i=0; i<(unsigned)num_membs; i++) {
-                        memb_offset = H5T_get_member_offset(dt, i);
-                        if(memb_offset > max_offset) {
-                            max_offset = memb_offset;
-                            max_index = i;
-                        }
+                    if(num_membs) {
+			for(i=0; i<(unsigned)num_membs; i++) {
+			    memb_offset = H5T_get_member_offset(dt, i);
+			    if(memb_offset > max_offset) {
+			        max_offset = memb_offset;
+				max_index = i;
+			    }
+			}
+
+			max_size = H5T_get_member_size(dt, max_index);
+
+			if(size<(max_offset+max_size))
+			    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size shrinking will cut off last member ");
                     }
-
-                    max_size = H5T_get_member_size(dt, max_index);
-
-                    if(size<(max_offset+max_size))
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size shrinking will cut off last member ");
 
                     /* Compound must not have been packed previously */
                     /* We will check if resizing changed the packed state of

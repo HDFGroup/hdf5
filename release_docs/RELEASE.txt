@@ -343,6 +343,9 @@ Bug Fixes since HDF5-1.8.0 release
     Library
     -------
 
+      - The library had seg fault when it tried to shrink the size of compound type
+            through H5Tset_size immediately after the type was created (Issue
+            7618). It's fixed now. (SLU - 2011/10/26)
       - Fixed a bug that occurred when using H5Ocopy on a committed datatype
             containing an attribute using that committed datatype.
             (NAF - 2011/10/13 - Issue 5854)
