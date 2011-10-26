@@ -1236,7 +1236,8 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
      *  data in each dataset will (probably) be different and the storage
      *  size will thus vary)
      */
-    if(!(nfilters > 0 && H5Tdetect_class(tid, H5T_VLEN))) {
+    if(!(nfilters > 0 && (H5Tdetect_class(tid, H5T_VLEN) ||
+            (H5Tdetect_class(tid, H5T_REFERENCE) && H5Tequal(tid, H5T_STD_REF_DSETREG))))) {
         hsize_t storage_size = H5Dget_storage_size(did);        /* Dataset's raw data storage size */
         hsize_t storage_size2 = H5Dget_storage_size(did2);      /* 2nd Dataset's raw data storage size */
 
