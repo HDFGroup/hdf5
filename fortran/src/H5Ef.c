@@ -309,7 +309,7 @@ nh5eset_auto2_c(int_f *printflag, hid_t_f *estack_id, H5E_auto2_t func, void *cl
   herr_t status = -1;
 
   if (*printflag == 1 && *estack_id == -1)
-    status = H5Eset_auto2(H5E_DEFAULT, H5Eprint2, stderr);
+    status = H5Eset_auto2(H5E_DEFAULT, (H5E_auto2_t)H5Eprint2, stderr);
   else if (*printflag == 1)
     status = H5Eset_auto2((hid_t)*estack_id, func, client_data);
   else if (*printflag == 0)
