@@ -153,7 +153,7 @@ $ CALL TOOLTEST tchar1.ddl "-r tchar.h5"
 $
 $ ! Test failure handling
 $ ! Missing file name
-$ CALL TOOLTEST "tnofilename-with-packed-bits.ddl"
+$ CALL TOOLTEST "tnofilename.ddl"
 $
 $ ! rev. 2004
 $
