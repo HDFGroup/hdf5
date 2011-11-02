@@ -206,7 +206,7 @@ $
 $ ! Exceed the dimensions for subsetting
 $ CALL TOOLTEST texceedsubstart.ddl "-d 1d -s 1,3 taindices.h5"
 $ CALL TOOLTEST texceedsubcount.ddl "-d 1d -c 1,3 taindices.h5"
-$ CALL TOOLTEST texceedsubstride.ddl "-d 1d -S 1,3 taindices.h5"
+$ CALL TOOLTEST texceedsubstride.ddl "-d 1d -"""S""" 1,3 taindices.h5"
 $ CALL TOOLTEST texceedsubblock.ddl "-d 1d -k 1,3 taindices.h5"
 
 $ ! User defined
