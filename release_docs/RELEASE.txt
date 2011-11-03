@@ -56,9 +56,9 @@ New Features
 
     Configuration
     -------------
-    - Added --enable-fortran2003 flag to enable Fortran2003 support 
+    - Added the --enable-fortran2003 flag to enable Fortran2003 support 
       in the HDF5 Fortran library. The flag should be used along with the
-      --enable-fortran flag and takes affect only when Fortran compiler 
+      --enable-fortran flag and takes affect only when the Fortran compiler 
       is Fortran2003 compliant.         (EIP - 2011/11/14)
     - Added checks for clock_gettime and mach/mach_time.h to both configure and
       CMake.  This will support the move from gettimeofday to clock_gettime's
@@ -67,8 +67,8 @@ New Features
     
     Library
     -------
-    - H5Tcreate now supports string type (fixed-length and variable-length).
-      (SLU - 2011/05/20)
+    - H5Tcreate now supports the string type (fixed-length and variable-
+      length). (SLU - 2011/05/20)
     - The Windows VFD code has been removed with the exception of the functions
       which set it (H5Pset_fapl_windows, for example).  Setting the Windows
       VFD now really sets the SEC2 VFD.  The WINDOWS_MAX_BUF and
@@ -82,8 +82,8 @@ New Features
     Parallel Library
     ----------------
     - Added new H5Pget_mpio_actual_chunk_opt_mode and
-        H5Pget_mpio_actual_io_mode API routines for querying whether/how
-        a collective I/O operation completed.  (QAK - 2011/10/12)
+      H5Pget_mpio_actual_io_mode API routines for querying whether/how
+      a collective I/O operation completed.  (QAK - 2011/10/12)
  
     Tools
     -----
@@ -91,54 +91,55 @@ New Features
 
     High-Level APIs
     ---------------
-    - Added Fortran wrappers for Dimension Scale APIs. (HDFFV-3797)
-      h5dsset_scale_f
-      h5dsattach_scale_f
-      h5dsdetach_scale_f
-      h5dsis_attached_f
-      h5dsis_scale_f
-      h5dsset_label_f
-      h5dsget_label_f
-      h5dsget_scale_name_f
-      h5dsget_num_scales_f
-                  (EIP for SB - 2011/10/13)
+    - Added the following Fortran wrappers for the Dimension Scale APIs 
+      (HDFFV-3797): 
+        h5dsset_scale_f
+        h5dsattach_scale_f
+        h5dsdetach_scale_f
+        h5dsis_attached_f
+        h5dsis_scale_f
+        h5dsset_label_f
+        h5dsget_label_f
+        h5dsget_scale_name_f
+        h5dsget_num_scales_f
+      (EIP for SB - 2011/10/13)
 
     Fortran API
     -----------
-    HDF5 Fortran library was enhanced to support Fortran 2003 standard. 
+    The HDF5 Fortran library was enhanced to support the Fortran 2003 standard.
     The following features are available when the HDF5 library is configured
-    using --enable-fortran --enable-fortran2003 configure flags AND
-    if fortran compiler is Fortran2003 compliant:
+    using the --enable-fortran and --enable-fortran2003 configure flags AND
+    if the Fortran compiler is Fortran 2003 compliant:
 
-     - Subroutines overloaded with the C_PTR derived type:
-         h5pget_f
-         h5pget_fill_value_f
-         h5pinsert_f
-         h5pregister_f
-         h5pset_f
-         h5pset_fill_value_f
-         h5rcreate_f
-         h5rderefrence_f
-         h5rget_name_f
-         h5rget_obj_type_f
-     - Subroutines overloaded with the C_PTR derived type 
-       and simplified signatures: 
-         h5aread_f
-         h5awrite_f
-         h5dread_f
-         h5dwrite_f
-     - New subroutines
-         h5dvlen_reclaim_f
-         h5literate_by_name_f
-         h5literate_f
-         h5ovisit_f
-         h5tconvert_f
-	 h5pset_nbit_f
-	 h5pset_scaleoffset_f
+    - Subroutines overloaded with the C_PTR derived type:
+        h5pget_f
+        h5pget_fill_value_f
+        h5pinsert_f
+        h5pregister_f
+        h5pset_f
+        h5pset_fill_value_f
+        h5rcreate_f
+        h5rderefrence_f
+        h5rget_name_f
+        h5rget_obj_type_f
+    - Subroutines overloaded with the C_PTR derived type 
+      and simplified signatures: 
+        h5aread_f
+        h5awrite_f
+        h5dread_f
+        h5dwrite_f
+    - New subroutines
+        h5dvlen_reclaim_f
+        h5literate_by_name_f
+        h5literate_f
+        h5ovisit_f
+        h5tconvert_f
+        h5pset_nbit_f
+        h5pset_scaleoffset_f
 
-     - Subroutines with additional optional parameters:
-         h5pcreate_class_f
-                   (EIP - 2011/10/14)
+    - Subroutines with additional optional parameters:
+        h5pcreate_class_f
+    (EIP - 2011/10/14)
  
 
     C++ API
@@ -173,15 +174,15 @@ Bug Fixes since HDF5-1.8.7
 
     Library
     -------
-    - Correct error when copying attributes between files which are using
+    - Corrected the error when copying attributes between files which are using
       different versions of the file format.  This addresses Jira issue #7718.
       (QAK - 2011/10/20)
-    - Corrected error when loading local heaps from the file, which could
+    - Corrected the error when loading local heaps from the file, which could
       cause the size of the local heap's data block to increase dramatically.
       This addresses Jira issue #7767.  (QAK - 2011/10/14)
-    - The first part fix for HDFFV-7640: does not need to do
-      H5O_move_msgs_forward() when writing attributes.
-      Tests are checked into the performance suite.
+    - This is the first part of fixing HDFFV-7640: an application does not 
+      need to do H5O_move_msgs_forward() when writing attributes.
+      Tests were checked into the performance suite.
       (VC - 2011/10/13)
     - Fixed a bug that occurred when using H5Ocopy on a committed datatype
       containing an attribute using that committed datatype.
@@ -216,11 +217,12 @@ Bug Fixes since HDF5-1.8.7
     - H5Epush2() now has the correct trace functionality (this is related to the
       bin/trace Perl script bug noted in the configure section).
       (DER 2011/08/25)
-    - Converted post-checks for appropriate POSIX I/O sizes to pre-checks in
-      order to avoid platform-specific/undefined behavior.  (DER - 2011/10/12)
+    - Converted post-checks for the appropriate POSIX I/O sizes to pre-checks 
+      in order to avoid platform-specific or undefined behavior.  
+      (DER - 2011/10/12)
     - Corrected some Windows behavior in the SEC2 and log VFDs.  This mainly
-      involved data type correctness fixes, Windows API call error checks and
-      adding the volume serial number to the VFD cmp functions.
+      involved datatype correctness fixes, Windows API call error checks, 
+      and adding the volume serial number to the VFD cmp functions.
       (DER 2011/10/12)
     - Added generic VFD I/O types to the SEC2 and log VFDs to ensure correct
       I/O sizes (and remove compiler warnings) between Windows and true POSIX
@@ -295,13 +297,14 @@ Bug Fixes since HDF5-1.8.7
 
     F90 API
     -------
-    - Modified the h5open_f and h5close_f subroutines to not to call H5open and
-      H5close correspodningly. While the H5open call just adds overhead, the H5close
-      call called by an Fortran application shuts down the HDF5 library making 
-      it unaccessible to the application. HDFFV-915 (EIP & SB - 2011/10/13)
-    - Fixed h5tget_tag_f where the length of the C string was used to repack the C
-      string into the fortran string leading to memory corruption in the calling 
-      program. (SB -- 2011/7/26)
+    - Modified the h5open_f and h5close_f subroutines to not to call H5open 
+      and H5close correspondingly. While the H5open call just adds overhead, 
+      the H5close call called by a Fortran application shuts down the HDF5 
+      library. This makes the library inaccessible to the application. 
+      HDFFV-915 (EIP & SB - 2011/10/13)
+    - Fixed h5tget_tag_f where the length of the C string was used to 
+      repack the C string into the Fortran string. This lead to memory 
+      corruption in the calling program. (SB -- 2011/7/26)
     - Added defined constants:
         H5T_ORDER_MIXED_F (HDFFV-2767)
         H5Z_SO_FLOAT_DSCALE_F
@@ -320,11 +323,12 @@ Bug Fixes since HDF5-1.8.7
 
     High-Level APIs:
     ------
-    - Fixed dimscale bug where if you create a dimscale, attach two datasets to it, 
-      and then unattach them, you get an error if they are unattached in order, 
-      but no error if you unattach them in reverse order. HDFFV-7605 (SB - 2011/6/7)
-    - Fixed H5DSset_label seg faulting when retrieving the length of a dimension label
-      that was not set. HDFFV-7673 (SB -- 2011/8/7)
+    - Fixed a dimension scale bug where if you create a dimscale, attach two 
+      datasets to it, and then unattach them, you get an error if they are 
+      unattached in order, but no error if you unattach them in reverse order. 
+      HDFFV-7605 (SB - 2011/6/7)
+    - Fixed H5DSset_label seg faulting when retrieving the length of a 
+      dimension label that was not set. HDFFV-7673 (SB -- 2011/8/7)
     - Fixed the H5LTdtype_to_text function.  It had some memory problems when 
       dealing with some complicated data types. HDFFVI-7701 (SLU - 2011/10/19)
 
