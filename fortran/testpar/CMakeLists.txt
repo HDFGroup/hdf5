@@ -22,6 +22,7 @@ TARGET_LINK_LIBRARIES (parallel_test
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
     ${HDF5_LIB_TARGET}
+    ${MPI_Fortran_LIBRARIES}
 )
 IF (WIN32 AND MSVC)
   TARGET_LINK_LIBRARIES (parallel_test "ws2_32.lib")
