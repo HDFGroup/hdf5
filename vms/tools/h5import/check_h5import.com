@@ -48,35 +48,35 @@ $ run [.-]h5importtest
 $ !
 $ type sys$input 
                  Testing ASCII I32 rank 3 - Output BE 
-$ CALL TOOLTEST "in32.txt -c textin32.conf -o" test1.h5
+$ CALL TOOLTEST "in32.txt -c txtin32.conf -o" test1.h5
 $ !
 $ type sys$input 
                 Testing ASCII I16 rank 3 - Output LE - CHUNKED - extended
-$ CALL TOOLTEST  "in16.txt -c textin16.conf -o" test2.h5
+$ CALL TOOLTEST  "in16.txt -c txtin16.conf -o" test2.h5
 $ !
 $ type sys$input 
                 Testing ASCII I8 - rank 3 - Output I16 LE-Chunked+Extended+Compressed 
-$ CALL TOOLTEST  "in16.txt -c textin8.conf  -o" test3.h5
+$ CALL TOOLTEST  "in16.txt -c txtin8.conf  -o" test3.h5
 $ !
 $ type sys$input 
                Testing ASCII UI32 - rank 3 - Output BE 
-$ CALL TOOLTEST  "in1.txt -c textuin32.conf -o" test4.h5
+$ CALL TOOLTEST  "in1.txt -c txtuin32.conf -o" test4.h5
 $ !
 $ type sys$input 
                Testing ASCII UI16 - rank 2 - Output LE+Chunked+Compressed 
-$ CALL TOOLTEST  "in1.txt -c textuin16.conf -o" test5.h5
+$ CALL TOOLTEST  "in1.txt -c txtuin16.conf -o" test5.h5
 $ !
 $ type sys$input 
                Testing ASCII F32 - rank 3 - Output LE 
-$ CALL TOOLTEST  "fp1.txt -c textfp32.conf -o" test6.h5
+$ CALL TOOLTEST  "fp1.txt -c txtfp32.conf -o" test6.h5
 $ !
 $ type sys$input 
                Testing ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed 
-$ CALL TOOLTEST  "fp2.txt -c textfp64.conf -o" test7.h5
+$ CALL TOOLTEST  "fp2.txt -c txtfp64.conf -o" test7.h5
 $ !
 $ type sys$input 
                Testing ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE
-$ CALL TOOLTEST  "in64.txt -c textpfe.conf -o" test15.h5
+$ CALL TOOLTEST  "in64.txt -c txtpfe.conf -o" test15.h5
 $ !
 $ type sys$input 
                Testing BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed 
@@ -104,7 +104,7 @@ $ CALL TOOLTEST  "binuin32.bin -c binuin32.conf -o" test13.h5
 $ !
 $ type sys$input 
                Testing STR
-$ CALL TOOLTEST "str.txt -c textstr.conf -o" test14.h5
+$ CALL TOOLTEST "str.txt -c txtstr.conf -o" test14.h5
 
 $
 $ ! Delete temporary files
