@@ -65,31 +65,30 @@ FOREACH (example ${examples})
 ENDFOREACH (example ${examples})
 
 IF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
-FOREACH (example ${F2003_examples})
-  ADD_EXECUTABLE (f03_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
-  TARGET_NAMING (f03_ex_${example} ${LIB_TYPE})
-  TARGET_FORTRAN_WIN_PROPERTIES (f03_ex_${example} "")
-  IF (WIN32 AND NOT CYGWIN)
-    SET_PROPERTY (TARGET f03_ex_${example} 
+  FOREACH (example ${F2003_examples})
+    ADD_EXECUTABLE (f03_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
+    TARGET_NAMING (f03_ex_${example} ${LIB_TYPE})
+    TARGET_FORTRAN_WIN_PROPERTIES (f03_ex_${example} "")
+    IF (WIN32 AND NOT CYGWIN)
+      SET_PROPERTY (TARGET f03_ex_${example} 
           APPEND PROPERTY COMPILE_DEFINITIONS HDF5F90_WINDOWS
+      )
+    ENDIF (WIN32 AND NOT CYGWIN)
+    TARGET_LINK_LIBRARIES (f03_ex_${example}
+        ${HDF5_F90_LIB_TARGET}
+        ${HDF5_LIB_TARGET}
     )
-  ENDIF (WIN32 AND NOT CYGWIN)
-  TARGET_LINK_LIBRARIES (f03_ex_${example}
-      ${HDF5_F90_LIB_TARGET}
-      ${HDF5_LIB_TARGET}
-  )
-  SET_TARGET_PROPERTIES (f03_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
-  SET_TARGET_PROPERTIES (f03_ex_${example} PROPERTIES FOLDER examples/fortran03)
+    SET_TARGET_PROPERTIES (f03_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
+    SET_TARGET_PROPERTIES (f03_ex_${example} PROPERTIES FOLDER examples/fortran03)
 
-  IF (BUILD_TESTING)
-    ADD_TEST (NAME f03_ex_${example} COMMAND $<TARGET_FILE:f03_ex_${example}>)
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (f03_ex_${example} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "f03_ex_${example}")
-  ENDIF (BUILD_TESTING)
-
-ENDFOREACH (example ${F2003_examples})
+    IF (BUILD_TESTING)
+      ADD_TEST (NAME f03_ex_${example} COMMAND $<TARGET_FILE:f03_ex_${example}>)
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (f03_ex_${example} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+      SET (last_test "f03_ex_${example}")
+    ENDIF (BUILD_TESTING)
+  ENDFOREACH (example ${F2003_examples})
 ENDIF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
 
 IF (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)

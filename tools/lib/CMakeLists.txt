@@ -40,9 +40,7 @@ H5_SET_LIB_OPTIONS (
     HDF5_TOOLS_LIB_NAME_RELEASE
   HDF5_TOOLS_LIB_NAME_DEBUG
 )
-
-# Add the tools library to a Visual Studio solution file
-set_target_properties(hdf5_tools PROPERTIES FOLDER libraries)
+SET_TARGET_PROPERTIES (hdf5_tools PROPERTIES FOLDER libraries/tools)
 
 ##############################################################################
 ##############################################################################

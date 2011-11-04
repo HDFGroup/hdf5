@@ -30,8 +30,6 @@ IF (H5_HAVE_PARALLEL)
   SET_TARGET_PROPERTIES (ph5diff PROPERTIES FOLDER tools)
 ENDIF (H5_HAVE_PARALLEL)
 
-set_target_properties(h5diff PROPERTIES FOLDER tools)
-
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###

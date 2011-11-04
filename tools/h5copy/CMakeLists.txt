@@ -17,8 +17,6 @@ SET_TARGET_PROPERTIES (h5copy PROPERTIES FOLDER tools)
 
 SET (H5_DEP_EXECUTABLES h5copy)
 
-set_target_properties(h5copy PROPERTIES FOLDER tools)
-
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###
