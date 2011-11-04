@@ -30,6 +30,7 @@ IF (MINGW)
 ENDIF (MINGW)
 TARGET_LINK_LIBRARIES (${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 H5_SET_LIB_OPTIONS (${HDF5_TEST_LIB_TARGET} ${HDF5_TEST_LIB_NAME} ${LIB_TYPE})
+SET_TARGET_PROPERTIES (${HDF5_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test)
 
 # --------------------------------------------------------------------
 # Copy all the HDF5 files from the test directory into the source directory
@@ -150,6 +151,7 @@ SET (testhdf5_SRCS
 ADD_EXECUTABLE (testhdf5 ${testhdf5_SRCS})
 TARGET_NAMING (testhdf5 ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (testhdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+SET_TARGET_PROPERTIES (testhdf5 PROPERTIES FOLDER test)
 
 # Remove any output file left over from previous test run
 ADD_TEST (
@@ -184,6 +186,7 @@ MACRO (ADD_H5_TEST file)
   ADD_EXECUTABLE (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
   TARGET_NAMING (${file} ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+  SET_TARGET_PROPERTIES (${file} PROPERTIES FOLDER test)
 
   ADD_TEST (NAME ${file} COMMAND $<TARGET_FILE:${file}>)
 ENDMACRO (ADD_H5_TEST file)
@@ -303,6 +306,7 @@ SET (H5_TESTS
 
 FOREACH (test ${H5_TESTS})
   ADD_H5_TEST(${test})
+#  SET_TESTS_PROPERTIES(${test} PROPERTIES DEPENDS h5test-clear-objects PASS_REGULAR_EXPRESSION "^All(.*)tests.passed.")
   SET_TESTS_PROPERTIES(${test} PROPERTIES DEPENDS h5test-clear-objects)
 ENDFOREACH (test ${H5_TESTS})
 
@@ -318,6 +322,7 @@ SET_TESTS_PROPERTIES(flush2 PROPERTIES DEPENDS flush1)
 ADD_EXECUTABLE (cache ${HDF5_TEST_SOURCE_DIR}/cache.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 TARGET_NAMING (cache ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (cache ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+SET_TARGET_PROPERTIES (cache PROPERTIES FOLDER test)
 ADD_TEST (
     NAME h5test-clear-cache-objects
     COMMAND    ${CMAKE_COMMAND}
@@ -331,6 +336,7 @@ SET_TESTS_PROPERTIES(cache PROPERTIES DEPENDS h5test-clear-cache-objects)
 ADD_EXECUTABLE (cache_api ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 TARGET_NAMING (cache_api ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (cache_api ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+SET_TARGET_PROPERTIES (cache_api PROPERTIES FOLDER test)
 
 ADD_TEST (
     NAME h5test-clear-cache_api-objects
@@ -351,6 +357,7 @@ ADD_EXECUTABLE (ttsafe
 )
 TARGET_NAMING (ttsafe ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (ttsafe ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+SET_TARGET_PROPERTIES (ttsafe PROPERTIES FOLDER test)
 
 ADD_TEST (
     NAME h5test-clear-ttsafe-objects
@@ -369,6 +376,7 @@ IF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
   ADD_EXECUTABLE (err_compat ${HDF5_TEST_SOURCE_DIR}/err_compat.c)
   TARGET_NAMING (err_compat ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (err_compat ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+  SET_TARGET_PROPERTIES (err_compat PROPERTIES FOLDER test)
 
   ADD_TEST (
       NAME h5test-clear-err_compat-objects
@@ -394,6 +402,7 @@ ENDIF (HDF5_ENABLE_DEPRECATED_SYMBOLS)
 ADD_EXECUTABLE (error_test ${HDF5_TEST_SOURCE_DIR}/error_test.c)
 TARGET_NAMING (error_test ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (error_test ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+SET_TARGET_PROPERTIES (error_test PROPERTIES FOLDER test)
 
 ADD_TEST (
     NAME h5test-clear-error_test-objects
@@ -418,11 +427,14 @@ SET_TESTS_PROPERTIES(error_test PROPERTIES DEPENDS h5test-clear-error_test-objec
 ADD_EXECUTABLE (links_env ${HDF5_TEST_SOURCE_DIR}/links_env.c)
 TARGET_NAMING (links_env ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (links_env ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+SET_TARGET_PROPERTIES (links_env PROPERTIES FOLDER test)
 
 ADD_TEST (
     NAME h5test-clear-links_env-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove 
+        -E remove
+        links_env.txt
+        links_env.txt.err 
         extlinks_env0.h5
         extlinks_env1.h5
         tmp/extlinks_env1.h5
@@ -574,6 +586,7 @@ IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
     TARGET_NAMING (${genfile} ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (${genfile} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+    SET_TARGET_PROPERTIES (${genfile} PROPERTIES FOLDER generator/test)
   ENDMACRO (ADD_H5_GENERATOR genfile)
 
   # generator executables
@@ -597,10 +610,7 @@ IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
   )
 
   FOREACH (gen ${H5_GENERATORS})
-    ADD_EXECUTABLE (${gen} ${HDF5_TEST_SOURCE_DIR}/${gen}.c)
-    TARGET_NAMING (${gen} ${LIB_TYPE})
-    TARGET_LINK_LIBRARIES (${gen} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+    ADD_H5_GENERATOR (${gen})
   ENDFOREACH (gen ${H5_GENERATORS})
 
 ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
-

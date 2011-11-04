@@ -45,6 +45,7 @@ FOREACH (example ${examples})
   ADD_EXECUTABLE (hl_ex_${example} ${HDF5_HL_EXAMPLES_SOURCE_DIR}/${example}.c)
   TARGET_NAMING (hl_ex_${example} ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (hl_ex_${example} ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
+  SET_TARGET_PROPERTIES (hl_ex_${example} PROPERTIES FOLDER examples/hl)
 
   IF (BUILD_TESTING)
     ADD_TEST (NAME hl_ex_${example} COMMAND $<TARGET_FILE:hl_ex_${example}>)
