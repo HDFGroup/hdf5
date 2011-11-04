@@ -23,4 +23,6 @@ SET (VALGRIND_COMMAND "/usr/bin/valgrind")
 SET (VALGRIND_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=yes --num-callers=50 --show-reachable=yes --track-origins=yes --malloc-fill=0xff --free-fill=0xfe")
 
 SET (CTEST_TESTING_TIMEOUT 3600) 
-SET (DART_TESTING_TIMEOUT 3600) 
+SET (DART_TESTING_TIMEOUT 3600)
+
+SET (CTEST_SUBMIT_RETRY_DELAY 20)
