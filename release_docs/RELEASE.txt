@@ -391,12 +391,9 @@ The following platforms and compilers have been tested for this release.
     SGI Altix UV
     (NCSA ember)
 
-    SunOS 5.10 32- and 64-bit     Sun C 5.9 Sun OS_sparc Patch 124867-16
-    (linew)                       Sun Fortran 95 8.3 Sun OS_sparc Patch 127000-13
-                                  Sun C++ 5.9 Sun OS_sparc Patch 124863-26
-                                  Sun C 5.10 SunOS_sparc Patch 141861-07
-                                  Sun Fortran 95 8.4 SunOS_sparc Patch 128231-06
-                                  Sun C++ 5.10 SunOS_sparc 128228-11
+    SunOS 5.10 32- and 64-bit     Sun C 5.11 SunOS_sparc 2010/08/13
+                                  Sun Fortran 95 8.5 SunOS_sparc 2010/08/13
+                                  Sun C++ 5.11 SunOS_sparc 2010/08/13
 
     Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
                                   Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
