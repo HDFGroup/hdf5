@@ -96,7 +96,9 @@ Bug Fixes since HDF5-1.8.8
 
     Library
     -------
-    - None
+    - The library had seg fault when it tried to shrink the size of compound
+      type through H5Tset_size immediately after the type was created (Issue
+      7618). It's fixed now. (SLU - 2011/11/4)
 
     Parallel Library
     ----------------
