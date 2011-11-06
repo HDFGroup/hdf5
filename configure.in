@@ -1463,8 +1463,9 @@ case "$host_cpu-$host_vendor-$host_os" in
     dnl correctly in <stdio.h>
     dnl Linking to the bsd-compat library is required as per the gcc manual:
     dnl http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
+    dnl however, we do not do this since it breaks the big test on some 
+    dnl older platforms.
     AM_CPPFLAGS="-D_BSD_SOURCE $AM_CPPFLAGS"
-    AM_LDFLAGS="-lbsd-compat $AM_LDFLAGS"
     ;;
 esac
 
