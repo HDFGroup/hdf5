@@ -162,8 +162,6 @@ Bug Fixes since HDF5-1.8.7
       usage of the packed bits feature. (MAM - 2011/06/23)
     - Configure now uses the same flags and symbols in its tests that are
       used to build the library. (DER - 2011/05/24)
-    - On linux we now link to the bsd_compat library, as per the gcc
-      manual, since we define _BSD_SOURCE. (DER - 2011/05/24)
     - Fixed a bug in the bin/trace Perl script where API functions
       that take a variable number of arguments were not processed for
       trace statement fixup. (DER - 2011/08/25)
