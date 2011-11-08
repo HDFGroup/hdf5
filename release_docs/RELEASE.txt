@@ -343,6 +343,9 @@ Bug Fixes since HDF5-1.8.0 release
     Library
     -------
 
+      - The library allowed the conversion of strings between ASCII and UTF8
+            (Issue 7582).  We have corrected it to report an error under this
+            situation. (SLU - 2011/11/8)
       - The library had seg fault when it tried to shrink the size of compound type
             through H5Tset_size immediately after the type was created (Issue
             7618). It's fixed now. (SLU - 2011/10/26)

@@ -81,6 +81,7 @@ const char *FILENAME[] = {
     "dtypes7",
     "dtypes8",
     "dtypes9",
+    "dtypes10",
     NULL
 };
 
@@ -108,6 +109,10 @@ typedef enum dtype_t {
 #define DEL_OBJ_NAMED_DATASET           "/Dataset"
 #define DEL_OBJ_NAMED_NAMED_DTYPE       "/Dtype"
 #define DEL_OBJ_NAMED_ATTRIBUTE         "Attr"
+
+/* Constant for testing conversion of UTF-8 characters */
+#define UTF8_DATASET                    "utf8"
+#define UTF8_DATASET2                   "2nd_utf8"
 
 /* Count opaque conversions */
 static int num_opaque_conversions_g = 0;
@@ -7021,6 +7026,132 @@ error:
 } /* end test_deprec() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
+int test_utf_conv()
+{
+    hid_t fid;
+    hid_t did;
+    hid_t utf8_vtid, ascii_vtid;
+    hid_t utf8_tid, ascii_tid;
+    hid_t sid;
+    const char *utf8 = "foo!";
+    char *ascii = NULL;
+    char ascii2[4];
+    herr_t status;
+
+    TESTING("string conversion between ASCII and UTF");
+ 
+    /***********************************
+     * Test VL string conversion
+     ***********************************/
+    /* Create a variable-length string */
+    if((utf8_vtid = H5Tcopy(H5T_C_S1)) < 0) FAIL_STACK_ERROR
+
+    if((status = H5Tset_size(utf8_vtid, H5T_VARIABLE)) < 0) FAIL_STACK_ERROR
+
+    /* Set the character set for the string to UTF-8 */
+    if((status = H5Tset_cset(utf8_vtid, H5T_CSET_UTF8)) < 0) FAIL_STACK_ERROR
+
+    /* Create a variable-length string */
+    if((ascii_vtid = H5Tcopy(H5T_C_S1)) < 0) FAIL_STACK_ERROR
+
+    if((status = H5Tset_size(ascii_vtid, H5T_VARIABLE)) < 0) FAIL_STACK_ERROR
+
+    /* Set the character set for the string to ASCII (should already be so) */
+    if((status = H5Tset_cset(ascii_vtid, H5T_CSET_ASCII) < 0)) FAIL_STACK_ERROR
+
+    /* Create a file */
+    if((fid = H5Fcreate(FILENAME[10], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Create a scalar dataspace for the dataset */
+    if((sid = H5Screate(H5S_SCALAR)) < 0) FAIL_STACK_ERROR
+
+    /* Create a dataset */
+    if((did = H5Dcreate2(fid, UTF8_DATASET, utf8_vtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Write the UTF8 string, as UTF8 */
+    if((status = H5Dwrite(did, utf8_vtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &utf8)) < 0) FAIL_STACK_ERROR
+
+    /* Read the UTF8 string, as ASCII, supposed to fail */
+    H5E_BEGIN_TRY {
+        status = H5Dread(did, ascii_vtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ascii);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Close the UTF8 VL-string datatype */
+    if((status = H5Tclose(utf8_vtid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the ASCII VL-string datatype */
+    if((status = H5Tclose(ascii_vtid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if((status = H5Dclose(did)) < 0) FAIL_STACK_ERROR
+
+    /***************************************
+     * Test fixed-length string conversion
+     ***************************************/
+    /* Create a fixed-length UTF8 string */
+    if((utf8_tid = H5Tcopy(H5T_C_S1)) < 0) FAIL_STACK_ERROR
+
+    if((status = H5Tset_size(utf8_tid, 4)) < 0) FAIL_STACK_ERROR
+
+    /* Set the character set for the string to UTF-8 */
+    if((status = H5Tset_cset(utf8_tid, H5T_CSET_UTF8)) < 0) FAIL_STACK_ERROR
+
+    /* Create a fixed-length ASCII string */
+    if((ascii_tid = H5Tcopy(H5T_C_S1)) < 0) FAIL_STACK_ERROR
+
+    if((status = H5Tset_size(ascii_tid, 4)) < 0) FAIL_STACK_ERROR
+
+    /* Set the character set for the string to ASCII (should already be so) */
+    if((status = H5Tset_cset(ascii_tid, H5T_CSET_ASCII) < 0)) FAIL_STACK_ERROR
+
+    /* Create a dataset */
+    if((did = H5Dcreate2(fid, UTF8_DATASET2, utf8_tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Write the UTF8 string, as UTF8 */
+    if((status = H5Dwrite(did, utf8_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &utf8)) < 0) FAIL_STACK_ERROR
+
+    /* Read the UTF8 string as ASCII, supposed to fail */
+    H5E_BEGIN_TRY {
+        status = H5Dread(did, ascii_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, ascii2);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Close the UTF8 string datatype */
+    if((status = H5Tclose(utf8_tid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the ASCII string datatype */
+    if((status = H5Tclose(ascii_tid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if((status = H5Dclose(did)) < 0) FAIL_STACK_ERROR
+
+    /* Close the dataspace */
+    if((status = H5Sclose(sid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the file */
+    if((status = H5Fclose(fid)) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Tclose(utf8_vtid);
+	H5Tclose(ascii_vtid);
+	H5Tclose(utf8_tid);
+	H5Tclose(ascii_tid);
+	H5Dclose(did);
+	H5Sclose(sid);
+	H5Fclose(fid);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -7102,6 +7233,7 @@ main(void)
     nerrors += test_bitfield_funcs();
     nerrors += test_opaque();
     nerrors += test_set_order();
+    nerrors += test_utf_conv();
 
     if(nerrors) {
         printf("***** %lu FAILURE%s! *****\n",
