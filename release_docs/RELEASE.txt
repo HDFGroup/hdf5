@@ -383,11 +383,16 @@ The following platforms and compilers have been tested for this release.
                                   MPICH mpich2-1.3.1 compiled with
                                       gcc 4.1.2 and gfortran 4.1.2
 
-    SGI ProPack 7 Linux           Intel(R) C++ Version 11.1 20100806
-    2.6.32.24-0.2.1.2230.2.PTF-   Intel(R) Fortran Version 11.1 20100806
-    default #1 SMP                SGI MPT 2.01
-    SGI Altix UV
+    SGI Altix UV                  Intel(R) C, Fortran Compilers
+    SGI ProPack 7 Linux               Version 11.1 20100806
+    2.6.32.24-0.2.1.2230.2.PTF-   SGI MPT 2.02
+    default #1 SMP                
     (NCSA ember)
+
+    Dell NVIDIA Cluster           Intel(R) C, Fortran Compilers
+    Red Hat Enterprise Linux 6        Version 12.0.4 20110427
+    2.6.32-131.4.1.el6.x86_64     mvapich2 1.7rc1-intel-12.0.4
+    (NCSA forge)
 
     SunOS 5.10 32- and 64-bit     Sun C 5.11 SunOS_sparc 2010/08/13
                                   Sun Fortran 95 8.5 SunOS_sparc 2010/08/13
@@ -497,7 +502,8 @@ CentOS 5.5 Linux 2.6.16 x86_64 GNU (1)  W  y        y(3)   y        y     y     
 CentOS 5.5 Linux 2.6.16 x86_64 Intel    W  n        y      n        y     y     n
 CentOS 5.5 Linux 2.6.16 x86_64 PGI      W  n        y      n        y     y     y
 Fedora 12 Linux 2.6.32.16-150.fc12.ppc64   n        y      n        y     y     y
-SGI Linux 2.6.32.19                        y        y      y        y     y     y
+SGI ProPack 7 Linux 2.6.32.24              y        y      y        y     y     y
+Red Hat Enterprise Linux 6                 y        y      y        y     y     y
 CLE hopper.nersc.gov                       y        y(3)   y        y     y     n  
 CLE franklin.nersc.gov                     y        y(3)   y        y     y     n  
 
@@ -522,7 +528,8 @@ CentOS 5.5 Linux 2.6.16 x86_64 GNU (1)  W  y       y         y         y
 CentOS 5.5 Linux 2.6.16 x86_64 Intel    W  y       y         y         n        
 CentOS 5.5 Linux 2.6.16 x86_64 PGI      W  y       y         y         n        
 Fedora 12 Linux 2.6.32.16-150.fc12.ppc64   y       y         y         y 
-SGI Linux 2.6.32.19                        y       y         y         y 
+SGI ProPack 7 Linux 2.6.32.24              y       y         y         n 
+Red Hat Enterprise Linux 6                 y       y         y         n
 CLE hopper.nersc.gov                       n       n         n         n
 CLE franklin.nersc.gov                     n       n         n         n
 
