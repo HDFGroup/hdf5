@@ -286,27 +286,27 @@ SUBROUTINE test_genprop_class_callback(total_error)
   f6 = C_LOC(cls_cb_struct)
 
   !/* Create a new generic class, derived from the root of the class hierarchy */
-  CALL H5Pcreate_class_f(H5P_ROOT_F,CLASS1_NAME, cid1, error, f1, f2, c_null_funptr, c_null_ptr, f5, f6)
-  CALL check("H5Pcreate_class_f", error, total_error)
+  CALL h5pcreate_class_f(h5p_ROOT_F,CLASS1_NAME, cid1, error, f1, f2, c_null_funptr, c_null_ptr, f5, f6)
+  CALL check("h5pcreate_class_f", error, total_error)
 
   !/* Insert first property into class (with no callbacks) */
-  CALL H5Pregister_f(cid1, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, error)
-  CALL check("H5Pregister_f", error, total_error)
+  CALL h5pregister_f(cid1, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, error)
+  CALL check("h5pregister_f", error, total_error)
   !/* Insert second property into class (with no callbacks) */
-  CALL H5Pregister_f(cid1, PROP2_NAME, PROP2_SIZE, PROP2_DEF_VALUE, error)
-  CALL check("H5Pregister_f", error, total_error)
+  CALL h5pregister_f(cid1, PROP2_NAME, PROP2_SIZE, PROP2_DEF_VALUE, error)
+  CALL check("h5pregister_f", error, total_error)
   !/* Insert third property into class (with no callbacks) */
-  CALL H5Pregister_f(cid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, error)
-  CALL check("H5Pregister_f", error, total_error)
+  CALL h5pregister_f(cid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, error)
+  CALL check("h5pregister_f", error, total_error)
 
   !/* Insert fourth property into class (with no callbacks) */
-  CALL H5Pregister_f(cid1, PROP4_NAME, PROP4_SIZE, PROP4_DEF_VALUE, error)
-  CALL check("H5Pregister_f", error, total_error)
+  CALL h5pregister_f(cid1, PROP4_NAME, PROP4_SIZE, PROP4_DEF_VALUE, error)
+  CALL check("h5pregister_f", error, total_error)
 
   ! /* Check the number of properties in class */
-  CALL H5Pget_nprops_f(cid1, nprops, error)
-  CALL check("H5Pget_nprops_f", error, total_error)
-  CALL VERIFY("H5Pget_nprops_f", INT(nprops), 4, total_error)
+  CALL h5pget_nprops_f(cid1, nprops, error)
+  CALL check("h5pget_nprops_f", error, total_error)
+  CALL VERIFY("h5pget_nprops_f", INT(nprops), 4, total_error)
 
   ! /* Initialize class callback structs */
 
@@ -316,49 +316,49 @@ SUBROUTINE test_genprop_class_callback(total_error)
   cls_cb_struct%id    = -1
 
   !/* Create a property list from the class */
-  CALL H5Pcreate_f(cid1, lid1, error)
-  CALL check("H5Pcreate", error, total_error)
+  CALL h5pcreate_f(cid1, lid1, error)
+  CALL check("h5pcreate_f", error, total_error)
 
   !/* Verify that the creation callback occurred */
-  CALL VERIFY("H5Pcreate", INT(crt_cb_struct%count), 1, total_error)
-  CALL VERIFY("H5Pcreate", INT(crt_cb_struct%id), INT(lid1), total_error)
+  CALL VERIFY("h5pcreate_f", crt_cb_struct%count, 1, total_error)
+  CALL VERIFY("h5pcreate_f", INT(crt_cb_struct%id), INT(lid1), total_error)
 
   ! /* Check the number of properties in list */
-  CALL H5Pget_nprops_f(lid1,nprops, error)
-  CALL check("H5Pget_nprops_f", error, total_error)
-  CALL VERIFY("H5Pget_nprops_f", INT(nprops), 4, total_error)
+  CALL h5pget_nprops_f(lid1,nprops, error)
+  CALL check("h5pget_nprops_f", error, total_error)
+  CALL VERIFY("h5pget_nprops_f", INT(nprops), 4, total_error)
 
   ! /* Create another property list from the class */
-  CALL H5Pcreate_f(cid1, lid2, error)
-  CALL check("H5Pcreate", error, total_error)
+  CALL h5pcreate_f(cid1, lid2, error)
+  CALL check("h5pcreate_f", error, total_error)
 
   ! /* Verify that the creation callback occurred */
-  CALL VERIFY("H5Pcreate", INT(crt_cb_struct%count), 2, total_error)
-  CALL VERIFY("H5Pcreate", INT(crt_cb_struct%id), INT(lid2), total_error)
+  CALL VERIFY("h5pcreate_f", crt_cb_struct%count, 2, total_error)
+  CALL VERIFY("h5pcreate_f", INT(crt_cb_struct%id), INT(lid2), total_error)
 
   ! /* Check the number of properties in list */
-  CALL H5Pget_nprops_f(lid2,nprops, error)
-  CALL check("H5Pget_nprops_f", error, total_error)
-  CALL VERIFY("H5Pget_nprops_f", INT(nprops), 4, total_error)
+  CALL h5pget_nprops_f(lid2,nprops, error)
+  CALL check("h5pget_nprops_f", error, total_error)
+  CALL VERIFY("h5pget_nprops_f", INT(nprops), 4, total_error)
 
   ! /* Close first list */
-  CALL H5Pclose_f(lid1, error);
-  CALL check("h5pclose", error, total_error)
+  CALL h5pclose_f(lid1, error);
+  CALL check("h5pclose_f", error, total_error)
 
   !/* Verify that the close callback occurred */
-  CALL VERIFY("H5Pcreate", INT(cls_cb_struct%count), 1, total_error)
-  CALL VERIFY("H5Pcreate", INT(cls_cb_struct%id), INT(lid1), total_error)
+  CALL VERIFY("h5pcreate_f", cls_cb_struct%count, 1, total_error)
+  CALL VERIFY("h5pcreate_f", INT(cls_cb_struct%id), INT(lid1), total_error)
 
   !/* Close second list */
-  CALL H5Pclose_f(lid2, error);
-  CALL check("h5pclose", error, total_error)
+  CALL h5pclose_f(lid2, error);
+  CALL check("h5pclose_f", error, total_error)
 
   !/* Verify that the close callback occurred */
-  CALL VERIFY("H5Pcreate", INT(cls_cb_struct%count), 2, total_error)
-  CALL VERIFY("H5Pcreate", INT(cls_cb_struct%id), INT(lid2), total_error)
+  CALL VERIFY("h5pcreate_f", cls_cb_struct%count, 2, total_error)
+  CALL VERIFY("h5pcreate_f", INT(cls_cb_struct%id), INT(lid2), total_error)
 
   !/* Close class */
-  CALL H5Pclose_class_f(cid1, error)
-  CALL check("H5Pclose_class_f", error, total_error)
+  CALL h5pclose_class_f(cid1, error)
+  CALL check("h5pclose_class_f", error, total_error)
 
 END SUBROUTINE test_genprop_class_callback

@@ -1031,7 +1031,7 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_4) !should map to REAL*4 on most modern processors
     INTEGER, PARAMETER :: real_kind_15 = SELECTED_REAL_KIND(Fortran_REAL_8) !should map to REAL*8 on most modern processors
     
-    CHARACTER(LEN=8), PARAMETER :: filename = "dsetf.h5" ! File name
+    CHARACTER(LEN=12), PARAMETER :: filename = "dsetf_F03.h5" ! File name
     CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"     ! Dataset name
     CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"     ! Dataset name
     CHARACTER(LEN=5), PARAMETER :: dsetname4 = "dset4"     ! Dataset name
