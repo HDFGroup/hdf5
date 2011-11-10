@@ -339,11 +339,9 @@ Platforms Tested
 ================
 The following platforms and compilers have been tested for this release.
 
-    AIX 6.1                       xlc 11.1.0.3
-    (NCSA BP)                     xlC 11.1.0.3
-                                  xlf90 13.1.0.3
-                                  mpcc_r 11.1.0.3
-                                  mpxlf90_r 13.1.0.3
+    AIX 5.3                       xlc 10.1.0.5
+    (NASA G-ADA)                  xlC 10.1.0.5
+                                  xlf90 12.1.0.6
 
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
     (loyalty)                     g++ 4.2.1 [FreeBSD] 20070719
@@ -484,28 +482,28 @@ Tested Configuration Features Summary
 
 Platform                                 C        F90    F90      C++   zlib  SZIP
                                          parallel        parallel
-Solaris2.10 32-bit                         n        y      n        y     y     y
-Solaris2.10 64-bit                         n        y      n        y     y     y
-Windows XP                                 n        y(4)   n        y     y     y
-Windows XP x64                             n        y(4)   n        y     y     y
-Windows Vista                              n        y(4)   n        y     y     y
-Windows Vista x64                          n        y(4)   n        y     y     y
-OpenVMS Alpha                              n        y      n        y     y     n
-Mac OS X 10.8 Intel 32-bit                 n        y      n        y     y     y
-Mac OS X 10.8 Intel 64-bit                 n        y      n        y     y     y
-AIX 6.1 32- and 64-bit                     y        y      y        y     y     y
-FreeBSD 8.2-STABLE 32&64 bit               n        x      n        x     y     y
-CentOS 5.5 Linux 2.6.18-194 i686 GNU (1)W  y        y(2)   y        y     y     y
-CentOS 5.5 Linux 2.6.18-194 i686 Intel  W  n        y      n        y     y     n
-CentOS 5.5 Linux 2.6.18-194 i686 PGI    W  n        y      n        y     y     n
-CentOS 5.5 Linux 2.6.16 x86_64 GNU (1)  W  y        y(3)   y        y     y     y
-CentOS 5.5 Linux 2.6.16 x86_64 Intel    W  n        y      n        y     y     n
-CentOS 5.5 Linux 2.6.16 x86_64 PGI      W  n        y      n        y     y     y
-Fedora 12 Linux 2.6.32.16-150.fc12.ppc64   n        y      n        y     y     y
-SGI ProPack 7 Linux 2.6.32.24              y        y      y        y     y     y
-Red Hat Enterprise Linux 6                 y        y      y        y     y     y
-CLE hopper.nersc.gov                       y        y(3)   y        y     y     n  
-CLE franklin.nersc.gov                     y        y(3)   y        y     y     n  
+Solaris2.10 32-bit                         n        y      n        y     y    y
+Solaris2.10 64-bit                         n        y      n        y     y    y
+Windows XP                                 n        y(4)   n        y     y    y
+Windows XP x64                             n        y(4)   n        y     y    y
+Windows Vista                              n        y(4)   n        y     y    y
+Windows Vista x64                          n        y(4)   n        y     y    y
+OpenVMS Alpha                              n        y      n        y     y    n
+Mac OS X 10.8 Intel 32-bit                 n        y      n        y     y    y
+Mac OS X 10.8 Intel 64-bit                 n        y      n        y     y    y
+AIX 5.3 32- and 64-bit                     n        y      n        y     y    y
+FreeBSD 8.2-STABLE 32&64 bit               n        x      n        x     y    y
+CentOS 5.5 Linux 2.6.18-194 i686 GNU (1)W  y        y(2)   y        y     y    y
+CentOS 5.5 Linux 2.6.18-194 i686 Intel  W  n        y      n        y     y    n
+CentOS 5.5 Linux 2.6.18-194 i686 PGI    W  n        y      n        y     y    n
+CentOS 5.5 Linux 2.6.16 x86_64 GNU (1)  W  y        y(3)   y        y     y    y
+CentOS 5.5 Linux 2.6.16 x86_64 Intel    W  n        y      n        y     y    n
+CentOS 5.5 Linux 2.6.16 x86_64 PGI      W  n        y      n        y     y    y
+Fedora 12 Linux 2.6.32.16-150.fc12.ppc64   n        y      n        y     y    y
+SGI ProPack 7 Linux 2.6.32.24              y        y      y        y     y    y
+Red Hat Enterprise Linux 6                 y        y      y        y     y    y
+CLE hopper.nersc.gov                       y        y(3)   y        y     y    n  
+CLE franklin.nersc.gov                     y        y(3)   y        y     y    n  
 
 
 Platform                                 Shared  Shared    Shared    Thread-  
@@ -519,7 +517,7 @@ Windows Vista x64                          y       y(4)      y         y
 OpenVMS Alpha                              n       n         n         n
 Mac OS X 10.8 Intel 32-bit                 y(5)    n         y         n        
 Mac OS X 10.8 Intel 64-bit                 y(5)    n         y         n        
-AIX 6.1 32- and 64-bit                     n       n         n         y        
+AIX 5.3 32- and 64-bit                     n       n         n         y        
 FreeBSD 8.2-STABLE 32&64 bit               y       x         x         y        
 CentOS 5.5 Linux 2.6.18-128 i686 GNU (1)W  y       y(2)      y         y        
 CentOS 5.5 Linux 2.6.18-128 i686 Intel  W  y       y         y         n        
