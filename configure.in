@@ -553,6 +553,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     fi
 
   fi
+else
+  FC="no"
 fi
 
 dnl Change back to the C language
