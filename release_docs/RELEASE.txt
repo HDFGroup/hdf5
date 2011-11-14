@@ -355,12 +355,18 @@ The following platforms and compilers have been tested for this release.
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
+    IBM Blue Gene/P		  bgxlc Version 09.00.0000.0009
+    (LLNL uDawn) 		      Version 11.1 20090630
+
     Linux 2.6.16.60-0.54.5-smp    Intel(R) C, C++, Fortran Compilers
     x86_64			      Version 11.1 20090630
     (INL Icestorm) 		  
 
     Linux 2.6.18-194.el5 x86_64   Intel(R) C, C++, Fortran Compilers
     (INL Fission) 		      Version 12.0.2 20110112
+
+    Linux 2.6.18-108chaos x86_64  Intel(R) C, C++, Fortran Compilers
+    (LLNL Aztec) 		      Version 11.1 20090630
 
     Linux 2.6.18-194.3.1.el5PAE   gcc (GCC) 4.1.2 and 4.4.2
     #1 SMP i686 i686 i386         GNU Fortran (GCC) 4.1.2 20080704
