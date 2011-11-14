@@ -355,8 +355,9 @@ The following platforms and compilers have been tested for this release.
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
-    IBM Blue Gene/P		  bgxlc Version 09.00.0000.0009
-    (LLNL uDawn) 		      Version 11.1 20090630
+    IBM Blue Gene/P		  bgxlc 9.0.0.9
+    (LLNL uDawn) 		  bgxlf90 11.1.0.7
+				  bgxlC 9.0.0.9
 
     Linux 2.6.16.60-0.54.5-smp    Intel(R) C, C++, Fortran Compilers
     x86_64			      Version 11.1 20090630
