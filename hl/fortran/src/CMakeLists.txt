@@ -71,14 +71,25 @@ SET_TARGET_PROPERTIES (${HDF5_HL_F90_LIB_TARGET} PROPERTIES FOLDER libraries/hl/
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
-INSTALL (
-    DIRECTORY
-        ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
-    DESTINATION
-        ${HDF5_INSTALL_INCLUDE_DIR}/fortran
-    COMPONENT
-        fortheaders
-)
+IF (WIN32 AND NOT CYGWIN)
+  INSTALL (
+      DIRECTORY
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
+      DESTINATION
+          ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+      COMPONENT
+          fortheaders
+  )
+ELSE (WIN32 AND NOT CYGWIN)
+  INSTALL (
+      DIRECTORY
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/
+      DESTINATION
+          ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+      COMPONENT
+          fortheaders
+  )
+ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
