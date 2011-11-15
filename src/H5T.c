@@ -4464,7 +4464,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	path->cdata.command = H5T_CONV_INIT;
 	if((H5T_g.soft[i].func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id) < 0) {
 	    HDmemset(&(path->cdata), 0, sizeof(H5T_cdata_t));
-	    H5E_clear_stack(NULL); /*ignore the error*/
+	    H5E_clear_stack(H5E_DEFAULT); /*ignore the error*/
 	} /* end if */
         else {
 	    HDstrcpy(path->name, H5T_g.soft[i].name);

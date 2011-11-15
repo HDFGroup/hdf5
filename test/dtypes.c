@@ -81,6 +81,7 @@ const char *FILENAME[] = {
     "dtypes7",
     "dtypes8",
     "dtypes9",
+    "dtypes10",
     NULL
 };
 
@@ -108,6 +109,12 @@ typedef enum dtype_t {
 #define DEL_OBJ_NAMED_DATASET           "/Dataset"
 #define DEL_OBJ_NAMED_NAMED_DTYPE       "/Dtype"
 #define DEL_OBJ_NAMED_ATTRIBUTE         "Attr"
+
+/* Constant for testing conversion of UTF-8 characters */
+#define UTF8_DATASET                    "utf8"
+#define UTF8_DATASET2                   "2nd_utf8"
+#define ASCII_DATASET                   "ascii"
+#define ASCII_DATASET2                  "2nd_ascii"
 
 /* Count opaque conversions */
 static int num_opaque_conversions_g = 0;
@@ -7024,6 +7031,215 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_utf_ascii_conv
+ *
+ * Purpose:	Make sure the library doesn't conversion strings between
+ *              ASCII and UTF8.
+ *
+ * Return:	Success:	0
+ *		Failure:	number of errors
+ *
+ * Programmer:	Raymond Lu
+ *              10 November 2011
+ *-------------------------------------------------------------------------
+ */
+int test_utf_ascii_conv(void)
+{
+    hid_t fid;
+    hid_t did;
+    hid_t utf8_vtid, ascii_vtid;
+    hid_t utf8_tid, ascii_tid;
+    hid_t sid;
+    const char *utf8_w = "foo!";
+    char *ascii_r = NULL;
+    const char *ascii_w = "bar!";
+    char *utf8_r = NULL;
+
+    char ascii2[4], utf8_2[4];
+    herr_t status;
+
+    TESTING("string conversion between ASCII and UTF");
+ 
+    /************************************************
+     * Test VL string conversion from UTF8 to ASCII
+     ************************************************/
+    /* Create a variable-length string */
+    if((utf8_vtid = H5Tcopy(H5T_C_S1)) < 0) FAIL_STACK_ERROR
+
+    if((status = H5Tset_size(utf8_vtid, H5T_VARIABLE)) < 0) FAIL_STACK_ERROR
+
+    /* Set the character set for the string to UTF-8 */
+    if((status = H5Tset_cset(utf8_vtid, H5T_CSET_UTF8)) < 0) FAIL_STACK_ERROR
+
+    /* Create a variable-length string */
+    if((ascii_vtid = H5Tcopy(H5T_C_S1)) < 0) FAIL_STACK_ERROR
+
+    if((status = H5Tset_size(ascii_vtid, H5T_VARIABLE)) < 0) FAIL_STACK_ERROR
+
+    /* Set the character set for the string to ASCII (should already be so) */
+    if((status = H5Tset_cset(ascii_vtid, H5T_CSET_ASCII) < 0)) FAIL_STACK_ERROR
+
+    /* Test conversion in memory */
+    H5E_BEGIN_TRY {
+        status = H5Tconvert(utf8_vtid, ascii_vtid, 1, (void *)utf8_w, NULL, H5P_DEFAULT);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Create a file */
+    if((fid = H5Fcreate(FILENAME[10], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Create a scalar dataspace for the dataset */
+    if((sid = H5Screate(H5S_SCALAR)) < 0) FAIL_STACK_ERROR
+
+    /* Create a dataset of UTF8 string type */
+    if((did = H5Dcreate2(fid, UTF8_DATASET, utf8_vtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Write the UTF8 string, as UTF8 */
+    if((status = H5Dwrite(did, utf8_vtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &utf8_w)) < 0) FAIL_STACK_ERROR
+
+    /* Read the UTF8 string, as ASCII, supposed to fail */
+    H5E_BEGIN_TRY {
+        status = H5Dread(did, ascii_vtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ascii_r);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if((status = H5Dclose(did)) < 0) FAIL_STACK_ERROR
+
+    /************************************************
+     * Test VL string conversion from ASCII to UTF8
+     ************************************************/
+    /* Test conversion in memory */
+    H5E_BEGIN_TRY {
+        status = H5Tconvert(ascii_vtid, utf8_vtid, 1, (void *)ascii_w, NULL, H5P_DEFAULT);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Create a dataset of ASCII string type */
+    if((did = H5Dcreate2(fid, ASCII_DATASET, ascii_vtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Write the ASCII string, as ASCII */
+    if((status = H5Dwrite(did, ascii_vtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ascii_w)) < 0) FAIL_STACK_ERROR
+
+    /* Read the ASCII string, as UTF8, supposed to fail */
+    H5E_BEGIN_TRY {
+        status = H5Dread(did, utf8_vtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &utf8_r);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if((status = H5Dclose(did)) < 0) FAIL_STACK_ERROR
+
+    /* Close the UTF8 VL-string datatype */
+    if((status = H5Tclose(utf8_vtid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the ASCII VL-string datatype */
+    if((status = H5Tclose(ascii_vtid)) < 0) FAIL_STACK_ERROR
+
+    /**********************************************************
+     * Test fixed-length string conversion from UTF8 to ASCII
+     **********************************************************/
+    /* Create a fixed-length UTF8 string */
+    if((utf8_tid = H5Tcopy(H5T_C_S1)) < 0) FAIL_STACK_ERROR
+
+    if((status = H5Tset_size(utf8_tid, 4)) < 0) FAIL_STACK_ERROR
+
+    /* Set the character set for the string to UTF-8 */
+    if((status = H5Tset_cset(utf8_tid, H5T_CSET_UTF8)) < 0) FAIL_STACK_ERROR
+
+    /* Create a fixed-length ASCII string */
+    if((ascii_tid = H5Tcopy(H5T_C_S1)) < 0) FAIL_STACK_ERROR
+
+    if((status = H5Tset_size(ascii_tid, 4)) < 0) FAIL_STACK_ERROR
+
+    /* Set the character set for the string to ASCII (should already be so) */
+    if((status = H5Tset_cset(ascii_tid, H5T_CSET_ASCII) < 0)) FAIL_STACK_ERROR
+
+    /* Test conversion in memory */
+    H5E_BEGIN_TRY {
+        status = H5Tconvert(utf8_tid, ascii_tid, 1, utf8_2, NULL, H5P_DEFAULT);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Create a dataset */
+    if((did = H5Dcreate2(fid, UTF8_DATASET2, utf8_tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Write the UTF8 string, as UTF8 */
+    if((status = H5Dwrite(did, utf8_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &utf8_w)) < 0) FAIL_STACK_ERROR
+
+    /* Read the UTF8 string as ASCII, supposed to fail */
+    H5E_BEGIN_TRY {
+        status = H5Dread(did, ascii_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ascii2);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if((status = H5Dclose(did)) < 0) FAIL_STACK_ERROR
+
+    /**********************************************************
+     * Test fixed-length string conversion from ASCII to UTF8
+     **********************************************************/
+    /* Test conversion in memory */
+    H5E_BEGIN_TRY {
+        status = H5Tconvert(ascii_tid, utf8_tid, 1, ascii2, NULL, H5P_DEFAULT);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Create a dataset */
+    if((did = H5Dcreate2(fid, ASCII_DATASET2, ascii_tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Write the ASCII string, as ASCII */
+    if((status = H5Dwrite(did, ascii_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ascii_w)) < 0) FAIL_STACK_ERROR
+
+    /* Read the UTF8 string as ASCII, supposed to fail */
+    H5E_BEGIN_TRY {
+        status = H5Dread(did, utf8_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &utf8_2);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if((status = H5Dclose(did)) < 0) FAIL_STACK_ERROR
+
+    /* Close the UTF8 string datatype */
+    if((status = H5Tclose(utf8_tid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the ASCII string datatype */
+    if((status = H5Tclose(ascii_tid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the dataspace */
+    if((status = H5Sclose(sid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the file */
+    if((status = H5Fclose(fid)) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Tclose(utf8_vtid);
+	H5Tclose(ascii_vtid);
+	H5Tclose(utf8_tid);
+	H5Tclose(ascii_tid);
+	H5Dclose(did);
+	H5Sclose(sid);
+	H5Fclose(fid);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Test the datatype interface.
@@ -7105,6 +7321,7 @@ main(void)
     nerrors += test_bitfield_funcs();
     nerrors += test_opaque();
     nerrors += test_set_order();
+    nerrors += test_utf_ascii_conv();
 
     if(nerrors) {
         printf("***** %lu FAILURE%s! *****\n",
