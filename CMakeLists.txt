@@ -297,17 +297,6 @@ IF (BUILD_STATIC_EXECS)
 ENDIF (BUILD_STATIC_EXECS)
 
 #-----------------------------------------------------------------------------
-# Option to Build Static PIC
-#-----------------------------------------------------------------------------
-OPTION (BUILD_STATIC_PIC "Build Static PIC" OFF)
-IF (BUILD_STATIC_PIC)
-  IF (NOT WIN32)
-    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-  ENDIF (NOT WIN32)
-ENDIF (BUILD_STATIC_PIC)
-
-#-----------------------------------------------------------------------------
 # Option to use code coverage
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
@@ -402,6 +391,13 @@ IF (CMAKE_COMPILER_IS_GNUCC)
     SET (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS} -std=c99 -fomit-frame-pointer -finline-functions -fno-common")
   ENDIF (CMAKE_BUILD_TYPE MATCHES Debug)
 ENDIF (CMAKE_COMPILER_IS_GNUCC)
+IF (CMAKE_COMPILER_IS_GNUCXX)
+  IF (CMAKE_BUILD_TYPE MATCHES Debug)
+    SET (CMAKE_CXX_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_CXX_FLAGS} -finline-functions -fno-common")
+  ELSE (CMAKE_BUILD_TYPE MATCHES Debug)
+    SET (CMAKE_CXX_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_CXX_FLAGS} -fomit-frame-pointer -finline-functions -fno-common")
+  ENDIF (CMAKE_BUILD_TYPE MATCHES Debug)
+ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 #-----------------------------------------------------------------------------
 # Option to embed library info into executables
@@ -420,9 +416,10 @@ IF (HDF5_DISABLE_COMPILER_WARNINGS)
   # warning level is given, so remove it.
   IF (MSVC)
     SET (HDF5_WARNINGS_BLOCKED 1)
-    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " "
-        CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
   ENDIF (MSVC)
   IF (WIN32 AND NOT CYGWIN)
     ADD_DEFINITIONS (-D_CRT_SECURE_NO_WARNINGS)
@@ -436,6 +433,7 @@ IF (HDF5_DISABLE_COMPILER_WARNINGS)
   # Most compilers use -w to suppress warnings.
   IF (NOT HDF5_WARNINGS_BLOCKED)
     SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
   ENDIF (NOT HDF5_WARNINGS_BLOCKED)
 ENDIF (HDF5_DISABLE_COMPILER_WARNINGS)
 
