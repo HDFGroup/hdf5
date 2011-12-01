@@ -8066,7 +8066,7 @@ error:
     return -1;
 } /* end test_chunk_expand() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: test_large_chunk_shrink
  *
