@@ -343,6 +343,8 @@ Bug Fixes since HDF5-1.8.0 release
     Library
     -------
 
+      - Fixed a seg fault that could occur when shrinking a dataset with chunks
+            larger than 1 MB. (NAF - 2011/11/30 - HDFFV-7833)
       - The library allowed the conversion of strings between ASCII and UTF8
             (Issue 7582).  We have corrected it to report an error under this
             situation. (SLU - 2011/11/8)
