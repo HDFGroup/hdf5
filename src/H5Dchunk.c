@@ -3476,6 +3476,7 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     H5S_sel_iter_t chunk_iter;          /* Memory selection iteration info */
     hssize_t    sel_nelmts;             /* Number of elements in selection */
     hsize_t     count[H5O_LAYOUT_NDIMS]; /* Element count of hyperslab */
+    size_t      chunk_size;             /*size of a chunk       */
     void        *chunk;	                /* The file chunk  */
     H5D_chunk_ud_t chk_udata;           /* User data for locking chunk */
     uint32_t    bytes_accessed;         /* Bytes accessed in chunk */
@@ -3484,6 +3485,10 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_prune_fill)
+
+    /* Get the chunk's size */
+    HDassert(layout->u.chunk.size > 0);
+    H5_ASSIGN_OVERFLOW(chunk_size, layout->u.chunk.size, uint32_t, size_t);
 
     /* Get the info for the chunk in the file */
     if(H5D_chunk_lookup(dset, io_info->dxpl_id, chunk_offset,
@@ -3501,7 +3506,7 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
         if(H5D_fill_init(&udata->fb_info, NULL, NULL, NULL, NULL, NULL,
                 &dset->shared->dcpl_cache.fill,
                 dset->shared->type, dset->shared->type_id, (size_t)udata->elmts_per_chunk,
-                io_info->dxpl_cache->max_temp_buf, io_info->dxpl_id) < 0)
+                chunk_size, io_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
         udata->fb_info_init = TRUE;
     } /* end if */
