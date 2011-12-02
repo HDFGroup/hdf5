@@ -172,42 +172,9 @@ H5D_mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     HDassert(file_space);
     HDassert(type_info);
 
-    /* Global decisions.  These conditions are common to all processes and they
-     * will all arrive at the same conclusions, without requiring communication.
-     */
-
     /* For independent I/O, get out quickly and don't try to form consensus */
     if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_INDEPENDENT)
         HGOTO_DONE(FALSE);
-
-    /* Optimized MPI types flag must be set and it must be collective IO */
-    /* (Don't allow parallel I/O for the MPI-posix driver, since it doesn't do real collective I/O) */
-    /* (Global decision if all processes share the same environment, which is reasonable) */
-    if(!(H5S_mpi_opt_types_g && io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE
-            && !IS_H5FD_MPIPOSIX(io_info->dset->oloc.file)))
-        HGOTO_DONE(FALSE);
-
-    /* Dataset storage must be contiguous or chunked */
-    if(!(io_info->dset->shared->layout.type == H5D_CONTIGUOUS ||
-            io_info->dset->shared->layout.type == H5D_CHUNKED))
-        HGOTO_DONE(FALSE);
-
-    /* The handling of memory space is different for chunking and contiguous
-     *  storage.  For contiguous storage, mem_space and file_space won't change
-     *  when it it is doing disk IO.  For chunking storage, mem_space will
-     *  change for different chunks. So for chunking storage, whether we can
-     *  use collective IO will defer until each chunk IO is reached.
-     */
-
-    /* Don't allow collective operations if filters need to be applied */
-    if(io_info->dset->shared->layout.type == H5D_CHUNKED && 
-            io_info->dset->shared->dcpl_cache.pline.nused > 0)
-        HGOTO_DONE(FALSE);
-
-
-    /* Local decisions.  These conditions could be different on each process,
-     * and require communication to verify.
-     */
 
     /* Don't allow collective operations if datatype conversions need to happen */
     if(!type_info->is_conv_noop) {
@@ -217,6 +184,14 @@ H5D_mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
 
     /* Don't allow collective operations if data transform operations should occur */
     if(!type_info->is_xform_noop) {
+        local_opinion = FALSE;
+        goto broadcast;
+    } /* end if */
+
+    /* Optimized MPI types flag must be set and it must be collective IO */
+    /* (Don't allow parallel I/O for the MPI-posix driver, since it doesn't do real collective I/O) */
+    if(!(H5S_mpi_opt_types_g && io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE
+            && !IS_H5FD_MPIPOSIX(io_info->dset->oloc.file))) {
         local_opinion = FALSE;
         goto broadcast;
     } /* end if */
@@ -233,6 +208,28 @@ H5D_mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
             || H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(file_space)) {
         local_opinion = FALSE;
         goto broadcast;
+    } /* end if */
+
+    /* Dataset storage must be contiguous or chunked */
+    if(!(io_info->dset->shared->layout.type == H5D_CONTIGUOUS ||
+            io_info->dset->shared->layout.type == H5D_CHUNKED)) {
+        local_opinion = FALSE;
+        goto broadcast;
+    } /* end if */
+
+    /* The handling of memory space is different for chunking and contiguous
+     *  storage.  For contiguous storage, mem_space and file_space won't change
+     *  when it it is doing disk IO.  For chunking storage, mem_space will
+     *  change for different chunks. So for chunking storage, whether we can
+     *  use collective IO will defer until each chunk IO is reached.
+     */
+
+    /* Don't allow collective operations if filters need to be applied */
+    if(io_info->dset->shared->layout.type == H5D_CHUNKED) {
+        if(io_info->dset->shared->dcpl_cache.pline.nused > 0) {
+            local_opinion = FALSE;
+            goto broadcast;
+        } /* end if */
     } /* end if */
 
 broadcast:
