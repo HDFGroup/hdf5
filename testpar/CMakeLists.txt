@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.6)
 PROJECT (HDF5_TEST_PAR)
 
 INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
