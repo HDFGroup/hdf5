@@ -92,7 +92,8 @@ Bug Fixes since HDF5-1.8.8
 
     Configuration
     -------------
-    - None
+    - Updated all CMakeLists.txt files to indicate minimum CMake version is
+      current standard of 2.8.6 (ADB -2011/12/05 - HDFFV-7854)
 
     Library
     -------
