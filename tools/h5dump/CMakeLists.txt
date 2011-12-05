@@ -63,6 +63,7 @@ IF (BUILD_TESTING)
       tattr-1.ddl
       tattr-2.ddl
       tattr-3.ddl
+      tattr-4_be.ddl
       tattrreg.ddl
       tattrregR.ddl
       tbin1.ddl
@@ -245,6 +246,7 @@ IF (BUILD_TESTING)
       tarray8.h5
       tattr.h5
       tattr2.h5
+      tattr4_be.h5
       tattrreg.h5
       tbigdims.h5
       tbinary.h5
@@ -710,6 +712,8 @@ IF (BUILD_TESTING)
           tattr-2.out.err
           tattr-3.out
           tattr-3.out.err
+          tattr-4_be.out
+          tattr-4_be.out.err
           tattrreg.out
           tattrreg.out.err
           tattrregR.out
@@ -925,6 +929,8 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tattr-3 1 --header -a /attr2 --attribute=/attr tattr.h5)
   # test for displaying attributes in shared datatype (also in group and dataset)
   ADD_H5_TEST (tnamed_dtype_attr 0 tnamed_dtype_attr.h5)
+  # test for displaying at least 9 attributes on root from a be machine
+  ADD_H5_TEST (tattr-4_be 0 tattr4_be.h5)
 
   # test for displaying soft links and user-defined links
   ADD_H5_TEST (tslink-1 0 tslink.h5)
