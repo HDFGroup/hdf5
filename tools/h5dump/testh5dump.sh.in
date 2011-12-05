@@ -90,6 +90,7 @@ $SRC_H5DUMP_TESTFILES/tarray7.h5
 $SRC_H5DUMP_TESTFILES/tarray8.h5
 $SRC_H5DUMP_TESTFILES/tattr.h5
 $SRC_H5DUMP_TESTFILES/tattr2.h5
+$SRC_H5DUMP_TESTFILES/tattr4_be.h5
 $SRC_H5DUMP_TESTFILES/tattrreg.h5
 $SRC_H5DUMP_TESTFILES/tbigdims.h5
 $SRC_H5DUMP_TESTFILES/tbinary.h5
@@ -182,6 +183,7 @@ $SRC_H5DUMP_TESTFILES/tarray8.ddl
 $SRC_H5DUMP_TESTFILES/tattr-1.ddl
 $SRC_H5DUMP_TESTFILES/tattr-2.ddl
 $SRC_H5DUMP_TESTFILES/tattr-3.ddl
+$SRC_H5DUMP_TESTFILES/tattr-4_be.ddl
 $SRC_H5DUMP_TESTFILES/tattrreg.ddl
 $SRC_H5DUMP_TESTFILES/tattrregR.ddl
 $SRC_H5DUMP_TESTFILES/tbin1.ddl
@@ -715,6 +717,8 @@ TOOLTEST tattr-1.ddl tattr.h5
 TOOLTEST tattr-2.ddl -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5
 # test for header and error messages
 TOOLTEST tattr-3.ddl --header -a /attr2 --attribute=/attr tattr.h5
+# test for displaying at least 9 attributes on root from a BE machine
+TOOLTEST tattr-4_be.ddl tattr4_be.h5
 # test for displaying attributes in shared datatype (also in group and dataset)
 TOOLTEST tnamed_dtype_attr.ddl tnamed_dtype_attr.h5
 
