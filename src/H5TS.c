@@ -393,13 +393,22 @@ H5TS_cancel_count_dec(void)
  *--------------------------------------------------------------------------
  */
 H5TS_thread_t
-H5TS_create_thread(void * func, H5TS_attr_t * attr, void*udata)
+H5TS_create_thread(void *func, H5TS_attr_t *attr, void *udata)
 {
     H5TS_thread_t ret_value;
 
 #ifdef  H5_HAVE_WIN_THREADS 
 
-    ret_value = CreateThread(NULL, 0, func, udata, 0, NULL);
+    /* When calling C runtime functions, you have to use _beginthread or
+     * _beginthreadex instead of CreateThread.  Threads created with
+     * CreateThread risk being killed in low-memory situations.
+     * We use _beginthread instead of _begintheadex because the latter
+     * requires a stdcall function (and we don't need the more advanced
+     * features it exposes).
+     *
+     * NOTE: No error checks here!  ret_value will be -1L on errors.
+     */
+    ret_value = _beginthread(func, 0 /* stack size */, udata);
 
 #else /* H5_HAVE_WIN_THREADS */
 
