@@ -268,6 +268,7 @@ typedef struct H5D_chunk_ud_t {
 
     /* Upward */
     unsigned    idx_hint;               /*index of chunk in cache, if present */
+    hbool_t     aligned;                /*whether the chunk is aligned in memory (only set if not in cache) */
     uint32_t	nbytes;			/*size of stored data	*/
     unsigned	filter_mask;		/*excluded filters	*/
     haddr_t	addr;			/*file address of chunk */
@@ -496,6 +497,7 @@ typedef struct H5D_rdcc_ent_t {
     hbool_t	locked;		/*entry is locked in cache		*/
     hbool_t	dirty;		/*needs to be written to disk?		*/
     hbool_t     deleted;        /*chunk about to be deleted (do not flush) */
+    hbool_t     aligned;        /*chunk buffer is aligned               */
     hsize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
     uint32_t	rd_count;	/*bytes remaining to be read		*/
     uint32_t	wr_count;	/*bytes remaining to be written		*/

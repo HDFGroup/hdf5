@@ -934,7 +934,7 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id,
     H5FD_direct_t       *file = (H5FD_direct_t*)_file;
     H5P_genplist_t      *plist;                 /* Property list pointer */
     hbool_t             aligned_read = FALSE;   /* Whether we can use the simpler aligned read algorithm */
-    H5D_aligned_mem_buf_t aligned_mem_buf;      /* Last aligned memory buffer allocated */
+    H5D_aligned_mem_t   aligned_mem;            /* Aligned memory buffer information */
     ssize_t             nbytes;
     hbool_t             _must_align = TRUE;
     herr_t              ret_value=SUCCEED;      /* Return value */
@@ -991,25 +991,33 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id,
             if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
                 HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-            if(H5P_get(plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_read) < 0)
+            if(H5P_get(plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
 
-            /* Make sure that the buffer is really aligned - compare the
-             * address and size of the buffer to the last aligned buffer
-             * allocated. */
-            if(aligned_read) {
-                if(H5P_get(plist, H5D_XFER_ALIGNED_MEM_BUF_NAME,
-                        &aligned_mem_buf) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            /* Check if buffer is marked as aligned and make sure that the
+             * buffer is really aligned - compare the address and size of the
+             * buffer to that present on th dxpl. */
+            if(aligned_mem.aligned && buf == aligned_mem.buf
+                    && size == aligned_mem.size) {
+                /* Read aligned block */
+                aligned_read = TRUE;
 
-                if(buf != aligned_mem_buf.buf || size != aligned_mem_buf.size)
-                    aligned_read = FALSE;
-                else
-                    /* Read a multiple of the block size */
-                    read_size = (((size - 1) / _fbsize) + 1) * _fbsize;
+                /* Read a multiple of the block size */
+                read_size = (((size - 1) / _fbsize) + 1) * _fbsize;
             } /* end if */
         } /* end else */
     } /* end if */
+#ifndef NDEBUG
+    else if((size_t)buf % _boundary != 0) {
+        /* Make sure this buffer wasn't marked as aligned on the dxpl */
+        if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        if(H5P_get(plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+        HDassert(!(aligned_mem.aligned && buf == aligned_mem.buf
+                && size == aligned_mem.size));
+    } /* end else */
+#endif /* NDEBUG */
 
     /* if the data is aligned or the system doesn't require data to be aligned,
      * read it directly from the file.  If not, read a bigger
@@ -1163,8 +1171,7 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
     ssize_t		nbytes;
     hbool_t		_must_align = TRUE;
     int                 method = -1;            /* Which write algorithm to use */
-    hbool_t             aligned_mem;            /* Aligned memory property on dxpl */
-    H5D_aligned_mem_buf_t aligned_mem_buf;      /* Last aligned memory buffer allocated */
+    H5D_aligned_mem_t   aligned_mem;            /* Aligned memory buffer information */
     herr_t      	ret_value=SUCCEED;      /* Return value */
     size_t		alloc_size;
     void		*copy_buf = NULL, *p1;
@@ -1229,27 +1236,33 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
             if(H5P_get(plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
 
-            if(aligned_mem) {
-                /* Make sure that the buffer is really aligned - compare the
-                 * address and size of the buffer to the last aligned buffer
-                 * allocated. */
-                if(H5P_get(plist, H5D_XFER_ALIGNED_MEM_BUF_NAME,
-                        &aligned_mem_buf) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
-
-                if(buf == aligned_mem_buf.buf && size == aligned_mem_buf.size)
-                    method = 1;
-                else
-                    method = 2;
-            } /* end if */
+            /* Check if buffer is marked as aligned and make sure that the
+             * buffer is really aligned - compare the address and size of the
+             * buffer to that present on th dxpl. */
+            if(aligned_mem.aligned && buf == aligned_mem.buf
+                    && size == aligned_mem.size)
+                method = 1;
             else
                 method = 2;
         } /* end else */
     } /* end if */
-    else
+    else {
         /* Start of data is unaligned either on disk or in memory.  Use safe
          * algorithm */
         method = 2;
+
+#ifndef NDEBUG
+        if((size_t)buf % _boundary != 0) {
+            /* Make sure this buffer wasn't marked as aligned on the dxpl */
+            if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+            if(H5P_get(plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            HDassert(!(aligned_mem.aligned && buf == aligned_mem.buf
+                    && size == aligned_mem.size));
+        } /* end if */
+#endif /* NDEBUG */
+    } /* end else */
 
     /* if the data is aligned or the system doesn't require data to be aligned,
      * write it directly to the file.  If not, read a bigger and aligned data

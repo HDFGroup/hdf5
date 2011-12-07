@@ -173,7 +173,7 @@ typedef struct H5D_chunk_readvv_ud_t {
 typedef struct H5D_chunk_alloc_ud_t {
     const H5O_pline_t   *pline;         /* I/O pipeline */
     const H5F_t         *f;             /* File */
-    hid_t               dxpl_id;        /* Dataset transfer property list */
+    hbool_t             *aligned;       /* Chunk buffer is aligned */
 } H5D_chunk_alloc_ud_t;
 
 
@@ -868,7 +868,7 @@ done:
 static void *
 H5D_chunk_alloc(size_t size, const H5D_chunk_alloc_ud_t *udata)
 {
-    void *ret_value = NULL;		/* Return value */
+    void                    *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_alloc)
 
@@ -876,15 +876,20 @@ H5D_chunk_alloc(size_t size, const H5D_chunk_alloc_ud_t *udata)
     HDassert(udata);
     HDassert(udata->pline);
     HDassert(udata->f);
+    HDassert(udata->aligned);
 
-    if(H5F_HAS_FEATURE(udata->f, H5FD_FEAT_ALIGNED_MEM))
+    /* Check if we should align the buffer */
+    if(H5F_LF(udata->f)->must_align) {
         /* Add support for free lists of aligned blocks? -NAF */
-        ret_value = H5MM_aligned_malloc(size, H5F_LF(udata->f), udata->dxpl_id);
+        ret_value = H5MM_aligned_malloc(size, H5F_LF(udata->f));
+        *udata->aligned = TRUE;
+    } /* end if */
     else {
         if(udata->pline->nused > 0)
             ret_value = H5MM_malloc(size);
         else
             ret_value = H5FL_BLK_MALLOC(chunk, size);
+        *udata->aligned = FALSE;
     } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -915,8 +920,7 @@ H5D_chunk_xfree(void *chk, const H5D_chunk_alloc_ud_t *udata)
     HDassert(udata->f);
 
     if(chk) {
-        if(udata->pline->nused > 0
-                || H5F_HAS_FEATURE(udata->f, H5FD_FEAT_ALIGNED_MEM))
+        if(udata->pline->nused > 0 || H5F_LF(udata->f)->must_align)
             H5MM_xfree(chk);
         else
             chk = H5FL_BLK_FREE(chunk, chk);
@@ -952,19 +956,22 @@ H5D_chunk_realloc(void *chk, size_t old_size, size_t new_size,
     HDassert(udata);
     HDassert(udata->pline);
     HDassert(udata->f);
+    HDassert(udata->aligned);
 
-    if(H5F_HAS_FEATURE(udata->f, H5FD_FEAT_ALIGNED_MEM)) {
+    if(H5F_LF(udata->f)->must_align) {
         /* Make this smarter? avoid realloc if old_size and new_size are in the
          * same fbsize block? -NAF */
-        ret_value = H5MM_aligned_realloc(chk, old_size, new_size, H5F_LF(udata->f), udata->dxpl_id);
+        ret_value = H5MM_aligned_realloc(chk, old_size, new_size, H5F_LF(udata->f));
         HDmemcpy(ret_value, chk, old_size);
         H5MM_free(chk);
+        *udata->aligned = TRUE;
     } /* end if */
     else {
         if(udata->pline->nused > 0)
             ret_value = H5MM_realloc(chk, new_size);
         else
             ret_value = H5FL_BLK_REALLOC(chunk, chk, new_size);
+        *udata->aligned = FALSE;
     } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2288,6 +2295,7 @@ H5D_chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *chunk_offset,
     udata->common.rdcc = &(dset->shared->cache.chunk);
 
     /* Reset information about the chunk we are looking for */
+    udata->aligned = FALSE;
     udata->nbytes = 0;
     udata->filter_mask = 0;
     udata->addr = HADDR_UNDEF;
@@ -2360,6 +2368,11 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     void	*buf = NULL;	        /* Temporary buffer		*/
     hbool_t	point_of_no_return = FALSE;
     H5D_chunk_alloc_ud_t alloc_ud;      /* Information for H5D_chunk_alloc/xfree */
+    H5P_genplist_t *dx_plist = NULL;    /* Data transer property list */
+    H5D_aligned_mem_t aligned_mem;      /* Aligned memory property */
+    H5D_aligned_mem_t orig_aligned_mem; /* Original aligned memory property */
+    hbool_t     aligned_mem_set = FALSE; /* Whether the aligned memory property has been set */
+    hbool_t     must_align = H5F_LF(dset->oloc.file)->must_align; /* Whether we need to keep track of the aligned memory property */
     herr_t	ret_value = SUCCEED;	/* Return value			*/
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_chunk_flush_entry, dxpl_id, dset->oloc.addr, FAIL)
@@ -2373,7 +2386,7 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     /* Build alloc_ud */
     alloc_ud.pline = &(dset->shared->dcpl_cache.pline);
     alloc_ud.f = dset->oloc.file;
-    alloc_ud.dxpl_id = dxpl_id;
+    alloc_ud.aligned = NULL;
 
     buf = ent->chunk;
     if(ent->dirty && !ent->deleted) {
@@ -2393,6 +2406,7 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
         if(dset->shared->dcpl_cache.pline.nused) {
             size_t alloc = udata.nbytes;        /* Bytes allocated for BUF	*/
             size_t nbytes;                      /* Chunk size (in bytes) */
+            hbool_t aligned = ent->aligned;     /* Whether chunk buffer is aligned */
 
             if(!reset) {
                 /*
@@ -2401,6 +2415,7 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
                  * for later.
                  */
                 H5_ASSIGN_OVERFLOW(alloc, udata.nbytes, uint32_t, size_t);
+                alloc_ud.aligned = &aligned;
                 if(NULL == (buf = H5D_chunk_alloc(alloc, &alloc_ud)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for pipeline")
                 HDmemcpy(buf, ent->chunk, udata.nbytes);
@@ -2416,9 +2431,39 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
                 point_of_no_return = TRUE;
                 ent->chunk = NULL;
             } /* end else */
+
+            if(must_align) {
+                /* Mark the buffer as aligned on the dxpl if it is so, and
+                 * unaligned otherwise */
+                if(aligned) {
+                    aligned_mem.aligned = TRUE;
+                    aligned_mem.buf = buf;
+                    aligned_mem.size = udata.nbytes;
+                } /* end if */
+                else {
+                    aligned_mem.aligned = FALSE;
+                    aligned_mem.buf = NULL;
+                    aligned_mem.size = 0;
+                } /* end if */
+
+                /* Get the dataset transfer property list */
+                if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+
+                /* Get the original aligned memory property, so we can reset it
+                 * afterwards */
+                if(H5P_get(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &orig_aligned_mem) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+                /* Set the aligned memory property */
+                if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+                aligned_mem_set = TRUE;
+            } /* end if */
+
             H5_ASSIGN_OVERFLOW(nbytes, udata.nbytes, uint32_t, size_t);
             if(H5Z_pipeline(&(dset->shared->dcpl_cache.pline), 0, &(udata.filter_mask), dxpl_cache->err_detect,
-                     dxpl_cache->filter_cb, &nbytes, &alloc, &buf, dset->oloc.file, dxpl_id) < 0)
+                     dxpl_cache->filter_cb, &nbytes, &alloc, &buf, must_align, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
 #if H5_SIZEOF_SIZE_T > 4
             /* Check for the chunk expanding too much to encode in a 32-bit value */
@@ -2430,9 +2475,40 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
             /* Indicate that the chunk must go through 'insert' method */
             must_insert = TRUE;
         } /* end if */
-        else if(!H5F_addr_defined(udata.addr))
-            /* Indicate that the chunk must go through 'insert' method */
-            must_insert = TRUE;
+        else {
+            if(!H5F_addr_defined(udata.addr))
+                /* Indicate that the chunk must go through 'insert' method */
+                must_insert = TRUE;
+
+            if(must_align) {
+                /* Mark the buffer as aligned on the dxpl if it is so, and
+                 * unaligned otherwise */
+                if(ent->aligned) {
+                    aligned_mem.aligned = TRUE;
+                    aligned_mem.buf = buf;
+                    aligned_mem.size = udata.nbytes;
+                } /* end if */
+                else {
+                    aligned_mem.aligned = FALSE;
+                    aligned_mem.buf = NULL;
+                    aligned_mem.size = 0;
+                } /* end if */
+
+                /* Get the dataset transfer property list */
+                if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+
+                /* Get the original aligned memory property, so we can reset it
+                 * afterwards */
+                if(H5P_get(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &orig_aligned_mem) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+                /* Set the aligned memory property */
+                if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+                aligned_mem_set = TRUE;
+            } /* end if */
+        } /* end else */
 
         /* Check if the chunk needs to be 'inserted' (could exist already and
          *      the 'insert' operation could resize it)
@@ -2461,6 +2537,14 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
         HDassert(H5F_addr_defined(udata.addr));
         if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.addr, udata.nbytes, dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
+
+        /* Reset the aligned memory property */
+        if(aligned_mem_set) {
+            HDassert(dx_plist);
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &orig_aligned_mem) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+            aligned_mem_set = FALSE;
+        } /* end if */
 
         /* Cache the chunk's info, in case it's accessed again shortly */
         H5D_chunk_cinfo_cache_update(&dset->shared->cache.chunk.last, &udata);
@@ -2495,6 +2579,14 @@ done:
     if(ret_value < 0 && point_of_no_return) {
         if(ent->chunk)
             ent->chunk = (uint8_t *)H5D_chunk_xfree(ent->chunk, &alloc_ud);
+    } /* end if */
+
+    /* Reset the aligned memory property */
+    if(aligned_mem_set) {
+        HDassert(ret_value < 0);
+        HDassert(dx_plist);
+        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &orig_aligned_mem) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
     } /* end if */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
@@ -2533,7 +2625,7 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     /* Build alloc_ud */
     alloc_ud.pline = &(dset->shared->dcpl_cache.pline);
     alloc_ud.f = dset->oloc.file;
-    alloc_ud.dxpl_id = dxpl_id;
+    alloc_ud.aligned = NULL;
 
     if(flush) {
 	/* Flush */
@@ -2720,6 +2812,11 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     haddr_t             chunk_addr = HADDR_UNDEF; /* Address of chunk on disk */
     size_t		chunk_size;		/*size of a chunk	*/
     void		*chunk = NULL;		/*the file chunk	*/
+    H5P_genplist_t      *dx_plist = NULL;       /* Data transer property list */
+    H5D_aligned_mem_t   aligned_mem = {FALSE, NULL, 0}; /* Aligned memory */
+    H5D_aligned_mem_t   orig_aligned_mem;       /* Original aligned memory property */
+    hbool_t             aligned_mem_set = FALSE; /* Whether the aligned memory property has been set */
+    hbool_t             must_align = H5F_LF(dset->oloc.file)->must_align; /* Whether we need to keep track of the aligned memory property */
     unsigned		u;			/*counters		*/
     void		*ret_value;	        /*return value		*/
 
@@ -2735,7 +2832,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     /* Build alloc_ud */
     alloc_ud.pline = &(dset->shared->dcpl_cache.pline);
     alloc_ud.f = dset->oloc.file;
-    alloc_ud.dxpl_id = io_info->dxpl_id;
+    alloc_ud.aligned = &aligned_mem.aligned;
 
     /* Get the chunk's size */
     HDassert(layout->u.chunk.size > 0);
@@ -2755,29 +2852,6 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
         for(u = 0; u < layout->u.chunk.ndims; u++)
             HDassert(io_info->store->chunk.offset[u] == ent->offset[u]);
 #endif /* NDEBUG */
-
-        /* If using a driver that uses aligned buffers, the chunk must have been
-         * allocated in an aligned manner, so set the aligned memory property */
-        if(H5F_HAS_FEATURE(alloc_ud.f, H5FD_FEAT_ALIGNED_MEM)) {
-            H5P_genplist_t          *dx_plist = NULL;   /* Data transer property list */
-            hbool_t                 aligned_mem = TRUE; /* Aligned memory */
-            H5D_aligned_mem_buf_t   aligned_mem_buf;    /* Aligned memory buffer */
-
-            /* Get the dataset transfer property list */
-            if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(alloc_ud.dxpl_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataset creation property list")
-
-            /* Set the aligned memory property */
-            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
-
-            /* Set the aligned memory buffer property */
-            aligned_mem_buf.buf = ent->chunk;
-            aligned_mem_buf.size = chunk_size;
-            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_BUF_NAME,
-                    &aligned_mem_buf) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
-        } /* end if */
 
         /*
          * Already in the cache.  Count a hit.
@@ -2821,14 +2895,60 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
             H5_ASSIGN_OVERFLOW(chunk_alloc, udata->nbytes, uint32_t, size_t);
             if(NULL == (chunk = H5D_chunk_alloc(chunk_alloc, &alloc_ud)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
+
+            /* Set the aligned memory property properly if it may be retrieved
+             * (by H5F_block_read) or manipulated (by H5Z_pipeline) */
+            if(must_align) {
+                /* Mark the buffer as aligned on the dxpl if it is so, and
+                 * unaligned otherwise */
+                if(aligned_mem.aligned) {
+                    aligned_mem.buf = chunk;
+                    aligned_mem.size = chunk_alloc;
+                } /* end if */
+                else {
+                    aligned_mem.aligned = FALSE;
+                    aligned_mem.buf = NULL;
+                    aligned_mem.size = 0;
+                } /* end if */
+
+                /* Get the dataset transfer property list */
+                if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(io_info->dxpl_id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataset creation property list")
+
+                /* Get the original aligned memory property, so we can reset it
+                 * afterwards */
+                if(H5P_get(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &orig_aligned_mem) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get value")
+
+                /* Set the aligned memory property */
+                if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
+                aligned_mem_set = TRUE;
+            } /* end if */
+
             if(H5F_block_read(dset->oloc.file, H5FD_MEM_DRAW, chunk_addr, chunk_alloc, io_info->dxpl_id, chunk) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk")
 
             if(alloc_ud.pline->nused) {
                 if(H5Z_pipeline(alloc_ud.pline, H5Z_FLAG_REVERSE, &(udata->filter_mask), io_info->dxpl_cache->err_detect,
-                        io_info->dxpl_cache->filter_cb, &chunk_alloc, &chunk_alloc, &chunk, dset->oloc.file, io_info->dxpl_id) < 0)
+                        io_info->dxpl_cache->filter_cb, &chunk_alloc, &chunk_alloc, &chunk, must_align, io_info->dxpl_id) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, NULL, "data pipeline read failed")
                 H5_ASSIGN_OVERFLOW(udata->nbytes, chunk_alloc, size_t, uint32_t);
+
+                /* Get the aligned memory property, in case H5Z_pipeline changed
+                 * it */
+                if(aligned_mem_set)
+                    if(H5P_get(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get value")
+            } /* end if */
+
+            /* Reset the aligned memory property (we will keep the value in
+             * aligned_mem around for setting the entry flag later) */
+            if(aligned_mem_set) {
+                HDassert(dx_plist);
+                if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &orig_aligned_mem) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
+                aligned_mem_set = FALSE;
             } /* end if */
 
             /* Increment # of cache misses */
@@ -2922,6 +3042,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
             ent->locked = 0;
             ent->dirty = FALSE;
             ent->deleted = FALSE;
+            ent->aligned = aligned_mem.aligned;
             ent->chunk_addr = chunk_addr;
             for(u = 0; u < layout->u.chunk.ndims; u++)
                 ent->offset[u] = io_info->store->chunk.offset[u];
@@ -2953,13 +3074,15 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
             ent = NULL;
     } /* end else */
 
-    if(!ent)
+    if(!ent) {
         /*
          * The chunk cannot be placed in cache so we don't cache it. This is the
          * reason all those arguments have to be repeated for the unlock
          * function.
          */
         udata->idx_hint = UINT_MAX;
+        udata->aligned = aligned_mem.aligned;
+    } /* end if */
 
     /* Lock the chunk into the cache */
     if(ent) {
@@ -2976,10 +3099,22 @@ done:
     if(fb_info_init && H5D_fill_term(&fb_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't release fill buffer info")
 
-    /* Release the chunk allocated, on error */
-    if(!ret_value)
+    if(!ret_value) {
+        /* Release the chunk allocated, on error */
         if(chunk)
             chunk = H5D_chunk_xfree(chunk, &alloc_ud);
+
+        /* Reset the aligned memory property */
+        if(aligned_mem_set) {
+            HDassert(dx_plist);
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &orig_aligned_mem) < 0)
+                HDONE_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
+        } /* end if */
+    } /* end if */
+    else
+        /* aligned_mem_set should always be FALSE by this point unless there was
+         * an error */
+        HDassert(!aligned_mem_set);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_lock() */
@@ -3024,7 +3159,7 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
     /* Build alloc_ud */
     alloc_ud.pline = &(io_info->dset->shared->dcpl_cache.pline);
     alloc_ud.f = io_info->dset->oloc.file;
-    alloc_ud.dxpl_id = io_info->dxpl_id;
+    alloc_ud.aligned = NULL;
 
     if(UINT_MAX == udata->idx_hint) {
         /*
@@ -3038,6 +3173,7 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
 
             HDmemset(&fake_ent, 0, sizeof(fake_ent));
             fake_ent.dirty = TRUE;
+            fake_ent.aligned = udata->aligned;
             HDmemcpy(fake_ent.offset, io_info->store->chunk.offset, layout->u.chunk.ndims * sizeof(fake_ent.offset[0]));
             HDassert(layout->u.chunk.size > 0);
             fake_ent.chunk_addr = udata->addr;
@@ -3191,6 +3327,10 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
     size_t	orig_chunk_size; /* Original size of chunk in bytes */
     unsigned    filter_mask = 0; /* Filter mask for chunks that have them */
     H5D_chunk_alloc_ud_t alloc_ud;      /* Information for H5D_chunk_alloc/xfree */
+    H5D_aligned_mem_t aligned_mem = {FALSE, NULL, 0}; /* Aligned memory */
+    H5D_aligned_mem_t orig_aligned_mem; /* Original aligned memory property */
+    hbool_t     aligned_mem_set = FALSE; /* Whether the aligned memory property has been set */
+    hbool_t     must_align = H5F_LF(dset->oloc.file)->must_align; /* Whether we need to keep track of the aligned memory property */
     const H5O_layout_t *layout = &(dset->shared->layout);       /* Dataset layout */
     const H5O_pline_t *pline = &(dset->shared->dcpl_cache.pline);    /* I/O pipeline info */
     const H5O_fill_t *fill = &(dset->shared->dcpl_cache.fill);    /* Fill value info */
@@ -3213,6 +3353,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
     H5D_fill_buf_info_t fb_info;        /* Dataset's fill buffer info */
     hbool_t     fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
     hid_t       data_dxpl_id;           /* DXPL ID to use for raw data I/O operations */
+    H5P_genplist_t *dx_plist = NULL;    /* Data transer property list */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5D_chunk_allocate, dxpl_id, dset->oloc.addr, FAIL)
@@ -3270,7 +3411,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
     /* Build alloc_ud */
     alloc_ud.pline = pline;
     alloc_ud.f = dset->oloc.file;
-    alloc_ud.dxpl_id = data_dxpl_id;
+    alloc_ud.aligned = &aligned_mem.aligned;
 
     /* Fill the DXPL cache values for later use */
     if(H5D_get_dxpl_cache(data_dxpl_id, &dxpl_cache) < 0)
@@ -3306,6 +3447,35 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
         fb_info_init = TRUE;
 
+        /* Set the aligned memory property properly */
+        if(must_align) {
+            /* Mark the buffer as aligned on the dxpl if it is so, and
+                * unaligned otherwise */
+            if(aligned_mem.aligned) {
+                aligned_mem.buf = fb_info.fill_buf;
+                aligned_mem.size = orig_chunk_size;
+            } /* end if */
+            else {
+                aligned_mem.aligned = FALSE;
+                aligned_mem.buf = NULL;
+                aligned_mem.size = 0;
+            } /* end if */
+
+            /* Get the dataset transfer property list */
+            if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(data_dxpl_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+
+            /* Get the original aligned memory property, so we can reset it
+                * afterwards */
+            if(H5P_get(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &orig_aligned_mem) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+            /* Set the aligned memory property */
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+            aligned_mem_set = TRUE;
+        } /* end if */
+
         /* Check if there are filters which need to be applied to the chunk */
         /* (only do this in advance when the chunk info can be re-used (i.e.
          *      it doesn't contain any non-default VL datatype fill values)
@@ -3314,7 +3484,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             size_t buf_size = orig_chunk_size;
 
             /* Push the chunk through the filters */
-            if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &orig_chunk_size, &buf_size, &fb_info.fill_buf, dset->oloc.file, data_dxpl_id) < 0)
+            if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &orig_chunk_size, &buf_size, &fb_info.fill_buf, must_align, data_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
 #if H5_SIZEOF_SIZE_T > 4
             /* Check for the chunk expanding too much to encode in a 32-bit value */
@@ -3425,6 +3595,28 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                     fb_info.fill_buf_size = orig_chunk_size;
                 } /* end if */
 
+                /* Set the aligned memory property properly */
+                if(must_align) {
+                    HDassert(aligned_mem_set);
+                    HDassert(dx_plist);
+
+                    /* Mark the buffer as aligned on the dxpl if it is so, and
+                        * unaligned otherwise */
+                    if(aligned_mem.aligned) {
+                        aligned_mem.buf = fb_info.fill_buf;
+                        aligned_mem.size = orig_chunk_size;
+                    } /* end if */
+                    else {
+                        aligned_mem.aligned = FALSE;
+                        aligned_mem.buf = NULL;
+                        aligned_mem.size = 0;
+                    } /* end if */
+
+                    /* Set the aligned memory property */
+                    if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+                } /* end if */
+
                 /* Fill the buffer with VL datatype fill values */
                 if(H5D_fill_refill_vl(&fb_info, fb_info.elmts_per_buf, data_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer")
@@ -3434,7 +3626,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                     size_t nbytes = orig_chunk_size;
 
                     /* Push the chunk through the filters */
-                    if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &nbytes, &fb_info.fill_buf_size, &fb_info.fill_buf, dset->oloc.file, data_dxpl_id) < 0)
+                    if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &nbytes, &fb_info.fill_buf_size, &fb_info.fill_buf, must_align, data_dxpl_id) < 0)
                         HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
 
 #if H5_SIZEOF_SIZE_T > 4
@@ -3534,6 +3726,13 @@ done:
     /* Release the fill buffer info, if it's been initialized */
     if(fb_info_init && H5D_fill_term(&fb_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+
+    /* Reset the aligned memory property */
+    if(aligned_mem_set) {
+        HDassert(dx_plist);
+        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &orig_aligned_mem) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+    } /* end if */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D_chunk_allocate() */
@@ -4404,7 +4603,7 @@ H5D_chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     if(has_filters && (is_vlen || fix_ref)) {
         unsigned filter_mask = chunk_rec->filter_mask;
 
-        if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, cb_struct, &nbytes, &buf_size, &buf, udata->file_src, udata->idx_info_dst->dxpl_id) < 0)
+        if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, cb_struct, &nbytes, &buf_size, &buf, FALSE, udata->idx_info_dst->dxpl_id) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "data pipeline read failed")
     } /* end if */
 
@@ -4467,7 +4666,7 @@ H5D_chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     /* Need to compress variable-length & reference data elements before writing to file */
     if(has_filters && (is_vlen || fix_ref) ) {
-        if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), H5Z_NO_EDC, cb_struct, &nbytes, &buf_size, &buf, udata->idx_info_dst->f, udata->idx_info_dst->dxpl_id) < 0)
+        if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), H5Z_NO_EDC, cb_struct, &nbytes, &buf_size, &buf, FALSE, udata->idx_info_dst->dxpl_id) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
 #if H5_SIZEOF_SIZE_T > 4
         /* Check for the chunk expanding too much to encode in a 32-bit value */

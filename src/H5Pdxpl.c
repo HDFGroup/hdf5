@@ -89,10 +89,8 @@
 #define H5D_XFER_HYPER_VECTOR_SIZE_SIZE       sizeof(size_t)
 #define H5D_XFER_HYPER_VECTOR_SIZE_DEF        H5D_IO_VECTOR_SIZE
 /* Definitions for aligned memory property */
-#define H5D_XFER_ALIGNED_MEM_SIZE       sizeof(hbool_t)
-#define H5D_XFER_ALIGNED_MEM_DEF        FALSE
-/* Definitions for aligned memory property (default in H5Dprivate.h) */
-#define H5D_XFER_ALIGNED_MEM_BUF_SIZE       sizeof(H5D_aligned_mem_buf_t)
+#define H5D_XFER_ALIGNED_MEM_SIZE       sizeof(H5D_aligned_mem_t)
+#define H5D_XFER_ALIGNED_MEM_DEF        {FALSE, NULL, 0}
 /* Definitions for I/O transfer mode property */
 #define H5D_XFER_IO_XFER_MODE_SIZE       sizeof(H5FD_mpio_xfer_t)
 #define H5D_XFER_IO_XFER_MODE_DEF        H5FD_MPIO_INDEPENDENT
@@ -204,7 +202,7 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
     void *def_vfl_info = H5D_XFER_VFL_INFO_DEF;                 /* Default value for file driver info */
     size_t def_hyp_vec_size = H5D_XFER_HYPER_VECTOR_SIZE_DEF;   /* Default value for vector size */
     hbool_t def_aligned_mem = H5D_XFER_ALIGNED_MEM_DEF;         /* Default value for aligned memory */
-    H5D_aligned_mem_buf_t def_aligned_mem_buf = H5D_XFER_ALIGNED_MEM_BUF_DEF; /* Default value for aligned memory buffer */
+    H5D_aligned_mem_t def_aligned_mem_buf = H5D_XFER_ALIGNED_MEM_DEF; /* Default value for aligned memory buffer */
     haddr_t metadata_tag = H5AC_METADATA_TAG_DEF;              /* Default value for metadata tag */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t def_io_xfer_mode = H5D_XFER_IO_XFER_MODE_DEF;      /* Default value for I/O transfer mode */
@@ -276,10 +274,6 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the aligned memory property */
     if(H5P_register_real(pclass, H5D_XFER_ALIGNED_MEM_NAME, H5D_XFER_ALIGNED_MEM_SIZE, &def_aligned_mem, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the aligned memory buffer property */
-    if(H5P_register_real(pclass, H5D_XFER_ALIGNED_MEM_BUF_NAME, H5D_XFER_ALIGNED_MEM_BUF_SIZE, &def_aligned_mem_buf, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 #ifdef H5_HAVE_PARALLEL

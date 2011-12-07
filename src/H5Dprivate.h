@@ -67,8 +67,6 @@
 #define H5D_XFER_VFL_INFO_NAME          "vfl_info"      /* File driver info */
 #define H5D_XFER_HYPER_VECTOR_SIZE_NAME "vec_size"      /* Hyperslab vector size */
 #define H5D_XFER_ALIGNED_MEM_NAME       "aligned_mem"   /* Whether the buffer is aligned */
-#define H5D_XFER_ALIGNED_MEM_BUF_NAME   "aligned_mem_buf" /* Aligned buffer */
-#define H5D_XFER_ALIGNED_MEM_BUF_DEF    {NULL, 0}       /* Aligned buffer default */
 #ifdef H5_HAVE_PARALLEL
 #define H5D_XFER_IO_XFER_MODE_NAME      "io_xfer_mode"  /* I/O transfer mode */
 #define H5D_XFER_MPIO_COLLECTIVE_OPT_NAME "mpio_collective_opt" /* Optimization of MPI-IO transfer mode */
@@ -152,10 +150,11 @@ typedef struct H5D_copy_file_ud_t {
 /* Structure for storing the last allocated aligned memory buffer, for direct
  * I/O.  The "size" here refers to the size of the used data: the actual buffer
  * may be larger. */
-typedef struct H5D_aligned_mem_buf_t {
+typedef struct H5D_aligned_mem_t {
+    hbool_t aligned;
     const void *buf;
     size_t size;
-} H5D_aligned_mem_buf_t;
+} H5D_aligned_mem_t;
 
 
 /*****************************/
