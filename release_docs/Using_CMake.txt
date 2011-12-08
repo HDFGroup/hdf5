@@ -35,7 +35,7 @@ Notes: This short instruction is written for users who want to quickly build
 ========================================================================                          
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.8.x product requires CMake version 2.8.4.                     
+      web site. The HDF5 1.8.x product requires CMake version 2.8.6.                     
                                                                          
    2. You have installed the HDF5 library built with CMake. If you are
       using a Windows platform, you can obtain a pre-built Windows binary

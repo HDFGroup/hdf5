@@ -333,7 +333,7 @@ typedef struct H5O_addr_map_t {
     haddr_t     dst_addr;               /* Address of object in destination file */
     hbool_t     is_locked;              /* Indicate that the destination object is locked currently */
     hsize_t     inc_ref_count;          /* Number of deferred increments to reference count */
-    H5O_obj_class_t *obj_class;         /* Object class */
+    const H5O_obj_class_t *obj_class;   /* Object class */
     void        *udata;                 /* Object class copy file udata */
 } H5O_addr_map_t;
 
@@ -587,7 +587,9 @@ H5_DLL herr_t H5O_shared_link(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 H5_DLL herr_t H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst,
     const H5O_msg_class_t *mesg_type, const void *_native_src, void *_native_dst,
     hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
-H5_DLL herr_t H5O_shared_post_copy_file (H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *mesg);
+H5_DLL herr_t H5O_shared_post_copy_file (H5F_t *f,
+    const H5O_msg_class_t *mesg_type, const H5O_shared_t *shared_src,
+    H5O_shared_t *shared_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);
 H5_DLL herr_t H5O_shared_debug(const H5O_shared_t *mesg, FILE *stream,
     int indent, int fwidth);
 

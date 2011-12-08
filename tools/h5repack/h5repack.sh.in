@@ -230,7 +230,7 @@ VERIFY_LAYOUT_DSET()
     #---------------------------------
     # check the layout from a dataset
     VERIFY  "Layout"
-    $H5DUMP_BIN -d $dset -pH $outfile > $layoutfile
+    $RUNSERIAL $H5DUMP_BIN -d $dset -pH $outfile > $layoutfile
     $GREP $expectlayout $layoutfile > /dev/null
     if [ $? -eq 0 ]; then
         echo " PASSED"
@@ -257,7 +257,7 @@ VERIFY_LAYOUT_ALL()
     VERIFY  "Layout "
         # if CONTIGUOUS
         if [ $expectlayout = "CONTIGUOUS" ]; then
-            $H5DUMP_BIN -pH $outfile > $layoutfile
+            $RUNSERIAL $H5DUMP_BIN -pH $outfile > $layoutfile
             $GREP "COMPACT" $layoutfile  > /dev/null
             if [ $? -eq 0 ]; then
                 echo " FAILED"
@@ -272,7 +272,7 @@ VERIFY_LAYOUT_ALL()
         else    
             # if COMPACT
             if [ $expectlayout = "COMPACT" ]; then
-                $H5DUMP_BIN -pH $outfile > $layoutfile
+                $RUNSERIAL $H5DUMP_BIN -pH $outfile > $layoutfile
                 $GREP "CHUNKED" $layoutfile  > /dev/null
                 if [ $? -eq 0 ]; then
                     echo " FAILED"
@@ -287,7 +287,7 @@ VERIFY_LAYOUT_ALL()
             else
                 # if CHUNKED
                 if [ $expectlayout = "CHUNKED" ]; then
-                    $H5DUMP_BIN -pH $outfile > $layoutfile
+                    $RUNSERIAL $H5DUMP_BIN -pH $outfile > $layoutfile
                     $GREP "CONTIGUOUS" $layoutfile  > /dev/null
                     if [ $? -eq 0 ]; then
                         echo " FAILED"

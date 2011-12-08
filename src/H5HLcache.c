@@ -134,9 +134,10 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_fl_deserialize(H5HL_t *heap, hsize_t free_block)
+H5HL_fl_deserialize(H5HL_t *heap)
 {
     H5HL_free_t *fl = NULL, *tail = NULL;      /* Heap free block nodes */
+    hsize_t free_block;                 /* Offset of free block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HL_fl_deserialize)
@@ -146,6 +147,7 @@ H5HL_fl_deserialize(H5HL_t *heap, hsize_t free_block)
     HDassert(!heap->freelist);
 
     /* Build free list */
+    free_block = heap->free_block;
     while(H5HL_FREE_NULL != free_block) {
         const uint8_t *p;               /* Pointer into image buffer */
 
@@ -310,8 +312,8 @@ H5HL_prefix_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     H5F_DECODE_LENGTH_LEN(p, heap->dblk_size, udata->sizeof_size);
 
     /* Free list head */
-    H5F_DECODE_LENGTH_LEN(p, udata->free_block, udata->sizeof_size);
-    if(udata->free_block != H5HL_FREE_NULL && udata->free_block >= heap->dblk_size)
+    H5F_DECODE_LENGTH_LEN(p, heap->free_block, udata->sizeof_size);
+    if(heap->free_block != H5HL_FREE_NULL && heap->free_block >= heap->dblk_size)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad heap free list")
 
     /* Heap data address */
@@ -345,16 +347,13 @@ H5HL_prefix_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
             } /* end else */
 
             /* Build free list */
-            if(H5HL_fl_deserialize(heap, udata->free_block) < 0)
+            if(H5HL_fl_deserialize(heap) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize free list")
         } /* end if */
         else
             /* Note that the heap should _NOT_ be a single object in the cache */
             heap->single_cache_obj = FALSE;
     } /* end if */
-
-    /* Set flag to indicate prefix from loaded from file */
-    udata->loaded = TRUE;
 
     /* Set return value */
     ret_value = prfx;
@@ -408,7 +407,6 @@ H5HL_prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 
     if(prfx->cache_info.is_dirty) {
         H5HL_t *heap = prfx->heap; /* Pointer to the local heap */
-        H5HL_free_t *fl = heap->freelist; /* Pointer to heap's free list */
         uint8_t *buf;           /* Pointer to heap buffer */
         size_t buf_size;        /* Size of buffer for encoding & writing heap info */
         uint8_t *p;             /* Pointer into raw data buffer */
@@ -426,6 +424,9 @@ H5HL_prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         if(NULL == (buf = (uint8_t *)H5WB_actual(wb, buf_size)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
+        /* Update the free block value from the free list */
+        heap->free_block = heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL;
+
         /* Serialize the heap prefix */
         p = buf;
         HDmemcpy(p, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -435,18 +436,18 @@ H5HL_prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         *p++ = 0;	/*reserved*/
         *p++ = 0;	/*reserved*/
         H5F_ENCODE_LENGTH_LEN(p, heap->dblk_size, heap->sizeof_size);
-        H5F_ENCODE_LENGTH_LEN(p, fl ? fl->offset : H5HL_FREE_NULL, heap->sizeof_size);
+        H5F_ENCODE_LENGTH_LEN(p, heap->free_block, heap->sizeof_size);
         H5F_addr_encode_len(heap->sizeof_addr, &p, heap->dblk_addr);
 
         /* Check if the local heap is a single object in cache */
         if(heap->single_cache_obj) {
-            if((p - buf) < heap->prfx_size) {
+            if((size_t)(p - buf) < heap->prfx_size) {
                 size_t gap;         /* Size of gap between prefix and data block */
 
                 /* Set p to the start of the data block.  This is necessary because
                  * there may be a gap between the used portion of the prefix and the
                  * data block due to alignment constraints. */
-                gap = heap->prfx_size - (p - buf);
+                gap = heap->prfx_size - (size_t)(p - buf);
                 HDmemset(p, 0, gap);
                 p += gap;
             } /* end if */
@@ -654,7 +655,7 @@ H5HL_datablock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
             HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read local heap data block")
 
         /* Build free list */
-        if(H5HL_fl_deserialize(udata->heap, udata->free_block) < 0)
+        if(H5HL_fl_deserialize(udata->heap) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize free list")
     } /* end if */
 
@@ -706,6 +707,9 @@ H5HL_datablock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 
     if(dblk->cache_info.is_dirty) {
         H5HL_t *heap = dblk->heap;      /* Pointer to the local heap */
+
+        /* Update the free block value from the free list */
+        heap->free_block = heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL;
 
         /* Serialize the free list into the heap data's image */
         H5HL_fl_serialize(heap);

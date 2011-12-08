@@ -1319,7 +1319,9 @@
 ./tools/testfiles/tattr-1.ddl
 ./tools/testfiles/tattr-2.ddl
 ./tools/testfiles/tattr-3.ddl
+./tools/testfiles/tattr-4_be.ddl
 ./tools/testfiles/tattr.h5
+./tools/testfiles/tattr4_be.h5
 ./tools/testfiles/tattrreg.h5
 ./tools/testfiles/tattrreg.ddl 
 ./tools/testfiles/tattrregR.ddl 
@@ -2186,6 +2188,7 @@
 ./config/cmake/hdf5-config.cmake.install.in
 ./config/cmake/hdf5-config-version.cmake.in
 ./config/cmake/HDFMacros.cmake
+./config/cmake/HDFLibMacros.cmake
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/libhdf5.settings.cmake.in

@@ -536,10 +536,10 @@ H5AC_create(const H5F_t *f,
             sprintf(prefix, "%d:", mpi_rank);
 
             if(mpi_rank == 0) {
-                if(NULL == (aux_ptr->d_slist_ptr = H5SL_create(H5SL_TYPE_HADDR)))
+                if(NULL == (aux_ptr->d_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create dirtied entry list.")
 
-                if(NULL == (aux_ptr->c_slist_ptr = H5SL_create(H5SL_TYPE_HADDR)))
+                if(NULL == (aux_ptr->c_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create cleaned entry list.")
             } /* end if */
 
@@ -547,7 +547,7 @@ H5AC_create(const H5F_t *f,
  	     * when the distributed strategy is selected as all processes
  	     * will use it in the case of a flush.
              */
-            if(NULL == (aux_ptr->candidate_slist_ptr = H5SL_create(H5SL_TYPE_HADDR)))
+            if(NULL == (aux_ptr->candidate_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create candidate entry list.")
         } /* end if */
 

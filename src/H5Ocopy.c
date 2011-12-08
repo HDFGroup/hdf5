@@ -293,6 +293,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     unsigned               mesgno = 0;
     haddr_t                addr_new = HADDR_UNDEF;
     hbool_t                *deleted = NULL;      /* Array of flags indicating whether messages should be copied */
+    hbool_t                inserted = FALSE;        /* Whether the destination object header has been inserted into the cache */
     size_t                 null_msgs;               /* Number of NULL messages found in each loop */
     size_t                 orig_dst_msgs;           /* Original # of messages in dest. object */
     H5O_mesg_t             *mesg_src;               /* Message in source object header */
@@ -370,9 +371,9 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Allocate memory for "deleted" array.  This array marks the message in
      * the source that shouldn't be copied to the destination.
      */
-     if(NULL == (deleted = (hbool_t *)HDmalloc(sizeof(hbool_t) * oh_src->nmesgs)))
+    if(NULL == (deleted = (hbool_t *)HDmalloc(sizeof(hbool_t) * oh_src->nmesgs)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-     HDmemset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
+    HDmemset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
 
     /* "pre copy" pass over messages, to gather information for actual message copy operation
      * (for messages which depend on information from other messages)
@@ -745,6 +746,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     if(H5AC_insert_entry(oloc_dst->file, dxpl_id, H5AC_OHDR, oloc_dst->addr, oh_dst, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
     oh_dst = NULL;
+    inserted = TRUE;
 
     /* Reset metadat tag */
     H5_END_TAG(FAIL);
@@ -769,9 +771,13 @@ done:
     if(oh_src && H5O_unprotect(oloc_src, dxpl_id, oh_src, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
-    /* Release pointer to destination object header */
-    if(ret_value < 0 && oh_dst && H5O_free(oh_dst) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
+    /* Free destination object header on failure */
+    if(ret_value < 0 && oh_dst && !inserted) {
+        if(H5O_free(oh_dst) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
+        if(H5O_loc_reset(oloc_dst) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
+    } /* end if */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5O_copy_header_real() */
@@ -964,7 +970,7 @@ H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         cpy_info.preserve_null = TRUE;
 
     /* Create a skip list to keep track of which objects are copied */
-    if((cpy_info.map_list = H5SL_create(H5SL_TYPE_OBJ)) == NULL)
+    if((cpy_info.map_list = H5SL_create(H5SL_TYPE_OBJ, NULL)) == NULL)
         HGOTO_ERROR(H5E_SLIST, H5E_CANTCREATE, FAIL, "cannot make skip list")
 
     /* copy the object from the source file to the destination file */

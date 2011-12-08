@@ -26,13 +26,11 @@ const char *FILENAME[] = {
 };
 
 typedef enum {
-    E1_ERROR = -1,
-    E1_RED   = 0,
-    E1_GREEN = 1,
-    E1_BLUE  = 2,
-    E1_WHITE = 3,
-    E1_BLACK = 4,
-    E1_NO_COLOR
+    E1_RED,
+    E1_GREEN,
+    E1_BLUE,
+    E1_WHITE,
+    E1_BLACK
 } c_e1;
 
 
@@ -121,14 +119,6 @@ test_named(hid_t file)
  *
  * Programmer:	Robb Matzke
  *              Monday, January  4, 1999
- *
- * Modifications:
- *              Raymond Lu
- *              26 May 2011
- *              I added a few overflowing values (beyond the range of enumerate
- *              values) to make sure the library retains these values.  The 
- *              test for overflowing values when conversion happens is in the 
- *              test_conv_enum_2() of dtypes.c.
  *-------------------------------------------------------------------------
  */
 static int
@@ -139,8 +129,7 @@ test_noconv(hid_t file)
     static c_e1	data1[]={E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
 			 E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED,
 			 E1_RED,   E1_BLUE,  E1_GREEN, E1_BLACK, E1_WHITE,
-			 E1_RED,   E1_WHITE, E1_GREEN, E1_GREEN, E1_BLUE,
-                         E1_ERROR, E1_ERROR, E1_NO_COLOR, E1_NO_COLOR, E1_NO_COLOR};
+			 E1_RED,   E1_WHITE, E1_GREEN, E1_GREEN, E1_BLUE};
     c_e1	data2[NELMTS(data1)];
     hsize_t	ds_size[1]={NELMTS(data1)};
     size_t	i;

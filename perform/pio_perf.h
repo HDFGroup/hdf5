@@ -16,7 +16,6 @@
 #ifndef PIO_PERF_H__
 #define PIO_PERF_H__
 
-#include "pio_timer.h"
 #ifndef STANDALONE
 #include "H5private.h"
 #include "h5test.h"
@@ -24,6 +23,7 @@
 #else
 #include "pio_standalone.h"
 #endif
+#include "pio_timer.h"
 
 /* setup the dataset no fill option if this is v1.5 or more */
 #if H5_VERS_MAJOR > 1 || H5_VERS_MINOR > 4

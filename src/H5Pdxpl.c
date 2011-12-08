@@ -103,18 +103,21 @@
 #define H5D_XFER_MPIO_CHUNK_OPT_NUM_DEF         H5D_ONE_LINK_CHUNK_IO_THRESHOLD
 #define H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE      sizeof(unsigned)
 #define H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEF       H5D_MULTI_CHUNK_IO_COL_THRESHOLD
+/* Definitions for chunk opt mode property. */
+#define H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_SIZE     sizeof(H5D_mpio_actual_chunk_opt_mode_t)
+#define H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_DEF      H5D_MPIO_NO_CHUNK_OPTIMIZATION
+/* Definitions for chunk io mode property. */
+#define H5D_MPIO_ACTUAL_IO_MODE_SIZE    sizeof(H5D_mpio_actual_io_mode_t)
+#define H5D_MPIO_ACTUAL_IO_MODE_DEF     H5D_MPIO_NO_COLLECTIVE
 /* Definitions for EDC property */
-#define H5D_XFER_EDC_SIZE       sizeof(H5Z_EDC_t)
-#define H5D_XFER_EDC_DEF        H5Z_ENABLE_EDC
+#define H5D_XFER_EDC_SIZE           sizeof(H5Z_EDC_t)
+#define H5D_XFER_EDC_DEF            H5Z_ENABLE_EDC
 /* Definitions for filter callback function property */
-#define H5D_XFER_FILTER_CB_SIZE       sizeof(H5Z_cb_t)
-#define H5D_XFER_FILTER_CB_DEF        {NULL,NULL}
+#define H5D_XFER_FILTER_CB_SIZE     sizeof(H5Z_cb_t)
+#define H5D_XFER_FILTER_CB_DEF      {NULL,NULL}
 /* Definitions for type conversion callback function property */
 #define H5D_XFER_CONV_CB_SIZE       sizeof(H5T_conv_cb_t)
 #define H5D_XFER_CONV_CB_DEF        {NULL,NULL}
-/* Definition for the property of converting enum overflowing values */
-#define H5D_XFER_CONV_ENUM_OVERFLOW_SIZE        sizeof(hbool_t)
-#define H5D_XFER_CONV_ENUM_OVERFLOW_DEF         TRUE
 /* Definitions for data transform property */
 #define H5D_XFER_XFORM_SIZE         sizeof(void *)
 #define H5D_XFER_XFORM_DEF          NULL
@@ -210,11 +213,12 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
     H5FD_mpio_collective_opt_t def_mpio_collective_opt_mode = H5D_XFER_MPIO_COLLECTIVE_OPT_DEF;
     unsigned def_mpio_chunk_opt_num = H5D_XFER_MPIO_CHUNK_OPT_NUM_DEF;
     unsigned def_mpio_chunk_opt_ratio = H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEF;
+    H5D_mpio_actual_chunk_opt_mode_t def_mpio_actual_chunk_opt_mode = H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_DEF;
+    H5D_mpio_actual_io_mode_t def_mpio_actual_io_mode = H5D_MPIO_ACTUAL_IO_MODE_DEF;
 #endif /* H5_HAVE_PARALLEL */
     H5Z_EDC_t enable_edc = H5D_XFER_EDC_DEF;            /* Default value for EDC property */
     H5Z_cb_t filter_cb = H5D_XFER_FILTER_CB_DEF;        /* Default value for filter callback */
     H5T_conv_cb_t conv_cb = H5D_XFER_CONV_CB_DEF;       /* Default value for datatype conversion callback */
-    hbool_t enum_conv = H5D_XFER_CONV_ENUM_OVERFLOW_DEF;/* Default value for enum overflow values handling*/
     void *def_xfer_xform = H5D_XFER_XFORM_DEF;          /* Default value for data transform */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -277,7 +281,7 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 #ifdef H5_HAVE_PARALLEL
-    /* Register the I/O transfer mode property */
+    /* Register the I/O transfer mode properties */
     if(H5P_register_real(pclass, H5D_XFER_IO_XFER_MODE_NAME, H5D_XFER_IO_XFER_MODE_SIZE, &def_io_xfer_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     if(H5P_register_real(pclass, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, H5D_XFER_MPIO_COLLECTIVE_OPT_SIZE, &def_mpio_collective_opt_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -287,6 +291,14 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, H5D_XFER_MPIO_CHUNK_OPT_NUM_SIZE, &def_mpio_chunk_opt_num, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     if(H5P_register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME, H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE, &def_mpio_chunk_opt_ratio, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the chunk optimization mode property. */
+    if(H5P_register_real(pclass, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_SIZE, &def_mpio_actual_chunk_opt_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the actual io mode property. */
+    if(H5P_register_real(pclass, H5D_MPIO_ACTUAL_IO_MODE_NAME, H5D_MPIO_ACTUAL_IO_MODE_SIZE, &def_mpio_actual_io_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 #endif /* H5_HAVE_PARALLEL */
 
@@ -300,10 +312,6 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the type conversion callback property */
     if(H5P_register_real(pclass, H5D_XFER_CONV_CB_NAME, H5D_XFER_CONV_CB_SIZE, &conv_cb, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the enum overflow handling property */
-    if(H5P_register_real(pclass, H5D_XFER_CONV_ENUM_OVERFLOW_NAME, H5D_XFER_CONV_ENUM_OVERFLOW_SIZE, &enum_conv, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the data transform property */
@@ -1087,83 +1095,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_enum_conv_overflow
- *
- * Purpose:     Sets the property of converting overflowing enum values 
- *              for dataset transfer property list. It indicates whether
- *              to convert the values or fill in the default value.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              26 May 2011
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_enum_conv_overflow(hid_t plist_id, hbool_t conv_overflow)
-{
-    H5P_genplist_t      *plist;      /* Property list pointer */
-    herr_t              ret_value=SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(H5Pset_enum_conv_overflow, FAIL)
-    H5TRACE2("e", "ib", plist_id, conv_overflow);
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* Update property list */
-    if (H5P_set(plist,H5D_XFER_CONV_ENUM_OVERFLOW_NAME,&conv_overflow)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_enum_conv_overflow
- *
- * Purpose:     Gets the property of converting overflowing enum values 
- *              for dataset transfer property list. It indicates whether
- *              to convert the values or fill in the default value.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              26 May 2011
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pget_enum_conv_overflow(hid_t plist_id, hbool_t *conv_overflow/*out*/)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(H5Pget_enum_conv_overflow, FAIL)
-    H5TRACE2("e", "ix", plist_id, conv_overflow);
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* Return values */
-    if (conv_overflow)
-        if (H5P_get(plist,H5D_XFER_CONV_ENUM_OVERFLOW_NAME,conv_overflow)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_enum_conv_overflow() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5Pget_btree_ratios
  *
  * Purpose:	Queries B-tree split ratios.  See H5Pset_btree_ratios().
@@ -1491,4 +1422,75 @@ H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size/*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_hyper_vector_size() */
+
+
+#ifdef H5_HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_mpio_actual_chunk_opt_mode
+ *
+ * Purpose:	Retrieves the chunked io optimization scheme that library chose
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jacob Gruber
+ *              Wednesday, May 4, 2011
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_mpio_actual_chunk_opt_mode(hid_t plist_id, H5D_mpio_actual_chunk_opt_mode_t *actual_chunk_opt_mode)
+{
+    H5P_genplist_t     *plist;
+    herr_t ret_value = SUCCEED;   /* return value */
+    
+    FUNC_ENTER_API(H5Pget_mpio_actual_chunk_opt_mode, FAIL)
+    H5TRACE2("e", "i*Do", plist_id, actual_chunk_opt_mode);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Return values */
+    if(actual_chunk_opt_mode)
+        if(H5P_get(plist, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, actual_chunk_opt_mode) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_mpio_actual_chunk_opt_mode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_mpio_actual_io_mode
+ *
+ * Purpose:	Retrieves the type of I/O actually preformed when collective I/O
+ *		is requested.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jacob Gruber
+ *              Wednesday, May 4, 2011
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_mode)
+{
+    H5P_genplist_t     *plist;
+    herr_t ret_value = SUCCEED;   /* return value */
+    
+    FUNC_ENTER_API(H5Pget_mpio_actual_io_mode, FAIL)
+    H5TRACE2("e", "i*Di", plist_id, actual_io_mode);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Return values */
+    if(actual_io_mode)
+        if(H5P_get(plist, H5D_MPIO_ACTUAL_IO_MODE_NAME, actual_io_mode) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_mpio_actual_io_mode() */
+#endif /* H5_HAVE_PARALLEL */
 

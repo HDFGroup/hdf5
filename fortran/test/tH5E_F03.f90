@@ -158,10 +158,10 @@ SUBROUTINE test_error(total_error)
 !!$    CALL VERIFY("H5Eset_auto_f",my_hdf5_error_handler_data(1),10, total_error)
 !!$    CALL VERIFY("H5Eset_auto_f",my_hdf5_error_handler_data(2),20, total_error)
 
-  ! Test enabling and disabling default printing
-
-  CALL H5Eget_auto_f(H5E_DEFAULT_F, func1, f_ptr1, error)
-  CALL VERIFY("H5Eget_auto_f", error, 0, total_error)
+!!$  ! Test enabling and disabling default printing
+!!$
+!!$  CALL H5Eget_auto_f(H5E_DEFAULT_F, func1, f_ptr1, error)
+!!$  CALL VERIFY("H5Eget_auto_f", error, 0, total_error)
 
   !    PRINT*,c_associated(f_ptr1)
 

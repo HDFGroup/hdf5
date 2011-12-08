@@ -15,6 +15,7 @@
 
 #include "h5repack.h"
 #include "h5tools.h"
+#include "h5tools_utils.h"
 
 /* number of members in an array */
 #ifndef NELMTS

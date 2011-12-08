@@ -120,7 +120,7 @@ const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     NULL,		    	/*can share method		*/
     NULL,			/* pre copy native value to file	*/
     H5O_fill_shared_copy_file,	/* copy native value to file		*/
-    NULL,			/* post copy native value to file	*/
+    H5O_fill_shared_post_copy_file,	/* post copy native value to file	*/
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
     H5O_fill_shared_debug       /*debug the message			*/
@@ -144,7 +144,7 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     NULL,		    	/*can share method		*/
     NULL,			/* pre copy native value to file	*/
     H5O_fill_new_shared_copy_file, /* copy native value to file		*/
-    NULL,			/* post copy native value to file	*/
+    H5O_fill_new_shared_post_copy_file,	/* post copy native value to file	*/
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
     H5O_fill_new_shared_debug	/*debug the message			*/

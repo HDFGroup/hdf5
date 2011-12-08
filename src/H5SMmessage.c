@@ -52,7 +52,7 @@ typedef struct H5SM_compare_udata_t {
 /********************/
 static herr_t H5SM_compare_cb(const void *obj, size_t obj_len, void *udata);
 static herr_t H5SM_compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence,
-    hbool_t *oh_modified, void *udata);
+    unsigned *oh_modified, void *udata);
 
 
 /*********************/
@@ -125,7 +125,7 @@ H5SM_compare_cb(const void *obj, size_t obj_len, void *_udata)
  */
 static herr_t
 H5SM_compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
-    hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
+    unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5SM_compare_udata_t *udata = (H5SM_compare_udata_t *) _udata;
     herr_t ret_value = H5_ITER_CONT;

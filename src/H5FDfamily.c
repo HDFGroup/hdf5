@@ -966,7 +966,6 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     ret_value = H5FDcmp(f1->memb[0], f2->memb[0]);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_family_cmp() */
 
