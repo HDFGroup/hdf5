@@ -253,7 +253,7 @@ H5MM_xfree(void *mem)
  *
  * Purpose:     Allocate a block of memory of at least size bytes,
  *              following the alignment restrictions specified by the file
- *              driver in lf.  Marks the buffer as aligned on dxpl_id.
+ *              driver in lf.
  *
  * Return:      Success:        Ptr to new memory
  *
@@ -293,7 +293,7 @@ done:
  *
  * Purpose:     Reallocate a block of memory of at least size bytes,
  *              following the alignment restrictions specified by the file
- *              driver in lf.  Marks the buffer as aligned on dxpl_id.
+ *              driver in lf.
  *
  * Return:      Success:        Ptr to new memory
  *

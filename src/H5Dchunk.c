@@ -959,11 +959,7 @@ H5D_chunk_realloc(void *chk, size_t old_size, size_t new_size,
     HDassert(udata->aligned);
 
     if(H5F_LF(udata->f)->must_align) {
-        /* Make this smarter? avoid realloc if old_size and new_size are in the
-         * same fbsize block? -NAF */
         ret_value = H5MM_aligned_realloc(chk, old_size, new_size, H5F_LF(udata->f));
-        HDmemcpy(ret_value, chk, old_size);
-        H5MM_free(chk);
         *udata->aligned = TRUE;
     } /* end if */
     else {
@@ -3588,10 +3584,13 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                  * possible (though ill-advised) for the filter to shrink the
                  * buffer. */
                 if(fb_info.fill_buf_size < orig_chunk_size) {
+                    void *orig_fill_buf = fb_info.fill_buf;
                     if(NULL == (fb_info.fill_buf = H5D_chunk_realloc(
                             fb_info.fill_buf, fb_info.fill_buf_size,
-                            orig_chunk_size, &alloc_ud)))
+                            orig_chunk_size, &alloc_ud))) {
+                        fb_info.fill_buf = orig_fill_buf;
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory reallocation failed for raw data chunk")
+                    } /* end if */
                     fb_info.fill_buf_size = orig_chunk_size;
                 } /* end if */
 
