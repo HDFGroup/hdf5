@@ -383,11 +383,6 @@ H5MMaligned_malloc(size_t size, hid_t loc_id, hid_t dxpl_id)
         HGOTO_DONE(NULL)
     if(H5G_loc(loc_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a location")
-    if(H5P_DEFAULT == dxpl_id)
-        dxpl_id = -1;
-    else
-        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not xfer parms")
 
     /* Call the internal routine, but only if the file driver uses aligned
      * buffers */
@@ -409,7 +404,7 @@ H5MMaligned_malloc(size_t size, hid_t loc_id, hid_t dxpl_id)
 
             /* Mark on the DXPL that the memory buffer is aligned */
             aligned_mem.aligned = TRUE;
-            aligned_mem.buf = ret_value;
+            aligned_mem.buf = buf;
             aligned_mem.size = size;
             if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem)
                     < 0)
