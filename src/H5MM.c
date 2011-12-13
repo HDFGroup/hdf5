@@ -278,10 +278,14 @@ H5MM_aligned_malloc(size_t size, H5FD_t *lf)
     HDassert(lf->feature_flags & H5FD_FEAT_ALIGNED_MEM);
     HDassert(lf->must_align);
 
+#ifdef H5_HAVE_POSIX_MEMALIGN
     /* Allocate the memory block */
     if(0 != HDposix_memalign(&ret_value, lf->mboundary,
             (((size - 1) / lf->mbsize) + 1) * lf->mbsize))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+#else
+    HDassert(0 && "H5MM_aligned_malloc called without posix_memalign being available");
+#endif /* H5_HAVE_POSIX_MEMALIGN */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -383,6 +387,9 @@ H5MMaligned_malloc(size_t size, hid_t loc_id, hid_t dxpl_id)
         HGOTO_DONE(NULL)
     if(H5G_loc(loc_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a location")
+#ifndef H5_HAVE_POSIX_MEMALIGN
+    HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "posix_memalign is unavailable")
+#endif /* H5_HAVE_POSIX_MEMALIGN */
 
     /* Call the internal routine, but only if the file driver uses aligned
      * buffers */
@@ -406,8 +413,7 @@ H5MMaligned_malloc(size_t size, hid_t loc_id, hid_t dxpl_id)
             aligned_mem.aligned = TRUE;
             aligned_mem.buf = buf;
             aligned_mem.size = size;
-            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem)
-                    < 0)
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
         } /* end if */
     } /* end if */
@@ -469,13 +475,17 @@ H5MMaligned_free(void *mem, hid_t loc_id, hid_t dxpl_id)
         if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
 
-        /* Mark on the DXPL that the memory buffer is unaligned */
-        aligned_mem.aligned = FALSE;
-        aligned_mem.buf = NULL;
-        aligned_mem.size = 0;
-        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem)
-                < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        /* Mark on the DXPL that the memory buffer is unaligned, if this buffer
+         * is currently present on the DXPL */
+        if(H5P_get(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+        if(aligned_mem.buf == mem) {
+            aligned_mem.aligned = FALSE;
+            aligned_mem.buf = NULL;
+            aligned_mem.size = 0;
+            if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        } /* end if */
     } /* end if */
 
     /* Free the memory */

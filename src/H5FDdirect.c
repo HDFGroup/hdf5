@@ -42,6 +42,11 @@
 
 #ifdef H5_HAVE_DIRECT
 
+/* This driver shouldn't be enabled if we don't have posix_memalign */
+#ifndef H5_HAVE_POSIX_MEMALIGN
+#error Direct driver enabled without posix_memalign being available!
+#endif /* H5_HAVE_POSIX_MEMALIGN */
+
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_DIRECT_g = 0;
 

@@ -253,6 +253,9 @@
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL
 
+/* Define to 1 if you have the `posix_memalign' function. */
+#undef HAVE_POSIX_MEMALIGN
+
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H
 
