@@ -2207,6 +2207,7 @@
 ./config/cmake/NSIS.InstallOptions.ini.in
 ./CMakeLists.txt
 ./CTestConfig.cmake
+./CTestScript.cmake
 ./c++/CMakeLists.txt
 ./c++/examples/CMakeLists.txt
 ./c++/src/CMakeLists.txt
