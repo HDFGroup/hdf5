@@ -97,7 +97,7 @@ message("Dashboard script configuration:\n${vars}\n")
 #-----------------------------------------------------------------------------
 
 SET (CTEST_CONFIGURE_COMMAND
-    "${CMAKE_COMMAND} -C ${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\"")
+    "${CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\"")
 
 CTEST_START (${MODEL})
 CTEST_UPDATE (SOURCE     "${CTEST_SOURCE_DIRECTORY}")
