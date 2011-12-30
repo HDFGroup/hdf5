@@ -70,12 +70,6 @@ PROJECT (HDF5 C CXX)
 #   ADD_SUBDIRECTORY(Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
 
-IF (BUILD_SHARED_LIBS)
-  SET (BUILD_NAME_EXT "SHARED")
-ELSE (BUILD_SHARED_LIBS)
-  SET (BUILD_NAME_EXT "STATIC")
-ENDIF (BUILD_SHARED_LIBS)
-
 #-----------------------------------------------------------------------------
 # Allow Visual Studio solution directories
 #-----------------------------------------------------------------------------
