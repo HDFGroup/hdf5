@@ -24,7 +24,7 @@ SET (VALGRIND_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=
 SET (CTEST_TESTING_TIMEOUT 3600 CACHE STRING 
     "Maximum time allowed before CTest will kill the test.") 
 SET (DART_TESTING_TIMEOUT 3600 CACHE STRING 
-    "Maximum time allowed before CTest will kill the test.")
+    "Maximum time allowed before CTest will kill the test." FORCE)
 
 SET(CTEST_SUBMIT_RETRY_DELAY 20 CACHE STRING
     "How long to wait between timed-out CTest submissions.")
