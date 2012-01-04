@@ -121,14 +121,6 @@ PROGRAM fortranlibtest_F03
   CALL write_test_status(ret_total_error, &
        ' Testing filling functions', &
        total_error)
-!DEC$ if defined(H5_VMS)
-  GOTO 8
-!DEC$ else
-  ret_total_error = 0
-  CALL file_close(cleanup, ret_total_error)
-  CALL write_test_status(ret_total_error, ' File open/close test', total_error)
-!DEC$ endif
-8 CONTINUE
 
   ret_total_error = 0
   CALL test_h5kind_to_type(total_error)

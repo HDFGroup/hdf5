@@ -519,7 +519,7 @@ CONTAINS
   SUBROUTINE h5dget_space_status_f(dset_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id  ! Dataspace identifier
-    INTEGER, INTENT(IN)        :: flag     ! Memory buffer to fill in
+    INTEGER, INTENT(OUT)       :: flag     ! Memory buffer to fill in
     INTEGER, INTENT(OUT)       :: hdferr   ! Error code
   !*****
     INTERFACE

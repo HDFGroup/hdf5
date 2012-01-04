@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.6)
 PROJECT (HDF5_TOOLS_H5DIFF)
 
 #-----------------------------------------------------------------------------
@@ -16,6 +16,7 @@ ADD_EXECUTABLE (h5diff
 )
 TARGET_NAMING (h5diff ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+SET_TARGET_PROPERTIES (h5diff PROPERTIES FOLDER tools)
 
 SET (H5_DEP_EXECUTABLES h5diff)
 
@@ -26,6 +27,7 @@ IF (H5_HAVE_PARALLEL)
   )
   TARGET_NAMING (ph5diff ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (ph5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+  SET_TARGET_PROPERTIES (ph5diff PROPERTIES FOLDER tools)
 ENDIF (H5_HAVE_PARALLEL)
 
 ##############################################################################
@@ -42,6 +44,7 @@ IF (BUILD_TESTING)
     ADD_EXECUTABLE (h5diffgentest ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diffgentest.c)
     TARGET_NAMING (h5diffgentest ${LIB_TYPE})
     TARGET_LINK_LIBRARIES (h5diffgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+    SET_TARGET_PROPERTIES (h5diffgentest PROPERTIES FOLDER generator/tools)
     
     #ADD_TEST (NAME h5diffgentest COMMAND $<TARGET_FILE:h5diffgentest>)
   ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
@@ -1131,6 +1134,7 @@ ADD_H5_TEST (h5diff_208 0 -c ${FILE19} ${FILE20})
 ADD_H5_TEST (h5diff_220 1 -c non_comparables1.h5 non_comparables2.h5 /g1)
 
 # comparable dataset with non-comparable attribute and other comparable attributes.
+# Also test non-compatible attributes with different type, dimention, rank.
 # All the rest comparables should display differences.
 ADD_H5_TEST (h5diff_221 1 -c non_comparables1.h5 non_comparables2.h5 /g2)
 

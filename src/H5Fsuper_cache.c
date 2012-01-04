@@ -469,7 +469,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     eof = H5FD_get_eof(lf);
     /* (Account for the stored EOF being absolute offset -QAK) */
     if((eof + sblock->base_addr) < stored_eof)
-        HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, "truncated file")
+        HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eof = %llu", (unsigned long long)eof, (unsigned long long)sblock->base_addr, (unsigned long long)stored_eof)
 
 #ifdef H5_HAVE_PARALLEL
     if (H5F_AVOID_TRUNCATE(f))

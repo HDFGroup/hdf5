@@ -153,9 +153,12 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/)
 	heap->freelist->offset = 0;
 	heap->freelist->size = size_hint;
 	heap->freelist->prev = heap->freelist->next = NULL;
+        heap->free_block = 0;
     } /* end if */
-    else
+    else {
 	heap->freelist = NULL;
+        heap->free_block = H5HL_FREE_NULL;
+    } /* end else */
 
     /* Allocate the heap prefix */
     if(NULL == (prfx = H5HL_prfx_new(heap)))
@@ -459,8 +462,6 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw)
     prfx_udata.sizeof_addr = H5F_SIZEOF_ADDR(f);
     prfx_udata.prfx_addr = addr;
     prfx_udata.sizeof_prfx = H5HL_SIZEOF_HDR(f);
-    prfx_udata.loaded = FALSE;
-    prfx_udata.free_block = H5HL_FREE_NULL;
 
     /* Protect the local heap prefix */
     if(NULL == (prfx = (H5HL_prfx_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP_PRFX, addr, &prfx_udata, rw)))
@@ -482,8 +483,6 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw)
 
             /* Construct the user data for protect callback */
             dblk_udata.heap = heap;
-            dblk_udata.free_block = prfx_udata.loaded ? prfx_udata.free_block :
-                    (heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL);
             dblk_udata.loaded = FALSE;
 
             /* Protect the local heap data block */
@@ -1076,8 +1075,6 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     prfx_udata.sizeof_addr = H5F_SIZEOF_ADDR(f);
     prfx_udata.prfx_addr = addr;
     prfx_udata.sizeof_prfx = H5HL_SIZEOF_HDR(f);
-    prfx_udata.loaded = FALSE;
-    prfx_udata.free_block = H5HL_FREE_NULL;
 
     /* Protect the local heap prefix */
     if(NULL == (prfx = (H5HL_prfx_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP_PRFX, addr, &prfx_udata, H5AC_WRITE)))
@@ -1092,8 +1089,6 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 
         /* Construct the user data for protect callback */
         dblk_udata.heap = heap;
-        dblk_udata.free_block = prfx_udata.loaded ? prfx_udata.free_block :
-                (heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL);
         dblk_udata.loaded = FALSE;
 
         /* Protect the local heap data block */
@@ -1156,8 +1151,6 @@ H5HL_get_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t *size)
     prfx_udata.sizeof_addr = H5F_SIZEOF_ADDR(f);
     prfx_udata.prfx_addr = addr;
     prfx_udata.sizeof_prfx = H5HL_SIZEOF_HDR(f);
-    prfx_udata.loaded = FALSE;
-    prfx_udata.free_block = H5HL_FREE_NULL;
 
     /* Protect the local heap prefix */
     if(NULL == (prfx = (H5HL_prfx_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP_PRFX, addr, &prfx_udata, H5AC_READ)))
@@ -1210,8 +1203,6 @@ H5HL_heapsize(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *heap_size)
     prfx_udata.sizeof_addr = H5F_SIZEOF_ADDR(f);
     prfx_udata.prfx_addr = addr;
     prfx_udata.sizeof_prfx = H5HL_SIZEOF_HDR(f);
-    prfx_udata.loaded = FALSE;
-    prfx_udata.free_block = H5HL_FREE_NULL;
 
     /* Protect the local heap prefix */
     if(NULL == (prfx = (H5HL_prfx_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP_PRFX, addr, &prfx_udata, H5AC_READ)))

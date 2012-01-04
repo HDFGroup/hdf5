@@ -380,8 +380,10 @@ hsize_t diff_attr(hid_t loc1_id,
         *----------------------------------------------------------------------
         */
 
+        /* pass dims1 and dims2 for maxdims as well since attribute's maxdims
+         * are always same */
         if( diff_can_type(ftype1_id, ftype2_id, rank1, rank2, dims1, dims2,
-                          NULL, NULL, name1, name2, options, 0) != 1 )
+                          dims1, dims2, name1, name2, options, 0) != 1 )
         {
             if(H5Tclose(ftype1_id) < 0)
                 goto error;

@@ -614,7 +614,7 @@ SUBROUTINE test_scaleoffset(cleanup, total_error )
   CALL CHECK(" H5Pset_scaleoffset_f", error, total_error)
   
   ! Create the dataset
-  CALL  H5Dcreate_f(file, "scaleoffset_int", datatype, &
+  CALL H5Dcreate_f(file, "scaleoffset_int", datatype, &
        space, dataset, error, dc)
   CALL CHECK(" H5Dcreate_f", error, total_error)
 
@@ -639,7 +639,7 @@ SUBROUTINE test_scaleoffset(cleanup, total_error )
   DO j = 1, dims(2)
      CALL RANDOM_NUMBER(x)
      orig_data(1,j) = INT(x*10000.)
-     IF(MOD(j,2).EQ.0)THEN
+     IF(MOD(j,2_size_t).EQ.0)THEN
         orig_data(1,j) = - orig_data(1,j)
      ENDIF
   ENDDO

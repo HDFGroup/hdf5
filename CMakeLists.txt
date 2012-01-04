@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.6)
 PROJECT (HDF5 C CXX)
 
 #-----------------------------------------------------------------------------
@@ -69,11 +69,21 @@ PROJECT (HDF5 C CXX)
 #   # Add the sub project
 #   ADD_SUBDIRECTORY(Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
-IF (BUILD_SHARED_LIBS)
-  SET (BUILD_NAME_EXT "SHARED")
-ELSE (BUILD_SHARED_LIBS)
-  SET (BUILD_NAME_EXT "STATIC")
-ENDIF (BUILD_SHARED_LIBS)
+
+#-----------------------------------------------------------------------------
+# Allow Visual Studio solution directories
+#-----------------------------------------------------------------------------
+# Provide a way for Visual Studio Express users to turn OFF the new FOLDER
+# organization feature. Default to ON for non-Express users. Express users must
+# explicitly turn off this option to build HDF5 in the Express IDE...
+#
+OPTION (HDF5_USE_FOLDERS "Enable folder grouping of projects in IDEs." ON)
+MARK_AS_ADVANCED (HDF5_USE_FOLDERS)
+IF (HDF5_USE_FOLDERS)
+  SET_PROPERTY (GLOBAL PROPERTY USE_FOLDERS ON)
+ENDIF (HDF5_USE_FOLDERS)
+OPTION (HDF5_NO_PACKAGES "CPACK - Disable packaging" OFF)
+MARK_AS_ADVANCED (HDF5_NO_PACKAGES)
 
 #-----------------------------------------------------------------------------
 # Set the core names of all the libraries
@@ -193,6 +203,7 @@ SET (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
 INCLUDE (${HDF5_RESOURCES_DIR}/HDFMacros.cmake)
+INCLUDE (${HDF5_RESOURCES_DIR}/HDFLibMacros.cmake)
 INCLUDE (${HDF5_RESOURCES_DIR}/HDF5Macros.cmake)
 
 #-----------------------------------------------------------------------------
@@ -241,13 +252,6 @@ SET (EXTERNAL_LIBRARYDLL_LIST "")
 # Run all the CMake configuration tests for our build environment
 #-----------------------------------------------------------------------------
 INCLUDE (${HDF5_RESOURCES_DIR}/ConfigureChecks.cmake)
-
-#-----------------------------------------------------------------------------
-# Option to use legacy naming for windows libs/programs, default is legacy
-#-----------------------------------------------------------------------------
-IF (WIN32 AND NOT CYGWIN)
-  OPTION (HDF_LEGACY_NAMING "Use Legacy Names for Libraries and Programs" OFF)
-ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Option to Build Shared/Static libs, default is static
@@ -375,6 +379,13 @@ IF (CMAKE_COMPILER_IS_GNUCC)
     SET (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS} -std=c99 -fomit-frame-pointer -finline-functions -fno-common")
   ENDIF (CMAKE_BUILD_TYPE MATCHES Debug)
 ENDIF (CMAKE_COMPILER_IS_GNUCC)
+IF (CMAKE_COMPILER_IS_GNUCXX)
+  IF (CMAKE_BUILD_TYPE MATCHES Debug)
+    SET (CMAKE_CXX_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_CXX_FLAGS} -finline-functions -fno-common")
+  ELSE (CMAKE_BUILD_TYPE MATCHES Debug)
+    SET (CMAKE_CXX_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_CXX_FLAGS} -fomit-frame-pointer -finline-functions -fno-common")
+  ENDIF (CMAKE_BUILD_TYPE MATCHES Debug)
+ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 #-----------------------------------------------------------------------------
 # Option to embed library info into executables
@@ -393,9 +404,10 @@ IF (HDF5_DISABLE_COMPILER_WARNINGS)
   # warning level is given, so remove it.
   IF (MSVC)
     SET (HDF5_WARNINGS_BLOCKED 1)
-    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " "
-        CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
   ENDIF (MSVC)
   IF (WIN32 AND NOT CYGWIN)
     ADD_DEFINITIONS (-D_CRT_SECURE_NO_WARNINGS)
@@ -409,6 +421,7 @@ IF (HDF5_DISABLE_COMPILER_WARNINGS)
   # Most compilers use -w to suppress warnings.
   IF (NOT HDF5_WARNINGS_BLOCKED)
     SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
   ENDIF (NOT HDF5_WARNINGS_BLOCKED)
 ENDIF (HDF5_DISABLE_COMPILER_WARNINGS)
 
@@ -435,28 +448,25 @@ SET (CMAKE_MODULE_PATH ${HDF5_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
 OPTION (HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
 IF (HDF5_ENABLE_PARALLEL)
   INCLUDE (FindMPI)
-  INCLUDE_DIRECTORIES (${MPI_INCLUDE_PATH})
-  IF (MPI_FOUND)
+  INCLUDE_DIRECTORIES (${MPI_C_INCLUDE_PATH})
+  IF (MPI_C_FOUND)
     SET (H5_HAVE_PARALLEL 1)
-    # MPI checks, only do these if MPI_FOUND is true, otherwise they always fail
+    # MPI checks, only do these if MPI_C_FOUND is true, otherwise they always fail
     # and once set, they are cached as false and not regenerated
-    SET (CMAKE_REQUIRED_LIBRARIES "${MPI_LIBRARY};${MPI_EXTRA_LIBRARY}" )
+    SET (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}" )
     CHECK_FUNCTION_EXISTS (MPI_File_get_size H5_HAVE_MPI_GET_SIZE) 
     # Used by Fortran + MPI
-    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
-    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
-  ENDIF (MPI_FOUND)
+    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
+    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+  ENDIF (MPI_C_FOUND)
 ENDIF (HDF5_ENABLE_PARALLEL)
 
 # Parallel IO usage requires MPI to be Linked and Included
 IF (H5_HAVE_PARALLEL)
-  SET (LINK_LIBS ${LINK_LIBS} ${MPI_LIBRARY})
-  IF (MPI_LINK_FLAGS)
-    SET (CMAKE_EXE_LINKER_FLAGS ${MPI_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS})
-  ENDIF (MPI_LINK_FLAGS)
-  IF (MPI_EXTRA_LIBRARY)
-    SET (LINK_LIBS ${LINK_LIBS} ${MPI_EXTRA_LIBRARY})
-  ENDIF (MPI_EXTRA_LIBRARY)
+  SET (LINK_LIBS ${LINK_LIBS} ${MPI_C_LIBRARIES})
+  IF (MPI_C_LINK_FLAGS)
+    SET (CMAKE_EXE_LINKER_FLAGS ${MPI_C_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS})
+  ENDIF (MPI_C_LINK_FLAGS)
 ENDIF (H5_HAVE_PARALLEL)
 
 #-----------------------------------------------------------------------------
@@ -596,12 +606,13 @@ ENDIF (HDF5_ENABLE_SZIP_SUPPORT)
 OPTION (HDF5_PACKAGE_EXTLIBS "CPACK - include external libraries" OFF)
 IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   IF (HDF5_PACKAGE_EXTLIBS)
+    SET (HDF5_NO_PACKAGES OFF CACHE BOOL "CPACK - Disable packaging" FORCE)
     IF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
-      PACKAGE_ZLIB_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT} ${LIB_TYPE})
+      PACKAGE_ZLIB_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
     ENDIF (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
     
     IF (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
-      PACKAGE_SZIP_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT} ${LIB_TYPE})
+      PACKAGE_SZIP_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
     ENDIF (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
   ENDIF (HDF5_PACKAGE_EXTLIBS)
 ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
@@ -904,7 +915,7 @@ ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 #-----------------------------------------------------------------------------
 # Set the cpack variables
 #-----------------------------------------------------------------------------
-IF (NOT HDF5_EXTERNALLY_CONFIGURED)
+IF (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
   SET (CPACK_PACKAGE_VENDOR "HDF Group")
   SET (CPACK_PACKAGE_NAME "${HDF5_PACKAGE_NAME}")
   SET (CPACK_PACKAGE_INSTALL_DIRECTORY "${HDF5_PACKAGE_NAME}")
@@ -1052,4 +1063,4 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
     )
   ENDIF (HDF5_BUILD_HL_LIB)
   
-ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
+ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)

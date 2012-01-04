@@ -35,7 +35,7 @@ TEST_BIN=`pwd`/$TEST_NAME 	# The path of the test binary
 ENVCMD="env HDF5_EXT_PREFIX=.:tmp" 	# The environment variable & value
 #
 # Run the test
-$ENVCMD $TEST_BIN
+$ENVCMD $RUNSERIAL $TEST_BIN
 exitcode=$?
 if [ $exitcode -eq 0 ]; then
         echo "Test for HDF5_EXT_PREFIX PASSED"

@@ -239,6 +239,7 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC20_SPACE2_DIM0      8
 #define MISC20_SPACE2_DIM1      4
 
+#ifdef H5_HAVE_FILTER_SZIP
 /* Definitions for misc. test #21 */
 #define MISC21_FILE             "tmisc21.h5"
 #define MISC21_DSET_NAME        "Dataset"
@@ -256,6 +257,7 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC22_CHUNK_DIM1       512
 #define MISC22_SPACE_DIM0       639
 #define MISC22_SPACE_DIM1       1308
+#endif /* H5_HAVE_FILTER_SZIP */
 
 /* Definitions for misc. test #23 */
 #define MISC23_FILE             "tmisc23.h5"
@@ -310,6 +312,9 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC29_ORIG_FILE        "specmetaread.h5"
 #define MISC29_COPY_FILE        "tmisc29.h5"
 #define MISC29_DSETNAME         "dset2"
+
+/* Definitions for misc. test #30 */
+#define MISC30_FILE             "tmisc30.h5"
 
 /****************************************************************
 **
@@ -3529,7 +3534,7 @@ test_misc20(void)
    and encoder is available.
                             EIP 2004/8/04
 */
-#if defined H5_HAVE_FILTER_SZIP
+#ifdef H5_HAVE_FILTER_SZIP
 
 /****************************************************************
 **
@@ -5113,6 +5118,87 @@ test_misc29(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc29() */
 
+
+static int
+test_misc30_get_info_cb(hid_t loc_id, const char *name, const H5L_info_t UNUSED *info,
+    void UNUSED *op_data)
+{
+    H5O_info_t object_info;
+
+    return H5Oget_info_by_name(loc_id, name, &object_info, H5P_DEFAULT);	
+}
+
+static int
+test_misc30_get_info(hid_t loc_id)
+{
+    return H5Literate(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, test_misc30_get_info_cb, NULL);
+}
+
+
+/****************************************************************
+**
+**  test_misc30(): Exercise local heap code that loads prefix
+**                 separately from data block, causing the free
+**                 block information to get lost.
+**
+****************************************************************/
+static void
+test_misc30(void)
+{
+    hsize_t file_size[] = {0, 0};       /* Sizes of file created */
+    hbool_t get_info;                   /* Whether to perform the get info call */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Local heap dropping free block info\n"));
+
+    for(get_info = FALSE; get_info <= TRUE; get_info++) {
+        hid_t fid;                  /* File ID */
+        hid_t gid;                  /* Group ID */
+        int i;                      /* Local index counter */
+        herr_t  ret;                /* Generic return value */
+
+        fid = H5Fcreate(MISC30_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(fid, FAIL, "H5Fcreate");
+        gid = H5Gcreate2(fid, "/g0", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(gid, FAIL, "H5Gcreate2");
+
+        ret = H5Gclose(gid);
+        CHECK(ret, FAIL, "H5Gclose");
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
+        
+        for(i = 0; i < 20; i++) {
+            char gname[32];
+
+            fid = H5Fopen(MISC30_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+            CHECK(fid, FAIL, "H5Fopen");
+    
+            if(get_info) {
+                ret = test_misc30_get_info(fid);			
+                CHECK(ret, FAIL, "test_misc30_get_info");
+            }
+
+            sprintf(gname, "/g0/group%d", i);
+            gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(gid, FAIL, "H5Gcreate2");
+
+            ret = H5Gclose(gid);
+            CHECK(ret, FAIL, "H5Gclose");
+            ret = H5Fclose(fid);
+            CHECK(ret, FAIL, "H5Fclose");
+        } 
+        
+        fid = H5Fopen(MISC30_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+        CHECK(fid, FAIL, "H5Fopen");
+        ret = H5Fget_filesize(fid, &file_size[get_info]);
+        CHECK(fid, FAIL, "H5Fget_filesize");
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
+    } 
+    
+    VERIFY(file_size[0], file_size[1], "test_misc30");
+} /* end test_misc30() */
+
 /****************************************************************
 **
 **  test_misc(): Main misc. test routine.
@@ -5144,7 +5230,7 @@ test_misc(void)
     test_misc18();      /* Test new object header information in H5O_info_t struct */
     test_misc19();      /* Test incrementing & decrementing ref count on IDs */
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
-#if defined H5_HAVE_FILTER_SZIP
+#ifdef H5_HAVE_FILTER_SZIP
     test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
     test_misc22();      /* check szip bits per pixel */
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -5157,6 +5243,7 @@ test_misc(void)
     test_misc27();      /* Test opening file with object that has bad # of object header messages */
     test_misc28();      /* Test that chunks are cached appropriately */
     test_misc29();      /* Test that speculative metadata reads are handled correctly */
+    test_misc30();      /* Exercise local heap loading bug where free lists were getting dropped */
 
 } /* test_misc() */
 
@@ -5201,7 +5288,7 @@ cleanup_misc(void)
     HDremove(MISC18_FILE);
     HDremove(MISC19_FILE);
     HDremove(MISC20_FILE);
-#if defined H5_HAVE_FILTER_SZIP
+#ifdef H5_HAVE_FILTER_SZIP
     HDremove(MISC21_FILE);
     HDremove(MISC22_FILE);
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -5212,5 +5299,6 @@ cleanup_misc(void)
     HDremove(MISC26_FILE);
     HDremove(MISC28_FILE);
     HDremove(MISC29_COPY_FILE);
+    HDremove(MISC30_FILE);
 }
 

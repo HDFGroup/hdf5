@@ -65,7 +65,7 @@ static herr_t H5SM_convert_list_to_btree(H5F_t * f, H5SM_index_header_t * header
 static herr_t H5SM_convert_btree_to_list(H5F_t * f, H5SM_index_header_t * header, hid_t dxpl_id);
 static herr_t H5SM_incr_ref(void *record, void *_op_data, hbool_t *changed);
 static herr_t H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    H5SM_index_header_t *header, unsigned type_id, void *mesg,
+    H5SM_index_header_t *header, hbool_t defer, unsigned type_id, void *mesg,
     unsigned *cache_flags_ptr);
 static herr_t H5SM_decr_ref(void *record, void *op_data, hbool_t *changed);
 static herr_t H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
@@ -73,7 +73,7 @@ static herr_t H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned *cache_flags, void ** /*out*/ encoded_mesg);
 static herr_t H5SM_type_to_flag(unsigned type_id, unsigned *type_flag);
 static herr_t H5SM_read_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence,
-    hbool_t *oh_modified, void *_udata);
+    unsigned *oh_modified, void *_udata);
 static herr_t H5SM_read_mesg_fh_cb(const void *obj, size_t obj_len, void *_udata);
 static herr_t H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
                H5O_t * open_oh, hid_t dxpl_id, size_t *encoding_size /*out*/,
@@ -477,8 +477,8 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
 
         /* Create the v2 B-tree index */
         bt2_cparam.cls = H5SM_INDEX;
-        bt2_cparam.node_size = (size_t)H5SM_B2_NODE_SIZE;
-        bt2_cparam.rrec_size = (size_t)H5SM_SOHM_ENTRY_SIZE(f);
+        bt2_cparam.node_size = (uint32_t)H5SM_B2_NODE_SIZE;
+        bt2_cparam.rrec_size = (uint32_t)H5SM_SOHM_ENTRY_SIZE(f);
         bt2_cparam.split_percent = H5SM_B2_SPLIT_PERCENT;
         bt2_cparam.merge_percent = H5SM_B2_MERGE_PERCENT;
         if(NULL == (bt2 = H5B2_create(f, dxpl_id, &bt2_cparam, f)))
@@ -720,8 +720,8 @@ H5SM_convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header,
 
     /* Create the new v2 B-tree for tracking the messages */
     bt2_cparam.cls = H5SM_INDEX;
-    bt2_cparam.node_size = (size_t)H5SM_B2_NODE_SIZE;
-    bt2_cparam.rrec_size = (size_t)H5SM_SOHM_ENTRY_SIZE(f);
+    bt2_cparam.node_size = (uint32_t)H5SM_B2_NODE_SIZE;
+    bt2_cparam.rrec_size = (uint32_t)H5SM_SOHM_ENTRY_SIZE(f);
     bt2_cparam.split_percent = H5SM_B2_SPLIT_PERCENT;
     bt2_cparam.merge_percent = H5SM_B2_MERGE_PERCENT;
     if(NULL == (bt2 = H5B2_create(f, dxpl_id, &bt2_cparam, f)))
@@ -988,6 +988,12 @@ done:
  *              header it needs (which can cause an error if that OH is
  *              already protected!).
  *
+ *              DEFER_FLAGS indicates whether the sharing operation should
+ *              actually occur, or whether this is just a set up call for a
+ *              future sharing operation.  In the latter case this argument
+ *              should be H5SM_DEFER.  If the message was previously deferred
+ *              this argument should be H5SM_WAS_DEFERRED.
+ *
  *              MESG_FLAGS will have the H5O_MSG_FLAG_SHAREABLE or
  *              H5O_MSG_FLAG_SHARED flag set if one is appropriate.  This is
  *              the only way to tell the difference between a message that
@@ -1025,17 +1031,33 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
-    void *mesg, unsigned *mesg_flags)
+H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned defer_flags,
+    unsigned type_id, void *mesg, unsigned *mesg_flags)
 {
     H5SM_master_table_t *table = NULL;
     H5SM_table_cache_ud_t cache_udata;      /* User-data for callback */
     unsigned            cache_flags = H5AC__NO_FLAGS_SET;
     ssize_t             index_num;
     htri_t              tri_ret;
+#ifndef NDEBUG
+    unsigned            deferred_type = -1u;
+#endif
     htri_t              ret_value = TRUE;
 
     FUNC_ENTER_NOAPI_TAG(H5SM_try_share, dxpl_id, H5AC__SOHM_TAG, FAIL)
+
+    /* If we previously deferred this operation, the saved message type should
+     * be the same as the one we get here.  In debug mode, we make sure this
+     * holds true; otherwise we can leave now if it wasn't shared in the DEFER
+     * pass. */
+    if(defer_flags & H5SM_WAS_DEFERRED)
+#ifndef NDEBUG
+        deferred_type = ((H5O_shared_t *)mesg)->type;
+#else /* NDEBUG */
+        if((((H5O_shared_t *)mesg)->type != H5O_SHARE_TYPE_HERE)
+                && (((H5O_shared_t *)mesg)->type != H5O_SHARE_TYPE_SOHM))
+            HGOTO_DONE(FALSE);
+#endif /* NDEBUG */
 
     /* "trivial" sharing checks */
     if(mesg_flags && (*mesg_flags & H5O_MSG_FLAG_DONTSHARE))
@@ -1071,20 +1093,31 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
      * message to become shared (if it is unique, it will not be shared).
      */
     if(H5SM_write_mesg(f, dxpl_id, open_oh, &(table->indexes[index_num]),
-            type_id, mesg, &cache_flags) < 0)
+            (defer_flags & H5SM_DEFER) != 0, type_id, mesg, &cache_flags) < 0)
 	HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "can't write shared message")
 
-    /* Set flags if this message was "written" without error; it is now
-     * either fully shared or "shareable".
+    /* Set flags if this message was "written" without error and wasn't a
+     * 'defer' attempt; it is now either fully shared or "shareable".
      */
-    if(mesg_flags) {
+    if(mesg_flags && !(defer_flags & H5SM_DEFER)) {
         if(((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_HERE)
             *mesg_flags |= H5O_MSG_FLAG_SHAREABLE;
-        else
+        else {
+            HDassert(((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_SOHM);
             *mesg_flags |= H5O_MSG_FLAG_SHARED;
+        } /* end else */
     } /* end if */
 
 done:
+    HDassert(!ret_value || ((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_HERE
+            || ((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_SOHM);
+#ifndef NDEBUG
+    /* If we previously deferred this operation, make sure the saved message
+     * type is the same as the one we get here. */
+    if(defer_flags & H5SM_WAS_DEFERRED)
+        HDassert(deferred_type == ((H5O_shared_t *)mesg)->type);
+#endif /* NDEBUG */
+
     /* Release the master SOHM table */
     if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, H5F_SOHM_ADDR(f), table, cache_flags) < 0)
 	HDONE_ERROR(H5E_SOHM, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM master table")
@@ -1157,19 +1190,28 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5SM_write_mesg
  *
- * Purpose:     Adds a shareable message to an index.  If this is the first
- *              such message and we have an object header location for this
- *              message, we record it in the index but don't modify the
- *              message passed in.
+ * Purpose:     This routine adds a shareable message to an index.
+ *              The behavior is controlled by the DEFER parameter:
  *
- *              If the message is already in the index or we don't have an
- *              object header location for it, it is shared in the heap
- *              and this function sets its sharing struct to reflect this.
+ *              If DEFER is TRUE, this routine Simulates adding a shareable
+ *              message to an index.  It determines what the outcome would
+ *              be with DEFER set the FALSE and updates the shared message
+ *              info, but does not actually add the message to a heap, list,
+ *              or b-tree.  Assumes that an open object header will be
+ *              available when H5SM_write_mesg is called with DEFER set to
+ *              FALSE.
+ *
+ *              If DEFER is FALSE, this routine adds a shareable message to
+ *              an index.  If this is the first such message and we have an
+ *              object header location for this message, we record it in the
+ *              index but don't modify the message passed in.  If the message
+ *              is already in the index or we don't have an object header
+ *              location for it, it is shared in the heap and this function
+ *              sets its sharing struct to reflect this.
  *
  *              The index could be a list or a B-tree.
  *
- * Return:      TRUE if message is now shared
- *              FALSE if message is in index but is not shared
+ * Return:      Non-negative on success
  *              Negative on failure
  *
  * Programmer:  James Laird
@@ -1179,7 +1221,7 @@ done:
  */
 static herr_t
 H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    H5SM_index_header_t *header, unsigned type_id, void *mesg,
+    H5SM_index_header_t *header, hbool_t defer, unsigned type_id, void *mesg,
     unsigned *cache_flags_ptr)
 {
     H5SM_list_t           *list = NULL;     /* List index */
@@ -1234,7 +1276,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         cache_udata.header = header;
 
         /* The index is a list; get it from the cache */
-        if(NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, &cache_udata, H5AC_WRITE)))
+        if(NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, &cache_udata, defer ? H5AC_READ : H5AC_WRITE)))
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
         /* See if the message is already in the index and get its location.
@@ -1242,55 +1284,75 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
          * later.
          */
         list_pos = H5SM_find_in_list(list, &key, &empty_pos);
-        if(list_pos != UFAIL) {
-            /* If the message was previously shared in an object header, share
-             * it in the heap now.
-             */
-            if(list->messages[list_pos].location == H5SM_IN_OH) {
-                /* Put the message in the heap and record its new heap ID */
-                if(H5HF_insert(fheap, dxpl_id, key.encoding_size, key.encoding, &shared.u.heap_id) < 0)
-                    HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to insert message into fractal heap")
-
-                list->messages[list_pos].location = H5SM_IN_HEAP;
-                list->messages[list_pos].u.heap_loc.fheap_id = shared.u.heap_id;
-                list->messages[list_pos].u.heap_loc.ref_count = 2;
-            } /* end if */
-            else {
-                /* If the message was already in the heap, increase its ref count */
-                HDassert(list->messages[list_pos].location == H5SM_IN_HEAP);
-                ++(list->messages[list_pos].u.heap_loc.ref_count);
-            } /* end else */
-
-            /* Set up the shared location to point to the shared location */
-            shared.u.heap_id = list->messages[list_pos].u.heap_loc.fheap_id;
-            found = TRUE;
+        if(defer) {
+            if(list_pos != UFAIL)
+                found = TRUE;
         } /* end if */
+        else {
+            if(list_pos != UFAIL) {
+                /* If the message was previously shared in an object header, share
+                 * it in the heap now.
+                 */
+                if(list->messages[list_pos].location == H5SM_IN_OH) {
+                    /* Put the message in the heap and record its new heap ID */
+                    if(H5HF_insert(fheap, dxpl_id, key.encoding_size, key.encoding, &shared.u.heap_id) < 0)
+                        HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to insert message into fractal heap")
+
+                    list->messages[list_pos].location = H5SM_IN_HEAP;
+                    list->messages[list_pos].u.heap_loc.fheap_id = shared.u.heap_id;
+                    list->messages[list_pos].u.heap_loc.ref_count = 2;
+                } /* end if */
+                else {
+                    /* If the message was already in the heap, increase its ref count */
+                    HDassert(list->messages[list_pos].location == H5SM_IN_HEAP);
+                    ++(list->messages[list_pos].u.heap_loc.ref_count);
+                } /* end else */
+
+                /* Set up the shared location to point to the shared location */
+                shared.u.heap_id = list->messages[list_pos].u.heap_loc.fheap_id;
+                found = TRUE;
+            } /* end if */
+        } /* end else */
     } /* end if */
     /* Index is a B-tree */
     else {
-        H5SM_incr_ref_opdata op_data;
-
         HDassert(header->index_type == H5SM_BTREE);
 
         /* Open the index v2 B-tree */
         if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
 
-        /* Set up callback info */
-        op_data.key = &key;
-        op_data.dxpl_id = dxpl_id;
+        if(defer) {
+            htri_t bt2_find;  /* Result from searching in the v2 B-tree */
 
-        /* If this returns failure, it means that the message wasn't found. */
-        /* If it succeeds, set the heap_id in the shared struct.  It will
-         * return a heap ID, since a message with a reference count greater
-         * than 1 is always shared in the heap.
-         */
-        if(H5B2_modify(bt2, dxpl_id, &key, H5SM_incr_ref, &op_data) >= 0) {
-            shared.u.heap_id = op_data.fheap_id;
-            found = TRUE;
+            /* If this returns 0, it means that the message wasn't found. */
+            /* If it return 1, set the heap_id in the shared struct.  It will
+             * return a heap ID, since a message with a reference count greater
+             * than 1 is always shared in the heap.
+             */
+            if((bt2_find = H5B2_find(bt2, dxpl_id, &key, NULL, NULL)) < 0)
+                HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "can't search for message in index")
+            found = (hbool_t)bt2_find;
         } /* end if */
-        else
-            H5E_clear_stack(NULL); /*ignore error*/
+        else {
+            H5SM_incr_ref_opdata op_data;
+
+            /* Set up callback info */
+            op_data.key = &key;
+            op_data.dxpl_id = dxpl_id;
+
+            /* If this returns failure, it means that the message wasn't found. */
+            /* If it succeeds, set the heap_id in the shared struct.  It will
+             * return a heap ID, since a message with a reference count greater
+             * than 1 is always shared in the heap.
+             */
+            if(H5B2_modify(bt2, dxpl_id, &key, H5SM_incr_ref, &op_data) >= 0) {
+                shared.u.heap_id = op_data.fheap_id;
+                found = TRUE;
+            } /* end if */
+            else
+                H5E_clear_stack(NULL); /*ignore error*/
+        } /* end else */
     } /* end else */
 
     if(found)
@@ -1308,11 +1370,21 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
             HGOTO_ERROR(H5E_SOHM, H5E_BADTYPE, FAIL, "'share in ohdr' check returned error")
 
         /* If this message can be shared in an object header location, it is
-         *      "shareable" but not shared in the heap.  Insert it in the index
-         *      but don't modify the original message.
+         *      "shareable" but not shared in the heap.
          *
-         * If it can't be shared in an object header location or there's no
-         *      object header location available, insert it in the heap.
+         * If 'defer' flag is set:
+         *      We will insert it in the index but not modify the original
+         *              message.
+         *      If it can't be shared in an object header location, we will
+         *              insert it in the heap.  Note that we will only share
+         *              the message in the object header if there is an
+         *              "open_oh" available.
+         *
+         * If 'defer' flag is not set:
+         *      Insert it in the index but don't modify the original message.
+         *      If it can't be shared in an object header location or there's
+         *              no object header location available, insert it in the
+         *              heap.
          */
         if(share_in_ohdr && open_oh) {
             /* Set up shared component info */
@@ -1321,62 +1393,71 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
             /* Retrieve any creation index from the native message */
             if(H5O_msg_get_crt_index(type_id, mesg, &shared.u.loc.index) < 0)
                 HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "unable to retrieve creation index")
-            shared.u.loc.oh_addr = H5O_OH_GET_ADDR(open_oh);
 
-            /* Copy shared component info into key for inserting into index */
-            key.message.location = H5SM_IN_OH;
-            key.message.u.mesg_loc = shared.u.loc;
+            if(defer)
+                shared.u.loc.oh_addr = HADDR_UNDEF;
+            else {
+                shared.u.loc.oh_addr = H5O_OH_GET_ADDR(open_oh);
+
+                /* Copy shared component info into key for inserting into index */
+                key.message.location = H5SM_IN_OH;
+                key.message.u.mesg_loc = shared.u.loc;
+            } /* end else */
         } /* end if */
         else {
-            /* Put the message in the heap and record its new heap ID */
-            if(H5HF_insert(fheap, dxpl_id, key.encoding_size, key.encoding, &shared.u.heap_id) < 0)
-                HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to insert message into fractal heap")
-
             /* Set up shared component info */
-            /* (heap ID set above) */
+            /* (heap ID set below, if not deferred) */
             shared.type = H5O_SHARE_TYPE_SOHM;
 
-            key.message.location = H5SM_IN_HEAP;
-            key.message.u.heap_loc.fheap_id = shared.u.heap_id;
-            key.message.u.heap_loc.ref_count = 1;
-        } /* end else */
+            if(!defer) {
+                /* Put the message in the heap and record its new heap ID */
+                if(H5HF_insert(fheap, dxpl_id, key.encoding_size, key.encoding, &shared.u.heap_id) < 0)
+                    HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to insert message into fractal heap")
 
-        /* Set common information */
-        key.message.msg_type_id = type_id;
-
-        /* Check whether the list has grown enough that it needs to become a B-tree */
-        if(header->index_type == H5SM_LIST && header->num_messages >= header->list_max)
-            if(H5SM_convert_list_to_btree(f, header, &list, fheap, open_oh, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to convert list to B-tree")
-
-        /* Insert the new message into the SOHM index */
-        if(header->index_type == H5SM_LIST) {
-            /* Index is a list.  Find an empty spot if we haven't already */
-            if(empty_pos == UFAIL)
-                if((H5SM_find_in_list(list, NULL, &empty_pos) == UFAIL) || empty_pos == UFAIL)
-                    HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to find empty entry in list")
-
-            /* Insert message into list */
-            HDassert(list->messages[empty_pos].location == H5SM_NO_LOC);
-            HDassert(key.message.location != H5SM_NO_LOC);
-            list->messages[empty_pos] = key.message;
-        } /* end if */
-        /* Index is a B-tree */
-        else {
-            HDassert(header->index_type == H5SM_BTREE);
-
-            /* Open the index v2 B-tree, if it isn't already */
-            if(NULL == bt2) {
-                if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
-                    HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
+                key.message.location = H5SM_IN_HEAP;
+                key.message.u.heap_loc.fheap_id = shared.u.heap_id;
+                key.message.u.heap_loc.ref_count = 1;
             } /* end if */
-
-            if(H5B2_insert(bt2, dxpl_id, &key) < 0)
-                HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "couldn't add SOHM to B-tree")
         } /* end else */
 
-        ++(header->num_messages);
-        (*cache_flags_ptr) |= H5AC__DIRTIED_FLAG;
+        if(!defer) {
+            /* Set common information */
+            key.message.msg_type_id = type_id;
+
+            /* Check whether the list has grown enough that it needs to become a B-tree */
+            if(header->index_type == H5SM_LIST && header->num_messages >= header->list_max)
+                if(H5SM_convert_list_to_btree(f, header, &list, fheap, open_oh, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to convert list to B-tree")
+
+            /* Insert the new message into the SOHM index */
+            if(header->index_type == H5SM_LIST) {
+                /* Index is a list.  Find an empty spot if we haven't already */
+                if(empty_pos == UFAIL)
+                    if((H5SM_find_in_list(list, NULL, &empty_pos) == UFAIL) || empty_pos == UFAIL)
+                        HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to find empty entry in list")
+
+                /* Insert message into list */
+                HDassert(list->messages[empty_pos].location == H5SM_NO_LOC);
+                HDassert(key.message.location != H5SM_NO_LOC);
+                list->messages[empty_pos] = key.message;
+            } /* end if */
+            /* Index is a B-tree */
+            else {
+                HDassert(header->index_type == H5SM_BTREE);
+
+                /* Open the index v2 B-tree, if it isn't already */
+                if(NULL == bt2) {
+                    if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
+                        HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
+                } /* end if */
+
+                if(H5B2_insert(bt2, dxpl_id, &key) < 0)
+                    HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "couldn't add SOHM to B-tree")
+            } /* end else */
+
+            ++(header->num_messages);
+            (*cache_flags_ptr) |= H5AC__DIRTIED_FLAG;
+        } /* end if */
     } /* end else */
 
     /* Set the file pointer & message type for the shared component */
@@ -1395,7 +1476,7 @@ done:
         HDONE_ERROR(H5E_SOHM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for SOHM index")
 
     /* If we got a list out of the cache, release it (it is always dirty after writing a message) */
-    if(list && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DIRTIED_FLAG) < 0)
+    if(list && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, list, defer ? H5AC__NO_FLAGS_SET : H5AC__DIRTIED_FLAG) < 0)
 	HDONE_ERROR(H5E_SOHM, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM index")
 
     if(encoding_buf)
@@ -1537,7 +1618,7 @@ H5SM_find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *e
      * Also record the first empty position we find.
      */
     for(x = 0; x < list->header->list_max; x++) {
-        if(key && (list->messages[x].location != H5SM_NO_LOC) &&
+        if((list->messages[x].location != H5SM_NO_LOC) &&
                 (0 == H5SM_message_compare(key, &(list->messages[x]))))
             HGOTO_DONE(x)
         else if(empty_pos && list->messages[x].location == H5SM_NO_LOC) {
@@ -1892,14 +1973,14 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
         /* Get index conversion limits */
-        sohm_l2b = table->indexes[0].list_max;
-        sohm_b2l = table->indexes[0].btree_min;
+        sohm_l2b = (unsigned)table->indexes[0].list_max;
+        sohm_b2l = (unsigned)table->indexes[0].btree_min;
 
         /* Iterate through all indices */
         for(u = 0; u < table->num_indexes; ++u) {
             /* Pack information about the individual SOHM index */
             index_flags[u] = table->indexes[u].mesg_types;
-            minsizes[u] = table->indexes[u].min_mesg_size;
+            minsizes[u] = (unsigned)table->indexes[u].min_mesg_size;
 
             /* Sanity check */
             HDassert(sohm_l2b == table->indexes[u].list_max);
@@ -2158,7 +2239,7 @@ done:
  */
 static herr_t
 H5SM_read_iter_op(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
-    hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
+    unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5SM_read_udata_t *udata = (H5SM_read_udata_t *) _udata;
     herr_t ret_value = H5_ITER_CONT;

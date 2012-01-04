@@ -151,10 +151,14 @@
 
 
 #ifdef H5_HAVE_WIN32_API
-#define WIN32_LEAN_AND_MEAN    /*Exclude rarely-used stuff from Windows headers */
+#define WIN32_LEAN_AND_MEAN    /* Exclude rarely-used stuff from Windows headers */
 
 #ifdef H5_HAVE_WINSOCK_H
 #include <winsock2.h>
+#endif
+
+#ifdef H5_HAVE_THREADSAFE
+#include <process.h>        /* For _beginthread() */
 #endif
 
 #include <windows.h>

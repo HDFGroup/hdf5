@@ -82,31 +82,41 @@
 
 
 /* Define a code template for comparing scalar keys for the "CMP" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_SCALAR_CMP(TYPE, PNODE, PKEY, HASHVAL)              \
+#define H5SL_LOCATE_SCALAR_CMP(SLIST, TYPE, PNODE, PKEY, HASHVAL)              \
         (*(TYPE *)((PNODE)->key) < *(TYPE *)PKEY)
 
 /* Define a code template for comparing string keys for the "CMP" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_STRING_CMP(TYPE, PNODE, PKEY, HASHVAL)              \
+#define H5SL_LOCATE_STRING_CMP(SLIST, TYPE, PNODE, PKEY, HASHVAL)              \
         (((PNODE)->hashval == HASHVAL) ?                                \
             (HDstrcmp((const char *)(PNODE)->key, (const char *)PKEY) < 0) : \
             ((PNODE)->hashval < HASHVAL))
 
 /* Define a code template for comparing H5_obj_t keys for the "CMP" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_OBJ_CMP(TYPE, PNODE, PKEY, HASHVAL)                 \
-        ((((TYPE *)((PNODE)->key))->fileno < ((TYPE *)PKEY)->fileno) ? TRUE : (((TYPE *)((PNODE)->key))->addr < ((TYPE *)PKEY)->addr))
+#define H5SL_LOCATE_OBJ_CMP(SLIST, TYPE, PNODE, PKEY, HASHVAL)                 \
+        ((((TYPE *)((PNODE)->key))->fileno == ((TYPE *)PKEY)->fileno)          \
+        ? (((TYPE *)((PNODE)->key))->addr < ((TYPE *)PKEY)->addr)              \
+        : (((TYPE *)((PNODE)->key))->fileno < ((TYPE *)PKEY)->fileno))
+
+/* Define a code template for comparing generic keys for the "CMP" in the H5SL_LOCATE macro */
+#define H5SL_LOCATE_GENERIC_CMP(SLIST, TYPE, PNODE, PKEY, HASHVAL)             \
+        ((SLIST)->cmp((TYPE *)((PNODE)->key), (TYPE *)PKEY) < 0)
 
 
 /* Define a code template for comparing scalar keys for the "EQ" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_SCALAR_EQ(TYPE, PNODE, PKEY, HASHVAL)               \
+#define H5SL_LOCATE_SCALAR_EQ(SLIST, TYPE, PNODE, PKEY, HASHVAL)               \
         (*(TYPE *)((PNODE)->key) == *(TYPE *)PKEY)
 
 /* Define a code template for comparing string keys for the "EQ" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_STRING_EQ(TYPE, PNODE, PKEY, HASHVAL)               \
+#define H5SL_LOCATE_STRING_EQ(SLIST, TYPE, PNODE, PKEY, HASHVAL)               \
         (((PNODE)->hashval == HASHVAL) && (HDstrcmp((const char *)(PNODE)->key, (const char *)PKEY) == 0))
 
 /* Define a code template for comparing H5_obj_t keys for the "EQ" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_OBJ_EQ(TYPE, PNODE, PKEY, HASHVAL)                  \
+#define H5SL_LOCATE_OBJ_EQ(SLIST, TYPE, PNODE, PKEY, HASHVAL)                  \
         ((((TYPE *)((PNODE)->key))->fileno == ((TYPE *)PKEY)->fileno) && (((TYPE *)((PNODE)->key))->addr == ((TYPE *)PKEY)->addr))
+
+/* Define a code template for comparing generic keys for the "EQ" in the H5SL_LOCATE macro */
+#define H5SL_LOCATE_GENERIC_EQ(SLIST, TYPE, PNODE, PKEY, HASHVAL)             \
+        ((SLIST)->cmp((TYPE *)((PNODE)->key), (TYPE *)PKEY) == 0)
 
 
 /* Define a code template for initializing the hash value for scalar keys for the "HASHINIT" in the H5SL_LOCATE macro */
@@ -119,6 +129,9 @@
 /* Define a code template for initializing the hash value for H5_obj_t keys for the "HASHINIT" in the H5SL_LOCATE macro */
 #define H5SL_LOCATE_OBJ_HASHINIT(KEY, HASHVAL)
 
+/* Define a code template for initializing the hash value for generic keys for the "HASHINIT" in the H5SL_LOCATE macro */
+#define H5SL_LOCATE_GENERIC_HASHINIT(KEY, HASHVAL)
+
 
 /* Macro used to find node for operation */
 #define H5SL_LOCATE(OP, CMP, SLIST, X, TYPE, KEY, HASHVAL)      \
@@ -130,15 +143,15 @@
     for(_i = (int)SLIST->curr_level; _i >= 0; _i--) {                   \
         _count = 0;                                                     \
         while(_count < 3 && X->forward[_i] &&                           \
-                H5_GLUE3(H5SL_LOCATE_,CMP,_CMP)(TYPE, X->forward[_i], KEY, HASHVAL) ) { \
+                H5_GLUE3(H5SL_LOCATE_,CMP,_CMP)(SLIST, TYPE, X->forward[_i], KEY, HASHVAL) ) { \
             X = X->forward[_i];                                         \
             _count++;                                                   \
         } /* end while */                                               \
     } /* end for */                                                     \
     X = X->forward[0];                                                  \
-    if(X != NULL && H5_GLUE3(H5SL_LOCATE_,CMP,_EQ)(TYPE, X, KEY, HASHVAL) ) {    \
+    if(X != NULL && H5_GLUE3(H5SL_LOCATE_,CMP,_EQ)(SLIST, TYPE, X, KEY, HASHVAL) ) { \
         /* What to do when a node is found */				\
-        H5_GLUE3(H5SL_LOCATE_,OP,_FOUND)(SLIST, X, _i)          \
+        H5_GLUE3(H5SL_LOCATE_,OP,_FOUND)(SLIST, X, _i)                  \
     } /* end if */                                                      \
 }
 
@@ -266,7 +279,7 @@
             } /* end if */                                                     \
                                                                                \
             /* Check if this node is the start of the next gap */              \
-            if(!_drop && !H5_GLUE3(H5SL_LOCATE_,CMP,_CMP)(TYPE, X->forward[_i], KEY, HASHVAL)) \
+            if(!_drop && !H5_GLUE3(H5SL_LOCATE_,CMP,_CMP)(SLIST, TYPE, X->forward[_i], KEY, HASHVAL)) \
                 _drop = X;                                                     \
                                                                                \
             /* No need to check the last node in the gap if there are 3, as */ \
@@ -280,7 +293,7 @@
             X = X->forward[_i];                                                \
         } /* end for */                                                        \
         HDassert(!_drop->forward[_i] ||                                        \
-                !H5_GLUE3(H5SL_LOCATE_,CMP,_CMP)(TYPE, _drop->forward[_i], KEY, HASHVAL)); \
+                !H5_GLUE3(H5SL_LOCATE_,CMP,_CMP)(SLIST, TYPE, _drop->forward[_i], KEY, HASHVAL)); \
                                                                                \
         /* Promote the middle node if necessary */                             \
         if(_count == 3) {                                                      \
@@ -293,7 +306,7 @@
         _next = _drop->forward[_i];                                            \
     } /* end for */                                                            \
                                                                                \
-    if(_next && H5_GLUE3(H5SL_LOCATE_,CMP,_EQ)(TYPE, _next, KEY, HASHVAL))     \
+    if(_next && H5_GLUE3(H5SL_LOCATE_,CMP,_EQ)(SLIST, TYPE, _next, KEY, HASHVAL)) \
         HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, NULL, "can't insert duplicate key") \
 }
 
@@ -316,7 +329,7 @@
     H5_GLUE3(H5SL_LOCATE_,CMP,_HASHINIT)(KEY, HASHVAL)                         \
                                                                                \
     /* Find the gap to drop in to at the highest level */                      \
-    while(X && (!X->key || H5_GLUE3(H5SL_LOCATE_,CMP,_CMP)(TYPE, X, KEY, HASHVAL))) { \
+    while(X && (!X->key || H5_GLUE3(H5SL_LOCATE_,CMP,_CMP)(SLIST, TYPE, X, KEY, HASHVAL))) { \
         _llast = _last;                                                        \
         _last = X;                                                             \
         X = X->forward[_i];                                                    \
@@ -347,7 +360,7 @@
                 break;                                                         \
             } else { /* !_drop */                                              \
                 /* Check if this node is the start of the next gap */          \
-                if (!H5_GLUE3(H5SL_LOCATE_,CMP,_CMP)(TYPE, X->forward[_i], KEY, HASHVAL)) { \
+                if (!H5_GLUE3(H5SL_LOCATE_,CMP,_CMP)(SLIST, TYPE, X->forward[_i], KEY, HASHVAL)) { \
                     _drop = X;                                                 \
                     /* Again check if we can stop searching */                 \
                     if(_count) {                                               \
@@ -370,7 +383,7 @@
         } /* end for */                                                        \
         HDassert(_count >= 1 && _count <= 3);                                  \
         HDassert(!_drop->forward[_i] ||                                        \
-                !H5_GLUE3(H5SL_LOCATE_,CMP,_CMP)(TYPE, _drop->forward[_i], KEY, HASHVAL)); \
+                !H5_GLUE3(H5SL_LOCATE_,CMP,_CMP)(SLIST, TYPE, _drop->forward[_i], KEY, HASHVAL)); \
                                                                                \
         /* Check if we need to adjust node heights */                          \
         if(_count == 1) {                                                      \
@@ -431,7 +444,7 @@
     } /* end for */                                                            \
                                                                                \
     /* Check if we've found the node */                                        \
-    if(_next && H5_GLUE3(H5SL_LOCATE_,CMP,_EQ)(TYPE, _next, KEY, HASHVAL)) {   \
+    if(_next && H5_GLUE3(H5SL_LOCATE_,CMP,_EQ)(SLIST, TYPE, _next, KEY, HASHVAL)) { \
         void *tmp = _next->item;                                               \
         X = _next;                                                             \
                                                                                \
@@ -485,6 +498,7 @@ struct H5SL_node_t {
 struct H5SL_t {
     /* Static values for each list */
     H5SL_type_t type;   /* Type of skip list */
+    H5SL_cmp_t cmp;     /* Comparison callback, if type is H5SL_TYPE_GENERIC */
 
     /* Dynamic values for each list */
     int curr_level;             /* Current top level used in list */
@@ -667,6 +681,10 @@ H5SL_insert_common(H5SL_t *slist, void *item, const void *key)
             H5SL_INSERT(OBJ, slist, prev, const H5_obj_t, key, -)
             break;
 
+        case H5SL_TYPE_GENERIC:
+            H5SL_INSERT(GENERIC, slist, prev, const void, key, -)
+            break;
+
         default:
             HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
@@ -834,7 +852,7 @@ done:
  PURPOSE
     Create a skip list
  USAGE
-    H5SL_t *H5SL_create(H5SL_type_t type)
+    H5SL_t *H5SL_create(H5SL_type_t type, H5SL_cmp_t cmp)
 
  RETURNS
     Returns a pointer to a skip list on success, NULL on failure.
@@ -846,7 +864,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 H5SL_t *
-H5SL_create(H5SL_type_t type)
+H5SL_create(H5SL_type_t type, H5SL_cmp_t cmp)
 {
     H5SL_t *new_slist = NULL;   /* Pointer to new skip list object created */
     H5SL_node_t *header;        /* Pointer to skip list header node */
@@ -855,7 +873,7 @@ H5SL_create(H5SL_type_t type)
     FUNC_ENTER_NOAPI(H5SL_create,NULL);
 
     /* Check args */
-    HDassert(type>=H5SL_TYPE_INT && type<=H5SL_TYPE_OBJ);
+    HDassert(type>=H5SL_TYPE_INT && type<=H5SL_TYPE_GENERIC);
 
     /* Allocate skip list structure */
     if(NULL == (new_slist = H5FL_MALLOC(H5SL_t)))
@@ -863,6 +881,8 @@ H5SL_create(H5SL_type_t type)
 
     /* Set the static internal fields */
     new_slist->type = type;
+    HDassert((type == H5SL_TYPE_GENERIC) == !!cmp);
+    new_slist->cmp = cmp;
 
     /* Set the dynamic internal fields */
     new_slist->curr_level = -1;
@@ -1090,6 +1110,10 @@ H5SL_remove(H5SL_t *slist, const void *key)
             H5SL_REMOVE(OBJ, slist, x, const H5_obj_t, key, -)
             break;
 
+        case H5SL_TYPE_GENERIC:
+            H5SL_REMOVE(GENERIC, slist, x, const void, key, -)
+            break;
+
         default:
             HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
@@ -1269,6 +1293,10 @@ H5SL_search(H5SL_t *slist, const void *key)
             H5SL_SEARCH(OBJ, slist, x, const H5_obj_t, key, -)
             break;
 
+        case H5SL_TYPE_GENERIC:
+            H5SL_SEARCH(GENERIC, slist, x, const void, key, -)
+            break;
+
         default:
             HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
@@ -1352,6 +1380,10 @@ H5SL_less(H5SL_t *slist, const void *key)
 
         case H5SL_TYPE_OBJ:
             H5SL_SEARCH(OBJ, slist, x, const H5_obj_t, key, -)
+            break;
+
+        case H5SL_TYPE_GENERIC:
+            H5SL_SEARCH(GENERIC, slist, x, const void, key, -)
             break;
 
         default:
@@ -1452,6 +1484,10 @@ H5SL_greater(H5SL_t *slist, const void *key)
             H5SL_SEARCH(OBJ, slist, x, const H5_obj_t, key, -)
             break;
 
+        case H5SL_TYPE_GENERIC:
+            H5SL_SEARCH(GENERIC, slist, x, const void, key, -)
+            break;
+
         default:
             HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
@@ -1540,6 +1576,10 @@ H5SL_find(H5SL_t *slist, const void *key)
             H5SL_FIND(OBJ, slist, x, const H5_obj_t, key, -)
             break;
 
+        case H5SL_TYPE_GENERIC:
+            H5SL_FIND(GENERIC, slist, x, const void, key, -)
+            break;
+
         default:
             HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
@@ -1623,6 +1663,10 @@ H5SL_below(H5SL_t *slist, const void *key)
 
         case H5SL_TYPE_OBJ:
             H5SL_FIND(OBJ, slist, x, const H5_obj_t, key, -)
+            break;
+
+        case H5SL_TYPE_GENERIC:
+            H5SL_FIND(GENERIC, slist, x, const void, key, -)
             break;
     } /* end switch */
 
@@ -1718,6 +1762,10 @@ H5SL_above(H5SL_t *slist, const void *key)
 
         case H5SL_TYPE_OBJ:
             H5SL_FIND(OBJ, slist, x, const H5_obj_t, key, -)
+            break;
+
+        case H5SL_TYPE_GENERIC:
+            H5SL_FIND(GENERIC, slist, x, const void, key, -)
             break;
     } /* end switch */
 

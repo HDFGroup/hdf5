@@ -86,6 +86,9 @@ $SRC_H5JAM_TESTFILES/h5unjam-help.txt
 $SRC_H5JAM_TESTFILES/h5jam-ub-nohdf5.txt
 "
 
+# Source in the output filter function definitions.
+. $srcdir/../../bin/output_filter.sh
+
 #
 # copy test files and expected output files from source dirs to test dir
 #
@@ -462,6 +465,8 @@ TOOLTEST_OUTPUT() {
     expect="$TESTDIR/$1"
     actual="$TESTDIR/`basename $1 .ls`.out"
     actual_err="$TESTDIR/`basename $1 .ls`.err"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
     shift
     retvalexpect=$1
     shift
@@ -472,6 +477,11 @@ TOOLTEST_OUTPUT() {
         $TOOLCMD "$@"
     ) >$actual 2>$actual_err
 
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
     # combine stderr to stdout for output compare 
     cat $actual_err >> $actual
 

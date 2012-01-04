@@ -32,6 +32,10 @@ extern "C" {
 #define PRINT_DATA_MAX_SIZE 	512
 #define OUTBUFF_SIZE 		(PRINT_DATA_MAX_SIZE*4)
 
+/* Maximum size used in a call to malloc for a dataset */
+H5TOOLS_DLLVAR hsize_t H5TOOLS_MALLOCSIZE;
+/* size of hyperslab buffer when a dataset is bigger than H5TOOLS_MALLOCSIZE */
+H5TOOLS_DLLVAR hsize_t H5TOOLS_BUFSIZE;
 H5TOOLS_DLLVAR int  g_nTasks;
 H5TOOLS_DLLVAR unsigned char g_Parallel;
 H5TOOLS_DLLVAR char    outBuff[];
@@ -169,7 +173,7 @@ H5TOOLS_DLL const char *h5tools_getprogname(void);
 H5TOOLS_DLL void     h5tools_setprogname(const char*progname);
 H5TOOLS_DLL int      h5tools_getstatus(void);
 H5TOOLS_DLL void     h5tools_setstatus(int d_status);
-
+H5TOOLS_DLL int h5tools_getenv_update_hyperslab_bufsize(void);
 #ifdef __cplusplus
 }
 #endif

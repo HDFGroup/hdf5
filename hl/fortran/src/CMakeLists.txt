@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.6)
 PROJECT(HDF5_HL_F90_SRC C CXX Fortran)
 
 #-----------------------------------------------------------------------------
@@ -30,6 +30,7 @@ ADD_LIBRARY (${HDF5_HL_F90_C_LIB_TARGET} ${LIB_TYPE} ${HDF5_HL_F90_C_SRCS} ${HDF
 TARGET_LINK_LIBRARIES (${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_F90_C_LIB_TARGET} ${HDF5_HL_LIB_TARGET})
 SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_F90_C_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_HL_F90_C_LIB_NAME} ${LIB_TYPE})
+SET_TARGET_PROPERTIES (${HDF5_HL_F90_C_LIB_TARGET} PROPERTIES FOLDER libraries/hl/fortran)
 
 #-----------------------------------------------------------------------------
 # Fortran Modules
@@ -65,18 +66,30 @@ SET_TARGET_PROPERTIES (${HDF5_HL_F90_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fort
 TARGET_LINK_LIBRARIES (${HDF5_HL_F90_LIB_TARGET} ${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_F90_LIB_TARGET})
 SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_F90_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_HL_F90_LIB_TARGET} ${HDF5_HL_F90_LIB_NAME} ${LIB_TYPE})
+SET_TARGET_PROPERTIES (${HDF5_HL_F90_LIB_TARGET} PROPERTIES FOLDER libraries/hl/fortran)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
-INSTALL (
-    DIRECTORY
-        ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
-    DESTINATION
-        ${HDF5_INSTALL_INCLUDE_DIR}/fortran
-    COMPONENT
-        fortheaders
-)
+IF (WIN32 AND NOT CYGWIN)
+  INSTALL (
+      DIRECTORY
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
+      DESTINATION
+          ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+      COMPONENT
+          fortheaders
+  )
+ELSE (WIN32 AND NOT CYGWIN)
+  INSTALL (
+      DIRECTORY
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/
+      DESTINATION
+          ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+      COMPONENT
+          fortheaders
+  )
+ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.6)
 PROJECT (HDF5_F90_SRC C CXX Fortran)
 
 #-----------------------------------------------------------------------------
@@ -115,9 +115,10 @@ ENDIF (H5_HAVE_PARALLEL)
 SET_SOURCE_FILES_PROPERTIES (${f90CStub_C_SRCS} PROPERTIES LANGUAGE C)
 
 ADD_LIBRARY (${HDF5_F90_C_LIB_TARGET} ${LIB_TYPE} ${f90CStub_C_SRCS})
-TARGET_LINK_LIBRARIES (${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET})
+TARGET_LINK_LIBRARIES (${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
 SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_C_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_F90_C_LIB_TARGET} ${HDF5_F90_C_LIB_NAME} ${LIB_TYPE})
+SET_TARGET_PROPERTIES (${HDF5_F90_C_LIB_TARGET} PROPERTIES FOLDER libraries/fortran)
 
 #-----------------------------------------------------------------------------
 # Fortran 2003 standard
@@ -179,18 +180,18 @@ SET (f90_F_SRCS
 #-----------------------------------------------------------------------------
 # Add H5FDMPIO if parallel
 #-----------------------------------------------------------------------------
-IF (H5_HAVE_PARALLEL)
+IF (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   SET (f90_F_SRCS
     ${f90_F_SRCS}
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5mpio.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5FDmpioff.f90
   )
-ELSE (H5_HAVE_PARALLEL)
+ELSE (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   SET (f90_F_SRCS
     ${f90_F_SRCS}
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.f90
   )
-ENDIF (H5_HAVE_PARALLEL)
+ENDIF (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
 
 #-----------------------------------------------------------------------------
 # Add Main fortran library
@@ -219,8 +220,12 @@ ENDIF (WIN32 AND NOT CYGWIN)
 TARGET_FORTRAN_WIN_PROPERTIES (${HDF5_F90_LIB_TARGET} ${SHARED_LINK_FLAGS})
 SET_TARGET_PROPERTIES (${HDF5_F90_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fortran)
 TARGET_LINK_LIBRARIES (${HDF5_F90_LIB_TARGET} ${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET})
+IF (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
+  TARGET_LINK_LIBRARIES (${HDF5_F90_LIB_TARGET} ${MPI_Fortran_LIBRARIES})
+ENDIF (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
 SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_F90_LIB_TARGET} ${HDF5_F90_LIB_NAME} ${LIB_TYPE})
+SET_TARGET_PROPERTIES (${HDF5_F90_LIB_TARGET} PROPERTIES FOLDER libraries/fortran)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
@@ -238,14 +243,25 @@ INSTALL (
         fortheaders
 )
 
-INSTALL (
-    DIRECTORY
-        ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
-    DESTINATION
-        ${HDF5_INSTALL_INCLUDE_DIR}/fortran
-    COMPONENT
-        fortheaders
-)
+IF (WIN32 AND NOT CYGWIN)
+  INSTALL (
+      DIRECTORY
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
+      DESTINATION
+          ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+      COMPONENT
+          fortheaders
+  )
+ELSE (WIN32 AND NOT CYGWIN)
+  INSTALL (
+      DIRECTORY
+          ${CMAKE_Fortran_MODULE_DIRECTORY}/
+      DESTINATION
+          ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+      COMPONENT
+          fortheaders
+  )
+ENDIF (WIN32 AND NOT CYGWIN)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects

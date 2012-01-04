@@ -68,6 +68,9 @@
 /* Define if the compiler understands the __func__ keyword */
 #undef HAVE_C99_FUNC
 
+/* Define to 1 if you have the `clock_gettime' function. */
+#undef HAVE_CLOCK_GETTIME
+
 /* Define if the function stack tracing code is to be compiled in */
 #undef HAVE_CODESTACK
 
