@@ -1579,6 +1579,8 @@
 ./tools/testfiles/tsaf.ls
 ./tools/testfiles/tstr-1.ls
 ./tools/testfiles/tattr2.ls
+./tools/testfiles/tattrreg_le.ls
+./tools/testfiles/tattrreg_be.ls
 ./tools/testfiles/tvldtypes1.ls
 ./tools/testfiles/tvldtypes2le.ls
 ./tools/testfiles/tvldtypes2be.ls
