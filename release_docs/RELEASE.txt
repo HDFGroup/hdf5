@@ -112,7 +112,8 @@ Bug Fixes since HDF5-1.8.8
 
     Tools
     -----
-    - None
+    - h5ls: fixed segfault when access region reference data in an
+      attribute. HDFFV-7838 (JKM 2012/01/06)
 
     F90 API
     -------

@@ -1447,9 +1447,15 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
             info.line_suf = "\"";
         } /* end if */
 
-        /* values of type reference */
+        /* values of reference type formats */
+        info.dset_format =  "DSET-%s ";
+        info.dset_hidefileno = 1;
+        info.dset_blockformat_pre = "%sBlk%lu: ";
+        info.dset_ptformat_pre = "%sPt%lu: ";
+
         info.obj_format = "-%lu:"H5_PRINTF_HADDR_FMT;
         info.obj_hidefileno = 0;
+
         if(hexdump_g)
            p_type = H5Tcopy(type);
         else
