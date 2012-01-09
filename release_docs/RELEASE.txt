@@ -632,8 +632,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5repack: fixed memory leak for handling variable length string in 
+          attribute.  HDFFV-7840 (JKM 2012/01/06)
         - h5ls: fixed segfault when access region reference data in an
-          attribute. (JKM 2011/12/29)
+          attribute. HDFFV-7838 (JKM 2011/12/29)
         - h5diff: fixed segfault over non-comparable attribute with different 
           dimention or rank, along with '-c' option to display details.
           HDFFV-7770 (JKM 2011/10/24)
