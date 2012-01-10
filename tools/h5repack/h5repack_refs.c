@@ -533,6 +533,23 @@ static int copy_refs_attr(hid_t loc_in,
         		}
         		H5Tclose(mtid);
         	}
+            
+            /* if don't contain reference type, free malloc for continue 
+             * and malloc again later */
+            if (!ref_comp_field_n) 
+            {
+                if (ref_comp_index) 
+                {
+                	HDfree(ref_comp_index);
+                	ref_comp_index = NULL;
+                }
+
+                if (ref_comp_size) 
+                {
+            	    HDfree(ref_comp_size);
+        	        ref_comp_size = NULL;
+                }
+            }
         }
 
         is_ref_comp = (ref_comp_field_n > 0);
