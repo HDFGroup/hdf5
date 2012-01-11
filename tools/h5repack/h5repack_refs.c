@@ -534,8 +534,9 @@ static int copy_refs_attr(hid_t loc_in,
         		H5Tclose(mtid);
         	}
             
-            /* if don't contain reference type, free malloc for continue 
-             * and malloc again later */
+            /* if compound don't contain reference type member, free the above 
+             * mallocs. Otherwise there can be memory leaks by the 'continue' 
+             * statement below. */
             if (!ref_comp_field_n) 
             {
                 if (ref_comp_index) 
