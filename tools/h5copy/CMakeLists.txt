@@ -34,43 +34,49 @@ IF (BUILD_TESTING)
   ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
   
   # --------------------------------------------------------------------
-  # Copy all the HDF5 files from the test directory into the source directory
+  # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
-  SET (HDF5_REFERENCE_FILES
-      h5copy_extlinks_src.out.ls
-      h5copy_ref.out.ls
-      h5copytst.out.ls
+  SET (LIST_HDF5_TEST_FILES
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_extlinks_src.h5
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_extlinks_trg.h5
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_ref.h5
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copytst.h5
   )
-  SET (HDF5_REFERENCE_TEST_FILES
-      h5copy_extlinks_src.h5
-      h5copy_extlinks_trg.h5
-      h5copy_ref.h5
-      h5copytst.h5
-      h5copy_misc1.out
+
+  SET (LIST_OTHER_TEST_FILES
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_misc1.out
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_extlinks_src.out.ls
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_ref.out.ls
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copytst.out.ls
   )
 
   FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-  FOREACH (ls_file ${HDF5_REFERENCE_FILES})
-    SET (lsdest "${PROJECT_BINARY_DIR}/testfiles/${ls_file}")
-    #MESSAGE (STATUS " Translating ${ls_file}")
-    ADD_CUSTOM_COMMAND (
-        TARGET     h5copy
-        POST_BUILD
-        COMMAND    ${XLATE_UTILITY}
-        ARGS       ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/${ls_file} ${lsdest} -l3
-    )
-  ENDFOREACH (ls_file ${HDF5_REFERENCE_FILES})
 
-  FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    SET (dest "${PROJECT_BINARY_DIR}/testfiles/${h5_file}")
-    #MESSAGE (STATUS " Copying ${h5_file}")
+  FOREACH (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+    GET_FILENAME_COMPONENT(fname "${listfiles}" NAME)
+    SET (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
+    #MESSAGE (STATUS " Copying ${listfiles}")
     ADD_CUSTOM_COMMAND (
         TARGET     h5copy
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/${h5_file} ${dest}
+        ARGS       -E copy_if_different ${listfiles} ${dest}
     )
-  ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  ENDFOREACH (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+
+  #
+  # This section can be removed, but leave here for a reference later.
+  # Purpose: '-l3' ignores top 3 lines when copy text file.
+  #
+  #FOREACH (listfiles ${LIST_OTHER_TEST_FILES})
+  #  SET (lsdest "${PROJECT_BINARY_DIR}/testfiles/${listfiles}")
+  #  ADD_CUSTOM_COMMAND (
+  #      TARGET     h5copy
+  #      POST_BUILD
+  #      COMMAND    ${XLATE_UTILITY}
+  #      ARGS       ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/${listfiles} ${lsdest} -l3
+  #  )
+  #ENDFOREACH (listfiles ${LIST_OTHER_TEST_FILES})
   
 ##############################################################################
 ##############################################################################
