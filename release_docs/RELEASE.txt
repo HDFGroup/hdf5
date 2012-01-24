@@ -632,6 +632,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: fixed to prevent from displaying error stack message when 
+          comparing the two dangling symlinks with follow-symlinks option.
+          HDFFV-7836 (JKM 2012/01/13)
         - h5repack: fixed memory leak for handling variable length string in 
           attribute.  HDFFV-7840 (JKM 2012/01/06)
         - h5ls: fixed segfault when access region reference data in an
