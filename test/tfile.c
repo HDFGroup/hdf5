@@ -1263,6 +1263,79 @@ test_file_perm(void)
 
 /****************************************************************
 **
+**  test_file_perm2(): low-level file test routine.
+**      This test verifies that no object can be created in a 
+**      file that is opened for read-only.
+**
+*****************************************************************/
+static void 
+test_file_perm2(void)
+{
+    hid_t    file;      /* File opened with read-write permission */
+    hid_t    filero;    /* Same file opened with read-only permission */
+    hid_t    dspace;    /* Dataspace ID */
+    hid_t    group;     /* Group ID */
+    hid_t    dset;      /* Dataset ID */
+    hid_t    type;      /* Datatype ID */
+    hid_t    attr;      /* Attribute ID */
+    herr_t   ret; 
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Low-Level File Permissions again\n"));
+
+    dspace = H5Screate(H5S_SCALAR);
+    CHECK(dspace, FAIL, "H5Screate");
+
+    /* Create the file (with read-write permission) */
+    file = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Open the file (with read-only permission) */
+    filero = H5Fopen(FILE2, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(filero, FAIL, "H5Fopen");
+
+    /* Create a group with the read-only file handle (should fail) */
+    H5E_BEGIN_TRY {
+        group = H5Gcreate2(filero, "MY_GROUP", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    } H5E_END_TRY;
+    VERIFY(group, FAIL, "H5Gcreate2");
+
+    /* Create a dataset with the read-only file handle (should fail) */
+    H5E_BEGIN_TRY {
+        dset = H5Dcreate2(filero, F2_DSET, H5T_NATIVE_INT, dspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    } H5E_END_TRY;
+    VERIFY(dset, FAIL, "H5Dcreate2");
+
+    /* Create an attribute with the read-only file handle (should fail) */
+    H5E_BEGIN_TRY {
+        attr = H5Acreate2(filero, "MY_ATTR", H5T_NATIVE_INT, dspace, H5P_DEFAULT, H5P_DEFAULT);
+    } H5E_END_TRY;
+    VERIFY(attr, FAIL, "H5Acreate2");
+
+    type = H5Tcopy(H5T_NATIVE_SHORT);
+    CHECK(type, FAIL, "H5Tcopy");
+
+    type = H5Tcopy(H5T_NATIVE_SHORT);
+    CHECK(type, FAIL, "H5Tcopy");
+
+    /* Commit a datatype with the read-only file handle (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5Tcommit2(filero, "MY_DTYPE", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Tcommit2");
+
+    ret = H5Fclose(filero);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Sclose(dspace);
+    CHECK(ret, FAIL, "H5Sclose");
+} /* end test_file_perm2() */
+
+/****************************************************************
+**
 **  test_file_freespace(): low-level file test routine.
 **      This test checks the free space available in a file in various
 **      situations.
@@ -3435,6 +3508,7 @@ test_file(void)
 #endif /* H5_NO_SHARED_WRITING */
     test_get_file_id();         /* Test H5Iget_file_id */
     test_file_perm();           /* Test file access permissions */
+    test_file_perm2();          /* Test file access permission again */
     test_file_freespace();      /* Test file free space information */
     test_file_ishdf5();         /* Test detecting HDF5 files correctly */
     test_file_open_dot();       /* Test opening objects with "." for a name */

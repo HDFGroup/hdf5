@@ -1122,10 +1122,12 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
 
     /* check args */
     HDassert(f);
-    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
     HDassert(loc);
     HDassert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
 
+    /* Check for invalid access request */
+    if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "no write intent on file")
 
     /* Make certain we allocate at least a reasonable size for the object header */
     size_hint = H5O_ALIGN_F(f, MAX(H5O_MIN_SIZE, size_hint));

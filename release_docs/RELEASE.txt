@@ -343,6 +343,9 @@ Bug Fixes since HDF5-1.8.0 release
     Library
     -------
 
+      - Creating a dataset in a read-only file caused seg fault when the file 
+            is closed.  It's fixed.  The error stack is returned correctly
+            now. (SLU - 2012/1/25. Issue 7756)
       - Fixed a seg fault that could occur when shrinking a dataset with chunks
             larger than 1 MB. (NAF - 2011/11/30 - HDFFV-7833)
       - The library allowed the conversion of strings between ASCII and UTF8
