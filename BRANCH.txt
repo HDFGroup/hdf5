@@ -10,3 +10,5 @@ significant performance penalties in many-process parallel applications.
 This branch is off of the trunk. At this time, none of the changes in this
 branch are scheduled for merge with the 1.8.x release series, since the
 core avoid_truncate feature requires a file format change.
+
+All trunk changes through r21862 have been merged up to this feature branch.

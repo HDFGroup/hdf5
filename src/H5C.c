@@ -338,74 +338,74 @@ done:
  *
  * Purpose:     Apply the supplied candidate list.
  *
- *		We used to do this by simply having each process write 
- *		every mpi_size-th entry in the candidate list, starting 
- *		at index mpi_rank, and mark all the others clean.  
+ *              We used to do this by simply having each process write 
+ *              every mpi_size-th entry in the candidate list, starting 
+ *              at index mpi_rank, and mark all the others clean.  
  *
- *		However, this can cause unnecessary contention in a file 
- *		system by increasing the number of processes writing to 
- *		adjacent locations in the HDF5 file.
+ *              However, this can cause unnecessary contention in a file 
+ *              system by increasing the number of processes writing to 
+ *              adjacent locations in the HDF5 file.
  *
- *		To attempt to minimize this, we now arange matters such 
- *		that each process writes n adjacent entries in the 
- *		candidate list, and marks all others clean.  We must do
- *		this in such a fashion as to guarantee that each entry 
- *		on the candidate list is written by exactly one process, 
- *		and marked clean by all others.  
+ *              To attempt to minimize this, we now arange matters such 
+ *              that each process writes n adjacent entries in the 
+ *              candidate list, and marks all others clean.  We must do
+ *              this in such a fashion as to guarantee that each entry 
+ *              on the candidate list is written by exactly one process, 
+ *              and marked clean by all others.  
  *
- *		To do this, first construct a table mapping mpi_rank
- *		to the index of the first entry in the candidate list to
- *		be written by the process of that mpi_rank, and then use
- *		the table to control which entries are written and which
- *		are marked as clean as a function of the mpi_rank.
+ *              To do this, first construct a table mapping mpi_rank
+ *              to the index of the first entry in the candidate list to
+ *              be written by the process of that mpi_rank, and then use
+ *              the table to control which entries are written and which
+ *              are marked as clean as a function of the mpi_rank.
  *
- *		Note that the table must be identical on all processes, as
- *		all see the same candidate list, mpi_size, and mpi_rank --
- *		the inputs used to construct the table.  
+ *              Note that the table must be identical on all processes, as
+ *              all see the same candidate list, mpi_size, and mpi_rank --
+ *              the inputs used to construct the table.  
  *
- *		We construct the table as follows.  Let:
+ *              We construct the table as follows.  Let:
  *
- *			n = num_candidates / mpi_size;
+ *                      n = num_candidates / mpi_size;
  *
- *			m = num_candidates % mpi_size;
+ *                      m = num_candidates % mpi_size;
  *
- *		Now allocate an array of integers of length mpi_size + 1, 
- *		and call this array candidate_assignment_table. 
+ *              Now allocate an array of integers of length mpi_size + 1, 
+ *              and call this array candidate_assignment_table. 
  *
- *		Conceptually, if the number of candidates is a multiple
- *		of the mpi_size, we simply pass through the candidate list
- *		and assign n entries to each process to flush, with the 
- *		index of the first entry to flush in the location in 
- *		the candidate_assignment_table indicated by the mpi_rank
- *		of the process.  
+ *              Conceptually, if the number of candidates is a multiple
+ *              of the mpi_size, we simply pass through the candidate list
+ *              and assign n entries to each process to flush, with the 
+ *              index of the first entry to flush in the location in 
+ *              the candidate_assignment_table indicated by the mpi_rank
+ *              of the process.  
  *
- *		In the more common case in which the candidate list isn't 
- *		isn't a multiple of the mpi_size, we pretend it is, and 
- *		give num_candidates % mpi_size processes one extra entry
- *		each to make things work out.
+ *              In the more common case in which the candidate list isn't 
+ *              isn't a multiple of the mpi_size, we pretend it is, and 
+ *              give num_candidates % mpi_size processes one extra entry
+ *              each to make things work out.
  *
- *		Once the table is constructed, we determine the first and
- *		last entry this process is to flush as follows:
+ *              Once the table is constructed, we determine the first and
+ *              last entry this process is to flush as follows:
  *
- *	 	first_entry_to_flush = candidate_assignment_table[mpi_rank]
+ *              first_entry_to_flush = candidate_assignment_table[mpi_rank]
  *
- *		last_entry_to_flush = 
- *			candidate_assignment_table[mpi_rank + 1] - 1;
- *		
- *		With these values determined, we simply scan through the 
- *		candidate list, marking all entries in the range 
- *		[first_entry_to_flush, last_entry_to_flush] for flush,
- *		and all others to be cleaned.
+ *              last_entry_to_flush = 
+ *                      candidate_assignment_table[mpi_rank + 1] - 1;
+ *              
+ *              With these values determined, we simply scan through the 
+ *              candidate list, marking all entries in the range 
+ *              [first_entry_to_flush, last_entry_to_flush] for flush,
+ *              and all others to be cleaned.
  *
- *		Finally, we scan the LRU from tail to head, flushing 
- *		or marking clean the candidate entries as indicated.
- *		If necessary, we scan the pinned list as well.
+ *              Finally, we scan the LRU from tail to head, flushing 
+ *              or marking clean the candidate entries as indicated.
+ *              If necessary, we scan the pinned list as well.
  *
- *		Note that this function will fail if any protected or 
- *		clean entries appear on the candidate list.
+ *              Note that this function will fail if any protected or 
+ *              clean entries appear on the candidate list.
  *
- *		This function is used in managing sync points, and 
- *		shouldn't be used elsewhere.
+ *              This function is used in managing sync points, and 
+ *              shouldn't be used elsewhere.
  *
  * Return:      Success:        SUCCEED
  *
@@ -416,9 +416,13 @@ done:
  *
  * Modifications:
  *
- *		Heavily reworked to have each process flush a group of 
- *		adjacent entries.
- *						JRM -- 4/15/10
+ *              Heavily reworked to have each process flush a group of 
+ *              adjacent entries.
+ *                                              JRM -- 4/15/10
+ *
+ *              Reworked to account for flush_me_last and flush_me_collectively
+ *              cache entry flags now potentially present on candidates.
+ *                                              MAM -- 4/26/11
  *
  *-------------------------------------------------------------------------
  */
@@ -434,30 +438,36 @@ H5C_apply_candidate_list(H5F_t * f,
                          int mpi_rank,
                          int mpi_size)
 {
-    hbool_t             first_flush = FALSE;
-    int                 i;
-    int			m;
-    int			n;
-    int			first_entry_to_flush;
-    int			last_entry_to_flush;
-    int			entries_to_clear = 0;
-    int			entries_to_flush = 0;
-    int			entries_cleared = 0;
-    int			entries_flushed = 0;
-    int			entries_examined = 0;
-    int			initial_list_len;
-    int               * candidate_assignment_table = NULL;
-    haddr_t		addr;
-    H5C_cache_entry_t *	clear_ptr = NULL;
-    H5C_cache_entry_t *	entry_ptr = NULL;
-    H5C_cache_entry_t *	flush_ptr = NULL;
+    hbool_t first_flush = FALSE;
+    int i;
+    int m;
+    int n;
+    int first_entry_to_flush;
+    int last_entry_to_flush;
+    int entries_to_clear = 0;
+    int entries_to_flush = 0;
+    int entries_to_flush_or_clear_last = 0;
+    int entries_to_flush_collectively = 0;
+    int entries_cleared = 0;
+    int entries_flushed = 0;
+    int entries_delayed = 0;
+    int entries_flushed_or_cleared_last = 0;
+    int entries_flushed_collectively = 0;
+    int entries_examined = 0;
+    int initial_list_len;
+    int * candidate_assignment_table = NULL;
+    haddr_t addr;
+    H5C_cache_entry_t * clear_ptr = NULL;
+    H5C_cache_entry_t * entry_ptr = NULL;
+    H5C_cache_entry_t * flush_ptr = NULL;
+    H5C_cache_entry_t * delayed_ptr = NULL;
 #if H5C_DO_SANITY_CHECKS
-    haddr_t		last_addr;
+    haddr_t last_addr;
 #endif /* H5C_DO_SANITY_CHECKS */
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    char		tbl_buf[1024];
+    char tbl_buf[1024];
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
-    herr_t              ret_value = SUCCEED;      /* Return value */
+    herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_apply_candidate_list, FAIL)
 
@@ -612,20 +622,37 @@ H5C_apply_candidate_list(H5F_t * f,
               (int)(cache_ptr->LRU_list_len));
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
+    /* ====================================================================== *
+     * Now scan the LRU and PEL lists, flushing or clearing entries as
+     * needed.
+     *
+     * The flush_me_last and flush_me_collectively flags may dictate how or
+     * when some entries can be flushed, and should be addressed here.
+     * However, in their initial implementation, these flags only apply to the
+     * superblock, so there's only a relatively small change to this function
+     * to account for this one case where they come into play. If these flags
+     * are ever expanded upon, this function and the following flushing steps
+     * should be reworked to account for additional cases.
+     * ====================================================================== */
+
     entries_examined = 0;
     initial_list_len = cache_ptr->LRU_list_len;
     entry_ptr = cache_ptr->LRU_tail_ptr;
 
+    /* Examine each entry in the LRU list */
     while((entry_ptr != NULL) && (entries_examined <= initial_list_len) &&
-            ((entries_cleared + entries_flushed) < num_candidates)) {
-        if(entry_ptr->clear_on_unprotect) {
+          ((entries_cleared + entries_flushed) < num_candidates)) {
+
+        /* If this process needs to clear this entry. */
+        if (entry_ptr->clear_on_unprotect) {
+
             entry_ptr->clear_on_unprotect = FALSE;
             clear_ptr = entry_ptr;
             entry_ptr = entry_ptr->prev;
             entries_cleared++;
 
 #if ( H5C_APPLY_CANDIDATE_LIST__DEBUG > 1 )
-    HDfprintf(stdout, "%s:%d: clearing 0x%llx.\n", FUNC, mpi_rank, 
+    HDfprintf(stdout, "%s:%d: clearing 0x%llx.\n", FUNC, mpi_rank,
               (long long)clear_ptr->addr);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
@@ -638,14 +665,18 @@ H5C_apply_candidate_list(H5F_t * f,
                                       &first_flush,
                                       TRUE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't clear entry.")
-        } else if(entry_ptr->flush_immediately) {
+        } /* end if */
+
+        /* Else, if this process needs to flush this entry. */
+        else if (entry_ptr->flush_immediately) {
+
             entry_ptr->flush_immediately = FALSE;
             flush_ptr = entry_ptr;
             entry_ptr = entry_ptr->prev;
             entries_flushed++;
 
 #if ( H5C_APPLY_CANDIDATE_LIST__DEBUG > 1 )
-    HDfprintf(stdout, "%s:%d: flushing 0x%llx.\n", FUNC, mpi_rank, 
+    HDfprintf(stdout, "%s:%d: flushing 0x%llx.\n", FUNC, mpi_rank,
               (long long)flush_ptr->addr);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
@@ -657,17 +688,20 @@ H5C_apply_candidate_list(H5F_t * f,
                                       H5C__NO_FLAGS_SET,
                                       &first_flush,
                                       TRUE) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't clear entry.")
-        } else {
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't flush entry.")
+        } /* end else */
+
+        /* Otherwise, no action to be taken on this entry. Grab the next. */
+        else {
             entry_ptr = entry_ptr->prev;
-        }
+        } /* end else */
 
         entries_examined++;
     } /* end while */
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    HDfprintf(stdout, "%s:%d: entries examined/cleared/flushed = %d/%d/%d.\n", 
-              FUNC, mpi_rank, entries_examined, 
+    HDfprintf(stdout, "%s:%d: entries examined/cleared/flushed = %d/%d/%d.\n",
+              FUNC, mpi_rank, entries_examined,
               entries_cleared, entries_flushed);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
@@ -676,69 +710,168 @@ H5C_apply_candidate_list(H5F_t * f,
      */
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    HDfprintf(stdout, "%s:%d: scanning pinned entry list. len = %d\n", 
+    HDfprintf(stdout, "%s:%d: scanning pinned entry list. len = %d\n",
              FUNC, mpi_rank, (int)(cache_ptr->pel_len));
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
     entry_ptr = cache_ptr->pel_head_ptr;
     while((entry_ptr != NULL) &&
-            ((entries_cleared + entries_flushed) < num_candidates)) {
-        if(entry_ptr->clear_on_unprotect) {
-            entry_ptr->clear_on_unprotect = FALSE;
-            clear_ptr = entry_ptr;
-            entry_ptr = entry_ptr->next;
-            entries_cleared++;
+          ((entries_cleared + entries_flushed + entries_delayed)
+            < num_candidates)) {
+
+        /* If entry is marked for flush or for clear */
+        if((entry_ptr->clear_on_unprotect||entry_ptr->flush_immediately)) {
+
+            /* If this entry needs to be flushed last */
+            if (entry_ptr->flush_me_last) {
+
+                /* At this time, only the superblock supports being
+                   flushed last. Conveniently, it also happens to be the only
+                   entry that supports being flushed collectively, as well. Also
+                   conveniently, it's always pinned, so we only need to check
+                   for it while scanning the PEL here. Finally, it's never
+                   included in a candidate list that excludes other dirty
+                   entries in a cache, so we can handle this relatively simple
+                   case here.
+                   
+                   For now, this function asserts this and saves the entry
+                   to flush it after scanning the rest of the PEL list.
+
+                   If there are ever more entries that either need to be
+                   flushed last and/or flushed collectively, this whole routine
+                   will need to be reworked to handle all additional cases. As
+                   it is the simple case of a single pinned entry needing
+                   flushed last and collectively is just a minor addition to
+                   this routine, but signficantly buffing up the usage of
+                   flush_me_last or flush_me_collectively will require a more
+                   intense rework of this function and potentially the function
+                   of candidate lists as a whole. */
+
+                HDassert(entry_ptr->flush_me_collectively);
+                entries_to_flush_or_clear_last++;
+                entries_to_flush_collectively++;
+                HDassert(entries_to_flush_or_clear_last == 1);
+                HDassert(entries_to_flush_collectively == 1);
+
+                /* Delay the entry. It will be flushed later. */
+                delayed_ptr = entry_ptr;
+                entries_delayed++;
+                HDassert(entries_delayed == 1);
+
+            } /* end if */
+
+            /* Else, this process needs to clear this entry. */
+            else if (entry_ptr->clear_on_unprotect) {
+                HDassert(!entry_ptr->flush_immediately);
+                entry_ptr->clear_on_unprotect = FALSE;
+                clear_ptr = entry_ptr;
+                entry_ptr = entry_ptr->next;
+                entries_cleared++;
 
 #if ( H5C_APPLY_CANDIDATE_LIST__DEBUG > 1 )
-            HDfprintf(stdout, "%s:%d: clearing 0x%llx.\n", FUNC, mpi_rank, 
+            HDfprintf(stdout, "%s:%d: clearing 0x%llx.\n", FUNC, mpi_rank,
                       (long long)clear_ptr->addr);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
-            if(H5C_flush_single_entry(f,
-                                      primary_dxpl_id,
-                                      secondary_dxpl_id,
-                                      clear_ptr->type,
-                                      clear_ptr->addr,
-                                      H5C__FLUSH_CLEAR_ONLY_FLAG,
-                                      &first_flush,
-                                      TRUE) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't clear entry.")
-        } else if(entry_ptr->flush_immediately) {
-            entry_ptr->flush_immediately = FALSE;
-            flush_ptr = entry_ptr;
-            entry_ptr = entry_ptr->next;
-            entries_flushed++;
+                if(H5C_flush_single_entry(f,
+                                          primary_dxpl_id,
+                                          secondary_dxpl_id,
+                                          clear_ptr->type,
+                                          clear_ptr->addr,
+                                          H5C__FLUSH_CLEAR_ONLY_FLAG,
+                                          &first_flush,
+                                          TRUE) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't clear entry.")
+            } /* end else */
+
+            /* Else, if this process needs to independently flush this entry. */
+            else if (entry_ptr->flush_immediately) {
+                entry_ptr->flush_immediately = FALSE;
+                flush_ptr = entry_ptr;
+                entry_ptr = entry_ptr->next;
+                entries_flushed++;
 
 #if ( H5C_APPLY_CANDIDATE_LIST__DEBUG > 1 )
-            HDfprintf(stdout, "%s:%d: flushing 0x%llx.\n", FUNC, mpi_rank, 
+            HDfprintf(stdout, "%s:%d: flushing 0x%llx.\n", FUNC, mpi_rank,
                       (long long)flush_ptr->addr);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
-            if(H5C_flush_single_entry(f,
-                                      primary_dxpl_id,
-                                      secondary_dxpl_id,
-                                      flush_ptr->type,
-                                      flush_ptr->addr,
-                                      H5C__NO_FLAGS_SET,
-                                      &first_flush,
-                                      TRUE) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't clear entry.")
-        } else {
+                if(H5C_flush_single_entry(f,
+                                          primary_dxpl_id,
+                                          secondary_dxpl_id,
+                                          flush_ptr->type,
+                                          flush_ptr->addr,
+                                          H5C__NO_FLAGS_SET,
+                                          &first_flush,
+                                          TRUE) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't flush entry.")
+            } /* end else */
+        } /* end if */
+
+        /* Otherwise, this entry is not marked for flush or clear. Grab the next. */
+        else {
             entry_ptr = entry_ptr->next;
-        }
+        } /* end else */
+
     } /* end while */
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    HDfprintf(stdout, 
-              "%s:%d: pel entries examined/cleared/flushed = %d/%d/%d.\n", 
-              FUNC, mpi_rank, entries_examined, 
+    HDfprintf(stdout,
+              "%s:%d: pel entries examined/cleared/flushed = %d/%d/%d.\n",
+              FUNC, mpi_rank, entries_examined,
               entries_cleared, entries_flushed);
     HDfprintf(stdout, "%s:%d: done.\n", FUNC, mpi_rank);
 
     fsync(stdout);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
-    if((entries_flushed != entries_to_flush) || (entries_cleared != entries_to_clear))
+    /* ====================================================================== *
+     * Now, handle all delayed entries.                                       *
+     *                                                                        *
+     * This can *only* be the superblock at this time, so it's relatively     *
+     * easy to deal with. We're collectively flushing the entry saved from    *
+     * above. This will need to be handled differently if there are ever more *
+     * than one entry needing this special treatment.)                        *
+     * ====================================================================== */
+
+    if (delayed_ptr) {
+
+        if (delayed_ptr->clear_on_unprotect) {
+            entry_ptr->clear_on_unprotect = FALSE;
+            entries_cleared++;
+        } else if (delayed_ptr->flush_immediately) {
+            entry_ptr->flush_immediately = FALSE;
+            entries_flushed++;
+        } /* end if */
+
+        if(H5C_flush_single_entry(f,
+                                  primary_dxpl_id,
+                                  secondary_dxpl_id,
+                                  delayed_ptr->type,
+                                  delayed_ptr->addr,
+                                  H5C__NO_FLAGS_SET,
+                                  &first_flush,
+                                  TRUE) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,
+                        "Can't flush entry collectively.")
+
+        entries_flushed_collectively++;
+        entries_flushed_or_cleared_last++;
+    } /* end if */
+
+    /* ====================================================================== *
+     * Finished flushing everything.                                          *
+     * ====================================================================== */
+
+       HDassert((entries_flushed == entries_to_flush));
+       HDassert((entries_cleared == entries_to_clear));
+       HDassert((entries_flushed_or_cleared_last == entries_to_flush_or_clear_last));
+       HDassert((entries_flushed_collectively == entries_to_flush_collectively));
+    
+    if((entries_flushed != entries_to_flush) || 
+       (entries_cleared != entries_to_clear) ||
+       (entries_flushed_or_cleared_last != entries_to_flush_or_clear_last) ||
+       (entries_flushed_collectively != entries_to_flush_collectively))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry count mismatch.")
 
 done:
@@ -877,6 +1010,11 @@ done:
  * Programmer:  John Mainzer
  *              3/17/10
  *
+ * Modifications:
+ *
+ *              Modified construction of min_clean candidate lists to
+ *              exclude flush_me_last tagged entries, since they cannot
+ *              be flushed prior to other dirty entries. MAM - 2012/01/09
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
@@ -924,7 +1062,8 @@ H5C_construct_candidate_list__min_clean(H5C_t * cache_ptr)
         entry_ptr = cache_ptr->dLRU_tail_ptr;
         while((nominated_entries_size < space_needed) &&
                 (nominated_entries_count < cache_ptr->slist_len) &&
-                (entry_ptr != NULL)) {
+                (entry_ptr != NULL) &&
+                (!entry_ptr->flush_me_last)) {
             haddr_t		nominated_addr;
 
             HDassert( ! (entry_ptr->is_protected) );
@@ -1771,8 +1910,12 @@ H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, unsign
                     HDassert( entry_ptr != NULL );
                     HDassert( entry_ptr->in_slist );
 
-                    if ( ( ! flush_marked_entries ) ||
-                         ( entry_ptr->flush_marker ) ) {
+                    if ( ( ( ! flush_marked_entries ) ||
+                           ( entry_ptr->flush_marker ) ) &&
+                         ( ( ! entry_ptr->flush_me_last ) ||
+                           ( ( entry_ptr->flush_me_last ) &&
+                             ( cache_ptr->num_last_entries >=
+                               cache_ptr->slist_len ) ) ) ) {
 
                         if ( entry_ptr->is_protected ) {
 
@@ -2524,6 +2667,10 @@ H5C_insert_entry(H5F_t *             f,
     herr_t		result;
     hbool_t		first_flush = TRUE;
     hbool_t		insert_pinned;
+    hbool_t     flush_last;
+#ifdef H5_HAVE_PARALLEL
+    hbool_t     flush_collectively;
+#endif
     hbool_t             set_flush_marker;
     hbool_t		write_permitted = TRUE;
     size_t		empty_space;
@@ -2562,8 +2709,12 @@ H5C_insert_entry(H5F_t *             f,
     }
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-    set_flush_marker = ( (flags & H5C__SET_FLUSH_MARKER_FLAG) != 0 );
-    insert_pinned    = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
+    set_flush_marker    = ( (flags & H5C__SET_FLUSH_MARKER_FLAG) != 0 );
+    insert_pinned       = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
+    flush_last          = ( (flags & H5C__FLUSH_LAST_FLAG) != 0 );
+#ifdef H5_HAVE_PARALLEL
+    flush_collectively  = ( (flags & H5C__FLUSH_COLLECTIVELY_FLAG) != 0 );
+#endif
 
     entry_ptr = (H5C_cache_entry_t *)thing;
 
@@ -2604,7 +2755,11 @@ H5C_insert_entry(H5F_t *             f,
 
     entry_ptr->is_pinned = insert_pinned;
     entry_ptr->pinned_from_client = insert_pinned;
-
+    entry_ptr->flush_me_last = flush_last;
+#ifdef H5_HAVE_PARALLEL
+    entry_ptr->flush_me_collectively = flush_collectively;
+#endif
+    
     /* newly inserted entries are assumed to be dirty */
     entry_ptr->is_dirty = TRUE;
 
@@ -7694,7 +7849,7 @@ H5C_flush_invalidate_cache(H5F_t * f,
                     HDassert( next_entry_ptr->in_slist );
                 } else {
                     next_entry_ptr = NULL;
-	        }
+                }
 
                 /* Note that we now remove nodes from the slist as we flush
                  * the associated entries, instead of leaving them there
@@ -7710,85 +7865,91 @@ H5C_flush_invalidate_cache(H5F_t * f,
                 HDassert( entry_ptr != NULL );
                 HDassert( entry_ptr->in_slist );
 
-#if H5C_DO_SANITY_CHECKS
-                /* update actual_slist_len & actual_slist_size before
-                 * the flush.  Note that the entry will be removed
-                 * from the slist after the flush, and thus may be
-                 * resized by the flush callback.  This is OK, as
-                 * we will catch the size delta in
-                 * cache_ptr->slist_size_increase.
-                 *
-                 * Note that we include pinned entries in this count, even
-                 * though we will not actually flush them.
-                 */
-                actual_slist_len++;
-                actual_slist_size += entry_ptr->size;
-#endif /* H5C_DO_SANITY_CHECKS */
+                if ( ( ! entry_ptr->flush_me_last ) ||
+                     ( ( entry_ptr->flush_me_last ) &&
+                       ( cache_ptr->num_last_entries >=
+                         cache_ptr->slist_len ) ) ) {
 
-                if ( entry_ptr->is_protected ) {
-
-                    /* we have major problems -- but lets flush
-                     * everything we can before we flag an error.
+    #if H5C_DO_SANITY_CHECKS
+                    /* update actual_slist_len & actual_slist_size before
+                     * the flush.  Note that the entry will be removed
+                     * from the slist after the flush, and thus may be
+                     * resized by the flush callback.  This is OK, as
+                     * we will catch the size delta in
+                     * cache_ptr->slist_size_increase.
+                     *
+                     * Note that we include pinned entries in this count, even
+                     * though we will not actually flush them.
                      */
-                    protected_entries++;
+                    actual_slist_len++;
+                    actual_slist_size += entry_ptr->size;
+    #endif /* H5C_DO_SANITY_CHECKS */
 
-                } else if ( entry_ptr->is_pinned ) {
+                    if ( entry_ptr->is_protected ) {
 
-                    /* Test to see if we are can flush the entry now.
-                     * If we can, go ahead and flush, but don't tell
-                     * H5C_flush_single_entry() to destroy the entry
-                     * as pinned entries can't be evicted.
-                     */
-                    if(entry_ptr->flush_dep_height == curr_flush_dep_height ) {
-                        status = H5C_flush_single_entry(f,
-                                                        primary_dxpl_id,
-                                                        secondary_dxpl_id,
-                                                        NULL,
-                                                        entry_ptr->addr,
-                                                        H5C__NO_FLAGS_SET,
-                                                        &first_flush,
-                                                        FALSE);
-                        if ( status < 0 ) {
+                        /* we have major problems -- but lets flush
+                         * everything we can before we flag an error.
+                         */
+                        protected_entries++;
 
-                            /* This shouldn't happen -- if it does, we are toast
-                             * so just scream and die.
-                             */
+                    } else if ( entry_ptr->is_pinned ) {
 
-                            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                                        "dirty pinned entry flush failed.")
+                        /* Test to see if we are can flush the entry now.
+                         * If we can, go ahead and flush, but don't tell
+                         * H5C_flush_single_entry() to destroy the entry
+                         * as pinned entries can't be evicted.
+                         */
+                        if(entry_ptr->flush_dep_height == curr_flush_dep_height ) {
+                            status = H5C_flush_single_entry(f,
+                                                            primary_dxpl_id,
+                                                            secondary_dxpl_id,
+                                                            NULL,
+                                                            entry_ptr->addr,
+                                                            H5C__NO_FLAGS_SET,
+                                                            &first_flush,
+                                                            FALSE);
+                            if ( status < 0 ) {
+
+                                /* This shouldn't happen -- if it does, we are toast
+                                 * so just scream and die.
+                                 */
+
+                                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                                            "dirty pinned entry flush failed.")
+                            } /* end if */
+                            flushed_during_dep_loop = TRUE;
                         } /* end if */
-                        flushed_during_dep_loop = TRUE;
+                        else if(entry_ptr->flush_dep_height < curr_flush_dep_height)
+                            /* This shouldn't happen -- if it does, just scream and die.  */
+                            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,  "dirty entry below current flush dep. height.")
                     } /* end if */
-                    else if(entry_ptr->flush_dep_height < curr_flush_dep_height)
-                        /* This shouldn't happen -- if it does, just scream and die.  */
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,  "dirty entry below current flush dep. height.")
+                    else {
+                        if(entry_ptr->flush_dep_height == curr_flush_dep_height ){
+
+                            status = H5C_flush_single_entry(f,
+                                                            primary_dxpl_id,
+                                                            secondary_dxpl_id,
+                                                            NULL,
+                                                            entry_ptr->addr,
+                                                            (cooked_flags | H5C__FLUSH_INVALIDATE_FLAG),
+                                                            &first_flush,
+                                                            TRUE);
+                            if ( status < 0 ) {
+
+                                /* This shouldn't happen -- if it does, we are toast so
+                                 * just scream and die.
+                                 */
+
+                                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                                            "dirty entry flush destroy failed.")
+                            } /* end if */
+                            flushed_during_dep_loop = TRUE;
+                        } /* end if */
+                        else if(entry_ptr->flush_dep_height < curr_flush_dep_height)
+                            /* This shouldn't happen -- if it does, just scream and die.  */
+                            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,  "dirty entry below current flush dep. height.")
+                    } /* end else */    
                 } /* end if */
-                else {
-                    if(entry_ptr->flush_dep_height == curr_flush_dep_height ){
-
-                        status = H5C_flush_single_entry(f,
-                                                        primary_dxpl_id,
-                                                        secondary_dxpl_id,
-                                                        NULL,
-                                                        entry_ptr->addr,
-                                                        (cooked_flags | H5C__FLUSH_INVALIDATE_FLAG),
-                                                        &first_flush,
-                                                        TRUE);
-                        if ( status < 0 ) {
-
-                            /* This shouldn't happen -- if it does, we are toast so
-                             * just scream and die.
-                             */
-
-                            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                                        "dirty entry flush destroy failed.")
-                        } /* end if */
-                        flushed_during_dep_loop = TRUE;
-                    } /* end if */
-                    else if(entry_ptr->flush_dep_height < curr_flush_dep_height)
-                        /* This shouldn't happen -- if it does, just scream and die.  */
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,  "dirty entry below current flush dep. height.")
-                } /* end else */
             } /* end while loop scanning skip list */
 
 #if H5C_DO_SANITY_CHECKS
@@ -7835,45 +7996,52 @@ H5C_flush_invalidate_cache(H5F_t * f,
                     next_entry_ptr = entry_ptr->ht_next;
                     HDassert ( ( next_entry_ptr == NULL ) ||
                                ( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC ) );
-                    if ( entry_ptr->is_protected ) {
 
-                        /* we have major problems -- but lets flush and destroy
-                         * everything we can before we flag an error.
-                         */
-                        protected_entries++;
+                    if ( ( ! entry_ptr->flush_me_last ) ||
+                         ( ( entry_ptr->flush_me_last ) &&
+                           ( cache_ptr->num_last_entries >=
+                             cache_ptr->slist_len ) ) ) {
 
-                        if ( ! entry_ptr->in_slist ) {
+                        if ( entry_ptr->is_protected ) {
 
-                            HDassert( !(entry_ptr->is_dirty) );
-                        }
-                    } else if ( ! ( entry_ptr->is_pinned ) ) {
+                            /* we have major problems -- but lets flush and destroy
+                             * everything we can before we flag an error.
+                             */
+                            protected_entries++;
 
-                        /* Test to see if we are can flush the entry now.
-                         * If we can, go ahead and flush.
-                         */
-                        if(entry_ptr->flush_dep_height == curr_flush_dep_height ){
-                            status = H5C_flush_single_entry(f,
-                                                            primary_dxpl_id,
-                                                            secondary_dxpl_id,
-                                                            NULL,
-                                                            entry_ptr->addr,
-                                                            (cooked_flags | H5C__FLUSH_INVALIDATE_FLAG),
-                                                            &first_flush,
-                                                            TRUE);
-                            if ( status < 0 ) {
+                            if ( ! entry_ptr->in_slist ) {
 
-                                /* This shouldn't happen -- if it does, we are toast so
-                                 * just scream and die.
-                                 */
-
-                                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                                            "Entry flush destroy failed.")
+                                HDassert( !(entry_ptr->is_dirty) );
                             }
-                            flushed_during_dep_loop = TRUE;
+                        } else if ( ! ( entry_ptr->is_pinned ) ) {
+
+                            /* Test to see if we are can flush the entry now.
+                             * If we can, go ahead and flush.
+                             */
+                            if(entry_ptr->flush_dep_height == curr_flush_dep_height ){
+                                status = H5C_flush_single_entry(f,
+                                                                primary_dxpl_id,
+                                                                secondary_dxpl_id,
+                                                                NULL,
+                                                                entry_ptr->addr,
+                                                                (cooked_flags | H5C__FLUSH_INVALIDATE_FLAG),
+                                                                &first_flush,
+                                                                TRUE);
+                                if ( status < 0 ) {
+
+                                    /* This shouldn't happen -- if it does, we are toast so
+                                     * just scream and die.
+                                     */
+
+                                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                                                "Entry flush destroy failed.")
+                                }
+                                flushed_during_dep_loop = TRUE;
+                            } /* end if */
+                            else if(entry_ptr->flush_dep_height < curr_flush_dep_height)
+                                /* This shouldn't happen -- if it does, just scream and die.  */
+                                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,  "dirty entry below current flush dep. height.")
                         } /* end if */
-                        else if(entry_ptr->flush_dep_height < curr_flush_dep_height)
-                            /* This shouldn't happen -- if it does, just scream and die.  */
-                            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,  "dirty entry below current flush dep. height.")
                     } /* end if */
                     /* We can't do anything if the entry is pinned.  The
                      * hope is that the entry will be unpinned as the
@@ -8665,27 +8833,27 @@ H5C_make_space_in_cache(H5F_t *	f,
 
         entry_ptr = cache_ptr->LRU_tail_ptr;
 
-	if ( cache_ptr->index_size >= cache_ptr->max_cache_size ) {
+        if ( cache_ptr->index_size >= cache_ptr->max_cache_size ) {
 
-	   empty_space = 0;
+           empty_space = 0;
 
-	} else {
+        } else {
 
-	   empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
+           empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
 
-	}
+        }
 
         while ( ( ( (cache_ptr->index_size + space_needed)
                     >
                     cache_ptr->max_cache_size
                   )
-		  ||
-		  (
-		    ( empty_space + cache_ptr->clean_index_size )
-		    <
-		    ( cache_ptr->min_clean_size )
+                  ||
+                  (
+                    ( empty_space + cache_ptr->clean_index_size )
+                    <
+                    ( cache_ptr->min_clean_size )
                   )
-		)
+                )
                 &&
                 ( entries_examined <= (2 * initial_list_len) )
                 &&
@@ -8696,13 +8864,13 @@ H5C_make_space_in_cache(H5F_t *	f,
             HDassert( ! (entry_ptr->is_read_only) );
             HDassert( (entry_ptr->ro_ref_count) == 0 );
 
-	    next_ptr = entry_ptr->next;
+            next_ptr = entry_ptr->next;
             prev_ptr = entry_ptr->prev;
 
-	    if ( prev_ptr != NULL ) {
+            if ( prev_ptr != NULL ) {
 
-		prev_is_dirty = prev_ptr->is_dirty;
-	    }
+                prev_is_dirty = prev_ptr->is_dirty;
+            }
 
             if ( (entry_ptr->type)->id != H5C__EPOCH_MARKER_TYPE ) {
 

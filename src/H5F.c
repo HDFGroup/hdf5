@@ -998,22 +998,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
             if(H5F_flush(f, dxpl_id, TRUE) < 0)
                 HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
 
-#ifdef H5_HAVE_PARALLEL
-    /* Depending on how entries in the cache were distributed amongst flushing
-     * processes, the superblock may have been given an EOF value that's not
-     * accurate. Check for that here, and mark the superblock as dirty if we
-     * need to re-flush it. Note this only matters if we're avoiding truncation,
-     * as otherwise we use the EOA value rather than EOF value when writing
-     * out the superblock.
-     */
-    if (H5F_AVOID_TRUNCATE(f))
-        if((f->shared->flags & H5F_ACC_RDWR) && flush)
-            if (f->shared->sblock->eof_in_file != H5FD_get_eof(f->shared->lf))
-                if (H5F_super_dirty(f) < 0)
-                    HDONE_ERROR(H5E_VFL, H5E_CANTMARKDIRTY, HADDR_UNDEF,
-                                "unable to mark superblock as dirty")
-#endif /* H5_HAVE_PARALLEL */
-
         /* Release the external file cache */
         if(f->shared->efc) {
             if(H5F_efc_destroy(f->shared->efc) < 0)
@@ -1721,13 +1705,6 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing)
     if(H5FD_flush(f->shared->lf, dxpl_id, closing) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
-
-#ifdef H5_HAVE_PARALLEL
-    /* Coordinate to synchronize EOF value amongst all processes */
-    if(H5FD_coordinate(f->shared->lf, dxpl_id, H5FD_COORD_EOF, NULL) < 0)
-        /* Push error, but keep going*/
-        HDONE_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level coordinate failed")
-#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

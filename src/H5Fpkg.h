@@ -189,9 +189,6 @@ typedef struct H5F_super_t {
     haddr_t     driver_addr;    /* File driver information block address      */
     haddr_t     root_addr;      /* Root group address                         */
     H5G_entry_t *root_ent;      /* Root group symbol table entry              */
-#ifdef H5_HAVE_PARALLEL
-    haddr_t     eof_in_file;    /* Last known EOF stored in file's superblock */
-#endif /* H5_HAVE_PARALLEL */
 } H5F_super_t;
 
 /*

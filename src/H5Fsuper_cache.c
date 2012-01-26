@@ -153,6 +153,12 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     if(NULL == (sblock = H5FL_CALLOC(H5F_super_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
+    /* The superblock must be flushed last (and collectively in parallel) */
+    sblock->cache_info.flush_me_last = TRUE;
+#ifdef H5_HAVE_PARALLEL
+    sblock->cache_info.flush_me_collectively = TRUE;
+#endif
+
     /* Read fixed-size portion of the superblock */
     p = sbuf;
     H5_CHECK_OVERFLOW(fixed_size, size_t, haddr_t);
@@ -471,11 +477,6 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     if((eof + sblock->base_addr) < stored_eof)
         HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eof = %llu", (unsigned long long)eof, (unsigned long long)sblock->base_addr, (unsigned long long)stored_eof)
 
-#ifdef H5_HAVE_PARALLEL
-    if (H5F_AVOID_TRUNCATE(f))
-        sblock->eof_in_file = stored_eof - sblock->base_addr;
-#endif /* H5_HAVE_PARALLEL */
-
     /*
      * Tell the file driver how much address space has already been
      * allocated so that it knows how to allocate additional memory.
@@ -525,8 +526,8 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to read object header")
         if(status) {
             haddr_t eoa;
-            f->shared->avoid_truncate = TRUE;
             unsigned mesg_flags;
+            f->shared->avoid_truncate = TRUE;
 
             /* Set 'avoid truncate' feature in the property list */
             if(H5P_set(c_plist, H5F_CRT_AVOID_TRUNCATE_NAME, &f->shared->avoid_truncate) < 0)
@@ -691,6 +692,15 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
     HDassert(f);
     HDassert(H5F_addr_eq(addr, 0));
     HDassert(sblock);
+    
+    /* Assert that the superblock is marked as being flushed last (and 
+       collectively in parallel) */
+    /* (We'll rely on the cache to make sure it actually *is* flushed
+       last (and collectively in parallel), but this check doesn't hurt) */
+    HDassert(sblock->cache_info.flush_me_last);    
+#ifdef H5_HAVE_PARALLEL
+    HDassert(sblock->cache_info.flush_me_collectively);
+#endif
 
     if(sblock->cache_info.is_dirty) {
         uint8_t         buf[H5F_MAX_SUPERBLOCK_SIZE + H5F_MAX_DRVINFOBLOCK_SIZE];  /* Superblock & driver info blockencoding buffer */
@@ -804,21 +814,27 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 
             /* Encode the end-of-file address */
             if(H5F_AVOID_TRUNCATE(f)) {
-                /* If we're avoiding truncating the file, then the current
-                value of the 'EOF' address will reflect the file's size, so
-                we can use it here directly. Note, however, that if 
-                in a parallel situation, H5FD_get_eof may return failure, as
-                individual processes only keep local copies of their perceived
-                eof values. For now, we'll flush the superblock a second time
-                once we synchronize the eof value amongst all processes, and 
-                this will happen later (see H5F_dest). */
-                rel_eof = H5FD_get_eof(f->shared->lf);
-#ifndef H5_HAVE_PARALLEL
-                if (rel_eof == HADDR_UNDEF)
+                /* If we're avoiding truncating the file, then we need to
+                 * store the file's size in the superblock. We will only be
+                 * in this routine in this case when all other metadata
+                 * has been flushed. Therefore, we first flush all buffers
+                 * to make sure everything is to disk. Then we can query the
+                 * file driver layer for the EOF value, which we use to store
+                 * the file's size. Note that in parallel, we need to
+                 * coordinate the EOF value amongst all processes before
+                 * querying it. We will be flushing collectively. */
+                if(H5F_accum_flush(f, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
+                if (H5FD_flush(f->shared->lf, dxpl_id, FALSE) <0)
+                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
+#ifdef H5_HAVE_PARALLEL
+                if(H5FD_coordinate(f->shared->lf, dxpl_id, H5FD_COORD_EOF, NULL) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level coordinate failed")
+#endif
+                if (HADDR_UNDEF == (rel_eof = H5FD_get_eof(f->shared->lf)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine file size")
-#else /* H5_HAVE_PARALLEL */
-                sblock->eof_in_file = rel_eof;
-#endif /* H5_HAVE_PARALLEL */
+                if ( rel_eof == 0 )
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "flushing a superblock to an empty file?!?!")
                 H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
             } else {
                 /* Otherwise, at this point in time, the EOF value itself may
@@ -869,7 +885,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 
             /* Check for the 'EOA' message */
             if((status = H5O_msg_exists(&ext_loc, H5O_EOA_ID, dxpl_id)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to read object header")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to read object header")
             if(status) {
                 haddr_t eoa = HADDR_UNDEF;
 

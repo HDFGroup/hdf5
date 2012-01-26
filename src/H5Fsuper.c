@@ -412,9 +412,6 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     sblock->ext_addr = HADDR_UNDEF;
     sblock->driver_addr = HADDR_UNDEF;
     sblock->root_addr = HADDR_UNDEF;
-#ifdef H5_HAVE_PARALLEL
-    sblock->eof_in_file = HADDR_UNDEF;
-#endif /* H5_HAVE_PARALLEL */
 
     /* Get the shared file creation property list */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
@@ -522,7 +519,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to set EOA value for superblock")
 
     /* Insert superblock into cache, pinned */
-    if(H5AC_insert_entry(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, sblock, H5AC__PIN_ENTRY_FLAG) < 0)
+    if(H5AC_insert_entry(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, sblock, H5AC__PIN_ENTRY_FLAG | H5C__FLUSH_LAST_FLAG | H5C__FLUSH_COLLECTIVELY_FLAG) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "can't add superblock to cache")
     sblock_in_cache = TRUE;
 
