@@ -130,6 +130,7 @@ IF (BUILD_TESTING)
       h5diff_457.txt
       h5diff_458.txt
       h5diff_459.txt
+      h5diff_465.txt
       h5diff_480.txt
       h5diff_481.txt
       h5diff_482.txt
@@ -655,6 +656,8 @@ IF (BUILD_TESTING)
           h5diff_458.out.err
           h5diff_459.out
           h5diff_459.out.err
+          h5diff_465.out
+          h5diff_465.out.err
           h5diff_480.out
           h5diff_480.out.err
           h5diff_481.out
@@ -1261,6 +1264,10 @@ ADD_H5_TEST (h5diff_458 2  --follow-symlinks -v --no-dangling-links  ${FILE15} $
 
 # dangling link found for ext links (obj to obj). Both dangle links
 ADD_H5_TEST (h5diff_459 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_noexist2)
+
+# dangling link --follow-symlinks (obj vs obj)
+# (HDFFV-7836)
+ADD_H5_TEST (h5diff_465 1 --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
 
 # ##############################################################################
 # # test for group diff recursivly

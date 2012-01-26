@@ -65,6 +65,7 @@ LIST_HDF5_TEST_FILES="
 $SRC_H5LS_TESTFILES/tall.h5
 $SRC_H5LS_TESTFILES/tarray1.h5
 $SRC_H5LS_TESTFILES/tattr2.h5
+$SRC_H5LS_TESTFILES/tattrreg.h5
 $SRC_H5LS_TESTFILES/tcompound.h5
 $SRC_H5LS_TESTFILES/tdatareg.h5
 $SRC_H5LS_TESTFILES/tdset.h5
@@ -94,6 +95,8 @@ $SRC_H5LS_TESTFILES/tall-1.ls
 $SRC_H5LS_TESTFILES/tall-2.ls
 $SRC_H5LS_TESTFILES/tarray1.ls
 $SRC_H5LS_TESTFILES/tattr2.ls
+$SRC_H5LS_TESTFILES/tattrreg_le.ls
+$SRC_H5LS_TESTFILES/tattrreg_be.ls
 $SRC_H5LS_TESTFILES/tcomp-1.ls
 $SRC_H5LS_TESTFILES/tdataregbe.ls
 $SRC_H5LS_TESTFILES/tdataregle.ls
@@ -356,6 +359,14 @@ TOOLTEST tempty.ls 0 -w80 -d tempty.h5
 # test for all dataset types written to attributes
 # enable -S for avoiding printing NATIVE types
 TOOLTEST tattr2.ls 0 -w80 -v -S tattr2.h5
+
+# test for attribute with region references without verbose mode
+# ( HDFFV-7838, )
+if test $WORDS_BIGENDIAN != "yes"; then
+TOOLTEST tattrreg_le.ls 0 -w80 -v -d tattrreg.h5
+else
+TOOLTEST tattrreg_be.ls 0 -w80 -v -d tattrreg.h5
+fi
 
 # tests for error handling.
 # test for non-existing file

@@ -101,6 +101,7 @@ $SRC_H5REPACK_TESTFILES/h5repack_refs.h5
 $SRC_H5REPACK_TESTFILES/h5repack_shuffle.h5
 $SRC_H5REPACK_TESTFILES/h5repack_soffset.h5
 $SRC_H5REPACK_TESTFILES/h5repack_szip.h5
+$SRC_H5DIFF_TESTFILES/h5diff_attr1.h5
 $SRC_TOOLS_TESTFILES/tfamily00000.h5
 $SRC_TOOLS_TESTFILES/tfamily00001.h5
 $SRC_TOOLS_TESTFILES/tfamily00002.h5
@@ -799,6 +800,14 @@ TOOLTEST h5repack_refs.h5
 # test attribute with various references (bug1797 / HDFFV-5932)
 # the references in attribute of compund or vlen datatype 
 TOOLTEST h5repack_attr_refs.h5 
+
+
+# Add test for memory leak in attirbute. This test is verified by CTEST.   
+# 1. leak from vlen string  
+# 2. leak from compound type without reference member
+# (HDFFV-7840, )
+# Note: this test is experimental for sharing test file among tools
+TOOLTEST h5diff_attr1.h5
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."

@@ -41,12 +41,6 @@ TESTNAME=h5copy
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
-# Test files
-HDF_FILE1=h5copytst.h5
-HDF_FILE2=h5copy_ref.h5
-HDF_EXT_SRC_FILE=h5copy_extlinks_src.h5
-HDF_EXT_TRG_FILE=h5copy_extlinks_trg.h5
-
 ######################################################################
 # test files
 # --------------------------------------------------------------------
@@ -58,10 +52,10 @@ HDF_EXT_TRG_FILE=h5copy_extlinks_trg.h5
 # --------------------------------------------------------------------
 # List of files that will be copied over to local test dir
 LIST_HDF5_TEST_FILES="
-$SRC_H5COPY_TESTFILES/$HDF_FILE1
-$SRC_H5COPY_TESTFILES/$HDF_FILE2
-$SRC_H5COPY_TESTFILES/$HDF_EXT_SRC_FILE
-$SRC_H5COPY_TESTFILES/$HDF_EXT_TRG_FILE
+$SRC_H5COPY_TESTFILES/h5copytst.h5
+$SRC_H5COPY_TESTFILES/h5copy_ref.h5
+$SRC_H5COPY_TESTFILES/h5copy_extlinks_src.h5
+$SRC_H5COPY_TESTFILES/h5copy_extlinks_trg.h5
 "
 
 # List of expect files that will be copied over to local test dir
@@ -345,9 +339,6 @@ H5LSTEST()
     #   so that the output is more portable
     VERIFY_H5LS  $@
     (
-      echo "#############################"
-      echo "Expected output for '$H5LS $@'" 
-      echo "#############################"
       $RUNSERIAL $H5LS_BIN $H5LS_ARGS $@
     ) 2>&1 |sed 's/Modified:.*/Modified:  XXXX-XX-XX XX:XX:XX XXX/' |sed 's/Storage:.*/Storage:   <details removed for portability>/' >$actual
 
@@ -378,8 +369,8 @@ H5LSTEST()
 # <none>
 COPY_OBJECTS() 
 {
-    TESTFILE="$TESTDIR/$HDF_FILE1"
-    FILEOUT="$TESTDIR/`basename $HDF_FILE1 .h5`.out.h5"
+    TESTFILE="$TESTDIR/h5copytst.h5"
+    FILEOUT="$TESTDIR/`basename h5copytst.h5 .h5`.out.h5"
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
@@ -438,8 +429,8 @@ COPY_OBJECTS()
 # <none>
 COPY_REFERENCES() 
 {
-    TESTFILE="$TESTDIR/$HDF_FILE2"
-    FILEOUT="$TESTDIR/`basename $HDF_FILE2 .h5`.out.h5"
+    TESTFILE="$TESTDIR/h5copy_ref.h5"
+    FILEOUT="$TESTDIR/`basename h5copy_ref.h5 .h5`.out.h5"
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
@@ -464,8 +455,8 @@ COPY_REFERENCES()
 # <none>
 COPY_EXT_LINKS() 
 {
-    TESTFILE="$TESTDIR/$HDF_EXT_SRC_FILE"
-    FILEOUT="$TESTDIR/`basename $HDF_EXT_SRC_FILE .h5`.out.h5"
+    TESTFILE="$TESTDIR/h5copy_extlinks_src.h5"
+    FILEOUT="$TESTDIR/`basename h5copy_extlinks_src.h5 .h5`.out.h5"
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
@@ -510,8 +501,8 @@ COPY_EXT_LINKS()
 # <none>
 TEST_MISC() 
 {
-    TESTFILE="$TESTDIR/$HDF_FILE1"
-    FILEOUT="$TESTDIR/`basename $HDF_FILE1 .h5`.out.h5"
+    TESTFILE="$TESTDIR/h5copytst.h5"
+    FILEOUT="$TESTDIR/`basename h5copytst.h5 .h5`.out.h5"
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT

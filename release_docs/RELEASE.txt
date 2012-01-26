@@ -1,4 +1,4 @@
-HDF5 version 1.9.105 currently under development
+HDF5 version 1.9.107 currently under development
 ================================================================================
 
 
@@ -343,6 +343,9 @@ Bug Fixes since HDF5-1.8.0 release
     Library
     -------
 
+      - Creating a dataset in a read-only file caused seg fault when the file 
+            is closed.  It's fixed.  The error stack is returned correctly
+            now. (SLU - 2012/1/25. Issue 7756)
       - Fixed a seg fault that could occur when shrinking a dataset with chunks
             larger than 1 MB. (NAF - 2011/11/30 - HDFFV-7833)
       - The library allowed the conversion of strings between ASCII and UTF8
@@ -632,6 +635,13 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: fixed to prevent from displaying error stack message when 
+          comparing the two dangling symlinks with follow-symlinks option.
+          HDFFV-7836 (JKM 2012/01/13)
+        - h5repack: fixed memory leak for handling variable length string in 
+          attribute.  HDFFV-7840 (JKM 2012/01/06)
+        - h5ls: fixed segfault when access region reference data in an
+          attribute. HDFFV-7838 (JKM 2011/12/29)
         - h5diff: fixed segfault over non-comparable attribute with different 
           dimention or rank, along with '-c' option to display details.
           HDFFV-7770 (JKM 2011/10/24)

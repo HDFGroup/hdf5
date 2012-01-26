@@ -544,9 +544,9 @@ int copy_attr(hid_t loc_in,
             if(H5Aclose(attr_out) < 0)
                 goto error;
 
-            /* Check if we have VL data in the attribute's  datatype that must
+            /* Check if we have VL data and string in the attribute's  datatype that must
              * be reclaimed */
-            if(TRUE == H5Tdetect_class(wtype_id, H5T_VLEN))
+            if (TRUE == h5tools_detect_vlen(wtype_id))
                 H5Dvlen_reclaim(wtype_id, space_id, H5P_DEFAULT, buf);
             HDfree(buf);
             buf = NULL;
@@ -576,13 +576,13 @@ int copy_attr(hid_t loc_in,
 error:
     H5E_BEGIN_TRY {
         if(buf) {
-            /* Check if we have VL data in the attribute's  datatype that must
+            /* Check if we have VL data and string in the attribute's  datatype that must
              * be reclaimed */
-            if(TRUE == H5Tdetect_class(wtype_id, H5T_VLEN))
+            if (TRUE == h5tools_detect_vlen(wtype_id))
                 H5Dvlen_reclaim(wtype_id, space_id, H5P_DEFAULT, buf);
 
             /* Free buf */
-            free(buf);
+            HDfree(buf);
         } /* end if */
 
         H5Tclose(ftype_id);

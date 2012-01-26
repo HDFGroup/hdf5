@@ -1585,6 +1585,8 @@
 ./tools/testfiles/tsaf.ls
 ./tools/testfiles/tstr-1.ls
 ./tools/testfiles/tattr2.ls
+./tools/testfiles/tattrreg_le.ls
+./tools/testfiles/tattrreg_be.ls
 ./tools/testfiles/tvldtypes1.ls
 ./tools/testfiles/tvldtypes2le.ls
 ./tools/testfiles/tvldtypes2be.ls
@@ -1842,6 +1844,7 @@
 ./tools/h5diff/testfiles/h5diff_457.txt
 ./tools/h5diff/testfiles/h5diff_458.txt
 ./tools/h5diff/testfiles/h5diff_459.txt
+./tools/h5diff/testfiles/h5diff_465.txt
 ./tools/h5diff/testfiles/h5diff_480.txt
 ./tools/h5diff/testfiles/h5diff_481.txt
 ./tools/h5diff/testfiles/h5diff_482.txt

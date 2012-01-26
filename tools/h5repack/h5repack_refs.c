@@ -533,6 +533,24 @@ static int copy_refs_attr(hid_t loc_in,
         		}
         		H5Tclose(mtid);
         	}
+            
+            /* if compound don't contain reference type member, free the above 
+             * mallocs. Otherwise there can be memory leaks by the 'continue' 
+             * statement below. */
+            if (!ref_comp_field_n) 
+            {
+                if (ref_comp_index) 
+                {
+                	HDfree(ref_comp_index);
+                	ref_comp_index = NULL;
+                }
+
+                if (ref_comp_size) 
+                {
+            	    HDfree(ref_comp_size);
+        	        ref_comp_size = NULL;
+                }
+            }
         }
 
         is_ref_comp = (ref_comp_field_n > 0);
