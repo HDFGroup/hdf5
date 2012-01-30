@@ -788,10 +788,11 @@ IF (BUILD_TESTING)
 # test various references (bug 1814 and 1726)
   ADD_H5_TEST (bug1814 "TEST" ${FILE_REF})
 
-# test attribute with various references (bug 1797)
-# the references in attribute of compund or vlen datatype 
+# test attribute with various references in attribute of compund 
+# or vlen datatype 
+# (HDFFV-2605, 7513)
 # TODO: include this test when code portion is completed.
-  ADD_H5_TEST (bug1797 "SKIP" ${FILE_ATTR_REF})
+  ADD_H5_TEST (HDFFV-2605 "SKIP" ${FILE_ATTR_REF})
 
 # Add test for memory leak in attirbute. This test is verified by CTEST.   
 # 1. leak from vlen string  
