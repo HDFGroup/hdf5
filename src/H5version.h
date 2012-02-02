@@ -147,6 +147,15 @@
   #define H5Z_class_t_vers 1
 #endif /* !defined(H5Z_class_t_vers) */
 
+/**********/
+/* Macros */
+/**********/
+/* Added manually for now -NAF */
+
+#if !defined(H5Z_CLASS_T_VERS_vers)
+  #define H5Z_CLASS_T_VERS_vers 1
+#endif /* !defined(H5Z_CLASS_T_VERS_vers) */
+
 #endif /* H5_USE_16_API */
 
 #ifdef H5_USE_18_API
@@ -258,6 +267,19 @@
 #if !defined(H5Z_class_t_vers)
   #define H5Z_class_t_vers 2
 #endif /* !defined(H5Z_class_t_vers) */
+
+#if !defined(H5Z_func_t_vers)
+  #define H5Z_func_t_vers 1
+#endif /* !defined(H5Z_func_t_vers) */
+
+/**********/
+/* Macros */
+/**********/
+/* Added manually for now -NAF */
+
+#if !defined(H5Z_CLASS_T_VERS_vers)
+  #define H5Z_CLASS_T_VERS_vers 2
+#endif /* !defined(H5Z_CLASS_T_VERS_vers) */
 
 #endif /* H5_USE_18_API */
 
@@ -549,16 +571,48 @@
 #endif /* H5E_auto_t_vers */
 
 
-#if !defined(H5Z_class_t_vers) || H5Z_class_t_vers == 2
+#if !defined(H5Z_class_t_vers) || H5Z_class_t_vers == 3
   #ifndef H5Z_class_t_vers
-    #define H5Z_class_t_vers 2
+    #define H5Z_class_t_vers 3
   #endif /* H5Z_class_t_vers */
+  #define H5Z_class_t H5Z_class3_t
+#elif H5Z_class_t_vers == 2
   #define H5Z_class_t H5Z_class2_t
 #elif H5Z_class_t_vers == 1
   #define H5Z_class_t H5Z_class1_t
 #else /* H5Z_class_t_vers */
   #error "H5Z_class_t_vers set to invalid value"
 #endif /* H5Z_class_t_vers */
+
+
+#if !defined(H5Z_func_t_vers) || H5Z_func_t_vers == 2
+  #ifndef H5Z_func_t_vers
+    #define H5Z_func_t_vers 2
+  #endif /* H5Z_func_t_vers */
+  #define H5Z_func_t H5Z_func2_t
+#elif H5Z_func_t_vers == 1
+  #define H5Z_func_t H5Z_func1_t
+#else /* H5Z_func_t_vers */
+  #error "H5Z_func_t_vers set to invalid value"
+#endif /* H5Z_func_t_vers */
+
+/**********/
+/* Macros */
+/**********/
+/* Added manually for now -NAF */
+
+#if !defined(H5Z_CLASS_T_VERS_vers) || H5Z_CLASS_T_VERS_vers == 3
+  #ifndef H5Z_CLASS_T_VERS_vers
+    #define H5Z_CLASS_T_VERS_vers 3
+  #endif /* H5Z_CLASS_T_VERS_vers */
+  #define H5Z_CLASS_T_VERS H5Z_CLASS_T_VERS_3
+#elif H5Z_CLASS_T_VERS_vers == 2
+  #define H5Z_CLASS_T_VERS H5Z_CLASS_T_VERS_2
+#elif H5Z_CLASS_T_VERS_vers == 1
+  #define H5Z_CLASS_T_VERS H5Z_CLASS_T_VERS_1
+#else /* H5Z_CLASS_T_VERS_vers */
+  #error "H5Z_CLASS_T_VERS_vers set to invalid value"
+#endif /* H5Z_CLASS_T_VERS_vers */
 
 #endif /* H5version_H */
 

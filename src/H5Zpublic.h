@@ -102,7 +102,9 @@ typedef enum H5Z_SO_scale_type_t {
 } H5Z_SO_scale_type_t;
 
 /* Current version of the H5Z_class_t struct */
-#define H5Z_CLASS_T_VERS (1)
+#define H5Z_CLASS_T_VERS_1 (1)
+#define H5Z_CLASS_T_VERS_2 (2)
+#define H5Z_CLASS_T_VERS_3 (3)
 
 /* Values to decide if EDC is enabled for reading data */
 typedef enum H5Z_EDC_t {
@@ -198,15 +200,15 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  * buffer. If an error occurs then the function should return zero and leave
  * all pointer arguments unchanged.
  */
-typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts,
+typedef size_t (*H5Z_func2_t)(unsigned int flags, size_t cd_nelmts,
 			     const unsigned int cd_values[], size_t nbytes,
-			     size_t *buf_size, void **buf);
+			     size_t *buf_size, void **buf, void *lib_data);
 
 /*
  * The filter table maps filter identification numbers to structs that
  * contain a pointers to the filter function and timing statistics.
  */
-typedef struct H5Z_class2_t {
+typedef struct H5Z_class3_t {
     int version;                /* Version number of the H5Z_class_t struct */
     H5Z_filter_t id;		/* Filter ID number			     */
     unsigned encoder_present;   /* Does this filter have an encoder? */
@@ -214,13 +216,17 @@ typedef struct H5Z_class2_t {
     const char	*name;		/* Comment for debugging		     */
     H5Z_can_apply_func_t can_apply; /* The "can apply" callback for a filter */
     H5Z_set_local_func_t set_local; /* The "set local" callback for a filter */
-    H5Z_func_t filter;		/* The actual filter function		     */
-} H5Z_class2_t;
+    H5Z_func2_t filter;		/* The actual filter function		     */
+} H5Z_class3_t;
 
 H5_DLL herr_t H5Zregister(const void *cls);
 H5_DLL herr_t H5Zunregister(H5Z_filter_t id);
 H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
 H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
+H5_DLL void *H5Zaligned_malloc(size_t size, void *lib_data);
+H5_DLL herr_t H5Zaligned_free(void *buf, void *lib_data);
+H5_DLL void *H5Zaligned_realloc(void *buf, size_t old_size, size_t new_size,
+    void *lib_data);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
@@ -229,15 +235,47 @@ H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_confi
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*
+ * A filter gets definition flags and invocation flags (defined above), the
+ * client data array and size defined when the filter was added to the
+ * pipeline, the size in bytes of the data on which to operate, and pointers
+ * to a buffer and its allocated size.
+ *
+ * The filter should store the result in the supplied buffer if possible,
+ * otherwise it can allocate a new buffer, freeing the original.  The
+ * allocated size of the new buffer should be returned through the BUF_SIZE
+ * pointer and the new buffer through the BUF pointer.
+ *
+ * The return value from the filter is the number of bytes in the output
+ * buffer. If an error occurs then the function should return zero and leave
+ * all pointer arguments unchanged.
+ */
+typedef size_t (*H5Z_func1_t)(unsigned int flags, size_t cd_nelmts,
+                             const unsigned int cd_values[], size_t nbytes,
+                             size_t *buf_size, void **buf);
+
+/*
  * The filter table maps filter identification numbers to structs that
  * contain a pointers to the filter function and timing statistics.
  */
+/* Version 2 */
+typedef struct H5Z_class2_t {
+    int version;                /* Version number of the H5Z_class_t struct */
+    H5Z_filter_t id;            /* Filter ID number                          */
+    unsigned encoder_present;   /* Does this filter have an encoder? */
+    unsigned decoder_present;   /* Does this filter have a decoder? */
+    const char  *name;          /* Comment for debugging                     */
+    H5Z_can_apply_func_t can_apply; /* The "can apply" callback for a filter */
+    H5Z_set_local_func_t set_local; /* The "set local" callback for a filter */
+    H5Z_func1_t filter;          /* The actual filter function                */
+} H5Z_class2_t;
+
+/* Version 1 */
 typedef struct H5Z_class1_t {
     H5Z_filter_t id;		/* Filter ID number			     */
     const char	*name;		/* Comment for debugging		     */
     H5Z_can_apply_func_t can_apply; /* The "can apply" callback for a filter */
     H5Z_set_local_func_t set_local; /* The "set local" callback for a filter */
-    H5Z_func_t filter;		/* The actual filter function		     */
+    H5Z_func1_t filter;		/* The actual filter function		     */
 } H5Z_class1_t;
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

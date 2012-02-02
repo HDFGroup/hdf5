@@ -41,7 +41,7 @@ typedef struct {
 static htri_t H5Z_can_apply_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-                              size_t nbytes, size_t *buf_size, void **buf);
+                              size_t nbytes, size_t *buf_size, void **buf, void *lib_data);
 
 static void H5Z_calc_parms_nooptype(void);
 static void H5Z_calc_parms_atomic(void);
@@ -79,18 +79,6 @@ static void H5Z_nbit_compress_one_compound(unsigned char *data, size_t data_offs
 static void H5Z_nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
                               size_t *buffer_size, const unsigned parms[]);
 
-/* This message derives from H5Z */
-H5Z_class2_t H5Z_NBIT[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
-    H5Z_FILTER_NBIT,		/* Filter id number		*/
-    1,              /* Assume encoder present: check before registering */
-    1,                  /* decoder_present flag (set to true) */
-    "nbit",			    /* Filter name for debugging	*/
-    H5Z_can_apply_nbit,		/* The "can apply" callback     */
-    H5Z_set_local_nbit,         /* The "set local" callback     */
-    H5Z_filter_nbit,		/* The actual filter function	*/
-}};
-
 /* Local macros */
 #define H5Z_NBIT_ATOMIC          1     /* Atomic datatype class: integer/floating-point */
 #define H5Z_NBIT_ARRAY           2     /* Array datatype class */
@@ -111,6 +99,48 @@ static unsigned cd_values_index = 0;
 static size_t cd_values_actual_nparms = 0;
 static unsigned char need_not_compress = FALSE;
 static unsigned parms_index = 0;
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_init_nbit
+ *
+ * Purpose:     Registers the nbit filter.
+ *
+ * Return:      Success: 0
+ *              Failure: Negative
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, December 12, 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_init_nbit(void)
+{
+    H5Z_class_int_t     fclass;         /* Filter class */
+    herr_t              ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_init_nbit)
+
+    /* Build filter class struct */
+    fclass.version = H5Z_CLASS_T_VERS_3;        /* H5Z_class_t version */
+    fclass.id = H5Z_FILTER_NBIT;                /* Filter id number */
+    fclass.encoder_present = 1;                 /* encoder_present flag (set to true) */
+    fclass.decoder_present = 1;                 /* decoder_present flag (set to true) */
+    fclass.name = "nbit";                       /* Filter name for debugging */
+    fclass.can_apply = H5Z_can_apply_nbit;      /* The "can apply" callback */
+    fclass.set_local = H5Z_set_local_nbit;      /* The "set local" callback */
+    fclass.filter.v2 = H5Z_filter_nbit;         /* The actual filter function */
+
+    /* Register the filter */
+    if(H5Z_register(&fclass) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register nbit filter")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_init_nbit() */
 
 
 /*-------------------------------------------------------------------------
@@ -866,7 +896,7 @@ done:
  */
 static size_t
 H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-                size_t nbytes, size_t *buf_size, void **buf)
+                size_t nbytes, size_t *buf_size, void **buf, void *lib_data)
 {
     unsigned char *outbuf;      /* pointer to new output buffer */
     size_t size_out  = 0;       /* size of output buffer */
@@ -895,7 +925,7 @@ H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         size_out = d_nelmts * cd_values[4]; /* cd_values[4] stores datatype size */
 
         /* allocate memory space for decompressed buffer */
-        if(NULL == (outbuf = (unsigned char *)H5MM_malloc(size_out)))
+        if(NULL == (outbuf = (unsigned char *)H5Z_aligned_malloc(size_out, lib_data)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for nbit decompression")
 
         /* decompress the buffer */
@@ -908,7 +938,7 @@ H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         size_out = nbytes;
 
         /* allocate memory space for compressed buffer */
-        if(NULL == (outbuf = (unsigned char *)H5MM_malloc(size_out)))
+        if(NULL == (outbuf = (unsigned char *)H5Z_aligned_malloc(size_out, lib_data)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for nbit compression")
 
         /* compress the buffer, size_out will be changed */

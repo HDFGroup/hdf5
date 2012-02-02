@@ -35,6 +35,7 @@
 
 /* Private headers needed by this file */
 #include "H5private.h"
+#include "H5Pprivate.h"
 
 #ifdef NDEBUG
 #define H5MM_malloc(Z)	HDmalloc(Z)
@@ -56,5 +57,7 @@ H5_DLL void *H5MM_xfree(void *mem);
 H5_DLL void *H5MM_aligned_malloc(size_t size, H5FD_t *lf);
 H5_DLL void *H5MM_aligned_realloc(void *mem, size_t old_size, size_t new_size,
     H5FD_t *lf);
+H5_DLL void *H5MM_aligned_realloc_mark(void *mem, size_t old_size,
+    size_t new_size, H5FD_t *lf, H5P_genplist_t *dx_plist);
 
 #endif

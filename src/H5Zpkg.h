@@ -24,50 +24,53 @@
 #include "H5Zprivate.h"          /* Filter functions                */
 
 
+/* Package-local function prototypes */
+H5_DLL void *H5Z_aligned_malloc(size_t size, void *lib_data);
+H5_DLL herr_t H5Z_aligned_free(void *buf, void *lib_data);
+H5_DLL void *H5Z_aligned_realloc(void *buf, size_t old_size, size_t new_size,
+    void *lib_data);
+
 #ifdef H5_HAVE_FILTER_DEFLATE
 /*
- * Deflate filter
+ * Deflate filter initialization routine
  */
-H5_DLLVAR const H5Z_class2_t H5Z_DEFLATE[1];
+H5_DLL herr_t H5Z_init_deflate(void);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
 #ifdef H5_HAVE_FILTER_SHUFFLE
 /*
- * Shuffle filter
+ * Shuffle filter initialization routine
  */
-H5_DLLVAR const H5Z_class2_t H5Z_SHUFFLE[1];
+H5_DLL herr_t H5Z_init_shuffle(void);
 #endif /* H5_HAVE_FILTER_SHUFFLE */
 
 #ifdef H5_HAVE_FILTER_FLETCHER32
 /*
- * Fletcher32 filter
+ * Fletcher32 filter initialization routine
  */
-H5_DLLVAR const H5Z_class2_t H5Z_FLETCHER32[1];
+H5_DLL herr_t H5Z_init_fletcher32(void);
 #endif /* H5_HAVE_FILTER_FLETCHER32 */
 
 #ifdef H5_HAVE_FILTER_SZIP
 /*
- * szip filter
+ * szip filter initialization routine
  */
-H5_DLLVAR H5Z_class2_t H5Z_SZIP[1];
+H5_DLL herr_t H5Z_init_szip(void);
 #endif /* H5_HAVE_FILTER_SZIP */
 
 #ifdef H5_HAVE_FILTER_NBIT
 /*
- * nbit filter
+ * nbit filter initialization routine
  */
-H5_DLLVAR H5Z_class2_t H5Z_NBIT[1];
+H5_DLL herr_t H5Z_init_nbit(void);
 #endif /* H5_HAVE_FILTER_NBIT */
 
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
 /*
- * scaleoffset filter
+ * scaleoffset filter initialization routine
  */
-H5_DLLVAR H5Z_class2_t H5Z_SCALEOFFSET[1];
+H5_DLL herr_t H5Z_init_scaleoffset(void);
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */
-
-/* Package-local function prototypes */
-H5_DLL void H5Z_update_class_vers(H5Z_class2_t * old_vers, H5Z_class2_t * curr_vers);
 
 #endif /* _H5Zpkg_H */
 

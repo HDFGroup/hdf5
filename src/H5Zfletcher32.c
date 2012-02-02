@@ -31,21 +31,52 @@
 
 /* Local function prototypes */
 static size_t H5Z_filter_fletcher32 (unsigned flags, size_t cd_nelmts,
-    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
-
-/* This message derives from H5Z */
-const H5Z_class2_t H5Z_FLETCHER32[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
-    H5Z_FILTER_FLETCHER32,	/* Filter id number		*/
-    1,              /* encoder_present flag (set to true) */
-    1,              /* decoder_present flag (set to true) */
-    "fletcher32",		/* Filter name for debugging	*/
-    NULL,                       /* The "can apply" callback     */
-    NULL,                       /* The "set local" callback     */
-    H5Z_filter_fletcher32,	/* The actual filter function	*/
-}};
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf,
+    void *lib_data);
 
 #define FLETCHER_LEN       4
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_init_fletcher32
+ *
+ * Purpose:     Registers the fletcher32 filter.
+ *
+ * Return:      Success: 0
+ *              Failure: Negative
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, December 12, 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_init_fletcher32(void)
+{
+    H5Z_class_int_t     fclass;         /* Filter class */
+    herr_t              ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_init_fletcher32)
+
+    /* Build filter class struct */
+    fclass.version = H5Z_CLASS_T_VERS_3;        /* H5Z_class_t version */
+    fclass.id = H5Z_FILTER_FLETCHER32;          /* Filter id number */
+    fclass.encoder_present = 1;                 /* encoder_present flag (set to true) */
+    fclass.decoder_present = 1;                 /* decoder_present flag (set to true) */
+    fclass.name = "fletcher32";                 /* Filter name for debugging */
+    fclass.can_apply = NULL;                    /* The "can apply" callback */
+    fclass.set_local = NULL;                    /* The "set local" callback */
+    fclass.filter.v2 = H5Z_filter_fletcher32;   /* The actual filter function */
+
+    /* Register the filter */
+    if(H5Z_register(&fclass) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register fletcher32 filter")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_init_fletcher32() */
 
 
 /*-------------------------------------------------------------------------
@@ -75,7 +106,7 @@ const H5Z_class2_t H5Z_FLETCHER32[1] = {{
 /* ARGSUSED */
 static size_t
 H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned UNUSED cd_values[],
-                     size_t nbytes, size_t *buf_size, void **buf)
+                     size_t nbytes, size_t *buf_size, void **buf, void *lib_data)
 {
     void    *outbuf = NULL;     /* Pointer to new buffer */
     unsigned char *src = (unsigned char*)(*buf);
@@ -139,7 +170,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
         /* Compute checksum (can't fail) */
         fletcher = H5_checksum_fletcher32(src, nbytes);
 
-	if (NULL==(dst=outbuf=H5MM_malloc(nbytes+FLETCHER_LEN)))
+	if(NULL == (dst = (unsigned char *)(outbuf = H5Z_aligned_malloc(nbytes+FLETCHER_LEN, lib_data))))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate Fletcher32 checksum destination buffer")
 
         /* Copy raw data */

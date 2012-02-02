@@ -37,20 +37,50 @@
 static htri_t H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z_filter_szip (unsigned flags, size_t cd_nelmts,
-    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf,
+    void *lib_data);
 
-/* This message derives from H5Z */
-H5Z_class2_t H5Z_SZIP[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
-    H5Z_FILTER_SZIP,		/* Filter id number		*/
-    1,              /* Assume encoder present: check before registering */
-    1,                  /* decoder_present flag (set to true) */
-    "szip",			    /* Filter name for debugging	*/
-    H5Z_can_apply_szip,		/* The "can apply" callback     */
-    H5Z_set_local_szip,         /* The "set local" callback     */
-    H5Z_filter_szip,		/* The actual filter function	*/
-}};
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_init_szip
+ *
+ * Purpose:     Registers the szip filter.
+ *
+ * Return:      Success: 0
+ *              Failure: Negative
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, December 12, 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_init_szip(void)
+{
+    H5Z_class_int_t     fclass;         /* Filter class */
+    herr_t              ret_value = SUCCEED; /* Return value */
 
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_init_szip)
+
+    /* Build filter class struct */
+    fclass.version = H5Z_CLASS_T_VERS_3;        /* H5Z_class_t version */
+    fclass.id = H5Z_FILTER_SZIP;                /* Filter id number */
+    fclass.encoder_present = (unsigned)SZ_encoder_enabled(); /* encoder_present flag */
+    fclass.decoder_present = 1;                 /* decoder_present flag (set to true) */
+    fclass.name = "szip";                       /* Filter name for debugging */
+    fclass.can_apply = H5Z_can_apply_szip;      /* The "can apply" callback */
+    fclass.set_local = H5Z_set_local_szip;      /* The "set local" callback */
+    fclass.filter.v2 = H5Z_filter_szip;         /* The actual filter function */
+
+    /* Register the filter */
+    if(H5Z_register(&fclass) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register szip filter")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_init_szip() */
 
 
 /*-------------------------------------------------------------------------
@@ -276,7 +306,7 @@ done:
  */
 static size_t
 H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-    size_t nbytes, size_t *buf_size, void **buf)
+    size_t nbytes, size_t *buf_size, void **buf, void *lib_data)
 {
     size_t ret_value = 0;       /* Return value */
     size_t size_out  = 0;       /* Size of output buffer */
@@ -312,12 +342,12 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         size_t nalloc;  /* Number of bytes the compressed block will expand into */
 
         /* Get the size of the uncompressed buffer */
-        newbuf = *buf;
+        newbuf = (unsigned char *)*buf;
         UINT32DECODE(newbuf,stored_nalloc);
         H5_ASSIGN_OVERFLOW(nalloc,stored_nalloc,uint32_t,size_t);
 
         /* Allocate space for the uncompressed buffer */
-        if(NULL==(outbuf = H5MM_malloc(nalloc)))
+        if(NULL == (outbuf = (unsigned char *)H5Z_aligned_malloc(nalloc, lib_data)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for szip decompression")
 
         /* Decompress the buffer */
@@ -340,7 +370,7 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         unsigned char *dst = NULL;    /* Temporary pointer to new output buffer */
 
         /* Allocate space for the compressed buffer & header (assume data won't get bigger) */
-        if(NULL==(dst=outbuf = H5MM_malloc(nbytes+4)))
+        if(NULL == (dst = outbuf = (unsigned char *)H5Z_aligned_malloc(nbytes + 4, lib_data)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate szip destination buffer")
 
         /* Encode the uncompressed length */

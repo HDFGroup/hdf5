@@ -353,6 +353,108 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5MM_aligned_realloc_mark
+ *
+ * Purpose:     Reallocate a block of memory of at least size bytes,
+ *              following the alignment restrictions specified by the file
+ *              driver in lf.  Marks the buffer as aligned on dxpl_id.
+ *
+ * Return:      Success:        Ptr to new memory
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              Dec  9 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5MM_aligned_realloc_mark(void *mem, size_t old_size, size_t new_size,
+    H5FD_t *lf, H5P_genplist_t *dx_plist)
+{
+    H5D_aligned_mem_t aligned_mem; /* Aligned memory property */
+    hbool_t aligned_mem_set = FALSE; /* Whether the aligned memory property has been set */
+    void *ret_value;  /* Return value */
+
+    FUNC_ENTER_NOAPI(H5MM_aligned_realloc_mark, NULL);
+
+    HDassert(lf);
+    HDassert(lf->feature_flags & H5FD_FEAT_ALIGNED_MEM);
+    HDassert(lf->must_align);
+
+    aligned_mem.aligned = FALSE;
+    if(NULL == mem) {
+        if(0 == new_size)
+            ret_value = NULL;
+        else {
+            ret_value = H5MM_aligned_malloc(new_size, lf);
+            aligned_mem.aligned = TRUE;
+        } /* end else */
+    } /* end if */
+    else if(0 == new_size) {
+        /* Mark data as unaligned.  Do this before mem is freed so mem is not
+         * freed if H5P_set fails, to match the behavior of the standard
+         * realloc(). */
+        aligned_mem.aligned = FALSE;
+        aligned_mem.buf = NULL;
+        aligned_mem.size = 0;
+        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
+        aligned_mem_set = TRUE;
+
+        /* Free mem */
+        H5MM_free(mem);
+        ret_value = NULL;
+    } /* end if */
+    else if((((new_size - 1) / lf->mbsize) + 1) * lf->mbsize
+            == (((old_size - 1) / lf->mbsize) + 1) * lf->mbsize) {
+        /* New allocation is in the same memory block size, no need to
+         * realloc */
+        ret_value = mem;
+        aligned_mem.aligned = TRUE;
+    } /* end if */
+    else {
+        /* Reallocate a block of a different size */
+        /* Should we call standard H5MM_realloc with aligned size if
+         * new_size < old_size?  Is realloc guaranteed to preserve the
+         * aligned property of the original buffer in this case?  -NAF */
+        if(NULL == (ret_value = H5MM_aligned_malloc(new_size, lf)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+        /* Mark data as aligned.  Do this before mem is freed so mem is not
+         * freed if H5P_set fails, to match the behavior of the standard
+         * realloc(). */
+        aligned_mem.aligned = TRUE;
+        aligned_mem.buf = ret_value;
+        aligned_mem.size = new_size;
+        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0) {
+            (void)H5MM_xfree(ret_value);
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
+        } /* end if */
+        aligned_mem_set = TRUE;
+
+        HDmemcpy(ret_value, mem, MIN(old_size, new_size));
+        H5MM_free(mem);
+    } /* end else */
+
+    /* Set the aligned memory property if necessary */
+    if(!aligned_mem_set) {
+        HDassert(aligned_mem.aligned == (ret_value != NULL));
+        aligned_mem.buf = ret_value;
+        aligned_mem.size = new_size;
+
+        if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5MM_aligned_realloc_mark */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5MMaligned_malloc
  *
  * Purpose:     Allocate a block of memory of at least size bytes,

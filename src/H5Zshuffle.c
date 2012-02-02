@@ -29,22 +29,53 @@
 /* Local function prototypes */
 static herr_t H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
-    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
-
-/* This message derives from H5Z */
-const H5Z_class2_t H5Z_SHUFFLE[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
-    H5Z_FILTER_SHUFFLE,		/* Filter id number		*/
-    1,              /* encoder_present flag (set to true) */
-    1,              /* decoder_present flag (set to true) */
-    "shuffle",			/* Filter name for debugging	*/
-    NULL,                       /* The "can apply" callback     */
-    H5Z_set_local_shuffle,      /* The "set local" callback     */
-    H5Z_filter_shuffle,		/* The actual filter function	*/
-}};
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf,
+    void *lib_data);
 
 /* Local macros */
 #define H5Z_SHUFFLE_PARM_SIZE      0       /* "Local" parameter for shuffling size */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_init_shuffle
+ *
+ * Purpose:     Registers the shuffle filter.
+ *
+ * Return:      Success: 0
+ *              Failure: Negative
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, December 12, 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_init_shuffle(void)
+{
+    H5Z_class_int_t     fclass;         /* Filter class */
+    herr_t              ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_init_shuffle)
+
+    /* Build filter class struct */
+    fclass.version = H5Z_CLASS_T_VERS_3;        /* H5Z_class_t version */
+    fclass.id = H5Z_FILTER_SHUFFLE;             /* Filter id number */
+    fclass.encoder_present = 1;                 /* encoder_present flag (set to true) */
+    fclass.decoder_present = 1;                 /* decoder_present flag (set to true) */
+    fclass.name = "shuffle";                    /* Filter name for debugging */
+    fclass.can_apply = NULL;                    /* The "can apply" callback */
+    fclass.set_local = H5Z_set_local_shuffle;   /* The "set local" callback */
+    fclass.filter.v2 = H5Z_filter_shuffle;      /* The actual filter function */
+
+    /* Register the filter */
+    if(H5Z_register(&fclass) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register shuffle filter")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_init_shuffle() */
 
 
 /*-------------------------------------------------------------------------
@@ -125,7 +156,7 @@ done:
  */
 static size_t
 H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-                   size_t nbytes, size_t *buf_size, void **buf)
+                   size_t nbytes, size_t *buf_size, void **buf, void *lib_data)
 {
     void *dest = NULL;          /* Buffer to deposit [un]shuffled bytes into */
     unsigned char *_src=NULL;   /* Alias for source buffer */
@@ -157,7 +188,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         leftover = nbytes%bytesoftype;
 
         /* Allocate the destination buffer */
-        if (NULL==(dest = H5MM_malloc(nbytes)))
+        if (NULL==(dest = H5Z_aligned_malloc(nbytes, lib_data)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for shuffle buffer")
 
         if(flags & H5Z_FLAG_REVERSE) {

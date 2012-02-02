@@ -50,10 +50,17 @@ typedef enum {
     H5Z_PRELUDE_SET_LOCAL       /* Call "set local" callback */
 } H5Z_prelude_type_t;
 
+/* Type for the "lib_data" paramter for version 3+ classes */
+typedef struct H5Z_lib_data_t {
+    H5FD_t      *lf;            /* Low-level file pointer */
+    H5P_genplist_t *dx_plist;   /* Dataset transfer property list */
+    hbool_t     align;          /* Whether the file driver uses aligned blocks */
+} H5Z_lib_data_t;
+
 /* Local variables */
 static size_t		H5Z_table_alloc_g = 0;
 static size_t		H5Z_table_used_g = 0;
-static H5Z_class2_t	*H5Z_table_g = NULL;
+static H5Z_class_int_t	*H5Z_table_g = NULL;
 #ifdef H5Z_DEBUG
 static H5Z_stats_t	*H5Z_stat_table_g = NULL;
 #endif /* H5Z_DEBUG */
@@ -84,28 +91,27 @@ H5Z_init_interface (void)
     FUNC_ENTER_NOAPI_NOINIT(H5Z_init_interface)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if (H5Z_register (H5Z_DEFLATE)<0)
+    if(H5Z_init_deflate() < 0)
 	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register deflate filter")
 #endif /* H5_HAVE_FILTER_DEFLATE */
 #ifdef H5_HAVE_FILTER_SHUFFLE
-    if (H5Z_register (H5Z_SHUFFLE)<0)
+    if(H5Z_init_shuffle() < 0)
 	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register shuffle filter")
 #endif /* H5_HAVE_FILTER_SHUFFLE */
 #ifdef H5_HAVE_FILTER_FLETCHER32
-    if (H5Z_register (H5Z_FLETCHER32)<0)
+    if(H5Z_init_fletcher32() < 0)
 	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register fletcher32 filter")
 #endif /* H5_HAVE_FILTER_FLETCHER32 */
 #ifdef H5_HAVE_FILTER_SZIP
-    H5Z_SZIP->encoder_present = SZ_encoder_enabled();
-    if (H5Z_register (H5Z_SZIP)<0)
+    if(H5Z_init_szip() < 0)
 	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register szip filter")
 #endif /* H5_HAVE_FILTER_SZIP */
 #ifdef H5_HAVE_FILTER_NBIT
-    if (H5Z_register (H5Z_NBIT)<0)
+    if(H5Z_init_nbit() < 0)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register nbit filter")
 #endif /* H5_HAVE_FILTER_NBIT */
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
-    if (H5Z_register (H5Z_SCALEOFFSET)<0)
+    if(H5Z_init_scaleoffset() < 0)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register scaleoffset filter")
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */
 
@@ -189,7 +195,7 @@ H5Z_term_interface(void)
 	}
 #endif /* H5Z_DEBUG */
 	/* Free the table of filters */
-	H5Z_table_g = (H5Z_class2_t *)H5MM_xfree(H5Z_table_g);
+	H5Z_table_g = (H5Z_class_int_t *)H5MM_xfree(H5Z_table_g);
 #ifdef H5Z_DEBUG
 	H5Z_stat_table_g = (H5Z_stats_t *)H5MM_xfree(H5Z_stat_table_g);
 #endif /* H5Z_DEBUG */
@@ -218,17 +224,16 @@ H5Z_term_interface(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Zregister(const void *cls)
+H5Zregister(const void *_cls)
 {
-    const H5Z_class2_t  *cls_real = (const H5Z_class2_t *) cls; /* "Real" class pointer */
-    H5Z_class2_t        cls_new;                /* Translated class struct */
+    H5Z_class_int_t     cls_new;                /* Translated class struct */
     herr_t              ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(H5Zregister, FAIL)
-    H5TRACE1("e", "*x", cls);
+    H5TRACE1("e", "*x", _cls);
 
     /* Check args */
-    if (cls_real==NULL)
+    if (_cls == NULL)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter class")
 
     /* Check H5Z_class_t version number; this is where a function to convert
@@ -241,44 +246,85 @@ H5Zregister(const void *cls)
      * at least 256, there should be no overlap and the version of the struct
      * can be determined by the value of the first field.
      */
-    if(cls_real->version != H5Z_CLASS_T_VERS) {
+    if(*(const int *)_cls > H5Z_CLASS_T_VERS_3) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-        /* Assume it is an old "H5Z_class1_t" instead */
-        const H5Z_class1_t *cls_old = (const H5Z_class1_t *) cls;
+        /* Assume it is an "H5Z_class1_t" */
+        const H5Z_class1_t *cls = (const H5Z_class1_t *)_cls;
 
-        /* Translate to new H5Z_class2_t */
-        cls_new.version = H5Z_CLASS_T_VERS;
-        cls_new.id = cls_old->id;
+        if (cls->filter==NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no filter function specified")
+
+        /* Translate to H5Z_class_int_t */
+        cls_new.version = H5Z_CLASS_T_VERS_1;
+        cls_new.id = cls->id;
         cls_new.encoder_present = 1;
         cls_new.decoder_present = 1;
-        cls_new.name = cls_old->name;
-        cls_new.can_apply = cls_old->can_apply;
-        cls_new.set_local = cls_old->set_local;
-        cls_new.filter = cls_old->filter;
-
-        /* Set cls_real to point to the translated structure */
-        cls_real = &cls_new;
+        cls_new.name = cls->name;
+        cls_new.can_apply = cls->can_apply;
+        cls_new.set_local = cls->set_local;
+        cls_new.filter.v1 = cls->filter;
 
 #else /* H5_NO_DEPRECATED_SYMBOLS */
         /* Deprecated symbols not allowed, throw an error */
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class_t version number");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     } /* end if */
+    else if(*(const int *)_cls == H5Z_CLASS_T_VERS_1
+            || *(const int *)_cls == H5Z_CLASS_T_VERS_2) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+        /* It is an "H5Z_class2_t" */
+        const H5Z_class2_t *cls = (const H5Z_class2_t *)_cls;
 
-    if (cls_real->id<0 || cls_real->id>H5Z_FILTER_MAX)
+        if (cls->filter==NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no filter function specified")
+
+        /* Translate to H5Z_class_int_t */
+        cls_new.version = H5Z_CLASS_T_VERS_2;
+        cls_new.id = cls->id;
+        cls_new.encoder_present = cls->encoder_present;
+        cls_new.decoder_present = cls->decoder_present;
+        cls_new.name = cls->name;
+        cls_new.can_apply = cls->can_apply;
+        cls_new.set_local = cls->set_local;
+        cls_new.filter.v1 = cls->filter;
+
+#else /* H5_NO_DEPRECATED_SYMBOLS */
+        /* Deprecated symbols not allowed, throw an error */
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class_t version number");
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+    } /* end if */
+    else if(*(const int *)_cls == H5Z_CLASS_T_VERS_3) {
+        /* It is an "H5Z_class3_t" */
+        const H5Z_class3_t *cls = (const H5Z_class3_t *)_cls;
+
+        if (cls->filter==NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no filter function specified")
+
+        /* Translate to H5Z_class_int_t */
+        cls_new.version = cls->version;
+        cls_new.id = cls->id;
+        cls_new.encoder_present = cls->encoder_present;
+        cls_new.decoder_present = cls->decoder_present;
+        cls_new.name = cls->name;
+        cls_new.can_apply = cls->can_apply;
+        cls_new.set_local = cls->set_local;
+        cls_new.filter.v2 = cls->filter;
+    } /* end if */
+    else
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number or version number")
+
+    if (cls_new.id < 0 || cls_new.id > H5Z_FILTER_MAX)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number")
-    if (cls_real->id<H5Z_FILTER_RESERVED)
+    if (cls_new.id < H5Z_FILTER_RESERVED)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "unable to modify predefined filters")
-    if (cls_real->filter==NULL)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no filter function specified")
 
     /* Do it */
-    if (H5Z_register (cls_real)<0)
+    if (H5Z_register (&cls_new)<0)
 	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Zregister() */
 
 
 /*-------------------------------------------------------------------------
@@ -297,7 +343,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_register (const H5Z_class2_t *cls)
+H5Z_register (const H5Z_class_int_t *cls)
 {
     size_t	i;
     herr_t      ret_value = SUCCEED;       /* Return value */
@@ -316,7 +362,7 @@ H5Z_register (const H5Z_class2_t *cls)
     if(i >= H5Z_table_used_g) {
 	if(H5Z_table_used_g >= H5Z_table_alloc_g) {
 	    size_t n = MAX(H5Z_MAX_NFILTERS, 2*H5Z_table_alloc_g);
-	    H5Z_class2_t *table = (H5Z_class2_t *)H5MM_realloc(H5Z_table_g, n * sizeof(H5Z_class2_t));
+	    H5Z_class_int_t *table = (H5Z_class_int_t *)H5MM_realloc(H5Z_table_g, n * sizeof(H5Z_class_int_t));
 #ifdef H5Z_DEBUG
 	    H5Z_stats_t *stat_table = (H5Z_stats_t *)H5MM_realloc(H5Z_stat_table_g, n * sizeof(H5Z_stats_t));
 #endif /* H5Z_DEBUG */
@@ -333,7 +379,7 @@ H5Z_register (const H5Z_class2_t *cls)
 
 	/* Initialize */
 	i = H5Z_table_used_g++;
-	HDmemcpy(H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
+	HDmemcpy(H5Z_table_g+i, cls, sizeof(H5Z_class_int_t));
 #ifdef H5Z_DEBUG
 	HDmemset(H5Z_stat_table_g+i, 0, sizeof(H5Z_stats_t));
 #endif /* H5Z_DEBUG */
@@ -341,12 +387,12 @@ H5Z_register (const H5Z_class2_t *cls)
     /* Filter already registered */
     else {
 	/* Replace old contents */
-	HDmemcpy(H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
+	HDmemcpy(H5Z_table_g+i, cls, sizeof(H5Z_class_int_t));
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5Z_register() */
 
 
 /*-------------------------------------------------------------------------
@@ -422,7 +468,7 @@ H5Z_unregister (H5Z_filter_t id)
 
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
-    HDmemmove(&H5Z_table_g[i],&H5Z_table_g[i+1],sizeof(H5Z_class2_t)*((H5Z_table_used_g-1)-i));
+    HDmemmove(&H5Z_table_g[i],&H5Z_table_g[i+1],sizeof(H5Z_class_int_t)*((H5Z_table_used_g-1)-i));
 #ifdef H5Z_DEBUG
     HDmemmove(&H5Z_stat_table_g[i],&H5Z_stat_table_g[i+1],sizeof(H5Z_stats_t)*((H5Z_table_used_g-1)-i));
 #endif /* H5Z_DEBUG */
@@ -494,7 +540,7 @@ static herr_t
 H5Z_prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id,
     hid_t space_id, H5Z_prelude_type_t prelude_type)
 {
-    H5Z_class2_t    *fclass;                /* Individual filter information */
+    H5Z_class_int_t *fclass;                /* Individual filter information */
     size_t          u;                      /* Local index variable */
     htri_t          ret_value = TRUE;    /* Return value */
 
@@ -1006,11 +1052,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5Z_class2_t *
+H5Z_class_int_t *
 H5Z_find(H5Z_filter_t id)
 {
     int	idx;                            /* Filter index in global table */
-    H5Z_class2_t *ret_value=NULL;        /* Return value */
+    H5Z_class_int_t *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_find, NULL)
 
@@ -1045,7 +1091,7 @@ done:
  *		then the pipeline function should free the original buffer
  *		and return a fresh buffer, adjusting BUF_SIZE accordingly.
  *
- *              If align_malloc is set to TRUE, callers are required to save the
+ *              If align_file is not NULL, callers are required to save the
  *              original state of the aligned memory property on dxpl_id, and
  *              reset the state after I/O is finished.
  *
@@ -1063,19 +1109,19 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
  	     unsigned *filter_mask/*in,out*/, H5Z_EDC_t edc_read,
              H5Z_cb_t cb_struct, size_t *nbytes/*in,out*/,
              size_t *buf_size/*in,out*/, void **buf/*in,out*/,
-             hbool_t align_malloc, hid_t dxpl_id)
+             const H5F_t *align_file, hid_t dxpl_id)
 {
     size_t	i, idx, new_nbytes;
     int fclass_idx;             /* Index of filter class in global table */
-    H5Z_class2_t	*fclass=NULL;   /* Filter class pointer */
+    H5Z_class_int_t	*fclass=NULL;   /* Filter class pointer */
 #ifdef H5Z_DEBUG
     H5Z_stats_t	*fstats=NULL;   /* Filter stats pointer */
     H5_timer_t	timer;
 #endif
     unsigned	failed = 0;
     unsigned	tmp_flags;
-    H5P_genplist_t *dx_plist = NULL;    /* Data transer property list */
-    H5D_aligned_mem_t aligned_mem;      /* Whether the buffer is aligned */
+    H5Z_lib_data_t lib_data;            /* Library data struct to pass to filters */
+    H5D_aligned_mem_t aligned_mem;      /* Aligned memory property */
     void        *prev_buf;              /* Previous value of *buf */
     size_t      prev_buf_size;          /* Previous value of *buf_size */
     herr_t      ret_value=SUCCEED;      /* Return value */
@@ -1089,17 +1135,28 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
     assert(buf && *buf);
     assert(!pline || pline->nused<H5Z_MAX_NFILTERS);
 
+    /* Build lib_data struct.  dx_plist will be initialized below. */
+    if(align_file) {
+        lib_data.lf = H5F_LF(align_file);
+        lib_data.align = lib_data.lf->must_align;
+    } /* end if */
+    else {
+        lib_data.lf = NULL;
+        lib_data.align = FALSE;
+    } /* end else */
+
     /* Get the aligned memory property if necessary */
-    aligned_mem.aligned = FALSE;
-    if(align_malloc) {
+    if(lib_data.align) {
         /* Get the dataset transfer property list */
-        if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        if(NULL == (lib_data.dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, FAIL, "not a dataset creation property list")
 
         /* Check the aligned memory property */
-        if(H5P_get(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+        if(H5P_get(lib_data.dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_WRITEERROR, FAIL, "unable to get value")
     } /* end if */
+    else
+        lib_data.dx_plist = NULL;
 
     if (pline && (flags & H5Z_FLAG_REVERSE)) { /* Read */
 	for (i=pline->nused; i>0; --i) {
@@ -1123,7 +1180,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
             /* Keep track of the values of buf and buf_size before and after
              * the callback, to see if the filter reallocated the buffer.  If
              * it did, mark the buffer as unaligned on the dxpl. */
-            if(aligned_mem.aligned) {
+            if(lib_data.align) {
                 prev_buf = *buf;
                 prev_buf_size = *buf_size;
             } /* end if */
@@ -1134,8 +1191,10 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 #endif
             tmp_flags=flags|(pline->filter[idx].flags);
             tmp_flags|=(edc_read== H5Z_DISABLE_EDC) ? H5Z_FLAG_SKIP_EDC : 0;
-	    new_nbytes = (fclass->filter)(tmp_flags, pline->filter[idx].cd_nelmts,
-                                        pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+            if(fclass->version >= H5Z_CLASS_T_VERS_3)
+                new_nbytes = (fclass->filter.v2)(tmp_flags, pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf, &lib_data);
+            else
+                new_nbytes = (fclass->filter.v1)(tmp_flags, pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
 
 #ifdef H5Z_DEBUG
 	    H5_timer_end(&(fstats->stats[1].timer), &timer);
@@ -1146,7 +1205,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
             if(0==new_nbytes) {
                 if((cb_struct.func && (H5Z_CB_FAIL==cb_struct.func(pline->filter[idx].id, *buf, *buf_size, cb_struct.op_data)))
                         || !cb_struct.func)
-		    HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "filter returned failure during read")
+                    HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "filter returned failure during read")
 
                 *nbytes = *buf_size;
                 failed |= (unsigned)1 << idx;
@@ -1156,17 +1215,26 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                 *nbytes = new_nbytes;
             } /* end else */
 
-            if(aligned_mem.aligned && (prev_buf != *buf || prev_buf_size != *buf_size))
-                    {
-                /* Buffer changed, may no longer be aligned */
-                aligned_mem.aligned = FALSE;
-                aligned_mem.buf = NULL;
-                aligned_mem.size = 0;
-                if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem)
-                        < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+            /* Update the aligned memory property if necessary */
+            if(lib_data.align
+                    && (prev_buf != *buf || prev_buf_size != *buf_size)) {
+                /* Buffer changed, may no longer be aligned.  Check to see if
+                 * DXPL was updated with new buffer. */
+                if(H5P_get(lib_data.dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+                /* If the buffer property does not match the expected value,
+                 * unset the aligned memory property */
+                if(aligned_mem.aligned && (aligned_mem.buf != buf
+                        || aligned_mem.size != *buf_size)) {
+                    aligned_mem.aligned = FALSE;
+                    aligned_mem.buf = NULL;
+                    aligned_mem.size = 0;
+                    if(H5P_set(lib_data.dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+                } /* end if */
             } /* end if */
-	}  /* end for */
+        } /* end for */
     } /* end if */
     else if (pline) { /* Write */
 	for (idx=0; idx<pline->nused; idx++) {
@@ -1188,7 +1256,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
             /* Keep track of the values of buf and buf_size before and after
              * the callback, to see if the filter reallocated the buffer.  If
              * it did, mark the buffer as unaligned on the dxpl. */
-            if(aligned_mem.aligned) {
+            if(lib_data.align) {
                 prev_buf = *buf;
                 prev_buf_size = *buf_size;
             } /* end if */
@@ -1198,8 +1266,11 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 	    H5_timer_begin(&timer);
 #endif
 
-	    new_nbytes = (fclass->filter)(flags|(pline->filter[idx].flags), pline->filter[idx].cd_nelmts,
-					pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+            if(fclass->version >= H5Z_CLASS_T_VERS_3)
+                new_nbytes = (fclass->filter.v2)(flags|(pline->filter[idx].flags), pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf, &lib_data);
+            else
+                new_nbytes = (fclass->filter.v1)(flags|(pline->filter[idx].flags), pline->filter[idx].cd_nelmts, pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+
 #ifdef H5Z_DEBUG
 	    H5_timer_end(&(fstats->stats[0].timer), &timer);
 	    fstats->stats[0].total += MAX(*nbytes, new_nbytes);
@@ -1222,15 +1293,24 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                 *nbytes = new_nbytes;
             } /* end else */
 
-            if(aligned_mem.aligned && (prev_buf != *buf || prev_buf_size != *buf_size))
-                    {
-                /* Buffer changed, may no longer be aligned */
-                aligned_mem.aligned = FALSE;
-                aligned_mem.buf = NULL;
-                aligned_mem.size = 0;
-                if(H5P_set(dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem)
-                        < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+            /* Update the aligned memory property if necessary */
+            if(lib_data.align
+                    && (prev_buf != *buf || prev_buf_size != *buf_size)) {
+                /* Buffer changed, may no longer be aligned.  Check to see if
+                 * DXPL was updated with new buffer. */
+                if(H5P_get(lib_data.dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+                /* If the buffer property does not match the expected value,
+                 * unset the aligned memory property */
+                if(aligned_mem.aligned && (aligned_mem.buf != buf
+                        || aligned_mem.size != *buf_size)) {
+                    aligned_mem.aligned = FALSE;
+                    aligned_mem.buf = NULL;
+                    aligned_mem.size = 0;
+                    if(H5P_set(lib_data.dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+                } /* end if */
             } /* end if */
 	} /* end for */
     } /* end if */
@@ -1430,7 +1510,7 @@ done:
 herr_t
 H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags)
 {
-    H5Z_class2_t *fclass;
+    H5Z_class_int_t *fclass;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Zget_filter_info, FAIL)
@@ -1453,4 +1533,293 @@ H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Zget_filter_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Z_aligned_malloc
+ *
+ * Purpose: Internal version of H5Zaligned_malloc.
+ *
+ * Return: Success:        Ptr to new memory
+ *
+ *         Failure:        NULL
+ *
+ * Programmer: Neil Fortner
+ *              Friday, December 9, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5Z_aligned_malloc(size_t size, void *_lib_data)
+{
+    H5Z_lib_data_t *lib_data = (H5Z_lib_data_t *)_lib_data;
+    void *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_aligned_malloc)
+
+    /* Check args */
+    HDassert(lib_data);
+
+    if(size == 0)
+        HGOTO_DONE(NULL)
+    if(!lib_data->align) {
+        /* No need to allocate aligned, just call malloc */
+        if(NULL == (ret_value = H5MM_malloc(size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    } /* end if */
+    else {
+        H5D_aligned_mem_t aligned_mem;      /* Aligned memory property */
+
+        /* Allocate aligned memory */;
+        HDassert(lib_data->lf);
+        HDassert(lib_data->dx_plist);
+        if(NULL == (ret_value = H5MM_aligned_malloc(size, lib_data->lf))
+                && size > 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+        /* Mark data as aligned */
+        aligned_mem.aligned = TRUE;
+        aligned_mem.buf = ret_value;
+        aligned_mem.size = size;
+        if(H5P_set(lib_data->dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0) {
+            (void)H5MM_xfree(ret_value);
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set value")
+        } /* end if */
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_aligned_malloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Z_aligned_free
+ *
+ * Purpose: Internal version of H5Zaligned_free.
+ *
+ * Return: Success:        0
+ *
+ *         Failure:        Negative
+ *
+ * Programmer: Neil Fortner
+ *              Friday, December 9, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_aligned_free(void *buf, void *_lib_data)
+{
+    H5Z_lib_data_t *lib_data = (H5Z_lib_data_t *)_lib_data;
+    herr_t ret_value = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_aligned_free)
+
+    /* Check args */
+    if(!lib_data)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "lib_data not provided")
+
+    /* Mark the dxpl as unaligned.  Do this first so if it fails mem is not
+     * freed. */
+    if(lib_data->align) {
+        H5D_aligned_mem_t aligned_mem;      /* Aligned memory property */
+
+        HDassert(lib_data->lf);
+        HDassert(lib_data->dx_plist);
+
+        /* Mark data as unaligned, if this buffer is currently present on the
+         * DXPL */
+        if(H5P_get(lib_data->dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+        if(aligned_mem.buf == buf) {
+            aligned_mem.aligned = FALSE;
+            aligned_mem.buf = NULL;
+            aligned_mem.size = 0;
+            if(H5P_set(lib_data->dx_plist, H5D_XFER_ALIGNED_MEM_NAME, &aligned_mem) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        } /* end if */
+    } /* end if */
+
+    /* Free the memory */
+    (void)H5MM_free(buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_aligned_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Z_aligned_realloc
+ *
+ * Purpose: Internal version of H5Zaligned_realloc.
+ *
+ * Return: Success:        Ptr to new memory
+ *
+ *         Failure:        NULL
+ *
+ * Programmer: Neil Fortner
+ *              Friday, December 9, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5Z_aligned_realloc(void *buf, size_t old_size, size_t new_size,
+    void *_lib_data)
+{
+    H5Z_lib_data_t *lib_data = (H5Z_lib_data_t *)_lib_data;
+    void *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_aligned_realloc)
+
+    if(!lib_data->align) {
+        if(NULL == (ret_value = H5MM_realloc(buf, new_size)) && new_size > 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    } /* end if */
+    else {
+        /* Reallocate aligned memory */;
+        HDassert(lib_data->lf);
+        HDassert(lib_data->dx_plist);
+        if(NULL == (ret_value = H5MM_aligned_realloc_mark(buf, old_size, new_size, lib_data->lf, lib_data->dx_plist))
+                && new_size > 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_aligned_realloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Zaligned_malloc
+ *
+ * Purpose: Allocate a block of memory of at least size bytes, obeying the
+ *          necessary alignment restrictions (if any) embedded in
+ *          lib_data.  Keeps track of the alignment status of the buffer.
+ *          Should only be used to allocate the main data buffer.
+ *
+ * Return: Success:        Ptr to new memory
+ *
+ *         Failure:        NULL
+ *
+ * Programmer: Neil Fortner
+ *              Friday, November 18, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5Zaligned_malloc(size_t size, void *_lib_data)
+{
+    H5Z_lib_data_t *lib_data = (H5Z_lib_data_t *)_lib_data;
+    void *ret_value;
+
+    FUNC_ENTER_API(H5Zaligned_malloc, NULL)
+    H5TRACE2("*x", "z*x", size, _lib_data);
+
+    /* Check args */
+    if(!lib_data)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "lib_data not provided")
+    if(lib_data->align) {
+        if(!lib_data->lf)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "lib_data does not include low-level file pointer")
+        if(!lib_data->dx_plist)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "lib_data does not include dataset transfer property list")
+    } /* end if */
+
+    /* Call the internal routine */
+    if(NULL == (ret_value = H5Z_aligned_malloc(size, _lib_data)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Zaligned_malloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Zaligned_free
+ *
+ * Purpose: Frees a block of memory that may have been allocated in an
+ *          aligned manner.  Does not need to be used to free an old
+ *          buffer if the new main data buffer has already been allocated
+ *          using H5Zaligned_malloc().  In this case the user can simply
+ *          call free() instead.
+ *
+ * Return: Success:        0
+ *
+ *         Failure:        Negative
+ *
+ * Programmer: Neil Fortner
+ *              Friday, November 18, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Zaligned_free(void *buf, void *_lib_data)
+{
+    H5Z_lib_data_t *lib_data = (H5Z_lib_data_t *)_lib_data;
+    herr_t ret_value = 0;
+
+    FUNC_ENTER_API(H5Zaligned_free, FAIL)
+    H5TRACE2("e", "*x*x", buf, _lib_data);
+
+    /* Check args */
+    if(!lib_data)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "lib_data not provided")
+    if(lib_data->align) {
+        if(!lib_data->lf)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "lib_data does not include low-level file pointer")
+        if(!lib_data->dx_plist)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "lib_data does not include dataset transfer property list")
+    } /* end if */
+
+    /* Call the internal routine */
+    if(H5Z_aligned_free(buf, _lib_data) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free memory")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Zaligned_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Zaligned_realloc
+ *
+ * Purpose: Reallocate a block of memory of at least size bytes, obeying
+ *          the necessary alignment restrictions (if any) embedded in
+ *          lib_data.  Keeps track of the alignment status of the buffer.
+ *          Should only be used to reallocate the main data buffer.
+ *
+ * Return: Success:        Ptr to new memory
+ *
+ *         Failure:        NULL
+ *
+ * Programmer: Neil Fortner
+ *              Friday, November 18, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5Zaligned_realloc(void *buf, size_t old_size, size_t new_size, void *_lib_data)
+{
+    H5Z_lib_data_t *lib_data = (H5Z_lib_data_t *)_lib_data;
+    void *ret_value;
+
+    FUNC_ENTER_API(H5Zaligned_realloc, NULL)
+    H5TRACE4("*x", "*xzz*x", buf, old_size, new_size, _lib_data);
+
+    /* Check args */
+    if(!lib_data)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "lib_data not provided")
+    if(lib_data->align) {
+        if(!lib_data->lf)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "lib_data does not include low-level file pointer")
+        if(!lib_data->dx_plist)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "lib_data does not include dataset transfer property list")
+    } /* end if */
+
+    /* Call the internal routine */
+    if(NULL == (ret_value = H5Z_aligned_realloc(buf, old_size, new_size, _lib_data)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Zaligned_realloc() */
 

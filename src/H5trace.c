@@ -2428,7 +2428,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            H5Z_class2_t *filter = va_arg(ap, H5Z_class2_t*); /*lint !e64 Type mismatch not really occuring */
+                            H5Z_class3_t *filter = va_arg(ap, H5Z_class3_t*); /*lint !e64 Type mismatch not really occuring */
 
                             fprintf(out, "0x%lx", (unsigned long)filter);
                         } /* end else */

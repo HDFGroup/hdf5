@@ -37,21 +37,52 @@
 
 /* Local function prototypes */
 static size_t H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
-    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
-
-/* This message derives from H5Z */
-const H5Z_class2_t H5Z_DEFLATE[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
-    H5Z_FILTER_DEFLATE,		/* Filter id number		*/
-    1,              /* encoder_present flag (set to true) */
-    1,              /* decoder_present flag (set to true) */
-    "deflate",			/* Filter name for debugging	*/
-    NULL,                       /* The "can apply" callback     */
-    NULL,                       /* The "set local" callback     */
-    H5Z_filter_deflate,         /* The actual filter function	*/
-}};
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf,
+    void *lib_data);
 
 #define H5Z_DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s))*1.001)+12)
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_init_deflate
+ *
+ * Purpose:     Registers the deflate filter.
+ *
+ * Return:      Success: 0
+ *              Failure: Negative
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, December 12, 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_init_deflate(void)
+{
+    H5Z_class_int_t     fclass;         /* Filter class */
+    herr_t              ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_init_deflate)
+
+    /* Build filter class struct */
+    fclass.version = H5Z_CLASS_T_VERS_3;        /* H5Z_class_t version */
+    fclass.id = H5Z_FILTER_DEFLATE;             /* Filter id number */
+    fclass.encoder_present = 1;                 /* encoder_present flag (set to true) */
+    fclass.decoder_present = 1;                 /* decoder_present flag (set to true) */
+    fclass.name = "deflate";                    /* Filter name for debugging */
+    fclass.can_apply = NULL;                    /* The "can apply" callback */
+    fclass.set_local = NULL;                    /* The "set local" callback */
+    fclass.filter.v2 = H5Z_filter_deflate;      /* The actual filter function */
+
+    /* Register the filter */
+    if(H5Z_register(&fclass) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register deflate filter")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_init_deflate() */
 
 
 /*-------------------------------------------------------------------------
@@ -73,7 +104,7 @@ const H5Z_class2_t H5Z_DEFLATE[1] = {{
 static size_t
 H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 		    const unsigned cd_values[], size_t nbytes,
-		    size_t *buf_size, void **buf)
+		    size_t *buf_size, void **buf, void *lib_data)
 {
     void	*outbuf = NULL;         /* Pointer to new buffer */
     int		status;                 /* Status from zlib operation */
@@ -96,7 +127,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 	size_t		nalloc = *buf_size;     /* Number of bytes for output (compressed) buffer */
 
         /* Allocate space for the compressed buffer */
-	if (NULL==(outbuf = H5MM_malloc(nalloc)))
+	if(NULL == (outbuf = H5Z_aligned_malloc(nalloc, lib_data)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for deflate uncompression")
 
         /* Set the uncompression parameters */
@@ -128,14 +159,15 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
                 /* If we're not done and just ran out of buffer space, get more */
                 if(0 == z_strm.avail_out) {
                     void	*new_outbuf;         /* Pointer to new output buffer */
+                    size_t      new_nalloc = nalloc * 2; /* New buffer size */
 
                     /* Allocate a buffer twice as big */
-                    nalloc *= 2;
-                    if(NULL == (new_outbuf = H5MM_realloc(outbuf, nalloc))) {
+                    if(NULL == (new_outbuf = H5Z_aligned_realloc(outbuf, nalloc, new_nalloc, lib_data))) {
                         (void)inflateEnd(&z_strm);
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for deflate uncompression")
                     } /* end if */
                     outbuf = new_outbuf;
+                    nalloc = new_nalloc;
 
                     /* Update pointers to buffer for next set of uncompressed data */
                     z_strm.next_out = (unsigned char*)outbuf + z_strm.total_out;
@@ -172,7 +204,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
         H5_ASSIGN_OVERFLOW(aggression,cd_values[0],unsigned,int);
 
         /* Allocate output (compressed) buffer */
-	if(NULL == (outbuf = H5MM_malloc(z_dst_nbytes)))
+	if(NULL == (outbuf = H5Z_aligned_malloc(z_dst_nbytes, lib_data)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate deflate destination buffer")
         z_dst = (Bytef *)outbuf;
 

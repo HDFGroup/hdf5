@@ -49,7 +49,8 @@ static herr_t H5Z_scaleoffset_set_parms_fillval(H5P_genplist_t *dcpl_plist,
     int need_convert, hid_t dxpl_id);
 static herr_t H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts,
-    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf,
+    void *lib_data);
 static void H5Z_scaleoffset_convert(void *buf, unsigned d_nelmts, size_t dtype_size);
 static unsigned H5Z_scaleoffset_log2(unsigned long long num);
 static void H5Z_scaleoffset_precompress_i(void *data, unsigned d_nelmts,
@@ -79,18 +80,6 @@ static void H5Z_scaleoffset_decompress(unsigned char *data, unsigned d_nelmts,
     unsigned char *buffer, parms_atomic p);
 static void H5Z_scaleoffset_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
     size_t buffer_size, parms_atomic p);
-
-/* This message derives from H5Z */
-H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
-    H5Z_FILTER_SCALEOFFSET, /* Filter id number		*/
-    1,              /* Assume encoder present: check before registering */
-    1,              /* decoder_present flag (set to true) */
-    "scaleoffset",		/* Filter name for debugging	*/
-    H5Z_can_apply_scaleoffset,	/* The "can apply" callback     */
-    H5Z_set_local_scaleoffset,  /* The "set local" callback     */
-    H5Z_filter_scaleoffset,	/* The actual filter function	*/
-}};
 
 /* Local macros */
 #define H5Z_SCALEOFFSET_TOTAL_NPARMS     20   /* Total number of parameters for filter */
@@ -675,6 +664,48 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Z_init_scaleoffset
+ *
+ * Purpose:     Registers the scaleoffset filter.
+ *
+ * Return:      Success: 0
+ *              Failure: Negative
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, December 12, 2011
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_init_scaleoffset(void)
+{
+    H5Z_class_int_t     fclass;         /* Filter class */
+    herr_t              ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_init_scaleoffset)
+
+    /* Build filter class struct */
+    fclass.version = H5Z_CLASS_T_VERS_3;        /* H5Z_class_t version */
+    fclass.id = H5Z_FILTER_SCALEOFFSET;         /* Filter id number */
+    fclass.encoder_present = 1;                 /* encoder_present flag (set to true) */
+    fclass.decoder_present = 1;                 /* decoder_present flag (set to true) */
+    fclass.name = "scaleoffset";                /* Filter name for debugging */
+    fclass.can_apply = H5Z_can_apply_scaleoffset; /* The "can apply" callback */
+    fclass.set_local = H5Z_set_local_scaleoffset; /* The "set local" callback */
+    fclass.filter.v2 = H5Z_filter_scaleoffset;  /* The actual filter function */
+
+    /* Register the filter */
+    if(H5Z_register(&fclass) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register scaleoffset filter")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_init_scaleoffset() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Z_can_apply_scaleoffset
  *
  * Purpose:	Check the parameters for scaleoffset compression for
@@ -1037,7 +1068,7 @@ done:
  */
 static size_t
 H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-    size_t nbytes, size_t *buf_size, void **buf)
+    size_t nbytes, size_t *buf_size, void **buf, void *lib_data)
 {
     size_t ret_value = 0;           /* return value */
     size_t size_out  = 0;           /* size of output buffer */
@@ -1171,7 +1202,7 @@ H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_value
         size_out = d_nelmts * p.size;
 
         /* allocate memory space for decompressed buffer */
-        if(NULL == (outbuf = (unsigned char *)H5MM_malloc(size_out)))
+        if(NULL == (outbuf = (unsigned char *)H5Z_aligned_malloc(size_out, lib_data)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for scaleoffset decompression")
 
         /* special case: minbits equal to full precision */
@@ -1250,7 +1281,7 @@ H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_value
         size_out = buf_offset + nbytes * p.minbits / (p.size * 8) + 1; /* may be 1 larger */
 
         /* allocate memory space for compressed buffer */
-        if(NULL == (outbuf = (unsigned char *)H5MM_malloc(size_out)))
+        if(NULL == (outbuf = (unsigned char *)H5Z_aligned_malloc(size_out, lib_data)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for scaleoffset compression")
 
         /* store minbits and minval in the front of output compressed buffer
