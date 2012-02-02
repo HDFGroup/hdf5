@@ -1295,11 +1295,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     file->intent = flags;
     file->open_name = H5MM_xstrdup(name);
 
-    /* Update low level file struct.  Note this must happen before H5F_super_init
-     * or H5G_mkroot. */
-    if(H5FD_open_update(lf, file) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to update low level file struct")
-
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -1309,6 +1304,12 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
          */
+
+        /* Update low level file struct.  Note this must happen before
+         * H5F_super_init or H5G_mkroot, but after H5F_super_read (if opening) or
+         * H5F_new (if creating). */
+        if(H5FD_open_update(lf, file) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to update low level file struct")
 
         /* Initialize information about the superblock and allocate space for it */
         /* (Writes superblock extension messages, if there are any) */
@@ -1325,6 +1326,12 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 	/* Read the superblock if it hasn't been read before. */
         if(H5F_super_read(file, dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
+
+        /* Update low level file struct.  Note this must happen before
+         * H5F_super_init or H5G_mkroot, but after H5F_super_read (if opening) or
+         * H5F_new (if creating). */
+        if(H5FD_open_update(lf, file) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to update low level file struct")
 
 	/* Open the root group */
 	if(H5G_mkroot(file, dxpl_id, FALSE) < 0)

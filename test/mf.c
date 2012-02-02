@@ -7374,7 +7374,7 @@ test_mf_persist_align_alloc(hid_t fapl)
         /*
          * Test alloc and free
          */
-        /* Initial layout is: X/X
+        /* Initial layout is: X|X|X
          * Notation is:
          * S = small block (127)
          * L = large block (128+)
@@ -7384,348 +7384,348 @@ test_mf_persist_align_alloc(hid_t fapl)
          * X = constant data at head of file (superblock, etc.)
          */
         /* Allocate block of size 128.  Should be aligned */
-        /* Expected layout of file:  X|X|L */
+        /* Expected layout of file:  X|X|X|L */
         type = H5FD_MEM_SUPER;
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 128)))
-            TEST_ERROR
-        if(addr != 4096 + 4096)
-            TEST_ERROR
-
-        /* Allocate block of size 127.  Should not be aligned per se, but should
-         * be placed  after the previous aligned block of 4096. */
-        /* X|X|L|S */
-        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
         if(addr != 4096 + 4096 + 4096)
             TEST_ERROR
 
-        /* Allocate block of size 127.  Should not be aligned, and should be
-         * placed directly after the previous block. */
-        /* X|X|L|SS */
+        /* Allocate block of size 127.  Should not be aligned per se, but should
+         * be placed  after the previous aligned block of 4096. */
+        /* X|X|X|L|S */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 4096 + 127)
+        if(addr != 4096 + 4096 + 4096 + 4096)
             TEST_ERROR
 
         /* Allocate block of size 127.  Should not be aligned, and should be
          * placed directly after the previous block. */
-        /* X|X|L|SSS */
+        /* X|X|X|L|SS */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 4096 + 127 + 127)
+        if(addr != 4096 + 4096 + 4096 + 4096 + 127)
+            TEST_ERROR
+
+        /* Allocate block of size 127.  Should not be aligned, and should be
+         * placed directly after the previous block. */
+        /* X|X|X|L|SSS */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096 + 4096 + 127 + 127)
             TEST_ERROR
 
         /* Free the first 2 blocks of 127 */
-        /* X|X|L|--S */
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 127) < 0)
+        /* X|X|X|L|--S */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096, 127) < 0)
             TEST_ERROR
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 127, 127) < 0)
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096 + 127, 127) < 0)
             TEST_ERROR
 
         /* Allocate block of size 128.  Verify that it is not placed in the newly
          * freed area, even though it is aligned and large enough (must reserve
          * entire block). */
-        /* X|X|L|--S|L */
+        /* X|X|X|L|--S|L */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 128)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 4096 + 4096)
+        if(addr != 4096 + 4096 + 4096 + 4096 + 4096)
             TEST_ERROR
 
         /* Allocate block of size 127.  Verify that it is placed in the freed
          * area. */
-        /* X|X|L|S-S|L */
+        /* X|X|X|L|S-S|L */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 4096)
+        if(addr != 4096 + 4096 + 4096 + 4096)
             TEST_ERROR
 
         /* Free first large block */
-        /* X|X||S-S|L */
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096, 128) < 0)
+        /* X|X|X||S-S|L */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 128) < 0)
             TEST_ERROR
 
         /* Allocate block of size 128.  Verify that it is placed in the newly
          * freed area */
-        /* X|X|L|S-S|L */
+        /* X|X|X|L|S-S|L */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 128)))
             TEST_ERROR
-        if(addr != 4096 + 4096)
+        if(addr != 4096 + 4096 + 4096)
             TEST_ERROR
 
         /* Free the two outstanding small blocks and replace with a large block.
          * This is to force the library to allocate in the space from freeing a
          * large block in the next test, instead of just the empty space in the
          * aligned block with the small blocks */
-        /* X|X|L|L|L */
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 127) < 0)
+        /* X|X|X|L|L|L */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096, 127) < 0)
             TEST_ERROR
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 127 + 127, 127) < 0)
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096 + 127 + 127, 127) < 0)
             TEST_ERROR
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 128)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096 + 4096)
+            TEST_ERROR
+
+        /* Free first large block */
+        /* X|X|X||L|L */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 128) < 0)
+            TEST_ERROR
+
+        /* Allocate block of size 127.  Verify that it is placed in the freed
+         * area. */
+        /* X|X|X|S|L|L */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
         if(addr != 4096 + 4096 + 4096)
             TEST_ERROR
 
-        /* Free first large block */
-        /* X|X||L|L */
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096, 128) < 0)
-            TEST_ERROR
-
         /* Allocate block of size 127.  Verify that it is placed in the freed
          * area. */
-        /* X|X|S|L|L */
+        /* X|X|X|SS|L|L */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096)
-            TEST_ERROR
-
-        /* Allocate block of size 127.  Verify that it is placed in the freed
-         * area. */
-        /* X|X|SS|L|L */
-        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
-            TEST_ERROR
-        if(addr != 4096 + 4096 + 127)
+        if(addr != 4096 + 4096 + 4096 + 127)
             TEST_ERROR
 
         /*
          * Test shrinking and extending within file
          */
         /* Free second small block */
-        /* X|X|S|L|L */
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 127, 127) < 0)
+        /* X|X|X|S|L|L */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 127, 127) < 0)
             TEST_ERROR
 
         /* Grow remaining small block */
-        /* X|X|L|L|L */
-        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096, 127, 1)) < 0)
+        /* X|X|X|L|L|L */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096 + 4096, 127, 1)) < 0)
             TEST_ERROR
         if(!extended)
             TEST_ERROR
 
         /* Allocate small block.  Verify that it is placed at the end of the file.
          */
-        /* X|X|L|L|L|S */
+        /* X|X|X|L|L|L|S */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 4096 + 4096 + 4096)
+        if(addr != 4096 + 4096 + 4096 + 4096 + 4096 + 4096)
             TEST_ERROR
 
         /* Shrink first large block */
-        /* X|X|S|L|L|S */
-        if(H5MF_shrink(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096, 128, 127) < 0)
+        /* X|X|X|S|L|L|S */
+        if(H5MF_shrink(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 128, 127) < 0)
             TEST_ERROR
 
         /* Allocate small block.  Verify that it is placed behind the newly shrunk
          * block. */
-        /* X|X|SS|L|L|S */
+        /* X|X|X|SS|L|L|S */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 127)
+        if(addr != 4096 + 4096 + 4096 + 127)
             TEST_ERROR
 
         /* Allocate small block.  Verify that it is placed behind the last block.
          */
-        /* X|X|SSS|L|L|S */
+        /* X|X|X|SSS|L|L|S */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 127 + 127)
+        if(addr != 4096 + 4096 + 4096 + 127 + 127)
             TEST_ERROR
 
         /* Free middle small block */
-        /* X|X|S-S|L|L|S */
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 127, 127) < 0)
+        /* X|X|X|S-S|L|L|S */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 127, 127) < 0)
             TEST_ERROR
 
         /* Try to grow the first small block.  Should fail due to used space in
          * aligned block. */
-        /* X|X|S-S|L|L|S */
-        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096, 127, 1)) < 0)
+        /* X|X|X|S-S|L|L|S */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096 + 4096, 127, 1)) < 0)
             TEST_ERROR
         if(extended)
             TEST_ERROR
 
         /* Free first large block */
-        /* X|X|S-S||L|S */
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 128) < 0)
+        /* X|X|X|S-S||L|S */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096, 128) < 0)
             TEST_ERROR
 
         /* Try to grow the second small block.  Should fail due to unalignment */
-        /* X|X|S-S||L|S */
-        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096 + 127 + 127, 127, 1)) < 0)
+        /* X|X|X|S-S||L|S */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096 + 4096 + 127 + 127, 127, 1)) < 0)
             TEST_ERROR
         if(extended)
             TEST_ERROR
 
         /* Free second small block */
-        /* X|X|S||L|S */
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 127 + 127, 127) < 0)
+        /* X|X|X|S||L|S */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 127 + 127, 127) < 0)
             TEST_ERROR
 
         /* Grow the first small block to a size that spans 2 aligned blocks */
-        /* X|X|L|=|L|S */
-        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096, 127, 4097 - 127)) < 0)
+        /* X|X|X|L|=|L|S */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096 + 4096, 127, 4097 - 127)) < 0)
             TEST_ERROR
         if(!extended)
             TEST_ERROR
 
         /* Allocate small block.  Verify that it is placed at the end of the file.
          */
-        /* X|X|L|=|L|SS */
+        /* X|X|X|L|=|L|SS */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 4096 + 4096 + 4096 + 127)
+        if(addr != 4096 + 4096 + 4096 + 4096 + 4096 + 4096 + 127)
             TEST_ERROR
 
         /* Shrink first large block */
-        /* X|X|S||L|SS */
-        if(H5MF_shrink(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096, 4097, 127) < 0)
+        /* X|X|X|S||L|SS */
+        if(H5MF_shrink(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 4097, 127) < 0)
             TEST_ERROR
 
         /* Allocate small block.  Verify that it is placed behind the newly shrunk
          * block. */
-        /* X|X|SS||L|SS */
+        /* X|X|X|SS||L|SS */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 127)
+        if(addr != 4096 + 4096 + 4096 + 127)
             TEST_ERROR
 
         /* Free second small block */
-        /* X|X|S||L|SS */
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 127, 127) < 0)
+        /* X|X|X|S||L|SS */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 127, 127) < 0)
             TEST_ERROR
 
         /* Grow the first small block to a size equal to the alignment */
-        /* X|X|L||L|SS */
-        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096, 127, 4096 - 127)) < 0)
+        /* X|X|X|L||L|SS */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096 + 4096, 127, 4096 - 127)) < 0)
             TEST_ERROR
         if(!extended)
             TEST_ERROR
 
         /* Allocate small block.  Verify that it is placed behind the newly grown
          * block (in the empty aligned block). */
-        /* X|X|L|S|L|SS */
+        /* X|X|X|L|S|L|SS */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 4096)
+        if(addr != 4096 + 4096 + 4096 + 4096)
             TEST_ERROR
 
         /* Allocate small block.  Verify that it is placed behind the newly
          * allocated block. */
-        /* X|X|L|SS|L|SS */
+        /* X|X|X|L|SS|L|SS */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 4096 + 127)
+        if(addr != 4096 + 4096 + 4096 + 4096 + 127)
             TEST_ERROR
 
         /* Free first small block */
-        /* X|X|L|-S|L|SS */
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 127) < 0)
+        /* X|X|X|L|-S|L|SS */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096, 127) < 0)
             TEST_ERROR
 
-         /* Try to extend first large block.  Should fail due to used space in
-          * second aligned block. */
-        /* X|X|L|-S|L|SS */
-        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096, 4096, 1)) < 0)
+        /* Try to extend first large block.  Should fail due to used space in
+         * second aligned block. */
+        /* X|X|X|L|-S|L|SS */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096 + 4096, 4096, 1)) < 0)
             TEST_ERROR
         if(extended)
             TEST_ERROR
 
         /* Free second small block */
-        /* X|X|L||L|SS */
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 127, 127) < 0)
+        /* X|X|X|L||L|SS */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096 + 127, 127) < 0)
             TEST_ERROR
 
         /* Grow the first large block to a size that spans 2 aligned blocks */
-        /* X|X|L|=|L|SS */
-        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096, 4096, 2)) < 0)
+        /* X|X|X|L|=|L|SS */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096 + 4096, 4096, 2)) < 0)
             TEST_ERROR
         if(!extended)
             TEST_ERROR
 
         /* Allocate small block.  Verify that it is placed at the end of the file.
          */
-        /* X|X|L|=|L|SSS */
+        /* X|X|X|L|=|L|SSS */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 4096 + 4096 + 4096 + 127 + 127)
+        if(addr != 4096 + 4096 + 4096 + 4096 + 4096 + 4096 + 127 + 127)
             TEST_ERROR
 
         /* Shrink first large block to a size that still spans 2 aligned blocks */
-        /* X|X|L|=|L|SSS */
-        if(H5MF_shrink(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096, 4098, 4097) < 0)
+        /* X|X|X|L|=|L|SSS */
+        if(H5MF_shrink(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 4098, 4097) < 0)
             TEST_ERROR
 
         /* Allocate small block.  Verify that it is placed at the end of the file.
          */
-        /* X|X|L|=|L|SSSS */
+        /* X|X|X|L|=|L|SSSS */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 4096 + 4096 + 4096 + 4096 + 4096 + 127 + 127 + 127)
+        if(addr != 4096 + 4096 + 4096 + 4096 + 4096 + 4096 + 127 + 127 + 127)
             TEST_ERROR
 
         /*
          * Test shrinking and extending within file
          */
         /* Replace 4 small blocks at end with one large block */
-        /* X|X|L|=|L|L */
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096 + 4096 + 127, 127) < 0)
+        /* X|X|X|L|=|L|L */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096 + 4096 + 4096 + 127, 127) < 0)
             TEST_ERROR
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096 + 4096 + 127 + 127, 127) < 0)
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096 + 4096 + 4096 + 127 + 127, 127) < 0)
             TEST_ERROR
-        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096 + 4096 + 127 + 127 + 127, 127) < 0)
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096 + 4096 + 4096 + 127 + 127 + 127, 127) < 0)
             TEST_ERROR
-        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096 + 4096 + 4096 + 4096, 127, 4096 - 127)) < 0)
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096 + 4096 + 4096 + 4096 + 4096, 127, 4096 - 127)) < 0)
             TEST_ERROR
         if(!extended)
             TEST_ERROR
 
         /* Allocate small block at end of file */
-        /* X|X|L|=|L|L|S */
+        /* X|X|X|L|=|L|L|S */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 6 * 4096)
+        if(addr != 7 * 4096)
             TEST_ERROR
 
         /* Grow the small block */
-        /* X|X|L|=|L|L|L */
-        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 6 * 4096, 127, 1)) < 0)
+        /* X|X|X|L|=|L|L|L */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 7 * 4096, 127, 1)) < 0)
             TEST_ERROR
         if(!extended)
             TEST_ERROR
 
         /* Allocate small block.  Verify that it is placed in the next aligned
          * block. */
-        /* X|X|L|=|L|L|L|S */
+        /* X|X|X|L|=|L|L|L|S */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 7 * 4096)
+        if(addr != 8 * 4096)
             TEST_ERROR
 
         /* Grow then shrink the small block */
-        /* X|X|L|=|L|L|L|S */
-        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 7 * 4096, 127, 1)) < 0)
+        /* X|X|X|L|=|L|L|L|S */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 8 * 4096, 127, 1)) < 0)
             TEST_ERROR
         if(!extended)
             TEST_ERROR
-        if(H5MF_shrink(f, type, H5P_DATASET_XFER_DEFAULT, 7 * 4096, 128, 127) < 0)
+        if(H5MF_shrink(f, type, H5P_DATASET_XFER_DEFAULT, 8 * 4096, 128, 127) < 0)
             TEST_ERROR
 
         /* Allocate large block.  This is done to wipe out the aggregator, which
          * may be placed at 8 * 4096, so we can test if the space after the shrunk
          * block was properly freed.  If we did not do this, small blocks may be
          * placed in the aggregator instead of right after the shrunk block. */
-        /* X|X|L|=|L|L|L|S|L */
+        /* X|X|X|L|=|L|L|L|S|L */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 128)))
             TEST_ERROR
-        if(addr != 8 * 4096)
+        if(addr != 9 * 4096)
             TEST_ERROR
 
         /* Allocate small block.  Verify that it is placed immediately behind the
          * shrunk block. */
-        /* X|X|L|=|L|L|L|SS|L */
+        /* X|X|X|L|=|L|L|L|SS|L */
         if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
             TEST_ERROR
-        if(addr != 7 * 4096 + 127)
+        if(addr != 8 * 4096 + 127)
             TEST_ERROR
 
         if(H5Fclose(file) < 0)
