@@ -50,17 +50,18 @@
 #define CONFIG_CHUNK            0x0008u
 #define CONFIG_TCONV            0x0010u
 #define CONFIG_ALIGN_FILE       0x0020u
-#define CONFIG_BLOCK_FILE       0x0040u
-#define CONFIG_ALIGN_BUF        0x0080u
-#define CONFIG_PAD_BUF          0x0100u
-#define CONFIG_INTERN_MALLOC    0x0200u
-#define CONFIG_BY_CHUNK         0x0400u
+#define CONFIG_ALIGN_F_STRICT   0x0040u
+#define CONFIG_BLOCK_FILE       0x0080u
+#define CONFIG_ALIGN_BUF        0x0100u
+#define CONFIG_PAD_BUF          0x0200u
+#define CONFIG_INTERN_MALLOC    0x0400u
+#define CONFIG_BY_CHUNK         0x0800u
 #define CONFIG_ALL              (CONFIG_COMPRESS + CONFIG_CACHE                \
                                 + CONFIG_EARLY_ALLOC + CONFIG_CHUNK            \
                                 + CONFIG_TCONV + CONFIG_ALIGN_FILE             \
-                                + CONFIG_BLOCK_FILE + CONFIG_ALIGN_BUF         \
-                                + CONFIG_PAD_BUF + CONFIG_INTERN_MALLOC        \
-                                + CONFIG_BY_CHUNK)
+                                + CONFIG_ALIGN_F_STRICT + CONFIG_BLOCK_FILE    \
+                                + CONFIG_ALIGN_BUF + CONFIG_PAD_BUF            \
+                                + CONFIG_INTERN_MALLOC + CONFIG_BY_CHUNK)
 
 const char *FILENAME[] = {
     "sec2_file",         /*0*/
@@ -447,6 +448,7 @@ static int test_direct2(void )
     hid_t       space = -1;
     hid_t       mspace = -1;
     hid_t       fapl = -1;
+    hid_t       fcpl = -1;
     hid_t       dcpl = -1;
     hid_t       dxpl_write = -1;
     hid_t       dxpl_read = -1;
@@ -470,6 +472,10 @@ static int test_direct2(void )
     return 0;
 #else /*H5_HAVE_DIRECT*/
 
+    /* Create FCPL */
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        TEST_ERROR
+
     /* Set property list and file name for Direct driver.  Set memory alignment
      * boundary and file block size to 512 which is the minimum for Linux 2.6.
      */
@@ -486,13 +492,18 @@ static int test_direct2(void )
         if((config & CONFIG_INTERN_MALLOC) && ((config & CONFIG_ALIGN_BUF)
                 || (config & CONFIG_PAD_BUF)))
             continue;
+        if((config & CONFIG_ALIGN_FILE) && (config & CONFIG_ALIGN_F_STRICT))
+            continue;
 
         /* Generate error message */
         (void)sprintf(err_msg, "Config: %X", config);
 
-        /* Set alignment value */
+        /* Set alignment values */
         if(H5Pset_alignment(fapl, 1, (config & CONFIG_ALIGN_FILE) ? FBSIZE : 1)
                 < 0)
+            FAIL_PUTS_ERROR(err_msg);
+        if(H5Pset_persist_alignment(fcpl, 1, (config & CONFIG_ALIGN_F_STRICT) ?
+                FBSIZE : 1) < 0)
             FAIL_PUTS_ERROR(err_msg);
 
         /* Set cache */
@@ -505,7 +516,7 @@ static int test_direct2(void )
                 FAIL_PUTS_ERROR(err_msg);
 
         /* Create file */
-        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
             FAIL_PUTS_ERROR(err_msg);
 
         /* Create property lists */
@@ -665,12 +676,16 @@ static int test_direct2(void )
             FAIL_PUTS_ERROR(err_msg);
     } /* end for */
 
+    if(H5Pclose(fcpl) < 0)
+        TEST_ERROR;
+
     h5_cleanup(FILENAME, fapl);
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(fcpl);
         H5Pclose(fapl);
     } H5E_END_TRY
     return -1;

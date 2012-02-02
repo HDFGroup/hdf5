@@ -279,6 +279,10 @@ H5_DLL herr_t H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list,
 H5_DLL herr_t H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *min_btree);
 H5_DLL herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold);
 H5_DLL herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold);
+H5_DLL herr_t H5Pset_persist_alignment(hid_t fapl_id, hsize_t threshold,
+    hsize_t alignment);
+H5_DLL herr_t H5Pget_persist_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
+    hsize_t *alignment/*out*/);
 
 
 /* File access property list (FAPL) routines */

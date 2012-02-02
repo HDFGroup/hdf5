@@ -1068,8 +1068,10 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed")
 
     /*
-     * Fill in public fields. We must increment the reference count on the
-     * driver ID to prevent it from being freed while this file is open.
+     * Fill in public fields. We must increment the reference count on the driver
+     * ID to prevent it from being freed while this file is open.  Note that the
+     * alignment info is tentative and may be changed due to a superblock message
+     * or the FCPL (in H5FD_open_update).
      */
     file->driver_id = driver_id;
     if(H5I_inc_ref(file->driver_id, FALSE) < 0)
@@ -1080,6 +1082,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold")
     if(H5P_get(plist, H5F_ACS_ALIGN_NAME, &(file->alignment)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment")
+    file->strict_alignment = FALSE;
 
     /* Retrieve the VFL driver feature flags */
     if(H5FD_query(file, &(file->feature_flags)) < 0)
@@ -1112,6 +1115,42 @@ done:
     /* Can't cleanup 'file' information, since we don't know what type it is */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_open_update
+ *
+ * Purpose:     Update field in the H5FD_t struct from the mostly complete
+ *              H5F_t struct (except f->shared->sblock).
+ *
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  Neil Fortner
+ *              Wednesday, January  11, 2012
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_open_update(H5FD_t *file, const H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_open_update)
+
+    /* Sanity check */
+    HDassert(file);
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Update alignment info */
+    file->alignment = f->shared->align.alignment;
+    file->threshold = f->shared->align.threshold;
+    file->strict_alignment = f->shared->align.strict;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD_open_update() */
 
 
 /*-------------------------------------------------------------------------

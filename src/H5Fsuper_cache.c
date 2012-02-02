@@ -594,6 +594,21 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
 		shared->fs_addr[u] = fsinfo.fs_addr[u-1];
         } /* end if */
 
+        /* Check for the extension having a 'file alignment' message */
+        if((status = H5O_msg_exists(&ext_loc, H5O_ALIGN_ID, dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to read object header")
+        if(status) {
+            /* Retrieve the 'file alignment' structure */
+            if(NULL == H5O_msg_read(&ext_loc, H5O_ALIGN_ID, &shared->align, dxpl_id))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "file alignment info message not present")
+
+            /* Set file alignment values in the property list */
+            if(H5P_set(c_plist, H5F_CRT_ALIGN_THRHD_NAME, &shared->align.threshold) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set file alignment threshold")
+            if(H5P_set(c_plist, H5F_CRT_ALIGN_NAME, &shared->align.alignment) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set file alignment")
+        } /* end if */
+
         /* Close superblock extension */
         if(H5F_super_ext_close(f, &ext_loc, dxpl_id, FALSE) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, NULL, "unable to close file's superblock extension")

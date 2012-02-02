@@ -227,8 +227,9 @@ struct H5F_file_t {
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
     size_t      sieve_buf_size; /* Size of the data sieve buffer allocated (in bytes) */
-    hsize_t	threshold;	/* Threshold for alignment		*/
-    hsize_t	alignment;	/* Alignment				*/
+    H5O_align_t align;          /* File alignment information	*/
+    hsize_t     fapl_threshold; /* Threshold from FAPL (only for H5Fget_access_plist) */
+    hsize_t     fapl_alignment; /* Alignment from FAPL (only for H5Fget_access_plist) */
     unsigned	gc_ref;		/* Garbage-collect references?		*/
     hbool_t	latest_format;	/* Always use the latest format?	*/
     hbool_t	store_msg_crt_idx;  /* Store creation index for object header messages?	*/

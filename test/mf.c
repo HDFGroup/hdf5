@@ -308,13 +308,13 @@ error:
  * 	There is nothing in free-space manager
  *
  *	Test 1: Allocate a block of 30 from file allocation
- * 		H5MF_try_shrink() the block by 30 : succeed
+ * 		H5MF_try_shrink_file() the block by 30 : succeed
  *	Test 2: Allocate a block of 30 from file allocation
- * 		H5MF_try_shrink() the block by 20 : fail
+ * 		H5MF_try_shrink_file() the block by 20 : fail
  *	Test 3: Allocate a block of 30 from file allocation
- * 		H5MF_try_shrink() the block by 40 : fail
+ * 		H5MF_try_shrink_file() the block by 40 : fail
  *	Test 4: Allocate a block of 30 from file allocation
- * 		H5MF_try_shrink() the block by 20 from the end: succeed
+ * 		H5MF_try_shrink_file() the block by 20 from the end: succeed
  *
  */
 static unsigned
@@ -331,7 +331,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
     hsize_t 		ma_size=0, new_ma_size=0;
     hbool_t             contig_addr_vfd;        /* Whether VFD used has a contigous address space */
 
-    TESTING("H5MF_try_shrink() of file allocation: test 1");
+    TESTING("H5MF_try_shrink_file() of file allocation: test 1");
 
     /* Skip test when using VFDs that has different address spaces for each
      *  type of metadata allocation.
@@ -402,7 +402,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         /* should succeed */
-        if(H5MF_try_shrink(f, type, H5P_DATASET_XFER_DEFAULT, addr, (hsize_t)TEST_BLOCK_SIZE30) <= 0)
+        if(H5MF_try_shrink_file(f, type, H5P_DATASET_XFER_DEFAULT, addr, (hsize_t)TEST_BLOCK_SIZE30) <= 0)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
@@ -430,7 +430,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
 	puts("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
-    TESTING("H5MF_try_shrink() of file allocation: test 2");
+    TESTING("H5MF_try_shrink_file() of file allocation: test 2");
 
     /* Skip test when using VFDs that has different address spaces for each
      *  type of metadata allocation.
@@ -452,7 +452,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* should not succeed in shrinking */
-        if(H5MF_try_shrink(f, type, H5P_DATASET_XFER_DEFAULT, addr, (hsize_t)TEST_BLOCK_SIZE30 - 10) > 0)
+        if(H5MF_try_shrink_file(f, type, H5P_DATASET_XFER_DEFAULT, addr, (hsize_t)TEST_BLOCK_SIZE30 - 10) > 0)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
@@ -479,7 +479,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
     } /* end else */
 
 
-    TESTING("H5MF_try_shrink() of file allocation: test 3");
+    TESTING("H5MF_try_shrink_file() of file allocation: test 3");
 
     /* Skip test when using VFDs that has different address spaces for each
      *  type of metadata allocation.
@@ -496,7 +496,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         /* should not succeed in shrinking */
-        if(H5MF_try_shrink(f, type, H5P_DATASET_XFER_DEFAULT, addr, (hsize_t)TEST_BLOCK_SIZE30 + 10) > 0)
+        if(H5MF_try_shrink_file(f, type, H5P_DATASET_XFER_DEFAULT, addr, (hsize_t)TEST_BLOCK_SIZE30 + 10) > 0)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
@@ -522,7 +522,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
 	puts("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
-    TESTING("H5MF_try_shrink() of file allocation: test 4");
+    TESTING("H5MF_try_shrink_file() of file allocation: test 4");
 
     /* Skip test when using VFDs that has different address spaces for each
      *  type of metadata allocation.
@@ -539,7 +539,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
         /* should succeed in shrinking */
-        if(H5MF_try_shrink(f, type, H5P_DATASET_XFER_DEFAULT, addr+10, (hsize_t)(TEST_BLOCK_SIZE30 - 10)) <= 0)
+        if(H5MF_try_shrink_file(f, type, H5P_DATASET_XFER_DEFAULT, addr+10, (hsize_t)(TEST_BLOCK_SIZE30 - 10)) <= 0)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
@@ -3444,20 +3444,22 @@ error:
  * MF_try_shrink() only allows blocks to be absorbed into an aggregator
  *
  *	Test 1: H5MF_alloc() block A from meta_aggr
- *		H5MF_try_shrink() block A should merge it back into meta_aggr
- *			since block A adjoins the beginning of meta_aggr
+ *		H5MF_try_shrink_file() block A should merge it back into
+ *                      meta_aggr since block A adjoins the beginning of
+ *                      meta_aggr
  *
  *	Test 2: H5MF_alloc() block A from meta_aggr
  *		H5MF_alloc() block B from sdata_aggr
- *		H5MF_try_shrink() block B should merge it onto the end of meta_aggr
- *			because H5F_FS_MERGE_METADATA|H5F_FS_MERGE_RAWDATA is on for
+ *		H5MF_try_shrink_file() block B should merge it onto the end of
+ *                      meta_aggr because
+ *                      H5F_FS_MERGE_METADATA|H5F_FS_MERGE_RAWDATA is on for
  *			sec2 driver's FLMAP_SINGLE
  *
  *	Test 3: H5MF_alloc() block A from meta_aggr
  *		H5MF_alloc() block B from meta_aggr
  *		H5MF_alloc() block C from meta_aggr
- *		H5MF_try_shrink() block B should fail since it does not adjoin the
- *			beginning nor the end of meta_aggr
+ *		H5MF_try_shrink_file() block B should fail since it does not
+ *                      adjoin the beginning nor the end of meta_aggr
  */
 static unsigned
 test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
@@ -3474,7 +3476,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
     hsize_t 		sdata_size=0, new_sdata_size=0;
     hbool_t             contig_addr_vfd;        /* Whether VFD used has a contigous address space */
 
-    TESTING("H5MF_try_shrink() of meta/sdata aggregator: test 1");
+    TESTING("H5MF_try_shrink_file() of meta/sdata aggregator: test 1");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
     contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
@@ -3512,7 +3514,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* should succeed */
-        if(H5MF_try_shrink(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30) <= 0)
+        if(H5MF_try_shrink_file(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30) <= 0)
             TEST_ERROR
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
@@ -3537,7 +3539,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
 	puts("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
-    TESTING("H5MF_try_shrink() of meta/sdata aggregator: test 2");
+    TESTING("H5MF_try_shrink_file() of meta/sdata aggregator: test 2");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
     if(contig_addr_vfd) {
@@ -3564,7 +3566,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
 
         /* should succeed */
-        if(H5MF_try_shrink(f, stype, H5P_DATASET_XFER_DEFAULT, saddr1, (hsize_t)TEST_BLOCK_SIZE50) <= 0)
+        if(H5MF_try_shrink_file(f, stype, H5P_DATASET_XFER_DEFAULT, saddr1, (hsize_t)TEST_BLOCK_SIZE50) <= 0)
             TEST_ERROR
 
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &new_sdata_addr, &new_sdata_size);
@@ -3596,7 +3598,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
 	puts("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
-    TESTING("H5MF_try_shrink() of meta/sdata aggregator: test 3");
+    TESTING("H5MF_try_shrink_file() of meta/sdata aggregator: test 3");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
     if(contig_addr_vfd) {
@@ -3629,7 +3631,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR
 
         /* should not succeed */
-        if(H5MF_try_shrink(f, type, H5P_DATASET_XFER_DEFAULT, addr2, (hsize_t)TEST_BLOCK_SIZE50) > 0)
+        if(H5MF_try_shrink_file(f, type, H5P_DATASET_XFER_DEFAULT, addr2, (hsize_t)TEST_BLOCK_SIZE50) > 0)
             TEST_ERROR
 
         /* aggregator info should be the same as before */
@@ -3689,7 +3691,7 @@ error:
  * 	Turn off using meta data aggregator
  * 	Allocate a block which should be from file allocation
  *	The return address should be aligned
- *	H5MF_try_shrink() the block with aligned address should succeed
+ *	H5MF_try_shrink_file() the block with aligned address should succeed
  *
  * Test 3:
  * 	Turn off using meta data aggregator
@@ -3823,7 +3825,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 	puts("    Current VFD doesn't support mis-aligned fragments");
     } /* end else */
 
-    TESTING("H5MF_try_shrink() of file allocation with alignment: test 2");
+    TESTING("H5MF_try_shrink_file() of file allocation with alignment: test 2");
 
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
@@ -3860,7 +3862,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* shrink the block */
-        if(H5MF_try_shrink(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE50) <= 0)
+        if(H5MF_try_shrink_file(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE50) <= 0)
             TEST_ERROR
 
         if(H5Fclose(file) < 0)
@@ -7250,6 +7252,499 @@ error:
     return(1);
 } /* test_filespace_drivers() */
 
+/*
+ * Tests the persistent file alignment feature.
+ */
+static unsigned
+test_mf_persist_align_alloc(hid_t fapl)
+{
+    char                test_mesg[128];
+    hid_t               file = -1;              /* File ID */
+    hid_t               my_fapl = -1;           /* Local FAPL */
+    hid_t               fcpl = -1;              /* FCPL */
+    char                filename[FILENAME_LEN]; /* Filename to use */
+    H5F_t               *f = NULL;              /* Internal file object pointer */
+    H5FD_mem_t          type;
+    haddr_t             addr;
+    hsize_t             alignment = 0, threshold = 0;
+    htri_t              extended;
+    hsize_t             meta_aggr_size[4] = {0, 192, 2048, 6144};
+    unsigned            i;
+
+    /* Test for different metadata aggregator sizes */
+    for(i=0; i<(sizeof(meta_aggr_size)/sizeof(meta_aggr_size[0])); i++) {
+        HDsnprintf(test_mesg, sizeof(test_mesg), "persistent alignment with aggregator size = %llu", (long long unsigned)meta_aggr_size[i]);
+        TESTING(test_mesg);
+
+        /* Set the filename to use for this test (dependent on fapl) */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+        /* Create the FCPL, check default alignment, and set persistent alignment
+         * = 4096, threshold = 128 */
+        if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+            TEST_ERROR
+        if(H5Pget_persist_alignment(fcpl, &threshold, &alignment) < 0)
+            TEST_ERROR
+        if(threshold != 1 || alignment != 1)
+            FAIL_PUTS_ERROR("Unexpected default persistent alignment or threshold")
+        if(H5Pset_persist_alignment(fcpl, 128, 4096) < 0)
+            TEST_ERROR
+
+        /* Test H5Pget_persist_alignment */
+        if(H5Pget_persist_alignment(fcpl, &threshold, &alignment) < 0)
+            TEST_ERROR
+        if(threshold != 128 || alignment != 4096)
+            FAIL_PUTS_ERROR("Unexpected persistent alignment or threshold")
+
+        /* Create the file to work on */
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Close FCPL */
+        if(H5Pclose(fcpl) < 0)
+            TEST_ERROR
+
+        /* Get FCPL and FAPL from the file and verify that alignment and threshold
+         * settings are as expected */
+        if((fcpl = H5Fget_create_plist(file)) < 0)
+            TEST_ERROR
+        if(H5Pget_persist_alignment(fcpl, &threshold, &alignment) < 0)
+            TEST_ERROR
+        if(threshold != 128 || alignment != 4096)
+            FAIL_PUTS_ERROR("Unexpected persistent alignment or threshold")
+        if(H5Pclose(fcpl) < 0)
+            TEST_ERROR
+        if((my_fapl = H5Fget_access_plist(file)) < 0)
+            TEST_ERROR
+        if(H5Pget_alignment(my_fapl, &threshold, &alignment) < 0)
+            TEST_ERROR
+        if(threshold != 1 || alignment != 1)
+            FAIL_PUTS_ERROR("Unexpected alignment or threshold")
+        if(H5Pclose(my_fapl) < 0)
+            TEST_ERROR
+
+        /* Close file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
+
+        /* Copy fapl */
+        if((my_fapl = H5Pcopy(fapl)) < 0)
+            TEST_ERROR
+
+        /* Set different alignment settings on my_fapl, to verify that persistent
+         * alignment settings override those on the FAPL */
+        if(H5Pset_alignment(my_fapl, 2, 4095) < 0)
+            TEST_ERROR
+
+        /* Set appropriate aggregator size on my_fapl */
+        if(H5Pset_meta_block_size(my_fapl, meta_aggr_size[i]) < 0)
+            TEST_ERROR
+
+        /* Open file with new FAPL */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, my_fapl)) < 0)
+            TEST_ERROR
+
+        /* Close new FAPL */
+        if(H5Pclose(my_fapl) < 0)
+            TEST_ERROR
+
+        /* Get FCPL and FAPL from the file and verify that alignment and threshold
+         * settings are as expected */
+        if((fcpl = H5Fget_create_plist(file)) < 0)
+            TEST_ERROR
+        if(H5Pget_persist_alignment(fcpl, &threshold, &alignment) < 0)
+            TEST_ERROR
+        if(threshold != 128 || alignment != 4096)
+            FAIL_PUTS_ERROR("Unexpected persistent alignment or threshold")
+        if(H5Pclose(fcpl) < 0)
+            TEST_ERROR
+        if((my_fapl = H5Fget_access_plist(file)) < 0)
+            TEST_ERROR
+        if(H5Pget_alignment(my_fapl, &threshold, &alignment) < 0)
+            TEST_ERROR
+        if(threshold != 2 || alignment != 4095)
+            FAIL_PUTS_ERROR("Unexpected alignment or threshold")
+        if(H5Pclose(my_fapl) < 0)
+            TEST_ERROR
+
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
+            FAIL_STACK_ERROR
+
+        /*
+         * Test alloc and free
+         */
+        /* Initial layout is: X/X
+         * Notation is:
+         * S = small block (127)
+         * L = large block (128+)
+         * = = continuation of previous block
+         * - = free space large enough for a small block (127)
+         * | = alignment block boundary (every 4096 bytes)
+         * X = constant data at head of file (superblock, etc.)
+         */
+        /* Allocate block of size 128.  Should be aligned */
+        /* Expected layout of file:  X|X|L */
+        type = H5FD_MEM_SUPER;
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 128)))
+            TEST_ERROR
+        if(addr != 4096 + 4096)
+            TEST_ERROR
+
+        /* Allocate block of size 127.  Should not be aligned per se, but should
+         * be placed  after the previous aligned block of 4096. */
+        /* X|X|L|S */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096)
+            TEST_ERROR
+
+        /* Allocate block of size 127.  Should not be aligned, and should be
+         * placed directly after the previous block. */
+        /* X|X|L|SS */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096 + 127)
+            TEST_ERROR
+
+        /* Allocate block of size 127.  Should not be aligned, and should be
+         * placed directly after the previous block. */
+        /* X|X|L|SSS */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096 + 127 + 127)
+            TEST_ERROR
+
+        /* Free the first 2 blocks of 127 */
+        /* X|X|L|--S */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 127) < 0)
+            TEST_ERROR
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 127, 127) < 0)
+            TEST_ERROR
+
+        /* Allocate block of size 128.  Verify that it is not placed in the newly
+         * freed area, even though it is aligned and large enough (must reserve
+         * entire block). */
+        /* X|X|L|--S|L */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 128)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096 + 4096)
+            TEST_ERROR
+
+        /* Allocate block of size 127.  Verify that it is placed in the freed
+         * area. */
+        /* X|X|L|S-S|L */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096)
+            TEST_ERROR
+
+        /* Free first large block */
+        /* X|X||S-S|L */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096, 128) < 0)
+            TEST_ERROR
+
+        /* Allocate block of size 128.  Verify that it is placed in the newly
+         * freed area */
+        /* X|X|L|S-S|L */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 128)))
+            TEST_ERROR
+        if(addr != 4096 + 4096)
+            TEST_ERROR
+
+        /* Free the two outstanding small blocks and replace with a large block.
+         * This is to force the library to allocate in the space from freeing a
+         * large block in the next test, instead of just the empty space in the
+         * aligned block with the small blocks */
+        /* X|X|L|L|L */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 127) < 0)
+            TEST_ERROR
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 127 + 127, 127) < 0)
+            TEST_ERROR
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 128)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096)
+            TEST_ERROR
+
+        /* Free first large block */
+        /* X|X||L|L */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096, 128) < 0)
+            TEST_ERROR
+
+        /* Allocate block of size 127.  Verify that it is placed in the freed
+         * area. */
+        /* X|X|S|L|L */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096)
+            TEST_ERROR
+
+        /* Allocate block of size 127.  Verify that it is placed in the freed
+         * area. */
+        /* X|X|SS|L|L */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 127)
+            TEST_ERROR
+
+        /*
+         * Test shrinking and extending within file
+         */
+        /* Free second small block */
+        /* X|X|S|L|L */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 127, 127) < 0)
+            TEST_ERROR
+
+        /* Grow remaining small block */
+        /* X|X|L|L|L */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096, 127, 1)) < 0)
+            TEST_ERROR
+        if(!extended)
+            TEST_ERROR
+
+        /* Allocate small block.  Verify that it is placed at the end of the file.
+         */
+        /* X|X|L|L|L|S */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096 + 4096 + 4096)
+            TEST_ERROR
+
+        /* Shrink first large block */
+        /* X|X|S|L|L|S */
+        if(H5MF_shrink(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096, 128, 127) < 0)
+            TEST_ERROR
+
+        /* Allocate small block.  Verify that it is placed behind the newly shrunk
+         * block. */
+        /* X|X|SS|L|L|S */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 127)
+            TEST_ERROR
+
+        /* Allocate small block.  Verify that it is placed behind the last block.
+         */
+        /* X|X|SSS|L|L|S */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 127 + 127)
+            TEST_ERROR
+
+        /* Free middle small block */
+        /* X|X|S-S|L|L|S */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 127, 127) < 0)
+            TEST_ERROR
+
+        /* Try to grow the first small block.  Should fail due to used space in
+         * aligned block. */
+        /* X|X|S-S|L|L|S */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096, 127, 1)) < 0)
+            TEST_ERROR
+        if(extended)
+            TEST_ERROR
+
+        /* Free first large block */
+        /* X|X|S-S||L|S */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 128) < 0)
+            TEST_ERROR
+
+        /* Try to grow the second small block.  Should fail due to unalignment */
+        /* X|X|S-S||L|S */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096 + 127 + 127, 127, 1)) < 0)
+            TEST_ERROR
+        if(extended)
+            TEST_ERROR
+
+        /* Free second small block */
+        /* X|X|S||L|S */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 127 + 127, 127) < 0)
+            TEST_ERROR
+
+        /* Grow the first small block to a size that spans 2 aligned blocks */
+        /* X|X|L|=|L|S */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096, 127, 4097 - 127)) < 0)
+            TEST_ERROR
+        if(!extended)
+            TEST_ERROR
+
+        /* Allocate small block.  Verify that it is placed at the end of the file.
+         */
+        /* X|X|L|=|L|SS */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096 + 4096 + 4096 + 127)
+            TEST_ERROR
+
+        /* Shrink first large block */
+        /* X|X|S||L|SS */
+        if(H5MF_shrink(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096, 4097, 127) < 0)
+            TEST_ERROR
+
+        /* Allocate small block.  Verify that it is placed behind the newly shrunk
+         * block. */
+        /* X|X|SS||L|SS */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 127)
+            TEST_ERROR
+
+        /* Free second small block */
+        /* X|X|S||L|SS */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 127, 127) < 0)
+            TEST_ERROR
+
+        /* Grow the first small block to a size equal to the alignment */
+        /* X|X|L||L|SS */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096, 127, 4096 - 127)) < 0)
+            TEST_ERROR
+        if(!extended)
+            TEST_ERROR
+
+        /* Allocate small block.  Verify that it is placed behind the newly grown
+         * block (in the empty aligned block). */
+        /* X|X|L|S|L|SS */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096)
+            TEST_ERROR
+
+        /* Allocate small block.  Verify that it is placed behind the newly
+         * allocated block. */
+        /* X|X|L|SS|L|SS */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096 + 127)
+            TEST_ERROR
+
+        /* Free first small block */
+        /* X|X|L|-S|L|SS */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096, 127) < 0)
+            TEST_ERROR
+
+         /* Try to extend first large block.  Should fail due to used space in
+          * second aligned block. */
+        /* X|X|L|-S|L|SS */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096, 4096, 1)) < 0)
+            TEST_ERROR
+        if(extended)
+            TEST_ERROR
+
+        /* Free second small block */
+        /* X|X|L||L|SS */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 127, 127) < 0)
+            TEST_ERROR
+
+        /* Grow the first large block to a size that spans 2 aligned blocks */
+        /* X|X|L|=|L|SS */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096, 4096, 2)) < 0)
+            TEST_ERROR
+        if(!extended)
+            TEST_ERROR
+
+        /* Allocate small block.  Verify that it is placed at the end of the file.
+         */
+        /* X|X|L|=|L|SSS */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096 + 4096 + 4096 + 127 + 127)
+            TEST_ERROR
+
+        /* Shrink first large block to a size that still spans 2 aligned blocks */
+        /* X|X|L|=|L|SSS */
+        if(H5MF_shrink(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096, 4098, 4097) < 0)
+            TEST_ERROR
+
+        /* Allocate small block.  Verify that it is placed at the end of the file.
+         */
+        /* X|X|L|=|L|SSSS */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 4096 + 4096 + 4096 + 4096 + 4096 + 127 + 127 + 127)
+            TEST_ERROR
+
+        /*
+         * Test shrinking and extending within file
+         */
+        /* Replace 4 small blocks at end with one large block */
+        /* X|X|L|=|L|L */
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096 + 4096 + 127, 127) < 0)
+            TEST_ERROR
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096 + 4096 + 127 + 127, 127) < 0)
+            TEST_ERROR
+        if(H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, 4096 + 4096 + 4096 + 4096 + 4096 + 127 + 127 + 127, 127) < 0)
+            TEST_ERROR
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 4096 + 4096 + 4096 + 4096 + 4096, 127, 4096 - 127)) < 0)
+            TEST_ERROR
+        if(!extended)
+            TEST_ERROR
+
+        /* Allocate small block at end of file */
+        /* X|X|L|=|L|L|S */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 6 * 4096)
+            TEST_ERROR
+
+        /* Grow the small block */
+        /* X|X|L|=|L|L|L */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 6 * 4096, 127, 1)) < 0)
+            TEST_ERROR
+        if(!extended)
+            TEST_ERROR
+
+        /* Allocate small block.  Verify that it is placed in the next aligned
+         * block. */
+        /* X|X|L|=|L|L|L|S */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 7 * 4096)
+            TEST_ERROR
+
+        /* Grow then shrink the small block */
+        /* X|X|L|=|L|L|L|S */
+        if((extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, 7 * 4096, 127, 1)) < 0)
+            TEST_ERROR
+        if(!extended)
+            TEST_ERROR
+        if(H5MF_shrink(f, type, H5P_DATASET_XFER_DEFAULT, 7 * 4096, 128, 127) < 0)
+            TEST_ERROR
+
+        /* Allocate large block.  This is done to wipe out the aggregator, which
+         * may be placed at 8 * 4096, so we can test if the space after the shrunk
+         * block was properly freed.  If we did not do this, small blocks may be
+         * placed in the aggregator instead of right after the shrunk block. */
+        /* X|X|L|=|L|L|L|S|L */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 128)))
+            TEST_ERROR
+        if(addr != 8 * 4096)
+            TEST_ERROR
+
+        /* Allocate small block.  Verify that it is placed immediately behind the
+         * shrunk block. */
+        /* X|X|L|=|L|L|L|SS|L */
+        if(HADDR_UNDEF == (addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, 127)))
+            TEST_ERROR
+        if(addr != 7 * 4096 + 127)
+            TEST_ERROR
+
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
+
+        PASSED()
+    } /* end for */
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(file);
+        H5Pclose(my_fapl);
+        H5Pclose(fcpl);
+    } H5E_END_TRY;
+    return(1);
+} /* test_mf_persist_align_alloc() */
+
 int
 main(void)
 {
@@ -7333,6 +7828,7 @@ main(void)
 	nerrors += test_mf_align_alloc5(env_h5_drvr, fapl, new_fapl);
 	nerrors += test_mf_align_alloc6(env_h5_drvr, fapl, new_fapl);
     } /* end if */
+    nerrors += test_mf_persist_align_alloc(fapl);
 
     /* tests to verify that file's free-space managers are persistent */
     nerrors += test_mf_fs_drivers(fapl);

@@ -294,6 +294,7 @@ struct H5FD_t {
     /* Space allocation management fields */
     hsize_t             threshold;      /* Threshold for alignment  */
     hsize_t             alignment;      /* Allocation alignment     */
+    hbool_t             strict_alignment; /* Whether file alignment has always been enforced, and unused parts of aligned blocks are reserved (i.e. can be overwritten) */
 
     /* Memory allocation management fields */
     hbool_t             must_align;     /* Whether memory blocks should be aligned for this file */

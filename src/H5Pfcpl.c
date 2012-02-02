@@ -80,6 +80,10 @@
 #define H5F_CRT_FILE_SPACE_STRATEGY_DEF        H5F_FILE_SPACE_STRATEGY_DEF
 #define H5F_CRT_FREE_SPACE_THRESHOLD_SIZE      sizeof(hsize_t)
 #define H5F_CRT_FREE_SPACE_THRESHOLD_DEF       H5F_FREE_SPACE_THRESHOLD_DEF
+/* Definition for threshold for alignment (default in H5Fprivate.h) */
+#define H5F_CRT_ALIGN_THRHD_SIZE                sizeof(hsize_t)
+/* Definition for alignment (default in H5Fprivate.h) */
+#define H5F_CRT_ALIGN_SIZE                      sizeof(hsize_t)
 
 
 /******************/
@@ -147,8 +151,8 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     hsize_t userblock_size = H5F_CRT_USER_BLOCK_DEF;    /* Default userblock size */
     unsigned sym_leaf_k = H5F_CRT_SYM_LEAF_DEF;         /* Default size for symbol table leaf nodes */
     unsigned btree_k[H5B_NUM_BTREE_ID] = H5F_CRT_BTREE_RANK_DEF;    /* Default 'K' values for B-trees in file */
-    uint8_t sizeof_addr = H5F_CRT_ADDR_BYTE_NUM_DEF;     /* Default size of addresses in the file */
-    uint8_t sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;      /* Default size of sizes in the file */
+    uint8_t sizeof_addr = H5F_CRT_ADDR_BYTE_NUM_DEF;    /* Default size of addresses in the file */
+    uint8_t sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;     /* Default size of sizes in the file */
     unsigned superblock_ver = H5F_CRT_SUPER_VERS_DEF;   /* Default superblock version # */
     unsigned num_sohm_indexes    = H5F_CRT_SHMSG_NINDEXES_DEF;
     unsigned sohm_index_flags[H5O_SHMESG_MAX_NINDEXES]    = H5F_CRT_SHMSG_INDEX_TYPES_DEF;
@@ -157,6 +161,8 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     unsigned sohm_btree_min  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
     unsigned file_space_strategy = H5F_CRT_FILE_SPACE_STRATEGY_DEF;
     hsize_t free_space_threshold = H5F_CRT_FREE_SPACE_THRESHOLD_DEF;
+    hsize_t threshold = H5F_CRT_ALIGN_THRHD_DEF;        /* Default allocation alignment threshold */
+    hsize_t alignment = H5F_CRT_ALIGN_DEF;              /* Default allocation alignment value */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_fcrt_reg_prop)
@@ -205,6 +211,14 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the free space section threshold */
     if(H5P_register_real(pclass, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, H5F_CRT_FREE_SPACE_THRESHOLD_SIZE, &free_space_threshold, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the threshold for alignment */
+    if(H5P_register_real(pclass, H5F_CRT_ALIGN_THRHD_NAME, H5F_CRT_ALIGN_THRHD_SIZE, &threshold, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the alignment */
+    if(H5P_register_real(pclass, H5F_CRT_ALIGN_NAME, H5F_CRT_ALIGN_SIZE, &alignment, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -994,4 +1008,103 @@ H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *thre
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_file_space() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_persist_alignment
+ *
+ * Purpose:     Sets the alignment properties of a file creation property
+ *              list so that any file object >= THRESHOLD bytes will be
+ *              aligned on an address which is a multiple of ALIGNMENT,
+ *              and the remainder of the last block of size ALIGNMENT used
+ *              by the object will be unused.  This applies for the life
+ *              of the file.  The addresses are relative to the end of the
+ *              user block; the alignment is calculated by subtracting the
+ *              user block size from theabsolute file address and then
+ *              adjusting the address to be a multiple of ALIGNMENT.
+ *
+ *              Default values for THRESHOLD and ALIGNMENT are one, implying
+ *              no alignment.  Generally the default values will result in
+ *              the best performance for single-process access to the file.
+ *              For MPI-IO and other parallel systems, choose an alignment
+ *              which is a multiple of the disk block size.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, January 10, 2012
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_persist_alignment(hid_t fcpl_id, hsize_t threshold, hsize_t alignment)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(H5Pset_persist_alignment, FAIL);
+    H5TRACE3("e", "ihh", fcpl_id, threshold, alignment);
+
+    /* Check args */
+    if(alignment < 1)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "alignment must be positive");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(fcpl_id, H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set values */
+    if(H5P_set(plist, H5F_CRT_ALIGN_THRHD_NAME, &threshold) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set threshold");
+    if(H5P_set(plist, H5F_CRT_ALIGN_NAME, &alignment) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set alignment");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* end H5Pset_persist_alignment() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_persist_alignment
+ *
+ * Purpose:     Returns the current settings for alignment properties from a
+ *              file creation property list.  The THRESHOLD and/or ALIGNMENT
+ *              pointers may be null pointers.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, January 10, 2012
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_persist_alignment(hid_t fcpl_id, hsize_t *threshold/*out*/,
+                  hsize_t *alignment/*out*/)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t      ret_value=SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(H5Pget_persist_alignment, FAIL);
+    H5TRACE3("e", "ixx", fcpl_id, threshold, alignment);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(fcpl_id, H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Get values */
+    if (threshold)
+        if(H5P_get(plist, H5F_CRT_ALIGN_THRHD_NAME, threshold) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get threshold");
+    if (alignment)
+        if(H5P_get(plist, H5F_CRT_ALIGN_NAME, alignment) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
 

@@ -2288,7 +2288,7 @@ H5O_alloc_shrink_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTRESIZE, FAIL, "unable to resize object header chunk")
 
     /* Free the unused space in the file */
-    if(H5MF_xfree(f, H5FD_MEM_OHDR, dxpl_id, chunk->addr + new_size, (hsize_t)(old_size - new_size)) < 0)
+    if(H5MF_shrink(f, H5FD_MEM_OHDR, dxpl_id, chunk->addr, (hsize_t)old_size, (hsize_t)new_size) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to shrink object header chunk")
 
 done:

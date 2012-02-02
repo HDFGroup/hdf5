@@ -1217,19 +1217,24 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
     _cbsize = file->cbsize;
 
     /* Determine which algorithm we should use to write the data.
-     * Method 0: Write the buffer directly to the file.
+     * Method 0: Write the buffer directly to the file.  Must set write_size in
+     *           this case.
      * Method 1: Read the unused part of the buffer from the file, then write to
      *           the file, as a multiple of _fbsize.
      * Method 2: Allocate a copy buffer, and read/write to/from the copy buffer,
      *           provided buffer, and file as appropriate. */
-    if(!_must_align)
+    if(!_must_align) {
         /* No need to align data, can use direct algorithm */
+        write_size = size;
         method = 0;
+    } /* end if */
     else if((addr % _fbsize == 0) && ((size_t)buf % _boundary == 0)) {
-        if(size % _fbsize == 0)
+        if(size % _fbsize == 0) {
             /* Data is completely aligned on disk and in memory, can use direct
              * algorithm */
+            write_size = size;
             method = 0;
+        } /* end if */
         else {
             /* Check if the buffer was allocated in an aligned manner.  This
              * implies that the size is a multiple of _fbsize and that the data
@@ -1245,8 +1250,22 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
              * buffer is really aligned - compare the address and size of the
              * buffer to that present on th dxpl. */
             if(aligned_mem.aligned && buf == aligned_mem.buf
-                    && size == aligned_mem.size)
-                method = 1;
+                    && size == aligned_mem.size) {
+                /* Check if a persistent alignment setting will allow us to use
+                 * method 0, by guaranteeing that the remainder of the last block
+                 * is unused and can be overwritten */
+                if(file->pub.strict_alignment && file->pub.alignment > 1
+                        && size >= file->pub.threshold
+                        && (((size - 1) / _fbsize) + 1) * _fbsize
+                        == (((size - 1) / file->pub.alignment) + 1)
+                        * file->pub.alignment) {
+                    HDassert(!(addr % file->pub.alignment));
+                    write_size = (((size - 1) / _fbsize) + 1) * _fbsize;
+                    method = 0;
+                } /* end if */
+                else
+                    method = 1;
+            } /* end if */
             else
                 method = 2;
         } /* end else */
@@ -1280,16 +1299,16 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
                     file_seek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
                 HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
 
-            while(size > 0) {
+            while(write_size > 0) {
                 do {
-                    nbytes = HDwrite(file->fd, buf, size);
+                    nbytes = HDwrite(file->fd, buf, write_size);
                 } while (-1 == nbytes && EINTR == errno);
                 if (-1 == nbytes) /* error */
                     HSYS_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
                 HDassert(nbytes>0);
-                HDassert((size_t)nbytes<=size);
+                HDassert((size_t)nbytes<=write_size);
                 H5_CHECK_OVERFLOW(nbytes,ssize_t,size_t);
-                size -= (size_t)nbytes;
+                write_size -= (size_t)nbytes;
                 H5_CHECK_OVERFLOW(nbytes,ssize_t,haddr_t);
                 addr += (haddr_t)nbytes;
                 buf = (const char*)buf + nbytes;

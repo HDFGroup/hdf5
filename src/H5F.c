@@ -304,9 +304,9 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache byte size")
     if(H5P_set(new_plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &(f->shared->rdcc_w0)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set preempt read chunks")
-    if(H5P_set(new_plist, H5F_ACS_ALIGN_THRHD_NAME, &(f->shared->threshold)) < 0)
+    if(H5P_set(new_plist, H5F_ACS_ALIGN_THRHD_NAME, &(f->shared->fapl_threshold)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set alignment threshold")
-    if(H5P_set(new_plist, H5F_ACS_ALIGN_NAME, &(f->shared->alignment)) < 0)
+    if(H5P_set(new_plist, H5F_ACS_ALIGN_NAME, &(f->shared->fapl_alignment)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set alignment")
     if(H5P_set(new_plist, H5F_ACS_GARBG_COLCT_REF_NAME, &(f->shared->gc_ref)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set garbage collect reference")
@@ -867,6 +867,10 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space strategy")
         if(H5P_get(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, &f->shared->fs_threshold) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get free-space section threshold")
+        if(H5P_get(plist, H5F_CRT_ALIGN_THRHD_NAME, &(f->shared->align.threshold)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold")
+        if(H5P_get(plist, H5F_CRT_ALIGN_NAME, &(f->shared->align.alignment)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment")
 
         /* Get the FAPL values to cache */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -879,9 +883,9 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get data cache byte size")
         if(H5P_get(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &(f->shared->rdcc_w0)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get preempt read chunk")
-        if(H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, &(f->shared->threshold)) < 0)
+        if(H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, &(f->shared->fapl_threshold)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold")
-        if(H5P_get(plist, H5F_ACS_ALIGN_NAME, &(f->shared->alignment)) < 0)
+        if(H5P_get(plist, H5F_ACS_ALIGN_NAME, &(f->shared->fapl_alignment)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment")
         if(H5P_get(plist, H5F_ACS_GARBG_COLCT_REF_NAME,&(f->shared->gc_ref)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get garbage collect reference")
@@ -922,6 +926,18 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
          *      we make it work. - QAK)
          */
         f->shared->use_tmp_space = !H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI);
+
+        /* Determine whether we should use the fapl or fcpl alignment values, and
+         * set persistent and strict flags */
+        if(f->shared->align.threshold != H5F_CRT_ALIGN_THRHD_DEF
+                || f->shared->align.alignment != H5F_CRT_ALIGN_DEF) {
+            f->shared->align.persistent = TRUE;
+            f->shared->align.strict = TRUE;
+        } /* end if */
+        else {
+            f->shared->align.threshold = f->shared->fapl_threshold;
+            f->shared->align.alignment = f->shared->fapl_alignment;
+        } /* end else */
 
 	/*
 	 * Create a metadata cache with the specified number of elements.
@@ -1278,6 +1294,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
      */
     file->intent = flags;
     file->open_name = H5MM_xstrdup(name);
+
+    /* Update low level file struct.  Note this must happen before H5F_super_init
+     * or H5G_mkroot. */
+    if(H5FD_open_update(lf, file) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to update low level file struct")
 
     /*
      * Read or write the file superblock, depending on whether the file is

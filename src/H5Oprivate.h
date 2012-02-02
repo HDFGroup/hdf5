@@ -174,6 +174,7 @@ typedef struct H5O_copy_t {
 #define H5O_FSINFO_ID   0x0017          /* Free-space manager info message.  */
 #define H5O_UNKNOWN_ID  0x0018          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
+#define H5O_ALIGN_ID    0x0019          /* File alignment info message.  */
 
 
 /* Shared object message types.
@@ -573,22 +574,34 @@ typedef struct H5O_ainfo_t {
 typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 */
 
 /*
- * "Unknown" Message.
- * (Data structure in memory)
- */
-typedef unsigned H5O_unknown_t;         /* Original message type ID */
-
-/*
  * Free space manager info Message.
  * Contains file space management info and
  * addresses of free space managers for file memory
  * (Data structure in memory)
  */
 typedef struct H5O_fsinfo_t {
-    H5F_file_space_type_t strategy;	/* File space strategy */
-    hsize_t		  threshold;	/* Free space section threshold */
-    haddr_t     	  fs_addr[H5FD_MEM_NTYPES-1]; /* Addresses of free space managers */
+    H5F_file_space_type_t strategy;     /* File space strategy */
+    hsize_t               threshold;    /* Free space section threshold */
+    haddr_t               fs_addr[H5FD_MEM_NTYPES-1]; /* Addresses of free space managers */
 } H5O_fsinfo_t;
+
+/*
+ * Alignment Message.
+ * (Containts persistent file alignment information)
+ * (Data structure in memory)
+ */
+typedef struct H5O_align_t {
+    hsize_t     threshold;              /* Threshold for alignment */
+    hsize_t     alignment;              /* File alignment value */
+    hbool_t     persistent;             /* Whether this information is stored in the file */
+    hbool_t     strict;                 /* Whether we can assume the "remainder" of aligned blocks is unused */
+} H5O_align_t;
+
+/*
+ * "Unknown" Message.
+ * (Data structure in memory)
+ */
+typedef unsigned H5O_unknown_t;         /* Original message type ID */
 
 /* Typedef for "application" iteration operations */
 typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,

@@ -437,6 +437,10 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     else if(f->shared->fs_strategy != H5F_FILE_SPACE_STRATEGY_DEF ||
             f->shared->fs_threshold != H5F_FREE_SPACE_THRESHOLD_DEF)
         super_vers = HDF5_SUPERBLOCK_VERSION_2;
+    /* Check for persistent file alignment information and set superblock version
+     * to 2 if present */
+    else if(f->shared->align.persistent)
+        super_vers = HDF5_SUPERBLOCK_VERSION_2;
     /* Check for non-default indexed storage B-tree internal 'K' value
      * and set the version # of the superblock to 1 if it is a non-default
      * value.
@@ -465,9 +469,9 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
 
     /* Sanity check the userblock size vs. the file's allocation alignment */
     if(userblock_size > 0) {
-        if(userblock_size < f->shared->alignment)
+        if(userblock_size < f->shared->align.alignment)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "userblock size must be > file object alignment")
-        if(0 != (userblock_size % f->shared->alignment))
+        if(0 != (userblock_size % f->shared->align.alignment))
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "userblock size must be an integral multiple of file object alignment")
     } /* end if */
 
@@ -535,6 +539,11 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     /* Files with non-default free space settings always need the superblock extension */
     else if(f->shared->fs_strategy != H5F_FILE_SPACE_STRATEGY_DEF ||
             f->shared->fs_threshold != H5F_FREE_SPACE_THRESHOLD_DEF) {
+        HDassert(super_vers >= HDF5_SUPERBLOCK_VERSION_2);
+        need_ext = TRUE;
+    } /* end if */
+    /* File with persistent alignment always need the superblock extension */
+    else if(f->shared->align.persistent) {
         HDassert(super_vers >= HDF5_SUPERBLOCK_VERSION_2);
         need_ext = TRUE;
     } /* end if */
@@ -628,6 +637,13 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
             if(H5O_msg_create(&ext_loc, H5O_FSINFO_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &fsinfo, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update free-space info header message")
 	} /* end if */
+
+        /* Check for persistent file alignment values to store */
+        if(f->shared->align.persistent) {
+            /* Write file alignment information to the superblock extension */
+            if(H5O_msg_create(&ext_loc, H5O_ALIGN_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE | H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &f->shared->align, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update file alignment header message")
+        } /* end if */
     } /* end if */
 
 done:

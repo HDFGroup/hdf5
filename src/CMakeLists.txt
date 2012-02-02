@@ -400,6 +400,7 @@ IDE_GENERATED_PROPERTIES ("H5MP" "${H5MP_HDRS}" "${H5MP_SRCS}" )
 SET (H5O_SRCS
     ${HDF5_SRC_DIR}/H5O.c
     ${HDF5_SRC_DIR}/H5Oainfo.c
+    ${HDF5_SRC_DIR}/H5Oalign.c
     ${HDF5_SRC_DIR}/H5Oalloc.c
     ${HDF5_SRC_DIR}/H5Oattr.c
     ${HDF5_SRC_DIR}/H5Oattribute.c

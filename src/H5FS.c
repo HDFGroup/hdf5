@@ -430,7 +430,7 @@ HDfprintf(stderr, "%s: Section info allocated though\n", FUNC);
 HDfprintf(stderr, "%s: Section info is for file free space\n", FUNC);
 #endif /* H5FS_DEBUG */
                     /* Try to shrink the file or absorb the section info into a block aggregator */
-                    if((status = H5MF_try_shrink(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, fspace->sect_addr, fspace->alloc_sect_size)) < 0)
+                    if((status = H5MF_try_shrink_file(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, fspace->sect_addr, fspace->alloc_sect_size)) < 0)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTMERGE, FAIL, "can't check for absorbing section info")
                     else if(status == FALSE) {
                         /* Section info can't "go away", but it's free.  Allow

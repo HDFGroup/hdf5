@@ -395,6 +395,8 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_CRT_SHMSG_BTREE_MIN_NAME "shmsg_btree_min"  /* Shared message B-tree minimum size */
 #define H5F_CRT_FILE_SPACE_STRATEGY_NAME "file_space_strategy"  /* File space handling strategy */
 #define H5F_CRT_FREE_SPACE_THRESHOLD_NAME "free_space_threshold"  /* Free space section threshold */
+#define H5F_CRT_ALIGN_THRHD_NAME                "threshold"     /* Threshold for persistent alignment */
+#define H5F_CRT_ALIGN_NAME                      "align"         /* Persistent alignment */
 
 
 
@@ -452,6 +454,11 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_FILE_SPACE_STRATEGY_DEF	        H5F_FILE_SPACE_ALL
 /* Default free space section threshold used by free-space managers */
 #define H5F_FREE_SPACE_THRESHOLD_DEF	        1
+
+/* Default persistent file alignment threshold */
+#define H5F_CRT_ALIGN_THRHD_DEF                 1
+/* Default persistent file alignment */
+#define H5F_CRT_ALIGN_DEF                       1
 
 /* Macros to define signatures of all objects in the file */
 

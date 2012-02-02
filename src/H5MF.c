@@ -244,7 +244,7 @@ H5MF_alloc_open(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
 
     /* Open an existing free space structure for the file */
     if(NULL == (f->shared->fs_man[type] = H5FS_open(f, dxpl_id, f->shared->fs_addr[type],
-	    NELMTS(classes), classes, f, f->shared->alignment, f->shared->threshold)))
+	    NELMTS(classes), classes, f, f->shared->align.alignment, f->shared->align.threshold)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info")
 
     /* Set the state for the free space manager to "open", if it is now */
@@ -297,7 +297,7 @@ H5MF_alloc_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
     fs_create.max_sect_size = f->shared->maxaddr;
 
     if(NULL == (f->shared->fs_man[type] = H5FS_create(f, dxpl_id, NULL,
-	    &fs_create, NELMTS(classes), classes, f, f->shared->alignment, f->shared->threshold)))
+	    &fs_create, NELMTS(classes), classes, f, f->shared->align.alignment, f->shared->align.threshold)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info")
 
 
@@ -413,7 +413,8 @@ haddr_t
 H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, hsize_t size)
 {
     H5FD_mem_t  fs_type;                /* Free space type (mapped from allocation type) */
-    haddr_t	ret_value;              /* Return value */
+    hsize_t     alloc_size = size;      /* Size to allocate */
+    haddr_t     ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5MF_alloc, HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
@@ -425,6 +426,11 @@ HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_typ
     HDassert(f->shared);
     HDassert(f->shared->lf);
     HDassert(size > 0);
+
+    /* Adjust the allocation size if using strict alignment */
+    if(f->shared->align.strict && size >= f->shared->align.threshold)
+        alloc_size = (((size - 1) / f->shared->align.alignment) + 1)
+                * f->shared->align.alignment;
 
     /* Get free space type from allocation type */
     fs_type = H5MF_ALLOC_TO_FS_TYPE(f, alloc_type);
@@ -442,7 +448,7 @@ HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_typ
             htri_t node_found = FALSE;      /* Whether an existing free list node was found */
 
             /* Try to get a section from the free space manager */
-            if((node_found = H5FS_sect_find(f, dxpl_id, f->shared->fs_man[fs_type], size, (H5FS_section_info_t **)&node)) < 0)
+            if((node_found = H5FS_sect_find(f, dxpl_id, f->shared->fs_man[fs_type], alloc_size, (H5FS_section_info_t **)&node)) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "error locating free space in file")
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: Check 1.5, node_found = %t\n", FUNC, node_found);
@@ -457,7 +463,7 @@ HDfprintf(stderr, "%s: Check 1.5, node_found = %t\n", FUNC, node_found);
                 ret_value = node->sect_info.addr;
 
                 /* Check for eliminating the section */
-                if(node->sect_info.size == size) {
+                if(node->sect_info.size == alloc_size) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: Check 1.6, freeing node\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
@@ -469,8 +475,8 @@ HDfprintf(stderr, "%s: Check 1.6, freeing node\n", FUNC);
                     H5MF_sect_ud_t udata;               /* User data for callback */
 
                     /* Adjust information for section */
-                    node->sect_info.addr += size;
-                    node->sect_info.size -= size;
+                    node->sect_info.addr += alloc_size;
+                    node->sect_info.size -= alloc_size;
 
                     /* Construct user data for callbacks */
                     udata.f = f;
@@ -496,7 +502,7 @@ HDfprintf(stderr, "%s: Check 2.0\n", FUNC);
     } /* end if */
 
     /* Allocate from the metadata aggregator (or the VFD) */
-    if(HADDR_UNDEF == (ret_value = H5MF_aggr_vfd_alloc(f, alloc_type, dxpl_id, size)))
+    if(HADDR_UNDEF == (ret_value = H5MF_aggr_vfd_alloc(f, alloc_type, dxpl_id, alloc_size)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed from aggr/vfd")
 
 done:
@@ -574,6 +580,48 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5MF_xfree
  *
+ * Purpose:     Frees an object in a file, making that part of the file
+ *              available for reuse.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Jan 11 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
+    hsize_t size)
+{
+    hsize_t free_size = size;           /* Size to free */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5MF_xfree, FAIL)
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(addr != 0);        /* Can't deallocate the superblock :-) */
+
+    /* Adjust the free size if using strict alignment */
+    if(f->shared->align.strict && size >= f->shared->align.threshold) {
+        HDassert(!(addr % f->shared->align.alignment));
+        free_size = (((size - 1) / f->shared->align.alignment) + 1)
+                * f->shared->align.alignment;
+    } /* end if */
+
+    /* Call the internal routine */
+    if(H5MF_xfree_real(f, alloc_type, dxpl_id, addr, free_size) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free object file space")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF_xfree() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF_xfree_real
+ *
  * Purpose:     Frees part of a file, making that part of the file
  *              available for reuse.
  *
@@ -586,15 +634,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
+H5MF_xfree_real(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
     hsize_t size)
 {
     H5MF_free_section_t *node = NULL;   /* Free space section pointer */
     H5MF_sect_ud_t udata;               /* User data for callback */
     H5FD_mem_t fs_type;                 /* Free space type (mapped from allocation type) */
+    hsize_t free_size = size;           /* Size to free */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_xfree, FAIL)
+    FUNC_ENTER_NOAPI(H5MF_xfree_real, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)alloc_type, addr, size);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -610,7 +659,7 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
         HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, FAIL, "attempting to free temporary file space")
 
     /* Check if the space to free intersects with the file's metadata accumulator */
-    if(H5F_accum_free(f, dxpl_id, alloc_type, addr, size) < 0)
+    if(H5F_accum_free(f, dxpl_id, alloc_type, addr, free_size) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't check free space intersection w/metadata accumulator")
 
     /* Get free space type from allocation type */
@@ -635,12 +684,12 @@ HDfprintf(stderr, "%s: f->shared->fs_addr[%u] = %a\n", FUNC, (unsigned)fs_type, 
 HDfprintf(stderr, "%s: Trying to avoid starting up free space manager\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
             /* Try to shrink the file or absorb the block into a block aggregator */
-            if((status = H5MF_try_shrink(f, alloc_type, dxpl_id, addr, size)) < 0)
+            if((status = H5MF_try_shrink_file(f, alloc_type, dxpl_id, addr, free_size)) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTMERGE, FAIL, "can't check for absorbing block")
             else if(status > 0)
                 /* Indicate success */
                 HGOTO_DONE(SUCCEED)
-	    else if(size < f->shared->fs_threshold) {
+	    else if(free_size < f->shared->fs_threshold) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, addr, size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
@@ -674,7 +723,7 @@ HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, a
     } /* end if */
 
     /* Create free space section for block */
-    if(NULL == (node = H5MF_sect_simple_new(addr, size)))
+    if(NULL == (node = H5MF_sect_simple_new(addr, free_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section")
 
     /* Construct user data for callbacks */
@@ -684,7 +733,7 @@ HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, a
     udata.allow_sect_absorb = TRUE;
 
     /* If size of section freed is larger than threshold, add it to the free space manager */
-    if(size >= f->shared->fs_threshold) {
+    if(free_size >= f->shared->fs_threshold) {
 	HDassert(f->shared->fs_man[fs_type]);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
@@ -722,7 +771,7 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
 H5MF_sects_dump(f, dxpl_id, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MF_xfree() */
+} /* end H5MF_xfree_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -744,6 +793,8 @@ H5MF_try_extend(H5F_t *f, hid_t dxpl_id, H5FD_mem_t alloc_type, haddr_t addr,
     hsize_t size, hsize_t extra_requested)
 {
     haddr_t     end;            /* End of block to extend */
+    hsize_t     orig_alloc_size = size; /* Original allocated size */
+    hsize_t     extra_alloc = extra_requested; /* extra amount to allocate */
     htri_t	ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5MF_try_extend, FAIL)
@@ -755,18 +806,51 @@ HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_r
     HDassert(f);
     HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
 
+    /* Check if the extended block will be aligned and we will therefore need to
+     * take alignment into account */
+    if(size + extra_requested >= f->shared->align.threshold) {
+        /* If the original block was below the threshold, check if it was aligned
+         * (by coincidence).  If not, it must be reallocated in order to be
+         * aligned.  Return FALSE. */
+        if(size < f->shared->align.threshold)
+            if(addr % f->shared->align.alignment)
+                HGOTO_DONE(FALSE)
+
+        /* By this point, the original block must be aligned */
+        HDassert(!(addr % f->shared->align.alignment));
+
+        /* Adjust the sizes if using strict alignment */
+        if(f->shared->align.strict) {
+            /* If the original block was aligned, calculate the original allocated
+             * size */
+            if(size >= f->shared->align.threshold)
+                orig_alloc_size = (((size - 1) / f->shared->align.alignment) + 1)
+                        * f->shared->align.alignment;
+
+            /* Calculate extra amount to allocate */
+            extra_alloc = ((((size + extra_requested - 1)
+                    / f->shared->align.alignment) + 1)
+                    * f->shared->align.alignment) - orig_alloc_size;
+
+            /* Check if we don't need to do anything due to the extended block
+             * being inside the same aligned block */
+            if(extra_alloc == 0)
+                HGOTO_DONE(TRUE)
+        } /* end if */
+    } /* end if */
+
     /* Compute end of block to extend */
-    end = addr + size;
+    end = addr + orig_alloc_size;
 
     /* Check if the block is exactly at the end of the file */
-    if((ret_value = H5FD_try_extend(f->shared->lf, alloc_type, f, end, extra_requested)) < 0)
+    if((ret_value = H5FD_try_extend(f->shared->lf, alloc_type, f, end, extra_alloc)) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending file")
     else if(ret_value == FALSE) {
         H5F_blk_aggr_t *aggr;   /* Aggregator to use */
 
         /* Check for test block able to extend aggregation block */
         aggr = (alloc_type == H5FD_MEM_DRAW) ?  &(f->shared->sdata_aggr) : &(f->shared->meta_aggr);
-        if((ret_value = H5MF_aggr_try_extend(f, aggr, alloc_type, end, extra_requested)) < 0)
+        if((ret_value = H5MF_aggr_try_extend(f, aggr, alloc_type, end, extra_alloc)) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending aggregation block")
         else if(ret_value == FALSE) {
             H5FD_mem_t  fs_type;                /* Free space type (mapped from allocation type) */
@@ -781,7 +865,7 @@ HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_r
 
             /* Check for test block able to block in free space manager */
             if(f->shared->fs_man[fs_type])
-                if((ret_value = H5FS_sect_try_extend(f, dxpl_id, f->shared->fs_man[fs_type], addr, size, extra_requested)) < 0)
+                if((ret_value = H5FS_sect_try_extend(f, dxpl_id, f->shared->fs_man[fs_type], addr, orig_alloc_size, extra_alloc)) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending block in free space manager")
         } /* end if */
     } /* end if */
@@ -796,6 +880,53 @@ H5MF_sects_dump(f, dxpl_id, stderr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_try_extend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF_shrink
+ *
+ * Purpose:     Shrinks an object in a file, making the newly unused part
+ *              of that object in the file available for reuse.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Jan 11 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MF_shrink(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
+    hsize_t old_size, hsize_t new_size)
+{
+    hsize_t old_alloc_size = old_size;  /* Old allocated size */
+    hsize_t new_alloc_size = new_size;  /* New allocated size */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5MF_shrink, FAIL)
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(old_size >= new_size);
+
+    /* Adjust the allocated sizes if using strict alignment */
+    if(f->shared->align.strict && old_size >= f->shared->align.threshold) {
+        HDassert(!(addr % f->shared->align.alignment));
+        old_alloc_size = (((old_size - 1) / f->shared->align.alignment) + 1)
+                * f->shared->align.alignment;
+
+        if(new_size >= f->shared->align.threshold)
+            new_alloc_size = (((new_size - 1) / f->shared->align.alignment) + 1)
+                    * f->shared->align.alignment;
+    } /* end if */
+
+    /* Free the newly unused space using the internal routine */
+    if(H5MF_xfree_real(f, alloc_type, dxpl_id, addr + new_alloc_size, old_alloc_size - new_alloc_size) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free object file space")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF_shrink() */
 
 
 /*-------------------------------------------------------------------------
@@ -905,7 +1036,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5MF_try_shrink
+ * Function:    H5MF_try_shrink_file
  *
  * Purpose:     Try to shrink the size of a file with a block or absorb it
  *              into a block aggregator.
@@ -919,14 +1050,14 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5MF_try_shrink(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
+H5MF_try_shrink_file(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
     hsize_t size)
 {
     H5MF_free_section_t *node = NULL;   /* Free space section pointer */
     H5MF_sect_ud_t udata;               /* User data for callback */
     htri_t ret_value;                   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_try_shrink, FAIL)
+    FUNC_ENTER_NOAPI(H5MF_try_shrink_file, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)alloc_type, addr, size);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -966,7 +1097,7 @@ done:
 HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
 #endif /* H5MF_ALLOC_DEBUG */
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MF_try_shrink() */
+} /* end H5MF_try_shrink_file() */
 
 
 /*-------------------------------------------------------------------------
