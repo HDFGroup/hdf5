@@ -1028,6 +1028,18 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* The data conversion test dt_arith.c fails in "long double" to integer
+  conversion on Ubuntu 11.10 (3.0.0.13 kernal) with GCC 4.6.1 if the library
+  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
+  (3.2.2 on Fedora) doesn't have the problem.  Users should lower down the 
+  optimization level (-O1 or -O0) by defining CFLAGS in the command line of 
+  "configure" like:
+
+      CFLAGS=-O1 ./configure
+
+  It will overwrite the library's default optimization level. (Issue 7829. 
+  SLU - 2012/2/7)
+ 
 * --with-mpe configure option does not work with Mpich2. AKC - 2011/03/10)
 
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can
