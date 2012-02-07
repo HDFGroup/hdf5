@@ -44,9 +44,9 @@
 # Configure should set AM_MAKEFLAGS to -V to solve this problem in
 # subdirectories.
 # NOTE: This means that invoking pmake in a subdirectory will not work.
-.MAKEFLAGS:@AM_MAKEFLAGS@
-	$(MAKE) all
-
+#xxx.MAKEFLAGS:@AM_MAKEFLAGS@
+#xxx	$(MAKE) all
+#xxx
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@

@@ -54,6 +54,9 @@
 /* Define the default virtual file driver to compile */
 #cmakedefine H5_DEFAULT_VFD @H5_DEFAULT_VFD@
 
+/* Define the default vol plugin to compile */
+#cmakedefine H5_DEFAULT_VOL @H5_DEFAULT_VOL@
+
 /* Define if `dev_t' is a scalar */
 #cmakedefine H5_DEV_T_IS_SCALAR @H5_DEV_T_IS_SCALAR@
 
