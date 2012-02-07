@@ -26,6 +26,7 @@ hid_t H5E_FILE_g           = FAIL;      /* File accessability */
 hid_t H5E_SOHM_g           = FAIL;      /* Shared Object Header Messages */
 hid_t H5E_SYM_g            = FAIL;      /* Symbol table */
 hid_t H5E_VFL_g            = FAIL;      /* Virtual File Layer */
+hid_t H5E_VOL_g            = FAIL;      /* Virtual Object Layer */
 hid_t H5E_INTERNAL_g       = FAIL;      /* Internal error (too specific to document in detail) */
 hid_t H5E_BTREE_g          = FAIL;      /* B-Tree node */
 hid_t H5E_REFERENCE_g      = FAIL;      /* References */

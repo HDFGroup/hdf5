@@ -27,6 +27,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
+#include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/* File memory management		*/
@@ -59,7 +60,6 @@ static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
 static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
     const char *name, char ** /*out*/ actual_name);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush);
-static herr_t H5F_close(H5F_t *f);
 
 /* Declare a free list to manage the H5F_t struct */
 H5FL_DEFINE(H5F_t);
@@ -117,7 +117,7 @@ H5F_init_interface(void)
     /*
      * Initialize the atom group for the file IDs.
      */
-    if(H5I_register_type(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<H5I_FILE)
+    if(H5I_register_type(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5VL_close)<H5I_FILE)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
 done:
@@ -336,11 +336,23 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &(f->shared->lf->driver_id)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID")
 
+    /* Increment the reference count on the VOL ID and insert it into the property list */
+    if(H5I_inc_ref(f->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL")
+    if(H5P_set(new_plist, H5F_ACS_VOL_ID_NAME, &(f->vol_id)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file VOL ID")
+
     /* Set the driver "info" in the property list */
     driver_info = H5FD_fapl_get(f->shared->lf);
     if(driver_info != NULL && H5P_set(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver info")
 
+    /* Set the vol "info" in the property list */
+            /* MSC - can't do that yet 
+    vol_info = H5VL_fapl_get(f);
+    if(vol_info != NULL && H5P_set(new_plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol info")
+            */
     /* Set the file close degree appropriately */
     if(f->shared->fc_degree == H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_ACS_CLOSE_DEGREE_NAME, &(f->shared->lf->cls->fc_degree)) < 0) {
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
@@ -661,6 +673,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 	    case H5I_DATASPACE:
 	    case H5I_REFERENCE:
 	    case H5I_VFL:
+	    case H5I_VOL:
 	    case H5I_GENPROP_CLS:
 	    case H5I_GENPROP_LST:
 	    case H5I_ERROR_CLASS:
@@ -1429,9 +1442,12 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /*
      * Create a new file or truncate an existing file.
      */
+    if(NULL == (new_file = H5VL_create(filename, flags, fcpl_id, fapl_id)))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
+            /*
     if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
-
+            */
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
@@ -1441,9 +1457,12 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
 done:
     if(ret_value < 0 && new_file)
+        if(H5VL_close(new_file) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
+        /*
         if(H5F_close(new_file) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
-
+        */
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
 
@@ -1491,8 +1510,8 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    H5F_t	*new_file = NULL;	/*file struct for new file	*/
-    hid_t	ret_value;	        /*return value			*/
+    H5F_t   *new_file = NULL;	/*file struct for new file	*/
+    hid_t   ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(H5Fopen, FAIL)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
@@ -1511,9 +1530,13 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
     /* Open the file */
-    if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5VL_open(filename, flags, fapl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
 
+    /* Open the file 
+    if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
+    */
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
@@ -1604,6 +1627,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
         case H5I_DATASPACE:
         case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
@@ -1731,7 +1755,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5F_close(H5F_t *f)
 {
     herr_t	        ret_value = SUCCEED;    /* Return value */

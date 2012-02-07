@@ -29,6 +29,7 @@
 #define H5E_SOHM             (H5OPEN H5E_SOHM_g)
 #define H5E_SYM              (H5OPEN H5E_SYM_g)
 #define H5E_VFL              (H5OPEN H5E_VFL_g)
+#define H5E_VOL              (H5OPEN H5E_VOL_g)
 #define H5E_INTERNAL         (H5OPEN H5E_INTERNAL_g)
 #define H5E_BTREE            (H5OPEN H5E_BTREE_g)
 #define H5E_REFERENCE        (H5OPEN H5E_REFERENCE_g)
@@ -61,6 +62,7 @@ H5_DLLVAR hid_t H5E_FILE_g;          /* File accessability */
 H5_DLLVAR hid_t H5E_SOHM_g;          /* Shared Object Header Messages */
 H5_DLLVAR hid_t H5E_SYM_g;           /* Symbol table */
 H5_DLLVAR hid_t H5E_VFL_g;           /* Virtual File Layer */
+H5_DLLVAR hid_t H5E_VOL_g;           /* Virtual Object Layer */
 H5_DLLVAR hid_t H5E_INTERNAL_g;      /* Internal error (too specific to document in detail) */
 H5_DLLVAR hid_t H5E_BTREE_g;         /* B-Tree node */
 H5_DLLVAR hid_t H5E_REFERENCE_g;     /* References */

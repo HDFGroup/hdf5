@@ -44,6 +44,7 @@ typedef enum H5I_type_t {
     H5I_ATTR,		        /*type ID for Attribute objects		    */
     H5I_REFERENCE,	        /*type ID for Reference objects		    */
     H5I_VFL,			/*type ID for virtual file layer	    */
+    H5I_VOL,			/*type ID for virtual object layer	    */
     H5I_GENPROP_CLS,            /*type ID for generic property list classes */
     H5I_GENPROP_LST,            /*type ID for generic property lists        */
     H5I_ERROR_CLASS,            /*type ID for error classes		    */
