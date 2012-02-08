@@ -276,7 +276,7 @@ H5G_create_named(const H5G_loc_t *loc, const char *name, hid_t lcpl_id,
     H5G_obj_create_t gcrt_info;         /* Information for group creation */
     H5G_t	   *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_create_named, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5G_create_named)
 
     /* Check arguments */
     HDassert(loc);

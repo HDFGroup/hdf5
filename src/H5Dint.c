@@ -403,7 +403,7 @@ H5D_create_named(const H5G_loc_t *loc, const char *name, hid_t type_id,
     H5D_obj_create_t dcrt_info;         /* Information for dataset creation */
     H5D_t	   *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_create_named, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_create_named)
 
     /* Check arguments */
     HDassert(loc);
