@@ -602,6 +602,7 @@
 
 /* The main part of every integer hardware conversion macro */
 #define H5T_CONV(GUTS,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)  		              \
+{                                                                             \
     herr_t      ret_value=SUCCEED;      /* Return value         */            \
                                                                               \
     FUNC_ENTER_NOAPI(FAIL)                                                    \
@@ -753,7 +754,8 @@
 }                                                                             \
 									      \
 done:                                                                         \
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)                                               \
+}
 
 /* Macro defining action on source data which needs to be aligned (before main action) */
 #define H5T_CONV_LOOP_PRE_SALIGN(ST) {					      \
