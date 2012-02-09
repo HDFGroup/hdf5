@@ -98,7 +98,7 @@ H5G_ent_decode_vec(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, unsigne
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_ent_decode_vec, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -138,7 +138,7 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
     uint32_t		tmp;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_ent_decode, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -203,7 +203,7 @@ H5G_ent_encode_vec(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, unsigne
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_ent_encode_vec, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -243,7 +243,7 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
     uint8_t	*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_ent_encode, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -322,7 +322,7 @@ done:
 herr_t
 H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5_copy_depth_t depth)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_copy)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(src);
@@ -361,7 +361,7 @@ H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5_copy_depth_t depth)
 herr_t
 H5G_ent_reset(H5G_entry_t *ent)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(ent);
@@ -396,7 +396,7 @@ H5G_ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, const char *name,
     size_t	name_offset;            /* Offset of name in heap */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_ent_convert, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -546,7 +546,7 @@ H5G_ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth,
     const char		*lval = NULL;
     int nested_indent, nested_fwidth;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Calculate the indent & field width values for nested information */
     nested_indent = indent + 3;

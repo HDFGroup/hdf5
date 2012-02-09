@@ -108,7 +108,7 @@ H5D_scatter_file(const H5D_io_info_t *_io_info,
     size_t  nelem;                 /* Number of elements used in sequences */
     herr_t  ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_scatter_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(_io_info);
@@ -207,7 +207,7 @@ H5D_gather_file(const H5D_io_info_t *_io_info,
     size_t nelem;               /* Number of elements used in sequences */
     size_t ret_value = nelmts;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_gather_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(_io_info);
@@ -301,7 +301,7 @@ H5D_scatter_mem (const void *_tscat_buf, const H5S_t *space,
     size_t nelem;               /* Number of elements used in sequences */
     herr_t ret_value = SUCCEED;   /* Number of elements scattered */
 
-    FUNC_ENTER_NOAPI(H5D_scatter_mem, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(tscat_buf);
@@ -388,7 +388,7 @@ H5D_gather_mem(const void *_buf, const H5S_t *space,
     size_t nelem;               /* Number of elements used in sequences */
     size_t ret_value = nelmts;    /* Number of elements gathered */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_gather_mem)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(buf);
@@ -469,7 +469,7 @@ H5D_scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
     size_t	smine_nelmts;		/*elements per strip	*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_scatgath_read)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(io_info);
@@ -601,7 +601,7 @@ H5D_scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     size_t	smine_nelmts;		/*elements per strip	*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_scatgath_write)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(io_info);
@@ -750,7 +750,7 @@ H5D_compound_opt_read(size_t nelmts, const H5S_t *space,
     size_t     src_stride, dst_stride, copy_size;
     herr_t     ret_value = SUCCEED;	       /*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_compound_opt_read)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(nelmts > 0);
@@ -875,7 +875,7 @@ H5D_compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
     size_t     src_stride, dst_stride;          /* Strides through source & destination datatypes */
     size_t     i;                               /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_compound_opt_write)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(nelmts > 0);

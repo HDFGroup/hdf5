@@ -53,7 +53,7 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
     hsize_t userblock_size;             /* Userblock size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_debug, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);

@@ -123,7 +123,7 @@ H5D_compact_fill(H5D_t *dset, hid_t dxpl_id)
     hbool_t     fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_compact_fill, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
@@ -180,7 +180,7 @@ H5D_compact_construct(H5F_t *f, H5D_t *dset)
     int i;                              /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_compact_construct)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(f);
@@ -231,7 +231,7 @@ done:
 static hbool_t
 H5D_compact_is_space_alloc(const H5O_storage_t UNUSED *storage)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_compact_is_space_alloc)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(storage);
@@ -258,7 +258,7 @@ H5D_compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *
     hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
     H5D_chunk_map_t UNUSED *cm)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_compact_io_init)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     io_info->store->compact.buf = io_info->dset->shared->layout.storage.u.compact.buf;
     io_info->store->compact.dirty = &io_info->dset->shared->layout.storage.u.compact.dirty;
@@ -292,7 +292,7 @@ H5D_compact_readvv(const H5D_io_info_t *io_info,
 {
     ssize_t ret_value;                  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_compact_readvv)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(io_info);
 
@@ -333,7 +333,7 @@ H5D_compact_writevv(const H5D_io_info_t *io_info,
 {
     ssize_t ret_value;                  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_compact_writevv)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(io_info);
 
@@ -366,7 +366,7 @@ H5D_compact_flush(H5D_t *dset, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_compact_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(dset);
@@ -409,7 +409,7 @@ H5D_compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src, H5F_t *f_dst,
     hid_t       buf_sid = -1;           /* ID for buffer dataspace */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_compact_copy, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f_src);

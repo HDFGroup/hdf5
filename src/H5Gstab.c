@@ -142,7 +142,7 @@ H5G_stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint, hid_t d
     size_t name_offset;	            /* Offset of "" name */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_stab_create_components, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -210,7 +210,7 @@ H5G_stab_create(H5O_loc_t *grp_oloc, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
     size_t      size_hint;              /* Local heap size hint */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5G_stab_create, dxpl_id, grp_oloc->addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, grp_oloc->addr, FAIL)
 
     /*
      * Check arguments.
@@ -267,7 +267,7 @@ H5G_stab_insert_real(H5F_t *f, const H5O_stab_t *stab, const char *name,
     H5G_bt_ins_t udata;		        /* Data to pass through B-tree	*/
     herr_t       ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_stab_insert_real, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -322,7 +322,7 @@ H5G_stab_insert(const H5O_loc_t *grp_oloc, const char *name,
     H5O_stab_t		stab;		/* Symbol table message		*/
     herr_t              ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5G_stab_insert, dxpl_id, grp_oloc->addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, grp_oloc->addr, FAIL)
 
     /* check arguments */
     HDassert(grp_oloc && grp_oloc->file);
@@ -363,7 +363,7 @@ H5G_stab_remove(H5O_loc_t *loc, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
     H5G_bt_rm_t	udata;		        /*data to pass through B-tree	*/
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_stab_remove, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(loc && loc->file);
     HDassert(name && *name);
@@ -417,7 +417,7 @@ H5G_stab_remove_by_idx(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5RS_str_t *grp_full_
     hbool_t     lnk_copied = FALSE;     /* Whether the link was copied */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_stab_remove_by_idx, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(grp_oloc && grp_oloc->file);
 
@@ -477,7 +477,7 @@ H5G_stab_delete(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab)
     H5G_bt_rm_t	udata;		        /*data to pass through B-tree	*/
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_stab_delete, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(f);
     HDassert(stab);
@@ -535,7 +535,7 @@ H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
     H5G_link_table_t ltable = {0, NULL};        /* Link table */
     herr_t ret_value;                           /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5G_stab_iterate, dxpl_id, oloc->addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, oloc->addr, FAIL)
 
     /* Sanity check */
     HDassert(oloc);
@@ -624,7 +624,7 @@ H5G_stab_count(H5O_loc_t *oloc, hsize_t *num_objs, hid_t dxpl_id)
     H5O_stab_t		stab;		        /* Info about symbol table */
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_TAG(H5G_stab_count, dxpl_id, oloc->addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, oloc->addr, FAIL)
 
     /* Sanity check */
     HDassert(oloc);
@@ -666,7 +666,7 @@ H5G_stab_bh_size(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab,
     H5B_info_t  bt_info;                /* B-tree node info */
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5G_stab_bh_size, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(f);
@@ -713,7 +713,7 @@ H5G_stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     size_t name_off;                    /* Offset of name in heap */
     const char *name;                   /* Pointer to name string in heap */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_stab_get_name_by_idx_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ent);
@@ -756,7 +756,7 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));
 
-    FUNC_ENTER_NOAPI(H5G_stab_get_name_by_idx, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(oloc);
@@ -840,7 +840,7 @@ H5G_stab_lookup_cb(const H5G_entry_t *ent, void *_udata)
     H5G_stab_fnd_ud_t *udata = (H5G_stab_fnd_ud_t *)_udata;   /* 'User data' passed in */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_stab_lookup_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check for setting link info */
     if(udata->lnk)
@@ -876,7 +876,7 @@ H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     H5O_stab_t stab;		        /* Symbol table message		*/
     htri_t     ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_stab_lookup, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(grp_oloc && grp_oloc->file);
@@ -936,7 +936,7 @@ H5G_stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     const char *name;                   /* Pointer to name string in heap */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_stab_lookup_by_idx_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(ent);
@@ -978,7 +978,7 @@ H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_t n,
     H5O_stab_t stab;		        /* Symbol table message */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_stab_lookup_by_idx, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(grp_oloc && grp_oloc->file);
@@ -1060,7 +1060,7 @@ H5G_stab_valid(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5O_stab_t *alt_stab)
     hbool_t     changed = FALSE;        /* Whether stab has been modified */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5G_stab_valid, dxpl_id, grp_oloc->addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, grp_oloc->addr, FAIL)
 
     /* Read the symbol table message */
     if(NULL == H5O_msg_read(grp_oloc, H5O_STAB_ID, &stab, dxpl_id))
@@ -1132,7 +1132,7 @@ H5G_stab_get_type_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     H5G_bt_it_gtbi_t	*udata = (H5G_bt_it_gtbi_t *)_udata;
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_stab_get_type_by_idx_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(ent);
@@ -1193,7 +1193,7 @@ H5G_stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
     H5G_bt_it_gtbi_t	udata;          /* User data for B-tree callback */
     H5G_obj_t		ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5G_stab_get_type_by_idx, dxpl_id, oloc->addr, H5G_UNKNOWN)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, oloc->addr, H5G_UNKNOWN)
 
     /* Sanity check */
     HDassert(oloc);

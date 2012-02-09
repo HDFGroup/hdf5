@@ -96,7 +96,7 @@ H5HF_dtable_init(H5HF_dtable_t *dtable)
     size_t u;                           /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_dtable_init)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -153,7 +153,7 @@ done:
 herr_t
 H5HF_dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, unsigned *col)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_dtable_lookup)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -201,7 +201,7 @@ HDfprintf(stderr, "%s: high_bit = %u, off_mask = %Hu\n", "H5HF_dtable_lookup", h
 herr_t
 H5HF_dtable_dest(H5HF_dtable_t *dtable)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_dtable_dest)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -242,7 +242,7 @@ H5HF_dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size)
 {
     unsigned row;               /* Row where block will fit */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_dtable_size_to_row)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -276,7 +276,7 @@ H5HF_dtable_size_to_rows(const H5HF_dtable_t *dtable, hsize_t size)
 {
     unsigned rows;              /* # of rows required for indirect block */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_dtable_size_to_rows)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -312,7 +312,7 @@ H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start_row,
     unsigned end_entry;         /* Entry for last block covered */
     hsize_t acc_span_size;      /* Accumulated span size */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_dtable_span_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.

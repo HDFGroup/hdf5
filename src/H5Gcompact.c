@@ -89,7 +89,7 @@ H5G_compact_build_table_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
     H5G_iter_bt_t *udata = (H5G_iter_bt_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value=H5_ITER_CONT;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_compact_build_table_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(lnk);
@@ -128,7 +128,7 @@ H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t 
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_compact_build_table)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(oloc);
@@ -191,7 +191,7 @@ H5G_compact_insert(const H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk,
 {
     herr_t     ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_compact_insert, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(grp_oloc && grp_oloc->file);
@@ -227,7 +227,7 @@ H5G_compact_get_name_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
     H5G_link_table_t    ltable = {0, NULL};         /* Link table */
     ssize_t		ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_compact_get_name_by_idx, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(oloc);
@@ -280,7 +280,7 @@ H5G_compact_remove_common_cb(const void *_mesg, unsigned UNUSED idx, void *_udat
     H5G_iter_rm_t *udata = (H5G_iter_rm_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5_ITER_CONT;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_compact_remove_common_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(lnk);
@@ -320,7 +320,7 @@ H5G_compact_remove(const H5O_loc_t *oloc, hid_t dxpl_id, H5RS_str_t *grp_full_pa
     H5G_iter_rm_t udata;               /* Data to pass through OH iteration */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_compact_remove, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(oloc && oloc->file);
     HDassert(name && *name);
@@ -361,7 +361,7 @@ H5G_compact_remove_by_idx(const H5O_loc_t *oloc, hid_t dxpl_id,
     H5G_iter_rm_t udata;                /* Data to pass through OH iteration */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_compact_remove_by_idx, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(oloc && oloc->file);
     HDassert(linfo);
@@ -413,7 +413,7 @@ H5G_compact_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *lin
     H5G_link_table_t    ltable = {0, NULL};     /* Link table */
     herr_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_compact_iterate, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(oloc);
@@ -458,7 +458,7 @@ H5G_compact_lookup_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
     H5G_iter_lkp_t *udata = (H5G_iter_lkp_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5_ITER_CONT;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_compact_lookup_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(lnk);
@@ -505,7 +505,7 @@ H5G_compact_lookup(H5O_loc_t *oloc, const char *name, H5O_link_t *lnk,
     H5O_mesg_operator_t op;             /* Message operator */
     htri_t     ret_value;               /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_compact_lookup, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(lnk && oloc->file);
@@ -551,7 +551,7 @@ H5G_compact_lookup_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *lin
     H5G_link_table_t ltable = {0, NULL};/* Link table */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_compact_lookup_by_idx, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(oloc && oloc->file);
@@ -600,7 +600,7 @@ H5G_compact_get_type_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *l
     H5G_link_table_t    ltable = {0, NULL};         /* Link table */
     H5G_obj_t		ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_compact_get_type_by_idx, H5G_UNKNOWN)
+    FUNC_ENTER_NOAPI(H5G_UNKNOWN)
 
     /* Sanity check */
     HDassert(oloc);

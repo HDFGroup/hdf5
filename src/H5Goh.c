@@ -108,7 +108,7 @@ H5O_group_get_copy_file_udata(void)
 {
     void *ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_group_get_copy_file_udata)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate space for the 'copy file' user data for copying groups.
      * Currently this is only a ginfo, so there is no specific struct type for
@@ -139,7 +139,7 @@ H5O_group_free_copy_file_udata(void *_udata)
 {
     H5G_copy_file_ud_t *udata = (H5G_copy_file_ud_t *)_udata;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_group_free_copy_file_udata)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(udata);
@@ -178,7 +178,7 @@ H5O_group_isa(struct H5O_t *oh)
     htri_t	linfo_exists;           /* Whether the 'linfo' message is in the object header */
     htri_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_group_isa)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(oh);
 
@@ -214,7 +214,7 @@ H5O_group_open(const H5G_loc_t *obj_loc, hid_t UNUSED lapl_id, hid_t dxpl_id, hb
     H5G_t       *grp = NULL;            /* Group opened */
     hid_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_group_open)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(obj_loc);
 
@@ -255,7 +255,7 @@ H5O_group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
     H5G_t *grp = NULL;          /* New group created */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_group_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(f);
@@ -303,7 +303,7 @@ H5O_group_get_oloc(hid_t obj_id)
     H5G_t       *grp;                   /* Group opened */
     H5O_loc_t	*ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_group_get_oloc)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get the group */
     if(NULL ==  (grp = (H5G_t *)H5I_object(obj_id)))
@@ -340,7 +340,7 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
     H5B2_t      *bt2_corder = NULL;     /* v2 B-tree handle for creation order index */
     herr_t      ret_value = SUCCEED;  	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_group_bh_info, dxpl_id, oh->cache_info.addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, oh->cache_info.addr, FAIL)
 
     /* Sanity check */
     HDassert(f);

@@ -128,7 +128,7 @@ H5D_init(void)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
     /* FUNC_ENTER() does all the work */
 
 done:
@@ -157,7 +157,7 @@ H5D_init_interface(void)
     H5P_genplist_t *def_dcpl;               /* Default Dataset Creation Property list */
     herr_t          ret_value                = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the dataset IDs */
     if(H5I_register_type(H5I_DATASET, (size_t)H5I_DATASETID_HASHSIZE, H5D_RESERVED_ATOMS, (H5I_free_t)H5D_close)<H5I_FILE)
@@ -216,7 +216,7 @@ H5D_term_interface(void)
 {
     int		n=0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_term_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
 	if((n=H5I_nmembers(H5I_DATASET))>0) {
@@ -278,7 +278,7 @@ H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache)
     H5P_genplist_t *dx_plist;   /* Data transfer property list */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_get_dxpl_cache_real)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(cache);
@@ -363,7 +363,7 @@ H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_get_dxpl_cache,FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(cache);
@@ -403,7 +403,7 @@ H5D_create_named(const H5G_loc_t *loc, const char *name, hid_t type_id,
     H5D_obj_create_t dcrt_info;         /* Information for dataset creation */
     H5D_t	   *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_create_named)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(loc);
@@ -464,7 +464,7 @@ H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id)
     hsize_t     full_size;          /* The number of bytes in the dataset when fully populated */
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_get_space_status)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(dset);
 
@@ -529,7 +529,7 @@ H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
     H5P_genplist_t  *plist;             /* Property list created */
     H5D_shared_t    *ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_new)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate new shared dataset structure */
     if(NULL == (new_dset = H5FL_MALLOC(H5D_shared_t)))
@@ -591,7 +591,7 @@ H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
     hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_init_type)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checking */
     HDassert(file);
@@ -663,7 +663,7 @@ H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
     hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_init_space)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checking */
     HDassert(file);
@@ -719,7 +719,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_update_oh_info)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checking */
     HDassert(file);
@@ -914,7 +914,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     H5G_loc_t           dset_loc;               /* Dataset location */
     H5D_t		*ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_create, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* check args */
     HDassert(file);
@@ -1106,7 +1106,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
     H5D_t           *dataset = NULL;
     H5D_t           *ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_open, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* check args */
     HDassert(loc);
@@ -1205,7 +1205,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
     htri_t msg_exists;                  /* Whether a particular type of message exists */
     herr_t ret_value = SUCCEED;		/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_open_oid, dxpl_id, dataset->oloc.addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, dataset->oloc.addr, FAIL)
 
     /* check args */
     HDassert(dataset);
@@ -1354,7 +1354,7 @@ H5D_close(H5D_t *dataset)
     unsigned free_failed = FALSE;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_close, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(dataset && dataset->oloc.file && dataset->shared);
@@ -1499,8 +1499,8 @@ done:
 H5O_loc_t *
 H5D_oloc(H5D_t *dataset)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_oloc)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(dataset ? &(dataset->oloc) : (H5O_loc_t *)NULL)
 } /* end H5D_oloc() */
@@ -1522,8 +1522,8 @@ H5D_oloc(H5D_t *dataset)
 H5G_name_t *
 H5D_nameof(H5D_t *dataset)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_nameof)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(dataset ? &(dataset->path) : (H5G_name_t *)NULL)
 } /* end H5D_nameof() */
@@ -1546,8 +1546,8 @@ H5D_nameof(H5D_t *dataset)
 H5T_t *
 H5D_typeof(const H5D_t *dset)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_typeof)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(dset);
     HDassert(dset->shared);
@@ -1579,7 +1579,7 @@ H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_al
     hbool_t addr_set = FALSE;           /* Flag to indicate that the dataset's storage address was set */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_alloc_storage)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(dset);
@@ -1733,7 +1733,7 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
 {
     herr_t		ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_init_storage)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(dset);
 
@@ -1806,7 +1806,7 @@ H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id)
 {
     hsize_t	ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_get_storage_size, dxpl_id, dset->oloc.addr, 0)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, dset->oloc.addr, 0)
 
     switch(dset->shared->layout.type) {
         case H5D_CHUNKED:
@@ -1861,7 +1861,7 @@ H5D_get_offset(const H5D_t *dset)
 {
     haddr_t	ret_value = HADDR_UNDEF;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_get_offset)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(dset);
 
@@ -1909,7 +1909,7 @@ H5D_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t op,
 {
     herr_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_iterate)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(buf);
@@ -1946,7 +1946,7 @@ H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id, void *buf)
     H5T_vlen_alloc_info_t *vl_alloc_info = &_vl_alloc_info;   /* VL allocation info */
     herr_t ret_value;
 
-    FUNC_ENTER_NOAPI(H5D_vlen_reclaim, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(H5I_DATATYPE == H5I_get_type(type_id));
@@ -1987,7 +1987,7 @@ H5D_vlen_get_buf_size_alloc(size_t size, void *info)
     H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)info;
     void *ret_value;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_vlen_get_buf_size_alloc)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Get a temporary pointer to space for the VL data */
     if((vlen_bufsize->vl_tbuf = H5FL_BLK_REALLOC(vlen_vl_buf, vlen_bufsize->vl_tbuf, size)) != NULL)
@@ -2033,7 +2033,7 @@ H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, co
     H5T_t *dt;                          /* Datatype for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_vlen_get_buf_size)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(op_data);
     HDassert(H5I_DATATYPE == H5I_get_type(type_id));
@@ -2077,7 +2077,7 @@ H5D_check_filters(H5D_t *dataset)
     H5O_fill_t *fill;                   /* Dataset's fill value */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_check_filters)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(dataset);
@@ -2135,7 +2135,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
     htri_t  changed;                    /* Whether the dataspace changed size */
     herr_t  ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_set_extent, dxpl_id, dset->oloc.addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
     /* Check args */
     HDassert(dset);
@@ -2238,7 +2238,7 @@ H5D_flush_sieve_buf(H5D_t *dataset, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_flush_sieve_buf)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(dataset);
@@ -2280,7 +2280,7 @@ H5D_flush_real(H5D_t *dataset, hid_t dxpl_id)
     H5O_t *oh = NULL;                   /* Pointer to dataset's object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_flush_real, dxpl_id, dataset->oloc.addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, dataset->oloc.addr, FAIL)
 
     /* Check args */
     HDassert(dataset);
@@ -2350,7 +2350,7 @@ H5D_mark(H5D_t *dataset, hid_t dxpl_id, unsigned flags)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_mark)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(dataset);
@@ -2386,7 +2386,7 @@ H5D_flush_cb(void *_dataset, hid_t UNUSED id, void *_udata)
     H5D_flush_ud_t *udata = (H5D_flush_ud_t *)_udata;   /* User data for callback */
     int         ret_value = H5_ITER_CONT;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_flush_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(dataset);
@@ -2422,7 +2422,7 @@ H5D_flush(const H5F_t *f, hid_t dxpl_id)
     H5D_flush_ud_t udata;               /* User data for callback */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_flush, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);

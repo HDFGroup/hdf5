@@ -102,7 +102,7 @@ H5F_get_sohm_mesg_count_test(hid_t file_id, unsigned type_id,
     H5F_t	*file;                  /* File info */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_get_sohm_mesg_count_test)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -139,7 +139,7 @@ H5F_check_cached_stab_test(hid_t file_id)
     H5F_t	*file;                  /* File info */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_check_cached_stab_test)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -173,7 +173,7 @@ H5F_get_maxaddr_test(hid_t file_id, haddr_t *maxaddr)
     H5F_t	*file;                  /* File info */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_get_maxaddr_test)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))

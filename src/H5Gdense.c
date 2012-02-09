@@ -278,7 +278,7 @@ H5G_dense_create(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     size_t fheap_id_len;                /* Fractal heap ID length */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_dense_create, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -397,7 +397,7 @@ H5G_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     void *link_ptr = NULL;              /* Pointer to serialized link */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_dense_insert, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -503,7 +503,7 @@ H5G_dense_lookup_cb(const void *_lnk, void *_user_lnk)
     H5O_link_t *user_lnk = (H5O_link_t *)_user_lnk;       /* User data from v2 B-tree link lookup */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_lookup_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -542,7 +542,7 @@ H5G_dense_lookup(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     htri_t ret_value;                   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_dense_lookup, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -605,7 +605,7 @@ H5G_dense_lookup_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_uda
     H5O_link_t *tmp_lnk = NULL;         /* Temporary pointer to link */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_lookup_by_idx_fh_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Decode link information & keep a copy */
     if(NULL == (tmp_lnk = (H5O_link_t *)H5O_msg_decode(udata->f, udata->dxpl_id, NULL, H5O_LINK_ID, (const unsigned char *)obj)))
@@ -645,7 +645,7 @@ H5G_dense_lookup_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     H5G_fh_ud_lbi_t fh_udata;          /* User data for fractal heap 'op' callback */
     int ret_value = H5_ITER_CONT;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_lookup_by_idx_bt2_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Prepare user data for callback */
     /* down */
@@ -687,7 +687,7 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     haddr_t bt2_addr;                   /* Address of v2 B-tree to use for lookup */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_dense_lookup_by_idx, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -794,7 +794,7 @@ H5G_dense_build_table_cb(const H5O_link_t *lnk, void *_udata)
     H5G_dense_bt_ud_t *udata = (H5G_dense_bt_ud_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_build_table_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(lnk);
@@ -835,7 +835,7 @@ H5G_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_build_table)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);
@@ -894,7 +894,7 @@ H5G_dense_iterate_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
     H5G_fh_ud_it_t *udata = (H5G_fh_ud_it_t *)_udata;       /* User data for fractal heap 'op' callback */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_iterate_fh_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Decode link information & keep a copy */
     /* (we make a copy instead of calling the user/library callback directly in
@@ -931,7 +931,7 @@ H5G_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
     H5G_bt2_ud_it_t *bt2_udata = (H5G_bt2_ud_it_t *)_bt2_udata;         /* User data for callback */
     herr_t ret_value = H5_ITER_CONT;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_iterate_bt2_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check for skipping links */
     if(bt2_udata->skip > 0)
@@ -993,7 +993,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     haddr_t bt2_addr;                   /* Address of v2 B-tree to use for lookup */
     herr_t ret_value;                   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_dense_iterate, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -1107,7 +1107,7 @@ H5G_dense_get_name_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_u
     H5O_link_t *lnk;            /* Pointer to link created from heap object */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_get_name_by_idx_fh_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Decode link information */
     if(NULL == (lnk = (H5O_link_t *)H5O_msg_decode(udata->f, udata->dxpl_id, NULL, H5O_LINK_ID, (const unsigned char *)obj)))
@@ -1152,7 +1152,7 @@ H5G_dense_get_name_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     H5G_fh_ud_gnbi_t fh_udata;         /* User data for fractal heap 'op' callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_get_name_by_idx_bt2_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Prepare user data for callback */
     /* down */
@@ -1199,7 +1199,7 @@ H5G_dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     haddr_t bt2_addr;           /* Address of v2 B-tree to use for lookup */
     ssize_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_dense_get_name_by_idx, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -1315,7 +1315,7 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
     H5B2_t *bt2 = NULL;                 /* v2 B-tree handle for index */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_remove_fh_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Decode link information */
     if(NULL == (lnk = (H5O_link_t *)H5O_msg_decode(udata->f, udata->dxpl_id, NULL, H5O_LINK_ID, (const unsigned char *)obj)))
@@ -1380,7 +1380,7 @@ H5G_dense_remove_bt2_cb(const void *_record, void *_bt2_udata)
     H5G_fh_ud_rm_t fh_udata;          /* User data for fractal heap 'op' callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_remove_bt2_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Set up the user data for fractal heap 'op' callback */
     fh_udata.f = bt2_udata->common.f;
@@ -1426,7 +1426,7 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     H5B2_t *bt2 = NULL;                 /* v2 B-tree handle for index */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_dense_remove, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -1490,7 +1490,7 @@ H5G_dense_remove_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_uda
     H5G_fh_ud_rmbi_t *udata = (H5G_fh_ud_rmbi_t *)_udata;       /* User data for fractal heap 'op' callback */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_remove_by_idx_fh_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Decode link information */
     if(NULL == (udata->lnk = (H5O_link_t *)H5O_msg_decode(udata->f, udata->dxpl_id, NULL, H5O_LINK_ID, (const unsigned char *)obj)))
@@ -1525,7 +1525,7 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     const uint8_t *heap_id;             /* Heap ID for link */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_dense_remove_by_idx_bt2_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Determine the index being used */
     if(bt2_udata->idx_type == H5_INDEX_NAME) {
@@ -1637,7 +1637,7 @@ H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     haddr_t bt2_addr;                   /* Address of v2 B-tree to use for lookup */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_dense_remove_by_idx, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -1742,7 +1742,7 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_dense_delete, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -1839,7 +1839,7 @@ H5G_dense_get_type_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     H5G_link_table_t ltable = {0, NULL};         /* Table of links */
     H5G_obj_t ret_value;        /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_dense_get_type_by_idx, H5G_UNKNOWN)
+    FUNC_ENTER_NOAPI(H5G_UNKNOWN)
 
     /*
      * Check arguments.

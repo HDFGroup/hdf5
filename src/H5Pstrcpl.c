@@ -114,7 +114,7 @@ H5P_strcrt_reg_prop(H5P_genclass_t *pclass)
     H5T_cset_t char_encoding = H5P_STRCRT_CHAR_ENCODING_DEF;  /* Default character set encoding */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_strcrt_reg_prop, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Register character encoding */
     if(H5P_register_real(pclass, H5P_STRCRT_CHAR_ENCODING_NAME, H5P_STRCRT_CHAR_ENCODING_SIZE, &char_encoding, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -145,7 +145,7 @@ H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_char_encoding, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iTc", plist_id, encoding);
 
     /* Check arguments */
@@ -161,7 +161,7 @@ H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set character encoding")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5P_set_char_encoding() */
 
 
@@ -182,7 +182,7 @@ H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Pget_char_encoding, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, encoding);
 
     /* Get the plist structure */
@@ -195,6 +195,6 @@ H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get character encoding flag")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_char_encoding() */
 

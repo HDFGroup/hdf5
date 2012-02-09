@@ -79,7 +79,7 @@ H5CS_get_stack(void)
 {
     H5CS_t *fstack;
 
-    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5CS_get_stack);
+    FUNC_ENTER_NOAPI_NOERR_NOFS
 
     fstack = H5TS_get_thread_local_value(H5TS_funcstk_key_g);
     if (!fstack) {
@@ -123,7 +123,7 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
     int         i;                      /* Local index ariable */
 
     /* Don't push this function on the function stack... :-) */
-    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5CS_print_stack);
+    FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
     HDassert(fstack);
@@ -170,7 +170,7 @@ H5CS_print(FILE *stream)
     H5CS_t	*fstack = H5CS_get_my_stack (); /* Get the correct function stack */
 
     /* Don't push this function on the function stack... :-) */
-    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5CS_print);
+    FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
     assert(fstack);
@@ -202,7 +202,7 @@ H5CS_push(const char *func_name)
     H5CS_t	*fstack = H5CS_get_my_stack ();
 
     /* Don't push this function on the function stack... :-) */
-    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5CS_push);
+    FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
     assert (fstack);
@@ -239,7 +239,7 @@ H5CS_pop(void)
     H5CS_t	*fstack = H5CS_get_my_stack ();
 
     /* Don't push this function on the function stack... :-) */
-    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5CS_pop);
+    FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
     assert (fstack);
@@ -273,7 +273,7 @@ H5CS_copy_stack(H5CS_t *new_stack)
     unsigned    u;                      /* Local index variable */
 
     /* Don't push this function on the function stack... :-) */
-    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5CS_copy_stack);
+    FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
     HDassert (old_stack);
@@ -307,7 +307,7 @@ H5CS_close_stack(H5CS_t *stack)
     unsigned    u;                      /* Local index variable */
 
     /* Don't push this function on the function stack... :-) */
-    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5CS_close_stack);
+    FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
     HDassert (stack);

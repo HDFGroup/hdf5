@@ -99,7 +99,7 @@ DESCRIPTION
 static herr_t
 H5T_init_commit_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_commit_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_commit_interface() */
@@ -126,7 +126,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     H5T_t	*type;                  /* Datatype for ID */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Tcommit2, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*siiii", loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id);
 
     /* Check arguments */
@@ -189,7 +189,7 @@ H5T_commit_named(const H5G_loc_t *loc, const char *name, H5T_t *dt,
     H5T_state_t old_state = H5T_STATE_TRANSIENT;        /* The state of the datatype before H5T_commit. */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_commit_named)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(loc);
@@ -275,7 +275,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     H5T_t	*type = NULL;           /* Datatype created */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Tcommit_anon, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iiii", loc_id, type_id, tcpl_id, tapl_id);
 
     /* Check arguments */
@@ -342,7 +342,7 @@ H5T_commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id)
     size_t      dtype_size;             /* Size of the datatype message */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_commit)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file);
     HDassert(type);
@@ -462,7 +462,7 @@ H5Tcommitted(hid_t type_id)
     H5T_t	*type;          /* Datatype to query */
     htri_t      ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tcommitted, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "i", type_id);
 
     /* Check arguments */
@@ -493,7 +493,7 @@ htri_t
 H5T_committed(const H5T_t *type)
 {
     /* Use no-init for efficiency */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_committed)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(type);
 
@@ -520,7 +520,7 @@ H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id)
 {
     int ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_link, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(type);
     HDassert(type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED);
@@ -561,7 +561,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
     hid_t        ret_value = FAIL;      /* Return value */
 
-    FUNC_ENTER_API(H5Topen2, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "i*si", loc_id, name, tapl_id);
 
     /* Check args */
@@ -643,7 +643,7 @@ H5Tget_create_plist(hid_t dtype_id)
     herr_t              status;         /* Generic status value */
     hid_t		ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tget_create_plist, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dtype_id);
 
     /* Check arguments */
@@ -707,7 +707,7 @@ H5T_open(const H5G_loc_t *loc, hid_t dxpl_id)
     H5T_t          *dt = NULL;
     H5T_t          *ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_open, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     HDassert(loc);
 
@@ -823,7 +823,7 @@ H5T_open_oid(const H5G_loc_t *loc, hid_t dxpl_id)
     H5T_t *dt = NULL;          /* Datatype from the file */
     H5T_t *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_open_oid)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(loc);
 
@@ -876,7 +876,7 @@ done:
 herr_t
 H5T_update_shared(H5T_t *dt)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_update_shared)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(dt);
 

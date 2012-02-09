@@ -96,7 +96,7 @@ H5G_init_int_interface(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_init_int_interface, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Funnel all work to H5G_init() */
     if(H5G_init() < 0)
@@ -128,8 +128,8 @@ done:
 const char *
 H5G_component(const char *name, size_t *size_p)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_component)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(name);
 
@@ -164,7 +164,7 @@ H5G_normalize(const char *name)
     unsigned    last_slash;     /* Flag to indicate last character was a slash */
     char *ret_value;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_normalize)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(name);

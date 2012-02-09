@@ -49,7 +49,7 @@ DESCRIPTION
 static herr_t
 H5T_init_offset_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_offset_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_offset_interface() */
@@ -90,7 +90,7 @@ H5Tget_offset(hid_t type_id)
     H5T_t	*dt;
     int	ret_value;
 
-    FUNC_ENTER_API(H5Tget_offset, -1)
+    FUNC_ENTER_API(-1)
     H5TRACE1("Is", "i", type_id);
 
     /* Check args */
@@ -140,7 +140,7 @@ H5T_get_offset(const H5T_t *dt)
 {
     int	ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_get_offset, -1)
+    FUNC_ENTER_NOAPI(-1)
 
     /* Defer to parent*/
     while(dt->shared->parent)
@@ -201,7 +201,7 @@ H5Tset_offset(hid_t type_id, size_t offset)
     H5T_t	*dt;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tset_offset, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iz", type_id, offset);
 
     /* Check args */
@@ -269,7 +269,7 @@ H5T_set_offset(const H5T_t *dt, size_t offset)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_set_offset, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(dt);

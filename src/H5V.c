@@ -72,7 +72,7 @@ static void
 H5V_stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
 		     const hsize_t *size, hsize_t *stride1)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_stride_optimize1);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * This has to be true because if we optimize the dimensionality down to
@@ -121,7 +121,7 @@ static void
 H5V_stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
 		     const hsize_t *size, hsize_t *stride1, hsize_t *stride2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_stride_optimize2)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * This has to be true because if we optimize the dimensionality down to
@@ -265,7 +265,7 @@ H5V_hyper_stride(unsigned n, const hsize_t *size,
     int		i;		/*counter				*/
     hsize_t	    ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_hyper_stride)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(n <= H5V_HYPER_NDIMS);
     assert(size);
@@ -364,8 +364,8 @@ H5V_hyper_eq(unsigned n,
     unsigned	i;
     htri_t      ret_value=TRUE;         /* Return value */
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_hyper_eq)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (n == 0) HGOTO_DONE(TRUE)
 
@@ -411,8 +411,8 @@ H5V_hyper_disjointp(unsigned n,
     unsigned	u;
     htri_t      ret_value = FALSE;        /* Return value */
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_hyper_disjointp)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(!n || !size1 || !size2)
         HGOTO_DONE(TRUE)
@@ -471,7 +471,7 @@ H5V_hyper_fill(unsigned n, const hsize_t *_size,
     unsigned	u;
 #endif
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_hyper_fill)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     assert(n > 0 && n <= H5V_HYPER_NDIMS);
@@ -557,7 +557,7 @@ H5V_hyper_copy(unsigned n, const hsize_t *_size,
     unsigned	u;
 #endif
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_hyper_copy)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     assert(n > 0 && n <= H5V_HYPER_NDIMS);
@@ -711,7 +711,8 @@ H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
     int	j;			/*counter			*/
     hbool_t	carry;			/*subtraction carray value	*/
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_stride_fill)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
     assert (elmt_size < SIZET_MAX);
 
     H5V_vector_cpy(n, idx, size);
@@ -772,7 +773,8 @@ H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
     int	j;				/*counters		*/
     hbool_t	carry;				/*carray for subtraction*/
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_stride_copy)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
     assert (elmt_size<SIZET_MAX);
 
     if (n) {
@@ -840,7 +842,8 @@ H5V_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size,
     int	j;				/*counters		*/
     hbool_t	carry;				/*carray for subtraction*/
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_stride_copy_s)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
     assert (elmt_size<SIZET_MAX);
 
     if (n) {
@@ -913,7 +916,7 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
     int		j;              /* Local index variable */
     hbool_t	carry;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_stride_copy2)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert (elmt_size < SIZET_MAX);
     assert(dst_n>0);
@@ -978,7 +981,7 @@ H5V_array_fill(void *_dst, const void *src, size_t size, size_t count)
     size_t      items_left;         /* number of items left to copy 	*/
     uint8_t     *dst=(uint8_t*)_dst;/* alias for pointer arithmetic	*/
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_array_fill)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert (dst);
     assert (src);
@@ -1033,7 +1036,7 @@ H5V_array_down(unsigned n, const hsize_t *total_size, hsize_t *down)
     hsize_t	acc;	                /*accumulator			*/
     int	        i;		        /*counter			*/
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_array_down)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(n <= H5V_HYPER_NDIMS);
     assert(total_size);
@@ -1079,7 +1082,7 @@ H5V_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset)
     int             i;		/*counter				*/
     hsize_t	    ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_array_offset_pre)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(n <= H5V_HYPER_NDIMS);
     assert(acc);
@@ -1119,7 +1122,7 @@ H5V_array_offset(unsigned n, const hsize_t *total_size, const hsize_t *offset)
     hsize_t	acc_arr[H5V_HYPER_NDIMS];	/* Accumulated size of down dimensions */
     hsize_t	ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5V_array_offset, (HDabort(), 0)) /*lint !e527 Don't worry about unreachable statement */
+    FUNC_ENTER_NOAPI((HDabort(), 0)) /*lint !e527 Don't worry about unreachable statement */
 
     assert(n <= H5V_HYPER_NDIMS);
     assert(total_size);
@@ -1161,7 +1164,7 @@ H5V_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down,
 {
     unsigned    u;                      /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_array_calc_pre)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(n <= H5V_HYPER_NDIMS);
@@ -1203,7 +1206,7 @@ H5V_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hsize_t *c
     hsize_t	idx[H5V_HYPER_NDIMS];	/* Size of each dimension in bytes */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5V_array_calc, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(n <= H5V_HYPER_NDIMS);
@@ -1272,7 +1275,7 @@ H5V_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
     hsize_t	scaled_coord[H5V_HYPER_NDIMS];	/* Scaled, coordinates, in terms of chunks */
     unsigned    u;                      /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_chunk_index)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     assert(ndims <= H5V_HYPER_NDIMS);
@@ -1328,7 +1331,7 @@ H5V_opvv(size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[],
     size_t acc_len;             /* Accumulated length of sequences */
     ssize_t ret_value = 0;      /* Return value (Total size of sequence in bytes) */
 
-    FUNC_ENTER_NOAPI(H5V_opvv, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(dst_curr_seq);
@@ -1536,7 +1539,7 @@ H5V_memcpyvv(void *_dst,
     size_t acc_len;             /* Accumulated length of sequences */
     ssize_t ret_value = 0;      /* Return value (Total size of sequence in bytes) */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_memcpyvv)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(_dst);

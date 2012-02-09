@@ -209,7 +209,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
     H5G_t	   *grp = NULL;         /* New group created */
     hid_t	    ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Gcreate2, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("i", "i*siii", loc_id, name, lcpl_id, gcpl_id, gapl_id);
 
     /* Check arguments */
@@ -276,7 +276,7 @@ H5G_create_named(const H5G_loc_t *loc, const char *name, hid_t lcpl_id,
     H5G_obj_create_t gcrt_info;         /* Information for group creation */
     H5G_t	   *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_create_named)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(loc);
@@ -352,7 +352,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     H5G_obj_create_t gcrt_info;         /* Information for group creation */
     hid_t	    ret_value;
 
-    FUNC_ENTER_API(H5Gcreate_anon, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "iii", loc_id, gcpl_id, gapl_id);
 
     /* Check arguments */
@@ -431,7 +431,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
     H5G_loc_t	loc;                    /* Location of parent for group */
     hid_t       ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Gopen2, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "i*si", loc_id, name, gapl_id);
 
     /* Check args */
@@ -494,7 +494,7 @@ H5Gget_create_plist(hid_t group_id)
     hid_t		new_gcpl_id = FAIL;
     hid_t		ret_value = FAIL;
 
-    FUNC_ENTER_API(H5Gget_create_plist, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", group_id);
 
     /* Check args */
@@ -586,7 +586,7 @@ H5Gget_info(hid_t grp_id, H5G_info_t *grp_info)
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Gget_info, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", grp_id, grp_info);
 
     /* Check args */
@@ -633,7 +633,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Gget_info_by_name, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*s*xi", loc_id, name, grp_info, lapl_id);
 
     /* Check args */
@@ -696,7 +696,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Gget_info_by_idx, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIoh*xi", loc_id, group_name, idx_type, order, n, grp_info,
              lapl_id);
 
@@ -758,7 +758,7 @@ H5Gclose(hid_t group_id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Gclose, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", group_id);
 
     /* Check args */
@@ -803,7 +803,7 @@ H5G_init(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
     /* FUNC_ENTER() does all the work */
 
 done:
@@ -835,7 +835,7 @@ H5G_init_interface(void)
 {
     herr_t          ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the group IDs */
     if(H5I_register_type(H5I_GROUP, (size_t)H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS, (H5I_free_t)H5G_close) < 0)
@@ -866,7 +866,7 @@ H5G_term_interface(void)
 {
     int	n = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_term_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
 	if((n = H5I_nmembers(H5I_GROUP)))
@@ -910,7 +910,7 @@ H5G_create(H5F_t *file, H5G_obj_create_t *gcrt_info, hid_t dxpl_id)
     unsigned    oloc_init = 0;  /* Flag to indicate that the group object location was created successfully */
     H5G_t	*ret_value;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(file);
@@ -987,7 +987,7 @@ H5G_open_name(const H5G_loc_t *loc, const char *name, hid_t gapl_id,
     H5O_type_t  obj_type;               /* Type of object at location */
     H5G_t      *ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_open_name, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Check args */
     HDassert(loc);
@@ -1048,7 +1048,7 @@ H5G_open(const H5G_loc_t *loc, hid_t dxpl_id)
     H5G_shared_t    *shared_fo;         /* Shared group object */
     H5G_t           *ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_open, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Check args */
     HDassert(loc);
@@ -1140,7 +1140,7 @@ H5G_open_oid(H5G_t *grp, hid_t dxpl_id)
     hbool_t             obj_opened = FALSE;
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_open_oid)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(grp);
@@ -1188,7 +1188,7 @@ H5G_close(H5G_t *grp)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_close, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(grp && grp->shared);
@@ -1260,8 +1260,8 @@ done:
 H5O_loc_t *
 H5G_oloc(H5G_t *grp)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_oloc)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(grp ? &(grp->oloc) : NULL)
 } /* end H5G_oloc() */
@@ -1283,8 +1283,8 @@ H5G_oloc(H5G_t *grp)
 H5G_name_t *
 H5G_nameof(H5G_t *grp)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_nameof)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(grp ? &(grp->path) : NULL)
 } /* end H5G_nameof() */
@@ -1307,8 +1307,8 @@ H5G_nameof(H5G_t *grp)
 H5F_t *
 H5G_fileof(H5G_t *grp)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_fileof)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(grp);
 
@@ -1331,7 +1331,7 @@ H5G_fileof(H5G_t *grp)
 herr_t
 H5G_get_shared_count(H5G_t *grp)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_get_shared_count)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(grp && grp->shared);
@@ -1355,7 +1355,7 @@ H5G_get_shared_count(H5G_t *grp)
 herr_t
 H5G_mount(H5G_t *grp)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_mount)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(grp && grp->shared);
@@ -1383,7 +1383,7 @@ H5G_mount(H5G_t *grp)
 hbool_t
 H5G_mounted(H5G_t *grp)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_mounted)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(grp && grp->shared);
@@ -1407,7 +1407,7 @@ H5G_mounted(H5G_t *grp)
 herr_t
 H5G_unmount(H5G_t *grp)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_unmount)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(grp && grp->shared);
@@ -1439,7 +1439,7 @@ H5G_iterate_cb(const H5O_link_t *lnk, void *_udata)
     H5G_iter_appcall_ud_t *udata = (H5G_iter_appcall_ud_t *)_udata;     /* User data for callback */
     herr_t ret_value = H5_ITER_ERROR;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_iterate_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(lnk);
@@ -1499,7 +1499,7 @@ H5G_iterate(hid_t loc_id, const char *group_name,
     H5G_iter_appcall_ud_t udata; /* User data for callback */
     herr_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_iterate, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(group_name);
@@ -1554,7 +1554,7 @@ done:
 static herr_t
 H5G_free_visit_visited(void *item, void UNUSED *key, void UNUSED *operator_data/*in,out*/)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_free_visit_visited)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     item = H5FL_FREE(H5_obj_t, item);
 
@@ -1589,7 +1589,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
     size_t len_needed;                  /* Length of path string needed */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_visit_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(lnk);
@@ -1772,7 +1772,7 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));
 
-    FUNC_ENTER_NOAPI(H5G_visit, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)

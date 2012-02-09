@@ -601,7 +601,12 @@
 }
 
 /* The main part of every integer hardware conversion macro */
-#define H5T_CONV(GUTS,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		              \
+#define H5T_CONV(GUTS,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)  		              \
+    herr_t      ret_value=SUCCEED;      /* Return value         */            \
+                                                                              \
+    FUNC_ENTER_NOAPI(FAIL)                                                    \
+                                                                              \
+{                                                                             \
     size_t	elmtno;			/*element number		*/    \
     size_t	sprec;			/*source precision		*/    \
     size_t	dprec;			/*destination precision		*/    \
@@ -745,7 +750,10 @@
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
 		      "unknown conversion command");			      \
     }									      \
-}
+}                                                                             \
+									      \
+done:                                                                         \
+    FUNC_LEAVE_NOAPI(ret_value)
 
 /* Macro defining action on source data which needs to be aligned (before main action) */
 #define H5T_CONV_LOOP_PRE_SALIGN(ST) {					      \
@@ -955,7 +963,7 @@ DESCRIPTION
 static herr_t
 H5T_init_conv_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_conv_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_conv_interface() */
@@ -982,7 +990,7 @@ H5T_conv_noop(hid_t UNUSED src_id, hid_t UNUSED dst_id, H5T_cdata_t *cdata,
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_noop, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -1035,7 +1043,7 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     size_t      i;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_order_opt, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -1443,7 +1451,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	j, md;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_order, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -1548,7 +1556,7 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hbool_t             reverse;        /*if reverse the order of destination        */
     herr_t      ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_b_b, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -1774,7 +1782,7 @@ H5T_conv_struct_free(H5T_conv_struct_t *priv)
                 *dst_memb_id = priv->dst_memb_id;
     unsigned    i;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_conv_struct_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     for(i = 0; i < priv->src_nmembs; i++)
         if(src2dst[i] >= 0) {
@@ -1852,7 +1860,7 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
     unsigned		i, j;
     herr_t              ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_conv_struct_init)
+    FUNC_ENTER_NOAPI_NOINIT
 
     src_nmembs = src->shared->u.compnd.nmembs;
     dst_nmembs = dst->shared->u.compnd.nmembs;
@@ -2017,7 +2025,7 @@ H5T_conv_struct_subset(const H5T_cdata_t *cdata)
 {
     H5T_conv_struct_t	*priv;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_conv_struct_subset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(cdata);
     HDassert(cdata->priv);
@@ -2088,7 +2096,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     H5T_conv_struct_t *priv = (H5T_conv_struct_t *)(cdata->priv);
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_struct, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -2338,7 +2346,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     int		i;			/*counters			*/
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_struct_opt, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -2570,7 +2578,7 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     unsigned	i, j;		/*counters			*/
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_conv_enum_init)
+    FUNC_ENTER_NOAPI_NOINIT
 
     cdata->need_bkg = H5T_BKG_NO;
     if(NULL == (priv = (H5T_enum_struct_t *)(cdata->priv = H5MM_calloc(sizeof(*priv)))))
@@ -2719,7 +2727,7 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	i;			/*counters			*/
     herr_t      ret_value = SUCCEED;    /* Return value                 */
 
-    FUNC_ENTER_NOAPI(H5T_conv_enum, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -2949,7 +2957,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	elmtno;			/*element number counter	     */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_vlen, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -3257,7 +3265,7 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     void	*bkg_buf = NULL;     	/*temporary background buffer 	     */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_array, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch (cdata->command) {
         case H5T_CONV_INIT:
@@ -3422,7 +3430,7 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hbool_t             reverse;        /*if reverse the order of destination        */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_i_i, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -3844,7 +3852,7 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hbool_t             reverse;        /*if reverse the order of destination        */
     herr_t      ret_value = SUCCEED;    /*return value                 */
 
-    FUNC_ENTER_NOAPI(H5T_conv_f_f, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -4389,7 +4397,7 @@ H5T_conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     uint8_t	*dbuf=NULL;		/*temp buf for overlap convers.	*/
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_s_s, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -4607,14 +4615,7 @@ H5T_conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                      hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_schar_uchar, FAIL)
-
     H5T_CONV_su(SCHAR, UCHAR, signed char, unsigned char, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4640,14 +4641,7 @@ H5T_conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                      hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uchar_schar, FAIL)
-
     H5T_CONV_us(UCHAR, SCHAR, unsigned char, signed char, -, SCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4673,14 +4667,7 @@ H5T_conv_schar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                      hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_schar_short, FAIL)
-
     H5T_CONV_sS(SCHAR, SHORT, signed char, short, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4706,14 +4693,7 @@ H5T_conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_schar_ushort, FAIL)
-
     H5T_CONV_sU(SCHAR, USHORT, signed char, unsigned short, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4739,14 +4719,7 @@ H5T_conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                      hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uchar_short, FAIL)
-
     H5T_CONV_uS(UCHAR, SHORT, unsigned char, short, -, SHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4772,14 +4745,7 @@ H5T_conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uchar_ushort, FAIL)
-
     H5T_CONV_uU(UCHAR, USHORT, unsigned char, unsigned short, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4804,14 +4770,7 @@ H5T_conv_schar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_schar_int, FAIL)
-
     H5T_CONV_sS(SCHAR, INT, signed char, int, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4836,14 +4795,7 @@ H5T_conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_schar_uint, FAIL)
-
     H5T_CONV_sU(SCHAR, UINT, signed char, unsigned, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4868,14 +4820,7 @@ H5T_conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uchar_int, FAIL)
-
     H5T_CONV_uS(UCHAR, INT, unsigned char, int, -, INT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4900,14 +4845,7 @@ H5T_conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uchar_uint, FAIL)
-
     H5T_CONV_uU(UCHAR, UINT, unsigned char, unsigned, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4932,14 +4870,7 @@ H5T_conv_schar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_schar_long, FAIL)
-
     H5T_CONV_sS(SCHAR, LONG, signed char, long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4965,14 +4896,7 @@ H5T_conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_schar_ulong, FAIL)
-
     H5T_CONV_sU(SCHAR, ULONG, signed char, unsigned long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4997,14 +4921,7 @@ H5T_conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uchar_long, FAIL)
-
     H5T_CONV_uS(UCHAR, LONG, unsigned char, long, -, LONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5030,14 +4947,7 @@ H5T_conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uchar_ulong, FAIL)
-
     H5T_CONV_uU(UCHAR, ULONG, unsigned char, unsigned long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5063,14 +4973,7 @@ H5T_conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_schar_llong, FAIL)
-
     H5T_CONV_sS(SCHAR, LLONG, signed char, long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5096,14 +4999,7 @@ H5T_conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_schar_ullong, FAIL)
-
     H5T_CONV_sU(SCHAR, ULLONG, signed char, unsigned long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5129,14 +5025,7 @@ H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uchar_llong, FAIL)
-
     H5T_CONV_uS(UCHAR, LLONG, unsigned char, long long, -, LLONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5162,14 +5051,7 @@ H5T_conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uchar_ullong, FAIL)
-
     H5T_CONV_uU(UCHAR, ULLONG, unsigned char, unsigned long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5195,14 +5077,7 @@ H5T_conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_short_schar, FAIL)
-
     H5T_CONV_Ss(SHORT, SCHAR, short, signed char, SCHAR_MIN, SCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5228,14 +5103,7 @@ H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_short_uchar, FAIL)
-
     H5T_CONV_Su(SHORT, UCHAR, short, unsigned char, -, UCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5261,14 +5129,7 @@ H5T_conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ushort_schar, FAIL)
-
     H5T_CONV_Us(USHORT, SCHAR, unsigned short, signed char, -, SCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5294,14 +5155,7 @@ H5T_conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ushort_uchar, FAIL)
-
     H5T_CONV_Uu(USHORT, UCHAR, unsigned short, unsigned char, -, UCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5327,14 +5181,7 @@ H5T_conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_short_ushort, FAIL)
-
     H5T_CONV_su(SHORT, USHORT, short, unsigned short, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5360,14 +5207,7 @@ H5T_conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ushort_short, FAIL)
-
     H5T_CONV_us(USHORT, SHORT, unsigned short, short, -, SHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5393,14 +5233,7 @@ H5T_conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                    size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		   hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_short_int, FAIL)
-
     H5T_CONV_sS(SHORT, INT, short, int, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5426,14 +5259,7 @@ H5T_conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_short_uint, FAIL)
-
     H5T_CONV_sU(SHORT, UINT, short, unsigned, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5459,14 +5285,7 @@ H5T_conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ushort_int, FAIL)
-
     H5T_CONV_uS(USHORT, INT, unsigned short, int, -, INT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5492,14 +5311,7 @@ H5T_conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ushort_uint, FAIL)
-
     H5T_CONV_uU(USHORT, UINT, unsigned short, unsigned, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5525,14 +5337,7 @@ H5T_conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_short_long, FAIL)
-
     H5T_CONV_sS(SHORT, LONG, short, long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5558,14 +5363,7 @@ H5T_conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_short_ulong, FAIL)
-
     H5T_CONV_sU(SHORT, ULONG, short, unsigned long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5591,14 +5389,7 @@ H5T_conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ushort_long, FAIL)
-
     H5T_CONV_uS(USHORT, LONG, unsigned short, long, -, LONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5624,14 +5415,7 @@ H5T_conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ushort_ulong, FAIL)
-
     H5T_CONV_uU(USHORT, ULONG, unsigned short, unsigned long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5657,14 +5441,7 @@ H5T_conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_short_llong, FAIL)
-
     H5T_CONV_sS(SHORT, LLONG, short, long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5690,14 +5467,7 @@ H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_short_ullong, FAIL)
-
     H5T_CONV_sU(SHORT, ULLONG, short, unsigned long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5723,14 +5493,7 @@ H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ushort_llong, FAIL)
-
     H5T_CONV_uS(USHORT, LLONG, unsigned short, long long, -, LLONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5756,14 +5519,7 @@ H5T_conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ushort_ullong, FAIL)
-
     H5T_CONV_uU(USHORT, ULLONG, unsigned short, unsigned long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5789,14 +5545,7 @@ H5T_conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                    size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		   hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_int_schar, FAIL)
-
     H5T_CONV_Ss(INT, SCHAR, int, signed char, SCHAR_MIN, SCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5822,14 +5571,7 @@ H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                    size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		   hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_int_uchar, FAIL)
-
     H5T_CONV_Su(INT, UCHAR, int, unsigned char, -, UCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5855,14 +5597,7 @@ H5T_conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uint_schar, FAIL)
-
     H5T_CONV_Us(UINT, SCHAR, unsigned, signed char, -, SCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5888,14 +5623,7 @@ H5T_conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uint_uchar, FAIL)
-
     H5T_CONV_Uu(UINT, UCHAR, unsigned, unsigned char, -, UCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5921,14 +5649,7 @@ H5T_conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                    size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		   hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_int_short, FAIL)
-
     H5T_CONV_Ss(INT, SHORT, int, short, SHRT_MIN, SHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5954,14 +5675,7 @@ H5T_conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_int_ushort, FAIL)
-
     H5T_CONV_Su(INT, USHORT, int, unsigned short, -, USHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5987,14 +5701,7 @@ H5T_conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uint_short, FAIL)
-
     H5T_CONV_Us(UINT, SHORT, unsigned, short, -, SHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6020,14 +5727,7 @@ H5T_conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uint_ushort, FAIL)
-
     H5T_CONV_Uu(UINT, USHORT, unsigned, unsigned short, -, USHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6052,14 +5752,7 @@ H5T_conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		  size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                   void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_int_uint, FAIL)
-
     H5T_CONV_su(INT, UINT, int, unsigned, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6084,14 +5777,7 @@ H5T_conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		  size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                   void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uint_int, FAIL)
-
     H5T_CONV_us(UINT, INT, unsigned, int, -, INT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6116,14 +5802,7 @@ H5T_conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		  size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                   void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_int_long, FAIL)
-
     H5T_CONV_sS(INT, LONG, int, long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6148,14 +5827,7 @@ H5T_conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_int_ulong, FAIL)
-
     H5T_CONV_sU(INT, LONG, int, unsigned long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6180,14 +5852,7 @@ H5T_conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uint_long, FAIL)
-
     H5T_CONV_uS(UINT, LONG, unsigned, long, -, LONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6212,14 +5877,7 @@ H5T_conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uint_ulong, FAIL)
-
     H5T_CONV_uU(UINT, ULONG, unsigned, unsigned long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6244,14 +5902,7 @@ H5T_conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_int_llong, FAIL)
-
     H5T_CONV_sS(INT, LLONG, int, long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6276,14 +5927,7 @@ H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_int_ullong, FAIL)
-
     H5T_CONV_sU(INT, ULLONG, int, unsigned long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6308,14 +5952,7 @@ H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uint_llong, FAIL)
-
     H5T_CONV_uS(UINT, LLONG, unsigned, long long, -, LLONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6341,14 +5978,7 @@ H5T_conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uint_ullong, FAIL)
-
     H5T_CONV_uU(UINT, ULLONG, unsigned, unsigned long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6373,14 +6003,7 @@ H5T_conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_long_schar, FAIL)
-
     H5T_CONV_Ss(LONG, SCHAR, long, signed char, SCHAR_MIN, SCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6405,14 +6028,7 @@ H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_long_uchar, FAIL)
-
     H5T_CONV_Su(LONG, UCHAR, long, unsigned char, -, UCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6438,14 +6054,7 @@ H5T_conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ulong_schar, FAIL)
-
     H5T_CONV_Us(ULONG, SCHAR, unsigned long, signed char, -, SCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6471,14 +6080,7 @@ H5T_conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ulong_uchar, FAIL)
-
     H5T_CONV_Uu(ULONG, UCHAR, unsigned long, unsigned char, -, UCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6503,14 +6105,7 @@ H5T_conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_long_short, FAIL)
-
     H5T_CONV_Ss(LONG, SHORT, long, short, SHRT_MIN, SHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6536,14 +6131,7 @@ H5T_conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_long_ushort, FAIL)
-
     H5T_CONV_Su(LONG, USHORT, long, unsigned short, -, USHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6568,14 +6156,7 @@ H5T_conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                      void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ulong_short, FAIL)
-
     H5T_CONV_Us(ULONG, SHORT, unsigned long, short, -, SHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6601,14 +6182,7 @@ H5T_conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ulong_ushort, FAIL)
-
     H5T_CONV_Uu(ULONG, USHORT, unsigned long, unsigned short, -, USHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6633,14 +6207,7 @@ H5T_conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		  size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                   void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_long_int, FAIL)
-
     H5T_CONV_Ss(LONG, INT, long, int, INT_MIN, INT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6665,14 +6232,7 @@ H5T_conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_long_uint, FAIL)
-
     H5T_CONV_Su(LONG, UINT, long, unsigned, -, UINT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6697,14 +6257,7 @@ H5T_conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ulong_int, FAIL)
-
     H5T_CONV_Us(ULONG, INT, unsigned long, int, -, INT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6729,14 +6282,7 @@ H5T_conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ulong_uint, FAIL)
-
     H5T_CONV_Uu(ULONG, UINT, unsigned long, unsigned, -, UINT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6761,14 +6307,7 @@ H5T_conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_long_ulong, FAIL)
-
     H5T_CONV_su(LONG, ULONG, long, unsigned long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6793,14 +6332,7 @@ H5T_conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ulong_long, FAIL)
-
     H5T_CONV_us(ULONG, LONG, unsigned long, long, -, LONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6825,14 +6357,7 @@ H5T_conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_long_llong, FAIL)
-
     H5T_CONV_sS(LONG, LLONG, long, long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6858,14 +6383,7 @@ H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_long_ullong, FAIL)
-
     H5T_CONV_sU(LONG, ULLONG, long, unsigned long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6891,14 +6409,7 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ulong_llong, FAIL)
-
     H5T_CONV_uS(ULONG, LLONG, unsigned long, long long, -, LLONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6924,14 +6435,7 @@ H5T_conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ulong_ullong, FAIL)
-
     H5T_CONV_uU(ULONG, ULLONG, unsigned long, unsigned long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6957,14 +6461,7 @@ H5T_conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_llong_schar, FAIL)
-
     H5T_CONV_Ss(LLONG, SCHAR, long long, signed char, SCHAR_MIN, SCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -6990,14 +6487,7 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_llong_uchar, FAIL)
-
     H5T_CONV_Su(LLONG, UCHAR, long long, unsigned char, -, UCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7023,14 +6513,7 @@ H5T_conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ullong_schar, FAIL)
-
     H5T_CONV_Us(ULLONG, SCHAR, unsigned long long, signed char, -, SCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7056,14 +6539,7 @@ H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ullong_uchar, FAIL)
-
     H5T_CONV_Uu(ULLONG, UCHAR, unsigned long long, unsigned char, -, UCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7089,14 +6565,7 @@ H5T_conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_llong_short, FAIL)
-
     H5T_CONV_Ss(LLONG, SHORT, long long, short, SHRT_MIN, SHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7122,14 +6591,7 @@ H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_llong_ushort, FAIL)
-
     H5T_CONV_Su(LLONG, USHORT, long long, unsigned short, -, USHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7155,14 +6617,7 @@ H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ullong_short, FAIL)
-
     H5T_CONV_Us(ULLONG, SHORT, unsigned long long, short, -, SHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7188,14 +6643,7 @@ H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ullong_ushort, FAIL)
-
     H5T_CONV_Uu(ULLONG, USHORT, unsigned long long, unsigned short, -, USHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7220,14 +6668,7 @@ H5T_conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_llong_int, FAIL)
-
     H5T_CONV_Ss(LLONG, INT, long long, int, INT_MIN, INT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7252,14 +6693,7 @@ H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_llong_uint, FAIL)
-
     H5T_CONV_Su(LLONG, UINT, long long, unsigned, -, UINT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7284,14 +6718,7 @@ H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ullong_int, FAIL)
-
     H5T_CONV_Us(ULLONG, INT, unsigned long long, int, -, INT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7317,14 +6744,7 @@ H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ullong_uint, FAIL)
-
     H5T_CONV_Uu(ULLONG, UINT, unsigned long long, unsigned, -, UINT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7349,14 +6769,7 @@ H5T_conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_llong_long, FAIL)
-
     H5T_CONV_Ss(LLONG, LONG, long long, long, LONG_MIN, LONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7382,14 +6795,7 @@ H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_llong_ulong, FAIL)
-
     H5T_CONV_Su(LLONG, ULONG, long long, unsigned long, -, ULONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7415,14 +6821,7 @@ H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ullong_long, FAIL)
-
     H5T_CONV_Us(ULLONG, LONG, unsigned long long, long, -, LONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7448,14 +6847,7 @@ H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ullong_ulong, FAIL)
-
     H5T_CONV_Uu(ULLONG, ULONG, unsigned long long, unsigned long, -, ULONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7481,14 +6873,7 @@ H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_llong_ullong, FAIL)
-
     H5T_CONV_su(LLONG, ULLONG, long long, unsigned long long, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7514,14 +6899,7 @@ H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ullong_llong, FAIL)
-
     H5T_CONV_us(ULLONG, LLONG, unsigned long long, long long, -, LLONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7551,14 +6929,7 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_float_double, FAIL)
-
     H5T_CONV_fF(FLOAT, DOUBLE, float, double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_FP_FP */
 
@@ -7585,14 +6956,7 @@ H5T_conv_float_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_float_ldouble, FAIL)
-
     H5T_CONV_fF(FLOAT, LDOUBLE, float, long double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_FP_LDOUBLE*/
 
@@ -7626,14 +6990,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_double_float, FAIL)
-
     H5T_CONV_Ff(DOUBLE, FLOAT, double, float, -FLT_MAX, FLT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_FP_FP*/
 
@@ -7660,15 +7017,7 @@ H5T_conv_double_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_double_ldouble, FAIL)
-
     H5T_CONV_fF(DOUBLE, LDOUBLE, double, long double, -, -);
-
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_FP_LDOUBLE*/
 
@@ -7695,14 +7044,7 @@ H5T_conv_ldouble_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ldouble_float, FAIL)
-
     H5T_CONV_Ff(LDOUBLE, FLOAT, long double, float, -FLT_MAX, FLT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_FP_LDOUBLE */
 
@@ -7729,14 +7071,7 @@ H5T_conv_ldouble_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ldouble_double, FAIL)
-
     H5T_CONV_Ff(LDOUBLE, DOUBLE, long double, double, -DBL_MAX, DBL_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_FP_LDOUBLE*/
 
@@ -7762,14 +7097,7 @@ H5T_conv_schar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_schar_float, FAIL)
-
     H5T_CONV_xF(SCHAR, FLOAT, signed char, float, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7794,14 +7122,7 @@ H5T_conv_schar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_schar_double, FAIL)
-
     H5T_CONV_xF(SCHAR, DOUBLE, signed char, double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7827,14 +7148,7 @@ H5T_conv_schar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_schar_ldouble, FAIL)
-
     H5T_CONV_xF(SCHAR, LDOUBLE, signed char, long double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
@@ -7860,14 +7174,7 @@ H5T_conv_uchar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uchar_float, FAIL)
-
     H5T_CONV_xF(UCHAR, FLOAT, unsigned char, float, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7892,14 +7199,7 @@ H5T_conv_uchar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uchar_double, FAIL)
-
     H5T_CONV_xF(UCHAR, DOUBLE, unsigned char, double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7925,14 +7225,7 @@ H5T_conv_uchar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uchar_ldouble, FAIL)
-
     H5T_CONV_xF(UCHAR, LDOUBLE, unsigned char, long double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
@@ -7958,14 +7251,7 @@ H5T_conv_short_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_short_float, FAIL)
-
     H5T_CONV_xF(SHORT, FLOAT, short, float, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -7990,14 +7276,7 @@ H5T_conv_short_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_short_double, FAIL)
-
     H5T_CONV_xF(SHORT, DOUBLE, short, double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8023,14 +7302,7 @@ H5T_conv_short_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_short_ldouble, FAIL)
-
     H5T_CONV_xF(SHORT, LDOUBLE, short, long double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
@@ -8056,14 +7328,7 @@ H5T_conv_ushort_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ushort_float, FAIL)
-
     H5T_CONV_xF(USHORT, FLOAT, unsigned short, float, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8088,14 +7353,7 @@ H5T_conv_ushort_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ushort_double, FAIL)
-
     H5T_CONV_xF(USHORT, DOUBLE, unsigned short, double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8121,14 +7379,7 @@ H5T_conv_ushort_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ushort_ldouble, FAIL)
-
     H5T_CONV_xF(USHORT, LDOUBLE, unsigned short, long double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
@@ -8154,14 +7405,7 @@ H5T_conv_int_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_int_float, FAIL)
-
     H5T_CONV_xF(INT, FLOAT, int, float, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8186,14 +7430,7 @@ H5T_conv_int_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_int_double, FAIL)
-
     H5T_CONV_xF(INT, DOUBLE, int, double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8219,14 +7456,7 @@ H5T_conv_int_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_int_ldouble, FAIL)
-
     H5T_CONV_xF(INT, LDOUBLE, int, long double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
@@ -8252,14 +7482,7 @@ H5T_conv_uint_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uint_float, FAIL)
-
     H5T_CONV_xF(UINT, FLOAT, unsigned int, float, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8284,14 +7507,7 @@ H5T_conv_uint_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uint_double, FAIL)
-
     H5T_CONV_xF(UINT, DOUBLE, unsigned int, double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8317,14 +7533,7 @@ H5T_conv_uint_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_uint_ldouble, FAIL)
-
     H5T_CONV_xF(UINT, LDOUBLE, unsigned int, long double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
@@ -8350,14 +7559,7 @@ H5T_conv_long_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_long_float, FAIL)
-
     H5T_CONV_xF(LONG, FLOAT, long, float, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8382,14 +7584,7 @@ H5T_conv_long_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_long_double, FAIL)
-
     H5T_CONV_xF(LONG, DOUBLE, long, double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8415,14 +7610,7 @@ H5T_conv_long_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_long_ldouble, FAIL)
-
     H5T_CONV_xF(LONG, LDOUBLE, long, long double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
@@ -8449,14 +7637,7 @@ H5T_conv_ulong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ulong_float, FAIL)
-
     H5T_CONV_xF(ULONG, FLOAT, unsigned long, float, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_ULONG_FLT */
 
@@ -8483,14 +7664,7 @@ H5T_conv_ulong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ulong_double, FAIL)
-
     H5T_CONV_xF(ULONG, DOUBLE, unsigned long, double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_ULONG_DBL */
 
@@ -8517,14 +7691,7 @@ H5T_conv_ulong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ulong_ldouble, FAIL)
-
     H5T_CONV_xF(ULONG, LDOUBLE, unsigned long, long double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_ULONG_LDOUBLE */
 
@@ -8550,14 +7717,7 @@ H5T_conv_llong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_llong_float, FAIL)
-
     H5T_CONV_xF(LLONG, FLOAT, long long, float, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8582,14 +7742,7 @@ H5T_conv_llong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_llong_double, FAIL)
-
     H5T_CONV_xF(LLONG, DOUBLE, long long, double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8615,14 +7768,7 @@ H5T_conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_llong_ldouble, FAIL)
-
     H5T_CONV_xF(LLONG, LDOUBLE, long long, long double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_LLONG_LDOUBLE */
 
@@ -8649,14 +7795,7 @@ H5T_conv_ullong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ullong_float, FAIL)
-
     H5T_CONV_xF(ULLONG, FLOAT, unsigned long long, float, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_ULLONG_FP*/
 
@@ -8683,14 +7822,7 @@ H5T_conv_ullong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ullong_double, FAIL)
-
     H5T_CONV_xF(ULLONG, DOUBLE, unsigned long long, double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_ULLONG_FP*/
 
@@ -8717,14 +7849,7 @@ H5T_conv_ullong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ullong_ldouble, FAIL)
-
     H5T_CONV_xF(ULLONG, LDOUBLE, unsigned long long, long double, -, -);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_ULLONG_LDOUBLE*/
 
@@ -8750,14 +7875,7 @@ H5T_conv_float_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_float_schar, FAIL)
-
     H5T_CONV_Fx(FLOAT, SCHAR, float, signed char, SCHAR_MIN, SCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8782,14 +7900,7 @@ H5T_conv_float_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_float_uchar, FAIL)
-
     H5T_CONV_Fx(FLOAT, UCHAR, float, unsigned char, 0, UCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8814,14 +7925,7 @@ H5T_conv_double_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_double_schar, FAIL)
-
     H5T_CONV_Fx(DOUBLE, SCHAR, double, signed char, SCHAR_MIN, SCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8846,14 +7950,7 @@ H5T_conv_double_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_double_uchar, FAIL)
-
     H5T_CONV_Fx(DOUBLE, UCHAR, double, unsigned char, 0, UCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8879,14 +7976,7 @@ H5T_conv_ldouble_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ldouble_schar, FAIL)
-
     H5T_CONV_Fx(LDOUBLE, SCHAR, long double, signed char, SCHAR_MIN, SCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_LDOUBLE_INTEGER */
 
@@ -8913,14 +8003,7 @@ H5T_conv_ldouble_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ldouble_uchar, FAIL)
-
     H5T_CONV_Fx(LDOUBLE, UCHAR, long double, unsigned char, 0, UCHAR_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_LDOUBLE_INTEGER */
 
@@ -8946,14 +8029,7 @@ H5T_conv_float_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_float_short, FAIL)
-
     H5T_CONV_Fx(FLOAT, SHORT, float, short, SHRT_MIN, SHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -8978,14 +8054,7 @@ H5T_conv_float_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_float_ushort, FAIL)
-
     H5T_CONV_Fx(FLOAT, USHORT, float, unsigned short, 0, USHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -9010,14 +8079,7 @@ H5T_conv_double_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_double_short, FAIL)
-
     H5T_CONV_Fx(DOUBLE, SHORT, double, short, SHRT_MIN, SHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -9042,14 +8104,7 @@ H5T_conv_double_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_double_ushort, FAIL)
-
     H5T_CONV_Fx(DOUBLE, USHORT, double, unsigned short, 0, USHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -9075,14 +8130,7 @@ H5T_conv_ldouble_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ldouble_short, FAIL)
-
     H5T_CONV_Fx(LDOUBLE, SHORT, long double, short, SHRT_MIN, SHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_LDOUBLE_INTEGER*/
 
@@ -9109,14 +8157,7 @@ H5T_conv_ldouble_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ldouble_ushort, FAIL)
-
     H5T_CONV_Fx(LDOUBLE, USHORT, long double, unsigned short, 0, USHRT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_LDOUBLE_INTEGER */
 
@@ -9142,14 +8183,7 @@ H5T_conv_float_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_float_int, FAIL)
-
     H5T_CONV_Fx(FLOAT, INT, float, int, INT_MIN, INT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -9174,14 +8208,7 @@ H5T_conv_float_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_float_uint, FAIL)
-
     H5T_CONV_Fx(FLOAT, UINT, float, unsigned int, 0, UINT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -9206,14 +8233,7 @@ H5T_conv_double_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_double_int, FAIL)
-
     H5T_CONV_Fx(DOUBLE, INT, double, int, INT_MIN, INT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -9238,14 +8258,7 @@ H5T_conv_double_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_double_uint, FAIL)
-
     H5T_CONV_Fx(DOUBLE, UINT, double, unsigned int, 0, UINT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -9271,14 +8284,7 @@ H5T_conv_ldouble_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ldouble_int, FAIL)
-
     H5T_CONV_Fx(LDOUBLE, INT, long double, int, INT_MIN, INT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_LDOUBLE_INTEGER */
 
@@ -9305,14 +8311,7 @@ H5T_conv_ldouble_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ldouble_uint, FAIL)
-
     H5T_CONV_Fx(LDOUBLE, UINT, long double, unsigned int, 0, UINT_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_LDOUBLE_UINT */
 
@@ -9338,14 +8337,7 @@ H5T_conv_float_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_float_long, FAIL)
-
     H5T_CONV_Fx(FLOAT, LONG, float, long, LONG_MIN, LONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -9370,14 +8362,7 @@ H5T_conv_float_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_float_ulong, FAIL)
-
     H5T_CONV_Fx(FLOAT, ULONG, float, unsigned long, 0, ULONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -9402,14 +8387,7 @@ H5T_conv_double_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_double_long, FAIL)
-
     H5T_CONV_Fx(DOUBLE, LONG, double, long, LONG_MIN, LONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -9434,14 +8412,7 @@ H5T_conv_double_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_double_ulong, FAIL)
-
     H5T_CONV_Fx(DOUBLE, ULONG, double, unsigned long, 0, ULONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -9467,14 +8438,7 @@ H5T_conv_ldouble_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ldouble_long, FAIL)
-
     H5T_CONV_Fx(LDOUBLE, LONG, long double, long, LONG_MIN, LONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_LDOUBLE_INTEGER*/
 
@@ -9501,14 +8465,7 @@ H5T_conv_ldouble_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ldouble_ulong, FAIL)
-
     H5T_CONV_Fx(LDOUBLE, ULONG, long double, unsigned long, 0, ULONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_LDOUBLE_INTEGER */
 
@@ -9535,14 +8492,7 @@ H5T_conv_float_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_float_llong, FAIL)
-
     H5T_CONV_Fx(FLOAT, LLONG, float, long long, LLONG_MIN, LLONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5T_CONV_INTERNAL_FP_LLONG */
 
@@ -9569,14 +8519,7 @@ H5T_conv_float_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_float_ullong, FAIL)
-
     H5T_CONV_Fx(FLOAT, ULLONG, float, unsigned long long, 0, ULLONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_FP_ULLONG*/
 
@@ -9603,14 +8546,7 @@ H5T_conv_double_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_double_llong, FAIL)
-
     H5T_CONV_Fx(DOUBLE, LLONG, double, long long, LLONG_MIN, LLONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_FP_LLONG*/
 
@@ -9637,14 +8573,7 @@ H5T_conv_double_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_double_ullong, FAIL)
-
     H5T_CONV_Fx(DOUBLE, ULLONG, double, unsigned long long, 0, ULLONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_FP_ULLONG*/
 
@@ -9671,14 +8600,7 @@ H5T_conv_ldouble_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ldouble_llong, FAIL)
-
     H5T_CONV_Fx(LDOUBLE, LLONG, long double, long long, LLONG_MIN, LLONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_LDOUBLE_LLONG*/
 
@@ -9705,14 +8627,7 @@ H5T_conv_ldouble_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t dxpl_id)
 {
-    herr_t      ret_value=SUCCEED;      /* Return value         */
-
-    FUNC_ENTER_NOAPI(H5T_conv_ldouble_ullong, FAIL)
-
     H5T_CONV_Fx(LDOUBLE, ULLONG, long double, unsigned long long, 0, ULLONG_MAX);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /*H5T_CONV_INTERNAL_LDOUBLE_ULLONG*/
 
@@ -9776,7 +8691,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     H5T_conv_ret_t      except_ret;     /*return of callback function   */
     herr_t      ret_value=SUCCEED;      /* Return value                 */
 
-    FUNC_ENTER_NOAPI(H5T_conv_f_i, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -10365,7 +9280,7 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hbool_t             reverse;        /*if reverse the order of destination   */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_i_f, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -10760,7 +9675,7 @@ H5T_reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order)
 {
     size_t      i;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_reverse_order)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(s);
     assert(size);

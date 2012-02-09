@@ -126,7 +126,7 @@ H5G_traverse_slink_cb(H5G_loc_t UNUSED *grp_loc, const char UNUSED *name,
     H5G_trav_slink_t *udata = (H5G_trav_slink_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_slink_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check for dangling soft link */
     if(obj_loc == NULL) {
@@ -182,7 +182,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     hid_t               cur_grp = (-1);
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_ud)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(grp_loc);
@@ -324,7 +324,7 @@ H5G_traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
     hbool_t             tmp_grp_loc_set = FALSE;       /* Flag to indicate that tmp group location is initialized */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_slink)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(grp_loc);
@@ -399,7 +399,7 @@ H5G_traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_traverse_special, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(grp_loc);
@@ -502,7 +502,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
     hbool_t last_comp = FALSE;          /* Flag to indicate that a component is the last component in the name */
     herr_t              ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_traverse_real)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check parameters */
     HDassert(_loc);
@@ -835,7 +835,7 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
     H5P_genplist_t *lapl;                   /* Property list with value for nlinks */
     herr_t          ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_traverse, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     if(!name || !*name)

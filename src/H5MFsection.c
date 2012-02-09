@@ -134,7 +134,7 @@ H5MF_sect_simple_new(haddr_t sect_off, hsize_t sect_size)
     H5MF_free_section_t *sect = NULL;   /* 'Simple' free space section to add */
     H5MF_free_section_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5MF_sect_simple_new)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments.  */
     HDassert(sect_size);
@@ -180,7 +180,7 @@ H5MF_sect_simple_deserialize(const H5FS_section_class_t UNUSED *cls,
     H5MF_free_section_t *sect;          /* New section */
     H5FS_section_info_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5MF_sect_simple_deserialize)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(H5F_addr_defined(sect_addr));
@@ -221,7 +221,7 @@ H5MF_sect_simple_can_merge(const H5FS_section_info_t *_sect1,
     const H5MF_free_section_t *sect2 = (const H5MF_free_section_t *)_sect2;   /* File free section */
     htri_t ret_value;                   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MF_sect_simple_can_merge)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
     HDassert(sect1);
@@ -259,7 +259,7 @@ H5MF_sect_simple_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
     H5MF_free_section_t *sect2 = (H5MF_free_section_t *)_sect2;   /* File free section */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5MF_sect_simple_merge)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(sect1);
@@ -302,7 +302,7 @@ H5MF_sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     haddr_t end;                /* End of section to extend */
     htri_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5MF_sect_simple_can_shrink)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(sect);
@@ -395,7 +395,7 @@ H5MF_sect_simple_shrink(H5FS_section_info_t **_sect, void *_udata)
     H5MF_sect_ud_t *udata = (H5MF_sect_ud_t *)_udata;   /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5MF_sect_simple_shrink)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(sect);
@@ -453,7 +453,7 @@ H5MF_sect_simple_free(H5FS_section_info_t *_sect)
 {
     H5MF_free_section_t *sect = (H5MF_free_section_t *)_sect;   /* File free section */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MF_sect_simple_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
     HDassert(sect);
@@ -490,7 +490,7 @@ H5MF_sect_simple_valid(const H5FS_section_class_t UNUSED *cls,
     const H5MF_free_section_t *sect = (const H5MF_free_section_t *)_sect;   /* File free section */
 #endif /* NDEBUG */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MF_sect_simple_valid)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
     HDassert(sect);
@@ -517,7 +517,7 @@ H5MF_sect_simple_split(H5FS_section_info_t *sect, hsize_t frag_size)
 {
     H5MF_free_section_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5MF_sect_simple_split)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate space for new section */
     if(NULL == (ret_value = H5MF_sect_simple_new(sect->addr, frag_size)))

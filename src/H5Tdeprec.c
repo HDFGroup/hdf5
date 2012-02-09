@@ -101,7 +101,7 @@ DESCRIPTION
 static herr_t
 H5T_init_deprec_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_deprec_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_deprec_interface() */
@@ -129,7 +129,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     H5T_t	*type;                  /* Datatype for ID */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Tcommit1, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*si", loc_id, name, type_id);
 
     /* Check arguments */
@@ -179,7 +179,7 @@ H5Topen1(hid_t loc_id, const char *name)
     hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
     hid_t        ret_value = FAIL;
 
-    FUNC_ENTER_API(H5Topen1, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check args */

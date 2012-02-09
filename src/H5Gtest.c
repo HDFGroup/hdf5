@@ -99,7 +99,7 @@ H5G_is_empty_test(hid_t gid)
     htri_t linfo_exists = FALSE;/* Indicate that the 'link info' message is present */
     htri_t ret_value = TRUE;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_is_empty_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get group structure */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
@@ -210,7 +210,7 @@ H5G_has_links_test(hid_t gid, unsigned *nmsgs)
     htri_t msg_exists = 0;      /* Indicate that a header message is present */
     htri_t ret_value = TRUE;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_has_links_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get group structure */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
@@ -268,7 +268,7 @@ H5G_has_stab_test(hid_t gid)
     htri_t msg_exists = 0;      /* Indicate that a header message is present */
     htri_t ret_value = TRUE;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_has_stab_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get group structure */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
@@ -318,7 +318,7 @@ H5G_is_new_dense_test(hid_t gid)
     htri_t msg_exists = 0;      /* Indicate that a header message is present */
     htri_t ret_value = TRUE;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_is_new_dense_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get group structure */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
@@ -388,7 +388,7 @@ H5G_new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     H5G_t *grp = NULL;          /* Pointer to group */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_new_dense_info_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get group structure */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
@@ -468,7 +468,7 @@ H5G_lheap_size_test(hid_t gid, size_t *lheap_size)
     H5O_stab_t stab;		/* Symbol table message		*/
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_lheap_size_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get group structure */
     if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
@@ -516,7 +516,7 @@ H5G_user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsigne
     H5G_name_t *obj_path;       /* Pointer to group hier. path for obj */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_user_path_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(user_path_len);
@@ -609,7 +609,7 @@ H5G_verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent)
     H5HL_t      *heap = NULL;           /* Pointer to local heap */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5G_verify_cached_stab_test, H5AC_ind_dxpl_id, grp_oloc->addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5AC_ind_dxpl_id, grp_oloc->addr, FAIL)
 
     /* Verify that stab info is cached in ent */
     if(ent->type != H5G_CACHED_STAB)
@@ -670,7 +670,7 @@ H5G_verify_cached_stabs_test_cb(H5F_t *f, hid_t dxpl_id,
     unsigned            i;
     int                 ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_NOAPI(H5G_verify_cached_stabs_test_cb, H5_ITER_ERROR)
+    FUNC_ENTER_NOAPI(H5_ITER_ERROR)
 
     /*
      * Check arguments.
@@ -765,7 +765,7 @@ H5G_verify_cached_stabs_test(hid_t gid)
     haddr_t             prev_tag = HADDR_UNDEF; /* Previous metadata tag */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_verify_cached_stabs_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(gid >= 0);

@@ -101,7 +101,7 @@
 H5G_t *
 H5G_rootof(H5F_t *f)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_rootof)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -154,7 +154,7 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
     hbool_t     path_init = FALSE;      /* Whether path was initialized */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_mkroot, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -347,7 +347,7 @@ done:
 herr_t
 H5G_root_free(H5G_t *grp)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_root_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(grp && grp->shared);
@@ -383,7 +383,7 @@ H5G_root_loc(H5F_t *f, H5G_loc_t *loc)
     H5G_t *root_grp;                    /* Pointer to root group's info */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_root_loc, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(f);
     HDassert(loc);

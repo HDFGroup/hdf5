@@ -130,7 +130,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     hbool_t            *dirtied = (hbool_t *)_udata;  /* Set up dirtied out value */
     H5F_super_t        *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_sblock_load)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -632,7 +632,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 {
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_sblock_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -830,7 +830,7 @@ H5F_sblock_dest(H5F_t UNUSED *f, H5F_super_t* sblock)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_sblock_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(sblock);
@@ -861,7 +861,7 @@ H5F_sblock_clear(H5F_t *f, H5F_super_t *sblock, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_sblock_clear)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -895,7 +895,7 @@ done:
 static herr_t
 H5F_sblock_size(const H5F_t *f, const H5F_super_t *sblock, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sblock_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(f);

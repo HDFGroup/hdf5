@@ -118,7 +118,7 @@ H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     unsigned char index_flags;  /* Flags for encoding link index info */
     void        *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_linfo_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -191,7 +191,7 @@ H5O_linfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
     const H5O_linfo_t   *linfo = (const H5O_linfo_t *)_mesg;
     unsigned char       index_flags;          /* Flags for encoding link index info */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_linfo_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);
@@ -248,7 +248,7 @@ H5O_linfo_copy(const void *_mesg, void *_dest)
     H5O_linfo_t         *dest = (H5O_linfo_t *) _dest;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_linfo_copy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(linfo);
@@ -288,7 +288,7 @@ H5O_linfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     const H5O_linfo_t   *linfo = (const H5O_linfo_t *)_mesg;
     size_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_linfo_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set return value */
     ret_value = 1                       /* Version */
@@ -317,7 +317,7 @@ H5O_linfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
 static herr_t
 H5O_linfo_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_linfo_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(mesg);
 
@@ -345,7 +345,7 @@ H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
     H5O_linfo_t *linfo = (H5O_linfo_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_linfo_delete)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -385,7 +385,7 @@ H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
     H5G_copy_file_ud_t *udata = (H5G_copy_file_ud_t *) _udata;
     void                 *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_linfo_copy_file, dxpl_id, H5AC__COPIED_TAG, NULL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__COPIED_TAG, NULL)
 
     /* check args */
     HDassert(linfo_src);
@@ -453,7 +453,7 @@ H5O_linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
     hbool_t dst_lnk_init = FALSE;       /* Whether the destination link is initialized */
     herr_t ret_value = H5_ITER_CONT;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_linfo_post_copy_file_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(src_lnk);
@@ -505,7 +505,7 @@ H5O_linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     H5O_linfo_t         *linfo_dst = (H5O_linfo_t *)mesg_dst;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_linfo_post_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(src_oloc && src_oloc->file);
@@ -559,7 +559,7 @@ H5O_linfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
 {
     const H5O_linfo_t       *linfo = (const H5O_linfo_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_linfo_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);

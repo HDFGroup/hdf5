@@ -97,7 +97,7 @@ DESCRIPTION
 static herr_t
 H5P_init_deprec_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_init_deprec_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5P_init())
 } /* H5P_init_deprec_interface() */
@@ -253,7 +253,7 @@ H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value,
     H5P_genclass_t *orig_pclass;    /* Original property class */
     herr_t ret_value;               /* Return value */
 
-    FUNC_ENTER_API(H5Pregister1, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE10("e", "i*sz*xxxxxxx", cls_id, name, size, def_value, prp_create,
              prp_set, prp_get, prp_delete, prp_copy, prp_close);
 
@@ -285,7 +285,7 @@ H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value,
     } /* end if */
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Pregister1() */
 
 
@@ -437,7 +437,7 @@ H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
     H5P_genplist_t	*plist;    /* Property list to modify */
     herr_t ret_value;           /* return value */
 
-    FUNC_ENTER_API(H5Pinsert1, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE9("e", "i*sz*xxxxxx", plist_id, name, size, value, prp_set, prp_get,
              prp_delete, prp_copy, prp_close);
 
@@ -454,7 +454,7 @@ H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Pinsert1() */
 
 
@@ -488,7 +488,7 @@ H5Pget_version(hid_t plist_id, unsigned *super/*out*/, unsigned *freelist/*out*/
     H5P_genplist_t *plist;     	/* Property list pointer */
     herr_t ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_API(H5Pget_version, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "ixxxx", plist_id, super, freelist, stab, shhdr);
 
     /* Get the plist structure */

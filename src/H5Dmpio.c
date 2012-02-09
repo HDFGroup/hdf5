@@ -164,7 +164,7 @@ H5D_mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     int mpi_code;               /* MPI error code */
     htri_t ret_value = TRUE;
 
-    FUNC_ENTER_NOAPI(H5D_mpio_opt_possible, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(io_info);
@@ -264,7 +264,7 @@ H5D_mpio_select_read(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED 
     const H5D_contig_storage_t *store_contig = &(io_info->store->contig);    /* Contiguous storage info for this I/O operation */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5D_mpio_select_read, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
     if(H5F_block_read(io_info->dset->oloc.file, H5FD_MEM_DRAW, store_contig->dset_addr, (size_t)mpi_buf_count, io_info->dxpl_id, io_info->u.rbuf) < 0)
@@ -293,7 +293,7 @@ H5D_mpio_select_write(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED
     const H5D_contig_storage_t *store_contig = &(io_info->store->contig);    /* Contiguous storage info for this I/O operation */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5D_mpio_select_write, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
@@ -323,7 +323,7 @@ H5D_ioinfo_xfer_mode(H5D_io_info_t *io_info, H5P_genplist_t *dx_plist,
 {
     herr_t  ret_value = SUCCEED;    /* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_ioinfo_xfer_mode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Change the xfer_mode */
     io_info->dxpl_cache->xfer_mode = xfer_mode;
@@ -368,7 +368,7 @@ H5D_ioinfo_coll_opt_mode(H5D_io_info_t *io_info, H5P_genplist_t *dx_plist,
 {
     herr_t  ret_value = SUCCEED;    /* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_ioinfo_coll_opt_mode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Change the optimal xfer_mode */
     io_info->dxpl_cache->coll_opt_mode = coll_opt_mode;
@@ -401,7 +401,7 @@ H5D_mpio_get_min_chunk(const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
     int mpi_code;               /* MPI return code */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_mpio_get_min_chunk)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get the number of chunks to perform I/O on */
     num_chunkf = H5SL_count(fm->sel_chunks);
@@ -437,7 +437,7 @@ H5D_mpio_get_sum_chunk(const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
     int mpi_code;               /* MPI return code */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_mpio_get_sum_chunk)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get the number of chunks to perform I/O on */
     num_chunkf = 0;
@@ -475,7 +475,7 @@ H5D_contig_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_i
     H5P_genplist_t *dx_plist;           /* Pointer to DXPL */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_contig_collective_read, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(IS_H5FD_MPIO(io_info->dset->oloc.file));
@@ -522,7 +522,7 @@ H5D_contig_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_
     H5P_genplist_t *dx_plist;           /* Pointer to DXPL */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_contig_collective_write, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(IS_H5FD_MPIO(io_info->dset->oloc.file));
@@ -592,7 +592,7 @@ H5D_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info
 #endif
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_collective_io)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(io_info);
@@ -733,7 +733,7 @@ H5D_chunk_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_in
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_collective_read, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Call generic selection operation */
     if(H5D_chunk_collective_io(io_info, type_info, fm) < 0)
@@ -764,7 +764,7 @@ H5D_chunk_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_i
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_collective_write, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Call generic selection operation */
     if(H5D_chunk_collective_io(io_info, type_info, fm) < 0)
@@ -815,7 +815,7 @@ H5D_link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type
     int                 mpi_code;           /* MPI return code */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_link_chunk_collective_io)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get the sum # of chunks, if not already available */
     if(sum_chunk < 0) {
@@ -1088,7 +1088,7 @@ H5D_multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
     H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_NO_COLLECTIVE; /* Local variable for tracking the I/O mode used. */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_multi_chunk_collective_io)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef H5Dmpio_DEBUG
     mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file);
@@ -1295,7 +1295,7 @@ H5D_multi_chunk_collective_io_no_opt(H5D_io_info_t *io_info,
     H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_NO_COLLECTIVE; /*Local variable for tracking the I/O modes used. */
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_multi_chunk_collective_io_no_opt)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef H5D_DEBUG
 if(H5DEBUG(D)) {
@@ -1482,7 +1482,7 @@ H5D_inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info
     int                 mpi_code;       /* MPI return code */
     herr_t       ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_inter_collective_io)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if((file_space != NULL) && (mem_space != NULL)) {
         int  mpi_file_count;         /* Number of file "objects" to transfer */
@@ -1546,7 +1546,7 @@ H5D_final_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info
     hbool_t     plist_is_setup = FALSE; /* Whether the dxpl has been customized */
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_final_collective_io)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Pass buf type, file type to the file driver.  */
     if(H5FD_mpi_setup_collective(io_info->dxpl_id, *mpi_buf_type, *mpi_file_type) < 0)
@@ -1617,7 +1617,7 @@ H5D_sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
     int             i;                          /* Local index variable */
     herr_t          ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_sort_chunk)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Retrieve # of MPI processes */
     if((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file)) < 0)
@@ -1780,7 +1780,7 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
 #endif
     herr_t            ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_obtain_mpio_mode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Assign the rank 0 to the root */
     root              = 0;
@@ -1923,7 +1923,7 @@ H5D_cmp_chunk_addr(const void *chunk_addr_info1, const void *chunk_addr_info2)
 {
    haddr_t addr1, addr2;
 
-   FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_cmp_chunk_addr)
+   FUNC_ENTER_NOAPI_NOINIT_NOERR
 
    addr1 = ((const H5D_chunk_addr_info_t *)chunk_addr_info1)->chunk_addr;
    addr2 = ((const H5D_chunk_addr_info_t *)chunk_addr_info2)->chunk_addr;

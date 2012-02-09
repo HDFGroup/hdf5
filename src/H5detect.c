@@ -621,7 +621,7 @@ H5TN_init_interface(void)\n\
     H5T_t	*dt = NULL;\n\
     herr_t	ret_value = SUCCEED;\n\
 \n\
-    FUNC_ENTER_NOAPI(H5TN_init_interface, FAIL)\n");
+    FUNC_ENTER_NOAPI(FAIL)\n");
 
     for(i = 0; i < nd; i++) {
         /* The native endianess of this machine */

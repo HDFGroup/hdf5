@@ -521,11 +521,11 @@ H5T_init(void)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_init, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
     /* FUNC_ENTER() does all the work */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -556,7 +556,7 @@ H5T_init_inf(void)
     size_t      u;              /* Local index value */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_init_inf)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get the float datatype */
     if(NULL == (dst_p = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT_g)))
@@ -666,7 +666,7 @@ H5T_init_hw(void)
 #endif /* H5_HAVE_GET_FPC_CSR */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_hw)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef H5_HAVE_GET_FPC_CSR
     /* [This code is specific to SGI machines] */
@@ -739,7 +739,7 @@ H5T_init_interface(void)
     H5P_genclass_t  *crt_pclass;        /* Property list class for datatype creation properties */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the file IDs */
     if(H5I_register_type(H5I_DATATYPE, (size_t)H5I_DATATYPEID_HASHSIZE, H5T_RESERVED_ATOMS, (H5I_free_t)H5T_close)<0)
@@ -1376,7 +1376,7 @@ H5T_unlock_cb(void *_dt, hid_t UNUSED id, void UNUSED *key)
 {
     H5T_t	*dt = (H5T_t *)_dt;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_unlock_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert (dt && dt->shared);
     if (H5T_STATE_IMMUTABLE==dt->shared->state)
@@ -1408,7 +1408,7 @@ H5T_term_interface(void)
     int	i, nprint=0, n=0;
     H5T_path_t	*path = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_term_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
 	/* Unregister all conversion functions */
@@ -1585,7 +1585,7 @@ H5Tcreate(H5T_class_t type, size_t size)
     H5T_t	*dt = NULL;     /* New datatype constructed */
     hid_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tcreate, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("i", "Ttz", type, size);
 
     /* check args. We support string (fixed-size or variable-length) now. */
@@ -1636,7 +1636,7 @@ H5Tcopy(hid_t type_id)
     H5T_t	*new_dt = NULL;
     hid_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Tcopy, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", type_id);
 
     switch(H5I_get_type(type_id)) {
@@ -1713,7 +1713,7 @@ H5Tclose(hid_t type_id)
     H5T_t	*dt;                    /* Pointer to datatype to close */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tclose, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", type_id);
 
     /* Check args */
@@ -1752,7 +1752,7 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
     const H5T_t	*dt2;           /* Pointer to second datatype */
     htri_t		ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tequal, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "ii", type1_id, type2_id);
 
     /* check args */
@@ -1798,7 +1798,7 @@ H5Tlock(hid_t type_id)
     H5T_t	*dt;                    /* Datatype to operate on */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Tlock, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", type_id);
 
     /* Check args */
@@ -1836,7 +1836,7 @@ H5Tget_class(hid_t type_id)
     H5T_t	*dt;            /* Pointer to datatype */
     H5T_class_t ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tget_class, H5T_NO_CLASS)
+    FUNC_ENTER_API(H5T_NO_CLASS)
     H5TRACE1("Tt", "i", type_id);
 
     /* Check args */
@@ -1874,7 +1874,7 @@ H5T_get_class(const H5T_t *dt, htri_t internal)
 {
     H5T_class_t ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_get_class, H5T_NO_CLASS);
+    FUNC_ENTER_NOAPI(H5T_NO_CLASS)
 
     assert(dt);
 
@@ -1889,7 +1889,7 @@ H5T_get_class(const H5T_t *dt, htri_t internal)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_get_class() */
 
 
@@ -1914,7 +1914,7 @@ H5Tdetect_class(hid_t type, H5T_class_t cls)
     H5T_t	*dt;            /* Datatype to query */
     htri_t      ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tdetect_class, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "iTt", type, cls);
 
     /* Check args */
@@ -1960,7 +1960,7 @@ H5T_detect_class(const H5T_t *dt, H5T_class_t cls, hbool_t from_api)
     unsigned	i;
     htri_t      ret_value = FALSE;        /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_detect_class, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(dt);
     HDassert(cls > H5T_NO_CLASS && cls < H5T_NCLASSES);
@@ -2035,7 +2035,7 @@ H5Tis_variable_str(hid_t dtype_id)
     H5T_t	*dt;            /* Datatype to query */
     htri_t      ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tis_variable_str, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "i", dtype_id);
 
     /* Check args */
@@ -2047,7 +2047,7 @@ H5Tis_variable_str(hid_t dtype_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "can't determine if datatype is VL-string")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Tis_variable_str() */
 
 
@@ -2066,9 +2066,9 @@ done:
 htri_t
 H5T_is_variable_str(const H5T_t *dt)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_is_variable_str)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI(H5T_IS_VL_STRING(dt->shared));
+    FUNC_LEAVE_NOAPI(H5T_IS_VL_STRING(dt->shared))
 } /* end H5T_is_variable_str() */
 
 
@@ -2094,7 +2094,7 @@ H5Tget_size(hid_t type_id)
     H5T_t	*dt;            /* Datatype to query */
     size_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tget_size, 0)
+    FUNC_ENTER_API(0)
     H5TRACE1("z", "i", type_id);
 
     /* Check args */
@@ -2139,7 +2139,7 @@ H5Tset_size(hid_t type_id, size_t size)
     H5T_t	*dt;                    /* Datatype to modify */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Tset_size, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iz", type_id, size);
 
     /* Check args */
@@ -2189,7 +2189,7 @@ H5Tget_super(hid_t type)
     H5T_t      *super = NULL;  /* Supertype */
     hid_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tget_super, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", type);
 
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type,H5I_DATATYPE)))
@@ -2231,7 +2231,7 @@ H5T_get_super(const H5T_t *dt)
 {
     H5T_t	*ret_value=NULL;
 
-    FUNC_ENTER_NOAPI(H5T_get_super, NULL);
+    FUNC_ENTER_NOAPI(NULL)
 
     assert(dt);
 
@@ -2241,7 +2241,7 @@ H5T_get_super(const H5T_t *dt)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy parent data type");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -2278,7 +2278,7 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     int	i;			/*counter			*/
     herr_t	ret_value=SUCCEED;		/*return value			*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_register);
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     assert(src);
@@ -2411,7 +2411,7 @@ done:
             H5I_dec_ref(tmp_did);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_register() */
 
 
@@ -2442,7 +2442,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     H5T_t	*dst;		        /*destination data type desc	*/
     herr_t	ret_value = SUCCEED;	/*return value			*/
 
-    FUNC_ENTER_API(H5Tregister, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "Te*siix", pers, name, src_id, dst_id, func);
 
     /* Check args */
@@ -2494,7 +2494,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     int	nprint = 0;		/*number of paths shut down	*/
     int	i;			/*counter			*/
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_unregister)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Remove matching entries from the soft list */
     if(H5T_PERS_DONTCARE == pers || H5T_PERS_SOFT == pers) {
@@ -2588,7 +2588,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     H5T_t	*src = NULL, *dst = NULL;	/* Datatype descriptors	*/
     herr_t      ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_API(H5Tunregister, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "Te*siix", pers, name, src_id, dst_id, func);
 
     /* Check arguments */
@@ -2630,7 +2630,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
     H5T_path_t	*path;
     H5T_conv_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tfind, NULL)
+    FUNC_ENTER_API(NULL)
     H5TRACE3("x", "ii**x", src_id, dst_id, pcdata);
 
     /* Check args */
@@ -2678,7 +2678,7 @@ H5Tcompiler_conv(hid_t src_id, hid_t dst_id)
     H5T_t	*src, *dst;
     htri_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tcompiler_conv, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "ii", src_id, dst_id);
 
     /* Check args */
@@ -2726,7 +2726,7 @@ H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
     H5T_t	*src, *dst;		/*unatomized types	*/
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Tconvert, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiz*x*xi", src_id, dst_id, nelmts, buf, background, dxpl_id);
 
     /* Check args */
@@ -2773,7 +2773,7 @@ H5Tencode(hid_t obj_id, void *buf, size_t *nalloc)
     H5T_t       *dtype;
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_API (H5Tencode, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*x*z", obj_id, buf, nalloc);
 
     /* Check argument and retrieve object */
@@ -2818,7 +2818,7 @@ H5Tdecode(const void *buf)
     H5T_t       *dt;
     hid_t       ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tdecode, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "*x", buf);
 
     /* Check args */
@@ -2866,7 +2866,7 @@ H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
     H5F_t       *f = NULL;              /* Fake file structure*/
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_encode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate "fake" file structure */
     if(NULL == (f = H5F_fake_alloc((uint8_t)0)))
@@ -2922,7 +2922,7 @@ H5T_decode(const unsigned char *buf)
     H5F_t       *f = NULL;      /* Fake file structure*/
     H5T_t       *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate "fake" file structure */
     if(NULL == (f = H5F_fake_alloc((uint8_t)0)))
@@ -2979,7 +2979,7 @@ H5T_create(H5T_class_t type, size_t size)
     H5T_t  *dt = NULL;
     H5T_t  *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(H5T_create, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     switch(type) {
         case H5T_INTEGER:
@@ -3125,7 +3125,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     char	*s;
     H5T_t	*ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_copy, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* check args */
     HDassert(old_dt);
@@ -3395,7 +3395,8 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_lock, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
+
     assert (dt);
 
     switch (dt->shared->state) {
@@ -3413,7 +3414,7 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -3435,7 +3436,7 @@ H5T_alloc(void)
     H5T_t *dt = NULL;           /* Pointer to datatype allocated */
     H5T_t *ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_alloc, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Allocate & initialize datatype wrapper info */
     if(NULL == (dt = H5FL_CALLOC(H5T_t)))
@@ -3484,7 +3485,7 @@ H5T_free(H5T_t *dt)
     unsigned	i;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_free, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(dt && dt->shared);
 
@@ -3582,7 +3583,7 @@ H5T_close(H5T_t *dt)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_close, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(dt && dt->shared);
 
@@ -3667,7 +3668,7 @@ H5T_set_size(H5T_t *dt, size_t size)
     size_t	prec, offset;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_set_size, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(dt);
@@ -3823,7 +3824,7 @@ H5T_set_size(H5T_t *dt, size_t size)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -3848,13 +3849,13 @@ done:
 size_t
 H5T_get_size(const H5T_t *dt)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_get_size);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     assert(dt);
 
-    FUNC_LEAVE_NOAPI(dt->shared->size);
+    FUNC_LEAVE_NOAPI(dt->shared->size)
 }
 
 
@@ -3885,7 +3886,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
     int	tmp;
     int	ret_value = 0;
 
-    FUNC_ENTER_NOAPI(H5T_cmp, 0)
+    FUNC_ENTER_NOAPI(0)
 
     /* Sanity check */
     HDassert(dt1);
@@ -4330,7 +4331,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
     int	nprint = 0;		/*lines of output printed	*/
     H5T_path_t	*ret_value;	/*return value			*/
 
-    FUNC_ENTER_NOAPI(H5T_path_find, NULL);
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity check */
     HDassert(src);
@@ -4563,7 +4564,7 @@ done:
     if(dst_id >= 0)
         H5I_dec_ref(dst_id);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_path_find() */
 
 
@@ -4587,11 +4588,11 @@ done:
 hbool_t
 H5T_path_noop(const H5T_path_t *p)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_path_noop);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(p);
 
-    FUNC_LEAVE_NOAPI(p->is_noop || (p->is_hard && 0==H5T_cmp(p->src, p->dst, FALSE)));
+    FUNC_LEAVE_NOAPI(p->is_noop || (p->is_hard && 0==H5T_cmp(p->src, p->dst, FALSE)))
 } /* end H5T_path_noop() */
 
 
@@ -4628,14 +4629,14 @@ H5T_path_compound_subset(const H5T_path_t *p)
 {
     H5T_subset_info_t *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_path_compound_subset);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(p);
 
     if(p->are_compounds)
         ret_value = H5T_conv_struct_subset(&(p->cdata));
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_path_compound_subset */
 
 
@@ -4656,11 +4657,11 @@ H5T_path_compound_subset(const H5T_path_t *p)
 H5T_bkg_t
 H5T_path_bkg(const H5T_path_t *p)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_path_bkg);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(p);
 
-    FUNC_LEAVE_NOAPI(p->cdata.need_bkg);
+    FUNC_LEAVE_NOAPI(p->cdata.need_bkg)
 } /* end H5T_path_bkg() */
 
 
@@ -4688,7 +4689,7 @@ H5T_compiler_conv(H5T_t *src, H5T_t *dst)
     H5T_path_t	*path;
     htri_t	ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_compiler_conv)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Find it */
     if (NULL==(path=H5T_path_find(src, dst, NULL, NULL, H5AC_ind_dxpl_id, FALSE)))
@@ -4752,7 +4753,7 @@ H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts,
 #endif
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_convert, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
 #ifdef H5T_DEBUG
     if (H5DEBUG(T)) H5_timer_begin(&timer);
@@ -4770,7 +4771,7 @@ H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts,
 #endif
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4792,7 +4793,7 @@ H5T_oloc(H5T_t *dt)
 {
     H5O_loc_t *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(H5T_oloc, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     HDassert(dt);
 
@@ -4831,7 +4832,7 @@ H5T_nameof(H5T_t *dt)
 {
     H5G_name_t *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(H5T_nameof, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     HDassert(dt);
 
@@ -4872,7 +4873,7 @@ H5T_is_immutable(const H5T_t *dt)
 {
     htri_t ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI(H5T_is_immutable, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
 
@@ -4880,7 +4881,7 @@ H5T_is_immutable(const H5T_t *dt)
         ret_value = TRUE;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4905,7 +4906,7 @@ H5T_is_named(const H5T_t *dt)
 {
     htri_t ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI(H5T_is_named, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
 
@@ -4913,7 +4914,7 @@ H5T_is_named(const H5T_t *dt)
         ret_value = TRUE;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -4942,7 +4943,7 @@ H5T_get_ref_type(const H5T_t *dt)
 {
     H5R_type_t ret_value = H5R_BADTYPE;
 
-    FUNC_ENTER_NOAPI(H5T_get_ref_type, H5R_BADTYPE);
+    FUNC_ENTER_NOAPI(H5R_BADTYPE)
 
     assert(dt);
 
@@ -4950,7 +4951,7 @@ H5T_get_ref_type(const H5T_t *dt)
         ret_value=dt->shared->u.atomic.u.r.rtype;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_get_ref_type() */
 
 
@@ -4976,7 +4977,7 @@ H5T_is_sensible(const H5T_t *dt)
 {
     htri_t	ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_is_sensible, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
 
@@ -5004,7 +5005,7 @@ H5T_is_sensible(const H5T_t *dt)
     } /* end switch */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -5041,7 +5042,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
     int accum_change;       /* Amount of change in the offset of the fields */
     size_t old_size;        /* Previous size of a field */
 
-    FUNC_ENTER_NOAPI(H5T_set_loc, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
     assert(loc>=H5T_LOC_BADLOC && loc<H5T_LOC_MAXLOC);
@@ -5148,7 +5149,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_set_loc() */
 
 
@@ -5177,7 +5178,7 @@ H5T_is_relocatable(const H5T_t *dt)
 {
     htri_t ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI(H5T_is_relocatable, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(dt);
@@ -5211,7 +5212,7 @@ done:
 static herr_t
 H5T_upgrade_version_cb(H5T_t *dt, void *op_value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_upgrade_version_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(dt);
@@ -5259,7 +5260,7 @@ H5T_upgrade_version(H5T_t *dt, unsigned new_version)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_upgrade_version, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(dt);
@@ -5290,7 +5291,7 @@ H5T_set_latest_version(H5T_t *dt)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_set_latest_version, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(dt);
@@ -5324,7 +5325,7 @@ H5T_patch_file(H5T_t *dt, H5F_t *f)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5T_patch_file, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(dt);

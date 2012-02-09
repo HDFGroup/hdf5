@@ -101,7 +101,7 @@ DESCRIPTION
 static herr_t
 H5D_init_deprec_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_init_deprec_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5D_init())
 } /* H5D_init_deprec_interface() */
@@ -146,7 +146,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t           ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Dcreate1, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("i", "i*siii", loc_id, name, type_id, space_id, dcpl_id);
 
     /* Check arguments */
@@ -212,7 +212,7 @@ H5Dopen1(hid_t loc_id, const char *name)
     hid_t        dxpl_id = H5AC_dxpl_id;    /* dxpl to use to open datset */
     hid_t        ret_value;
 
-    FUNC_ENTER_API(H5Dopen1, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check args */
@@ -283,7 +283,7 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
     H5D_t	*dset;
     herr_t       ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_API(H5Dextend, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", dset_id, size);
 
     /* Check args */
@@ -323,7 +323,7 @@ H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
     H5O_fill_t *fill;                   /* Dataset's fill value */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_extend)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(dataset);

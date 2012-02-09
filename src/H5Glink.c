@@ -101,7 +101,7 @@
 int
 H5G_link_cmp_name_inc(const void *lnk1, const void *lnk2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_link_cmp_name_inc)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk1)->name, ((const H5O_link_t *)lnk2)->name))
 } /* end H5G_link_cmp_name_inc() */
@@ -128,7 +128,7 @@ H5G_link_cmp_name_inc(const void *lnk1, const void *lnk2)
 int
 H5G_link_cmp_name_dec(const void *lnk1, const void *lnk2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_link_cmp_name_dec)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk2)->name, ((const H5O_link_t *)lnk1)->name))
 } /* end H5G_link_cmp_name_dec() */
@@ -156,7 +156,7 @@ H5G_link_cmp_corder_inc(const void *lnk1, const void *lnk2)
 {
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_link_cmp_corder_inc)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(((const H5O_link_t *)lnk1)->corder < ((const H5O_link_t *)lnk2)->corder)
         ret_value = -1;
@@ -191,7 +191,7 @@ H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2)
 {
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_link_cmp_corder_dec)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(((const H5O_link_t *)lnk1)->corder < ((const H5O_link_t *)lnk2)->corder)
         ret_value = 1;
@@ -221,7 +221,7 @@ herr_t
 H5G_ent_to_link(H5O_link_t *lnk, const H5HL_t *heap,
     const H5G_entry_t *ent, const char *name)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_to_link)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(lnk);
@@ -278,7 +278,7 @@ H5G_link_to_info(const H5O_link_t *lnk, H5L_info_t *info)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_link_to_info, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(lnk);
@@ -355,7 +355,7 @@ H5G_link_to_loc(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_link_to_loc, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(grp_loc);
@@ -412,7 +412,7 @@ H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
     H5O_loc_t tmp_src_oloc;             /* Object location for target object */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_link_copy_file, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(dst_file);
@@ -536,7 +536,7 @@ herr_t
 H5G_link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type,
     H5_iter_order_t order)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_link_sort_table)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ltable);
@@ -585,7 +585,7 @@ H5G_link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip,
     size_t u;                           /* Local index variable */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR(H5G_link_iterate_table, -)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     HDassert(ltable);
@@ -633,7 +633,7 @@ H5G_link_release_table(H5G_link_table_t *ltable)
     size_t      u;                      /* Local index variable */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_link_release_table)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(ltable);
@@ -677,7 +677,7 @@ H5G_link_name_replace(H5F_t *file, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
     H5RS_str_t *obj_path_r = NULL;      /* Full path for link being removed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_link_name_replace, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(file);

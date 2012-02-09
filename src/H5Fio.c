@@ -97,7 +97,7 @@ H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_block_read, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(f);
     HDassert(f->shared);
@@ -138,7 +138,7 @@ H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_block_write, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 #ifdef QAK
 HDfprintf(stderr, "%s: write to addr = %a, size = %Zu\n", FUNC, addr, size);
 #endif /* QAK */

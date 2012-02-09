@@ -159,7 +159,7 @@ H5FL_SEQ_DEFINE(H5G_entry_t);
 static H5RC_t *
 H5G_node_get_shared(const H5F_t *f, const void UNUSED *_udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_get_shared)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(f);
 
@@ -186,7 +186,7 @@ H5G_node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_decode_key)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(shared);
     HDassert(raw);
@@ -216,7 +216,7 @@ H5G_node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
 {
     const H5G_node_key_t *key = (const H5G_node_key_t *) _key;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_encode_key)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(shared);
     HDassert(raw);
@@ -247,7 +247,7 @@ H5G_node_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
     const H5G_node_key_t   *key = (const H5G_node_key_t *) _key;
     const H5G_bt_common_t   *udata = (const H5G_bt_common_t *) _udata;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_debug_key)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(key);
 
@@ -285,7 +285,7 @@ H5G_node_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
 herr_t
 H5G_node_free(H5G_node_t *sym)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -331,7 +331,7 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
     H5G_node_t		*sym = NULL;
     herr_t              ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -406,7 +406,7 @@ H5G_node_cmp2(void *_lt_key, void *_udata, void *_rt_key)
     const char		   *base;           /* Base of heap */
     int		           ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_cmp2)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(udata && udata->heap);
@@ -465,7 +465,7 @@ H5G_node_cmp3(void *_lt_key, void *_udata, void *_rt_key)
     const char          *base;              /* Base of heap */
     int                  ret_value = 0;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_cmp3)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(udata && udata->heap);
@@ -529,7 +529,7 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
     const char          *base;                  /* Base of heap */
     htri_t              ret_value = TRUE;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_found)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -632,7 +632,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     H5G_entry_t         ent;                    /* Entry to insert in node */
     H5B_ins_t		ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_insert)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -798,7 +798,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
     int		        cmp = 1;
     H5B_ins_t		ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_remove)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(f);
@@ -991,7 +991,7 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
     unsigned		u;                      /* Local index variable */
     int	                ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_NOAPI(H5G_node_iterate, H5_ITER_ERROR)
+    FUNC_ENTER_NOAPI(H5_ITER_ERROR)
 
     /*
      * Check arguments.
@@ -1068,7 +1068,7 @@ H5G_node_sumup(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr
     H5G_node_t		*sn = NULL;
     int                  ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_NOAPI(H5G_node_sumup, H5_ITER_ERROR)
+    FUNC_ENTER_NOAPI(H5_ITER_ERROR)
 
     /*
      * Check arguments.
@@ -1113,7 +1113,7 @@ H5G_node_by_idx(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t add
     H5G_node_t		*sn = NULL;
     int                 ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_NOAPI(H5G_node_by_idx, H5_ITER_ERROR)
+    FUNC_ENTER_NOAPI(H5_ITER_ERROR)
 
     /*
      * Check arguments.
@@ -1173,7 +1173,7 @@ H5G_node_init(H5F_t *f)
     size_t	sizeof_rkey;	        /* Size of raw (disk) key	     */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_node_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
     HDassert(f);
@@ -1215,7 +1215,7 @@ done:
 herr_t
 H5G_node_close(const H5F_t *f)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_close)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
     HDassert(f);
@@ -1253,7 +1253,7 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
     unsigned int        i;                   /* Local index variable */
     int                 ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_NOAPI(H5G_node_copy, H5_ITER_ERROR)
+    FUNC_ENTER_NOAPI(H5_ITER_ERROR)
 
     /* Check arguments. */
     HDassert(f);
@@ -1407,7 +1407,7 @@ H5G_node_build_table(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_
     unsigned		u;                      /* Local index variable */
     int	                ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_NOAPI(H5G_node_build_table, H5_ITER_ERROR)
+    FUNC_ENTER_NOAPI(H5_ITER_ERROR)
 
     /*
      * Check arguments.
@@ -1479,7 +1479,7 @@ H5G_node_iterate_size(H5F_t *f, hid_t UNUSED dxpl_id, const void UNUSED *_lt_key
 {
     hsize_t     *stab_size = (hsize_t *)_udata;         /* User data */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_node_iterate_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(f);
@@ -1514,7 +1514,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
     unsigned		u;                      /* Local index variable */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_node_debug, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.

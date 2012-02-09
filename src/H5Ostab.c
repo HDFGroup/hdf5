@@ -102,7 +102,7 @@ H5O_stab_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     H5O_stab_t          *stab = NULL;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -145,7 +145,7 @@ H5O_stab_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void 
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_stab_encode);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     assert(f);
@@ -156,7 +156,7 @@ H5O_stab_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void 
     H5F_addr_encode(f, &p, stab->btree_addr);
     H5F_addr_encode(f, &p, stab->heap_addr);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -183,7 +183,7 @@ H5O_stab_copy(const void *_mesg, void *_dest)
     H5O_stab_t             *dest = (H5O_stab_t *) _dest;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_copy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(stab);
@@ -223,12 +223,12 @@ H5O_stab_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED *
 {
     size_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_stab_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set return value */
     ret_value=2 * H5F_SIZEOF_ADDR(f);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -249,7 +249,7 @@ H5O_stab_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED *
 static herr_t
 H5O_stab_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_stab_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(mesg);
 
@@ -276,7 +276,7 @@ H5O_stab_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *mesg)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_delete)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -316,7 +316,7 @@ H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
     size_t              size_hint;              /* Local heap initial size */
     void                *ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(stab_src);
@@ -378,7 +378,7 @@ H5O_stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc
     H5G_bt_it_cpy_t     udata;      /* B-tree user data */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_post_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(stab_src);
@@ -428,7 +428,7 @@ H5O_stab_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_stab_debug);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     assert(f);
@@ -443,5 +443,6 @@ H5O_stab_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Name heap address:", stab->heap_addr);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
+

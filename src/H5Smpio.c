@@ -78,7 +78,7 @@ H5S_mpio_all_type(const H5S_t *space, size_t elmt_size,
     hsize_t	nelmts;                 /* Total number of elmts	*/
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_all_type)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(space);
@@ -119,7 +119,7 @@ done:
 static herr_t
 H5S_mpio_none_type(MPI_Datatype *new_type, int *count, hbool_t *is_derived_type)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_mpio_none_type)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* fill in the return values */
     *new_type = MPI_BYTE;
@@ -173,7 +173,7 @@ H5S_mpio_hyper_type(const H5S_t *space, size_t elmt_size,
     int                 mpi_code;               /* MPI return code */
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_hyper_type)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(space);
@@ -439,7 +439,7 @@ H5S_mpio_span_hyper_type(const H5S_t *space, size_t elmt_size,
     int           mpi_code;             /* MPI return code */
     herr_t        ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_span_hyper_type)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(space);
@@ -506,7 +506,7 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
     int                   mpi_code;             /* MPI return status code */
     herr_t                ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_obtain_datatype)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(span);
@@ -677,7 +677,7 @@ H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_space_type)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(space);
@@ -730,7 +730,7 @@ H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
     } /* end switch */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_mpio_space_type() */
 #endif  /* H5_HAVE_PARALLEL */
 

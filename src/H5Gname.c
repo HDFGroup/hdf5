@@ -134,7 +134,7 @@ H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
     size_t  nchars1,nchars2;    /* Number of characters in components */
     htri_t ret_value=FALSE;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_common_path)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Get component of each name */
     fullpath=H5RS_get_str(fullpath_r);
@@ -199,7 +199,7 @@ H5G_build_fullpath(const char *prefix, const char *name)
     unsigned need_sep;          /* Flag to indicate if separator is needed */
     H5RS_str_t *ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_build_fullpath)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(prefix);
@@ -255,7 +255,7 @@ H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
     const char *prefix;         /* Pointer to raw string for path */
     H5RS_str_t *ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_build_fullpath_refstr_str)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(prefix_r);
     HDassert(name);
@@ -293,7 +293,7 @@ H5G_build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *n
     const char *name;           /* Pointer to raw string of name */
     H5RS_str_t *ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_build_fullpath_refstr_refstr)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Get the pointer to the prefix */
     prefix = H5RS_get_str(prefix_r);
@@ -325,7 +325,7 @@ H5G_build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *n
 herr_t
 H5G_name_init(H5G_name_t *name, const char *path)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_name_init)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(name);
@@ -359,7 +359,7 @@ H5G_name_set(H5G_name_t *loc, H5G_name_t *obj, const char *name)
 {
     herr_t  ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5G_name_set, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(loc);
     HDassert(obj);
@@ -413,7 +413,7 @@ done:
 herr_t
 H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_name_copy)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(src);
@@ -466,7 +466,7 @@ H5G_get_name(const H5G_loc_t *loc, char *name/*out*/, size_t size,
     ssize_t len = 0;            /* Length of object's name */
     ssize_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_get_name, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(loc);
@@ -533,7 +533,7 @@ done:
 herr_t
 H5G_name_reset(H5G_name_t *name)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_name_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(name);
@@ -561,7 +561,7 @@ H5G_name_reset(H5G_name_t *name)
 herr_t
 H5G_name_free(H5G_name_t *name)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_name_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(name);
@@ -602,7 +602,7 @@ H5G_name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char 
     size_t full_suffix_len;             /* Length of full suffix */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_name_move_path)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(path_r_ptr && *path_r_ptr);
@@ -704,7 +704,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
     hbool_t obj_in_child = FALSE;   /* Flag to indicate that the object is in the child mount hier. */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_name_replace_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(obj_ptr);
 
@@ -972,7 +972,7 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5G_name_replace, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
     HDassert(src_file);
@@ -1110,7 +1110,7 @@ H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info_t *linfo,
     hbool_t     obj_found = FALSE;      /* Object at 'path' found */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_get_name_by_addr_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(path);
@@ -1183,7 +1183,7 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));
 
-    FUNC_ENTER_NOAPI(H5G_get_name_by_addr, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Construct the link info for the file's root group */
     if(H5G_loc(file, &root_loc) < 0)

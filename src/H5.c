@@ -108,7 +108,7 @@ H5_init_library(void)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5_init_library, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
     /*
      * Make sure the package information is updated.
      */
@@ -364,7 +364,7 @@ H5dont_atexit(void)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_NOINIT_NOERR_NOFS(H5dont_atexit)
+    FUNC_ENTER_API_NOINIT_NOERR_NOFS
     H5TRACE0("e","");
 
     if(H5_dont_atexit_g)
@@ -403,7 +403,7 @@ H5garbage_collect(void)
 {
     herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5garbage_collect, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE0("e","");
 
     /* Call the garbage collection routines in the library */
@@ -455,7 +455,7 @@ H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
 {
     herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5set_free_list_limits, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "IsIsIsIsIsIs", reg_global_lim, reg_list_lim, arr_global_lim,
              arr_list_lim, blk_global_lim, blk_list_lim);
 
@@ -598,7 +598,7 @@ H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
 {
     herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5get_libversion, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "*Iu*Iu*Iu", majnum, minnum, relnum);
 
     /* Set the version information */
@@ -653,7 +653,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     static const char *version_mismatch_warning = VERSION_MISMATCH_WARNING;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_NOINIT_NOERR_NOFS(H5check_version)
+    FUNC_ENTER_API_NOINIT_NOERR_NOFS
     H5TRACE3("e", "IuIuIu", majnum, minnum, relnum);
 
     /* Don't check again, if we already have */
@@ -767,7 +767,7 @@ H5open(void)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API_NOCLEAR(H5open, FAIL)
+    FUNC_ENTER_API_NOCLEAR(FAIL)
     H5TRACE0("e","");
     /* all work is done by FUNC_ENTER() */
 done:
@@ -797,7 +797,7 @@ H5close(void)
      * whole library just to release it all right away.  It is safe to call
      * this function for an uninitialized library.
      */
-    FUNC_ENTER_API_NOINIT_NOERR_NOFS(H5close)
+    FUNC_ENTER_API_NOINIT_NOERR_NOFS
     H5TRACE0("e","");
 
     H5_term_library();
