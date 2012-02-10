@@ -181,7 +181,7 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
     UINT16DECODE(p, sym->nsyms);
 
     /* entries */
-    if(H5G_ent_decode_vec(f, &p, sym->entry, sym->nsyms) < 0)
+    if(H5G__ent_decode_vec(f, &p, sym->entry, sym->nsyms) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "unable to decode symbol table entries")
 
     /* Set return value */
@@ -192,7 +192,7 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value)
-        if(sym && H5G_node_free(sym) < 0)
+        if(sym && H5G__node_free(sym) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -260,7 +260,7 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
         UINT16ENCODE(p, sym->nsyms);
 
         /* entries */
-        if(H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms) < 0)
+        if(H5G__ent_encode_vec(f, &p, sym->entry, sym->nsyms) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
         HDmemset(p, 0, sym->node_size - (size_t)(p - node));
 
@@ -330,7 +330,7 @@ H5G_node_dest(H5F_t *f, H5G_node_t *sym)
     } /* end if */
 
     /* Destroy symbol table node */
-    if(H5G_node_free(sym) < 0)
+    if(H5G__node_free(sym) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node")
 
 done:

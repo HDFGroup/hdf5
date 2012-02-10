@@ -116,7 +116,7 @@ RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.  (Just calls
-    H5G_init() currently).
+    H5G__init() currently).
 
 --------------------------------------------------------------------------*/
 static herr_t
@@ -124,7 +124,7 @@ H5G_init_deprec_interface(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI(H5G_init())
+    FUNC_LEAVE_NOAPI(H5G__init())
 } /* H5G_init_deprec_interface() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -245,7 +245,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
         tmp_gcpl = H5P_GROUP_CREATE_DEFAULT;
 
     /* Create the new group & get its ID */
-    if(NULL == (grp = H5G_create_named(&loc, name, H5P_LINK_CREATE_DEFAULT,
+    if(NULL == (grp = H5G__create_named(&loc, name, H5P_LINK_CREATE_DEFAULT,
             tmp_gcpl, H5P_GROUP_ACCESS_DEFAULT, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
     if((ret_value = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
@@ -298,7 +298,7 @@ H5Gopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Open the group */
-    if((grp = H5G_open_name(&loc, name, H5P_DEFAULT, H5AC_dxpl_id)) == NULL)
+    if((grp = H5G__open_name(&loc, name, H5P_DEFAULT, H5AC_dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an atom for the group */
@@ -826,7 +826,7 @@ H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad pointer to # of objects")
 
     /* Retrieve information about the group */
-    if(H5G_obj_info(loc.oloc, &grp_info, H5AC_ind_dxpl_id) < 0)
+    if(H5G__obj_info(loc.oloc, &grp_info, H5AC_ind_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "can't determine")
 
     /* Set the number of objects [sic: links] in the group */
@@ -1148,23 +1148,23 @@ H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
     HDassert(oloc);
 
     /* Attempt to get the link info for this group */
-    if((linfo_exists = H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) < 0)
+    if((linfo_exists = H5G__obj_get_linfo(oloc, &linfo, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5G_UNKNOWN, "can't check for link info message")
     if(linfo_exists) {
         if(H5F_addr_defined(linfo.fheap_addr)) {
             /* Get the object's name from the dense link storage */
-            if((ret_value = H5G_dense_get_type_by_idx(oloc->file, dxpl_id, &linfo, idx)) < 0)
+            if((ret_value = H5G__dense_get_type_by_idx(oloc->file, dxpl_id, &linfo, idx)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "can't locate type")
         } /* end if */
         else {
             /* Get the object's type from the link messages */
-            if((ret_value = H5G_compact_get_type_by_idx(oloc, dxpl_id, &linfo, idx)) < 0)
+            if((ret_value = H5G__compact_get_type_by_idx(oloc, dxpl_id, &linfo, idx)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "can't locate type")
         } /* end else */
     } /* end if */
     else {
         /* Get the object's type from the symbol table */
-        if((ret_value = H5G_stab_get_type_by_idx(oloc, idx, dxpl_id)) < 0)
+        if((ret_value = H5G__stab_get_type_by_idx(oloc, idx, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "can't locate type")
     } /* end else */
 

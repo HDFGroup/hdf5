@@ -25,12 +25,14 @@
  */
 
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+#define H5L_PACKAGE		/*suppress error about including H5Lpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
+#include "H5Lpkg.h"             /* Links                                */
 #include "H5Opkg.h"             /* Object headers			*/
 
 
@@ -353,7 +355,7 @@ H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
 
     /* If the group is using "dense" link storage, delete it */
     if(H5F_addr_defined(linfo->fheap_addr))
-        if(H5G_dense_delete(f, dxpl_id, linfo, TRUE) < 0)
+        if(H5G__dense_delete(f, dxpl_id, linfo, TRUE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense link storage")
 
 done:
@@ -413,7 +415,7 @@ H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
          */
         if(H5F_addr_defined(linfo_src->fheap_addr)) {
             /* Create the dense link storage */
-            if(H5G_dense_create(file_dst, dxpl_id, linfo_dst, udata->common.src_pline) < 0)
+            if(H5G__dense_create(file_dst, dxpl_id, linfo_dst, udata->common.src_pline) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create 'dense' form of new format group")
         } /* end if */
     } /* end else */
@@ -460,7 +462,7 @@ H5O_linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
     HDassert(udata);
 
     /* Copy the link (and the object it points to) */
-    if(H5G_link_copy_file(udata->dst_oloc->file, udata->dxpl_id, src_lnk,
+    if(H5L_link_copy_file(udata->dst_oloc->file, udata->dxpl_id, src_lnk,
             udata->src_oloc, &dst_lnk, udata->cpy_info) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy link")
     dst_lnk_init = TRUE;
@@ -470,7 +472,7 @@ H5O_linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
 
     /* Insert the new object in the destination file's group */
     /* (Doesn't increment the link count - that's already been taken care of for hard links) */
-    if(H5G_dense_insert(udata->dst_oloc->file, udata->dxpl_id, udata->dst_linfo, &dst_lnk) < 0)
+    if(H5G__dense_insert(udata->dst_oloc->file, udata->dxpl_id, udata->dst_linfo, &dst_lnk) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert destination link")
 
     /* Reset metadata tag in dxpl_id */
@@ -531,7 +533,7 @@ H5O_linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
         udata.cpy_info = cpy_info;
 
         /* Iterate over the links in the group, building a table of the link messages */
-        if(H5G_dense_iterate(src_oloc->file, dxpl_id, linfo_src, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, H5O_linfo_post_copy_file_cb, &udata) < 0)
+        if(H5G__dense_iterate(src_oloc->file, dxpl_id, linfo_src, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, H5O_linfo_post_copy_file_cb, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
     } /* end if */
 

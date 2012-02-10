@@ -141,7 +141,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Commit the datatype to the file, using default property list values */
-    if(H5T_commit_named(&loc, name, type, H5P_LINK_CREATE_DEFAULT,
+    if(H5T__commit_named(&loc, name, type, H5P_LINK_CREATE_DEFAULT,
             H5P_DATATYPE_CREATE_DEFAULT, H5P_DATATYPE_ACCESS_DEFAULT, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 

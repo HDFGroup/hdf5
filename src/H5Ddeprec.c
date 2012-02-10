@@ -165,7 +165,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
 
     /* Build and open the new dataset */
-    if(NULL == (dset = H5D_create_named(&loc, name, type_id, space, H5P_LINK_CREATE_DEFAULT, dcpl_id, H5P_DATASET_ACCESS_DEFAULT, H5AC_dxpl_id)))
+    if(NULL == (dset = H5D__create_named(&loc, name, type_id, space, H5P_LINK_CREATE_DEFAULT, dcpl_id, H5P_DATASET_ACCESS_DEFAULT, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     /* Register the new dataset to get an ID for it */

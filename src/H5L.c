@@ -17,7 +17,6 @@
 /* Module Setup */
 /****************/
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
 #define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
 
 /* Interface initialization */
@@ -30,8 +29,8 @@
 #include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
-#include "H5Gpkg.h"             /* Groups                               */
 #include "H5Fprivate.h"		/* File access                          */
+#include "H5Gprivate.h"         /* Groups                               */
 #include "H5Iprivate.h"         /* IDs                                  */
 #include "H5Lpkg.h"             /* Links                                */
 #include "H5MMprivate.h"        /* Memory management                    */
@@ -2964,4 +2963,138 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_get_name_by_idx_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_link_copy_file
+ *
+ * Purpose:     Copy a link and the object it points to from one file to
+ *              another.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sep 29 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5L_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
+    const H5O_loc_t *src_oloc, H5O_link_t *dst_lnk, H5O_copy_t *cpy_info)
+{
+    H5O_link_t tmp_src_lnk;             /* Temporary copy of src link, when needed */
+    const H5O_link_t *src_lnk = _src_lnk; /* Source link */
+    hbool_t dst_lnk_init = FALSE;       /* Whether the destination link is initialized */
+    hbool_t expanded_link_open = FALSE; /* Whether the target location has been opened */
+    H5G_loc_t tmp_src_loc;              /* Group location holding target object */
+    H5G_name_t tmp_src_path;            /* Path for target object */
+    H5O_loc_t tmp_src_oloc;             /* Object location for target object */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* check arguments */
+    HDassert(dst_file);
+    HDassert(src_lnk);
+    HDassert(dst_lnk);
+    HDassert(cpy_info);
+
+    /* Expand soft or external link, if requested */
+    if((H5L_TYPE_SOFT == src_lnk->type && cpy_info->expand_soft_link)
+            || (H5L_TYPE_EXTERNAL == src_lnk->type
+            && cpy_info->expand_ext_link)) {
+        H5G_loc_t   lnk_grp_loc;    /* Group location holding link */
+        H5G_name_t  lnk_grp_path;   /* Path for link */
+        htri_t      tar_exists;     /* Whether the target object exists */
+
+        /* Set up group location for link */
+        H5G_name_reset(&lnk_grp_path);
+        lnk_grp_loc.path = &lnk_grp_path;
+        lnk_grp_loc.oloc = (H5O_loc_t *)src_oloc;    /* Casting away const OK -QAK */
+
+        /* Check if the target object exists */
+        if((tar_exists = H5G_loc_exists(&lnk_grp_loc, src_lnk->name, H5P_DEFAULT,
+                dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to check if target object exists")
+
+        if(tar_exists) {
+            /* Make a temporary copy of the link, so that it will not change the
+             * info in the cache when we change it to a hard link */
+            if(NULL == H5O_msg_copy(H5O_LINK_ID, src_lnk, &tmp_src_lnk))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy message")
+
+            /* Set up group location for target object.  Let H5G_traverse expand
+             * the link. */
+            tmp_src_loc.path = &tmp_src_path;
+            tmp_src_loc.oloc = &tmp_src_oloc;
+            if(H5G_loc_reset(&tmp_src_loc) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to reset location")
+
+            /* Find the target object */
+            if(H5G_loc_find(&lnk_grp_loc, src_lnk->name, &tmp_src_loc,
+                    H5P_DEFAULT, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to find target object")
+            expanded_link_open = TRUE;
+
+            /* Convert symbolic link to hard link */
+            if(tmp_src_lnk.type == H5L_TYPE_SOFT)
+                tmp_src_lnk.u.soft.name =
+                        (char *)H5MM_xfree(tmp_src_lnk.u.soft.name);
+            else if(tmp_src_lnk.u.ud.size > 0)
+                tmp_src_lnk.u.ud.udata = H5MM_xfree(tmp_src_lnk.u.ud.udata);
+            tmp_src_lnk.type = H5L_TYPE_HARD;
+            tmp_src_lnk.u.hard.addr = tmp_src_oloc.addr;
+            src_lnk = &tmp_src_lnk;
+        } /* end if */
+    } /* end if */
+
+    /* Copy src link information to dst link information */
+    if(NULL == H5O_msg_copy(H5O_LINK_ID, src_lnk, dst_lnk))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy message")
+    dst_lnk_init = TRUE;
+
+    /* Check if object in source group is a hard link & copy it */
+    if(H5L_TYPE_HARD == src_lnk->type) {
+        H5O_loc_t new_dst_oloc;     /* Copied object location in destination */
+
+        /* Set up copied object location to fill in */
+        H5O_loc_reset(&new_dst_oloc);
+        new_dst_oloc.file = dst_file;
+
+        if(!expanded_link_open) {
+            /* Build temporary object location for source */
+            H5O_loc_reset(&tmp_src_oloc);
+            tmp_src_oloc.file = src_oloc->file;
+            tmp_src_oloc.addr = src_lnk->u.hard.addr;
+        } /* end if */
+        HDassert(H5F_addr_defined(tmp_src_oloc.addr));
+
+        /* Copy the shared object from source to destination */
+        /* Don't care about obj_type or udata because those are only important
+         * for old style groups */
+        if(H5O_copy_header_map(&tmp_src_oloc, &new_dst_oloc, dxpl_id, cpy_info,
+                TRUE, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+        /* Copy new destination object's information for eventual insertion */
+        dst_lnk->u.hard.addr = new_dst_oloc.addr;
+    } /* end if */
+
+done:
+    /* Check if we used a temporary src link */
+    if(src_lnk != _src_lnk) {
+        HDassert(src_lnk == &tmp_src_lnk);
+        H5O_msg_reset(H5O_LINK_ID, &tmp_src_lnk);
+    } /* end if */
+    if(ret_value < 0)
+        if(dst_lnk_init)
+            H5O_msg_reset(H5O_LINK_ID, dst_lnk);
+    /* Check if we need to free the temp source oloc */
+    if(expanded_link_open)
+        if(H5G_loc_free(&tmp_src_loc) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free object")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_link_copy_file() */
 

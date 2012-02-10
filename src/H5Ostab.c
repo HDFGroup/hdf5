@@ -283,7 +283,7 @@ H5O_stab_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *mesg)
     HDassert(mesg);
 
     /* Free the file space for the symbol table */
-    if(H5G_stab_delete(f, dxpl_id, (const H5O_stab_t *)mesg) < 0)
+    if(H5G__stab_delete(f, dxpl_id, (const H5O_stab_t *)mesg) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free symbol table")
 
 done:
@@ -334,7 +334,7 @@ H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
     H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, NULL);
 
     /* Create components of symbol table message */
-    if(H5G_stab_create_components(file_dst, stab_dst, size_hint, dxpl_id) < 0)
+    if(H5G__stab_create_components(file_dst, stab_dst, size_hint, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create symbol table components")
 
     /* Reset metadata tag */
@@ -399,7 +399,7 @@ H5O_stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc
     udata.cpy_info = cpy_info;
 
     /* Iterate over objects in group, copying them */
-    if((H5B_iterate(src_oloc->file, dxpl_id, H5B_SNODE, stab_src->btree_addr, H5G_node_copy, &udata)) < 0)
+    if((H5B_iterate(src_oloc->file, dxpl_id, H5B_SNODE, stab_src->btree_addr, H5G__node_copy, &udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed")
 
 done:

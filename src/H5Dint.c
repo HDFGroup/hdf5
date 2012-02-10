@@ -381,7 +381,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_create_named
+ * Function:	H5D__create_named
  *
  * Purpose:	Internal routine to create a new dataset.
  *
@@ -395,7 +395,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5D_t *
-H5D_create_named(const H5G_loc_t *loc, const char *name, hid_t type_id,
+H5D__create_named(const H5G_loc_t *loc, const char *name, hid_t type_id,
     const H5S_t *space, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id,
     hid_t dxpl_id)
 {
@@ -403,7 +403,7 @@ H5D_create_named(const H5G_loc_t *loc, const char *name, hid_t type_id,
     H5D_obj_create_t dcrt_info;         /* Information for dataset creation */
     H5D_t	   *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -436,7 +436,7 @@ H5D_create_named(const H5G_loc_t *loc, const char *name, hid_t type_id,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_create_named() */
+} /* end H5D__create_named() */
 
 
 /*-------------------------------------------------------------------------

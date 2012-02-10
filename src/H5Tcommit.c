@@ -159,7 +159,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 
     /* Commit the type */
-    if(H5T_commit_named(&loc, name, type, lcpl_id, tcpl_id, tapl_id, H5AC_dxpl_id) < 0)
+    if(H5T__commit_named(&loc, name, type, lcpl_id, tcpl_id, tapl_id, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
@@ -168,7 +168,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_commit_named
+ * Function:	H5T__commit_named
  *
  * Purpose:	Internal routine to save a transient datatype to a file and
  *              turn the type ID into a "named", immutable type.
@@ -181,7 +181,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_commit_named(const H5G_loc_t *loc, const char *name, H5T_t *dt,
+H5T__commit_named(const H5G_loc_t *loc, const char *name, H5T_t *dt,
     hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id)
 {
     H5O_obj_create_t ocrt_info;             /* Information for object creation */
@@ -189,7 +189,7 @@ H5T_commit_named(const H5G_loc_t *loc, const char *name, H5T_t *dt,
     H5T_state_t old_state = H5T_STATE_TRANSIENT;        /* The state of the datatype before H5T_commit. */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(loc);
@@ -246,7 +246,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_commit_named() */
+} /* end H5T__commit_named() */
 
 
 /*-------------------------------------------------------------------------

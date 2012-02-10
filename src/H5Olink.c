@@ -25,6 +25,7 @@
  */
 
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+#define H5L_PACKAGE		/*suppress error about including H5Lpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -32,7 +33,7 @@
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"         /* IDs                                  */
-#include "H5Lprivate.h"		/* Links                                */
+#include "H5Lpkg.h"             /* Links                                */
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 
@@ -768,7 +769,7 @@ H5O_link_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     HDassert(cpy_info->max_depth < 0 || cpy_info->curr_depth < cpy_info->max_depth);
 
     /* Copy the link (and the object it points to) */
-    if(H5G_link_copy_file(dst_oloc->file, dxpl_id, link_src, src_oloc, link_dst,
+    if(H5L_link_copy_file(dst_oloc->file, dxpl_id, link_src, src_oloc, link_dst,
             cpy_info) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy link")
 

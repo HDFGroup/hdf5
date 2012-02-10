@@ -166,7 +166,7 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
         HGOTO_DONE(SUCCEED)
 
     /* Create information needed for group nodes */
-    if(H5G_node_init(f) < 0)
+    if(H5G__node_init(f) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group node info")
 
     /*
@@ -194,7 +194,7 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
         /* (Pass the FCPL which is a sub-class of the group creation property class) */
         gcrt_info.gcpl_id = f->shared->fcpl_id;
         gcrt_info.cache_type = H5G_NOTHING_CACHED;
-	if(H5G_obj_create(f, dxpl_id, &gcrt_info, root_loc.oloc/*out*/) < 0)
+	if(H5G__obj_create(f, dxpl_id, &gcrt_info, root_loc.oloc/*out*/) < 0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 	if(1 != H5O_link(root_loc.oloc, 1, dxpl_id))
 	    HGOTO_ERROR(H5E_SYM, H5E_LINKCOUNT, FAIL, "internal error (wrong link count)")
@@ -255,7 +255,7 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
 
                 /* Check if the symbol table message is valid, and replace with the
                 * cached symbol table if necessary */
-                if(H5G_stab_valid(root_loc.oloc, dxpl_id, &cached_stab) < 0)
+                if(H5G__stab_valid(root_loc.oloc, dxpl_id, &cached_stab) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to verify symbol table")
             } /* end if */
 #endif /* H5_STRICT_FORMAT_CHECKS */
@@ -293,7 +293,7 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
     } /* end if */
 
     /* Create the path names for the root group's entry */
-    H5G_name_init(root_loc.path, "/");
+    H5G__name_init(root_loc.path, "/");
     path_init = TRUE;
 
     f->shared->root_grp->shared->fo_count = 1;

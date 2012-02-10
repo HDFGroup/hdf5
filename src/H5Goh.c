@@ -263,7 +263,7 @@ H5O_group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
     HDassert(obj_loc);
 
     /* Create the the group */
-    if(NULL == (grp = H5G_create(f, crt_info, dxpl_id)))
+    if(NULL == (grp = H5G__create(f, crt_info, dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group")
 
     /* Set up the new group's location */
@@ -398,7 +398,7 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't find LINFO nor STAB messages")
 
         /* Get symbol table size info */
-        if(H5G_stab_bh_size(f, dxpl_id, &stab, bh_info) < 0)
+        if(H5G__stab_bh_size(f, dxpl_id, &stab, bh_info) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve symbol table size info")
     } /* end else */
 
