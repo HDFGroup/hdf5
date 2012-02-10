@@ -770,7 +770,7 @@ H5FD_direct_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 {
     const H5FD_direct_t  *file = (const H5FD_direct_t*)_file;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOER
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(file->eoa)
 }
@@ -835,7 +835,7 @@ H5FD_direct_get_eof(const H5FD_t *_file)
 {
     const H5FD_direct_t  *file = (const H5FD_direct_t*)_file;
 
-    FUNC_ENTER_NOAPI(H5FD_direct_get_eof, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
     FUNC_LEAVE_NOAPI(MAX(file->eof, file->eoa))
 }

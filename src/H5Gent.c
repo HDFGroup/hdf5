@@ -370,7 +370,7 @@ H5G__ent_reset(H5G_entry_t *ent)
     HDmemset(ent, 0, sizeof(H5G_entry_t));
     ent->header = HADDR_UNDEF;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5G__ent_reset() */
 
 
