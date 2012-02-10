@@ -17,7 +17,6 @@
 /* Module Setup */
 /****************/
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
 #define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
 
 /* Interface initialization */
@@ -30,8 +29,8 @@
 #include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
-#include "H5Gpkg.h"             /* Groups                               */
 #include "H5Fprivate.h"		/* File access                          */
+#include "H5Gprivate.h"         /* Groups                               */
 #include "H5Iprivate.h"         /* IDs                                  */
 #include "H5Lpkg.h"             /* Links                                */
 #include "H5MMprivate.h"        /* Memory management                    */
@@ -227,7 +226,7 @@ H5L_init(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
     /* FUNC_ENTER() does all the work */
 
 done:
@@ -252,7 +251,7 @@ H5L_init_interface(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize user-defined link classes */
     if(H5L_register_external() < 0)
@@ -280,7 +279,7 @@ H5L_term_interface(void)
 {
     int	n = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5L_term_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Free the table of link types */
     H5L_table_g = (H5L_class_t *)H5MM_xfree(H5L_table_g);
@@ -318,7 +317,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5G_loc_t	dst_loc, *dst_loc_p;
     herr_t      ret_value=SUCCEED;              /* Return value */
 
-    FUNC_ENTER_API(H5Lmove, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name, lcpl_id,
              lapl_id);
 
@@ -376,7 +375,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5G_loc_t	dst_loc, *dst_loc_p;
     herr_t      ret_value=SUCCEED;              /* Return value */
 
-    FUNC_ENTER_API(H5Lcopy, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name, lcpl_id,
              lapl_id);
 
@@ -437,7 +436,7 @@ H5Lcreate_soft(const char *link_target,
     H5G_loc_t	link_loc;               /* Group location for new link */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Lcreate_soft, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "*si*sii", link_target, link_loc_id, link_name, lcpl_id, lapl_id);
 
     /* Check arguments */
@@ -483,7 +482,7 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     H5G_loc_t	new_loc, *new_loc_p;
     herr_t      ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_API(H5Lcreate_hard, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*si*sii", cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id,
              lapl_id);
 
@@ -552,7 +551,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     H5G_loc_t	link_loc;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Lcreate_ud, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sLl*xzii", link_loc_id, link_name, link_type, udata,
              udata_size, lcpl_id, lapl_id);
 
@@ -596,7 +595,7 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
     H5G_loc_t	loc;                    /* Group's location */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Ldelete, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*si", loc_id, name, lapl_id);
 
     /* Check arguments */
@@ -641,7 +640,7 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5L_trav_rmbi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Ldelete_by_idx, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*sIiIohi", loc_id, group_name, idx_type, order, n, lapl_id);
 
     /* Check arguments */
@@ -700,7 +699,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
     H5G_loc_t	loc;                    /* Group location for location to query */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Lget_val, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*sxzi", loc_id, name, buf, size, lapl_id);
 
     /* Check arguments */
@@ -750,7 +749,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5L_trav_gvbi_t udata;              /* User data for callback */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Lget_val_by_idx, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "i*sIiIohxzi", loc_id, group_name, idx_type, order, n, buf, size,
              lapl_id);
 
@@ -806,7 +805,7 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
     H5G_loc_t	loc;
     htri_t ret_value;
 
-    FUNC_ENTER_API(H5Lexists, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
 
     /* Check arguments */
@@ -850,7 +849,7 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
     H5G_loc_t	loc;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5Lget_info, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sxi", loc_id, name, linfo, lapl_id);
 
     /* Check arguments */
@@ -896,7 +895,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     H5L_trav_gibi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Lget_info_by_idx, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, linfo,
              lapl_id);
 
@@ -956,7 +955,7 @@ H5Lregister(const H5L_class_t *cls)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Lregister, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "*x", cls);
 
     /* Check args */
@@ -1003,7 +1002,7 @@ H5Lunregister(H5L_type_t id)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Lunregister, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "Ll", id);
 
     /* Check args */
@@ -1040,7 +1039,7 @@ H5Lis_registered(H5L_type_t id)
     size_t i;                   /* Local index variable */
     htri_t ret_value = FALSE;     /* Return value */
 
-    FUNC_ENTER_API(H5Lis_registered, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "Ll", id);
 
     /* Check args */
@@ -1085,7 +1084,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     H5L_trav_gnbi_t udata;      /* User data for callback */
     ssize_t ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Lget_name_by_idx, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE8("Zs", "i*sIiIohxzi", loc_id, group_name, idx_type, order, n, name, size,
              lapl_id);
 
@@ -1157,7 +1156,7 @@ H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t	idx;            /* Internal location to hold index */
     herr_t ret_value;           /* Return value */
 
-    FUNC_ENTER_API(H5Literate, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iIiIo*hx*x", grp_id, idx_type, order, idx_p, op, op_data);
 
     /* Check arguments */
@@ -1224,7 +1223,7 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
     hsize_t	idx;            /* Internal location to hold index */
     herr_t ret_value;           /* Return value */
 
-    FUNC_ENTER_API(H5Literate_by_name, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "i*sIiIo*hx*xi", loc_id, group_name, idx_type, order, idx_p, op,
              op_data, lapl_id);
 
@@ -1299,7 +1298,7 @@ H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     H5I_type_t  id_type;                /* Type of ID */
     herr_t      ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Lvisit, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "iIiIox*x", grp_id, idx_type, order, op, op_data);
 
     /* Check args */
@@ -1356,7 +1355,7 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 {
     herr_t      ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Lvisit_by_name, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIox*xi", loc_id, group_name, idx_type, order, op, op_data,
              lapl_id);
 
@@ -1413,7 +1412,7 @@ H5L_find_class_idx(H5L_type_t id)
     size_t i;                   /* Local index variable */
     int ret_value = FAIL;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5L_find_class_idx)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     for(i = 0; i < H5L_table_used_g; i++)
 	if(H5L_table_g[i].id == id)
@@ -1444,7 +1443,7 @@ H5L_find_class(H5L_type_t id)
     int	idx;                            /* Filter index in global table */
     H5L_class_t *ret_value = NULL;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_find_class, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Get the index in the global table */
     if((idx = H5L_find_class_idx(id)) < 0)
@@ -1479,7 +1478,7 @@ H5L_register(const H5L_class_t *cls)
     size_t      i;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_register, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(cls);
     HDassert(cls->id >= 0 && cls->id <= H5L_TYPE_MAX);
@@ -1532,7 +1531,7 @@ H5L_unregister(H5L_type_t id)
     size_t i;                           /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_unregister, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(id >= 0 && id <= H5L_TYPE_MAX);
 
@@ -1575,7 +1574,7 @@ H5L_link(const H5G_loc_t *new_loc, const char *new_name, H5G_loc_t *obj_loc,
     H5O_link_t lnk;                     /* Link to insert */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_link)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(new_loc);
@@ -1619,7 +1618,7 @@ H5L_link_object(const H5G_loc_t *new_loc, const char *new_name,
     H5O_link_t lnk;                     /* Link to insert */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_link_object)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(new_loc);
@@ -1667,7 +1666,7 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
     hbool_t obj_created = FALSE;    /* Whether an object was created (through a hard link) */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_link_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name in this group resolved to a valid location */
     /* (which is not what we want) */
@@ -1830,7 +1829,7 @@ H5L_create_real(const H5G_loc_t *link_loc, const char *link_name,
     H5L_trav_cr_t udata;               /* User data for callback */
     herr_t ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_create_real)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(link_loc);
@@ -1917,7 +1916,7 @@ H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
     hbool_t loc_valid = FALSE;
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_create_hard, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(cur_loc);
@@ -1985,7 +1984,7 @@ H5L_create_soft(const char *target_path, const H5G_loc_t *link_loc,
     H5O_link_t lnk;                     /* Link to insert */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_create_soft, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(link_loc);
@@ -2034,7 +2033,7 @@ H5L_create_ud(const H5G_loc_t *link_loc, const char *link_name,
     H5O_link_t lnk;                     /* Link to insert */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_create_ud)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(type >= H5L_TYPE_UD_MIN && type <= H5L_TYPE_MAX);
@@ -2089,7 +2088,7 @@ H5L_get_val_real(const H5O_link_t *lnk, void *buf, size_t size)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_get_val_real)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(lnk);
@@ -2147,7 +2146,7 @@ H5L_get_val_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char *name, const H5O_link
     H5L_trav_gv_t *udata = (H5L_trav_gv_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_get_val_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name in this group resolved to a valid link */
     if(lnk == NULL)
@@ -2192,7 +2191,7 @@ H5L_get_val(H5G_loc_t *loc, const char *name, void *buf/*out*/, size_t size,
     H5L_trav_gv_t udata;           /* User data for callback */
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_get_val, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(loc);
@@ -2234,7 +2233,7 @@ H5L_get_val_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     hbool_t lnk_copied = FALSE;         /* Whether the link was copied */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_get_val_by_idx_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name of the group resolved to a valid object */
     if(obj_loc == NULL)
@@ -2283,7 +2282,7 @@ H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     H5L_trav_rm_t *udata = (H5L_trav_rm_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_delete_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the group resolved to a valid link */
     if(grp_loc == NULL)
@@ -2329,7 +2328,7 @@ H5L_delete(H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
     char		*norm_name = NULL;	/* Pointer to normalized name */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_delete, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(loc);
@@ -2373,7 +2372,7 @@ H5L_delete_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     H5L_trav_gvbi_t *udata = (H5L_trav_gvbi_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_delete_by_idx_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name of the group resolved to a valid object */
     if(obj_loc == NULL)
@@ -2419,7 +2418,7 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     hbool_t temp_loc_init = FALSE;
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_move_dest_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Make sure an object with this name doesn't already exist */
     if(obj_loc != NULL)
@@ -2531,7 +2530,7 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     hbool_t link_copied = FALSE;        /* Has udata_out.lnk been allocated? */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_move_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name in this group resolved to a valid link */
     if(obj_loc == NULL)
@@ -2650,7 +2649,7 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
     hid_t               lapl_copy;      /* Copy of lapl for this function */
     herr_t              ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_move)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(src_loc);
@@ -2728,7 +2727,7 @@ H5L_exists_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
 {
     hbool_t *udata = (hbool_t *)_udata;   /* User data passed in */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5L_exists_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check if the name in this group resolved to a valid link */
     *udata = (hbool_t)(lnk != NULL);
@@ -2759,7 +2758,7 @@ H5L_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
     hbool_t exists = FALSE;     /* Whether the link exists in the group */
     htri_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_exists)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Traverse the group hierarchy to locate the object to get info about */
     if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_exists_cb, &exists, lapl_id, dxpl_id) < 0)
@@ -2793,7 +2792,7 @@ H5L_get_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     H5L_trav_gi_t *udata = (H5L_trav_gi_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_get_info_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name in this group resolved to a valid link */
     if(lnk == NULL)
@@ -2831,7 +2830,7 @@ H5L_get_info(const H5G_loc_t *loc, const char *name,
     H5L_trav_gi_t udata;               /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_get_info, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     udata.linfo = linfo;
     udata.dxpl_id = dxpl_id;
@@ -2868,7 +2867,7 @@ H5L_get_info_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     hbool_t lnk_copied = FALSE;         /* Whether the link was copied */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_get_info_by_idx_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name of the group resolved to a valid object */
     if(obj_loc == NULL)
@@ -2916,7 +2915,7 @@ H5L_get_default_lcpl(void)
 {
     hid_t ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_get_default_lcpl, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     ret_value = H5P_LINK_CREATE_DEFAULT;
 
@@ -2946,7 +2945,7 @@ H5L_get_name_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     H5L_trav_gnbi_t *udata = (H5L_trav_gnbi_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_get_name_by_idx_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name of the group resolved to a valid object */
     if(obj_loc == NULL)
@@ -2964,4 +2963,138 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_get_name_by_idx_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_link_copy_file
+ *
+ * Purpose:     Copy a link and the object it points to from one file to
+ *              another.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sep 29 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5L_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
+    const H5O_loc_t *src_oloc, H5O_link_t *dst_lnk, H5O_copy_t *cpy_info)
+{
+    H5O_link_t tmp_src_lnk;             /* Temporary copy of src link, when needed */
+    const H5O_link_t *src_lnk = _src_lnk; /* Source link */
+    hbool_t dst_lnk_init = FALSE;       /* Whether the destination link is initialized */
+    hbool_t expanded_link_open = FALSE; /* Whether the target location has been opened */
+    H5G_loc_t tmp_src_loc;              /* Group location holding target object */
+    H5G_name_t tmp_src_path;            /* Path for target object */
+    H5O_loc_t tmp_src_oloc;             /* Object location for target object */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* check arguments */
+    HDassert(dst_file);
+    HDassert(src_lnk);
+    HDassert(dst_lnk);
+    HDassert(cpy_info);
+
+    /* Expand soft or external link, if requested */
+    if((H5L_TYPE_SOFT == src_lnk->type && cpy_info->expand_soft_link)
+            || (H5L_TYPE_EXTERNAL == src_lnk->type
+            && cpy_info->expand_ext_link)) {
+        H5G_loc_t   lnk_grp_loc;    /* Group location holding link */
+        H5G_name_t  lnk_grp_path;   /* Path for link */
+        htri_t      tar_exists;     /* Whether the target object exists */
+
+        /* Set up group location for link */
+        H5G_name_reset(&lnk_grp_path);
+        lnk_grp_loc.path = &lnk_grp_path;
+        lnk_grp_loc.oloc = (H5O_loc_t *)src_oloc;    /* Casting away const OK -QAK */
+
+        /* Check if the target object exists */
+        if((tar_exists = H5G_loc_exists(&lnk_grp_loc, src_lnk->name, H5P_DEFAULT,
+                dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to check if target object exists")
+
+        if(tar_exists) {
+            /* Make a temporary copy of the link, so that it will not change the
+             * info in the cache when we change it to a hard link */
+            if(NULL == H5O_msg_copy(H5O_LINK_ID, src_lnk, &tmp_src_lnk))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy message")
+
+            /* Set up group location for target object.  Let H5G_traverse expand
+             * the link. */
+            tmp_src_loc.path = &tmp_src_path;
+            tmp_src_loc.oloc = &tmp_src_oloc;
+            if(H5G_loc_reset(&tmp_src_loc) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to reset location")
+
+            /* Find the target object */
+            if(H5G_loc_find(&lnk_grp_loc, src_lnk->name, &tmp_src_loc,
+                    H5P_DEFAULT, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to find target object")
+            expanded_link_open = TRUE;
+
+            /* Convert symbolic link to hard link */
+            if(tmp_src_lnk.type == H5L_TYPE_SOFT)
+                tmp_src_lnk.u.soft.name =
+                        (char *)H5MM_xfree(tmp_src_lnk.u.soft.name);
+            else if(tmp_src_lnk.u.ud.size > 0)
+                tmp_src_lnk.u.ud.udata = H5MM_xfree(tmp_src_lnk.u.ud.udata);
+            tmp_src_lnk.type = H5L_TYPE_HARD;
+            tmp_src_lnk.u.hard.addr = tmp_src_oloc.addr;
+            src_lnk = &tmp_src_lnk;
+        } /* end if */
+    } /* end if */
+
+    /* Copy src link information to dst link information */
+    if(NULL == H5O_msg_copy(H5O_LINK_ID, src_lnk, dst_lnk))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy message")
+    dst_lnk_init = TRUE;
+
+    /* Check if object in source group is a hard link & copy it */
+    if(H5L_TYPE_HARD == src_lnk->type) {
+        H5O_loc_t new_dst_oloc;     /* Copied object location in destination */
+
+        /* Set up copied object location to fill in */
+        H5O_loc_reset(&new_dst_oloc);
+        new_dst_oloc.file = dst_file;
+
+        if(!expanded_link_open) {
+            /* Build temporary object location for source */
+            H5O_loc_reset(&tmp_src_oloc);
+            tmp_src_oloc.file = src_oloc->file;
+            tmp_src_oloc.addr = src_lnk->u.hard.addr;
+        } /* end if */
+        HDassert(H5F_addr_defined(tmp_src_oloc.addr));
+
+        /* Copy the shared object from source to destination */
+        /* Don't care about obj_type or udata because those are only important
+         * for old style groups */
+        if(H5O_copy_header_map(&tmp_src_oloc, &new_dst_oloc, dxpl_id, cpy_info,
+                TRUE, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+        /* Copy new destination object's information for eventual insertion */
+        dst_lnk->u.hard.addr = new_dst_oloc.addr;
+    } /* end if */
+
+done:
+    /* Check if we used a temporary src link */
+    if(src_lnk != _src_lnk) {
+        HDassert(src_lnk == &tmp_src_lnk);
+        H5O_msg_reset(H5O_LINK_ID, &tmp_src_lnk);
+    } /* end if */
+    if(ret_value < 0)
+        if(dst_lnk_init)
+            H5O_msg_reset(H5O_LINK_ID, dst_lnk);
+    /* Check if we need to free the temp source oloc */
+    if(expanded_link_open)
+        if(H5G_loc_free(&tmp_src_loc) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free object")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_link_copy_file() */
 

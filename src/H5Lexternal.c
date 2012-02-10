@@ -74,7 +74,7 @@ DESCRIPTION
 static herr_t
 H5L_init_extern_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5L_init_extern_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5L_init())
 } /* H5L_init_extern_interface() */
@@ -100,7 +100,7 @@ H5L_getenv_prefix_name(char **env_prefix/*in,out*/)
     char        *retptr=NULL;
     char        *strret=NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5L_getenv_prefix_name)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     strret = HDstrchr(*env_prefix, COLON_SEPC);
     if (strret == NULL) {
@@ -135,7 +135,7 @@ H5L_build_name(char *prefix, char *file_name, char **full_name/*out*/)
     size_t      fname_len;              /* Length of external link file name */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_build_name)
+    FUNC_ENTER_NOAPI_NOINIT
 
     prefix_len = HDstrlen(prefix);
     fname_len = HDstrlen(file_name);
@@ -218,7 +218,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     H5F_close_degree_t 	fc_degree = H5F_CLOSE_WEAK;  /* File close degree for target file */
     hid_t       ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_extern_traverse, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(p);
@@ -489,7 +489,7 @@ H5L_extern_query(const char UNUSED * link_name, const void *_udata, size_t udata
     const uint8_t *udata = (const uint8_t *)_udata;      /* Pointer to external link buffer */
     ssize_t     ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_extern_query)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check external link version & flags */
     if(((*udata >> 4) & 0x0F) != H5L_EXT_VERSION)
@@ -546,7 +546,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     uint8_t    *p;                      /* Pointer into external link buffer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Lcreate_external, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "*s*si*sii", file_name, obj_name, link_loc_id, link_name,
              lcpl_id, lapl_id);
 
@@ -607,7 +607,7 @@ H5L_register_external(void)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5L_register_external, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if(H5L_register(H5L_EXTERN_LINK_CLASS) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "unable to register external link class")
@@ -650,7 +650,7 @@ H5Lunpack_elink_val(const void *_ext_linkval, size_t link_size,
     size_t      len;                    /* Length of the filename in the linkval*/
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Lunpack_elink_val, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "*xz*Iu**s**s", _ext_linkval, link_size, flags, filename,
              obj_path);
 

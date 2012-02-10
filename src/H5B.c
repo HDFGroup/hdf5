@@ -222,7 +222,7 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
     H5B_shared_t        *shared=NULL;        /* Pointer to shared B-tree info */
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5B_create, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -311,7 +311,7 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
     int	        cmp = 1;                /* Key comparison value */
     htri_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B_find, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -407,7 +407,7 @@ H5B_split(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud, unsigned idx,
     double      split_ratios[3];        /* B-tree split ratios */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B_split)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -582,7 +582,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     H5B_ins_t	my_ins = H5B_INS_ERROR;
     herr_t	ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5B_insert, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
     HDassert(f);
@@ -721,7 +721,7 @@ H5B_insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx,
     H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
     uint8_t             *base;          /* Base offset for move */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_insert_child)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(bt);
     HDassert(bt_flags);
@@ -822,7 +822,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud,
     H5B_ins_t	my_ins = H5B_INS_ERROR;
     H5B_ins_t	ret_value = H5B_INS_ERROR;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B_insert_helper)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments
@@ -1142,7 +1142,7 @@ H5B_iterate_helper(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t add
     haddr_t		*child = NULL;	/* Array of child pointers */
     herr_t		ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B_iterate_helper)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -1282,7 +1282,7 @@ H5B_iterate(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
 {
     herr_t		ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR(H5B_iterate, -)
+    FUNC_ENTER_NOAPI_NOERR
 
     /*
      * Check arguments.
@@ -1340,7 +1340,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
     int         cmp = 1;                /* Key comparison value */
     H5B_ins_t	ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER_NOAPI(H5B_remove_helper, H5B_INS_ERROR)
+    FUNC_ENTER_NOAPI(H5B_INS_ERROR)
 
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
@@ -1662,7 +1662,7 @@ H5B_remove(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
     hbool_t	rt_key_changed = FALSE;		/*right key changed?*/
     herr_t      ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B_remove, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);
@@ -1706,7 +1706,7 @@ H5B_delete(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B_delete, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);
@@ -1779,7 +1779,7 @@ H5B_shared_new(const H5F_t *f, const H5B_class_t *type, size_t sizeof_rkey)
     size_t	u;                      /* Local index variable */
     H5B_shared_t *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B_shared_new, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /*
      * Check arguments.
@@ -1850,7 +1850,7 @@ H5B_shared_free(void *_shared)
 {
     H5B_shared_t *shared = (H5B_shared_t *)_shared;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_shared_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Free the raw B-tree node buffer */
     shared->page = H5FL_BLK_FREE(page, shared->page);
@@ -1887,7 +1887,7 @@ H5B_copy(const H5B_t *old_bt)
     H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
     H5B_t		*ret_value;
 
-    FUNC_ENTER_NOAPI(H5B_copy, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /*
      * Check arguments.
@@ -1960,7 +1960,7 @@ H5B_get_info_helper(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t ad
     haddr_t left_child;         /* Address of left-most child in node */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B_get_info_helper)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -2059,7 +2059,7 @@ H5B_get_info(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     H5B_info_ud_t       info_udata;     /* User-data for B-tree size iteration */
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B_get_info, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -2113,7 +2113,7 @@ H5B_valid(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr)
     H5B_cache_ud_t      cache_udata;            /* User-data for metadata cache callback */
     htri_t		ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B_valid, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -2165,7 +2165,7 @@ done:
 herr_t
 H5B_node_dest(H5B_t *bt)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_node_dest)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(bt);

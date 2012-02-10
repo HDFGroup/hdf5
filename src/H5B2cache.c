@@ -162,7 +162,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     const uint8_t	*p;             /* Pointer into raw data buffer */
     H5B2_hdr_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_hdr_load)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(f);
@@ -277,7 +277,7 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
     uint8_t     hdr_buf[H5B2_HDR_BUF_SIZE]; /* Buffer for header */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_hdr_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -378,7 +378,7 @@ H5B2_cache_hdr_dest(H5F_t *f, H5B2_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_hdr_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(hdr);
@@ -422,7 +422,7 @@ H5B2_cache_hdr_clear(H5F_t *f, H5B2_hdr_t *hdr, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_hdr_clear)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -459,7 +459,7 @@ done:
 static herr_t
 H5B2_cache_hdr_size(const H5F_t UNUSED *f, const H5B2_hdr_t *hdr, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_hdr_size)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -499,7 +499,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     unsigned		u;              /* Local index variable */
     H5B2_internal_t	*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_load)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(f);
@@ -622,7 +622,7 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -719,7 +719,7 @@ H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *internal)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(f);
@@ -764,7 +764,7 @@ H5B2_cache_internal_clear(H5F_t *f, H5B2_internal_t *internal, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_clear)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -801,7 +801,7 @@ done:
 static herr_t
 H5B2_cache_internal_size(const H5F_t UNUSED *f, const H5B2_internal_t *internal, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_internal_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(internal);
@@ -841,7 +841,7 @@ H5B2_cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     unsigned		u;              /* Local index variable */
     H5B2_leaf_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_load)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(f);
@@ -944,7 +944,7 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -1027,7 +1027,7 @@ H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(f);
@@ -1072,7 +1072,7 @@ H5B2_cache_leaf_clear(H5F_t *f, H5B2_leaf_t *leaf, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_clear)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -1109,7 +1109,7 @@ done:
 static herr_t
 H5B2_cache_leaf_size(const H5F_t UNUSED *f, const H5B2_leaf_t *leaf, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_leaf_size)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* check arguments */
     HDassert(leaf);

@@ -164,7 +164,7 @@ H5D_contig_alloc(H5F_t *f, hid_t dxpl_id, H5O_storage_contig_t *storage /*out */
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_contig_alloc, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -213,7 +213,7 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
     hid_t       my_dxpl_id;     /* DXPL ID to use for this operation */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_contig_fill, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
@@ -360,7 +360,7 @@ H5D_contig_delete(H5F_t *f, hid_t dxpl_id, const H5O_storage_t *storage)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_contig_delete, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -390,7 +390,7 @@ done:
 haddr_t
 H5D_contig_get_addr(const H5D_t *dset)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5D_contig_get_addr)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* check args */
     HDassert(dset);
@@ -426,7 +426,7 @@ H5D_contig_construct(H5F_t *f, H5D_t *dset)
     int i;                              /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_construct)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(f);
@@ -489,7 +489,7 @@ H5D_contig_is_space_alloc(const H5O_storage_t *storage)
 {
     hbool_t ret_value;                  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_contig_is_space_alloc)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(storage);
@@ -518,7 +518,7 @@ H5D_contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *t
     hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
     H5D_chunk_map_t UNUSED *cm)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_contig_io_init)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     io_info->store->contig.dset_addr = io_info->dset->shared->layout.storage.u.contig.addr;
     io_info->store->contig.dset_size = io_info->dset->shared->layout.storage.u.contig.size;
@@ -546,7 +546,7 @@ H5D_contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 {
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_read)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(io_info);
@@ -583,7 +583,7 @@ H5D_contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 {
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_write)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(io_info);
@@ -626,7 +626,7 @@ H5D_contig_write_one(H5D_io_info_t *io_info, hsize_t offset, size_t size)
     size_t mem_curr_seq = 0;    /* "Current sequence" in memory */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_write_one)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(io_info);
 
@@ -668,7 +668,7 @@ H5D_contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
     hsize_t max_data;           /* Actual maximum size of data to cache */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_readvv_sieve_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Stash local copies of these value */
     if(dset_contig->sieve_buf != NULL) {
@@ -824,7 +824,7 @@ H5D_contig_readvv_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata)
     H5D_contig_readvv_ud_t *udata = (H5D_contig_readvv_ud_t *)_udata; /* User data for H5V_opvv() operator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_readvv_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Write data */
     if(H5F_block_read(udata->file, H5FD_MEM_DRAW, (udata->dset_addr + dst_off),
@@ -861,7 +861,7 @@ H5D_contig_readvv(const H5D_io_info_t *io_info,
 {
     ssize_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_readvv)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(io_info);
@@ -939,7 +939,7 @@ H5D_contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
     hsize_t max_data;           /* Actual maximum size of data to cache */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_writevv_sieve_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Stash local copies of these values */
     if(dset_contig->sieve_buf != NULL) {
@@ -1145,7 +1145,7 @@ H5D_contig_writevv_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata
     H5D_contig_writevv_ud_t *udata = (H5D_contig_writevv_ud_t *)_udata; /* User data for H5V_opvv() operator */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_writevv_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Write data */
     if(H5F_block_write(udata->file, H5FD_MEM_DRAW, (udata->dset_addr + dst_off), len, udata->dxpl_id, (udata->wbuf + src_off)) < 0)
@@ -1181,7 +1181,7 @@ H5D_contig_writevv(const H5D_io_info_t *io_info,
 {
     ssize_t ret_value;          /* Return value (Size of sequence in bytes) */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_writevv)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(io_info);
@@ -1247,7 +1247,7 @@ H5D_contig_flush(H5D_t *dset, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(dset);
@@ -1306,7 +1306,7 @@ H5D_contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
     hbool_t     fix_ref = FALSE;        /* Flag to indicate that ref values should be fixed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_contig_copy, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f_src);

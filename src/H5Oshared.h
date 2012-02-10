@@ -53,7 +53,7 @@ H5O_SHARED_DECODE(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
 {
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_SHARED_DECODE)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifndef H5O_SHARED_TYPE
 #error "Need to define H5O_SHARED_TYPE macro!"
@@ -113,7 +113,7 @@ H5O_SHARED_ENCODE(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mes
     const H5O_shared_t *sh_mesg = (const H5O_shared_t *)_mesg;     /* Pointer to shared message portion of actual message */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_SHARED_ENCODE)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifndef H5O_SHARED_TYPE
 #error "Need to define H5O_SHARED_TYPE macro!"
@@ -168,7 +168,7 @@ H5O_SHARED_SIZE(const H5F_t *f, hbool_t disable_shared, const void *_mesg)
     const H5O_shared_t *sh_mesg = (const H5O_shared_t *)_mesg;     /* Pointer to shared message portion of actual message */
     size_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_SHARED_SIZE)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifndef H5O_SHARED_TYPE
 #error "Need to define H5O_SHARED_TYPE macro!"
@@ -221,7 +221,7 @@ H5O_SHARED_DELETE(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
     H5O_shared_t *sh_mesg = (H5O_shared_t *)_mesg;     /* Pointer to shared message portion of actual message */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_SHARED_DELETE)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifndef H5O_SHARED_TYPE
 #error "Need to define H5O_SHARED_TYPE macro!"
@@ -273,7 +273,7 @@ H5O_SHARED_LINK(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
     H5O_shared_t *sh_mesg = (H5O_shared_t *)_mesg;     /* Pointer to shared message portion of actual message */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_SHARED_LINK)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifndef H5O_SHARED_TYPE
 #error "Need to define H5O_SHARED_TYPE macro!"
@@ -325,7 +325,7 @@ H5O_SHARED_COPY_FILE(H5F_t *file_src, void *_native_src, H5F_t *file_dst,
     void *dst_mesg = NULL;      /* Destination message */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_SHARED_COPY_FILE)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifndef H5O_SHARED_TYPE
 #error "Need to define H5O_SHARED_TYPE macro!"
@@ -389,7 +389,7 @@ H5O_SHARED_POST_COPY_FILE(const H5O_loc_t *oloc_src, const void *mesg_src,
     H5O_shared_t        *shared_dst = (H5O_shared_t *)mesg_dst; /* Alias to shared info in native destination */
     herr_t              ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_SHARED_POST_COPY_FILE)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(oloc_src->file);
     HDassert(oloc_dst->file);
@@ -451,7 +451,7 @@ H5O_SHARED_DEBUG(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
     const H5O_shared_t *sh_mesg = (const H5O_shared_t *)_mesg;     /* Pointer to shared message portion of actual message */
     herr_t ret_value = SUCCEED;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_SHARED_DEBUG)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifndef H5O_SHARED_TYPE
 #error "Need to define H5O_SHARED_TYPE macro!"

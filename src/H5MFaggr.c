@@ -96,7 +96,7 @@ H5MF_aggr_vfd_alloc(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, hsize_t size
 {
     haddr_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_aggr_vfd_alloc, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_type, size);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -157,7 +157,7 @@ H5MF_aggr_alloc(H5F_t *f, hid_t dxpl_id, H5F_blk_aggr_t *aggr,
     haddr_t	eoa = HADDR_UNDEF;      /* Initial EOA for the file */
     haddr_t 	ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_aggr_alloc, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5MF_AGGR_DEBUG
 HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
 #endif /* H5MF_AGGR_DEBUG */
@@ -379,7 +379,7 @@ H5MF_aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr, H5FD_mem_t type,
 {
     htri_t ret_value = FALSE;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_aggr_try_extend, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);
@@ -446,7 +446,7 @@ H5MF_aggr_can_absorb(const H5F_t *f, const H5F_blk_aggr_t *aggr,
 {
     htri_t ret_value = FALSE;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5MF_aggr_can_absorb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(f);
@@ -497,7 +497,7 @@ herr_t
 H5MF_aggr_absorb(const H5F_t UNUSED *f, H5F_blk_aggr_t *aggr, H5MF_free_section_t *sect,
     hbool_t allow_sect_absorb)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5MF_aggr_absorb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(f);
@@ -583,7 +583,7 @@ herr_t
 H5MF_aggr_query(const H5F_t *f, const H5F_blk_aggr_t *aggr, haddr_t *addr,
     hsize_t *size)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MF_aggr_query)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(f);
@@ -619,7 +619,7 @@ H5MF_aggr_reset(H5F_t *f, hid_t dxpl_id, H5F_blk_aggr_t *aggr)
     H5FD_mem_t alloc_type;      /* Type of file memory to work with */
     herr_t ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5MF_aggr_reset)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(f);
@@ -682,7 +682,7 @@ H5MF_free_aggrs(H5F_t *f, hid_t dxpl_id)
     hsize_t sda_size = 0;               /* Size of "small data aggregator" */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_free_aggrs, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);

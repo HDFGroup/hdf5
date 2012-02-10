@@ -109,7 +109,7 @@ H5F_cwfs_add(H5F_t *f, H5HG_heap_t *heap)
 {
     herr_t	ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_cwfs_add, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);
@@ -167,7 +167,7 @@ H5F_cwfs_find_free_heap(H5F_t *f, hid_t dxpl_id, size_t need, haddr_t *addr)
     hbool_t     found = FALSE;          /* Flag to indicate a heap with enough space was found */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_cwfs_find_free_heap, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);
@@ -261,7 +261,7 @@ H5F_cwfs_advance_heap(H5F_t *f, H5HG_heap_t *heap, hbool_t add_heap)
 {
     unsigned u;                         /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5F_cwfs_advance_heap)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
     HDassert(f);
@@ -303,7 +303,7 @@ H5F_cwfs_remove_heap(H5F_file_t *shared, H5HG_heap_t *heap)
 {
     unsigned u;                         /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5F_cwfs_remove_heap)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
     HDassert(shared);

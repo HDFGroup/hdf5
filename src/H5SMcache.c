@@ -125,7 +125,7 @@ H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *udata)
     size_t        x;                    /* Counter variable for index headers */
     H5SM_master_table_t *ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_table_load)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Verify that we're reading version 0 of the table; this is the only
      * version defined so far.
@@ -254,7 +254,7 @@ H5SM_table_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
     uint8_t tbl_buf[H5SM_TBL_BUF_SIZE]; /* Buffer for table */
     herr_t ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_table_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -359,7 +359,7 @@ H5SM_table_dest(H5F_t UNUSED *f, H5SM_master_table_t* table)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_table_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(table);
@@ -391,7 +391,7 @@ H5SM_table_clear(H5F_t *f, H5SM_master_table_t *table, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_table_clear)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -425,7 +425,7 @@ done:
 static herr_t
 H5SM_table_size(const H5F_t UNUSED *f, const H5SM_master_table_t *table, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_table_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(f);
@@ -466,7 +466,7 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     size_t x;                   /* Counter variable for messages in list */
     H5SM_list_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_list_load)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(udata->header);
@@ -563,7 +563,7 @@ H5SM_list_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
     uint8_t lst_buf[H5SM_LST_BUF_SIZE]; /* Buffer for list index */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_list_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -653,7 +653,7 @@ H5SM_list_dest(H5F_t *f, H5SM_list_t* list)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_list_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(list);
@@ -697,7 +697,7 @@ H5SM_list_clear(H5F_t *f, H5SM_list_t *list, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_list_clear)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -731,7 +731,7 @@ done:
 static herr_t
 H5SM_list_size(const H5F_t UNUSED *f, const H5SM_list_t *list, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_list_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(f);

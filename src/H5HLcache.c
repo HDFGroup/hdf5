@@ -138,7 +138,7 @@ H5HL_fl_deserialize(H5HL_t *heap)
     hsize_t free_block;                 /* Offset of free block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_fl_deserialize)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(heap);
@@ -208,7 +208,7 @@ H5HL_fl_serialize(const H5HL_t *heap)
 {
     H5HL_free_t	*fl;                    /* Pointer to heap free list node */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_fl_serialize)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(heap);
@@ -258,7 +258,7 @@ H5HL_prefix_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     haddr_t             eoa;        /* Relative end of file address */
     H5HL_prfx_t *ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_prefix_load)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -396,7 +396,7 @@ H5HL_prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
     uint8_t heap_buf[H5HL_SPEC_READ_SIZE]; /* Buffer for heap */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_prefix_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -497,7 +497,7 @@ H5HL_prefix_dest(H5F_t *f, void *thing)
     H5HL_prfx_t *prfx = (H5HL_prfx_t *)thing;   /* Local heap prefix to destroy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_prefix_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(prfx);
@@ -553,7 +553,7 @@ H5HL_prefix_clear(H5F_t UNUSED *f, void *thing, hbool_t destroy)
     H5HL_prfx_t *prfx = (H5HL_prfx_t *)thing;   /* The local heap prefix to operate on */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_prefix_clear)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(prfx);
@@ -589,7 +589,7 @@ H5HL_prefix_size(const H5F_t UNUSED *f, const void *thing, size_t *size_ptr)
 {
     const H5HL_prfx_t *prfx = (const H5HL_prfx_t *)thing;   /* Pointer to local heap prefix to query */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_prefix_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(prfx);
@@ -628,7 +628,7 @@ H5HL_datablock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     H5HL_cache_dblk_ud_t *udata = (H5HL_cache_dblk_ud_t *)_udata;       /* User data for callback */
     H5HL_dblk_t *ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_datablock_load)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -694,7 +694,7 @@ H5HL_datablock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_datablock_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -748,7 +748,7 @@ H5HL_datablock_dest(H5F_t *f, void *_thing)
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_datablock_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(dblk);
@@ -798,7 +798,7 @@ H5HL_datablock_clear(H5F_t *f, void *_thing, hbool_t destroy)
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HL_datablock_clear)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(dblk);
@@ -834,7 +834,7 @@ H5HL_datablock_size(const H5F_t UNUSED *f, const void *_thing, size_t *size_ptr)
 {
     const H5HL_dblk_t *dblk = (const H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_datablock_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(dblk);

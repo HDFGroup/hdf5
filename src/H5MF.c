@@ -116,7 +116,7 @@ H5MF_init_merge_flags(H5F_t *f)
     hbool_t all_same;                   /* Whether all the types map to the same value */
     herr_t ret_value = SUCCEED;        	/* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_init_merge_flags, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -225,7 +225,7 @@ H5MF_alloc_open(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
         H5MF_FSPACE_SECT_CLS_SIMPLE};
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5MF_alloc_open)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -272,7 +272,7 @@ H5MF_alloc_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
     herr_t ret_value = SUCCEED;         /* Return value */
     H5FS_create_t fs_create; 		/* Free space creation parameters */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5MF_alloc_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -322,7 +322,7 @@ H5MF_alloc_start(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5MF_alloc_start)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -364,7 +364,7 @@ H5MF_alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5MF_alloc_close)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -408,7 +408,7 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, hsize_t size)
     H5FD_mem_t  fs_type;                /* Free space type (mapped from allocation type) */
     haddr_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_alloc, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_type, size);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -534,7 +534,7 @@ H5MF_alloc_tmp(H5F_t *f, hsize_t size)
     haddr_t eoa;                /* End of allocated space in the file */
     haddr_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_alloc_tmp, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: size = %Hu\n", FUNC, size);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -587,7 +587,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
     H5FD_mem_t fs_type;                 /* Free space type (mapped from allocation type) */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_xfree, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)alloc_type, addr, size);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -719,7 +719,7 @@ H5MF_try_extend(H5F_t *f, hid_t dxpl_id, H5FD_mem_t alloc_type, haddr_t addr,
     haddr_t     end;            /* End of block to extend */
     htri_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_try_extend, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_requested = %Hu\n", FUNC, (unsigned)alloc_type, addr, size, extra_requested);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -797,7 +797,7 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space, hsize_t *meta_si
     H5FD_mem_t type;            /* Memory type for iteration */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_get_freespace, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -899,7 +899,7 @@ H5MF_try_shrink(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
     H5MF_sect_ud_t udata;               /* User data for callback */
     htri_t ret_value;                   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_try_shrink, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)alloc_type, addr, size);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -960,7 +960,7 @@ H5MF_close(H5F_t *f, hid_t dxpl_id)
     H5FD_mem_t type;                    /* Memory type for iteration */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_close, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */

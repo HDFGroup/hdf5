@@ -72,7 +72,7 @@ check_name(hid_t id, const char *chk_name, const char *chk_user_path)
 
     /* Get user path */
     *user_path = '\0';
-    if(H5G_user_path_test(id, user_path, &user_path_len, &user_path_hidden) < 0) TEST_ERROR
+    if(H5G__user_path_test(id, user_path, &user_path_len, &user_path_hidden) < 0) TEST_ERROR
 
     /* Check on name from H5Iget_name() */
     if(HDstrcmp(name, chk_name)) goto error;

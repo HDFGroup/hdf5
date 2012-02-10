@@ -102,7 +102,7 @@ H5HF_man_dblock_create(hid_t dxpl_id, H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblo
     size_t free_space;                  /* Free space in new block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -229,7 +229,7 @@ H5HF_man_dblock_destroy(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_direct_t *dblock,
     unsigned cache_flags = H5AC__NO_FLAGS_SET;      /* Flags for unprotecting indirect block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_destroy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -343,7 +343,7 @@ H5HF_man_dblock_new(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t request,
     size_t min_dblock_size;         /* Min. size of direct block to allocate */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_new)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -442,7 +442,7 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
     H5HF_dblock_cache_ud_t udata;	/* parent and other infor for deserializing direct block */
     H5HF_direct_t *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_protect)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -521,7 +521,7 @@ H5HF_man_dblock_locate(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off,
     unsigned entry;                 /* Entry of block */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_locate)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -622,7 +622,7 @@ H5HF_man_dblock_delete(H5F_t *f, hid_t dxpl_id, haddr_t dblock_addr,
     unsigned dblock_status = 0;         /* Direct block's status in the metadata cache */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_delete)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -689,7 +689,7 @@ H5HF_man_dblock_dest(H5HF_direct_t *dblock)
 {
     herr_t          ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.

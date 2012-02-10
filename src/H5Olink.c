@@ -25,6 +25,7 @@
  */
 
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+#define H5L_PACKAGE		/*suppress error about including H5Lpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -32,7 +33,7 @@
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"         /* IDs                                  */
-#include "H5Lprivate.h"		/* Links                                */
+#include "H5Lpkg.h"             /* Links                                */
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 
@@ -124,7 +125,7 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     unsigned char       link_flags;     /* Flags for encoding link info */
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_link_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -281,7 +282,7 @@ H5O_link_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void 
     uint64_t            len;            /* Length of a string in the message */
     unsigned char       link_flags;     /* Flags for encoding link info */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_link_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);
@@ -405,7 +406,7 @@ H5O_link_copy(const void *_mesg, void *_dest)
     H5O_link_t          *dest = (H5O_link_t *) _dest;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_link_copy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(lnk);
@@ -474,7 +475,7 @@ H5O_link_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     size_t name_size;   /* Size of encoded name length */
     size_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_link_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Get name's length */
     name_len = (uint64_t)HDstrlen(lnk->name);
@@ -538,7 +539,7 @@ H5O_link_reset(void *_mesg)
 {
     H5O_link_t *lnk = (H5O_link_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_link_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(lnk) {
         /* Free information for link (but don't free link pointer) */
@@ -572,7 +573,7 @@ H5O_link_free(void *_mesg)
 {
     H5O_link_t *lnk = (H5O_link_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_link_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(lnk);
 
@@ -602,7 +603,7 @@ H5O_link_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
     H5O_link_t *lnk = (H5O_link_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_link_delete, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -675,7 +676,7 @@ static herr_t
 H5O_link_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void UNUSED *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_link_pre_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(deleted);
@@ -715,7 +716,7 @@ H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_
     H5O_link_t  *link_src = (H5O_link_t *)native_src;
     void        *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_link_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(link_src);
@@ -756,7 +757,7 @@ H5O_link_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     H5O_link_t          *link_dst = (H5O_link_t *)mesg_dst;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_link_post_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(link_src);
@@ -768,7 +769,7 @@ H5O_link_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     HDassert(cpy_info->max_depth < 0 || cpy_info->curr_depth < cpy_info->max_depth);
 
     /* Copy the link (and the object it points to) */
-    if(H5G_link_copy_file(dst_oloc->file, dxpl_id, link_src, src_oloc, link_dst,
+    if(H5L_link_copy_file(dst_oloc->file, dxpl_id, link_src, src_oloc, link_dst,
             cpy_info) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy link")
 
@@ -797,7 +798,7 @@ H5O_link_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
     const H5O_link_t    *lnk = (const H5O_link_t *) _mesg;
     herr_t               ret_value = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_link_debug)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);

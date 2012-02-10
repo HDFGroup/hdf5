@@ -115,7 +115,7 @@ H5O_add_gap(H5F_t *f, H5O_t *oh, unsigned chunkno, hbool_t *chk_dirtied,
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_add_gap)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -240,7 +240,7 @@ H5O_eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg,
     uint8_t *move_start, *move_end;     /* Pointers to area of messages to move */
     hbool_t null_before_gap;            /* Flag whether the null message is before the gap or not */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_eliminate_gap)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(oh);
@@ -343,7 +343,7 @@ H5O_alloc_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned null_idx,
     H5O_mesg_t *alloc_msg;              /* Pointer to null message to allocate out of */
     herr_t ret_value = SUCCEED; 	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_null)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -450,7 +450,7 @@ H5O_alloc_msgs(H5O_t *oh, size_t min_alloc)
     H5O_mesg_t *new_mesg;               /* Pointer to new message array */
     herr_t ret_value = SUCCEED; 	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_msgs)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -521,7 +521,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
     unsigned    u;              /* Local index variable */
     htri_t      ret_value = TRUE; 	/* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_extend_chunk)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f != NULL);
@@ -762,7 +762,7 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size)
     unsigned    u;                      /* Local index variable */
     int         ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_new_chunk)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -1121,7 +1121,7 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     int idx;                /* Index of message which fits allocation */
     int ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_alloc, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(oh);
@@ -1205,7 +1205,7 @@ H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
     hbool_t chk_dirtied = FALSE;            /* Flag for unprotecting chunk */
     herr_t ret_value = SUCCEED; 	    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_release_mesg, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -1278,7 +1278,7 @@ H5O_move_cont(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned cont_u)
     hbool_t     chk_dirtied = FALSE;    /* Flags for unprotecting chunk */
     htri_t 	ret_value = TRUE;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_move_cont)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(f);
@@ -1450,7 +1450,7 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     hbool_t did_packing = FALSE;        /* Whether any messages were packed */
     htri_t ret_value; 	                /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_move_msgs_forward)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -1734,7 +1734,7 @@ H5O_merge_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     hbool_t did_merging = FALSE;        /* Whether any messages were merged */
     htri_t ret_value; 	                /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_merge_null)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh != NULL);
@@ -1869,7 +1869,7 @@ H5O_remove_empty_chunks(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     hbool_t did_deleting = FALSE;       /* Whether any chunks were deleted */
     htri_t ret_value; 	                /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_remove_empty_chunks)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh != NULL);
@@ -2059,7 +2059,7 @@ H5O_condense_header(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
     htri_t result;                      /* Result from packing/merging/etc */
     herr_t ret_value = SUCCEED; 	/* return value */
 
-    FUNC_ENTER_NOAPI(H5O_condense_header, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(oh != NULL);
@@ -2132,7 +2132,7 @@ H5O_alloc_shrink_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno)
     herr_t      ret_value = SUCCEED;            /* Return value */
     unsigned    u;                              /* Index */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_shrink_chunk)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);

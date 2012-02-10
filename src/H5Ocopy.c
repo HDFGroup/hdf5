@@ -186,7 +186,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     herr_t      ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_API(H5Ocopy, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name,
              ocpypl_id, lcpl_id);
 
@@ -308,7 +308,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     size_t                 msghdr_size;
     herr_t                 ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_copy_header_real)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(oloc_src);
     HDassert(oloc_src->file);
@@ -796,7 +796,7 @@ H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     hbool_t             inc_link;               /* Whether to increment the link count for the object */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5O_copy_header_map, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(oloc_src);
@@ -895,7 +895,7 @@ H5O_copy_free_addrmap_cb(void *_item, void UNUSED *key, void UNUSED *op_data)
 {
     H5O_addr_map_t *item = (H5O_addr_map_t *)_item;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_copy_free_addrmap_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(item);
 
@@ -932,7 +932,7 @@ H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     H5O_copy_t  cpy_info;               /* Information for copying object */
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_copy_header)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(oloc_src);
     HDassert(oloc_src->file);
@@ -1002,7 +1002,7 @@ H5O_copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name,
     unsigned        cpy_option = 0;             /* Copy options */
     herr_t          ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_copy_obj, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(src_loc);
     HDassert(src_loc->oloc->file);
@@ -1069,7 +1069,7 @@ H5O_copy_obj_by_ref(H5O_loc_t *src_oloc, hid_t dxpl_id, H5O_loc_t *dst_oloc,
 {
     herr_t  ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5O_copy_obj_by_ref, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(src_oloc);
     HDassert(dst_oloc);
@@ -1137,7 +1137,7 @@ H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id,
     size_t      i;                      /* Local index variable */
     herr_t	ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5O_copy_expand_ref, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(file_src);

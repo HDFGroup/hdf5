@@ -58,7 +58,7 @@ H5F_sfile_node_t *H5F_sfile_head_g = NULL;
 herr_t
 H5F_sfile_assert_num(unsigned n)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sfile_assert_num)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(n == 0) {
         /* Sanity checking */
@@ -107,7 +107,7 @@ H5F_sfile_add(H5F_file_t *shared)
     H5F_sfile_node_t *new_shared;              /* New shared file node */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_sfile_add)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(shared);
@@ -149,7 +149,7 @@ H5F_sfile_search(H5FD_t *lf)
     H5F_sfile_node_t *curr;             /* Current shared file node */
     H5F_file_t *ret_value = NULL;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sfile_search)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(lf);
@@ -191,7 +191,7 @@ H5F_sfile_remove(H5F_file_t *shared)
     H5F_sfile_node_t *last;             /* Last shared file node */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_sfile_remove)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(shared);

@@ -110,7 +110,7 @@ H5HF_iblock_pin(H5HF_indirect_t *iblock)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_iblock_pin)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(iblock);
@@ -168,7 +168,7 @@ H5HF_iblock_unpin(H5HF_indirect_t *iblock)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_iblock_unpin)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(iblock);
@@ -226,7 +226,7 @@ H5HF_iblock_incr(H5HF_indirect_t *iblock)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_iblock_incr)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(iblock);
@@ -263,7 +263,7 @@ H5HF_iblock_decr(H5HF_indirect_t *iblock)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_iblock_decr)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(iblock);
@@ -326,7 +326,7 @@ H5HF_iblock_dirty(H5HF_indirect_t *iblock)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_iblock_dirty)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(iblock);
@@ -365,7 +365,7 @@ H5HF_man_iblock_root_create(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
     unsigned u;                     /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_root_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check for allocating entire root indirect block initially */
     if(hdr->man_dtable.cparam.start_root_rows == 0)
@@ -500,7 +500,7 @@ H5HF_man_iblock_root_double(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
     size_t u;                   /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_root_double)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get "new block" iterator information */
     if(H5HF_man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
@@ -682,7 +682,7 @@ H5HF_man_iblock_root_halve(H5HF_indirect_t *iblock, hid_t dxpl_id)
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_root_halve)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(iblock);
@@ -816,7 +816,7 @@ H5HF_man_iblock_root_revert(H5HF_indirect_t *root_iblock, hid_t dxpl_id)
     size_t dblock_size;                 /* Direct block's size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_root_revert)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -892,7 +892,7 @@ H5HF_man_iblock_alloc_row(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t **
     hbool_t iblock_held = FALSE;        /* Flag to indicate that indirect block is held */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_alloc_row)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -956,7 +956,7 @@ H5HF_man_iblock_create(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *par_iblo
     size_t u;                           /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -1092,7 +1092,7 @@ H5HF_man_iblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t iblock_addr,
     hbool_t should_protect = FALSE;     /* Whether we should protect the indirect block or not */
     H5HF_indirect_t *ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_protect)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -1192,7 +1192,7 @@ H5HF_man_iblock_unprotect(H5HF_indirect_t *iblock, hid_t dxpl_id,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_unprotect)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -1230,7 +1230,7 @@ H5HF_man_iblock_attach(H5HF_indirect_t *iblock, unsigned entry, haddr_t child_ad
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_attach)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -1295,7 +1295,7 @@ H5HF_man_iblock_detach(H5HF_indirect_t *iblock, hid_t dxpl_id, unsigned entry)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_detach)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -1396,7 +1396,7 @@ done:
 herr_t
 H5HF_man_iblock_entry_addr(H5HF_indirect_t *iblock, unsigned entry, haddr_t *child_addr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_man_iblock_entry_addr)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -1439,7 +1439,7 @@ H5HF_man_iblock_delete(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t iblock_addr,
     hbool_t did_protect;                /* Whether we protected the indirect block or not */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_delete)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -1539,7 +1539,7 @@ H5HF_man_iblock_size(H5F_t *f, hid_t dxpl_id, H5HF_hdr_t *hdr, haddr_t iblock_ad
     hbool_t             did_protect;            /* Whether we protected the indirect block or not */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HF_man_iblock_size, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -1606,7 +1606,7 @@ H5HF_man_iblock_dest(H5HF_indirect_t *iblock)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.

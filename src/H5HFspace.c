@@ -110,7 +110,7 @@ H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id, hbool_t may_create)
         H5HF_FSPACE_SECT_CLS_INDIRECT};
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_start)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -171,7 +171,7 @@ H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node,
     H5HF_sect_add_ud1_t udata;          /* User data for free space manager 'add' */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_add)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -218,7 +218,7 @@ H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request, H5HF_free_secti
     htri_t node_found = FALSE;  /* Whether an existing free list node was found */
     htri_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_find)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -264,7 +264,7 @@ H5HF_space_size(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t *fs_size)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_size)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -309,7 +309,7 @@ H5HF_space_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_remove)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -347,7 +347,7 @@ H5HF_space_close(H5HF_hdr_t *hdr, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_close)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -402,7 +402,7 @@ H5HF_space_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_delete)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -438,7 +438,7 @@ H5HF_space_sect_change_class(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_sect_change_class)
+    FUNC_ENTER_NOAPI_NOINIT
 #ifdef QAK
 HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* QAK */

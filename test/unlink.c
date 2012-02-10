@@ -2221,9 +2221,9 @@ test_full_group_compact(hid_t fapl)
     } /* end for */
 
     /* Check on group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) != TRUE) TEST_ERROR
-    if(H5G_has_stab_test(gid) == TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) != TRUE) TEST_ERROR
+    if(H5G__has_stab_test(gid) == TRUE) TEST_ERROR
 
     /* Close group with objects to delete */
     if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
@@ -2367,9 +2367,9 @@ test_full_group_dense(hid_t fapl)
     } /* end for */
 
     /* Check on group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Close group with objects to delete */
     if(H5Gclose(gid) < 0) FAIL_STACK_ERROR

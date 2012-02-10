@@ -63,7 +63,7 @@ H5R_init(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5R_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
     /* FUNC_ENTER() does all the work */
 
 done:
@@ -88,14 +88,14 @@ H5R_init_interface(void)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5R_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the file IDs */
     if(H5I_register_type(H5I_REFERENCE, (size_t)H5I_REFID_HASHSIZE, H5R_RESERVED_ATOMS, (H5I_free_t)NULL) < 0)
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -121,7 +121,7 @@ H5R_term_interface(void)
 {
     int	n=0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5R_term_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_REFERENCE))) {
@@ -133,7 +133,7 @@ H5R_term_interface(void)
 	}
     }
 
-    FUNC_LEAVE_NOAPI(n);
+    FUNC_LEAVE_NOAPI(n)
 }
 
 
@@ -173,7 +173,7 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
     hbool_t     obj_found = FALSE;      /* Object location found */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5R_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(_ref);
     HDassert(loc);
@@ -312,7 +312,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
     H5S_t      *space = NULL;   /* Pointer to dataspace containing region */
     herr_t      ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Rcreate, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "*xi*sRti", ref, loc_id, name, ref_type, space_id);
 
     /* Check args */
@@ -372,7 +372,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
     H5O_type_t obj_type;        /* Type of object */
     hid_t ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5R_dereference)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(_ref);
     HDassert(ref_type > H5R_BADTYPE || ref_type < H5R_MAXTYPE);
@@ -515,7 +515,7 @@ H5Rdereference(hid_t id, H5R_type_t ref_type, const void *_ref)
     H5F_t *file = NULL; /* File object */
     hid_t ret_value;
 
-    FUNC_ENTER_API(H5Rdereference, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "iRt*x", id, ref_type, _ref);
 
     /* Check args */
@@ -568,7 +568,7 @@ H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref)
     uint8_t *buf = NULL;        /* Buffer to store serialized selection in */
     H5S_t *ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5R_get_region)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(_ref);
     HDassert(file);
@@ -637,7 +637,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
     H5S_t *space = NULL;    /* Dataspace object */
     hid_t ret_value;
 
-    FUNC_ENTER_API(H5Rget_region, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "iRt*x", id, ref_type, ref);
 
     /* Check args */
@@ -691,7 +691,7 @@ H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type,
     unsigned rc;		/* Reference count of object    */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5R_get_obj_type)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file);
     HDassert(_ref);
@@ -777,7 +777,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
     H5G_loc_t loc;              /* Object location */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5Rget_obj_type2, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iRt*x*Ot", id, ref_type, ref, obj_type);
 
     /* Check args */
@@ -833,7 +833,7 @@ H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_ty
     H5O_loc_t oloc;             /* Object location describing object for reference */
     ssize_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5R_get_name)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(f);
@@ -931,7 +931,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
     H5F_t *file;        /* File object */
     ssize_t ret_value;  /* Return value */
 
-    FUNC_ENTER_API(H5Rget_name, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("Zs", "iRt*x*sz", id, ref_type, _ref, name, size);
 
     /* Check args */
