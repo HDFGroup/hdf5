@@ -835,7 +835,7 @@ H5FD_direct_get_eof(const H5FD_t *_file)
 {
     const H5FD_direct_t  *file = (const H5FD_direct_t*)_file;
 
-    FUNC_ENTER_NOAPI(HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT
 
     FUNC_LEAVE_NOAPI(MAX(file->eof, file->eoa))
 }
