@@ -48,7 +48,6 @@ extend_dset_SOURCES=extend_dset.c
 # library.
 LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
 
-CHECK_CLEANFILES+=*.h5
 DISTCLEANFILES=testh5watch.sh
 
 include $(top_srcdir)/config/conclude.am
