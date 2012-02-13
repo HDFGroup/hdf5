@@ -239,6 +239,12 @@ New Features
 
     Tools:
     ------
+     - h5dump: Added new option --no-compact-subset. This option will not
+               interpret the '[' character as starting the compact form of 
+               subsetting. This is useful when the "h5dump error: unable to 
+               open dataset "datset_name"" message is output because a dataset
+               name contains a '[' character.(JIRA HDFFV-7689).
+               (ADB - 2012/01/31)
      - h5dump: Corrected schema location: 
                <hdf5:HDF5-File 
                xmlns:hdf5="http://hdfgroup.org/HDF5/XML/schema/HDF5-File" 
