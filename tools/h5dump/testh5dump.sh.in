@@ -137,6 +137,7 @@ $SRC_H5DUMP_TESTFILES/tmulti-r.h5
 $SRC_H5DUMP_TESTFILES/tmulti-s.h5
 $SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.h5
 $SRC_H5DUMP_TESTFILES/tnestedcomp.h5
+$SRC_H5DUMP_TESTFILES/tno-subset.h5
 $SRC_H5DUMP_TESTFILES/tnullspace.h5
 $SRC_H5DUMP_TESTFILES/zerodim.h5
 $SRC_H5DUMP_TESTFILES/torderattr.h5
@@ -247,6 +248,7 @@ $SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.ddl
 $SRC_H5DUMP_TESTFILES/tnestcomp-1.ddl
 $SRC_H5DUMP_TESTFILES/tnbit.ddl
 $SRC_H5DUMP_TESTFILES/tnofilename.ddl
+$SRC_H5DUMP_TESTFILES/tno-subset.ddl
 $SRC_H5DUMP_TESTFILES/tnullspace.ddl
 $SRC_H5DUMP_TESTFILES/zerodim.ddl
 $SRC_H5DUMP_TESTFILES/tordergr1.ddl
@@ -487,7 +489,7 @@ TOOLTEST() {
     TESTING $DUMPER $@
     (
 	  cd $TESTDIR
-  	  $RUNSERIAL $DUMPER_BIN $@
+  	  $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.
@@ -534,7 +536,7 @@ TOOLTEST2() {
     TESTING $DUMPER $@
     (
       cd $TESTDIR
-      $RUNSERIAL $DUMPER_BIN $@
+      $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
     cat $actual_err >> $actual
 
@@ -585,7 +587,7 @@ TOOLTEST3() {
     TESTING $DUMPER $@
     (
       cd $TESTDIR
-      $RUNSERIAL $DUMPER_BIN $@
+      $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.
@@ -809,7 +811,7 @@ TOOLTEST tall-2B.ddl -A -r tall.h5
 TOOLTEST tall-4s.ddl --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5
 TOOLTEST tall-5s.ddl -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5
 TOOLTEST tdset-3s.ddl -d "/dset1[1,1;;;]" tdset.h5
-
+TOOLTEST tno-subset.ddl --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5
 
 # test printing characters in ASCII instead of decimal
 TOOLTEST tchar1.ddl -r tchar.h5
