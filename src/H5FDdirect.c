@@ -1317,6 +1317,9 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
         case 1:
             /* Determine where we will be reading from (size will be _fbsize)
              * and what size we will be writing (address will be addr) */
+            /* Note that we do note need to do "size - 1" here only because we
+             * know that size will never be a multiple of _fbsize here */
+            HDassert(size % _fbsize);
             write_size = ((size / _fbsize) + 1) * _fbsize;
             read_addr = addr + write_size - _fbsize;
 
