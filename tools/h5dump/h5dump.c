@@ -93,6 +93,7 @@ static int          display_ai        = TRUE;  /*array index */
 static int          display_escape    = FALSE; /*escape non printable characters */
 static int          display_region    = FALSE; /*print region reference data */
 static int          enable_error_stack= FALSE; /* re-enable error stack */
+static int          disable_compact_subset= FALSE; /* disable compact form of subset notation */
 static int          display_packed_bits = FALSE; /*print 1-8 byte numbers as packed bits*/
 
 /* sort parameters */
@@ -408,7 +409,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language cancatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:REM:";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:RECM:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -523,6 +524,7 @@ static struct long_options l_opts[] = {
     { "region", no_arg, 'R' },
     { "enable-error-stack", no_arg, 'E' },
     { "packed-bits", require_arg, 'M' },
+    { "no-compact-subset", no_arg, 'C' },
     { NULL, 0, '\0' }
 };
 
@@ -695,6 +697,8 @@ usage(const char *prog)
     fprintf(stdout, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
     fprintf(stdout, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
     fprintf(stdout, "                          occur.\n");
+    fprintf(stdout, "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
+    fprintf(stdout, "                          of \"[\" in datset names.\n");
     fprintf(stdout, "\n");
     fprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
     fprintf(stdout, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
@@ -3638,37 +3642,32 @@ parse_subset_params(char *dset)
     struct subset_t *s = NULL;
     register char   *brace;
 
-    if ((brace = strrchr(dset, '[')) != NULL) {
-        char *slash = strrchr(dset, '/');
+    if (!disable_compact_subset && ((brace = strrchr(dset, '[')) != NULL)) {
+        *brace++ = '\0';
 
-        /* sanity check to make sure the [ isn't part of the dataset name */
-        if (brace > slash) {
-            *brace++ = '\0';
+        s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
+        parse_hsize_list(brace, &s->start);
 
-            s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
-            parse_hsize_list(brace, &s->start);
+        while (*brace && *brace != ';')
+            brace++;
 
-            while (*brace && *brace != ';')
-                brace++;
+        if (*brace) brace++;
 
-            if (*brace) brace++;
+        parse_hsize_list(brace, &s->stride);
 
-            parse_hsize_list(brace, &s->stride);
+        while (*brace && *brace != ';')
+            brace++;
 
-            while (*brace && *brace != ';')
-                brace++;
+        if (*brace) brace++;
 
-            if (*brace) brace++;
+        parse_hsize_list(brace, &s->count);
 
-            parse_hsize_list(brace, &s->count);
+        while (*brace && *brace != ';')
+            brace++;
 
-            while (*brace && *brace != ';')
-                brace++;
+        if (*brace) brace++;
 
-            if (*brace) brace++;
-
-            parse_hsize_list(brace, &s->block);
-        }
+        parse_hsize_list(brace, &s->block);
     }
 
     return s;
@@ -4540,6 +4539,9 @@ end_collect:
 
         case 'E':
             enable_error_stack = TRUE;
+            break;
+        case 'C':
+            disable_compact_subset = TRUE;
             break;
         case 'h':
             usage(h5tools_getprogname());

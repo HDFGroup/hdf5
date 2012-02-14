@@ -87,7 +87,7 @@ H5O_align_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     H5O_align_t         *mesg;         /* Native message */
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_align_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);
@@ -135,7 +135,7 @@ H5O_align_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p,
 {
     const H5O_align_t *mesg = (const H5O_align_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_align_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -173,7 +173,7 @@ H5O_align_copy(const void *_mesg, void *_dest)
     H5O_align_t	*dest = (H5O_align_t *)_dest;
     void		*ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_align_copy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(mesg);
@@ -212,7 +212,7 @@ H5O_align_size(const H5F_t *f, hbool_t UNUSED disable_shared,
 {
     size_t                   ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_align_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -243,7 +243,7 @@ H5O_align_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
 {
     const H5O_align_t *mesg = (const H5O_align_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_align_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(f);

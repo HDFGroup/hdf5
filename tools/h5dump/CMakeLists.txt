@@ -127,6 +127,7 @@ IF (BUILD_TESTING)
       tnestcomp-1.ddl
       tnbit.ddl
       tnofilename.ddl
+      tno-subset.ddl
       tnullspace.ddl
       zerodim.ddl
       tordergr1.ddl
@@ -293,6 +294,7 @@ IF (BUILD_TESTING)
       tmulti-s.h5
       tnamed_dtype_attr.h5
       tnestedcomp.h5
+      tno-subset.h5
       tnullspace.h5
       zerodim.h5
       torderattr.h5
@@ -830,6 +832,8 @@ IF (BUILD_TESTING)
           tnbit.out.err
           tnofilename.out
           tnofilename.out.err
+          tno-subset.out
+          tno-subset.out.err
           tnullspace.out
           tnullspace.out.err
           zerodim.out
@@ -1019,6 +1023,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tall-4s 0 --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5)
   ADD_H5_TEST (tall-5s 0 -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5)
   ADD_H5_TEST (tdset-3s 0 -d "/dset1[1,1;;;]" tdset.h5)
+  ADD_H5_TEST (tno-subset 0 --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5)
 
   # test printing characters in ASCII instead of decimal
   ADD_H5_TEST (tchar1 0 -r tchar.h5)

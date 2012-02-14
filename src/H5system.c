@@ -689,7 +689,7 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
     char        *new_name = NULL;       /* Pointer to the name of the file */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5_build_extpath)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Clear external path pointer to begin with */
     *extpath = NULL;

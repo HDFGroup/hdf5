@@ -119,7 +119,7 @@ H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
     H5O_t *oh = NULL;                   /* Object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_create, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(loc);
@@ -167,7 +167,7 @@ H5O_msg_append_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     const H5O_msg_class_t *type;        /* Original H5O class type for the ID */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_append_oh, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -210,7 +210,7 @@ H5O_msg_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *t
     int idx;                            /* Index of message to modify */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_append_real, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -263,7 +263,7 @@ H5O_msg_write(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_write, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(loc);
@@ -318,7 +318,7 @@ H5O_msg_write_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5O_msg_write_oh, dxpl_id, oh->cache_info.addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, oh->cache_info.addr, FAIL)
 
     /* check args */
     HDassert(f);
@@ -367,7 +367,7 @@ H5O_msg_write_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *ty
     unsigned		idx;            /* Index of message to modify */
     herr_t	        ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_write_real)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -467,7 +467,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
     H5O_t *oh = NULL;                   /* Object header to use */
     void *ret_value;                    /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5O_msg_read, dxpl_id, loc->addr, NULL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, loc->addr, NULL)
 
     /* check args */
     HDassert(loc);
@@ -522,7 +522,7 @@ H5O_msg_read_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     unsigned       idx;                 /* Message's index in object header */
     void           *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_read_oh)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -578,7 +578,7 @@ H5O_msg_reset(unsigned type_id, void *native)
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_reset, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -614,7 +614,7 @@ H5O_msg_reset_real(const H5O_msg_class_t *type, void *native)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_reset_real)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(type);
@@ -654,7 +654,7 @@ H5O_msg_free(unsigned type_id, void *mesg)
     const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
     void * ret_value;                   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5O_msg_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -683,7 +683,7 @@ H5O_msg_free(unsigned type_id, void *mesg)
 herr_t
 H5O_msg_free_mesg(H5O_mesg_t *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_msg_free_mesg)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(mesg);
@@ -713,7 +713,7 @@ H5O_msg_free_mesg(H5O_mesg_t *mesg)
 void *
 H5O_msg_free_real(const H5O_msg_class_t *type, void *msg_native)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_msg_free_real)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(type);
@@ -751,7 +751,7 @@ H5O_msg_copy(unsigned type_id, const void *mesg, void *dst)
     const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
     void	*ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_copy, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* check args */
     HDassert(mesg);
@@ -790,7 +790,7 @@ H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     int	ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_count, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(loc);
@@ -836,7 +836,7 @@ H5O_msg_count_real(const H5O_t *oh, const H5O_msg_class_t *type)
     unsigned u;                 /* Local index variable */
     unsigned ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_msg_count_real)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(oh);
@@ -875,7 +875,7 @@ H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     H5O_t	*oh = NULL;             /* Object header for location */
     htri_t      ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5O_msg_exists, dxpl_id, loc->addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, loc->addr, FAIL)
 
     HDassert(loc);
     HDassert(loc->file);
@@ -922,7 +922,7 @@ H5O_msg_exists_oh(const H5O_t *oh, unsigned type_id)
     unsigned	u;                      /* Local index variable */
     htri_t      ret_value = FALSE;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_msg_exists_oh)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(oh);
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -967,7 +967,7 @@ H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj
     const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
     herr_t      ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_remove, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(loc);
@@ -1019,7 +1019,7 @@ H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
     const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
     herr_t      ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_remove_op, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(loc);
@@ -1069,7 +1069,7 @@ H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
     htri_t try_remove = FALSE;         /* Whether to try removing a message */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_remove_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(mesg);
@@ -1136,7 +1136,7 @@ H5O_msg_remove_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
     H5O_mesg_operator_t op;             /* Wrapper for operator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_remove_real, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -1210,7 +1210,7 @@ H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id,
     const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
     herr_t ret_value;               /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_iterate, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(loc);
@@ -1278,7 +1278,7 @@ H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
     unsigned 		oh_modified = 0;    	/* Whether the callback modified the object header */
     herr_t              ret_value = H5_ITER_CONT;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_iterate_real)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -1359,7 +1359,7 @@ H5O_msg_raw_size(const H5F_t *f, unsigned type_id, hbool_t disable_shared,
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     size_t ret_value;                   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_raw_size, 0)
+    FUNC_ENTER_NOAPI(0)
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -1404,7 +1404,7 @@ H5O_msg_size_f(const H5F_t *f, hid_t ocpl_id, unsigned type_id,
     uint8_t oh_flags;           /* Object header status flags */
     size_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_size_f, 0)
+    FUNC_ENTER_NOAPI(0)
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -1466,7 +1466,7 @@ H5O_msg_size_oh(const H5F_t *f, const H5O_t *oh, unsigned type_id,
     const H5O_msg_class_t *type; /* Actual H5O class type for the ID */
     size_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_size_oh, 0)
+    FUNC_ENTER_NOAPI(0)
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -1517,7 +1517,7 @@ H5O_msg_can_share(unsigned type_id, const void *mesg)
     const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
     htri_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5O_msg_can_share)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -1564,7 +1564,7 @@ H5O_msg_can_share_in_ohdr(unsigned type_id)
     const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
     htri_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5O_msg_can_share_in_ohdr)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -1602,7 +1602,7 @@ H5O_msg_is_shared(unsigned type_id, const void *mesg)
     const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
     htri_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5O_msg_is_shared)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -1640,7 +1640,7 @@ H5O_msg_set_share(unsigned type_id, const H5O_shared_t *share, void *mesg)
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_set_share, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -1690,7 +1690,7 @@ H5O_msg_reset_share(unsigned type_id, void *mesg)
 {
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5O_msg_reset_share)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -1725,7 +1725,7 @@ H5O_msg_get_crt_index(unsigned type_id, const void *mesg, H5O_msg_crt_idx_t *crt
     const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5O_msg_get_crt_index, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -1771,7 +1771,7 @@ H5O_msg_encode(H5F_t *f, unsigned type_id, hbool_t disable_shared,
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_encode,FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -1817,7 +1817,7 @@ H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
     void *ret_value;                    /* Return value */
     unsigned ioflags = 0;               /* Flags for decode routine */
 
-    FUNC_ENTER_NOAPI(H5O_msg_decode, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* check args */
     HDassert(f);
@@ -1859,7 +1859,7 @@ H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src,
 {
     void        *ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(type);
@@ -1901,7 +1901,7 @@ H5O_msg_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     htri_t shared_mesg;         /* Should this message be stored in the Shared Message table? */
     int ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_alloc)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -1965,7 +1965,7 @@ H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
     hbool_t chk_dirtied = FALSE;                /* Flag for unprotecting chunk */
     herr_t      ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_copy_mesg)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -2040,7 +2040,7 @@ H5O_msg_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
     const H5O_msg_class_t   *type;      /* Actual H5O class type for the ID */
     herr_t ret_value = SUCCEED;                    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_delete, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* check args */
     HDassert(f);
@@ -2078,7 +2078,7 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg)
     const H5O_msg_class_t *type = mesg->type;  /* Type of object to free */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_delete_mesg, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);
@@ -2119,7 +2119,7 @@ H5O_msg_flush(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg)
     unsigned    msg_id;         /* ID for message */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_flush, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -2221,7 +2221,7 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
     unsigned	u;              /* Local index variable */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_flush_msgs, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -2272,7 +2272,7 @@ H5O_msg_get_chunkno(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     unsigned idx;                       /* Index of message to modify */
     int ret_value;                      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_get_chunkno, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(loc);
@@ -2327,7 +2327,7 @@ H5O_msg_lock(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     unsigned idx;                       /* Index of message to modify */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_lock, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(loc);
@@ -2385,7 +2385,7 @@ H5O_msg_unlock(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     unsigned idx;                       /* Index of message to modify */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_unlock, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(loc);

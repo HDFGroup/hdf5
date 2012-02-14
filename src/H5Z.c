@@ -88,7 +88,7 @@ H5Z_init_interface (void)
 {
     herr_t	ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5Z_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     if(H5Z_init_deflate() < 0)
@@ -229,7 +229,7 @@ H5Zregister(const void *_cls)
     H5Z_class_int_t     cls_new;                /* Translated class struct */
     herr_t              ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_API(H5Zregister, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "*x", _cls);
 
     /* Check args */
@@ -348,7 +348,7 @@ H5Z_register (const H5Z_class_int_t *cls)
     size_t	i;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_register, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(cls);
     HDassert(cls->id >= 0 && cls->id <= H5Z_FILTER_MAX);
@@ -414,7 +414,7 @@ H5Zunregister(H5Z_filter_t id)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Zunregister, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "Zf", id);
 
     /* Check args */
@@ -453,7 +453,7 @@ H5Z_unregister (H5Z_filter_t id)
     size_t i;                   /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_unregister,FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert (id>=0 && id<=H5Z_FILTER_MAX);
 
@@ -499,7 +499,7 @@ H5Zfilter_avail(H5Z_filter_t id)
     size_t i;                   /* Local index variable */
     htri_t ret_value=FALSE;     /* Return value */
 
-    FUNC_ENTER_API(H5Zfilter_avail, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "Zf", id);
 
     /* Check args */
@@ -544,7 +544,7 @@ H5Z_prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id,
     size_t          u;                      /* Local index variable */
     htri_t          ret_value = TRUE;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5Z_prelude_callback)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(pline->nused > 0);
 
@@ -629,7 +629,7 @@ H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type
     hid_t space_id = -1;            /* ID for dataspace describing chunk */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5Z_prepare_prelude_callback_dcpl)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(H5I_GENPROP_LST == H5I_get_type(dcpl_id));
     HDassert(H5I_DATATYPE == H5I_get_type(type_id));
@@ -712,7 +712,7 @@ H5Z_can_apply(hid_t dcpl_id, hid_t type_id)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_can_apply, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Make "can apply" callbacks for filters in pipeline */
     if(H5Z_prepare_prelude_callback_dcpl(dcpl_id, type_id, H5Z_PRELUDE_CAN_APPLY) < 0)
@@ -747,7 +747,7 @@ H5Z_set_local(hid_t dcpl_id, hid_t type_id)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_set_local, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Make "set local" callbacks for filters in pipeline */
     if(H5Z_prepare_prelude_callback_dcpl(dcpl_id, type_id, H5Z_PRELUDE_SET_LOCAL) < 0)
@@ -777,7 +777,7 @@ H5Z_can_apply_direct(const H5O_pline_t *pline)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_can_apply_direct, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(pline->nused > 0);
 
@@ -814,7 +814,7 @@ H5Z_set_local_direct(const H5O_pline_t *pline)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_set_local_direct, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(pline->nused > 0);
 
@@ -848,7 +848,7 @@ H5Z_modify(const H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
     size_t	idx;                    /* Index of filter in pipeline */
     herr_t      ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_modify, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(pline);
     HDassert(filter >= 0 && filter <= H5Z_FILTER_MAX);
@@ -918,7 +918,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
     size_t	idx;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_append, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(pline);
     HDassert(filter >= 0 && filter <= H5Z_FILTER_MAX);
@@ -1023,7 +1023,7 @@ H5Z_find_idx(H5Z_filter_t id)
     size_t i;                   /* Local index variable */
     int ret_value=FAIL;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5Z_find_idx)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     for (i=0; i<H5Z_table_used_g; i++)
 	if (H5Z_table_g[i].id == id)
@@ -1058,7 +1058,7 @@ H5Z_find(H5Z_filter_t id)
     int	idx;                            /* Filter index in global table */
     H5Z_class_int_t *ret_value = NULL;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_find, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Get the index in the global table */
     if((idx=H5Z_find_idx(id))<0)
@@ -1126,7 +1126,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
     size_t      prev_buf_size;          /* Previous value of *buf_size */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_pipeline, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(0==(flags & ~((unsigned)H5Z_FLAG_INVMASK)));
     assert(filter_mask);
@@ -1342,7 +1342,7 @@ H5Z_filter_info(const H5O_pline_t *pline, H5Z_filter_t filter)
     size_t	idx;                    /* Index of filter in pipeline */
     H5Z_filter_info_t *ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_filter_info, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     assert(pline);
     assert(filter>=0 && filter<=H5Z_FILTER_MAX);
@@ -1385,7 +1385,7 @@ H5Z_all_filters_avail(const H5O_pline_t *pline)
     size_t i,j;                 /* Local index variable */
     htri_t ret_value=TRUE;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_all_filters_avail, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(pline);
@@ -1429,7 +1429,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_delete, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(pline);
@@ -1513,7 +1513,7 @@ H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags)
     H5Z_class_int_t *fclass;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5Zget_filter_info, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "Zf*Iu", filter, filter_config_flags);
 
     /* Look up the filter class info */
@@ -1555,7 +1555,7 @@ H5Z_aligned_malloc(size_t size, void *_lib_data)
     H5Z_lib_data_t *lib_data = (H5Z_lib_data_t *)_lib_data;
     void *ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5Z_aligned_malloc)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(lib_data);
@@ -1612,7 +1612,7 @@ H5Z_aligned_free(void *buf, void *_lib_data)
     H5Z_lib_data_t *lib_data = (H5Z_lib_data_t *)_lib_data;
     herr_t ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5Z_aligned_free)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     if(!lib_data)
@@ -1668,7 +1668,7 @@ H5Z_aligned_realloc(void *buf, size_t old_size, size_t new_size,
     H5Z_lib_data_t *lib_data = (H5Z_lib_data_t *)_lib_data;
     void *ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5Z_aligned_realloc)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(!lib_data->align) {
         if(NULL == (ret_value = H5MM_realloc(buf, new_size)) && new_size > 0)
@@ -1711,7 +1711,7 @@ H5Zaligned_malloc(size_t size, void *_lib_data)
     H5Z_lib_data_t *lib_data = (H5Z_lib_data_t *)_lib_data;
     void *ret_value;
 
-    FUNC_ENTER_API(H5Zaligned_malloc, NULL)
+    FUNC_ENTER_API(NULL)
     H5TRACE2("*x", "z*x", size, _lib_data);
 
     /* Check args */
@@ -1757,7 +1757,7 @@ H5Zaligned_free(void *buf, void *_lib_data)
     H5Z_lib_data_t *lib_data = (H5Z_lib_data_t *)_lib_data;
     herr_t ret_value = 0;
 
-    FUNC_ENTER_API(H5Zaligned_free, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "*x*x", buf, _lib_data);
 
     /* Check args */
@@ -1802,7 +1802,7 @@ H5Zaligned_realloc(void *buf, size_t old_size, size_t new_size, void *_lib_data)
     H5Z_lib_data_t *lib_data = (H5Z_lib_data_t *)_lib_data;
     void *ret_value;
 
-    FUNC_ENTER_API(H5Zaligned_realloc, NULL)
+    FUNC_ENTER_API(NULL)
     H5TRACE4("*x", "*xzz*x", buf, old_size, new_size, _lib_data);
 
     /* Check args */

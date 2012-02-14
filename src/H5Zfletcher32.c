@@ -58,7 +58,7 @@ H5Z_init_fletcher32(void)
     H5Z_class_int_t     fclass;         /* Filter class */
     herr_t              ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5Z_init_fletcher32)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Build filter class struct */
     fclass.version = H5Z_CLASS_T_VERS_3;        /* H5Z_class_t version */
@@ -116,7 +116,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
     uint8_t  tmp;
     size_t   ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_filter_fletcher32, 0)
+    FUNC_ENTER_NOAPI(0)
 
     assert(sizeof(uint32_t)>=4);
 

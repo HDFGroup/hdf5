@@ -194,7 +194,7 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
 static herr_t
 H5O_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* H5O interface sanity checks */
     HDassert(H5O_MSG_TYPES == NELMTS(H5O_msg_class_g));
@@ -234,7 +234,7 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     H5G_loc_t	loc;
     hid_t       ret_value = FAIL;
 
-    FUNC_ENTER_API(H5Oopen, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "i*si", loc_id, name, lapl_id);
 
     /* Check args */
@@ -286,7 +286,7 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     hid_t       ret_value = FAIL;
 
-    FUNC_ENTER_API(H5Oopen_by_idx, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("i", "i*sIiIohi", loc_id, group_name, idx_type, order, n, lapl_id);
 
     /* Check args */
@@ -373,7 +373,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     hid_t       lapl_id = H5P_LINK_ACCESS_DEFAULT; /* lapl to use to open this object */
     hid_t       ret_value = FAIL;
 
-    FUNC_ENTER_API(H5Oopen_by_addr, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("i", "ia", loc_id, addr);
 
     /* Check args */
@@ -429,7 +429,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     H5G_loc_t	obj_loc;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Olink, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "ii*sii", obj_id, new_loc_id, new_name, lcpl_id, lapl_id);
 
     /* Check arguments */
@@ -484,7 +484,7 @@ H5Oincr_refcount(hid_t object_id)
     H5O_loc_t  *oloc;
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5Oincr_refcount, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Get the object's oloc so we can adjust its link count */
@@ -525,7 +525,7 @@ H5Odecr_refcount(hid_t object_id)
     H5O_loc_t  *oloc;
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5Odecr_refcount, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Get the object's oloc so we can adjust its link count */
@@ -559,7 +559,7 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
     H5G_loc_t	loc;                    /* Location info */
     hid_t       ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_API(H5Oexists_by_name, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
 
     /* Check args */
@@ -601,7 +601,7 @@ H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Oget_info, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", loc_id, oinfo);
 
     /* Check args */
@@ -638,7 +638,7 @@ H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lap
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Oget_info_by_name, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*s*xi", loc_id, name, oinfo, lapl_id);
 
     /* Check args */
@@ -688,7 +688,7 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Oget_info_by_idx, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIoh*xi", loc_id, group_name, idx_type, order, n, oinfo,
              lapl_id);
 
@@ -755,7 +755,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Oset_comment, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*s", obj_id, comment);
 
     /* Check args */
@@ -795,7 +795,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Oset_comment_by_name, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*s*si", loc_id, name, comment, lapl_id);
 
     /* Check args */
@@ -840,7 +840,7 @@ H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize)
     H5G_loc_t	loc;                    /* Location of group */
     ssize_t     ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Oget_comment, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("Zs", "i*sz", obj_id, comment, bufsize);
 
     /* Check args */
@@ -879,7 +879,7 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t buf
     H5G_loc_t	loc;                    /* Location of group */
     ssize_t     ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Oget_comment_by_name, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("Zs", "i*s*szi", loc_id, name, comment, bufsize, lapl_id);
 
     /* Check args */
@@ -940,7 +940,7 @@ H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
 {
     herr_t      ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Ovisit, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "iIiIox*x", obj_id, idx_type, order, op, op_data);
 
     /* Check args */
@@ -998,7 +998,7 @@ H5Ovisit_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 {
     herr_t      ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Ovisit_by_name, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIox*xi", loc_id, obj_name, idx_type, order, op, op_data,
              lapl_id);
 
@@ -1049,7 +1049,7 @@ H5Oclose(hid_t object_id)
 {
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5Oclose, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Get the type of the object and close it in the correct way */
@@ -1119,14 +1119,16 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
     hbool_t     store_msg_crt_idx;      /* Whether to always store message creation indices for this file */
     herr_t      ret_value = SUCCEED;    /* return value */
 
-    FUNC_ENTER_NOAPI(H5O_create, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
-    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
     HDassert(loc);
     HDassert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
 
+    /* Check for invalid access request */
+    if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "no write intent on file")
 
     /* Make certain we allocate at least a reasonable size for the object header */
     size_hint = H5O_ALIGN_F(f, MAX(H5O_MIN_SIZE, size_hint));
@@ -1303,7 +1305,7 @@ H5O_open(H5O_loc_t *loc)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_open, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(loc);
@@ -1347,7 +1349,7 @@ H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id, hbool_t app_ref)
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     hid_t       ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI(H5O_open_name, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(loc);
@@ -1395,7 +1397,7 @@ H5O_open_by_loc(const H5G_loc_t *obj_loc, hid_t lapl_id, hid_t dxpl_id, hbool_t 
     const H5O_obj_class_t *obj_class;   /* Class of object for location */
     hid_t      ret_value;               /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_open_by_loc, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(obj_loc);
 
@@ -1430,7 +1432,7 @@ H5O_close(H5O_loc_t *loc)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_close, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(loc);
@@ -1491,7 +1493,7 @@ H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, hbool_t *deleted)
     haddr_t addr = H5O_OH_GET_ADDR(oh);     /* Object header address */
     int	ret_value;                      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_link_oh, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -1607,7 +1609,7 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
     hbool_t deleted = FALSE;            /* Whether the object was deleted */
     int	ret_value;                      /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5O_link, dxpl_id, loc->addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, loc->addr, FAIL)
 
     /* check args */
     HDassert(loc);
@@ -1658,7 +1660,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
     unsigned file_intent;       /* R/W intent on file */
     H5O_t *ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5O_protect, dxpl_id, loc->addr, NULL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, loc->addr, NULL)
 
     /* check args */
     HDassert(loc);
@@ -1875,7 +1877,7 @@ H5O_pin(const H5O_loc_t *loc, hid_t dxpl_id)
     H5O_t       *oh = NULL;     /* Object header */
     H5O_t       *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_pin, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* check args */
     HDassert(loc);
@@ -1921,7 +1923,7 @@ H5O_unpin(H5O_t *oh)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_unpin, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(oh);
@@ -1957,7 +1959,7 @@ H5O_unprotect(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh, unsigned oh_flags)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_unprotect, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(loc);
@@ -1994,7 +1996,7 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
     time_t	now;                    /* Current time */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_touch_oh)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(f);
     HDassert(oh);
@@ -2088,7 +2090,7 @@ H5O_touch(const H5O_loc_t *loc, hbool_t force, hid_t dxpl_id)
     unsigned 	oh_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting object header */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_touch, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(loc);
@@ -2132,7 +2134,7 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
     int	idx;                        /* Local index variable */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_bogus_oh, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(f);
     HDassert(oh);
@@ -2198,7 +2200,7 @@ H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     unsigned oh_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting object header */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5O_delete, dxpl_id, addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, addr, FAIL)
 
     /* Check args */
     HDassert(f);
@@ -2252,7 +2254,7 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     unsigned	u;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_delete_oh)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(f);
@@ -2291,7 +2293,7 @@ H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type, hid_t dxpl_id)
     H5O_t	*oh = NULL;             /* Object header for location */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5O_obj_type, dxpl_id, loc->addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, loc->addr, FAIL)
 
     /* Load the object header */
     if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
@@ -2327,7 +2329,7 @@ H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type)
 {
     const H5O_obj_class_t *obj_class;           /* Class of object for header */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_obj_type_real)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(oh);
@@ -2369,7 +2371,7 @@ H5O_obj_class(const H5O_loc_t *loc, hid_t dxpl_id)
     H5O_t	*oh = NULL;                     /* Object header for location */
     const H5O_obj_class_t *ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_obj_class, dxpl_id, loc->addr, NULL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, loc->addr, NULL)
 
     /* Load the object header */
     if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
@@ -2406,7 +2408,7 @@ H5O_obj_class_real(H5O_t *oh)
     size_t	i;                      /* Local index variable */
     const H5O_obj_class_t *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_obj_class_real, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity check */
     HDassert(oh);
@@ -2448,7 +2450,7 @@ H5O_get_loc(hid_t object_id)
 {
     H5O_loc_t   *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_get_loc)
+    FUNC_ENTER_NOAPI_NOINIT
 
     switch(H5I_get_type(object_id)) {
         case H5I_GROUP:
@@ -2504,7 +2506,7 @@ done:
 herr_t
 H5O_loc_reset(H5O_loc_t *loc)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_loc_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(loc);
@@ -2542,7 +2544,7 @@ H5O_loc_reset(H5O_loc_t *loc)
 herr_t
 H5O_loc_copy(H5O_loc_t *dst, H5O_loc_t *src, H5_copy_depth_t depth)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_loc_copy)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(src);
@@ -2584,7 +2586,7 @@ H5O_loc_copy(H5O_loc_t *dst, H5O_loc_t *src, H5_copy_depth_t depth)
 herr_t
 H5O_loc_hold_file(H5O_loc_t *loc)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_loc_hold_file)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(loc);
@@ -2620,7 +2622,7 @@ H5O_loc_free(H5O_loc_t *loc)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_loc_free)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(loc);
@@ -2659,7 +2661,7 @@ H5O_get_hdr_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_hdr_info_t *hdr)
     H5O_t *oh = NULL;                   /* Object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_get_hdr_info, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(loc);
@@ -2704,7 +2706,7 @@ H5O_get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
     const H5O_chunk_t *curr_chunk;	/* Pointer to current message being operated on */
     unsigned u;                         /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_get_hdr_info_real)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(oh);
@@ -2786,7 +2788,7 @@ H5O_get_info(const H5O_loc_t *loc, hid_t dxpl_id, hbool_t want_ih_info,
     H5O_t *oh = NULL;                   /* Object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5O_get_info, dxpl_id, loc->addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, loc->addr, FAIL)
 
     /* Check args */
     HDassert(loc);
@@ -2907,7 +2909,7 @@ H5O_get_create_plist(const H5O_loc_t *loc, hid_t dxpl_id, H5P_genplist_t *oc_pli
     H5O_t *oh = NULL;                   /* Object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_get_create_plist, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(loc);
@@ -2962,7 +2964,7 @@ H5O_get_nlinks(const H5O_loc_t *loc, hid_t dxpl_id, hsize_t *nlinks)
     H5O_t *oh = NULL;                   /* Object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_get_nlinks, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(loc);
@@ -3003,7 +3005,7 @@ H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc
     size_t u;                           /* Local index variable */
     void *ret_value = NULL;             /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_obj_create, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity checks */
     HDassert(f);
@@ -3051,8 +3053,8 @@ done:
 haddr_t
 H5O_get_oh_addr(const H5O_t *oh)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_get_oh_addr)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(oh);
     HDassert(oh->chunk);
@@ -3080,7 +3082,7 @@ H5O_get_rc_and_type(const H5O_loc_t *loc, hid_t dxpl_id, unsigned *rc, H5O_type_
     H5O_t *oh = NULL;                   /* Object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_get_rc_and_type, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(loc);
@@ -3121,7 +3123,7 @@ done:
 static herr_t
 H5O_free_visit_visited(void *item, void UNUSED *key, void UNUSED *operator_data/*in,out*/)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_free_visit_visited)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     item = H5FL_FREE(H5_obj_t, item);
 
@@ -3153,7 +3155,7 @@ H5O_visit_cb(hid_t UNUSED group, const char *name, const H5L_info_t *linfo,
     hbool_t     obj_found = FALSE;      /* Object at 'name' found */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_visit_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(name);
@@ -3268,7 +3270,7 @@ H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     hid_t       obj_id = (-1);  /* ID of object */
     herr_t      ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_visit, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Portably initialize user data struct to zeros */
     HDmemset(&udata, 0, sizeof(udata));
@@ -3379,7 +3381,7 @@ H5O_inc_rc(H5O_t *oh)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_inc_rc, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(oh);
@@ -3415,7 +3417,7 @@ H5O_dec_rc(H5O_t *oh)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_dec_rc, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(oh);
@@ -3453,7 +3455,7 @@ H5O_dec_rc_by_loc(const H5O_loc_t *loc, hid_t dxpl_id)
     H5O_t       *oh = NULL;             /* Object header */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_dec_rc_by_loc, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(loc);
@@ -3494,7 +3496,7 @@ H5O_free(H5O_t *oh)
 {
     unsigned	u;                      /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(oh);

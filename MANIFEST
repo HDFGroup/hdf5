@@ -1405,6 +1405,8 @@
 ./tools/testfiles/tnestcomp-1.ddl
 ./tools/testfiles/tnestedcomp.h5
 ./tools/testfiles/tnofilename.ddl
+./tools/testfiles/tno-subset.h5
+./tools/testfiles/tno-subset.ddl
 ./tools/testfiles/tnullspace.h5
 ./tools/testfiles/tnullspace.ddl
 ./tools/testfiles/tobjref.h5
@@ -1580,6 +1582,8 @@
 ./tools/testfiles/tsaf.ls
 ./tools/testfiles/tstr-1.ls
 ./tools/testfiles/tattr2.ls
+./tools/testfiles/tattrreg_le.ls
+./tools/testfiles/tattrreg_be.ls
 ./tools/testfiles/tvldtypes1.ls
 ./tools/testfiles/tvldtypes2le.ls
 ./tools/testfiles/tvldtypes2be.ls
@@ -1837,6 +1841,7 @@
 ./tools/h5diff/testfiles/h5diff_457.txt
 ./tools/h5diff/testfiles/h5diff_458.txt
 ./tools/h5diff/testfiles/h5diff_459.txt
+./tools/h5diff/testfiles/h5diff_465.txt
 ./tools/h5diff/testfiles/h5diff_480.txt
 ./tools/h5diff/testfiles/h5diff_481.txt
 ./tools/h5diff/testfiles/h5diff_482.txt
@@ -2195,7 +2200,6 @@
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/cacheinit.cmake
 ./config/cmake/mccacheinit.cmake
-./config/cmake/CTest.cmake
 ./config/cmake/grepTest.cmake
 ./config/cmake/prunTest.cmake
 ./config/cmake/runTest.cmake

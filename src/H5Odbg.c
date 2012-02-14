@@ -102,7 +102,7 @@ H5O_assert(const H5O_t *oh)
     size_t hdr_size;                    /* Size of header's chunks */
     unsigned u, v;                      /* Local index variables */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_assert)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Initialize the tracking variables */
     hdr_size = 0;
@@ -237,7 +237,7 @@ H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *
     const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
     herr_t      ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_debug_id,FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -284,7 +284,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
     unsigned	i;              /* Local index variable */
     herr_t	ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5O_debug_real, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -537,7 +537,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     H5O_loc_t   loc;                    /* Object location for object to delete */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_debug, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);

@@ -90,7 +90,7 @@ H5O_name_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     H5O_name_t          *mesg;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_name_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -135,7 +135,7 @@ H5O_name_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, cons
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_name_encode);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     assert(f);
@@ -145,7 +145,7 @@ H5O_name_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, cons
     /* encode */
     HDstrcpy((char*)p, mesg->s);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -174,7 +174,7 @@ H5O_name_copy(const void *_mesg, void *_dest)
     H5O_name_t             *dest = (H5O_name_t *) _dest;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_name_copy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(mesg);
@@ -225,7 +225,7 @@ H5O_name_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void *
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
     size_t                  ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_name_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     assert(f);
@@ -233,7 +233,7 @@ H5O_name_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void *
 
     ret_value = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -258,7 +258,7 @@ H5O_name_reset(void *_mesg)
 {
     H5O_name_t             *mesg = (H5O_name_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_name_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(mesg);
@@ -291,7 +291,7 @@ H5O_name_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *s
 {
     const H5O_name_t	*mesg = (const H5O_name_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_name_debug);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     assert(f);
@@ -304,5 +304,5 @@ H5O_name_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *s
             "Name:",
             mesg->s);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }

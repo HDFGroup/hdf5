@@ -64,7 +64,7 @@ H5Z_init_deflate(void)
     H5Z_class_int_t     fclass;         /* Filter class */
     herr_t              ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5Z_init_deflate)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Build filter class struct */
     fclass.version = H5Z_CLASS_T_VERS_3;        /* H5Z_class_t version */
@@ -110,7 +110,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
     int		status;                 /* Status from zlib operation */
     size_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_filter_deflate, 0)
+    FUNC_ENTER_NOAPI(0)
 
     /* Sanity check */
     HDassert(*buf_size > 0);

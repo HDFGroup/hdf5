@@ -235,7 +235,7 @@ DESCRIPTION
 static herr_t
 H5FD_direct_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_direct_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5FD_direct_init())
 } /* H5FD_direct_init_interface() */
@@ -263,7 +263,7 @@ H5FD_direct_init(void)
 {
     hid_t ret_value;        /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_direct_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if (H5I_VFL!=H5I_get_type(H5FD_DIRECT_g))
         H5FD_DIRECT_g = H5FD_register(&H5FD_direct_g,sizeof(H5FD_class_t),FALSE);
@@ -291,7 +291,7 @@ done:
 static herr_t
 H5FD_direct_term(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_direct_term)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Reset VFL ID */
     H5FD_DIRECT_g=0;
@@ -323,7 +323,7 @@ H5Pset_fapl_direct(hid_t fapl_id, size_t boundary, size_t block_size, size_t cbu
     H5FD_direct_fapl_t  fa;
     herr_t              ret_value;
 
-    FUNC_ENTER_API(H5Pset_fapl_direct, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "izzz", fapl_id, boundary, block_size, cbuf_size);
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
@@ -381,7 +381,7 @@ H5Pget_fapl_direct(hid_t fapl_id, size_t *boundary/*out*/, size_t *block_size/*o
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_fapl_direct, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "ixxx", fapl_id, boundary, block_size, cbuf_size);
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
@@ -428,7 +428,7 @@ H5FD_direct_fapl_get(H5FD_t *_file)
     H5FD_direct_fapl_t  *fa = NULL;
     void *ret_value;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_direct_fapl_get, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate new driver fapl object */
     if(NULL == (fa = (H5FD_direct_fapl_t *)H5MM_malloc(sizeof(H5FD_direct_fapl_t))))
@@ -469,20 +469,15 @@ H5FD_direct_fapl_copy(const void *_old_fa)
 {
     const H5FD_direct_fapl_t *old_fa = (const H5FD_direct_fapl_t*)_old_fa;
     H5FD_direct_fapl_t *new_fa = (H5FD_direct_fapl_t *)H5MM_malloc(sizeof(H5FD_direct_fapl_t));
-    void *ret_value;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_direct_fapl_copy, NULL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(new_fa);
 
     /* Copy the general information */
     HDmemcpy(new_fa, old_fa, sizeof(H5FD_direct_fapl_t));
 
-    /* Set return value */
-    ret_value=new_fa;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(new_fa)
 } /* end H5FD_direct_fapl_copy() */
 
 
@@ -520,7 +515,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     int                 *buf1, *buf2;
     H5FD_t              *ret_value;
 
-    FUNC_ENTER_NOAPI(H5FD_direct_open, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check on file offsets */
     assert(sizeof(file_offset_t)>=sizeof(size_t));
@@ -658,7 +653,7 @@ H5FD_direct_close(H5FD_t *_file)
     H5FD_direct_t       *file = (H5FD_direct_t*)_file;
     herr_t              ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_direct_close, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     file->block_buf = H5MM_xfree(file->block_buf);
 
@@ -697,7 +692,7 @@ H5FD_direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_direct_t         *f2 = (const H5FD_direct_t*)_f2;
     int ret_value=0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_direct_cmp)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef H5_HAVE_WIN32_API
     if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)
@@ -754,9 +749,7 @@ done:
 static herr_t
 H5FD_direct_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
 {
-    herr_t ret_value=SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5FD_direct_query, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -768,8 +761,7 @@ H5FD_direct_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
         *flags|=H5FD_FEAT_ALIGNED_MEM;      /* Library should try to align memory buffers */
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -798,15 +790,10 @@ static haddr_t
 H5FD_direct_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 {
     const H5FD_direct_t         *file = (const H5FD_direct_t*)_file;
-    haddr_t ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_direct_get_eoa, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Set return value */
-    ret_value=file->eoa;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(file->eoa)
 }
 
 
@@ -835,14 +822,12 @@ static herr_t
 H5FD_direct_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
 {
     H5FD_direct_t       *file = (H5FD_direct_t*)_file;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_direct_set_eoa, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     file->eoa = addr;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -870,15 +855,10 @@ static haddr_t
 H5FD_direct_get_eof(const H5FD_t *_file)
 {
     const H5FD_direct_t         *file = (const H5FD_direct_t*)_file;
-    haddr_t ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_direct_get_eof, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT
 
-    /* Set return value */
-    ret_value=MAX(file->eof, file->eoa);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(MAX(file->eof, file->eoa))
 }
 
 
@@ -902,7 +882,7 @@ H5FD_direct_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     H5FD_direct_t       *file = (H5FD_direct_t *)_file;
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5FD_direct_get_handle, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
@@ -952,7 +932,7 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id,
     size_t              copy_size = size;       /* Size remaining to read when using copy buffer */
     size_t              copy_offset;            /* Offset into copy buffer of the requested data */
 
-    FUNC_ENTER_NOAPI(H5FD_direct_read, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     assert(file && file->pub.cls);
     assert(buf);
@@ -1191,7 +1171,7 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
     size_t              copy_size = size;       /* Size remaining to write when using copy buffer */
     size_t              copy_offset;            /* Offset into copy buffer of the data to write */
 
-    FUNC_ENTER_NOAPI(H5FD_direct_write, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     assert(file && file->pub.cls);
     assert(buf);
@@ -1559,7 +1539,7 @@ H5FD_direct_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing
     H5FD_direct_t       *file = (H5FD_direct_t*)_file;
     herr_t              ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_direct_truncate, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     assert(file);
 

@@ -179,7 +179,7 @@ H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     H5A_t *attr = (H5A_t *)mesg->native;        /* Pointer to attribute to insert */
     herr_t ret_value = H5_ITER_CONT;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_to_dense_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -226,7 +226,7 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     htri_t shared_mesg;                 /* Should this message be stored in the Shared Message table? */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(loc);
@@ -424,7 +424,7 @@ H5O_attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
     H5O_iter_opn_t *udata = (H5O_iter_opn_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_open_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -477,7 +477,7 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     htri_t found_open_attr = FALSE;     /* Whether opened object is found */
     H5A_t *ret_value;                   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_attr_open_by_name, dxpl_id, loc->addr, NULL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, loc->addr, NULL)
 
     /* Check arguments */
     HDassert(loc);
@@ -575,7 +575,7 @@ H5O_attr_open_by_idx_cb(const H5A_t *attr, void *_ret_attr)
     H5A_t **ret_attr = (H5A_t **)_ret_attr;     /* 'User data' passed in */
     herr_t ret_value = H5_ITER_STOP;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_open_by_idx_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(attr);
@@ -619,7 +619,7 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     htri_t found_open_attr = FALSE;     /* Whether opened object is found */
     H5A_t *ret_value;                   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_open_by_idx)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(loc);
@@ -697,7 +697,7 @@ H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char* name_t
     size_t num_open_attr;               /* Number of opened attributes */
     htri_t ret_value = FALSE;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_find_opened_attr)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get file serial number for the location of attribute */
     if(H5F_get_fileno(loc->file, &loc_fnum) < 0)
@@ -772,7 +772,7 @@ H5O_attr_update_shared(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5A_t *attr,
     htri_t shared_mesg;                 /* Whether the message should be shared */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_update_shared)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -853,7 +853,7 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     hbool_t chk_dirtied = FALSE;        /* Flag for unprotecting chunk */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_write_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -932,7 +932,7 @@ H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_write)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(loc);
@@ -1010,7 +1010,7 @@ H5O_attr_rename_chk_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_rename_chk_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(oh);
@@ -1058,7 +1058,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     hbool_t chk_dirtied = FALSE;        /* Flag for unprotecting chunk */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_rename_mod_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -1179,7 +1179,7 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_attr_rename, dxpl_id, loc->addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, loc->addr, FAIL)
 
     /* Check arguments */
     HDassert(loc);
@@ -1270,7 +1270,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
     H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
     herr_t ret_value;                   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_attr_iterate_real, dxpl_id, loc->addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, loc->addr, FAIL)
 
     /* Check arguments */
     HDassert(loc);
@@ -1355,7 +1355,7 @@ H5O_attr_iterate(hid_t loc_id, hid_t dxpl_id,
     H5G_loc_t loc;	        /* Object location */
     herr_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_iterate)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(attr_op);
@@ -1400,7 +1400,7 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo,
     H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_remove_update)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(loc);
@@ -1518,7 +1518,7 @@ H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_remove_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -1566,7 +1566,7 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     htri_t ainfo_exists = FALSE;        /* Whether the attribute info exists in the file */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_attr_remove, dxpl_id, loc->addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, loc->addr, FAIL)
 
     /* Check arguments */
     HDassert(loc);
@@ -1651,7 +1651,7 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_attr_remove_by_idx, dxpl_id, loc->addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, loc->addr, FAIL)
 
     /* Check arguments */
     HDassert(loc);
@@ -1739,7 +1739,7 @@ H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hsize_t *nattrs)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_attr_count_real, dxpl_id, oh->cache_info.addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, oh->cache_info.addr, FAIL)
 
     /* Check arguments */
     HDassert(f);
@@ -1797,7 +1797,7 @@ H5O_attr_exists_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_exists_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(mesg);
@@ -1835,7 +1835,7 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     H5O_ainfo_t ainfo;          /* Attribute information for object */
     htri_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_attr_exists, dxpl_id, loc->addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, loc->addr, FAIL)
 
     /* Check arguments */
     HDassert(loc);
@@ -1907,7 +1907,7 @@ H5O_attr_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
     H5B2_t      *bt2_corder = NULL;         /* v2 B-tree handle for creation order index */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_attr_bh_info, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(f);
     HDassert(oh);
@@ -1990,7 +1990,7 @@ H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id)
     hsize_t nattrs;             /* Number of attributes */
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_count)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(loc);

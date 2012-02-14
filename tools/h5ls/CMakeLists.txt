@@ -38,6 +38,8 @@ IF (BUILD_TESTING)
       tall-2.ls
       tarray1.ls
       tattr2.ls
+      tattrreg_le.ls
+      tattrreg_be.ls
       tcomp-1.ls
       tdataregbe.ls
       tdataregle.ls
@@ -88,6 +90,7 @@ IF (BUILD_TESTING)
       tall.h5
       tarray1.h5
       tattr2.h5
+      tattrreg.h5
       tcompound.h5
       tdatareg.h5
       tdset.h5
@@ -395,16 +398,28 @@ IF (BUILD_TESTING)
   # enable -S for avoiding printing NATIVE types
   ADD_H5_TEST (tattr2 0 -w80 -v -S tattr2.h5)
 
+  # test for attribute with region references wo verbose mode
+  # ( HDFFV-7838, )
+  IF (H5_WORDS_BIGENDIAN)
+    ADD_H5_TEST (tattrreg_be 0 -w80 -v -d tattrreg.h5)
+  ELSE (H5_WORDS_BIGENDIAN)
+    ADD_H5_TEST (tattrreg_le 0 -w80 -v -d tattrreg.h5)
+  ENDIF (H5_WORDS_BIGENDIAN)
+
   # test for non-existing file
   ADD_H5_TEST (nosuchfile 1 nosuchfile.h5)
 
+  # test for variable length data types in verbose mode
   IF (H5_WORDS_BIGENDIAN)
-    # test for variable length data types in verbose mode
     ADD_H5_TEST (tvldtypes2be 0 -v tvldtypes1.h5)
-    # test for dataset region references data types in verbose mode
-    ADD_H5_TEST (tdataregbe 0 -v tdatareg.h5)
   ELSE (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tvldtypes2le 0 -v tvldtypes1.h5)
+  ENDIF (H5_WORDS_BIGENDIAN)
+
+  # test for dataset region references data types in verbose mode
+  IF (H5_WORDS_BIGENDIAN)
+    ADD_H5_TEST (tdataregbe 0 -v tdatareg.h5)
+  ELSE (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tdataregle 0 -v tdatareg.h5)
   ENDIF (H5_WORDS_BIGENDIAN)
 

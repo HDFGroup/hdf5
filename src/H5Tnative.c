@@ -60,7 +60,7 @@ DESCRIPTION
 static herr_t
 H5T_init_native_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_native_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_native_interface() */
@@ -104,7 +104,7 @@ H5Tget_native_type(hid_t type_id, H5T_direction_t direction)
     size_t      comp_size=0;        /* Compound datatype's size */
     hid_t       ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Tget_native_type, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("i", "iTd", type_id, direction);
 
     /* check argument */
@@ -170,7 +170,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
     unsigned    u;                  /* Local index variable */
     H5T_t       *ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_get_native_type, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     assert(dtype);
 
@@ -568,7 +568,7 @@ H5T_get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
     } match = H5T_NATIVE_INT_MATCH_UNKNOWN;
     H5T_t       *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_get_native_integer, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
         if(prec <= H5Tget_precision(H5T_NATIVE_SCHAR)) {
@@ -708,7 +708,7 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
     } match=H5T_NATIVE_FLOAT_MATCH_UNKNOWN;
     H5T_t       *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_get_native_float, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     assert(size>0);
 
@@ -826,7 +826,7 @@ H5T_get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_a
     size_t      native_size=0;  /* Datatype size of the native type */
     H5T_t       *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_get_native_bitfield, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
         if(prec<=H5Tget_precision(H5T_NATIVE_B8)) {
@@ -909,7 +909,7 @@ H5T_cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size,
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5T_cmp_offset, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if(offset && comp_size) {
         if(align>1 && *comp_size%align) {

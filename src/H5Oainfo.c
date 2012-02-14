@@ -112,7 +112,7 @@ H5O_ainfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     unsigned char flags;        /* Flags for encoding attribute info */
     void        *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_ainfo_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -184,7 +184,7 @@ H5O_ainfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
     const H5O_ainfo_t   *ainfo = (const H5O_ainfo_t *)_mesg;
     unsigned char       flags;          /* Flags for encoding attribute info */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_ainfo_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);
@@ -241,7 +241,7 @@ H5O_ainfo_copy(const void *_mesg, void *_dest)
     H5O_ainfo_t         *dest = (H5O_ainfo_t *) _dest;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_ainfo_copy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(ainfo);
@@ -281,7 +281,7 @@ H5O_ainfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     const H5O_ainfo_t   *ainfo = (const H5O_ainfo_t *)_mesg;
     size_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_ainfo_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set return value */
     ret_value = 1                       /* Version */
@@ -310,7 +310,7 @@ H5O_ainfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
 static herr_t
 H5O_ainfo_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_ainfo_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(mesg);
 
@@ -338,7 +338,7 @@ H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
     H5O_ainfo_t *ainfo = (H5O_ainfo_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_ainfo_delete)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -372,7 +372,7 @@ static herr_t
 H5O_ainfo_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void UNUSED *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_ainfo_pre_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(deleted);
@@ -409,7 +409,7 @@ H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     H5O_ainfo_t *ainfo_dst = NULL;
     void        *ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_ainfo_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(file_src);
@@ -473,7 +473,7 @@ H5O_ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     const H5O_ainfo_t *ainfo_src = (const H5O_ainfo_t *)mesg_src;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_ainfo_post_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(ainfo_src);
 
@@ -507,7 +507,7 @@ H5O_ainfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
 {
     const H5O_ainfo_t       *ainfo = (const H5O_ainfo_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_ainfo_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);

@@ -120,7 +120,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
     size_t      max_idx = 0;            /* The maximum index seen */
     H5HG_heap_t	*ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_load)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -284,7 +284,7 @@ H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HG_heap_t *
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(f);
@@ -324,7 +324,7 @@ H5HG_dest(H5F_t *f, H5HG_heap_t *heap)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(heap);
@@ -369,7 +369,7 @@ H5HG_clear(H5F_t *f, H5HG_heap_t *heap, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_clear)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(heap);
@@ -403,7 +403,7 @@ done:
 static herr_t
 H5HG_size(const H5F_t UNUSED *f, const H5HG_heap_t *heap, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(heap);

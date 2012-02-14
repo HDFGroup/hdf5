@@ -98,7 +98,7 @@ DESCRIPTION
 static herr_t
 H5F_init_deprec_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_init_deprec_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5F_init())
 } /* H5F_init_deprec_interface() */
@@ -128,7 +128,7 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo)
     H5F_t *f;                           /* Top file in mount hierarchy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Fget_info1, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", obj_id, finfo);
 
     /* Check args */

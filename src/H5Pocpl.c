@@ -133,7 +133,7 @@ H5P_ocrt_reg_prop(H5P_genclass_t *pclass)
     H5O_pline_t pline = H5O_CRT_PIPELINE_DEF;           /* Default I/O pipeline setting */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_ocrt_reg_prop)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Register max. compact attribute storage property */
     if(H5P_register_real(pclass, H5O_CRT_ATTR_MAX_COMPACT_NAME, H5O_CRT_ATTR_MAX_COMPACT_SIZE, &attr_max_compact, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -180,7 +180,7 @@ H5P_ocrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
     H5P_genplist_t *dst_plist;                  /* Pointer to destination property list */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_ocrt_copy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Verify property list IDs */
     if(NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_plist_id)))
@@ -228,7 +228,7 @@ H5P_ocrt_close(hid_t dcpl_id, void UNUSED *close_data)
     H5P_genplist_t *plist;              /* Property list */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_ocrt_close)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
@@ -275,7 +275,7 @@ H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pset_attr_phase_change, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iIuIu", plist_id, max_compact, min_dense);
 
     /* Range check values */
@@ -319,7 +319,7 @@ H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_de
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pget_attr_phase_change, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*Iu*Iu", plist_id, max_compact, min_dense);
 
     /* Get the plist structure */
@@ -360,7 +360,7 @@ H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags)
     uint8_t ohdr_flags;                 /* Object header flags */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pset_attr_creation_order, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", plist_id, crt_order_flags);
 
     /* Check for bad combination of flags */
@@ -409,7 +409,7 @@ H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags)
 {
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_attr_creation_order, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Iu", plist_id, crt_order_flags);
 
     /* Get values */
@@ -471,7 +471,7 @@ H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times)
     uint8_t ohdr_flags;                 /* Object header flags */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pset_obj_track_times, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ib", plist_id, track_times);
 
     /* Get the plist structure */
@@ -514,7 +514,7 @@ H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times)
 {
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_obj_track_times, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*b", plist_id, track_times);
 
     /* Get values */
@@ -582,7 +582,7 @@ H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned flags,
     H5O_pline_t         pline;
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_NOAPI(H5P_modify_filter, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the pipeline property to modify */
     if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
@@ -651,7 +651,7 @@ H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
     H5P_genplist_t  *plist;                 /* Property list */
     herr_t          ret_value = SUCCEED;    /* return value */
 
-    FUNC_ENTER_API(H5Pmodify_filter, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "iZfIuz*[a3]Iu", plist_id, filter, flags, cd_nelmts, cd_values);
 
     /* Check args */
@@ -728,7 +728,7 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
     H5O_pline_t     pline;              /* Filter pipeline */
     herr_t          ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER_API(H5Pset_filter, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "iZfIuz*[a3]Iu", plist_id, filter, flags, cd_nelmts, cd_values);
 
     /* Check args */
@@ -794,7 +794,7 @@ H5Pget_nfilters(hid_t plist_id)
     H5O_pline_t     pline;          /* Filter pipeline */
     int             ret_value;      /* return value */
 
-    FUNC_ENTER_API(H5Pget_nfilters, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("Is", "i", plist_id);
 
     /* Get the plist structure */
@@ -855,7 +855,7 @@ H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
     const H5Z_filter_info_t *filter;    /* Pointer to filter information */
     H5Z_filter_t    ret_value;          /* return value */
 
-    FUNC_ENTER_API(H5Pget_filter2, H5Z_FILTER_ERROR)
+    FUNC_ENTER_API(H5Z_FILTER_ERROR)
     H5TRACE8("Zf", "iIux*zxzxx", plist_id, idx, flags, cd_nelmts, cd_values,
              namelen, name, filter_config);
 
@@ -938,7 +938,7 @@ H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, unsigned int *flags
     H5Z_filter_info_t *filter;  /* Pointer to filter information */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_get_filter_by_id, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get pipeline info */
     if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
@@ -994,7 +994,7 @@ H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/
     H5P_genplist_t  *plist;                 /* Property list */
     herr_t          ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Pget_filter_by_id2, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "iZfx*zxzx*Iu", plist_id, id, flags, cd_nelmts, cd_values,
              namelen, name, filter_config);
 
@@ -1062,7 +1062,7 @@ H5Pall_filters_avail(hid_t plist_id)
     H5O_pline_t     pline;          /* Filter pipeline */
     htri_t          ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Pall_filters_avail, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "i", plist_id);
 
     /* Get the plist structure */
@@ -1109,7 +1109,7 @@ H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
     H5O_pline_t     pline;                  /* Filter pipeline */
     herr_t          ret_value = SUCCEED;    /* return value          */
 
-    FUNC_ENTER_API(H5Premove_filter, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iZf", plist_id, filter);
 
     /* Get the plist structure */
@@ -1173,7 +1173,7 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
     H5O_pline_t     pline;                  /* Filter pipeline */
     herr_t          ret_value = SUCCEED;    /* return value */
 
-    FUNC_ENTER_API(H5Pset_deflate, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", plist_id, level);
 
     /* Check arguments */
@@ -1228,7 +1228,7 @@ H5Pset_fletcher32(hid_t plist_id)
     H5O_pline_t     pline;              /* Filter pipeline */
     herr_t          ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER_API(H5Pset_fletcher32, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", plist_id);
 
     /* Get the plist structure */
@@ -1270,7 +1270,7 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
     size_t namelen, char name[]/*out*/,
     unsigned *filter_config /*out*/)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_get_filter)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(filter);
@@ -1351,7 +1351,7 @@ H5P_ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t UNUSED si
     int cmp_value;              /* Value from comparison */
     herr_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5P_ocrt_pipeline_cmp)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(pline1);
@@ -1448,7 +1448,7 @@ H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
     H5P_genplist_t *plist;      /* Property list pointer */
     H5Z_filter_t ret_value;     /* return value */
 
-    FUNC_ENTER_API(H5Pget_filter1, H5Z_FILTER_ERROR)
+    FUNC_ENTER_API(H5Z_FILTER_ERROR)
     H5TRACE7("Zf", "iIux*zxzx", plist_id, idx, flags, cd_nelmts, cd_values, namelen,
              name);
 
@@ -1529,7 +1529,7 @@ H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API(H5Pget_filter_by_id1, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "iZfx*zxzx", plist_id, id, flags, cd_nelmts, cd_values, namelen,
              name);
 

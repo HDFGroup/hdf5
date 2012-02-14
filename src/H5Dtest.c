@@ -87,7 +87,7 @@ H5D_layout_version_test(hid_t did, unsigned *version)
     H5D_t	*dset;          /* Pointer to dataset to query */
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_NOAPI(H5D_layout_version_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
@@ -126,7 +126,7 @@ H5D_layout_contig_size_test(hid_t did, hsize_t *size)
     H5D_t	*dset;          /* Pointer to dataset to query */
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_NOAPI(H5D_layout_contig_size_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
@@ -167,7 +167,7 @@ H5D_current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused)
     H5D_t	*dset;          /* Pointer to dataset to query */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_NOAPI(H5D_current_cache_size_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))

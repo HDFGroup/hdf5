@@ -116,7 +116,7 @@ H5P_lcrt_reg_prop(H5P_genclass_t *pclass)
     unsigned intmd_group = H5L_CRT_INTERMEDIATE_GROUP_DEF;      /* Default setting for creating intermediate groups */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_lcrt_reg_prop, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Register create intermediate groups property */
     if(H5P_register_real(pclass, H5L_CRT_INTERMEDIATE_GROUP_NAME, H5L_CRT_INTERMEDIATE_GROUP_SIZE, &intmd_group, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -147,7 +147,7 @@ H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd_group)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5Pset_create_intermediate_group, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", plist_id, crt_intmd_group);
 
     /* Get the plist structure */
@@ -182,7 +182,7 @@ H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd_group /*out
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Pget_create_intermediate_group, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, crt_intmd_group);
 
     /* Get the plist structure */

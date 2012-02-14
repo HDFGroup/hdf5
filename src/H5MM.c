@@ -59,8 +59,8 @@
 void *
 H5MM_malloc(size_t size)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_malloc);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(size);
 
@@ -92,8 +92,8 @@ H5MM_malloc(size_t size)
 void *
 H5MM_calloc(size_t size)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_calloc);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(size);
 
@@ -129,8 +129,8 @@ H5MM_realloc(void *mem, size_t size)
 {
     void *ret_value;
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_realloc)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(NULL == mem) {
 	if(0 == size)
@@ -167,7 +167,7 @@ H5MM_xstrdup(const char *s)
 {
     char	*ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(H5MM_xstrdup, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     if(s) {
         if(NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
@@ -203,7 +203,7 @@ H5MM_strdup(const char *s)
 {
     char *ret_value;
 
-    FUNC_ENTER_NOAPI(H5MM_strdup, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     if(!s)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "null string")
@@ -238,8 +238,8 @@ done:
 void *
 H5MM_xfree(void *mem)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_xfree);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(mem)
         HDfree(mem);
@@ -271,7 +271,7 @@ H5MM_aligned_malloc(size_t size, H5FD_t *lf)
 {
     void                    *ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MM_aligned_malloc, NULL);
+    FUNC_ENTER_NOAPI(NULL);
 
     HDassert(size);
     HDassert(lf);
@@ -315,7 +315,7 @@ H5MM_aligned_realloc(void *mem, size_t old_size, size_t new_size, H5FD_t *lf)
 {
     void *ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MM_aligned_realloc, NULL);
+    FUNC_ENTER_NOAPI(NULL);
 
     HDassert(lf);
     HDassert(lf->feature_flags & H5FD_FEAT_ALIGNED_MEM);
@@ -378,7 +378,7 @@ H5MM_aligned_realloc_mark(void *mem, size_t old_size, size_t new_size,
     hbool_t aligned_mem_set = FALSE; /* Whether the aligned memory property has been set */
     void *ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MM_aligned_realloc_mark, NULL);
+    FUNC_ENTER_NOAPI(NULL);
 
     HDassert(lf);
     HDassert(lf->feature_flags & H5FD_FEAT_ALIGNED_MEM);
@@ -481,7 +481,7 @@ H5MMaligned_malloc(size_t size, hid_t loc_id, hid_t dxpl_id)
     void        *buf;           /* Allocated buffer */
     void        *ret_value;     /* Return value */
 
-    FUNC_ENTER_API(H5MMaligned_malloc, NULL);
+    FUNC_ENTER_API(NULL);
     H5TRACE3("*x", "zii", size, loc_id, dxpl_id);
 
     /* Check args */
@@ -557,7 +557,7 @@ H5MMaligned_free(void *mem, hid_t loc_id, hid_t dxpl_id)
     H5G_loc_t    loc;           /* Location of object in file */
     herr_t       ret_value = 0; /* Return value */
 
-    FUNC_ENTER_API(H5MMaligned_free, FAIL);
+    FUNC_ENTER_API(FAIL);
     H5TRACE3("e", "*xii", mem, loc_id, dxpl_id);
 
     /* Check args */
