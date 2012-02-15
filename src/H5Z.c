@@ -1225,7 +1225,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 
                 /* If the buffer property does not match the expected value,
                  * unset the aligned memory property */
-                if(aligned_mem.aligned && (aligned_mem.buf != buf
+                if(aligned_mem.aligned && (aligned_mem.buf != *buf
                         || aligned_mem.size != *buf_size)) {
                     aligned_mem.aligned = FALSE;
                     aligned_mem.buf = NULL;
@@ -1303,7 +1303,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 
                 /* If the buffer property does not match the expected value,
                  * unset the aligned memory property */
-                if(aligned_mem.aligned && (aligned_mem.buf != buf
+                if(aligned_mem.aligned && (aligned_mem.buf != *buf
                         || aligned_mem.size != *buf_size)) {
                     aligned_mem.aligned = FALSE;
                     aligned_mem.buf = NULL;
