@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.6)
 PROJECT (HDF5_TOOLS_LIB)
 
 #-----------------------------------------------------------------------------
@@ -38,8 +38,9 @@ H5_SET_LIB_OPTIONS (
     ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TOOLS_LIB_NAME}
     ${LIB_TYPE}
     HDF5_TOOLS_LIB_NAME_RELEASE
-	HDF5_TOOLS_LIB_NAME_DEBUG
+  HDF5_TOOLS_LIB_NAME_DEBUG
 )
+SET_TARGET_PROPERTIES (hdf5_tools PROPERTIES FOLDER libraries/tools)
 
 ##############################################################################
 ##############################################################################
@@ -54,7 +55,7 @@ INSTALL (
     FILES
         ${H5_TOOLS_LIB_HDRS}
     DESTINATION
-        ${HDF5_INSTALL_INCLUDE_DIR}/tools
+        ${HDF5_INSTALL_INCLUDE_DIR}
     COMPONENT
         toolsheaders
 )
@@ -68,7 +69,7 @@ IF (APPLE)
     IF (HDF5_BUILD_WITH_INSTALL_NAME)
       SET_TARGET_PROPERTIES(${HDF5_TOOLS_LIB_TARGET} PROPERTIES
       LINK_FLAGS "-current_version ${HDF5_PACKAGE_VERSION} -compatibility_version ${HDF5_PACKAGE_VERSION}"
-      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib/tools"
+      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
       BUILD_WITH_INSTALL_RPATH ${HDF5_BUILD_WITH_INSTALL_NAME}
       )
     ENDIF (HDF5_BUILD_WITH_INSTALL_NAME)
@@ -83,8 +84,8 @@ IF (HDF5_EXPORTED_TARGETS)
           ${HDF5_TOOLS_LIB_TARGET}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
-      LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR}/tools COMPONENT toolslibraries
-      ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR}/tools COMPONENT toolslibraries
-      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR}/tools COMPONENT toolslibraries
+      LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT toolslibraries
+      ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT toolslibraries
+      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolslibraries
   )
 ENDIF (HDF5_EXPORTED_TARGETS)

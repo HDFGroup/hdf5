@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Off.f90</title>
+<!-- Source: ./src/H5Off.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5O"></a>
+<a name="robo56"></a><h2>H5O</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  MODULE <strong>H5O</strong>
+</pre>
+<p class="item_name">FILE</p>
+<pre>  fortran/src/<a href="#robo_top_of_doc">H5Off.f90</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran interfaces for <strong>H5O</strong> functions. It includes
+  all the functions that are independent on whether the Fortran 2003 functions
+  are enabled or disabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <strong>H5O</strong> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5O2fh5oclose5ff"></a>
+<a name="robo193"></a><h2>h5oclose_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo56">H5O</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5oclose_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Closes an object in an <a href="./HDF5_f90.html#robo76">HDF5</a> file.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  object_id     - Object identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  December 17, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5oclose_f</strong><span class="sign">(</span>object_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> object_id
+    INTEGER<span class="sign">,</span>        INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr
+</pre>
+
+<hr />
+<a name="H5O2fh5olink5ff"></a>
+<a name="robo195"></a><h2>h5olink_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo56">H5O</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5olink_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a hard link to an object in an <a href="./HDF5_f90.html#robo76">HDF5</a> file.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  object_id     - Object to be linked.
+  new_loc_id    - File or group identifier specifying location at which object is to be linked.
+  new_link_name - Name of link to be created, relative to new_loc_id.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lcpl_id       - Link creation property list identifier.
+  lapl_id       - Link access property list identifier.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  April 21, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5olink_f</strong><span class="sign">(</span>object_id<span class="sign">,</span> new_loc_id<span class="sign">,</span> new_link_name<span class="sign">,</span> hdferr<span class="sign">,</span> lcpl_id<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> object_id  <span class="sign">!</span> Object to be linked
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> new_loc_id <span class="sign">!</span> File or group identifier specifying
+                                             <span class="sign">!</span> location at which object is to be linked<span class="sign">.</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> new_link_name <span class="sign">!</span> Name of link to be created<span class="sign">,</span> relative to new_loc_id<span class="sign">.</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+                                          <span class="sign">!</span>   Success<span class="sign">:</span>  0
+                                          <span class="sign">!</span>   Failure<span class="sign">:</span> <span class="sign">-</span>1
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lcpl_id <span class="sign">!</span> Link creation property list identifier<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link creation property list identifier<span class="sign">.</span>
+</pre>
+
+<hr />
+<a name="H5O2fh5oopen5ff"></a>
+<a name="robo196"></a><h2>h5oopen_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo56">H5O</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5oopen_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens an object in an <a href="./HDF5_f90.html#robo76">HDF5</a> file by location identifier and path name.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - File or group identifier
+  name          - Path to the object, relative to loc_id.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  obj_id        - Object identifier for the opened object
+  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Access property list identifier for the link pointing to the object
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  April 18, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5oopen_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> obj_id<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id  <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span> Path to the object<span class="sign">,</span> relative to loc_id
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id <span class="sign">!</span> Object identifier <span class="keyword">for</span> the opened object
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+                                          <span class="sign">!</span>   Success<span class="sign">:</span>  0
+                                          <span class="sign">!</span>   Failure<span class="sign">:</span> <span class="sign">-</span>1
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id  <span class="sign">!</span> Attribute access property list
+</pre>
+
+<hr />
+<a name="H5O2fh5open5fby5faddr5ff"></a>
+<a name="robo197"></a><h2>h5open_by_addr_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo56">H5O</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  h5oopen_by_addr_f 
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens an object using its address within an <a href="./HDF5_f90.html#robo76">HDF5</a> file. 
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>    loc_id - File or group identifier
+    addr   - Objectâ€™s address in the file
+ OUTPUTS: 
+    obj_id - Object identifier for the opened object
+    hdferr - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  September 14, 2009
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5oopen_by_addr_f<span class="sign">(</span>loc_id<span class="sign">,</span> addr<span class="sign">,</span> obj_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id  <span class="sign">!</span> File or group identifier
+    INTEGER<span class="sign">(</span>HADDR_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> addr  <span class="sign">!</span> Object<span class="sign">â</span><span class="sign">€</span><span class="sign">™</span>s address in the file
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id <span class="sign">!</span> Object identifier <span class="keyword">for</span> the opened object
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code<span class="sign">:</span>
+                                          <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Off.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

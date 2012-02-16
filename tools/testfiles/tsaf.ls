@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -w80 -r -d tsaf.h5'
-#############################
 /                        Group
 /.DSL_METADATA           Dataset {5919/Inf}
     Data:

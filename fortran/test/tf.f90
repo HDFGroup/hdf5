@@ -1,3 +1,12 @@
+!****h* root/fortran/test/tf.f90
+!
+! NAME
+!  tf.f90
+!
+! FUNCTION
+!  Contains subroutines which are needed in all the hdf5 fortran tests
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,12 +22,29 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+! CONTAINS SUBROUTINES
+!  write_test_status, check, verify, verifyLogical, verifyString, h5_fixname_f,
+!  h5_cleanup_f, h5_exit_f, h5_env_nocleanup_f
 !
-!
-!    This file contains subroutines which are used in
-!    all the hdf5 fortran tests
-!
+!*****
 
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: verify_real
+!DEC$endif
+SUBROUTINE verify_real_kind_7(string,value,correct_value,total_error)
+  USE HDF5
+	  
+  INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_4) !should map to REAL*4 on most modern processors
+  CHARACTER(LEN=*) :: string
+  REAL(real_kind_7) :: value, correct_value
+  INTEGER :: total_error
+  IF (value .NE. correct_value) THEN
+     total_error=total_error+1
+     WRITE(*,*) "ERROR: INCORRECT REAL VALIDATION ", string
+  ENDIF
+  RETURN
+END SUBROUTINE verify_real_kind_7
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -77,7 +103,7 @@ END SUBROUTINE check
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: verify
 !DEC$endif
-SUBROUTINE VERIFY(string,value,correct_value,total_error)
+SUBROUTINE verify(string,value,correct_value,total_error)
   CHARACTER(LEN=*) :: string
   INTEGER :: value, correct_value, total_error
   IF (value .NE. correct_value) THEN
@@ -86,6 +112,25 @@ SUBROUTINE VERIFY(string,value,correct_value,total_error)
   ENDIF
   RETURN
 END SUBROUTINE verify
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: verify
+!DEC$endif
+SUBROUTINE verify_Fortran_INTEGER_4(string,value,correct_value,total_error)
+  USE HDF5
+  INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4)  ! should map to INTEGER*4 on most modern processors	
+  CHARACTER(LEN=*) :: string
+  INTEGER(int_kind_8) :: value, correct_value, total_error
+  IF (value .NE. correct_value) THEN
+     total_error=total_error+1
+     WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
+  ENDIF
+  RETURN
+END SUBROUTINE verify_Fortran_INTEGER_4
+
+
+
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -106,16 +151,16 @@ END SUBROUTINE verifyLogical
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: verifyString
 !DEC$endif
-SUBROUTINE verifyString(string, value,correct_value,total_error)
-  CHARACTER(LEN=*) :: string
-  CHARACTER(LEN=*) :: value, correct_value
+SUBROUTINE verifystring(string, value,correct_value,total_error)
+  CHARACTER*(*) :: string
+  CHARACTER*(*) :: value, correct_value
   INTEGER :: total_error
   IF (TRIM(value) .NE. TRIM(correct_value)) THEN
      total_error = total_error + 1
      WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
   ENDIF
   RETURN
-END SUBROUTINE verifyString
+END SUBROUTINE verifystring
 
 
 !----------------------------------------------------------------------

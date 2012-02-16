@@ -20,8 +20,17 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     error_test       #uses runTest.cmake
     err_compat       #uses runTest.cmake
     links_env        #uses runTest.cmake
+    testlibinfo      #uses grepTest.cmake
+    h5test-clear-testhdf5-objects
     h5test-clear-objects
-    h5perform-clear-objects
+    h5test-clear-cache-objects
+    h5test-clear-cache_api-objects
+    h5test-clear-cache_tagging-objects
+    h5test-clear-ttsafe-objects
+    h5test-clear-err_compat-objects
+    h5test-clear-error_test-objects
+    h5test-clear-links_env-objects
+    PERFORM_h5perform-clear-objects
     hl_test-clear-objects
     hl_fortran_test-clear-objects
     ######### tools/h5copy #########
@@ -41,22 +50,6 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP-XML-clearall-objects
     ######### tools/h5import #########
     H5IMPORT-clear-objects
-    H5IMPORT-ASCII_F32-clear-objects
-    H5IMPORT-ASCII_UI16-clear-objects
-    H5IMPORT-ASCII_UI32-clear-objects
-    H5IMPORT-ASCII_I8-clear-objects
-    H5IMPORT-ASCII_I16-clear-objects
-    H5IMPORT-ASCII_I32-clear-objects
-    H5IMPORT-ASCII_F64_R1-clear-objects
-    H5IMPORT-BINARY_I8_EOF-clear-objects
-    H5IMPORT-STR-clear-objects
-    H5IMPORT-BINARY_UI32-clear-objects
-    H5IMPORT-BINARY_UI16-clear-objects
-    H5IMPORT-BINARY_I32-clear-objects
-    H5IMPORT-BINARY_I8-clear-objects
-    H5IMPORT-BINARY_I16-clear-objects
-    H5IMPORT-BINARY_F64-clear-objects
-    H5IMPORT-ASCII_F64-clear-objects
     ######### tools/h5jam #########
     H5JAM-SETUP-N_twithub_u10_c-clear-objects
     H5JAM-SETUP-N_twithub_u10_c

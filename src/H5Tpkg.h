@@ -513,7 +513,7 @@ H5FL_EXTERN(H5T_shared_t);
 /* Common functions */
 H5_DLL H5T_t *H5T_create(H5T_class_t type, size_t size);
 H5_DLL herr_t H5T_commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id);
-H5_DLL herr_t H5T_commit_named(const H5G_loc_t *loc, const char *name,
+H5_DLL herr_t H5T__commit_named(const H5G_loc_t *loc, const char *name,
     H5T_t *dt, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id);
 H5_DLL H5T_t *H5T_alloc(void);
 H5_DLL herr_t H5T_free(H5T_t *dt);

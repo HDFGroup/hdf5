@@ -59,6 +59,8 @@ set srcexclude1_2=h5diff_exclude1-2.h5
 set srcexclude2_1=h5diff_exclude2-1.h5
 set srcexclude2_2=h5diff_exclude2-2.h5
 set src_comp_vl_strs=h5diff_comp_vl_strs.h5
+set src_COMPS_ARRAY_VLEN1=compounds_array_vlen1.h5
+set src_COMPS_ARRAY_VLEN2=compounds_array_vlen2.h5
 set src_ATTR_VERBOSE_LEVEL_FILE1=h5diff_attr_v_level1.h5
 set src_ATTR_VERBOSE_LEVEL_FILE2=h5diff_attr_v_level2.h5
 
@@ -93,6 +95,8 @@ set exclude1_2=%indir%\h5diff_exclude1-2.h5
 set exclude2_1=%indir%\h5diff_exclude2-1.h5
 set exclude2_2=%indir%\h5diff_exclude2-2.h5
 set comp_vl_strs=%indir%\h5diff_comp_vl_strs.h5
+set COMPS_ARRAY_VLEN1=%indir%\compounds_array_vlen1.h5
+set COMPS_ARRAY_VLEN2=%indir%\compounds_array_vlen2.h5
 set ATTR_VERBOSE_LEVEL_FILE1=%indir%\h5diff_attr_v_level1.h5
 set ATTR_VERBOSE_LEVEL_FILE2=%indir%\h5diff_attr_v_level2.h5
 
@@ -528,6 +532,16 @@ rem ############################################################################
     call :testing %h5diff% file1.h6 file2.h6
     call :tooltest h5diff_629.txt file1.h6 file2.h6
 
+    rem ######################################################################
+    rem # NaN
+    rem ######################################################################
+    rem 6.30: test (NaN == NaN) must be true based on our documentation -- XCAO
+    call :testing %h5diff% -v -d "0.0001" %srcfile1% %srcfile1% g1/fp18 g1/fp18_COPY
+    call :tooltest h5diff_630.txt -v -d "0.0001" %file1% %file1% g1/fp18 g1/fp18_COPY
+    call :testing %h5diff% -v --use-system-epsilon %srcfile1% %srcfile1% g1/fp18 g1/fp18_COPY
+    call :tooltest h5diff_631.txt -v --use-system-epsilon %file1% %file1% g1/fp18 g1/fp18_COPY
+
+
     rem ########################################################################
     rem 7.  attributes
     rem ########################################################################
@@ -884,9 +898,9 @@ rem ############################################################################
     call :tooltest h5diff_518.txt -v --follow-symlinks %grp_recurse1_ext% %grp_recurse2_ext1% /g1
 
 
-    rem ##############################################################################
+    rem #######################################################################
     rem # Exclude objects (--exclude-path)
-    rem ##############################################################################
+    rem #######################################################################
     rem #-------------------------------------------------
     rem # Same structure, same names and different value.
 
@@ -913,12 +927,45 @@ rem ############################################################################
     call :testing %h5diff% -v --exclude-path "/dset3" %srcexclude1_1% %srcexclude1_2% /group1
     call :tooltest h5diff_484.txt -v --exclude-path "/dset3"  %exclude1_1% %exclude1_2% /group1
 
-    rem ##############################################################################
+    rem #######################################################################
     rem # diff various multiple vlen and fixed strings in a compound type dataset
-    rem ##############################################################################
+    rem #######################################################################
     call :testing %h5diff% -v %src_comp_vl_strs% %src_comp_vl_strs% /group /group_copy
     call :tooltest h5diff_530.txt -v  %comp_vl_strs% %comp_vl_strs% /group /group_copy
 
+    rem # #####################################################################
+    rem # # Test container types (array,vlen) with multiple nested compound types
+    rem # # Complex compound types in dataset and attribute
+    rem # #####################################################################
+    call :testing %h5diff% -v %src_COMPS_ARRAY_VLEN1% %src_COMPS_ARRAY_VLEN2%
+    call :tooltest h5diff_540.txt -v %COMPS_ARRAY_VLEN1% %COMPS_ARRAY_VLEN2%
+
+    rem #######################################################################
+    rem # Test mutually exclusive options 
+    rem #######################################################################
+
+    rem ------------------------------------------------------
+    rem Test with -d , -p and --use-system-epsilon. 
+    call :testing %h5diff% -v -d 5 -p 0.05 --use-system-epsilon %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_640.txt -v -d 5 -p 0.05 --use-system-epsilon %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v -d 5 -p 0.05 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_641.txt -v -d 5 -p 0.05 %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v -p 0.05 -d 5 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_642.txt -v -p 0.05 -d 5 %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v -d 5 --use-system-epsilon %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_643.txt -v -d 5 --use-system-epsilon %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v --use-system-epsilon -d 5 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_644.txt -v --use-system-epsilon -d 5 %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v -p 0.05 --use-system-epsilon %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_645.txt -v -p 0.05 --use-system-epsilon %file1% %file2% /g1/dset3 /g1/dset4
+
+    call :testing %h5diff% -v --use-system-epsilon -p 0.05 %srcfile1% %srcfile2% /g1/dset3 /g1/dset4
+    call :tooltest h5diff_646.txt -v --use-system-epsilon -p 0.05 %file1% %file2% /g1/dset3 /g1/dset4
 	
     rem #######################################################################
     rem # END

@@ -42,6 +42,18 @@ const char *opt_arg;        /*flag argument (or value)               */
 static int  h5tools_d_status = 0;
 static const char  *h5tools_progname = "h5tools";
 
+/*
+ * The output functions need a temporary buffer to hold a piece of the
+ * dataset while it's being printed. This constant sets the limit on the
+ * size of that temporary buffer in bytes. For efficiency's sake, choose the
+ * largest value suitable for your machine (for testing use a small value).
+ */
+/* Maximum size used in a call to malloc for a dataset */
+hsize_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
+/* size of hyperslab buffer when a dataset is bigger than H5TOOLS_MALLOCSIZE */
+hsize_t H5TOOLS_BUFSIZE = (1024 * 1024);
+
+
 /* ``parallel_print'' variables */
 unsigned char  g_Parallel = 0;  /*0 for serial, 1 for parallel */
 char     outBuff[OUTBUFF_SIZE];
@@ -176,6 +188,24 @@ warn_msg(const char *fmt, ...)
     HDfprintf(stderr, "%s warning: ", h5tools_getprogname());
     HDvfprintf(stderr, fmt, ap);
     va_end(ap);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:  help_ref_msg
+ *
+ * Purpose: Print a message to refer help page 
+ *
+ * Return:  Nothing
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+help_ref_msg(FILE *output)
+{
+    HDfprintf(output, "Try '-h' or '--help' for more information or ");
+    HDfprintf(output, "see the <%s> entry in the 'HDF5 Reference Manual'.\n",h5tools_getprogname());
 }
 
 
@@ -785,10 +815,12 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
      * follow object in other file
      */
     if(link_info->linfo.type == H5L_TYPE_EXTERNAL) {
-        fapl = H5Pcreate(H5P_FILE_ACCESS);
+        if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            goto out;
         if(H5Pset_fapl_sec2(fapl) < 0)
             goto out;
-        lapl = H5Pcreate(H5P_LINK_ACCESS);
+        if((lapl = H5Pcreate(H5P_LINK_ACCESS)) < 0)
+            goto out;
         if(H5Pset_elink_fapl(lapl, fapl) < 0)
             goto out;
     } /* end if */
@@ -868,4 +900,44 @@ const char*h5tools_getprogname(void)
 int h5tools_getstatus(void)
 {
    return h5tools_d_status;
+}
+
+/*-----------------------------------------------------------
+ * PURPOSE : 
+ * if environment variable H5TOOLS_BUFSIZE is set, 
+ * update H5TOOLS_BUFSIZE and H5TOOLS_MALLOCSIZE from the env
+ * This can be called from each tools main() as part of initial act.
+ * Note: this is more of debugging purpose for now.
+ */
+int h5tools_getenv_update_hyperslab_bufsize(void)
+{
+    const char *env_str = NULL;
+    long hyperslab_bufsize_mb;
+
+    /* check if environment variable is set for the hyperslab buffer size */
+    if (NULL != (env_str = HDgetenv ("H5TOOLS_BUFSIZE")))
+    {
+        errno = 0;
+        hyperslab_bufsize_mb = HDstrtol(env_str, (char**)NULL, 10);
+        if (errno != 0 || hyperslab_bufsize_mb <= 0)
+        {
+            
+            /* TODO: later when pubilshed  
+            printf("Error: Invalid environment variable \"H5TOOLS_BUFSIZE\" : %s\n", env_str);
+            */
+            
+            goto error;
+        }
+
+
+        /* convert MB to byte */
+        H5TOOLS_BUFSIZE = hyperslab_bufsize_mb * 1024 * 1024;
+
+        H5TOOLS_MALLOCSIZE = MAX(H5TOOLS_BUFSIZE, H5TOOLS_MALLOCSIZE);
+    }
+
+
+    return (1);
+error:
+    return (-1);
 }

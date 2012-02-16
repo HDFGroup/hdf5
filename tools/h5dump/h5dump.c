@@ -93,6 +93,7 @@ static int          display_ai        = TRUE;  /*array index */
 static int          display_escape    = FALSE; /*escape non printable characters */
 static int          display_region    = FALSE; /*print region reference data */
 static int          enable_error_stack= FALSE; /* re-enable error stack */
+static int          disable_compact_subset= FALSE; /* disable compact form of subset notation */
 static int          display_packed_bits = FALSE; /*print 1-8 byte numbers as packed bits*/
 
 /* sort parameters */
@@ -113,8 +114,8 @@ static int packed_length[PACKED_BITS_MAX];
  **/
 
 /* module-scoped variables for XML option */
-#define DEFAULT_XSD     "http://www.hdfgroup.org/DTDs/HDF5-File.xsd"
-#define DEFAULT_DTD     "http://www.hdfgroup.org/DTDs/HDF5-File.dtd"
+#define DEFAULT_XSD     "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd"
+#define DEFAULT_DTD     "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.dtd"
 
 static int              doxml = 0;
 static int              useschema = 1;
@@ -144,7 +145,11 @@ static h5tool_format_t         dataformat = {
     "",             /*fmt_raw */
     "%d",           /*fmt_int */
     "%u",           /*fmt_uint */
-    "%hhd",           /*fmt_schar */
+#ifdef H5_VMS
+    "%hd",          /*fmt_schar */
+#else
+    "%hhd",         /*fmt_schar */
+#endif     
     "%u",           /*fmt_uchar */
     "%d",           /*fmt_short */
     "%u",           /*fmt_ushort */
@@ -228,7 +233,11 @@ static h5tool_format_t         xml_dataformat = {
     "",             /*fmt_raw */
     "%d",           /*fmt_int */
     "%u",           /*fmt_uint */
-    "%hhd",           /*fmt_schar */
+#ifdef H5_VMS
+    "%hd",          /*fmt_schar */
+#else
+    "%hhd",         /*fmt_schar */
+#endif     
     "%u",           /*fmt_uchar */
     "%d",           /*fmt_short */
     "%u",           /*fmt_ushort */
@@ -400,7 +409,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language cancatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:REM:";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:RECM:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -515,6 +524,7 @@ static struct long_options l_opts[] = {
     { "region", no_arg, 'R' },
     { "enable-error-stack", no_arg, 'E' },
     { "packed-bits", require_arg, 'M' },
+    { "no-compact-subset", no_arg, 'C' },
     { NULL, 0, '\0' }
 };
 
@@ -687,6 +697,8 @@ usage(const char *prog)
     fprintf(stdout, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
     fprintf(stdout, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
     fprintf(stdout, "                          occur.\n");
+    fprintf(stdout, "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
+    fprintf(stdout, "                          of \"[\" in datset names.\n");
     fprintf(stdout, "\n");
     fprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
     fprintf(stdout, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
@@ -3630,37 +3642,32 @@ parse_subset_params(char *dset)
     struct subset_t *s = NULL;
     register char   *brace;
 
-    if ((brace = strrchr(dset, '[')) != NULL) {
-        char *slash = strrchr(dset, '/');
+    if (!disable_compact_subset && ((brace = strrchr(dset, '[')) != NULL)) {
+        *brace++ = '\0';
 
-        /* sanity check to make sure the [ isn't part of the dataset name */
-        if (brace > slash) {
-            *brace++ = '\0';
+        s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
+        parse_hsize_list(brace, &s->start);
 
-            s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
-            parse_hsize_list(brace, &s->start);
+        while (*brace && *brace != ';')
+            brace++;
 
-            while (*brace && *brace != ';')
-                brace++;
+        if (*brace) brace++;
 
-            if (*brace) brace++;
+        parse_hsize_list(brace, &s->stride);
 
-            parse_hsize_list(brace, &s->stride);
+        while (*brace && *brace != ';')
+            brace++;
 
-            while (*brace && *brace != ';')
-                brace++;
+        if (*brace) brace++;
 
-            if (*brace) brace++;
+        parse_hsize_list(brace, &s->count);
 
-            parse_hsize_list(brace, &s->count);
+        while (*brace && *brace != ';')
+            brace++;
 
-            while (*brace && *brace != ';')
-                brace++;
+        if (*brace) brace++;
 
-            if (*brace) brace++;
-
-            parse_hsize_list(brace, &s->block);
-        }
+        parse_hsize_list(brace, &s->block);
     }
 
     return s;
@@ -4533,6 +4540,9 @@ end_collect:
         case 'E':
             enable_error_stack = TRUE;
             break;
+        case 'C':
+            disable_compact_subset = TRUE;
+            break;
         case 'h':
             usage(h5tools_getprogname());
             free_handler(hand, argc);
@@ -4560,7 +4570,7 @@ error:
     if (hand) {
         free_handler(hand, argc);
         hand = NULL;
-}
+    }
     h5tools_setstatus(EXIT_FAILURE);
 
     return hand;
@@ -4630,7 +4640,6 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
     if((hand = parse_command_line(argc, argv))==NULL) {
-        h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
@@ -4770,10 +4779,10 @@ main(int argc, const char *argv[])
                 indx = strrchr(ns,(int)':');
                 if (indx) *indx = '\0';
 
-                HDfprintf(stdout, "<%sHDF5-File xmlns:%s=\"http://hdfgroup.org/DTDs/HDF5-File\" "
+                HDfprintf(stdout, "<%sHDF5-File xmlns:%s=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File\" "
                        "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-                       "xsi:schemaLocation=\"http://hdfgroup.org/DTDs/HDF5-File "
-                       "http://www.hdfgroup.org/DTDs/HDF5-File.xsd\">\n",xmlnsprefix,ns);
+                       "xsi:schemaLocation=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File "
+                       "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\">\n",xmlnsprefix,ns);
                 HDfree(ns);
             }
         } 
@@ -4834,14 +4843,17 @@ done:
     /* Free tables for objects */
     table_list_free();
 
-    if (H5Fclose(fid) < 0)
-        h5tools_setstatus(EXIT_FAILURE);
+    if(hand) 
+        free_handler(hand, argc);
 
-    if(hand)
-    free_handler(hand, argc);
-
-    HDfree(prefix);
-    HDfree(fname);
+    if(fid >=0)
+        if (H5Fclose(fid) < 0)
+            h5tools_setstatus(EXIT_FAILURE);
+    
+    if(prefix)
+        HDfree(prefix);
+    if(fname)
+        HDfree(fname);
 
     /* To Do:  clean up XML table */
 
@@ -6191,7 +6203,7 @@ xml_dump_group(hid_t gid, const char *name)
     if(HDstrcmp(name, "/") == 0) {
         isRoot = 1;
         tmp = HDstrdup("/");
-    } 
+    }
     else {
         tmp = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
         HDstrcpy(tmp, prefix);
@@ -6211,7 +6223,7 @@ xml_dump_group(hid_t gid, const char *name)
     H5Oget_info(gid, &oinfo);
 
     if(oinfo.rc > 1) {
-        obj_t  *found_obj;    /* Found object */
+        obj_t *found_obj;    /* Found object */
 
         /* Group with more than one link to it... */
         found_obj = search_obj(group_table, oinfo.addr);
@@ -6220,7 +6232,7 @@ xml_dump_group(hid_t gid, const char *name)
             indentation(indent);
             error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
             h5tools_setstatus(EXIT_FAILURE);
-        } 
+        }
         else {
             char *t_name = xml_escape_the_name(name);
             char *grpxid = (char *)malloc(100);
@@ -6235,7 +6247,7 @@ xml_dump_group(hid_t gid, const char *name)
                     xml_name_to_XID("/", grpxid, 100, 1);
                     HDfprintf(stdout, "<%sRootGroup OBJ-XID=\"%s\" H5Path=\"%s\">\n",
                             xmlnsprefix, grpxid, "/");
-                } 
+                }
                 else {
                     t_objname = xml_escape_the_name(found_obj->objname);
                     par_name = xml_escape_the_name(par);
@@ -6261,7 +6273,7 @@ xml_dump_group(hid_t gid, const char *name)
                     free(par_name);
                 }
                 free(ptrstr);
-            } 
+            }
             else {
 
                 /* first time this group has been seen -- describe it  */
@@ -6269,7 +6281,7 @@ xml_dump_group(hid_t gid, const char *name)
                     xml_name_to_XID("/", grpxid, 100, 1);
                     HDfprintf(stdout, "<%sRootGroup OBJ-XID=\"%s\" H5Path=\"%s\">\n",
                             xmlnsprefix, grpxid, "/");
-                } 
+                }
                 else {
                     char *t_tmp = xml_escape_the_name(tmp);
 
@@ -6317,7 +6329,7 @@ xml_dump_group(hid_t gid, const char *name)
 
                 /* iterate through all the links */
 
-                if( (sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
+                if((sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
                     H5Literate(gid, sort_by, sort_order, NULL, dump_all_cb, NULL);
                 else
                     H5Literate(gid, H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL);
@@ -6328,7 +6340,7 @@ xml_dump_group(hid_t gid, const char *name)
             free(grpxid);
             free(parentxid);
         }
-    } 
+    }
     else {
 
         /* only link -- must be first time! */
@@ -6339,7 +6351,7 @@ xml_dump_group(hid_t gid, const char *name)
         if(isRoot) {
             xml_name_to_XID("/", grpxid, 100, 1);
             HDfprintf(stdout, "<%sRootGroup OBJ-XID=\"%s\" H5Path=\"%s\">\n", xmlnsprefix, grpxid, "/");
-        } 
+        }
         else {
             char *t_tmp = xml_escape_the_name(tmp);
 
@@ -6401,11 +6413,11 @@ xml_dump_group(hid_t gid, const char *name)
     if(isRoot)
         HDfprintf(stdout, "</%sRootGroup>\n", xmlnsprefix);
     else
-        HDfprintf(stdout, "</%sGroup>\n" , xmlnsprefix);
+        HDfprintf(stdout, "</%sGroup>\n", xmlnsprefix);
     if(par)
         free(par);
     if(tmp)
-    free(tmp);
+        free(tmp);
 }
 
 /*-------------------------------------------------------------------------

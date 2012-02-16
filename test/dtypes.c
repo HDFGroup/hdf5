@@ -71,6 +71,7 @@
     }
 
 const char *FILENAME[] = {
+    "dtypes0",
     "dtypes1",
     "dtypes2",
     "dtypes3",
@@ -79,6 +80,8 @@ const char *FILENAME[] = {
     "dtypes6",
     "dtypes7",
     "dtypes8",
+    "dtypes9",
+    "dtypes10",
     NULL
 };
 
@@ -101,6 +104,17 @@ typedef enum dtype_t {
 /* Constants for compound_13 test */
 #define COMPOUND13_ARRAY_SIZE   256
 #define COMPOUND13_ATTR_NAME    "attr"
+
+/* Constants for delete_obj_named test */
+#define DEL_OBJ_NAMED_DATASET           "/Dataset"
+#define DEL_OBJ_NAMED_NAMED_DTYPE       "/Dtype"
+#define DEL_OBJ_NAMED_ATTRIBUTE         "Attr"
+
+/* Constant for testing conversion of UTF-8 characters */
+#define UTF8_DATASET                    "utf8"
+#define UTF8_DATASET2                   "2nd_utf8"
+#define ASCII_DATASET                   "ascii"
+#define ASCII_DATASET2                  "2nd_ascii"
 
 /* Count opaque conversions */
 static int num_opaque_conversions_g = 0;
@@ -516,6 +530,12 @@ test_compound_1(void)
     if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof(complex_t))) < 0)
         goto error;
 
+    /* Try to shrink and expand the size */
+    if(H5Tset_size(complex_id, sizeof(double)) < 0)
+        goto error;
+    if(H5Tset_size(complex_id, sizeof(complex_t)) < 0)
+        goto error;
+
     /* Attempt to add the new compound datatype as a field within itself */
     H5E_BEGIN_TRY {
         ret=H5Tinsert(complex_id, "compound", (size_t)0, complex_id);
@@ -531,6 +551,14 @@ test_compound_1(void)
         goto error;
 
     /* Test some functions that aren't supposed to work for compound type */
+    /* Tries to shrink the size and trail the last member */
+    H5E_BEGIN_TRY {
+        ret=H5Tset_size(complex_id, sizeof(double));
+    } H5E_END_TRY;
+    if (ret>=0) {
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
+    } /* end if */
+
     H5E_BEGIN_TRY {
         size=H5Tget_precision(complex_id);
     } H5E_END_TRY;
@@ -3900,6 +3928,67 @@ mkstr(size_t len, H5T_str_t strpad)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_str_create
+ *
+ * Purpose:	Test string type creation using H5Tcreate
+ *
+ * Return:	Success:	0
+ *		Failure:	number of errors
+ *
+ * Programmer:	Raymond Lu
+ *              19 May 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_str_create(void)
+{
+    hid_t  fixed_str1, fixed_str2;
+    hid_t  vlen_str1,  vlen_str2;
+    htri_t is_vl_str = FALSE;
+    size_t query_size, str_size = 10;
+
+    TESTING("string type creation using H5Tcreate");
+
+    /* Create fixed-length string in two ways and make sure they are the same */
+    if((fixed_str1 = mkstr(str_size, H5T_STR_NULLTERM)) < 0) goto error;
+
+    if((fixed_str2 = H5Tcreate(H5T_STRING, str_size)) < 0) goto error;
+    if(H5Tset_strpad(fixed_str2, H5T_STR_NULLTERM) < 0) goto error;
+
+    if(!H5Tequal(fixed_str1, fixed_str2)) goto error;
+
+    if((query_size = H5Tget_size(fixed_str1)) == 0) goto error;
+    if(query_size != str_size) goto error;
+
+    if((query_size = H5Tget_size(fixed_str2)) == 0) goto error;
+    if(query_size != str_size) goto error;
+
+    /* Create variable-length string in two ways and make sure they are the same */
+    if((vlen_str1 = mkstr((size_t)H5T_VARIABLE, H5T_STR_NULLTERM)) < 0) goto error;
+
+    if((vlen_str2 = H5Tcreate(H5T_STRING, (size_t)H5T_VARIABLE)) < 0) goto error;
+    if(H5Tset_strpad(vlen_str2, H5T_STR_NULLTERM) < 0) goto error;
+
+    if(!H5Tequal(vlen_str1, vlen_str2)) goto error;
+
+    if((is_vl_str = H5Tis_variable_str(vlen_str1)) < 0) goto error;
+    if(!is_vl_str) goto error; 
+
+    if((is_vl_str = H5Tis_variable_str(vlen_str2)) < 0) goto error;
+    if(!is_vl_str) goto error; 
+
+
+    PASSED();
+    return 0;
+
+error:
+    H5_FAILED();
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_conv_str_1
  *
  * Purpose:	Test string conversions
@@ -4419,8 +4508,6 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Robb Matzke, LLNL, 2003-06-09
- *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static int
@@ -4436,7 +4523,7 @@ test_conv_enum_2(void)
                              "PURPLE",
                              "ORANGE",
                              "WHITE" };
-
+   
     TESTING("non-native enumeration type conversion");
 
     /* Source enum type */
@@ -6445,6 +6532,353 @@ error:
     return 1;
 } /* end test_named_indirect_reopen() */
 
+static void create_del_obj_named_test_file(const char *filename, hid_t fapl,
+    hbool_t new_format)
+{
+    hid_t file;         /* File ID */
+    hid_t type;         /* Datatype ID */
+    hid_t space;        /* Dataspace ID */
+    hid_t attr;         /* Attribute ID */
+    hid_t dset;         /* Dataset ID */
+    hid_t fcpl;         /* File creation property list ID */
+    hid_t my_fapl;      /* Copy of file access property list ID */
+    hid_t dcpl;         /* Dataset creation property list ID */
+    herr_t status;      /* Generic return value */
+
+    /* Make copy of FAPL */
+    my_fapl = H5Pcopy(fapl);
+    assert(my_fapl > 0);
+
+    if(new_format) {
+        /* Use latest version of file format */
+        status = H5Pset_libver_bounds(my_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+        assert(status >= 0);
+    } /* end if */
+
+    /* Create a file creation property list (used for the root group's creation property list) */
+    fcpl = H5Pcreate(H5P_FILE_CREATE);
+    assert(fcpl > 0);
+
+    if(new_format) {
+        /* Use dense link storage for all links in root group */
+        status = H5Pset_link_phase_change(fcpl, 0, 0);
+        assert(status >= 0);
+    } /* end if */
+
+    /* Create file with attribute that uses committed datatype */
+    file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, my_fapl);
+    assert(file > 0);
+
+    /* Close FCPL */
+    status = H5Pclose(fcpl);
+    assert(status >= 0);
+
+    /* Close FAPL */
+    status = H5Pclose(my_fapl);
+    assert(status >= 0);
+
+    /* Create datatype to commit */
+    type = H5Tvlen_create(H5T_NATIVE_INT);
+    assert(type > 0);
+
+    /* Commit datatype */
+    status = H5Tcommit2(file, DEL_OBJ_NAMED_NAMED_DTYPE, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    assert(status >= 0);
+
+    /* Create scalar dataspace */
+    space = H5Screate(H5S_SCALAR);
+    assert(space > 0);
+
+    /* Create a dataset creation property list */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    assert(dcpl > 0);
+
+    if(new_format) {
+        /* Use dense attribute storage for all attributes on dataset */
+        status = H5Pset_attr_phase_change(dcpl, 0, 0);
+        assert(status >= 0);
+    } /* end if */
+
+    /* Create dataset */
+    dset = H5Dcreate2(file, DEL_OBJ_NAMED_DATASET, type, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    assert(dset > 0);
+
+    /* Close DCPL */
+    status = H5Pclose(dcpl);
+    assert(status >= 0);
+
+    /* Close dataset */
+    status = H5Dclose(dset);
+    assert(status >= 0);
+
+    /* Create attribute */
+    attr = H5Acreate_by_name(file, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    assert(attr > 0);
+
+    /* Close dataspace */
+    status = H5Sclose(space);
+    assert(status >= 0);
+
+    /* Close datatype */
+    status = H5Tclose(type);
+    assert(status >= 0);
+
+    /* Close attribute */
+    status = H5Aclose(attr);
+    assert(status >= 0);
+
+    /* Close file */
+    status = H5Fclose(file);
+    assert(status >= 0);
+} /* end create_del_obj_named_test_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_delete_obj_named
+ *
+ * Purpose:	Tests that delete objects that use named datatypes through
+ *              different file IDs
+ *
+ * Return:	Success:	0
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 18, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_delete_obj_named(hid_t fapl)
+{
+    hid_t filea1 = -1, filea2 = -1, fileb = -1;         /* File IDs */
+    hid_t attr = -1;            /* Attribute ID */
+    hid_t dset = -1;            /* Dataset ID */
+    hid_t fapl2 = -1;           /* File access property list ID */
+    hbool_t new_format;         /* Whether to use old or new format */
+    char filename[1024], filename2[1024];
+
+    TESTING("deleting objects that use named datatypes");
+
+    /* Set up filenames & FAPLs */
+    if((fapl2 = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
+    h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
+
+    /* Loop over old & new format files */
+    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+        /* Create test file, with attribute that uses committed datatype */
+        create_del_obj_named_test_file(filename, fapl, new_format);
+
+/* Test deleting dataset opened through different file ID */
+        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+
+        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+
+        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+
+        if(H5Ldelete(filea2, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
+
+
+        /* Create test file, with attribute that uses committed datatype */
+        create_del_obj_named_test_file(filename, fapl, new_format);
+
+/* Test deleting attribute opened through different file ID */
+        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
+
+        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+
+        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+
+        if(H5Adelete_by_name(filea2, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
+    } /* end for */
+
+    if(H5Pclose(fapl2) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Tclose(attr);
+	H5Dclose(dset);
+	H5Pclose(fapl2);
+	H5Fclose(filea1);
+	H5Fclose(filea2);
+	H5Fclose(fileb);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_delete_obj_named() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_delete_obj_named_fileid
+ *
+ * Purpose:	Tests that objects that use named datatypes through
+ *              different file IDs get the correct file IDs
+ *
+ * Return:	Success:	0
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July 28, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_delete_obj_named_fileid(hid_t fapl)
+{
+    hid_t filea1 = -1, filea2 = -1, fileb = -1;         /* File IDs */
+    hid_t dset_fid = -1;        /* File ID from dataset */
+    hid_t type_fid = -1;        /* File ID from datatype */
+    hid_t attr_fid = -1;        /* File ID from attribute */
+    hid_t type = -1;            /* Datatype ID */
+    hid_t attr = -1;            /* Attribute ID */
+    hid_t dset = -1;            /* Dataset ID */
+    hid_t fapl2 = -1;           /* File access property list ID */
+    hbool_t new_format;         /* Whether to use old or new format */
+    char filename[1024], filename2[1024];
+
+    TESTING("deleting objects that use named datatypes");
+
+    /* Set up filenames & FAPLs */
+    if((fapl2 = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
+    h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
+
+    /* Loop over old & new format files */
+    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+        /* Create test file, with attribute that uses committed datatype */
+        create_del_obj_named_test_file(filename, fapl, new_format);
+
+/* Test getting file ID for dataset opened through different file ID */
+        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+        /* Verify file ID from dataset matches correct file */
+        dset_fid = H5Iget_file_id(dset);
+        if(dset_fid != filea1) TEST_ERROR
+        H5Fclose(dset_fid);
+
+        /* Verify file ID from datatype (from dataset) matches correct file */
+        type = H5Dget_type(dset);
+        type_fid = H5Iget_file_id(type);
+        if(type_fid != filea1) TEST_ERROR
+        H5Fclose(type_fid);
+        H5Tclose(type);
+
+        if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+
+        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+
+        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+
+        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        if((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+        /* Verify file ID from dataset matches correct file */
+        dset_fid = H5Iget_file_id(dset);
+        if(dset_fid != filea1) TEST_ERROR
+        H5Fclose(dset_fid);
+
+        /* Verify file ID from datatype (from dataset) matches correct file */
+        type = H5Dget_type(dset);
+        type_fid = H5Iget_file_id(type);
+        if(type_fid != filea1) TEST_ERROR
+        H5Fclose(type_fid);
+        H5Tclose(type);
+
+        if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+
+        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
+
+
+        /* Create test file, with attribute that uses committed datatype */
+        create_del_obj_named_test_file(filename, fapl, new_format);
+
+/* Test getting file ID for attribute opened through different file ID */
+        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+        if((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+        /* Verify file ID from dataset matches correct file */
+        attr_fid = H5Iget_file_id(attr);
+        if(attr_fid != filea1) TEST_ERROR
+        H5Fclose(attr_fid);
+
+        /* Verify file ID from datatype (from dataset) matches correct file */
+        type = H5Aget_type(attr);
+        type_fid = H5Iget_file_id(type);
+        if(type_fid != filea1) TEST_ERROR
+        H5Fclose(type_fid);
+        H5Tclose(type);
+
+        if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
+
+        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+
+        if((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0) FAIL_STACK_ERROR
+
+        if((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+
+        if((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+        /* Verify file ID from dataset matches correct file */
+        attr_fid = H5Iget_file_id(attr);
+        if(attr_fid != filea1) TEST_ERROR
+        H5Fclose(attr_fid);
+
+        /* Verify file ID from datatype (from dataset) matches correct file */
+        type = H5Aget_type(attr);
+        type_fid = H5Iget_file_id(type);
+        if(type_fid != filea1) TEST_ERROR
+        H5Fclose(type_fid);
+        H5Tclose(type);
+
+        if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
+
+        if(H5Fclose(filea1) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(filea2) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(fileb) < 0) FAIL_STACK_ERROR
+    } /* end for */
+
+    if(H5Pclose(fapl2) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Tclose(attr);
+	H5Dclose(dset);
+	H5Pclose(fapl2);
+	H5Fclose(filea1);
+	H5Fclose(filea2);
+	H5Fclose(fileb);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_delete_obj_named_fileid() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_deprec
@@ -6596,6 +7030,215 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_utf_ascii_conv
+ *
+ * Purpose:	Make sure the library doesn't conversion strings between
+ *              ASCII and UTF8.
+ *
+ * Return:	Success:	0
+ *		Failure:	number of errors
+ *
+ * Programmer:	Raymond Lu
+ *              10 November 2011
+ *-------------------------------------------------------------------------
+ */
+int test_utf_ascii_conv(void)
+{
+    hid_t fid;
+    hid_t did;
+    hid_t utf8_vtid, ascii_vtid;
+    hid_t utf8_tid, ascii_tid;
+    hid_t sid;
+    const char *utf8_w = "foo!";
+    char *ascii_r = NULL;
+    const char *ascii_w = "bar!";
+    char *utf8_r = NULL;
+
+    char ascii2[4], utf8_2[4];
+    herr_t status;
+
+    TESTING("string conversion between ASCII and UTF");
+ 
+    /************************************************
+     * Test VL string conversion from UTF8 to ASCII
+     ************************************************/
+    /* Create a variable-length string */
+    if((utf8_vtid = H5Tcopy(H5T_C_S1)) < 0) FAIL_STACK_ERROR
+
+    if((status = H5Tset_size(utf8_vtid, H5T_VARIABLE)) < 0) FAIL_STACK_ERROR
+
+    /* Set the character set for the string to UTF-8 */
+    if((status = H5Tset_cset(utf8_vtid, H5T_CSET_UTF8)) < 0) FAIL_STACK_ERROR
+
+    /* Create a variable-length string */
+    if((ascii_vtid = H5Tcopy(H5T_C_S1)) < 0) FAIL_STACK_ERROR
+
+    if((status = H5Tset_size(ascii_vtid, H5T_VARIABLE)) < 0) FAIL_STACK_ERROR
+
+    /* Set the character set for the string to ASCII (should already be so) */
+    if((status = H5Tset_cset(ascii_vtid, H5T_CSET_ASCII) < 0)) FAIL_STACK_ERROR
+
+    /* Test conversion in memory */
+    H5E_BEGIN_TRY {
+        status = H5Tconvert(utf8_vtid, ascii_vtid, 1, (void *)utf8_w, NULL, H5P_DEFAULT);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Create a file */
+    if((fid = H5Fcreate(FILENAME[10], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Create a scalar dataspace for the dataset */
+    if((sid = H5Screate(H5S_SCALAR)) < 0) FAIL_STACK_ERROR
+
+    /* Create a dataset of UTF8 string type */
+    if((did = H5Dcreate2(fid, UTF8_DATASET, utf8_vtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Write the UTF8 string, as UTF8 */
+    if((status = H5Dwrite(did, utf8_vtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &utf8_w)) < 0) FAIL_STACK_ERROR
+
+    /* Read the UTF8 string, as ASCII, supposed to fail */
+    H5E_BEGIN_TRY {
+        status = H5Dread(did, ascii_vtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ascii_r);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if((status = H5Dclose(did)) < 0) FAIL_STACK_ERROR
+
+    /************************************************
+     * Test VL string conversion from ASCII to UTF8
+     ************************************************/
+    /* Test conversion in memory */
+    H5E_BEGIN_TRY {
+        status = H5Tconvert(ascii_vtid, utf8_vtid, 1, (void *)ascii_w, NULL, H5P_DEFAULT);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Create a dataset of ASCII string type */
+    if((did = H5Dcreate2(fid, ASCII_DATASET, ascii_vtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Write the ASCII string, as ASCII */
+    if((status = H5Dwrite(did, ascii_vtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ascii_w)) < 0) FAIL_STACK_ERROR
+
+    /* Read the ASCII string, as UTF8, supposed to fail */
+    H5E_BEGIN_TRY {
+        status = H5Dread(did, utf8_vtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &utf8_r);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if((status = H5Dclose(did)) < 0) FAIL_STACK_ERROR
+
+    /* Close the UTF8 VL-string datatype */
+    if((status = H5Tclose(utf8_vtid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the ASCII VL-string datatype */
+    if((status = H5Tclose(ascii_vtid)) < 0) FAIL_STACK_ERROR
+
+    /**********************************************************
+     * Test fixed-length string conversion from UTF8 to ASCII
+     **********************************************************/
+    /* Create a fixed-length UTF8 string */
+    if((utf8_tid = H5Tcopy(H5T_C_S1)) < 0) FAIL_STACK_ERROR
+
+    if((status = H5Tset_size(utf8_tid, 4)) < 0) FAIL_STACK_ERROR
+
+    /* Set the character set for the string to UTF-8 */
+    if((status = H5Tset_cset(utf8_tid, H5T_CSET_UTF8)) < 0) FAIL_STACK_ERROR
+
+    /* Create a fixed-length ASCII string */
+    if((ascii_tid = H5Tcopy(H5T_C_S1)) < 0) FAIL_STACK_ERROR
+
+    if((status = H5Tset_size(ascii_tid, 4)) < 0) FAIL_STACK_ERROR
+
+    /* Set the character set for the string to ASCII (should already be so) */
+    if((status = H5Tset_cset(ascii_tid, H5T_CSET_ASCII) < 0)) FAIL_STACK_ERROR
+
+    /* Test conversion in memory */
+    H5E_BEGIN_TRY {
+        status = H5Tconvert(utf8_tid, ascii_tid, 1, utf8_2, NULL, H5P_DEFAULT);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Create a dataset */
+    if((did = H5Dcreate2(fid, UTF8_DATASET2, utf8_tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Write the UTF8 string, as UTF8 */
+    if((status = H5Dwrite(did, utf8_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &utf8_w)) < 0) FAIL_STACK_ERROR
+
+    /* Read the UTF8 string as ASCII, supposed to fail */
+    H5E_BEGIN_TRY {
+        status = H5Dread(did, ascii_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ascii2);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if((status = H5Dclose(did)) < 0) FAIL_STACK_ERROR
+
+    /**********************************************************
+     * Test fixed-length string conversion from ASCII to UTF8
+     **********************************************************/
+    /* Test conversion in memory */
+    H5E_BEGIN_TRY {
+        status = H5Tconvert(ascii_tid, utf8_tid, 1, ascii2, NULL, H5P_DEFAULT);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Create a dataset */
+    if((did = H5Dcreate2(fid, ASCII_DATASET2, ascii_tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Write the ASCII string, as ASCII */
+    if((status = H5Dwrite(did, ascii_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ascii_w)) < 0) FAIL_STACK_ERROR
+
+    /* Read the UTF8 string as ASCII, supposed to fail */
+    H5E_BEGIN_TRY {
+        status = H5Dread(did, utf8_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &utf8_2);
+    } H5E_END_TRY
+    if(status >= 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if((status = H5Dclose(did)) < 0) FAIL_STACK_ERROR
+
+    /* Close the UTF8 string datatype */
+    if((status = H5Tclose(utf8_tid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the ASCII string datatype */
+    if((status = H5Tclose(ascii_tid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the dataspace */
+    if((status = H5Sclose(sid)) < 0) FAIL_STACK_ERROR
+
+    /* Close the file */
+    if((status = H5Fclose(fid)) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Tclose(utf8_vtid);
+	H5Tclose(ascii_vtid);
+	H5Tclose(utf8_tid);
+	H5Tclose(ascii_tid);
+	H5Dclose(did);
+	H5Sclose(sid);
+	H5Fclose(fid);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Test the datatype interface.
@@ -6639,7 +7282,10 @@ main(void)
     nerrors += test_latest();
     nerrors += test_int_float_except();
     nerrors += test_named_indirect_reopen(fapl);
+    nerrors += test_delete_obj_named(fapl);
+    nerrors += test_delete_obj_named_fileid(fapl);
     nerrors += test_set_order_compound(fapl);
+    nerrors += test_str_create();
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     nerrors += test_deprec(fapl);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -6672,6 +7318,7 @@ main(void)
     nerrors += test_bitfield_funcs();
     nerrors += test_opaque();
     nerrors += test_set_order();
+    nerrors += test_utf_ascii_conv();
 
     if(nerrors) {
         printf("***** %lu FAILURE%s! *****\n",
@@ -6683,4 +7330,3 @@ main(void)
 
     return 0;
 }
-

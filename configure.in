@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.9.81], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.109], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -155,6 +155,7 @@ dnl EXTERNAL_FILTERS equals all external filters. Default none.
 dnl MPE: whether MPE option is enabled. Default no.
 dnl STATIC_EXEC: whether static-exec is enabled. Default no.
 dnl HDF_FORTRAN: whether Fortran is enabled. Default no.
+dnl HDF_FORTRAN2003: whether Fortran 2003 is enabled. Default no.
 dnl FC: Fortran compiler.
 dnl HDF_CXX: whether C++ is enabled. Default no.
 dnl CXX: C++ compiler.
@@ -175,7 +176,9 @@ AC_SUBST(EXTERNAL_FILTERS)
 AC_SUBST(MPE) MPE=no
 AC_SUBST(STATIC_EXEC) STATIC_EXEC=no
 AC_SUBST(HDF_FORTRAN) HDF_FORTRAN=no
+AC_SUBST(HDF_FORTRAN2003) HDF_FORTRAN2003=no
 AC_SUBST(FC) HDF_FORTRAN=no
+AC_SUBST(FC2003) HDF_FORTRAN2003=no
 AC_SUBST(HDF_CXX) HDF_CXX=no
 AC_SUBST(CXX) HDF_CXX=no
 AC_SUBST(HDF5_HL) HDF5_HL=yes
@@ -370,17 +373,51 @@ AC_SUBST([HDF5_INTERFACES]) HDF5_INTERFACES=""
 AC_MSG_CHECKING([if Fortran interface enabled])
 AC_ARG_ENABLE([fortran],
               [AC_HELP_STRING([--enable-fortran],
-                              [Compile the Fortran interface [default=no]])],
+                              [Compile the Fortran 77/90/95 interface [default=no]])],
               [HDF_FORTRAN=$enableval])
-
-
-HAVE_SIZEOF="no"
-FORTRAN_DEFAULT_REALisDBLE="no"	
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   echo "yes"
+else
+  echo "no"
+fi
 
+
+dnl ----------------------------------------------------------------------
+dnl Check if they would like the Fortran 2003 interface compiled
+dnl
+AC_MSG_CHECKING([if Fortran 2003 interface enabled])
+AC_ARG_ENABLE([fortran2003],
+              [AC_HELP_STRING([--enable-fortran2003],
+                              [Compile the Fortran 2003 interface, must also specify --enable-fortran [default=no]])],
+              [HDF_FORTRAN2003=$enableval])
+
+dnl ----------------------------------------------------------------------
+dnl Check to make sure --enable-fortran is present if --enable-fortran2003 
+dnl was specified
+
+if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xno"; then
+  echo "no"
+  AC_MSG_ERROR([--enable-fortran must be used with --enable-fortran2003])
+else
+  echo "yes"
+fi
+
+HAVE_SIZEOF="no"
+FORTRAN_DEFAULT_REALisDBLE="no"
+
+if test "X$HDF_FORTRAN" = "Xyes"; then
+
+  AC_SUBST(FC) HDF_FORTRAN=yes
+  AC_SUBST([HAVE_FORTRAN_2003])
+		
   HDF5_INTERFACES="$HDF5_INTERFACES fortran"
+
+  dnl --------------------------------------------------------------------
+  dnl Default for FORTRAN 2003 compliant compilers
+  dnl
+  HAVE_FORTRAN_2003="no"
+  HAVE_F2003_REQUIREMENTS="no"
 
   dnl --------------------------------------------------------------------
   dnl HDF5 integer variables for the H5fortran_types.f90 file.
@@ -430,19 +467,19 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   dnl --------------------------------------------------------------------
   dnl See if the compiler will support the "-I." option
   dnl
-dnl  AM_FCFLAGS_saved=$AM_FCFLAGS
-dnl  AM_FCFLAGS="${AM_FCFLAGS} -I."
+  dnl  AM_FCFLAGS_saved=$AM_FCFLAGS
+  dnl  AM_FCFLAGS="${AM_FCFLAGS} -I."
 
-dnl  AC_MSG_CHECKING(if compiler supports -I. option)
-dnl  AC_TRY_FCOMPILE([
-dnl      program conftest
-dnl      end
-dnl  ], AC_MSG_RESULT(yes),
-dnl     AC_MSG_RESULT(no)
-dnl     AM_FCFLAGS="$AM_FCFLAGS_saved")
+  dnl  AC_MSG_CHECKING(if compiler supports -I. option)
+  dnl  AC_TRY_FCOMPILE([
+  dnl      program conftest
+  dnl      end
+  dnl  ], AC_MSG_RESULT(yes),
+  dnl     AC_MSG_RESULT(no)
+  dnl     AM_FCFLAGS="$AM_FCFLAGS_saved")
 
-dnl --------------------------------------------------------------------
-dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
+  dnl --------------------------------------------------------------------
+  dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
 
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic SIZEOF])
   AC_TRY_RUN([ 
@@ -453,10 +490,8 @@ dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
      	HAVE_SIZEOF="yes"],
        AC_MSG_RESULT(no))
 
-
-dnl Check to see if -r8 was specified to determine if we need to
-dnl compile the DOUBLE PRECISION interfaces.
-
+  dnl Check to see if -r8 was specified to determine if we need to
+  dnl compile the DOUBLE PRECISION interfaces.
 
   AC_MSG_CHECKING([if Fortran default REAL is DOUBLE PRECISION])
   
@@ -485,14 +520,48 @@ dnl compile the DOUBLE PRECISION interfaces.
    AC_MSG_RESULT(no), 
    [AC_MSG_RESULT(yes) 
        FORTRAN_DEFAULT_REALisDBLE="yes"])
-  dnl Change back to the C language
-  AC_LANG_POP(Fortran)
+
+  if test "X$HDF_FORTRAN2003" = "Xyes"; then
+
+    dnl Checking if the compiler supports the required Fortran 2003 features and
+    dnl disable Fortran 2003 if it does not.
+
+    AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003 HDF])
+    HAVE_FORTRAN_2003="no"
+	
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[
+
+	USE iso_c_binding
+	IMPLICIT NONE
+	TYPE(C_PTR) :: ptr
+	TYPE(C_FUNPTR) :: funptr
+	CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
+
+	ptr = C_LOC(ichr(1:1))
+
+        ])], 
+        [AC_MSG_RESULT(yes) 
+        HAVE_F2003_REQUIREMENTS=[yes]],
+        [AC_MSG_RESULT(no)])
+
+    if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
+    dnl  echo $HAVE_FORTRAN_2003
+      AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003])
+    else
+      HAVE_FORTRAN_2003="yes"
+    dnl  echo $HAVE_FORTRAN_2003
+    fi
+
+  fi
 else
-  echo "no"
   FC="no"
 fi
 
+dnl Change back to the C language
+AC_LANG_POP(Fortran)
+
 AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_2003_CONDITIONAL_F], [test "X$HAVE_FORTRAN_2003" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_DEFAULT_REALisDBLE_F], [test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"])
 
 dnl ----------------------------------------------------------------------
@@ -781,7 +850,7 @@ dnl Furthermore, the name of the compiler might tell us how to run the
 dnl resulting executable. For `mpif90' the executable should be run with
 dnl `mpiexec' from the same directory as mpif90 if it exists.
 dnl
-if test "X$HDF_FORTRAN" = "Xyes"; then
+if test "X$HDF_FORTRAN" = "Xyes" ; then
   dnl Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
@@ -1178,7 +1247,7 @@ case "X-$enable_production" in
   *)
     enable_production="user-defined"
     AC_MSG_RESULT([user-defined])
-    CONFIG_MODE="$X-enableval"
+    CONFIG_MODE="$enableval"
     ;;
 esac
 
@@ -1202,17 +1271,23 @@ AC_HEADER_STDC
 AC_HEADER_TIME
 
 dnl ----------------------------------------------------------------------
-dnl Check for these two functions before <sys/time.h> is checked for, otherwise
-dnl they are not detected correctly on Solaris [2.6].
+dnl Check for these two functions before the time headers are checked
+dnl for, otherwise they are not detected correctly on Solaris (the
+dnl configure test will fail due to multiply-defined symbols).
 dnl
 AC_CHECK_FUNCS(difftime)
 AC_CHECK_FUNCS(gettimeofday, [have_gettime="yes"], [have_gettime="no"])
+AC_SEARCH_LIBS([clock_gettime], [rt posix4])
+AC_CHECK_FUNCS([clock_gettime],[have_clock_gettime="yes"],[have_clock_gettime="no"])
 
 dnl Unix
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
 AC_CHECK_HEADERS([sys/socket.h sys/types.h])
 AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
+
+dnl Darwin
+AC_CHECK_HEADERS([mach/mach_time.h])
 
 dnl Windows
 case "`uname`" in
@@ -1375,25 +1450,32 @@ case "$host_cpu-$host_vendor-$host_os" in
     dnl H5_CPPFLAGS because fdopen and HDfdopen fail without it. HDfdopen
     dnl is used only by H5_debug_mask which is used only when debugging in
     dnl H5_init_library (all in H5.c).  When the flag was removed this was
-    dnl the only compile failure noted;  however, defining the Macro 
-    dnl makes available the functionality from the POSIX.1 standard as well
-    dnl as all or the ISO C facilities, according to a discussion of 
-    dnl defining the _POSIX_SOURCE, _BSD_SOURCE, and _POSIX_C_SOURCE Macros
-    dnl and their interaction found at 
-    dnl http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html.
-    H5_CPPFLAGS="-D_POSIX_SOURCE $H5_CPPFLAGS"
+    dnl the only compile failure noted.
+    dnl This was originally defined as _POSIX_SOURCE which was updated to
+    dnl _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
+    dnl functionality so clock_gettime and CLOCK_MONOTONIC are defined
+    dnl correctly.
+    dnl POSIX feature information can be found in the gcc manual at:
+    dnl http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
+    H5_CPPFLAGS="-D_POSIX_C_SOURCE=199506L $H5_CPPFLAGS"
 
     dnl Also add BSD support on Linux systems, so <features.h> defines
     dnl __USE_BSD, which is required to get the prototype for strdup
     dnl defined correctly in <string.h> and snprintf & vsnprintf defined
     dnl correctly in <stdio.h>
+    dnl Linking to the bsd-compat library is required as per the gcc manual:
+    dnl http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
+    dnl however, we do not do this since it breaks the big test on some 
+    dnl older platforms.
     AM_CPPFLAGS="-D_BSD_SOURCE $AM_CPPFLAGS"
     ;;
 esac
 
-dnl Need to add AM_CPPFLAGS into CPPFLAGS to make them visible for configure checks.
-dnl Note: CPPFLAGS will be restored by the end of configure.
-CPPFLAGS="$AM_CPPFLAGS $CPPFLAGS"
+dnl Need to add the AM_ and H5_ into CPFLAGS/CPPFLAGS to make them visible 
+dnl for configure checks.
+dnl Note: Both will be restored by the end of configure.
+CPPFLAGS="$H5_CPPFLAGS $AM_CPPFLAGS $CPPFLAGS"
+CFLAGS="$H5_CFLAGS $AM_CFLAGS $CFLAGS"
 
 AC_TRY_COMPILE([#include <sys/types.h>],
                [off64_t n = 0;],
@@ -1921,6 +2003,12 @@ esac
 if test "X$THREADSAFE" = "Xyes"; then
   AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
 fi
+
+dnl ----------------------------------------------------------------------
+dnl Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
+dnl to be done after any POSIX/BSD defines to ensure that the test gets
+dnl the correct POSIX level on linux.
+AC_CHECK_DECL(CLOCK_MONOTONIC,[have_clock_monotonic="yes"],[have_clock_monotonic="no"],[[#include <time.h>]])
 
 dnl ----------------------------------------------------------------------
 dnl How does one figure out the local time zone?  Anyone know of a
@@ -2857,76 +2945,36 @@ if test -n "$PARALLEL"; then
     AC_MSG_RESULT([no])
   fi
 
-dnl ----------------------------------------------------------------------
-dnl Set the flag to indicate that the MPI_File_get_size() function
-dnl works.  The default is enabled unless the user knows the function
-dnl doesn't work on the system and disables it.  (This flag should be set
-dnl for all machines except for SGI Altix Propack 4 where the function 
-dnl doesn't return correct file size.)
-dnl
-AC_ARG_ENABLE([mpi-size],
-              [AC_HELP_STRING([--enable-mpi-size],
-                              [Some systems (only SGI Altix Propack 4 so far) return wrong value
-                               from MPI_File_get_size.  By disabling this function, the library
-                               will replace it with stat to get the correct file size.
-                               [default=yes]])],
-              [MPI_GET_SIZE=$enableval])
+  dnl ----------------------------------------------------------------------
+  dnl Set the flag to indicate that the MPI_File_get_size() function
+  dnl works.  The default is enabled unless the user knows the function
+  dnl doesn't work on the system and disables it.  (This flag should be set
+  dnl for all machines except for SGI Altix Propack 4 where the function 
+  dnl doesn't return correct file size.)
+  dnl
+  AC_ARG_ENABLE([mpi-size],
+                [AC_HELP_STRING([--enable-mpi-size],
+                                [Some systems (only SGI Altix Propack 4 so far) return wrong value
+                                 from MPI_File_get_size.  By disabling this function, the library
+                                 will replace it with stat to get the correct file size.
+                                 [default=yes]])],
+                [MPI_GET_SIZE=$enableval])
 
-AC_MSG_CHECKING([if MPI_File_get_size is enabled])
+  AC_MSG_CHECKING([if MPI_File_get_size is enabled])
 
-AC_SUBST(MPI_GET_SIZE)
-case "X-$MPI_GET_SIZE" in
-  X-no)
-    AC_MSG_RESULT([no])
-    MPI_GET_SIZE=no
-    ;;
-  X-yes|*)
-    AC_MSG_RESULT([yes])
-    MPI_GET_SIZE=yes
-    AC_DEFINE([HAVE_MPI_GET_SIZE], [1],
-              [Define if MPI_File_get_size works correctly])
-    ;;
-esac
-
-dnl ----------------------------------------------------------------------
-dnl Check to see whether the complicate MPI derived datatype works. 
-dnl In Dec. 20th, 2004, we found that IBM's MPIO implemention didn't
-dnl handle with the displacement of the complicate MPI type derived datatype 
-dnl correctly. So we add the check here.
-dnl IBM fixed this bug in their new version that supported MPI-IO around spring 2005. 
-dnl We find that mpich 1.2.5 has the similar bug. The same
-dnl bug also occurs at SGI IRIX 6.5 C with compiler version lower than or equal to 7.3.
-dnl In case people still use the old compiler, we keep this flag.
-AC_MSG_CHECKING([if irregular hyperslab optimization code works inside MPI-IO])
-
-AC_CACHE_VAL([hdf5_cv_mpi_complex_derived_datatype_works],[hdf5_cv_mpi_complex_derived_datatype_works=yes])
-
-if test ${hdf5_cv_mpi_complex_derived_datatype_works} = "yes"; then
-  AC_DEFINE([MPI_COMPLEX_DERIVED_DATATYPE_WORKS], [1],
-            [Define if your system can handle complicated MPI derived datatype correctly.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-
-dnl ----------------------------------------------------------------------
-dnl Check to see whether MPI-IO can do collective IO successfully when one or more processes don't do 
-dnl any IOs.
-dnl Up to now(Feb. 8th, 2006), we find that it will cause program hung with mpich 1.2.x version 
-dnl and SGI altix. For those systems, we have to turn off this feature and use independent IO instead.
-dnl
-AC_MSG_CHECKING([if MPI-IO can do collective IO when one or more processes don't do IOs])
-
-AC_CACHE_VAL([hdf5_cv_mpi_special_collective_io_works],[hdf5_cv_mpi_special_collective_io_works=yes])
-
-if test ${hdf5_cv_mpi_special_collective_io_works} = "yes"; then
-  AC_DEFINE([MPI_SPECIAL_COLLECTIVE_IO_WORKS], [1],
-            [Define if your system can handle special collective IO properly.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
+  AC_SUBST(MPI_GET_SIZE)
+  case "X-$MPI_GET_SIZE" in
+    X-no)
+      AC_MSG_RESULT([no])
+      MPI_GET_SIZE=no
+      ;;
+    X-yes|*)
+      AC_MSG_RESULT([yes])
+      MPI_GET_SIZE=yes
+      AC_DEFINE([HAVE_MPI_GET_SIZE], [1],
+                [Define if MPI_File_get_size works correctly])
+      ;;
+  esac
 fi
 
 dnl ----------------------------------------------------------------------

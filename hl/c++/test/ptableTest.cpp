@@ -74,6 +74,7 @@ int main(void)
       return -1;
 }
 
+
 int BasicTest()
 {
     herr_t err;
@@ -182,9 +183,17 @@ int TestCompoundDatatype()
       goto out;
 
     PASSED();
+
+    H5Tclose(dtypeID);
     return 0;
 
 out:
+
+    H5E_BEGIN_TRY {
+        H5Tclose(dtypeID);
+    } H5E_END_TRY;
+
+
     H5_FAILED();
     return 1;
 }
@@ -514,10 +523,19 @@ int SystemTest()
     if(ct1[1].b != ct2[2].g.b)
       goto out;
 
+    H5Tclose(dtypeID1);
+    H5Tclose(dtypeID2);
+
     PASSED();
     return 0;
 
 out:
+
+    H5E_BEGIN_TRY {
+        H5Tclose(dtypeID1);
+        H5Tclose(dtypeID2);
+    } H5E_END_TRY;
+
     H5_FAILED();
     return 1;
 }

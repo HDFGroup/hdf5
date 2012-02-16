@@ -198,7 +198,7 @@ typedef struct H5F_super_t {
  * count in this struct indicates the number of H5F_t structs which are
  * pointing to this struct.
  */
-typedef struct H5F_file_t {
+struct H5F_file_t {
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
     H5F_super_t *sblock;        /* Pointer to (pinned) superblock for file */
     unsigned	nrefs;		/* Ref count for times file is opened	*/
@@ -255,7 +255,7 @@ typedef struct H5F_file_t {
 
     /* Metadata accumulator information */
     H5F_meta_accum_t accum;     /* Metadata accumulator info           	*/
-} H5F_file_t;
+};
 
 /*
  * This is the top-level file descriptor.  One of these structures is

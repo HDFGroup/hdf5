@@ -180,7 +180,7 @@ DESCRIPTION
 static herr_t
 H5FD_mpio_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_mpio_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5FD_mpio_init())
 } /* H5FD_mpio_init_interface() */
@@ -211,7 +211,7 @@ H5FD_mpio_init(void)
 #endif /* H5FDmpio_DEBUG */
     hid_t ret_value;        	/* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if (H5I_VFL!=H5I_get_type(H5FD_MPIO_g))
         H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g,sizeof(H5FD_class_mpi_t),FALSE);
@@ -255,7 +255,7 @@ done:
 static herr_t
 H5FD_mpio_term(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_mpio_term)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Reset VFL ID */
     H5FD_MPIO_g=0;
@@ -330,7 +330,7 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_fapl_mpio, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iMcMi", fapl_id, comm, info);
 
     if(fapl_id == H5P_DEFAULT)
@@ -401,7 +401,7 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
     int		mpi_code;		/* mpi return code */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_API(H5Pget_fapl_mpio, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", fapl_id, comm, info);
 
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -475,7 +475,7 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_dxpl_mpio, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iDt", dxpl_id, xfer_mode);
 
     if(dxpl_id==H5P_DEFAULT)
@@ -525,7 +525,7 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_dxpl_mpio, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", dxpl_id, xfer_mode);
 
     if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
@@ -572,7 +572,7 @@ H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collective_opt_t opt_mo
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_dxpl_mpio_collective_opt, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iDc", dxpl_id, opt_mode);
 
     if(dxpl_id == H5P_DEFAULT)
@@ -624,7 +624,7 @@ H5Pset_dxpl_mpio_chunk_opt(hid_t dxpl_id, H5FD_mpio_chunk_opt_t opt_mode)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_dxpl_mpio_chunk_opt, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iDh", dxpl_id, opt_mode);
 
     if(dxpl_id == H5P_DEFAULT)
@@ -671,7 +671,7 @@ H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_dxpl_mpio_chunk_opt_num, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", dxpl_id, num_chunk_per_proc);
 
     if(dxpl_id == H5P_DEFAULT)
@@ -718,7 +718,7 @@ H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_num_proc_per_ch
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_dxpl_mpio_chunk_opt_ratio, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", dxpl_id, percent_num_proc_per_chunk);
 
     if(dxpl_id == H5P_DEFAULT)
@@ -767,7 +767,7 @@ H5FD_mpio_fapl_get(H5FD_t *_file)
     H5FD_mpio_fapl_t	*fa = NULL;
     void      *ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_fapl_get, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file);
     HDassert(H5FD_MPIO == file->pub.driver_id);
@@ -810,7 +810,7 @@ H5FD_mpio_fapl_copy(const void *_old_fa)
     const H5FD_mpio_fapl_t *old_fa = (const H5FD_mpio_fapl_t*)_old_fa;
     H5FD_mpio_fapl_t	*new_fa = NULL;
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_fapl_copy, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 #ifdef H5FDmpio_DEBUG
 if (H5FD_mpio_Debug[(int)'t'])
 fprintf(stderr, "enter H5FD_mpio_fapl_copy\n");
@@ -864,7 +864,7 @@ H5FD_mpio_fapl_free(void *_fa)
     herr_t		ret_value = SUCCEED;
     H5FD_mpio_fapl_t	*fa = (H5FD_mpio_fapl_t*)_fa;
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_fapl_free, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 #ifdef H5FDmpio_DEBUG
 if (H5FD_mpio_Debug[(int)'t'])
 fprintf(stderr, "in H5FD_mpio_fapl_free\n");
@@ -876,7 +876,6 @@ fprintf(stderr, "in H5FD_mpio_fapl_free\n");
     H5FD_mpi_comm_info_free(&fa->comm, &fa->info);
     H5MM_xfree(fa);
 
-done:
 #ifdef H5FDmpio_DEBUG
 if (H5FD_mpio_Debug[(int)'t'])
 fprintf(stderr, "leaving H5FD_mpio_fapl_free\n");
@@ -949,10 +948,10 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     MPI_Info                    info_dup=MPI_INFO_NULL;
     H5FD_t			*ret_value;     /* Return value */
 #ifndef H5_HAVE_MPI_GET_SIZE
-    struct stat                 stat_buf;
+    h5_stat_t                 stat_buf;
 #endif
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_open, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t']) {
@@ -1112,7 +1111,7 @@ H5FD_mpio_close(H5FD_t *_file)
     int		mpi_code;	        /* MPI return code */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_close, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
@@ -1156,9 +1155,7 @@ done:
 static herr_t
 H5FD_mpio_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
 {
-    herr_t ret_value=SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5FD_mpio_query, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -1169,8 +1166,7 @@ H5FD_mpio_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
         *flags|=H5FD_FEAT_ALLOCATE_EARLY;      /* Allocate space early instead of late */
     } /* end if */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -1199,18 +1195,13 @@ static haddr_t
 H5FD_mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 {
     const H5FD_mpio_t	*file = (const H5FD_mpio_t*)_file;
-    haddr_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_get_eoa, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-    /* Set return value */
-    ret_value=file->eoa;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(file->eoa)
 }
 
 
@@ -1239,17 +1230,15 @@ static herr_t
 H5FD_mpio_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_set_eoa, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
     file->eoa = addr;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -1286,18 +1275,13 @@ static haddr_t
 H5FD_mpio_get_eof(const H5FD_t *_file)
 {
     const H5FD_mpio_t	*file = (const H5FD_mpio_t*)_file;
-    haddr_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_get_eof, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-    /* Set return value */
-    ret_value=file->eof;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(file->eof)
 }
 
 
@@ -1321,7 +1305,7 @@ H5FD_mpio_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     H5FD_mpio_t         *file = (H5FD_mpio_t *)_file;
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_get_handle, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
@@ -1419,7 +1403,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     hbool_t			use_view_this_time = FALSE;
     herr_t              	ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_read, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
@@ -1703,7 +1687,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     H5P_genplist_t              *plist = NULL;  /* Property list pointer */
     herr_t              	ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_write, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
@@ -1878,7 +1862,7 @@ H5FD_mpio_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
     int			mpi_code;	/* mpi return code */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef H5FDmpio_DEBUG
     if(H5FD_mpio_Debug[(int)'t'])
@@ -1922,7 +1906,7 @@ H5FD_mpio_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_truncate, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
 #ifdef H5FDmpio_DEBUG
     if(H5FD_mpio_Debug[(int)'t'])
@@ -2012,18 +1996,13 @@ static int
 H5FD_mpio_mpi_rank(const H5FD_t *_file)
 {
     const H5FD_mpio_t	*file = (const H5FD_mpio_t*)_file;
-    int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_mpi_rank, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-    /* Set return value */
-    ret_value=file->mpi_rank;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(file->mpi_rank)
 } /* end H5FD_mpio_mpi_rank() */
 
 
@@ -2046,18 +2025,13 @@ static int
 H5FD_mpio_mpi_size(const H5FD_t *_file)
 {
     const H5FD_mpio_t	*file = (const H5FD_mpio_t*)_file;
-    int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_mpi_size, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-    /* Set return value */
-    ret_value=file->mpi_size;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(file->mpi_size)
 } /* end H5FD_mpio_mpi_size() */
 
 
@@ -2081,18 +2055,13 @@ static MPI_Comm
 H5FD_mpio_communicator(const H5FD_t *_file)
 {
     const H5FD_mpio_t	*file = (const H5FD_mpio_t*)_file;
-    MPI_Comm ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_communicator, MPI_COMM_NULL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-    /* Set return value */
-    ret_value=file->comm;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(file->comm)
 }
 
 /*-------------------------------------------------------------------------
@@ -2117,7 +2086,7 @@ H5FD_mpio_fsync(H5FD_t *file, hid_t UNUSED dxpl)
     herr_t        ret_value = SUCCEED;       /* Return value */
     H5FD_mpio_t * mpio_file = NULL;
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_fsync, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if(file == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
@@ -2133,3 +2102,4 @@ done:
 } /* end H5FD_mpio_fsync() */
 
 #endif /* H5_HAVE_PARALLEL */
+

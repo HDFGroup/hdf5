@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tstr3.h5'
-#############################
 HDF5 "tstr3.h5" {
 GROUP "/" {
    DATASET "str1" {

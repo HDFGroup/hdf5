@@ -1,3 +1,12 @@
+!****h* root/fortran/test/tH5A.f90
+!
+! NAME
+!  tH5A.f90
+!
+! FUNCTION
+!  Basic testing of Fortran H5A APIs.
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,6 +22,12 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+! CONTAINS SUBROUTINES
+!  attribute_test 
+!
+!
+!*****
+
     SUBROUTINE attribute_test(cleanup, total_error)
 
 !   This subroutine tests following functionalities:

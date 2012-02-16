@@ -117,7 +117,7 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
     H5T_t *buf_type;            /* Buffer datatype */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5Dfill, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "*xi*xii", fill, fill_type_id, buf, buf_type_id, space_id);
 
     /* Check args */
@@ -181,7 +181,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
     size_t dst_type_size;       /* Size of destination type*/
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_fill)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(fill_type);
@@ -370,7 +370,7 @@ H5D_fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf,
 {
     herr_t	ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_fill_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(fb_info);
@@ -566,7 +566,7 @@ H5D_fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts, hid_t dxpl_id)
     herr_t	ret_value = SUCCEED;	/* Return value */
     void * buf = NULL;              /* Temporary fill buffer */
 
-    FUNC_ENTER_NOAPI(H5D_fill_refill_vl, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(fb_info);
@@ -644,7 +644,7 @@ done:
 herr_t
 H5D_fill_release(H5D_fill_buf_info_t *fb_info)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5D_fill_release)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
     HDassert(fb_info);
@@ -682,7 +682,7 @@ H5D_fill_release(H5D_fill_buf_info_t *fb_info)
 herr_t
 H5D_fill_term(H5D_fill_buf_info_t *fb_info)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5D_fill_term)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
     HDassert(fb_info);

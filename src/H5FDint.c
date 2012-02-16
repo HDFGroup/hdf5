@@ -99,7 +99,7 @@ DESCRIPTION
 static herr_t
 H5FD_int_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_int_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5FD_init())
 } /* H5FD_int_init_interface() */
@@ -124,7 +124,7 @@ H5FD_read(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_read, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file && file->cls);
     HDassert(H5I_GENPROP_LST == H5I_get_type(dxpl_id));
@@ -167,7 +167,7 @@ H5FD_write(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_write, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file && file->cls);
     HDassert(H5I_GENPROP_LST == H5I_get_type(dxpl_id));
@@ -214,7 +214,7 @@ H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_set_eoa, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file && file->cls);
     HDassert(H5F_addr_defined(addr) && addr <= file->maxaddr);
@@ -251,7 +251,7 @@ H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type)
 {
     haddr_t	ret_value;
 
-    FUNC_ENTER_NOAPI(H5FD_get_eoa, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
     HDassert(file && file->cls);
 
@@ -292,7 +292,7 @@ H5FD_get_eof(const H5FD_t *file)
 {
     haddr_t	ret_value;
 
-    FUNC_ENTER_NOAPI(H5FD_get_eof, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
     HDassert(file && file->cls);
 
@@ -365,7 +365,7 @@ H5FD_aio_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr,
 {
     herr_t      	ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_aio_read, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if((file == NULL) || 
        (file->cls == NULL) || 
@@ -453,7 +453,7 @@ H5FD_aio_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr,
 {
     herr_t              ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_aio_write, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if((file == NULL) || 
        (file->cls == NULL) || 
@@ -530,7 +530,7 @@ H5FD_aio_test(H5FD_t *file, hbool_t *done_ptr, void *ctlblk_ptr)
 {
     herr_t		ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_aio_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if((file == NULL) || 
        (file->cls == NULL) || 
@@ -590,7 +590,7 @@ H5FD_aio_wait(H5FD_t *file, void *ctlblk_ptr)
 {
     herr_t    		ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_aio_wait, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if((file == NULL) || 
        (file->cls == NULL) || 
@@ -653,7 +653,7 @@ H5FD_aio_finish(H5FD_t *file, int *errno_ptr, void *ctlblk_ptr)
 {
     herr_t              ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_aio_finish, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if((file == NULL) || 
        (file->cls == NULL) || 
@@ -711,7 +711,7 @@ H5FD_aio_fsync(H5FD_t *file, void **ctlblk_ptr_ptr)
 {
     herr_t     		ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_aio_fsync, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if((file == NULL) || 
        (file->cls == NULL) || 
@@ -780,7 +780,7 @@ H5FD_aio_cancel(H5FD_t *file, void *ctlblk_ptr)
 {
     herr_t   		ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_aio_cancel, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if((file == NULL) || (file->cls == NULL) || (ctlblk_ptr == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "NULL ctlblk_ptr on entry.")
@@ -816,7 +816,7 @@ H5FD_fsync(H5FD_t *file, hid_t dxpl)
 {
     herr_t              ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_fsync, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if((file == NULL) || (file->cls == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad file param on entry.")
@@ -875,7 +875,7 @@ H5FD_aggregate_stats(H5FD_stats_t *base_stats_ptr, H5FD_stats_t *new_stats_ptr)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FD_aggregate_stats)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if((base_stats_ptr == NULL) || 
        (base_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC) || 
@@ -953,7 +953,7 @@ H5FD_copy_stats(H5FD_stats_t *dest_stats_ptr, H5FD_stats_t *src_stats_ptr)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FD_copy_stats)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if((dest_stats_ptr == NULL) || 
        (dest_stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC) || 
@@ -1032,7 +1032,7 @@ H5FD_dump_stats(FILE * out_stream,H5FD_stats_t *stats_ptr,const char *label_ptr)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FD_dump_stats)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if((out_stream == NULL) || 
        (stats_ptr == NULL) || 
@@ -1128,7 +1128,7 @@ H5FD_get_stats(H5FD_t *file, H5FD_stats_t *stats_ptr)
     const H5FD_private_class_t * private_class_ptr;
     herr_t                       ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_get_stats, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if((file == NULL) || 
        (file->cls == NULL) || 
@@ -1171,7 +1171,7 @@ H5FD_initialize_stats(H5FD_stats_t *stats_ptr)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FD_initialize_stats)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(( stats_ptr == NULL) || (stats_ptr->magic != H5FD__H5FD_STATS_T_MAGIC))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad arg(s) on entry.")
@@ -1237,7 +1237,7 @@ H5FD_reset_stats(H5FD_t *file)
     const H5FD_private_class_t * private_class_ptr;
     herr_t                       ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_reset_stats, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if((file == NULL)||(file->cls == NULL))
         HGOTO_ERROR(H5E_ARGS, H5E_SYSTEM, FAIL, "bad file param on entry.")

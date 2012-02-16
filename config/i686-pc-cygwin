@@ -1,4 +1,4 @@
-#							-*- shell-script -*-
+#              -*- shell-script -*-
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -39,9 +39,9 @@ fi
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
         gcc*)
-            FC=g95
+            FC=gfortran
             FCLIBS=-lgcc
-            FC_BASENAME=g95
+            FC_BASENAME=gfortran
             ;;
         pgcc*)
             FC=pgf90
@@ -60,6 +60,9 @@ else
     case $FC in
         # The PGI and Intel compilers are automatically detected below
         ifc*|ifort*|pgf90*)
+            ;;
+        gfortran)
+            FCLIBS=-lgcc
             ;;
         g95)
             FCLIBS=-lgcc

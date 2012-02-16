@@ -101,7 +101,7 @@ H5O_is_attr_dense_test(hid_t oid)
     H5O_loc_t *loc;             /* Pointer to object's location */
     htri_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_is_attr_dense_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get object location for object */
     if(NULL == (loc = H5O_get_loc(oid)))
@@ -166,7 +166,7 @@ H5O_is_attr_empty_test(hid_t oid)
     hsize_t nattrs;             /* Number of attributes */
     htri_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_is_attr_empty_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get object location for object */
     if(NULL == (loc = H5O_get_loc(oid)))
@@ -259,7 +259,7 @@ H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
     hsize_t obj_nattrs;         /* Number of attributes */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_num_attrs_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get object location for object */
     if(NULL == (loc = H5O_get_loc(oid)))
@@ -351,7 +351,7 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
     H5O_loc_t *loc;            /* Pointer to object's location */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_attr_dense_info_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get object location for object */
     if(NULL == (loc = H5O_get_loc(oid)))
@@ -399,6 +399,9 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
     else
         *corder_count = 0;
 
+    /* Reset metadata tag in dxpl_id */
+    H5_END_TAG(FAIL);
+
 done:
     /* Release resources */
     if(bt2_name && H5B2_close(bt2_name, H5AC_ind_dxpl_id) < 0)
@@ -407,9 +410,6 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
     if(oh && H5O_unprotect(loc, H5AC_ind_dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
-
-    /* Reset metadata tag in dxpl_id */
-    H5_END_TAG(FAIL);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5O_attr_dense_info_test() */
@@ -445,7 +445,7 @@ H5O_check_msg_marked_test(hid_t oid, hbool_t flag_val)
     unsigned idx;               /* Index of message */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_check_msg_marked_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get object location for object */
     if(NULL == (loc = H5O_get_loc(oid)))
@@ -508,7 +508,7 @@ H5O_expunge_chunks_test(const H5O_loc_t *loc, hid_t dxpl_id)
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_expunge_chunks_test, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the object header */
     if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_WRITE)))
@@ -564,7 +564,7 @@ H5O_get_rc(const H5O_loc_t *loc, hid_t dxpl_id, unsigned *rc)
     H5O_t *oh = NULL;           /* Object header */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_get_rc, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(loc);

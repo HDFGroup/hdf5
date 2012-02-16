@@ -32,6 +32,16 @@ extern "C" {
 #define PRINT_DATA_MAX_SIZE 	512
 #define OUTBUFF_SIZE 		(PRINT_DATA_MAX_SIZE*4)
 
+/* Maximum size used in a call to malloc for a dataset */
+H5TOOLS_DLLVAR hsize_t H5TOOLS_MALLOCSIZE;
+/* size of hyperslab buffer when a dataset is bigger than H5TOOLS_MALLOCSIZE */
+H5TOOLS_DLLVAR hsize_t H5TOOLS_BUFSIZE;
+H5TOOLS_DLLVAR int  g_nTasks;
+H5TOOLS_DLLVAR unsigned char g_Parallel;
+H5TOOLS_DLLVAR char    outBuff[];
+H5TOOLS_DLLVAR int  outBuffOffset;
+H5TOOLS_DLLVAR FILE *   overflow_file;
+
 /*
  * begin get_option section
  */
@@ -117,6 +127,7 @@ H5TOOLS_DLL void     print_version(const char *progname);
 H5TOOLS_DLL void     parallel_print(const char* format, ... );
 H5TOOLS_DLL void     error_msg(const char *fmt, ...);
 H5TOOLS_DLL void     warn_msg(const char *fmt, ...);
+H5TOOLS_DLL void     help_ref_msg(FILE *output);
 H5TOOLS_DLL void     free_table(table_t *table);
 #ifdef H5DUMP_DEBUG
 H5TOOLS_DLL void     dump_tables(find_objs_t *info)
@@ -162,7 +173,7 @@ H5TOOLS_DLL const char *h5tools_getprogname(void);
 H5TOOLS_DLL void     h5tools_setprogname(const char*progname);
 H5TOOLS_DLL int      h5tools_getstatus(void);
 H5TOOLS_DLL void     h5tools_setstatus(int d_status);
-
+H5TOOLS_DLL int h5tools_getenv_update_hyperslab_bufsize(void);
 #ifdef __cplusplus
 }
 #endif

@@ -17,13 +17,12 @@
 #define H5DIFFCOMMON_H__
 
 #include "h5tools.h"
+/* Name of tool */
+#define PROGRAMNAME "h5diff"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-H5TOOLS_DLLVAR unsigned char g_Parallel;
-H5TOOLS_DLLVAR int g_nTasks;
 
 void usage(void);
 void parse_command_line(int argc, const char* argv[], const char** fname1, const char** fname2, const char** objname1, const char** objname2, diff_opt_t* options);

@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump thyperslab.h5'
-#############################
 HDF5 "thyperslab.h5" {
 GROUP "/" {
    DATASET "stripmine" {

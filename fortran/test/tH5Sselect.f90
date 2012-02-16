@@ -1,3 +1,12 @@
+!****h* root/fortran/test/tH5Sselect.f90
+!
+! NAME
+!  tH5Sselect.f90
+!
+! FUNCTION
+!  Basic testing of Fortran H5S, Selection-related Dataspace Interface, APIs.
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,18 +22,20 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!    Testing Selection-related Dataspace Interface functionality.
-!
-
-!
-!    The following subroutines tests the following functionalities:
+! NOTES
+!  Tests the following functionalities:
 !    h5sget_select_npoints_f, h5sselect_elements_f, h5sselect_all_f,
 !    h5sselect_none_f, h5sselect_valid_f, h5sselect_hyperslab_f,
 !    h5sget_select_bounds_f, h5sget_select_elem_pointlist_f,
 !    h5sget_select_elem_npoints_f, h5sget_select_hyper_blocklist_f,
-!    h5sget_select_hyper_nblocks_f, h5sget_select_npoints_f
+!    h5sget_select_hyper_nblocks_f, h5sget_select_npoints_f   
 !
+! CONTAINS SUBROUTINES
+!  test_select_hyperslab, test_select_element, test_basic_select,
+!  test_select_point, test_select_combine, test_select_bounds
+!  
+!
+!*****
 
   SUBROUTINE test_select_hyperslab(cleanup, total_error)
 
@@ -1021,13 +1032,13 @@
 !****************************************************************/
 
 SUBROUTINE test_select_point(cleanup, total_error)
-  USE HDF5 ! This module contains all necessary modules
-
+  USE HDF5 ! This module contains all necessary modules 
+  
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(OUT) :: total_error
   INTEGER(HID_T) :: xfer_plist
-
+  
   INTEGER, PARAMETER :: SPACE1_DIM1=3
   INTEGER, PARAMETER :: SPACE1_DIM2=15
   INTEGER, PARAMETER :: SPACE1_DIM3=13
@@ -1035,11 +1046,11 @@ SUBROUTINE test_select_point(cleanup, total_error)
   INTEGER, PARAMETER :: SPACE2_DIM2=26
   INTEGER, PARAMETER :: SPACE3_DIM1=15
   INTEGER, PARAMETER :: SPACE3_DIM2=26
-
+  
   INTEGER, PARAMETER :: SPACE1_RANK=3
   INTEGER, PARAMETER :: SPACE2_RANK=2
   INTEGER, PARAMETER :: SPACE3_RANK=2
-
+  
   ! /* Element selection information */
   INTEGER, PARAMETER :: POINT1_NPOINTS=10
   INTEGER(hid_t) ::fid1 ! /* HDF5 File IDs */
@@ -1048,7 +1059,7 @@ SUBROUTINE test_select_point(cleanup, total_error)
   INTEGER(hsize_t), DIMENSION(1:3) :: dims1 = (/SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3/)
   INTEGER(hsize_t), DIMENSION(1:2) :: dims2 = (/SPACE2_DIM1, SPACE2_DIM2/)
   INTEGER(hsize_t), DIMENSION(1:2) :: dims3 = (/SPACE3_DIM1, SPACE3_DIM2/)
-
+  
   INTEGER(hsize_t), DIMENSION(1:SPACE1_RANK,1:POINT1_NPOINTS) :: coord1 !/* Coordinates for point selection */
   INTEGER(hsize_t), DIMENSION(1:SPACE1_RANK,1:POINT1_NPOINTS) :: temp_coord1 !/* Coordinates for point selection */
   INTEGER(hsize_t), DIMENSION(1:SPACE2_RANK,1:POINT1_NPOINTS) :: coord2 !/* Coordinates for point selection */
@@ -1064,7 +1075,7 @@ SUBROUTINE test_select_point(cleanup, total_error)
 !    struct pnt_iter pi;     /* Custom Pointer iterator struct */
   INTEGER :: error		!/* Generic return value		*/
   CHARACTER(LEN=9) :: filename = 'h5s_hyper'
-  CHARACTER(LEN=80) :: fix_filename
+  CHARACTER(LEN=80) :: fix_filename 
   CHARACTER(LEN=1), DIMENSION(1:SPACE2_DIM1,1:SPACE2_DIM2) :: wbuf, rbuf
 
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
@@ -1090,11 +1101,11 @@ SUBROUTINE test_select_point(cleanup, total_error)
 !!$  for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
 !!$  for(j=0; j<SPACE2_DIM2; j++)
 !!$  *tbuf++=(uint8_t)((i*SPACE2_DIM2)+j);
-
+  
   !/* Create file */
   CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, fid1, error)
   CALL check("h5fcreate_f", error, total_error)
-
+  
   !/* Create dataspace for dataset */
   CALL h5screate_simple_f(SPACE1_RANK, dims1, sid1, error)
   CALL check("h5screate_simple_f", error, total_error)
@@ -1114,7 +1125,6 @@ SUBROUTINE test_select_point(cleanup, total_error)
   coord1(1,8)=2; coord1(2,8)= 1; coord1(3,8)= 5;
   coord1(1,9)=3; coord1(2,9)= 2; coord1(3,9)= 7;
   coord1(1,10)=1; coord1(2,10)= 4; coord1(3,10)= 9
-
 
   CALL h5sselect_elements_f(sid1, H5S_SELECT_SET_F, SPACE1_RANK, INT(POINT1_NPOINTS,size_t), coord1, error)
   CALL check("h5sselect_elements_f", error, total_error)
@@ -1151,7 +1161,7 @@ SUBROUTINE test_select_point(cleanup, total_error)
   CALL h5sselect_elements_f(sid1, H5S_SELECT_APPEND_F, SPACE1_RANK, INT(POINT1_NPOINTS,size_t), coord1, error)
   CALL check("h5sselect_elements_f", error, total_error)
   ! /* Verify correct elements selected */
-
+  
   CALL h5sget_select_elem_pointlist_f(sid1, INT(POINT1_NPOINTS,hsize_t), INT(POINT1_NPOINTS,hsize_t),temp_coord1,error)
   CALL check("h5sget_select_elem_pointlist_f", error, total_error)
 
@@ -1182,7 +1192,7 @@ SUBROUTINE test_select_point(cleanup, total_error)
 
 
   !/* Verify correct elements selected */
-
+  
   CALL h5sget_select_elem_pointlist_f(sid2, INT(0,hsize_t), INT(POINT1_NPOINTS,hsize_t),temp_coord2,error)
   CALL check("h5sget_select_elem_pointlist_f", error, total_error)
 
@@ -1333,7 +1343,6 @@ SUBROUTINE test_select_point(cleanup, total_error)
   CALL h5fclose_f(fid1, error)
   CALL check("h5fclose_f", error, total_error)
 
-
   IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)
 
@@ -1349,8 +1358,8 @@ END SUBROUTINE test_select_point
 !****************************************************************/
 
 SUBROUTINE test_select_combine(cleanup, total_error)
-  USE HDF5 ! This module contains all necessary modules
-
+  USE HDF5 ! This module contains all necessary modules 
+  
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(OUT) :: total_error
@@ -1358,7 +1367,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   INTEGER, PARAMETER :: SPACE7_RANK = 2
   INTEGER, PARAMETER :: SPACE7_DIM1 = 10
   INTEGER, PARAMETER :: SPACE7_DIM2 = 10
-
+  
   INTEGER(hid_t) :: base_id !      /* Base dataspace for test */
   INTEGER(hid_t) :: all_id !       /* Dataspace for "all" selection */
   INTEGER(hid_t) :: none_id !      /* Dataspace for "none" selection */
@@ -1378,7 +1387,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL check("h5screate_simple_f", error, total_error)
 
   ! /* Copy base dataspace and set selection to "all" */
-  CALL h5scopy_f(base_id, all_id, error)
+  CALL h5scopy_f(base_id, all_id, error)  
   CALL check("h5scopy_f", error, total_error)
 
   CALL H5Sselect_all_f(all_id, error)
@@ -1389,7 +1398,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT(H5S_SEL_ALL_F), total_error)
 
   !/* Copy base dataspace and set selection to "none" */
-  CALL h5scopy_f(base_id, none_id, error)
+  CALL h5scopy_f(base_id, none_id, error)  
   CALL check("h5scopy_f", error, total_error)
 
   CALL H5Sselect_none_f(none_id, error)
@@ -1398,9 +1407,9 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL H5Sget_select_type_f(none_id, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
   CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT(H5S_SEL_NONE_F), total_error)
-
+  
   !/* Copy "all" selection & space */
-  CALL H5Scopy_f(all_id, space1, error)
+  CALL H5Scopy_f(all_id, space1, error)  
   CALL check("h5scopy_f", error, total_error)
 
   !/* 'OR' "all" selection with another hyperslab */
@@ -1409,7 +1418,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   icount(1:2) = 1
   iblock(1:2) = (/5,4/)
   CALL h5sselect_hyperslab_f(space1, H5S_SELECT_OR_F, start, &
-                                icount, error, stride, iblock)
+                                icount, error, stride, iblock) 
   CALL check("h5sselect_hyperslab_f", error, total_error)
 
   !/* Verify that it's still "all" selection */
@@ -1422,7 +1431,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL check("h5sclose_f", error, total_error)
 
   !/* Copy "all" selection & space */
-  CALL H5Scopy_f(all_id, space1, error)
+  CALL H5Scopy_f(all_id, space1, error)  
   CALL check("h5scopy_f", error, total_error)
 
   ! /* 'AND' "all" selection with another hyperslab */
@@ -1431,7 +1440,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   icount(1:2) = 1
   iblock(1:2) = (/5,4/)
   CALL h5sselect_hyperslab_f(space1, H5S_SELECT_AND_F, start, &
-       icount, error, stride, iblock)
+       icount, error, stride, iblock) 
   CALL check("h5sselect_hyperslab_f", error, total_error)
 
   !/* Verify that the new selection is the same at the original block */
@@ -1443,7 +1452,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL h5sget_select_hyper_nblocks_f(space1, nblocks, error)
   CALL check("h5sget_select_hyper_nblocks_f", error, total_error)
   CALL VERIFY("h5sget_select_hyper_nblocks_f", INT(nblocks), 1, total_error)
-
+  
   !/* Retrieve the block defined */
   CALL h5sget_select_hyper_blocklist_f(space1, INT(0, hsize_t), INT(nblocks,hsize_t), blocks, error)
   CALL check("h5sget_select_hyper_blocklist_f", error, total_error)
@@ -1460,7 +1469,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL check("h5sclose_f", error, total_error)
 
   !/* Copy "all" selection & space */
-  CALL H5Scopy_f(all_id, space1, error)
+  CALL H5Scopy_f(all_id, space1, error)  
   CALL check("h5scopy_f", error, total_error)
 
   ! /* 'XOR' "all" selection with another hyperslab */
@@ -1470,7 +1479,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   iblock(1:2) = (/5,4/)
 
   CALL h5sselect_hyperslab_f(space1, H5S_SELECT_XOR_F, start, &
-       icount, error, stride, iblock)
+       icount, error, stride, iblock) 
   CALL check("h5sselect_hyperslab_f", error, total_error)
 
   ! /* Verify that the new selection is an inversion of the original block */
@@ -1491,7 +1500,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
 
   ! /* Verify that the correct block is defined */
 
-  ! No guarantee is implied as the order in which blocks are listed.
+  ! No guarantee is implied as the order in which blocks are listed. 
   ! So this will ONLY work for square domains iblock(1:2) = (/5,5/)
 !!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
 !!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 5, total_error)
@@ -1512,7 +1521,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL check("h5sclose_f", error, total_error)
 
   ! /* Copy "all" selection & space */
-  CALL H5Scopy_f(all_id, space1, error)
+  CALL H5Scopy_f(all_id, space1, error)  
   CALL check("h5scopy_f", error, total_error)
 
   ! /* 'NOTB' "all" selection with another hyperslab */
@@ -1522,7 +1531,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   iblock(1:2) = (/5,4/) !5
 
   CALL h5sselect_hyperslab_f(space1, H5S_SELECT_NOTB_F, start, &
-       icount, error, stride, iblock)
+       icount, error, stride, iblock) 
   CALL check("h5sselect_hyperslab_f", error, total_error)
 
   ! /* Verify that the new selection is an inversion of the original block */
@@ -1540,9 +1549,9 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL h5sget_select_hyper_blocklist_f(space1, INT(0, hsize_t), INT(nblocks,hsize_t), blocks, error)
   CALL check("h5sget_select_hyper_blocklist_f", error, total_error)
 
-  ! /* Verify that the correct block is defined */
+  ! /* Verify that the correct block is defined */ 
 
-  ! No guarantee is implied as the order in which blocks are listed.
+  ! No guarantee is implied as the order in which blocks are listed. 
   ! So this will ONLY work for square domains iblock(1:2) = (/5,5/)
 
 !!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
@@ -1564,7 +1573,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL h5sclose_f(space1, error)
   CALL check("h5sclose_f", error, total_error)
   ! /* Copy "all" selection & space */
-  CALL H5Scopy_f(all_id, space1, error)
+  CALL H5Scopy_f(all_id, space1, error)  
   CALL check("h5scopy_f", error, total_error)
 
   ! /* 'NOTA' "all" selection with another hyperslab */
@@ -1574,7 +1583,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   iblock(1:2) = (/5,4/) !5
 
   CALL h5sselect_hyperslab_f(space1, H5S_SELECT_NOTA_F, start, &
-       icount, error, stride, iblock)
+       icount, error, stride, iblock) 
   CALL check("h5sselect_hyperslab_f", error, total_error)
 
   !/* Verify that the new selection is the "none" selection */
@@ -1587,7 +1596,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL check("h5sclose_f", error, total_error)
 
   ! /* Copy "none" selection & space */
-  CALL H5Scopy_f(none_id, space1, error)
+  CALL H5Scopy_f(none_id, space1, error)  
   CALL check("h5scopy_f", error, total_error)
 
   ! /* 'OR' "none" selection with another hyperslab */
@@ -1597,14 +1606,14 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   iblock(1:2) = (/5,4/) !5
 
   CALL h5sselect_hyperslab_f(space1, H5S_SELECT_OR_F, start, &
-       icount, error, stride, iblock)
+       icount, error, stride, iblock) 
   CALL check("h5sselect_hyperslab_f", error, total_error)
 
   ! /* Verify that the new selection is the same as the original hyperslab */
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
   CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
-
+  
 
   ! /* Verify that there is only one block */
   CALL h5sget_select_hyper_nblocks_f(space1, nblocks, error)
@@ -1627,7 +1636,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL check("h5sclose_f", error, total_error)
 
   ! /* Copy "none" selection & space */
-  CALL H5Scopy_f(none_id, space1, error)
+  CALL H5Scopy_f(none_id, space1, error)  
   CALL check("h5scopy_f", error, total_error)
 
   ! /* 'AND' "none" selection with another hyperslab */
@@ -1637,7 +1646,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   iblock(1:2) = (/5,4/) !5
 
   CALL h5sselect_hyperslab_f(space1, H5S_SELECT_AND_F, start, &
-       icount, error, stride, iblock)
+       icount, error, stride, iblock) 
   CALL check("h5sselect_hyperslab_f", error, total_error)
 
   ! /* Verify that the new selection is the "none" selection */
@@ -1650,7 +1659,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL check("h5sclose_f", error, total_error)
 
   ! /* Copy "none" selection & space */
-  CALL H5Scopy_f(none_id, space1, error)
+  CALL H5Scopy_f(none_id, space1, error)  
   CALL check("h5scopy_f", error, total_error)
 
   ! /* 'XOR' "none" selection with another hyperslab */
@@ -1660,14 +1669,14 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   iblock(1:2) = (/5,4/) !5
 
   CALL h5sselect_hyperslab_f(space1, H5S_SELECT_XOR_F, start, &
-       icount, error, stride, iblock)
+       icount, error, stride, iblock) 
   CALL check("h5sselect_hyperslab_f", error, total_error)
 
   ! /* Verify that the new selection is the same as the original hyperslab */
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
   CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
-
+  
 
   ! /* Verify that there is only one block */
   CALL h5sget_select_hyper_nblocks_f(space1, nblocks, error)
@@ -1683,13 +1692,13 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 1, total_error)
   CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
   CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)), 4, total_error)
-
+  
   ! /* Close temporary dataspace */
   CALL h5sclose_f(space1, error)
   CALL check("h5sclose_f", error, total_error)
 
   ! /* Copy "none" selection & space */
-  CALL H5Scopy_f(none_id, space1, error)
+  CALL H5Scopy_f(none_id, space1, error)  
   CALL check("h5scopy_f", error, total_error)
 
   ! /* 'NOTB' "none" selection with another hyperslab */
@@ -1699,7 +1708,7 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   iblock(1:2) = (/5,4/) !5
 
   CALL h5sselect_hyperslab_f(space1, H5S_SELECT_NOTB_F, start, &
-       icount, error, stride, iblock)
+       icount, error, stride, iblock) 
   CALL check("h5sselect_hyperslab_f", error, total_error)
 
   ! /* Verify that the new selection is the "none" selection */
@@ -1712,23 +1721,23 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL check("h5sclose_f", error, total_error)
 
   ! /* Copy "none" selection & space */
-  CALL H5Scopy_f(none_id, space1, error)
+  CALL H5Scopy_f(none_id, space1, error)  
   CALL check("h5scopy_f", error, total_error)
 
   ! /* 'NOTA' "none" selection with another hyperslab */
   start(1:2) = 0
   stride(1:2) = 1
   icount(1:2) = 1
-  iblock(1:2) = (/5,4/) !5
+  iblock(1:2) = (/5,4/) !5  
   CALL h5sselect_hyperslab_f(space1, H5S_SELECT_NOTA_F, start, &
-       icount, error, stride, iblock)
+       icount, error, stride, iblock) 
   CALL check("h5sselect_hyperslab_f", error, total_error)
 
   ! /* Verify that the new selection is the same as the original hyperslab */
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
   CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
-
+    
   ! /* Verify that there is ONLY one BLOCK */
   CALL h5sget_select_hyper_nblocks_f(space1, nblocks, error)
   CALL check("h5sget_select_hyper_nblocks_f", error, total_error)
@@ -1747,13 +1756,13 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 1, total_error)
   CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
   CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)), 4, total_error)
-
+  
   ! /* Close temporary dataspace */
   CALL h5sclose_f(space1, error)
   CALL check("h5sclose_f", error, total_error)
 
   ! /* Close dataspaces */
-
+  
   CALL h5sclose_f(base_id, error)
   CALL check("h5sclose_f", error, total_error)
   CALL h5sclose_f(all_id, error)
@@ -1771,8 +1780,8 @@ END SUBROUTINE test_select_combine
 !****************************************************************/
 
 SUBROUTINE test_select_bounds(cleanup, total_error)
-  USE HDF5 ! This module contains all necessary modules
-
+  USE HDF5 ! This module contains all necessary modules 
+  
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(OUT) :: total_error
@@ -1781,7 +1790,7 @@ SUBROUTINE test_select_bounds(cleanup, total_error)
   INTEGER, PARAMETER :: SPACE11_DIM1=100
   INTEGER, PARAMETER :: SPACE11_DIM2=50
   INTEGER, PARAMETER :: SPACE11_NPOINTS=4
-
+  
   INTEGER(hid_t) :: sid ! /* Dataspace ID */
   INTEGER(hsize_t), DIMENSION(1:SPACE11_RANK) :: dims = (/SPACE11_DIM1, SPACE11_DIM2/) !Dataspace dimensions
   INTEGER(hsize_t), DIMENSION(SPACE11_RANK, SPACE11_NPOINTS) :: coord !/* Coordinates for point selection
@@ -1792,7 +1801,7 @@ SUBROUTINE test_select_bounds(cleanup, total_error)
   INTEGER(hssize_t), DIMENSION(SPACE11_RANK) :: offset !/* Offset amount for selection */
   INTEGER(hsize_t), DIMENSION(SPACE11_RANK) :: low_bounds !/* The low bounds for the selection */
   INTEGER(hsize_t), DIMENSION(SPACE11_RANK) :: high_bounds !/* The high bounds for the selection */
-
+    
   INTEGER :: error
 
   !/* Create dataspace */
@@ -1836,7 +1845,7 @@ SUBROUTINE test_select_bounds(cleanup, total_error)
   CALL VERIFY("h5sget_select_bounds_f", error, -1, total_error)
 
   !/* Set point selection */
-
+  
   coord(1,1)=  3; coord(2,1)=  3;
   coord(1,2)=  3; coord(2,2)= 46;
   coord(1,3)= 96; coord(2,3)=  3;
@@ -1863,7 +1872,7 @@ SUBROUTINE test_select_bounds(cleanup, total_error)
   ! /* Get bounds for hyperslab selection with negative offset */
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL VERIFY("h5sget_select_bounds_f", error, -1, total_error)
-
+ 
   ! /* Set valid offset for selection */
   offset(1:2) = (/2,-2/)
   CALL H5Soffset_simple_f(sid, offset, error)
@@ -1888,9 +1897,9 @@ SUBROUTINE test_select_bounds(cleanup, total_error)
   stride(1:2) = 10
   count(1:2) = 4
   block(1:2) = 5
-
+  
   CALL h5sselect_hyperslab_f(sid, H5S_SELECT_SET_F, start, &
-       count, error, stride, block)
+       count, error, stride, block) 
   CALL check("h5sselect_hyperslab_f", error, total_error)
 
   !/* Get bounds for hyperslab selection */
@@ -1929,7 +1938,7 @@ SUBROUTINE test_select_bounds(cleanup, total_error)
   offset(1:2) = 0
   CALL H5Soffset_simple_f(sid, offset, error)
   CALL check("H5Soffset_simple_f", error, total_error)
-
+  
   ! /* Make "irregular" hyperslab selection */
   start(1:2) = 20
   stride(1:2) = 20
@@ -1937,7 +1946,7 @@ SUBROUTINE test_select_bounds(cleanup, total_error)
   block(1:2) = 10
 
   CALL h5sselect_hyperslab_f(sid, H5S_SELECT_OR_F, start, &
-       count, error, stride, block)
+       count, error, stride, block) 
   CALL check("h5sselect_hyperslab_f", error, total_error)
 
   !/* Get bounds for hyperslab selection */

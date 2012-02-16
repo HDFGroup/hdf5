@@ -318,7 +318,7 @@ herr_t H5DSattach_scale(hid_t did,
             ref_j = ((hobj_ref_t *)buf[idx].p)[i];
 
             /* get the scale id for this REF */
-            if((dsid_j = H5Rdereference(did,H5R_OBJECT,&ref_j)) < 0)
+            if((dsid_j = H5Rdereference2(did, H5P_DEFAULT, H5R_OBJECT, &ref_j)) < 0)
                 goto out;
 
             /* get info for DS in the parameter list */
@@ -690,7 +690,7 @@ herr_t H5DSdetach_scale(hid_t did,
             ref = ((hobj_ref_t *)buf[idx].p)[j];
 
             /* get the DS id */
-            if ((dsid_j = H5Rdereference(did,H5R_OBJECT,&ref)) < 0)
+            if ((dsid_j = H5Rdereference2(did,H5P_DEFAULT,H5R_OBJECT,&ref)) < 0)
                 goto out;
 
             /* get info for this DS */
@@ -800,7 +800,7 @@ herr_t H5DSdetach_scale(hid_t did,
             ref = dsbuf[ii].ref;
 
             /* get the dataset id */
-            if ((did_i = H5Rdereference(did,H5R_OBJECT,&ref)) < 0)
+            if ((did_i = H5Rdereference2(did,H5P_DEFAULT,H5R_OBJECT,&ref)) < 0)
                 goto out;
 
             /* get info for this dataset */
@@ -813,10 +813,8 @@ herr_t H5DSdetach_scale(hid_t did,
 
             /* same object, reset. we want to detach only for this DIM */
             if(did_oi.fileno == tmp_oi.fileno && did_oi.addr == tmp_oi.addr) {
-                /* if we found not the last one, copy the last one to replace 
-                   the one which is found */
-                if(i < nelmts-1)
-                    dsbuf[ii] = dsbuf[nelmts-1];
+                /* copy the last one to replace the one which is found */
+                dsbuf[ii] = dsbuf[nelmts-1];
                 nelmts--;
                 found_dset=1;
                 break;
@@ -1050,7 +1048,7 @@ htri_t H5DSis_attached(hid_t did,
             ref = ((hobj_ref_t *)buf[idx].p)[i];
 
             /* get the scale id for this REF */
-            if ((dsid_j = H5Rdereference(did,H5R_OBJECT,&ref)) < 0)
+            if ((dsid_j = H5Rdereference2(did,H5P_DEFAULT,H5R_OBJECT,&ref)) < 0)
                 goto out;
 
             /* get info for DS in the parameter list */
@@ -1140,7 +1138,7 @@ htri_t H5DSis_attached(hid_t did,
             if (ref)
             {
                 /* get the dataset id */
-                if ((did_i = H5Rdereference(did,H5R_OBJECT,&ref)) < 0)
+                if ((did_i = H5Rdereference2(did,H5P_DEFAULT,H5R_OBJECT,&ref)) < 0)
                     goto out;
 
                 /* get info for dataset in the parameter list */
@@ -1344,7 +1342,7 @@ herr_t H5DSiterate_scales(hid_t did,
                 /* disable error reporting, the ID might refer to a deleted dataset */
                 H5E_BEGIN_TRY {
                     /* get the DS id */
-                    if ((scale_id = H5Rdereference(did,H5R_OBJECT,&ref)) < 0)
+                    if ((scale_id = H5Rdereference2(did,H5P_DEFAULT,H5R_OBJECT,&ref)) < 0)
                         goto out;
                 } H5E_END_TRY;
 
@@ -1619,6 +1617,8 @@ out:
 * Comments:
 *
 * Modifications:
+*     JIRA HDFFV-7673: Added a check to see if the label name exists, 
+*     if not then returns zero. July 30, 2011. MSB
 *
 *-------------------------------------------------------------------------
 */
@@ -1631,7 +1631,7 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     int        rank;         /* rank of dataset */
     char       **buf = NULL; /* buffer to store in the attribute */
     H5I_type_t it;           /* ID type */
-    size_t     nbytes;
+    size_t     nbytes = 0;
     size_t     copy_len;
     int        i;
 
@@ -1687,6 +1687,7 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     if ((aid = H5Aopen(did, DIMENSION_LABELS, H5P_DEFAULT)) < 0)
         goto out;
 
+
     if ((tid = H5Aget_type(aid)) < 0)
         goto out;
 
@@ -1700,26 +1701,30 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     if (H5Aread(aid, tid, buf) < 0)
         goto out;
 
-    /* get the real string length */
-    nbytes = strlen(buf[idx]);
-
-    /* compute the string length which will fit into the user's buffer */
-    copy_len = MIN(size-1, nbytes);
-
-    /* copy all/some of the name */
-    if (label)
+    /* do only if the label name exists for the dimension */
+    if (buf[idx] != NULL)
     {
-        memcpy(label, buf[idx], copy_len);
+        /* get the real string length */
+        nbytes = strlen(buf[idx]);
 
-        /* terminate the string */
-        label[copy_len] = '\0';
+	/* compute the string length which will fit into the user's buffer */
+	copy_len = MIN(size-1, nbytes);
+
+	/* copy all/some of the name */
+	if (label)
+	  {
+	    memcpy(label, buf[idx], copy_len);
+	    
+	    /* terminate the string */
+	    label[copy_len] = '\0';
+	  }
+
     }
-
     /* free all the ptr's from the H5Aread() */
     for (i = 0; i < rank; i++)
     {
         if (buf[i])
-            free(buf[i]);
+	  free(buf[i]);
     }
 
     /* close */

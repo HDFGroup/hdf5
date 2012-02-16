@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump thlink.h5'
-#############################
 HDF5 "thlink.h5" {
 GROUP "/" {
    DATASET "dset1" {

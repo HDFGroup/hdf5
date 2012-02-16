@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -H -p -d nbit tfilters.h5'
-#############################
 HDF5 "tfilters.h5" {
 DATASET "nbit" {
    DATATYPE  32-bit little-endian integer

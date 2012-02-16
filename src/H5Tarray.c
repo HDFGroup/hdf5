@@ -94,7 +94,7 @@ DESCRIPTION
 static herr_t
 H5T_init_array_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_array_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_array_interface() */
@@ -127,7 +127,7 @@ H5Tarray_create2(hid_t base_id, unsigned ndims, const hsize_t dim[/* ndims */])
     unsigned    u;              /* local index variable */
     hid_t	ret_value;	/* return value	*/
 
-    FUNC_ENTER_API(H5Tarray_create2, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "iIu*h", base_id, ndims, dim);
 
     /* Check args */
@@ -182,7 +182,7 @@ H5T_array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
     H5T_t	*ret_value;	/* new array data type	*/
     unsigned    u;              /* local index variable */
 
-    FUNC_ENTER_NOAPI(H5T_array_create, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     HDassert(base);
     HDassert(ndims <= H5S_MAX_RANK);
@@ -239,7 +239,7 @@ H5Tget_array_ndims(hid_t type_id)
     H5T_t *dt;		    /* pointer to array datatype	*/
     int	ret_value;	    /* return value			*/
 
-    FUNC_ENTER_API(H5Tget_array_ndims, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("Is", "i", type_id);
 
     /* Check args */
@@ -273,7 +273,7 @@ done:
 int
 H5T_get_array_ndims(const H5T_t *dt)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_get_array_ndims)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(dt);
     HDassert(dt->shared->type == H5T_ARRAY);
@@ -302,7 +302,7 @@ H5Tget_array_dims2(hid_t type_id, hsize_t dims[])
     H5T_t *dt;		/* pointer to array data type	*/
     int	ret_value;	/* return value			*/
 
-    FUNC_ENTER_API(H5Tget_array_dims2, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("Is", "i*h", type_id, dims);
 
     /* Check args */
@@ -339,7 +339,7 @@ H5T_get_array_dims(const H5T_t *dt, hsize_t dims[])
     unsigned u;         /* Local index variable */
     int	ret_value;	/* return value			*/
 
-    FUNC_ENTER_NOAPI(H5T_get_array_dims, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(dt);
     HDassert(dt->shared->type == H5T_ARRAY);
@@ -386,7 +386,7 @@ H5Tarray_create1(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
     unsigned    u;              /* local index variable */
     hid_t	ret_value;	/* return value	*/
 
-    FUNC_ENTER_API(H5Tarray_create1, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("i", "iIs*h*Is", base_id, ndims, dim, perm);
 
     /* Check args */
@@ -437,7 +437,7 @@ H5Tget_array_dims1(hid_t type_id, hsize_t dims[], int UNUSED perm[])
     H5T_t *dt;		/* Array datatype to query	*/
     int	ret_value;	/* return value			*/
 
-    FUNC_ENTER_API(H5Tget_array_dims1, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("Is", "i*h*Is", type_id, dims, perm);
 
     /* Check args */

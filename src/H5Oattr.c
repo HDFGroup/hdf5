@@ -130,7 +130,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned UNUSED mesg_fl
     unsigned            flags = 0;      /* Attribute flags */
     H5A_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -278,7 +278,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     unsigned    flags = 0;      /* Attribute flags */
     herr_t      ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_encode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -381,7 +381,7 @@ H5O_attr_copy(const void *_src, void *_dst)
 {
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_copy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(_src);
@@ -418,7 +418,7 @@ H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
     size_t		name_len;
     size_t		ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(attr);
 
@@ -479,7 +479,7 @@ H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
 herr_t
 H5O_attr_reset(void UNUSED *_mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_attr_reset() */
@@ -507,7 +507,7 @@ H5O_attr_free(void *mesg)
     H5A_t *attr = (H5A_t *)mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_free)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(mesg);
 
@@ -537,7 +537,7 @@ H5O_attr_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *_mesg)
     H5A_t *attr = (H5A_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_delete)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -575,7 +575,7 @@ H5O_attr_link(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *_mesg)
     H5A_t *attr = (H5A_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_link)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -616,7 +616,7 @@ static herr_t
 H5O_attr_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void UNUSED *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_pre_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(deleted);
@@ -653,7 +653,7 @@ H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
 {
     void        *ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(native_src);
@@ -698,7 +698,7 @@ H5O_attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     herr_t ret_value = SUCCEED;   /* Return value */
 
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_post_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if ( H5A_attr_post_copy_file(src_oloc, (const H5A_t *)mesg_src,
          dst_oloc, (H5A_t *)mesg_dst, dxpl_id, cpy_info) < 0)
@@ -727,7 +727,7 @@ H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
 {
     const H5A_t  *attr = (const H5A_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_get_crt_index)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(attr);
     HDassert(crt_idx);
@@ -757,7 +757,7 @@ H5O_attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx)
 {
     H5A_t  *attr = (H5A_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_set_crt_index)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(attr);
 
@@ -795,7 +795,7 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
     char		buf[256];       /* Temporary string buffer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_debug)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);

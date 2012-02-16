@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Lff_F03.f90</title>
+<!-- Source: ./src/H5Lff_F03.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5L2028F0329"></a>
+<a name="robo50"></a><h2>H5L (F03)</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  H5L_PROVISIONAL
+</pre>
+<p class="item_name">FILE</p>
+<pre>  src/fortran/src/<a href="#robo_top_of_doc">H5Lff_F03.f90</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran 90 and Fortran 2003 interfaces for <a href="./H5Lff_f90.html#robo49">H5L</a> functions.
+  It contains the same functions as H5Lff_DEPRECIATE.f90 but includes the
+  Fortran 2003 functions and the interface listings. This file will be compiled
+  instead of H5Lff_DEPRECIATE.f90 if Fortran 2003 functions are enabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <a href="./H5Aff_f90.html#robo27">H5A</a> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5L2028F03292fh5literate5fby5fname5ff"></a>
+<a name="robo189"></a><h2>h5literate_by_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo50">H5L (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5literate_by_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Iterates through links in a group.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - File or group identifier specifying location of subject group
+  group_name    - Name of subject group
+  index_type    - Type of index which determines the order
+  order         - Order within index
+  idx           - Iteration position at which to start
+  op            - Callback function passing data regarding the link to the calling application
+  op_data       - User-defined pointer to data required by the application for its processing of the link
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  idx      - Position at which an interrupted iteration may be restarted
+  hdferr   - Error code:
+               Success:  0
+               Failure: -1
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id  - Link access property list
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  Augest 18, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5literate_by_name_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> group_name<span class="sign">,</span> index_type<span class="sign">,</span> order<span class="sign">,</span> idx<span class="sign">,</span> op<span class="sign">,</span> op_data<span class="sign">,</span> return_value<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">)</span>
+    USE ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id    <span class="sign">!</span> Identifier specifying subject group
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> group_name          <span class="sign">!</span> Name of subject group
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> index_type       <span class="sign">!</span> Type of index which determines the order<span class="sign">:</span>
+                                                <span class="sign">!</span> H5_INDEX_NAME_F <span class="sign">-</span> Alpha<span class="sign">-</span>numeric index on name
+                                                <span class="sign">!</span> H5_INDEX_CRT_ORDER_F <span class="sign">-</span> Index on creation order
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> order            <span class="sign">!</span> Order within index<span class="sign">:</span>
+                                                <span class="sign">!</span> H5_ITER_INC_F <span class="sign">-</span> Increasing order
+                                                <span class="sign">!</span> H5_ITER_DEC_F <span class="sign">-</span> Decreasing order
+                                                <span class="sign">!</span> H5_ITER_NATIVE_F <span class="sign">-</span> Fastest available order
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>INOUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> idx  <span class="sign">!</span> IN <span class="sign">:</span> Iteration position at which to start
+                                            <span class="sign">!</span> OUT<span class="sign">:</span> Position at which an interrupted iteration may be restarted
+
+    TYPE<span class="sign">(</span>C_FUNPTR<span class="sign">)</span><span class="sign">:</span><span class="sign">:</span> op      <span class="sign">!</span> Callback function passing data regarding the link to the calling application
+    TYPE<span class="sign">(</span>C_PTR<span class="sign">)</span>   <span class="sign">:</span><span class="sign">:</span> op_data <span class="sign">!</span> User<span class="sign">-</span>defined pointer to data required by the application <span class="keyword">for</span> its processing of the link
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> return_value <span class="sign">!</span> Success<span class="sign">:</span>   The <span class="keyword">return</span> value of the first operator that
+                                         <span class="sign">!</span>            returns non<span class="sign">-</span>zero<span class="sign">,</span> or zero <span class="keyword">if</span> all members were
+                                         <span class="sign">!</span>            processed with no operator returning non<span class="sign">-</span>zero<span class="sign">.</span>
+
+                                         <span class="sign">!</span> Failure<span class="sign">:</span>   Negative <span class="keyword">if</span> something goes wrong within the
+                                         <span class="sign">!</span>            library<span class="sign">,</span> or the negative value returned by one
+                                         <span class="sign">!</span>            of the operators<span class="sign">.</span>
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code<span class="sign">:</span>
+                                         <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list
+</pre>
+
+<hr />
+<a name="H5L2028F03292fh5literate5ff"></a>
+<a name="robo190"></a><h2>h5literate_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo50">H5L (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5literate_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Iterates through links in a group.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  group_id      - Identifier specifying subject group
+  index_type    - Type of index which determines the order
+  order         - Order within index
+  idx           - Iteration position at which to start
+  op            - Callback function passing data regarding the link to the calling application
+  op_data       - User-defined pointer to data required by the application for its processing of the link
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  idx           - Position at which an interrupted iteration may be restarted
+  hdferr        - Error code:
+                    Success:  0
+                    Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  July 8, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5literate_f</strong><span class="sign">(</span>group_id<span class="sign">,</span> index_type<span class="sign">,</span> order<span class="sign">,</span> idx<span class="sign">,</span> op<span class="sign">,</span> op_data<span class="sign">,</span> return_value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> group_id  <span class="sign">!</span> Identifier specifying subject group
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> index_type       <span class="sign">!</span> Type of index which determines the order<span class="sign">:</span>
+                                                <span class="sign">!</span> H5_INDEX_NAME_F <span class="sign">-</span> Alpha<span class="sign">-</span>numeric index on name
+                                                <span class="sign">!</span> H5_INDEX_CRT_ORDER_F <span class="sign">-</span> Index on creation order
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> order            <span class="sign">!</span> Order within index<span class="sign">:</span>
+                                                <span class="sign">!</span> H5_ITER_INC_F <span class="sign">-</span> Increasing order
+                                                <span class="sign">!</span> H5_ITER_DEC_F <span class="sign">-</span> Decreasing order
+                                                <span class="sign">!</span> H5_ITER_NATIVE_F <span class="sign">-</span> Fastest available order
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>INOUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> idx  <span class="sign">!</span> IN <span class="sign">:</span> Iteration position at which to start
+                                            <span class="sign">!</span> OUT<span class="sign">:</span> Position at which an interrupted iteration may be restarted
+
+    TYPE<span class="sign">(</span>C_FUNPTR<span class="sign">)</span><span class="sign">:</span><span class="sign">:</span> op      <span class="sign">!</span> Callback function passing data regarding the link to the calling application
+    TYPE<span class="sign">(</span>C_PTR<span class="sign">)</span>   <span class="sign">:</span><span class="sign">:</span> op_data <span class="sign">!</span> User<span class="sign">-</span>defined pointer to data required by the application <span class="keyword">for</span> its processing of the link
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> return_value <span class="sign">!</span> Success<span class="sign">:</span>   The <span class="keyword">return</span> value of the first operator that
+                                         <span class="sign">!</span>            returns non<span class="sign">-</span>zero<span class="sign">,</span> or zero <span class="keyword">if</span> all members were
+                                         <span class="sign">!</span>            processed with no operator returning non<span class="sign">-</span>zero<span class="sign">.</span>
+
+                                         <span class="sign">!</span> Failure<span class="sign">:</span>   Negative <span class="keyword">if</span> something goes wrong within the
+                                         <span class="sign">!</span>            library<span class="sign">,</span> or the negative value returned by one
+                                         <span class="sign">!</span>            of the operators<span class="sign">.</span>
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code<span class="sign">:</span>
+                                         <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Lff_F03.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

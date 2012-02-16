@@ -115,7 +115,7 @@ H5P_ocpy_reg_prop(H5P_genclass_t *pclass)
     unsigned ocpy_option = H5O_CPY_OPTION_DEF;  /* Default object copy flags */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_ocpy_reg_prop, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Register copy options property */
     if(H5P_register_real(pclass, H5O_CPY_OPTION_NAME, H5O_CPY_OPTION_SIZE, &ocpy_option, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -153,7 +153,7 @@ H5Pset_copy_object(hid_t plist_id, unsigned cpy_option)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5Pset_copy_object, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", plist_id, cpy_option);
 
     /* Check parameters */
@@ -191,7 +191,7 @@ H5Pget_copy_object(hid_t plist_id, unsigned *cpy_option /*out*/)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Pget_copy_object, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, cpy_option);
 
     /* Get the plist structure */

@@ -135,7 +135,7 @@ H5Z_can_apply_nbit(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
     const H5T_t	*type;                  /* Datatype */
     htri_t ret_value = TRUE;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_can_apply_nbit, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get datatype */
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -235,7 +235,7 @@ H5Z_calc_parms_array(const H5T_t *type)
     H5T_class_t dtype_base_class;  /* Array datatype's base datatype's class */
     herr_t ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_calc_parms_array, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Store datatype class code */
     ++cd_values_actual_nparms;
@@ -308,7 +308,7 @@ H5Z_calc_parms_compound(const H5T_t *type)
     unsigned    u;                  /* Local index variable */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_calc_parms_compound, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Store compound datatype class code */
     ++cd_values_actual_nparms;
@@ -397,7 +397,7 @@ H5Z_set_parms_nooptype(const H5T_t *type, unsigned cd_values[])
     size_t dtype_size;          /* No-op datatype's size (in bytes) */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_set_parms_nooptype, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Set datatype class code */
     cd_values[cd_values_index++] = H5Z_NBIT_NOOPTYPE;
@@ -439,7 +439,7 @@ H5Z_set_parms_atomic(const H5T_t *type, unsigned cd_values[])
     int dtype_offset;           /* Atomic datatype's offset (in bits) */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5Z_set_parms_atomic)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Set datatype class code */
     cd_values[cd_values_index++] = H5Z_NBIT_ATOMIC;
@@ -525,7 +525,7 @@ H5Z_set_parms_array(const H5T_t *type, unsigned cd_values[])
     htri_t is_vlstring;            /* flag indicating if datatype is varible-length string */
     herr_t ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_set_parms_array, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Set datatype class code */
     cd_values[cd_values_index++] = H5Z_NBIT_ARRAY;
@@ -615,7 +615,7 @@ H5Z_set_parms_compound(const H5T_t *type, unsigned cd_values[])
     unsigned u;                     /* Local index variable */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_set_parms_compound, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Set "local" parameter for compound datatype class code */
     cd_values[cd_values_index++] = H5Z_NBIT_COMPOUND;
@@ -739,7 +739,7 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     H5T_class_t dtype_class;        /* Datatype's class */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_set_local_nbit, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get datatype */
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -873,7 +873,7 @@ H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     unsigned d_nelmts = 0;      /* number of elements in the chunk */
     size_t ret_value = 0;       /* return value */
 
-    FUNC_ENTER_NOAPI(H5Z_filter_nbit, 0)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments
      * cd_values[0] stores actual number of parameters in cd_values[]

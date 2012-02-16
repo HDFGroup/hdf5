@@ -295,7 +295,7 @@ H5D_chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_set_info_real, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(layout);
@@ -340,7 +340,7 @@ H5D_chunk_set_info(const H5D_t *dset)
     unsigned ndims;             /* Rank of dataspace */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_set_info, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(dset);
@@ -386,7 +386,7 @@ H5D_chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_construct)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(f);
@@ -475,7 +475,7 @@ H5D_chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset, hid_t dapl_id)
     H5P_genplist_t *dapl;               /* Data access property list object pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(f);
@@ -549,7 +549,7 @@ H5D_chunk_is_space_alloc(const H5O_storage_t *storage)
 {
     hbool_t ret_value;                  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5D_chunk_is_space_alloc)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     HDassert(storage);
@@ -594,7 +594,7 @@ H5D_chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
     hbool_t sel_hyper_flag;
     herr_t ret_value = SUCCEED;	/* Return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_io_init)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get layout for dataset */
     fm->layout = &(dataset->shared->layout);
@@ -691,7 +691,7 @@ H5D_chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
     else {
         /* Initialize skip list for chunk selections */
         if(NULL == dataset->shared->cache.chunk.sel_chunks) {
-            if(NULL == (dataset->shared->cache.chunk.sel_chunks = H5SL_create(H5SL_TYPE_HSIZE)))
+            if(NULL == (dataset->shared->cache.chunk.sel_chunks = H5SL_create(H5SL_TYPE_HSIZE, NULL)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for chunk selections")
         } /* end if */
         fm->sel_chunks = dataset->shared->cache.chunk.sel_chunks;
@@ -862,7 +862,7 @@ H5D_chunk_alloc(size_t size, const H5O_pline_t *pline)
 {
     void *ret_value = NULL;		/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_alloc)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(size);
     HDassert(pline);
@@ -893,7 +893,7 @@ H5D_chunk_alloc(size_t size, const H5O_pline_t *pline)
 static void *
 H5D_chunk_xfree(void *chk, const H5O_pline_t *pline)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_xfree)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(pline);
 
@@ -927,7 +927,7 @@ H5D_chunk_realloc(void *chk, size_t size, const H5O_pline_t *pline)
 {
     void *ret_value = NULL;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_realloc)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(size);
     HDassert(pline);
@@ -963,7 +963,7 @@ H5D_free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata)
 {
     H5D_chunk_info_t *chunk_info = (H5D_chunk_info_t *)item;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_free_chunk_info)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(chunk_info);
 
@@ -1009,7 +1009,7 @@ H5D_create_chunk_map_single(H5D_chunk_map_t *fm, const H5D_io_info_t
     unsigned    u;                          /* Local index variable */
     herr_t	ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_create_chunk_map_single)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(fm->f_ndims > 0);
@@ -1095,7 +1095,7 @@ H5D_create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
     unsigned    u;                          /* Local index variable */
     herr_t	ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_create_chunk_file_map_hyper)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     assert(fm->f_ndims>0);
@@ -1272,7 +1272,7 @@ H5D_create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
     unsigned    u;                          /* Local index variable */
     herr_t	ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_create_chunk_mem_map_hyper)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     assert(fm->f_ndims>0);
@@ -1378,7 +1378,7 @@ H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const
     unsigned    u;                              /* Local index variable */
     herr_t	ret_value = SUCCEED;            /* Return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_file_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Calculate the index of this chunk */
     if(H5V_chunk_index(ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
@@ -1490,7 +1490,7 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const 
     hsize_t     chunk_index;                    /* Chunk index */
     herr_t	ret_value = SUCCEED;            /* Return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_mem_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Calculate the index of this chunk */
     if(H5V_chunk_index(ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
@@ -1565,7 +1565,7 @@ H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_o
     const H5D_t *dataset = io_info->dset;
     htri_t ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_cacheable)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(io_info);
     HDassert(dataset);
@@ -1648,7 +1648,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hbool_t     skip_missing_chunks = FALSE;    /* Whether to skip missing chunks */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_read)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(io_info);
@@ -1797,7 +1797,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     uint32_t    dst_accessed_bytes = 0; /* Total accessed size in a chunk */
     herr_t	ret_value = SUCCEED;	/* Return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_write)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(io_info);
@@ -1944,7 +1944,7 @@ H5D_chunk_flush(H5D_t *dset, hid_t dxpl_id)
     unsigned		nerrors = 0;    /* Count of any errors encountered when flushing chunks */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(dset);
@@ -1988,7 +1988,7 @@ H5D_chunk_io_term(const H5D_chunk_map_t *fm)
 {
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_io_term)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Single element I/O vs. multiple element I/O cleanup */
     if(fm->use_single) {
@@ -2039,7 +2039,7 @@ H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_idx_reset, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(storage);
@@ -2069,7 +2069,7 @@ done:
 herr_t
 H5D_chunk_cinfo_cache_reset(H5D_chunk_cached_t *last)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_cinfo_cache_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(last);
@@ -2098,7 +2098,7 @@ H5D_chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *uda
 {
     unsigned    u;                              /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_cinfo_cache_update)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(last);
@@ -2138,7 +2138,7 @@ H5D_chunk_cinfo_cache_found(const H5D_chunk_cached_t *last, H5D_chunk_ud_t *udat
 {
     hbool_t ret_value = FALSE;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_cinfo_cache_found)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(last);
@@ -2191,7 +2191,7 @@ H5D_chunk_create(H5D_t *dset /*in,out*/, hid_t dxpl_id)
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_create, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(dset);
@@ -2244,7 +2244,7 @@ H5D_chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *chunk_offset,
     unsigned        u;                  /* Counter */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_lookup)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(dset);
     HDassert(dset->shared->layout.u.chunk.ndims > 0);
@@ -2331,7 +2331,7 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     hbool_t	point_of_no_return = FALSE;
     herr_t	ret_value = SUCCEED;	/* Return value			*/
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_chunk_flush_entry, dxpl_id, dset->oloc.addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
     HDassert(dset);
     HDassert(dset->shared);
@@ -2485,7 +2485,7 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     H5D_rdcc_t *rdcc = &(dset->shared->cache.chunk);
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_cache_evict)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(dset);
     HDassert(dxpl_cache);
@@ -2555,7 +2555,7 @@ H5D_chunk_cache_prune(const H5D_t *dset, hid_t dxpl_id,
     int		nerrors = 0;            /* Accumulated error count during preemptions */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_cache_prune)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Preemption is accomplished by having multiple pointers (currently two)
@@ -2681,7 +2681,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     unsigned		u;			/*counters		*/
     void		*ret_value;	        /*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_lock)
+    FUNC_ENTER_NOAPI(NULL)
 
     HDassert(io_info);
     HDassert(io_info->dxpl_cache);
@@ -2945,7 +2945,7 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
     const H5D_rdcc_t	*rdcc = &(io_info->dset->shared->cache.chunk);
     herr_t              ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_unlock)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(io_info);
     HDassert(udata);
@@ -3021,7 +3021,7 @@ H5D_chunk_allocated_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 {
     hsize_t *nbytes = (hsize_t *)_udata;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_allocated_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     *(hsize_t *)nbytes += chunk_rec->nbytes;
 
@@ -3054,7 +3054,7 @@ H5D_chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes)
     hsize_t chunk_bytes = 0;            /* Number of bytes allocated for chunks */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_allocated, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(dset);
     HDassert(dset->shared);
@@ -3138,7 +3138,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
     hid_t       data_dxpl_id;           /* DXPL ID to use for raw data I/O operations */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5D_chunk_allocate, dxpl_id, dset->oloc.addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
@@ -3476,13 +3476,19 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     H5S_sel_iter_t chunk_iter;          /* Memory selection iteration info */
     hssize_t    sel_nelmts;             /* Number of elements in selection */
     hsize_t     count[H5O_LAYOUT_NDIMS]; /* Element count of hyperslab */
+    size_t      chunk_size;             /*size of a chunk       */
     void        *chunk;	                /* The file chunk  */
     H5D_chunk_ud_t chk_udata;           /* User data for locking chunk */
     uint32_t    bytes_accessed;         /* Bytes accessed in chunk */
+    hbool_t     chunk_iter_init = FALSE; /* Whether the chunk iterator has been initialized */
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_prune_fill)
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get the chunk's size */
+    HDassert(layout->u.chunk.size > 0);
+    H5_ASSIGN_OVERFLOW(chunk_size, layout->u.chunk.size, uint32_t, size_t);
 
     /* Get the info for the chunk in the file */
     if(H5D_chunk_lookup(dset, io_info->dxpl_id, chunk_offset,
@@ -3500,7 +3506,7 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
         if(H5D_fill_init(&udata->fb_info, NULL, NULL, NULL, NULL, NULL,
                 &dset->shared->dcpl_cache.fill,
                 dset->shared->type, dset->shared->type_id, (size_t)udata->elmts_per_chunk,
-                io_info->dxpl_cache->max_temp_buf, io_info->dxpl_id) < 0)
+                chunk_size, io_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
         udata->fb_info_init = TRUE;
     } /* end if */
@@ -3544,16 +3550,11 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     /* Create a selection iterator for scattering the elements to memory buffer */
     if(H5S_select_iter_init(&chunk_iter, udata->chunk_space, layout->u.chunk.dim[rank]) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunk selection information")
+    chunk_iter_init = TRUE;
 
     /* Scatter the data into memory */
-    if(H5D_scatter_mem(udata->fb_info.fill_buf, udata->chunk_space, &chunk_iter, (size_t)sel_nelmts, io_info->dxpl_cache, chunk/*out*/) < 0) {
-        H5S_SELECT_ITER_RELEASE(&chunk_iter);
+    if(H5D_scatter_mem(udata->fb_info.fill_buf, udata->chunk_space, &chunk_iter, (size_t)sel_nelmts, io_info->dxpl_cache, chunk/*out*/) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed")
-    } /* end if */
-
-    /* Release the selection iterator */
-    if(H5S_SELECT_ITER_RELEASE(&chunk_iter) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
 
 
     /* The number of bytes accessed in the chunk */
@@ -3566,6 +3567,10 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to unlock raw data chunk")
 
 done:
+    /* Release the selection iterator */
+    if(chunk_iter_init && H5S_SELECT_ITER_RELEASE(&chunk_iter) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_chunk_prune_fill */
 
@@ -3704,7 +3709,7 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     int                     i;	        /* Local index variable */
     herr_t                  ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_prune_by_extent, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
@@ -4003,7 +4008,7 @@ H5D_chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     hsize_t        chunk_index;
     int            ret_value = H5_ITER_CONT;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_addrmap_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Compute the index for this chunk */
     if(H5V_chunk_index(rank, chunk_rec->offset, udata->common.layout->dim, udata->common.layout->down_chunks, &chunk_index) < 0)
@@ -4038,7 +4043,7 @@ H5D_chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[])
     H5D_chunk_it_ud2_t udata;          	/* User data for iteration callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_addrmap, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(dset);
     HDassert(dset->shared);
@@ -4092,7 +4097,7 @@ H5D_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_storage_t *storage)
     htri_t	exists;                 /* Flag if header message of interest exists */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_delete, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(f);
@@ -4170,7 +4175,7 @@ H5D_chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
     unsigned            rank;	        /*current # of dimensions */
     herr_t              ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_update_cache, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(dset && H5D_CHUNKED == dset->shared->layout.type);
@@ -4266,7 +4271,7 @@ H5D_chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     int                     ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_copy_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get 'size_t' local value for number of bytes in chunk */
     H5_ASSIGN_OVERFLOW(nbytes, chunk_rec->nbytes, uint32_t, size_t);
@@ -4452,7 +4457,7 @@ H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
     hbool_t     copy_setup_done = FALSE;        /* Indicate that 'copy setup' is done */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_copy, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f_src);
@@ -4690,7 +4695,7 @@ H5D_chunk_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_bh_info, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);
@@ -4735,7 +4740,7 @@ H5D_chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 {
     H5D_chunk_it_ud4_t	*udata = (H5D_chunk_it_ud4_t *)_udata;  /* User data from caller */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_dump_index_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(udata->stream) {
         unsigned u;     /* Local index variable */
@@ -4779,7 +4784,7 @@ H5D_chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_dump_index, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(dset);
@@ -4839,7 +4844,7 @@ H5D_chunk_dest(H5F_t *f, hid_t dxpl_id, H5D_t *dset)
     int		nerrors = 0;            /* Accumulated count of errors */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5D_chunk_dest, dxpl_id, dset->oloc.addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
     HDassert(f);
     HDassert(dset);
@@ -4903,7 +4908,7 @@ H5D_chunk_stats(const H5D_t *dset, hbool_t headers)
     char	ascii[32];
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_chunk_stats, FAIL)
+    FUNC_ENTER_NOAPI_NOERR(FAIL)
 
     if (!H5DEBUG(AC))
         HGOTO_DONE(SUCCEED)
@@ -4971,7 +4976,7 @@ H5D_nonexistent_readvv_cb(hsize_t UNUSED dst_off, hsize_t src_off, size_t len,
     hbool_t fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_nonexistent_readvv_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the fill value buffer */
     if(H5D_fill_init(&fb_info, (udata->rbuf + src_off), NULL, NULL, NULL, NULL,
@@ -5021,7 +5026,7 @@ H5D_nonexistent_readvv(const H5D_io_info_t *io_info,
     H5D_chunk_readvv_ud_t udata;        /* User data for H5V_opvv() operator */
     ssize_t ret_value;                  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_nonexistent_readvv)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(io_info);

@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -H -p -d compact tfilters.h5'
-#############################
 HDF5 "tfilters.h5" {
 DATASET "compact" {
 COMMENT "This is a dataset with compact storage"

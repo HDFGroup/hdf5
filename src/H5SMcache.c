@@ -17,7 +17,6 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg 	  */
 #define H5SM_PACKAGE		/*suppress error about including H5SMpkg	  */
 
 
@@ -25,7 +24,7 @@
 /* Headers */
 /***********/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* File access                          */
+#include "H5Fprivate.h"		/* File access                          */
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MFprivate.h"        /* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -128,21 +127,21 @@ H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *udata)
     size_t        x;                    /* Counter variable for index headers */
     H5SM_master_table_t *ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_table_load)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Verify that we're reading version 0 of the table; this is the only
      * version defined so far.
      */
-    HDassert(f->shared->sohm_vers == HDF5_SHAREDHEADER_VERSION);
+    HDassert(H5F_SOHM_VERS(f) == HDF5_SHAREDHEADER_VERSION);
 
     /* Allocate space for the master table in memory */
     if(NULL == (table = H5FL_CALLOC(H5SM_master_table_t)))
 	HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read number of indexes and version from file superblock */
-    table->num_indexes = f->shared->sohm_nindexes;
+    table->num_indexes = H5F_SOHM_NINDEXES(f);
 
-    HDassert(addr == f->shared->sohm_addr);
+    HDassert(addr == H5F_SOHM_ADDR(f));
     HDassert(addr != HADDR_UNDEF);
     HDassert(table->num_indexes > 0);
 
@@ -257,7 +256,7 @@ H5SM_table_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
     uint8_t tbl_buf[H5SM_TBL_BUF_SIZE]; /* Buffer for table */
     herr_t ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_table_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -273,7 +272,7 @@ H5SM_table_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
         /* Verify that we're writing version 0 of the table; this is the only
          * version defined so far.
          */
-        HDassert(f->shared->sohm_vers == HDF5_SHAREDHEADER_VERSION);
+        HDassert(H5F_SOHM_VERS(f) == HDF5_SHAREDHEADER_VERSION);
 
         /* Wrap the local buffer for serialized header info */
         if(NULL == (wb = H5WB_wrap(tbl_buf, sizeof(tbl_buf))))
@@ -362,7 +361,7 @@ H5SM_table_dest(H5F_t UNUSED *f, H5SM_master_table_t* table)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_table_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(table);
@@ -394,7 +393,7 @@ H5SM_table_clear(H5F_t *f, H5SM_master_table_t *table, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_table_clear)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -428,7 +427,7 @@ done:
 static herr_t
 H5SM_table_size(const H5F_t UNUSED *f, const H5SM_master_table_t *table, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_table_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(f);
@@ -469,7 +468,7 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     size_t x;                   /* Counter variable for messages in list */
     H5SM_list_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_list_load)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(udata->header);
@@ -566,7 +565,7 @@ H5SM_list_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
     uint8_t lst_buf[H5SM_LST_BUF_SIZE]; /* Buffer for list index */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_list_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -615,7 +614,7 @@ H5SM_list_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
         computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
         UINT32ENCODE(p, computed_chksum);
 #ifdef H5_CLEAR_MEMORY
-HDmemset(p, 0, (list->header->list_size - (p - buf)));
+HDmemset(p, 0, (list->header->list_size - (size_t)(p - buf)));
 #endif /* H5_CLEAR_MEMORY */
 
         /* Write the list to disk */
@@ -656,7 +655,7 @@ H5SM_list_dest(H5F_t *f, H5SM_list_t* list)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_list_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(list);
@@ -700,7 +699,7 @@ H5SM_list_clear(H5F_t *f, H5SM_list_t *list, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_list_clear)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -734,7 +733,7 @@ done:
 static herr_t
 H5SM_list_size(const H5F_t UNUSED *f, const H5SM_list_t *list, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_list_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(f);

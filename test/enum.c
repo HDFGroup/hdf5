@@ -119,9 +119,6 @@ test_named(hid_t file)
  *
  * Programmer:	Robb Matzke
  *              Monday, January  4, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int

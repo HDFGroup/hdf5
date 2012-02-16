@@ -93,7 +93,7 @@ DESCRIPTION
 static herr_t
 H5F_init_super_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_init_super_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5F_init())
 } /* H5F_init_super_interface() */
@@ -123,7 +123,7 @@ H5F_locate_signature(H5FD_t *file, hid_t dxpl_id)
     unsigned	    n, maxpow;
     haddr_t         ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_locate_signature)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Find the least N such that 2^N is larger than the file size */
     if(HADDR_UNDEF == (addr = H5FD_get_eof(file)) || HADDR_UNDEF == (eoa = H5FD_get_eoa(file, H5FD_MEM_SUPER)))
@@ -180,7 +180,7 @@ H5F_super_ext_create(H5F_t *f, hid_t dxpl_id, H5O_loc_t *ext_ptr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_super_ext_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);
@@ -233,7 +233,7 @@ H5F_super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_super_ext_open)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);
@@ -272,7 +272,7 @@ H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hid_t dxpl_id,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_super_ext_close)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);
@@ -327,7 +327,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
     hbool_t             dirtied = FALSE;    /* Bool for sblock protect call                 */
     herr_t              ret_value = SUCCEED; /* return value                                */
 
-    FUNC_ENTER_NOAPI_TAG(H5F_super_read, dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
 
     /* Find the superblock */
     if(HADDR_UNDEF == (super_addr = H5F_locate_signature(f->shared->lf, dxpl_id)))
@@ -401,7 +401,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     hbool_t         ext_created = FALSE; /* Whether the extension has been created */
     herr_t          ret_value = SUCCEED; /* Return Value                              */
 
-    FUNC_ENTER_NOAPI_TAG(H5F_super_init, dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
 
     /* Allocate space for the superblock */
     if(NULL == (sblock = H5FL_CALLOC(H5F_super_t)))
@@ -681,7 +681,7 @@ H5F_super_dirty(H5F_t *f)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_super_dirty, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(f);
@@ -713,7 +713,7 @@ done:
 herr_t
 H5F_super_free(H5F_super_t *sblock)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_super_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(sblock);
@@ -746,7 +746,7 @@ H5F_super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_super_size, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(f);
@@ -805,7 +805,7 @@ H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, void *mesg, unsigned id, hbool_
     htri_t 	status;       	/* Indicate whether the message exists or not */
     herr_t 	ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_super_ext_write_msg, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(f);
@@ -881,7 +881,7 @@ H5F_super_ext_remove_msg(H5F_t *f, hid_t dxpl_id, unsigned id)
     htri_t      status;         /* Indicate whether the message exists or not */
     herr_t 	ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_super_ext_remove_msg, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Make sure that the superblock extension object header exists */
     HDassert(H5F_addr_defined(f->shared->sblock->ext_addr));

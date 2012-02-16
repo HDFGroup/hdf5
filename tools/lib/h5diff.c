@@ -861,17 +861,6 @@ hsize_t h5diff(const char *fname1,
         HDstrcat(obj2fullname, "/");
     }
 
-   /* 
-    * If verbose options is used, need to traverse thorugh the list of objects 
-    * in the group to print out objects information.
-    * Use h5tools_is_obj_same() to improve performance by skipping 
-    * comparing details of same objects. 
-    */
-    if(!(options->m_verbose || options->m_report))
-    {
-        if (h5tools_is_obj_same(file1_id,obj1fullname,file2_id,obj2fullname)!=0)
-            goto out;
-    }
 
     /*---------------------------------------------
      * check for following symlinks 
@@ -948,6 +937,19 @@ hsize_t h5diff(const char *fname1,
         else if(l_ret != 2)  /* symbolic link */
             obj2type = trg_linfo2.trg_type;
     } /* end of if follow symlinks */
+
+   /* 
+    * If verbose options is not used, don't need to traverse thorugh the list 
+    * of objects in the group to display objects information,
+    * So use h5tools_is_obj_same() to improve performance by skipping 
+    * comparing details of same objects. 
+    */
+
+    if(!(options->m_verbose || options->m_report))
+    {
+        if (h5tools_is_obj_same(file1_id,obj1fullname,file2_id,obj2fullname)!=0)
+            goto out;
+    }
 
 
     /* if both obj1 and obj2 are group */
@@ -1952,8 +1954,8 @@ hsize_t diff(hid_t file1_id,
             else
             {
                 nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
-                /* print info if compatible and difference found  */
-                if (!options->not_cmp && nfound)
+                /* print info if difference found  */
+                if (nfound)
                 {
                     do_print_objname("dataset", path1, path2, options);
                     print_found(nfound);	

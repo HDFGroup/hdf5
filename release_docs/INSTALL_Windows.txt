@@ -68,6 +68,9 @@ Preconditions:
       Note: We have attempted to mirror our Autoconf configuration files for
             maintainence reasons. We are still working to synchronize the
             configuration files.
+            Also, if you are using a VS Express version or do not want to enable
+            the packaging components, set HDF5_NO_PACKAGES to ON (on the command
+            line add -DHDF5_NO_PACKAGES:BOOL=ON)
             
    5. Set up a directory structure to unpack the library.  For example:
 

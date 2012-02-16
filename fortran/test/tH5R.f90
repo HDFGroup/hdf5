@@ -1,3 +1,12 @@
+!****h* root/fortran/test/tH5R.f90
+!
+! NAME
+!  tH5R.f90
+!
+! FUNCTION
+!  Basic testing of Fortran H5R, Reference Interface, APIs.
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,12 +22,14 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+! NOTES
+!  Tests h5rcreate_f, h5rdereference_f, h5rget_name_f 
+!  and H5Rget_object_type functions
 !
+! CONTAINS SUBROUTINES
+!  refobjtest, refregtest
 !
-!    Testing Reference Interface functionality.
-!
-!    The following subroutine tests h5rcreate_f, h5rdereference_f, h5rget_name_f
-!    and H5Rget_object_type functions
+!*****
 !
 SUBROUTINE refobjtest(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
@@ -230,6 +241,8 @@ END SUBROUTINE refobjtest
 !
 SUBROUTINE refregtest(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
+!  use iso_c_binding  ! NOTE: if this is uncommented, then need to move subroutine into another file.
+
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(OUT) :: total_error
@@ -249,22 +262,29 @@ SUBROUTINE refregtest(cleanup, total_error)
   INTEGER(HID_T) :: dsetv_id      ! Dataset identifier
   INTEGER(HID_T) :: dsetr_id      ! Dataset identifier
   INTEGER     ::   error
-  TYPE(hdset_reg_ref_t_f) , DIMENSION(2) :: ref     ! Buffers to store references
-  TYPE(hdset_reg_ref_t_f) , DIMENSION(2) :: ref_out !
-  INTEGER(HSIZE_T), DIMENSION(2) :: ref_dim
-  INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
-  INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/2,9/)  ! Datasets dimensions
-  INTEGER(HSIZE_T), DIMENSION(1) :: dimsr = (/2/)   !
-  INTEGER(HSIZE_T), DIMENSION(2) :: start
-  INTEGER(HSIZE_T), DIMENSION(2) :: count
+!  TYPE(hdset_reg_ref_t_f) , DIMENSION(1:2), TARGET :: ref 
+  TYPE(hdset_reg_ref_t_f) , DIMENSION(1:2) :: ref 
+  TYPE(hdset_reg_ref_t_f) , DIMENSION(1:2) :: ref_out
+  INTEGER(HSIZE_T), DIMENSION(2) :: ref_dim   = (/0,0/)
+  INTEGER(HSIZE_T), DIMENSION(2) :: data_dims ! = (/0,0/)
+  INTEGER(HSIZE_T), DIMENSION(2) :: dims      = (/2,9/)  ! Datasets dimensions
+  INTEGER(HSIZE_T), DIMENSION(1) :: dimsr     = (/2/)    ! 
+  INTEGER(HSIZE_T), DIMENSION(2) :: start     ! = (/0,0/)
+  INTEGER(HSIZE_T), DIMENSION(2) :: count     ! = (/0,0/)
+
   INTEGER :: rankr = 1
   INTEGER :: rank = 2
-  INTEGER , DIMENSION(2,9) ::  DATA
+!  INTEGER , DIMENSION(2,9), TARGET ::  DATA 
+  INTEGER , DIMENSION(2,9) ::  DATA 
   INTEGER , DIMENSION(2,9) ::  data_out = 0
   INTEGER(HSIZE_T) , DIMENSION(2,3) :: coord
   INTEGER(SIZE_T) ::num_points = 3  ! Number of selected points
+!  type(c_ptr) :: f_ptr
   coord = RESHAPE((/1,1,2,7,1,9/), (/2,3/))   ! Coordinates of selected points
   DATA = RESHAPE ((/1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6/), (/2,9/))
+
+  ref_out(1)%ref = 0
+  ref_out(2)%ref = 0
 
   !
   !  Initialize FORTRAN predefined datatypes.
@@ -305,11 +325,16 @@ SUBROUTINE refregtest(cleanup, total_error)
   CALL check("h5dcreate_f", error, total_error)
   data_dims(1) = 2
   data_dims(2) = 9
+
+!  f_ptr = c_loc(data)
+!  CALL h5dwrite_f(dsetv_id, H5T_NATIVE_INTEGER, f_ptr, error)
+
   CALL h5dwrite_f(dsetv_id, H5T_NATIVE_INTEGER, DATA, data_dims, error)
   CALL check("h5dwrite_f", error, total_error)
 
   CALL h5dclose_f(dsetv_id, error)
   CALL check("h5dclose_f", error, total_error)
+
   !
   ! Dataset with references
   !
@@ -326,8 +351,12 @@ SUBROUTINE refregtest(cleanup, total_error)
   CALL h5sselect_hyperslab_f(space_id, H5S_SELECT_SET_F, &
        start, count, error)
   CALL check("h5sselect_hyperslab_f", error, total_error)
+  ref(1)%ref(:) = 0
+!  f_ptr = C_LOC(ref(1))
+!  CALL h5rcreate_f(file_id, dsetnamev, 1, space_id, f_ptr, error) 
   CALL h5rcreate_f(file_id, dsetnamev, space_id, ref(1), error)
   CALL check("h5rcreate_f", error, total_error)
+
   !
   ! Create a reference to elements selection.
   !
@@ -336,6 +365,7 @@ SUBROUTINE refregtest(cleanup, total_error)
   CALL h5sselect_elements_f(space_id, H5S_SELECT_SET_F, rank, num_points,&
        coord, error)
   CALL check("h5sselect_elements_f", error, total_error)
+  ref(2)%ref(:) = 0
   CALL h5rcreate_f(file_id, dsetnamev, space_id, ref(2), error)
   CALL check("h5rcreate_f", error, total_error)
   !
@@ -355,6 +385,7 @@ SUBROUTINE refregtest(cleanup, total_error)
   CALL check("h5dclose_f", error, total_error)
   CALL h5fclose_f(file_id, error)
   CALL check("h5fclose_f", error, total_error)
+
   !
   ! Reopen the file to test selections.
   !
@@ -368,7 +399,6 @@ SUBROUTINE refregtest(cleanup, total_error)
   ref_dim(1) = SIZE(ref_out)
   CALL h5dread_f(dsetr_id, H5T_STD_REF_DSETREG, ref_out, ref_dim, error)
   CALL check("h5dread_f", error, total_error)
-
 
   ! Get name of the dataset the first region reference points to using H5Rget_name_f
   CALL H5Rget_name_f(dsetr_id, ref_out(1), buf, error, buf_size )
@@ -390,7 +420,6 @@ SUBROUTINE refregtest(cleanup, total_error)
   CALL check("H5Rget_name_f", error, total_error)
   CALL VERIFY("H5Rget_name_f", INT(buf_size),7,total_error)
   CALL VerifyString("H5Rget_name_f", TRIM(buf_small), "/MAT", total_error)
-
   !
   ! Dereference the first reference.
   !
@@ -402,9 +431,7 @@ SUBROUTINE refregtest(cleanup, total_error)
   ! Get name of the dataset the second region reference points to using H5Rget_name_f
   CALL H5Rget_name_f(dsetr_id, ref_out(2), buf, error) ! no optional size
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VerifyString("H5Rget_name_f", buf, "/MATRIX", total_error)
-
-
+  CALL VerifyString("H5Rget_name_f", TRIM(buf), "/MATRIX", total_error)
   !
   ! Read selected data from the dataset.
   !

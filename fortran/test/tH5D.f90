@@ -1,3 +1,12 @@
+!****h* root/fortran/test/tH5D.f90
+!
+! NAME
+!  tH5D.f90
+!
+! FUNCTION
+!  Basic testing of Fortran H5D APIs.
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,14 +22,17 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+! NOTES
+!  Tests the H5D APIs functionalities of:
+!   h5dcreate_f, h5dopen_f, h5dclose_f, h5dget_space_f, h5dget_type_f,
+!   h5dread_f, and h5dwrite_f, h5dget_space_status_f
 !
 !
-!    Testing Dataset Interface functionality.
+! CONTAINS SUBROUTINES
+!  datasettest, extenddsettest
 !
-!
-!    The following subroutine tests the following functionalities:
-!    h5dcreate_f, h5dopen_f, h5dclose_f, h5dget_space_f, h5dget_type_f,
-!    h5dread_f, and h5dwrite_f
+!*****
+
 !
         SUBROUTINE datasettest(cleanup, total_error)
         USE HDF5 ! This module contains all necessary modules
@@ -52,6 +64,7 @@
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
           INTEGER(HSIZE_T), DIMENSION(1) :: null_data_dim
           INTEGER     ::   null_dset_data = 1              ! null data
+          INTEGER :: flag ! Space allocation status
 
           !
           ! Initialize the dset_data array.
@@ -150,6 +163,16 @@
               CALL check("h5dopen_f", error, total_error)
           CALL h5dopen_f(file_id, null_dsetname, null_dset, error)
               CALL check("h5dopen_f", error, total_error)
+
+          ! Test whether space has been allocated for a dataset
+          CALL h5dget_space_status_f(dset_id, flag, error)
+          CALL check("h5dget_space_status_f",error, total_error)
+          CALL verify("h5dget_space_status_f", flag, H5D_SPACE_STS_ALLOCATED_F, total_error)
+
+          CALL h5dget_space_status_f(null_dset, flag, error)
+          CALL check("h5dget_space_status_f",error, total_error)
+          CALL verify("h5dget_space_status_f", flag, H5D_SPACE_STS_NOT_ALLOCATED_F, total_error)
+
 
           !
           ! Get the dataset type.

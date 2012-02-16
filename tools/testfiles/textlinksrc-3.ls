@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -w80 --follow-symlinks -r textlinksrc.h5/ext_link1'
-#############################
 ext_link1                External Link {textlinktar.h5//group} {Group}
 /dset                    Dataset {6}
 /elink_t1                External Link {textlinksrc.h5//} {Group}

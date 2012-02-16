@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Rff.f90</title>
+<!-- Source: ./src/H5Rff.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5R"></a>
+<a name="robo64"></a><h2>H5R</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  MODULE <strong>H5R</strong>
+</pre>
+<p class="item_name">FILE</p>
+<pre>  fortran/src/<a href="#robo_top_of_doc">H5Rff.f90</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran interfaces for <strong>H5R</strong> functions. It includes
+  all the functions that are independent on whether the Fortran 2003 functions
+  are enabled or disabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <strong>H5R</strong> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5R2fh5rget5fobject5ftype5fobj5ff"></a>
+<a name="robo374"></a><h2>h5rget_object_type_obj_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo64">H5R</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5rget_object_type_obj_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the type of object that an object reference points to.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dset_id       - identifier of the dataset containing
+                  reference to the objects
+  ref           - reference to open
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  obj_type      - object_type, possible values:
+                    H5G_UNKNOWN_F     (-1)
+                    H5G_GROUP_F        0
+                    H5G_DATASET_F      1
+                    H5G_TYPE_F         2
+                    H5G_LINK_F         3
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  This is a module procedure for the h5rget_object_type_f
+  subroutine.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5rget_object_type_obj_f</strong><span class="sign">(</span>dset_id<span class="sign">,</span> ref<span class="sign">,</span> obj_type<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dset_id   <span class="sign">!</span> Dataset identifier
+    TYPE<span class="sign">(</span>hobj_ref_t_f<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> ref   <span class="sign">!</span> Object reference
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_type     <span class="sign">!</span> Object type
+                                         <span class="sign">!</span>  H5G_UNKNOWN_F     <span class="sign">(</span><span class="sign">-</span>1<span class="sign">)</span>
+                                         <span class="sign">!</span>  H5G_GROUP_F        0
+                                         <span class="sign">!</span>  H5G_DATASET_F      1
+                                         <span class="sign">!</span>  H5G_TYPE_F         2
+                                         <span class="sign">!</span>  H5G_LINK_F         3
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5R2fh5rget5fregion5fregion5ff"></a>
+<a name="robo375"></a><h2>h5rget_region_region_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo64">H5R</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5rget_region_region_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves a dataspace with the specified region selected
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dset_id       - identifier of the dataset containing
+                  reference to the regions
+  ref           - reference to open
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  space_id      - dataspace identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  This is a module procedure for the h5rget_region_f subroutine.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5rget_region_region_f</strong><span class="sign">(</span>dset_id<span class="sign">,</span> ref<span class="sign">,</span> space_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dset_id      <span class="sign">!</span> Dataset identifier
+    TYPE<span class="sign">(</span>hdset_reg_ref_t_f<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> ref <span class="sign">!</span> Dataset region reference
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id    <span class="sign">!</span> Space identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr             <span class="sign">!</span> Error code
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Rff.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

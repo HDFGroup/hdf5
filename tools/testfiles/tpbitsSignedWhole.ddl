@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -d /DS08BITS -M 0,8 packedbits.h5'
-#############################
 HDF5 "packedbits.h5" {
 DATASET "/DS08BITS" {
    DATATYPE  H5T_STD_I8LE

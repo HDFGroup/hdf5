@@ -10,6 +10,7 @@ INCLUDE (${CMAKE_ROOT}/Modules/CheckSymbolExists.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckVariableExists.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckFortranFunctionExists.cmake)
+INCLUDE (${CMAKE_ROOT}/Modules/TestBigEndian.cmake)
 
 #-----------------------------------------------------------------------------
 # Always SET this for now IF we are on an OS X box
@@ -128,8 +129,12 @@ ENDMACRO (CHECK_LIBRARY_EXISTS_CONCAT)
 
 SET (WINDOWS)
 IF (WIN32)
+  SET (H5_HAVE_WIN32_API 1)
   IF (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
     SET (WINDOWS 1)
+    IF (MSVC_IDE)
+      SET (H5_HAVE_VISUAL_STUDIO 1)
+    ENDIF (MSVC_IDE)
   ENDIF (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
 ENDIF (WIN32)
 
@@ -146,19 +151,14 @@ ENDIF (WIN32)
 #
 IF (WINDOWS)
   SET (H5_HAVE_WINDOWS 1)
-#  SET (H5_WINDOWS_USE_STDIO 0)
   # ----------------------------------------------------------------------
   # Set the flag to indicate that the machine has window style pathname,
   # that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
   # (This flag should be _unset_ for all machines, except for Windows)
-  #
   SET (H5_HAVE_WINDOW_PATH 1)
-  SET (WINDOWS_MAX_BUF (1024 * 1024 * 1024))
-  SET (H5_DEFAULT_VFD H5FD_WINDOWS)
   SET (LINK_LIBS ${LINK_LIBS} "kernel32")
-ELSE (WINDOWS)
-  SET (H5_DEFAULT_VFD H5FD_SEC2)
 ENDIF (WINDOWS)
+SET (H5_DEFAULT_VFD H5FD_SEC2)
 
 IF (WINDOWS)
   SET (H5_HAVE_IO_H 1)
@@ -222,6 +222,9 @@ SET (USE_INCLUDES "")
 IF (WINDOWS)
   SET (USE_INCLUDES ${USE_INCLUDES} "windows.h")
 ENDIF (WINDOWS)
+
+TEST_BIG_ENDIAN(H5_WORDS_BIGENDIAN)
+
 #-----------------------------------------------------------------------------
 # Check IF header file exists and add it to the list.
 #-----------------------------------------------------------------------------
@@ -258,6 +261,7 @@ ELSE (CMAKE_SYSTEM_NAME MATCHES "OSF")
 ENDIF (CMAKE_SYSTEM_NAME MATCHES "OSF")
 CHECK_INCLUDE_FILE_CONCAT ("sys/time.h"      H5_HAVE_SYS_TIME_H)
 CHECK_INCLUDE_FILE_CONCAT ("time.h"          H5_HAVE_TIME_H)
+CHECK_INCLUDE_FILE_CONCAT ("mach/mach_time.h" H5_HAVE_MACH_MACH_TIME_H)
 CHECK_INCLUDE_FILE_CONCAT ("sys/timeb.h"     H5_HAVE_SYS_TIMEB_H)
 CHECK_INCLUDE_FILE_CONCAT ("sys/types.h"     H5_HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILE_CONCAT ("unistd.h"        H5_HAVE_UNISTD_H)
@@ -291,16 +295,43 @@ ENDIF (H5_HAVE_STDINT_H AND CMAKE_CXX_COMPILER_LOADED)
 SET (LINUX_LFS 0)
 
 SET (HDF5_EXTRA_FLAGS)
-IF (CMAKE_SYSTEM MATCHES "Linux-([3-9]\\.[0-9]|2\\.[4-9])\\.")
+#IF (CMAKE_SYSTEM MATCHES "Linux-([3-9]\\.[0-9]|2\\.[4-9])\\.")
+IF (NOT WINDOWS)
   # Linux Specific flags
   SET (HDF5_EXTRA_FLAGS -D_POSIX_SOURCE -D_BSD_SOURCE)
   OPTION (HDF5_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
   IF (HDF5_ENABLE_LARGE_FILE)
-    SET (LARGEFILE 1)
-    SET (HDF5_EXTRA_FLAGS ${HDF5_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
+    SET (msg "Performing TEST_LFS_WORKS")
+    TRY_RUN (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
+        ${HDF5_BINARY_DIR}/CMake
+        ${HDF5_RESOURCES_DIR}/HDF5Tests.c
+        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=-DTEST_LFS_WORKS
+        OUTPUT_VARIABLE OUTPUT
+    )
+    IF (TEST_LFS_WORKS_COMPILE)
+      IF (TEST_LFS_WORKS_RUN  MATCHES 0)
+        SET (TEST_LFS_WORKS 1 CACHE INTERNAL ${msg})
+        SET (LARGEFILE 1)
+        SET (HDF5_EXTRA_FLAGS ${HDF5_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
+        MESSAGE (STATUS "${msg}... yes")
+      ELSE (TEST_LFS_WORKS_RUN  MATCHES 0)
+        SET (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
+        MESSAGE (STATUS "${msg}... no")
+        FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+              "Test TEST_LFS_WORKS Run failed with the following output and exit code:\n ${OUTPUT}\n"
+        )
+      ENDIF (TEST_LFS_WORKS_RUN  MATCHES 0)
+    ELSE (TEST_LFS_WORKS_COMPILE )
+      SET (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
+      MESSAGE (STATUS "${msg}... no")
+      FILE (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+          "Test TEST_LFS_WORKS Compile failed with the following output:\n ${OUTPUT}\n"
+      )
+    ENDIF (TEST_LFS_WORKS_COMPILE)
   ENDIF (HDF5_ENABLE_LARGE_FILE)
   SET (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${HDF5_EXTRA_FLAGS})
-ENDIF (CMAKE_SYSTEM MATCHES "Linux-([3-9]\\.[0-9]|2\\.[4-9])\\.")
+ENDIF (NOT WINDOWS)
+#ENDIF (CMAKE_SYSTEM MATCHES "Linux-([3-9]\\.[0-9]|2\\.[4-9])\\.")
 
 ADD_DEFINITIONS (${HDF5_EXTRA_FLAGS})
 
@@ -372,6 +403,21 @@ IF (NOT H5_SIZEOF_OFF64_T)
   SET (H5_SIZEOF_OFF64_T 0)
 ENDIF (NOT H5_SIZEOF_OFF64_T)
 
+# Find the library containing clock_gettime()
+IF (NOT WINDOWS)
+  CHECK_FUNCTION_EXISTS(clock_gettime CLOCK_GETTIME_IN_LIBC)
+  CHECK_LIBRARY_EXISTS(rt clock_gettime "" CLOCK_GETTIME_IN_LIBRT)
+  CHECK_LIBRARY_EXISTS(posix4 clock_gettime "" CLOCK_GETTIME_IN_LIBPOSIX4)
+  IF(CLOCK_GETTIME_IN_LIBC)
+    SET(H5_HAVE_CLOCK_GETTIME 1)
+  ELSEIF(CLOCK_GETTIME_IN_LIBRT)
+    SET(H5_HAVE_CLOCK_GETTIME 1)
+    LIST(APPEND LINK_LIBS rt)
+  ELSEIF(CLOCK_GETTIME_IN_LIBPOSIX4)
+    SET(H5_HAVE_CLOCK_GETTIME 1)
+    LIST(APPEND LINK_LIBS posix4)
+  ENDIF(CLOCK_GETTIME_IN_LIBC)
+ENDIF (NOT WINDOWS)
 
 # For other tests to use the same libraries
 SET (CMAKE_REQUIRED_LIBRARIES ${LINK_LIBS})
@@ -578,7 +624,7 @@ IF (NOT WINDOWS)
     HDF5_FUNCTION_TEST (${test})
   ENDFOREACH (test)
   IF (NOT CYGWIN AND NOT MINGW)
-    HDF5_FUNCTION_TEST (HAVE_TIMEZONE)
+      HDF5_FUNCTION_TEST (HAVE_TIMEZONE)
 #      HDF5_FUNCTION_TEST (HAVE_STAT_ST_BLOCKS)
   ENDIF (NOT CYGWIN AND NOT MINGW)
 ENDIF (NOT WINDOWS)
@@ -586,7 +632,7 @@ ENDIF (NOT WINDOWS)
 #-----------------------------------------------------------------------------
 # Check if InitOnceExecuteOnce is available
 #-----------------------------------------------------------------------------
-IF (WINDOWS)
+IF (WINDOWS AND NOT HDF5_NO_IOEO_TEST)
   MESSAGE (STATUS "Checking for InitOnceExecuteOnce:")
   IF("${H5_HAVE_IOEO}" MATCHES "^${H5_HAVE_IOEO}$")
     IF (LARGEFILE)
@@ -644,8 +690,8 @@ IF (WINDOWS)
         "Return value: ${HAVE_IOEO_EXITCODE}\n")
     ENDIF("${HAVE_IOEO_EXITCODE}" EQUAL 0)
   ENDIF("${H5_HAVE_IOEO}" MATCHES "^${H5_HAVE_IOEO}$")
-ENDIF (WINDOWS)
-	
+ENDIF (WINDOWS AND NOT HDF5_NO_IOEO_TEST)
+  
 
 #-----------------------------------------------------------------------------
 # Option to see if GPFS is available on this filesystem --enable-gpfs
