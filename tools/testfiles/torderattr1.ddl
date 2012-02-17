@@ -85,7 +85,6 @@ GROUP "/" {
          DATATYPE  H5T_STD_U8LE
          DATASPACE  SCALAR
       }
-
    DATATYPE "tt" H5T_STD_I32LE;
       ATTRIBUTE "a" {
          DATATYPE  H5T_STD_U8LE
@@ -99,6 +98,5 @@ GROUP "/" {
          DATATYPE  H5T_STD_U8LE
          DATASPACE  SCALAR
       }
-
 }
 }

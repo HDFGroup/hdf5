@@ -31,7 +31,7 @@
       </hdf5:StorageLayout>
       <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
          <hdf5:FillValue>
-               <hdf5:NoFill/>
+            <hdf5:NoFill/>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>
@@ -67,7 +67,12 @@
    <!-- Note: format of compound data not specified -->
       <hdf5:Data>
          <hdf5:DataFromFile>
-         0 0 1 1 1 0.5 2 4 0.333333 3 9 0.25 4 16 0.2 5 25 0.166667
+         0 0 1
+         1 1 0.5
+         2 4 0.333333
+         3 9 0.25
+         4 16 0.2
+         5 25 0.166667
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>
@@ -82,7 +87,7 @@
          </hdf5:StorageLayout>
          <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -94,7 +99,12 @@
       <!-- Note: format of compound data not specified -->
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 1 1.1 2 2.2 3 3.3 4 4.4 5 5.5
+            0 0
+            1 1.1
+            2 2.2
+            3 3.3
+            4 4.4
+            5 5.5
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
@@ -108,7 +118,7 @@
          </hdf5:StorageLayout>
          <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -120,7 +130,12 @@
       <!-- Note: format of compound data not specified -->
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 1 1 2 2 3 3 4 4 5 5
+            0 0
+            1 1
+            2 2
+            3 3
+            4 4
+            5 5
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
@@ -156,7 +171,7 @@
          </hdf5:StorageLayout>
          <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -168,7 +183,12 @@
       <!-- Note: format of compound data not specified -->
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 1 1 2 2 3 3 4 4 5 5
+            0 0
+            1 1
+            2 2
+            3 3
+            4 4
+            5 5
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>

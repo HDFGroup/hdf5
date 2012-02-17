@@ -1107,6 +1107,12 @@
 ./tools/h5dump/Makefile.in
 ./tools/h5dump/h5dump.c
 ./tools/h5dump/h5dump.h
+./tools/h5dump/h5dump_defines.h
+./tools/h5dump/h5dump_extern.h
+./tools/h5dump/h5dump_ddl.c
+./tools/h5dump/h5dump_ddl.h
+./tools/h5dump/h5dump_xml.c
+./tools/h5dump/h5dump_xml.h
 ./tools/h5dump/h5dumpgentest.c
 ./tools/h5dump/testh5dump.sh.in
 ./tools/h5dump/testh5dumpxml.sh.in
@@ -1214,6 +1220,8 @@
 ./tools/lib/h5trav.h
 ./tools/lib/h5tools.c
 ./tools/lib/h5tools.h
+./tools/lib/h5tools_dump.c
+./tools/lib/h5tools_dump.h
 ./tools/lib/h5tools_filters.c
 ./tools/lib/h5tools_str.c
 ./tools/lib/h5tools_str.h

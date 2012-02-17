@@ -12,8 +12,8 @@
  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifndef H5DUMP_H__
-#define H5DUMP_H__
+#ifndef H5DUMP_EXTERN_H__
+#define H5DUMP_EXTERN_H__
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -50,54 +50,54 @@ typedef struct h5dump_table_list_t {
     } *tables;
 } h5dump_table_list_t;
 
-h5dump_table_list_t  table_list = {0, 0, NULL};
-table_t             *group_table = NULL, *dset_table = NULL, *type_table = NULL;
-int                  dump_indent = 0;              /*how far in to indent the line         */
+extern h5dump_table_list_t  table_list;
+extern table_t             *group_table, *dset_table, *type_table;
+extern int                  dump_indent;              /*how far in to indent the line         */
 
-int          unamedtype = 0;     /* shared datatype with no name */
-hbool_t      hit_elink = FALSE;  /* whether we have traversed an external link */
-size_t       prefix_len = 1024;
-char         *prefix = NULL;
-const char   *fp_format = NULL;
+extern int          unamedtype;     /* shared datatype with no name */
+extern hbool_t      hit_elink;  /* whether we have traversed an external link */
+extern size_t       prefix_len;
+extern char         *prefix;
+extern const char   *fp_format;
 
 /* things to display or which are set via command line parameters */
-int          display_all       = TRUE;
-int          display_oid       = FALSE;
-int          display_data      = TRUE;
-int          display_attr_data = TRUE;
-int          display_char      = FALSE; /*print 1-byte numbers as ASCII */
-int          usingdasho        = FALSE;
-int          display_bb        = FALSE; /*superblock */
-int          display_dcpl      = FALSE; /*dcpl */
-int          display_fi        = FALSE; /*file index */
-int          display_ai        = TRUE;  /*array index */
-int          display_escape    = FALSE; /*escape non printable characters */
-int          display_region    = FALSE; /*print region reference data */
-int          enable_error_stack= FALSE; /* re-enable error stack */
-int          disable_compact_subset= FALSE; /* disable compact form of subset notation */
-int          display_packed_bits = FALSE; /*print 1-8 byte numbers as packed bits*/
+extern int          display_all;
+extern int          display_oid;
+extern int          display_data;
+extern int          display_attr_data;
+extern int          display_char; /*print 1-byte numbers as ASCII */
+extern int          usingdasho;
+extern int          display_bb; /*superblock */
+extern int          display_dcpl; /*dcpl */
+extern int          display_fi; /*file index */
+extern int          display_ai;  /*array index */
+extern int          display_escape; /*escape non printable characters */
+extern int          display_region; /*print region reference data */
+extern int          enable_error_stack; /* re-enable error stack */
+extern int          disable_compact_subset; /* disable compact form of subset notation */
+extern int          display_packed_bits; /*print 1-8 byte numbers as packed bits*/
 
 /* sort parameters */
-H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
-H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descending]   */
+extern H5_index_t   sort_by; /*sort_by [creation_order | name]  */
+extern H5_iter_order_t sort_order; /*sort_order [ascending | descending]   */
 
 #define PACKED_BITS_MAX         8  /* Maximum number of packed-bits to display */
 #define PACKED_BITS_SIZE_MAX    8*sizeof(long long)  /* Maximum bits size of integer types of packed-bits */
 /* mask list for packed bits */
-unsigned long long packed_mask[PACKED_BITS_MAX];  /* packed bits are restricted to 8*sizeof(llong) bytes */
+extern unsigned long long packed_mask[PACKED_BITS_MAX];  /* packed bits are restricted to 8*sizeof(llong) bytes */
 
 /* packed bits display parameters */
-int packed_offset[PACKED_BITS_MAX];
-int packed_length[PACKED_BITS_MAX];
+extern int packed_offset[PACKED_BITS_MAX];
+extern int packed_length[PACKED_BITS_MAX];
 
 /*
  * The global table is set to either ddl_function_table or
  * xml_function_table in the initialization.
  */
-const dump_functions *dump_function_table;
+extern const dump_functions *dump_function_table;
 
 #ifdef __cplusplus
-"C" {
+extern "C" {
 #endif
 
 void     add_prefix(char **prfx, size_t *prfx_len, const char *name);
@@ -109,4 +109,4 @@ ssize_t  table_list_visited(unsigned long file_no);
 }
 #endif
 
-#endif  /* !H5DUMP_H__ */
+#endif  /* !H5DUMP_EXTERN_H__ */

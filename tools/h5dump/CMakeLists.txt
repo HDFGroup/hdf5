@@ -10,7 +10,11 @@ INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 # --------------------------------------------------------------------
 # Add the h5dump executables
 # --------------------------------------------------------------------
-ADD_EXECUTABLE (h5dump ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dump.c)
+ADD_EXECUTABLE (h5dump
+    ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dump.c
+    ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dump_ddl.c
+    ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dump_xml.c
+)
 TARGET_NAMING (h5dump ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5dump  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 SET_TARGET_PROPERTIES (h5dump PROPERTIES FOLDER tools)

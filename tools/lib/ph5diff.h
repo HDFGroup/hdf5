@@ -30,6 +30,12 @@
 #define MPI_TAG_END    7
 #define MPI_TAG_PARALLEL  8
 
+H5TOOLS_DLLVAR int	g_nTasks;
+H5TOOLS_DLLVAR unsigned char g_Parallel;
+H5TOOLS_DLLVAR char    outBuff[];
+H5TOOLS_DLLVAR int	outBuffOffset;
+H5TOOLS_DLLVAR FILE *	overflow_file;
+
 struct diff_mpi_args
 {
     char  name1[256];
