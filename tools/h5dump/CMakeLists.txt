@@ -40,6 +40,7 @@ IF (BUILD_TESTING)
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
   SET (HDF5_REFERENCE_FILES
+      file_space.ddl
       filter_fail.ddl
       packedbits.ddl
       tall-1.ddl
@@ -232,6 +233,7 @@ IF (BUILD_TESTING)
       tvlstr.h5.xml
   )
   SET (HDF5_REFERENCE_TEST_FILES
+      file_space.h5
       filter_fail.h5
       packedbits.h5
       taindices.h5
@@ -668,6 +670,8 @@ IF (BUILD_TESTING)
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
           h5dump-help.out
+          file_space.out
+          file_space.out.err
           filter_fail.out
           filter_fail.out.err
           packedbits.out
@@ -914,169 +918,175 @@ IF (BUILD_TESTING)
   ADD_HELP_TEST(help 0 -h)
 
   # test for signed/unsigned datasets
-  ADD_H5_TEST (packedbits 0 packedbits.h5)
+  ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
   # test for displaying groups
-  ADD_H5_TEST (tgroup-1 0 tgroup.h5)
+  ADD_H5_TEST (tgroup-1 0 --enable-error-stack tgroup.h5)
   # test for displaying the selected groups
   ADD_H5_TEST (tgroup-2 1 --group=/g2 --group / -g /y tgroup.h5)
 
   # test for displaying simple space datasets
-  ADD_H5_TEST (tdset-1 0 tdset.h5)
+  ADD_H5_TEST (tdset-1 0 --enable-error-stack tdset.h5)
   # test for displaying selected datasets
   ADD_H5_TEST (tdset-2 1 -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5)
 
   # test for displaying attributes
-  ADD_H5_TEST (tattr-1 0 tattr.h5)
+  ADD_H5_TEST (tattr-1 0 --enable-error-stack tattr.h5)
   # test for displaying the selected attributes of string type and scalar space
-  ADD_H5_TEST (tattr-2 0 -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
+  ADD_H5_TEST (tattr-2 0 --enable-error-stack -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
   # test for header and error messages
   ADD_H5_TEST (tattr-3 1 --header -a /attr2 --attribute=/attr tattr.h5)
   # test for displaying attributes in shared datatype (also in group and dataset)
-  ADD_H5_TEST (tnamed_dtype_attr 0 tnamed_dtype_attr.h5)
+  ADD_H5_TEST (tnamed_dtype_attr 0 --enable-error-stack tnamed_dtype_attr.h5)
   # test for displaying at least 9 attributes on root from a be machine
-  ADD_H5_TEST (tattr-4_be 0 tattr4_be.h5)
+  ADD_H5_TEST (tattr-4_be 0 --enable-error-stack tattr4_be.h5)
 
   # test for displaying soft links and user-defined links
-  ADD_H5_TEST (tslink-1 0 tslink.h5)
-  ADD_H5_TEST (tudlink-1 0 tudlink.h5)
+  ADD_H5_TEST (tslink-1 0 --enable-error-stack tslink.h5)
+  ADD_H5_TEST (tudlink-1 0 --enable-error-stack tudlink.h5)
   # test for displaying the selected link
-  ADD_H5_TEST (tslink-2 0 -l slink2 tslink.h5)
-  ADD_H5_TEST (tudlink-2 0 -l udlink2 tudlink.h5)
+  ADD_H5_TEST (tslink-2 0 --enable-error-stack -l slink2 tslink.h5)
+  ADD_H5_TEST (tudlink-2 0 --enable-error-stack -l udlink2 tudlink.h5)
 
   # tests for hard links
-  ADD_H5_TEST (thlink-1 0 thlink.h5)
-  ADD_H5_TEST (thlink-2 0 -d /g1/dset2 --dataset /dset1 --dataset=/g1/g1.1/dset3 thlink.h5)
-  ADD_H5_TEST (thlink-3 0 -d /g1/g1.1/dset3 --dataset /g1/dset2 --dataset=/dset1 thlink.h5)
-  ADD_H5_TEST (thlink-4 0 -g /g1 thlink.h5)
-  ADD_H5_TEST (thlink-5 0 -d /dset1 -g /g2 -d /g1/dset2 thlink.h5)
+  ADD_H5_TEST (thlink-1 0 --enable-error-stack thlink.h5)
+  ADD_H5_TEST (thlink-2 0 --enable-error-stack -d /g1/dset2 --dataset /dset1 --dataset=/g1/g1.1/dset3 thlink.h5)
+  ADD_H5_TEST (thlink-3 0 --enable-error-stack -d /g1/g1.1/dset3 --dataset /g1/dset2 --dataset=/dset1 thlink.h5)
+  ADD_H5_TEST (thlink-4 0 --enable-error-stack -g /g1 thlink.h5)
+  ADD_H5_TEST (thlink-5 0 --enable-error-stack -d /dset1 -g /g2 -d /g1/dset2 thlink.h5)
 
   # tests for compound data types
-  ADD_H5_TEST (tcomp-1 0 tcompound.h5)
+  ADD_H5_TEST (tcomp-1 0 --enable-error-stack tcompound.h5)
   # test for named data types
-  ADD_H5_TEST (tcomp-2 0 -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5)
+  ADD_H5_TEST (tcomp-2 0 --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5)
   # test for unamed type 
-  #ADD_H5_TEST (tcomp-3 0 -t /#6632 -g /group2 tcompound.h5)
+  # JIRA HDFFV-7936 ADD_H5_TEST (tcomp-3 0 "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
+  ADD_H5_TEST (tcomp-3 0 "-t;/#6632;-g;/group2;tcompound.h5")
   # test complicated compound datatype
-  ADD_H5_TEST (tcomp-4 0 tcompound_complex.h5)
+  ADD_H5_TEST (tcomp-4 0 --enable-error-stack tcompound_complex.h5)
 
   #test for the nested compound type
-  ADD_H5_TEST (tnestcomp-1 0 tnestedcomp.h5)
+  ADD_H5_TEST (tnestcomp-1 0 --enable-error-stack tnestedcomp.h5)
 
   # test for options
+  # JIRA HDFFV-7936 ADD_H5_TEST (tall-1 0 --enable-error-stack tall.h5)
   ADD_H5_TEST (tall-1 0 tall.h5)
-  ADD_H5_TEST (tall-2 0 --header -g /g1/g1.1 -a attr2 tall.h5)
-  ADD_H5_TEST (tall-3 0 -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5)
+  ADD_H5_TEST (tall-2 0 --enable-error-stack --header -g /g1/g1.1 -a attr2 tall.h5)
+  ADD_H5_TEST (tall-3 0 --enable-error-stack -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5)
 
   # test for loop detection
-  ADD_H5_TEST (tloop-1 0 tloop.h5)
+  ADD_H5_TEST (tloop-1 0 --enable-error-stack tloop.h5)
 
   # test for string 
-  ADD_H5_TEST (tstr-1 0 tstr.h5)
-  ADD_H5_TEST (tstr-2 0 tstr2.h5)
+  ADD_H5_TEST (tstr-1 0 --enable-error-stack tstr.h5)
+  ADD_H5_TEST (tstr-2 0 --enable-error-stack tstr2.h5)
 
   # test for file created by Lib SAF team
-  ADD_H5_TEST (tsaf 0 tsaf.h5)
+  ADD_H5_TEST (tsaf 0 --enable-error-stack tsaf.h5)
 
   # test for file with variable length data
-  ADD_H5_TEST (tvldtypes1 0 tvldtypes1.h5)
-  ADD_H5_TEST (tvldtypes2 0 tvldtypes2.h5)
-  ADD_H5_TEST (tvldtypes3 0 tvldtypes3.h5)
-  ADD_H5_TEST (tvldtypes4 0 tvldtypes4.h5)
-  ADD_H5_TEST (tvldtypes5 0 tvldtypes5.h5)
+  ADD_H5_TEST (tvldtypes1 0 --enable-error-stack tvldtypes1.h5)
+  ADD_H5_TEST (tvldtypes2 0 --enable-error-stack tvldtypes2.h5)
+  ADD_H5_TEST (tvldtypes3 0 --enable-error-stack tvldtypes3.h5)
+  ADD_H5_TEST (tvldtypes4 0 --enable-error-stack tvldtypes4.h5)
+  ADD_H5_TEST (tvldtypes5 0 --enable-error-stack tvldtypes5.h5)
 
   #test for file with variable length string data
-  ADD_H5_TEST (tvlstr 0 tvlstr.h5)
+  ADD_H5_TEST (tvlstr 0 --enable-error-stack tvlstr.h5)
 
   # test for files with array data
-  ADD_H5_TEST (tarray1 0 tarray1.h5)
+  ADD_H5_TEST (tarray1 0 --enable-error-stack tarray1.h5)
   # # added for bug# 2092 - tarray1_big.h5
+  # JIRA HDFFV-7936 ADD_H5_TEST (tarray1_big 0 --enable-error-stack -R tarray1_big.h5)
   ADD_H5_TEST (tarray1_big 0 -R tarray1_big.h5)
-  ADD_H5_TEST (tarray2 0 tarray2.h5)
-  ADD_H5_TEST (tarray3 0 tarray3.h5)
-  ADD_H5_TEST (tarray4 0 tarray4.h5)
-  ADD_H5_TEST (tarray5 0 tarray5.h5)
-  ADD_H5_TEST (tarray6 0 tarray6.h5)
-  ADD_H5_TEST (tarray7 0 tarray7.h5)
-  ADD_H5_TEST (tarray8 0 tarray8.h5)
+  ADD_H5_TEST (tarray2 0 --enable-error-stack tarray2.h5)
+  ADD_H5_TEST (tarray3 0 --enable-error-stack tarray3.h5)
+  ADD_H5_TEST (tarray4 0 --enable-error-stack tarray4.h5)
+  ADD_H5_TEST (tarray5 0 --enable-error-stack tarray5.h5)
+  ADD_H5_TEST (tarray6 0 --enable-error-stack tarray6.h5)
+  ADD_H5_TEST (tarray7 0 --enable-error-stack tarray7.h5)
+  ADD_H5_TEST (tarray8 0 --enable-error-stack tarray8.h5)
 
   # test for files with empty data
-  ADD_H5_TEST (tempty 0 tempty.h5)
+  ADD_H5_TEST (tempty 0 --enable-error-stack tempty.h5)
 
   # test for files with groups that have comments
-  ADD_H5_TEST (tgrp_comments 0 tgrp_comments.h5)
+  ADD_H5_TEST (tgrp_comments 0 --enable-error-stack tgrp_comments.h5)
 
   # test the --filedriver flag
-  ADD_H5_TEST (tsplit_file 0 --filedriver=split tsplit_file)
-  ADD_H5_TEST (tfamily 0 --filedriver=family tfamily%05d.h5)
-  ADD_H5_TEST (tmulti 0 --filedriver=multi tmulti)
+  ADD_H5_TEST (tsplit_file 0 --enable-error-stack --filedriver=split tsplit_file)
+  ADD_H5_TEST (tfamily 0 --enable-error-stack --filedriver=family tfamily%05d.h5)
+  ADD_H5_TEST (tmulti 0 --enable-error-stack --filedriver=multi tmulti)
 
   # test for files with group names which reach > 1024 bytes in size
-  ADD_H5_TEST (tlarge_objname 0 -w157 tlarge_objname.h5)
+  ADD_H5_TEST (tlarge_objname 0 --enable-error-stack -w157 tlarge_objname.h5)
 
   # test '-A' to suppress data but print attr's
+  # JIRA HDFFV-7936 ADD_H5_TEST (tall-2A 0 --enable-error-stack -A tall.h5)
   ADD_H5_TEST (tall-2A 0 -A tall.h5)
 
   # test '-r' to print attributes in ASCII instead of decimal
+  # JIRA HDFFV-7936 ADD_H5_TEST (tall-2B 0 --enable-error-stack -A -r tall.h5)
   ADD_H5_TEST (tall-2B 0 -A -r tall.h5)
 
   # test Subsetting
-  ADD_H5_TEST (tall-4s 0 --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5)
-  ADD_H5_TEST (tall-5s 0 -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5)
-  ADD_H5_TEST (tdset-3s 0 -d "/dset1[1,1;;;]" tdset.h5)
-  ADD_H5_TEST (tno-subset 0 --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5)
+  ADD_H5_TEST (tall-4s 0 --enable-error-stack --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5)
+  ADD_H5_TEST (tall-5s 0 --enable-error-stack -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5)
+  ADD_H5_TEST (tdset-3s 0 --enable-error-stack -d "/dset1[1,1;;;]" tdset.h5)
+  ADD_H5_TEST (tno-subset 0 --enable-error-stack --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5)
 
   # test printing characters in ASCII instead of decimal
-  ADD_H5_TEST (tchar1 0 -r tchar.h5)
+  ADD_H5_TEST (tchar1 0 --enable-error-stack -r tchar.h5)
 
   # rev. 2004
   # tests for super block
-  ADD_H5_TEST (tboot1 0 -H -B -d dset tfcontents1.h5)
-  ADD_H5_TEST (tboot2 0 -B tfcontents2.h5)
+  ADD_H5_TEST (tboot1 0 --enable-error-stack -H -B -d dset tfcontents1.h5)
+  ADD_H5_TEST (tboot2 0 --enable-error-stack -B tfcontents2.h5)
+  ADD_H5_TEST (file_space 0 --enable-error-stack -B file_space.h5)
 
   # test -p with a non existing dataset
   ADD_H5_TEST (tperror 1 -p -d bogus tfcontents1.h5)
 
   # test for file contents
-  ADD_H5_TEST (tcontents 0 -n tfcontents1.h5)
+  ADD_H5_TEST (tcontents 0 --enable-error-stack -n tfcontents1.h5)
 
   # tests for storage layout
   # compact
-  ADD_H5_TEST (tcompact 0 -H -p -d compact tfilters.h5)
+  ADD_H5_TEST (tcompact 0 --enable-error-stack -H -p -d compact tfilters.h5)
   # contiguous
-  ADD_H5_TEST (tcontiguos 0 -H -p -d contiguous tfilters.h5)
+  ADD_H5_TEST (tcontiguos 0 --enable-error-stack -H -p -d contiguous tfilters.h5)
   # chunked
-  ADD_H5_TEST (tchunked 0 -H -p -d chunked tfilters.h5)
+  ADD_H5_TEST (tchunked 0 --enable-error-stack -H -p -d chunked tfilters.h5)
   # external 
-  ADD_H5_TEST (texternal 0 -H -p -d external tfilters.h5)
+  ADD_H5_TEST (texternal 0 --enable-error-stack -H -p -d external tfilters.h5)
 
   # fill values
-  ADD_H5_TEST (tfill 0 -p tfvalues.h5)
+  ADD_H5_TEST (tfill 0 --enable-error-stack -p tfvalues.h5)
 
   # several datatype, with references , print path
-  ADD_H5_TEST (treference 0  tattr2.h5)
+  ADD_H5_TEST (treference 0 --enable-error-stack  tattr2.h5)
 
   # escape/not escape non printable characters
-  ADD_H5_TEST (tstringe 0 -e tstr3.h5)
-  ADD_H5_TEST (tstring 0 tstr3.h5)
+  ADD_H5_TEST (tstringe 0 --enable-error-stack -e tstr3.h5)
+  ADD_H5_TEST (tstring 0 --enable-error-stack tstr3.h5)
   # char data as ASCII with non escape
-  ADD_H5_TEST (tstring2 0 -r -d str4 tstr3.h5)
+  ADD_H5_TEST (tstring2 0 --enable-error-stack -r -d str4 tstr3.h5)
 
   # array indices print/not print
-  ADD_H5_TEST (tindicesyes 0 taindices.h5)
-  ADD_H5_TEST (tindicesno 0 -y taindices.h5)
+  ADD_H5_TEST (tindicesyes 0 --enable-error-stack taindices.h5)
+  ADD_H5_TEST (tindicesno 0 --enable-error-stack -y taindices.h5)
 
   ########## array indices with subsetting
   # 1D case
-  ADD_H5_TEST (tindicessub1 0 -d 1d -s 1 -S 10 -c 2  -k 3 taindices.h5)
+  ADD_H5_TEST (tindicessub1 0 --enable-error-stack -d 1d -s 1 -S 10 -c 2  -k 3 taindices.h5)
 
   # 2D case
-  ADD_H5_TEST (tindicessub2 0 -d 2d -s 1,2  -S 3,3 -c 3,2 -k 2,2 taindices.h5)
+  ADD_H5_TEST (tindicessub2 0 --enable-error-stack -d 2d -s 1,2  -S 3,3 -c 3,2 -k 2,2 taindices.h5)
 
   # 3D case
-  ADD_H5_TEST (tindicessub3 0 -d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2  -k 1,2,2  taindices.h5)
+  ADD_H5_TEST (tindicessub3 0 --enable-error-stack -d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2  -k 1,2,2  taindices.h5)
 
   # 4D case
-  ADD_H5_TEST (tindicessub4 0 -d 4d -s 0,0,1,2  -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2  taindices.h5)
+  ADD_H5_TEST (tindicessub4 0 --enable-error-stack -d 4d -s 0,0,1,2  -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2  taindices.h5)
 
   # Exceed the dimensions for subsetting
   ADD_H5_TEST (texceedsubstart 1 -d 1d -s 1,3 taindices.h5)
@@ -1135,34 +1145,34 @@ IF (BUILD_TESTING)
   ADD_SKIP_H5_TEST (tallfilters 0 ${TESTTYPE} -H -p -d all  tfilters.h5)
 
   # user defined
-  ADD_H5_TEST (tuserfilter 0 -H  -p -d myfilter  tfilters.h5)
+  ADD_H5_TEST (tuserfilter 0 --enable-error-stack -H  -p -d myfilter  tfilters.h5)
 
   # test for displaying objects with very long names
-  ADD_H5_TEST (tlonglinks 0 tlonglinks.h5)
+  ADD_H5_TEST (tlonglinks 0 --enable-error-stack tlonglinks.h5)
 
   # dimensions over 4GB, print boundary 
-  ADD_H5_TEST (tbigdims 0 -d dset4gb -s 4294967284 -c 22 tbigdims.h5)
+  ADD_H5_TEST (tbigdims 0 --enable-error-stack -d dset4gb -s 4294967284 -c 22 tbigdims.h5)
 
   # hyperslab read
-  ADD_H5_TEST (thyperslab 0 thyperslab.h5)
+  ADD_H5_TEST (thyperslab 0 --enable-error-stack thyperslab.h5)
     
   # test for displaying dataset and attribute of null space
-  ADD_H5_TEST (tnullspace 0 tnullspace.h5)
+  ADD_H5_TEST (tnullspace 0 --enable-error-stack tnullspace.h5)
 
   # test for displaying dataset and attribute of space with 0 dimension size
-  ADD_H5_TEST (zerodim 0 zerodim.h5)
+  ADD_H5_TEST (zerodim 0 --enable-error-stack zerodim.h5)
 
   # test for long double (some systems do not have long double)
-  #ADD_H5_TEST (tldouble 0 tldouble.h5)
+  #ADD_H5_TEST (tldouble 0 --enable-error-stack tldouble.h5)
 
   # test for vms
-  ADD_H5_TEST (tvms 0 tvms.h5)
+  ADD_H5_TEST (tvms 0 --enable-error-stack tvms.h5)
 
   # test for binary output
-  ADD_H5_TEST (tbin1LE 0 -d integer -o out1LE.bin -b LE tbinary.h5)
+  ADD_H5_TEST (tbin1LE 0 --enable-error-stack -d integer -o out1LE.bin -b LE tbinary.h5)
 
   # NATIVE default. the NATIVE test can be validated with h5import/h5diff
-  ADD_H5_TEST (tbin1 0 -d integer -o out1.bin -b tbinary.h5)
+  ADD_H5_TEST (tbin1 0 --enable-error-stack -d integer -o out1.bin -b tbinary.h5)
   IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DUMP-tbin1 PROPERTIES DEPENDS ${last_test})
@@ -1180,7 +1190,7 @@ IF (BUILD_TESTING)
   SET_TESTS_PROPERTIES (H5DUMP-h5diff-out1 PROPERTIES DEPENDS H5DUMP-h5import-out1)
   SET (last_test "H5DUMP-h5diff-out1")
 
-  ADD_H5_TEST (tbin2 0 -b BE -d float -o out2.bin tbinary.h5)
+  ADD_H5_TEST (tbin2 0 --enable-error-stack -b BE -d float -o out2.bin tbinary.h5)
   IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DUMP-tbin2 PROPERTIES DEPENDS ${last_test})
@@ -1189,7 +1199,7 @@ IF (BUILD_TESTING)
   ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
 
   # the NATIVE test can be validated with h5import/h5diff
-  ADD_H5_TEST (tbin3 0 -d integer -o out3.bin -b NATIVE tbinary.h5)
+  ADD_H5_TEST (tbin3 0 --enable-error-stack -d integer -o out3.bin -b NATIVE tbinary.h5)
   IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DUMP-tbin3 PROPERTIES DEPENDS ${last_test})
@@ -1207,7 +1217,7 @@ IF (BUILD_TESTING)
   SET_TESTS_PROPERTIES (H5DUMP-h5diff-out3 PROPERTIES DEPENDS H5DUMP-h5import-out3)
   SET (last_test "H5DUMP-h5diff-out3")
 
-  ADD_H5_TEST (tbin4 0 -d double -b FILE -o out4.bin tbinary.h5)
+  ADD_H5_TEST (tbin4 0 --enable-error-stack -d double -b FILE -o out4.bin tbinary.h5)
   IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DUMP-tbin4 PROPERTIES DEPENDS ${last_test})
@@ -1236,41 +1246,46 @@ IF (BUILD_TESTING)
   SET (last_test "H5DUMP-clear-objects")
 
   # test for dataset region references 
-  ADD_H5_TEST (tdatareg 0 tdatareg.h5)
+  ADD_H5_TEST (tdatareg 0 --enable-error-stack tdatareg.h5)
+  # JIRA HDFFV-7936 ADD_H5_TEST (tdataregR 0 --enable-error-stack -R tdatareg.h5)
   ADD_H5_TEST (tdataregR 0 -R tdatareg.h5)
-  ADD_H5_TEST (tattrreg 0 tattrreg.h5)
+  ADD_H5_TEST (tattrreg 0 --enable-error-stack tattrreg.h5)
+  # JIRA HDFFV-7936 ADD_H5_TEST (tattrregR 0 --enable-error-stack -R tattrreg.h5)
   ADD_H5_TEST (tattrregR 0 -R tattrreg.h5)
-  ADD_H5_EXPORT_TEST (tbinregR tdatareg.h5 0 -d /Dataset1 -s 0 -R -y -o)
+  ADD_H5_EXPORT_TEST (tbinregR tdatareg.h5 0 --enable-error-stack -d /Dataset1 -s 0 -R -y -o)
 
   # tests for group creation order
   # "1" tracked, "2" name, root tracked
-  ADD_H5_TEST (tordergr1 0 --group=1 --sort_by=creation_order --sort_order=ascending tordergr.h5)
-  ADD_H5_TEST (tordergr2 0 --group=1 --sort_by=creation_order --sort_order=descending tordergr.h5)
-  ADD_H5_TEST (tordergr3 0 -g 2 -q name -z ascending tordergr.h5)
-  ADD_H5_TEST (tordergr4 0 -g 2 -q name -z descending tordergr.h5)
-  ADD_H5_TEST (tordergr5 0 -q creation_order tordergr.h5)
+  ADD_H5_TEST (tordergr1 0 --enable-error-stack --group=1 --sort_by=creation_order --sort_order=ascending tordergr.h5)
+  ADD_H5_TEST (tordergr2 0 --enable-error-stack --group=1 --sort_by=creation_order --sort_order=descending tordergr.h5)
+  ADD_H5_TEST (tordergr3 0 --enable-error-stack -g 2 -q name -z ascending tordergr.h5)
+  ADD_H5_TEST (tordergr4 0 --enable-error-stack -g 2 -q name -z descending tordergr.h5)
+  ADD_H5_TEST (tordergr5 0 --enable-error-stack -q creation_order tordergr.h5)
 
   # tests for attribute order
-  ADD_H5_TEST (torderattr1 0 -H --sort_by=name --sort_order=ascending torderattr.h5)
-  ADD_H5_TEST (torderattr2 0 -H --sort_by=name --sort_order=descending torderattr.h5)
-  ADD_H5_TEST (torderattr3 0 -H --sort_by=creation_order --sort_order=ascending torderattr.h5)
-  ADD_H5_TEST (torderattr4 0 -H --sort_by=creation_order --sort_order=descending torderattr.h5)
+  ADD_H5_TEST (torderattr1 0 --enable-error-stack -H --sort_by=name --sort_order=ascending torderattr.h5)
+  ADD_H5_TEST (torderattr2 0 --enable-error-stack -H --sort_by=name --sort_order=descending torderattr.h5)
+  ADD_H5_TEST (torderattr3 0 --enable-error-stack -H --sort_by=creation_order --sort_order=ascending torderattr.h5)
+  ADD_H5_TEST (torderattr4 0 --enable-error-stack -H --sort_by=creation_order --sort_order=descending torderattr.h5)
 
   # tests for floating point user defined printf format
-  ADD_H5_TEST (tfpformat 0 -m %.7f tfpformat.h5)
+  ADD_H5_TEST (tfpformat 0 --enable-error-stack -m %.7f tfpformat.h5)
 
   # tests for traversal of external links
+  # JIRA HDFFV-7936 ADD_H5_TEST (textlinksrc 0 --enable-error-stack textlinksrc.h5)
   ADD_H5_TEST (textlinksrc 0 textlinksrc.h5)
+  # JIRA HDFFV-7936 ADD_H5_TEST (textlinkfar 0 --enable-error-stack textlinkfar.h5)
   ADD_H5_TEST (textlinkfar 0 textlinkfar.h5)
 
   # test for dangling external links
+  # JIRA HDFFV-7936 ADD_H5_TEST (textlink 0 --enable-error-stack textlink.h5)
   ADD_H5_TEST (textlink 0 textlink.h5)
 
   # test for error stack display (BZ2048)
   ADD_H5_MASK_TEST (filter_fail 1 --enable-error-stack filter_fail.h5)
 
   # test for -o -y for dataset with attributes
-  ADD_H5_TEST (tall-6 0 -y -o data -d /g1/g1.1/dset1.1.1 tall.h5)
+  ADD_H5_TEST (tall-6 0 --enable-error-stack -y -o data -d /g1/g1.1/dset1.1.1 tall.h5)
 
   ####### test for dataset packed bits ######
   IF (HDF5_ENABLE_USING_MEMCHECKER)
@@ -1404,70 +1419,70 @@ IF (BUILD_TESTING)
   # Normal operation on both signed and unsigned int datasets.
   # Sanity check
   # Their rawdata output should be the same.
-  ADD_H5_TEST (tpbitsSignedWhole 0 -d /DS08BITS -M 0,8 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedWhole 0 -d /DU08BITS -M 0,8 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedIntWhole 0 -d /DS16BITS -M 0,16 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedIntWhole 0 -d /DU16BITS -M 0,16 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedLongWhole 0 -d /DS32BITS -M 0,32 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedLongWhole 0 -d /DU32BITS -M 0,32 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedLongLongWhole 0 -d /DS64BITS -M 0,64 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedLongLongWhole 0 -d /DU64BITS -M 0,64 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedLongLongWhole63 0 -d /DS64BITS -M 0,63 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedLongLongWhole63 0 -d /DU64BITS -M 0,63 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedLongLongWhole1 0 -d /DS64BITS -M 1,63 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedLongLongWhole1 0 -d /DU64BITS -M 1,63 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedWhole 0 --enable-error-stack -d /DS08BITS -M 0,8 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedWhole 0 --enable-error-stack -d /DU08BITS -M 0,8 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedIntWhole 0 --enable-error-stack -d /DS16BITS -M 0,16 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedIntWhole 0 --enable-error-stack -d /DU16BITS -M 0,16 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedLongWhole 0 --enable-error-stack -d /DS32BITS -M 0,32 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedLongWhole 0 --enable-error-stack -d /DU32BITS -M 0,32 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedLongLongWhole 0 --enable-error-stack -d /DS64BITS -M 0,64 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedLongLongWhole 0 --enable-error-stack -d /DU64BITS -M 0,64 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedLongLongWhole63 0 --enable-error-stack -d /DS64BITS -M 0,63 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedLongLongWhole63 0 --enable-error-stack -d /DU64BITS -M 0,63 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedLongLongWhole1 0 --enable-error-stack -d /DS64BITS -M 1,63 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedLongLongWhole1 0 --enable-error-stack -d /DU64BITS -M 1,63 packedbits.h5)
   # Half sections
-  ADD_H5_TEST (tpbitsSigned4 0 -d /DS08BITS -M 0,4,4,4 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsigned4 0 -d /DU08BITS -M 0,4,4,4 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedInt8 0 -d /DS16BITS -M 0,8,8,8 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedInt8 0 -d /DU16BITS -M 0,8,8,8 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedLong16 0 -d /DS32BITS -M 0,16,16,16 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedLong16 0 -d /DU32BITS -M 0,16,16,16 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedLongLong32 0 -d /DS64BITS -M 0,32,32,32 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedLongLong32 0 -d /DU64BITS -M 0,32,32,32 packedbits.h5)
+  ADD_H5_TEST (tpbitsSigned4 0 --enable-error-stack -d /DS08BITS -M 0,4,4,4 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsigned4 0 --enable-error-stack -d /DU08BITS -M 0,4,4,4 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedInt8 0 --enable-error-stack -d /DS16BITS -M 0,8,8,8 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedInt8 0 --enable-error-stack -d /DU16BITS -M 0,8,8,8 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedLong16 0 --enable-error-stack -d /DS32BITS -M 0,16,16,16 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedLong16 0 --enable-error-stack -d /DU32BITS -M 0,16,16,16 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedLongLong32 0 --enable-error-stack -d /DS64BITS -M 0,32,32,32 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedLongLong32 0 --enable-error-stack -d /DU64BITS -M 0,32,32,32 packedbits.h5)
   # Quarter sections
-  ADD_H5_TEST (tpbitsSigned2 0 -d /DS08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsigned2 0 -d /DU08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedInt4 0 -d /DS16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedInt4 0 -d /DU16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedLong8 0 -d /DS32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedLong8 0 -d /DU32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedLongLong16 0 -d /DS64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedLongLong16 0 -d /DU64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5)
+  ADD_H5_TEST (tpbitsSigned2 0 --enable-error-stack -d /DS08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsigned2 0 --enable-error-stack -d /DU08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedInt4 0 --enable-error-stack -d /DS16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedInt4 0 --enable-error-stack -d /DU16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedLong8 0 --enable-error-stack -d /DS32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedLong8 0 --enable-error-stack -d /DU32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedLongLong16 0 --enable-error-stack -d /DS64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedLongLong16 0 --enable-error-stack -d /DU64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5)
   # Begin and End
-  ADD_H5_TEST (tpbitsSigned 0 -d /DS08BITS -M 0,2,2,6 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsigned 0 -d /DU08BITS -M 0,2,2,6 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedInt 0 -d /DS16BITS -M 0,2,10,6 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedInt 0 -d /DU16BITS -M 0,2,10,6 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedLong 0 -d /DS32BITS -M 0,2,26,6 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedLong 0 -d /DU32BITS -M 0,2,26,6 packedbits.h5)
-  ADD_H5_TEST (tpbitsSignedLongLong 0 -d /DS64BITS -M 0,2,58,6 packedbits.h5)
-  ADD_H5_TEST (tpbitsUnsignedLongLong 0 -d /DU64BITS -M 0,2,58,6 packedbits.h5)
+  ADD_H5_TEST (tpbitsSigned 0 --enable-error-stack -d /DS08BITS -M 0,2,2,6 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsigned 0 --enable-error-stack -d /DU08BITS -M 0,2,2,6 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedInt 0 --enable-error-stack -d /DS16BITS -M 0,2,10,6 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedInt 0 --enable-error-stack -d /DU16BITS -M 0,2,10,6 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedLong 0 --enable-error-stack -d /DS32BITS -M 0,2,26,6 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedLong 0 --enable-error-stack -d /DU32BITS -M 0,2,26,6 packedbits.h5)
+  ADD_H5_TEST (tpbitsSignedLongLong 0 --enable-error-stack -d /DS64BITS -M 0,2,58,6 packedbits.h5)
+  ADD_H5_TEST (tpbitsUnsignedLongLong 0 --enable-error-stack -d /DU64BITS -M 0,2,58,6 packedbits.h5)
   # Overlapped packed bits.
-  ADD_H5_TEST (tpbitsOverlapped 0 -d /DS08BITS -M 0,1,1,1,2,1,0,3 packedbits.h5)
+  ADD_H5_TEST (tpbitsOverlapped 0 --enable-error-stack -d /DS08BITS -M 0,1,1,1,2,1,0,3 packedbits.h5)
   # Maximum number of packed bits.
-  ADD_H5_TEST (tpbitsMax 0 -d /DS08BITS -M 0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5)
+  ADD_H5_TEST (tpbitsMax 0 --enable-error-stack -d /DS08BITS -M 0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5)
   # Compound type.
-  ADD_H5_TEST (tpbitsCompound 0 -d /dset1 -M 0,1,1,1 tcompound.h5)
+  ADD_H5_TEST (tpbitsCompound 0 --enable-error-stack -d /dset1 -M 0,1,1,1 tcompound.h5)
   # Array type.
-  ADD_H5_TEST (tpbitsArray 0 -d /Dataset1 -M 0,1,1,1 tarray1.h5)
+  ADD_H5_TEST (tpbitsArray 0 --enable-error-stack -d /Dataset1 -M 0,1,1,1 tarray1.h5)
   # Test Error handling.
   # Too many packed bits requested. Max is 8 for now.
   ADD_H5_TEST (tpbitsMaxExceeded 1 -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5)
   # Offset too large. Max is 8*sizeof(long long.
   ADD_H5_TEST (tpbitsOffsetExceeded 1 -d /DS08BITS -M 64,1 packedbits.h5)
-  ADD_H5_TEST (tpbitsCharOffsetExceeded 0 -d /DS08BITS -M 8,1 packedbits.h5)
-  ADD_H5_TEST (tpbitsIntOffsetExceeded 0 -d /DS16BITS -M 16,1 packedbits.h5)
-  ADD_H5_TEST (tpbitsLongOffsetExceeded 0 -d /DS32BITS -M 32,1 packedbits.h5)
+  ADD_H5_TEST (tpbitsCharOffsetExceeded 0 --enable-error-stack -d /DS08BITS -M 8,1 packedbits.h5)
+  ADD_H5_TEST (tpbitsIntOffsetExceeded 0 --enable-error-stack -d /DS16BITS -M 16,1 packedbits.h5)
+  ADD_H5_TEST (tpbitsLongOffsetExceeded 0 --enable-error-stack -d /DS32BITS -M 32,1 packedbits.h5)
   # Bad offset, must not be negative.
   ADD_H5_TEST (tpbitsOffsetNegative 1 -d /DS08BITS -M -1,1 packedbits.h5)
   # Bad length, must not be positive.
   ADD_H5_TEST (tpbitsLengthPositive 1 -d /DS08BITS -M 4,0 packedbits.h5)
   # Offset+Length is too large. Max is 8*sizeof(long long).
   ADD_H5_TEST (tpbitsLengthExceeded 1 -d /DS08BITS -M 37,28 packedbits.h5)
-  ADD_H5_TEST (tpbitsCharLengthExceeded 0 -d /DS08BITS -M 2,7 packedbits.h5)
-  ADD_H5_TEST (tpbitsIntLengthExceeded 0 -d /DS16BITS -M 10,7 packedbits.h5)
-  ADD_H5_TEST (tpbitsLongLengthExceeded 0 -d /DS32BITS -M 26,7 packedbits.h5)
+  ADD_H5_TEST (tpbitsCharLengthExceeded 0 --enable-error-stack -d /DS08BITS -M 2,7 packedbits.h5)
+  ADD_H5_TEST (tpbitsIntLengthExceeded 0 --enable-error-stack -d /DS16BITS -M 10,7 packedbits.h5)
+  ADD_H5_TEST (tpbitsLongLengthExceeded 0 --enable-error-stack -d /DS32BITS -M 26,7 packedbits.h5)
   # Incomplete pair of packed bits request.
   ADD_H5_TEST (tpbitsIncomplete 1 -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5)
    
