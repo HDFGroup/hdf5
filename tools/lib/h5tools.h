@@ -512,9 +512,9 @@ struct subset_t {
 
 #include "h5tools_str.h"
 
-extern h5tool_format_t h5tools_dataformat;
-extern const h5tools_dump_header_t h5tools_standardformat;
-extern const h5tools_dump_header_t* h5tools_dump_header_format;
+H5TOOLS_DLLVAR h5tool_format_t h5tools_dataformat;
+H5TOOLS_DLLVAR const h5tools_dump_header_t h5tools_standardformat;
+H5TOOLS_DLLVAR const h5tools_dump_header_t* h5tools_dump_header_format;
 
 #ifdef __cplusplus
 extern "C" {
