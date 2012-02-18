@@ -18,6 +18,7 @@
 TESTNAME=h5dumpxml
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
+    exit $EXIT_SUCCESS
 
 H5_LONE_COLON="@H5_LONE_COLON@"
 
@@ -71,7 +72,7 @@ TOOLTEST() {
    if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
     echo " CREATED"
-     cp $actual $expect		  
+     cp $actual $expect      
    elif  $CMP $expect $actual; then
       echo " PASSED"
    else
@@ -96,7 +97,7 @@ SKIP() {
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                ###
+###        T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 
