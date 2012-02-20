@@ -5,9 +5,9 @@
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
-         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <hdf5:FillValue>
-               <hdf5:NoFill/>
+            <hdf5:NoFill/>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>
@@ -22,7 +22,11 @@
       </hdf5:DataType>
       <hdf5:Data>
          <hdf5:DataFromFile>
-         0 1 2 3 4
+         0
+         1
+         2
+         3
+         4
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>
@@ -37,10 +41,10 @@
       </hdf5:Group>
    </hdf5:Group>
    <hdf5:Group Name="g2" OBJ-XID="xid_2000-3" H5Path="/g1/g1.1" Parents="xid_96" H5ParentPaths="/">
-         <hdf5:GroupPtr OBJ-XID="xid_2000" H5Path="/g1/g1.1" Parents="xid_96" H5ParentPaths="/" />
+      <hdf5:GroupPtr OBJ-XID="xid_2000" H5Path="/g1/g1.1" Parents="xid_96" H5ParentPaths="/" />
    </hdf5:Group>
    <hdf5:Group Name="g3" OBJ-XID="xid_96-4" H5Path="/" Parents="xid_96" H5ParentPaths="/">
-         <hdf5:GroupPtr OBJ-XID="xid_96" H5Path="/" Parents="xid_96" H5ParentPaths="/" />
+      <hdf5:GroupPtr OBJ-XID="xid_96" H5Path="/" Parents="xid_96" H5ParentPaths="/" />
    </hdf5:Group>
 </hdf5:RootGroup>
 </hdf5:HDF5-File>

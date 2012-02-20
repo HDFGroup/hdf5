@@ -5,13 +5,13 @@ DATASET "deflate" {
    STORAGE_LAYOUT {
       CHUNKED ( 10, 5 )
       SIZE 385 (2.078:1 COMPRESSION)
-    }
+   }
    FILTERS {
       COMPRESSION DEFLATE { LEVEL 9 }
    }
    FILLVALUE {
       FILL_TIME H5D_FILL_TIME_IFSET
-      VALUE  0   
+      VALUE  0
    }
    ALLOCATION_TIME {
       H5D_ALLOC_TIME_INCR

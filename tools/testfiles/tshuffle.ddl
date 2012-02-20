@@ -5,13 +5,13 @@ DATASET "shuffle" {
    STORAGE_LAYOUT {
       CHUNKED ( 10, 5 )
       SIZE 800
-    }
+   }
    FILTERS {
       PREPROCESSING SHUFFLE
    }
    FILLVALUE {
       FILL_TIME H5D_FILL_TIME_IFSET
-      VALUE  0   
+      VALUE  0
    }
    ALLOCATION_TIME {
       H5D_ALLOC_TIME_INCR

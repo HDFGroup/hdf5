@@ -10,6 +10,7 @@ Dataset1                 Dataset {NULL}
     Storage:   0 logical bytes, 0 allocated bytes
     Type:      native int
     Data:
+
 Dataset2                 Dataset {10/10, 10/10}
     Location:  1:800
     Links:     1

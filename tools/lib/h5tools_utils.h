@@ -29,19 +29,13 @@ extern "C" {
 #endif
 
 /* ``parallel_print'' information */
-#define PRINT_DATA_MAX_SIZE 	512
-#define OUTBUFF_SIZE 		(PRINT_DATA_MAX_SIZE*4)
+#define PRINT_DATA_MAX_SIZE     512
+#define OUTBUFF_SIZE        (PRINT_DATA_MAX_SIZE*4)
 
 /* Maximum size used in a call to malloc for a dataset */
 H5TOOLS_DLLVAR hsize_t H5TOOLS_MALLOCSIZE;
 /* size of hyperslab buffer when a dataset is bigger than H5TOOLS_MALLOCSIZE */
 H5TOOLS_DLLVAR hsize_t H5TOOLS_BUFSIZE;
-H5TOOLS_DLLVAR int  g_nTasks;
-H5TOOLS_DLLVAR unsigned char g_Parallel;
-H5TOOLS_DLLVAR char    outBuff[];
-H5TOOLS_DLLVAR int  outBuffOffset;
-H5TOOLS_DLLVAR FILE *   overflow_file;
-
 /*
  * begin get_option section
  */
@@ -51,7 +45,7 @@ H5TOOLS_DLLVAR const char *opt_arg;     /* flag argument (or value)             
 
 enum {
     no_arg = 0,         /* doesn't take an argument     */
-    require_arg,        /* requires an argument	        */
+    require_arg,        /* requires an argument          */
     optional_arg        /* argument is optional         */
 };
 
@@ -62,23 +56,23 @@ enum {
  * the option. The long options are specified in the following way:
  *
  * struct long_options foo[] = {
- * 	{ "filename", require_arg, 'f' },
- * 	{ "append", no_arg, 'a' },
- * 	{ "width", require_arg, 'w' },
- * 	{ NULL, 0, 0 }
+ *   { "filename", require_arg, 'f' },
+ *   { "append", no_arg, 'a' },
+ *   { "width", require_arg, 'w' },
+ *   { NULL, 0, 0 }
  * };
  *
  * Long named options can have arguments specified as either:
  *
- * 	``--param=arg'' or ``--param arg''
+ *   ``--param=arg'' or ``--param arg''
  *
  * Short named options can have arguments specified as either:
  *
- * 	``-w80'' or ``-w 80''
+ *   ``-w80'' or ``-w 80''
  *
  * and can have more than one short named option specified at one time:
  *
- * 	-aw80
+ *   -aw80
  *
  * in which case those options which expect an argument need to come at the
  * end.
@@ -119,7 +113,7 @@ typedef struct find_objs_t {
     table_t *dset_table;
 } find_objs_t;
 
-H5TOOLS_DLLVAR int     nCols;               /*max number of columns for outputting  */
+H5TOOLS_DLLVAR int     h5tools_nCols;               /*max number of columns for outputting  */
 
 /* Definitions of useful routines */
 H5TOOLS_DLL void     indentation(int);
@@ -136,7 +130,7 @@ H5TOOLS_DLL herr_t init_objs(hid_t fid, find_objs_t *info, table_t **group_table
     table_t **dset_table, table_t **type_table);
 H5TOOLS_DLL obj_t   *search_obj(table_t *temp, haddr_t objno);
 #ifndef H5_HAVE_TMPFILE
-H5TOOLS_DLL FILE *	tmpfile(void);
+H5TOOLS_DLL FILE *  tmpfile(void);
 #endif
 
 /*************************************************************
@@ -178,4 +172,4 @@ H5TOOLS_DLL int h5tools_getenv_update_hyperslab_bufsize(void);
 }
 #endif
 
-#endif	/* H5TOOLS_UTILS_H__ */
+#endif  /* H5TOOLS_UTILS_H__ */

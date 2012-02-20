@@ -2,11 +2,11 @@ HDF5 "tstr3.h5" {
 GROUP "/" {
    DATASET "str1" {
       DATATYPE  H5T_STRING {
-            STRSIZE 73;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 73;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
       DATA {
       (0): "quote \"  backspace\b form feed\f new line\n tab\t new line\n carriage return\r"
@@ -14,11 +14,11 @@ GROUP "/" {
    }
    DATASET "str2" {
       DATATYPE  H5T_STRING {
-            STRSIZE H5T_VARIABLE;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE H5T_VARIABLE;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
       DATA {
       (0): "Four score and seven\n years ago our forefathers brought forth on this continent a new nation,",

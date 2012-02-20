@@ -13,7 +13,7 @@
             </hdf5:StorageLayout>
             <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
                <hdf5:FillValue>
-                     <hdf5:NoFill/>
+                  <hdf5:NoFill/>
                </hdf5:FillValue>
             </hdf5:FillValueInfo>
             <hdf5:Dataspace>
@@ -83,7 +83,16 @@
                </hdf5:DataType>
                <hdf5:Data>
                   <hdf5:DataFromFile>
-                  97 98 99 100 101 102 103 104 105 0
+                  97
+                  98
+                  99
+                  100
+                  101
+                  102
+                  103
+                  104
+                  105
+                  0
                   </hdf5:DataFromFile>
                </hdf5:Data>
             </hdf5:Attribute>
@@ -101,8 +110,10 @@
                </hdf5:DataType>
                <hdf5:Data>
                   <hdf5:DataFromFile>
-                  0 1
-                  2 3
+                  0
+                  1
+                  2
+                  3
                   </hdf5:DataFromFile>
                </hdf5:Data>
             </hdf5:Attribute>
@@ -119,145 +130,28 @@
                </hdf5:DataType>
                <hdf5:Data>
                   <hdf5:DataFromFile>
-                  0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+                  0
+                  0.1
+                  0.2
+                  0.3
+                  0.4
+                  0.5
+                  0.6
+                  0.7
+                  0.8
+                  0.9
                   </hdf5:DataFromFile>
                </hdf5:Data>
             </hdf5:Attribute>
          <!-- Note: format of compound data not specified -->
             <hdf5:Data>
                <hdf5:DataFromFile>
-                0 1
-                     0 1
-                     0 1
-                     0 1
-                     0 1
-                     0 1
-                     0 1
-                     0 1  0 1
-                     0 1
-                     0 1
-                     0 1
-                     0 1
-                     0 1
-                     0 1
-                     0 1  6 7
-                     6 7
-                     6 7
-                     6 7
-                     6 7
-                     6 7
-                     6 7
-                     6 7
-                1 2
-                     1 2
-                     1 2
-                     1 2
-                     1 2
-                     1 2
-                     1 2
-                     1 2  1 2
-                     1 2
-                     1 2
-                     1 2
-                     1 2
-                     1 2
-                     1 2
-                     1 2  7 8
-                     7 8
-                     7 8
-                     7 8
-                     7 8
-                     7 8
-                     7 8
-                     7 8
-                2 3
-                     2 3
-                     2 3
-                     2 3
-                     2 3
-                     2 3
-                     2 3
-                     2 3  2 3
-                     2 3
-                     2 3
-                     2 3
-                     2 3
-                     2 3
-                     2 3
-                     2 3  8 9
-                     8 9
-                     8 9
-                     8 9
-                     8 9
-                     8 9
-                     8 9
-                     8 9
-                3 4
-                     3 4
-                     3 4
-                     3 4
-                     3 4
-                     3 4
-                     3 4
-                     3 4  3 4
-                     3 4
-                     3 4
-                     3 4
-                     3 4
-                     3 4
-                     3 4
-                     3 4  9 10
-                     9 10
-                     9 10
-                     9 10
-                     9 10
-                     9 10
-                     9 10
-                     9 10
-                4 5
-                     4 5
-                     4 5
-                     4 5
-                     4 5
-                     4 5
-                     4 5
-                     4 5  4 5
-                     4 5
-                     4 5
-                     4 5
-                     4 5
-                     4 5
-                     4 5
-                     4 5  10 11
-                     10 11
-                     10 11
-                     10 11
-                     10 11
-                     10 11
-                     10 11
-                     10 11
-                5 6
-                     5 6
-                     5 6
-                     5 6
-                     5 6
-                     5 6
-                     5 6
-                     5 6  5 6
-                     5 6
-                     5 6
-                     5 6
-                     5 6
-                     5 6
-                     5 6
-                     5 6  11 12
-                     11 12
-                     11 12
-                     11 12
-                     11 12
-                     11 12
-                     11 12
-                     11 12
+               0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 6 7 6 7 6 7 6 7 6 7 6 7 6 7 6 7
+               1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 7 8 7 8 7 8 7 8 7 8 7 8 7 8 7 8
+               2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 2 3 8 9 8 9 8 9 8 9 8 9 8 9 8 9 8 9
+               3 4 3 4 3 4 3 4 3 4 3 4 3 4 3 4 3 4 3 4 3 4 3 4 3 4 3 4 3 4 3 4 9 10 9 10 9 10 9 10 9 10 9 10 9 10 9 10
+               4 5 4 5 4 5 4 5 4 5 4 5 4 5 4 5 4 5 4 5 4 5 4 5 4 5 4 5 4 5 4 5 10 11 10 11 10 11 10 11 10 11 10 11 10 11 10 11
+               5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6 11 12 11 12 11 12 11 12 11 12 11 12 11 12 11 12
                </hdf5:DataFromFile>
             </hdf5:Data>
          </hdf5:Dataset>
@@ -276,9 +170,9 @@
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
-               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -294,16 +188,106 @@
          </hdf5:DataType>
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 1 2 3 4 5 6 7 8 9
-            0 1 2 3 4 5 6 7 8 9
-            0 1 2 3 4 5 6 7 8 9
-            0 1 2 3 4 5 6 7 8 9
-            0 1 2 3 4 5 6 7 8 9
-            0 1 2 3 4 5 6 7 8 9
-            0 1 2 3 4 5 6 7 8 9
-            0 1 2 3 4 5 6 7 8 9
-            0 1 2 3 4 5 6 7 8 9
-            0 1 2 3 4 5 6 7 8 9
+            0
+            1
+            2
+            3
+            4
+            5
+            6
+            7
+            8
+            9
+            0
+            1
+            2
+            3
+            4
+            5
+            6
+            7
+            8
+            9
+            0
+            1
+            2
+            3
+            4
+            5
+            6
+            7
+            8
+            9
+            0
+            1
+            2
+            3
+            4
+            5
+            6
+            7
+            8
+            9
+            0
+            1
+            2
+            3
+            4
+            5
+            6
+            7
+            8
+            9
+            0
+            1
+            2
+            3
+            4
+            5
+            6
+            7
+            8
+            9
+            0
+            1
+            2
+            3
+            4
+            5
+            6
+            7
+            8
+            9
+            0
+            1
+            2
+            3
+            4
+            5
+            6
+            7
+            8
+            9
+            0
+            1
+            2
+            3
+            4
+            5
+            6
+            7
+            8
+            9
+            0
+            1
+            2
+            3
+            4
+            5
+            6
+            7
+            8
+            9
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
@@ -321,9 +305,9 @@
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
-               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -339,16 +323,106 @@
          </hdf5:DataType>
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 0 0 0 0 0 0 0 0
-            1 1 1 1 1 1 1 1 1 1
-            2 2 2 2 2 2 2 2 2 2
-            3 3 3 3 3 3 3 3 3 3
-            4 4 4 4 4 4 4 4 4 4
-            5 5 5 5 5 5 5 5 5 5
-            6 6 6 6 6 6 6 6 6 6
-            7 7 7 7 7 7 7 7 7 7
-            8 8 8 8 8 8 8 8 8 8
-            9 9 9 9 9 9 9 9 9 9
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            1
+            1
+            1
+            1
+            1
+            1
+            1
+            1
+            1
+            1
+            2
+            2
+            2
+            2
+            2
+            2
+            2
+            2
+            2
+            2
+            3
+            3
+            3
+            3
+            3
+            3
+            3
+            3
+            3
+            3
+            4
+            4
+            4
+            4
+            4
+            4
+            4
+            4
+            4
+            4
+            5
+            5
+            5
+            5
+            5
+            5
+            5
+            5
+            5
+            5
+            6
+            6
+            6
+            6
+            6
+            6
+            6
+            6
+            6
+            6
+            7
+            7
+            7
+            7
+            7
+            7
+            7
+            7
+            7
+            7
+            8
+            8
+            8
+            8
+            8
+            8
+            8
+            8
+            8
+            8
+            9
+            9
+            9
+            9
+            9
+            9
+            9
+            9
+            9
+            9
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>

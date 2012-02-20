@@ -33,8 +33,7 @@
 #include "h5trav.h"
 
 /* global variables */
-int   nCols = 80;
-
+int   h5tools_nCols = 80;
 /* ``get_option'' variables */
 int         opt_err = 1;    /*get_option prints errors if this is on */
 int         opt_ind = 1;    /*token pointer                          */
@@ -393,7 +392,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 void
 indentation(int x)
 {
-    if (x < nCols) {
+    if (x < h5tools_nCols) {
         while (x-- > 0)
             printf(" ");
     } else {
