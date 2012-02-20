@@ -35,7 +35,8 @@
 #include "H5Fpkg.h"             /* File access                          */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
-
+#include "H5VLprivate.h"	/* VOL          		  	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 
 /* Special values for the "tag" field below */
 #define H5F_EFC_TAG_DEFAULT     -1
@@ -147,6 +148,9 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
     H5F_efc_t   *efc = NULL;    /* External file cache for parent file */
     H5F_efc_ent_t *ent = NULL;  /* Entry for target file in efc */
     hbool_t     open_file = FALSE; /* Whether ent->file needs to be closed in case of error */
+    H5P_genplist_t *plist ;        /* Property list pointer */
+    hid_t vol_id = -1;             /* VOL ID */
+    H5VL_class_t *vol_plugin;      /* VOL for file */
     H5F_t       *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_efc_open)
@@ -156,6 +160,14 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
     HDassert(parent->shared);
     HDassert(name);
 
+    /* get the VOL info from the fapl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
+    if(NULL == (vol_plugin = (H5VL_class_t *)H5I_object(vol_id)))
+	HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, NULL, "invalid vol plugin ID in file access property list")
+
     /* Get external file cache */
     efc = parent->shared->efc;
 
@@ -163,10 +175,23 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
      * support this so clients do not have to make 2 different calls depending
      * on the state of the efc. */
     if(!efc) {
+#if 0
         if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id,
-                dxpl_id)))
+                                         dxpl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
-
+#endif
+#if 1
+        /* check if the corresponding VOL open callback exists */
+        if(NULL == vol_plugin->file_cls.open)
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file open' method")
+        /* call the corresponding VOL open callback */
+        if(NULL == (ret_value = (vol_plugin->file_cls.open)(name, flags, fcpl_id, fapl_id, dxpl_id)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
+        ret_value->vol_id = vol_id;
+        /* increment the ref count on the vol ID */
+        if(H5I_inc_ref(ret_value->vol_id, FALSE) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL plugin")
+#endif
         /* Increment the number of open objects to prevent the file from being
          * closed out from under us - "simulate" having an open file id.  Note
          * that this behaviour replaces the calls to H5F_incr_nopen_objs() and
@@ -236,10 +261,23 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
             } /* end if */
             else {
                 /* Cannot cache file, just open file and return */
+#if 0
                 if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id,
-                        dxpl_id)))
+                                                 dxpl_id)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
-
+#endif
+#if 1
+                /* check if the corresponding VOL open callback exists */
+                if(NULL == vol_plugin->file_cls.open)
+                    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file open' method")
+                /* call the corresponding VOL open callback */
+                if(NULL == (ret_value = (vol_plugin->file_cls.open)(name, flags, fcpl_id, fapl_id, dxpl_id)))
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
+                ret_value->vol_id = vol_id;
+                /* increment the ref count on the vol ID */
+                if(H5I_inc_ref(ret_value->vol_id, FALSE) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL plugin")
+#endif
                 /* Increment the number of open objects to prevent the file from
                  * being closed out from under us - "simulate" having an open
                  * file id */
@@ -256,11 +294,24 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
         /* Build new entry */
         if(NULL == (ent->name = H5MM_strdup(name)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
+#if 0
         /* Open the file */
         if(NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id,
-                dxpl_id)))
+                                         dxpl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
+#endif
+#if 1
+        /* check if the corresponding VOL open callback exists */
+        if(NULL == vol_plugin->file_cls.open)
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file open' method")
+        /* call the corresponding VOL open callback */
+        if(NULL == (ent->file = (vol_plugin->file_cls.open)(name, flags, fcpl_id, fapl_id, dxpl_id)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
+        ent->file->vol_id = vol_id;
+        /* increment the ref count on the vol ID */
+        if(H5I_inc_ref(ent->file->vol_id, FALSE) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL plugin")
+#endif
         open_file = TRUE;
 
         /* Increment the number of open objects to prevent the file from being
@@ -305,6 +356,9 @@ done:
         if(ent) {
             if(open_file) {
                 ent->file->nopen_objs--;
+                /* Decrement ref count on VOL ID */
+                if(H5I_dec_ref(ent->file->vol_id) < 0)
+                    HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "can't close plugin ID")
                 if(H5F_try_close(ent->file) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close external file")
             } /* end if */
@@ -354,6 +408,9 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
      * on the state of the efc. */
     if(!efc) {
         file->nopen_objs--;
+        /* Decrement ref count on VOL ID */
+        if(H5I_dec_ref(file->vol_id) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "can't close plugin ID")
         if(H5F_try_close(file) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
 
@@ -368,6 +425,9 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
     for(ent = efc->LRU_head; ent && ent->file != file; ent = ent->LRU_next);
     if(!ent) {
         file->nopen_objs--;
+        /* Decrement ref count on VOL ID */
+        if(H5I_dec_ref(file->vol_id) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "can't close plugin ID")
         if(H5F_try_close(file) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
     } /* end if */
@@ -576,6 +636,9 @@ H5F_efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent)
      * However we must still manipulate the nopen_objs field to prevent the file
      * from being closed out from under us. */
     ent->file->nopen_objs--;
+    /* Decrement ref count on VOL ID */
+    if(H5I_dec_ref(ent->file->vol_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "can't close plugin ID")
     if(H5F_try_close(ent->file) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
     ent->file = NULL;

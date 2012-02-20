@@ -21,6 +21,8 @@
  *              using HDF5 VFDs. 
  */
 
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5VL_native_init_interface
 
@@ -28,8 +30,9 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5Fpkg.h"             /* File pkg                             */
 #include "H5VLprivate.h"	/* VOL plugins				*/
-#include "H5VLnative.h"        /* Native VOL plugin			*/
+#include "H5VLnative.h"         /* Native VOL plugin			*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -39,7 +42,8 @@ static hid_t H5VL_NATIVE_g = 0;
 
 
 /* Prototypes */
-static H5F_t *H5VL_native_open(const char *name, unsigned flags, hid_t fapl_id);
+static H5F_t *H5VL_native_open(const char *name, unsigned flags, hid_t fcpl_id, 
+                               hid_t fapl_id, hid_t dxpl_id);
 static herr_t H5VL_native_close(H5F_t *f);
 static H5F_t *H5VL_native_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 static herr_t H5VL_native_term(void);
@@ -231,14 +235,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5F_t *
-H5VL_native_open(const char *name, unsigned flags, hid_t fapl_id)
+H5VL_native_open(const char *name, unsigned flags, hid_t fcpl_id, 
+                 hid_t fapl_id, hid_t dxpl_id)
 {
-    H5F_t *ret_value = NULL;
+    H5F_t *ret_value = NULL;           /* file struct */
 
     FUNC_ENTER_NOAPI_NOINIT(H5VL_native_open)
 
     /* Open the file */ 
-    if(NULL == (ret_value = H5F_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (ret_value= H5F_open(name, flags, fcpl_id, fapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
 
 done:
@@ -289,15 +294,31 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_close(H5F_t *file)
+H5VL_native_close(H5F_t *f)
 {
+    int nref;
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5VL_native_close)
 
-    /* Close the file */ 
-    if(H5F_close(file) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+    /* Flush file if this is the last reference to this id and we have write
+     * intent, unless it will be flushed by the "shared" file being closed.
+     * This is only necessary to replicate previous behaviour, and could be
+     * disabled by an option/property to improve performance. */
+    if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
+        if((nref = H5I_get_ref(f->file_id, FALSE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
+        if(nref == 1)
+            if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+    } /* end if */
+
+    /*
+     * Decrement reference count on atom.  When it reaches zero the file will
+     * be closed.
+     */
+    if(H5I_dec_app_ref(f->file_id) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

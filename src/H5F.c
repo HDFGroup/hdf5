@@ -117,7 +117,7 @@ H5F_init_interface(void)
     /*
      * Initialize the atom group for the file IDs.
      */
-    if(H5I_register_type(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5VL_close)<H5I_FILE)
+    if(H5I_register_type(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<H5I_FILE)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
 done:
@@ -1398,7 +1398,6 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t	*new_file = NULL;	/*file struct for new file	*/
     hid_t	ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(H5Fcreate, FAIL)
@@ -1442,27 +1441,10 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /*
      * Create a new file or truncate an existing file.
      */
-    if(NULL == (new_file = H5VL_create(filename, flags, fcpl_id, fapl_id)))
+    if((ret_value = H5VL_create(filename, flags, fcpl_id, fapl_id)) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
-            /*
-    if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
-            */
-    /* Get an atom for the file */
-    if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
-
-    /* Keep this ID in file object structure */
-    new_file->file_id = ret_value;
 
 done:
-    if(ret_value < 0 && new_file)
-        if(H5VL_close(new_file) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
-        /*
-        if(H5F_close(new_file) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
-        */
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
 
@@ -1510,7 +1492,6 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    H5F_t   *new_file = NULL;	/*file struct for new file	*/
     hid_t   ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(H5Fopen, FAIL)
@@ -1530,24 +1511,21 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
     /* Open the file */
-    if(NULL == (new_file = H5VL_open(filename, flags, fapl_id)))
+    if((ret_value = H5VL_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id))<0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
 
-    /* Open the file 
+#if 0
+    /* Open the file  */
     if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
-    */
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
-
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
+#endif
 
 done:
-    if(ret_value < 0 && new_file && H5F_try_close(new_file) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
 
@@ -1919,10 +1897,10 @@ H5F_try_close(H5F_t *f)
     /* Check if this is a child file in a mounting hierarchy & proceed up the
      * hierarchy if so.
      */
-    if(f->parent)
+    if(f->parent) {
         if(H5F_try_close(f->parent) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close parent file")
-
+    }
     /* Unmount and close each child before closing the current file. */
     if(H5F_close_mounts(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't unmount child files")
@@ -1975,37 +1953,14 @@ done:
 herr_t
 H5Fclose(hid_t file_id)
 {
-    H5F_t       *f = NULL;
-    int         nref;
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Fclose, FAIL)
     H5TRACE1("e", "i", file_id);
 
-    /* Check/fix arguments. */
-    if(H5I_FILE != H5I_get_type(file_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
-
-    /* Flush file if this is the last reference to this id and we have write
-     * intent, unless it will be flushed by the "shared" file being closed.
-     * This is only necessary to replicate previous behaviour, and could be
-     * disabled by an option/property to improve performance. */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
-        if((nref = H5I_get_ref(file_id, FALSE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
-        if(nref == 1)
-            if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-    } /* end if */
-
-    /*
-     * Decrement reference count on atom.  When it reaches zero the file will
-     * be closed.
-     */
-    if(H5I_dec_app_ref(file_id) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+    /* Close the file */
+    if((ret_value = H5VL_close(file_id)) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2051,6 +2006,11 @@ H5Freopen(hid_t file_id)
     /* Get a new "top level" file struct, sharing the same "low level" file struct */
     if(NULL == (new_file = H5F_new(old_file->shared, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
+
+    /* assign the vol id to this file and increment the ref count on it */
+    new_file->vol_id = old_file->vol_id;
+    if(H5I_inc_ref(new_file->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL")
 
     /* Keep old file's read/write intent in new file */
     new_file->intent = old_file->intent;

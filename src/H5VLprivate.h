@@ -45,12 +45,14 @@ struct H5F_t;
 H5_DLL int H5VL_term_interface(void);
 H5_DLL H5VL_class_t *H5VL_get_class(hid_t id);
 //H5_DLL hsize_t H5VL_sb_size(H5F_t *file);
-H5_DLL hid_t H5VL_register(const void *cls, size_t size, hbool_t app_ref);
-H5_DLL H5F_t *H5VL_open(const char *name, unsigned flags, hid_t fapl_id);
-H5_DLL H5F_t *H5VL_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-H5_DLL herr_t H5VL_close(H5F_t *f);
+H5_DLL hid_t  H5VL_register(const void *cls, size_t size, hbool_t app_ref);
+H5_DLL hid_t  H5VL_open(const char *name, unsigned flags, hid_t fcpl_id, 
+                        hid_t fapl_id, hid_t dxpl_id);
+H5_DLL hid_t  H5VL_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+H5_DLL herr_t H5VL_close(hid_t file_id);
 H5_DLL herr_t H5VL_fapl_open(struct H5P_genplist_t *plist, hid_t vol_id, const void *vol_info);
 H5_DLL herr_t H5VL_fapl_copy(hid_t vol_id, const void *fapl, void **copied_fapl);
 H5_DLL herr_t H5VL_fapl_close(hid_t vol_id, void *fapl);
+H5_DLL herr_t H5VL_dec_file_vol_ref(H5F_t *f);
 
 #endif /* !_H5VLprivate_H */

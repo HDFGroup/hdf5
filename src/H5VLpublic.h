@@ -37,14 +37,15 @@ typedef struct H5VL_general_class_t {
 
 /* H5F routines */
 typedef struct H5VL_file_class_t {
-    H5F_t *(*open) (const char *name, unsigned flags, hid_t fapl_id);
+    H5F_t  *(*open) (const char *name, unsigned flags, hid_t fcpl_id, 
+                     hid_t fapl_id, hid_t dxpl_id);
     herr_t (*close) (H5F_t *file);
-    H5F_t *(*create) (const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+    H5F_t  *(*create) (const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
     herr_t (*flush) (hid_t object_id, H5F_scope_t scope);
     htri_t (*is_hdf5) (const char *name);
     herr_t (*mount) (hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id);
     herr_t (*unmount) (hid_t loc_id, const char *name);
-    hid_t (*reopen) (hid_t file_id);
+    hid_t  (*reopen) (hid_t file_id);
 } H5VL_file_class_t;
 
 /* H5D routines */

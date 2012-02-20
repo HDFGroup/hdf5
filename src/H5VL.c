@@ -102,7 +102,7 @@ H5VL_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT(H5VL_init_interface)
 
     if(H5I_register_type(H5I_VOL, (size_t)H5I_VOL_HASHSIZE, 0, (H5I_free_t)H5VL_free_cls)<H5I_FILE)
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -140,7 +140,7 @@ H5VL_term_interface(void)
 	if((n=H5I_nmembers(H5I_VOL))!=0) {
 	    H5I_clear_type(H5I_VOL, FALSE, FALSE);
 	} else {
-	    H5I_dec_type_ref(H5I_VFL);
+	    H5I_dec_type_ref(H5I_VOL);
 	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}
@@ -262,7 +262,7 @@ H5VL_register(const void *_cls, size_t size, hbool_t app_ref)
     HDmemcpy(saved, cls, size);
 
     /* Create the new class ID */
-    if((ret_value = H5I_register(H5I_VFL, saved, app_ref)) < 0)
+    if((ret_value = H5I_register(H5I_VOL, saved, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register vol plugin ID")
 
 done:
@@ -300,12 +300,12 @@ H5VLunregister(hid_t vol_id)
     H5TRACE1("e", "i", vol_id);
 
     /* Check arguments */
-    if(NULL == H5I_object_verify(vol_id, H5I_VFL))
+    if(NULL == H5I_object_verify(vol_id, H5I_VOL))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a vol plugin")
 
     /* The H5VL_class_t struct will be freed by this function */
     if(H5I_dec_app_ref(vol_id) < 0)
-	HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "unable to unregister vol plugin")
+	HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to unregister vol plugin")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -338,7 +338,7 @@ H5VL_get_class(hid_t id)
 
     FUNC_ENTER_NOAPI(H5VL_get_class, NULL)
 
-    if(H5I_VFL == H5I_get_type(id))
+    if(H5I_VOL == H5I_get_type(id))
 	ret_value = (H5VL_class_t *)H5I_object(id);
     else {
         H5P_genplist_t *plist;      /* Property list pointer */
@@ -417,7 +417,7 @@ done:
 herr_t
 H5VL_fapl_open(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
 {
-    void *copied_vol_info = NULL;   /* Temporary VFL vol info */
+    void *copied_vol_info = NULL;   /* Temporary VOL vol info */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5VL_fapl_open, FAIL)
@@ -544,6 +544,37 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VLdec_file_vol_ref
+ *
+ * Purpose:     Utility function to decrement the VOL ID ref count on the
+ *              file structure.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              February, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_dec_file_vol_ref(H5F_t *f)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5VL_dec_file_vol_ref)
+
+    if(H5I_dec_ref(f->vol_id) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to dec_file_vol_ref vol plugin")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VLdec_file_vol_ref() */
+
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_open
  *
  * Purpose:	Private version of H5VLopen()
@@ -557,42 +588,53 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5F_t *
-H5VL_open(const char *name, unsigned flags, hid_t fapl_id)
+hid_t
+H5VL_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
 {
     H5VL_class_t	*vol_plugin;            /* VOL for file */
-    H5F_t		*file = NULL;           /* VOL file struct */
+    H5F_t               *new_file = NULL;       /* file struct */
     hid_t               plugin_id = -1;         /* VOL ID */
-    H5P_genplist_t      *plist;                 /* Property list pointer */
-    H5F_t		*ret_value;             /* Return value */
+    H5P_genplist_t      *plist;                /* Property list pointer */
+    hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5VL_open, NULL)
+    FUNC_ENTER_NOAPI(H5VL_open, FAIL)
 
+    /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
     if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
     if(NULL == (vol_plugin = (H5VL_class_t *)H5I_object(plugin_id)))
-	HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, NULL, "invalid vol plugin ID in file access property list")
+	HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid vol plugin ID in file access property list")
 
+    /* check if the corresponding VOL open callback exists */
     if(NULL == vol_plugin->file_cls.open)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file open' method")
-    if(NULL == (file = (vol_plugin->file_cls.open)(name, flags, fapl_id)))
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file open' method")
+    /* call the corresponding VOL open callback */
+    if(NULL == (new_file = (vol_plugin->file_cls.open)(name, flags, fcpl_id, fapl_id, dxpl_id)))
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
     /*
      * Fill in public fields. We must increment the reference count on the
      * vol plugin ID to prevent it from being freed while this file is open.
      */
-    file->vol_id = plugin_id;
-    if(H5I_inc_ref(file->vol_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL plugin")
-    //file->vol_cls = vol_plugin;
+    new_file->vol_id = plugin_id;
+    //new_file->vol_cls = vol_plugin;
+    if(H5I_inc_ref(new_file->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
-    /* Set return value */
-    ret_value = file;
+    /* Get an atom for the file */
+    if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+
+    /* Keep this ID in file object structure */
+    new_file->file_id = ret_value;
 
 done:
+    /* MSC try_close should be VL_close */
+    if(ret_value < 0 && new_file && H5F_try_close(new_file) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_open() */
 
@@ -604,49 +646,56 @@ done:
  *
  * Return:	Success:	Pointer to a new file struct
  *
- *		Failure:	NULL
+ *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
  *              January, 2012
  *
  *-------------------------------------------------------------------------
  */
-H5F_t *
+hid_t
 H5VL_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5VL_class_t	*vol_plugin;            /* VOL for file */
-    H5F_t		*file = NULL;           /* VOL file struct */
+    H5F_t               *new_file = NULL;       /* file struct */
     hid_t               plugin_id = -1;         /* VOL ID */
-    H5P_genplist_t      *plist;                 /* Property list pointer */
-    H5F_t		*ret_value;             /* Return value */
+    H5P_genplist_t      *plist ;                /* Property list pointer */
+    hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5VL_create, NULL)
+    FUNC_ENTER_NOAPI(H5VL_create, FAIL)
 
+    /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
     if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
+            //printf ("VOL REF COUNT: %d\n",H5I_get_ref (plugin_id, FALSE));
     if(NULL == (vol_plugin = (H5VL_class_t *)H5I_object(plugin_id)))
-	HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, NULL, "invalid vol plugin ID in file access property list")
+	HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid vol plugin ID in file access property list")
 
+    /* check if the corresponding VOL create callback exists */
     if(NULL == vol_plugin->file_cls.create)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file create' method")
-    if(NULL == (file = (vol_plugin->file_cls.create)(name, flags, fcpl_id, fapl_id)))
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file create' method")
+    /* call the corresponding VOL create callback */
+    if(NULL == (new_file = (vol_plugin->file_cls.create)(name, flags, fcpl_id, fapl_id)))
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "create failed")
 
-    /*
-     * Fill in public fields. We must increment the reference count on the
-     * vol plugin ID to prevent it from being freed while this file is open.
-     */
-    file->vol_id = plugin_id;
-    //file->vol_cls = vol_plugin;
-    if(H5I_inc_ref(file->vol_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL plugin")
+    new_file->vol_id = plugin_id;
+    //new_file->vol_cls = vol_plugin;
+    if(H5I_inc_ref(new_file->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
-    /* Set return value */
-    ret_value = file;
+    /* Get an atom for the file */
+    if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
+
+    /* Keep this ID in file object structure */
+    new_file->file_id = ret_value;
 
 done:
+    if(ret_value < 0 && new_file)
+        if(H5VL_close(new_file->file_id) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_create() */
 
@@ -658,7 +707,7 @@ done:
  *
  * Return:	Success:	Pointer to a new file struct
  *
- *		Failure:	NULL
+ *		Failure:	FAIL
  *
  * Programmer:	Mohamad Chaarawi
  *              January, 2012
@@ -666,31 +715,34 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_close(H5F_t *file)
+H5VL_close(hid_t file_id)
 {
-    H5VL_class_t	*vol_plugin;            /* VOL for file */
-    H5P_genplist_t      *plist;                 /* Property list pointer */
-    herr_t              ret_value = SUCCEED;
+    H5VL_class_t  *vol_plugin ;           /* VOL for file */
+    H5F_t         *f = NULL;
+    herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5VL_close, FAIL)
 
-    /* check args */
-    HDassert(file);
+    /* Check/fix arguments. */
+    if(H5I_FILE != H5I_get_type(file_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
 
-    /* Prepare to close file by clearing all public fields */
-    if(NULL == (vol_plugin = (H5VL_class_t *)H5I_object(file->vol_id)))
+    /* get the file struct */
+    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* get VOL plugin info */
+    if(NULL == (vol_plugin = (H5VL_class_t *)H5I_object(f->vol_id)))
 	HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid vol plugin ID in file")
 
-    if(H5I_dec_ref(file->vol_id) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close plugin ID")
-
-    /*
-     * Dispatch to the driver for actual close. If the driver fails to
-     * close the file then the file will be in an unusable state.
-     */
+    //printf ("VL_CLOSE VOL REF COUNT: %d\n",H5I_get_ref (f->vol_id, FALSE));
+    /* Decrement ref count on VOL ID 
+    if(H5I_dec_ref(f->vol_id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "can't close plugin ID")
+    */
     if(NULL == vol_plugin->file_cls.close)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file close' method")
-    if((vol_plugin->file_cls.close)(file) < 0)
+    if((vol_plugin->file_cls.close)(f) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed")
 
 done:
