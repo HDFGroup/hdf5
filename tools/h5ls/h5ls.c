@@ -80,7 +80,7 @@ static h5tool_format_t         ls_dataformat = {
         ",", /*elmt_suf1 */
         " ", /*elmt_suf2 */
 
-        "%lu", /*idx_n_fmt */
+        HSIZE_T_FORMAT, /*idx_n_fmt */
         ",", /*idx_sep */
         "(%s)", /*idx_fmt */
 
@@ -2000,18 +2000,19 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
             h5tools_str_append(buffer, "0x");
             for (j=0; j<dst_size; j++)
                 h5tools_str_append(buffer, "%02x", value[i*dst_size+j]);
-        } else if (H5T_SGN_NONE==H5Tget_sign(native)) {
-       /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
-        *strangely, unless use another pointer "copy".*/
-       copy = value+i*dst_size;
-       h5tools_str_append(buffer, "%"H5_PRINTF_LL_WIDTH"u",
-            *((unsigned long long*)((void*)copy)));
-        } else {
-       /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
-        *strangely, unless use another pointer "copy".*/
-       copy = value+i*dst_size;
-       h5tools_str_append(buffer, "%"H5_PRINTF_LL_WIDTH"d",
-            *((long long*)((void*)copy)));
+        } 
+        else if (H5T_SGN_NONE==H5Tget_sign(native)) {
+            /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
+             *strangely, unless use another pointer "copy".*/
+            copy = value+i*dst_size;
+            h5tools_str_append(buffer, HSIZE_T_FORMAT, *((unsigned long long*)((void*)copy)));
+        } 
+        else {
+            /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
+             *strangely, unless use another pointer "copy".*/
+            copy = value+i*dst_size;
+            h5tools_str_append(buffer, "%"H5_PRINTF_LL_WIDTH"d",
+                    *((long long*)((void*)copy)));
         }
     }
 
