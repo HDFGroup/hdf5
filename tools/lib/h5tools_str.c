@@ -68,8 +68,8 @@ void
 h5tools_str_close(h5tools_str_t *str)
 {
     if (str && str->nalloc) {
-        free(str->s);
-        memset(str, 0, sizeof(h5tools_str_t));
+        HDfree(str->s);
+        HDmemset(str, 0, sizeof(h5tools_str_t));
     }
 }
 
@@ -128,13 +128,13 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
     /* Make sure we have some memory into which to print */
     if (!str->s || str->nalloc <= 0) {
         str->nalloc = STR_INIT_LEN;
-        str->s = malloc(str->nalloc);
+        str->s = HDmalloc(str->nalloc);
         assert(str->s);
         str->s[0] = '\0';
         str->len = 0;
     }
 
-    if (strlen(fmt) == 0) {
+    if (HDstrlen(fmt) == 0) {
         /* nothing to print */
         return str->s;
     }
@@ -165,7 +165,7 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
             return NULL;
         }
 
-        if (nchars < 0 || (size_t) nchars >= avail || (0 == nchars && (strcmp(fmt, "%s")))) {
+        if (nchars < 0 || (size_t) nchars >= avail || (0 == nchars && (HDstrcmp(fmt, "%s")))) {
             /* Truncation return value as documented by C99, or zero return value with either of the
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is
@@ -174,7 +174,7 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
              */
             size_t newsize = MAX(str->len + nchars + 1, 2 * str->nalloc);
             assert(newsize > str->nalloc); /*overflow*/
-            str->s = realloc(str->s, newsize);
+            str->s = HDrealloc(str->s, newsize);
             assert(str->s);
             str->nalloc = newsize;
             isReallocated = TRUE;
@@ -211,7 +211,7 @@ h5tools_str_reset(h5tools_str_t *str/*in,out*/)
 {
     if (!str->s || str->nalloc <= 0) {
         str->nalloc = STR_INIT_LEN;
-        str->s = malloc(str->nalloc);
+        str->s = HDmalloc(str->nalloc);
         assert(str->s);
     }
 
@@ -273,7 +273,7 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
     char _temp[1024], *temp = _temp;
 
     /* If the format string is simply "%s" then don't bother doing anything */
-    if (!strcmp(fmt, "%s"))
+    if (!HDstrcmp(fmt, "%s"))
         return str->s;
 
     /*
@@ -284,7 +284,7 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
         size_t n = sizeof(_temp);
         if (str->len - start + 1 > n) {
             n = str->len - start + 1; 
-            temp = malloc(n);
+            temp = HDmalloc(n);
             assert(temp);
         }
 
@@ -297,7 +297,7 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
 
     /* Free the temp buffer if we allocated one */
     if (temp != _temp)
-        free(temp);
+        HDfree(temp);
 
     return str->s;
 }
@@ -452,7 +452,7 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
 
         alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
         assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
-        ptdata = (hsize_t *)malloc((size_t) alloc_size);
+        ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(nblocks, hssize_t, hsize_t);
         H5Sget_select_hyper_blocklist(region, (hsize_t)0, (hsize_t)nblocks, ptdata);
 
@@ -474,7 +474,7 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
             h5tools_str_append(str, ")");
         }
 
-        free(ptdata);
+        HDfree(ptdata);
     } /* end if (nblocks > 0) */
 }
 
@@ -513,7 +513,7 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
 
         alloc_size = npoints * ndims * sizeof(ptdata[0]);
         assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
-        ptdata = (hsize_t *)malloc((size_t) alloc_size);
+        ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(npoints, hssize_t, hsize_t);
         H5Sget_select_elem_pointlist(region, (hsize_t)0, (hsize_t)npoints, ptdata);
 
@@ -530,7 +530,7 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
             h5tools_str_append(str, ")");
         }
 
-        free(ptdata);
+        HDfree(ptdata);
     } /* end if (npoints > 0) */
 }
 
@@ -676,7 +676,7 @@ h5tools_str_indent(h5tools_str_t *str, const h5tool_format_t *info,
  * 
  *  Raymond Lu, 2011-09-01
  *  CLANG compiler complained about the line (about 800):
- *  	tempint = (tempint >> packed_data_offset) & packed_data_mask;
+ *    tempint = (tempint >> packed_data_offset) & packed_data_mask;
  *  The right shift may cause undefined behavior if PACKED_DATA_OFFSET is 
  *  32-bit or more. For every kind of native integers, I changed the code 
  *  to make it zero if PACKED_DATA_OFFSET is greater than or equal to the
@@ -945,29 +945,29 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     }
     else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
         if (sizeof(hssize_t) == sizeof(int)) {
-            memcpy(&tempint, vp, sizeof(int));
+            HDmemcpy(&tempint, vp, sizeof(int));
             h5tools_str_append(str, OPT(info->fmt_int, "%d"), tempint);
         }
         else if (sizeof(hssize_t) == sizeof(long)) {
-            memcpy(&templong, vp, sizeof(long));
+            HDmemcpy(&templong, vp, sizeof(long));
             h5tools_str_append(str, OPT(info->fmt_long, "%ld"), templong);
         }
         else {
-            memcpy(&templlong, vp, sizeof(long long));
+            HDmemcpy(&templlong, vp, sizeof(long long));
             h5tools_str_append(str, OPT(info->fmt_llong, fmt_llong), templlong);
         }
     }
     else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
         if (sizeof(hsize_t) == sizeof(int)) {
-            memcpy(&tempuint, vp, sizeof(unsigned int));
+            HDmemcpy(&tempuint, vp, sizeof(unsigned int));
             h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
         }
         else if (sizeof(hsize_t) == sizeof(long)) {
-            memcpy(&tempulong, vp, sizeof(long));
+            HDmemcpy(&tempulong, vp, sizeof(long));
             h5tools_str_append(str, OPT(info->fmt_ulong, "%lu"), tempulong);
         }
         else {
-            memcpy(&tempullong, vp, sizeof(unsigned long long));
+            HDmemcpy(&tempullong, vp, sizeof(unsigned long long));
             h5tools_str_append(str, OPT(info->fmt_ullong, fmt_ullong), tempullong);
         }
     }
@@ -991,7 +991,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             /* The name */
             name = H5Tget_member_name(type, j);
             h5tools_str_append(str, OPT(info->cmpd_name, ""), name);
-            free(name);
+            HDfree(name);
 
             /* The value */
             offset = H5Tget_member_offset(type, j);
@@ -1275,7 +1275,7 @@ static char *
 h5tools_escape(char *s/*in,out*/, size_t size)
 {
     register size_t i;
-    size_t n = strlen(s);
+    size_t n = HDstrlen(s);
     const char *escape;
     char octal[8];
 
@@ -1327,14 +1327,14 @@ h5tools_escape(char *s/*in,out*/, size_t size)
         }
 
         if (escape) {
-            size_t esc_size = strlen(escape);
+            size_t esc_size = HDstrlen(escape);
 
             if (n + esc_size + 1 > size)
                 /*would overflow*/
                 return NULL;
 
-            memmove(s + i + esc_size, s + i + 1, n - i); /*make room*/
-            memcpy(s + i, escape, esc_size); /*insert*/
+            HDmemmove(s + i + esc_size, s + i + 1, n - i); /*make room*/
+            HDmemcpy(s + i, escape, esc_size); /*insert*/
             n += esc_size - 1; /* adjust total string size */
             i += esc_size; /* adjust string position */
         }
