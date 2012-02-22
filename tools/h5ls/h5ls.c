@@ -2261,7 +2261,7 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
 
         /* Print dimensions */
         for (i=0; i<ndims; i++)
-            h5tools_str_append(buffer, "%s%lu" , i?",":"[", dims[i]);
+            h5tools_str_append(buffer, "%s%"H5_PRINTF_LL_WIDTH"u" , i?",":"[", dims[i]);
         h5tools_str_append(buffer, "]");
 
         free(dims);
@@ -2586,7 +2586,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
                 /* simple dataspace */
                 h5tools_str_append(&buffer, " {");
                 for (i=0; i<ndims; i++) {
-                    h5tools_str_append(&buffer, "%s%lu", i?", ":"", size[i]);
+                    h5tools_str_append(&buffer, "%s%"H5_PRINTF_LL_WIDTH"u", i?", ":"", size[i]);
                     nelmts *= size[i];
                 }
                 h5tools_str_append(&buffer, "}\n");

@@ -32,6 +32,12 @@ extern "C" {
 #define PRINT_DATA_MAX_SIZE     512
 #define OUTBUFF_SIZE        (PRINT_DATA_MAX_SIZE*4)
 
+H5TOOLS_DLLVAR int  g_nTasks;
+H5TOOLS_DLLVAR unsigned char g_Parallel;
+H5TOOLS_DLLVAR char    outBuff[];
+H5TOOLS_DLLVAR int  outBuffOffset;
+H5TOOLS_DLLVAR FILE *   overflow_file;
+
 /* Maximum size used in a call to malloc for a dataset */
 H5TOOLS_DLLVAR hsize_t H5TOOLS_MALLOCSIZE;
 /* size of hyperslab buffer when a dataset is bigger than H5TOOLS_MALLOCSIZE */
