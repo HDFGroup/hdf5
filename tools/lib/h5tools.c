@@ -1059,7 +1059,7 @@ do_bin_output(FILE *stream, hid_t container, hsize_t nelmts, hid_t tid, void *_m
 
     for (i = 0; i < nelmts; i++) {
         if (render_bin_output(stream, container, tid, mem + i * size) < 0) {
-            HDprintf("\nError in writing binary stream\n");
+            printf("\nError in writing binary stream\n");
             return FAIL;
        }
     }
