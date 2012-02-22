@@ -79,57 +79,54 @@ static void add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t 
  */
 void parallel_print(const char* format, ...)
 {
- int  bytes_written;
- va_list ap;
+    int  bytes_written;
+    va_list ap;
 
- va_start(ap, format);
+    HDva_start(ap, format);
 
- if(!g_Parallel)
-  vprintf(format, ap);
- else
- {
-
-  if(overflow_file == NULL) /*no overflow has occurred yet */
-  {
+    if(!g_Parallel)
+        HDvprintf(format, ap);
+    else {
+        if(overflow_file == NULL) /*no overflow has occurred yet */ {
 #if 0
-   printf("calling HDvsnprintf: OUTBUFF_SIZE=%ld, outBuffOffset=%ld, ", (long)OUTBUFF_SIZE, (long)outBuffOffset);
+            printf("calling HDvsnprintf: OUTBUFF_SIZE=%ld, outBuffOffset=%ld, ", (long)OUTBUFF_SIZE, (long)outBuffOffset);
 #endif
-   bytes_written = HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
+            bytes_written = HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
 #if 0
-   printf("bytes_written=%ld\n", (long)bytes_written);
+            printf("bytes_written=%ld\n", (long)bytes_written);
 #endif
-   va_end(ap);
-   va_start(ap, format);
+            HDva_end(ap);
+            HDva_start(ap, format);
 
 #if 0
-   printf("Result: bytes_written=%ld, OUTBUFF_SIZE-outBuffOffset=%ld\n", (long)bytes_written, (long)OUTBUFF_SIZE-outBuffOffset);
+            printf("Result: bytes_written=%ld, OUTBUFF_SIZE-outBuffOffset=%ld\n", (long)bytes_written, (long)OUTBUFF_SIZE-outBuffOffset);
 #endif
 
-   if ((bytes_written < 0) ||
+            if ((bytes_written < 0) ||
 #ifdef H5_VSNPRINTF_WORKS
-    (bytes_written >= (OUTBUFF_SIZE-outBuffOffset))
+                    (bytes_written >= (OUTBUFF_SIZE-outBuffOffset))
 #else
-    ((bytes_written+1) == (OUTBUFF_SIZE-outBuffOffset))
+                    ((bytes_written+1) == (OUTBUFF_SIZE-outBuffOffset))
 #endif
-    )
-   {
-    /* Terminate the outbuff at the end of the previous output */
-    outBuff[outBuffOffset] = '\0';
+            )
+            {
+                /* Terminate the outbuff at the end of the previous output */
+                outBuff[outBuffOffset] = '\0';
 
-    overflow_file = HDtmpfile();
-    if(overflow_file == NULL)
-     fprintf(stderr, "warning: could not create overflow file.  Output may be truncated.\n");
-    else
-     bytes_written = HDvfprintf(overflow_file, format, ap);
-   }
-   else
-    outBuffOffset += bytes_written;
-  }
-  else
-   bytes_written = HDvfprintf(overflow_file, format, ap);
+                overflow_file = HDtmpfile();
+                if(overflow_file == NULL)
+                    HDfprintf(stderr, "warning: could not create overflow file.  Output may be truncated.\n");
+                else
+                    bytes_written = HDvfprintf(overflow_file, format, ap);
+            }
+            else
+                outBuffOffset += bytes_written;
+        }
+        else
+            bytes_written = HDvfprintf(overflow_file, format, ap);
 
- }
- va_end(ap);
+    }
+    HDva_end(ap);
 }
 
 
@@ -153,12 +150,12 @@ error_msg(const char *fmt, ...)
 {
     va_list ap;
 
-    va_start(ap, fmt);
+    HDva_start(ap, fmt);
     HDfflush(stdout);
     HDfprintf(stderr, "%s error: ", h5tools_getprogname());
     HDvfprintf(stderr, fmt, ap);
 
-    va_end(ap);
+    HDva_end(ap);
 }
 
 
@@ -182,11 +179,11 @@ warn_msg(const char *fmt, ...)
 {
     va_list ap;
 
-    va_start(ap, fmt);
+    HDva_start(ap, fmt);
     HDfflush(stdout);
     HDfprintf(stderr, "%s warning: ", h5tools_getprogname());
     HDvfprintf(stderr, fmt, ap);
-    va_end(ap);
+    HDva_end(ap);
 }
 
 /*-------------------------------------------------------------------------
@@ -239,7 +236,8 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
         /* check for more flag-like tokens */
         if (opt_ind >= argc || argv[opt_ind][0] != '-' || argv[opt_ind][1] == '\0') {
             return EOF;
-        } else if (HDstrcmp(argv[opt_ind], "--") == 0) {
+        } 
+        else if (HDstrcmp(argv[opt_ind], "--") == 0) {
             opt_ind++;
             return EOF;
         }
@@ -265,7 +263,8 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
                         if (opt_ind < (argc - 1)) 
                             if (argv[opt_ind + 1][0] != '-')
                                 opt_arg = argv[++opt_ind];
-                    } else if (l_opts[i].has_arg == require_arg) {
+                    } 
+                    else if (l_opts[i].has_arg == require_arg) {
                         if (opt_err)
                             HDfprintf(stderr,
                                     "%s: option required for \"--%s\" flag\n",
@@ -273,7 +272,8 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
                         opt_opt = '?';
                     }
-                } else {
+                } 
+                else {
                     if (arg[len] == '=') {
                         if (opt_err)
                             HDfprintf(stderr,
@@ -282,10 +282,8 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
                         opt_opt = '?';
                     }
-
                     opt_arg = NULL;
                 }
-
                 break;
             }
         }
@@ -300,13 +298,14 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
         opt_ind++;
         sp = 1;
-    } else {
+    } 
+    else {
         register char *cp;    /* pointer into current token */
 
         /* short command line option */
         opt_opt = argv[opt_ind][sp];
 
-        if (opt_opt == ':' || (cp = strchr(opts, opt_opt)) == 0) {
+        if (opt_opt == ':' || (cp = HDstrchr(opts, opt_opt)) == 0) {
             if (opt_err)
                 HDfprintf(stderr, "%s: unknown option \"%c\"\n",
                         argv[0], opt_opt);
@@ -316,7 +315,6 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
                 opt_ind++;
                 sp = 1;
             }
-
             return '?';
         }
 
@@ -325,48 +323,41 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
             if (argv[opt_ind][sp + 1] != '\0') {
                 /* flag value is rest of current token */
                 opt_arg = &argv[opt_ind++][sp + 1];
-            } else if (++opt_ind >= argc) {
+            } 
+            else if (++opt_ind >= argc) {
                 if (opt_err)
                     HDfprintf(stderr,
                             "%s: value expected for option \"%c\"\n",
                             argv[0], opt_opt);
 
                 opt_opt = '?';
-            } else {
+            } 
+            else {
                 /* flag value is next token */
                 opt_arg = argv[opt_ind++];
             }
 
             sp = 1;
         }
-
         /* wildcard argument */
-        else if (*cp == '*')
-        {
+        else if (*cp == '*') {
             /* check the next argument */
             opt_ind++;
             /* we do have an extra argument, check if not last */
-            if ( argv[opt_ind][0] != '-' && (opt_ind+1) < argc )
-            {
+            if ( argv[opt_ind][0] != '-' && (opt_ind+1) < argc ) {
                 opt_arg = argv[opt_ind++];
             }
-            else
-            {
+            else {
                 opt_arg = NULL;
             }
         }
-
-        else
-        {
+        else {
             /* set up to look at next char in token, next time */
             if (argv[opt_ind][++sp] == '\0') {
                 /* no more in current token, so setup next token */
                 opt_ind++;
                 sp = 1;
-
-
             }
-
             opt_arg = NULL;
         }
     }
@@ -395,7 +386,8 @@ indentation(int x)
     if (x < h5tools_nCols) {
         while (x-- > 0)
             printf(" ");
-    } else {
+    } 
+    else {
         HDfprintf(stderr, "error: the indentation exceeds the number of cols.\n");
         exit(1);
     }

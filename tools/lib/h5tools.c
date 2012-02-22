@@ -195,7 +195,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 
     /* Determine which driver the user wants to open the file with. Try
      * that driver. If it can't open it, then fail. */
-    if (!strcmp(driver, drivernames[SEC2_IDX])) {
+    if (!HDstrcmp(driver, drivernames[SEC2_IDX])) {
         /* SEC2 driver */
         if (H5Pset_fapl_sec2(new_fapl) < 0)
             goto error;
@@ -203,7 +203,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
         if (drivernum)
             *drivernum = SEC2_IDX;
     }
-    else if (!strcmp(driver, drivernames[FAMILY_IDX])) {
+    else if (!HDstrcmp(driver, drivernames[FAMILY_IDX])) {
         /* FAMILY Driver */
 
         /* Set member size to be 0 to indicate the current first member size
@@ -215,7 +215,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
         if (drivernum)
             *drivernum = FAMILY_IDX;
     }
-    else if (!strcmp(driver, drivernames[SPLIT_IDX])) {
+    else if (!HDstrcmp(driver, drivernames[SPLIT_IDX])) {
         /* SPLIT Driver */
         if (H5Pset_fapl_split(new_fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
             goto error;
@@ -223,7 +223,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
         if (drivernum)
             *drivernum = SPLIT_IDX;
     }
-    else if (!strcmp(driver, drivernames[MULTI_IDX])) {
+    else if (!HDstrcmp(driver, drivernames[MULTI_IDX])) {
         /* MULTI Driver */
         if (H5Pset_fapl_multi(new_fapl, NULL, NULL, NULL, NULL, TRUE) < 0)
         goto error;
@@ -232,7 +232,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
         *drivernum = MULTI_IDX;
 #ifdef H5_HAVE_STREAM
             }
-            else if(!strcmp(driver, drivernames[STREAM_IDX])) {
+            else if(!HDstrcmp(driver, drivernames[STREAM_IDX])) {
                 /* STREAM Driver */
                 if(H5Pset_fapl_stream(new_fapl, NULL) < 0)
                 goto error;
@@ -242,7 +242,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 #endif /* H5_HAVE_STREAM */
 #ifdef H5_HAVE_PARALLEL
             }
-            else if(!strcmp(driver, drivernames[MPIO_IDX])) {
+            else if(!HDstrcmp(driver, drivernames[MPIO_IDX])) {
                 /* MPI-I/O Driver */
                 /* check if MPI has been initialized. */
                 if(!h5tools_mpi_init_g)
@@ -255,7 +255,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
                 *drivernum = MPIO_IDX;
         } /* end if */
     }
-    else if (!strcmp(driver, drivernames[MPIPOSIX_IDX])) {
+    else if (!HDstrcmp(driver, drivernames[MPIPOSIX_IDX])) {
         /* MPI-I/O Driver */
         /* check if MPI has been initialized. */
         if(!h5tools_mpi_init_g)
@@ -381,7 +381,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, const char *driver,
     /* Save the driver name */
     if (drivername && drivername_size) {
         if (fid != FAIL) {
-            strncpy(drivername, drivernames[drivernum], drivername_size);
+            HDstrncpy(drivername, drivernames[drivernum], drivername_size);
             drivername[drivername_size - 1] = '\0';
         }
         else {
@@ -551,14 +551,14 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     if (!ctx->need_prefix)
         return;
 
-    memset(&prefix, 0, sizeof(h5tools_str_t));
-    memset(&str, 0, sizeof(h5tools_str_t));
+    HDmemset(&prefix, 0, sizeof(h5tools_str_t));
+    HDmemset(&str, 0, sizeof(h5tools_str_t));
 
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
-        fputs(OPT(info->line_suf, ""), stream);
-        putc('\n', stream);
-        fputs(OPT(info->line_sep, ""), stream);
+        HDfputs(OPT(info->line_suf, ""), stream);
+        HDputc('\n', stream);
+        HDfputs(OPT(info->line_sep, ""), stream);
     }
 
     /* Calculate new prefix */
@@ -582,23 +582,23 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
        the prefix is printed one indentation level before */
     if (info->pindex) {
         for (i = 0; i < indentlevel - 1; i++) {
-            fputs(h5tools_str_fmt(&str, 0, info->line_indent), stream);
+            HDfputs(h5tools_str_fmt(&str, 0, info->line_indent), stream);
         }
     }
 
     if (elmtno == 0 && secnum == 0 && info->line_1st)
-        fputs(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
+        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
     else if (secnum && info->line_cont)
-        fputs(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
+        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
     else
-        fputs(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
+        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
 
     templength = h5tools_str_len(&prefix);
 
     for (i = 0; i < indentlevel; i++) {
         /*we already made the indent for the array indices case */
         if (!info->pindex) {
-            fputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
+            HDfputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
             templength += h5tools_str_len(&prefix);
         }
         else {
@@ -640,14 +640,14 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
     if (!ctx->need_prefix)
         return;
 
-    memset(&prefix, 0, sizeof(h5tools_str_t));
-    memset(&str, 0, sizeof(h5tools_str_t));
+    HDmemset(&prefix, 0, sizeof(h5tools_str_t));
+    HDmemset(&str, 0, sizeof(h5tools_str_t));
 
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
-        fputs(OPT(info->line_suf, ""), stream);
-        putc('\n', stream);
-        fputs(OPT(info->line_sep, ""), stream);
+        HDfputs(OPT(info->line_suf, ""), stream);
+        HDputc('\n', stream);
+        HDfputs(OPT(info->line_sep, ""), stream);
     }
 
     /* Calculate new prefix */
@@ -671,23 +671,23 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
        the prefix is printed one indentation level before */
     if (info->pindex) {
         for (i = 0; i < indentlevel - 1; i++) {
-            fputs(h5tools_str_fmt(&str, 0, info->line_indent), stream);
+            HDfputs(h5tools_str_fmt(&str, 0, info->line_indent), stream);
         }
     }
 
     if (elmtno == 0 && secnum == 0 && info->line_1st)
-        fputs(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
+        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
     else if (secnum && info->line_cont)
-        fputs(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
+        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
     else
-        fputs(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
+        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
 
     templength = h5tools_str_len(&prefix);
 
     for (i = 0; i < indentlevel; i++) {
         /*we already made the indent for the array indices case */
         if (!info->pindex) {
-            fputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
+            HDfputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
             templength += h5tools_str_len(&prefix);
         }
         else {
@@ -749,8 +749,8 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
      */
     if (info->line_multi_new == 1 &&
         (ctx->cur_column + h5tools_count_ncols(s) +
-         strlen(OPT(info->elmt_suf2, " ")) +
-         strlen(OPT(info->line_suf, ""))) > ncols) {
+                HDstrlen(OPT(info->elmt_suf2, " ")) +
+                HDstrlen(OPT(info->line_suf, ""))) > ncols) {
         if (ctx->prev_multiline) {
             /*
              * ... and the previous element also occupied more than one
@@ -759,8 +759,8 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
             ctx->need_prefix = TRUE;
         }
         else if ((ctx->prev_prefix_len + h5tools_count_ncols(s) +
-                  strlen(OPT(info->elmt_suf2, " ")) +
-                  strlen(OPT(info->line_suf, ""))) <= ncols) {
+                HDstrlen(OPT(info->elmt_suf2, " ")) +
+                HDstrlen(OPT(info->line_suf, ""))) <= ncols) {
             /*
              * ...but *could* fit on one line otherwise, then we
              * should end the current line and start this element on its
@@ -794,8 +794,8 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
             ctx->prev_multiline &&
             (ctx->cur_column +
             h5tools_count_ncols(s) +
-            strlen(OPT(info->elmt_suf2, " ")) +
-            strlen(OPT(info->line_suf, ""))) > ncols)
+            HDstrlen(OPT(info->elmt_suf2, " ")) +
+            HDstrlen(OPT(info->line_suf, ""))) > ncols)
         ctx->need_prefix = TRUE;
 
     /*
@@ -812,7 +812,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
      */
     multiline = 0;
     for (secnum = 0, multiline = 0;
-             (section = strtok(secnum ? NULL : s, OPTIONAL_LINE_BREAK));
+             (section = HDstrtok(secnum ? NULL : s, OPTIONAL_LINE_BREAK));
              secnum++) {
         /*
          * If the current section plus possible suffix and end-of-line
@@ -823,9 +823,9 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
         /*
          * check for displaying prefix for each section
          */
-        if ( (ctx->cur_column + strlen(section) +
-              strlen(OPT(info->elmt_suf2, " ")) +
-              strlen(OPT(info->line_suf, ""))) > ncols)
+        if ( (ctx->cur_column + HDstrlen(section) +
+                HDstrlen(OPT(info->elmt_suf2, " ")) +
+                HDstrlen(OPT(info->line_suf, ""))) > ncols)
             ctx->need_prefix = 1;
 
         /*
@@ -845,13 +845,13 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
             h5tools_simple_prefix(stream, info, ctx, *curr_pos, secnum);
         }
         else if ((local_elmt_counter || ctx->continuation) && secnum == 0) {
-            fputs(OPT(info->elmt_suf2, " "), stream);
-            ctx->cur_column += strlen(OPT(info->elmt_suf2, " "));
+            HDfputs(OPT(info->elmt_suf2, " "), stream);
+            ctx->cur_column += HDstrlen(OPT(info->elmt_suf2, " "));
         }
 
         /* Print the section */
-        fputs(section, stream);
-        ctx->cur_column += strlen(section);
+        HDfputs(section, stream);
+        ctx->cur_column += HDstrlen(section);
     }
 
     ctx->prev_multiline = multiline;
@@ -903,8 +903,8 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
      */
     if (info->line_multi_new == 1 &&
             (ctx->cur_column + h5tools_count_ncols(s) +
-            strlen(OPT(info->elmt_suf2, " ")) +
-            strlen(OPT(info->line_suf, ""))) > ncols) {
+                    HDstrlen(OPT(info->elmt_suf2, " ")) +
+                    HDstrlen(OPT(info->line_suf, ""))) > ncols) {
         if (ctx->prev_multiline) {
             /*
              * ... and the previous element also occupied more than one
@@ -913,8 +913,8 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
             ctx->need_prefix = TRUE;
         }
         else if ((ctx->prev_prefix_len + h5tools_count_ncols(s) +
-                strlen(OPT(info->elmt_suf2, " ")) +
-                strlen(OPT(info->line_suf, ""))) <= ncols) {
+                HDstrlen(OPT(info->elmt_suf2, " ")) +
+                HDstrlen(OPT(info->line_suf, ""))) <= ncols) {
             /*
              * ...but *could* fit on one line otherwise, then we
              * should end the current line and start this element on its
@@ -948,8 +948,8 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
             ctx->prev_multiline &&
             (ctx->cur_column +
             h5tools_count_ncols(s) +
-            strlen(OPT(info->elmt_suf2, " ")) +
-            strlen(OPT(info->line_suf, ""))) > ncols)
+            HDstrlen(OPT(info->elmt_suf2, " ")) +
+            HDstrlen(OPT(info->line_suf, ""))) > ncols)
         ctx->need_prefix = TRUE;
 
     /*
@@ -965,7 +965,7 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
      * one-at a time.
      */
     multiline = 0;
-    for (secnum = 0, multiline = 0; (section = strtok(secnum ? NULL : s,
+    for (secnum = 0, multiline = 0; (section = HDstrtok(secnum ? NULL : s,
             OPTIONAL_LINE_BREAK)); secnum++) {
         /*
          * If the current section plus possible suffix and end-of-line
@@ -979,9 +979,9 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
          */
         if ((!info->skip_first || local_elmt_counter) &&
                 (ctx->cur_column +
-                strlen(section) +
-                strlen(OPT(info->elmt_suf2, " ")) +
-                strlen(OPT(info->line_suf, ""))) > ncols)
+                        HDstrlen(section) +
+                        HDstrlen(OPT(info->elmt_suf2, " ")) +
+                        HDstrlen(OPT(info->line_suf, ""))) > ncols)
             ctx->need_prefix = 1;
 
         /*
@@ -1001,13 +1001,13 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
             h5tools_region_simple_prefix(stream, info, ctx, local_elmt_counter, ptdata, secnum);
         }
         else if ((local_elmt_counter || ctx->continuation) && secnum == 0) {
-            fputs(OPT(info->elmt_suf2, " "), stream);
-            ctx->cur_column += strlen(OPT(info->elmt_suf2, " "));
+            HDfputs(OPT(info->elmt_suf2, " "), stream);
+            ctx->cur_column += HDstrlen(OPT(info->elmt_suf2, " "));
         }
 
         /* Print the section */
-        fputs(section, stream);
-        ctx->cur_column += strlen(section);
+        HDfputs(section, stream);
+        ctx->cur_column += HDstrlen(section);
     }
 
     ctx->prev_multiline = multiline;
@@ -1059,7 +1059,7 @@ do_bin_output(FILE *stream, hid_t container, hsize_t nelmts, hid_t tid, void *_m
 
     for (i = 0; i < nelmts; i++) {
         if (render_bin_output(stream, container, tid, mem + i * size) < 0) {
-            printf("\nError in writing binary stream\n");
+            HDprintf("\nError in writing binary stream\n");
             return FAIL;
        }
     }
@@ -1101,8 +1101,8 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem)
 #ifdef DEBUG_H5DUMP_BIN
     static char fmt_llong[8], fmt_ullong[8];
     if (!fmt_llong[0]) {
-        sprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH);
-        sprintf(fmt_ullong, "%%%su", H5_PRINTF_LL_WIDTH);
+        HDsprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH);
+        HDsprintf(fmt_ullong, "%%%su", H5_PRINTF_LL_WIDTH);
     }
 #endif
 
@@ -1110,30 +1110,30 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem)
         H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
 
     if (H5Tequal(tid, H5T_NATIVE_FLOAT)) {
-        memcpy(&tempfloat, mem, sizeof(float));
+        HDmemcpy(&tempfloat, mem, sizeof(float));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, "%g ", tempfloat);
+        HDfprintf(stream, "%g ", tempfloat);
 #else
-        if (1 != fwrite(&tempfloat, size, 1, stream))
+        if (1 != HDfwrite(&tempfloat, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
     else if (H5Tequal(tid, H5T_NATIVE_DOUBLE)) {
-        memcpy(&tempdouble, mem, sizeof(double));
+        HDmemcpy(&tempdouble, mem, sizeof(double));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, "%g ", tempdouble);
+        HDfprintf(stream, "%g ", tempdouble);
 #else
-        if (1 != fwrite(&tempdouble, size, 1, stream))
+        if (1 != HDfwrite(&tempdouble, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
 #if H5_SIZEOF_LONG_DOUBLE !=0
     else if (H5Tequal(tid, H5T_NATIVE_LDOUBLE)) {
-        memcpy(&templdouble, mem, sizeof(long double));
+        HDmemcpy(&templdouble, mem, sizeof(long double));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, "%Lf ", templdouble);
+        HDfprintf(stream, "%Lf ", templdouble);
 #else
-        if (1 != fwrite(&templdouble, size, 1, stream))
+        if (1 != HDfwrite(&templdouble, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
@@ -1156,159 +1156,159 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem)
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
         }
         for (i = 0; i < size && (s[i] || pad != H5T_STR_NULLTERM); i++) {
-            memcpy(&tempuchar, &s[i], sizeof(unsigned char));
+            HDmemcpy(&tempuchar, &s[i], sizeof(unsigned char));
 #ifdef DEBUG_H5DUMP_BIN
-            fprintf(stream, "%d", tempuchar);
+            HDfprintf(stream, "%d", tempuchar);
 #else
-            if (1 != fwrite(&tempuchar, size, 1, stream))
+            if (1 != HDfwrite(&tempuchar, size, 1, stream))
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
         } /* i */
     }
     else if (H5Tequal(tid, H5T_NATIVE_INT)) {
-        memcpy(&tempint, mem, sizeof(int));
+        HDmemcpy(&tempint, mem, sizeof(int));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, "%d ", tempint);
+        HDfprintf(stream, "%d ", tempint);
 #else
-        if (1 != fwrite(&tempint, size, 1, stream))
+        if (1 != HDfwrite(&tempint, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
     else if (H5Tequal(tid, H5T_NATIVE_UINT)) {
-        memcpy(&tempuint, mem, sizeof(unsigned int));
+        HDmemcpy(&tempuint, mem, sizeof(unsigned int));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, "%u ", tempuint);
+        HDfprintf(stream, "%u ", tempuint);
 #else
-        if (1 != fwrite(&tempuint, size, 1, stream))
+        if (1 != HDfwrite(&tempuint, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
     else if (H5Tequal(tid, H5T_NATIVE_SCHAR)) {
-        memcpy(&tempschar, mem, sizeof(char));
+        HDmemcpy(&tempschar, mem, sizeof(char));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, "%d ", tempschar);
+        HDfprintf(stream, "%d ", tempschar);
 #else
-        if (1 != fwrite(&tempschar, size, 1, stream))
+        if (1 != HDfwrite(&tempschar, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
     else if (H5Tequal(tid, H5T_NATIVE_UCHAR)) {
-        memcpy(&tempuchar, mem, sizeof(unsigned char));
+        HDmemcpy(&tempuchar, mem, sizeof(unsigned char));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, "%u ", tempuchar);
+        HDfprintf(stream, "%u ", tempuchar);
 #else
-        if (1 != fwrite(&tempuchar, size, 1, stream))
+        if (1 != HDfwrite(&tempuchar, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
     else if (H5Tequal(tid, H5T_NATIVE_SHORT)) {
-        memcpy(&tempshort, mem, sizeof(short));
+        HDmemcpy(&tempshort, mem, sizeof(short));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, "%d ", tempshort);
+        HDfprintf(stream, "%d ", tempshort);
 #else
-        if (1 != fwrite(&tempshort, size, 1, stream))
+        if (1 != HDfwrite(&tempshort, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
     else if (H5Tequal(tid, H5T_NATIVE_USHORT)) {
-        memcpy(&tempushort, mem, sizeof(unsigned short));
+        HDmemcpy(&tempushort, mem, sizeof(unsigned short));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, "%u ", tempushort);
+        HDfprintf(stream, "%u ", tempushort);
 #else
-        if (1 != fwrite(&tempushort, size, 1, stream))
+        if (1 != HDfwrite(&tempushort, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
     else if (H5Tequal(tid, H5T_NATIVE_LONG)) {
-        memcpy(&templong, mem, sizeof(long));
+        HDmemcpy(&templong, mem, sizeof(long));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, "%ld ", templong);
+        HDfprintf(stream, "%ld ", templong);
 #else
-        if (1 != fwrite(&templong, size, 1, stream))
+        if (1 != HDfwrite(&templong, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
     else if (H5Tequal(tid, H5T_NATIVE_ULONG)) {
-        memcpy(&tempulong, mem, sizeof(unsigned long));
+        HDmemcpy(&tempulong, mem, sizeof(unsigned long));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, "%lu ", tempulong);
+        HDfprintf(stream, "%lu ", tempulong);
 #else
-        if (1 != fwrite(&tempulong, size, 1, stream))
+        if (1 != HDfwrite(&tempulong, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
     else if (H5Tequal(tid, H5T_NATIVE_LLONG)) {
-        memcpy(&templlong, mem, sizeof(long long));
+        HDmemcpy(&templlong, mem, sizeof(long long));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, fmt_llong, templlong);
+        HDfprintf(stream, fmt_llong, templlong);
 #else
-        if (1 != fwrite(&templlong, size, 1, stream))
+        if (1 != HDfwrite(&templlong, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
     else if (H5Tequal(tid, H5T_NATIVE_ULLONG)) {
-        memcpy(&tempullong, mem, sizeof(unsigned long long));
+        HDmemcpy(&tempullong, mem, sizeof(unsigned long long));
 #ifdef DEBUG_H5DUMP_BIN
-        fprintf(stream, fmt_ullong, tempullong);
+        HDfprintf(stream, fmt_ullong, tempullong);
 #else
-        if (1 != fwrite(&tempullong, size, 1, stream))
+        if (1 != HDfwrite(&tempullong, size, 1, stream))
             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
     }
     else if (H5Tequal(tid, H5T_NATIVE_HSSIZE)) {
         if (sizeof(hssize_t) == sizeof(int)) {
-            memcpy(&tempint, mem, sizeof(int));
+            HDmemcpy(&tempint, mem, sizeof(int));
 #ifdef DEBUG_H5DUMP_BIN
-            fprintf(stream, "%d ", tempint);
+            HDfprintf(stream, "%d ", tempint);
 #else
-            if (1 != fwrite(&tempint, size, 1, stream))
+            if (1 != HDfwrite(&tempint, size, 1, stream))
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
         }
         else if (sizeof(hssize_t) == sizeof(long)) {
-            memcpy(&templong, mem, sizeof(long));
+            HDmemcpy(&templong, mem, sizeof(long));
 #ifdef DEBUG_H5DUMP_BIN
-            fprintf(stream, "%ld ", templong);
+            HDfprintf(stream, "%ld ", templong);
 #else
-            if (1 != fwrite(&templong, size, 1, stream))
+            if (1 != HDfwrite(&templong, size, 1, stream))
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
         }
         else {
-            memcpy(&templlong, mem, sizeof(long long));
+            HDmemcpy(&templlong, mem, sizeof(long long));
 #ifdef DEBUG_H5DUMP_BIN
-            fprintf(stream, fmt_llong, templlong);
+            HDfprintf(stream, fmt_llong, templlong);
 #else
-            if (1 != fwrite(&templlong, size, 1, stream))
+            if (1 != HDfwrite(&templlong, size, 1, stream))
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
         }
     }
     else if (H5Tequal(tid, H5T_NATIVE_HSIZE)) {
         if (sizeof(hsize_t) == sizeof(int)) {
-            memcpy(&tempuint, mem, sizeof(unsigned int));
+            HDmemcpy(&tempuint, mem, sizeof(unsigned int));
 #ifdef DEBUG_H5DUMP_BIN
-            fprintf(stream, "%u ", tempuint);
+            HDfprintf(stream, "%u ", tempuint);
 #else
-            if (1 != fwrite(&tempuint, size, 1, stream))
+            if (1 != HDfwrite(&tempuint, size, 1, stream))
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
         }
         else if (sizeof(hsize_t) == sizeof(long)) {
-            memcpy(&tempulong, mem, sizeof(unsigned long));
+            HDmemcpy(&tempulong, mem, sizeof(unsigned long));
 #ifdef DEBUG_H5DUMP_BIN
-            fprintf(stream, "%lu ", tempulong);
+            HDfprintf(stream, "%lu ", tempulong);
 #else
-            if (1 != fwrite(&tempulong, size, 1, stream))
+            if (1 != HDfwrite(&tempulong, size, 1, stream))
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
         }
         else {
-            memcpy(&tempullong, mem, sizeof(unsigned long long));
+            HDmemcpy(&tempullong, mem, sizeof(unsigned long long));
 #ifdef DEBUG_H5DUMP_BIN
-            fprintf(stream, fmt_ullong, tempullong);
+            HDfprintf(stream, fmt_ullong, tempullong);
 #else
-            if (1 != fwrite(&tempullong, size, 1, stream))
+            if (1 != HDfwrite(&tempullong, size, 1, stream))
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
         }
@@ -1335,18 +1335,18 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem)
         unsigned int i;
         if (1 == size) {
 #ifdef DEBUG_H5DUMP_BIN
-            fprintf(stream, "0x%02x", mem[0]);
+            HDfprintf(stream, "0x%02x", mem[0]);
 #else
-            if (1 != fwrite(&mem[0], size, 1, stream))
+            if (1 != HDfwrite(&mem[0], size, 1, stream))
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
         }
         else {
             for (i = 0; i < size; i++) {
 #ifdef DEBUG_H5DUMP_BIN
-                fprintf(stream, "%s%02x", i?":":"", mem[i]);
+                HDfprintf(stream, "%s%02x", i?":":"", mem[i]);
 #else
-                if (1 != fwrite(&mem[i], sizeof(char), 1, stream))
+                if (1 != HDfwrite(&mem[i], sizeof(char), 1, stream))
                     H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
             } /*i*/
@@ -1425,18 +1425,18 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem)
         size_t i;
         if (1 == size) {
 #ifdef DEBUG_H5DUMP_BIN
-            fprintf(stream, "0x%02x", mem[0]);
+            HDfprintf(stream, "0x%02x", mem[0]);
 #else
-            if (1 != fwrite(&mem[0], size, 1, stream))
+            if (1 != HDfwrite(&mem[0], size, 1, stream))
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
         }
         else {
             for (i = 0; i < size; i++) {
 #ifdef DEBUG_H5DUMP_BIN
-                fprintf(stream, "%s%02x", i?":":"", mem[i]);
+                HDfprintf(stream, "%s%02x", i?":":"", mem[i]);
 #else
-                if (1 != fwrite(&mem[i], sizeof(char), 1, stream))
+                if (1 != HDfwrite(&mem[i], sizeof(char), 1, stream))
                     H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 #endif
             } /*i*/
@@ -1467,7 +1467,8 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
     hsize_t     *dims1 = NULL;
     hsize_t     *start = NULL;
     hsize_t     *count = NULL;
-    size_t       numelem;
+    hsize_t      numelem;
+    hsize_t      numindex;
     hsize_t      total_size[H5S_MAX_RANK];
     int          jndx;
     int          type_size;
@@ -1525,10 +1526,10 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
         if(H5Sget_simple_extent_dims(mem_space, total_size, NULL) < 0)
             HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
 
-        for (jndx = 0; jndx < numelem; jndx++) {
+        for (numindex = 0; numindex < numelem; numindex++) {
 
             render_bin_output(stream, container, type_id,
-                                ((char*)region_buf + jndx * type_size));
+                                ((char*)region_buf + numindex * type_size));
             /* Render the region data element end */
         } /* end for (jndx = 0; jndx < numelem; jndx++) */
     } /* end for (blkndx = 0; blkndx < nblocks; blkndx++) */
@@ -1581,7 +1582,7 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
 
     alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
     assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
-    if((ptdata = (hsize_t*) malloc((size_t) alloc_size)) == NULL)
+    if((ptdata = (hsize_t*) HDmalloc((size_t) alloc_size)) == NULL)
         HGOTO_ERROR(FALSE, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
 
     H5_CHECK_OVERFLOW(nblocks, hssize_t, hsize_t);
@@ -1597,7 +1598,7 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
             type_id, nblocks, ptdata);
 
  done:
-    free(ptdata);
+    HDfree(ptdata);
 
     if(H5Tclose(type_id) < 0)
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
@@ -1785,12 +1786,12 @@ h5tools_is_obj_same(hid_t loc_id1, const char *name1,
     H5O_info_t oinfo1,  oinfo2;
     hbool_t ret_val = 0;
 
-    if ( name1 && strcmp(name1, "."))
+    if ( name1 && HDstrcmp(name1, "."))
       H5Oget_info_by_name(loc_id1, name1, &oinfo1, H5P_DEFAULT);
     else
       H5Oget_info(loc_id1, &oinfo1);
 
-    if ( name2 && strcmp(name2, "."))
+    if ( name2 && HDstrcmp(name2, "."))
       H5Oget_info_by_name(loc_id2, name2, &oinfo2, H5P_DEFAULT);
     else
       H5Oget_info(loc_id2, &oinfo2);
