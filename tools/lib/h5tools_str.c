@@ -129,7 +129,7 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
     if (!str->s || str->nalloc <= 0) {
         str->nalloc = STR_INIT_LEN;
         str->s = HDmalloc(str->nalloc);
-        assert(str->s);
+        HDassert(str->s);
         str->s[0] = '\0';
         str->len = 0;
     }
@@ -145,9 +145,9 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
         size_t avail = str->nalloc - str->len;
         int nchars = -1;
 
-        va_start(ap, fmt);
+        HDva_start(ap, fmt);
         nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
-        va_end(ap);
+        HDva_end(ap);
 
         /* Note: HDvsnprintf() behaves differently on Windows as Unix, when 
          * buffer is smaller than source string. On Unix, this function 
@@ -173,9 +173,9 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
              * Alocate at least twice as much space and try again.
              */
             size_t newsize = MAX(str->len + nchars + 1, 2 * str->nalloc);
-            assert(newsize > str->nalloc); /*overflow*/
+            HDassert(newsize > str->nalloc); /*overflow*/
             str->s = HDrealloc(str->s, newsize);
-            assert(str->s);
+            HDassert(str->s);
             str->nalloc = newsize;
             isReallocated = TRUE;
         }
@@ -212,7 +212,7 @@ h5tools_str_reset(h5tools_str_t *str/*in,out*/)
     if (!str->s || str->nalloc <= 0) {
         str->nalloc = STR_INIT_LEN;
         str->s = HDmalloc(str->nalloc);
-        assert(str->s);
+        HDassert(str->s);
     }
 
     str->s[0] = '\0';
@@ -280,12 +280,12 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
      * Save the input value if there is a `%' anywhere in FMT.  Otherwise
      * don't bother because we don't need a temporary copy.
      */
-    if (strchr(fmt, '%')) {
+    if (HDstrchr(fmt, '%')) {
         size_t n = sizeof(_temp);
         if (str->len - start + 1 > n) {
             n = str->len - start + 1; 
             temp = HDmalloc(n);
-            assert(temp);
+            HDassert(temp);
         }
 
         HDstrncpy(temp, str->s + start, n);
@@ -451,7 +451,7 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
         int i;
 
         alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
-        assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
+        HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
         ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(nblocks, hssize_t, hsize_t);
         H5Sget_select_hyper_blocklist(region, (hsize_t)0, (hsize_t)nblocks, ptdata);
@@ -512,7 +512,7 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
         int i;
 
         alloc_size = npoints * ndims * sizeof(ptdata[0]);
-        assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
+        HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
         ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(npoints, hssize_t, hsize_t);
         H5Sget_select_elem_pointlist(region, (hsize_t)0, (hsize_t)npoints, ptdata);
@@ -1097,13 +1097,13 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         size = H5Tget_size(memb);
         ndims = H5Tget_array_ndims(type);
         H5Tget_array_dims2(type, dims);
-        assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
+        HDassert(ndims >= 1 && ndims <= H5S_MAX_RANK);
 
         /* Calculate the number of array elements */
         for (k = 0, nelmts = 1; k < ndims; k++) {
             temp_nelmts = nelmts;
             temp_nelmts *= dims[k];
-            assert(temp_nelmts == (hsize_t) ((size_t) temp_nelmts));
+            HDassert(temp_nelmts == (hsize_t) ((size_t) temp_nelmts));
             nelmts = (size_t) temp_nelmts;
         }
         /* Print the opening bracket */
