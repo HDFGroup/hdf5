@@ -103,6 +103,7 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
+    NULL,					/*sb_verify		*/
     sizeof(H5FD_mpio_fapl_t),			/*fapl_size		*/
     H5FD_mpio_fapl_get,				/*fapl_get		*/
     H5FD_mpio_fapl_copy,			/*fapl_copy		*/
@@ -2096,3 +2097,4 @@ done:
 }
 
 #endif /* H5_HAVE_PARALLEL */
+

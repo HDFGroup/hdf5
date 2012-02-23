@@ -51,6 +51,8 @@ const char *FILENAME[] = {
     "stdio_file",        /*7*/
     "windows_file",      /*8*/
     "new_multi_file_v16",/*9*/
+    "null_core_file",    /*10*/
+    "null_family_file",  /*11*/
     NULL
 };
 
@@ -1294,6 +1296,229 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_null
+ *
+ * Purpose:     Tests the file handle interface for the NULL driver. 
+ *              The first component of this test is to wrap the null driver
+ *              around the core driver and run the core test suite.
+ *              Since the core driver does not implement all VFD features,
+ *              other drivers need to be tested as well.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Jacob Gruber
+ *              Friday, January 5, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_null(void)
+{
+    hid_t       file=(-1), null_fapl, core_fapl, family_fapl; 
+    hid_t       null_fapl2=(-1), core_fapl2=(-1), family_fapl2=(-1);
+    hid_t       dset1=(-1), space1=(-1);
+    char        filename[1024];
+    void        *fhandle=NULL;
+    hsize_t     file_size, dims1[2];
+    int         i, j, n, *points, *check, *p1, *p2;
+
+    TESTING("NULL file driver");
+    
+    /* Set property list for the CORE driver */
+    core_fapl = h5_fileaccess();
+    if(H5Pset_fapl_core(core_fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
+        TEST_ERROR;
+
+    /* Stack the null driver on top of the core driver. */
+    null_fapl = h5_fileaccess();
+    if(H5Pset_fapl_null(null_fapl, core_fapl) < 0)
+        TEST_ERROR;
+
+    /* Set the file name in the core driver */
+    h5_fixname(FILENAME[10], null_fapl, filename, sizeof filename);
+    
+    /* Create the file with the null driver */
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, null_fapl)) < 0)
+        TEST_ERROR;
+
+    /* Retrieve the top access property list... */
+    if((null_fapl2 = H5Fget_access_plist(file)) < 0)
+        TEST_ERROR;
+
+    /* Retrieve the bottom access property list */
+    if (H5Pget_fapl_null(null_fapl2, &core_fapl2) < 0)
+        TEST_ERROR;
+    if (core_fapl2 < 0)
+        TEST_ERROR;
+
+
+    /* Check that the top driver is correct */
+    if(H5FD_NULL != H5Pget_driver(null_fapl2))
+        TEST_ERROR;
+
+    /* Check that the bottom driver is correct */
+    if(H5FD_CORE != H5Pget_driver(core_fapl2))
+        TEST_ERROR;
+
+    /* Close the bottom property list */
+    if (H5Pclose(core_fapl2) < 0)
+        TEST_ERROR;
+
+    /* ...and close the top property list */
+    if (H5Pclose(null_fapl2) < 0)
+        TEST_ERROR;
+
+    /* Check the file handle API */
+    if(H5Fget_vfd_handle(file, H5P_DEFAULT, &fhandle) < 0)
+        TEST_ERROR;
+    if(fhandle == NULL)
+        TEST_ERROR;
+
+    /* Check file size API */
+    if(H5Fget_filesize(file, &file_size) < 0)
+        TEST_ERROR;
+
+    /* There is no garantee the size of metadata in file is constant.
+     * Just try to check if it's reasonable.  Why is this 4KB?
+     */
+    if(file_size<2*KB || file_size>6*KB)
+        TEST_ERROR;
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Turn off the backing store in the core driver. This is done
+     * to increase the speed of the test. The nul driver only stores
+     * a reference to this fapl, so the change is immediately
+     * recognized.
+     */
+    if(H5Pset_fapl_core(core_fapl, (size_t)CORE_INCREMENT, FALSE) < 0)
+        TEST_ERROR;
+
+    /* Open the file with the null driver */
+    if((file=H5Fopen(filename, H5F_ACC_RDWR, null_fapl)) < 0)
+        TEST_ERROR;
+
+    /* Allocate memory for data set. */
+    points=(int*)malloc(DSET1_DIM1*DSET1_DIM2*sizeof(int));
+    check=(int*)malloc(DSET1_DIM1*DSET1_DIM2*sizeof(int));
+
+    /* Initialize the dset1 */
+    p1 = points;
+    for(i = n = 0; i < DSET1_DIM1; i++)
+        for(j = 0; j < DSET1_DIM2; j++)
+            *p1++ = n++;
+
+    /* Create the data space1 */
+    dims1[0] = DSET1_DIM1;
+    dims1[1] = DSET1_DIM2;
+    if((space1 = H5Screate_simple(2, dims1, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create the dset1 */
+    if((dset1 = H5Dcreate2(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write the data to the dset1 */
+    if(H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
+        TEST_ERROR;
+
+    /* Close the dset */
+    if(H5Dclose(dset1) < 0)
+        TEST_ERROR;
+
+    /* Reopen the dset */
+    if((dset1 = H5Dopen2(file, DSET1_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Read the data back from dset1 */
+    if(H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    p1 = points;
+    p2 = check;
+    for(i = 0; i < DSET1_DIM1; i++)
+        for(j = 0; j < DSET1_DIM2; j++)
+            if(*p1++ != *p2++) {
+                H5_FAILED();
+                printf("    Read different values than written in data set 1.\n");
+                printf("    At index %d,%d\n", i, j);
+                TEST_ERROR;
+            } /* end if */
+
+    /* Clean up */
+    if(H5Sclose(space1) < 0)
+        TEST_ERROR;
+    if(H5Dclose(dset1) < 0)
+        TEST_ERROR;
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+    if(points)
+        free(points);
+    if(check)
+        free(check);
+    if(H5Pclose(core_fapl) < 0)
+        TEST_ERROR;
+
+    h5_cleanup(FILENAME, null_fapl);
+
+    /* Test the superblock fucntions. The superblock is only used when 
+     * testing the compatibility of the family and multi drivers, so
+     * a separate test is needed.
+     */
+
+    /* Set up family FAPL */
+    family_fapl = h5_fileaccess();
+    if(H5Pset_fapl_family(family_fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    
+    /* Wrap null around family driver */
+    null_fapl = h5_fileaccess();
+    if(H5Pset_fapl_null(null_fapl, family_fapl) < 0)
+        TEST_ERROR;
+
+    /* Set the file name. Thsi must be done with the family driver so that
+     * the member numbers are properly set up.
+     */
+    h5_fixname(FILENAME[11], family_fapl, filename, sizeof filename);
+    
+    /* Create file with the null driver*/
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, null_fapl)) < 0)
+        TEST_ERROR;
+
+    /* close file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Reopen file, testing suplerblocks for compatability */
+    if((file=H5Fopen(filename, H5F_ACC_RDWR, null_fapl)) < 0)
+        TEST_ERROR;
+
+    /* Cleanup */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    h5_cleanup(FILENAME, family_fapl);
+    if(H5Pclose(null_fapl) < 0)
+        TEST_ERROR;
+    
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose (core_fapl);
+        H5Pclose (null_fapl);
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_log
  *
  * Purpose:     Tests the file handle interface for log driver
@@ -1408,6 +1633,11 @@ test_stdio(void)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
 
+    /* Retrieve the access property list... */
+    if((access_fapl = H5Fget_access_plist(file)) < 0)
+        TEST_ERROR;
+
+    /* Check that the driver is correct */
     /* Retrieve the access property list... */
     if((access_fapl = H5Fget_access_plist(file)) < 0)
         TEST_ERROR;
@@ -1573,6 +1803,7 @@ main(void)
     nerrors += test_family_compat() < 0  ? 1 : 0;
     nerrors += test_multi() < 0          ? 1 : 0;
     nerrors += test_multi_compat() < 0   ? 1 : 0;
+    nerrors += test_null() < 0           ? 1 : 0;
     nerrors += test_direct() < 0         ? 1 : 0;
     nerrors += test_log() < 0            ? 1 : 0;
     nerrors += test_stdio() < 0          ? 1 : 0;

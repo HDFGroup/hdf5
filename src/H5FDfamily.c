@@ -99,6 +99,7 @@ static herr_t H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/,
 		     unsigned char *buf/*out*/);
 static herr_t H5FD_family_sb_decode(H5FD_t *_file, const char *name,
                     const unsigned char *buf);
+static herr_t H5FD_family_sb_verify(H5FD_t *_file, const char *driver_id);
 static H5FD_t *H5FD_family_open(const char *name, unsigned flags,
 				hid_t fapl_id, haddr_t maxaddr);
 static herr_t H5FD_family_close(H5FD_t *_file);
@@ -124,6 +125,7 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_sb_size,			/*sb_size		*/
     H5FD_family_sb_encode,			/*sb_encode		*/
     H5FD_family_sb_decode,			/*sb_decode		*/
+    H5FD_family_sb_verify,			/*sb_verify		*/
     sizeof(H5FD_family_fapl_t),			/*fapl_size		*/
     H5FD_family_fapl_get,			/*fapl_get		*/
     H5FD_family_fapl_copy,			/*fapl_copy		*/
@@ -703,6 +705,44 @@ H5FD_family_sb_decode(H5FD_t *_file, const char UNUSED *name, const unsigned cha
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_family_sb_decode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_family_sb_verify
+ *
+ * Purpose:     Verify that the family driver is compatable with the driver
+ *              that created the file. driver_id is the driver identifier
+ *              field stored in the superblock. This is called when
+ *              reopening a file and ensures that the driver is able to
+ *              decode the superblock info.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:  Jacob Gruber
+ *              Friday, January 13, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_family_sb_verify(H5FD_t UNUSED *_file, const char *driver_id)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+   
+    FUNC_ENTER_NOAPI(H5FD_family_sb_verify, FAIL)
+
+    if(HDstrncmp(driver_id, "NCSAfami", (size_t)8)) {
+        char err_msg[128];
+
+        HDsnprintf(err_msg, sizeof(err_msg), "File type %s not supported by the family driver",
+            driver_id);
+
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
+    }
+    
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_family_sb_verify() */
 
 
 /*-------------------------------------------------------------------------

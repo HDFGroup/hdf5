@@ -123,6 +123,7 @@ static herr_t H5FD_multi_sb_encode(H5FD_t *file, char *name/*out*/,
 				   unsigned char *buf/*out*/);
 static herr_t H5FD_multi_sb_decode(H5FD_t *file, const char *name,
 				   const unsigned char *buf);
+static herr_t H5FD_multi_sb_verify(H5FD_t *file, const char *driver_id);
 static void *H5FD_multi_fapl_get(H5FD_t *file);
 static void *H5FD_multi_fapl_copy(const void *_old_fa);
 static herr_t H5FD_multi_fapl_free(void *_fa);
@@ -157,6 +158,7 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_sb_size,				/*sb_size		*/
     H5FD_multi_sb_encode,			/*sb_encode		*/
     H5FD_multi_sb_decode,			/*sb_decode		*/
+    H5FD_multi_sb_verify,			/*sb_verify		*/
     sizeof(H5FD_multi_fapl_t),			/*fapl_size		*/
     H5FD_multi_fapl_get,			/*fapl_get		*/
     H5FD_multi_fapl_copy,			/*fapl_copy		*/
@@ -979,6 +981,40 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 
     return 0;
 } /* end H5FD_multi_sb_decode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_multi_sb_verify
+ *
+ * Purpose:     Verify that the multi driver is compatable with the driver
+ *              that created the file. driver_id is the driver identifier
+ *              field stored in the superblock. This is called when
+ *              reopening a file and ensures that the driver is able to
+ *              decode the superblock info.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:  Jacob Gruber
+ *              Friday, January 13, 2012
+ *
+ *-------------------------------------------------------------------------
+ */ 
+static herr_t
+H5FD_multi_sb_verify(H5FD_t *_file, const char *driver_id)
+{
+    static const char *func = "H5FD_multi_sb_verify";
+    
+    if(strncmp(driver_id, "NCSAmult", (size_t)8)) {
+        char err_msg[128];
+
+        snprintf(err_msg, sizeof(err_msg), "File type %s not supported by the multi driver",
+            driver_id);
+
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, err_msg, -1);
+    }
+   return 0; 
+} /* end H5FD_family_sb_verify() */
 
 
 /*-------------------------------------------------------------------------

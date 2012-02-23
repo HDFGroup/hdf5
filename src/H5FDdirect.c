@@ -181,6 +181,7 @@ static const H5FD_class_t H5FD_direct_g = {
     NULL,          /*sb_size    */
     NULL,          /*sb_encode    */
     NULL,          /*sb_decode    */
+    NULL,          /*sb_verify    */
     sizeof(H5FD_direct_fapl_t),                 /*fapl_size    */
     H5FD_direct_fapl_get,            /*fapl_get    */
     H5FD_direct_fapl_copy,            /*fapl_copy    */

@@ -677,6 +677,8 @@
 ./src/H5FDmpiposix.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
+./src/H5FDnull.c
+./src/H5FDnull.h
 ./src/H5FDpkg.h
 ./src/H5FDprivate.h
 ./src/H5FDpublic.h

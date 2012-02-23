@@ -71,6 +71,7 @@ static herr_t H5FD_null_sb_encode(H5FD_t *_file, char *name/*out*/,
                 unsigned char *buf/*out*/);
 static herr_t H5FD_null_sb_decode(H5FD_t *_file, const char *name,
                 const unsigned char *buf);
+static herr_t H5FD_null_sb_verify(H5FD_t *_file, const char *driver_id);
 static H5FD_t *H5FD_null_open(const char *name, unsigned flags,
                 hid_t fapl_id, haddr_t maxaddr);
 static herr_t H5FD_null_close(H5FD_t *_file);
@@ -101,6 +102,7 @@ static const H5FD_class_t H5FD_null_g = {
     H5FD_null_sb_size,          /* sb_size      */
     H5FD_null_sb_encode,        /* sb_encode    */
     H5FD_null_sb_decode,        /* sb_decode    */
+    H5FD_null_sb_verify,        /* sb_verify    */
     sizeof(H5FD_null_fapl_t),   /* fapl_size    */
     H5FD_null_fapl_get,         /* fapl_get     */
     H5FD_null_fapl_copy,        /* fapl_copy    */
@@ -633,6 +635,44 @@ H5FD_null_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_null_sb_decode() */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_null_sb_verify
+ *
+ * Purpose:     Verify that the inner driver is compatable with the driver
+ *              that created the file. driver_id is the driver identifier
+ *              field stored in the superblock. This is called when
+ *              reopening a file and ensures that the driver is able to
+ *              decode the superblock info.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:  Jacob Gruber
+ *              Friday, January 13, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_null_sb_verify(H5FD_t *_file, const char *driver_id)
+{
+    H5FD_null_t *file = (H5FD_null_t*)_file;
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_null_sb_verify, FAIL)
+    
+    HDassert(file);
+    
+    /* Delegate to the inner driver */
+    if(H5FD_sb_verify(file->inner_file, driver_id) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "inner driver sb_verify failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 
 
 /*-------------------------------------------------------------------------

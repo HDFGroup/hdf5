@@ -189,6 +189,7 @@ static const H5FD_class_t H5FD_stdio_g = {
     NULL,          /*sb_size    */
     NULL,          /*sb_encode    */
     NULL,          /*sb_decode    */
+    NULL,          /*sb_verify    */
     0,             /*fapl_size    */
     NULL,          /*fapl_get    */
     NULL,          /*fapl_copy    */
