@@ -181,7 +181,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
     /* setup */
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
-    memset(&ctx, 0, sizeof(ctx));
+    HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent/COL;
     ctx.cur_column = dump_indent;
     
@@ -574,7 +574,7 @@ dump_named_datatype(hid_t tid, const char *name)
     /* setup */
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
-    memset(&ctx, 0, sizeof(ctx));
+    HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent/COL;
     ctx.cur_column = dump_indent;
     
@@ -751,7 +751,7 @@ dump_group(hid_t gid, const char *name)
     /* setup */
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
-    memset(&ctx, 0, sizeof(ctx));
+    HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent/COL;
     ctx.cur_column = dump_indent;
     
@@ -1351,7 +1351,7 @@ handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int UNUSED pe
     } /* end else */
 
     dump_indent += COL;
-    memset(&ctx, 0, sizeof(ctx));
+    HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent/COL;
     ctx.cur_column = dump_indent;
 

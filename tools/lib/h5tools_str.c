@@ -334,7 +334,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
             ctx->pos[i] = curr_pos / ctx->acc[i];
             curr_pos -= ctx->acc[i] * ctx->pos[i];
         }
-        assert(curr_pos == 0);
+        HDassert(curr_pos == 0);
 
         /* Print the index values */
         for (i = 0; i < (size_t) ndims; i++) {
@@ -462,12 +462,12 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
 
             /* Start coordinates and opposite corner */
             for (j = 0; j < ndims; j++)
-                h5tools_str_append(str, "%s%lu", j ? "," : "(",
-                                    (unsigned long) ptdata[i * 2 * ndims + j]);
+                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(",
+                                    ptdata[i * 2 * ndims + j]);
 
             for (j = 0; j < ndims; j++)
-                h5tools_str_append(str, "%s%lu", j ? "," : ")-(",
-                                    (unsigned long) ptdata[i * 2 * ndims + j + ndims]);
+                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : ")-(",
+                                    ptdata[i * 2 * ndims + j + ndims]);
 
             h5tools_str_append(str, ")");
         }
@@ -522,8 +522,8 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
                                (unsigned long)i);
 
             for (j = 0; j < ndims; j++)
-                h5tools_str_append(str, "%s%lu", j ? "," : "(",
-                                  (unsigned long) (ptdata[i * ndims + j]));
+                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(",
+                                  (ptdata[i * ndims + j]));
 
             h5tools_str_append(str, ")");
         }

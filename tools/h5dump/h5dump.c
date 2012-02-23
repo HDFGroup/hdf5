@@ -847,26 +847,26 @@ free_handler(struct handler_t *hand, int len)
     if(hand) {
         for (i = 0; i < len; i++) {
             if(hand[i].obj) {
-                free(hand[i].obj);
+                HDfree(hand[i].obj);
                 hand[i].obj=NULL;
             }
 
             if (hand[i].subset_info) {
                 if(hand[i].subset_info->start.data)
-                    free(hand[i].subset_info->start.data);
+                    HDfree(hand[i].subset_info->start.data);
                 if(hand[i].subset_info->stride.data)
-                    free(hand[i].subset_info->stride.data);
+                    HDfree(hand[i].subset_info->stride.data);
                 if(hand[i].subset_info->count.data)
-                    free(hand[i].subset_info->count.data);
+                    HDfree(hand[i].subset_info->count.data);
                 if(hand[i].subset_info->block.data)
-                    free(hand[i].subset_info->block.data);
+                    HDfree(hand[i].subset_info->block.data);
 
-                free(hand[i].subset_info);
+                HDfree(hand[i].subset_info);
                 hand[i].subset_info=NULL;
             }
         }
 
-        free(hand);
+        HDfree(hand);
     }
 }
 
@@ -1181,28 +1181,28 @@ parse_start:
                 switch ((char)opt) {
                 case 's':
                     if (s->start.data) {
-                        free(s->start.data);
+                        HDfree(s->start.data);
                         s->start.data = NULL;
                     }
                     parse_hsize_list(opt_arg, &s->start);
                     break;
                 case 'S':
                     if (s->stride.data) {
-                        free(s->stride.data);
+                        HDfree(s->stride.data);
                         s->stride.data = NULL;
                     }
                     parse_hsize_list(opt_arg, &s->stride);
                     break;
                 case 'c':
                     if (s->count.data) {
-                        free(s->count.data);
+                        HDfree(s->count.data);
                         s->count.data = NULL;
                 }
                     parse_hsize_list(opt_arg, &s->count);
                     break;
                 case 'k':
                     if (s->block.data) {
-                        free(s->block.data);
+                        HDfree(s->block.data);
                         s->block.data = NULL;
                     }
                     parse_hsize_list(opt_arg, &s->block);
@@ -1629,7 +1629,7 @@ h5_fileaccess(void)
         HDmemset(memb_name, 0, sizeof memb_name);
         HDmemset(memb_addr, 0, sizeof memb_addr);
 
-        assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
+        HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
         for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
             memb_map[mt] = mt;

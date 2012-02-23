@@ -1027,7 +1027,7 @@ init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
 {
     int i;
 
-    assert(ctx->ndims);
+    HDassert(ctx->ndims);
 
     ctx->acc[ctx->ndims - 1] = 1;
     for (i = (ctx->ndims - 2); i >= 0; i--) {
@@ -1362,7 +1362,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem)
         size = H5Tget_size(memb);
         ndims = H5Tget_array_ndims(tid);
         H5Tget_array_dims2(tid, dims);
-        assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
+        HDassert(ndims >= 1 && ndims <= H5S_MAX_RANK);
 
         /* calculate the number of array elements */
         for (k = 0, nelmts = 1; k < ndims; k++) {
@@ -1581,7 +1581,7 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
         H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
 
     alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
-    assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
+    HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
     if((ptdata = (hsize_t*) HDmalloc((size_t) alloc_size)) == NULL)
         HGOTO_ERROR(FALSE, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
 
@@ -1708,7 +1708,7 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
         H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
 
     alloc_size = npoints * ndims * sizeof(ptdata[0]);
-    assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
+    HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
     if(NULL == (ptdata = (hsize_t *)HDmalloc((size_t) alloc_size)))
         HGOTO_ERROR(FALSE, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
 
@@ -1726,7 +1726,7 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
             stream, container, ndims, type_id, npoints, ptdata);
 
  done:
-    free(ptdata);
+    HDfree(ptdata);
 
     if(H5Tclose(type_id) < 0)
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");

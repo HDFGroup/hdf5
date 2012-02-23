@@ -2829,7 +2829,7 @@ static int test_group_recurse2(void)
      * datatype and default dataset creation properties.
      */
     dset1 = H5Dcreate2(fileid1, GRP_R_DSETNAME1, datatype, dataspace,
-			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Write the data to the dataset using default transfer properties.
@@ -2845,7 +2845,7 @@ static int test_group_recurse2(void)
      * datatype and default dataset creation properties.
      */
     dset1 = H5Dcreate2(grp3, GRP_R_DSETNAME1, datatype, dataspace,
-			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Write the data to the dataset using default transfer properties.
@@ -2860,7 +2860,7 @@ static int test_group_recurse2(void)
      * datatype and default dataset creation properties.
      */
     dset2 = H5Dcreate2(grp4, GRP_R_DSETNAME2, datatype, dataspace,
-			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Write the data to the dataset using default transfer properties.
@@ -2915,7 +2915,7 @@ static int test_group_recurse2(void)
      * datatype and default dataset creation properties.
      */
     dset2 = H5Dcreate2(grp4, GRP_R_DSETNAME2, datatype, dataspace,
-			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Write the data to the dataset using default transfer properties.
@@ -2960,7 +2960,7 @@ static int test_group_recurse2(void)
      * datatype and default dataset creation properties.
      */
     dset1 = H5Dcreate2(grp3, GRP_R_DSETNAME1, datatype, dataspace,
-			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Write the data to the dataset using default transfer properties.
@@ -3004,7 +3004,7 @@ static int test_group_recurse2(void)
      * dset1
      */
     dset1 = H5Dcreate2(fileid2, GRP_R_DSETNAME1, datatype, dataspace,
-			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Write the data to the dataset using default transfer properties.
@@ -6192,9 +6192,9 @@ void write_dset_in(hid_t loc_id,
     tid = H5Tvlen_create(H5T_NATIVE_INT);
     did = H5Dcreate2(loc_id, "vlen", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
-    assert(status >= 0);
+    HDassert(status >= 0);
     status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5);
-    assert(status >= 0);
+    HDassert(status >= 0);
     status = H5Dclose(did);
     status = H5Tclose(tid);
     status = H5Sclose(sid);
@@ -6230,7 +6230,7 @@ void write_dset_in(hid_t loc_id,
 
         /* allocate and initialize array data to write */
         size = ( H5TOOLS_MALLOCSIZE / sizeof(double) + 1 ) * sizeof(double);
-        dbuf = malloc( size );
+        dbuf = HDmalloc( size );
 
         for( j = 0; j < H5TOOLS_MALLOCSIZE / sizeof(double) + 1; j++)
             dbuf[j] = j;
@@ -6254,7 +6254,7 @@ void write_dset_in(hid_t loc_id,
         H5Dclose(did);
         H5Tclose(tid);
         H5Sclose(sid);
-        free( dbuf );
+        HDfree( dbuf );
     }
 
     /*-------------------------------------------------------------------------
@@ -6697,10 +6697,10 @@ void gen_datareg(hid_t fid,
     int             i;
 
     /* allocate the buffer for write the references */
-    rbuf = calloc((size_t)2, sizeof(hdset_reg_ref_t));
+    rbuf = HDcalloc((size_t)2, sizeof(hdset_reg_ref_t));
 
     /* allocate the buffer for write the data dataset */
-    buf = malloc(10 * 10 * sizeof(int));
+    buf = HDmalloc(10 * 10 * sizeof(int));
 
     for(i = 0; i < 10 * 10; i++)
         buf[i] = i;
@@ -6709,7 +6709,7 @@ void gen_datareg(hid_t fid,
     sid1   = H5Screate_simple(2, dims1, NULL);
     did1   = H5Dcreate2(fid, "dsetref", H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     /* create the reference dataset */
     sid2   = H5Screate_simple(1, dims2, NULL);
@@ -6726,12 +6726,12 @@ void gen_datareg(hid_t fid,
     }
 
     status = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL);
-    assert(status >= 0);
+    HDassert(status >= 0);
     H5Sget_select_npoints(sid1);
 
     /* store first dataset region */
     status = H5Rcreate(&rbuf[0], fid, "dsetref", H5R_DATASET_REGION, sid1);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     /* select sequence of five points for second reference */
     coord[0][0]=6; coord[0][1]=9;
@@ -6753,20 +6753,20 @@ void gen_datareg(hid_t fid,
 
     /* write */
     status = H5Dwrite(did2,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
     /* close, free memory buffers */
     status = H5Dclose(did1);
-    assert(status >= 0);
+    HDassert(status >= 0);
     status = H5Sclose(sid1);
-    assert(status >= 0);
+    HDassert(status >= 0);
     status = H5Dclose(did2);
-    assert(status >= 0);
+    HDassert(status >= 0);
     status = H5Sclose(sid2);
-    assert(status >= 0);
+    HDassert(status >= 0);
 
-    free(rbuf);
-    free(buf);
+    HDfree(rbuf);
+    HDfree(buf);
 }
 
 
@@ -6846,7 +6846,7 @@ int test_hyperslab(const char *fname,
         }
 
     }
-    free(buf);
+    HDfree(buf);
     buf=NULL;
 
     /* close */

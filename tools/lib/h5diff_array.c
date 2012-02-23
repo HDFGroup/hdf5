@@ -137,7 +137,7 @@ static int   not_comparable;
     is_zero=1;                                       \
 }
 
-#   define PDIFF(a,b)		( (b>a) ? (b-a) : (a-b))
+#   define PDIFF(a,b)    ( (b>a) ? (b-a) : (a-b))
 
 /*-------------------------------------------------------------------------
  * local prototypes
@@ -260,7 +260,7 @@ hsize_t diff_array( void *_mem1,
     switch (type_class)
     {
     default:
-        assert(0);
+        HDassert(0);
         break;
 
    /*-------------------------------------------------------------------------
@@ -440,10 +440,10 @@ hsize_t diff_datum(void       *_mem1,
     switch (H5Tget_class(m_type))
     {
     default:
-        assert(0);
+        HDassert(0);
         break;
     case H5T_TIME:
-        assert(0);
+        HDassert(0);
         break;
 
    /*-------------------------------------------------------------------------
@@ -705,7 +705,7 @@ hsize_t diff_datum(void       *_mem1,
             size      = H5Tget_size(memb_type);
             ndims     = H5Tget_array_ndims(m_type);
             H5Tget_array_dims2(m_type, adims);
-            assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
+            HDassert(ndims >= 1 && ndims <= H5S_MAX_RANK);
 
             /* calculate the number of array elements */
             for (u = 0, nelmts = 1; u <ndims; u++)
@@ -897,7 +897,7 @@ hsize_t diff_datum(void       *_mem1,
         {
             char        temp1_char;
             char        temp2_char;
-            assert(type_size==sizeof(char));
+            HDassert(type_size==sizeof(char));
             memcpy(&temp1_char, mem1, sizeof(char));
             memcpy(&temp2_char, mem2, sizeof(char));
             /* -d and !-p */
@@ -993,7 +993,7 @@ hsize_t diff_datum(void       *_mem1,
         {
             unsigned char      temp1_uchar;
             unsigned char      temp2_uchar;
-            assert(type_size==sizeof(unsigned char));
+            HDassert(type_size==sizeof(unsigned char));
 
             memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
             memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
@@ -1092,7 +1092,7 @@ hsize_t diff_datum(void       *_mem1,
         {
             short       temp1_short;
             short       temp2_short;
-            assert(type_size==sizeof(short));
+            HDassert(type_size==sizeof(short));
 
             memcpy(&temp1_short, mem1, sizeof(short));
             memcpy(&temp2_short, mem2, sizeof(short));
@@ -1191,7 +1191,7 @@ hsize_t diff_datum(void       *_mem1,
         {
             unsigned short       temp1_ushort;
             unsigned short       temp2_ushort;
-            assert(type_size==sizeof(short));
+            HDassert(type_size==sizeof(short));
 
             memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
             memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
@@ -1291,7 +1291,7 @@ hsize_t diff_datum(void       *_mem1,
         {
             int         temp1_int;
             int         temp2_int;
-            assert(type_size==sizeof(int));
+            HDassert(type_size==sizeof(int));
 
             memcpy(&temp1_int, mem1, sizeof(int));
             memcpy(&temp2_int, mem2, sizeof(int));
@@ -1389,7 +1389,7 @@ hsize_t diff_datum(void       *_mem1,
         {
             unsigned int         temp1_uint;
             unsigned int         temp2_uint;
-            assert(type_size==sizeof(int));
+            HDassert(type_size==sizeof(int));
 
             memcpy(&temp1_uint, mem1, sizeof(unsigned int));
             memcpy(&temp2_uint, mem2, sizeof(unsigned int));
@@ -1487,7 +1487,7 @@ hsize_t diff_datum(void       *_mem1,
         {
             long        temp1_long;
             long        temp2_long;
-            assert(type_size==sizeof(long));
+            HDassert(type_size==sizeof(long));
 
             memcpy(&temp1_long, mem1, sizeof(long));
             memcpy(&temp2_long, mem2, sizeof(long));
@@ -1587,7 +1587,7 @@ hsize_t diff_datum(void       *_mem1,
         {
             unsigned long        temp1_ulong;
             unsigned long        temp2_ulong;
-            assert(type_size==sizeof(unsigned long));
+            HDassert(type_size==sizeof(unsigned long));
 
             memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
             memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
@@ -1686,7 +1686,7 @@ hsize_t diff_datum(void       *_mem1,
         {
             long long        temp1_llong;
             long long        temp2_llong;
-            assert(type_size==sizeof(long long));
+            HDassert(type_size==sizeof(long long));
 
             memcpy(&temp1_llong, mem1, sizeof(long long));
             memcpy(&temp2_llong, mem2, sizeof(long long));
@@ -1784,7 +1784,7 @@ hsize_t diff_datum(void       *_mem1,
         {
             unsigned long long        temp1_ullong;
             unsigned long long        temp2_ullong;
-            assert(type_size==sizeof(unsigned long long));
+            HDassert(type_size==sizeof(unsigned long long));
 
             memcpy(&temp1_ullong, mem1, sizeof(unsigned long long));
             memcpy(&temp2_ullong, mem2, sizeof(unsigned long long));
@@ -1904,7 +1904,7 @@ hsize_t diff_datum(void       *_mem1,
             int   isnan1=0;
             int   isnan2=0;
 
-            assert(type_size==sizeof(float));
+            HDassert(type_size==sizeof(float));
 
             memcpy(&temp1_float, mem1, sizeof(float));
             memcpy(&temp2_float, mem2, sizeof(float));
@@ -2117,7 +2117,7 @@ hsize_t diff_datum(void       *_mem1,
             int    isnan1=0;
             int    isnan2=0;
 
-            assert(type_size==sizeof(double));
+            HDassert(type_size==sizeof(double));
 
             memcpy(&temp1_double, mem1, sizeof(double));
             memcpy(&temp2_double, mem2, sizeof(double));
@@ -2332,7 +2332,7 @@ hsize_t diff_datum(void       *_mem1,
             int         isnan2=0;
 
 
-            assert(type_size==sizeof(long double));
+            HDassert(type_size==sizeof(long double));
 
             memcpy(&temp1_double, mem1, sizeof(long double));
             memcpy(&temp2_double, mem2, sizeof(long double));
@@ -2668,13 +2668,13 @@ hsize_t diff_region(hid_t obj1_id,
     */
     if(nblocks1 > 0) {
         alloc_size = nblocks1 * ndims1 * 2 * sizeof(ptdata1[0]);
-        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+        HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
 
-        ptdata1 = malloc((size_t)alloc_size);
+        ptdata1 = HDmalloc((size_t)alloc_size);
         H5_CHECK_OVERFLOW(nblocks1, hssize_t, hsize_t);
         H5Sget_select_hyper_blocklist(region1_id, (hsize_t)0, (hsize_t)nblocks1, ptdata1);
 
-        ptdata2 = malloc((size_t)alloc_size);
+        ptdata2 = HDmalloc((size_t)alloc_size);
         H5_CHECK_OVERFLOW(nblocks2, hssize_t, hsize_t);
         H5Sget_select_hyper_blocklist(region2_id, (hsize_t)0, (hsize_t)nblocks2, ptdata2);
 
@@ -2723,13 +2723,13 @@ hsize_t diff_region(hid_t obj1_id,
     */
     if(npoints1 > 0) {
         alloc_size = npoints1 * ndims1 * sizeof(ptdata1[0]);
-        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+        HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
 
-        ptdata1 = malloc((size_t)alloc_size);
+        ptdata1 = HDmalloc((size_t)alloc_size);
         H5_CHECK_OVERFLOW(npoints1,hssize_t,hsize_t);
         H5Sget_select_elem_pointlist(region1_id, (hsize_t)0, (hsize_t)npoints1, ptdata1);
 
-        ptdata2 = malloc((size_t)alloc_size);
+        ptdata2 = HDmalloc((size_t)alloc_size);
         H5_CHECK_OVERFLOW(npoints1,hssize_t,hsize_t);
         H5Sget_select_elem_pointlist(region2_id, (hsize_t)0, (hsize_t)npoints2, ptdata2);
 
@@ -5591,7 +5591,7 @@ int ull2float(unsigned long long ull_value, float *f_value)
  memcpy(f_value, buf, dst_size);
 
  if(buf)
-  free(buf);
+     HDfree(buf);
 
  return 0;
 
@@ -5600,7 +5600,7 @@ error:
   H5Pclose(dxpl_id);
  } H5E_END_TRY;
  if(buf)
-  free(buf);
+     HDfree(buf);
 
  return -1;
 }
@@ -5774,13 +5774,13 @@ hbool_t equal_float(float value, float expected, diff_opt_t *options)
 
 
 /*-------------------------------------------------------------------------
- * Function:	my_isnan
+ * Function:  my_isnan
  *
- * Purpose:	Determines whether VAL points to NaN.
+ * Purpose:  Determines whether VAL points to NaN.
  *
- * Return:	TRUE or FALSE
+ * Return:  TRUE or FALSE
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, July  6, 1998
  *
  * Modifications:
@@ -5995,7 +5995,7 @@ void print_pos( int        *ph,       /* print header */
         pos[i] = curr_pos/acc[i];
         curr_pos -= acc[i]*pos[i];
     }
-    assert( curr_pos == 0 );
+    HDassert( curr_pos == 0 );
 
     if ( rank > 0 )
     {
@@ -6048,7 +6048,7 @@ void print_char_pos( int        *ph,       /* print header */
         pos[i] = curr_pos/acc[i];
         curr_pos -= acc[i]*pos[i];
     }
-    assert( curr_pos == 0 );
+    HDassert( curr_pos == 0 );
 
     parallel_print("[ " );
     if ( rank > 0 )

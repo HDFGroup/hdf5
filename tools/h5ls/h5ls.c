@@ -828,7 +828,7 @@ display_cmpd_type(hid_t type, int ind)
         n = display_string(stdout, name, FALSE);
         printf("\"%*s +%-4lu ", MAX(0, 16-n), "",
                (unsigned long)H5Tget_member_offset(type, i));
-        free(name);
+        HDfree(name);
 
         /* Member's type */
         subtype = H5Tget_member_type(type, i);
@@ -874,7 +874,7 @@ display_enum_type(hid_t type, int ind)
 
     if (H5T_ENUM!=H5Tget_class(type)) return FALSE;
     nmembs = H5Tget_nmembers(type);
-    assert(nmembs>0);
+    HDassert(nmembs>0);
     super = H5Tget_super(type);
     printf("enum ");
     display_type(super, ind+4);
@@ -936,9 +936,9 @@ display_enum_type(hid_t type, int ind)
     }
 
     /* Release resources */
-    for (i=0; i<nmembs; i++) free(name[i]);
-    free(name);
-    free(value);
+    for (i=0; i<nmembs; i++) HDfree(name[i]);
+    HDfree(name);
+    HDfree(value);
     H5Tclose(super);
 
     if (0==nmembs) printf("\n%*s <empty>", ind+4, "");
@@ -1113,7 +1113,7 @@ display_opaque_type(hid_t type, int ind)
         printf("\n%*s(tag = \"", ind, "");
         display_string(stdout, tag, FALSE);
         printf("\")");
-        free(tag);
+        HDfree(tag);
     }
     return TRUE;
 }
@@ -1172,7 +1172,7 @@ display_array_type(hid_t type, int ind)
     if (H5T_ARRAY!=H5Tget_class(type)) return FALSE;
     ndims = H5Tget_array_ndims(type);
     if (ndims) {
-        dims = (hsize_t *)malloc(ndims*sizeof(dims[0]));
+        dims = (hsize_t *)HDmalloc(ndims*sizeof(dims[0]));
         H5Tget_array_dims2(type, dims);
 
         /* Print dimensions */
@@ -1180,7 +1180,7 @@ display_array_type(hid_t type, int ind)
             HDfprintf(stdout, "%s%Hu" , i?",":"[", dims[i]);
         putchar(']');
 
-        free(dims);
+        HDfree(dims);
     } else {
         fputs(" [SCALAR]", stdout);
     }
@@ -1908,7 +1908,7 @@ print_cmpd_type(h5tools_str_t *buffer, hid_t type, int ind)
         n = print_string(buffer, name, FALSE);
         h5tools_str_append(buffer, "\"%*s +%-4lu ", MAX(0, 16-n), "",
                (unsigned long)H5Tget_member_offset(type, i));
-        free(name);
+        HDfree(name);
 
         /* Member's type */
         subtype = H5Tget_member_type(type, i);
@@ -1954,7 +1954,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
 
     if (H5T_ENUM!=H5Tget_class(type)) return FALSE;
     nmembs = H5Tget_nmembers(type);
-    assert(nmembs>0);
+    HDassert(nmembs>0);
     super = H5Tget_super(type);
     h5tools_str_append(buffer, "enum ");
     print_type(buffer, super, ind+4);
@@ -2017,9 +2017,9 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
     }
 
     /* Release resources */
-    for (i=0; i<nmembs; i++) free(name[i]);
-    free(name);
-    free(value);
+    for (i=0; i<nmembs; i++) HDfree(name[i]);
+    HDfree(name);
+    HDfree(value);
     H5Tclose(super);
 
     if (0==nmembs) h5tools_str_append(buffer, "\n%*s <empty>", ind+4, "");
@@ -2197,7 +2197,7 @@ print_opaque_type(h5tools_str_t *buffer, hid_t type, int ind)
         h5tools_str_append(buffer, "\n%*s(tag = \"", ind, "");
         print_string(buffer, tag, FALSE);
         h5tools_str_append(buffer, "\")");
-        free(tag);
+        HDfree(tag);
     }
     return TRUE;
 }
@@ -2256,15 +2256,15 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
     if (H5T_ARRAY!=H5Tget_class(type)) return FALSE;
     ndims = H5Tget_array_ndims(type);
     if (ndims) {
-        dims = (hsize_t *)malloc(ndims*sizeof(dims[0]));
+        dims = (hsize_t *)HDmalloc(ndims*sizeof(dims[0]));
         H5Tget_array_dims2(type, dims);
 
         /* Print dimensions */
         for (i=0; i<ndims; i++)
-            h5tools_str_append(buffer, "%s%"H5_PRINTF_LL_WIDTH"u" , i?",":"[", dims[i]);
+            h5tools_str_append(buffer, "%s" HSIZE_T_FORMAT , i?",":"[", dims[i]);
         h5tools_str_append(buffer, "]");
 
-        free(dims);
+        HDfree(dims);
     } 
     else {
         h5tools_str_append(buffer, " [SCALAR]\n", stdout);
@@ -2586,7 +2586,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
                 /* simple dataspace */
                 h5tools_str_append(&buffer, " {");
                 for (i=0; i<ndims; i++) {
-                    h5tools_str_append(&buffer, "%s%"H5_PRINTF_LL_WIDTH"u", i?", ":"", size[i]);
+                    h5tools_str_append(&buffer, "%s" HSIZE_T_FORMAT, i?", ":"", size[i]);
                     nelmts *= size[i];
                 }
                 h5tools_str_append(&buffer, "}\n");
@@ -2676,10 +2676,10 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
                 vl_data = TRUE;
 
             temp_need= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
-            assert(temp_need == (hsize_t)((size_t)temp_need));
+            HDassert(temp_need == (hsize_t)((size_t)temp_need));
             need = (size_t)temp_need;
-            buf = malloc(need);
-            assert(buf);
+            buf = HDmalloc(need);
+            HDassert(buf);
             if(H5Aread(attr, p_type, buf) >= 0) {
                 ctx.need_prefix = TRUE;
                 ctx.indent_level = 2;
@@ -2691,7 +2691,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
             if (vl_data)
                 H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
 
-            free(buf);
+            HDfree(buf);
             H5Tclose(p_type);
         } /* end if */
         fprintf(stdout, "\n");
@@ -3115,7 +3115,7 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
     h5tool_link_info_t lnk_info;
 
     /* init linkinfo struct */
-    memset(&lnk_info, 0, sizeof(h5tool_link_info_t));
+    HDmemset(&lnk_info, 0, sizeof(h5tool_link_info_t));
 
     /* if verbose, make H5tools_get_symlink_info() display more */
     if (verbose_g)

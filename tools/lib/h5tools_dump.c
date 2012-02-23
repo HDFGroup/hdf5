@@ -448,10 +448,10 @@ h5tools_print_region_data_blocks(hid_t region_id,
     h5tools_context_t ctx;
     void        *region_buf = NULL;
 
-    assert(info);
-    assert(cur_ctx);
-    assert(buffer);
-    assert(ptdata);
+    HDassert(info);
+    HDassert(cur_ctx);
+    HDassert(buffer);
+    HDassert(ptdata);
 
     HDmemset(&ctx, 0, sizeof(ctx));
     /* Get the dataspace of the dataset */
@@ -608,9 +608,9 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
     hid_t        type_id = -1;
     int          i;
 
-    assert(info);
-    assert(ctx);
-    assert(buffer);
+    HDassert(info);
+    HDassert(ctx);
+    HDassert(buffer);
 
     if((nblocks = H5Sget_select_hyper_nblocks(region_space)) <= 0)
         H5E_THROW(dimension_break, H5E_tools_min_id_g, "H5Sget_select_hyper_nblocks failed");
@@ -634,7 +634,7 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
     h5tools_str_append(buffer, "REGION_TYPE BLOCK  ");
 
     alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
-    assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
+    HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
     if((ptdata = (hsize_t*) HDmalloc((size_t) alloc_size)) == NULL)
         HGOTO_ERROR(dimension_break, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
 
@@ -650,12 +650,12 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
 
         /* Start coordinates and opposite corner */
         for (j = 0; j < ndims; j++)
-            h5tools_str_append(buffer, "%s%lu", j ? "," : "(",
-                                (unsigned long) ptdata[i * 2 * ndims + j]);
+            h5tools_str_append(buffer, "%s" HSIZE_T_FORMAT, j ? "," : "(",
+                                ptdata[i * 2 * ndims + j]);
 
         for (j = 0; j < ndims; j++)
-            h5tools_str_append(buffer, "%s%lu", j ? "," : ")-(",
-                                (unsigned long) ptdata[i * 2 * ndims + j + ndims]);
+            h5tools_str_append(buffer, "%s" HSIZE_T_FORMAT, j ? "," : ")-(",
+                                ptdata[i * 2 * ndims + j + ndims]);
 
         h5tools_str_append(buffer, ")");
     } /* end for (i = 0; i < nblocks; i++) */
@@ -799,10 +799,10 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id,
     void    *region_buf = NULL;
     h5tools_context_t ctx;
 
-    assert(info);
-    assert(cur_ctx);
-    assert(buffer);
-    assert(ptdata);
+    HDassert(info);
+    HDassert(cur_ctx);
+    HDassert(buffer);
+    HDassert(ptdata);
 
     HDmemset(&ctx, 0, sizeof(ctx));
     /* Allocate space for the dimension array */
@@ -929,9 +929,9 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
     hid_t    dtype;
     hid_t    type_id;
 
-    assert(info);
-    assert(ctx);
-    assert(buffer);
+    HDassert(info);
+    HDassert(ctx);
+    HDassert(buffer);
 
     if((npoints = H5Sget_select_elem_npoints(region_space)) <= 0)
         H5E_THROW(dimension_break, H5E_tools_min_id_g, "H5Sget_select_elem_npoints failed");
@@ -955,7 +955,7 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
     h5tools_str_append(buffer, "REGION_TYPE POINT  ");
 
     alloc_size = npoints * ndims * sizeof(ptdata[0]);
-    assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
+    HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
     if(NULL == (ptdata = (hsize_t *)HDmalloc((size_t) alloc_size)))
         HGOTO_ERROR(dimension_break, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
 
@@ -970,8 +970,8 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
                             indx ? "," OPTIONAL_LINE_BREAK " " : "", (unsigned long) indx);
 
         for (loop_indx = 0; loop_indx < ndims; loop_indx++)
-            h5tools_str_append(buffer, "%s%lu", loop_indx ? "," : "(",
-                                (unsigned long) (ptdata[indx * ndims + loop_indx]));
+            h5tools_str_append(buffer, "%s" HSIZE_T_FORMAT, loop_indx ? "," : "(",
+                                ptdata[indx * ndims + loop_indx]);
 
         h5tools_str_append(buffer, ")");
     } /* end for (indx = 0; indx < npoints; indx++) */
@@ -1196,10 +1196,10 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
                         size = 1;
                     sm_size[i - 1] = MIN(total_size[i - 1], size);
                     sm_nbytes *= sm_size[i - 1];
-                    assert(sm_nbytes > 0);
+                    HDassert(sm_nbytes > 0);
                 }
 
-            assert(sm_nbytes == (hsize_t) ((size_t) sm_nbytes)); /*check for overflow*/
+            HDassert(sm_nbytes == (hsize_t) ((size_t) sm_nbytes)); /*check for overflow*/
             if(NULL == (sm_buf = (unsigned char *)HDmalloc((size_t) sm_nelmts * p_type_nbytes)))
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "Could not allocate buffer for strip-mine");
 
@@ -1582,14 +1582,14 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
                 size = 1;
             sm_size[i - 1] = MIN(total_size[i - 1], size);
             sm_nbytes *= sm_size[i - 1];
-            assert(sm_nbytes > 0);
+            HDassert(sm_nbytes > 0);
         }
     }
 
     if(!sm_nbytes)
         goto done;
 
-    assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
+    HDassert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
     sm_buf = (unsigned char *)HDmalloc((size_t)sm_nbytes);
 
     sm_nelmts = sm_nbytes / p_type_nbytes;
@@ -1700,7 +1700,7 @@ h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, h5tools_conte
     if (nelmts == 0)
         return SUCCEED; /*nothing to print*/
     if (ctx->ndims > 0) {
-        assert(ctx->p_max_idx[ctx->ndims - 1] == (hsize_t) ((int) ctx->p_max_idx[ctx->ndims - 1]));
+        HDassert(ctx->p_max_idx[ctx->ndims - 1] == (hsize_t) ((int) ctx->p_max_idx[ctx->ndims - 1]));
         ctx->size_last_dim = (int) (ctx->p_max_idx[ctx->ndims - 1]);
     } /* end if */
     else
@@ -2390,7 +2390,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
             if(H5Tget_array_dims2(type, dims) >= 0) {
                 /* Print array dimensions */
                 for (i = 0; i < ndims; i++)
-                    h5tools_str_append(buffer, "[%d]", (int) dims[i]);
+                    h5tools_str_append(buffer, "[" HSIZE_T_FORMAT "]", dims[i]);
 
                 h5tools_str_append(buffer, " ");
             }
@@ -2461,12 +2461,12 @@ h5tools_print_dataspace(FILE *stream, h5tools_str_t *buffer, const h5tool_format
 
     case H5S_SIMPLE:
         /* simple dataspace */
-        h5tools_str_append(buffer, "%s %s { %s %" H5_PRINTF_LL_WIDTH "u",
+        h5tools_str_append(buffer, "%s %s { %s " HSIZE_T_FORMAT,
                             h5tools_dump_header_format->dataspacedescriptionbegin, S_SIMPLE,
                             h5tools_dump_header_format->dataspacedimbegin, size[0]);
 
         for(i = 1; i < ndims; i++)
-            h5tools_str_append(buffer, ", %" H5_PRINTF_LL_WIDTH "u", size[i]);
+            h5tools_str_append(buffer, ", " HSIZE_T_FORMAT, size[i]);
 
         h5tools_str_append(buffer, " %s / ", h5tools_dump_header_format->dataspacedimend);
 
@@ -2474,14 +2474,14 @@ h5tools_print_dataspace(FILE *stream, h5tools_str_t *buffer, const h5tool_format
             h5tools_str_append(buffer, "%s %s",
                                 h5tools_dump_header_format->dataspacedimbegin, "H5S_UNLIMITED");
         else
-            h5tools_str_append(buffer, "%s %" H5_PRINTF_LL_WIDTH "u",
+            h5tools_str_append(buffer, "%s " HSIZE_T_FORMAT,
                                 h5tools_dump_header_format->dataspacedimbegin, maxsize[0]);
 
         for(i = 1; i < ndims; i++)
             if(maxsize[i] == H5S_UNLIMITED)
                 h5tools_str_append(buffer, ", %s", "H5S_UNLIMITED");
             else
-                h5tools_str_append(buffer, ", %" H5_PRINTF_LL_WIDTH "u", maxsize[i]);
+                h5tools_str_append(buffer, ", " HSIZE_T_FORMAT, maxsize[i]);
 
         h5tools_str_append(buffer, " %s }", h5tools_dump_header_format->dataspacedimend);
         break;
@@ -2539,7 +2539,7 @@ h5tools_print_enum(FILE *stream, h5tools_str_t *buffer, const h5tool_format_t *i
     if((snmembs = H5Tget_nmembers(type)) < 0)
         H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_nmembers failed");
     nmembs = (unsigned)snmembs;
-    assert(nmembs > 0);
+    HDassert(nmembs > 0);
 
     if((super = H5Tget_super(type)) < 0)
         H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_super failed");
@@ -2611,7 +2611,7 @@ h5tools_print_enum(FILE *stream, h5tools_str_t *buffer, const h5tool_format_t *i
             /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
              *strangely, unless use another pointer "copy".*/
             copy = value + i * dst_size;
-            h5tools_str_append(buffer, "%" H5_PRINTF_LL_WIDTH "u", *((unsigned long long *) ((void *) copy)));
+            h5tools_str_append(buffer, HSIZE_T_FORMAT, *((unsigned long long *) ((void *) copy)));
         }
         else {
             /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
@@ -2890,9 +2890,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         h5tools_str_append(&buffer, "%s ", CHUNKED);
 
         rank = H5Pget_chunk(dcpl_id,NELMTS(chsize),chsize);
-        h5tools_str_append(&buffer, "%s %" H5_PRINTF_LL_WIDTH "u", h5tools_dump_header_format->dataspacedimbegin, chsize[0]);
+        h5tools_str_append(&buffer, "%s " HSIZE_T_FORMAT, h5tools_dump_header_format->dataspacedimbegin, chsize[0]);
         for(i = 1; i < rank; i++)
-            h5tools_str_append(&buffer, ", %" H5_PRINTF_LL_WIDTH "u", chsize[i]);
+            h5tools_str_append(&buffer, ", " HSIZE_T_FORMAT, chsize[i]);
         h5tools_str_append(&buffer, " %s", h5tools_dump_header_format->dataspacedimend);
         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
 
@@ -2942,18 +2942,18 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 if(storage_size != 0)
                     ratio = (double) uncomp_size / (double) storage_size;
 
-                h5tools_str_append(&buffer, "SIZE %" H5_PRINTF_LL_WIDTH "u (%.3f:1 COMPRESSION)", storage_size, ratio);
+                h5tools_str_append(&buffer, "SIZE " HSIZE_T_FORMAT" (%.3f:1 COMPRESSION)", storage_size, ratio);
 
             }
             else
-                h5tools_str_append(&buffer, "SIZE %" H5_PRINTF_LL_WIDTH "u", storage_size);
+                h5tools_str_append(&buffer, "SIZE " HSIZE_T_FORMAT, storage_size);
 
             H5Sclose(sid);
             H5Tclose(tid);
 
         }
         else {
-            h5tools_str_append(&buffer, "SIZE %" H5_PRINTF_LL_WIDTH "u", storage_size);
+            h5tools_str_append(&buffer, "SIZE " HSIZE_T_FORMAT, storage_size);
         }
         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
 
@@ -2980,7 +2980,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
         
         h5tools_str_reset(&buffer);
-        h5tools_str_append(&buffer, "SIZE %" H5_PRINTF_LL_WIDTH "u", storage_size);
+        h5tools_str_append(&buffer, "SIZE " HSIZE_T_FORMAT, storage_size);
         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
 
         ctx->indent_level--;
@@ -3026,7 +3026,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
                 
                 h5tools_str_reset(&buffer);
-                h5tools_str_append(&buffer, "FILENAME %s SIZE %" H5_PRINTF_LL_WIDTH "u", name, size);
+                h5tools_str_append(&buffer, "FILENAME %s SIZE " HSIZE_T_FORMAT, name, size);
                 h5tools_str_append(&buffer, " OFFSET %ld", offset);
                 h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
             }
@@ -3062,7 +3062,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
             
             h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer,"SIZE %" H5_PRINTF_LL_WIDTH "u", storage_size);
+            h5tools_str_append(&buffer,"SIZE " HSIZE_T_FORMAT, storage_size);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
 
             ctx->need_prefix = TRUE;
@@ -3289,7 +3289,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             h5tools_str_append(&buffer, "%s", "H5D_FILL_TIME_IFSET");
             break;
         default:
-            assert(0);
+            HDassert(0);
             break;
     }
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
@@ -3346,7 +3346,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             h5tools_str_append(&buffer, "%s", "H5D_ALLOC_TIME_LATE");
             break;
         default:
-            assert(0);
+            HDassert(0);
             break;
     }
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
@@ -3823,11 +3823,11 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info,
                 nelmts *= size[i];
 
             alloc_size = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
-            assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+            HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
 
             if(alloc_size) {
                 buf = HDmalloc((size_t)alloc_size);
-                assert(buf);
+                HDassert(buf);
 
                 if (H5Aread(obj_id, p_type, buf) >= 0)
                     if (display_char && H5Tget_size(type) == 1 && H5Tget_class(type) == H5T_INTEGER) {

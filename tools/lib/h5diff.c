@@ -154,7 +154,7 @@ void print_manager_output(void)
         }
 
         fflush(stdout);
-        memset(outBuff, 0, OUTBUFF_SIZE);
+        HDmemset(outBuff, 0, OUTBUFF_SIZE);
         outBuffOffset = 0;
     }
     else if( (outBuffOffset>0) && !g_Parallel)
@@ -189,7 +189,7 @@ static void print_incoming_data(void)
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &incomingMessage, &Status);
         if(incomingMessage)
         {
-            memset(data, 0, PRINT_DATA_MAX_SIZE+1);
+            HDmemset(data, 0, PRINT_DATA_MAX_SIZE+1);
             MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
 
             printf("%s", data);
@@ -531,7 +531,7 @@ static herr_t trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
     const char *ext_path;
 
     /* init linkinfo struct */
-    memset(&lnk_info, 0, sizeof(h5tool_link_info_t));
+    HDmemset(&lnk_info, 0, sizeof(h5tool_link_info_t));
 
     if (!opts->follow_links)
     {
@@ -1474,7 +1474,7 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
     } /* end if */
     h5diffdebug("done with if block\n");
 
-    free(workerTasks);
+    HDfree(workerTasks);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1938,7 +1938,7 @@ hsize_t diff(hid_t file1_id,
         *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_DATASET:
-			/* verbose (-v) and report (-r) mode */
+      /* verbose (-v) and report (-r) mode */
             if(options->m_verbose || options->m_report)
             {
                 do_print_objname("dataset", path1, path2, options);
@@ -1950,7 +1950,7 @@ hsize_t diff(hid_t file1_id,
             {
                 nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
             }
-			/* the rest (-c, none, ...) */
+      /* the rest (-c, none, ...) */
             else
             {
                 nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
@@ -1958,7 +1958,7 @@ hsize_t diff(hid_t file1_id,
                 if (nfound)
                 {
                     do_print_objname("dataset", path1, path2, options);
-                    print_found(nfound);	
+                    print_found(nfound);  
                 }
             }
             break;

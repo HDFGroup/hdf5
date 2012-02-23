@@ -26,12 +26,12 @@
 #include <assert.h>
 #include "hdf5.h"
 
-#define FILE 		"h5stat_newgrat.h5"
-#define DATASET_NAME	"DATASET_NAME"
-#define GROUP_NAME	"GROUP"
-#define ATTR_NAME	"ATTR"
-#define NUM_GRPS 	35000
-#define NUM_ATTRS	100
+#define FILE     "h5stat_newgrat.h5"
+#define DATASET_NAME  "DATASET_NAME"
+#define GROUP_NAME  "GROUP"
+#define ATTR_NAME  "ATTR"
+#define NUM_GRPS   35000
+#define NUM_ATTRS  100
 
 /*
  * Generate 1.8 HDF5 file
@@ -40,27 +40,27 @@
  */
 static void gen_file(void)
 {
-    hid_t	fcpl; 	/* File creation property */
-    hid_t	fapl; 	/* File access property */
-    hid_t   	file;	/* File id */
-    hid_t	gid;	/* Group id */
-    hid_t	type_id;	/* Datatype id */
-    hid_t	space_id; 	/* Dataspace id */
-    hid_t	attr_id; 	/* Attribute id */
-    hid_t	dset_id;	/* Dataset id */
-    char	name[30];	/* Group name */
-    char	attrname[30];	/* Attribute name */
-    int     	ret;	/* Return value */
-    int 	i;	/* Local index variable */
+    hid_t  fcpl;   /* File creation property */
+    hid_t  fapl;   /* File access property */
+    hid_t     file;  /* File id */
+    hid_t  gid;  /* Group id */
+    hid_t  type_id;  /* Datatype id */
+    hid_t  space_id;   /* Dataspace id */
+    hid_t  attr_id;   /* Attribute id */
+    hid_t  dset_id;  /* Dataset id */
+    char  name[30];  /* Group name */
+    char  attrname[30];  /* Attribute name */
+    int       ret;  /* Return value */
+    int   i;  /* Local index variable */
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
     /* Set file space handling strategy */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
     ret = H5Pset_file_space(fcpl, H5F_FILE_SPACE_ALL_PERSIST, (hsize_t)0);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
      /* Create dataset */
     file = H5Fcreate(FILE, H5F_ACC_TRUNC, fcpl, fapl);
@@ -82,17 +82,17 @@ static void gen_file(void)
         sprintf(attrname, "%s%d", ATTR_NAME,i);
         attr_id = H5Acreate2(dset_id, attrname, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
         ret = H5Aclose(attr_id);
-        assert(ret >= 0);
+        HDassert(ret >= 0);
     } /* end for */
 
     ret = H5Dclose(dset_id);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
     ret = H5Sclose(space_id);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
     ret = H5Tclose(type_id);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
     ret = H5Fclose(file);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 }
 
 int main(void)

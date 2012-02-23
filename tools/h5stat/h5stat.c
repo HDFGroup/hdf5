@@ -319,7 +319,7 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
     bin = ceil_log10((unsigned long)oi->num_attrs);
     if((bin + 1) > iter->attr_nbins) {
   iter->attr_bins = (unsigned long *)realloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
-        assert(iter->attr_bins);
+        HDassert(iter->attr_bins);
 
   /* Initialize counts for intermediate bins */
         while(iter->attr_nbins < bin)
@@ -378,7 +378,7 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Get group information */
     ret = H5Gget_info_by_name(iter->fid, name, &ginfo, H5P_DEFAULT);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
     /* Update link stats */
     if(ginfo.nlinks < SIZE_SMALL_GROUPS)
@@ -391,7 +391,7 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     if((bin + 1) > iter->group_nbins) {
         /* Allocate more storage for info about dataset's datatype */
         iter->group_bins = (unsigned long *)realloc(iter->group_bins, (bin + 1) * sizeof(unsigned long));
-        assert(iter->group_bins);
+        HDassert(iter->group_bins);
 
   /* Initialize counts for intermediate bins */
         while(iter->group_nbins < bin)
@@ -410,7 +410,7 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Update attribute metadata info */
     ret = attribute_stats(iter, oi);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
     return 0;
 } /* end group_stats() */
@@ -458,7 +458,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     iter->dset_ohdr_info.free_size += oi->hdr.space.free;
 
     did = H5Dopen2(iter->fid, name, H5P_DEFAULT);
-    assert(did > 0);
+    HDassert(did > 0);
 
     /* Update dataset metadata info */
     iter->datasets_index_storage_size += oi->meta_size.obj.index_size;
@@ -466,17 +466,17 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Update attribute metadata info */
     ret = attribute_stats(iter, oi);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
     /* Get storage info */
     storage = H5Dget_storage_size(did);
 
     /* Gather layout statistics */
     dcpl = H5Dget_create_plist(did);
-    assert(dcpl > 0);
+    HDassert(dcpl > 0);
 
     lout = H5Pget_layout(dcpl);
-    assert(lout >= 0);
+    HDassert(lout >= 0);
 
     /* Object header's total size for H5D_COMPACT layout includes raw data size */
     /* "storage" also includes H5D_COMPACT raw data size */
@@ -499,10 +499,10 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Gather dataspace statistics */
     sid = H5Dget_space(did);
-    assert(sid > 0);
+    HDassert(sid > 0);
 
     ndims = H5Sget_simple_extent_dims(sid, dims, NULL);
-    assert(ndims >= 0);
+    HDassert(ndims >= 0);
 
     /* Check for larger rank of dataset */
     if((unsigned)ndims > iter->max_dset_rank)
@@ -522,7 +522,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
        if((bin + 1) > iter->dset_dim_nbins) {
           /* Allocate more storage for info about dataset's datatype */
           iter->dset_dim_bins = (unsigned long *)realloc(iter->dset_dim_bins, (bin + 1) * sizeof(unsigned long));
-          assert(iter->dset_dim_bins);
+          HDassert(iter->dset_dim_bins);
 
           /* Initialize counts for intermediate bins */
           while(iter->dset_dim_nbins < bin)
@@ -537,11 +537,11 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     } /* end if */
 
     ret = H5Sclose(sid);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
     /* Gather datatype statistics */
     tid = H5Dget_type(did);
-    assert(tid > 0);
+    HDassert(tid > 0);
 
     type_found = FALSE;
     for(u = 0; u < iter->dset_ntypes; u++)
@@ -559,11 +559,11 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
         /* Allocate more storage for info about dataset's datatype */
         iter->dset_type_info = (dtype_info_t *)realloc(iter->dset_type_info, iter->dset_ntypes * sizeof(dtype_info_t));
-        assert(iter->dset_type_info);
+        HDassert(iter->dset_type_info);
 
         /* Initialize information about datatype */
         iter->dset_type_info[curr_ntype].tid = H5Tcopy(tid);
-        assert(iter->dset_type_info[curr_ntype].tid > 0);
+        HDassert(iter->dset_type_info[curr_ntype].tid > 0);
         iter->dset_type_info[curr_ntype].count = 1;
         iter->dset_type_info[curr_ntype].named = 0;
 
@@ -576,7 +576,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
         (iter->dset_type_info[u].named)++;
 
     ret = H5Tclose(tid);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
     /* Track different filters */
     if((nfltr = H5Pget_nfilters(dcpl)) >= 0) {
@@ -594,10 +594,10 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     } /* endif nfltr */
 
      ret = H5Pclose(dcpl);
-     assert(ret >= 0);
+     HDassert(ret >= 0);
 
      ret = H5Dclose(did);
-     assert(ret >= 0);
+     HDassert(ret >= 0);
 
      return 0;
 }  /* end dataset_stats() */
@@ -628,7 +628,7 @@ datatype_stats(iter_t *iter, const H5O_info_t *oi)
 
     /* Update attribute metadata info */
     ret = attribute_stats(iter, oi);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
      return 0;
 }  /* end datatype_stats() */
@@ -744,7 +744,7 @@ freespace_stats(hid_t fid, iter_t *iter)
   if(NULL == (sect_info = (H5F_sect_info_t *)calloc((size_t)nsects, sizeof(H5F_sect_info_t))))
       return(FAIL);
   nsects = H5Fget_free_sections(fid, H5FD_MEM_DEFAULT, (size_t)nsects, sect_info);
-  assert(nsects);
+  HDassert(nsects);
     } /* end else-if */
 
     for(u = 0; u < (size_t)nsects; u++) {
@@ -758,7 +758,7 @@ freespace_stats(hid_t fid, iter_t *iter)
         if(bin >= iter->sect_nbins) {
             /* Allocate more storage for section info */
             iter->sect_bins = (unsigned long *)realloc(iter->sect_bins, (bin + 1) * sizeof(unsigned long));
-            assert(iter->sect_bins);
+            HDassert(iter->sect_bins);
 
             /* Initialize counts for intermediate bins */
             while(iter->sect_nbins < bin)
@@ -1651,7 +1651,7 @@ main(int argc, const char *argv[])
 
     if(H5Fget_filesize(fid, &iter.filesize) < 0)
         warn_msg("Unable to retrieve file size\n");
-    assert(iter.filesize != 0);
+    HDassert(iter.filesize != 0);
 
     /* Get storge info for file-level structures */
     if(H5Fget_info2(fid, &finfo) < 0)
@@ -1674,7 +1674,7 @@ main(int argc, const char *argv[])
 
     if(H5Pget_file_space(fcpl, &iter.fs_strategy, &iter.fs_threshold) < 0)
         warn_msg("Unable to retrieve file space information\n");
-    assert(iter.fs_strategy != 0 && iter.fs_strategy < H5F_FILE_SPACE_NTYPES);
+    HDassert(iter.fs_strategy != 0 && iter.fs_strategy < H5F_FILE_SPACE_NTYPES);
 
     /* get information for free-space sections */
     if(freespace_stats(fid, &iter) < 0)

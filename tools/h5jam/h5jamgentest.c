@@ -310,18 +310,18 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   {
         HDassert(ub_size <= BUF_SIZE);
 
-	fd = HDopen(filename, O_RDWR, 0);
+  fd = HDopen(filename, O_RDWR, 0);
         HDassert(fd >= 0);
 
-	/* fill buf with pattern */
-	HDmemset(buf, '\0', ub_size);
-	bp = buf;
-	for (u = 0; u < ub_fill; u++)
+  /* fill buf with pattern */
+  HDmemset(buf, '\0', ub_size);
+  bp = buf;
+  for (u = 0; u < ub_fill; u++)
             *bp++ = pattern[u % 10];
 
-	HDwrite(fd, buf, ub_size);
+  HDwrite(fd, buf, ub_size);
 
-	HDclose(fd);
+  HDclose(fd);
   }
 }
 
@@ -334,9 +334,9 @@ create_textfile(const char *name, size_t size)
     char *bp;
 
     fd = HDcreat(name,0777);
-    assert(fd >= 0);
+    HDassert(fd >= 0);
     buf = calloc(size, (size_t)1);
-    assert(buf);
+    HDassert(buf);
 
     /* fill buf with pattern */
     bp = buf;
@@ -345,7 +345,7 @@ create_textfile(const char *name, size_t size)
 
     HDwrite(fd, buf, size);
 
-    free(buf);
+    HDfree(buf);
 
     HDclose(fd);
 }
