@@ -123,15 +123,10 @@ char *
 h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
 {
     va_list ap;
-    hbool_t isReallocated = FALSE;
 
     /* Make sure we have some memory into which to print */
     if (!str->s || str->nalloc <= 0) {
-        str->nalloc = STR_INIT_LEN;
-        str->s = HDmalloc(str->nalloc);
-        HDassert(str->s);
-        str->s[0] = '\0';
-        str->len = 0;
+        h5tools_str_reset(str);
     }
 
     if (HDstrlen(fmt) == 0) {
@@ -155,12 +150,16 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
          * buffer size with NULL at the end of the buffer. However on 
          * Windows with the same condition, this function returns -1 and 
          * doesn't add NULL at the end of the buffer.
-         * Because of this different return results, isReallocated variable
+         * Because of this different return results, the strlen of the new string
          * is used to handle when HDvsnprintf() returns -1 on Windows due
          * to lack of buffer size, so try one more time after realloc more
          * buffer size before return NULL. 
          */
-        if (nchars < 0 && isReallocated == TRUE) {
+        if (nchars < 0 
+#ifndef H5_VSNPRINTF_WORKS
+                && (strlen(str->s) < str->nalloc)
+#endif
+                ) {
             /* failure, such as bad format */
             return NULL;
         }
@@ -177,7 +176,6 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
             str->s = HDrealloc(str->s, newsize);
             HDassert(str->s);
             str->nalloc = newsize;
-            isReallocated = TRUE;
         }
         else {
             /* Success */
