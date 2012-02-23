@@ -4,7 +4,7 @@ GROUP "/" {
       DATATYPE  H5T_STD_I32LE
       DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
       DATA {
-               }
+      }
    }
 }
 }

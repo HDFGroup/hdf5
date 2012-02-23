@@ -1,4 +1,4 @@
-HDF5 version 1.9.106 currently under development
+HDF5 version 1.9.109 currently under development
 ================================================================================
 
 
@@ -239,6 +239,12 @@ New Features
 
     Tools:
     ------
+     - h5dump: Added new option --no-compact-subset. This option will not
+               interpret the '[' character as starting the compact form of 
+               subsetting. This is useful when the "h5dump error: unable to 
+               open dataset "datset_name"" message is output because a dataset
+               name contains a '[' character.(JIRA HDFFV-7689).
+               (ADB - 2012/01/31)
      - h5dump: Corrected schema location: 
                <hdf5:HDF5-File 
                xmlns:hdf5="http://hdfgroup.org/HDF5/XML/schema/HDF5-File" 
@@ -343,6 +349,9 @@ Bug Fixes since HDF5-1.8.0 release
     Library
     -------
 
+      - Creating a dataset in a read-only file caused seg fault when the file 
+            is closed.  It's fixed.  The error stack is returned correctly
+            now. (SLU - 2012/1/25. Issue 7756)
       - Fixed a seg fault that could occur when shrinking a dataset with chunks
             larger than 1 MB. (NAF - 2011/11/30 - HDFFV-7833)
       - The library allowed the conversion of strings between ASCII and UTF8
@@ -632,6 +641,13 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5dump: Refactored code to remove duplicated functions. Split XML 
+          functions from DDL functions. Corrected indentation and formatting
+          errors. Also fixed subsetting counting overflow (HDFFV-5874).
+          HDFFV-7560 (ADB 2012/02/17)
+        - h5diff: fixed to prevent from displaying error stack message when 
+          comparing the two dangling symlinks with follow-symlinks option.
+          HDFFV-7836 (JKM 2012/01/13)
         - h5repack: fixed memory leak for handling variable length string in 
           attribute.  HDFFV-7840 (JKM 2012/01/06)
         - h5ls: fixed segfault when access region reference data in an
@@ -1022,6 +1038,18 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* The data conversion test dt_arith.c fails in "long double" to integer
+  conversion on Ubuntu 11.10 (3.0.0.13 kernal) with GCC 4.6.1 if the library
+  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
+  (3.2.2 on Fedora) doesn't have the problem.  Users should lower down the 
+  optimization level (-O1 or -O0) by defining CFLAGS in the command line of 
+  "configure" like:
+
+      CFLAGS=-O1 ./configure
+
+  It will overwrite the library's default optimization level. (Issue 7829. 
+  SLU - 2012/2/7)
+ 
 * --with-mpe configure option does not work with Mpich2. AKC - 2011/03/10)
 
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can

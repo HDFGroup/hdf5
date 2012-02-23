@@ -66,7 +66,6 @@ GROUP "/" {
                TARGETFILE "textlinktar.h5"
                TARGETPATH "type"
                   DATATYPE "type" H5T_STD_I32LE;
-
             }
             EXTERNAL_LINK "ext_link4" {
                TARGETFILE "textlinktar.h5"

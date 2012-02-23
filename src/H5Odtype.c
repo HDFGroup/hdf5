@@ -134,7 +134,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
     size_t	z;
     htri_t      ret_value = FALSE;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_decode_helper)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(pp && *pp);
@@ -597,7 +597,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
     size_t	n, z;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_encode_helper)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(pp && *pp);
@@ -1087,7 +1087,7 @@ H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh, unsigned
     H5T_t	*dt = NULL;
     void        *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(p);
@@ -1131,7 +1131,7 @@ H5O_dtype_encode(H5F_t *f, uint8_t *p, const void *mesg)
     const H5T_t	   *dt = (const H5T_t *) mesg;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_encode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -1171,7 +1171,7 @@ H5O_dtype_copy(const void *_src, void *_dst)
     H5T_t		   *dst;
     void 		   *ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_copy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(src);
@@ -1218,7 +1218,7 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
     unsigned	u;                      /* Local index variable */
     size_t	ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(f);
     HDassert(dt);
@@ -1351,7 +1351,7 @@ H5O_dtype_reset(void *_mesg)
 {
     H5T_t		   *dt = (H5T_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(dt)
         H5T_free(dt);
@@ -1377,7 +1377,7 @@ H5O_dtype_reset(void *_mesg)
 static herr_t
 H5O_dtype_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(mesg);
 
@@ -1406,7 +1406,7 @@ H5O_dtype_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
     H5T_t *dt = (H5T_t *)_mesg;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_set_share)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(dt);
     HDassert(sh);
@@ -1462,7 +1462,7 @@ H5O_dtype_can_share(const void *_mesg)
     htri_t tri_ret;
     htri_t ret_value = TRUE;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_can_share)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(mesg);
 
@@ -1507,7 +1507,7 @@ H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     herr_t ret_value = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_pre_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(file_src);
@@ -1556,7 +1556,7 @@ H5O_dtype_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t *mesg_type,
     H5T_t *dst_mesg;            /* Destination datatype */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Perform a normal copy of the object header message */
     if(NULL == (dst_mesg = (H5T_t *)H5O_dtype_copy(native_src, NULL)))
@@ -1604,7 +1604,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
     unsigned		i;
     size_t		k;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);

@@ -211,7 +211,7 @@ H5HF_huge_bt2_crt_context(void *_f)
     H5HF_huge_bt2_ctx_t *ctx;   /* Callback context structure */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_bt2_crt_context)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);
@@ -252,7 +252,7 @@ H5HF_huge_bt2_dst_context(void *_ctx)
 {
     H5HF_huge_bt2_ctx_t *ctx = (H5HF_huge_bt2_ctx_t *)_ctx;       /* Callback context structure */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_dst_context)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -283,7 +283,7 @@ H5HF_huge_bt2_crt_dbg_context(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED add
     H5HF_huge_bt2_ctx_t *ctx;   /* Callback context structure */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_bt2_crt_dbg_context)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);
@@ -321,7 +321,7 @@ done:
 herr_t
 H5HF_huge_bt2_indir_found(const void *nrecord, void *op_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_indir_found)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef QAK
 HDfprintf(stderr, "%s: nrecord = {%a, %Hu, %Hu}\n", "H5HF_huge_bt2_indir_found",
@@ -355,7 +355,7 @@ H5HF_huge_bt2_indir_remove(const void *nrecord, void *_udata)
     H5HF_huge_remove_ud1_t *udata = (H5HF_huge_remove_ud1_t *)_udata;   /* User callback data */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_bt2_indir_remove)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Free the space in the file for the object being removed */
     if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, udata->dxpl_id, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->len) < 0)
@@ -385,7 +385,7 @@ done:
 static herr_t
 H5HF_huge_bt2_indir_store(void *nrecord, const void *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_indir_store)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     *(H5HF_huge_bt2_indir_rec_t *)nrecord = *(const H5HF_huge_bt2_indir_rec_t *)udata;
 
@@ -410,7 +410,7 @@ H5HF_huge_bt2_indir_store(void *nrecord, const void *udata)
 static herr_t
 H5HF_huge_bt2_indir_compare(const void *_rec1, const void *_rec2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_indir_compare)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef QAK
 {
@@ -444,7 +444,7 @@ H5HF_huge_bt2_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *ctx = (H5HF_huge_bt2_ctx_t *)_ctx;       /* Callback context structure */
     const H5HF_huge_bt2_indir_rec_t *nrecord = (const H5HF_huge_bt2_indir_rec_t *)_nrecord;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_indir_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -477,7 +477,7 @@ H5HF_huge_bt2_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *ctx = (H5HF_huge_bt2_ctx_t *)_ctx;       /* Callback context structure */
     H5HF_huge_bt2_indir_rec_t *nrecord = (H5HF_huge_bt2_indir_rec_t *)_nrecord;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_indir_decode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -511,7 +511,7 @@ H5HF_huge_bt2_indir_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl
 {
     const H5HF_huge_bt2_indir_rec_t *nrecord = (const H5HF_huge_bt2_indir_rec_t *)_nrecord;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_indir_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDfprintf(stream, "%*s%-*s {%a, %Hu, %Hu}\n", indent, "", fwidth, "Record:",
         nrecord->addr, nrecord->len, nrecord->id);
@@ -537,7 +537,7 @@ H5HF_huge_bt2_indir_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl
 herr_t
 H5HF_huge_bt2_filt_indir_found(const void *nrecord, void *op_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_filt_indir_found)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef QAK
 HDfprintf(stderr, "%s: nrecord = {%a, %Hu, %x, %Hu, %Hu}\n", "H5HF_huge_bt2_filt_indir_found",
@@ -573,7 +573,7 @@ H5HF_huge_bt2_filt_indir_remove(const void *nrecord, void *_udata)
     H5HF_huge_remove_ud1_t *udata = (H5HF_huge_remove_ud1_t *)_udata;   /* User callback data */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_bt2_filt_indir_remove)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Free the space in the file for the object being removed */
     if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, udata->dxpl_id, ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_filt_indir_rec_t *)nrecord)->len) < 0)
@@ -603,7 +603,7 @@ done:
 static herr_t
 H5HF_huge_bt2_filt_indir_store(void *nrecord, const void *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_filt_indir_store)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     *(H5HF_huge_bt2_filt_indir_rec_t *)nrecord = *(const H5HF_huge_bt2_filt_indir_rec_t *)udata;
 
@@ -628,7 +628,7 @@ H5HF_huge_bt2_filt_indir_store(void *nrecord, const void *udata)
 static herr_t
 H5HF_huge_bt2_filt_indir_compare(const void *_rec1, const void *_rec2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_filt_indir_compare)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef QAK
 {
@@ -662,7 +662,7 @@ H5HF_huge_bt2_filt_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *ctx = (H5HF_huge_bt2_ctx_t *)_ctx;       /* Callback context structure */
     const H5HF_huge_bt2_filt_indir_rec_t *nrecord = (const H5HF_huge_bt2_filt_indir_rec_t *)_nrecord;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_filt_indir_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -697,7 +697,7 @@ H5HF_huge_bt2_filt_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *ctx = (H5HF_huge_bt2_ctx_t *)_ctx;       /* Callback context structure */
     H5HF_huge_bt2_filt_indir_rec_t *nrecord = (H5HF_huge_bt2_filt_indir_rec_t *)_nrecord;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_filt_indir_decode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -733,7 +733,7 @@ H5HF_huge_bt2_filt_indir_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED
 {
     const H5HF_huge_bt2_filt_indir_rec_t *nrecord = (const H5HF_huge_bt2_filt_indir_rec_t *)_nrecord;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_filt_indir_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDfprintf(stream, "%*s%-*s {%a, %Hu, %x, %Hu, %Hu}\n", indent, "", fwidth, "Record:",
         nrecord->addr, nrecord->len, nrecord->filter_mask, nrecord->obj_size, nrecord->id);
@@ -762,7 +762,7 @@ H5HF_huge_bt2_dir_remove(const void *nrecord, void *_udata)
     H5HF_huge_remove_ud1_t *udata = (H5HF_huge_remove_ud1_t *)_udata;   /* User callback data */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_bt2_dir_remove)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Free the space in the file for the object being removed */
     if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, udata->dxpl_id, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_indir_rec_t *)nrecord)->len) < 0)
@@ -792,7 +792,7 @@ done:
 static herr_t
 H5HF_huge_bt2_dir_store(void *nrecord, const void *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_dir_store)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     *(H5HF_huge_bt2_dir_rec_t *)nrecord = *(const H5HF_huge_bt2_dir_rec_t *)udata;
 
@@ -821,7 +821,7 @@ H5HF_huge_bt2_dir_compare(const void *_rec1, const void *_rec2)
     const H5HF_huge_bt2_dir_rec_t *rec2 = (const H5HF_huge_bt2_dir_rec_t *)_rec2;
     herr_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_dir_compare)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef QAK
 HDfprintf(stderr, "%s: rec1 = {%a, %Hu}\n", "H5HF_huge_bt2_dir_compare", rec1->addr, rec1->len);
@@ -861,7 +861,7 @@ H5HF_huge_bt2_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *ctx = (H5HF_huge_bt2_ctx_t *)_ctx;       /* Callback context structure */
     const H5HF_huge_bt2_dir_rec_t *nrecord = (const H5HF_huge_bt2_dir_rec_t *)_nrecord;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_dir_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -893,7 +893,7 @@ H5HF_huge_bt2_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *ctx = (H5HF_huge_bt2_ctx_t *)_ctx;       /* Callback context structure */
     H5HF_huge_bt2_dir_rec_t *nrecord = (H5HF_huge_bt2_dir_rec_t *)_nrecord;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_dir_decode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -926,7 +926,7 @@ H5HF_huge_bt2_dir_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_i
 {
     const H5HF_huge_bt2_dir_rec_t *nrecord = (const H5HF_huge_bt2_dir_rec_t *)_nrecord;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_dir_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDfprintf(stream, "%*s%-*s {%a, %Hu}\n", indent, "", fwidth, "Record:",
         nrecord->addr, nrecord->len);
@@ -952,7 +952,7 @@ H5HF_huge_bt2_dir_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_i
 herr_t
 H5HF_huge_bt2_filt_dir_found(const void *nrecord, void *op_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_filt_dir_found)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef QAK
 HDfprintf(stderr, "%s: nrecord = {%a, %Hu, %x, %Hu}\n", "H5HF_huge_bt2_filt_dir_found",
@@ -987,7 +987,7 @@ H5HF_huge_bt2_filt_dir_remove(const void *nrecord, void *_udata)
     H5HF_huge_remove_ud1_t *udata = (H5HF_huge_remove_ud1_t *)_udata;   /* User callback data */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_bt2_filt_dir_remove)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Free the space in the file for the object being removed */
     if(H5MF_xfree(udata->hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, udata->dxpl_id, ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->addr, ((const H5HF_huge_bt2_filt_dir_rec_t *)nrecord)->len) < 0)
@@ -1017,7 +1017,7 @@ done:
 static herr_t
 H5HF_huge_bt2_filt_dir_store(void *nrecord, const void *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_filt_dir_store)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     *(H5HF_huge_bt2_filt_dir_rec_t *)nrecord = *(const H5HF_huge_bt2_filt_dir_rec_t *)udata;
 
@@ -1046,7 +1046,7 @@ H5HF_huge_bt2_filt_dir_compare(const void *_rec1, const void *_rec2)
     const H5HF_huge_bt2_filt_dir_rec_t *rec2 = (const H5HF_huge_bt2_filt_dir_rec_t *)_rec2;
     herr_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_filt_dir_compare)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef QAK
 HDfprintf(stderr, "%s: rec1 = {%a, %Hu, %x, %Hu}\n", "H5HF_huge_bt2_filt_dir_compare", rec1->addr, rec1->len, rec1->filter_mask, rec1->obj_size);
@@ -1086,7 +1086,7 @@ H5HF_huge_bt2_filt_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *ctx = (H5HF_huge_bt2_ctx_t *)_ctx;       /* Callback context structure */
     const H5HF_huge_bt2_filt_dir_rec_t *nrecord = (const H5HF_huge_bt2_filt_dir_rec_t *)_nrecord;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_filt_dir_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -1120,7 +1120,7 @@ H5HF_huge_bt2_filt_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *ctx = (H5HF_huge_bt2_ctx_t *)_ctx;       /* Callback context structure */
     H5HF_huge_bt2_filt_dir_rec_t *nrecord = (H5HF_huge_bt2_filt_dir_rec_t *)_nrecord;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_filt_dir_decode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -1154,7 +1154,7 @@ H5HF_huge_bt2_filt_dir_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED d
 {
     const H5HF_huge_bt2_filt_dir_rec_t *nrecord = (const H5HF_huge_bt2_filt_dir_rec_t *)_nrecord;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_bt2_filt_dir_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDfprintf(stream, "%*s%-*s {%a, %Hu, %x, %Hu}\n", indent, "", fwidth, "Record:",
         nrecord->addr, nrecord->len, nrecord->filter_mask, nrecord->obj_size);

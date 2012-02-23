@@ -132,7 +132,7 @@ DESCRIPTION
 static herr_t
 H5E_init_int_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_init_int_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5E_init())
 } /* H5E_init_int_interface() */
@@ -156,7 +156,7 @@ H5E_get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
 {
     ssize_t       len;          /* Length of error message */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_msg)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(msg);
@@ -227,7 +227,7 @@ H5E_walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     unsigned            have_desc = 1;  /* Flag to indicate whether the error has a "real" description */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_walk1_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(err_desc);
@@ -349,7 +349,7 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     unsigned            have_desc = 1;  /* Flag to indicate whether the error has a "real" description */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_walk2_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
     HDassert(err_desc);
@@ -450,8 +450,7 @@ H5E_print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
     H5E_walk_op_t walk_op;      /* Error stack walking callback */
     herr_t ret_value = SUCCEED;
 
-    /* Don't clear the error stack! :-) */
-    FUNC_ENTER_NOAPI_NOINIT(H5E_print)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(estack);
@@ -526,7 +525,7 @@ H5E_walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *op
     herr_t	status;         /* Status from callback function */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5E_walk)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(estack);
@@ -620,7 +619,7 @@ done:
 herr_t
 H5E_get_auto(const H5E_t *estack, H5E_auto_op_t *op, void **client_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_auto)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(estack);
 
@@ -660,7 +659,7 @@ H5E_get_auto(const H5E_t *estack, H5E_auto_op_t *op, void **client_data)
 herr_t
 H5E_set_auto(H5E_t *estack, const H5E_auto_op_t *op, void *client_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_set_auto)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(estack);
 
@@ -704,7 +703,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
      *		HERROR().  HERROR() is called by HRETURN_ERROR() which could
      *		be called by FUNC_ENTER().
      */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_printf_stack)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(cls_id > 0);
@@ -808,7 +807,7 @@ H5E_push_stack(H5E_t *estack, const char *file, const char *func, unsigned line,
      *		HERROR().  HERROR() is called by HRETURN_ERROR() which could
      *		be called by FUNC_ENTER().
      */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_push_stack)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(cls_id > 0);
@@ -882,7 +881,7 @@ H5E_clear_entries(H5E_t *estack, size_t nentries)
     unsigned u;                 /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5E_clear_entries)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(estack);
@@ -936,7 +935,7 @@ H5E_clear_stack(H5E_t *estack)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5E_clear_stack, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check for 'default' error stack */
     if(estack == NULL)
@@ -972,7 +971,7 @@ H5E_pop(H5E_t *estack, size_t count)
 {
     herr_t      ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5E_pop)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(estack);
@@ -1006,7 +1005,7 @@ H5E_dump_api_stack(hbool_t is_api)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5E_dump_api_stack, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Only dump the error stack during an API call */
     if(is_api) {

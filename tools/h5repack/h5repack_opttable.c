@@ -158,7 +158,7 @@ int options_table_init( pack_opttbl_t **tbl )
     if(NULL == (table->objs = (pack_info_t*)malloc(table->size * sizeof(pack_info_t))))
     {
         error_msg("not enough memory for options table\n");
-        free(table);
+        HDfree(table);
         return -1;
     }
 
@@ -182,8 +182,8 @@ int options_table_init( pack_opttbl_t **tbl )
 
 int options_table_free( pack_opttbl_t *table )
 {
-    free(table->objs);
-    free(table);
+    HDfree(table->objs);
+    HDfree(table);
     return 0;
 }
 

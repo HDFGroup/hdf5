@@ -188,7 +188,7 @@ H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh
     H5O_fill_t	*fill = NULL;
     void	*ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_fill_new_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(f);
     HDassert(p);
@@ -302,7 +302,7 @@ H5O_fill_old_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh
     H5O_fill_t *fill = NULL;		/* Decoded fill value message */
     void *ret_value;                    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_fill_old_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(f);
     HDassert(p);
@@ -361,7 +361,7 @@ H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_fill)
 {
     const H5O_fill_t	*fill = (const H5O_fill_t *)_fill;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(f);
     HDassert(p);
@@ -457,7 +457,7 @@ H5O_fill_old_encode(H5F_t UNUSED *f, uint8_t *p, const void *_fill)
 {
     const H5O_fill_t *fill = (const H5O_fill_t *)_fill;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_old_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(f);
     HDassert(p);
@@ -494,7 +494,7 @@ H5O_fill_copy(const void *_src, void *_dst)
     H5O_fill_t		*dst = (H5O_fill_t *)_dst;
     void		*ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_fill_copy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(src);
 
@@ -611,7 +611,7 @@ H5O_fill_new_size(const H5F_t UNUSED *f, const void *_fill)
     const H5O_fill_t	*fill = (const H5O_fill_t *)_fill;
     size_t		ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(f);
     HDassert(fill);
@@ -658,7 +658,7 @@ H5O_fill_old_size(const H5F_t UNUSED *f, const void *_fill)
 {
     const H5O_fill_t *fill = (const H5O_fill_t *)_fill;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_old_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(fill);
 
@@ -684,7 +684,7 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
     hid_t fill_type_id = -1;            /* Datatype ID for fill value datatype when reclaiming VL fill values */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_fill_reset_dyn, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(fill);
 
@@ -749,7 +749,7 @@ H5O_fill_reset(void *_fill)
 {
     H5O_fill_t	*fill = (H5O_fill_t *)_fill;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(fill);
 
@@ -780,7 +780,7 @@ H5O_fill_reset(void *_fill)
 static herr_t
 H5O_fill_free(void *fill)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(fill);
 
@@ -809,7 +809,7 @@ H5O_fill_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_fill, FILE *s
     const H5O_fill_t *fill = (const H5O_fill_t *)_fill;
     H5D_fill_value_t fill_status;       /* Whether the fill value is defined */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(f);
     HDassert(fill);
@@ -912,7 +912,7 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed, hid_
     hid_t		src_id = -1, dst_id = -1;   /* Datatype identifiers	*/
     herr_t      	ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_fill_convert)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(fill);
     HDassert(dset_type);
@@ -1007,7 +1007,7 @@ done:
 herr_t
 H5O_fill_set_latest_version(H5O_fill_t *fill)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5O_fill_set_latest_version)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(fill);

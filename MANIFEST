@@ -1109,6 +1109,12 @@
 ./tools/h5dump/Makefile.in
 ./tools/h5dump/h5dump.c
 ./tools/h5dump/h5dump.h
+./tools/h5dump/h5dump_defines.h
+./tools/h5dump/h5dump_extern.h
+./tools/h5dump/h5dump_ddl.c
+./tools/h5dump/h5dump_ddl.h
+./tools/h5dump/h5dump_xml.c
+./tools/h5dump/h5dump_xml.h
 ./tools/h5dump/h5dumpgentest.c
 ./tools/h5dump/testh5dump.sh.in
 ./tools/h5dump/testh5dumpxml.sh.in
@@ -1216,6 +1222,8 @@
 ./tools/lib/h5trav.h
 ./tools/lib/h5tools.c
 ./tools/lib/h5tools.h
+./tools/lib/h5tools_dump.c
+./tools/lib/h5tools_dump.h
 ./tools/lib/h5tools_filters.c
 ./tools/lib/h5tools_str.c
 ./tools/lib/h5tools_str.h
@@ -1406,6 +1414,8 @@
 ./tools/testfiles/tnestcomp-1.ddl
 ./tools/testfiles/tnestedcomp.h5
 ./tools/testfiles/tnofilename.ddl
+./tools/testfiles/tno-subset.h5
+./tools/testfiles/tno-subset.ddl
 ./tools/testfiles/tnullspace.h5
 ./tools/testfiles/tnullspace.ddl
 ./tools/testfiles/tobjref.h5
@@ -1840,6 +1850,7 @@
 ./tools/h5diff/testfiles/h5diff_457.txt
 ./tools/h5diff/testfiles/h5diff_458.txt
 ./tools/h5diff/testfiles/h5diff_459.txt
+./tools/h5diff/testfiles/h5diff_465.txt
 ./tools/h5diff/testfiles/h5diff_480.txt
 ./tools/h5diff/testfiles/h5diff_481.txt
 ./tools/h5diff/testfiles/h5diff_482.txt

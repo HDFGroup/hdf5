@@ -78,7 +78,7 @@ H5FL_DEFINE(H5O_unknown_t);
 static herr_t
 H5O_unknown_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_unknown_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(mesg);
 

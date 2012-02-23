@@ -59,7 +59,7 @@ H5FD_mpi_get_rank(const H5FD_t *file)
     const H5FD_class_mpi_t *cls=(const H5FD_class_mpi_t *)(file->cls);
     int	ret_value;
 
-    FUNC_ENTER_NOAPI(H5FD_mpi_get_rank, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(file && cls);
     assert(cls->get_rank);        /* All MPI drivers must implement this */
@@ -95,7 +95,7 @@ H5FD_mpi_get_size(const H5FD_t *file)
     const H5FD_class_mpi_t *cls=(const H5FD_class_mpi_t *)(file->cls);
     int	ret_value;
 
-    FUNC_ENTER_NOAPI(H5FD_mpi_get_size, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(file && cls);
     assert(cls->get_size);        /* All MPI drivers must implement this */
@@ -131,7 +131,7 @@ H5FD_mpi_get_comm(const H5FD_t *file)
     const H5FD_class_mpi_t *cls=(const H5FD_class_mpi_t *)(file->cls);
     MPI_Comm	ret_value;
 
-    FUNC_ENTER_NOAPI(H5FD_mpi_get_comm, MPI_COMM_NULL)
+    FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
     assert(file && cls);
     assert(cls->get_comm);        /* All MPI drivers must implement this */
@@ -172,7 +172,7 @@ H5FD_mpi_MPIOff_to_haddr(MPI_Offset mpi_off)
 {
     haddr_t ret_value=HADDR_UNDEF;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_mpi_MPIOff_to_haddr)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (mpi_off != (MPI_Offset)(haddr_t)mpi_off)
         ret_value=HADDR_UNDEF;
@@ -213,7 +213,7 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
 {
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_mpi_haddr_to_MPIOff)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(mpi_off);
 
@@ -257,7 +257,7 @@ H5FD_mpi_comm_info_dup(MPI_Comm comm, MPI_Info info, MPI_Comm *comm_new, MPI_Inf
     MPI_Info	info_dup=MPI_INFO_NULL;
     int		mpi_code;
 
-    FUNC_ENTER_NOAPI(H5FD_mpi_comm_info_dup, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
     if (MPI_COMM_NULL == comm)
@@ -316,7 +316,8 @@ herr_t
 H5FD_mpi_comm_info_free(MPI_Comm *comm, MPI_Info *info)
 {
     herr_t      ret_value=SUCCEED;
-    FUNC_ENTER_NOAPI(H5FD_mpi_comm_info_free, FAIL)
+
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
     if (!comm || !info)
@@ -368,7 +369,7 @@ H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
     int		mpi_code;		/* mpi return code */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_wait_for_left_neighbor, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
@@ -422,7 +423,7 @@ H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
     int		mpi_code;		/* mpi return code */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpio_signal_right_neighbor, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
@@ -470,7 +471,7 @@ H5FD_mpi_setup_collective(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpi_setup_collective, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
     if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
@@ -510,7 +511,7 @@ H5FD_mpi_teardown_collective(hid_t dxpl_id)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpi_teardown_collective, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
     if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))

@@ -129,7 +129,7 @@ H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_o
     uint32_t    tmp_time;       /* Temporary copy of the time */
     void        *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_mtime_new_decode);
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -154,7 +154,7 @@ H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_o
     ret_value=mesg;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_mtime_new_decode() */
 
 
@@ -186,7 +186,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     struct tm	tm;
     void        *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_mtime_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -293,7 +293,7 @@ H5O_mtime_new_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p,
 {
     const time_t	*mesg = (const time_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_new_encode);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);
@@ -311,7 +311,7 @@ H5O_mtime_new_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p,
     /* Encode time */
     UINT32ENCODE(p, *mesg);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_mtime_new_encode() */
 
 
@@ -336,7 +336,7 @@ H5O_mtime_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, con
     const time_t	*mesg = (const time_t *) _mesg;
     struct tm		*tm;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_encode);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);
@@ -349,7 +349,7 @@ H5O_mtime_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, con
 	    1900+tm->tm_year, 1+tm->tm_mon, tm->tm_mday,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -378,7 +378,7 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
     time_t		*dest = (time_t *) _dest;
     void        *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_mtime_copy);
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(mesg);
@@ -392,7 +392,7 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
     ret_value=dest;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -419,13 +419,13 @@ done:
 static size_t
 H5O_mtime_new_size(const H5F_t UNUSED * f, hbool_t UNUSED disable_shared, const void UNUSED * mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_new_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);
     HDassert(mesg);
 
-    FUNC_LEAVE_NOAPI(8);
+    FUNC_LEAVE_NOAPI(8)
 } /* end H5O_mtime_new_size() */
 
 
@@ -452,13 +452,13 @@ H5O_mtime_new_size(const H5F_t UNUSED * f, hbool_t UNUSED disable_shared, const 
 static size_t
 H5O_mtime_size(const H5F_t UNUSED * f, hbool_t UNUSED disable_shared, const void UNUSED * mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);
     HDassert(mesg);
 
-    FUNC_LEAVE_NOAPI(16);
+    FUNC_LEAVE_NOAPI(16)
 }
 
 
@@ -480,9 +480,9 @@ H5O_mtime_size(const H5F_t UNUSED * f, hbool_t UNUSED disable_shared, const void
 static herr_t
 H5O_mtime_reset(void UNUSED *_mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_reset);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -503,7 +503,7 @@ H5O_mtime_reset(void UNUSED *_mesg)
 static herr_t
 H5O_mtime_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(mesg);
 
@@ -536,7 +536,7 @@ H5O_mtime_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
     struct tm		*tm;
     char		buf[128];
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_debug);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);
@@ -552,6 +552,6 @@ H5O_mtime_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Time:", buf);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 

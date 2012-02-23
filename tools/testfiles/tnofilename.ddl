@@ -34,6 +34,8 @@ usage: h5dump [OPTIONS] file
                           E.g., to dump a file called `-f', use h5dump -- -f
      --enable-error-stack Prints messages from the HDF5 error stack as they
                           occur.
+     --no-compact-subset  Disable compact form of subsetting and allow the use
+                          of "[" in datset names.
 
  Subsetting is available by using the following options with a dataset
  attribute. Subsetting is done by selecting a hyperslab from the data.
@@ -71,7 +73,7 @@ usage: h5dump [OPTIONS] file
 
   1) Attribute foo of the group /bar_none in file quux.h5
 
-     	h5dump -a /bar_none/foo quux.h5
+       h5dump -a /bar_none/foo quux.h5
 
   2) Selecting a subset from dataset /foo in file quux.h5
 

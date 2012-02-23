@@ -127,7 +127,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     char                    fake_char;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_API(H5Dread, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
              plist_id, buf);
 
@@ -219,7 +219,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     char                    fake_char;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_API(H5Dwrite, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf);
 
@@ -315,7 +315,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_read, dxpl_id, dataset->oloc.addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, dataset->oloc.addr, FAIL)
 
     /* check args */
     HDassert(dataset && dataset->oloc.file);
@@ -516,7 +516,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_write, dxpl_id, dataset->oloc.addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, dataset->oloc.addr, FAIL)
 
     /* check args */
     HDassert(dataset && dataset->oloc.file);
@@ -728,7 +728,7 @@ static herr_t
 H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     const H5D_type_info_t *type_info, H5D_storage_t *store, H5D_io_info_t *io_info)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_ioinfo_init)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(dset);
@@ -798,7 +798,7 @@ H5D_typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     const H5T_t	*dst_type;              /* Destination datatype */
     herr_t ret_value = SUCCEED;	        /* Return value	*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_typeinfo_init)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(type_info);
@@ -955,7 +955,7 @@ H5D_ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
     H5D_mpio_actual_io_mode_t actual_io_mode; /* performed io mode */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_ioinfo_adjust)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(dset);
@@ -1043,7 +1043,7 @@ H5D_ioinfo_term(H5D_io_info_t *io_info)
 {
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_ioinfo_term)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if we used the MPI VFD for the I/O */
     if(io_info->using_mpi_vfd) {
@@ -1096,7 +1096,7 @@ done:
 static herr_t
 H5D_typeinfo_term(const H5D_type_info_t *type_info)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_typeinfo_term)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check for releasing datatype conversion & background buffers */
     if(type_info->tconv_buf_allocated) {

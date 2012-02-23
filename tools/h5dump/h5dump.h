@@ -16,148 +16,97 @@
 #define H5DUMP_H__
 
 #include "hdf5.h"
+#include "H5private.h"
+#include "h5tools.h"
+#include "h5tools_utils.h"
+#include "h5tools_ref.h"
+#include "h5trav.h"
+#include "h5dump_defines.h"
 
-#define H5DUMP_MAX_RANK     H5S_MAX_RANK
+/**
+ **  This is the global dispatch table for the dump functions.
+ **/
+/* the table of dump functions */
+typedef struct dump_functions_t {
+    void     (*dump_group_function) (hid_t, const char *);
+    void     (*dump_named_datatype_function) (hid_t, const char *);
+    void     (*dump_dataset_function) (hid_t, const char *, struct subset_t *);
+    void     (*dump_dataspace_function) (hid_t);
+    void     (*dump_datatype_function) (hid_t);
+    herr_t   (*dump_attribute_function) (hid_t, const char *, const H5A_info_t *, void *);
+    void     (*dump_data_function) (hid_t, int, struct subset_t *, int);
+} dump_functions;
 
-#define ATTRIBUTE_DATA  0
-#define DATASET_DATA    1
-#define ENUM_DATA       2
-#define COL             3
+/* List of table structures.  There is one table structure for each file */
+typedef struct h5dump_table_list_t {
+    size_t      nalloc;
+    size_t      nused;
+    struct {
+        unsigned long   fileno;         /* File number that these tables refer to */
+        hid_t           oid;            /* ID of an object in this file, held open so fileno is consistent */
+        table_t         *group_table;   /* Table of groups */
+        table_t         *dset_table;    /* Table of datasets */
+        table_t         *type_table;    /* Table of datatypes */
+    } *tables;
+} h5dump_table_list_t;
 
-/* Strings for output */
-#define ATTRIBUTE       "ATTRIBUTE"
-#define BLOCK           "BLOCK"
-#define SUPER_BLOCK     "SUPER_BLOCK"
-#define COMPRESSION     "COMPRESSION"
-#define CONCATENATOR    "//"
-#define COMPLEX         "COMPLEX"
-#define COUNT           "COUNT"
-#define CSET            "CSET"
-#define CTYPE           "CTYPE"
-#define DATA            "DATA"
-#define DATASPACE       "DATASPACE"
-#define EXTERNAL        "EXTERNAL"
-#define FILENO          "FILENO"
-#define HARDLINK        "HARDLINK"
-#define NLINK           "NLINK"
-#define OBJID           "OBJECTID"
-#define OBJNO           "OBJNO"
-#define S_SCALAR        "SCALAR"
-#define S_SIMPLE        "SIMPLE"
-#define S_NULL          "NULL"
-#define SOFTLINK        "SOFTLINK"
-#define EXTLINK         "EXTERNAL_LINK"
-#define UDLINK          "USERDEFINED_LINK"
-#define START           "START"
-#define STRIDE          "STRIDE"
-#define STRSIZE         "STRSIZE"
-#define STRPAD          "STRPAD"
-#define SUBSET          "SUBSET"
-#define FILTERS         "FILTERS"
-#define DEFLATE         "COMPRESSION DEFLATE"
-#define DEFLATE_LEVEL   "LEVEL"
-#define SHUFFLE         "PREPROCESSING SHUFFLE"
-#define FLETCHER32      "CHECKSUM FLETCHER32"
-#define SZIP            "COMPRESSION SZIP"
-#define NBIT            "COMPRESSION NBIT"
-#define SCALEOFFSET            "COMPRESSION SCALEOFFSET"
-#define SCALEOFFSET_MINBIT            "MIN BITS"
-#define STORAGE_LAYOUT  "STORAGE_LAYOUT"
-#define CONTIGUOUS      "CONTIGUOUS"
-#define COMPACT         "COMPACT"
-#define CHUNKED         "CHUNKED"
-#define EXTERNAL_FILE   "EXTERNAL_FILE"
-#define FILLVALUE       "FILLVALUE"
-#define FILE_CONTENTS   "FILE_CONTENTS"
-#define PACKED_BITS     "PACKED_BITS"
-#define PACKED_OFFSET   "OFFSET"
-#define PACKED_LENGTH   "LENGTH"
+h5dump_table_list_t  table_list = {0, 0, NULL};
+table_t             *group_table = NULL, *dset_table = NULL, *type_table = NULL;
+int                  dump_indent = 0;              /*how far in to indent the line         */
 
-#define BEGIN           "{"
-#define END             "}"
+int          unamedtype = 0;     /* shared datatype with no name */
+hbool_t      hit_elink = FALSE;  /* whether we have traversed an external link */
+size_t       prefix_len = 1024;
+char         *prefix = NULL;
+const char   *fp_format = NULL;
 
-typedef struct h5dump_header_t {
-    const char *name;
-    const char *filebegin;
-    const char *fileend;
-    const char *bootblockbegin;
-    const char *bootblockend;
-    const char *groupbegin;
-    const char *groupend;
-    const char *datasetbegin;
-    const char *datasetend;
-    const char *attributebegin;
-    const char *attributeend;
-    const char *datatypebegin;
-    const char *datatypeend;
-    const char *dataspacebegin;
-    const char *dataspaceend;
-    const char *databegin;
-    const char *dataend;
-    const char *softlinkbegin;
-    const char *softlinkend;
-    const char *extlinkbegin;
-    const char *extlinkend;
-    const char *udlinkbegin;
-    const char *udlinkend;
-    const char *subsettingbegin;
-    const char *subsettingend;
-    const char *startbegin;
-    const char *startend;
-    const char *stridebegin;
-    const char *strideend;
-    const char *countbegin;
-    const char *countend;
-    const char *blockbegin;
-    const char *blockend;
+/* things to display or which are set via command line parameters */
+int          display_all       = TRUE;
+int          display_oid       = FALSE;
+int          display_data      = TRUE;
+int          display_attr_data = TRUE;
+int          display_char      = FALSE; /*print 1-byte numbers as ASCII */
+int          usingdasho        = FALSE;
+int          display_bb        = FALSE; /*superblock */
+int          display_dcpl      = FALSE; /*dcpl */
+int          display_fi        = FALSE; /*file index */
+int          display_ai        = TRUE;  /*array index */
+int          display_escape    = FALSE; /*escape non printable characters */
+int          display_region    = FALSE; /*print region reference data */
+int          enable_error_stack= FALSE; /* re-enable error stack */
+int          disable_compact_subset= FALSE; /* disable compact form of subset notation */
+int          display_packed_bits = FALSE; /*print 1-8 byte numbers as packed bits*/
 
-    const char *fileblockbegin;
-    const char *fileblockend;
-    const char *bootblockblockbegin;
-    const char *bootblockblockend;
-    const char *groupblockbegin;
-    const char *groupblockend;
-    const char *datasetblockbegin;
-    const char *datasetblockend;
-    const char *attributeblockbegin;
-    const char *attributeblockend;
-    const char *datatypeblockbegin;
-    const char *datatypeblockend;
-    const char *dataspaceblockbegin;
-    const char *dataspaceblockend;
-    const char *datablockbegin;
-    const char *datablockend;
-    const char *softlinkblockbegin;
-    const char *softlinkblockend;
-    const char *extlinkblockbegin;
-    const char *extlinkblockend;
-    const char *udlinkblockbegin;
-    const char *udlinkblockend;
-    const char *strblockbegin;
-    const char *strblockend;
-    const char *enumblockbegin;
-    const char *enumblockend;
-    const char *structblockbegin;
-    const char *structblockend;
-    const char *vlenblockbegin;
-    const char *vlenblockend;
-    const char *subsettingblockbegin;
-    const char *subsettingblockend;
-    const char *startblockbegin;
-    const char *startblockend;
-    const char *strideblockbegin;
-    const char *strideblockend;
-    const char *countblockbegin;
-    const char *countblockend;
-    const char *blockblockbegin;
-    const char *blockblockend;
+/* sort parameters */
+H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
+H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descending]   */
 
-    const char *dataspacedescriptionbegin;
-    const char *dataspacedescriptionend;
-    const char *dataspacedimbegin;
-    const char *dataspacedimend;
+#define PACKED_BITS_MAX         8  /* Maximum number of packed-bits to display */
+#define PACKED_BITS_SIZE_MAX    8*sizeof(long long)  /* Maximum bits size of integer types of packed-bits */
+/* mask list for packed bits */
+unsigned long long packed_mask[PACKED_BITS_MAX];  /* packed bits are restricted to 8*sizeof(llong) bytes */
 
-} h5dump_header_t;
+/* packed bits display parameters */
+int packed_offset[PACKED_BITS_MAX];
+int packed_length[PACKED_BITS_MAX];
 
+/*
+ * The global table is set to either ddl_function_table or
+ * xml_function_table in the initialization.
+ */
+const dump_functions *dump_function_table;
+
+#ifdef __cplusplus
+"C" {
+#endif
+
+void     add_prefix(char **prfx, size_t *prfx_len, const char *name);
+hid_t    h5_fileaccess(void);
+ssize_t  table_list_add(hid_t oid, unsigned long file_no);
+ssize_t  table_list_visited(unsigned long file_no);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* !H5DUMP_H__ */

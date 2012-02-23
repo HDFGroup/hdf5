@@ -243,7 +243,7 @@ H5C_epoch_marker_load(H5F_t UNUSED * f,
 {
     void * ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_epoch_marker_load, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "called unreachable fcn.")
 
@@ -262,7 +262,7 @@ H5C_epoch_marker_flush(H5F_t UNUSED *f,
 {
     herr_t ret_value = FAIL;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_epoch_marker_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
 
@@ -277,7 +277,7 @@ H5C_epoch_marker_dest(H5F_t UNUSED * f,
 {
     herr_t ret_value = FAIL;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_epoch_marker_dest, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
 
@@ -293,7 +293,7 @@ H5C_epoch_marker_clear(H5F_t UNUSED * f,
 {
     herr_t ret_value = FAIL;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_epoch_marker_clear, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
 
@@ -308,7 +308,7 @@ H5C_epoch_marker_notify(H5C_notify_action_t UNUSED action,
 {
     herr_t ret_value = FAIL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C_epoch_marker_notify)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
 
@@ -323,7 +323,7 @@ H5C_epoch_marker_size(const H5F_t UNUSED * f,
 {
     herr_t ret_value = FAIL;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_epoch_marker_size, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
 
@@ -459,7 +459,7 @@ H5C_apply_candidate_list(H5F_t * f,
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
     herr_t              ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_apply_candidate_list, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -775,7 +775,7 @@ H5C_construct_candidate_list__clean_cache(H5C_t * cache_ptr)
     size_t              space_needed;
     herr_t              ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_construct_candidate_list__clean_cache, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -886,7 +886,7 @@ H5C_construct_candidate_list__min_clean(H5C_t * cache_ptr)
     size_t              space_needed = 0;
     herr_t              ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_construct_candidate_list__min_clean, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -989,7 +989,7 @@ H5C_create(size_t		      max_cache_size,
     H5C_t * cache_ptr = NULL;
     H5C_t * ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_create, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     HDassert( max_cache_size >= H5C__MIN_MAX_CACHE_SIZE );
     HDassert( max_cache_size <= H5C__MAX_MAX_CACHE_SIZE );
@@ -1401,7 +1401,7 @@ H5C_dest(H5F_t * f,
     H5C_t * cache_ptr = f->shared->cache;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_dest, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(cache_ptr);
@@ -1455,7 +1455,7 @@ H5C_expunge_entry(H5F_t *             f,
     H5C_cache_entry_t *	entry_ptr = NULL;
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_expunge_entry, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert( f );
     HDassert( f->shared );
@@ -1587,7 +1587,7 @@ H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, unsign
     size_t              initial_slist_size;
 #endif /* H5C_DO_SANITY_CHECKS */
 
-    FUNC_ENTER_NOAPI(H5C_flush_cache, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -1963,7 +1963,7 @@ H5C_flush_to_min_clean(H5F_t * f,
 #endif /* JRM */
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C_flush_to_min_clean, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert( f );
     HDassert( f->shared );
@@ -2134,7 +2134,7 @@ H5C_get_cache_auto_resize_config(const H5C_t * cache_ptr,
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_get_cache_auto_resize_config, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if ( ( cache_ptr == NULL ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
 
@@ -2183,7 +2183,7 @@ H5C_get_cache_size(H5C_t * cache_ptr,
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_get_cache_size, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if ( ( cache_ptr == NULL ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
 
@@ -2240,7 +2240,7 @@ H5C_get_cache_hit_rate(H5C_t * cache_ptr,
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_get_cache_hit_rate, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if ( ( cache_ptr == NULL ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
 
@@ -2309,7 +2309,7 @@ H5C_get_entry_status(const H5F_t *f,
     H5C_cache_entry_t *	entry_ptr = NULL;
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_get_entry_status, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert( f );
     HDassert( f->shared );
@@ -2399,7 +2399,7 @@ H5C_get_evictions_enabled(const H5C_t *cache_ptr,
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_get_evictions_enabled, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if ( ( cache_ptr == NULL ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
 
@@ -2440,7 +2440,7 @@ done:
 herr_t
 H5C_get_trace_file_ptr(const H5C_t *cache_ptr, FILE **trace_file_ptr_ptr)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5C_get_trace_file_ptr)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -2472,7 +2472,7 @@ herr_t
 H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr,
     FILE **trace_file_ptr_ptr)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5C_get_trace_file_ptr_from_entry)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     HDassert(entry_ptr);
@@ -2532,7 +2532,7 @@ H5C_insert_entry(H5F_t *             f,
     unsigned            u;                      /* Local index variable */
     herr_t		ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_insert_entry, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert( f );
     HDassert( f->shared );
@@ -2856,7 +2856,7 @@ H5C_mark_entries_as_clean(H5F_t *  f,
     H5C_cache_entry_t *	entry_ptr = NULL;
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_mark_entries_as_clean, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert( f );
     HDassert( f->shared );
@@ -3126,7 +3126,7 @@ H5C_mark_entry_dirty(void *thing)
     H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)thing;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_mark_entry_dirty, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(entry_ptr);
@@ -3205,7 +3205,7 @@ H5C_move_entry(H5C_t *	     cache_ptr,
 #endif /* H5C_DO_SANITY_CHECKS */
     herr_t			ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_move_entry, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -3369,7 +3369,7 @@ H5C_resize_entry(void *thing, size_t new_size)
     H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)thing;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_resize_entry, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(entry_ptr);
@@ -3476,7 +3476,7 @@ H5C_pin_entry_from_client(H5C_t UNUSED *	cache_ptr,
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C_pin_entry_from_client)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert( cache_ptr );
@@ -3522,7 +3522,7 @@ H5C_pin_protected_entry(void *thing)
     H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)thing; /* Pointer to entry to pin */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_pin_protected_entry, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(entry_ptr);
@@ -3617,7 +3617,7 @@ H5C_protect(H5F_t *		f,
     H5P_genplist_t *dxpl;    /* dataset transfer property list */
     void *		ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_protect, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* check args */
     HDassert( f );
@@ -4021,7 +4021,7 @@ H5C_reset_cache_hit_rate_stats(H5C_t * cache_ptr)
 {
     herr_t	ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_reset_cache_hit_rate_stats, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if ( ( cache_ptr == NULL ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
 
@@ -4066,7 +4066,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr,
     size_t      new_min_clean_size;
     herr_t	ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_set_cache_auto_resize_config, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if ( ( cache_ptr == NULL ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
 
@@ -4340,7 +4340,7 @@ H5C_set_evictions_enabled(H5C_t *cache_ptr,
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_set_evictions_enabled, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if ( ( cache_ptr == NULL ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
 
@@ -4394,7 +4394,7 @@ H5C_set_prefix(H5C_t * cache_ptr, char * prefix)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_set_prefix, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if ( ( cache_ptr == NULL ) ||
          ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
@@ -4437,7 +4437,7 @@ H5C_set_trace_file_ptr(H5C_t * cache_ptr,
 {
     herr_t		ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_set_trace_file_ptr, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* This would normally be an assert, but we need to use an HGOTO_ERROR
      * call to shut up the compiler.
@@ -4524,7 +4524,7 @@ H5C_stats(H5C_t * cache_ptr,
     double      average_entries_scanned_per_calls_to_msic = 0.0;
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-    FUNC_ENTER_NOAPI(H5C_stats, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* This would normally be an assert, but we need to use an HGOTO_ERROR
      * call to shut up the compiler.
@@ -5051,7 +5051,7 @@ H5C_dump_cache(H5C_t * cache_ptr,
     H5SL_t *            slist_ptr = NULL;
     H5SL_node_t *       node_ptr = NULL;
 
-    FUNC_ENTER_NOAPI(H5C_dump_cache, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(cache_ptr != NULL);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -5178,7 +5178,7 @@ H5C_unpin_entry_from_client(H5C_t *		  cache_ptr,
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C_unpin_entry_from_client)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checking */
     HDassert( cache_ptr );
@@ -5231,7 +5231,7 @@ H5C_unpin_entry(void *_entry_ptr)
     H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)_entry_ptr; /* Pointer to entry to unpin */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_unpin_entry, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(entry_ptr);
@@ -5310,7 +5310,7 @@ H5C_unprotect(H5F_t *		  f,
     H5C_cache_entry_t *	test_entry_ptr;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_unprotect, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     deleted          = ( (flags & H5C__DELETED_FLAG) != 0 );
     dirtied          = ( (flags & H5C__DIRTIED_FLAG) != 0 );
@@ -5623,7 +5623,7 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr,
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_validate_resize_config, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if ( config_ptr == NULL ) {
 
@@ -5881,7 +5881,7 @@ static void
 H5C_adjust_flush_dependency_rc(H5C_cache_entry_t * cache_entry,
     unsigned old_child_height, unsigned new_child_height)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C_adjust_flush_dependency_rc)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(cache_entry);
@@ -5994,7 +5994,7 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
 #endif /* NDEBUG */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_create_flush_dependency, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(parent_entry);
@@ -6107,7 +6107,7 @@ H5C_destroy_flush_dependency(void *parent_thing, void * child_thing)
 #endif /* NDEBUG */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_destroy_flush_dependency, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(parent_entry);
@@ -6246,7 +6246,7 @@ H5C__auto_adjust_cache_size(H5F_t * f,
     enum H5C_resize_status	status = in_spec; /* will change if needed */
     herr_t			ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C__auto_adjust_cache_size)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert( f );
     HDassert( cache_ptr );
@@ -6596,7 +6596,7 @@ H5C__autoadjust__ageout(H5F_t * f,
     size_t	test_size;
     herr_t	ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C__autoadjust__ageout)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert( f );
     HDassert( cache_ptr );
@@ -6709,7 +6709,7 @@ H5C__autoadjust__ageout__cycle_epoch_marker(H5C_t * cache_ptr)
     herr_t                      ret_value = SUCCEED;      /* Return value */
     int i;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C__autoadjust__ageout__cycle_epoch_marker)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -6847,7 +6847,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
     H5C_cache_entry_t * prev_ptr;
     herr_t              ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C__autoadjust__ageout__evict_aged_out_entries)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert( f );
     HDassert( cache_ptr );
@@ -7054,7 +7054,7 @@ H5C__autoadjust__ageout__insert_new_marker(H5C_t * cache_ptr)
     herr_t                      ret_value = SUCCEED;      /* Return value */
     int i;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C__autoadjust__ageout__insert_new_marker)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -7132,7 +7132,7 @@ H5C__autoadjust__ageout__remove_all_markers(H5C_t * cache_ptr)
     int i;
     int ring_buf_index;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C__autoadjust__ageout__remove_all_markers)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -7213,7 +7213,7 @@ H5C__autoadjust__ageout__remove_excess_markers(H5C_t * cache_ptr)
     int		i;
     int		ring_buf_index;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C__autoadjust__ageout__remove_excess_markers)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -7309,7 +7309,7 @@ H5C__flash_increase_cache_size(H5C_t * cache_ptr,
     double                     hit_rate;
     herr_t                     ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C__flash_increase_cache_size)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -7506,7 +7506,7 @@ H5C_flush_invalidate_cache(H5F_t * f,
 #endif /* H5C_DO_SANITY_CHECKS */
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C_flush_invalidate_cache, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert( f );
     HDassert( cache_ptr );
@@ -8056,7 +8056,7 @@ H5C_flush_single_entry(H5F_t *	   	   f,
     H5C_cache_entry_t * entry_ptr = NULL;
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C_flush_single_entry)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert( f );
     HDassert( cache_ptr );
@@ -8479,7 +8479,7 @@ H5C_load_entry(H5F_t *             f,
     unsigned            u;              /* Local index variable */
     void *		ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C_load_entry)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(f);
     HDassert(f->shared);
@@ -8649,7 +8649,7 @@ H5C_make_space_in_cache(H5F_t *	f,
     H5C_cache_entry_t *	next_ptr;
     herr_t		ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C_make_space_in_cache)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert( f );
     HDassert( cache_ptr );
@@ -8946,7 +8946,7 @@ H5C_validate_lru_list(H5C_t * cache_ptr)
     size_t              size = 0;
     H5C_cache_entry_t *	entry_ptr = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C_validate_lru_list)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -9067,7 +9067,7 @@ H5C_verify_not_in_index(H5C_t * cache_ptr,
     int32_t             depth;
     H5C_cache_entry_t *	scan_ptr = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C_verify_not_in_index)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -9129,7 +9129,7 @@ done:
 herr_t
 H5C_ignore_tags(H5C_t * cache_ptr)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5C_ignore_tags)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Assertions */
     HDassert(cache_ptr != NULL);
@@ -9167,7 +9167,7 @@ H5C_tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
     haddr_t tag;                /* Tag address */
     hid_t ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_tag_entry, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Assertions */
     HDassert(cache_ptr != NULL);
@@ -9230,7 +9230,7 @@ H5C_flush_tagged_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_
 {
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C_flush_tagged_entries, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Assertions */
     HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
@@ -9274,7 +9274,7 @@ H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag)
     H5C_cache_entry_t *next_entry_ptr;  /* entry pointer */
     unsigned u;                         /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C_mark_tagged_entries)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Assertions */
     HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
@@ -9319,7 +9319,7 @@ H5C_flush_marked_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_
 { 
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C_flush_marked_entries, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Assertions */
     HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
@@ -9355,7 +9355,7 @@ H5C_verify_tag(int id, haddr_t tag)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C_verify_tag, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Perform some sanity checks on tag value. Certain entry
      * types require certain tag values, so check that these
@@ -9433,7 +9433,7 @@ H5C_retag_copied_metadata(H5C_t * cache_ptr, haddr_t metadata_tag)
 {
     unsigned u;         /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5C_retag_copied_metadata)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(cache_ptr);
 
