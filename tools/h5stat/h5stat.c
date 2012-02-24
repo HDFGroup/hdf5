@@ -239,21 +239,21 @@ leave(int ret)
 static void usage(const char *prog)
 {
      fflush(stdout);
-     fprintf(stdout, "Usage: %s [OPTIONS] file\n", prog);
-     fprintf(stdout, "\n");
-     fprintf(stdout, "      OPTIONS\n");
-     fprintf(stdout, "     -h, --help            Print a usage message and exit\n");
-     fprintf(stdout, "     -V, --version         Print version number and exit\n");
-     fprintf(stdout, "     -f, --file            Print file information\n");
-     fprintf(stdout, "     -F, --filemetadata    Print file space information for file's metadata\n");
-     fprintf(stdout, "     -g, --group           Print group information\n");
-     fprintf(stdout, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
-     fprintf(stdout, "     -d, --dset            Print dataset information\n");
-     fprintf(stdout, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
-     fprintf(stdout, "     -T, --dtypemetadata   Print datasets' datatype information\n");
-     fprintf(stdout, "     -A, --attribute       Print attribute information\n");
-     fprintf(stdout, "     -s, --freespace       Print free space information\n");
-     fprintf(stdout, "     -S, --summary         Print summary of file space information\n");
+     HDfprintf(stdout, "Usage: %s [OPTIONS] file\n", prog);
+     HDfprintf(stdout, "\n");
+     HDfprintf(stdout, "      OPTIONS\n");
+     HDfprintf(stdout, "     -h, --help            Print a usage message and exit\n");
+     HDfprintf(stdout, "     -V, --version         Print version number and exit\n");
+     HDfprintf(stdout, "     -f, --file            Print file information\n");
+     HDfprintf(stdout, "     -F, --filemetadata    Print file space information for file's metadata\n");
+     HDfprintf(stdout, "     -g, --group           Print group information\n");
+     HDfprintf(stdout, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
+     HDfprintf(stdout, "     -d, --dset            Print dataset information\n");
+     HDfprintf(stdout, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
+     HDfprintf(stdout, "     -T, --dtypemetadata   Print datasets' datatype information\n");
+     HDfprintf(stdout, "     -A, --attribute       Print attribute information\n");
+     HDfprintf(stdout, "     -s, --freespace       Print free space information\n");
+     HDfprintf(stdout, "     -S, --summary         Print summary of file space information\n");
 }
 
 

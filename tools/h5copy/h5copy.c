@@ -75,7 +75,7 @@ leave(int ret)
 static void
 usage (void)
 {
-    fprintf(stdout, "\
+    HDfprintf(stdout, "\
 usage: h5copy [OPTIONS] [OBJECTS...]\n\
    OBJECTS\n\
       -i, --input        input file name\n\

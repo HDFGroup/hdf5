@@ -601,27 +601,27 @@ xml_escape_the_name(const char *str)
 
     for (i = 0; i < len; i++) {
         if (*cp == '\'') {
-            strncpy(ncp, apos, HDstrlen(apos));
+            HDstrncpy(ncp, apos, HDstrlen(apos));
             ncp += HDstrlen(apos);
             cp++;
         } 
         else if (*cp == '<') {
-            strncpy(ncp, lt, HDstrlen(lt));
+            HDstrncpy(ncp, lt, HDstrlen(lt));
             ncp += HDstrlen(lt);
             cp++;
         } 
         else if (*cp == '>') {
-            strncpy(ncp, gt, HDstrlen(gt));
+            HDstrncpy(ncp, gt, HDstrlen(gt));
             ncp += HDstrlen(gt);
             cp++;
         } 
         else if (*cp == '\"') {
-            strncpy(ncp, quote, HDstrlen(quote));
+            HDstrncpy(ncp, quote, HDstrlen(quote));
             ncp += HDstrlen(quote);
             cp++;
         } 
         else if (*cp == '&') {
-            strncpy(ncp, amp, HDstrlen(amp));
+            HDstrncpy(ncp, amp, HDstrlen(amp));
             ncp += HDstrlen(amp);
             cp++;
         } 
@@ -708,22 +708,22 @@ xml_escape_the_string(const char *str, int slen)
             *ncp++ = *cp++;
         }
         else if (*cp == '\'') {
-            strncpy(ncp, apos, HDstrlen(apos));
+            HDstrncpy(ncp, apos, HDstrlen(apos));
             ncp += HDstrlen(apos);
             cp++;
         }
         else if (*cp == '<') {
-            strncpy(ncp, lt, HDstrlen(lt));
+            HDstrncpy(ncp, lt, HDstrlen(lt));
             ncp += HDstrlen(lt);
             cp++;
         }
         else if (*cp == '>') {
-            strncpy(ncp, gt, HDstrlen(gt));
+            HDstrncpy(ncp, gt, HDstrlen(gt));
             ncp += HDstrlen(gt);
             cp++;
         }
         else if (*cp == '&') {
-            strncpy(ncp, amp, HDstrlen(amp));
+            HDstrncpy(ncp, amp, HDstrlen(amp));
             ncp += HDstrlen(amp);
             cp++;
         }

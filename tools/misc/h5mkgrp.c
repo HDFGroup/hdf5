@@ -81,7 +81,7 @@ leave(int ret)
 static void
 usage(void)
 {
-    fprintf(stdout, "\
+    HDfprintf(stdout, "\
 usage: h5mkgrp [OPTIONS] FILE GROUP...\n\
    OPTIONS\n\
       -h, --help         Print a usage message and exit\n\
@@ -97,8 +97,8 @@ usage: h5mkgrp [OPTIONS] FILE GROUP...\n\
  *
  * Purpose: Parses command line and sets up global variable to control output
  *
- * Return:	Success: 0
- *		Failure: -1
+ * Return:  Success: 0
+ *    Failure: -1
  *
  * Programmer: Quincey Koziol, 2/13/2007
  *

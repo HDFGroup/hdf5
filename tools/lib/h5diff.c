@@ -25,11 +25,11 @@
  * Debug printf macros. The prefix allows output filtering by test scripts.
  */
 #ifdef H5DIFF_DEBUG
-#define h5diffdebug(x) fprintf(stderr, "h5diff debug: " x)
-#define h5diffdebug2(x1, x2) fprintf(stderr, "h5diff debug: " x1, x2)
-#define h5diffdebug3(x1, x2, x3) fprintf(stderr, "h5diff debug: " x1, x2, x3)
-#define h5diffdebug4(x1, x2, x3, x4) fprintf(stderr, "h5diff debug: " x1, x2, x3, x4)
-#define h5diffdebug5(x1, x2, x3, x4, x5) fprintf(stderr, "h5diff debug: " x1, x2, x3, x4, x5)
+#define h5diffdebug(x) HDfprintf(stderr, "h5diff debug: " x)
+#define h5diffdebug2(x1, x2) HDfprintf(stderr, "h5diff debug: " x1, x2)
+#define h5diffdebug3(x1, x2, x3) HDfprintf(stderr, "h5diff debug: " x1, x2, x3)
+#define h5diffdebug4(x1, x2, x3, x4) HDfprintf(stderr, "h5diff debug: " x1, x2, x3, x4)
+#define h5diffdebug5(x1, x2, x3, x4, x5) HDfprintf(stderr, "h5diff debug: " x1, x2, x3, x4, x5)
 #else
 #define h5diffdebug(x)
 #define h5diffdebug2(x1, x2)
@@ -159,7 +159,7 @@ void print_manager_output(void)
     }
     else if( (outBuffOffset>0) && !g_Parallel)
     {
-        fprintf(stderr, "h5diff error: outBuffOffset>0, but we're not in parallel!\n");
+        HDfprintf(stderr, "h5diff error: outBuffOffset>0, but we're not in parallel!\n");
     }
 }
 
@@ -995,7 +995,7 @@ hsize_t h5diff(const char *fname1,
             if((HDstrlen(fname1) > MAX_FILENAME) || 
                (HDstrlen(fname2) > MAX_FILENAME))
             {
-                fprintf(stderr, "The parallel diff only supports path names up to %d characters\n", MAX_FILENAME);
+                HDfprintf(stderr, "The parallel diff only supports path names up to %d characters\n", MAX_FILENAME);
                 MPI_Abort(MPI_COMM_WORLD, 0);
             } /* end if */
 

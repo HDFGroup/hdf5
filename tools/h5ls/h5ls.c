@@ -176,7 +176,7 @@ static herr_t visit_obj(hid_t file, const char *oname, iter_t *iter);
 static void
 usage (void)
 {
-    fprintf(stderr, "\
+    HDfprintf(stderr, "\
 usage: %s [OPTIONS] [OBJECTS...]\n\
   OPTIONS\n\
    -h, -?, --help  Print a usage message and exit\n\
@@ -263,39 +263,39 @@ display_string(FILE *stream, const char *s, hbool_t escape_spaces)
     for (/*void*/; s && *s; s++) {
         switch (*s) {
             case '"':
-                if (stream) fprintf(stream, "\\\"");
+                if (stream) HDfprintf(stream, "\\\"");
                 nprint += 2;
                 break;
             case '\\':
-                if (stream) fprintf(stream, "\\\\");
+                if (stream) HDfprintf(stream, "\\\\");
                 nprint += 2;
                 break;
             case '\b':
-                if (stream) fprintf(stream, "\\b");
+                if (stream) HDfprintf(stream, "\\b");
                 nprint += 2;
                 break;
             case '\f':
-                if (stream) fprintf(stream, "\\f");
+                if (stream) HDfprintf(stream, "\\f");
                 nprint += 2;
                 break;
             case '\n':
-                if (stream) fprintf(stream, "\\n");
+                if (stream) HDfprintf(stream, "\\n");
                 nprint += 2;
                 break;
             case '\r':
-                if (stream) fprintf(stream, "\\r");
+                if (stream) HDfprintf(stream, "\\r");
                 nprint += 2;
                 break;
             case '\t':
-                if (stream) fprintf(stream, "\\t");
+                if (stream) HDfprintf(stream, "\\t");
                 nprint += 2;
                 break;
             case ' ':
                 if (escape_spaces) {
-                    if (stream) fprintf(stream, "\\ ");
+                    if (stream) HDfprintf(stream, "\\ ");
                     nprint += 2;
                 } else {
-                    if (stream) fprintf(stream, " ");
+                    if (stream) HDfprintf(stream, " ");
                     nprint++;
                 }
                 break;
@@ -305,7 +305,7 @@ display_string(FILE *stream, const char *s, hbool_t escape_spaces)
                     nprint++;
                 } else {
                     if (stream) {
-                        fprintf(stream, "\\%03o", *((const unsigned char*)s));
+                        HDfprintf(stream, "\\%03o", *((const unsigned char*)s));
                     }
                     nprint += 4;
                 }
@@ -2515,7 +2515,7 @@ dump_dataset_values(hid_t dset)
 
     H5Tclose(f_type);
     
-    fprintf(stdout, "\n");
+    HDfprintf(stdout, "\n");
 
     h5tools_str_close(&buffer);
 }
@@ -2694,14 +2694,14 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
             HDfree(buf);
             H5Tclose(p_type);
         } /* end if */
-        fprintf(stdout, "\n");
+        HDfprintf(stdout, "\n");
 
         H5Sclose(space);
         H5Tclose(type);
         H5Aclose(attr);
     } 
     else {
-        fprintf(stdout, "\n");
+        HDfprintf(stdout, "\n");
     }
 
     h5tools_str_close(&buffer);
@@ -3296,7 +3296,7 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
     if(H5O_TYPE_GROUP == oi.type && !grp_literal_g) {
         /* Get ID for group */
         if(!iter->symlink_target && (iter->gid = H5Gopen2(file, oname, H5P_DEFAULT)) < 0) {
-            fprintf(stderr, "%s: unable to open '%s' as group\n", iter->fname, oname);
+            HDfprintf(stderr, "%s: unable to open '%s' as group\n", iter->fname, oname);
             return 0;   /* Previously "continue", when this code was in main().
                          * We don't "continue" here in order to close the file
                          * and free the file name properly. */
@@ -3424,14 +3424,14 @@ is_valid_args(void)
 
     if(recursive_g && grp_literal_g) 
     {
-        fprintf(stderr, "Error: 'recursive' option not compatible with 'group info' option!\n\n");
+        HDfprintf(stderr, "Error: 'recursive' option not compatible with 'group info' option!\n\n");
         ret = FALSE;
         goto out;
     }
 
     if(no_dangling_link_g && !follow_symlink_g) 
     {
-        fprintf(stderr, "Error: --no-dangling-links must be used along with --follow-symlinks option!\n\n");
+        HDfprintf(stderr, "Error: --no-dangling-links must be used along with --follow-symlinks option!\n\n");
         ret = FALSE;
         goto out;
     }
@@ -3727,7 +3727,7 @@ main(int argc, const char *argv[])
         } /* end while */
 
         if(file < 0) {
-            fprintf(stderr, "%s: unable to open file\n", argv[argno-1]);
+            HDfprintf(stderr, "%s: unable to open file\n", argv[argno-1]);
             HDfree(fname);
             err_exit = 1;
             continue;
@@ -3740,7 +3740,7 @@ main(int argc, const char *argv[])
             iter.base_len -= oname[iter.base_len-1] == '/';
             x = oname;
             if(NULL == (oname = HDstrdup(oname))) {
-                fprintf(stderr, "memory allocation failed\n");
+                HDfprintf(stderr, "memory allocation failed\n");
                 leave(EXIT_FAILURE);
             }
             *x = '\0';
