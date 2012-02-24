@@ -3069,7 +3069,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
             
             h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer,"OFFSET %u", ioffset);
+            h5tools_str_append(&buffer,"OFFSET "H5_PRINTF_HADDR_FMT, ioffset);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
 
             ctx->indent_level--;
