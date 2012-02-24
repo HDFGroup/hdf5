@@ -153,7 +153,7 @@ void print_manager_output(void)
             overflow_file = NULL;
         }
 
-        fflush(stdout);
+        HDfflush(stdout);
         HDmemset(outBuff, 0, OUTBUFF_SIZE);
         outBuffOffset = 0;
     }

@@ -238,7 +238,7 @@ leave(int ret)
 
 static void usage(const char *prog)
 {
-     fflush(stdout);
+     HDfflush(stdout);
      HDfprintf(stdout, "Usage: %s [OPTIONS] file\n", prog);
      HDfprintf(stdout, "\n");
      HDfprintf(stdout, "      OPTIONS\n");
