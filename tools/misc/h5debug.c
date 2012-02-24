@@ -246,7 +246,7 @@ main(int argc, char *argv[])
         HDfprintf(stderr, "cannot create file access property list\n");
         HDexit(1);
     } /* end if */
-    if(strchr(argv[1], '%'))
+    if(HDstrchr(argv[1], '%'))
   H5Pset_fapl_family (fapl, (hsize_t)0, H5P_DEFAULT);
     if((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, fapl)) < 0) {
         HDfprintf(stderr, "cannot open file\n");

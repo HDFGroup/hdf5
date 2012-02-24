@@ -3352,8 +3352,8 @@ get_width(void)
 
     /* Try to get it from the COLUMNS environment variable first since it's
      * value is sometimes wrong. */
-    if ((s=getenv("COLUMNS")) && *s && isdigit((int)*s))
-        width = (int)strtol(s, NULL, 0);
+    if ((s=HDgetenv("COLUMNS")) && *s && isdigit((int)*s))
+        width = (int)HDstrtol(s, NULL, 0);
 
 #if defined(H5_HAVE_STRUCT_VIDEOCONFIG) && defined(H5_HAVE__GETVIDEOCONFIG)
     {
