@@ -693,7 +693,7 @@ xml_escape_the_string(const char *str, int slen)
     }
 
     cp = str;
-    rcp = ncp = (char *) calloc((len + extra + 1), sizeof(char));
+    rcp = ncp = (char *) HDcalloc((len + extra + 1), sizeof(char));
 
     if (ncp == NULL)
         return NULL; /* ?? */
@@ -2899,7 +2899,7 @@ xml_print_refs(hid_t did, int source)
         if ((tsiz = H5Tget_size(type)) == 0)
             goto error;
 
-        buf = (char *) calloc((size_t)(ssiz * tsiz), sizeof(char));
+        buf = (char *) HDcalloc((size_t)(ssiz * tsiz), sizeof(char));
         if (buf == NULL)
             goto error;
         e = H5Dread(did, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
@@ -2915,7 +2915,7 @@ xml_print_refs(hid_t did, int source)
         if ((tsiz = H5Tget_size(type)) == 0)
             goto error;
 
-        buf = (char *) calloc((size_t)(ssiz * tsiz), sizeof(char));
+        buf = (char *) HDcalloc((size_t)(ssiz * tsiz), sizeof(char));
         if (buf == NULL) {
             goto error;
         }
@@ -3085,7 +3085,7 @@ xml_print_strs(hid_t did, int source)
 
     bp = (char*) buf;
     if (!is_vlstr)
-        onestring = (char *) calloc(tsiz, sizeof(char));
+        onestring = (char *) HDcalloc(tsiz, sizeof(char));
 
     /* setup */
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -4355,8 +4355,8 @@ xml_print_enum(hid_t type)
     }
 
     /* Get the names and raw values of all members */
-    name = (char **)calloc(nmembs, sizeof(char *));
-    value = (unsigned char *)calloc(nmembs, MAX(H5Tget_size(type), dst_size));
+    name = (char **)HDcalloc(nmembs, sizeof(char *));
+    value = (unsigned char *)HDcalloc(nmembs, MAX(H5Tget_size(type), dst_size));
 
     for (i = 0; i < nmembs; i++) {
         name[i] = H5Tget_member_name(type, i);

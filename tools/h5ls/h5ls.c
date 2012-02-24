@@ -897,8 +897,8 @@ display_enum_type(hid_t type, int ind)
     }
 
     /* Get the names and raw values of all members */
-    name = calloc(nmembs, sizeof(char*));
-    value = (unsigned char *)calloc(nmembs, MAX(H5Tget_size(type), dst_size));
+    name = HDcalloc(nmembs, sizeof(char*));
+    value = (unsigned char *)HDcalloc(nmembs, MAX(H5Tget_size(type), dst_size));
     for (i=0; i<nmembs; i++) {
         name[i] = H5Tget_member_name(type, i);
         H5Tget_member_value(type, i, value+i*H5Tget_size(type));
@@ -1977,8 +1977,8 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
     }
 
     /* Get the names and raw values of all members */
-    name = calloc(nmembs, sizeof(char*));
-    value = (unsigned char *)calloc(nmembs, MAX(H5Tget_size(type), dst_size));
+    name = HDcalloc(nmembs, sizeof(char*));
+    value = (unsigned char *)HDcalloc(nmembs, MAX(H5Tget_size(type), dst_size));
     for (i=0; i<nmembs; i++) {
         name[i] = H5Tget_member_name(type, i);
         H5Tget_member_value(type, i, value+i*H5Tget_size(type));

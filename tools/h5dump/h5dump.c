@@ -642,7 +642,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
         return;
 
     /* allocate an array for the integers in the list */
-    p_list = (hsize_t *)calloc(size_count, sizeof(hsize_t));
+    p_list = (hsize_t *)HDcalloc(size_count, sizeof(hsize_t));
 
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
         if(isdigit(*ptr)) {
@@ -684,7 +684,7 @@ parse_subset_params(char *dset)
     if (!disable_compact_subset && ((brace = strrchr(dset, '[')) != NULL)) {
         *brace++ = '\0';
 
-        s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
+        s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
         parse_hsize_list(brace, &s->start);
 
         while (*brace && *brace != ';')
@@ -906,7 +906,7 @@ parse_command_line(int argc, const char *argv[])
     }
 
     /* this will be plenty big enough to hold the info */
-    if((hand = (struct handler_t *)calloc((size_t)argc, sizeof(struct handler_t)))==NULL) {
+    if((hand = (struct handler_t *)HDcalloc((size_t)argc, sizeof(struct handler_t)))==NULL) {
             goto error;
     }
 
@@ -1163,7 +1163,7 @@ parse_start:
                 s = last_dset->subset_info;
             } 
             else {
-                last_dset->subset_info = s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
+                last_dset->subset_info = s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
             }
 
             /*

@@ -88,7 +88,7 @@ obj_list_t* parse_filter(const char *str,
     }
 
     n++;
-    obj_list = (obj_list_t*) malloc(n*sizeof(obj_list_t));
+    obj_list = (obj_list_t*) HDmalloc(n*sizeof(obj_list_t));
     if (obj_list==NULL)
     {
         error_msg("could not allocate object list\n");
@@ -509,7 +509,7 @@ obj_list_t* parse_layout(const char *str,
     }
 
     n++;
-    obj_list = (obj_list_t*) malloc(n*sizeof(obj_list_t));
+    obj_list = (obj_list_t*) HDmalloc(n*sizeof(obj_list_t));
     if (obj_list==NULL)
     {
         error_msg("could not allocate object list\n");

@@ -1502,26 +1502,26 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
              * dimensions */
             if(!sset->start.data) {
                 /* default to (0, 0, ...) for the start coord */
-                sset->start.data = (hsize_t *)calloc((size_t)ndims, sizeof(hsize_t));
+                sset->start.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
                 sset->start.len = ndims;
             }
 
             if(!sset->stride.data) {
-                sset->stride.data = (hsize_t *)calloc((size_t)ndims, sizeof(hsize_t));
+                sset->stride.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
                 sset->stride.len = ndims;
                 for (i = 0; i < ndims; i++)
                     sset->stride.data[i] = 1;
             }
 
             if(!sset->count.data) {
-                sset->count.data = (hsize_t *)calloc((size_t)ndims, sizeof(hsize_t));
+                sset->count.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
                 sset->count.len = ndims;
                 for (i = 0; i < ndims; i++)
                     sset->count.data[i] = 1;
             }
 
             if(!sset->block.data) {
-                sset->block.data = (hsize_t *)calloc((size_t)ndims, sizeof(hsize_t));
+                sset->block.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
                 sset->block.len = ndims;
                 for (i = 0; i < ndims; i++)
                     sset->block.data[i] = 1;

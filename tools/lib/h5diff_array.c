@@ -5580,7 +5580,7 @@ int ull2float(unsigned long long ull_value, float *f_value)
 
  src_size = H5Tget_size(H5T_NATIVE_ULLONG);
  dst_size = H5Tget_size(H5T_NATIVE_FLOAT);
- buf = (unsigned char*)calloc(1, MAX(src_size, dst_size));
+ buf = (unsigned char*)HDcalloc(1, MAX(src_size, dst_size));
 
  HDmemcpy(buf, &ull_value, src_size);
 
