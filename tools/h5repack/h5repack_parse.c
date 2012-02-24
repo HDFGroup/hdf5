@@ -52,7 +52,7 @@ obj_list_t* parse_filter(const char *str,
 {
     unsigned    i, u;
     char        c;
-    size_t      len=strlen(str);
+    size_t      len=HDstrlen(str);
     int         j, m, n, k, l, end_obj=-1, no_param=0;
     char        sobj[MAX_NC_NAME];
     char        scomp[10];
@@ -479,7 +479,7 @@ obj_list_t* parse_layout(const char *str,
     obj_list_t* obj_list=NULL;
     unsigned    i;
     char        c;
-    size_t      len=strlen(str);
+    size_t      len=HDstrlen(str);
     int         j, n, k, end_obj=-1, c_index;
     char        sobj[MAX_NC_NAME];
     char        sdim[10];

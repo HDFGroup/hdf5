@@ -157,7 +157,7 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
          */
         if (nchars < 0 
 #ifndef H5_VSNPRINTF_WORKS
-                && (strlen(str->s) < str->nalloc)
+                && (HDstrlen(str->s) < str->nalloc)
 #endif
                 ) {
             /* failure, such as bad format */

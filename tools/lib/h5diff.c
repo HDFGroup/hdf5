@@ -274,7 +274,7 @@ static int is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *options
         if (exclude_path_ptr->obj_type == H5TRAV_TYPE_GROUP)
         {
             ret_cmp = HDstrncmp(exclude_path_ptr->obj_path, path,
-                                strlen(exclude_path_ptr->obj_path));
+                                HDstrlen(exclude_path_ptr->obj_path));
             if (ret_cmp == 0)
             {
                 /* check if given path belong to an excluding group, if so 
@@ -1180,12 +1180,12 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
         {
             objtype = table->objs[i].type;
             /* make full path for obj1 */
-            obj1_fullpath = (char*)HDcalloc (strlen(grp1_path) + strlen (table->objs[i].name) + 1, sizeof (char));
+            obj1_fullpath = (char*)HDcalloc (HDstrlen(grp1_path) + strlen (table->objs[i].name) + 1, sizeof (char));
             HDstrcpy(obj1_fullpath, grp1_path);
             HDstrcat(obj1_fullpath, table->objs[i].name);
 
             /* make full path for obj2 */
-            obj2_fullpath = (char*)HDcalloc (strlen(grp2_path) + strlen (table->objs[i].name) + 1, sizeof (char));
+            obj2_fullpath = (char*)HDcalloc (HDstrlen(grp2_path) + strlen (table->objs[i].name) + 1, sizeof (char));
             HDstrcpy(obj2_fullpath, grp2_path);
             HDstrcat(obj2_fullpath, table->objs[i].name);
 

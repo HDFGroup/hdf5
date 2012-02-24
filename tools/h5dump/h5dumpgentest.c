@@ -3528,7 +3528,7 @@ void gent_split_file(void)
     root = H5Gopen2(fid, "/", H5P_DEFAULT);
 
     atype = H5Tcopy(H5T_C_S1);
-    H5Tset_size(atype, strlen(meta) + 1);
+    H5Tset_size(atype, HDstrlen(meta) + 1);
     H5Tset_strpad(atype, H5T_STR_NULLTERM);
 
     dims[0] = 1;
@@ -3729,7 +3729,7 @@ static void gent_char(void)
     hid_t       sid1;               /* Dataspace ID     */
     hsize_t     dims1[1];
 
-    dims1[0] = strlen(wdata);
+    dims1[0] = HDstrlen(wdata);
 
     /* Create file */
     fid1 = H5Fcreate(FILE39, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

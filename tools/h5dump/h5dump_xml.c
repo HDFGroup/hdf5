@@ -172,12 +172,12 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNU
 
                         /* Render the element */
                         h5tools_str_reset(&buffer);
-                        if(strlen(h5tools_dump_header_format->datasetblockend)) {
+                        if(HDstrlen(h5tools_dump_header_format->datasetblockend)) {
                             h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->datasetblockend);
-                            if(strlen(h5tools_dump_header_format->datasetend))
+                            if(HDstrlen(h5tools_dump_header_format->datasetend))
                                 h5tools_str_append(&buffer, " ");
                         }
-                        if(strlen(h5tools_dump_header_format->datasetend))
+                        if(HDstrlen(h5tools_dump_header_format->datasetend))
                             h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->datasetend);
                         h5tools_render_element(stdout, outputformat, &ctx, &buffer, &curr_pos, outputformat->line_ncols, 0, 0);
 
@@ -567,24 +567,24 @@ xml_escape_the_name(const char *str)
         return NULL;
 
     cp = str;
-    len = strlen(str);
+    len = HDstrlen(str);
     extra = 0;
 
     for (i = 0; i < len; i++) {
         if (*cp == '\"') {
-            extra += (strlen(quote) - 1);
+            extra += (HDstrlen(quote) - 1);
         } 
         else if (*cp == '\'') {
-            extra += (strlen(apos) - 1);
+            extra += (HDstrlen(apos) - 1);
         } 
         else if (*cp == '<') {
-            extra += (strlen(lt) - 1);
+            extra += (HDstrlen(lt) - 1);
         } 
         else if (*cp == '>') {
-            extra += (strlen(gt) - 1);
+            extra += (HDstrlen(gt) - 1);
         } 
         else if (*cp == '&') {
-            extra += (strlen(amp) - 1);
+            extra += (HDstrlen(amp) - 1);
         }
 
         cp++;
@@ -601,28 +601,28 @@ xml_escape_the_name(const char *str)
 
     for (i = 0; i < len; i++) {
         if (*cp == '\'') {
-            strncpy(ncp, apos, strlen(apos));
-            ncp += strlen(apos);
+            strncpy(ncp, apos, HDstrlen(apos));
+            ncp += HDstrlen(apos);
             cp++;
         } 
         else if (*cp == '<') {
-            strncpy(ncp, lt, strlen(lt));
-            ncp += strlen(lt);
+            strncpy(ncp, lt, HDstrlen(lt));
+            ncp += HDstrlen(lt);
             cp++;
         } 
         else if (*cp == '>') {
-            strncpy(ncp, gt, strlen(gt));
-            ncp += strlen(gt);
+            strncpy(ncp, gt, HDstrlen(gt));
+            ncp += HDstrlen(gt);
             cp++;
         } 
         else if (*cp == '\"') {
-            strncpy(ncp, quote, strlen(quote));
-            ncp += strlen(quote);
+            strncpy(ncp, quote, HDstrlen(quote));
+            ncp += HDstrlen(quote);
             cp++;
         } 
         else if (*cp == '&') {
-            strncpy(ncp, amp, strlen(amp));
-            ncp += strlen(amp);
+            strncpy(ncp, amp, HDstrlen(amp));
+            ncp += HDstrlen(amp);
             cp++;
         } 
         else {
@@ -664,7 +664,7 @@ xml_escape_the_string(const char *str, int slen)
     cp = str;
 
     if (slen < 0)
-        len = strlen(str);
+        len = HDstrlen(str);
     else
         len = slen;
 
@@ -678,16 +678,16 @@ xml_escape_the_string(const char *str, int slen)
             extra++;
         }
         else if (*cp == '\'') {
-            extra += (strlen(apos) - 1);
+            extra += (HDstrlen(apos) - 1);
         }
         else if (*cp == '<') {
-            extra += (strlen(lt) - 1);
+            extra += (HDstrlen(lt) - 1);
         }
         else if (*cp == '>') {
-            extra += (strlen(gt) - 1);
+            extra += (HDstrlen(gt) - 1);
         }
         else if (*cp == '&') {
-            extra += (strlen(amp) - 1);
+            extra += (HDstrlen(amp) - 1);
         }
         cp++;
     }
@@ -708,23 +708,23 @@ xml_escape_the_string(const char *str, int slen)
             *ncp++ = *cp++;
         }
         else if (*cp == '\'') {
-            strncpy(ncp, apos, strlen(apos));
-            ncp += strlen(apos);
+            strncpy(ncp, apos, HDstrlen(apos));
+            ncp += HDstrlen(apos);
             cp++;
         }
         else if (*cp == '<') {
-            strncpy(ncp, lt, strlen(lt));
-            ncp += strlen(lt);
+            strncpy(ncp, lt, HDstrlen(lt));
+            ncp += HDstrlen(lt);
             cp++;
         }
         else if (*cp == '>') {
-            strncpy(ncp, gt, strlen(gt));
-            ncp += strlen(gt);
+            strncpy(ncp, gt, HDstrlen(gt));
+            ncp += HDstrlen(gt);
             cp++;
         }
         else if (*cp == '&') {
-            strncpy(ncp, amp, strlen(amp));
-            ncp += strlen(amp);
+            strncpy(ncp, amp, HDstrlen(amp));
+            ncp += HDstrlen(amp);
             cp++;
         }
         else {
