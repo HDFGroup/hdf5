@@ -219,6 +219,7 @@ main (int argc, const char *argv[])
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
+
     /* initialize h5tools lib */
     h5tools_init();
 

@@ -295,15 +295,15 @@ struct options {
     int buf_rank;             /* Rank                   */
     int order_rank;             /* Rank                   */
     int chk_rank;             /* Rank                   */
-    int print_times;       	/* print times as well as throughputs   */
-    int print_raw;         	/* print raw data throughput info       */
+    int print_times;         /* print times as well as throughputs   */
+    int print_raw;           /* print raw data throughput info       */
     off_t h5_alignment;         /* alignment in HDF5 file               */
     off_t h5_threshold;         /* threshold for alignment in HDF5 file */
-    int h5_use_chunks;     	/* Make HDF5 dataset chunked            */
-    int h5_write_only;        	/* Perform the write tests only         */
-    int h5_extendable;        	/* Perform the write tests only         */
+    int h5_use_chunks;       /* Make HDF5 dataset chunked            */
+    int h5_write_only;          /* Perform the write tests only         */
+    int h5_extendable;          /* Perform the write tests only         */
     unsigned h5_use_mpi_posix;  /* Use MPI-posix VFD for HDF5 I/O (instead of MPI-I/O VFD) */
-    int verify;        		/* Verify data correctness              */
+    int verify;            /* Verify data correctness              */
     vfdtype     vfd;            /* File driver */
 
 };
@@ -343,6 +343,11 @@ main(int argc, char **argv)
     int exit_value = EXIT_SUCCESS;
     struct options *opts = NULL;
 
+#ifndef STANDALONE
+    /* Initialize h5tools lib */
+    h5tools_init();
+#endif
+    
     output = stdout;
 
     opts = parse_command_line(argc, argv);
@@ -553,7 +558,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
     /*
      * Show various statistics
      */
-    /* Write statistics	*/
+    /* Write statistics  */
     /* Print the raw data throughput if desired */
     if (opts->print_raw) {
         /* accumulate and output the max, min, and average "raw write" times */
@@ -599,7 +604,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
     output_results(opts,"Write Open-Close",write_gross_mm_table,parms.num_iters,raw_size);
 
     if (!parms.h5_write_only) {
-        /* Read statistics	*/
+        /* Read statistics  */
         /* Print the raw data throughput if desired */
         if (opts->print_raw) {
             /* accumulate and output the max, min, and average "raw read" times */
@@ -810,10 +815,10 @@ output_report(const char *fmt, ...)
 static void
 print_indent(register int indent)
 {
-	indent *= TAB_SPACE;
+  indent *= TAB_SPACE;
 
-	for (; indent > 0; --indent)
-	    fputc(' ', output);
+  for (; indent > 0; --indent)
+      fputc(' ', output);
 }
 
 static void
@@ -837,9 +842,9 @@ static void
 print_io_api(long io_types)
 {
     if (io_types & SIO_POSIX)
-	HDfprintf(output, "posix ");
+  HDfprintf(output, "posix ");
     if (io_types & SIO_HDF5)
-	HDfprintf(output, "hdf5 ");
+  HDfprintf(output, "hdf5 ");
     HDfprintf(output, "\n");
 }
 
@@ -849,7 +854,7 @@ report_parameters(struct options *opts)
     int i, rank;
     rank = opts->dset_rank;
 
-    print_version("HDF5 Library");	/* print library version */
+    print_version("HDF5 Library");  /* print library version */
     HDfprintf(output, "==== Parameters ====\n");
 
     HDfprintf(output, "IO API=");
@@ -1343,7 +1348,7 @@ parse_size_directive(const char *size)
 static void
 usage(const char *prog)
 {
-	print_version(prog);
+  print_version(prog);
         printf("usage: %s [OPTIONS]\n", prog);
         printf("  OPTIONS\n");
         printf("     -h                Print an usage message and exit\n");

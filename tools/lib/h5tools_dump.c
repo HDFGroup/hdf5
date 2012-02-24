@@ -297,7 +297,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
 
     /* binary dump */
     if (bin_output) {
-        do_bin_output(rawdatastream, container, nelmts, type, _mem);
+        do_bin_output(rawdatastream, rawoutstream, container, nelmts, type, _mem);
     } /* end if */
     else {
         /* setup */
@@ -1754,7 +1754,7 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     h5tool_format_t info_dflt;
     /* Use default values */
     if (!stream)
-        stream = stdout;
+        stream = rawoutstream;
 
     if (!info) {
         HDmemset(&info_dflt, 0, sizeof info_dflt);
@@ -1826,7 +1826,7 @@ h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, h5tools_context_t *c
 
     /* Use default values */
     if (!stream)
-        stream = stdout;
+        stream = rawoutstream;
 
     if (!info) {
         HDmemset(&info_dflt, 0, sizeof(info_dflt));

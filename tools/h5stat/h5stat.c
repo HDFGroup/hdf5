@@ -1631,6 +1631,7 @@ main(int argc, const char *argv[])
 
     /* Initialize h5tools lib */
     h5tools_init();
+    
     if((hand = parse_command_line(argc, argv))==NULL) {
         goto done;
     }

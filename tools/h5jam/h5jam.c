@@ -237,6 +237,9 @@ main (int argc, const char *argv[])
     H5Eget_auto2(H5E_DEFAULT, &func, &edata);
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
+    /* Initialize h5tools lib */
+    h5tools_init();
+
     parse_command_line (argc, argv);
 
     if (ub_file == NULL) {

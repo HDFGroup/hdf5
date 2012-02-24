@@ -230,35 +230,35 @@ leave(int ret)
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
-    HDfprintf(stdout, "usage: %s [OPTIONS] file\n", prog);
-    HDfprintf(stdout, "  OPTIONS\n");
-    HDfprintf(stdout, "     -h, --help           Print a usage message and exit\n");
-    HDfprintf(stdout, "     -n, --contents       Print a list of the file contents and exit\n");
-    HDfprintf(stdout, "     -B, --superblock     Print the content of the super block\n");
-    HDfprintf(stdout, "     -H, --header         Print the header only; no data is displayed\n");
-    HDfprintf(stdout, "     -A, --onlyattr       Print the header and value of attributes\n");
-    HDfprintf(stdout, "     -i, --object-ids     Print the object ids\n");
-    HDfprintf(stdout, "     -r, --string         Print 1-byte integer datasets as ASCII\n");
-    HDfprintf(stdout, "     -e, --escape         Escape non printing characters\n");
-    HDfprintf(stdout, "     -V, --version        Print version number and exit\n");
-    HDfprintf(stdout, "     -a P, --attribute=P  Print the specified attribute\n");
-    HDfprintf(stdout, "     -d P, --dataset=P    Print the specified dataset\n");
-    HDfprintf(stdout, "     -y, --noindex        Do not print array indices with the data\n");
-    HDfprintf(stdout, "     -p, --properties     Print dataset filters, storage layout and fill value\n");
-    HDfprintf(stdout, "     -f D, --filedriver=D Specify which driver to open the file with\n");
-    HDfprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
-    HDfprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
-    HDfprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
-    HDfprintf(stdout, "     -b B, --binary=B     Binary file output, of form B\n");
-    HDfprintf(stdout, "     -t P, --datatype=P   Print the specified named datatype\n");
-    HDfprintf(stdout, "     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)\n");
-    HDfprintf(stdout, "                          sets the number of columns to the maximum (65535).\n");
-    HDfprintf(stdout, "                          Default width is 80 columns.\n");
-    HDfprintf(stdout, "     -m T, --format=T     Set the floating point output format\n");
-    HDfprintf(stdout, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
-    HDfprintf(stdout, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
-    HDfprintf(stdout,
+    HDfflush(rawoutstream);
+    HDfprintf(rawoutstream, "usage: %s [OPTIONS] file\n", prog);
+    HDfprintf(rawoutstream, "  OPTIONS\n");
+    HDfprintf(rawoutstream, "     -h, --help           Print a usage message and exit\n");
+    HDfprintf(rawoutstream, "     -n, --contents       Print a list of the file contents and exit\n");
+    HDfprintf(rawoutstream, "     -B, --superblock     Print the content of the super block\n");
+    HDfprintf(rawoutstream, "     -H, --header         Print the header only; no data is displayed\n");
+    HDfprintf(rawoutstream, "     -A, --onlyattr       Print the header and value of attributes\n");
+    HDfprintf(rawoutstream, "     -i, --object-ids     Print the object ids\n");
+    HDfprintf(rawoutstream, "     -r, --string         Print 1-byte integer datasets as ASCII\n");
+    HDfprintf(rawoutstream, "     -e, --escape         Escape non printing characters\n");
+    HDfprintf(rawoutstream, "     -V, --version        Print version number and exit\n");
+    HDfprintf(rawoutstream, "     -a P, --attribute=P  Print the specified attribute\n");
+    HDfprintf(rawoutstream, "     -d P, --dataset=P    Print the specified dataset\n");
+    HDfprintf(rawoutstream, "     -y, --noindex        Do not print array indices with the data\n");
+    HDfprintf(rawoutstream, "     -p, --properties     Print dataset filters, storage layout and fill value\n");
+    HDfprintf(rawoutstream, "     -f D, --filedriver=D Specify which driver to open the file with\n");
+    HDfprintf(rawoutstream, "     -g P, --group=P      Print the specified group and all members\n");
+    HDfprintf(rawoutstream, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
+    HDfprintf(rawoutstream, "     -o F, --output=F     Output raw data into file F\n");
+    HDfprintf(rawoutstream, "     -b B, --binary=B     Binary file output, of form B\n");
+    HDfprintf(rawoutstream, "     -t P, --datatype=P   Print the specified named datatype\n");
+    HDfprintf(rawoutstream, "     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)\n");
+    HDfprintf(rawoutstream, "                          sets the number of columns to the maximum (65535).\n");
+    HDfprintf(rawoutstream, "                          Default width is 80 columns.\n");
+    HDfprintf(rawoutstream, "     -m T, --format=T     Set the floating point output format\n");
+    HDfprintf(rawoutstream, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
+    HDfprintf(rawoutstream, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
+    HDfprintf(rawoutstream,
   "     -M L, --packedbits=L Print packed bits as unsigned integers, using mask\n"
   "                          format L for an integer dataset specified with\n"
   "                          option -d. L is a list of offset,length values,\n"
@@ -266,69 +266,69 @@ usage(const char *prog)
   "                          the data value and length is the number of bits of\n"
   "                          the mask.\n"
   );
-    HDfprintf(stdout, "     -R, --region         Print dataset pointed by region references\n");
-    HDfprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
-    HDfprintf(stdout, "     -u, --use-dtd        Output in XML using DTD\n");
-    HDfprintf(stdout, "     -D U, --xml-dtd=U    Use the DTD or schema at U\n");
-    HDfprintf(stdout, "     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML\n");
-    HDfprintf(stdout, "                          \":\": no namespace, default: \"hdf5:\"\n");
-    HDfprintf(stdout, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
-    HDfprintf(stdout, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
-    HDfprintf(stdout, "                          occur.\n");
-    HDfprintf(stdout, "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
-    HDfprintf(stdout, "                          of \"[\" in datset names.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
-    HDfprintf(stdout, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
-    HDfprintf(stdout, " Thus, the options mirror those for performing a hyperslab selection.\n");
-    HDfprintf(stdout, " One of the START, COUNT, STRIDE, or BLOCK parameters are mandatory if you do subsetting.\n");
-    HDfprintf(stdout, " The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in\n");
-    HDfprintf(stdout, " each dimension. START is optional and will default to 0 in each dimension.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "      -s START,  --start=START    Offset of start of subsetting selection\n");
-    HDfprintf(stdout, "      -S STRIDE, --stride=STRIDE  Hyperslab stride\n");
-    HDfprintf(stdout, "      -c COUNT,  --count=COUNT    Number of blocks to include in selection\n");
-    HDfprintf(stdout, "      -k BLOCK,  --block=BLOCK    Size of block in hyperslab\n");
-    HDfprintf(stdout, "  START, COUNT, STRIDE, and BLOCK - is a list of integers the number of which are equal to the\n");
-    HDfprintf(stdout, "        number of dimensions in the dataspace being queried\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "  D - is the file driver to use in opening the file. Acceptable values\n");
-    HDfprintf(stdout, "        are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
-    HDfprintf(stdout, "        the file driver flag, the file will be opened with each driver in\n");
-    HDfprintf(stdout, "        turn and in the order specified above until one driver succeeds\n");
-    HDfprintf(stdout, "        in opening the file.\n");
-    HDfprintf(stdout, "  F - is a filename.\n");
-    HDfprintf(stdout, "  P - is the full path from the root group to the object.\n");
-    HDfprintf(stdout, "  N - is an integer greater than 1.\n");
-    HDfprintf(stdout, "  T - is a string containing the floating point format, e.g '%%.3f'\n");
-    HDfprintf(stdout, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
-    HDfprintf(stdout, "        updated by [IETF RFC 2732])\n");
-    HDfprintf(stdout, "  B - is the form of binary output: NATIVE for a memory type, FILE for the\n");
-    HDfprintf(stdout, "        file type, LE or BE for pre-existing little or big endian types.\n");
-    HDfprintf(stdout, "        Must be used with -o (output file) and it is recommended that\n");
-    HDfprintf(stdout, "        -d (dataset) is used. B is an optional argument, defaults to NATIVE\n");
-    HDfprintf(stdout, "  Q - is the sort index type. It can be \"creation_order\" or \"name\" (default)\n");
-    HDfprintf(stdout, "  Z - is the sort order type. It can be \"descending\" or \"ascending\" (default)\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "  Examples:\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "  1) Attribute foo of the group /bar_none in file quux.h5\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "      h5dump -a /bar_none/foo quux.h5\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "  2) Selecting a subset from dataset /foo in file quux.h5\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "      h5dump -d /foo -s \"0,1\" -S \"1,1\" -c \"2,3\" -k \"2,2\" quux.h5\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "  3) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin'\n");
-    HDfprintf(stdout, "        using a little-endian type\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "      h5dump -d /dset -b LE -o out.bin quux.h5\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "  4) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "      h5dump -d /dset -M 0,1,4,3 quux.h5\n");
-    HDfprintf(stdout, "\n");
+    HDfprintf(rawoutstream, "     -R, --region         Print dataset pointed by region references\n");
+    HDfprintf(rawoutstream, "     -x, --xml            Output in XML using Schema\n");
+    HDfprintf(rawoutstream, "     -u, --use-dtd        Output in XML using DTD\n");
+    HDfprintf(rawoutstream, "     -D U, --xml-dtd=U    Use the DTD or schema at U\n");
+    HDfprintf(rawoutstream, "     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML\n");
+    HDfprintf(rawoutstream, "                          \":\": no namespace, default: \"hdf5:\"\n");
+    HDfprintf(rawoutstream, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
+    HDfprintf(rawoutstream, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
+    HDfprintf(rawoutstream, "                          occur.\n");
+    HDfprintf(rawoutstream, "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
+    HDfprintf(rawoutstream, "                          of \"[\" in datset names.\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, " Subsetting is available by using the following options with a dataset\n");
+    HDfprintf(rawoutstream, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
+    HDfprintf(rawoutstream, " Thus, the options mirror those for performing a hyperslab selection.\n");
+    HDfprintf(rawoutstream, " One of the START, COUNT, STRIDE, or BLOCK parameters are mandatory if you do subsetting.\n");
+    HDfprintf(rawoutstream, " The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in\n");
+    HDfprintf(rawoutstream, " each dimension. START is optional and will default to 0 in each dimension.\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      -s START,  --start=START    Offset of start of subsetting selection\n");
+    HDfprintf(rawoutstream, "      -S STRIDE, --stride=STRIDE  Hyperslab stride\n");
+    HDfprintf(rawoutstream, "      -c COUNT,  --count=COUNT    Number of blocks to include in selection\n");
+    HDfprintf(rawoutstream, "      -k BLOCK,  --block=BLOCK    Size of block in hyperslab\n");
+    HDfprintf(rawoutstream, "  START, COUNT, STRIDE, and BLOCK - is a list of integers the number of which are equal to the\n");
+    HDfprintf(rawoutstream, "        number of dimensions in the dataspace being queried\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  D - is the file driver to use in opening the file. Acceptable values\n");
+    HDfprintf(rawoutstream, "        are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
+    HDfprintf(rawoutstream, "        the file driver flag, the file will be opened with each driver in\n");
+    HDfprintf(rawoutstream, "        turn and in the order specified above until one driver succeeds\n");
+    HDfprintf(rawoutstream, "        in opening the file.\n");
+    HDfprintf(rawoutstream, "  F - is a filename.\n");
+    HDfprintf(rawoutstream, "  P - is the full path from the root group to the object.\n");
+    HDfprintf(rawoutstream, "  N - is an integer greater than 1.\n");
+    HDfprintf(rawoutstream, "  T - is a string containing the floating point format, e.g '%%.3f'\n");
+    HDfprintf(rawoutstream, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
+    HDfprintf(rawoutstream, "        updated by [IETF RFC 2732])\n");
+    HDfprintf(rawoutstream, "  B - is the form of binary output: NATIVE for a memory type, FILE for the\n");
+    HDfprintf(rawoutstream, "        file type, LE or BE for pre-existing little or big endian types.\n");
+    HDfprintf(rawoutstream, "        Must be used with -o (output file) and it is recommended that\n");
+    HDfprintf(rawoutstream, "        -d (dataset) is used. B is an optional argument, defaults to NATIVE\n");
+    HDfprintf(rawoutstream, "  Q - is the sort index type. It can be \"creation_order\" or \"name\" (default)\n");
+    HDfprintf(rawoutstream, "  Z - is the sort order type. It can be \"descending\" or \"ascending\" (default)\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  Examples:\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  1) Attribute foo of the group /bar_none in file quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -a /bar_none/foo quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  2) Selecting a subset from dataset /foo in file quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -d /foo -s \"0,1\" -S \"1,1\" -c \"2,3\" -k \"2,2\" quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  3) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin'\n");
+    HDfprintf(rawoutstream, "        using a little-endian type\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -d /dset -b LE -o out.bin quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  4) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -d /dset -M 0,1,4,3 quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
 }
 
 
@@ -454,9 +454,8 @@ table_list_free(void)
     table_list.nalloc = table_list.nused = 0;
 } /* end table_list_free() */
 
-
 /*-------------------------------------------------------------------------
- * Function:    set_output_file
+ * Function:    set_data_output_file
  *
  * Purpose:     Open fname as the output file for dataset raw data.
  *      Set rawdatastream as its file stream.
@@ -472,7 +471,7 @@ table_list_free(void)
  *-------------------------------------------------------------------------
  */
 static int
-set_output_file(const char *fname, int is_bin)
+set_data_output_file(const char *fname, int is_bin)
 {
     FILE    *f;    /* temporary holding place for the stream pointer
                     * so that rawdatastream is changed only when succeeded */
@@ -496,6 +495,70 @@ set_output_file(const char *fname, int is_bin)
             rawdatastream = f;
             return 0;
         }
+    }
+
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    set_output_file
+ *
+ * Purpose:     Open fname as the output file for raw output.
+ *      Set rawoutstream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+set_output_file(const char *fname)
+{
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawoutstream is changed only when succeeded */
+
+    if (rawoutstream && rawoutstream != stdout) {
+        if (fclose(rawoutstream))
+            perror("closing rawoutstream");
+        else
+            rawoutstream = NULL;
+    }
+
+    if ((f = fopen(fname, "w")) != NULL) {
+        rawoutstream = f;
+        return 0;
+    }
+
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    set_error_file
+ *
+ * Purpose:     Open fname as the error output file for dataset raw error.
+ *      Set rawerrorstream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+set_error_file(const char *fname)
+{
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawerrorstream is changed only when succeeded */
+
+    if (rawerrorstream && rawerrorstream != stderr) {
+        if (fclose(rawerrorstream))
+            perror("closing rawerrorstream");
+        else
+            rawerrorstream = NULL;
+    }
+
+    if ((f = fopen(fname, "w")) != NULL) {
+        rawerrorstream = f;
+        return 0;
     }
 
     return -1;
@@ -1031,13 +1094,13 @@ parse_start:
 
         case 'o':
             if ( bin_output ) {
-                if (set_output_file(opt_arg, 1) < 0) {
+                if (set_data_output_file(opt_arg, 1) < 0) {
                     usage(h5tools_getprogname());
                     goto error;
                 }
             }
             else {
-                if (set_output_file(opt_arg, 0) < 0) {
+                if (set_data_output_file(opt_arg, 0) < 0) {
                     usage(h5tools_getprogname());
                     goto error;
                 }
@@ -1058,7 +1121,7 @@ parse_start:
             }
             bin_output = TRUE;
             if (outfname!=NULL) {
-                if (set_output_file(outfname, 1) < 0)  {
+                if (set_data_output_file(outfname, 1) < 0)  {
                     /* failed to set output file */
                     usage(h5tools_getprogname());
                     goto error;
@@ -1448,12 +1511,12 @@ main(int argc, const char *argv[])
         begin_obj(h5tools_dump_header_format->filebegin, fname, h5tools_dump_header_format->fileblockbegin);
     } 
     else {
-        HDfprintf(stdout, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        HDfprintf(rawoutstream, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
         /* alternative first element, depending on schema or DTD. */
         if (useschema) {
             if (strcmp(xmlnsprefix,"") == 0) {
-                HDfprintf(stdout, "<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
+                HDfprintf(rawoutstream, "<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
                        xml_dtd_uri);
             } 
             else {
@@ -1465,7 +1528,7 @@ main(int argc, const char *argv[])
                 indx = strrchr(ns,(int)':');
                 if (indx) *indx = '\0';
 
-                HDfprintf(stdout, "<%sHDF5-File xmlns:%s=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File\" "
+                HDfprintf(rawoutstream, "<%sHDF5-File xmlns:%s=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File\" "
                        "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
                        "xsi:schemaLocation=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File "
                        "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\">\n",xmlnsprefix,ns);
@@ -1473,17 +1536,17 @@ main(int argc, const char *argv[])
             }
         } 
         else {
-            HDfprintf(stdout, "<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n", xml_dtd_uri);
-            HDfprintf(stdout, "<HDF5-File>\n");
+            HDfprintf(rawoutstream, "<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n", xml_dtd_uri);
+            HDfprintf(rawoutstream, "<HDF5-File>\n");
         }
     }
 
     if (!doxml) {
         if (display_fi) {
-            HDfprintf(stdout, "\n");
+            HDfprintf(rawoutstream, "\n");
             dump_fcontents(fid);
             end_obj(h5tools_dump_header_format->fileend,h5tools_dump_header_format->fileblockend);
-            HDfprintf(stdout, "\n");
+            HDfprintf(rawoutstream, "\n");
             goto done;
         }
 
@@ -1502,7 +1565,7 @@ main(int argc, const char *argv[])
             dump_function_table->dump_group_function(gid, "/" );
             if (!doxml)
                 dump_indent -= COL;
-            HDfprintf(stdout, "\n");
+            HDfprintf(rawoutstream, "\n");
         }
 
         if(H5Gclose(gid) < 0) {
@@ -1524,15 +1587,15 @@ main(int argc, const char *argv[])
                 hand[i].func(fid, hand[i].obj, hand[i].subset_info, 1, NULL);
             }
         }
-        HDfprintf(stdout, "\n");
+        HDfprintf(rawoutstream, "\n");
     }
 
     if (!doxml) {
         end_obj(h5tools_dump_header_format->fileend, h5tools_dump_header_format->fileblockend);
-        HDfprintf(stdout, "\n");
+        HDfprintf(rawoutstream, "\n");
     } 
     else {
-        HDfprintf(stdout, "</%sHDF5-File>\n", xmlnsprefix);
+        HDfprintf(rawoutstream, "</%sHDF5-File>\n", xmlnsprefix);
     }
 
 done:

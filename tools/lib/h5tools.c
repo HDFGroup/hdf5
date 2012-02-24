@@ -40,6 +40,8 @@ hid_t H5E_tools_g = -1;
 hid_t H5E_tools_min_id_g = -1;
 int         compound_data;
 FILE       *rawdatastream;      /* should initialize to stdout but gcc moans about it */
+FILE       *rawoutstream;       /* should initialize to stdout but gcc moans about it */
+FILE       *rawerrorstream;     /* should initialize to stderr but gcc moans about it */
 int         bin_output;         /* binary output */
 int         bin_form;           /* binary form */
 int         region_output;      /* region output */
@@ -117,6 +119,10 @@ h5tools_init(void)
 
         if (!rawdatastream)
             rawdatastream = stdout;
+        if (!rawoutstream)
+            rawoutstream = stdout;
+        if (!rawerrorstream)
+            rawerrorstream = stderr;
 
         h5tools_dump_init();
 
@@ -149,6 +155,18 @@ h5tools_close(void)
                 perror("closing rawdatastream");
             else
                 rawdatastream = NULL;
+        }
+        if (rawoutstream && rawoutstream != stdout) {
+            if (fclose(rawoutstream))
+                perror("closing rawoutstream");
+            else
+                rawoutstream = NULL;
+        }
+        if (rawerrorstream && rawerrorstream != stderr) {
+            if (fclose(rawerrorstream))
+                perror("closing rawerrorstream");
+            else
+                rawerrorstream = NULL;
         }
 
         /* Clean up the reference path table, if it's been used */
@@ -1047,7 +1065,7 @@ init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
  *-------------------------------------------------------------------------
  */
 int
-do_bin_output(FILE *stream, hid_t container, hsize_t nelmts, hid_t tid, void *_mem)
+do_bin_output(FILE *stream, FILE *err_stream, hid_t container, hsize_t nelmts, hid_t tid, void *_mem)
 {
     HERR_INIT(int, SUCCEED)
     unsigned char *mem  = (unsigned char*)_mem;
@@ -1059,7 +1077,7 @@ do_bin_output(FILE *stream, hid_t container, hsize_t nelmts, hid_t tid, void *_m
 
     for (i = 0; i < nelmts; i++) {
         if (render_bin_output(stream, container, tid, mem + i * size) < 0) {
-            printf("\nError in writing binary stream\n");
+            HDfprintf(err_stream,"\nError in writing binary stream\n");
             return FAIL;
        }
     }

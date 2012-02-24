@@ -81,11 +81,14 @@ int main(int argc, const char *argv[])
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
+
+    /* Initialize h5tools lib */
+    h5tools_init();
+
     /*-------------------------------------------------------------------------
     * process the command-line
     *-------------------------------------------------------------------------
     */
-
     parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
 
     /*-------------------------------------------------------------------------

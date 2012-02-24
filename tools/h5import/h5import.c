@@ -53,6 +53,9 @@ int main(int argc, char *argv[])
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
+    /* Initialize h5tools lib */
+    h5tools_init();
+
     (void) HDsetvbuf(stderr, (char *) NULL, _IOLBF, 0);
     (void) HDsetvbuf(stdout, (char *) NULL, _IOLBF, 0);
 
