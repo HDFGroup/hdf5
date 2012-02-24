@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
     if (argv[1] && (HDstrcmp("-V", argv[1]) == 0)) {
         print_version(PROGRAMNAME);
-        exit(EXIT_SUCCESS);
+        HDexit(EXIT_SUCCESS);
     }
 
     /*
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 
         case 6: /* -h found; help, then exit */
             help(argv[0]);
-            exit(EXIT_SUCCESS);
+            HDexit(EXIT_SUCCESS);
             break;
 
         case 7: /* -d found; look for dimensions */

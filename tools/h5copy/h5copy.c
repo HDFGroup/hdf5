@@ -55,7 +55,7 @@ static void
 leave(int ret)
 {
     h5tools_close();
-    exit(ret);
+    HDexit(ret);
 }
 
 

@@ -389,7 +389,7 @@ indentation(int x)
     } 
     else {
         HDfprintf(stderr, "error: the indentation exceeds the number of cols.\n");
-        exit(1);
+        HDexit(1);
     }
 }
 

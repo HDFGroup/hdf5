@@ -142,7 +142,7 @@ leave(int ret)
 
     h5tools_close();
 
-    exit(ret);
+    HDexit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -199,7 +199,7 @@ parse_command_line(int argc, const char *argv[])
     if (argc <= opt_ind+2) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
-        exit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
     }
 */
 }
