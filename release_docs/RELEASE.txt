@@ -643,7 +643,8 @@ Bug Fixes since HDF5-1.8.0 release
     -----
         - h5dump: Refactored code to remove duplicated functions. Split XML 
           functions from DDL functions. Corrected indentation and formatting
-          errors. Also fixed subsetting counting overflow (HDFFV-5874).
+          errors. Also fixed subsetting counting overflow (HDFFV-5874). Verified
+          all tools call tools_init() in main.
           HDFFV-7560 (ADB 2012/02/17)
         - h5diff: fixed to prevent from displaying error stack message when 
           comparing the two dangling symlinks with follow-symlinks option.
