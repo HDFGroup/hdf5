@@ -17,12 +17,18 @@
 #include <stdlib.h>
 #include "hdf5.h"
 #include "H5private.h"
-#include "h5tools.h"
-#include "h5tools_utils.h"
 
-
-/* Name of tool */
-#define PROGRAMNAME "h5diffgentest"
+/*
+ * The output functions need a temporary buffer to hold a piece of the
+ * dataset while it's being printed. This constant sets the limit on the
+ * size of that temporary buffer in bytes. For efficiency's sake, choose the
+ * largest value suitable for your machine (for testing use a small value).
+ */
+/* Maximum size used in a call to malloc for a dataset 
+ * NOTE: this value should stay in sync with the value defined in the tools
+ *       library file: h5tools_utils.h 
+ */
+hsize_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 
 /*-------------------------------------------------------------------------
 * Program: h5diffgentest
