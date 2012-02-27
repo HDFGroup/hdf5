@@ -131,7 +131,6 @@ IF (BUILD_TESTING)
       tnamed_dtype_attr.ddl
       tnestcomp-1.ddl
       tnbit.ddl
-      tnofilename.ddl
       tno-subset.ddl
       tnullspace.ddl
       zerodim.ddl
@@ -838,8 +837,6 @@ IF (BUILD_TESTING)
           tnestcomp-1.out.err
           tnbit.out
           tnbit.out.err
-          tnofilename.out
-          tnofilename.out.err
           tno-subset.out
           tno-subset.out.err
           tnullspace.out

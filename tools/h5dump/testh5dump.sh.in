@@ -247,7 +247,6 @@ $SRC_H5DUMP_TESTFILES/tmulti.ddl
 $SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.ddl
 $SRC_H5DUMP_TESTFILES/tnestcomp-1.ddl
 $SRC_H5DUMP_TESTFILES/tnbit.ddl
-$SRC_H5DUMP_TESTFILES/tnofilename.ddl
 $SRC_H5DUMP_TESTFILES/tno-subset.ddl
 $SRC_H5DUMP_TESTFILES/tnullspace.ddl
 $SRC_H5DUMP_TESTFILES/zerodim.ddl
@@ -881,7 +880,7 @@ TOOLTEST texceedsubcount.ddl -d 1d -c 1,3 taindices.h5
 TOOLTEST texceedsubstride.ddl -d 1d -S 1,3 taindices.h5
 TOOLTEST texceedsubblock.ddl -d 1d -k 1,3 taindices.h5
 
-###### 2/17  SKIP tests because compression values are different ############
+
 # tests for filters
 # SZIP
 option="-H -p -d szip tfilters.h5"

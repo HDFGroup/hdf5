@@ -409,7 +409,7 @@ hsize_t diff_datasetid( hid_t did1,
                 options, name1, name2, m_tid1, did1, did2);
 
             /* reclaim any VL memory, if necessary */
-             if(vl_data) {
+            if(vl_data) {
                 H5Dvlen_reclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
                 H5Dvlen_reclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
             } /* end if */

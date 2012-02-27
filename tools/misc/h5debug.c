@@ -225,8 +225,8 @@ main(int argc, char *argv[])
     herr_t      status = SUCCEED;
 
     if(argc == 1) {
-  HDfprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
-  HDexit(1);
+  		HDfprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
+  		HDexit(1);
     } /* end if */
 
     /* Initialize the library */
@@ -247,7 +247,7 @@ main(int argc, char *argv[])
         HDexit(1);
     } /* end if */
     if(HDstrchr(argv[1], '%'))
-  H5Pset_fapl_family (fapl, (hsize_t)0, H5P_DEFAULT);
+  		H5Pset_fapl_family (fapl, (hsize_t)0, H5P_DEFAULT);
     if((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, fapl)) < 0) {
         HDfprintf(stderr, "cannot open file\n");
         HDexit(1);
@@ -298,10 +298,10 @@ main(int argc, char *argv[])
         status = H5HL_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
     } else if(!HDmemcmp (sig, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
-  /*
-   * Debug a global heap collection.
-   */
-  status = H5HG_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+	/*
+	 * Debug a global heap collection.
+	 */
+	status = H5HG_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
     } else if(!HDmemcmp(sig, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
