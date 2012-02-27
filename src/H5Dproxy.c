@@ -319,17 +319,19 @@ H5D_cache_proxy_size(const H5F_t UNUSED *f, const H5D_chunk_proxy_t UNUSED *prox
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_proxy_create(H5D_t *dset, hid_t dxpl_id, H5D_chunk_common_ud_t *udata,
+H5D_chunk_proxy_create(H5D_t *dset, hid_t dxpl_id, H5D_chunk_ud_t *udata,
     H5D_rdcc_ent_t *ent)
 {
     H5D_chunk_proxy_t *proxy = NULL;    /* Chunk proxy */
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
+    htri_t supported;                   /* Return value from "support" callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_proxy_create)
 
     HDassert(dset);
     HDassert(ent);
+    HDassert(dset->shared->layout.storage.u.chunk.ops->support);
 
     /* Get a temp. address for chunk proxy */
     if(HADDR_UNDEF == (ent->proxy_addr = H5MF_alloc_tmp(dset->oloc.file, (hsize_t)1)))
@@ -363,8 +365,9 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
     /* Create a flush dependency between the proxy (as the child) and the
      *  metadata object in the index (as the parent).
      */
-    if((dset->shared->layout.storage.u.chunk.ops->support)(&idx_info, udata, (H5AC_info_t *)proxy) < 0)
+    if((supported = (dset->shared->layout.storage.u.chunk.ops->support)(&idx_info, udata, (H5AC_info_t *)proxy)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency for chunk proxy")
+    proxy->supported = (hbool_t)supported;
 
 done:
     if(ret_value < 0) {
@@ -402,6 +405,7 @@ H5D_chunk_proxy_remove(const H5D_t *dset, hid_t dxpl_id, H5D_rdcc_ent_t *ent)
 
     HDassert(dset);
     HDassert(ent);
+    HDassert(dset->shared->layout.storage.u.chunk.ops->unsupport);
 #ifdef QAK
 HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
 #endif /* QAK */
@@ -425,8 +429,11 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
     /* Remove flush dependency between the proxy (as the child) and the
      *  metadata object in the index (as the parent).
      */
-    if((dset->shared->layout.storage.u.chunk.ops->unsupport)(&idx_info, &udata, (H5AC_info_t *)proxy) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency for chunk proxy")
+    if(proxy->supported) {
+        if((dset->shared->layout.storage.u.chunk.ops->unsupport)(&idx_info, &udata, (H5AC_info_t *)proxy) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to remove flush dependency for chunk proxy")
+        proxy->supported = FALSE;
+    } /* end if */
 
     /* Unpin & delete chunk proxy from metadata cache, taking ownership of it */
     if(H5AC_unprotect(dset->oloc.file, dxpl_id, H5AC_CHUNK_PROXY, ent->proxy_addr, proxy, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG | H5AC__TAKE_OWNERSHIP_FLAG)) < 0)
@@ -456,7 +463,7 @@ done:
  *              be invoked collectively when operating in parallel I/O mode
  *              and it's possible that this routine can be invoked during
  *              indepedent raw data I/O.
- *              
+ *
  *              So, the chunk proxy's dirty state in the metadata cache may 
  *              be out of sync with the chunk itself, but only in the direction
  *              of being dirty when the chunk itself is clean.  We'll call
@@ -473,7 +480,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_proxy_mark(const H5D_rdcc_ent_t *ent, hbool_t dirty)
+H5D_chunk_proxy_mark(H5D_rdcc_ent_t *ent, hbool_t dirty)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -521,4 +528,81 @@ H5D_chunk_proxy_destroy(H5D_chunk_proxy_t *proxy)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_chunk_proxy_destroy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_chunk_proxy_create_flush_dep
+ *
+ * Purpose:     Creates a flush dependency between the specified chunk
+ *              (child) and parent, if not already present.
+ *
++ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              21 Sept 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_chunk_proxy_create_flush_dep(H5D_rdcc_ent_t *ent, void *parent)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_proxy_create_flush_dep)
+
+    HDassert(ent);
+    HDassert(parent);
+
+    /* If the proxy already has a parent, do nothing. */
+    if(!(ent->proxy->supported)) {
+        /* Create the flush dependency */
+        if(H5AC_create_flush_dependency(parent, ent->proxy) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+        ent->proxy->supported = TRUE;
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_chunk_proxy_create_flush_dep() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_chunk_proxy_update_flush_dep
+ *
+ * Purpose:     Updates the flush dependency of the specified chunk from
+ *              old_parent to new_parent, if the dependency exists.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              7 Sept 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_chunk_proxy_update_flush_dep(H5D_rdcc_ent_t *ent, void *old_parent,
+    void *new_parent)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_proxy_update_flush_dep)
+
+    HDassert(ent);
+    HDassert(old_parent);
+    HDassert(new_parent);
+
+    /* It is guaranteed that the proxy has a parent, because the dependency
+     * should always be present if the parent object exists in the index, and
+     * this should only be called when updating the parent object */
+    HDassert(ent->proxy->supported);
+
+    /* Update the flush dependencies */
+    if(H5AC_destroy_flush_dependency(old_parent, ent->proxy) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+    if(H5AC_create_flush_dependency(new_parent, ent->proxy) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_chunk_proxy_update_flush_dep() */
 

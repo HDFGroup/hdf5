@@ -59,12 +59,16 @@ typedef struct H5B_t {
     haddr_t		right;		/*address of right sibling	     */
     uint8_t		*native;	/*array of keys in native format     */
     haddr_t		*child;		/*2k child pointers		     */
+
+    /* Not stored on disk */
+    void                *parent;        /* Flush dependency parent           */
 } H5B_t;
 
 /* Callback info for loading a B-tree node into the cache */
 typedef struct H5B_cache_ud_t {
     H5F_t *f;                           /* File that B-tree node is within   */
     const struct H5B_class_t *type;     /* Type of tree			     */
+    void *parent;                       /* Flush dependency parent           */
     H5RC_t *rc_shared;                  /* Ref-counted shared info	     */
 } H5B_cache_ud_t;
 

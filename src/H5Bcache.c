@@ -60,6 +60,7 @@ static herr_t H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
 static herr_t H5B_dest(H5F_t *f, H5B_t *bt);
 static herr_t H5B_clear(H5F_t *f, H5B_t *b, hbool_t destroy);
 static herr_t H5B_compute_size(const H5F_t *f, const H5B_t *bt, size_t *size_ptr);
+static herr_t H5B_notify(H5AC_notify_action_t action, H5B_t *bt);
 
 
 /*********************/
@@ -73,7 +74,7 @@ const H5AC_class_t H5AC_BT[1] = {{
     (H5AC_flush_func_t)H5B_flush,
     (H5AC_dest_func_t)H5B_dest,
     (H5AC_clear_func_t)H5B_clear,
-    (H5AC_notify_func_t)NULL,
+    (H5AC_notify_func_t)H5B_notify,
     (H5AC_size_func_t)H5B_compute_size,
 }};
 
@@ -174,6 +175,13 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         /* Decode native key value */
         if((udata->type->decode)(shared, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
+    } /* end if */
+
+    /* Set up flush dependency.  The dependency will actually be created in the
+     * "notify" callback. */
+    if(shared->swmr_write) {
+        HDassert(udata->parent);
+        bt->parent = udata->parent;
     } /* end if */
 
     /* Set return value */
@@ -367,6 +375,64 @@ H5B_clear(H5F_t *f, H5B_t *bt, hbool_t destroy)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              nfortne2@hdfgroup.org
+ *              Aug 17 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B_notify(H5AC_notify_action_t action, H5B_t *bt)
+{
+    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B_notify)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(bt);
+    HDassert(bt->rc_shared);
+    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(shared->swmr_write) {
+        HDassert(bt->parent);
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+                /* Create flush dependency on parent */
+                if(H5AC_create_flush_dependency(bt->parent, bt) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Destroy flush dependency on parent */
+                if(H5AC_destroy_flush_dependency(bt->parent, bt) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B_notify() */
 
 
 /*-------------------------------------------------------------------------

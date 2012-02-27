@@ -626,7 +626,7 @@ H5G_verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent)
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "cached stab info does not match object header")
 
     /* Verify that the btree address is valid */
-    if(H5B_valid(grp_oloc->file, H5AC_ind_dxpl_id, H5B_SNODE, stab.btree_addr) < 0)
+    if(H5B_valid(grp_oloc->file, H5AC_ind_dxpl_id, H5B_SNODE, stab.btree_addr, NULL) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "b-tree address is invalid")
 
     /* Verify that the heap address is valid */
@@ -794,7 +794,8 @@ H5G_verify_cached_stabs_test(hid_t gid)
 
     /* Iterate over the b-tree, checking validity of cached information */
     if((ret_value = H5B_iterate(grp->oloc.file, H5AC_ind_dxpl_id, H5B_SNODE,
-            stab.btree_addr, H5G_verify_cached_stabs_test_cb, &udata)) < 0)
+            stab.btree_addr, H5G_verify_cached_stabs_test_cb, &udata, NULL))
+            < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "iteration operator failed");
 
     /* Reset metadata tagging */

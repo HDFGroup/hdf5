@@ -100,6 +100,7 @@ typedef struct H5B_shared_t {
     size_t              sizeof_len;     /* Size of file lengths (in bytes)   */
     uint8_t	        *page;	        /* Disk page */
     size_t              *nkey;          /* Offsets of each native key in native key buffer */
+    hbool_t             swmr_write;     /* Whether we are doing SWMR writes */
 } H5B_shared_t;
 
 /*
@@ -138,6 +139,10 @@ typedef struct H5B_class_t {
     herr_t	(*decode)(const H5B_shared_t*, const uint8_t*, void*);
     herr_t	(*encode)(const H5B_shared_t*, uint8_t*, const void*);
     herr_t	(*debug_key)(FILE*, int, int, const void*, const void*);
+
+    /* flush dependency functions */
+    herr_t      (*create_flush_dep)(void*, void *, void *);
+    herr_t      (*update_flush_dep)(void*, void *, void *, void*);
 } H5B_class_t;
 
 /* Information about B-tree */
@@ -157,25 +162,30 @@ typedef struct H5B_info_t {
 /* Library-private Function Prototypes */
 /***************************************/
 H5_DLL herr_t H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type,
-    void *udata, haddr_t *addr_p/*out*/);
+    void *udata, void *parent, haddr_t *addr_p/*out*/);
 H5_DLL herr_t H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type,
-    haddr_t addr, void *udata);
+    haddr_t addr, void *udata, void *parent);
 H5_DLL herr_t H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type,
-    haddr_t addr, void *udata);
+    haddr_t addr, void *udata, void *parent);
 H5_DLL herr_t H5B_iterate(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type,
-    haddr_t addr, H5B_operator_t op, void *udata);
+    haddr_t addr, H5B_operator_t op, void *udata, void *parent);
 H5_DLL herr_t H5B_get_info(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type,
-    haddr_t addr, H5B_info_t *bt_info, H5B_operator_t op, void *udata);
+    haddr_t addr, H5B_info_t *bt_info, H5B_operator_t op, void *udata,
+    void *parent);
 H5_DLL herr_t H5B_remove(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type,
-    haddr_t addr, void *udata);
+    haddr_t addr, void *udata, void *parent);
 H5_DLL herr_t H5B_delete(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type,
-    haddr_t addr, void *udata);
+    haddr_t addr, void *udata, void *parent);
 H5_DLL H5B_shared_t *H5B_shared_new(const H5F_t *f, const H5B_class_t *type,
     size_t sizeof_rkey);
 H5_DLL herr_t H5B_shared_free(void *_shared);
+H5_DLL htri_t H5B_support(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type,
+    haddr_t addr, void *udata, void *parent, void *child);
+H5_DLL herr_t H5B_unsupport(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type,
+    haddr_t addr, void *udata, void *parent, void *child);
 H5_DLL herr_t H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
     int indent, int fwidth, const H5B_class_t *type, void *udata);
 H5_DLL htri_t H5B_valid(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type,
-    haddr_t addr);
+    haddr_t addr, void *parent);
 #endif /* _H5Bprivate_H */
 

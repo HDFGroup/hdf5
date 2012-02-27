@@ -3137,7 +3137,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                  *  flush dependencies are maintained in the proper way for SWMR
                  *  access to work.
                  */
-                if(H5D_chunk_proxy_create(io_info->dset, io_info->dxpl_id, (H5D_chunk_common_ud_t *)udata, ent) < 0)
+                if(H5D_chunk_proxy_create(io_info->dset, io_info->dxpl_id, udata, ent) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, NULL, "can't insert proxy for chunk in metadata cache")
             } /* end if */
         } /* end if */
@@ -5870,4 +5870,123 @@ H5D_chunk_is_partial_edge_chunk(const hsize_t offset[], const H5D_t *dset,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_chunk_is_partial_edge_chunk() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_chunk_create_flush_dep
+ *
+ * Purpose:     Creates a flush dependency between the specified chunk
+ *              (child) and parent.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, September 21, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_chunk_create_flush_dep(const H5D_rdcc_t *rdcc,
+    const H5O_layout_chunk_t *layout, const hsize_t offset[], void *parent)
+{
+    hsize_t         chunk_idx;          /* Chunk index */
+    H5D_rdcc_ent_t  *ent = NULL;        /* Cache entry */
+    hbool_t         found = FALSE;      /* In cache? */
+    unsigned        u;                  /* Local index variable */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_create_flush_dep)
+
+    /* Check args */
+    HDassert(rdcc);
+    HDassert(layout);
+    HDassert(offset);
+    HDassert(parent);
+
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index(layout->ndims - 1, offset, layout->dim,
+            layout->down_chunks, &chunk_idx) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+
+    /* Check for chunk in cache */
+    if(rdcc->nslots > 0) {
+        ent = rdcc->slot[H5F_addr_hash(chunk_idx, rdcc->nslots)];
+
+        if(ent)
+            for(u = 0, found = TRUE; u < layout->ndims - 1; u++)
+                if(offset[u] != ent->offset[u]) {
+                    found = FALSE;
+                    break;
+                } /* end if */
+    } /* end if */
+
+    /* Create the dependency on the chunk proxy */
+    if(found)
+        if(H5D_chunk_proxy_create_flush_dep(ent, parent) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D_chunk_create_flush_dep() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_chunk_update_flush_dep
+ *
+ * Purpose:     Updates the flush dependency of the specified chunk from
+ *              old_parent to new_parent, but only if the current parent
+ *              is cached.  If the chunk is not cached, does nothing.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              7 Sept 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_chunk_update_flush_dep(const H5D_rdcc_t *rdcc,
+    const H5O_layout_chunk_t *layout, const hsize_t offset[], void *old_parent,
+    void *new_parent)
+{
+    hsize_t         chunk_idx;          /* Chunk index */
+    H5D_rdcc_ent_t  *ent = NULL;        /* Cache entry */
+    hbool_t         found = FALSE;      /* In cache? */
+    unsigned        u;                  /* Local index variable */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_update_flush_dep)
+
+    /* Check args */
+    HDassert(rdcc);
+    HDassert(layout);
+    HDassert(offset);
+    HDassert(old_parent);
+    HDassert(new_parent);
+
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index(layout->ndims - 1, offset, layout->dim,
+            layout->down_chunks, &chunk_idx) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+
+    /* Check for chunk in cache */
+    if(rdcc->nslots > 0) {
+        ent = rdcc->slot[H5F_addr_hash(chunk_idx, rdcc->nslots)];
+
+        if(ent)
+            for(u = 0, found = TRUE; u < layout->ndims - 1; u++)
+                if(offset[u] != ent->offset[u]) {
+                    found = FALSE;
+                    break;
+                } /* end if */
+    } /* end if */
+
+    /* Update the dependencies on the chunk proxy */
+    if(found)
+        if(H5D_chunk_proxy_update_flush_dep(ent, old_parent, new_parent) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D_chunk_update_flush_dep() */
 

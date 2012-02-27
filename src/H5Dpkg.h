@@ -322,7 +322,7 @@ typedef herr_t (*H5D_chunk_copy_shutdown_func_t)(H5O_storage_chunk_t *storage_sr
 typedef herr_t (*H5D_chunk_size_func_t)(const H5D_chk_idx_info_t *idx_info,
     hsize_t *idx_size);
 typedef herr_t (*H5D_chunk_reset_func_t)(H5O_storage_chunk_t *storage, hbool_t reset_addr);
-typedef herr_t (*H5D_chunk_support_func_t)(const H5D_chk_idx_info_t *idx_info,
+typedef htri_t (*H5D_chunk_support_func_t)(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
 typedef herr_t (*H5D_chunk_unsupport_func_t)(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
@@ -553,6 +553,7 @@ typedef struct H5D_chunk_proxy_t {
                             /* first field in structure */
     H5D_t *dset;            /* Pointer to dataset that chunk proxies are related to */
     H5D_rdcc_ent_t *ent;    /* Pointer to chunk cache entry this proxy is standing in for */
+    hbool_t supported;      /* Whether the proxy is a flush dependency of the index */
 } H5D_chunk_proxy_t;
 
 
@@ -694,6 +695,11 @@ H5_DLL herr_t H5D_chunk_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     const H5O_pline_t *pline, hsize_t *btree_size);
 H5_DLL herr_t H5D_chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream);
 H5_DLL herr_t H5D_chunk_dest(H5F_t *f, hid_t dxpl_id, H5D_t *dset);
+H5_DLL herr_t H5D_chunk_create_flush_dep(const H5D_rdcc_t *rdcc,
+    const H5O_layout_chunk_t *layout, const hsize_t offset[], void *parent);
+H5_DLL herr_t H5D_chunk_update_flush_dep(const H5D_rdcc_t *rdcc,
+    const H5O_layout_chunk_t *layout, const hsize_t offset[], void *old_parent,
+    void *new_parent);
 #ifdef H5D_CHUNK_DEBUG
 H5_DLL herr_t H5D_chunk_stats(const H5D_t *dset, hbool_t headers);
 #endif /* H5D_CHUNK_DEBUG */
@@ -724,10 +730,14 @@ H5_DLL herr_t H5D_fill_term(H5D_fill_buf_info_t *fb_info);
 
 /* Functions that operate on chunk proxy objects */
 H5_DLL herr_t H5D_chunk_proxy_create(H5D_t *dset, hid_t dxpl_id,
-    H5D_chunk_common_ud_t *udata, H5D_rdcc_ent_t *ent);
+    H5D_chunk_ud_t *udata, H5D_rdcc_ent_t *ent);
 H5_DLL herr_t H5D_chunk_proxy_remove(const H5D_t *dset, hid_t dxpl_it,
     H5D_rdcc_ent_t *ent);
-H5_DLL herr_t H5D_chunk_proxy_mark(const H5D_rdcc_ent_t *ent, hbool_t dirty);
+H5_DLL herr_t H5D_chunk_proxy_mark(H5D_rdcc_ent_t *ent, hbool_t dirty);
+H5_DLL herr_t H5D_chunk_proxy_create_flush_dep(H5D_rdcc_ent_t *ent,
+    void *parent);
+H5_DLL herr_t H5D_chunk_proxy_update_flush_dep(H5D_rdcc_ent_t *ent,
+    void *old_parent, void *new_parent);
 
 #ifdef H5_HAVE_PARALLEL
 

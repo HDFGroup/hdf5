@@ -1,10 +1,14 @@
 #include "swmr_common.h"
 
+#define BUSY_WAIT 100000
+
 static hid_t
 open_skeleton(const char *filename, unsigned verbose)
 {
     hid_t fid;          /* File ID for new HDF5 file */
     hid_t fapl;         /* File access property list */
+    hid_t aid;          /* Attribute ID */
+    unsigned seed;      /* Seed for random number generator */
     unsigned u, v;      /* Local index variable */
 
     /* Create file access property list */
@@ -43,6 +47,15 @@ printf("mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length
     if(verbose)
         printf("Opening datasets\n");
 
+    /* Seed the random number generator with the attribute in the file */
+    if((aid = H5Aopen(fid, "seed", H5P_DEFAULT)) < 0)
+        return(-1);
+    if(H5Aread(aid, H5T_NATIVE_UINT, &seed) < 0)
+        return(-1);
+    if(H5Aclose(aid) < 0)
+        return(-1);
+    srandom(seed);
+
     /* Open the datasets */
     for(u = 0; u < NLEVELS; u++)
         for(v = 0; v < symbol_count[u]; v++) {
@@ -64,6 +77,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
     H5AC_cache_config_t mdc_config_orig; /* Original metadata cache configuration */
     H5AC_cache_config_t mdc_config_cork; /* Corked metadata cache configuration */
     unsigned long rec_to_flush;         /* # of records left to write before flush */
+    volatile int dummy;                 /* Dummy varialbe for busy sleep */
     unsigned long u, v;                 /* Local index variables */
 
     /* Reset the record */
@@ -94,20 +108,39 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
     for(u = 0; u < nrecords; u++) {
         symbol_info_t *symbol;  /* Symbol to write record to */
         hid_t file_sid;         /* Dataset's space ID */
+        hid_t aid;              /* Attribute ID */
 
         /* Get a random dataset, according to the symbol distribution */
         symbol = choose_dataset();
-
-        /* Set the record's ID (equal to its position) */
-        record.rec_id = symbol->nrecords;
-
-        /* Get the coordinate to write */
-        start = symbol->nrecords;
 
         /* Cork the metadata cache, to prevent the object header from being
          * flushed before the data has been written */
         /*if(H5Fset_mdc_config(fid, &mdc_config_cork) < 0)
             return(-1);*/
+
+        /* If this is the first time the dataset has been opened, extend it and
+         * add the sequence attribute */
+        if(symbol->nrecords == 0) {
+            symbol->nrecords = nrecords / 5;
+
+            if(H5Dset_extent(symbol->dsid, &symbol->nrecords) < 0)
+                return(-1);
+
+            if((file_sid = H5Screate(H5S_SCALAR)) < 0)
+                return(-1);
+            if((aid = H5Acreate2(symbol->dsid, "seq", H5T_NATIVE_ULONG, file_sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                return(-1);
+            if(H5Sclose(file_sid) < 0)
+                return(-1);
+        } /* end if */
+        else if((aid = H5Aopen(symbol->dsid, "seq", H5P_DEFAULT)) < 0)
+            return(-1);
+
+        /* Get the coordinate to write */
+        start = (hsize_t)random() % symbol->nrecords;
+
+        /* Set the record's ID (equal to its position) */
+        record.rec_id = start;
 
         /* Extend the dataset's dataspace to hold the new record */
         symbol->nrecords++;
@@ -124,6 +157,19 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 
         /* Write record to the dataset */
         if(H5Dwrite(symbol->dsid, tid, mem_sid, file_sid, H5P_DEFAULT, &record) < 0)
+            return(-1);
+
+        /* Write the sequence number attribute.  Since we synchronize the random
+         * number seed, the readers will always generate the same sequence of
+         * randomly chosen datasets and offsets.  Therefore, and because of the
+         * flush dependencies on the object header, the reader will be
+         * guaranteed to see the written data if the sequence attribute is >=u.
+         */
+        if(H5Awrite(aid, H5T_NATIVE_ULONG, &u) < 0)
+            return(-1);
+
+        /* Close the attribute */
+        if(H5Aclose(aid) < 0)
             return(-1);
 
         /* Uncork the metadata cache */
@@ -149,6 +195,13 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
                 rec_to_flush = flush_count;
             } /* end if */
         } /* end if */
+
+        /* Busy wait, to let readers catch up */
+        dummy = 0;
+        for(v=0; v<BUSY_WAIT; v++)
+            dummy++;
+        if((unsigned long)dummy != v)
+            return(-1);
     } /* end for */
 
     /* Close the memory dataspace */
@@ -176,18 +229,17 @@ static void
 usage(void)
 {
     printf("Usage error!\n");
-    printf("Usage: swmr_writer [-q] [-f <# of records to write between flushing file contents>] <# of records>\n");
+    printf("Usage: swmr_sparse_writer [-q] [-f <# of records to write between flushing file contents>] <# of records>\n");
     printf("<# of records to write between flushing file contents> should be 0 (for no flushing) or between 1 and (<# of records> - 1)\n");
-    printf("Defaults to verbose (no '-q' given) and flushing every 10000 records('-f 10000')\n");
+    printf("Defaults to verbose (no '-q' given) and flushing every 1000 records('-f 1000')\n");
     exit(1);
 }
 
 int main(int argc, const char *argv[])
 {
-    hid_t fid;          /* File ID for file opened */
-    time_t curr_time;   /* Current time, for seeding random number generator */
+    hid_t fid;          /* File ID for file opened */\
     long nrecords = 0;  /* # of records to append */
-    long flush_count = 10000;  /* # of records to write between flushing file */
+    long flush_count = 1000;  /* # of records to write between flushing file */
     unsigned verbose = 1;       /* Whether to emit some informational messages */
     unsigned u;         /* Local index variable */
 
@@ -239,10 +291,6 @@ int main(int argc, const char *argv[])
         printf("\t# of records between flushes = %ld\n", flush_count);
         printf("\t# of records to write = %ld\n", nrecords);
     } /* end if */
-
-    /* Create randomized set of numbers */
-    curr_time = time(NULL);
-    srandom((unsigned)curr_time);
 
     /* Emit informational message */
     if(verbose)

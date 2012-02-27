@@ -45,7 +45,8 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            getname vfd ntypes dangle dtransform reserved cross_read \
            freespace mf farray earray btree2 fheap
 
-bin_PROGRAMS=swmr_generator swmr_reader swmr_writer
+bin_PROGRAMS=swmr_generator swmr_reader swmr_writer swmr_remove_reader \
+    swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.

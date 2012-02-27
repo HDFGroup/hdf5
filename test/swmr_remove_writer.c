@@ -1,10 +1,14 @@
 #include "swmr_common.h"
 
+#define MAX_REMOVE_SIZE 10
+
 static hid_t
 open_skeleton(const char *filename, unsigned verbose)
 {
     hid_t fid;          /* File ID for new HDF5 file */
     hid_t fapl;         /* File access property list */
+    hid_t sid;		/* Dataspace ID */
+    hsize_t dim;        /* Dataspace dimension */
     unsigned u, v;      /* Local index variable */
 
     /* Create file access property list */
@@ -48,116 +52,58 @@ printf("mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length
         for(v = 0; v < symbol_count[u]; v++) {
             if((symbol_info[u][v].dsid = H5Dopen2(fid, symbol_info[u][v].name, H5P_DEFAULT)) < 0)
                 return(-1);
-            symbol_info[u][v].nrecords = 0;
+            if((sid = H5Dget_space(symbol_info[u][v].dsid)) < 0)
+                return -1;
+            if(1 != H5Sget_simple_extent_ndims(sid))
+                return -1;
+            if(H5Sget_simple_extent_dims(sid, &dim, NULL) < 0)
+                return -1;
+            symbol_info[u][v].nrecords = (hsize_t)dim;
         } /* end for */
 
     return(fid);
 }
 
 static int
-add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long flush_count)
+remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned long flush_count)
 {
-    hid_t tid;                          /* Datatype ID for records */
-    hid_t mem_sid;                      /* Memory dataspace ID */
-    hsize_t start, count = 1;           /* Hyperslab selection values */
-    symbol_t record;                    /* The record to add to the dataset */
-    H5AC_cache_config_t mdc_config_orig; /* Original metadata cache configuration */
-    H5AC_cache_config_t mdc_config_cork; /* Corked metadata cache configuration */
-    unsigned long rec_to_flush;         /* # of records left to write before flush */
+    unsigned long shrink_to_flush;      /* # of removals before flush */
     unsigned long u, v;                 /* Local index variables */
 
-    /* Reset the record */
-    /* (record's 'info' field might need to change for each record written, also) */
-    memset(&record, 0, sizeof(record));
-
-    /* Create a dataspace for the record to add */
-    if((mem_sid = H5Screate(H5S_SCALAR)) < 0)
-        return(-1);
-
-    /* Create datatype for appending records */
-    if((tid = create_symbol_datatype()) < 0)
-        return(-1);
-
-    /* Get the current metadata cache configuration, and set up the corked
-     * configuration */
-    mdc_config_orig.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-    if(H5Fget_mdc_config(fid, &mdc_config_orig) < 0)
-        return(-1);
-    memcpy(&mdc_config_cork, &mdc_config_orig, sizeof(mdc_config_cork));
-    mdc_config_cork.evictions_enabled = FALSE;
-    mdc_config_cork.incr_mode = H5C_incr__off;
-    mdc_config_cork.flash_incr_mode = H5C_flash_incr__off;
-    mdc_config_cork.decr_mode = H5C_decr__off;
-
-    /* Add records to random datasets, according to frequency distribution */
-    rec_to_flush = flush_count;
-    for(u = 0; u < nrecords; u++) {
-        symbol_info_t *symbol;  /* Symbol to write record to */
-        hid_t file_sid;         /* Dataset's space ID */
+    /* Remove records from random datasets, according to frequency distribution */
+    shrink_to_flush = flush_count;
+    for(u = 0; u < nshrinks; u++) {
+        symbol_info_t *symbol;  /* Symbol to remove record from */
+        hsize_t remove_size;	/* Size to reduce dataset dimension by */
 
         /* Get a random dataset, according to the symbol distribution */
         symbol = choose_dataset();
 
-        /* Set the record's ID (equal to its position) */
-        record.rec_id = symbol->nrecords;
-
-        /* Get the coordinate to write */
-        start = symbol->nrecords;
-
-        /* Cork the metadata cache, to prevent the object header from being
-         * flushed before the data has been written */
-        /*if(H5Fset_mdc_config(fid, &mdc_config_cork) < 0)
-            return(-1);*/
-
-        /* Extend the dataset's dataspace to hold the new record */
-        symbol->nrecords++;
-        if(H5Dset_extent(symbol->dsid, &symbol->nrecords) < 0)
-            return(-1);
-
-        /* Get the dataset's dataspace */
-        if((file_sid = H5Dget_space(symbol->dsid)) < 0)
-            return(-1);
-
-        /* Choose the last record in the dataset */
-        if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
-            return(-1);
-
-        /* Write record to the dataset */
-        if(H5Dwrite(symbol->dsid, tid, mem_sid, file_sid, H5P_DEFAULT, &record) < 0)
-            return(-1);
-
-        /* Uncork the metadata cache */
-        /*if(H5Fset_mdc_config(fid, &mdc_config_orig) < 0)
-            return(-1);*/
-
-        /* Close the dataset's dataspace */
-        if(H5Sclose(file_sid) < 0)
-            return(-1);
+	/* Shrink the dataset's dataspace */
+	remove_size = (hsize_t)random() % MAX_REMOVE_SIZE + 1;
+	if(remove_size > symbol->nrecords)
+	    symbol->nrecords = 0;
+	else
+	    symbol->nrecords -= remove_size;
+	if(H5Dset_extent(symbol->dsid, &symbol->nrecords) < 0)
+	    return(-1);
 
         /* Check for flushing file */
         if(flush_count > 0) {
             /* Decrement count of records to write before flushing */
-            rec_to_flush--;
+            shrink_to_flush--;
 
             /* Check for counter being reached */
-            if(0 == rec_to_flush) {
+            if(0 == shrink_to_flush) {
                 /* Flush contents of file */
                 if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
                     return(-1);
 
                 /* Reset flush counter */
-                rec_to_flush = flush_count;
+                shrink_to_flush = flush_count;
             } /* end if */
         } /* end if */
     } /* end for */
-
-    /* Close the memory dataspace */
-    if(H5Sclose(mem_sid) < 0)
-        return(-1);
-
-    /* Close the datatype */
-    if(H5Tclose(tid) < 0)
-        return(-1);
 
     /* Emit informational message */
     if(verbose)
@@ -176,9 +122,9 @@ static void
 usage(void)
 {
     printf("Usage error!\n");
-    printf("Usage: swmr_writer [-q] [-f <# of records to write between flushing file contents>] <# of records>\n");
-    printf("<# of records to write between flushing file contents> should be 0 (for no flushing) or between 1 and (<# of records> - 1)\n");
-    printf("Defaults to verbose (no '-q' given) and flushing every 10000 records('-f 10000')\n");
+    printf("Usage: swmr_remove_writer [-q] [-f <# of shrinks between flushing file contents>] <# of shrinks>\n");
+    printf("<# of shrinks between flushing file contents> should be 0 (for no flushing) or between 1 and (<# of shrinks> - 1)\n");
+    printf("Defaults to verbose (no '-q' given) and flushing every 1000 shrinks('-f 1000')\n");
     exit(1);
 }
 
@@ -186,8 +132,8 @@ int main(int argc, const char *argv[])
 {
     hid_t fid;          /* File ID for file opened */
     time_t curr_time;   /* Current time, for seeding random number generator */
-    long nrecords = 0;  /* # of records to append */
-    long flush_count = 10000;  /* # of records to write between flushing file */
+    long nshrinks = 0;  /* # of times to shrink the dataset */
+    long flush_count = 1000;  /* # of records to write between flushing file */
     unsigned verbose = 1;       /* Whether to emit some informational messages */
     unsigned u;         /* Local index variable */
 
@@ -220,24 +166,24 @@ int main(int argc, const char *argv[])
             } /* end if */
             else {
                 /* Get the number of records to append */
-                nrecords = atol(argv[u]);
-                if(nrecords <= 0)
+                nshrinks = atol(argv[u]);
+                if(nshrinks <= 0)
                     usage();
 
                 u++;
             } /* end else */
         } /* end while */
     } /* end if */
-    if(nrecords <= 0)
+    if(nshrinks <= 0)
         usage();
-    if(flush_count >= nrecords)
+    if(flush_count >= nshrinks)
         usage();
 
     /* Emit informational message */
     if(verbose) {
         printf("Parameters:\n");
-        printf("\t# of records between flushes = %ld\n", flush_count);
-        printf("\t# of records to write = %ld\n", nrecords);
+        printf("\t# of shrinks between flushes = %ld\n", flush_count);
+        printf("\t# of shrinks = %ld\n", nshrinks);
     } /* end if */
 
     /* Create randomized set of numbers */
@@ -264,11 +210,11 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        printf("Adding records\n");
+        printf("Removing records\n");
 
-    /* Append records to datasets */
-    if(add_records(fid, verbose, (unsigned long)nrecords, (unsigned long)flush_count) < 0) {
-        printf("Error appending records to datasets!\n");
+    /* Remove records from datasets */
+    if(remove_records(fid, verbose, (unsigned long)nshrinks, (unsigned long)flush_count) < 0) {
+        printf("Error removing records from datasets!\n");
         exit(1);
     } /* end if */
 

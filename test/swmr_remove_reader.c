@@ -30,20 +30,33 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
 
     /* Check if there are records for symbol */
     if(snpoints > 0) {
-        /* Choose the last record in the dataset */
-        start = (hsize_t)(snpoints - 1);
+        /* Choose a random record in the dataset, choosing the last record half
+         * the time */
+        start = (hsize_t)(random() % (snpoints * 2));
+        if(start > (hsize_t)(snpoints - 1))
+            start = (hsize_t)(snpoints - 1);
         if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
             return(-1);
 
         /* Read record from dataset */
-        record->rec_id = (uint64_t)ULLONG_MAX;
+#ifdef FILLVAL_WORKS
+        /* When shrinking the dataset, we cannot guarantee that the buffer will
+         * even be touched, unless there is a fill value.  Since fill values do
+         * not work with SWMR currently (see note in swmr_generator.c), we
+         * simply initialize rec_id to 0. */
+        record->rec_id = (uint64_t)ULLONG_MAX - 1;
+#else /* FILLVAL_WORKS */
+        record->rec_id = (uint64_t)0;
+#endif /* FILLVAL_WORKS */
         if(H5Dread(dsid, symbol_tid, rec_sid, file_sid, H5P_DEFAULT, record) < 0)
             return(-1);
 
-        /* Verify record value */
-        if(record->rec_id != start) {
+        /* Verify record value - note that it may be the fill value, because the
+         * chunk may be deleted before the object header has the updated
+         * dimensions */
+        if(record->rec_id != start && record->rec_id != (uint64_t)0) {
             printf("Incorrect record value!\n");
-            printf("Symbol = '%s', # of records = %lld, record->rec_id = %llu\n", sym_name, (long long)snpoints, (unsigned long long)record->rec_id);
+            printf("Symbol = '%s', # of records = %lld, record->rec_id = %llx\n", sym_name, (long long)snpoints, (unsigned long long)record->rec_id);
             return(-1);
         } /* end if */
     } /* end if */

@@ -24,8 +24,13 @@
 ###############################################################################
 
 Nreaders=5		# number of readers to launch
+Nrdrs_spa=3             # number of sparse readers to launch
 Nrecords=200000		# number of records to write
-Nsecs=5			# number of seconds per read interval
+Nrecs_rem=40000         # number of times to shrink
+Nrecs_spa=20000         # number of records to write in the sparse test
+Nsecs_add=5		# number of seconds per read interval
+Nsecs_rem=3             # number of seconds per read interval
+Nsecs_addrem=8          # number of seconds per read interval
 nerrors=0
 
 ###############################################################################
@@ -63,49 +68,236 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-# Launch the Generator
-echo launch the swmr_generator
-./swmr_generator
-if test $? -ne 0; then
-    echo generator had error
-    nerrors=`expr $nerrors + 1`
-fi
+# Loop over index types
+for index_type in "-i b1" "-i ea"
+do
+    # Try with and without compression
+    for compress in "" "-c 1"
+    do
+        ###############################################################################
+        ## Writer test - test expanding the dataset
+        ###############################################################################
 
-# Launch the Writer
-echo launch the swmr_writer
-./swmr_writer $Nrecords &
-pid_writer=$!
-$DPRINT pid_writer=$pid_writer
+        # Launch the Generator
+        echo launch the swmr_generator
+        ./swmr_generator $compress $index_type
+        if test $? -ne 0; then
+            echo generator had error
+            nerrors=`expr $nerrors + 1`
+        fi
 
-# Launch the Readers
-n=0
-echo launch $Nreaders swmr_readers
-while [ $n -lt $Nreaders ]; do
-    ./swmr_reader -r $n $Nsecs &
-    pid_readers="$pid_readers $!"
-    n=`expr $n + 1`
+        # Launch the Writer
+        echo launch the swmr_writer
+        ./swmr_writer $Nrecords &
+        pid_writer=$!
+        $DPRINT pid_writer=$pid_writer
+
+        # Launch the Readers
+        n=0
+        echo launch $Nreaders swmr_readers
+        pid_readers=""
+        while [ $n -lt $Nreaders ]; do
+            ./swmr_reader -r $n $Nsecs_add &
+            pid_readers="$pid_readers $!"
+            n=`expr $n + 1`
+        done
+        $DPRINT pid_readers=$pid_readers
+        $IFDEBUG ps
+
+        # Collect exit code of the readers first because they usually finish
+        # before the writer.
+        for xpid in $pid_readers; do
+            $DPRINT checked reader $xpid
+            wait $xpid
+            if test $? -ne 0; then
+                echo reader had error
+                nerrors=`expr $nerrors + 1`
+            fi
+        done
+
+        # Collect exit code of the writer
+        $DPRINT checked writer $pid_writer
+        wait $pid_writer
+        if test $? -ne 0; then
+            echo writer had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Check for error and exit if one occured
+        $DPRINT nerrors=$nerrors
+        if test $nerrors -ne 0 ; then
+            echo "SWMR tests failed with $nerrors errors."
+            exit 1
+        fi
+
+        ###############################################################################
+        ## Remove test - test shrinking the dataset
+        ###############################################################################
+
+        # Launch the Remove Writer
+        echo launch the swmr_remove_writer
+        ./swmr_remove_writer $Nrecs_rem &
+        pid_writer=$!
+        $DPRINT pid_writer=$pid_writer
+
+        # Launch the Remove Readers
+        n=0
+        pid_readers=""
+        echo launch $Nreaders swmr_remove_readers
+        while [ $n -lt $Nreaders ]; do
+            ./swmr_remove_reader -r $n $Nsecs_rem &
+            pid_readers="$pid_readers $!"
+            n=`expr $n + 1`
+        done
+        $DPRINT pid_readers=$pid_readers
+        $IFDEBUG ps
+
+        # Collect exit code of the readers first because they usually finish
+        # before the writer.
+        for xpid in $pid_readers; do
+            $DPRINT checked reader $xpid
+            wait $xpid
+            if test $? -ne 0; then
+                echo reader had error
+                nerrors=`expr $nerrors + 1`
+            fi
+        done
+
+        # Collect exit code of the writer
+        $DPRINT checked writer $pid_writer
+        wait $pid_writer
+        if test $? -ne 0; then
+            echo writer had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Check for error and exit if one occured
+        $DPRINT nerrors=$nerrors
+        if test $nerrors -ne 0 ; then
+            echo "SWMR tests failed with $nerrors errors."
+            exit 1
+        fi
+
+        ###############################################################################
+        ## Add/remove test - randomly grow or shrink the dataset
+        ###############################################################################
+
+        # Launch the Generator
+        echo launch the swmr_generator
+        ./swmr_generator $compress $index_type
+        if test $? -ne 0; then
+            echo generator had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Launch the Writer (not in parallel - just to rebuild the datasets)
+        echo launch the swmr_writer
+        ./swmr_writer $Nrecords
+        if test $? -ne 0; then
+            echo writer had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Launch the Add/Remove Writer
+        echo launch the swmr_addrem_writer
+        ./swmr_addrem_writer $Nrecords &
+        pid_writer=$!
+        $DPRINT pid_writer=$pid_writer
+
+        # Launch the Add/Remove Readers
+        n=0
+        pid_readers=""
+        echo launch $Nreaders swmr_remove_readers
+        while [ $n -lt $Nreaders ]; do
+            ./swmr_remove_reader -r $n $Nsecs_addrem &
+            pid_readers="$pid_readers $!"
+            n=`expr $n + 1`
+        done
+        $DPRINT pid_readers=$pid_readers
+        $IFDEBUG ps
+
+        # Collect exit code of the readers first because they usually finish
+        # before the writer.
+        for xpid in $pid_readers; do
+            $DPRINT checked reader $xpid
+            wait $xpid
+            if test $? -ne 0; then
+                echo reader had error
+                nerrors=`expr $nerrors + 1`
+            fi
+        done
+
+        # Collect exit code of the writer
+        $DPRINT checked writer $pid_writer
+        wait $pid_writer
+        if test $? -ne 0; then
+            echo writer had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Check for error and exit if one occured
+        $DPRINT nerrors=$nerrors
+        if test $nerrors -ne 0 ; then
+            echo "SWMR tests failed with $nerrors errors."
+            exit 1
+        fi
+
+        ###############################################################################
+        ## Sparse writer test - test writing to random locations in the dataset
+        ###############################################################################
+
+        # Launch the Generator
+        echo launch the swmr_generator
+        ./swmr_generator $compress $index_type
+        if test $? -ne 0; then
+            echo generator had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Launch the Sparse writer
+        echo launch the swmr_sparse_writer
+        nice -n 20 ./swmr_sparse_writer -q $Nrecs_spa &
+        pid_writer=$!
+        $DPRINT pid_writer=$pid_writer
+
+        # Launch the Sparse readers
+        n=0
+        pid_readers=""
+        echo launch $Nrdrs_spa swmr_sparse_readers
+        while [ $n -lt $Nrdrs_spa ]; do
+            ./swmr_sparse_reader -q $Nrecs_spa &
+            pid_readers="$pid_readers $!"
+            n=`expr $n + 1`
+        done
+        $DPRINT pid_readers=$pid_readers
+        $IFDEBUG ps
+
+        # Collect exit code of the writer
+        $DPRINT checked writer $pid_writer
+        wait $pid_writer
+        if test $? -ne 0; then
+            echo writer had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Collect exit code of the readers
+        for xpid in $pid_readers; do
+            $DPRINT checked reader $xpid
+            wait $xpid
+            if test $? -ne 0; then
+                echo reader had error
+                nerrors=`expr $nerrors + 1`
+            fi
+        done
+
+        # Check for error and exit if one occured
+        $DPRINT nerrors=$nerrors
+        if test $nerrors -ne 0 ; then
+            echo "SWMR tests failed with $nerrors errors."
+            exit 1
+        fi
+    done
 done
-$DPRINT pid_readers=$pid_readers
-$IFDEBUG ps
-
-# Collect exit code of the readers first because they usually finish
-# before the writer.
-for xpid in $pid_readers; do
-    $DPRINT checked reader $xpid
-    wait $xpid
-    if test $? -ne 0; then
-	echo reader had error
-	nerrors=`expr $nerrors + 1`
-    fi
-done
-
-# Collect exit code of the writer
-$DPRINT checked writer $pid_writer
-wait $pid_writer
-if test $? -ne 0; then
-    echo writer had error
-    nerrors=`expr $nerrors + 1`
-fi
 
 ###############################################################################
 ## Report and exit
