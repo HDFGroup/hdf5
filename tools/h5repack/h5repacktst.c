@@ -168,6 +168,11 @@ static int make_complex_attr_references(hid_t loc_id);
 
 int main (void)
 {
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
+
+    /* Initialize h5tools lib */
+    h5tools_init();
     pack_opt_t  pack_options;
     diff_opt_t  diff_options;
     hsize_t  fs_size = 0;  /* free space section threshold */

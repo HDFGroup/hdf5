@@ -32,9 +32,9 @@ void parse_command_line (int argc, const char *argv[]);
 #define PROGRAMNAME "getub"
 char *nbytes = NULL;
 
-static const char *s_opts = "c:";	/* add more later ? */
+static const char *s_opts = "c:";  /* add more later ? */
 static struct long_options l_opts[] = {
-  {"c", require_arg, 'c'},	/* input file */
+  {"c", require_arg, 'c'},  /* input file */
   {NULL, 0, '\0'}
 };
 
@@ -84,15 +84,15 @@ parse_command_line (int argc, const char *argv[])
   while ((opt = get_option (argc, argv, s_opts, l_opts)) != EOF)
     {
       switch ((char) opt)
-	{
-	case 'c':
-	  nbytes = HDstrdup (opt_arg);
-	  break;
-	case '?':
-	default:
-	  usage (h5tools_getprogname());
-	  exit (EXIT_FAILURE);
-	}
+  {
+  case 'c':
+    nbytes = HDstrdup (opt_arg);
+    break;
+  case '?':
+  default:
+    usage (h5tools_getprogname());
+    exit (EXIT_FAILURE);
+  }
     }
 
   if (argc <= opt_ind)
@@ -114,6 +114,9 @@ main (int argc, const char *argv[])
 
   h5tools_setprogname(PROGRAMNAME);
   h5tools_setstatus(EXIT_SUCCESS);
+
+  /* Initialize h5tools lib */
+  h5tools_init();
 
   parse_command_line (argc, argv);
 
@@ -161,7 +164,7 @@ main (int argc, const char *argv[])
   if (res < (long)size)
     {
       if (buf)
-	free (buf);
+  free (buf);
       HDclose (fd);
       exit (EXIT_FAILURE);
     }
