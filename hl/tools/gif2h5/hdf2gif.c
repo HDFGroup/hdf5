@@ -70,6 +70,9 @@ int main(int argc , char **argv)
     char *image_name = NULL;
     int idx;
 
+    /* Initialize h5tools lib */
+    h5tools_init();
+
     if ( argv[1] && (strcmp("-V",argv[1])==0) )
     {
         print_version("gif2h5");

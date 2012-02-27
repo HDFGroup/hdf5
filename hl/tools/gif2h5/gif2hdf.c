@@ -49,6 +49,9 @@ main(int argv , char *argc[])
     GifMemoryStruct.GifApplicationExtension    = NULL;
     GifMemoryStruct.GifCommentExtension        = NULL;
 
+    /* Initialize h5tools lib */
+    h5tools_init();
+
     if ( argc[1] && (strcmp("-V",argc[1])==0) )
     {
         print_version("gif2h5");

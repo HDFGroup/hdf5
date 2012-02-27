@@ -573,6 +573,9 @@ main(int argc, char **argv)
     int opt;
 
     prog = argv[0];
+    
+    /* Initialize h5tools lib */
+    h5tools_init();
 
     while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) > 0) {
         switch ((char)opt) {
