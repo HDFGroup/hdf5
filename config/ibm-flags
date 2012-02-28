@@ -19,8 +19,8 @@
 # if the compiler is not IBM; otherwise `cc_flags_set' is set to `yes'
 #
 
-# Get the compiler version in a way that works for pgcc
-# pgcc unless a compiler version is already known
+# Get the compiler version in a way that works for XL compiler
+# unless a compiler version is already defined.
 #
 #   cc_vendor:       The compiler product name: XL
 #   cc_version:      Version number: 10.1
@@ -74,4 +74,32 @@ if test "X-$cc_flags_set" = "X-"; then
   cc_vendor=
   cc_version=
   cc_version_info=
+fi
+
+
+# get fortran version info
+if test X != X$FC; then
+    # Verify this is an IBM XL compiler
+    fc_version="`$FC $FCFLAGS -qversion 2>&1 | grep 'IBM XL Fortran'`"
+    if test X != "X$fc_version"; then
+        fc_vendor="XL"
+	fc_version="`$FC $FCFLAGS -qversion 2>&1 | sed -n 's/Version: \([0-9\.]*\).*/\1/p'`"
+	fc_version_info="IBM XL Fortran $fc_version"
+        echo "compiler '$FC' is IBM $fc_vendor-$fc_version"
+
+    fi
+fi
+
+
+# get c++ version info
+if test X != X$CXX; then
+    # Verify this is an IBM XL compiler
+    cxx_version="`$CXX $CXXFLAGS -qversion 2>&1 | grep 'IBM XL C/C++'`"
+    if test X != "X$cxx_version"; then
+        cxx_vendor="XL"
+	cxx_version="`$CXX $CXXFLAGS -qversion 2>&1 | sed -n 's/Version: \([0-9\.]*\).*/\1/p'`"
+	cxx_version_info="IBM XL C/C++ $cxx_version"
+        echo "compiler '$CXX' is IBM $cxx_vendor-$cxx_version"
+
+    fi
 fi
