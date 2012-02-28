@@ -288,14 +288,14 @@ struct options {
     unsigned interleaved;       /* Interleaved vs. contiguous blocks    */
     unsigned collective;        /* Collective vs. independent I/O       */
     unsigned dim2d;             /* 1D vs. 2D geometry                   */
-    int print_times;         /* print times as well as throughputs   */
-    int print_raw;           /* print raw data throughput info       */
+    int print_times;       	/* print times as well as throughputs   */
+    int print_raw;         	/* print raw data throughput info       */
     off_t h5_alignment;         /* alignment in HDF5 file               */
     off_t h5_threshold;         /* threshold for alignment in HDF5 file */
-    int h5_use_chunks;       /* Make HDF5 dataset chunked            */
-    int h5_write_only;          /* Perform the write tests only         */
+    int h5_use_chunks;     	/* Make HDF5 dataset chunked            */
+    int h5_write_only;        	/* Perform the write tests only         */
     unsigned h5_use_mpi_posix;  /* Use MPI-posix VFD for HDF5 I/O (instead of MPI-I/O VFD) */
-    int verify;            /* Verify data correctness              */
+    int verify;        		/* Verify data correctness              */
 };
 
 typedef struct _minmax {
@@ -683,7 +683,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
     /*
      * Show various statistics
      */
-    /* Write statistics  */
+    /* Write statistics	*/
     /* Print the raw data throughput if desired */
     if (opts->print_raw) {
         /* accumulate and output the max, min, and average "raw write" times */
@@ -749,7 +749,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
     }
 
     if (!parms.h5_write_only) {
-        /* Read statistics  */
+        /* Read statistics	*/
         /* Print the raw data throughput if desired */
         if (opts->print_raw) {
             /* accumulate and output the max, min, and average "raw read" times */
@@ -1103,10 +1103,10 @@ print_indent(register int indent)
     MPI_Comm_rank(pio_comm_g, &myrank);
 
     if (myrank == 0) {
-  indent *= TAB_SPACE;
+	indent *= TAB_SPACE;
 
-  for (; indent > 0; --indent)
-      fputc(' ', output);
+	for (; indent > 0; --indent)
+	    fputc(' ', output);
     }
 }
 
@@ -1131,11 +1131,11 @@ static void
 print_io_api(long io_types)
 {
     if (io_types & PIO_POSIX)
-  HDfprintf(output, "posix ");
+	HDfprintf(output, "posix ");
     if (io_types & PIO_MPI)
-  HDfprintf(output, "mpiio ");
+	HDfprintf(output, "mpiio ");
     if (io_types & PIO_HDF5)
-  HDfprintf(output, "phdf5 ");
+	HDfprintf(output, "phdf5 ");
     HDfprintf(output, "\n");
 }
 
@@ -1144,7 +1144,7 @@ report_parameters(struct options *opts)
 {
     int rank = comm_world_rank_g;
 
-    print_version("HDF5 Library");  /* print library version */
+    print_version("HDF5 Library");	/* print library version */
     HDfprintf(output, "rank %d: ==== Parameters ====\n", rank);
 
     HDfprintf(output, "rank %d: IO API=", rank);
@@ -1565,7 +1565,7 @@ parse_size_directive(const char *size)
  * Return:      Nothing
  * Programmer:  Bill Wendling, 31. October 2001
  * Modifications:
- *   Added 2D testing (Christian Chilan, 10. August 2005)
+ * 	Added 2D testing (Christian Chilan, 10. August 2005)
  */
 static void
 usage(const char *prog)
@@ -1575,7 +1575,7 @@ usage(const char *prog)
     MPI_Comm_rank(pio_comm_g, &myrank);
 
     if (myrank == 0) {
-  print_version(prog);
+	print_version(prog);
         printf("usage: %s [OPTIONS]\n", prog);
         printf("  OPTIONS\n");
         printf("     -h, --help                  Print a usage message and exit\n");

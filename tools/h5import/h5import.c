@@ -20,6 +20,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "h5import.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 /* Name of tool */
@@ -1361,7 +1362,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
             break;
 
         case 12: /* EXTERNAL-STORAGE */
-            if (in->configOptionVector[EXTERNAL] == 1) {
+            if (in->configOptionVector[EXTERNALSTORE] == 1) {
                 (void) HDfprintf(stderr, err15a, infile);
                 HDfclose(strm);
                 return (-1);
@@ -1372,7 +1373,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
                 HDfclose(strm);
                 return (-1);
             }
-            in->configOptionVector[EXTERNAL] = 1;
+            in->configOptionVector[EXTERNALSTORE] = 1;
             break;
 
         case 13: /* MAXIMUM-DIMENSIONS */
@@ -1435,7 +1436,7 @@ static int validateConfigurationParameters(struct Input *in)
         return (-1);
     }
 
-    if (in->configOptionVector[EXTERNAL] == 1) {
+    if (in->configOptionVector[EXTERNALSTORE] == 1) {
         if ((in->configOptionVector[COMPRESS] == 1) || (in->configOptionVector[CHUNK] == 1) || (in->configOptionVector[EXTEND] == 1)) {
             (void) HDfprintf(stderr, "%s", err2);
             return (-1);
@@ -2360,7 +2361,7 @@ static int process(struct Options *opt)
                 H5Pset_deflate(proplist, (unsigned) in->compressionParam);
             }
 
-            if (in->configOptionVector[EXTERNAL] == 1) {
+            if (in->configOptionVector[EXTERNALSTORE] == 1) {
                 /* creating the external file if it doesnt exist */
                 if ((extfile = HDfopen(in->externFilename, "ab")) == NULL) {
                     (void) HDfprintf(stderr, "%s", err4);

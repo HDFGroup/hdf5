@@ -21,6 +21,7 @@
 #endif
 
 #include "H5private.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 void parse_command_line (int argc, const char *argv[]);

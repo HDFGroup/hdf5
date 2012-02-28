@@ -3127,7 +3127,7 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
             ret = H5tools_get_symlink_info(iter->fid, name, &lnk_info, follow_symlink_g);
             /* lnk_info.trg_path is malloced in H5tools_get_symlink_info()
              * so it will be freed via buf later */
-            buf = lnk_info.trg_path;
+            buf = (char*)lnk_info.trg_path;
             /* error */
             if (ret < 0)
                 goto done;
@@ -3185,7 +3185,7 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
             ret = H5tools_get_symlink_info(iter->fid, name, &lnk_info, follow_link);
             /* lnk_info.trg_path is malloced in H5tools_get_symlink_info()
              * so it will be freed via buf later */
-            buf = lnk_info.trg_path;
+            buf = (char*)lnk_info.trg_path;
             /* error */
             if (ret < 0)
                 goto done;

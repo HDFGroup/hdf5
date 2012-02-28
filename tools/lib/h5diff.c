@@ -614,7 +614,7 @@ static herr_t trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
 
 done:    
     if (lnk_info.trg_path)
-        HDfree(lnk_info.trg_path);
+        HDfree((char *)lnk_info.trg_path);
     return 0;
 }    
 
@@ -728,25 +728,25 @@ hsize_t h5diff(const char *fname1,
         /* make the given object1 fullpath, start with "/"  */
         if (HDstrncmp(objname1, "/", 1))
         {
-            HDstrcpy(obj1fullname, "/");
-            HDstrcat(obj1fullname, objname1);
+            HDstrcpy((char *)obj1fullname, "/");
+            HDstrcat((char *)obj1fullname, objname1);
         }
         else
-            HDstrcpy(obj1fullname, objname1);
+            HDstrcpy((char *)obj1fullname, objname1);
 
         /* make the given object2 fullpath, start with "/" */
         if (HDstrncmp(objname2, "/", 1))
         {
-            HDstrcpy(obj2fullname, "/");
-            HDstrcat(obj2fullname, objname2);
+            HDstrcpy((char *)obj2fullname, "/");
+            HDstrcat((char *)obj2fullname, objname2);
         }
         else
-            HDstrcpy(obj2fullname, objname2);
+            HDstrcpy((char *)obj2fullname, objname2);
 
         /*----------------------------------------------------------
          * check if obj1 is root, group, single object or symlink
          */
-        if(!HDstrcmp(obj1fullname, "/"))
+        if(!HDstrcmp((char *)obj1fullname, "/"))
         {
             obj1type = H5TRAV_TYPE_GROUP;
         }
@@ -856,9 +856,9 @@ hsize_t h5diff(const char *fname1,
     {
         /* set root group */
         obj1fullname = (char*)HDcalloc(2, sizeof(char));
-        HDstrcat(obj1fullname, "/");
+        HDstrcat((char *)obj1fullname, "/");
         obj2fullname = (char*)HDcalloc(2, sizeof(char));
-        HDstrcat(obj2fullname, "/");
+        HDstrcat((char *)obj2fullname, "/");
     }
 
 
@@ -1045,15 +1045,15 @@ out:
 
     /* free buffers */
     if (obj1fullname)
-        HDfree(obj1fullname);
+        HDfree((char *)obj1fullname);
     if (obj2fullname)
-        HDfree(obj2fullname);
+        HDfree((char *)obj2fullname);
 
     /* free link info buffer */
     if (trg_linfo1.trg_path)
-        HDfree(trg_linfo1.trg_path);
+        HDfree((char *)trg_linfo1.trg_path);
     if (trg_linfo2.trg_path)
-        HDfree(trg_linfo2.trg_path);
+        HDfree((char *)trg_linfo2.trg_path);
 
     /* close */
     H5E_BEGIN_TRY
@@ -1112,9 +1112,9 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
      * make full path
      */
     if (HDstrcmp (grp1, "/"))
-        grp1_path = grp1;
+        grp1_path = (char *)grp1;
     if (HDstrcmp (grp2, "/"))
-        grp2_path = grp2;
+        grp2_path = (char *)grp2;
 
     /*-------------------------------------------------------------------------
     * regarding the return value of h5diff (0, no difference in files, 1 difference )
@@ -1769,9 +1769,9 @@ out:
 
     /* free link info buffer */
     if (linkinfo1.trg_path)
-        HDfree(linkinfo1.trg_path);
+        HDfree((char *)linkinfo1.trg_path);
     if (linkinfo2.trg_path)
-        HDfree(linkinfo2.trg_path);
+        HDfree((char *)linkinfo2.trg_path);
 
     return nfound;
 }
@@ -2163,9 +2163,9 @@ hsize_t diff(hid_t file1_id,
 
     /* free link info buffer */
     if (linkinfo1.trg_path)
-        HDfree(linkinfo1.trg_path);
+        HDfree((char *)linkinfo1.trg_path);
     if (linkinfo2.trg_path)
-        HDfree(linkinfo2.trg_path);
+        HDfree((char *)linkinfo2.trg_path);
 
     return nfound;
 
@@ -2206,9 +2206,9 @@ out2:
 
     /* free link info buffer */
     if (linkinfo1.trg_path)
-        HDfree(linkinfo1.trg_path);
+        HDfree((char *)linkinfo1.trg_path);
     if (linkinfo2.trg_path)
-        HDfree(linkinfo2.trg_path);
+        HDfree((char *)linkinfo2.trg_path);
 
     /* close */
     /* disable error reporting */

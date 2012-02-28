@@ -17,6 +17,7 @@
 #include <assert.h>
 #include "gif.h"
 #include "H5IMpublic.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 

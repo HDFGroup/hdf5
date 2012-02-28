@@ -15,6 +15,7 @@
 
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 /* Name of tool */

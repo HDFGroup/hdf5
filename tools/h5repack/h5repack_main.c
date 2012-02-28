@@ -13,6 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include "h5tools.h"
 #include "h5tools_utils.h"
 #include "h5repack.h"
 

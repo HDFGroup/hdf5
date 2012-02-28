@@ -23,6 +23,7 @@
 
 /* our header files */
 #include "h5test.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 #ifdef H5_HAVE_FILTER_DEFLATE

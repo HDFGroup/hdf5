@@ -493,24 +493,24 @@ int copy_attr(hid_t loc_in,
         type_class = H5Tget_class(wtype_id);
         is_ref = (type_class == H5T_REFERENCE);
         if (type_class == H5T_VLEN ||type_class == H5T_ARRAY ) {
-          hid_t base_type = -1;
-          base_type = H5Tget_super(ftype_id);
-          is_ref = (is_ref || (H5Tget_class(base_type)==H5T_REFERENCE));
-          H5Tclose(base_type);
+        	hid_t base_type = -1;
+        	base_type = H5Tget_super(ftype_id);
+        	is_ref = (is_ref || (H5Tget_class(base_type)==H5T_REFERENCE));
+        	H5Tclose(base_type);
         }
 
         if (type_class == H5T_COMPOUND) {
-          int nmembers = H5Tget_nmembers(wtype_id) ;
-          for (j=0; j<nmembers; j++) {
-            hid_t mtid = H5Tget_member_type( wtype_id, j );
-            H5T_class_t mtclass = H5Tget_class(mtid);
-            H5Tclose(mtid);
+        	int nmembers = H5Tget_nmembers(wtype_id) ;
+        	for (j=0; j<nmembers; j++) {
+        		hid_t mtid = H5Tget_member_type( wtype_id, j );
+        		H5T_class_t mtclass = H5Tget_class(mtid);
+        		H5Tclose(mtid);
 
-            if (mtclass==H5T_REFERENCE) {
-              is_ref = 1;
-              break;
-            }
-          } /* for (j=0; i<nmembers; j++) */
+        		if (mtclass==H5T_REFERENCE) {
+        			is_ref = 1;
+        			break;
+        		}
+        	} /* for (j=0; i<nmembers; j++) */
         } /* if (type_class == H5T_COMPOUND) */
 
         if(is_ref) {
