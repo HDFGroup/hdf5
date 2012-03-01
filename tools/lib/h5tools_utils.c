@@ -49,9 +49,9 @@ static const char  *h5tools_progname = "h5tools";
  * largest value suitable for your machine (for testing use a small value).
  */
 /* Maximum size used in a call to malloc for a dataset */
-hsize_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
+hsize_t H5TOOLS_MALLOCSIZE = (256 * 1024 * 1024);  /* 256 MB */
 /* size of hyperslab buffer when a dataset is bigger than H5TOOLS_MALLOCSIZE */
-hsize_t H5TOOLS_BUFSIZE = (1024 * 1024);
+hsize_t H5TOOLS_BUFSIZE = ( 32 * 1024 * 1024);  /* 32 MB */
 
 
 /* ``parallel_print'' variables */

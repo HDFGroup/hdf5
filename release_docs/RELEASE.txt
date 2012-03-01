@@ -241,6 +241,12 @@ New Features
 
     Tools:
     ------
+     - h5repack: Improved performance for hanlding big chunked dataset 
+               (size > 128MB). It would perform much better prior to the
+               improvement, especially for cases that chunk dimentions
+               looks like "1024x5x1" (compare to "1x5x1024"). When bigger numbers
+               are toward front and smaller number is toward back in chunk
+               dimentions.
      - h5dump: Added new option --no-compact-subset. This option will not
                interpret the '[' character as starting the compact form of 
                subsetting. This is useful when the "h5dump error: unable to 

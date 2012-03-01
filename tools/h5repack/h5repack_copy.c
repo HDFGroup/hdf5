@@ -53,6 +53,7 @@
 * local functions
 *-------------------------------------------------------------------------
 */
+static int Get_hyperslab (hid_t dcpl_id, int rank_dset, hsize_t dims_dset[], size_t size_datum, hsize_t dims_hslab[], hsize_t * hslab_nbytes_p);
 static void  print_dataset_info(hid_t dcpl_id,char *objname,double per, int pr);
 static int   do_copy_objects(hid_t fidin,hid_t fidout,trav_table_t *travt,pack_opt_t *options);
 static int   copy_user_block(const char *infile, const char *outfile, hsize_t size);
@@ -491,6 +492,184 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+* Function: Get_hyperslab
+*
+* Purpose: Calulate a hyperslab from a dataset for higher performance.
+*          The size of hyperslab is limitted by H5TOOLS_BUFSIZE.
+*          Return the hyperslab dimentions and size in byte.
+*
+* Return: 0 - SUCCEED, -1 FAILED
+*
+* Parameters:
+*   dcpl_id : [IN] dataset creation property.
+*   rank_dset : [IN] dataset rank
+*   dims_dset[] : [IN] dataset dimentions
+*   size_datum : [IN] size of a data element in byte
+*   dims_hslab[] : [OUT] calculated hyperslab dimentions
+*   * hslab_nbytes_p : [OUT] total byte of the hyperslab
+*
+* Programmer: Jonathan Kim
+* Date: Feburary, 2012
+* Update:
+*   The hyperslab calucation would be depend on if the dataset is chunked
+*   or not. 
+*
+*   There care 3 conditions to cover:
+*   1. If chunked and a chunk fits in buffer, each chunk would be a unit of
+*      collection and the boundary would be dataset's dims.
+*   2. If chunked but a chunk doesn't fit in buffer, each data element would
+*      be a unit of collection and the boundary would be the chunk itself.
+*   3. If not chunked, each data element would be a unit of collection and
+*      the boundary would be dataset's dims.
+*
+*   The calulation starts from the last dimention (h5dump dims output).
+*
+* Note:
+*   Added for JIRA HDFFV-7862. 
+*-----------------------------------------*/
+
+int Get_hyperslab (hid_t dcpl_id, int rank_dset, hsize_t dims_dset[], 
+                   size_t size_datum, 
+                   hsize_t dims_hslab[], hsize_t * hslab_nbytes_p)
+{
+    int status = 0;
+    int k;
+    H5D_layout_t dset_layout;
+    int rank_chunk;
+    hsize_t dims_chunk[H5S_MAX_RANK];
+    hsize_t size_chunk=1;
+    hsize_t nchunk_fit;  /* number of chunks that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
+    hsize_t ndatum_fit;  /* number of dataum that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
+    hsize_t chunk_dims_map[H5S_MAX_RANK];  /* mapped chunk dimentions */
+    hsize_t hs_dims_map[H5S_MAX_RANK];  /* mapped hyperslab dimentions */
+    hsize_t hslab_nbytes;  /* size of hyperslab in byte */
+
+    /* init to set as size of a data element */
+    hslab_nbytes = size_datum;
+
+    /* get layout of dataset */
+    dset_layout =  H5Pget_layout(dcpl_id);
+
+   /* if dataset is chunked */
+    if ( dset_layout == H5D_CHUNKED )
+    {
+        /* get chunk dims */
+        rank_chunk = H5Pget_chunk(dcpl_id, rank_dset, dims_chunk);
+        if (rank_chunk < 0)
+        {
+            status = -1;
+            goto out;
+        }
+
+        for (k = rank_dset; k > 0; --k)
+            size_chunk *= dims_chunk[k-1];
+
+        /* figure out how many chunks can fit in the hyperslab buffer */
+        nchunk_fit = (H5TOOLS_BUFSIZE / size_datum) / size_chunk;
+             
+
+        /* 1. if a chunk fit in hyperslab buffer */
+        if (nchunk_fit >= 1)
+        {
+            /* Calulate a hyperslab that contains as many chunks that can fit
+             * in hyperslab buffer. Hyperslab will be increased starting from 
+             * the last dimention of the dataset (see h5dump's dims output).
+             * The calculation boundary is dataset dims.
+             * In the loop, used mapping from a datum to a chunk to figure out
+             * chunk based hyperslab.
+             */
+            for (k = rank_dset; k > 0; --k)
+            {
+                /* map dataset dimentions with a chunk dims */
+                chunk_dims_map[k-1]= dims_dset[k-1] / dims_chunk[k-1];
+
+                /* if reminder exist, increse by 1 to cover partial edge chunks */
+                if (dims_dset[k-1] % dims_chunk[k-1] > 0)
+                    chunk_dims_map[k-1]++;
+
+                /* get mapped hyperslab dims */
+                hs_dims_map[k-1] = MIN (nchunk_fit, chunk_dims_map[k-1]);
+
+                /* prepare next round */
+                nchunk_fit = nchunk_fit / chunk_dims_map[k-1];
+                /* if a chunk is bigger than the rest of buffer */
+                if (nchunk_fit == 0) 
+                    nchunk_fit=1;
+
+                /* get hyperslab dimentions as unmapping to actual size */
+                dims_hslab[k-1] = MIN( (hs_dims_map[k-1] * dims_chunk[k-1]), dims_dset[k-1]);
+
+                /* calculate total size for the hyperslab */
+                hslab_nbytes *= dims_hslab[k-1];
+            }
+        }
+        /* 2. if a chunk is bigger than hyperslab buffer */
+        else
+        {
+            /* Calulate a hyperslab that contains as many data elements that 
+             * can fit in hyperslab buffer. Hyperslab will be increased 
+             * starting from the last dimention of the chunk (see h5dump's dims
+             * output).
+             * The calculation boundary is a chunk dims.
+             */
+            for (k = rank_dset; k > 0; --k)
+            {
+                ndatum_fit = H5TOOLS_BUFSIZE / hslab_nbytes;
+
+                /* if a datum is bigger than rest of buffer */
+                if ( ndatum_fit == 0)
+                    ndatum_fit = 1;
+                /* get hyperslab dimentions within a chunk boundary */
+                dims_hslab[k - 1] = MIN (dims_chunk[k-1], ndatum_fit);
+
+                /* calculate total size for the hyperslab */
+                hslab_nbytes *= dims_hslab[k - 1];
+
+                if (hslab_nbytes <= 0)
+                {
+                     status = -1;
+                     goto out;
+                }
+            }
+        }
+    }
+    /* 3. if dataset is not chunked */
+    else
+    {
+        /* Calulate a hyperslab that contains as many data elements that can
+         * fit in hyperslab buffer. Hyperslab will be increased starting from
+         * the last dimention of the dataset (see h5dump's dims output).
+         * The calculation boundary is dataset dims.
+         */
+        for (k = rank_dset; k > 0; --k)
+        {
+            ndatum_fit = H5TOOLS_BUFSIZE / hslab_nbytes;
+
+            /* if a datum is bigger than rest of buffer */
+            if ( ndatum_fit == 0) 
+                ndatum_fit = 1;
+            /* get hyperslab dimentions within dataset boundary */
+            dims_hslab[k - 1] = MIN(dims_dset[k - 1], ndatum_fit);
+
+            /* calculate total size for the hyperslab */
+            hslab_nbytes *= dims_hslab[k - 1];
+
+            if (hslab_nbytes <= 0)
+            {
+                 status = -1;
+                 goto out;
+            }
+        }
+    }
+
+    /* pass out the hyperslab size*/
+    *hslab_nbytes_p = hslab_nbytes;
+
+out:
+    return status;
+}
+
+/*-------------------------------------------------------------------------
 * Function: do_copy_objects
 *
 * Purpose: duplicate all HDF5 objects in the file
@@ -557,6 +736,30 @@ out:
 *
 * May, 1, 2008: Add a printing of the compression ratio of old size / new size
 *
+* Feburary 2012:  improve Read/Write by hyperslabs for big datasets.
+* Programmer: Jonathan Kim
+*
+*  A threshold of H5TOOLS_MALLOCSIZE is the limit upon which I/O hyperslab is done
+*  i.e., if the memory needed to read a dataset is greater than this limit,
+*  then hyperslab I/O is done instead of one operation I/O
+*  For each dataset, the memory needed is calculated according to
+*
+*  memory needed = number of elements * size of each element
+*
+*  if the memory needed is lower than H5TOOLS_MALLOCSIZE, then the following operations
+*  are done
+*
+*  H5Dread( input_dataset )
+*  H5Dwrite( output_dataset )
+*
+*  with all elements in the datasets selected. If the memory needed is greater than
+*  H5TOOLS_MALLOCSIZE, then the following operations are done instead:
+*
+*  1. figure out a hyperslab (dimentions) and size  (refer to Get_hyperslab()).
+*  2. Calculate the hyperslab selections as the selection is moving forward. 
+*     Selection would be same as the hyperslab except for the remaining edge portion
+*     of the dataset. The code take care of the remaining portion if exist.
+*
 *-------------------------------------------------------------------------
 */
 
@@ -573,7 +776,7 @@ int do_copy_objects(hid_t fidin,
     hid_t    gcpl_out = -1;     /* group creation property list */
     hid_t    type_in = -1;      /* named type ID */
     hid_t    type_out = -1;     /* named type ID */
-    hid_t    dcpl_id = -1;      /* dataset creation property list ID */
+    hid_t    dcpl_in = -1;      /* dataset creation property list ID */
     hid_t    dcpl_out = -1;     /* dataset creation property list ID */
     hid_t    f_space_id = -1;   /* file space ID */
     hid_t    ftype_id = -1;     /* file type ID */
@@ -589,7 +792,7 @@ int do_copy_objects(hid_t fidin,
     int      apply_s;           /* flag for apply filter to small dataset sizes */
     int      apply_f;           /* flag for apply filter to return error on H5Dcreate */
     void     *buf=NULL;         /* buffer for raw data */
-    void     *sm_buf=NULL;      /* buffer for raw data */
+    void     *hslab_buf=NULL;   /* hyperslab buffer for raw data */
     int      has_filter;        /* current object has a filter */
     int      req_filter;        /* there was a request for a filter */
     unsigned crt_order_flags;   /* group creation order flag */
@@ -597,6 +800,7 @@ int do_copy_objects(hid_t fidin,
     unsigned u;
     int      is_ref=0;
     htri_t   is_named;
+
 
     /*-------------------------------------------------------------------------
     * copy the suppplied object list
@@ -760,9 +964,9 @@ int do_copy_objects(hid_t fidin,
                     goto error;
                 if((ftype_id = H5Dget_type(dset_in)) < 0)
                     goto error;
-                if((dcpl_id = H5Dget_create_plist(dset_in)) < 0)
+                if((dcpl_in = H5Dget_create_plist(dset_in)) < 0)
                     goto error;
-                if((dcpl_out = H5Pcopy(dcpl_id)) < 0)
+                if((dcpl_out = H5Pcopy(dcpl_in)) < 0)
                     goto error;
                 if((rank = H5Sget_simple_extent_ndims(f_space_id)) < 0)
                     goto error;
@@ -795,7 +999,7 @@ int do_copy_objects(hid_t fidin,
                 * 2) the internal filters might be turned off
                 *-------------------------------------------------------------------------
                 */
-                if (h5tools_canreadf((travt->objs[i].name),dcpl_id)==1)
+                if (h5tools_canreadf((travt->objs[i].name),dcpl_in)==1)
                 {
                     apply_s=1;
                     apply_f=1;
@@ -855,7 +1059,7 @@ int do_copy_objects(hid_t fidin,
                                 printf(" warning: could not create dataset <%s>. Applying original settings\n",
                                 travt->objs[i].name);
 
-                            if((dset_out = H5Dcreate2(fidout, travt->objs[i].name, wtype_id, f_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+                            if((dset_out = H5Dcreate2(fidout, travt->objs[i].name, wtype_id, f_space_id, H5P_DEFAULT, dcpl_in, H5P_DEFAULT)) < 0)
                                 goto error;
                             apply_f = 0;
                         }
@@ -886,100 +1090,108 @@ int do_copy_objects(hid_t fidin,
                             else /* possibly not enough memory, read/write by hyperslabs */
                             {
                                 size_t        p_type_nbytes = msize; /*size of memory type */
-                                hsize_t       p_nelmts = nelmts;     /*total selected elmts */
+                                hsize_t       p_nelmts = nelmts;     /*total elements */
                                 hsize_t       elmtno;                /*counter  */
                                 int           carry;                 /*counter carry value */
                                 unsigned int  vl_data = 0;           /*contains VL datatypes */
 
-                                /* stripmine info */
-                                hsize_t       sm_size[H5S_MAX_RANK]; /*stripmine size */
-                                hsize_t       sm_nbytes;             /*bytes per stripmine */
-                                hsize_t       sm_nelmts;             /*elements per stripmine*/
-                                hid_t         sm_space;              /*stripmine data space */
-
                                 /* hyperslab info */
-                                hsize_t       hs_offset[H5S_MAX_RANK];/*starting offset */
-                                hsize_t       hs_size[H5S_MAX_RANK];  /*size this pass */
-                                hsize_t       hs_nelmts;              /*elements in request */
+                                hsize_t       hslab_dims[H5S_MAX_RANK]; /*hyperslab dims */
+                                hsize_t       hslab_nbytes;             /*bytes per hyperslab */
+                                hsize_t       hslab_nelmts;             /*elements per hyperslab*/
+                                hid_t         hslab_space;              /*hyperslab data space */
+
+                                /* hyperslab selection info */
+                                hsize_t       hs_sel_offset[H5S_MAX_RANK];/* selection offset */
+                                hsize_t       hs_sel_count[H5S_MAX_RANK];  /* selection count */
+                                hsize_t       hs_select_nelmts;    /* selected elements */
                                 hsize_t       zero[8];                /*vector of zeros */
                                 int           k;
+                                H5D_layout_t dset_layout;
+                                hid_t    dcpl_tmp = -1;     /* dataset creation property list ID */
 
                                 /* check if we have VL data in the dataset's datatype */
                                 if (H5Tdetect_class(wtype_id, H5T_VLEN) == TRUE)
                                     vl_data = TRUE;
 
-                                /*
-                                * determine the strip mine size and allocate a buffer. The strip mine is
-                                * a hyperslab whose size is manageable.
-                                */
-                                sm_nbytes = p_type_nbytes;
 
-                                for (k = rank; k > 0; --k)
+                                /* check first if writing dataset is chunked, 
+                                 * if so use its chunk layout for better performance. */
+                                dset_layout = H5Pget_layout(dcpl_out);
+                                if (dset_layout == H5D_CHUNKED)
+                                   dcpl_tmp = dcpl_out;  /* writing dataset */
+                                else /* if reading dataset is chunked */
                                 {
-                                    hsize_t size = H5TOOLS_BUFSIZE / sm_nbytes;
-                                    if ( size == 0) /* datum size > H5TOOLS_BUFSIZE */
-                                        size = 1;
-                                    sm_size[k - 1] = MIN(dims[k - 1], size);
-                                    sm_nbytes *= sm_size[k - 1];
-                                    HDassert(sm_nbytes > 0);
+                                   dset_layout = H5Pget_layout(dcpl_in);
+                                   if (dset_layout == H5D_CHUNKED)
+                                       dcpl_tmp = dcpl_in;  /* reading dataset */
                                 }
-                                sm_buf = HDmalloc((size_t)sm_nbytes);
 
-                                sm_nelmts = sm_nbytes / p_type_nbytes;
-                                sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
+                                /* get hyperslab dims and size in byte */
+                                if(Get_hyperslab(dcpl_tmp, rank, dims, p_type_nbytes, hslab_dims, &hslab_nbytes) < 0)
+                                    goto error;
 
-                                /* the stripmine loop */
-                                HDmemset(hs_offset, 0, sizeof hs_offset);
+                                hslab_buf = HDmalloc((size_t)hslab_nbytes);
+
+                                hslab_nelmts = hslab_nbytes / p_type_nbytes;
+                                hslab_space = H5Screate_simple(1, &hslab_nelmts, NULL);
+
+                                /* the hyperslab selection loop */
+                                HDmemset(hs_sel_offset, 0, sizeof hs_sel_offset);
                                 HDmemset(zero, 0, sizeof zero);
 
-                                for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_nelmts)
+                                for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_select_nelmts)
                                 {
-                                    /* calculate the hyperslab size */
                                     if (rank > 0)
                                     {
-                                        for (k = 0, hs_nelmts = 1; k < rank; k++)
+                                        /* calculate the hyperslab selections. The selection would be same as the hyperslab except for remaining edge portion of the dataset which is smaller then the hyperslab.
+                                         */
+                                        for (k = 0, hs_select_nelmts = 1; k < rank; k++)
                                         {
-                                            hs_size[k] = MIN(dims[k] - hs_offset[k], sm_size[k]);
-                                            hs_nelmts *= hs_size[k];
+                                            /* MIN() is used to get the remaining edge portion if exist. 
+                                             * "dims[k] - hs_sel_offset[k]" is remaining edge portion that is smaller then the hyperslab.*/
+                                            hs_sel_count[k] = MIN(dims[k] - hs_sel_offset[k], hslab_dims[k]);
+                                            hs_select_nelmts *= hs_sel_count[k];
                                         }
 
-                                        if (H5Sselect_hyperslab(f_space_id, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
+                                        if (H5Sselect_hyperslab(f_space_id, H5S_SELECT_SET, hs_sel_offset, NULL, hs_sel_count, NULL) < 0)
                                             goto error;
-                                        if (H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL) < 0)
+                                        if (H5Sselect_hyperslab(hslab_space, H5S_SELECT_SET, zero, NULL, &hs_select_nelmts, NULL) < 0)
                                             goto error;
                                     }
                                     else
                                     {
                                         H5Sselect_all(f_space_id);
-                                        H5Sselect_all(sm_space);
-                                        hs_nelmts = 1;
+                                        H5Sselect_all(hslab_space);
+                                        hs_select_nelmts = 1;
                                     } /* rank */
 
                                     /* read/write: use the macro to check error, e.g. memory allocation error inside the library. */
-                                    CHECK_H5DRW_ERROR(H5Dread, dset_in, wtype_id, sm_space, f_space_id, H5P_DEFAULT, sm_buf);
-                                    CHECK_H5DRW_ERROR(H5Dwrite, dset_out, wtype_id, sm_space, f_space_id, H5P_DEFAULT, sm_buf);
+                                    CHECK_H5DRW_ERROR(H5Dread, dset_in, wtype_id, hslab_space, f_space_id, H5P_DEFAULT, hslab_buf);
+                                    CHECK_H5DRW_ERROR(H5Dwrite, dset_out, wtype_id, hslab_space, f_space_id, H5P_DEFAULT, hslab_buf);
 
                                     /* reclaim any VL memory, if necessary */
                                     if(vl_data)
-                                        H5Dvlen_reclaim(wtype_id, sm_space, H5P_DEFAULT, sm_buf);
+                                        H5Dvlen_reclaim(wtype_id, hslab_space, H5P_DEFAULT, hslab_buf);
 
                                     /* calculate the next hyperslab offset */
                                     for (k = rank, carry = 1; k > 0 && carry; --k)
                                     {
-                                        hs_offset[k - 1] += hs_size[k - 1];
-                                        if (hs_offset[k - 1] == dims[k - 1])
-                                            hs_offset[k - 1] = 0;
+                                        hs_sel_offset[k - 1] += hs_sel_count[k - 1];
+                                        /* if reached the end of a dim */
+                                        if (hs_sel_offset[k - 1] == dims[k - 1])
+                                            hs_sel_offset[k - 1] = 0;
                                         else
                                             carry = 0;
                                     } /* k */
                                 } /* elmtno */
 
-                                H5Sclose(sm_space);
+                                H5Sclose(hslab_space);
                                 /* free */
-                                if (sm_buf!=NULL)
+                                if (hslab_buf!=NULL)
                                 {
-                                    HDfree(sm_buf);
-                                    sm_buf=NULL;
+                                    HDfree(hslab_buf);
+                                    hslab_buf=NULL;
                                 }
                             } /* hyperslab read */
                         } /* if (nelmts>0 && space_status==H5D_SPACE_STATUS_NOT_ALLOCATED) */
@@ -1005,7 +1217,7 @@ int do_copy_objects(hid_t fidin,
                                 print_dataset_info(dcpl_out,travt->objs[i].name,ratio,1);
                             }
                             else
-                                print_dataset_info(dcpl_id,travt->objs[i].name,ratio,0);
+                                print_dataset_info(dcpl_in,travt->objs[i].name,ratio,0);
 
                             /* print a message that the filter was not applied
                             (in case there was a filter)
@@ -1044,7 +1256,7 @@ int do_copy_objects(hid_t fidin,
                     goto error;
                 if (H5Tclose(wtype_id) < 0)
                     goto error;
-                if (H5Pclose(dcpl_id) < 0)
+                if (H5Pclose(dcpl_in) < 0)
                     goto error;
                 if (H5Pclose(dcpl_out) < 0)
                     goto error;
@@ -1199,7 +1411,7 @@ error:
     H5E_BEGIN_TRY {
         H5Gclose(grp_in);
         H5Gclose(grp_out);
-        H5Pclose(dcpl_id);
+        H5Pclose(dcpl_in);
         H5Pclose(gcpl_in);
         H5Pclose(gcpl_out);
         H5Sclose(f_space_id);
@@ -1214,8 +1426,8 @@ error:
     /* free */
     if (buf!=NULL)
         HDfree(buf);
-    if (sm_buf!=NULL)
-        HDfree(sm_buf);
+    if (hslab_buf!=NULL)
+        HDfree(hslab_buf);
     return -1;
 }
 
