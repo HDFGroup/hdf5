@@ -1089,7 +1089,7 @@ H5F_use_tmp_space(const H5F_t *f)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+H5F_avoid_truncate_t
 H5F_avoid_truncate(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */

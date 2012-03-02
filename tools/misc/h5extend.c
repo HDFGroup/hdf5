@@ -167,6 +167,7 @@ main (int argc, char *argv[])
     /* Check to see if the EOA value is stored via an 'EOA' message */
     if (f->shared->sblock->ext_addr != HADDR_UNDEF) {
         H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
+        H5O_eoa_t eoa_msg;      /* 'EOA' Message' */
 
         /* Open the superblock extension */
         if (H5F_super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0) {
@@ -178,11 +179,15 @@ main (int argc, char *argv[])
         if (H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id)) {
             eoa_msg_found = 1;
 
-            /* Retrieve 'EOA' value from message in superblock extension */
-            if (H5O_msg_read(&ext_loc, H5O_EOA_ID, &eoa, H5AC_dxpl_id) == NULL) {
+            /* Retrieve 'EOA' message */ 
+            if (H5O_msg_read(&ext_loc, H5O_EOA_ID, &eoa_msg, H5AC_dxpl_id) == NULL) {
                 error_msg("Unable to read 'EOA' message in superblock extension.\n");
                 leave(EXIT_FAILURE);
             } /* end if */
+
+            /* Pull 'EOA' value from the 'EOA' message */
+            eoa = eoa_msg.eoa;
+
             if (!quiet_g) HDfprintf(outputfile, "  Superblock extension contains 'EOA' message with value = %a\n", eoa);
 
             /* If requested, remove the 'EOA' message from the superblock extension */

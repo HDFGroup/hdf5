@@ -727,6 +727,36 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
             case 'F':
                 switch(type[1]) {
+                    case 'a':
+                        if(ptr) {
+                            if(vp)
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5F_avoid_truncate_t avoid_truncate = (H5F_avoid_truncate_t)va_arg(ap, int);
+
+                            switch(avoid_truncate) {
+                                case H5F_AVOID_TRUNCATE_OFF:
+                                    fprintf(out, "H5F_AVOID_TRUNCATE_OFF");
+                                    break;
+
+                                case H5F_AVOID_TRUNCATE_EXTEND:
+                                    fprintf(out, "H5F_AVOID_TRUNCATE_EXTEND");
+                                    break;
+
+                                case H5F_AVOID_TRUNCATE_ALL:
+                                    fprintf(out, "H5F_AVOID_TRUNCATE_ALL");
+                                    break;
+
+                                default:
+                                    fprintf(out, "%ld", (long)avoid_truncate);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+
                     case 'd':
                         if(ptr) {
                             if(vp)

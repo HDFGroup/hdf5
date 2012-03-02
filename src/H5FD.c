@@ -1894,11 +1894,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDcoordinate(H5FD_t *file, hid_t dxpl_id, H5FD_coord_t op, void * udata)
+H5FDcoordinate(H5FD_t *file, hid_t dxpl_id, H5FD_coord_t op)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5FDcoordinate, FAIL)
+    H5TRACE3("e", "*xix", file, dxpl_id, op);
 
     /* Check args */
     if(!file || !file->cls)
@@ -1910,7 +1911,7 @@ H5FDcoordinate(H5FD_t *file, hid_t dxpl_id, H5FD_coord_t op, void * udata)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
 
     /* Do the real work */
-    if(H5FD_coordinate(file, dxpl_id, op, udata) < 0)
+    if(H5FD_coordinate(file, dxpl_id, op) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "file coordinate request failed")
 
 done:
@@ -1931,7 +1932,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_coordinate(H5FD_t *file, hid_t dxpl_id, H5FD_coord_t op, void * udata)
+H5FD_coordinate(H5FD_t *file, hid_t dxpl_id, H5FD_coord_t op)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -1939,7 +1940,7 @@ H5FD_coordinate(H5FD_t *file, hid_t dxpl_id, H5FD_coord_t op, void * udata)
 
     HDassert(file && file->cls);
 
-    if(file->cls->coordinate && (file->cls->coordinate)(file, dxpl_id, op, udata) < 0)
+    if(file->cls->coordinate && (file->cls->coordinate)(file, dxpl_id, op) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver coordinate request failed")
 
 done:

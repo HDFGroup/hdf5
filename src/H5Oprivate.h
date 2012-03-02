@@ -329,6 +329,13 @@ typedef struct H5O_efl_t {
     H5O_efl_entry_t *slot;		/*array of external file entries     */
 } H5O_efl_t;
 
+/* 
+ * EOA Message
+ */
+typedef struct H5O_eoa_t {
+    H5F_avoid_truncate_t avoid_truncate; /* Avoid Truncate setting for the file */
+    hsize_t eoa; /* 'EOA' value */
+} H5O_eoa_t;
 
 /*
  * Data Layout Message.

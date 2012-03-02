@@ -84,7 +84,7 @@ static herr_t H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, had
             size_t size, const void *buf);
 static herr_t H5FD_mpio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_mpio_coordinate(H5FD_t *_file, hid_t dxpl_id,
-                                   H5FD_coord_t op, void * udata);
+                                   H5FD_coord_t op);
 static herr_t H5FD_mpio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static int H5FD_mpio_mpi_rank(const H5FD_t *_file);
 static int H5FD_mpio_mpi_size(const H5FD_t *_file);
@@ -1932,7 +1932,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpio_coordinate(H5FD_t *_file, hid_t UNUSED dxpl_id, H5FD_coord_t op, void * UNUSED udata)
+H5FD_mpio_coordinate(H5FD_t *_file, hid_t UNUSED dxpl_id, H5FD_coord_t op)
 {
     H5FD_mpio_t     *file = (H5FD_mpio_t*)_file;
     int         mpi_code;   /* mpi return code */

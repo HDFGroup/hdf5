@@ -34,7 +34,7 @@ int main(void)
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) return -1;
 
     /* Enable 'avoid truncate' feature */
-    if (H5Pset_avoid_truncate(fcpl, 1) < 0) return -1;
+    if (H5Pset_avoid_truncate(fcpl, H5F_AVOID_TRUNCATE_ALL) < 0) return -1;
 
     /* Create a file that avoids truncation */
     if ((fid = H5Fcreate(TESTFILE, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)

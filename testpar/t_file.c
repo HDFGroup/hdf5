@@ -134,7 +134,7 @@ test_avoid_truncation(void)
     hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     herr_t ret;			/* generic return value */
     hid_t status;
-    hbool_t avoid_truncate;
+    H5F_avoid_truncate_t avoid_truncate;
     int filesize;
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
@@ -162,7 +162,7 @@ test_avoid_truncation(void)
     VRFY((fcpl >= 0), "");
 
     /* Enable 'avoid truncate' feature */
-    status = H5Pset_avoid_truncate(fcpl, TRUE);
+    status = H5Pset_avoid_truncate(fcpl, H5F_AVOID_TRUNCATE_ALL);
     VRFY((status >= 0), "");
 
     /* create the file collectively */
@@ -212,7 +212,7 @@ test_avoid_truncation(void)
 
     /* Verify that 'avoid truncate' feature is detected as enabled */
     H5Pget_avoid_truncate(fcpl, &avoid_truncate);
-    VRFY((avoid_truncate == 1), "");
+    VRFY((avoid_truncate == H5F_AVOID_TRUNCATE_ALL), "");
 
     /* Close the fcpl */
     status = H5Pclose(fcpl);

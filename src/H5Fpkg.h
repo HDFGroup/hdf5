@@ -214,7 +214,7 @@ struct H5F_file_t {
     unsigned	sohm_nindexes;	/* Number of shared messages indexes in the table */
     unsigned long feature_flags; /* VFL Driver feature Flags            */
     haddr_t	maxaddr;	/* Maximum address for file             */
-    hbool_t avoid_truncate; /* Whether or not to avoid file truncation */
+    H5F_avoid_truncate_t avoid_truncate; /* Whether or not to avoid file truncation */
 
     H5AC_t      *cache;		/* The object cache	 		*/
     H5AC_cache_config_t

@@ -1049,7 +1049,7 @@
 ./test/tmisc.c
 ./test/tmtimen.h5
 ./test/tmtimeo.h5
-./test/trunc_detect.c
+./test/truncation.c
 ./test/ttime.c
 ./test/trefer.c
 ./test/trefstr.c

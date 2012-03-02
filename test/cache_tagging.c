@@ -867,21 +867,12 @@ check_multi_group_creation_tags(hid_t fcpl, int type)
 
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0 ) TEST_ERROR;
 
-    /* Retrieve various tags */
-    if ( type == TEST_DEFAULT ) {
 
-        /* determine tag value of root group's object header */
-        if ( get_new_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
+    /* determine tag value of sblock extension object header */
+    if ( get_new_object_header_tag(fid, &sbe_tag) < 0 ) TEST_ERROR;
 
-    } else if ( type == TEST_SHMESG ) {
-        
-        /* determine tag value of sblock extension object header */
-        if ( get_new_object_header_tag(fid, &sbe_tag) < 0 ) TEST_ERROR;
-
-        /* determine tag value of root group's object header */
-        if ( get_new_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
-
-    } /* end if */
+    /* determine tag value of root group's object header */
+    if ( get_new_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;
 
     /* Clear Metadata Tags (don't care about them for this test */
     mark_all_entries_investigated(fid);
@@ -1088,6 +1079,7 @@ check_dense_attribute_tags(void)
     haddr_t d_tag = 0;      /* Dataset tag value */
     haddr_t root_tag = 0;   /* Root group tag value */
     char attrname[500];      /* Name of attribute */
+    haddr_t sbe_tag = 0;     /* Root group tag value */
 
     /* Testing Macro */
     TESTING("tag application during dense attribute manipulation");
@@ -1103,6 +1095,9 @@ check_dense_attribute_tags(void)
     /* Create File */
     /* =========== */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0 ) TEST_ERROR;
+
+    /* determine tag value of sblock extension object header */
+    if ( get_new_object_header_tag(fid, &sbe_tag) < 0 ) TEST_ERROR;
 
     /* Get root group tag */
     if ( get_new_object_header_tag(fid, &root_tag) < 0 ) TEST_ERROR;

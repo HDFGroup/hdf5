@@ -258,7 +258,7 @@ ADD_TEST (
 
 SET (H5_TESTS
     accum
-    trunc_detect
+    truncation
     lheap
     ohdr
     stab
@@ -507,7 +507,7 @@ IF (HDF5_TEST_VFD)
   SET (H5_VFD_TESTS
       testhdf5
       accum
-      trunc_detect
+      truncation
       lheap
       ohdr
       stab

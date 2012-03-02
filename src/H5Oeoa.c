@@ -52,8 +52,8 @@ static herr_t H5O_eoa_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *st
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_EOA[1] = {{
     H5O_EOA_ID,         /* Message ID number                */
-    "'EOA' value",      /* Message name for debugging       */
-    sizeof(haddr_t),    /* Native message size              */
+    "'EOA' message",    /* Message name for debugging       */
+    sizeof(H5O_eoa_t),  /* Native message size              */
     0,                  /* Messages are sharable?           */
     H5O_eoa_decode,     /* Decode message                   */
     H5O_eoa_encode,     /* Encode message                   */
@@ -77,14 +77,14 @@ const H5O_msg_class_t H5O_MSG_EOA[1] = {{
 #define H5O_EOA_VERSION 0
 
 /* Declare a free list to manage the haddr_t struct */
-H5FL_DEFINE(haddr_t);
+H5FL_DEFINE(H5O_eoa_t);
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_eoa_decode
  *
  * Purpose:     Decode an 'EOA' message a return a pointer to a 
- *              new haddr_t value.
+ *              new H5O_eoa_t structure.
  *
  * Return:      Success:    PTR to a new message in native struct.
  *              Failure:    NULL
@@ -98,8 +98,7 @@ static void *
 H5O_eoa_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
 {
-    haddr_t *mesg = NULL;   /* Native message */
-    haddr_t tmp_eoa;        /* Temporary EOA */
+    H5O_eoa_t *mesg = NULL;   /* Native message */
     void    *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_eoa_decode);
@@ -107,18 +106,20 @@ H5O_eoa_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     /* Check Arguments */
     HDassert(f);
     HDassert(p);
-    
+
+    /* Allocate new message */
+    if (NULL == (mesg = (H5O_eoa_t *)H5FL_MALLOC(H5O_eoa_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
     /* Version of the message */
     if(*p++ != H5O_EOA_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
     
     /* Get the 'EOA' message from the file */
-    H5F_addr_decode(f, (const uint8_t **)&p, &tmp_eoa);
+    H5F_addr_decode(f, (const uint8_t **)&p, &(mesg->eoa));
 
-    /* The return value */
-    if (NULL == (mesg = H5FL_MALLOC(haddr_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    *mesg = (haddr_t)tmp_eoa;
+    /* Get the 'avoid truncate' setting */
+    mesg->avoid_truncate = *p++; /* avoid truncate setting */
 
     /* Set return value */
     ret_value = (void *)mesg;
@@ -144,7 +145,7 @@ done:
 static herr_t
 H5O_eoa_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
-    const haddr_t   *mesg = (const haddr_t *)   _mesg;
+    const H5O_eoa_t *mesg = (const H5O_eoa_t *) _mesg;    
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_eoa_encode);
 
@@ -157,7 +158,10 @@ H5O_eoa_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const
     *p++ = H5O_EOA_VERSION;
 
     /* Encode 'EOA' Message */
-    H5F_addr_encode(f, &p, *mesg);
+    H5F_addr_encode(f, &p, mesg->eoa);
+    
+    /* Encode 'Avoid Truncate' setting */
+    *p++ = mesg->avoid_truncate;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5O_eoa_encode() */
@@ -180,19 +184,20 @@ H5O_eoa_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const
 static void *
 H5O_eoa_copy(const void *_mesg, void *_dest)
 {
-    const haddr_t   *mesg = (const haddr_t *) _mesg;
-    haddr_t         *dest = (haddr_t *)_dest;
+    const H5O_eoa_t   *mesg = (const H5O_eoa_t *) _mesg;
+    H5O_eoa_t         *dest = (H5O_eoa_t *)_dest;
     void            *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_eoa_copy);
 
     /* Check Arguments */
     HDassert(mesg);
-    if (!dest && NULL == (dest = H5FL_MALLOC(haddr_t)))
+    if (!dest && NULL == (dest = H5FL_MALLOC(H5O_eoa_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy */
-    *dest = *mesg;
+    dest->eoa = mesg->eoa;
+    dest->avoid_truncate = mesg->avoid_truncate;
 
     /* Set return value */
     ret_value = dest;
@@ -228,8 +233,9 @@ H5O_eoa_size(const H5F_t UNUSED * f, hbool_t UNUSED disable_shared, const void U
     HDassert(mesg);
     
     /* Determine Size */
-    ret_value = 1 +     /* 8-bit Version Number (int)   */
-                H5F_SIZEOF_ADDR(f); /* EOA Address (haddr_t) */
+    ret_value = 1 +     /* Version */
+                H5F_SIZEOF_ADDR(f) + /* EOA Address (haddr_t) */
+                1; /* truncation avoidance mode */
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_eoa_size() */
@@ -278,7 +284,7 @@ H5O_eoa_free(void *mesg)
 
     HDassert(mesg);
 
-    mesg = H5FL_FREE(haddr_t, mesg);
+    mesg = H5FL_FREE(H5O_eoa_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_eoa_free() */

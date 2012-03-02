@@ -37,7 +37,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
 # the library yet. Move them to the end so that their failure do not block
 # other current library code tests.
 TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
-           pool accum trunc_detect hyperslab istore bittests dt_arith \
+           pool accum truncation hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe \

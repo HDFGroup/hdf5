@@ -168,6 +168,12 @@ typedef enum H5F_file_space_type_t {
     H5F_FILE_SPACE_NTYPES	    /* must be last */
 } H5F_file_space_type_t;
 
+/* Avoid Truncate Property */
+typedef enum H5F_avoid_truncate_t {
+    H5F_AVOID_TRUNCATE_OFF = 0,
+    H5F_AVOID_TRUNCATE_EXTEND,
+    H5F_AVOID_TRUNCATE_ALL
+} H5F_avoid_truncate_t;
 
 #ifdef __cplusplus
 extern "C" {

@@ -1069,7 +1069,19 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list")
 
-        if (!H5F_AVOID_TRUNCATE(f)) {
+    /* If not avoiding truncation, OR if only avoiding truncation during file
+       extension and a truncation will result in a smaller file, then truncate
+       the file */
+    if (((!H5F_AVOID_TRUNCATE(f))||
+        (((H5F_AVOID_TRUNCATE(f)==H5F_AVOID_TRUNCATE_EXTEND)&&
+          (H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT) < H5FD_get_eof(f->shared->lf)))))||
+        /* Note: Due to some currently unknown (bug? feature?) in the multi
+           driver, we *must* truncate if the EOA = EOF. I do not understand
+           *why* at the current point in time ... needs investigation ...
+           This should be resolved before merging to 1.10. In any case, when
+           EOA=EOF, the truncate file driver call shouldn't actually truncate
+           the file since it doesn't need to ... */
+        (H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT) == H5FD_get_eof(f->shared->lf))) {
             /* Only truncate the file on an orderly close, with write-access */
             if(f->closing && (H5F_ACC_RDWR & H5F_INTENT(f))) {
                 /* Truncate the file to the current allocated size */
@@ -1292,6 +1304,16 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
          */
+    
+        /* If we are using the latest format, we need to explicitly
+           enable avoiding file truncation, even if it's not set in
+           file creation properties. Do that before the superblock is
+           created because it will need to know to create superblock
+           extension containing EOA message. The default setting when
+           using the latest format is H5F_AVOID_TRUNCATE_EXTEND */
+        if((H5F_USE_LATEST_FORMAT(file))&&(H5F_AVOID_TRUNCATE(file)==H5F_AVOID_TRUNCATE_OFF)) {
+            file->shared->avoid_truncate = H5F_AVOID_TRUNCATE_EXTEND;
+        } /* end if */
 
         /* Initialize information about the superblock and allocate space for it */
         /* (Writes superblock extension messages, if there are any) */
