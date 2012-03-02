@@ -1173,7 +1173,7 @@ h5_verify_cached_stabs_cb(hid_t oid, const char UNUSED *name,
     const H5O_info_t *oinfo, void UNUSED *udata)
 {
     if(oinfo->type == H5O_TYPE_GROUP)
-        return(H5G_verify_cached_stabs_test(oid));
+        return(H5G__verify_cached_stabs_test(oid));
     else
         return(0);
 } /* end h5_verify_cached_stabs_cb() */

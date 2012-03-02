@@ -277,14 +277,14 @@ test_large(hid_t fapl, hbool_t new_format)
      */
     if((cwg = H5Gcreate2(fid, "/big", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(new_format)
-        if(H5G_has_stab_test(cwg) != FALSE) TEST_ERROR
+        if(H5G__has_stab_test(cwg) != FALSE) TEST_ERROR
     for(i = 0; i < LARGE_NOBJS; i++) {
         sprintf(name, "%05d%05d", (HDrandom() % 100000), i);
 	if((dir = H5Gcreate2(cwg, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(dir) < 0) TEST_ERROR
     }
     if(new_format)
-        if(H5G_is_new_dense_test(cwg) != TRUE) TEST_ERROR
+        if(H5G__is_new_dense_test(cwg) != TRUE) TEST_ERROR
     if(H5Gclose(cwg) < 0) TEST_ERROR
 
     /* Close file */
@@ -386,21 +386,21 @@ lifecycle(hid_t fapl2)
     if(est_name_len != LIFECYCLE_EST_NAME_LEN) TEST_ERROR
 
     /* Use internal testing routine to check that the group has no links or symbol table */
-    if(H5G_is_empty_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) != TRUE) TEST_ERROR
 
     /* Create first "bottom" group */
     sprintf(objname, LIFECYCLE_BOTTOM_GROUP, (unsigned)0);
     if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on bottom group's status */
-    if(H5G_is_empty_test(gid2) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid2) != TRUE) TEST_ERROR
 
     /* Close bottom group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* Check on top group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR
     if(nmsgs != 1) TEST_ERROR
 
     /* Create several more bottom groups, to push the top group almost to a symbol table */
@@ -410,17 +410,17 @@ lifecycle(hid_t fapl2)
         if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
         /* Check on bottom group's status */
-        if(H5G_is_empty_test(gid2) != TRUE) TEST_ERROR
+        if(H5G__is_empty_test(gid2) != TRUE) TEST_ERROR
 
         /* Close bottom group */
         if(H5Gclose(gid2) < 0) TEST_ERROR
     } /* end for */
 
     /* Check on top group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR
     if(nmsgs != LIFECYCLE_MAX_COMPACT) TEST_ERROR
-    if(H5G_is_new_dense_test(gid) != FALSE) TEST_ERROR
+    if(H5G__is_new_dense_test(gid) != FALSE) TEST_ERROR
 
     /* Check that the object header is only one chunk and the space has been allocated correctly */
     if(H5Oget_info(gid, &oinfo) < 0) TEST_ERROR
@@ -434,15 +434,15 @@ lifecycle(hid_t fapl2)
     if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on bottom group's status */
-    if(H5G_is_empty_test(gid2) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid2) != TRUE) TEST_ERROR
 
     /* Close bottom group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* Check on top group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Check that the object header is still one chunk and the space has been allocated correctly */
     if(H5Oget_info(gid, &oinfo) < 0) TEST_ERROR
@@ -461,9 +461,9 @@ lifecycle(hid_t fapl2)
     } /* end while */
 
     /* Check on top group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Unlink one more object from the group, which should transform back to using links */
     sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
@@ -471,8 +471,8 @@ lifecycle(hid_t fapl2)
     u--;
 
     /* Check on top group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR
     if(nmsgs != (LIFECYCLE_MIN_DENSE - 1)) TEST_ERROR
 
     /* Unlink last two objects from top group */
@@ -483,7 +483,7 @@ lifecycle(hid_t fapl2)
     if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Check on top group's status */
-    if(H5G_is_empty_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) != TRUE) TEST_ERROR
 
     /* Close top group */
     if(H5Gclose(gid) < 0) TEST_ERROR
@@ -568,47 +568,47 @@ long_compact(hid_t fapl2)
     if((gid = H5Gcreate2(fid, "top", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Use internal testing routine to check that the group has no links or dense storage */
-    if(H5G_is_empty_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) != TRUE) TEST_ERROR
 
     /* Create first group with "long" name */
     if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on bottom group's status */
-    if(H5G_is_empty_test(gid2) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid2) != TRUE) TEST_ERROR
 
     /* Close bottom group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* Check on top group's status */
     /* (Should have dense storage to hold links, since name is too long for object header message) */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Create second group with "long" name */
     objname[0] = 'b';
     if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on bottom group's status */
-    if(H5G_is_empty_test(gid2) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid2) != TRUE) TEST_ERROR
 
     /* Close bottom group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* Check on top group's status */
     /* (Should have dense storage to hold links, since name is too long for object header message) */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Unlink second object from top group */
     if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Check on top group's status */
     /* (Should still be dense storage to hold links, since name is too long for object header message) */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Unlink first object from top group */
     objname[0] = 'a';
@@ -616,7 +616,7 @@ long_compact(hid_t fapl2)
 
     /* Check on top group's status */
     /* (Should have deleted the dense storage now) */
-    if(H5G_is_empty_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) != TRUE) TEST_ERROR
 
     /* Free object name */
     HDfree(objname);
@@ -684,9 +684,9 @@ read_old(void)
     if((gid = H5Gopen2(fid, "old", H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on old group's status */
-    if(H5G_is_empty_test(gid) == FALSE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
-    if(H5G_has_stab_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == FALSE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(gid) != TRUE) TEST_ERROR
 
     /* Create a bunch of objects in the group */
     for(u = 0; u < READ_OLD_NGROUPS; u++) {
@@ -694,7 +694,7 @@ read_old(void)
         if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
         /* Check on bottom group's status */
-        if(H5G_is_empty_test(gid2) != TRUE) TEST_ERROR
+        if(H5G__is_empty_test(gid2) != TRUE) TEST_ERROR
 
         /* Close bottom group */
         if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -702,9 +702,9 @@ read_old(void)
 
     /* Check on old group's status */
     /* (Should stay in old "symbol table" form) */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
-    if(H5G_has_stab_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(gid) != TRUE) TEST_ERROR
 
     /* Delete new objects from old group */
     for(u = 0; u < READ_OLD_NGROUPS; u++) {
@@ -714,9 +714,9 @@ read_old(void)
 
     /* Check on old group's status */
     /* (Should stay in old "symbol table" form, but have no links) */
-    if(H5G_is_empty_test(gid) == FALSE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
-    if(H5G_has_stab_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == FALSE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(gid) != TRUE) TEST_ERROR
 
     /* Close old group */
     if(H5Gclose(gid) < 0) TEST_ERROR
@@ -798,29 +798,29 @@ no_compact(hid_t fapl2)
     if(H5Pclose(gcpl) < 0) TEST_ERROR
 
     /* Use internal testing routine to check that the group has no links or dense storage */
-    if(H5G_is_empty_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) != TRUE) TEST_ERROR
 
     /* Create first "bottom" group */
     sprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on bottom group's status */
-    if(H5G_is_empty_test(gid2) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid2) != TRUE) TEST_ERROR
 
     /* Close bottom group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* Check on top group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Unlink object from top group */
     sprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Check on top group's status */
-    if(H5G_is_empty_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) != TRUE) TEST_ERROR
 
     /* Close top group */
     if(H5Gclose(gid) < 0) TEST_ERROR

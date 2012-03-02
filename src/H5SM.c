@@ -130,7 +130,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t d
     unsigned x;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5SM_init, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     HDassert(f);
     /* File should not already have a SOHM table */
@@ -256,7 +256,7 @@ H5SM_type_to_flag(unsigned type_id, unsigned *type_flag)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_type_to_flag)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Translate the H5O type_id into an H5SM type flag */
     switch(type_id) {
@@ -304,7 +304,7 @@ H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id)
     unsigned type_flag;
     ssize_t ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_get_index)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Translate the H5O type_id into an H5SM type flag */
     if(H5SM_type_to_flag(type_id, &type_flag) < 0)
@@ -345,7 +345,7 @@ H5SM_type_shared(H5F_t *f, unsigned type_id, hid_t dxpl_id)
     size_t u;                           /* Local index variable */
     htri_t ret_value = FALSE;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5SM_type_shared, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     /* Translate the H5O type_id into an H5SM type flag */
     if(H5SM_type_to_flag(type_id, &type_flag) < 0)
@@ -402,7 +402,7 @@ H5SM_get_fheap_addr(H5F_t *f, hid_t dxpl_id, unsigned type_id, haddr_t *fheap_ad
     ssize_t index_num;                  /* Which index */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5SM_get_fheap_addr, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     /* Sanity checks */
     HDassert(f);
@@ -451,7 +451,7 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
     H5B2_t *bt2 = NULL;                 /* v2 B-tree handle for index */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_create_index)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(header);
@@ -556,7 +556,7 @@ H5SM_delete_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_delete_index)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Determine whether index is a list or a B-tree. */
     if(header->index_type == H5SM_LIST) {
@@ -629,7 +629,7 @@ H5SM_create_list(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
     haddr_t addr = HADDR_UNDEF; /* Address of the list on disk */
     haddr_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5SM_create_list, dxpl_id, H5AC__SOHM_TAG, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__SOHM_TAG, HADDR_UNDEF)
 
     HDassert(f);
     HDassert(header);
@@ -710,7 +710,7 @@ H5SM_convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header,
     void *      encoding_buf = NULL;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_convert_list_to_btree)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(_list && *_list);
     HDassert(header);
@@ -812,7 +812,7 @@ H5SM_convert_btree_to_list(H5F_t * f, H5SM_index_header_t * header, hid_t dxpl_i
     haddr_t          btree_addr;
     herr_t           ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5SM_convert_btree_to_list, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     /* Remember the address of the old B-tree, but change the header over to be
      * a list..
@@ -872,7 +872,7 @@ H5SM_can_share_common(const H5F_t *f, unsigned type_id, const void *mesg)
 {
     htri_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_can_share_common)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check whether this message ought to be shared or not */
     /* If sharing is disabled in this file, don't share the message */
@@ -921,7 +921,7 @@ H5SM_can_share(H5F_t *f, hid_t dxpl_id, H5SM_master_table_t *table,
     htri_t              tri_ret;
     htri_t              ret_value = TRUE;
 
-    FUNC_ENTER_NOAPI_TAG(H5SM_can_share, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     /* "trivial" sharing checks */
     if((tri_ret = H5SM_can_share_common(f, type_id, mesg)) < 0)
@@ -1044,7 +1044,7 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned defer_flags,
 #endif
     htri_t              ret_value = TRUE;
 
-    FUNC_ENTER_NOAPI_TAG(H5SM_try_share, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     /* If we previously deferred this operation, the saved message type should
      * be the same as the one we get here.  In debug mode, we make sure this
@@ -1150,7 +1150,7 @@ H5SM_incr_ref(void *record, void *_op_data, hbool_t *changed)
     H5SM_incr_ref_opdata *op_data = (H5SM_incr_ref_opdata *) _op_data;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_incr_ref)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(record);
     HDassert(op_data);
@@ -1236,7 +1236,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     size_t                empty_pos = UFAIL; /* Empty entry in list */
     herr_t                ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5SM_write_mesg, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     /* Sanity check */
     HDassert(header);
@@ -1516,7 +1516,7 @@ H5SM_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5O_shared_t *sh_mesg)
     unsigned              type_id;              /* Message type ID to operate on */
     herr_t                ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_TAG(H5SM_delete, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     HDassert(f);
     HDassert(H5F_addr_defined(H5F_SOHM_ADDR(f)));
@@ -1604,7 +1604,7 @@ H5SM_find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *e
     size_t               x;
     size_t               ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_find_in_list)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(list);
     /* Both key and empty_pos can be NULL, but not both! */
@@ -1657,7 +1657,7 @@ H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata)
 {
     H5SM_fh_ud_gh_t *udata = (H5SM_fh_ud_gh_t *)_udata;       /* User data for fractal heap 'op' callback */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_get_hash_fh_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Compute hash value on raw message */
     udata->hash = H5_checksum_lookup3(obj, obj_len, udata->type_id);
@@ -1690,7 +1690,7 @@ H5SM_decr_ref(void *record, void *op_data, hbool_t *changed)
 {
     H5SM_sohm_t *message = (H5SM_sohm_t *) record;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_decr_ref)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(record);
     HDassert(op_data);
@@ -1745,7 +1745,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned        type_id;            /* Message type to operate on */
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5SM_delete_from_index, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     /* Sanity check */
     HDassert(f);
@@ -1932,7 +1932,7 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
     htri_t status;                      /* Status for message existing */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5SM_get_info, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     /* Sanity check */
     HDassert(ext_loc);
@@ -2044,7 +2044,7 @@ herr_t
 H5SM_reconstitute(H5O_shared_t *sh_mesg, H5F_t *f, unsigned msg_type_id,
     H5O_fheap_id_t heap_id)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_reconstitute)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check args */
     HDassert(sh_mesg);
@@ -2077,7 +2077,7 @@ H5SM_get_refcount_bt2_cb(const void *_record, void *_op_data)
     const H5SM_sohm_t *record = (const H5SM_sohm_t *)_record;  /* v2 B-tree record for message */
     H5SM_sohm_t *op_data = (H5SM_sohm_t *)_op_data;       /* "op data" from v2 B-tree find */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_get_refcount_bt2_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -2121,7 +2121,7 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     void * encoding_buf = NULL;         /* Buffer for encoded message */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5SM_get_refcount, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     /* Sanity check */
     HDassert(f);
@@ -2244,7 +2244,7 @@ H5SM_read_iter_op(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
     H5SM_read_udata_t *udata = (H5SM_read_udata_t *) _udata;
     herr_t ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_read_iter_op)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -2301,7 +2301,7 @@ H5SM_read_mesg_fh_cb(const void *obj, size_t obj_len, void *_udata)
     H5SM_read_udata_t *udata = (H5SM_read_udata_t *)_udata;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_read_mesg_fh_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate a buffer to hold the message */
     if(NULL == (udata->encoding_buf = H5MM_malloc(obj_len)))
@@ -2339,7 +2339,7 @@ H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
     H5O_t *oh = NULL;           /* Object header for message in object header */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5SM_read_mesg, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     HDassert(f);
     HDassert(mesg);
@@ -2432,7 +2432,7 @@ done:
 herr_t
 H5SM_table_free(H5SM_master_table_t *table)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_table_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(table);
@@ -2461,7 +2461,7 @@ H5SM_table_free(H5SM_master_table_t *table)
 herr_t
 H5SM_list_free(H5SM_list_t *list)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_list_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(list);
     HDassert(list->messages);
@@ -2499,7 +2499,7 @@ H5SM_table_debug(H5F_t *f, hid_t dxpl_id, haddr_t table_addr,
     unsigned x;                         /* Counter variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5SM_table_debug, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     HDassert(f);
     HDassert(table_addr != HADDR_UNDEF);
@@ -2590,7 +2590,7 @@ H5SM_list_debug(H5F_t *f, hid_t dxpl_id, haddr_t list_addr,
     unsigned x;                         /* Counter variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5SM_list_debug, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     HDassert(f);
     HDassert(list_addr != HADDR_UNDEF);
@@ -2680,7 +2680,7 @@ H5SM_ih_size(H5F_t *f, hid_t dxpl_id, hsize_t *hdr_size, H5_ih_info_t *ih_info)
     unsigned             u;                     /* Local index variable */
     herr_t               ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5SM_ih_size, dxpl_id, H5AC__SOHM_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     /* Sanity check */
     HDassert(f);

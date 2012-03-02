@@ -115,7 +115,7 @@ H5B2_hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_init)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -241,7 +241,7 @@ H5B2_hdr_alloc(H5F_t *f)
     H5B2_hdr_t *hdr = NULL;             /* v2 B-tree header */
     H5B2_hdr_t *ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_alloc)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -288,7 +288,7 @@ H5B2_hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     H5B2_hdr_t *hdr = NULL;     /* The new v2 B-tree header information */
     haddr_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -342,7 +342,7 @@ H5B2_hdr_incr(H5B2_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_incr)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(hdr);
@@ -378,7 +378,7 @@ H5B2_hdr_decr(H5B2_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_decr)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(hdr);
@@ -413,7 +413,7 @@ done:
 herr_t
 H5B2_hdr_fuse_incr(H5B2_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_hdr_fuse_incr)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(hdr);
@@ -441,7 +441,7 @@ H5B2_hdr_fuse_incr(H5B2_hdr_t *hdr)
 size_t
 H5B2_hdr_fuse_decr(H5B2_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_hdr_fuse_decr)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(hdr);
@@ -472,7 +472,7 @@ H5B2_hdr_dirty(H5B2_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_dirty)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(hdr);
@@ -504,7 +504,7 @@ H5B2_hdr_free(H5B2_hdr_t *hdr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_free)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(hdr);
@@ -569,7 +569,7 @@ H5B2_hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id)
     unsigned cache_flags = H5AC__NO_FLAGS_SET;  /* Flags for unprotecting v2 B-tree header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_hdr_delete, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(hdr);

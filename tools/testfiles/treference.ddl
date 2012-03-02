@@ -225,10 +225,10 @@ GROUP "/" {
    }
    ATTRIBUTE "enum" {
       DATATYPE  H5T_ENUM {
-            H5T_STD_I32LE;
-            "RED"              0;
-            "GREEN"            1;
-         }
+         H5T_STD_I32LE;
+         "RED"              0;
+         "GREEN"            1;
+      }
       DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
       DATA {
       (0): RED, RED
@@ -236,10 +236,10 @@ GROUP "/" {
    }
    ATTRIBUTE "enum2D" {
       DATATYPE  H5T_ENUM {
-            H5T_STD_I32LE;
-            "RED"              0;
-            "GREEN"            1;
-         }
+         H5T_STD_I32LE;
+         "RED"              0;
+         "GREEN"            1;
+      }
       DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
       DATA {
       (0,0): RED, RED,
@@ -249,10 +249,10 @@ GROUP "/" {
    }
    ATTRIBUTE "enum3D" {
       DATATYPE  H5T_ENUM {
-            H5T_STD_I32LE;
-            "RED"              0;
-            "GREEN"            1;
-         }
+         H5T_STD_I32LE;
+         "RED"              0;
+         "GREEN"            1;
+      }
       DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
       DATA {
       (0,0,0): RED, RED,
@@ -338,20 +338,18 @@ GROUP "/" {
       }
    }
    ATTRIBUTE "opaque" {
-      DATATYPE  
-         H5T_OPAQUE;
+      DATATYPE  H5T_OPAQUE {
          OPAQUE_TAG "1-byte opaque type";
-      
+      }
       DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
       DATA {
       (0): 0x01, 0x02
       }
    }
    ATTRIBUTE "opaque2D" {
-      DATATYPE  
-         H5T_OPAQUE;
+      DATATYPE  H5T_OPAQUE {
          OPAQUE_TAG "1-byte opaque type";
-      
+      }
       DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
       DATA {
       (0,0): 0x01, 0x02,
@@ -360,10 +358,9 @@ GROUP "/" {
       }
    }
    ATTRIBUTE "opaque3D" {
-      DATATYPE  
-         H5T_OPAQUE;
+      DATATYPE  H5T_OPAQUE {
          OPAQUE_TAG "1-byte opaque type";
-      
+      }
       DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
       DATA {
       (0,0,0): 0x01, 0x02,
@@ -382,11 +379,11 @@ GROUP "/" {
    }
    ATTRIBUTE "string" {
       DATATYPE  H5T_STRING {
-            STRSIZE 2;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 2;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
       DATA {
       (0): "ab", "de"
@@ -394,11 +391,11 @@ GROUP "/" {
    }
    ATTRIBUTE "string2D" {
       DATATYPE  H5T_STRING {
-            STRSIZE 2;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 2;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
       DATA {
       (0,0): "ab", "cd",
@@ -408,11 +405,11 @@ GROUP "/" {
    }
    ATTRIBUTE "string3D" {
       DATATYPE  H5T_STRING {
-            STRSIZE 2;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 2;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
       DATA {
       (0,0,0): "ab", "cd",
@@ -694,10 +691,10 @@ GROUP "/" {
       }
       ATTRIBUTE "enum" {
          DATATYPE  H5T_ENUM {
-               H5T_STD_I32LE;
-               "RED"              0;
-               "GREEN"            1;
-            }
+            H5T_STD_I32LE;
+            "RED"              0;
+            "GREEN"            1;
+         }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): RED, RED
@@ -705,10 +702,10 @@ GROUP "/" {
       }
       ATTRIBUTE "enum2D" {
          DATATYPE  H5T_ENUM {
-               H5T_STD_I32LE;
-               "RED"              0;
-               "GREEN"            1;
-            }
+            H5T_STD_I32LE;
+            "RED"              0;
+            "GREEN"            1;
+         }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): RED, RED,
@@ -718,10 +715,10 @@ GROUP "/" {
       }
       ATTRIBUTE "enum3D" {
          DATATYPE  H5T_ENUM {
-               H5T_STD_I32LE;
-               "RED"              0;
-               "GREEN"            1;
-            }
+            H5T_STD_I32LE;
+            "RED"              0;
+            "GREEN"            1;
+         }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): RED, RED,
@@ -807,20 +804,18 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "opaque" {
-         DATATYPE  
-            H5T_OPAQUE;
+         DATATYPE  H5T_OPAQUE {
             OPAQUE_TAG "1-byte opaque type";
-         
+         }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): 0x01, 0x02
          }
       }
       ATTRIBUTE "opaque2D" {
-         DATATYPE  
-            H5T_OPAQUE;
+         DATATYPE  H5T_OPAQUE {
             OPAQUE_TAG "1-byte opaque type";
-         
+         }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): 0x01, 0x02,
@@ -829,10 +824,9 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "opaque3D" {
-         DATATYPE  
-            H5T_OPAQUE;
+         DATATYPE  H5T_OPAQUE {
             OPAQUE_TAG "1-byte opaque type";
-         
+         }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): 0x01, 0x02,
@@ -885,11 +879,11 @@ GROUP "/" {
       }
       ATTRIBUTE "string" {
          DATATYPE  H5T_STRING {
-               STRSIZE 2;
-               STRPAD H5T_STR_NULLTERM;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 2;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): "ab", "de"
@@ -897,11 +891,11 @@ GROUP "/" {
       }
       ATTRIBUTE "string2D" {
          DATATYPE  H5T_STRING {
-               STRSIZE 2;
-               STRPAD H5T_STR_NULLTERM;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 2;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): "ab", "cd",
@@ -911,11 +905,11 @@ GROUP "/" {
       }
       ATTRIBUTE "string3D" {
          DATATYPE  H5T_STRING {
-               STRSIZE 2;
-               STRPAD H5T_STR_NULLTERM;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 2;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): "ab", "cd",
@@ -1193,10 +1187,10 @@ GROUP "/" {
       }
       ATTRIBUTE "enum" {
          DATATYPE  H5T_ENUM {
-               H5T_STD_I32LE;
-               "RED"              0;
-               "GREEN"            1;
-            }
+            H5T_STD_I32LE;
+            "RED"              0;
+            "GREEN"            1;
+         }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): RED, RED
@@ -1204,10 +1198,10 @@ GROUP "/" {
       }
       ATTRIBUTE "enum2D" {
          DATATYPE  H5T_ENUM {
-               H5T_STD_I32LE;
-               "RED"              0;
-               "GREEN"            1;
-            }
+            H5T_STD_I32LE;
+            "RED"              0;
+            "GREEN"            1;
+         }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): RED, RED,
@@ -1217,10 +1211,10 @@ GROUP "/" {
       }
       ATTRIBUTE "enum3D" {
          DATATYPE  H5T_ENUM {
-               H5T_STD_I32LE;
-               "RED"              0;
-               "GREEN"            1;
-            }
+            H5T_STD_I32LE;
+            "RED"              0;
+            "GREEN"            1;
+         }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): RED, RED,
@@ -1306,20 +1300,18 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "opaque" {
-         DATATYPE  
-            H5T_OPAQUE;
+         DATATYPE  H5T_OPAQUE {
             OPAQUE_TAG "1-byte opaque type";
-         
+         }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): 0x01, 0x02
          }
       }
       ATTRIBUTE "opaque2D" {
-         DATATYPE  
-            H5T_OPAQUE;
+         DATATYPE  H5T_OPAQUE {
             OPAQUE_TAG "1-byte opaque type";
-         
+         }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): 0x01, 0x02,
@@ -1328,10 +1320,9 @@ GROUP "/" {
          }
       }
       ATTRIBUTE "opaque3D" {
-         DATATYPE  
-            H5T_OPAQUE;
+         DATATYPE  H5T_OPAQUE {
             OPAQUE_TAG "1-byte opaque type";
-         
+         }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): 0x01, 0x02,
@@ -1350,11 +1341,11 @@ GROUP "/" {
       }
       ATTRIBUTE "string" {
          DATATYPE  H5T_STRING {
-               STRSIZE 2;
-               STRPAD H5T_STR_NULLTERM;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 2;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): "ab", "de"
@@ -1362,11 +1353,11 @@ GROUP "/" {
       }
       ATTRIBUTE "string2D" {
          DATATYPE  H5T_STRING {
-               STRSIZE 2;
-               STRPAD H5T_STR_NULLTERM;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 2;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): "ab", "cd",
@@ -1376,11 +1367,11 @@ GROUP "/" {
       }
       ATTRIBUTE "string3D" {
          DATATYPE  H5T_STRING {
-               STRSIZE 2;
-               STRPAD H5T_STR_NULLTERM;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 2;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): "ab", "cd",
@@ -1658,10 +1649,10 @@ GROUP "/" {
       }
       DATASET "enum" {
          DATATYPE  H5T_ENUM {
-               H5T_STD_I32LE;
-               "RED"              0;
-               "GREEN"            1;
-            }
+            H5T_STD_I32LE;
+            "RED"              0;
+            "GREEN"            1;
+         }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): RED, RED
@@ -1669,10 +1660,10 @@ GROUP "/" {
       }
       DATASET "enum2D" {
          DATATYPE  H5T_ENUM {
-               H5T_STD_I32LE;
-               "RED"              0;
-               "GREEN"            1;
-            }
+            H5T_STD_I32LE;
+            "RED"              0;
+            "GREEN"            1;
+         }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): RED, RED,
@@ -1682,10 +1673,10 @@ GROUP "/" {
       }
       DATASET "enum3D" {
          DATATYPE  H5T_ENUM {
-               H5T_STD_I32LE;
-               "RED"              0;
-               "GREEN"            1;
-            }
+            H5T_STD_I32LE;
+            "RED"              0;
+            "GREEN"            1;
+         }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): RED, RED,
@@ -1771,20 +1762,18 @@ GROUP "/" {
          }
       }
       DATASET "opaque" {
-         DATATYPE  
-            H5T_OPAQUE;
+         DATATYPE  H5T_OPAQUE {
             OPAQUE_TAG "1-byte opaque type";
-         
+         }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): 0x01, 0x02
          }
       }
       DATASET "opaque2D" {
-         DATATYPE  
-            H5T_OPAQUE;
+         DATATYPE  H5T_OPAQUE {
             OPAQUE_TAG "1-byte opaque type";
-         
+         }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): 0x01, 0x02,
@@ -1793,10 +1782,9 @@ GROUP "/" {
          }
       }
       DATASET "opaque3D" {
-         DATATYPE  
-            H5T_OPAQUE;
+         DATATYPE  H5T_OPAQUE {
             OPAQUE_TAG "1-byte opaque type";
-         
+         }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): 0x01, 0x02,
@@ -1849,11 +1837,11 @@ GROUP "/" {
       }
       DATASET "string" {
          DATATYPE  H5T_STRING {
-               STRSIZE 2;
-               STRPAD H5T_STR_NULLTERM;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 2;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
          (0): "ab", "de"
@@ -1861,11 +1849,11 @@ GROUP "/" {
       }
       DATASET "string2D" {
          DATATYPE  H5T_STRING {
-               STRSIZE 2;
-               STRPAD H5T_STR_NULLTERM;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 2;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
          (0,0): "ab", "cd",
@@ -1875,11 +1863,11 @@ GROUP "/" {
       }
       DATASET "string3D" {
          DATATYPE  H5T_STRING {
-               STRSIZE 2;
-               STRPAD H5T_STR_NULLTERM;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 2;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
          (0,0,0): "ab", "cd",

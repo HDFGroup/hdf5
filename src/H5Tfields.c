@@ -47,7 +47,7 @@ DESCRIPTION
 static herr_t
 H5T_init_fields_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_fields_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_fields_interface() */
@@ -79,7 +79,7 @@ H5Tget_nmembers(hid_t type_id)
     H5T_t *dt;          /* Datatype to query */
     int	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tget_nmembers, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("Is", "i", type_id);
 
     /* Check args */
@@ -119,7 +119,7 @@ H5T_get_nmembers(const H5T_t *dt)
 {
     int	ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_get_nmembers, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(dt);
 
@@ -162,7 +162,7 @@ H5Tget_member_name(hid_t type_id, unsigned membno)
     H5T_t	*dt = NULL;
     char	*ret_value;
 
-    FUNC_ENTER_API(H5Tget_member_name, NULL)
+    FUNC_ENTER_API(NULL)
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
@@ -200,7 +200,7 @@ H5T_get_member_name(H5T_t const *dt, unsigned membno)
 {
     char	*ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_get_member_name, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     assert(dt);
 
@@ -251,7 +251,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
     int         ret_value=FAIL;
     unsigned    i;
 
-    FUNC_ENTER_API(H5Tget_member_index, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("Is", "i*s", type_id, name);
 
     /* Check arguments */
@@ -308,7 +308,7 @@ H5T_sort_value(const H5T_t *dt, int *map)
     unsigned	i, j;                   /* Local index variables */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_sort_value, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(dt);
@@ -413,7 +413,7 @@ H5T_sort_name(const H5T_t *dt, int *map)
     uint8_t	tbuf[32];
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_sort_name, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(dt);

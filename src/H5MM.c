@@ -56,8 +56,8 @@
 void *
 H5MM_malloc(size_t size)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_malloc);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(size);
 
@@ -89,8 +89,8 @@ H5MM_malloc(size_t size)
 void *
 H5MM_calloc(size_t size)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_calloc);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(size);
 
@@ -126,8 +126,8 @@ H5MM_realloc(void *mem, size_t size)
 {
     void *ret_value;
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_realloc)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(NULL == mem) {
 	if(0 == size)
@@ -164,7 +164,7 @@ H5MM_xstrdup(const char *s)
 {
     char	*ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(H5MM_xstrdup, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     if(s) {
         if(NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
@@ -200,7 +200,7 @@ H5MM_strdup(const char *s)
 {
     char *ret_value;
 
-    FUNC_ENTER_NOAPI(H5MM_strdup, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     if(!s)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "null string")
@@ -235,8 +235,8 @@ done:
 void *
 H5MM_xfree(void *mem)
 {
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_xfree);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(mem)
         HDfree(mem);

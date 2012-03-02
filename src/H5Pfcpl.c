@@ -163,7 +163,7 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     hsize_t free_space_threshold = H5F_CRT_FREE_SPACE_THRESHOLD_DEF;
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_fcrt_reg_prop)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Register the user block size */
     if(H5P_register_real(pclass, H5F_CRT_USER_BLOCK_NAME, H5F_CRT_USER_BLOCK_SIZE, &userblock_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -239,7 +239,7 @@ H5Pset_userblock(hid_t plist_id, hsize_t size)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Pset_userblock, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ih", plist_id, size);
 
     /* Sanity check non-zero userblock sizes */
@@ -290,9 +290,9 @@ herr_t
 H5Pget_userblock(hid_t plist_id, hsize_t *size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_userblock, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", plist_id, size);
 
     /* Get the plist structure */
@@ -305,7 +305,7 @@ H5Pget_userblock(hid_t plist_id, hsize_t *size)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,"can't get user block");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -329,7 +329,7 @@ H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_sizes, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "izz", plist_id, sizeof_addr, sizeof_size);
 
     /* Check arguments */
@@ -386,7 +386,7 @@ H5Pget_sizes(hid_t plist_id, size_t *sizeof_addr, size_t *sizeof_size)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_sizes, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*z*z", plist_id, sizeof_addr, sizeof_size);
 
     /* Get the plist structure */
@@ -449,9 +449,9 @@ H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk)
 {
     unsigned btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pset_sym_k, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iIuIu", plist_id, ik, lk);
 
     /* Get the plist structure */
@@ -471,7 +471,7 @@ H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for symbol table leaf nodes");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -500,9 +500,9 @@ H5Pget_sym_k(hid_t plist_id, unsigned *ik /*out */ , unsigned *lk /*out */ )
 {
     unsigned btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_sym_k, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", plist_id, ik, lk);
 
     /* Get the plist structure */
@@ -520,7 +520,7 @@ H5Pget_sym_k(hid_t plist_id, unsigned *ik /*out */ , unsigned *lk /*out */ )
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for symbol table leaf nodes");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -548,9 +548,9 @@ H5Pset_istore_k(hid_t plist_id, unsigned ik)
 {
     unsigned btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pset_istore_k, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", plist_id, ik);
 
     /* Check arguments */
@@ -569,7 +569,7 @@ H5Pset_istore_k(hid_t plist_id, unsigned ik)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for btree interanl nodes");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -601,7 +601,7 @@ H5Pget_istore_k(hid_t plist_id, unsigned *ik /*out */ )
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pget_istore_k, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, ik);
 
     /* Get the plist structure */
@@ -645,7 +645,7 @@ H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pset_shared_mesg_nindexes, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", plist_id, nindexes);
 
     /* Check argument */
@@ -660,7 +660,7 @@ H5Pset_shared_mesg_nindexes(hid_t plist_id, unsigned nindexes)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set number of indexes");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_shared_mesg_nindexes() */
 
 
@@ -683,7 +683,7 @@ H5Pget_shared_mesg_nindexes(hid_t plist_id, unsigned *nindexes)
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pget_shared_mesg_nindexes, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Iu", plist_id, nindexes);
 
     /* Get the plist structure */
@@ -724,7 +724,7 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
     unsigned    minsizes[H5O_SHMESG_MAX_NINDEXES]; /* Array of min_mesg_sizes*/
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pset_shared_mesg_index, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iIuIuIu", plist_id, index_num, mesg_type_flags, min_mesg_size);
 
     /* Check arguments */
@@ -785,9 +785,9 @@ H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type
     unsigned    nindexes;               /* Number of SOHM indexes */
     unsigned    type_flags[H5O_SHMESG_MAX_NINDEXES]; /* Array of mesg_type_flags*/
     unsigned    minsizes[H5O_SHMESG_MAX_NINDEXES]; /* Array of min_mesg_sizes*/
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_shared_mesg_index, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iIu*Iu*Iu", plist_id, index_num, mesg_type_flags,
              min_mesg_size);
 
@@ -815,7 +815,7 @@ H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type
         *min_mesg_size = minsizes[index_num];
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_shared_mesg_index() */
 
 
@@ -842,9 +842,9 @@ herr_t
 H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_btree)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pset_shared_mesg_phase_change, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iIuIu", plist_id, max_list, min_btree);
 
     /* Check that values are sensible.  The min_btree value must be no greater
@@ -875,7 +875,7 @@ H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set B-tree minimum in property list");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_shared_mesg_phase_change() */
 
 
@@ -896,9 +896,9 @@ herr_t
 H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *min_btree)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_shared_mesg_phase_change, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*Iu*Iu", plist_id, max_list, min_btree);
 
     /* Get the plist structure */
@@ -916,7 +916,7 @@ H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *mi
     }
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_shared_mesg_phase_change() */
 
 
@@ -943,7 +943,7 @@ H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t thresh
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Pset_file_space, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iFfh", plist_id, strategy, threshold);
 
     if((unsigned)strategy >= H5F_FILE_SPACE_NTYPES)
@@ -985,7 +985,7 @@ H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *thre
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Pget_file_space, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*Ff*h", plist_id, strategy, threshold);
 
     /* Get the plist structure */
@@ -1024,7 +1024,7 @@ H5Pget_avoid_truncate(hid_t fcpl_id, H5F_avoid_truncate_t *avoid_truncate)
     H5P_genplist_t  *plist;  /* Property list pointer */
     herr_t  ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Pget_avoid_truncate, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Fa", fcpl_id, avoid_truncate);
 
     /* Get the plist structure */
@@ -1059,7 +1059,7 @@ H5Pset_avoid_truncate(hid_t fcpl_id, H5F_avoid_truncate_t avoid_truncate)
     H5P_genplist_t  *plist;  /* Property list pointer */
     herr_t  ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Pset_avoid_truncate, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iFa", fcpl_id, avoid_truncate);
 
     /* Get the plist structure */

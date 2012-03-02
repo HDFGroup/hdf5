@@ -147,7 +147,7 @@ H5O_eoa_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const
 {
     const H5O_eoa_t *mesg = (const H5O_eoa_t *) _mesg;    
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_eoa_encode);
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check Arguments */
     HDassert(f);
@@ -226,7 +226,7 @@ H5O_eoa_size(const H5F_t UNUSED * f, hbool_t UNUSED disable_shared, const void U
 {
     size_t  ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_eoa_size);
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check Arguments */
     HDassert(f);
@@ -258,7 +258,7 @@ H5O_eoa_size(const H5F_t UNUSED * f, hbool_t UNUSED disable_shared, const void U
 static herr_t
 H5O_eoa_reset(void UNUSED *_mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_eoa_reset);
+    FUNC_ENTER_NOAPI_NOERR
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* H5O_eoa_reset */
@@ -280,7 +280,7 @@ H5O_eoa_reset(void UNUSED *_mesg)
 static herr_t
 H5O_eoa_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_eoa_free)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(mesg);
 
@@ -309,8 +309,7 @@ H5O_eoa_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *st
 {
     const haddr_t   *mesg = (const haddr_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_eoa_debug);
-HDassert(0);
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check Arguments */
     HDassert(f);

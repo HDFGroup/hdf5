@@ -79,7 +79,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
     int		status;                 /* Status from zlib operation */
     size_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_filter_deflate, 0)
+    FUNC_ENTER_NOAPI(0)
 
     /* Sanity check */
     HDassert(*buf_size > 0);

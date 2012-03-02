@@ -1318,14 +1318,14 @@ test_file_perm2(void)
     type = H5Tcopy(H5T_NATIVE_SHORT);
     CHECK(type, FAIL, "H5Tcopy");
 
-    type = H5Tcopy(H5T_NATIVE_SHORT);
-    CHECK(type, FAIL, "H5Tcopy");
-
     /* Commit a datatype with the read-only file handle (should fail) */
     H5E_BEGIN_TRY {
         ret = H5Tcommit2(filero, "MY_DTYPE", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Tcommit2");
+
+    ret = H5Tclose(type);
+    CHECK(ret, FAIL, "H5Tclose");
 
     ret = H5Fclose(filero);
     CHECK(ret, FAIL, "H5Fclose");

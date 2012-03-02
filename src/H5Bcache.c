@@ -108,7 +108,7 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     unsigned u;                 /* Local index variable */
     H5B_t *ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B_load)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(f);
@@ -207,7 +207,7 @@ H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt, uns
     H5B_shared_t *shared;       /* Pointer to shared B-tree info */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);
@@ -297,7 +297,7 @@ H5B_dest(H5F_t *f, H5B_t *bt)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -350,7 +350,7 @@ H5B_clear(H5F_t *f, H5B_t *bt, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B_clear)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -388,7 +388,7 @@ H5B_compute_size(const H5F_t UNUSED *f, const H5B_t *bt, size_t *size_ptr)
 {
     H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_compute_size)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(f);

@@ -6,9 +6,9 @@
       <StorageLayout>
          <ContiguousLayout/>
       </StorageLayout>
-         <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <FillValue>
-               <NoFill/>
+            <NoFill/>
          </FillValue>
       </FillValueInfo>
       <Dataspace>
@@ -23,7 +23,12 @@
       </DataType>
       <Data>
          <DataFromFile>
-         -0.1234567 0.1234567 0.0000000 0.0000000 0.0000000 0.0000000
+         -0.1234567
+         0.1234567
+         0.0000000
+         0.0000000
+         0.0000000
+         0.0000000
          </DataFromFile>
       </Data>
    </Dataset>
@@ -31,9 +36,9 @@
       <StorageLayout>
          <ContiguousLayout/>
       </StorageLayout>
-         <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <FillValue>
-               <NoFill/>
+            <NoFill/>
          </FillValue>
       </FillValueInfo>
       <Dataspace>
@@ -48,7 +53,12 @@
       </DataType>
       <Data>
          <DataFromFile>
-         -0.1234567 0.1234567 0.0000000 0.0000000 0.0000000 0.0000000
+         -0.1234567
+         0.1234567
+         0.0000000
+         0.0000000
+         0.0000000
+         0.0000000
          </DataFromFile>
       </Data>
    </Dataset>

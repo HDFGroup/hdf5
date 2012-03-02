@@ -4,6 +4,6 @@ ATTRIBUTE "/attr2" {
    DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
 }
 ATTRIBUTE "/attr" {
-   }
 }
-h5dump error: unable to open attribute "/"
+}
+h5dump error: unable to open attribute "/attr"

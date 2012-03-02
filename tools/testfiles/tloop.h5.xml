@@ -4,12 +4,12 @@
    <hdf5:Group Name="g1" OBJ-XID="xid_1344" H5Path="/g1" Parents="xid_696" H5ParentPaths="/" >
       <hdf5:Group Name="g1.1" OBJ-XID="xid_2320" H5Path="/g1/g1.1" Parents="xid_1344" H5ParentPaths="/g1" >
          <hdf5:Group Name="g2.1" OBJ-XID="xid_1344-1" H5Path="/g1" Parents="xid_2320" H5ParentPaths="/g1/g1.1">
-               <hdf5:GroupPtr OBJ-XID="xid_1344" H5Path="/g1" Parents="xid_2320" H5ParentPaths="/g1/g1.1" />
+            <hdf5:GroupPtr OBJ-XID="xid_1344" H5Path="/g1" Parents="xid_2320" H5ParentPaths="/g1/g1.1" />
          </hdf5:Group>
       </hdf5:Group>
    </hdf5:Group>
    <hdf5:Group Name="g2" OBJ-XID="xid_2320-2" H5Path="/g1/g1.1" Parents="xid_696" H5ParentPaths="/">
-         <hdf5:GroupPtr OBJ-XID="xid_2320" H5Path="/g1/g1.1" Parents="xid_696" H5ParentPaths="/" />
+      <hdf5:GroupPtr OBJ-XID="xid_2320" H5Path="/g1/g1.1" Parents="xid_696" H5ParentPaths="/" />
    </hdf5:Group>
 </hdf5:RootGroup>
 </hdf5:HDF5-File>

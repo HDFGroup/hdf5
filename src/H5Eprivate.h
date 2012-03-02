@@ -126,7 +126,7 @@ extern	int	H5E_mpi_error_str_len;
  * error number, a description of the error (as a printf-like format string),
  * and an optional set of arguments for the printf format arguments.
  */
-#define H5E_PRINTF(...) H5E_printf_stack(NULL, __FILE__, FUNCNAME, __LINE__, H5E_ERR_CLS_g, H5_MY_PKG_ERR,  __VA_ARGS__)
+#define H5E_PRINTF(...) H5E_printf_stack(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, H5_MY_PKG_ERR,  __VA_ARGS__)
 
 /*
  * H5_LEAVE macro, used to facilitate control flow between a

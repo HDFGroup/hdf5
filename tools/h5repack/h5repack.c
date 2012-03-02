@@ -90,7 +90,7 @@ int
 h5repack_init(pack_opt_t *options, int verbose, H5F_file_space_type_t strategy, hsize_t threshold)
 {
     int k, n;
-    memset(options,0,sizeof(pack_opt_t));
+    HDmemset(options,0,sizeof(pack_opt_t));
     options->min_comp = 1024;
     options->verbose  = verbose;
 
@@ -157,7 +157,7 @@ int h5repack_addfilter(const char* str,
         if(options->n_filter_g > H5_REPACK_MAX_NFILTERS)
         {
             error_msg("maximum number of filters exceeded for <%s>\n", str);
-            free(obj_list);
+            HDfree(obj_list);
             return -1;
         }
 
@@ -166,7 +166,7 @@ int h5repack_addfilter(const char* str,
     else
         options_add_filter(obj_list, n_objs, filter, options->op_tbl);
 
-    free(obj_list);
+    HDfree(obj_list);
     return 0;
 }
 
@@ -232,7 +232,7 @@ int h5repack_addlayout(const char* str,
         &pack,
         options->op_tbl);
 
-    free(obj_list);
+    HDfree(obj_list);
     return 0;
 }
 
@@ -1002,7 +1002,7 @@ static const char* get_sfilter(H5Z_filter_t filtn)
         return "SOFF";
     else {
         error_msg("input error in filter type\n");
-        exit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
     }
 }
 

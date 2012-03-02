@@ -108,7 +108,7 @@ H5O_dset_get_copy_file_udata(void)
 {
     void *ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dset_get_copy_file_udata)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate space for the 'copy file' user data for copying datasets */
     if(NULL == (ret_value = H5FL_CALLOC(H5D_copy_file_ud_t)))
@@ -141,7 +141,7 @@ H5O_dset_free_copy_file_udata(void *_udata)
 {
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dset_free_copy_file_udata)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(udata);
@@ -182,13 +182,13 @@ H5O_dset_free_copy_file_udata(void *_udata)
  *
  *-------------------------------------------------------------------------
  */
-htri_t
+static htri_t
 H5O_dset_isa(H5O_t *oh)
 {
     htri_t	exists;                 /* Flag if header message of interest exists */
     htri_t	ret_value = TRUE;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_dset_isa, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(oh);
 
@@ -230,7 +230,7 @@ H5O_dset_open(const H5G_loc_t *obj_loc, hid_t lapl_id, hid_t dxpl_id, hbool_t ap
     hid_t   dapl_id;                /* dapl to use to open this dataset */
     hid_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dset_open)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(obj_loc);
 
@@ -283,7 +283,7 @@ H5O_dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
     H5D_t *dset = NULL;         /* New dataset created */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dset_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(f);
@@ -331,7 +331,7 @@ H5O_dset_get_oloc(hid_t obj_id)
     H5D_t       *dset;                  /* Dataset opened */
     H5O_loc_t	*ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dset_get_oloc)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get the dataset */
     if(NULL == (dset = (H5D_t *)H5I_object(obj_id)))
@@ -372,7 +372,7 @@ H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
     htri_t		exists;                 /* Flag if header message of interest exists */
     herr_t      	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_dset_bh_info)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);

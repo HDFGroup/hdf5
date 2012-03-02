@@ -1,4 +1,4 @@
-HDF5 version 1.9.107 currently under development
+HDF5 version 1.9.109 currently under development
 ================================================================================
 
 
@@ -39,6 +39,8 @@ New Features
 
     Configuration:
     -------------
+    - Added code to display the version information of XL fortran and C++
+      in the summary of configure. (AKC - 2012/02/28 - HDFFV-7793)
     - Configure now generates Makefiles that build in "silent make mode"
       by default in which compile and link lines are significantly
       simplified for clarity. To override this and view actual compile and
@@ -239,6 +241,18 @@ New Features
 
     Tools:
     ------
+     - h5repack: Improved performance for hanlding big chunked dataset 
+               (size > 128MB). It would perform much better prior to the
+               improvement, especially for cases that chunk dimentions
+               looks like "1024x5x1" (compare to "1x5x1024"). When bigger numbers
+               are toward front and smaller number is toward back in chunk
+               dimentions.
+     - h5dump: Added new option --no-compact-subset. This option will not
+               interpret the '[' character as starting the compact form of 
+               subsetting. This is useful when the "h5dump error: unable to 
+               open dataset "datset_name"" message is output because a dataset
+               name contains a '[' character.(JIRA HDFFV-7689).
+               (ADB - 2012/01/31)
      - h5dump: Corrected schema location: 
                <hdf5:HDF5-File 
                xmlns:hdf5="http://hdfgroup.org/HDF5/XML/schema/HDF5-File" 
@@ -635,6 +649,11 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5dump: Refactored code to remove duplicated functions. Split XML 
+          functions from DDL functions. Corrected indentation and formatting
+          errors. Also fixed subsetting counting overflow (HDFFV-5874). Verified
+          all tools call tools_init() in main.
+          HDFFV-7560 (ADB 2012/02/17)
         - h5diff: fixed to prevent from displaying error stack message when 
           comparing the two dangling symlinks with follow-symlinks option.
           HDFFV-7836 (JKM 2012/01/13)
@@ -881,6 +900,10 @@ Bug Fixes since HDF5-1.8.0 release
 Platforms Tested
 ================
 
+    AIX 5.3                       xlc 10.1.0.5
+    (NASA G-ADA)                  xlC 10.1.0.5
+                                  xlf90 12.1.0.6
+
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
     (loyalty)                     g++ 4.2.1 [FreeBSD] 20070719
                                   gcc 4.6.1 20110422
@@ -1028,6 +1051,18 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* The data conversion test dt_arith.c fails in "long double" to integer
+  conversion on Ubuntu 11.10 (3.0.0.13 kernal) with GCC 4.6.1 if the library
+  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
+  (3.2.2 on Fedora) doesn't have the problem.  Users should lower down the 
+  optimization level (-O1 or -O0) by defining CFLAGS in the command line of 
+  "configure" like:
+
+      CFLAGS=-O1 ./configure
+
+  It will overwrite the library's default optimization level. (Issue 7829. 
+  SLU - 2012/2/7)
+ 
 * --with-mpe configure option does not work with Mpich2. AKC - 2011/03/10)
 
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can

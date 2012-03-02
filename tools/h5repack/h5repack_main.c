@@ -13,6 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include "h5tools.h"
 #include "h5tools_utils.h"
 #include "h5repack.h"
 
@@ -106,9 +107,12 @@ int main(int argc, const char **argv)
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
+    /* Initialize h5tools lib */
+    h5tools_init();
+
     /* update hyperslab buffer size from H5TOOLS_BUFSIZE env if exist */
     if ( h5tools_getenv_update_hyperslab_bufsize() < 0)
-        exit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
 
     /* initialize options  */
     h5repack_init(&options, 0, 0, (hsize_t)0);
@@ -128,7 +132,7 @@ int main(int argc, const char **argv)
             {
                 error_msg("file names cannot be the same\n");
                 usage(h5tools_getprogname());
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
 
             }
         }
@@ -137,7 +141,7 @@ int main(int argc, const char **argv)
         {
             error_msg("file names missing\n");
             usage(h5tools_getprogname());
-            exit(EXIT_FAILURE);
+            HDexit(EXIT_FAILURE);
         }
     }
 
@@ -320,10 +324,10 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
         case 'h':
             usage(h5tools_getprogname());
-            exit(EXIT_SUCCESS);
+            HDexit(EXIT_SUCCESS);
         case 'V':
             print_version(h5tools_getprogname());
-            exit(EXIT_SUCCESS);
+            HDexit(EXIT_SUCCESS);
         case 'v':
             options->verbose = 1;
             break;
@@ -333,7 +337,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             if (h5repack_addfilter( opt_arg, options)<0)
             {
                 error_msg("in parsing filter\n");
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
             break;
         case 'l':
@@ -342,7 +346,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             if (h5repack_addlayout( opt_arg, options)<0)
             {
                 error_msg("in parsing layout\n");
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
             break;
 
@@ -353,7 +357,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             if ((int)options->min_comp<=0)
             {
                 error_msg("invalid minimum compress size <%s>\n", opt_arg );
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
             break;
 
@@ -446,12 +450,12 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             if ( options->alignment < 1 )
             {
                 error_msg("invalid alignment size\n", opt_arg );
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
             break;
 
         case 'S':
-	{
+  {
             char strategy[MAX_NC_NAME];
 
             HDstrcpy(strategy, opt_arg);
@@ -465,7 +469,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 options->fs_strategy = H5F_FILE_SPACE_VFD;
             else {
                 error_msg("invalid file space management strategy\n", opt_arg );
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
             break;
         }
@@ -486,7 +490,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
         {
             error_msg("missing file names\n");
             usage(h5tools_getprogname());
-            exit(EXIT_FAILURE);
+            HDexit(EXIT_FAILURE);
         }
     }
 
@@ -519,7 +523,7 @@ void read_info(const char *filename,
 
     if ((fp = fopen(filename, "r")) == (FILE *)NULL) {
         error_msg("cannot open options file %s\n", filename);
-        exit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
     }
 
     /* cycle until end of file reached */
@@ -556,7 +560,7 @@ void read_info(const char *filename,
 
             if (h5repack_addfilter(comp_info,options)==-1){
                 error_msg("could not add compression option\n");
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
         }
         /*-------------------------------------------------------------------------
@@ -586,7 +590,7 @@ void read_info(const char *filename,
 
             if (h5repack_addlayout(comp_info,options)==-1){
                 error_msg("could not add chunck option\n");
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
         }
         /*-------------------------------------------------------------------------
@@ -595,7 +599,7 @@ void read_info(const char *filename,
         */
         else {
             error_msg("bad file format for %s", filename);
-            exit(EXIT_FAILURE);
+            HDexit(EXIT_FAILURE);
         }
     }
 

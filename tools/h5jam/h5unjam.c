@@ -15,6 +15,7 @@
 
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 /* Name of tool */
@@ -142,7 +143,7 @@ leave(int ret)
 
     h5tools_close();
 
-    exit(ret);
+    HDexit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -199,7 +200,7 @@ parse_command_line(int argc, const char *argv[])
     if (argc <= opt_ind+2) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
-        exit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
     }
 */
 }

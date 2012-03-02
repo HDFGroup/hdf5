@@ -327,7 +327,7 @@ int do_copy_refobjs(hid_t fidin,
                             goto error;
                     } /* end else */
 
-                    assert(dset_out != FAIL);
+                    HDassert(dset_out != FAIL);
 
                     /*-------------------------------------------------------------------------
                     * copy referenced objects in attributes
@@ -858,9 +858,9 @@ static herr_t update_ref_value(hid_t obj_id, H5R_type_t ref_type, void *ref_in,
 	const char* ref_obj_name;
 	hid_t space_id=-1, ref_obj_id=-1;
 
-	ref_obj_id = H5Rdereference2(obj_id, H5P_DEFAULT, ref_type, ref_in);
-	if (ref_obj_id<0)
-		goto done;
+    ref_obj_id = H5Rdereference2(obj_id, H5P_DEFAULT, ref_type, ref_in);
+    if (ref_obj_id<0)
+       goto done;
 
 	ref_obj_name = MapIdToName(ref_obj_id, travt);
 	if (ref_obj_name == NULL)
@@ -881,8 +881,8 @@ static herr_t update_ref_value(hid_t obj_id, H5R_type_t ref_type, void *ref_in,
 
 done:
     H5E_BEGIN_TRY {
-    	H5Sclose(space_id);
-    	H5Oclose(ref_obj_id);
+      H5Sclose(space_id);
+      H5Oclose(ref_obj_id);
     } H5E_END_TRY;
 
 	return ret;
