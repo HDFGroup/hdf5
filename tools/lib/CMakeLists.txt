@@ -14,6 +14,7 @@ SET (H5_TOOLS_LIB_SRCS
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff_dset.c
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff_util.c
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools.c
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_dump.c
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_filters.c
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_ref.c
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_str.c
@@ -25,6 +26,7 @@ SET (H5_TOOLS_LIB_SRCS
 SET (H5_TOOLS_LIB_HDRS
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5trav.h
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools.h
+    ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_dump.h
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_utils.h
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_str.h
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_ref.h

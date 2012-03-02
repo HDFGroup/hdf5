@@ -90,7 +90,7 @@ int h5repack_init (pack_opt_t *options,
                    int verbose)
 {
     int k, n;
-    memset(options,0,sizeof(pack_opt_t));
+    HDmemset(options,0,sizeof(pack_opt_t));
     options->min_comp = 1024;
     options->verbose  = verbose;
 
@@ -154,7 +154,7 @@ int h5repack_addfilter(const char* str,
         if(options->n_filter_g > H5_REPACK_MAX_NFILTERS)
         {
             error_msg("maximum number of filters exceeded for <%s>\n", str);
-            free(obj_list);
+            HDfree(obj_list);
             return -1;
         }
 
@@ -163,7 +163,7 @@ int h5repack_addfilter(const char* str,
     else
         options_add_filter(obj_list, n_objs, filter, options->op_tbl);
 
-    free(obj_list);
+    HDfree(obj_list);
     return 0;
 }
 
@@ -229,7 +229,7 @@ int h5repack_addlayout(const char* str,
         &pack,
         options->op_tbl);
 
-    free(obj_list);
+    HDfree(obj_list);
     return 0;
 }
 
@@ -627,20 +627,20 @@ static int check_options(pack_opt_t *options)
             switch (options->layout_g)
             {
             case H5D_COMPACT:
-                HDstrcpy(slayout,"compact");
+                strcpy(slayout,"compact");
                 break;
             case H5D_CONTIGUOUS:
-                HDstrcpy(slayout,"contiguous");
+                strcpy(slayout,"contiguous");
                 break;
             case H5D_CHUNKED:
-                HDstrcpy(slayout,"chunked");
+                strcpy(slayout,"chunked");
                 break;
             case H5D_LAYOUT_ERROR:
             case H5D_NLAYOUTS:
                 error_msg("invalid layout\n");
                 return -1;
             default:
-                HDstrcpy(slayout,"invalid layout\n");
+                strcpy(slayout,"invalid layout\n");
                 return -1;
             }
             printf(" Apply %s layout to all\n", slayout);
@@ -999,7 +999,7 @@ static const char* get_sfilter(H5Z_filter_t filtn)
         return "SOFF";
     else {
         error_msg("input error in filter type\n");
-        exit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
     }
 }
 

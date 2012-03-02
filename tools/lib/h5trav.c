@@ -900,7 +900,7 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
 
                 H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT);
                 printf(" %-10s %s -> %s\n", "link", path, targbuf);
-                free(targbuf);
+                HDfree(targbuf);
             } /* end if */
             else
                 printf(" %-10s %s ->\n", "link", path);
@@ -913,12 +913,12 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
                 const char *objname;
 
                 targbuf = HDmalloc(linfo->u.val_size + 1);
-                assert(targbuf);
+                HDassert(targbuf);
 
                 H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT);
                 H5Lunpack_elink_val(targbuf, linfo->u.val_size, NULL, &filename, &objname);
                 printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
-                free(targbuf);
+                HDfree(targbuf);
             } /* end if */
             else
                 printf(" %-10s %s ->\n", "ext link", path);

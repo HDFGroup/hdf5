@@ -24,14 +24,14 @@ GROUP "/" {
                DATATYPE  H5T_STD_I8BE
                DATASPACE  SIMPLE { ( 27 ) / ( 27 ) }
                DATA {
-         "1st attribute of dset1.1.1\000"
+                  "1st attribute of dset1.1.1\000"
                }
             }
             ATTRIBUTE "attr2" {
                DATATYPE  H5T_STD_I8BE
                DATASPACE  SIMPLE { ( 27 ) / ( 27 ) }
                DATA {
-         "2nd attribute of dset1.1.1\000"
+                  "2nd attribute of dset1.1.1\000"
                }
             }
          }

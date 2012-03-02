@@ -995,6 +995,12 @@
 ./tools/h5dump/Makefile.in
 ./tools/h5dump/h5dump.c
 ./tools/h5dump/h5dump.h
+./tools/h5dump/h5dump_defines.h
+./tools/h5dump/h5dump_extern.h
+./tools/h5dump/h5dump_ddl.c
+./tools/h5dump/h5dump_ddl.h
+./tools/h5dump/h5dump_xml.c
+./tools/h5dump/h5dump_xml.h
 ./tools/h5dump/h5dumpgentest.c
 ./tools/h5dump/testh5dump.sh.in
 ./tools/h5dump/testh5dumpxml.sh.in
@@ -1076,11 +1082,13 @@
 ./tools/h5repack/h5repacktst.c
 ./tools/h5repack/testh5repack_detect_szip.c
 
+# h5ls sources
 ./tools/h5ls/Makefile.am
 ./tools/h5ls/Makefile.in
 ./tools/h5ls/h5ls.c
 ./tools/h5ls/testh5ls.sh.in
 
+# h5copy sources
 ./tools/h5copy/testh5copy.sh
 ./tools/h5copy/Makefile.in
 ./tools/h5copy/h5copy.c
@@ -1100,6 +1108,8 @@
 ./tools/lib/h5trav.h
 ./tools/lib/h5tools.c
 ./tools/lib/h5tools.h
+./tools/lib/h5tools_dump.c
+./tools/lib/h5tools_dump.h
 ./tools/lib/h5tools_filters.c
 ./tools/lib/h5tools_str.c
 ./tools/lib/h5tools_str.h
@@ -1126,9 +1136,12 @@
 ./tools/misc/testfiles/h5mkgrp_help.txt
 ./tools/misc/testfiles/h5mkgrp_version.txt.in
 
+# h5stat sources
 ./tools/h5stat/Makefile.am
 ./tools/h5stat/Makefile.in
 ./tools/h5stat/h5stat.c
+
+# h5stat test files
 ./tools/h5stat/h5stat_gentest.c
 ./tools/h5stat/testh5stat.sh.in
 ./tools/h5stat/testfiles/h5stat_filters-UT.ddl
@@ -1149,8 +1162,7 @@
 ./tools/h5stat/testfiles/h5stat_tsohm.ddl
 ./tools/h5stat/testfiles/h5stat_tsohm.h5
 
-
-# h5dump
+# h5dump test files
 ./tools/testfiles/family_file00000.h5
 ./tools/testfiles/family_file00001.h5
 ./tools/testfiles/family_file00002.h5
@@ -1285,7 +1297,8 @@
 ./tools/testfiles/tnbit.ddl
 ./tools/testfiles/tnestcomp-1.ddl
 ./tools/testfiles/tnestedcomp.h5
-./tools/testfiles/tnofilename.ddl
+./tools/testfiles/tno-subset.h5
+./tools/testfiles/tno-subset.ddl
 ./tools/testfiles/tnullspace.h5
 ./tools/testfiles/tnullspace.ddl
 ./tools/testfiles/tobjref.h5
@@ -1366,6 +1379,7 @@
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
 # h5dump packed bits validation
+./tools/testfiles/tnofilename-with-packed-bits.ddl
 ./tools/testfiles/tpbitsLengthPositive.ddl
 ./tools/testfiles/tpbitsMaxExceeded.ddl
 ./tools/testfiles/tpbitsSigned.ddl

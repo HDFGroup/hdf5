@@ -15,6 +15,7 @@
 
 #include "h5repack.h"
 #include "h5tools.h"
+#include "h5tools_utils.h"
 
 /* number of members in an array */
 #ifndef NELMTS
@@ -329,7 +330,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
                     size = 1;
                 sm_size[i - 1] = MIN(dims[i - 1], size);
                 sm_nbytes *= sm_size[i - 1];
-                assert(sm_nbytes > 0);
+                HDassert(sm_nbytes > 0);
 
             }
 

@@ -19,10 +19,6 @@
 #include <stdlib.h>
 #include "hdf5.h"
 #include "H5private.h"
-#include "h5tools.h"
-
-/* Name of tool */
-#define PROGRAMNAME "h5copygentest"
 
 /* HDF file names */
 #define HDF_FILE1                "h5copytst.h5"
@@ -365,7 +361,7 @@ static void gent_empty_group(hid_t loc_id)
  * Function: gent_nested_datasets
  *
  * Purpose: Generate a group in a location and populate it with the "standard"
- *		datasets
+ *    datasets
  *
  *-------------------------------------------------------------------------
  */
@@ -387,7 +383,7 @@ static void gent_nested_datasets(hid_t loc_id)
  * Function: gent_nested_group
  *
  * Purpose: Generate a group in a location and populate it with another group
- *		containing the "standard" datasets
+ *    containing the "standard" datasets
  *
  *-------------------------------------------------------------------------
  */
@@ -891,9 +887,6 @@ out:
 
 int main(void)
 {
-    h5tools_setprogname(PROGRAMNAME);
-    h5tools_setstatus(EXIT_SUCCESS);
-
     Test_Obj_Copy();
     Test_Ref_Copy();
     Test_Extlink_Copy();

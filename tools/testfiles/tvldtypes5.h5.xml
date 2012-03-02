@@ -5,12 +5,12 @@
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
-         <hdf5:FillValueInfo FillTime="FillOnAlloc" AllocationTime="Late">
+      <hdf5:FillValueInfo FillTime="FillOnAlloc" AllocationTime="Late">
          <hdf5:FillValue>
-               <hdf5:Data>
-                  <!-- VL fill not yet implemented. -->
-                  <hdf5:NoData />
-               </hdf5:Data>
+            <hdf5:Data>
+               <!-- VL fill not yet implemented. -->
+               <hdf5:NoData />
+            </hdf5:Data>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>
@@ -30,7 +30,10 @@
 <!-- Note: format of VL data not specified -->
       <hdf5:Data>
          <hdf5:DataFromFile>
-          0 2 4 6 8    0 2 4 6 8 10 12  
+          0 2 4 6 8
+          
+          0 2 4 6 8 10 12
+          
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>

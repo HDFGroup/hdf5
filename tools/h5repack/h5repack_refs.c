@@ -327,7 +327,7 @@ int do_copy_refobjs(hid_t fidin,
                             goto error;
                     } /* end else */
 
-                    assert(dset_out != FAIL);
+                    HDassert(dset_out != FAIL);
 
                     /*-------------------------------------------------------------------------
                     * copy referenced objects in attributes

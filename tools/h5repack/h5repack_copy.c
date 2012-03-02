@@ -574,7 +574,7 @@ int do_copy_objects(hid_t fidin,
         {
 
         case H5TRAV_TYPE_UNKNOWN:
-            assert(0);
+            HDassert(0);
             break;
             /*-------------------------------------------------------------------------
             * H5TRAV_TYPE_GROUP
@@ -877,7 +877,7 @@ int do_copy_objects(hid_t fidin,
                                         size = 1;
                                     sm_size[k - 1] = MIN(dims[k - 1], size);
                                     sm_nbytes *= sm_size[k - 1];
-                                    assert(sm_nbytes > 0);
+                                    HDassert(sm_nbytes > 0);
                                 }
                                 sm_buf = HDmalloc((size_t)sm_nbytes);
 
@@ -885,8 +885,8 @@ int do_copy_objects(hid_t fidin,
                                 sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
 
                                 /* the stripmine loop */
-                                memset(hs_offset, 0, sizeof hs_offset);
-                                memset(zero, 0, sizeof zero);
+                                HDmemset(hs_offset, 0, sizeof hs_offset);
+                                HDmemset(zero, 0, sizeof zero);
 
                                 for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_nelmts)
                                 {
@@ -1301,7 +1301,7 @@ copy_user_block(const char *infile, const char *outfile, hsize_t size)
     int status = 0;                     /* Return value */
 
     /* User block must be any power of 2 equal to 512 or greater (512, 1024, 2048, etc.) */
-    assert(size > 0);
+    HDassert(size > 0);
 
     /* Open files */
     if((infid = HDopen(infile, O_RDONLY, 0)) < 0) {
@@ -1343,13 +1343,13 @@ copy_user_block(const char *infile, const char *outfile, hsize_t size)
                 status = -1;
                 goto done;
             } /* end if */
-            assert(nwritten > 0);
-            assert(nwritten <= nbytes);
+            HDassert(nwritten > 0);
+            HDassert(nwritten <= nbytes);
 
             /* Update # of bytes left & offset in buffer */
             nbytes -= nwritten;
             wbuf += nwritten;
-            assert(nbytes == 0 || wbuf < (rbuf + USERBLOCK_XFER_SIZE));
+            HDassert(nbytes == 0 || wbuf < (rbuf + USERBLOCK_XFER_SIZE));
         } /* end while */
 
         /* Update size of userblock left to transfer */

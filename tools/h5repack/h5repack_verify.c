@@ -14,11 +14,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5repack.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 /* number of members in an array */
 #ifndef NELMTS
-#    define NELMTS(X)		(sizeof(X)/sizeof(X[0]))
+#    define NELMTS(X)    (sizeof(X)/sizeof(X[0]))
 #endif
 
 static int verify_layout(hid_t pid, pack_info_t *obj);
@@ -222,9 +223,9 @@ error:
  *
  * Purpose: verify which layout is present in the property list DCPL_ID
  *
- *  H5D_COMPACT	  	= 0
- *  H5D_CONTIGUOUS	= 1
- *  H5D_CHUNKED		= 2
+ *  H5D_COMPACT      = 0
+ *  H5D_CONTIGUOUS  = 1
+ *  H5D_CHUNKED    = 2
  *
  * Return: 1 has, 0 does not, -1 error
  *

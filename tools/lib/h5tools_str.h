@@ -26,25 +26,25 @@ typedef struct h5tools_str_t {
     size_t  nalloc;     /*allocated size of string  */
 } h5tools_str_t;
 
-extern void     h5tools_str_close(h5tools_str_t *str);
-extern size_t   h5tools_str_len(h5tools_str_t *str);
-extern char    *h5tools_str_append(h5tools_str_t *str, const char *fmt, ...);
-extern char    *h5tools_str_reset(h5tools_str_t *str);
-extern char    *h5tools_str_trunc(h5tools_str_t *str, size_t size);
-extern char    *h5tools_str_fmt(h5tools_str_t *str, size_t start, const char *fmt);
-extern char    *h5tools_str_prefix(h5tools_str_t *str, const h5tool_format_t *info,
+H5TOOLS_DLL void     h5tools_str_close(h5tools_str_t *str);
+H5TOOLS_DLL size_t   h5tools_str_len(h5tools_str_t *str);
+H5TOOLS_DLL char    *h5tools_str_append(h5tools_str_t *str, const char *fmt, ...);
+H5TOOLS_DLL char    *h5tools_str_reset(h5tools_str_t *str);
+H5TOOLS_DLL char    *h5tools_str_trunc(h5tools_str_t *str, size_t size);
+H5TOOLS_DLL char    *h5tools_str_fmt(h5tools_str_t *str, size_t start, const char *fmt);
+H5TOOLS_DLL char    *h5tools_str_prefix(h5tools_str_t *str, const h5tool_format_t *info,
                         hsize_t elmtno, unsigned ndims, h5tools_context_t *ctx);
 /*
  * new functions needed to display region reference data
  */
-extern char    *h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
+H5TOOLS_DLL char    *h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
                                    hsize_t elmtno, hsize_t *ptdata, unsigned ndims, 
                                    hsize_t max_idx[], h5tools_context_t *ctx);
-extern void     h5tools_str_dump_region_blocks(h5tools_str_t *, hid_t, const h5tool_format_t *);
-extern void     h5tools_str_dump_region_points(h5tools_str_t *, hid_t, const h5tool_format_t *);
-extern void     h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info, hid_t container,
+H5TOOLS_DLL void     h5tools_str_dump_region_blocks(h5tools_str_t *, hid_t, const h5tool_format_t *);
+H5TOOLS_DLL void     h5tools_str_dump_region_points(h5tools_str_t *, hid_t, const h5tool_format_t *);
+H5TOOLS_DLL void     h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info, hid_t container,
                                    void *vp);
-extern char    *h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info,
+H5TOOLS_DLL char    *h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info,
                                    hid_t container, hid_t type, void *vp,
                                    h5tools_context_t *ctx);
 

@@ -22,9 +22,7 @@ GROUP "/" {
          (0): 8
          }
       }
-
    DATATYPE "Link_to_Datatype" HARDLINK "/Datatype"
-
    GROUP "g1" {
       ATTRIBUTE "Attribute" {
          DATATYPE  "/Datatype"
