@@ -173,7 +173,7 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
              */
             size_t newsize = MAX(str->len + nchars + 1, 2 * str->nalloc);
             HDassert(newsize > str->nalloc); /*overflow*/
-            str->s = HDrealloc(str->s, newsize);
+            str->s = (char*)HDrealloc(str->s, newsize);
             HDassert(str->s);
             str->nalloc = newsize;
         }
@@ -209,7 +209,7 @@ h5tools_str_reset(h5tools_str_t *str/*in,out*/)
 {
     if (!str->s || str->nalloc <= 0) {
         str->nalloc = STR_INIT_LEN;
-        str->s = HDmalloc(str->nalloc);
+        str->s = (char*)HDmalloc(str->nalloc);
         HDassert(str->s);
     }
 
@@ -282,7 +282,7 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
         size_t n = sizeof(_temp);
         if (str->len - start + 1 > n) {
             n = str->len - start + 1; 
-            temp = HDmalloc(n);
+            temp = (char*)HDmalloc(n);
             HDassert(temp);
         }
 
@@ -1114,8 +1114,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 h5tools_str_append(str, "%s", OPT(info->arr_sep, "," OPTIONAL_LINE_BREAK));
 
             if (info->arr_linebreak && i && i % dims[ndims - 1] == 0) {
-                int x;
-
                 h5tools_str_append(str, "%s", "\n");
                 h5tools_str_indent(str, info, ctx);
 
@@ -1123,7 +1121,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             else if (i && info->arr_sep) {
                 /* if next element begin, add next line with indent */
                 if (is_next_arry_elmt) {
-                    int x;
                     is_next_arry_elmt = 0;
 
                     h5tools_str_append(str, "%s", "\n ");
