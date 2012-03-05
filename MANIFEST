@@ -1422,6 +1422,7 @@
 ./tools/testfiles/tscaleoffset.ddl
 ./tools/testfiles/tslink-1.ddl
 ./tools/testfiles/tslink-2.ddl
+./tools/testfiles/tslink-D.ddl
 ./tools/testfiles/tslink.h5
 ./tools/testfiles/tsplit_file-m.h5
 ./tools/testfiles/tsplit_file-r.h5
