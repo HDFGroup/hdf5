@@ -1474,13 +1474,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
 
     if((dsetid = H5Dopen2(fid, dset, H5P_DEFAULT)) < 0) {
         if (pe) {
-            HDfprintf(rawoutstream, "\n");
-            begin_obj(h5tools_dump_header_format->datasetbegin, real_name, h5tools_dump_header_format->datasetblockbegin);
-            HDfprintf(rawoutstream, "\n");
-            indentation(COL);
-            error_msg("unable to open dataset \"%s\"\n", real_name);
-            end_obj(h5tools_dump_header_format->datasetend, h5tools_dump_header_format->datasetblockend);
-            h5tools_setstatus(EXIT_FAILURE);
+            handle_links(fid, dset, data, pe, display_name);
         }
         return;
     } /* end if */

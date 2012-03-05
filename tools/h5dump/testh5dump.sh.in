@@ -712,7 +712,7 @@ TOOLTEST tgroup-2.ddl --group=/g2 --group / -g /y tgroup.h5
 # test for displaying simple space datasets
 TOOLTEST tdset-1.ddl --enable-error-stack tdset.h5
 # test for displaying selected datasets
-TOOLTEST tdset-2.ddl -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5
+TOOLTEST3 tdset-2.ddl --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5
 
 # test for displaying attributes
 TOOLTEST tattr-1.ddl --enable-error-stack tattr.h5
@@ -731,6 +731,8 @@ TOOLTEST tudlink-1.ddl --enable-error-stack tudlink.h5
 # test for displaying the selected link
 TOOLTEST tslink-2.ddl --enable-error-stack -l slink2 tslink.h5
 TOOLTEST tudlink-2.ddl --enable-error-stack -l udlink2 tudlink.h5
+# test for displaying dangling soft links
+TOOLTEST3 tslink-D.ddl --enable-error-stack -d /slink1 tslink.h5
 
 # tests for hard links
 TOOLTEST thlink-1.ddl --enable-error-stack thlink.h5
@@ -830,7 +832,7 @@ TOOLTEST tboot2.ddl --enable-error-stack -B tfcontents2.h5
 TOOLTEST file_space.ddl --enable-error-stack -B file_space.h5
 
 # test -p with a non existing dataset
-TOOLTEST tperror.ddl -p -d bogus tfcontents1.h5
+TOOLTEST3 tperror.ddl --enable-error-stack -p -d bogus tfcontents1.h5
 
 # test for file contents
 TOOLTEST tcontents.ddl --enable-error-stack -n tfcontents1.h5

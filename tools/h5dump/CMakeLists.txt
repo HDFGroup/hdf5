@@ -928,7 +928,7 @@ IF (BUILD_TESTING)
   # test for displaying simple space datasets
   ADD_H5_TEST (tdset-1 0 --enable-error-stack tdset.h5)
   # test for displaying selected datasets
-  ADD_H5_TEST (tdset-2 1 -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5)
+  ADD_H5_MASK_TEST (tdset-2 1 --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5)
 
   # test for displaying attributes
   ADD_H5_TEST (tattr-1 0 --enable-error-stack tattr.h5)
@@ -947,6 +947,8 @@ IF (BUILD_TESTING)
   # test for displaying the selected link
   ADD_H5_TEST (tslink-2 0 --enable-error-stack -l slink2 tslink.h5)
   ADD_H5_TEST (tudlink-2 0 --enable-error-stack -l udlink2 tudlink.h5)
+  # test for displaying dangling soft links
+  ADD_H5_MASK_TEST (tslink-D 0 --enable-error-stack -d /slink1 tslink.h5)
 
   # tests for hard links
   ADD_H5_TEST (thlink-1 0 --enable-error-stack thlink.h5)
@@ -1045,7 +1047,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (file_space 0 --enable-error-stack -B file_space.h5)
 
   # test -p with a non existing dataset
-  ADD_H5_TEST (tperror 1 -p -d bogus tfcontents1.h5)
+  ADD_H5_MASK_TEST (tperror 1 --enable-error-stack -p -d bogus tfcontents1.h5)
 
   # test for file contents
   ADD_H5_TEST (tcontents 0 --enable-error-stack -n tfcontents1.h5)
