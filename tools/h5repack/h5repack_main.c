@@ -353,7 +353,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
         case 'm':
 
-            options->min_comp = atoi( opt_arg );
+            options->min_comp = HDatoi( opt_arg );
             if ((int)options->min_comp<=0)
             {
                 error_msg("invalid minimum compress size <%s>\n", opt_arg );
@@ -375,7 +375,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
         case 'c':
 
-            options->grp_compact = atoi( opt_arg );
+            options->grp_compact = HDatoi( opt_arg );
             if (options->grp_compact>0)
                 options->latest = 1; /* must use latest format */
             break;
@@ -383,7 +383,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
         case 'd':
 
-            options->grp_indexed = atoi( opt_arg );
+            options->grp_indexed = HDatoi( opt_arg );
             if (options->grp_indexed>0)
                 options->latest = 1; /* must use latest format */
             break;
@@ -398,7 +398,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 options->latest = 1; /* must use latest format */
                 if (msgPtr == NULL)
                 {
-                    ssize = atoi( opt_arg );
+                    ssize = HDatoi( opt_arg );
                     for (idx=0; idx<5; idx++)
                         options->msg_size[idx] = ssize;
                 }
@@ -407,7 +407,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
                     char msgType[10];
                     HDstrcpy(msgType, msgPtr+1);
                     msgPtr[0] = '\0';
-                    ssize = atoi( opt_arg );
+                    ssize = HDatoi( opt_arg );
                     if (HDstrncmp(msgType, "dspace",6) == 0) {
                         options->msg_size[0] = ssize;
                     }
@@ -436,17 +436,17 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
         case 'b':
 
-            options->ublock_size = (hsize_t)atol( opt_arg );
+            options->ublock_size = (hsize_t)HDatol( opt_arg );
             break;
 
         case 't':
 
-            options->threshold = (hsize_t)atol( opt_arg );
+            options->threshold = (hsize_t)HDatol( opt_arg );
             break;
 
         case 'a':
 
-            options->alignment = atol( opt_arg );
+            options->alignment = HDatol( opt_arg );
             if ( options->alignment < 1 )
             {
                 error_msg("invalid alignment size\n", opt_arg );
@@ -476,7 +476,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
         case 'T':
 
-            options->fs_threshold = (hsize_t)atol( opt_arg );
+            options->fs_threshold = (hsize_t)HDatol( opt_arg );
             break;
         } /* switch */
 
@@ -521,7 +521,7 @@ void read_info(const char *filename,
     char c;
     int  i, rc=1;
 
-    if ((fp = fopen(filename, "r")) == (FILE *)NULL) {
+    if ((fp = HDfopen(filename, "r")) == (FILE *)NULL) {
         error_msg("cannot open options file %s\n", filename);
         HDexit(EXIT_FAILURE);
     }
@@ -544,7 +544,7 @@ void read_info(const char *filename,
             while( c!=' ' )
             {
                 fscanf(fp, "%c", &c);
-                if (feof(fp)) break;
+                if (HDfeof(fp)) break;
             }
             c='0';
             /* go until end */
@@ -553,7 +553,7 @@ void read_info(const char *filename,
                 fscanf(fp, "%c", &c);
                 comp_info[i]=c;
                 i++;
-                if (feof(fp)) break;
+                if (HDfeof(fp)) break;
                 if (c==10 /*eol*/) break;
             }
             comp_info[i-1]='\0'; /*cut the last " */
@@ -574,7 +574,7 @@ void read_info(const char *filename,
             while( c!=' ' )
             {
                 fscanf(fp, "%c", &c);
-                if (feof(fp)) break;
+                if (HDfeof(fp)) break;
             }
             c='0';
             /* go until end */
@@ -583,7 +583,7 @@ void read_info(const char *filename,
                 fscanf(fp, "%c", &c);
                 comp_info[i]=c;
                 i++;
-                if (feof(fp)) break;
+                if (HDfeof(fp)) break;
                 if (c==10 /*eol*/) break;
             }
             comp_info[i-1]='\0'; /*cut the last " */
@@ -603,6 +603,6 @@ void read_info(const char *filename,
         }
     }
 
-    fclose(fp);
+    HDfclose(fp);
     return;
 }

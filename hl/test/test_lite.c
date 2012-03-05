@@ -367,7 +367,7 @@ static int test_dsets( void )
     if ( H5LTread_dataset_string(file_id,DSET7_NAME,data_string_out) < 0 )
         goto out;
 
-    if ( strcmp(data_string_in,data_string_out) != 0 )
+    if ( HDstrcmp(data_string_in,data_string_out) != 0 )
         goto out;
 
 
@@ -536,7 +536,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     if ( H5LTget_attribute_string( loc_id, obj_name, ATTR1_NAME, attr_str_out ) < 0 )
         return -1;
 
-    if ( strcmp( attr_str_in, attr_str_out ) != 0 )
+    if ( HDstrcmp( attr_str_in, attr_str_out ) != 0 )
     {
         return -1;
     }
@@ -1015,25 +1015,25 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     TESTING("H5LTget_attribute_info");
 
-    dims_out = (hsize_t*) malloc( sizeof(hsize_t) * rank_out );
+    if(NULL==(dims_out = (hsize_t*) HDmalloc( sizeof(hsize_t) * rank_out ))) return -1;
 
-    if ( H5LTget_attribute_info( loc_id, obj_name, ATTR2_NAME, dims_out, &type_class,
-        &type_size) < 0 )
+    if ( H5LTget_attribute_info( loc_id, obj_name, ATTR2_NAME, dims_out, &type_class, &type_size) < 0 ) {
+        HDfree( dims_out );
         return -1;
-
-    for (i = 0; i < rank_out; i++)
-    {
+    }
+    
+    for (i = 0; i < rank_out; i++) {
         if ( dims_out[i] != 5 ) {
+            HDfree( dims_out );
             return -1;
         }
     }
 
     if ( type_class != H5T_INTEGER ) {
+        HDfree( dims_out );
         return -1;
     }
-
-    if ( dims_out )
-        free( dims_out );
+    HDfree( dims_out );
 
     PASSED();
 
@@ -1066,12 +1066,18 @@ static int test_integers(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_STD_I8BE"))
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
-    free(dt_str);
+    }
+    if(HDstrcmp(dt_str, "H5T_STD_I8BE")) {
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1117,12 +1123,18 @@ static int test_fps(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_IEEE_F32BE"))
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
-    free(dt_str);
+    }
+    if(HDstrcmp(dt_str, "H5T_IEEE_F32BE")) {
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1180,14 +1192,18 @@ static int test_strings(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_STRING {\n      STRSIZE 13;\n      STRPAD H5T_STR_NULLTERM;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
     }
-    free(dt_str);
+    if(HDstrcmp(dt_str, "H5T_STRING {\n      STRSIZE 13;\n      STRPAD H5T_STR_NULLTERM;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }")) {
+        printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1208,14 +1224,18 @@ static int test_strings(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
     }
-    free(dt_str);
+    if(HDstrcmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }")) {
+        printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1257,14 +1277,18 @@ static int test_opaques(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
     }
-    free(dt_str);
+    if(HDstrcmp(dt_str, "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }")) {
+        printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1311,7 +1335,7 @@ static int test_enums(void)
 
     if(H5Tenum_nameof(dtype, &value1, name1, size)<0)
         goto out;
-    if(strcmp(name1, "BLUE"))
+    if(HDstrcmp(name1, "BLUE"))
         goto out;
 
     if(H5Tenum_valueof(dtype, name2, &value2)<0)
@@ -1328,16 +1352,20 @@ static int test_enums(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"            6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }")) {
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
+        goto out;
+    }
+    if(HDstrcmp(dt_str, "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"            6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }")) {
 
         printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
         goto out;
     }
 
-    free(dt_str);
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1385,14 +1413,18 @@ static int test_variables(void)
     
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_VLEN {\n      H5T_VLEN {\n         H5T_STD_I32BE\n      }\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
     }
-    free(dt_str);
+    if(HDstrcmp(dt_str, "H5T_VLEN {\n      H5T_VLEN {\n         H5T_STD_I32BE\n      }\n   }")) {
+        printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
     
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1440,15 +1472,19 @@ static int test_arrays(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_ARRAY {\n      [5][7][13] H5T_ARRAY {\n         [17][19] H5T_COMPOUND {\n            H5T_STD_I8BE \"arr_compound_1\" : 0;\n            H5T_STD_I32BE \"arr_compound_2\" : 1;\n         }\n      }\n   }")) {
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
+        goto out;
+    }
+    if(HDstrcmp(dt_str, "H5T_ARRAY {\n      [5][7][13] H5T_ARRAY {\n         [17][19] H5T_COMPOUND {\n            H5T_STD_I8BE \"arr_compound_1\" : 0;\n            H5T_STD_I32BE \"arr_compound_2\" : 1;\n         }\n      }\n   }")) {
         printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
         goto out;
     }
 
-    free(dt_str);
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1492,14 +1528,18 @@ static int test_compounds(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_COMPOUND {\n      H5T_STD_I16BE \"one_field\" : 2;\n      H5T_STD_U8LE \"two_field\" : 6;\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
     }
-    free(dt_str);
+    if(HDstrcmp(dt_str, "H5T_COMPOUND {\n      H5T_STD_I16BE \"one_field\" : 2;\n      H5T_STD_U8LE \"two_field\" : 6;\n   }")) {
+        printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1509,9 +1549,11 @@ static int test_compounds(void)
 
     if((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
         goto out;
-    if(strcmp(memb_name, "i16_field"))
+    if(HDstrcmp(memb_name, "i16_field")) {
+        HDfree(memb_name);
         goto out;
-    free(memb_name);
+    }
+    HDfree(memb_name);
 
     if((memb_class = H5Tget_member_class(dtype, 2))<0)
         goto out;
@@ -1575,17 +1617,22 @@ static int test_compound_bug(void)
 
     if((memb_name = H5Tget_member_name(dtype, 2)) == NULL)
         goto out;
-    if(strcmp(memb_name, "sub"))
+    if(HDstrcmp(memb_name, "sub")) {
+        HDfree(memb_name);
         goto out;
-    free(memb_name);
+    }
+    HDfree(memb_name);
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
 
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    free(dt_str);
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1607,18 +1654,23 @@ static int test_compound_bug(void)
 
     if((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
         goto out;
-    if(strcmp(memb_name, "desc_________________________________________________________________________________________"))
+    if(HDstrcmp(memb_name, "desc_________________________________________________________________________________________")) {
+        HDfree(memb_name);
         goto out;
-    free(memb_name);
+    }
+    HDfree(memb_name);
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
 
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
+        goto out;
+    }
 
-    free(dt_str);
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1648,7 +1700,7 @@ static int test_complicated_compound(void)
     TESTING3("        text for complicated compound types");
 
     /* Open input file */
-    fp = fopen(filename, "r");
+    fp = HDfopen(filename, "r");
     if(fp == NULL) {
         printf( "Could not find file %s. Try set $srcdir \n", filename);
         goto out;
@@ -1658,23 +1710,23 @@ static int test_complicated_compound(void)
     * Library has convenient function getline() but isn't available on
     * all machines.
     */
-    if((line = (char*)calloc(size, sizeof(char)))==NULL)
+    if((line = (char*)HDcalloc(size, sizeof(char)))==NULL)
         goto out;
-    if(fgets(line, (int)size, fp)==NULL)
+    if(HDfgets(line, (int)size, fp)==NULL)
         goto out;
-    while(strlen(line)==size-1) {
+    while(HDstrlen(line)==size-1) {
         size *= 2;
         if(line)
-            free(line);
-        if((line = (char*)calloc(size, sizeof(char)))==NULL)
+            HDfree(line);
+        if((line = (char*)HDcalloc(size, sizeof(char)))==NULL)
             goto out;
-        if(fseek(fp, 0L, SEEK_SET)!=0)
+        if(HDfseek(fp, 0L, SEEK_SET)!=0)
             goto out;
-        if(fgets(line, (int)size, fp)==NULL)
+        if(HDfgets(line, (int)size, fp)==NULL)
             goto out;
     }
 
-    fclose(fp);
+    HDfclose(fp);
     fp = NULL;
 
     if((dtype = H5LTtext_to_dtype(line, H5LT_DDL))<0)
@@ -1692,7 +1744,7 @@ static int test_complicated_compound(void)
         goto out;
 
     if(line)
-        free(line);
+        HDfree(line);
 
     PASSED();
     return 0;
@@ -1700,9 +1752,9 @@ static int test_complicated_compound(void)
 out:
 
     if(line)
-        free(line);
+        HDfree(line);
     if(fp)
-        fclose(fp);
+        HDfclose(fp);
 
     H5_FAILED();
     return -1;
