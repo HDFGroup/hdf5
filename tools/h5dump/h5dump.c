@@ -477,21 +477,21 @@ set_data_output_file(const char *fname, int is_bin)
                     * so that rawdatastream is changed only when succeeded */
 
     if (rawdatastream && rawdatastream != stdout) {
-        if (fclose(rawdatastream))
-            perror("closing rawdatastream");
+        if (HDfclose(rawdatastream))
+            HDperror("closing rawdatastream");
         else
             rawdatastream = NULL;
     }
 
     /* binary output */
     if (is_bin) {
-        if ((f = fopen(fname, "wb")) != NULL) {
+        if ((f = HDfopen(fname, "wb")) != NULL) {
             rawdatastream = f;
             return 0;
         }
     }
     else {
-        if ((f = fopen(fname, "w")) != NULL) {
+        if ((f = HDfopen(fname, "w")) != NULL) {
             rawdatastream = f;
             return 0;
         }
@@ -518,13 +518,13 @@ set_output_file(const char *fname)
                     * so that rawoutstream is changed only when succeeded */
 
     if (rawoutstream && rawoutstream != stdout) {
-        if (fclose(rawoutstream))
-            perror("closing rawoutstream");
+        if (HDfclose(rawoutstream))
+            HDperror("closing rawoutstream");
         else
             rawoutstream = NULL;
     }
 
-    if ((f = fopen(fname, "w")) != NULL) {
+    if ((f = HDfopen(fname, "w")) != NULL) {
         rawoutstream = f;
         return 0;
     }
@@ -550,13 +550,13 @@ set_error_file(const char *fname)
                     * so that rawerrorstream is changed only when succeeded */
 
     if (rawerrorstream && rawerrorstream != stderr) {
-        if (fclose(rawerrorstream))
-            perror("closing rawerrorstream");
+        if (HDfclose(rawerrorstream))
+            HDperror("closing rawerrorstream");
         else
             rawerrorstream = NULL;
     }
 
-    if ((f = fopen(fname, "w")) != NULL) {
+    if ((f = HDfopen(fname, "w")) != NULL) {
         rawerrorstream = f;
         return 0;
     }
@@ -584,15 +584,15 @@ set_binary_form(const char *form)
 {
     int bform = -1;
 
-    if (strcmp(form,"NATIVE") == 0 || strcmp(form,"MEMORY") == 0) {
+    if (HDstrcmp(form,"NATIVE") == 0 || HDstrcmp(form,"MEMORY") == 0) {
         /* native form */
         bform = 0;
     }
-    else if (strcmp(form,"FILE") == 0) /* file type form */
+    else if (HDstrcmp(form,"FILE") == 0) /* file type form */
         bform = 1;
-    else if (strcmp(form,"LE") == 0) /* convert to little endian */
+    else if (HDstrcmp(form,"LE") == 0) /* convert to little endian */
         bform = 2;
-    else if (strcmp(form,"BE") == 0) /* convert to big endian */
+    else if (HDstrcmp(form,"BE") == 0) /* convert to big endian */
         bform = 3;
 
     return bform;
@@ -619,9 +619,9 @@ set_sort_by(const char *form)
 {
     H5_index_t idx_type = H5_INDEX_UNKNOWN;
 
-    if (strcmp(form,"name")==0) /* H5_INDEX_NAME */
+    if (HDstrcmp(form,"name")==0) /* H5_INDEX_NAME */
         idx_type = H5_INDEX_NAME;
-    else if (strcmp(form,"creation_order")==0) /* H5_INDEX_CRT_ORDER */
+    else if (HDstrcmp(form,"creation_order")==0) /* H5_INDEX_CRT_ORDER */
         idx_type = H5_INDEX_CRT_ORDER;
 
     return idx_type;
@@ -648,9 +648,9 @@ set_sort_order(const char *form)
 {
     H5_iter_order_t iter_order = H5_ITER_UNKNOWN;
 
-    if (strcmp(form,"ascending")==0) /* H5_ITER_INC */
+    if (HDstrcmp(form,"ascending")==0) /* H5_ITER_INC */
         iter_order = H5_ITER_INC;
-    else if (strcmp(form,"descending")==0) /* H5_ITER_DEC */
+    else if (HDstrcmp(form,"descending")==0) /* H5_ITER_DEC */
         iter_order = H5_ITER_DEC;
 
     return iter_order;
@@ -689,7 +689,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
 
     /* count how many integers do we have */
     for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (isdigit(*ptr)) {
+        if (HDisdigit(*ptr)) {
             if (!last_digit)
                 /* the last read character wasn't a digit */
                 size_count++;
@@ -708,11 +708,11 @@ parse_hsize_list(const char *h_list, subset_d *d)
     p_list = (hsize_t *)HDcalloc(size_count, sizeof(hsize_t));
 
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if(isdigit(*ptr)) {
+        if(HDisdigit(*ptr)) {
             /* we should have an integer now */
-            p_list[i++] = (hsize_t)atof(ptr);
+            p_list[i++] = (hsize_t)HDatof(ptr);
 
-            while (isdigit(*ptr))
+            while (HDisdigit(*ptr))
                 /* scroll to end of integer */
                 ptr++;
         }
@@ -744,7 +744,7 @@ parse_subset_params(char *dset)
     struct subset_t *s = NULL;
     register char   *brace;
 
-    if (!disable_compact_subset && ((brace = strrchr(dset, '[')) != NULL)) {
+    if (!disable_compact_subset && ((brace = HDstrrchr(dset, '[')) != NULL)) {
         *brace++ = '\0';
 
         s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
@@ -1196,7 +1196,7 @@ parse_start:
                 usage(h5tools_getprogname());
                 goto error;
             }
-            if (strcmp(opt_arg,":") == 0) {
+            if (HDstrcmp(opt_arg,":") == 0) {
                 xmlnsprefix = "";
             } 
             else {
@@ -1474,7 +1474,7 @@ main(int argc, const char *argv[])
             }
         } 
         else {
-            if (useschema && strcmp(xmlnsprefix,"")) {
+            if (useschema && HDstrcmp(xmlnsprefix,"")) {
                 error_msg("Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
                 h5tools_setstatus(EXIT_FAILURE);
                 goto done;
@@ -1515,7 +1515,7 @@ main(int argc, const char *argv[])
 
         /* alternative first element, depending on schema or DTD. */
         if (useschema) {
-            if (strcmp(xmlnsprefix,"") == 0) {
+            if (HDstrcmp(xmlnsprefix,"") == 0) {
                 HDfprintf(rawoutstream, "<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
                        xml_dtd_uri);
             } 
@@ -1525,7 +1525,7 @@ main(int argc, const char *argv[])
                 char *indx;
 
                 ns = HDstrdup(xmlnsprefix);
-                indx = strrchr(ns,(int)':');
+                indx = HDstrrchr(ns,(int)':');
                 if (indx) *indx = '\0';
 
                 HDfprintf(rawoutstream, "<%sHDF5-File xmlns:%s=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File\" "

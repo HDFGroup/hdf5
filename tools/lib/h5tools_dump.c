@@ -189,22 +189,6 @@ const h5tools_dump_header_t* h5tools_dump_header_format;
 table_t *h5dump_type_table = NULL;  /*type table reference for datatype dump  */
 
 /* local prototypes */
-
-hbool_t h5tools_render_element(FILE *stream, const h5tool_format_t *info,
-                h5tools_context_t *ctx/*in,out*/,
-                h5tools_str_t *buffer/*string into which to render */,
-                hsize_t *curr_pos/*total data element position*/,
-                size_t ncols, hsize_t local_elmt_counter/*element counter*/,
-                hsize_t elmt_counter);
-
-hbool_t h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
-                h5tools_context_t *ctx/*in,out*/,
-                h5tools_str_t *buffer/*string into which to render */,
-                hsize_t *curr_pos/*total data element position*/,
-                size_t ncols, hsize_t *ptdata,
-                hsize_t local_elmt_counter/*element counter*/,
-                hsize_t elmt_counter);
-
 static int h5tools_print_region_data_blocks(hid_t region_id,
         FILE *stream, const h5tool_format_t *info, h5tools_context_t *cur_ctx,
         h5tools_str_t *buffer/*string into which to render */, size_t ncols,
