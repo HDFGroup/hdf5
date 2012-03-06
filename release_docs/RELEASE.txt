@@ -68,7 +68,10 @@ New Features
  
     Tools
     -----
-    - None
+    - h5repack: Improved performance for hanlding big chunked datasets (size > 128MB). 
+      Especially performance would be much better prior to the update, for the cases 
+      that chunk dimentions look like "1024x5x1" (opposite to "1x5x1024"). When big
+      numbers are toward front and small numbers are toward back in chunk dimentions.
 
     High-Level APIs
     ---------------
