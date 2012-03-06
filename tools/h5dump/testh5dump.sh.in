@@ -266,6 +266,7 @@ $SRC_H5DUMP_TESTFILES/tscaleoffset.ddl
 $SRC_H5DUMP_TESTFILES/tshuffle.ddl
 $SRC_H5DUMP_TESTFILES/tslink-1.ddl
 $SRC_H5DUMP_TESTFILES/tslink-2.ddl
+$SRC_H5DUMP_TESTFILES/tslink-D.ddl
 $SRC_H5DUMP_TESTFILES/tsplit_file.ddl
 $SRC_H5DUMP_TESTFILES/tstr-1.ddl
 $SRC_H5DUMP_TESTFILES/tstr-2.ddl
@@ -719,7 +720,7 @@ TOOLTEST tattr-1.ddl --enable-error-stack tattr.h5
 # test for displaying the selected attributes of string type and scalar space
 TOOLTEST tattr-2.ddl --enable-error-stack -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5
 # test for header and error messages
-TOOLTEST tattr-3.ddl --header -a /attr2 --attribute=/attr tattr.h5
+TOOLTEST3 tattr-3.ddl --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5
 # test for displaying at least 9 attributes on root from a BE machine
 TOOLTEST tattr-4_be.ddl --enable-error-stack tattr4_be.h5
 # test for displaying attributes in shared datatype (also in group and dataset)
@@ -877,57 +878,57 @@ TOOLTEST tindicessub3.ddl --enable-error-stack -d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2 
 TOOLTEST tindicessub4.ddl --enable-error-stack -d 4d -s 0,0,1,2  -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2  taindices.h5
 
 #Exceed the dimensions for subsetting
-TOOLTEST texceedsubstart.ddl -d 1d -s 1,3 taindices.h5
-TOOLTEST texceedsubcount.ddl -d 1d -c 1,3 taindices.h5
-TOOLTEST texceedsubstride.ddl -d 1d -S 1,3 taindices.h5
-TOOLTEST texceedsubblock.ddl -d 1d -k 1,3 taindices.h5
+TOOLTEST texceedsubstart.ddl --enable-error-stack -d 1d -s 1,3 taindices.h5
+TOOLTEST texceedsubcount.ddl --enable-error-stack -d 1d -c 1,3 taindices.h5
+TOOLTEST texceedsubstride.ddl --enable-error-stack -d 1d -S 1,3 taindices.h5
+TOOLTEST texceedsubblock.ddl --enable-error-stack -d 1d -k 1,3 taindices.h5
 
 
 # tests for filters
 # SZIP
-option="-H -p -d szip tfilters.h5"
+option="--enable-error-stack -H -p -d szip tfilters.h5"
 if test $USE_FILTER_SZIP != "yes"; then
  SKIP $option
 else
 TOOLTEST tszip.ddl $option
 fi
 # deflate
-option="-H -p -d deflate tfilters.h5"
+option="--enable-error-stack -H -p -d deflate tfilters.h5"
 if test $USE_FILTER_DEFLATE != "yes"; then
  SKIP $option
 else
  TOOLTEST tdeflate.ddl $option
 fi
 # shuffle
-option="-H -p -d shuffle tfilters.h5"
+option="--enable-error-stack -H -p -d shuffle tfilters.h5"
 if test $USE_FILTER_SHUFFLE != "yes"; then
  SKIP $option
 else
  TOOLTEST tshuffle.ddl $option
 fi
 # fletcher32
-option="-H -p -d fletcher32  tfilters.h5"
+option="--enable-error-stack -H -p -d fletcher32  tfilters.h5"
 if test $USE_FILTER_FLETCHER32 != "yes"; then
  SKIP $option
 else
  TOOLTEST tfletcher32.ddl $option
 fi
 # nbit
-option="-H -p -d nbit  tfilters.h5"
+option="--enable-error-stack -H -p -d nbit  tfilters.h5"
 if test $USE_FILTER_NBIT != "yes"; then
  SKIP $option
 else
  TOOLTEST tnbit.ddl $option
 fi
 # scaleoffset
-option="-H -p -d scaleoffset  tfilters.h5"
+option="--enable-error-stack -H -p -d scaleoffset  tfilters.h5"
 if test $USE_FILTER_SCALEOFFSET != "yes"; then
  SKIP $option
 else
  TOOLTEST tscaleoffset.ddl $option
 fi
 # all
-option="-H -p -d all  tfilters.h5"
+option="--enable-error-stack -H -p -d all  tfilters.h5"
 if test $USE_FILTER_FLETCHER32 != "yes" -o  $USE_FILTER_SZIP != "yes" -o  $USE_FILTER_DEFLATE != "yes" -o  $USE_FILTER_SHUFFLE != "yes" -o $USE_FILTER_NBIT != "yes" -o  $USE_FILTER_SCALEOFFSET != "yes"; then
  SKIP $option
 else
@@ -1024,7 +1025,7 @@ TOOLTEST textlinkfar.ddl textlinkfar.h5
 
 # test for dangling external links
 # JIRA HDFFV-7936 TOOLTEST textlink.ddl --enable-error-stack textlink.h5
-TOOLTEST textlink.ddl textlink.h5
+TOOLTEST3 textlink.ddl --enable-error-stack textlink.h5
 
 # test for error stack display (BZ2048)
 TOOLTEST3 filter_fail.ddl --enable-error-stack filter_fail.h5
@@ -1036,7 +1037,7 @@ TOOLTEST tall-6.ddl --enable-error-stack -y -o data -d /g1/g1.1/dset1.1.1 tall.h
 
 # test failure handling
 # Missing file name
-TOOLTEST tnofilename-with-packed-bits.ddl
+TOOLTEST tnofilename-with-packed-bits.ddl --enable-error-stack
 # Limits:
 # Maximum number of packed bits is 8 (for now).
 # Maximum integer size is 64 (for now).
@@ -1095,23 +1096,23 @@ TOOLTEST tpbitsCompound.ddl --enable-error-stack -d /dset1 -M 0,1,1,1 tcompound.
 TOOLTEST tpbitsArray.ddl --enable-error-stack -d /Dataset1 -M 0,1,1,1 tarray1.h5
 # Test Error handling.
 # Too many packed bits requested. Max is 8 for now.
-TOOLTEST tpbitsMaxExceeded.ddl -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
+TOOLTEST tpbitsMaxExceeded.ddl --enable-error-stack -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
 # Offset too large. Max is 7 (8-1) for now.
-TOOLTEST tpbitsOffsetExceeded.ddl -d /DS08BITS -M 64,1 packedbits.h5
+TOOLTEST tpbitsOffsetExceeded.ddl --enable-error-stack -d /DS08BITS -M 64,1 packedbits.h5
 TOOLTEST tpbitsCharOffsetExceeded.ddl --enable-error-stack -d /DS08BITS -M 8,1 packedbits.h5
 TOOLTEST tpbitsIntOffsetExceeded.ddl --enable-error-stack -d /DS16BITS -M 16,1 packedbits.h5
 TOOLTEST tpbitsLongOffsetExceeded.ddl --enable-error-stack -d /DS32BITS -M 32,1 packedbits.h5
 # Bad offset, must not be negative.
-TOOLTEST tpbitsOffsetNegative.ddl -d /DS08BITS -M -1,1 packedbits.h5
+TOOLTEST tpbitsOffsetNegative.ddl --enable-error-stack -d /DS08BITS -M -1,1 packedbits.h5
 # Bad length, must not be positive.
-TOOLTEST tpbitsLengthPositive.ddl -d /DS08BITS -M 4,0 packedbits.h5
+TOOLTEST tpbitsLengthPositive.ddl --enable-error-stack -d /DS08BITS -M 4,0 packedbits.h5
 # Offset+Length is too large. Max is 8 for now.
-TOOLTEST tpbitsLengthExceeded.ddl -d /DS08BITS -M 37,28 packedbits.h5
+TOOLTEST tpbitsLengthExceeded.ddl --enable-error-stack -d /DS08BITS -M 37,28 packedbits.h5
 TOOLTEST tpbitsCharLengthExceeded.ddl --enable-error-stack -d /DS08BITS -M 2,7 packedbits.h5
 TOOLTEST tpbitsIntLengthExceeded.ddl --enable-error-stack -d /DS16BITS -M 10,7 packedbits.h5
 TOOLTEST tpbitsLongLengthExceeded.ddl --enable-error-stack -d /DS32BITS -M 26,7 packedbits.h5
 # Incomplete pair of packed bits request.
-TOOLTEST tpbitsIncomplete.ddl -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5
+TOOLTEST tpbitsIncomplete.ddl --enable-error-stack -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5
 
 
 # Report test results and exit

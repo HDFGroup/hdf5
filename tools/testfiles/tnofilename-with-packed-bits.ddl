@@ -94,3 +94,4 @@ usage: h5dump [OPTIONS] file
 
       h5dump -d /dset -M 0,1,4,3 quux.h5
 
+h5dump error: missing file name
