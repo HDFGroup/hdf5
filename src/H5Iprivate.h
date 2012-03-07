@@ -27,6 +27,7 @@
 
 /* Private headers needed by this file */
 #include "H5private.h"
+#include "H5FLprivate.h"	/* Free Lists                           */
 
 /* Macro to determine if a H5I_type_t is a "library type" */
 #define H5I_IS_LIB_TYPE( type ) (type > 0 && type < H5I_NTYPES)
@@ -44,11 +45,18 @@
 #define H5I_REFID_HASHSIZE		64
 #define H5I_VFL_HASHSIZE		64
 #define H5I_VOL_HASHSIZE		64
+#define H5I_UID_HASHSIZE		64
 #define H5I_GENPROPCLS_HASHSIZE		64
 #define H5I_GENPROPOBJ_HASHSIZE		128
 #define H5I_ERRCLS_HASHSIZE		64
 #define H5I_ERRMSG_HASHSIZE		64
 #define H5I_ERRSTK_HASHSIZE		64
+
+/* type of the ID passed to users */
+typedef struct H5I_t {
+    hid_t vol_id;  /* ID for VOL plugin */
+    hid_t obj_id;  /* actual id for object */
+} H5I_t;
 
 /* Private Functions in H5I.c */
 H5_DLL H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved, H5I_free_t free_func);
@@ -72,6 +80,6 @@ H5_DLL int H5I_dec_app_ref_always_close(hid_t id);
 H5_DLL int H5I_inc_type_ref(H5I_type_t type);
 H5_DLL herr_t H5I_dec_type_ref(H5I_type_t type);
 H5_DLL int H5I_get_type_ref(H5I_type_t type);
-
+H5_DLL herr_t H5I_replace_with_uids(hid_t *oid_list, ssize_t num_ids);
 #endif /* _H5Iprivate_H */
 

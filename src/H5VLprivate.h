@@ -30,6 +30,7 @@
 /* Library Private Typedefs */
 /****************************/
 
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -50,9 +51,10 @@ H5_DLL hid_t  H5VL_open(const char *name, unsigned flags, hid_t fcpl_id,
                         hid_t fapl_id, hid_t dxpl_id);
 H5_DLL hid_t  H5VL_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5VL_close(hid_t file_id);
+H5_DLL herr_t H5VL_flush(hid_t file_id, H5F_scope_t scope);
+H5_DLL herr_t H5VL_get(hid_t uid, H5VL_file_get_t get_type, void *data, int argc, void **argv);
 H5_DLL herr_t H5VL_fapl_open(struct H5P_genplist_t *plist, hid_t vol_id, const void *vol_info);
 H5_DLL herr_t H5VL_fapl_copy(hid_t vol_id, const void *fapl, void **copied_fapl);
 H5_DLL herr_t H5VL_fapl_close(hid_t vol_id, void *fapl);
-H5_DLL herr_t H5VL_dec_file_vol_ref(H5F_t *f);
 
 #endif /* !_H5VLprivate_H */

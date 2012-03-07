@@ -40,7 +40,6 @@ typedef struct H5F_file_t H5F_file_t;
 /* Block aggregation structure */
 typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 
-
 /*
  * Encode and decode macros for file meta-data.
  * Currently, all file meta-data is little-endian.

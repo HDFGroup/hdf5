@@ -580,17 +580,30 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gget_info(hid_t grp_id, H5G_info_t *grp_info)
+H5Gget_info(hid_t uid, H5G_info_t *grp_info)
 {
     H5I_type_t  id_type;                /* Type of ID */
     H5G_loc_t	loc;                    /* Location of group */
+    H5I_t       *uid_info;                    /* user id structure */
+    hid_t       grp_id;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Gget_info, FAIL)
     H5TRACE2("e", "i*x", grp_id, grp_info);
 
     /* Check args */
-    id_type = H5I_get_type(grp_id);
+    id_type = H5I_get_type(uid);
+
+    if (H5I_UID == id_type) {
+        if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+        grp_id = uid_info->obj_id;
+        id_type = H5I_get_type(grp_id);
+    }
+    else {
+        grp_id = uid;
+    }
+
     if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(!grp_info)

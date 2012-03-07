@@ -96,13 +96,24 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_get_sohm_mesg_count_test(hid_t file_id, unsigned type_id,
+H5F_get_sohm_mesg_count_test(hid_t uid, unsigned type_id,
     size_t *mesg_count)
 {
     H5F_t	*file;                  /* File info */
+    H5I_t       *uid_info;
+    hid_t       file_id;
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_get_sohm_mesg_count_test)
+
+    if (H5I_UID == H5I_get_type(uid)) {
+        if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+        file_id = uid_info->obj_id;
+    }
+    else {
+        file_id = uid;
+    }
 
     /* Check arguments */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -134,12 +145,23 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_check_cached_stab_test(hid_t file_id)
+H5F_check_cached_stab_test(hid_t uid)
 {
     H5F_t	*file;                  /* File info */
+    H5I_t       *uid_info; 
+    hid_t       file_id;
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_check_cached_stab_test)
+
+    if (H5I_UID == H5I_get_type(uid)) {
+        if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+        file_id = uid_info->obj_id;
+    }
+    else {
+        file_id = uid;
+    }
 
     /* Check arguments */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -168,12 +190,23 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_get_maxaddr_test(hid_t file_id, haddr_t *maxaddr)
+H5F_get_maxaddr_test(hid_t uid, haddr_t *maxaddr)
 {
     H5F_t	*file;                  /* File info */
+    H5I_t       *uid_info;
+    hid_t       file_id;
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_get_maxaddr_test)
+
+    if (H5I_UID == H5I_get_type(uid)) {
+        if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+        file_id = uid_info->obj_id;
+    }
+    else {
+        file_id = uid;
+    }
 
     /* Check arguments */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))

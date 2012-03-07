@@ -157,13 +157,24 @@ static herr_t H5G_loc_get_comment_cb(H5G_loc_t *grp_loc, const char *name,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc(hid_t loc_id, H5G_loc_t *loc)
+H5G_loc(hid_t id, H5G_loc_t *loc)
 {
+    H5I_t       *uid_info;              /* user id structure */
+    hid_t       loc_id;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_loc, FAIL)
 
+    if (H5I_UID == H5I_get_type(id)) {
+        if(NULL == (uid_info = (H5I_t *)H5I_object(id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+        loc_id = uid_info->obj_id;
+    }
+    else {
+        loc_id = id;
+    }
     switch(H5I_get_type(loc_id)) {
+        case H5I_UID:
         case H5I_FILE:
             {
                 H5F_t	*f;
@@ -248,6 +259,7 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object ID")

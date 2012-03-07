@@ -1148,20 +1148,33 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
+H5Literate(hid_t uid, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t *idx_p, H5L_iterate_t op, void *op_data)
 {
     H5I_type_t  id_type;        /* Type of ID */
     H5G_link_iterate_t lnk_op;  /* Link operator */
     hsize_t     last_lnk;       /* Index of last object looked at */
     hsize_t	idx;            /* Internal location to hold index */
+    H5I_t *uid_info;            /* user id structure */
+    hid_t grp_id;
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(H5Literate, FAIL)
     H5TRACE6("e", "iIiIo*hx*x", grp_id, idx_type, order, idx_p, op, op_data);
 
     /* Check arguments */
-    id_type = H5I_get_type(grp_id);
+    id_type = H5I_get_type(uid);
+
+    if (H5I_UID == id_type) {
+        if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+        grp_id = uid_info->obj_id;
+        id_type = H5I_get_type(grp_id);
+    }
+    else {
+        grp_id = uid;
+    }
+
     if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -1293,17 +1306,30 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
+H5Lvisit(hid_t uid, H5_index_t idx_type, H5_iter_order_t order,
     H5L_iterate_t op, void *op_data)
 {
     H5I_type_t  id_type;                /* Type of ID */
+    H5I_t *uid_info;            /* user id structure */
+    hid_t grp_id;
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Lvisit, FAIL)
     H5TRACE5("e", "iIiIox*x", grp_id, idx_type, order, op, op_data);
 
+    id_type = H5I_get_type(uid);
+
+    if (H5I_UID == id_type) {
+        if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+        grp_id = uid_info->obj_id;
+        id_type = H5I_get_type(grp_id);
+    }
+    else {
+        grp_id = uid;
+    }
+
     /* Check args */
-    id_type = H5I_get_type(grp_id);
     if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
