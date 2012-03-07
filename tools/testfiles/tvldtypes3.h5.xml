@@ -5,9 +5,9 @@
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
-         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <hdf5:FillValue>
-               <hdf5:NoFill/>
+            <hdf5:NoFill/>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>
@@ -47,7 +47,10 @@
    <!-- Note: format of compound data not specified -->
       <hdf5:Data>
          <hdf5:DataFromFile>
-         0 0  0 10 6.66667  10 11 20 13.3333  20 21 22 30 20  30 31 32 33
+         0 0  0
+         10 6.66667  10 11
+         20 13.3333  20 21 22
+         30 20  30 31 32 33
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>

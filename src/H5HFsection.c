@@ -327,7 +327,7 @@ H5HF_sect_init_cls(H5FS_section_class_t *cls, H5HF_hdr_t *hdr)
     H5HF_sect_private_t *cls_prvt;      /* Pointer to class private info */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_init_cls)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(cls);
@@ -369,7 +369,7 @@ H5HF_sect_term_cls(H5FS_section_class_t *cls)
     H5HF_sect_private_t *cls_prvt;      /* Pointer to class private info */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_term_cls)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(cls);
@@ -410,7 +410,7 @@ H5HF_sect_node_new(unsigned sect_type, haddr_t sect_addr, hsize_t sect_size,
     H5HF_free_section_t *new_sect;      /* New section */
     H5HF_free_section_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_node_new)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(H5F_addr_defined(sect_addr));
@@ -454,7 +454,7 @@ H5HF_sect_node_free(H5HF_free_section_t *sect, H5HF_indirect_t *iblock)
 {
     herr_t ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_node_free)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(sect);
 
@@ -491,7 +491,7 @@ H5HF_sect_single_new(hsize_t sect_off, size_t sect_size,
     H5HF_free_section_t *sect = NULL;   /* 'Single' free space section to add */
     H5HF_free_section_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_new)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -545,7 +545,7 @@ H5HF_sect_single_locate_parent(H5HF_hdr_t *hdr, hid_t dxpl_id, hbool_t refresh,
     hbool_t did_protect;                /* Whether we protected the indirect block or not */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_locate_parent)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -604,7 +604,7 @@ H5HF_sect_single_revive(H5HF_hdr_t *hdr, hid_t dxpl_id,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_revive)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -653,7 +653,7 @@ H5HF_sect_single_dblock_info(H5HF_hdr_t *hdr, hid_t dxpl_id,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HF_sect_single_dblock_info, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -740,7 +740,7 @@ H5HF_sect_single_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_reduce)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -797,7 +797,7 @@ H5HF_sect_single_full_dblock(H5HF_hdr_t *hdr, hid_t dxpl_id,
     size_t dblock_overhead;             /* Direct block's overhead */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_full_dblock)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(sect);
@@ -853,7 +853,7 @@ H5HF_sect_single_add(H5FS_section_info_t *_sect, unsigned *flags, void *_udata)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_add)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Don't need to check section if we are deserializing, because it should
      *  have already been checked when it was first added
@@ -907,7 +907,7 @@ H5HF_sect_single_deserialize(const H5FS_section_class_t UNUSED *cls,
     H5HF_free_section_t *new_sect;      /* New section */
     H5FS_section_info_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_deserialize)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(H5F_addr_defined(sect_addr));
@@ -949,7 +949,7 @@ H5HF_sect_single_can_merge(const H5FS_section_info_t *_sect1,
     const H5HF_free_section_t *sect2 = (const H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
     htri_t ret_value = FALSE;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_single_can_merge)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
     HDassert(sect1);
@@ -997,7 +997,7 @@ H5HF_sect_single_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
     hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_merge)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(sect1);
@@ -1054,7 +1054,7 @@ H5HF_sect_single_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     htri_t ret_value = FALSE;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_single_can_shrink)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
     HDassert(sect);
@@ -1113,7 +1113,7 @@ H5HF_sect_single_shrink(H5FS_section_info_t **_sect, void UNUSED *_udata)
     size_t dblock_size;                 /* Section's direct block's size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_shrink)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(sect);
@@ -1175,7 +1175,7 @@ H5HF_sect_single_free(H5FS_section_info_t *_sect)
     H5HF_indirect_t *parent = NULL;     /* Parent indirect block for section */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_free)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(sect);
@@ -1214,7 +1214,7 @@ H5HF_sect_single_valid(const H5FS_section_class_t UNUSED *cls, const H5FS_sectio
 {
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Pointer to section to check */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_single_valid)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
     HDassert(sect);
@@ -1302,7 +1302,7 @@ H5HF_sect_row_create(haddr_t sect_off, hsize_t sect_size, hbool_t is_first,
     H5HF_free_section_t *sect = NULL;   /* 'Row' section created */
     H5HF_free_section_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(sect_size);
@@ -1348,7 +1348,7 @@ H5HF_sect_row_from_single(H5HF_hdr_t *hdr, H5HF_free_section_t *sect,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_from_single)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -1396,7 +1396,7 @@ H5HF_sect_row_revive(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sect)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_revive)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -1438,7 +1438,7 @@ H5HF_sect_row_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sect,
     hbool_t alloc_from_start;           /* Whether to allocate from the end of the row */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_reduce)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -1512,7 +1512,7 @@ H5HF_sect_row_first(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sect)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_first)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(hdr);
@@ -1554,7 +1554,7 @@ H5HF_sect_row_get_iblock(H5HF_free_section_t *sect)
 {
     H5HF_indirect_t *ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_row_get_iblock)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -1593,7 +1593,7 @@ H5HF_sect_row_init_cls(H5FS_section_class_t *cls, void *_udata)
     H5HF_hdr_t *hdr = (H5HF_hdr_t *)_udata; /* Fractal heap header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_init_cls)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(cls);
@@ -1636,7 +1636,7 @@ H5HF_sect_row_term_cls(H5FS_section_class_t *cls)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_term_cls)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(cls);
@@ -1672,7 +1672,7 @@ H5HF_sect_row_serialize(const H5FS_section_class_t *cls,
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_serialize)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(cls);
@@ -1716,7 +1716,7 @@ H5HF_sect_row_deserialize(const H5FS_section_class_t *cls, hid_t dxpl_id,
     H5HF_hdr_t *hdr;                    /* Fractal heap header */
     H5FS_section_info_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_deserialize)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(cls);
@@ -1760,7 +1760,7 @@ H5HF_sect_row_can_merge(const H5FS_section_info_t *_sect1,
     H5HF_free_section_t *top_indir_sect1, *top_indir_sect2; /* Top indirect section for each row */
     htri_t ret_value = FALSE;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_row_can_merge)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
     HDassert(sect1);
@@ -1819,7 +1819,7 @@ H5HF_sect_row_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
     hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_merge)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(sect1);
@@ -1885,7 +1885,7 @@ H5HF_sect_row_can_shrink(const H5FS_section_info_t *_sect, void UNUSED *_udata)
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     htri_t ret_value = FALSE;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_row_can_shrink)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
     HDassert(sect);
@@ -1924,7 +1924,7 @@ H5HF_sect_row_shrink(H5FS_section_info_t **_sect, void *_udata)
     hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_shrink)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(sect);
@@ -1965,7 +1965,7 @@ H5HF_sect_row_free_real(H5HF_free_section_t *sect)
 {
     herr_t ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_free_real)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(sect);
 
@@ -1998,7 +1998,7 @@ H5HF_sect_row_free(H5FS_section_info_t *_sect)
     H5HF_free_section_t *sect = (H5HF_free_section_t *)_sect;   /* Pointer to section to free */
     herr_t ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_row_free)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(sect);
     HDassert(sect->u.row.under);
@@ -2038,7 +2038,7 @@ H5HF_sect_row_valid(const H5FS_section_class_t *cls, const H5FS_section_info_t *
     const H5HF_free_section_t *indir_sect;   /* Pointer to underlying indirect section */
     unsigned indir_idx;         /* Index of row in underlying indirect section's row array */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_row_valid)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Basic sanity check */
     HDassert(cls);
@@ -2096,7 +2096,7 @@ H5HF_sect_row_debug(const H5FS_section_info_t *_sect,
 {
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;       /* Section to dump info */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_row_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
     HDassert(sect);
@@ -2143,7 +2143,7 @@ H5HF_sect_indirect_iblock_off(const H5HF_free_section_t *sect)
 {
     hsize_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_indirect_iblock_off)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -2174,7 +2174,7 @@ H5HF_sect_indirect_top(H5HF_free_section_t *sect)
 {
     H5HF_free_section_t *ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_indirect_top)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -2210,7 +2210,7 @@ H5HF_sect_indirect_init_cls(H5FS_section_class_t *cls, void *_udata)
     H5HF_hdr_t *hdr = (H5HF_hdr_t *)_udata; /* Fractal heap header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_init_cls)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(cls);
@@ -2247,7 +2247,7 @@ H5HF_sect_indirect_term_cls(H5FS_section_class_t *cls)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_term_cls)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(cls);
@@ -2283,7 +2283,7 @@ H5HF_sect_indirect_new(H5HF_hdr_t *hdr, haddr_t sect_off, hsize_t sect_size,
     H5HF_free_section_t *sect = NULL;   /* 'Indirect' free space section to add */
     H5HF_free_section_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_new)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -2354,7 +2354,7 @@ H5HF_sect_indirect_for_row(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock,
     H5HF_free_section_t *sect = NULL;   /* 'Indirect' free space section to add */
     H5HF_free_section_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_for_row)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -2428,7 +2428,7 @@ H5HF_sect_indirect_init_rows(H5HF_hdr_t *hdr, hid_t dxpl_id,
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_init_rows)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -2670,7 +2670,7 @@ H5HF_sect_indirect_add(H5HF_hdr_t *hdr, hid_t dxpl_id,
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_add)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -2738,7 +2738,7 @@ H5HF_sect_indirect_decr(H5HF_free_section_t *sect)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_decr)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -2792,7 +2792,7 @@ H5HF_sect_indirect_revive_row(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_revive_row)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -2858,7 +2858,7 @@ H5HF_sect_indirect_revive(H5HF_hdr_t *hdr, hid_t dxpl_id,
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_revive)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -2927,7 +2927,7 @@ H5HF_sect_indirect_reduce_row(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_
     H5HF_free_section_t *peer_sect = NULL; /* Peer indirect section */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_reduce_row)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -3194,7 +3194,7 @@ H5HF_sect_indirect_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *s
     H5HF_free_section_t *peer_sect = NULL; /* Peer indirect section */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_reduce)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -3421,7 +3421,7 @@ H5HF_sect_indirect_is_first(H5HF_free_section_t *sect)
 {
     hbool_t ret_value = FALSE;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_indirect_is_first)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(sect);
@@ -3456,7 +3456,7 @@ H5HF_sect_indirect_first(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *se
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_first)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(hdr);
@@ -3506,7 +3506,7 @@ done:
 static H5HF_indirect_t *
 H5HF_sect_indirect_get_iblock(H5HF_free_section_t *sect)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_indirect_get_iblock)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -3549,7 +3549,7 @@ H5HF_sect_indirect_merge_row(H5HF_hdr_t *hdr, hid_t dxpl_id,
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_merge_row)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check parameters */
     HDassert(hdr);
@@ -3786,7 +3786,7 @@ H5HF_sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
     unsigned par_entry;                 /* Entry within parent indirect section */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_build_parent)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check parameters */
     HDassert(hdr);
@@ -3854,7 +3854,7 @@ H5HF_sect_indirect_shrink(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *s
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_shrink)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check parameters */
     HDassert(hdr);
@@ -3911,7 +3911,7 @@ H5HF_sect_indirect_serialize(H5HF_hdr_t *hdr, const H5HF_free_section_t *sect,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_serialize)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(hdr);
@@ -3978,7 +3978,7 @@ H5HF_sect_indirect_deserialize(H5HF_hdr_t *hdr, hid_t dxpl_id,
     unsigned end_col;                   /* End column in indirect block */
     H5FS_section_info_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_deserialize)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(hdr);
@@ -4048,7 +4048,7 @@ H5HF_sect_indirect_free(H5HF_free_section_t *sect)
     H5HF_indirect_t *iblock = NULL;     /* Indirect block for section */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_free)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(sect);
 
@@ -4097,7 +4097,7 @@ H5HF_sect_indirect_valid(const H5HF_hdr_t *hdr, const H5HF_free_section_t *sect)
     unsigned end_entry;         /* Entry for last block covered */
     unsigned u;                 /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_indirect_valid)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check arguments */
     HDassert(hdr);
@@ -4195,7 +4195,7 @@ static herr_t
 H5HF_sect_indirect_debug(const H5HF_free_section_t *sect,
     FILE *stream, int indent, int fwidth)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_sect_indirect_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
     HDassert(sect);

@@ -1,0 +1,2 @@
+1 differences found
+EXIT CODE: 1

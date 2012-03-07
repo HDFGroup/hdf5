@@ -119,7 +119,7 @@ DESCRIPTION
 static herr_t
 H5VL_native_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5VL_native_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5VL_native_init())
 } /* H5VL_native_init_interface() */
@@ -144,7 +144,7 @@ H5VL_native_init(void)
 {
     hid_t ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5VL_native_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if(H5I_VOL != H5I_get_type(H5VL_NATIVE_g))
         H5VL_NATIVE_g = H5VL_register(&H5VL_native_g, sizeof(H5VL_class_t), FALSE);
@@ -172,7 +172,7 @@ done:
 static herr_t
 H5VL_native_term(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5VL_native_term)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Reset VOL ID */
     H5VL_NATIVE_g = 0;
@@ -200,7 +200,7 @@ H5Pset_fapl_native(hid_t fapl_id)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_fapl_native, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", fapl_id);
 
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -233,7 +233,7 @@ H5VL_native_open(const char *name, unsigned flags, hid_t fcpl_id,
     H5F_t *new_file;           /* file struct */
     hid_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5VL_native_open)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Open the file */ 
     if(NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id, dxpl_id)))
@@ -279,7 +279,7 @@ H5VL_native_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_i
     H5F_t *new_file;           /* file struct */
     hid_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5VL_native_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Create the file */ 
     if(NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
@@ -320,7 +320,7 @@ H5VL_native_close(hid_t file_id)
     H5F_t *f;
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5VL_native_close)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check/fix arguments. */
     if(H5I_FILE != H5I_get_type(file_id))
@@ -374,7 +374,7 @@ H5VL_native_flush(hid_t object_id, H5F_scope_t scope)
     H5O_loc_t	*oloc = NULL;           /* Object location for ID */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5VL_native_flush)
+    FUNC_ENTER_NOAPI_NOINIT
 
     switch(H5I_get_type(object_id)) {
         case H5I_FILE:
@@ -493,7 +493,7 @@ H5VL_native_get(hid_t obj_id, H5VL_file_get_t get_type, void *data, int argc, vo
     H5F_t	*f = NULL;              /* File struct */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5VL_native_get)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check/fix arguments. */
     if(H5I_get_type(obj_id) == H5I_FILE ) {

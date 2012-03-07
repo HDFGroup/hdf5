@@ -28,8 +28,14 @@
 if test X = "X$cc_flags_set"; then
     # PathScale compiler spits out gcc version string too. Need to
     # filter it out.
+    # icc beginning with version 12 includes a "gcc version compatiblilty"
+    # string, causing the gcc H5_CFLAGS to be erroneously added.  The line
+    # "grep -v 'icc version'" causes the discarding of any output
+    # containing 'icc version'.  The cc_version for icc is correctly determined
+    # and flags added in the intel-flags script.
     cc_version="`$CC $CFLAGS $H5_CFLAGS -v 2>&1 | grep -v 'PathScale' |\
-	grep 'gcc version' | sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
+        grep -v 'icc version' |\
+        grep 'gcc version' | sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
     cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
     cc_version=`echo $cc_version |sed 's/[-a-z]//g'`
     if test X = "X$cc_vendor" -a X != "X$cc_version"; then

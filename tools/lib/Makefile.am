@@ -26,7 +26,7 @@ INCLUDES=-I$(top_srcdir)/src
 # This is our main target, the h5tools library.
 noinst_LTLIBRARIES=libh5tools.la
 
-libh5tools_la_SOURCES=h5tools.c h5tools_str.c h5tools_utils.c h5diff.c \
+libh5tools_la_SOURCES=h5tools.c h5tools_dump.c h5tools_str.c h5tools_utils.c h5diff.c \
     h5diff_array.c h5diff_attr.c h5diff_dset.c h5diff_util.c h5trav.c  \
     h5tools_filters.c h5tools_ref.c h5tools_type.c
 

@@ -339,6 +339,11 @@ main(int argc, char **argv)
     int exit_value = EXIT_SUCCESS;
     struct options *opts = NULL;
 
+#ifndef STANDALONE
+    /* Initialize h5tools lib */
+    h5tools_init();
+#endif
+
     output = stdout;
 
     /* initialize MPI and get the maximum num of processors we started with */

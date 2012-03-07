@@ -3,9 +3,9 @@ DATASET "str4" {
    DATATYPE  H5T_STD_I8LE
    DATASPACE  SIMPLE { ( 93 ) / ( 93 ) }
    DATA {
-         "Four score and seven
+      "Four score and seven
             years ago our forefathers brought fo"
-         "rth on this continent a new nation\000"
+      "rth on this continent a new nation\000"
    }
 }
 }

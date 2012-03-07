@@ -87,7 +87,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
  * Print the current location on the standard output stream.
  */
 #define AT()     printf ("   at %s:%d in %s()...\n",        \
-        __FILE__, __LINE__, __FUNCTION__);
+        __FILE__, __LINE__, FUNC);
 
 /*
  * The name of the test is printed by saying TESTING("something") which will

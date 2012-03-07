@@ -114,7 +114,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned *ioflags,
     uint8_t mesg_buf[H5O_MESG_BUF_SIZE]; /* Buffer for deserializing messages */
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_read)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -226,7 +226,7 @@ H5O_shared_link_adj(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_link_adj)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -315,7 +315,7 @@ H5O_shared_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned *ioflags,
     unsigned version;           /* Shared message version */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(f);
@@ -400,7 +400,7 @@ H5O_shared_encode(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_me
 {
     unsigned    version;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(f);
@@ -448,7 +448,7 @@ H5O_shared_encode(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_me
 herr_t
 H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_set_shared)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(dst);
@@ -479,7 +479,7 @@ H5O_shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
 {
     size_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(sh_mesg->type == H5O_SHARE_TYPE_COMMITTED) {
         ret_value = (size_t)1 +		/*version			*/
@@ -515,7 +515,7 @@ H5O_shared_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_delete)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -558,7 +558,7 @@ H5O_shared_link(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_link)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -596,7 +596,7 @@ H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst,
     H5O_shared_t        *shared_dst = (H5O_shared_t *)_native_dst; /* Alias to shared info in native destination message */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(file_src);
@@ -662,7 +662,7 @@ H5O_shared_post_copy_file(H5F_t *f, const H5O_msg_class_t *mesg_type,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_post_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -711,7 +711,7 @@ done:
 herr_t
 H5O_shared_debug(const H5O_shared_t *mesg, FILE *stream, int indent, int fwidth)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shared_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(mesg);

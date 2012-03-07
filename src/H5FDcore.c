@@ -181,7 +181,7 @@ DESCRIPTION
 static herr_t
 H5FD_core_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_core_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5FD_core_init())
 } /* H5FD_core_init_interface() */
@@ -209,7 +209,7 @@ H5FD_core_init(void)
 {
     hid_t ret_value=H5FD_CORE_g;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if (H5I_VFL!=H5Iget_type(H5FD_CORE_g))
         H5FD_CORE_g = H5FD_register(&H5FD_core_g,sizeof(H5FD_class_t),FALSE);
@@ -237,7 +237,7 @@ done:
 static herr_t
 H5FD_core_term(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_core_term)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Reset VFL ID */
     H5FD_CORE_g=0;
@@ -276,7 +276,7 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_fapl_core, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "izb", fapl_id, increment, backing_store);
 
     /* Check argument */
@@ -323,7 +323,7 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_fapl_core, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", fapl_id, increment, backing_store);
 
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -366,7 +366,7 @@ H5FD_core_fapl_get(H5FD_t *_file)
     H5FD_core_fapl_t	*fa;
     void      *ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_fapl_get, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (fa = (H5FD_core_fapl_t *)H5MM_calloc(sizeof(H5FD_core_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -424,7 +424,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     int			fd=-1;
     H5FD_t		*ret_value;
 
-    FUNC_ENTER_NOAPI(H5FD_core_open, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     if(!name || !*name)
@@ -541,7 +541,7 @@ H5FD_core_close(H5FD_t *_file)
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_close, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Flush any changed buffers */
     if(H5FD_core_flush(_file, (hid_t)-1, TRUE) < 0)
@@ -594,7 +594,7 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_core_t	*f2 = (const H5FD_core_t*)_f2;
     int			ret_value = 0;
 
-    FUNC_ENTER_NOAPI(H5FD_core_cmp, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(f1->fd >= 0 && f2->fd >= 0) {
         /* Compare low level file information for backing store */
@@ -669,7 +669,7 @@ H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
 {
     const H5FD_core_t	*file = (const H5FD_core_t*)_file;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_core_query)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -713,15 +713,10 @@ static haddr_t
 H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 {
     const H5FD_core_t	*file = (const H5FD_core_t*)_file;
-    haddr_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_get_eoa, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Set return value */
-    ret_value=file->eoa;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(file->eoa)
 }
 
 
@@ -752,7 +747,7 @@ H5FD_core_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_set_eoa, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(ADDR_OVERFLOW(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "address overflow")
@@ -787,17 +782,11 @@ done:
 static haddr_t
 H5FD_core_get_eof(const H5FD_t *_file)
 {
-    haddr_t ret_value;   /* Return value */
-
     const H5FD_core_t	*file = (const H5FD_core_t*)_file;
 
-    FUNC_ENTER_NOAPI(H5FD_core_get_eof, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Set return value */
-    ret_value=MAX(file->eof, file->eoa);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(MAX(file->eof, file->eoa))
 }
 
 
@@ -821,7 +810,7 @@ H5FD_core_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
     H5FD_core_t *file = (H5FD_core_t *)_file;   /* core VFD info */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_get_handle, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     if(!file_handle)
@@ -890,7 +879,7 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_read, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     assert(file && file->pub.cls);
     assert(buf);
@@ -957,7 +946,7 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
     H5FD_core_t *file = (H5FD_core_t*)_file;
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_write, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -1029,7 +1018,7 @@ H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Write to backing store */
     if (file->dirty && file->fd>=0 && file->backing_store) {
@@ -1081,7 +1070,7 @@ H5FD_core_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
     size_t new_eof;                             /* New size of memory buffer */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_truncate, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file);
 

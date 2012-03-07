@@ -88,7 +88,7 @@ H5HP_swim_max(H5HP_t *heap, size_t loc)
     H5HP_info_t *obj;           /* Temporary pointer to object to move in heap */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HP_swim_max);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Get copies of the information about the object to move in the heap */
     val=heap->heap[loc].val;
@@ -146,7 +146,7 @@ H5HP_swim_min(H5HP_t *heap, size_t loc)
     H5HP_info_t *obj;           /* Temporary pointer to object to move in heap */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HP_swim_min);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Get copies of the information about the object to move in the heap */
     val=heap->heap[loc].val;
@@ -204,7 +204,7 @@ H5HP_sink_max(H5HP_t *heap, size_t loc)
     void *obj;                  /* Temporary pointer to object to move in heap */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HP_sink_max);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Get copies of the information about the object to move in the heap */
     val=heap->heap[loc].val;
@@ -273,7 +273,7 @@ H5HP_sink_min(H5HP_t *heap, size_t loc)
     void *obj;                  /* Temporary pointer to object to move in heap */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HP_sink_min);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Get copies of the information about the object to move in the heap */
     val=heap->heap[loc].val;
@@ -339,7 +339,7 @@ H5HP_create(H5HP_type_t heap_type)
     H5HP_t *new_heap=NULL;      /* Pointer to new heap object created */
     H5HP_t *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HP_create,NULL);
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Check args */
     assert(heap_type==H5HP_MIN_HEAP || heap_type==H5HP_MAX_HEAP);
@@ -413,7 +413,7 @@ H5HP_count(const H5HP_t *heap)
 {
     ssize_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5HP_count);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     assert(heap);
@@ -460,7 +460,7 @@ H5HP_insert(H5HP_t *heap, int val, void *obj)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HP_insert,FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(heap);
@@ -539,7 +539,7 @@ done:
 herr_t
 H5HP_top(const H5HP_t *heap, int *val)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5HP_top);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     assert(heap);
@@ -586,7 +586,7 @@ H5HP_remove(H5HP_t *heap, int *val, void **obj)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HP_remove,FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(heap);
@@ -672,7 +672,7 @@ H5HP_change(H5HP_t *heap, int val, void *_obj)
     int old_val;                /* Object's old priority value */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HP_change,FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(heap);
@@ -757,7 +757,7 @@ H5HP_incr(H5HP_t *heap, unsigned amt, void *_obj)
     size_t obj_loc;             /* Location of object in heap */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HP_incr,FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(heap);
@@ -829,7 +829,7 @@ H5HP_decr(H5HP_t *heap, unsigned amt, void *_obj)
     size_t obj_loc;             /* Location of object in heap */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HP_decr,FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(heap);
@@ -896,7 +896,7 @@ done:
 herr_t
 H5HP_close(H5HP_t *heap)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5HP_close)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(heap);

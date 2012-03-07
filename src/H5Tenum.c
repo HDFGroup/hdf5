@@ -53,7 +53,7 @@ DESCRIPTION
 static herr_t
 H5T_init_enum_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_enum_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_enum_interface() */
@@ -83,7 +83,7 @@ H5Tenum_create(hid_t parent_id)
     H5T_t	*dt = NULL;		/*new enumeration data type	*/
     hid_t	ret_value;	        /*return value			*/
 
-    FUNC_ENTER_API(H5Tenum_create, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", parent_id);
 
     /* Check args */
@@ -125,7 +125,7 @@ H5T_enum_create(const H5T_t *parent)
 {
     H5T_t	*ret_value;		/*new enumeration data type	*/
 
-    FUNC_ENTER_NOAPI(H5T_enum_create, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     assert(parent);
 
@@ -169,7 +169,7 @@ H5Tenum_insert(hid_t type, const char *name, const void *value)
     H5T_t	*dt=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tenum_insert, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*s*x", type, name, value);
 
     /* Check args */
@@ -218,7 +218,7 @@ H5T_enum_insert(const H5T_t *dt, const char *name, const void *value)
     uint8_t	*values=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_enum_insert, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
     assert(name && *name);
@@ -280,7 +280,7 @@ H5Tget_member_value(hid_t type, unsigned membno, void *value/*out*/)
     H5T_t	*dt=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tget_member_value, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iIux", type, membno, value);
 
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type, H5I_DATATYPE)))
@@ -322,7 +322,7 @@ H5T_get_member_value(const H5T_t *dt, unsigned membno, void *value/*out*/)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_get_member_value, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
     assert(value);
@@ -363,7 +363,7 @@ H5Tenum_nameof(hid_t type, const void *value, char *name/*out*/, size_t size)
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tenum_nameof, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*xxz", type, value, name, size);
 
     /* Check args */
@@ -421,7 +421,7 @@ H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t si
     hbool_t     alloc_name = FALSE;     /* Whether name has been allocated */
     char        *ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_enum_nameof)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(dt && H5T_ENUM == dt->shared->type);
@@ -512,7 +512,7 @@ H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/)
     H5T_t	*dt;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tenum_valueof, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*sx", type, name, value);
 
     /* Check args */
@@ -563,7 +563,7 @@ H5T_enum_valueof(const H5T_t *dt, const char *name, void *value/*out*/)
     H5T_t       *copied_dt = NULL;      /*do sorting in copied datatype */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_enum_valueof)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     assert(dt && H5T_ENUM==dt->shared->type);

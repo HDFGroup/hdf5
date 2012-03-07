@@ -2,11 +2,11 @@ HDF5 "tattr4_be.h5" {
 GROUP "/" {
    ATTRIBUTE "attr0" {
       DATATYPE  H5T_STRING {
-            STRSIZE 4;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 4;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SCALAR
       DATA {
       (0): "1234"
@@ -14,11 +14,11 @@ GROUP "/" {
    }
    ATTRIBUTE "attr1" {
       DATATYPE  H5T_STRING {
-            STRSIZE 4;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 4;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SCALAR
       DATA {
       (0): "1234"
@@ -26,11 +26,11 @@ GROUP "/" {
    }
    ATTRIBUTE "attr2" {
       DATATYPE  H5T_STRING {
-            STRSIZE 4;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 4;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SCALAR
       DATA {
       (0): "1234"
@@ -38,11 +38,11 @@ GROUP "/" {
    }
    ATTRIBUTE "attr3" {
       DATATYPE  H5T_STRING {
-            STRSIZE 4;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 4;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SCALAR
       DATA {
       (0): "1234"
@@ -50,11 +50,11 @@ GROUP "/" {
    }
    ATTRIBUTE "attr4" {
       DATATYPE  H5T_STRING {
-            STRSIZE 4;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 4;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SCALAR
       DATA {
       (0): "1234"
@@ -62,11 +62,11 @@ GROUP "/" {
    }
    ATTRIBUTE "attr5" {
       DATATYPE  H5T_STRING {
-            STRSIZE 4;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 4;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SCALAR
       DATA {
       (0): "1234"
@@ -74,11 +74,11 @@ GROUP "/" {
    }
    ATTRIBUTE "attr6" {
       DATATYPE  H5T_STRING {
-            STRSIZE 4;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 4;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SCALAR
       DATA {
       (0): "1234"
@@ -86,11 +86,11 @@ GROUP "/" {
    }
    ATTRIBUTE "attr7" {
       DATATYPE  H5T_STRING {
-            STRSIZE 4;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 4;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SCALAR
       DATA {
       (0): "1234"
@@ -98,11 +98,11 @@ GROUP "/" {
    }
    ATTRIBUTE "attr8" {
       DATATYPE  H5T_STRING {
-            STRSIZE 4;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 4;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SCALAR
       DATA {
       (0): "1234"

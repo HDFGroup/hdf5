@@ -53,7 +53,7 @@ H5Pset_fapl_windows(hid_t fapl_id)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_fapl_windows, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", fapl_id);
 
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))

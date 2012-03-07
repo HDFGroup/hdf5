@@ -260,7 +260,7 @@ DESCRIPTION
 static herr_t
 H5FD_mpiposix_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_mpiposix_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5FD_mpiposix_init())
 } /* H5FD_mpiposix_init_interface() */
@@ -288,7 +288,7 @@ H5FD_mpiposix_init(void)
 {
     hid_t ret_value=H5FD_MPIPOSIX_g;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if (H5I_VFL!=H5Iget_type(H5FD_MPIPOSIX_g))
         H5FD_MPIPOSIX_g = H5FD_register((const H5FD_class_t *)&H5FD_mpiposix_g,sizeof(H5FD_class_mpi_t),FALSE);
@@ -316,7 +316,7 @@ done:
 static herr_t
 H5FD_mpiposix_term(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_mpiposix_term)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Reset VFL ID */
     H5FD_MPIPOSIX_g=0;
@@ -366,7 +366,7 @@ H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm, hbool_t use_gpfs)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_fapl_mpiposix, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iMcb", fapl_id, comm, use_gpfs);
 
     /* Check arguments */
@@ -425,7 +425,7 @@ H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/, hbool_t *use_gpfs/*ou
     int    mpi_code;    /* mpi return code */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_API(H5Pget_fapl_mpiposix, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", fapl_id, comm, use_gpfs);
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
@@ -478,7 +478,7 @@ H5FD_mpiposix_fapl_get(H5FD_t *_file)
     int    mpi_code;  /* MPI return code */
     void        *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_get, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     assert(file);
     assert(H5FD_MPIPOSIX==file->pub.driver_id);
@@ -524,7 +524,7 @@ H5FD_mpiposix_fapl_copy(const void *_old_fa)
     H5FD_mpiposix_fapl_t  *new_fa = NULL;
     int    mpi_code;  /* MPI return code */
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_copy, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if (NULL==(new_fa=H5MM_malloc(sizeof(H5FD_mpiposix_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -569,10 +569,10 @@ done:
 static herr_t
 H5FD_mpiposix_fapl_free(void *_fa)
 {
-    herr_t    ret_value = SUCCEED;
     H5FD_mpiposix_fapl_t  *fa = (H5FD_mpiposix_fapl_t*)_fa;
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_free, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
     assert(fa);
 
     /* Free the internal communicator */
@@ -580,8 +580,7 @@ H5FD_mpiposix_fapl_free(void *_fa)
     MPI_Comm_free(&fa->comm);
     H5MM_xfree(fa);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_mpiposix_fapl_free() */
 
 
@@ -630,7 +629,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_t                     *ret_value=NULL; /* Return value */
     MPI_Comm                    comm_dup=MPI_COMM_NULL;
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_open, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     if (!name || !*name)
@@ -824,7 +823,7 @@ H5FD_mpiposix_close(H5FD_t *_file)
     H5FD_mpiposix_t  *file = (H5FD_mpiposix_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_close, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     assert(file);
     assert(H5FD_MPIPOSIX==file->pub.driver_id);
@@ -868,7 +867,7 @@ H5FD_mpiposix_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_mpiposix_t  *f2 = (const H5FD_mpiposix_t*)_f2;
     int ret_value=0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_mpiposix_cmp)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef H5_HAVE_WIN32_API
     if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)
@@ -924,9 +923,7 @@ done:
 static herr_t
 H5FD_mpiposix_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
 {
-    herr_t ret_value=SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_query, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -937,8 +934,7 @@ H5FD_mpiposix_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
         *flags|=H5FD_FEAT_ALLOCATE_EARLY;      /* Allocate space early instead of late */
     } /* end if */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_mpiposix_query() */
 
 
@@ -966,18 +962,13 @@ static haddr_t
 H5FD_mpiposix_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 {
     const H5FD_mpiposix_t *file = (const H5FD_mpiposix_t*)_file;
-    haddr_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_get_eoa, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
     assert(H5FD_MPIPOSIX==file->pub.driver_id);
 
-    /* Set return value */
-    ret_value=file->eoa;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(file->eoa)
 } /* end H5FD_mpiposix_get_eoa() */
 
 
@@ -1005,17 +996,15 @@ static herr_t
 H5FD_mpiposix_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
 {
     H5FD_mpiposix_t  *file = (H5FD_mpiposix_t*)_file;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_set_eoa, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
     assert(H5FD_MPIPOSIX==file->pub.driver_id);
 
     file->eoa = addr;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_mpi_posix_set_eoa() */
 
 
@@ -1045,18 +1034,13 @@ static haddr_t
 H5FD_mpiposix_get_eof(const H5FD_t *_file)
 {
     const H5FD_mpiposix_t  *file = (const H5FD_mpiposix_t*)_file;
-    haddr_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_get_eof, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
     assert(H5FD_MPIPOSIX==file->pub.driver_id);
 
-    /* Set return value */
-    ret_value=MAX(file->eof,file->eoa);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(MAX(file->eof,file->eoa))
 } /* end H5FD_mpiposix_get_eof() */
 
 
@@ -1080,7 +1064,7 @@ H5FD_mpiposix_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     H5FD_mpiposix_t       *file = (H5FD_mpiposix_t *)_file;
     herr_t                ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_get_handle, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
@@ -1122,7 +1106,7 @@ H5FD_mpiposix_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, 
     ssize_t          nbytes;         /* Number of bytes read each I/O call */
     herr_t               ret_value=SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_read, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     assert(file);
     assert(H5FD_MPIPOSIX==file->pub.driver_id);
@@ -1224,7 +1208,7 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     H5P_genplist_t      *plist;         /* Property list pointer */
     herr_t               ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_write, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     assert(file);
     assert(H5FD_MPIPOSIX==file->pub.driver_id);
@@ -1397,7 +1381,7 @@ H5FD_mpiposix_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closi
     int      mpi_code;  /* MPI return code */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_truncate, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file);
     HDassert(H5FD_MPIPOSIX == file->pub.driver_id);
@@ -1464,18 +1448,13 @@ static int
 H5FD_mpiposix_mpi_rank(const H5FD_t *_file)
 {
     const H5FD_mpiposix_t *file = (const H5FD_mpiposix_t*)_file;
-    int ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_mpi_rank, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
     assert(H5FD_MPIPOSIX==file->pub.driver_id);
 
-    /* Set return value */
-    ret_value=file->mpi_rank;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(file->mpi_rank)
 } /* end H5FD_mpiposix_mpi_rank() */
 
 
@@ -1498,18 +1477,13 @@ static int
 H5FD_mpiposix_mpi_size(const H5FD_t *_file)
 {
     const H5FD_mpiposix_t *file = (const H5FD_mpiposix_t*)_file;
-    int ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_mpi_size, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
     assert(H5FD_MPIPOSIX==file->pub.driver_id);
 
-    /* Set return value */
-    ret_value=file->mpi_size;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(file->mpi_size)
 } /* end H5FD_mpiposix_mpi_size() */
 
 
@@ -1533,18 +1507,13 @@ static MPI_Comm
 H5FD_mpiposix_communicator(const H5FD_t *_file)
 {
     const H5FD_mpiposix_t *file = (const H5FD_mpiposix_t*)_file;
-    MPI_Comm ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_communicator, MPI_COMM_NULL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file);
     assert(H5FD_MPIPOSIX==file->pub.driver_id);
 
-    /* Set return value */
-    ret_value=file->comm;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(file->comm)
 } /* end H5FD_mpi_posix_communicator() */
 
 #endif /*H5_HAVE_PARALLEL*/

@@ -100,7 +100,7 @@ DESCRIPTION
 static herr_t
 H5R_init_deprec_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5R_init_deprec_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5R_init())
 } /* H5R_init_deprec_interface() */
@@ -136,7 +136,7 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
     H5O_type_t obj_type;        /* Object type */
     H5G_obj_t ret_value;        /* Return value */
 
-    FUNC_ENTER_API(H5Rget_obj_type1, H5G_UNKNOWN)
+    FUNC_ENTER_API(H5G_UNKNOWN)
     H5TRACE3("Go", "iRt*x", id, ref_type, ref);
 
     /* Check args */
@@ -188,7 +188,7 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
     H5F_t *file = NULL; /* File object */
     hid_t ret_value;
 
-    FUNC_ENTER_API(H5Rdereference1, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "iRt*x", obj_id, ref_type, _ref);
 
     /* Check args */

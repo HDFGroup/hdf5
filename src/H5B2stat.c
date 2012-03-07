@@ -86,7 +86,7 @@
 herr_t
 H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_stat_info)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(info);
@@ -118,7 +118,7 @@ H5B2_size(H5B2_t *bt2, hid_t dxpl_id, hsize_t *btree_size)
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_size, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
     HDassert(bt2);

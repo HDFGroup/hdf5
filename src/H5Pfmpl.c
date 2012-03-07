@@ -110,7 +110,7 @@ H5P_fmnt_reg_prop(H5P_genclass_t *pclass)
     hbool_t local = H5F_MNT_SYM_LOCAL_DEF;      /* Whether symlinks are local to file */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_fmnt_reg_prop)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Register property of whether symlinks is local to file */
     if(H5P_register_real(pclass, H5F_MNT_SYM_LOCAL_NAME, H5F_MNT_SYM_LOCAL_SIZE, &local, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)

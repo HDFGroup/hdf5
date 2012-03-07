@@ -136,7 +136,7 @@ H5D_efl_construct(H5F_t *f, H5D_t *dset)
     int i;                              /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_efl_construct)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(f);
@@ -200,7 +200,7 @@ done:
 hbool_t
 H5D_efl_is_space_alloc(const H5O_storage_t UNUSED *storage)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_efl_is_space_alloc)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(storage);
@@ -227,7 +227,7 @@ H5D_efl_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type
     hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
     H5D_chunk_map_t UNUSED *cm)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_efl_io_init)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDmemcpy(&io_info->store->efl, &(io_info->dset->shared->dcpl_cache.efl), sizeof(H5O_efl_t));
 
@@ -267,7 +267,7 @@ H5D_efl_read(const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
     size_t      u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_efl_read)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(efl && efl->nused>0);
@@ -353,7 +353,7 @@ H5D_efl_write(const H5O_efl_t *efl, haddr_t addr, size_t size, const uint8_t *bu
     size_t	u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_efl_write)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(efl && efl->nused > 0);
@@ -428,7 +428,7 @@ H5D_efl_readvv_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata)
     H5D_efl_readvv_ud_t *udata = (H5D_efl_readvv_ud_t *)_udata; /* User data for H5V_opvv() operator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_efl_readvv_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Read data */
     if(H5D_efl_read(udata->efl, dst_off, len, (udata->rbuf + src_off)) < 0)
@@ -462,7 +462,7 @@ H5D_efl_readvv(const H5D_io_info_t *io_info,
     H5D_efl_readvv_ud_t udata;  /* User data for H5V_opvv() operator */
     ssize_t ret_value;          /* Return value (Total size of sequence in bytes) */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_efl_readvv)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(io_info);
@@ -508,7 +508,7 @@ H5D_efl_writevv_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata)
     H5D_efl_writevv_ud_t *udata = (H5D_efl_writevv_ud_t *)_udata; /* User data for H5V_opvv() operator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_efl_writevv_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Write data */
     if(H5D_efl_write(udata->efl, dst_off, len, (udata->wbuf + src_off)) < 0)
@@ -542,7 +542,7 @@ H5D_efl_writevv(const H5D_io_info_t *io_info,
     H5D_efl_writevv_ud_t udata;  /* User data for H5V_opvv() operator */
     ssize_t ret_value;          /* Return value (Total size of sequence in bytes) */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_efl_writevv)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(io_info);
@@ -587,7 +587,7 @@ H5D_efl_bh_info(H5F_t *f, hid_t dxpl_id, H5O_efl_t *efl, hsize_t *heap_size)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_efl_bh_info, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);

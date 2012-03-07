@@ -225,7 +225,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     void *vol_info = H5F_ACS_VOL_INFO_DEF;                      /* Default VOL plugin info */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_facc_reg_prop)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Register the initial metadata cache resize configuration */
     if(H5P_register_real(pclass, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_CONFIG_SIZE, &mdc_initCacheCfg, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -345,7 +345,7 @@ H5P_facc_create(hid_t fapl_id, void UNUSED *copy_data)
     H5P_genplist_t *plist;              /* Property list */
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_facc_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check argument */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -410,7 +410,7 @@ H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void UNUSED *copy_data)
     H5P_genplist_t *src_plist;              /* Source property list */
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_facc_copy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Get driver ID from source property list */
     if(NULL == (src_plist = (H5P_genplist_t *)H5I_object(src_fapl_id)))
@@ -478,7 +478,7 @@ H5P_facc_close(hid_t fapl_id, void UNUSED *close_data)
     H5P_genplist_t *plist;              /* Property list */
     herr_t     ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5P_facc_close, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check argument */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -555,9 +555,9 @@ herr_t
 H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignment)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_alignment, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ihh", fapl_id, threshold, alignment);
 
     /* Check args */
@@ -575,7 +575,7 @@ H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignment)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set alignment");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -605,9 +605,9 @@ H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
 		  hsize_t *alignment/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_alignment, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", fapl_id, threshold, alignment);
 
     /* Get the plist structure */
@@ -623,7 +623,7 @@ H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -659,9 +659,9 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
 {
     hid_t driver_id;            /* VFL driver ID */
     void *driver_info;          /* VFL driver info */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_set_driver, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if(NULL == H5I_object_verify(new_driver_id, H5I_VFL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID")
@@ -736,7 +736,7 @@ H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5Pset_driver, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", plist_id, new_driver_id, new_driver_info);
 
     /* Check arguments */
@@ -792,7 +792,7 @@ H5P_get_driver(H5P_genplist_t *plist)
 {
     hid_t	ret_value=FAIL;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_get_driver, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the current driver ID */
     if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
@@ -809,7 +809,7 @@ H5P_get_driver(H5P_genplist_t *plist)
         ret_value = H5_DEFAULT_VFD;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -847,7 +847,7 @@ H5Pget_driver(hid_t plist_id)
     H5P_genplist_t *plist;      /* Property list pointer */
     hid_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Pget_driver, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", plist_id);
 
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -891,7 +891,7 @@ H5P_get_driver_info(H5P_genplist_t *plist)
 {
     void	*ret_value=NULL;
 
-    FUNC_ENTER_NOAPI(H5P_get_driver_info, NULL);
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Get the current driver info */
     if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
@@ -905,7 +905,7 @@ H5P_get_driver_info(H5P_genplist_t *plist)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_get_driver_info() */
 
 
@@ -941,7 +941,7 @@ H5Pget_driver_info(hid_t plist_id)
     H5P_genplist_t *plist;      /* Property list pointer */
     void	*ret_value;     /* Return value */
 
-    FUNC_ENTER_API(H5Pget_driver_info, NULL);
+    FUNC_ENTER_API(NULL)
 
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
@@ -976,9 +976,9 @@ herr_t
 H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
-    herr_t              ret_value=SUCCEED;      /* return value */
+    herr_t              ret_value = SUCCEED;      /* return value */
 
-    FUNC_ENTER_API(H5Pset_family_offset, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ih", fapl_id, offset);
 
     /* Get the plist structure */
@@ -991,7 +991,7 @@ H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set family offset");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -1015,9 +1015,9 @@ done:
 static herr_t
 H5P_set_family_offset(H5P_genplist_t *plist, hsize_t offset)
 {
-    herr_t      ret_value=SUCCEED;
+    herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5P_set_family_offset, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
          if(H5P_set(plist, H5F_ACS_FAMILY_OFFSET_NAME, &offset) < 0)
@@ -1027,7 +1027,7 @@ H5P_set_family_offset(H5P_genplist_t *plist, hsize_t offset)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -1053,9 +1053,9 @@ herr_t
 H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
-    herr_t              ret_value=SUCCEED;      /* return value */
+    herr_t              ret_value = SUCCEED;      /* return value */
 
-    FUNC_ENTER_API(H5Pget_family_offset, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", fapl_id, offset);
 
     /* Get the plist structure */
@@ -1068,7 +1068,7 @@ H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get family offset");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -1092,9 +1092,9 @@ done:
 static herr_t
 H5P_get_family_offset(H5P_genplist_t *plist, hsize_t *offset)
 {
-    herr_t      ret_value=SUCCEED;
+    herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5P_get_family_offset, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
         if(H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, offset) < 0)
@@ -1104,7 +1104,7 @@ H5P_get_family_offset(H5P_genplist_t *plist, hsize_t *offset)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -1130,9 +1130,9 @@ herr_t
 H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
-    herr_t              ret_value=SUCCEED;      /* return value */
+    herr_t              ret_value = SUCCEED;      /* return value */
 
-    FUNC_ENTER_API(H5Pset_multi_type, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iMt", fapl_id, type);
 
     /* Get the plist structure */
@@ -1145,7 +1145,7 @@ H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data type for multi driver");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -1169,9 +1169,9 @@ done:
 static herr_t
 H5P_set_multi_type(H5P_genplist_t *plist, H5FD_mem_t type)
 {
-    herr_t      ret_value=SUCCEED;
+    herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5P_set_multi_type, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
          if(H5P_set(plist, H5F_ACS_MULTI_TYPE_NAME, &type) < 0)
@@ -1181,7 +1181,7 @@ H5P_set_multi_type(H5P_genplist_t *plist, H5FD_mem_t type)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -1207,9 +1207,9 @@ herr_t
 H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
-    herr_t              ret_value=SUCCEED;      /* return value */
+    herr_t              ret_value = SUCCEED;      /* return value */
 
-    FUNC_ENTER_API(H5Pget_multi_type, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Mt", fapl_id, type);
 
     /* Get the plist structure */
@@ -1222,7 +1222,7 @@ H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get data type for multi driver");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -1246,9 +1246,9 @@ done:
 static herr_t
 H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type)
 {
-    herr_t      ret_value=SUCCEED;
+    herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5P_get_multi_type, FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
          if(H5P_get(plist, H5F_ACS_MULTI_TYPE_NAME, type) < 0)
@@ -1258,7 +1258,7 @@ H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -1300,9 +1300,9 @@ H5Pset_cache(hid_t plist_id, int UNUSED mdc_nelmts,
 	     size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_cache, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes,
              rdcc_w0);
 
@@ -1323,7 +1323,7 @@ H5Pset_cache(hid_t plist_id, int UNUSED mdc_nelmts,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set preempt read chunks");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -1360,9 +1360,9 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
 	     size_t *rdcc_nslots, size_t *rdcc_nbytes, double *rdcc_w0)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_cache, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*Is*z*z*d", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes,
              rdcc_w0);
 
@@ -1387,7 +1387,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get preempt read chunks");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -1410,7 +1410,7 @@ H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_mdc_config, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", plist_id, config_ptr);
 
     /* Get the plist structure */
@@ -1431,7 +1431,7 @@ H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set metadata cache initial config")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* H5Pset_mdc_config() */
 
 
@@ -1458,7 +1458,7 @@ H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_mdc_config, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", plist_id, config_ptr);
 
     /* Get the plist structure */
@@ -1521,9 +1521,9 @@ herr_t
 H5Pset_gc_references(hid_t plist_id, unsigned gc_ref)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_gc_references, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", plist_id, gc_ref);
 
     /* Get the plist structure */
@@ -1535,7 +1535,7 @@ H5Pset_gc_references(hid_t plist_id, unsigned gc_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set garbage collect reference");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -1563,9 +1563,9 @@ herr_t
 H5Pget_gc_references(hid_t plist_id, unsigned *gc_ref/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_gc_references, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, gc_ref);
 
     /* Get the plist structure */
@@ -1578,7 +1578,7 @@ H5Pget_gc_references(hid_t plist_id, unsigned *gc_ref/*out*/)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get garbage collect reference");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -1602,7 +1602,7 @@ H5Pset_fclose_degree(hid_t plist_id, H5F_close_degree_t degree)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_fclose_degree, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iFd", plist_id, degree);
 
     /* Get the plist structure */
@@ -1638,7 +1638,7 @@ H5Pget_fclose_degree(hid_t plist_id, H5F_close_degree_t *degree)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_fclose_degree, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Fd", plist_id, degree);
 
     /* Get the plist structure */
@@ -1686,9 +1686,9 @@ herr_t
 H5Pset_meta_block_size(hid_t plist_id, hsize_t size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_meta_block_size, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ih", plist_id, size);
 
     /* Get the plist structure */
@@ -1700,7 +1700,7 @@ H5Pset_meta_block_size(hid_t plist_id, hsize_t size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set meta data block size");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -1728,9 +1728,9 @@ herr_t
 H5Pget_meta_block_size(hid_t plist_id, hsize_t *size/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_meta_block_size, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, size);
 
     /* Get the plist structure */
@@ -1744,7 +1744,7 @@ H5Pget_meta_block_size(hid_t plist_id, hsize_t *size/*out*/)
     } /* end if */
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -1781,9 +1781,9 @@ herr_t
 H5Pset_sieve_buf_size(hid_t plist_id, size_t size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_sieve_buf_size, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iz", plist_id, size);
 
     /* Get the plist structure */
@@ -1795,7 +1795,7 @@ H5Pset_sieve_buf_size(hid_t plist_id, size_t size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sieve buffer size");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_sieve_buf_size() */
 
 
@@ -1823,9 +1823,9 @@ herr_t
 H5Pget_sieve_buf_size(hid_t plist_id, size_t *size/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_sieve_buf_size, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, size);
 
     /* Get the plist structure */
@@ -1838,7 +1838,7 @@ H5Pget_sieve_buf_size(hid_t plist_id, size_t *size/*out*/)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get sieve buffer size");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_sieve_buf_size() */
 
 
@@ -1870,9 +1870,9 @@ herr_t
 H5Pset_small_data_block_size(hid_t plist_id, hsize_t size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_small_data_block_size, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ih", plist_id, size);
 
     /* Get the plist structure */
@@ -1884,7 +1884,7 @@ H5Pset_small_data_block_size(hid_t plist_id, hsize_t size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' block size");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_small_data_block_size() */
 
 
@@ -1907,9 +1907,9 @@ herr_t
 H5Pget_small_data_block_size(hid_t plist_id, hsize_t *size/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_small_data_block_size, FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, size);
 
     /* Get the plist structure */
@@ -1923,7 +1923,7 @@ H5Pget_small_data_block_size(hid_t plist_id, hsize_t *size/*out*/)
     } /* end if */
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_small_data_block_size() */
 
 
@@ -2021,7 +2021,7 @@ H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low,
     hbool_t latest;             /* Whether to use the latest version or not */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_libver_bounds, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iFvFv", plist_id, low, high);
 
     /* Check args */
@@ -2066,7 +2066,7 @@ H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low/*out*/,
     hbool_t latest;             /* Whether to use the latest version or not */
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Pget_libver_bounds, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", plist_id, low, high);
 
     /* Get the plist structure */
@@ -2111,7 +2111,7 @@ H5Pset_elink_file_cache_size(hid_t plist_id, unsigned efc_size)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_elink_file_cache_size, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", plist_id, efc_size);
 
     /* Get the plist structure */
@@ -2149,7 +2149,7 @@ H5Pget_elink_file_cache_size(hid_t plist_id, unsigned *efc_size)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_elink_file_cache_size, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Iu", plist_id, efc_size);
 
     /* Get the plist structure */
@@ -2193,7 +2193,7 @@ H5P_set_vol(H5P_genplist_t *plist, hid_t new_vol_id, const void *new_vol_info)
     void *vol_info;          /* VFL vol info */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_set_vol, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if(NULL == H5I_object_verify(new_vol_id, H5I_VOL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file vol ID")
@@ -2237,7 +2237,7 @@ H5P_get_vol(H5P_genplist_t *plist)
 {
     hid_t	ret_value=FAIL;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_get_vol, FAIL);
+    FUNC_ENTER_NOAPI(FAIL);
 
     /* Get the current vol ID */
     if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
@@ -2278,7 +2278,7 @@ H5P_get_vol_info(H5P_genplist_t *plist)
 {
     void	*ret_value=NULL;
 
-    FUNC_ENTER_NOAPI(H5P_get_vol_info, NULL);
+    FUNC_ENTER_NOAPI(NULL);
 
     /* Get the current vol info */
     if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
@@ -2319,7 +2319,7 @@ H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5Pset_vol, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", plist_id, new_vol_id, new_vol_info);
 
     /* Check arguments */
@@ -2361,7 +2361,7 @@ H5Pget_vol_info(hid_t plist_id)
     H5P_genplist_t *plist;      /* Property list pointer */
     void	*ret_value;     /* Return value */
 
-    FUNC_ENTER_API(H5Pget_vol_info, NULL);
+    FUNC_ENTER_API(NULL);
 
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
@@ -2395,7 +2395,7 @@ H5Pget_vol(hid_t plist_id)
     H5P_genplist_t *plist;      /* Property list pointer */
     hid_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Pget_vol, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", plist_id);
 
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))

@@ -71,7 +71,7 @@ H5VL_init(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5VL_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
     /* FUNC_ENTER() does all the work */
 
 done:
@@ -100,7 +100,7 @@ H5VL_init_interface(void)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5VL_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(H5I_register_type(H5I_VOL, (size_t)H5I_VOL_HASHSIZE, 0, (H5I_free_t)H5VL_free_cls)<H5I_FILE)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize interface")
@@ -135,7 +135,7 @@ H5VL_term_interface(void)
 {
     int	n = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5VL_term_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
 	if((n=H5I_nmembers(H5I_VOL))!=0) {
@@ -173,7 +173,7 @@ H5VL_free_cls(H5VL_class_t *cls)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5VL_free_cls)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(cls);
@@ -210,7 +210,7 @@ H5VLregister(const H5VL_class_t *cls)
 {
     hid_t		ret_value;
 
-    FUNC_ENTER_API(H5VLregister, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "*x", cls);
 
     /* Check arguments */
@@ -250,7 +250,7 @@ H5VL_register(const void *_cls, size_t size, hbool_t app_ref)
     H5VL_class_t	*saved = NULL;
     hid_t		ret_value;
 
-    FUNC_ENTER_NOAPI(H5VL_register, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
     HDassert(cls);
@@ -297,7 +297,7 @@ H5VLunregister(hid_t vol_id)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5VLunregister, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", vol_id);
 
     /* Check arguments */
@@ -337,7 +337,7 @@ H5VL_get_class(hid_t id)
 {
     H5VL_class_t	*ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(H5VL_get_class, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     if(H5I_VOL == H5I_get_type(id))
 	ret_value = (H5VL_class_t *)H5I_object(id);
@@ -385,7 +385,7 @@ H5VL_fapl_open(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
     void *copied_vol_info = NULL;   /* Temporary VOL vol info */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5VL_fapl_open, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Increment the reference count on vol and copy vol info */
     if(H5I_inc_ref(vol_id, FALSE) < 0)
@@ -433,7 +433,7 @@ H5VL_fapl_copy(hid_t vol_id, const void *old_fapl, void **copied_fapl)
     void *new_pl = NULL;        /* Copy of property list */
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5VL_fapl_copy, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     if(NULL == (vol = (H5VL_class_t *)H5I_object(vol_id)))
@@ -483,7 +483,7 @@ H5VL_fapl_close(hid_t vol_id, void *fapl)
     H5VL_class_t	*vol = NULL;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5VL_fapl_close, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     if(vol_id > 0) {
@@ -532,7 +532,7 @@ H5VL_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t 
     hid_t               file_id;
     hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5VL_open, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -587,7 +587,7 @@ H5VL_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hid_t               file_id;
     hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5VL_create, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -641,7 +641,7 @@ H5VL_close(hid_t uid)
     H5I_t               *uid_info;              /* user id structure */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5VL_close, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check/fix arguments. */
     if(H5I_UID != H5I_get_type(uid))
@@ -688,7 +688,7 @@ H5VL_flush(hid_t uid, H5F_scope_t scope)
     H5I_t               *uid_info;              /* user id structure */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5VL_flush, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check/fix arguments. */
     if(H5I_UID != H5I_get_type(uid))
@@ -733,7 +733,7 @@ H5VL_get(hid_t uid, H5VL_file_get_t get_type, void *data, int argc, void **argv)
     H5I_t            *uid_info;              /* user id structure */
     herr_t            ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5VL_get, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check/fix arguments. */
     if(H5I_UID != H5I_get_type(uid))

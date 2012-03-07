@@ -77,8 +77,9 @@ binread_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
-h5dump_SOURCES = h5dump.c
-h5dump_OBJECTS = h5dump.$(OBJEXT)
+am_h5dump_OBJECTS = h5dump.$(OBJEXT) h5dump_ddl.$(OBJEXT) \
+	h5dump_xml.$(OBJEXT)
+h5dump_OBJECTS = $(am_h5dump_OBJECTS)
 h5dump_LDADD = $(LDADD)
 h5dump_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 h5dump_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -114,8 +115,8 @@ am__v_CCLD_0 = @echo "  CCLD  " $@;
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
-SOURCES = binread.c h5dump.c h5dumpgentest.c
-DIST_SOURCES = binread.c h5dump.c h5dumpgentest.c
+SOURCES = binread.c $(h5dump_SOURCES) h5dumpgentest.c
+DIST_SOURCES = binread.c $(h5dump_SOURCES) h5dumpgentest.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -420,6 +421,9 @@ h5dump_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # All the programs depend on the hdf5 and h5tools libraries
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
+
+# Source files for the program
+h5dump_SOURCES = h5dump.c h5dump_ddl.c h5dump_xml.c
 DISTCLEANFILES = testh5dump.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
@@ -545,6 +549,8 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dump.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dump_ddl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dump_xml.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dumpgentest.Po@am__quote@
 
 .c.o:

@@ -155,7 +155,7 @@ H5P_lacc_reg_prop(H5P_genclass_t *pclass)
 
     herr_t ret_value = SUCCEED;         	   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_lacc_reg_prop)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Register property for number of links traversed */
     if(H5P_register_real(pclass, H5L_ACS_NLINKS_NAME, H5L_ACS_NLINKS_SIZE, &nlinks, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -202,7 +202,7 @@ H5P_lacc_elink_fapl_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UN
     hid_t          l_fapl_id;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5P_lacc_elink_fapl_del, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(value);
 
@@ -236,7 +236,7 @@ H5P_lacc_elink_fapl_copy(const char UNUSED *name, size_t UNUSED size, void *valu
     hid_t          l_fapl_id;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5P_lacc_elink_fapl_copy, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(value);
 
@@ -277,7 +277,7 @@ H5P_lacc_elink_fapl_close(const char UNUSED *name, size_t UNUSED size, void *val
     hid_t		l_fapl_id;
     herr_t     		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_lacc_elink_fapl_close)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(value);
 
@@ -306,7 +306,7 @@ done:
 static herr_t
 H5P_lacc_elink_pref_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_lacc_elink_pref_del)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(value);
 
@@ -332,7 +332,7 @@ H5P_lacc_elink_pref_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UN
 static herr_t
 H5P_lacc_elink_pref_copy(const char UNUSED *name, size_t UNUSED size, void *value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_lacc_elink_pref_copy)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(value);
 
@@ -358,7 +358,7 @@ H5P_lacc_elink_pref_copy(const char UNUSED *name, size_t UNUSED size, void *valu
 static herr_t
 H5P_lacc_elink_pref_close(const char UNUSED *name, size_t UNUSED size, void *value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_lacc_elink_pref_close)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(value);
 
@@ -395,7 +395,7 @@ H5Pset_nlinks(hid_t plist_id, size_t nlinks)
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pset_nlinks, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iz", plist_id, nlinks);
 
     if(nlinks <= 0)
@@ -436,7 +436,7 @@ H5Pget_nlinks(hid_t plist_id, size_t *nlinks)
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pget_nlinks, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*z", plist_id, nlinks);
 
     if(!nlinks)
@@ -476,7 +476,7 @@ H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
     char *my_prefix;                    /* Copy of prefix string */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pset_elink_prefix, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*s", plist_id, prefix);
 
     /* Get the plist structure */
@@ -527,7 +527,7 @@ H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size)
     size_t	len;                    /* Length of prefix string */
     ssize_t 	ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Pget_elink_prefix, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("Zs", "i*sz", plist_id, prefix, size);
 
     /* Get the plist structure */
@@ -577,7 +577,7 @@ H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id)
     hid_t		l_fapl_id, new_fapl_id;
     herr_t 		ret_value = SUCCEED;         		/* Return value */
 
-    FUNC_ENTER_API(H5Pset_elink_fapl, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ii", lapl_id, fapl_id);
 
     /* Check arguments */
@@ -628,7 +628,7 @@ H5Pget_elink_fapl(hid_t lapl_id)
     hid_t		l_fapl_id;
     hid_t		ret_value=FAIL;		/* Return value */
 
-    FUNC_ENTER_API(H5Pget_elink_fapl, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", lapl_id);
 
     /* Get the plist structure */
@@ -672,7 +672,7 @@ H5Pset_elink_acc_flags(hid_t lapl_id, unsigned flags)
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pset_elink_acc_flags, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", lapl_id, flags);
 
     /* Check that flags are valid */
@@ -711,7 +711,7 @@ H5Pget_elink_acc_flags(hid_t lapl_id, unsigned *flags)
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Pget_elink_acc_flags, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Iu", lapl_id, flags);
 
     /* Get the plist structure */
@@ -749,7 +749,7 @@ H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data)
     H5L_elink_cb_t  cb_info;                /* Callback info struct */
     herr_t          ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Pset_elink_cb, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ix*x", lapl_id, func, op_data);
 
     /* Check if the callback function is NULL and the user data is non-NULL.
@@ -794,7 +794,7 @@ H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **op_data)
     H5L_elink_cb_t  cb_info;                /* Callback info struct */
     herr_t          ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Pget_elink_cb, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*x**x", lapl_id, func, op_data);
 
     /* Get the plist structure */

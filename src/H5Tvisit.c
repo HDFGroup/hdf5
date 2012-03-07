@@ -101,7 +101,7 @@ H5T_visit(H5T_t *dt, unsigned visit_flags, H5T_operator_t op, void *op_value)
     hbool_t is_complex;                 /* Flag indicating current datatype is "complex" */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_visit, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(dt);

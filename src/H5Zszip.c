@@ -84,7 +84,7 @@ H5Z_can_apply_szip(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
     H5T_order_t dtype_order;            /* Datatype's endianness order */
     htri_t ret_value = TRUE;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_can_apply_szip, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get datatype */
     if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -151,7 +151,7 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     hsize_t scanline;           /* Size of dataspace's fastest changing dimension */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_set_local_szip, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the plist structure */
     if(NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
@@ -284,7 +284,7 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     unsigned char *newbuf = NULL;    /* Pointer to input buffer */
     SZ_com_t sz_param;          /* szip parameter block */
 
-    FUNC_ENTER_NOAPI(H5Z_filter_szip, 0)
+    FUNC_ENTER_NOAPI(0)
 
     /* Sanity check to make certain that we haven't drifted out of date with
      * the mask options from the szlib.h header */

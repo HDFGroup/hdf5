@@ -98,7 +98,7 @@ H5F_mpi_get_rank(const H5F_t *f)
 {
     int	ret_value;
 
-    FUNC_ENTER_NOAPI(H5F_mpi_get_rank, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(f && f->shared);
 
@@ -132,7 +132,7 @@ H5F_mpi_get_comm(const H5F_t *f)
 {
     MPI_Comm	ret_value;
 
-    FUNC_ENTER_NOAPI(H5F_mpi_get_comm, MPI_COMM_NULL)
+    FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
     assert(f && f->shared);
 
@@ -166,7 +166,7 @@ H5F_mpi_get_size(const H5F_t *f)
 {
     int ret_value;
 
-    FUNC_ENTER_NOAPI(H5F_mpi_get_size, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(f && f->shared);
 

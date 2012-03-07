@@ -163,7 +163,7 @@ H5G_loc(hid_t id, H5G_loc_t *loc)
     hid_t       loc_id;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_loc, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if (H5I_UID == H5I_get_type(id)) {
         if(NULL == (uid_info = (H5I_t *)H5I_object(id)))
@@ -271,7 +271,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_loc_copy
+ * Function:	H5G__loc_copy
  *
  * Purpose:	Copy over information for a location
  *
@@ -283,11 +283,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth)
+H5G__loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_loc_copy, FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Check args. */
     HDassert(dst);
@@ -301,7 +301,7 @@ H5G_loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_loc_copy() */
+} /* end H5G__loc_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -321,7 +321,7 @@ H5G_loc_reset(H5G_loc_t *loc)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_loc_reset, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
     HDassert(loc);
@@ -354,7 +354,7 @@ H5G_loc_free(H5G_loc_t *loc)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_loc_free, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
     HDassert(loc);
@@ -390,7 +390,7 @@ H5G_loc_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char *name,
     H5G_loc_fnd_t *udata = (H5G_loc_fnd_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_loc_find_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name in this group resolved to a valid object */
     if(obj_loc == NULL)
@@ -400,7 +400,7 @@ H5G_loc_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char *name,
     /* (Group traversal callbacks are responsible for either taking ownership
      *  of the group location for the object, or freeing it. - QAK)
      */
-    H5G_loc_copy(udata->loc, obj_loc, H5_COPY_SHALLOW);
+    H5G__loc_copy(udata->loc, obj_loc, H5_COPY_SHALLOW);
     *own_loc = H5G_OWN_OBJ_LOC;
 
 done:
@@ -427,7 +427,7 @@ H5G_loc_find(const H5G_loc_t *loc, const char *name, H5G_loc_t *obj_loc/*out*/,
     H5G_loc_fnd_t udata;                /* User data for traversal callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_loc_find, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
     HDassert(loc);
@@ -472,7 +472,7 @@ H5G_loc_find_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     hbool_t obj_exists = FALSE;         /* Whether the object exists (unused) */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_loc_find_by_idx_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name in this group resolved to a valid link */
     if(obj_loc == NULL)
@@ -485,14 +485,14 @@ H5G_loc_find_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     lnk_copied = TRUE;
 
     /* Build the initial object location for the link */
-    if(H5G_link_to_loc(obj_loc, &fnd_lnk, udata->loc) < 0)
+    if(H5G__link_to_loc(obj_loc, &fnd_lnk, udata->loc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot initialize object location")
     obj_loc_valid = TRUE;
 
     /* Perform any special traversals that the link needs */
     /* (soft links, user-defined links, file mounting, etc.) */
     /* (may modify the object location) */
-    if(H5G_traverse_special(obj_loc, &fnd_lnk, H5G_TARGET_NORMAL, &links_left, TRUE, udata->loc, &obj_exists, udata->lapl_id, udata->dxpl_id) < 0)
+    if(H5G__traverse_special(obj_loc, &fnd_lnk, H5G_TARGET_NORMAL, &links_left, TRUE, udata->loc, &obj_exists, udata->lapl_id, udata->dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "special link traversal failed")
 
 done:
@@ -533,7 +533,7 @@ H5G_loc_find_by_idx(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
     H5G_loc_fbi_t udata;                /* User data for traversal callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_loc_find_by_idx, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
     HDassert(loc);
@@ -558,7 +558,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_loc_insert
+ * Function:	H5G__loc_insert
  *
  * Purpose:	Insert an object at a location
  *
@@ -570,13 +570,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc,
+H5G__loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc,
     H5O_type_t obj_type, const void *crt_info, hid_t dxpl_id)
 {
     H5O_link_t  lnk;                    /* Link for object to insert */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_loc_insert, FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Check args. */
     HDassert(grp_loc);
@@ -603,7 +603,7 @@ H5G_loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_loc_insert() */
+} /* end H5G__loc_insert() */
 
 
 /*-------------------------------------------------------------------------
@@ -625,7 +625,7 @@ H5G_loc_exists_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
 {
     H5G_loc_exists_t *udata = (H5G_loc_exists_t *)_udata;   /* User data passed in */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_loc_exists_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check if the name in this group resolved to a valid object */
     if(obj_loc == NULL)
@@ -663,7 +663,7 @@ H5G_loc_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl
     H5G_loc_exists_t udata;     /* User data for traversal callback */
     htri_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_loc_exists, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
     HDassert(loc);
@@ -703,7 +703,7 @@ H5G_loc_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const 
     H5G_loc_info_t *udata = (H5G_loc_info_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_loc_info_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name in this group resolved to a valid link */
     if(obj_loc == NULL)
@@ -742,7 +742,7 @@ H5G_loc_info(H5G_loc_t *loc, const char *name, hbool_t want_ih_info, H5O_info_t 
     H5G_loc_info_t udata;               /* User data for traversal callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_loc_info, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
     HDassert(loc);
@@ -784,7 +784,7 @@ H5G_loc_set_comment_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     htri_t exists;                      /* Whether a "comment" message already exists */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_loc_set_comment_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name in this group resolved to a valid link */
     if(obj_loc == NULL)
@@ -836,7 +836,7 @@ H5G_loc_set_comment(H5G_loc_t *loc, const char *name, const char *comment,
     H5G_loc_sc_t udata;         /* User data for traversal callback */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_loc_set_comment, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
     HDassert(loc);
@@ -875,7 +875,7 @@ H5G_loc_get_comment_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     H5O_name_t comment;                 /* Object header "comment" message */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_loc_get_comment_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if the name in this group resolved to a valid link */
     if(obj_loc == NULL)
@@ -927,7 +927,7 @@ H5G_loc_get_comment(H5G_loc_t *loc, const char *name, char *comment/*out*/,
     H5G_loc_gc_t udata;         /* User data for traversal callback */
     ssize_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_loc_get_comment, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
     HDassert(loc);

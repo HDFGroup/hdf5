@@ -250,11 +250,11 @@ GROUP "/" {
    }
    DATASET "string1" {
       DATATYPE  H5T_STRING {
-            STRSIZE 5;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 5;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SIMPLE { ( 3, 4 ) / ( 3, 4 ) }
       DATA {
       (0,0): "s1", "s2", "s3", "s4",
@@ -264,11 +264,11 @@ GROUP "/" {
    }
    DATASET "string2" {
       DATATYPE  H5T_STRING {
-            STRSIZE 11;
-            STRPAD H5T_STR_SPACEPAD;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 11;
+         STRPAD H5T_STR_SPACEPAD;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SIMPLE { ( 20 ) / ( 20 ) }
       DATA {
       (0): "ab cd ef1  ", "ab cd ef2  ", "ab cd ef3  ", "ab cd ef4  ",
@@ -280,11 +280,11 @@ GROUP "/" {
    }
    DATASET "string3" {
       DATATYPE  H5T_STRING {
-            STRSIZE 8;
-            STRPAD H5T_STR_NULLPAD;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 8;
+         STRPAD H5T_STR_NULLPAD;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SIMPLE { ( 27 ) / ( 27 ) }
       DATA {
       (0): "abcd0\000\000\000", "abcd1\000\000\000", "abcd2\000\000\000",
@@ -300,11 +300,11 @@ GROUP "/" {
    }
    DATASET "string4" {
       DATATYPE  H5T_STRING {
-            STRSIZE 168;
-            STRPAD H5T_STR_SPACEPAD;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 168;
+         STRPAD H5T_STR_SPACEPAD;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
       DATA {
       (0): "s1234567890123456789                                                                                                                                                    ",

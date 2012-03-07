@@ -143,7 +143,7 @@ H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     H5A_compact_bt_ud_t *udata = (H5A_compact_bt_ud_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_compact_build_table_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(mesg);
@@ -204,7 +204,7 @@ H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_index_t idx_type,
     H5O_mesg_operator_t op;             /* Wrapper for operator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_compact_build_table)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);
@@ -265,7 +265,7 @@ H5A_dense_build_table_cb(const H5A_t *attr, void *_udata)
     H5A_dense_bt_ud_t *udata = (H5A_dense_bt_ud_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_build_table_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(attr);
@@ -314,7 +314,7 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     hsize_t nrec;                       /* # of records in v2 B-tree */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_build_table)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);
@@ -395,7 +395,7 @@ done:
 static int
 H5A_attr_cmp_name_inc(const void *attr1, const void *attr2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_name_inc)
+    FUNC_ENTER_NOAPI_NOINIT
 
     FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t * const *)attr1)->shared->name,
             (*(const H5A_t * const *)attr2)->shared->name))
@@ -423,7 +423,7 @@ H5A_attr_cmp_name_inc(const void *attr1, const void *attr2)
 static int
 H5A_attr_cmp_name_dec(const void *attr1, const void *attr2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_name_dec)
+    FUNC_ENTER_NOAPI_NOINIT
 
     FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t * const *)attr2)->shared->name,
             (*(const H5A_t * const *)attr1)->shared->name))
@@ -452,7 +452,7 @@ H5A_attr_cmp_corder_inc(const void *attr1, const void *attr2)
 {
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_corder_inc)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if((*(const H5A_t * const *)attr1)->shared->crt_idx < (*(const H5A_t * const *)attr2)->shared->crt_idx)
         ret_value = -1;
@@ -487,7 +487,7 @@ H5A_attr_cmp_corder_dec(const void *attr1, const void *attr2)
 {
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_corder_dec)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if((*(const H5A_t * const *)attr1)->shared->crt_idx < (*(const H5A_t * const *)attr2)->shared->crt_idx)
         ret_value = 1;
@@ -517,7 +517,7 @@ static herr_t
 H5A_attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
     H5_iter_order_t order)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_sort_table)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(atable);
@@ -567,7 +567,7 @@ H5A_attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip,
     size_t u;                           /* Local index variable */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5A_attr_iterate_table, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(atable);
@@ -646,7 +646,7 @@ H5A_attr_release_table(H5A_attr_table_t *atable)
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_attr_release_table)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(atable);
@@ -691,7 +691,7 @@ H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     htri_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5A_get_ainfo, dxpl_id, oh->cache_info.addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, oh->cache_info.addr, FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -756,7 +756,7 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
     hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
     hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5A_set_version)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -820,7 +820,7 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
 
     H5A_t       *ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_attr_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(attr_src);
@@ -1065,7 +1065,7 @@ H5A_attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
     H5F_t  *file_src, *file_dst;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_attr_post_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(src_oloc);
@@ -1161,7 +1161,7 @@ H5A_dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
     H5A_t *attr_dst = NULL;
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_post_copy_file_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(attr_src);
@@ -1223,7 +1223,7 @@ H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t *ainfo
     hbool_t recompute_size = FALSE;     /* recompute the size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_post_copy_file_all)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(ainfo_src);

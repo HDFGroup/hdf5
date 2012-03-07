@@ -140,7 +140,7 @@ H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size)
     size_t	n;
     haddr_t	ret_value = HADDR_UNDEF;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5HG_create, dxpl_id, H5AC__GLOBALHEAP_TAG, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__GLOBALHEAP_TAG, HADDR_UNDEF)
 
     /* Check args */
     HDassert(f);
@@ -251,7 +251,7 @@ H5HG_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw)
     H5HG_heap_t *heap;          /* Global heap */
     H5HG_heap_t *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_protect)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     HDassert(f);
@@ -298,7 +298,7 @@ H5HG_alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
     size_t	need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
     size_t      ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_alloc);
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(heap);
@@ -433,7 +433,7 @@ H5HG_extend(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t need)
     unsigned u;                     /* Local index variable */
     herr_t  ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_extend)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(f);
@@ -524,7 +524,7 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
     unsigned 	heap_flags = H5AC__NO_FLAGS_SET;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5HG_insert, dxpl_id, H5AC__GLOBALHEAP_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__GLOBALHEAP_TAG, FAIL)
 
     /* Check args */
     HDassert(f);
@@ -611,7 +611,7 @@ H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
     void        *orig_object = object;  /* Keep a copy of the original object pointer */
     void	*ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5HG_read, dxpl_id, H5AC__GLOBALHEAP_TAG, NULL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__GLOBALHEAP_TAG, NULL)
 
     /* Check args */
     HDassert(f);
@@ -683,7 +683,7 @@ H5HG_link(H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
     unsigned heap_flags = H5AC__NO_FLAGS_SET;
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5HG_link, dxpl_id, H5AC__GLOBALHEAP_TAG, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__GLOBALHEAP_TAG, FAIL)
 
     /* Check args */
     HDassert(f);
@@ -746,7 +746,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     unsigned    flags = H5AC__NO_FLAGS_SET;/* Whether the heap gets deleted */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5HG_remove, dxpl_id, H5AC__GLOBALHEAP_TAG, FAIL);
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__GLOBALHEAP_TAG, FAIL);
 
     /* Check args */
     HDassert(f);
@@ -829,7 +829,7 @@ H5HG_free(H5HG_heap_t *heap)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HG_free, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
     HDassert(heap);

@@ -93,7 +93,7 @@ DESCRIPTION
 static herr_t
 H5T_init_compound_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_compound_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_compound_interface() */
@@ -125,7 +125,7 @@ H5Tget_member_offset(hid_t type_id, unsigned membno)
     H5T_t	*dt;            /* Datatype to query */
     size_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tget_member_offset, 0)
+    FUNC_ENTER_API(0)
     H5TRACE2("z", "iIu", type_id, membno);
 
     /* Check args */
@@ -164,7 +164,7 @@ done:
 size_t
 H5T_get_member_offset(const H5T_t *dt, unsigned membno)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_get_member_offset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(dt);
     HDassert(membno < dt->shared->u.compnd.nmembs);
@@ -195,7 +195,7 @@ H5Tget_member_class(hid_t type_id, unsigned membno)
     H5T_t	*dt;            /* Datatype to query */
     H5T_class_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Tget_member_class, H5T_NO_CLASS)
+    FUNC_ENTER_API(H5T_NO_CLASS)
     H5TRACE2("Tt", "iIu", type_id, membno);
 
     /* Check args */
@@ -239,7 +239,7 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
     H5T_t	*memb_dt = NULL;        /* Member datatype */
     hid_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Tget_member_type, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("i", "iIu", type_id, membno);
 
     /* Check args */
@@ -283,7 +283,7 @@ H5T_get_member_type(const H5T_t *dt, unsigned membno, H5T_copy_t method)
 {
     H5T_t	*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_get_member_type, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     HDassert(dt);
     HDassert(membno < dt->shared->u.compnd.nmembs);
@@ -313,7 +313,7 @@ done:
 size_t
 H5T_get_member_size(const H5T_t *dt, unsigned membno)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_get_member_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(dt);
     HDassert(membno < dt->shared->u.compnd.nmembs);
@@ -354,7 +354,7 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
     H5T_t	*member;		/* The member datatype	*/
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Tinsert, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*szi", parent_id, name, offset, member_id);
 
     /* Check args */
@@ -399,7 +399,7 @@ H5Tpack(hid_t type_id)
     H5T_t	*dt;                    /* Datatype to modify */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Tpack, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", type_id);
 
     /* Check args */
@@ -438,7 +438,7 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     unsigned	i;                          /* Local index variable */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_insert, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(parent && H5T_COMPOUND == parent->shared->type);
@@ -530,7 +530,7 @@ H5T_pack(const H5T_t *dt)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_pack)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(dt);
 
@@ -607,7 +607,7 @@ H5T_is_packed(const H5T_t *dt)
 {
     htri_t      ret_value = TRUE;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_is_packed)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(dt);
 
@@ -646,7 +646,7 @@ H5T_update_packed(const H5T_t *dt)
 {
     unsigned    i;                      /* Index */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_update_packed)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(dt);
     HDassert(dt->shared->type == H5T_COMPOUND);

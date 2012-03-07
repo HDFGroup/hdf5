@@ -102,7 +102,7 @@ H5D_select_io(const H5D_io_info_t *io_info, size_t elmt_size,
     ssize_t tmp_file_len;       /* Temporary number of bytes in file sequence */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_select_io, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(io_info);
@@ -266,7 +266,7 @@ H5D_select_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_select_read, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Call generic selection operation */
     H5_CHECK_OVERFLOW(nelmts, hsize_t, size_t);
@@ -297,7 +297,7 @@ H5D_select_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_select_write, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Call generic selection operation */
     H5_CHECK_OVERFLOW(nelmts, hsize_t, size_t);
