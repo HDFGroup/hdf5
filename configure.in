@@ -4417,6 +4417,36 @@ case $host_os in
     ;;
 esac
 
+dnl If we think posix aio is supported, verify that we can link with it.
+
+saved_libs="$LIBS"
+saved_ldflags="$LDFLAGS"
+
+case "X-$POSIX_AIO_SUPPORTED" in
+  X-yes)
+    LIBS="$LIBS -lrt"
+    if test "X$STATIC_EXEC" = "Xyes"; then
+        LDFLAGS="$LDFLAGS -static"
+    fi
+    AC_TRY_LINK([#include <aio.h>],
+        [struct aiocb cb; aio_fsync(O_SYNC, &cb)], 
+        ,
+        AIO_SUPPORTED=no
+        POSIX_AIO_SUPPORTED=no
+        REQUIRE_64_BIT_POSIX_AIO=no
+        )
+    ;;
+  X-no|*)
+    ;;
+esac
+
+LIBS="$saved_libs"
+LDFLAGS="$saved_ldflags"
+
+
+dnl As of last check, aio didn't get along with portland group compilers.
+dnl Disable aio if we are using same.
+
 if (${CC-cc} -V 2>&1 | grep '^pgcc') > /dev/null ; then
     AIO_SUPPORTED=no
 fi
