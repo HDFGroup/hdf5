@@ -28,111 +28,104 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   # Copy all the test files from source directory to test directory
   # --------------------------------------------------------------------
-  SET (LIST_EXPECT_OUTPUT_FILES
-      help-1.ls
-      help-2.ls
-      help-3.ls
-      nosuchfile.ls
-      tall-1.ls
-      tall-2.ls
-      tarray1.ls
-      tattr2.ls
-      tattrreg_le.ls
-      tattrreg_be.ls
-      tcomp-1.ls
-      tdataregbe.ls
-      tdataregle.ls
-      tdset-1.ls
-      tempty.ls
-      textlink-1.ls
-      textlinksrc-1.ls
-      textlinksrc-2.ls
-      textlinksrc-3.ls
-      textlinksrc-4.ls
-      textlinksrc-5.ls
-      textlinksrc-6.ls
-      textlinksrc-7.ls
-      textlinksrc-1-old.ls
-      textlinksrc-2-old.ls
-      textlinksrc-3-old.ls
-      textlinksrc-6-old.ls
-      textlinksrc-7-old.ls
-      tsoftlinks-1.ls
-      tsoftlinks-2.ls
-      tsoftlinks-3.ls
-      tsoftlinks-4.ls
-      tsoftlinks-5.ls
-      textlinksrc-nodangle-1.ls
-      textlinksrc-nodangle-2.ls
-      tgrp_comments.ls
-      tsoftlinks-nodangle-1.ls
-      thlinks-nodangle-1.ls
-      tgroup.ls
-      tgroup-1.ls
-      tgroup-2.ls
-      tgroup-3.ls
-      thlink-1.ls
-      tloop-1.ls
-      tnestcomp-1.ls
-      tnestcomp-2.ls
-      tnestcomp-3.ls
-      tnestcomp-4.ls
-      tsaf.ls
-      tslink-1.ls
-      tstr-1.ls
-      tudlink-1.ls
-      tvldtypes1.ls
-      tvldtypes2le.ls
-      tvldtypes2be.ls
-  )
   SET (LIST_HDF5_TEST_FILES
-      tall.h5
-      tarray1.h5
-      tattr2.h5
-      tattrreg.h5
-      tcompound.h5
-      tdatareg.h5
-      tdset.h5
-      tempty.h5
-      textlink.h5
-      textlinksrc.h5
-      textlinktar.h5
-      tgroup.h5
-      tgrp_comments.h5
-      thlink.h5
-      tloop.h5
-      tnestedcomp.h5
-      tsaf.h5
-      tslink.h5
-      tsoftlinks.h5
-      tstr.h5
-      tudlink.h5
-      tvldtypes1.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr2.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrreg.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdatareg.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlink.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinktar.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tgroup.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tgrp_comments.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/thlink.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestedcomp.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsoftlinks.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tudlink.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes1.h5
   )
 
-  # copy the list of expected output files
-  FOREACH (out_file ${LIST_EXPECT_OUTPUT_FILES})
-    SET (out_dest "${PROJECT_BINARY_DIR}/${out_file}")
-    #MESSAGE (STATUS " Translating ${out_file}")
-    ADD_CUSTOM_COMMAND (
-        TARGET     h5ls
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${out_file} ${out_dest}
-    )
-  ENDFOREACH (out_file ${LIST_EXPECT_OUTPUT_FILES})
+  SET (LIST_OTHER_TEST_FILES
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/help-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/help-2.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/help-3.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/nosuchfile.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr2.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrreg_le.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrreg_be.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcomp-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdataregbe.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdataregle.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlink-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-2.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-3.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-4.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-5.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-6.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-7.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-1-old.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-2-old.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-3-old.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-6-old.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-7-old.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsoftlinks-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsoftlinks-2.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsoftlinks-3.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsoftlinks-4.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsoftlinks-5.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-nodangle-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlinksrc-nodangle-2.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tgrp_comments.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsoftlinks-nodangle-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/thlinks-nodangle-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tgroup.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tgroup-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tgroup-2.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tgroup-3.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/thlink-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestcomp-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestcomp-2.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestcomp-3.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestcomp-4.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tudlink-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes2le.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes2be.ls
+  )
 
-  # copy the list of hdf5 test files
-  FOREACH (h5_file ${LIST_HDF5_TEST_FILES})
-    SET (h5_dest "${PROJECT_BINARY_DIR}/${h5_file}")
-    #MESSAGE (STATUS " Copying ${h5_file}")
+  FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+
+  # copy the list of test files
+  FOREACH (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+    GET_FILENAME_COMPONENT(fname "${listfiles}" NAME)
+    SET (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
+    #MESSAGE (STATUS " Copying ${listfiles} to ${dest}")
     ADD_CUSTOM_COMMAND (
         TARGET     h5ls
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file} ${h5_dest}
+        ARGS       -E copy_if_different ${listfiles} ${dest}
     )
-  ENDFOREACH (h5_file ${LIST_HDF5_TEST_FILES})
+  ENDFOREACH (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+
   
 ##############################################################################
 ##############################################################################
@@ -155,14 +148,14 @@ IF (BUILD_TESTING)
       ADD_TEST (
           NAME H5LS-clear-${resultfile}-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ${resultfile}.out ${resultfile}.out.err
+              -E remove ./testfiles/${resultfile}.out ./testfiles/${resultfile}.out.err
       )
       ADD_TEST (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ls"
