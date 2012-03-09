@@ -241,12 +241,13 @@ New Features
 
     Tools:
     ------
-     - h5repack: Improved performance for hanlding big chunked dataset 
-               (size > 128MB). It would perform much better prior to the
-               improvement, especially for cases that chunk dimentions
-               looks like "1024x5x1" (compare to "1x5x1024"). When bigger numbers
+     - h5repack: Improved performance for big chunked datasets (size > 128MB)
+               when used with layout (-l) or compression (-f) option. 
+               It would perform much better prior to the improvement, 
+               especially for cases that chunk dimentions looks like 
+               "1024x5x1" (compare to "1x5x1024"). When bigger numbers
                are toward front and smaller number is toward back in chunk
-               dimentions.
+               dimentions.  HDFFV-7862 (JKM - 2012/03/01)
      - h5dump: Added new option --no-compact-subset. This option will not
                interpret the '[' character as starting the compact form of 
                subsetting. This is useful when the "h5dump error: unable to 
@@ -649,6 +650,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: When two symbolic dangling links are compared with 
+          --follow-symlinks option, the result should be same. It worked for 
+          comparing two files, but didn't work for comparing two objects.
+          HDFFV-7835 (JKM 2012/03/09)
         - h5dump: Refactored code to remove duplicated functions. Split XML 
           functions from DDL functions. Corrected indentation and formatting
           errors. Also fixed subsetting counting overflow (HDFFV-5874). Verified

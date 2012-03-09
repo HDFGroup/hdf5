@@ -644,8 +644,8 @@ hsize_t h5diff(const char *fname1,
     char         filenames[2][MAX_FILENAME];
     hsize_t      nfound = 0;
     int i;
-    //int i1, i2;
-    int l_ret;
+    int l_ret1 = -1;
+    int l_ret2 = -1;
     const char * obj1fullname = NULL;
     const char * obj2fullname = NULL;
     /* init to group type */
@@ -862,6 +862,10 @@ hsize_t h5diff(const char *fname1,
     }
 
 
+    /* get any symbolic links info */
+    l_ret1 = H5tools_get_symlink_info(file1_id, obj1fullname, &trg_linfo1, TRUE);
+    l_ret2 = H5tools_get_symlink_info(file2_id, obj2fullname, &trg_linfo2, TRUE);
+
     /*---------------------------------------------
      * check for following symlinks 
      */
@@ -874,13 +878,12 @@ hsize_t h5diff(const char *fname1,
         /*-------------------------------
          * check symbolic link (object1)
          */
-        l_ret = H5tools_get_symlink_info(file1_id, obj1fullname, &trg_linfo1, TRUE);
         /* dangling link */
-        if (l_ret == 0)
+        if (l_ret1 == 0)
         {
             if (options->no_dangle_links)
             {
-                /* gangling link is error */
+                /* treat dangling link is error */
                 if(options->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", obj1fullname);
                 options->err_stat = 1;
@@ -890,30 +893,33 @@ hsize_t h5diff(const char *fname1,
             {
                 if(options->m_verbose)
                     parallel_print("obj1 <%s> is a dangling link.\n", obj1fullname);
-                nfound++;
-                print_found(nfound);
-                goto out;
+                if (l_ret1 != 0 ||  l_ret2 != 0)
+                {
+                    nfound++;
+                    print_found(nfound);
+                    goto out;
+                }
             }
         }
-        else if(l_ret < 0) /* fail */
+        else if(l_ret1 < 0) /* fail */
         {
             parallel_print ("Object <%s> could not be found in <%s>\n", obj1fullname, fname1);
             options->err_stat = 1;
             goto out;
         }
-        else if(l_ret != 2) /* symbolic link */
+        else if(l_ret1 != 2) /* symbolic link */
             obj1type = trg_linfo1.trg_type;
 
         /*-------------------------------
          * check symbolic link (object2)
          */
-        l_ret = H5tools_get_symlink_info(file2_id, obj2fullname, &trg_linfo2, TRUE);
+
         /* dangling link */
-        if (l_ret == 0)
+        if (l_ret2 == 0)
         {
             if (options->no_dangle_links)
             {
-                /* gangling link is error */
+                /* treat dangling link is error */
                 if(options->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", obj2fullname);
                 options->err_stat = 1;
@@ -923,18 +929,21 @@ hsize_t h5diff(const char *fname1,
             {
                 if(options->m_verbose)
                     parallel_print("obj2 <%s> is a dangling link.\n", obj2fullname);
-                nfound++;
-                print_found(nfound);
-                goto out;
+                if (l_ret1 != 0 ||  l_ret2 != 0)
+                {
+                    nfound++;
+                    print_found(nfound);
+                    goto out;
+                }
             }
         }
-        else if(l_ret < 0) /* fail */ 
+        else if(l_ret2 < 0) /* fail */ 
         {
             parallel_print ("Object <%s> could not be found in <%s>\n", obj2fullname, fname2);
             options->err_stat = 1;
             goto out;
         }
-        else if(l_ret != 2)  /* symbolic link */
+        else if(l_ret2 != 2)  /* symbolic link */
             obj2type = trg_linfo2.trg_type;
     } /* end of if follow symlinks */
 
@@ -947,8 +956,10 @@ hsize_t h5diff(const char *fname1,
 
     if(!(options->m_verbose || options->m_report))
     {
-        if (h5tools_is_obj_same(file1_id,obj1fullname,file2_id,obj2fullname)!=0)
-            goto out;
+        /* if no danglink links */
+        if ( l_ret1 > 0 && l_ret2 > 0 )
+            if (h5tools_is_obj_same(file1_id,obj1fullname,file2_id,obj2fullname)!=0)
+                goto out;
     }
 
 
