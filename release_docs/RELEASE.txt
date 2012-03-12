@@ -68,6 +68,14 @@ New Features
  
     Tools
     -----
+    - h5dump: Added ability to apply command options across multiple files using a
+      wildcard in the filename. Example; "h5dump -H -d Dataset1 tarr*.h5".
+      (ADB - 2012/03/12 - HDFFV-7876).
+    - h5dump: Added new option --no-compact-subset. This option will not
+      interpret the '[' character as starting the compact form of 
+      subsetting. This is useful when the "h5dump error: unable to 
+      open dataset "datset_name"" message is output because a dataset
+      name contains a '[' character.(ADB - 2012/03/05 - HDFFV-7689).
     - h5repack: Improved performance for hanlding big chunked datasets (size > 128MB). 
       Especially performance would be much better prior to the update, for the cases 
       that chunk dimentions look like "1024x5x1" (opposite to "1x5x1024"). When big
@@ -123,6 +131,12 @@ Bug Fixes since HDF5-1.8.8
 
     Tools
     -----
+    - h5dump: Added tools library error stack to properly catch error
+      information generated within the library.
+      HDFFV-7958 (ADB 2012/03/12)
+    - h5dump: Dangling links no longer throw error message, change process
+      when open link fails.
+      HDFFV-7839 (ADB 2012/03/12)
     - h5dump: Refactored code to remove duplicated functions. Split XML 
       functions from DDL functions. Corrected indentation and formatting
       errors. Also fixed subsetting counting overflow (HDFFV-5874). Verified
