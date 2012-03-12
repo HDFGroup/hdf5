@@ -494,8 +494,11 @@ H5D_contig_is_space_alloc(const H5O_storage_t *storage)
     /* Sanity checks */
     HDassert(storage);
 
-    /* Set return value */
-    ret_value = (hbool_t)H5F_addr_defined(storage->u.contig.addr);
+    /* Set return value, indicating space is allocated when size is zero */
+    if(0 == storage->u.contig.size)
+        ret_value = TRUE;
+    else
+        ret_value = (hbool_t)H5F_addr_defined(storage->u.contig.addr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_contig_is_space_alloc() */
