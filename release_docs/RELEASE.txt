@@ -241,6 +241,9 @@ New Features
 
     Tools:
     ------
+     - h5dump: Added ability to apply command options across multiple files using a
+               wildcard in the filename. Example; "h5dump -H -d Dataset1 tarr*.h5".
+               HDFFV-7876 (ADB - 2012/03/12).
      - h5repack: Improved performance for big chunked datasets (size > 128MB)
                when used with layout (-l) or compression (-f) option. 
                It would perform much better prior to the improvement, 
@@ -252,8 +255,7 @@ New Features
                interpret the '[' character as starting the compact form of 
                subsetting. This is useful when the "h5dump error: unable to 
                open dataset "datset_name"" message is output because a dataset
-               name contains a '[' character.(JIRA HDFFV-7689).
-               (ADB - 2012/01/31)
+               name contains a '[' character.  HDFFV-7689 (ADB - 2012/01/31)
      - h5dump: Corrected schema location: 
                <hdf5:HDF5-File 
                xmlns:hdf5="http://hdfgroup.org/HDF5/XML/schema/HDF5-File" 
@@ -650,6 +652,12 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5dump: Added tools library error stack to properly catch error
+          information generated within the library.
+          HDFFV-7958 (ADB 2012/03/12)
+        - h5dump: Dangling links no longer throw error message, change process
+          when open link fails.
+          HDFFV-7839 (ADB 2012/03/12)
         - h5diff: When two symbolic dangling links are compared with 
           --follow-symlinks option, the result should be same. It worked for 
           comparing two files, but didn't work for comparing two objects.
