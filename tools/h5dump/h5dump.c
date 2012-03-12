@@ -1369,11 +1369,13 @@ main(int argc, const char *argv[])
     hid_t               fid = -1;
     hid_t               gid = -1;
     H5E_auto2_t         func;
+    H5E_auto2_t         tools_func;
     H5O_info_t          oi;
-    struct handler_t   *hand;
+    struct handler_t   *hand = NULL;
     int                 i;
     unsigned            u;
     void               *edata;
+    void               *tools_edata;
     char               *fname = NULL;
 
     h5tools_setprogname(PROGRAMNAME);
@@ -1388,6 +1390,10 @@ main(int argc, const char *argv[])
 
     /* Initialize h5tools lib */
     h5tools_init();
+    /* Disable tools error reporting */
+    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
+    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
+    
     if((hand = parse_command_line(argc, argv))==NULL) {
         goto done;
     }
@@ -1398,8 +1404,10 @@ main(int argc, const char *argv[])
         goto done;
     }
 
-    if (enable_error_stack)
+    if (enable_error_stack) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
+        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
+    }
 
     /* Check for conflicting options */
     if (doxml) {
@@ -1442,7 +1450,8 @@ main(int argc, const char *argv[])
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
-    fname = HDstrdup(argv[opt_ind]);
+    while(opt_ind < argc) {
+        fname = HDstrdup(argv[opt_ind++]);
 
     fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, driver, NULL, 0);
 
@@ -1597,13 +1606,29 @@ main(int argc, const char *argv[])
     else {
         HDfprintf(rawoutstream, "</%sHDF5-File>\n", xmlnsprefix);
     }
+    /* Free tables for objects */
+    table_list_free();
+
+        if(fid >=0)
+            if (H5Fclose(fid) < 0)
+                h5tools_setstatus(EXIT_FAILURE);
+
+        if(prefix)
+            HDfree(prefix);
+        if(fname)
+            HDfree(fname);
+    } /* end while */
+
+    if(hand) 
+        free_handler(hand, argc);
+
+    /* To Do:  clean up XML table */
+
+    leave(h5tools_getstatus());
 
 done:
     /* Free tables for objects */
     table_list_free();
-
-    if(hand) 
-        free_handler(hand, argc);
 
     if(fid >=0)
         if (H5Fclose(fid) < 0)
@@ -1613,6 +1638,9 @@ done:
         HDfree(prefix);
     if(fname)
         HDfree(fname);
+
+    if(hand) 
+        free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
 
