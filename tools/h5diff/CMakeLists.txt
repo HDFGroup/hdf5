@@ -130,6 +130,10 @@ IF (BUILD_TESTING)
       h5diff_458.txt
       h5diff_459.txt
       h5diff_465.txt
+      h5diff_466.txt
+      h5diff_467.txt
+      h5diff_468.txt
+      h5diff_469.txt
       h5diff_480.txt
       h5diff_481.txt
       h5diff_482.txt
@@ -657,6 +661,14 @@ IF (BUILD_TESTING)
           h5diff_459.out.err
           h5diff_465.out
           h5diff_465.out.err
+          h5diff_466.out
+          h5diff_466.out.err
+          h5diff_467.out
+          h5diff_467.out.err
+          h5diff_468.out
+          h5diff_468.out.err
+          h5diff_469.out
+          h5diff_469.out.err
           h5diff_480.out
           h5diff_480.out.err
           h5diff_481.out
@@ -1266,7 +1278,16 @@ ADD_H5_TEST (h5diff_459 2  --follow-symlinks -v --no-dangling-links  ${FILE15} $
 
 # dangling link --follow-symlinks (obj vs obj)
 # (HDFFV-7836)
-ADD_H5_TEST (h5diff_465 1 --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
+ADD_H5_TEST (h5diff_465 0 --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
+# (HDFFV-7835)
+# soft dangling vs. soft dangling
+ADD_H5_TEST (h5diff_466 0 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
+# soft link  vs. soft dangling
+ADD_H5_TEST (h5diff_467 1 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link2)
+# ext dangling vs. ext dangling
+ADD_H5_TEST (h5diff_468 0 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4)
+# ext link vs. ext dangling
+ADD_H5_TEST (h5diff_469 1 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link2)
 
 # ##############################################################################
 # # test for group diff recursivly
