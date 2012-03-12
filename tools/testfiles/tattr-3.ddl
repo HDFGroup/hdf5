@@ -1,9 +1,9 @@
 HDF5 "tattr.h5" {
-ATTRIBUTE "/attr2" {
+ATTRIBUTE "attr2" {
    DATATYPE  H5T_STD_I32BE
    DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
 }
-ATTRIBUTE "/attr" {
+ATTRIBUTE "attr" {
 }
 }
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
@@ -13,4 +13,4 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #001: (file name) line (number) in H5O_attr_open_by_name(): can't locate attribute: 'attr'
     major: Attribute
     minor: Object not found
-h5dump error: unable to open attribute "/attr"
+h5dump error: unable to open attribute "attr"

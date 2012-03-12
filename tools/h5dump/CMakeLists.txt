@@ -937,7 +937,7 @@ IF (BUILD_TESTING)
   # test for displaying attributes
   ADD_H5_TEST (tattr-1 0 --enable-error-stack tattr.h5)
   # test for displaying the selected attributes of string type and scalar space
-  ADD_H5_TEST (tattr-2 0 --enable-error-stack -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
+  ADD_H5_TEST (tattr-2 0 --enable-error-stack -a "/\/attr1" --attribute /attr4 --attribute=/attr5 tattr.h5)
   # test for header and error messages
   ADD_H5_MASK_TEST (tattr-3 1 --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5)
   # test for displaying attributes in shared datatype (also in group and dataset)

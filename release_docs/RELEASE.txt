@@ -241,6 +241,11 @@ New Features
 
     Tools:
     ------
+     - h5dump: Added capability for "-a" option to show attributes containing "/" 
+               by using an escape character. For example, for a dataset "/dset" 
+               containing attribute "speed(m/h)", use "h5dump -a "/dset/speed(\/h)" 
+               to show the content of the attribute. See details at HDFFV-7523
+               (PC -- 2012/03/12) 
      - h5dump: Added ability to apply command options across multiple files using a
                wildcard in the filename. Example; "h5dump -H -d Dataset1 tarr*.h5".
                HDFFV-7876 (ADB - 2012/03/12).

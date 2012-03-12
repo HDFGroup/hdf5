@@ -718,7 +718,7 @@ TOOLTEST3 tdset-2.ddl --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3
 # test for displaying attributes
 TOOLTEST tattr-1.ddl --enable-error-stack tattr.h5
 # test for displaying the selected attributes of string type and scalar space
-TOOLTEST tattr-2.ddl --enable-error-stack -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5
+TOOLTEST tattr-2.ddl --enable-error-stack -a "/\/attr1" --attribute /attr4 --attribute=/attr5 tattr.h5
 # test for header and error messages
 TOOLTEST3 tattr-3.ddl --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5
 # test for displaying at least 9 attributes on root from a BE machine
