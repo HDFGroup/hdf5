@@ -1369,11 +1369,13 @@ main(int argc, const char *argv[])
     hid_t               fid = -1;
     hid_t               gid = -1;
     H5E_auto2_t         func;
+    H5E_auto2_t         tools_func;
     H5O_info_t          oi;
-    struct handler_t   *hand;
+    struct handler_t   *hand = NULL;
     int                 i;
     unsigned            u;
     void               *edata;
+    void               *tools_edata;
     char               *fname = NULL;
 
     h5tools_setprogname(PROGRAMNAME);
@@ -1388,6 +1390,10 @@ main(int argc, const char *argv[])
 
     /* Initialize h5tools lib */
     h5tools_init();
+    /* Disable tools error reporting */
+    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
+    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
+    
     if((hand = parse_command_line(argc, argv))==NULL) {
         goto done;
     }
@@ -1398,8 +1404,10 @@ main(int argc, const char *argv[])
         goto done;
     }
 
-    if (enable_error_stack)
+    if (enable_error_stack) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
+        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
+    }
 
     /* Check for conflicting options */
     if (doxml) {
@@ -1442,168 +1450,185 @@ main(int argc, const char *argv[])
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
-    fname = HDstrdup(argv[opt_ind]);
+    while(opt_ind < argc) {
+        fname = HDstrdup(argv[opt_ind++]);
 
-    fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, driver, NULL, 0);
+        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, driver, NULL, 0);
 
-    if (fid < 0) {
-        error_msg("unable to open file \"%s\"\n", fname);
-        h5tools_setstatus(EXIT_FAILURE);
-        goto done;
-    }
-
-    /* allocate and initialize internal data structure */
-    init_prefix(&prefix, prefix_len);
-
-    /* Prepare to find objects that might be targets of a reference */
-    fill_ref_path_table(fid);
-
-    if(doxml) {
-        /* initialize XML */
-        /* reset prefix! */
-        HDstrcpy(prefix, "");
-
-        /* make sure the URI is initialized to something */
-        if (xml_dtd_uri == NULL) {
-            if (useschema) {
-                xml_dtd_uri = DEFAULT_XSD;
-            } 
-            else {
-                xml_dtd_uri = DEFAULT_DTD;
-                xmlnsprefix = "";
-            }
-        } 
-        else {
-            if (useschema && HDstrcmp(xmlnsprefix,"")) {
-                error_msg("Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
-                h5tools_setstatus(EXIT_FAILURE);
-                goto done;
-            }
-        }
-    }
-
-    /* Get object info for root group */
-    if(H5Oget_info_by_name(fid, "/", &oi, H5P_DEFAULT) < 0) {
-        error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
-        h5tools_setstatus(EXIT_FAILURE);
-        goto done;
-    }
-
-    /* Initialize object tables */
-    if(table_list_add(fid, oi.fileno) < 0) {
-        error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
-        h5tools_setstatus(EXIT_FAILURE);
-        goto done;
-    }
-    group_table = table_list.tables[0].group_table;
-    dset_table = table_list.tables[0].dset_table;
-    type_table = table_list.tables[0].type_table;
-
-    /* does there exist unamed committed datatype */
-    for (u = 0; u < type_table->nobjs; u++)
-        if (!type_table->objs[u].recorded) {
-            unamedtype = 1;
-            break;
-        } /* end if */
-
-    /* start to dump - display file header information */
-    if (!doxml) {
-        begin_obj(h5tools_dump_header_format->filebegin, fname, h5tools_dump_header_format->fileblockbegin);
-    } 
-    else {
-        HDfprintf(rawoutstream, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-
-        /* alternative first element, depending on schema or DTD. */
-        if (useschema) {
-            if (HDstrcmp(xmlnsprefix,"") == 0) {
-                HDfprintf(rawoutstream, "<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
-                       xml_dtd_uri);
-            } 
-            else {
-/*  TO DO: make -url option work in this case (may need new option) */
-                char *ns;
-                char *indx;
-
-                ns = HDstrdup(xmlnsprefix);
-                indx = HDstrrchr(ns,(int)':');
-                if (indx) *indx = '\0';
-
-                HDfprintf(rawoutstream, "<%sHDF5-File xmlns:%s=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File\" "
-                       "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-                       "xsi:schemaLocation=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File "
-                       "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\">\n",xmlnsprefix,ns);
-                HDfree(ns);
-            }
-        } 
-        else {
-            HDfprintf(rawoutstream, "<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n", xml_dtd_uri);
-            HDfprintf(rawoutstream, "<HDF5-File>\n");
-        }
-    }
-
-    if (!doxml) {
-        if (display_fi) {
-            HDfprintf(rawoutstream, "\n");
-            dump_fcontents(fid);
-            end_obj(h5tools_dump_header_format->fileend,h5tools_dump_header_format->fileblockend);
-            HDfprintf(rawoutstream, "\n");
+        if (fid < 0) {
+            error_msg("unable to open file \"%s\"\n", fname);
+            h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
 
-        if (display_bb)
-            dump_fcpl(fid);
-    }
+        /* allocate and initialize internal data structure */
+        init_prefix(&prefix, prefix_len);
 
-    if(display_all) {
-        if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) {
-            error_msg("unable to open root group\n");
-            h5tools_setstatus(EXIT_FAILURE);
-        }
-        else {
-            if (!doxml)
-                dump_indent += COL;
-            dump_function_table->dump_group_function(gid, "/" );
-            if (!doxml)
-                dump_indent -= COL;
-            HDfprintf(rawoutstream, "\n");
-        }
+        /* Prepare to find objects that might be targets of a reference */
+        fill_ref_path_table(fid);
 
-        if(H5Gclose(gid) < 0) {
-            error_msg("unable to close root group\n");
-            h5tools_setstatus(EXIT_FAILURE);
-        }
-
-    }
-    else {
-        /* Note: this option is not supported for XML */
         if(doxml) {
+            /* initialize XML */
+            /* reset prefix! */
+            HDstrcpy(prefix, "");
+
+            /* make sure the URI is initialized to something */
+            if (xml_dtd_uri == NULL) {
+                if (useschema) {
+                    xml_dtd_uri = DEFAULT_XSD;
+                } 
+                else {
+                    xml_dtd_uri = DEFAULT_DTD;
+                    xmlnsprefix = "";
+                }
+            } 
+            else {
+                if (useschema && HDstrcmp(xmlnsprefix,"")) {
+                    error_msg("Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    goto done;
+                }
+            }
+        }
+
+        /* Get object info for root group */
+        if(H5Oget_info_by_name(fid, "/", &oi, H5P_DEFAULT) < 0) {
             error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
-        } /* end if */
+        }
 
-        for(i = 0; i < argc; i++) {
-            if(hand[i].func) {
-                hand[i].func(fid, hand[i].obj, hand[i].subset_info, 1, NULL);
+        /* Initialize object tables */
+        if(table_list_add(fid, oi.fileno) < 0) {
+            error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
+            h5tools_setstatus(EXIT_FAILURE);
+            goto done;
+        }
+        group_table = table_list.tables[0].group_table;
+        dset_table = table_list.tables[0].dset_table;
+        type_table = table_list.tables[0].type_table;
+
+        /* does there exist unamed committed datatype */
+        for (u = 0; u < type_table->nobjs; u++)
+            if (!type_table->objs[u].recorded) {
+                unamedtype = 1;
+                break;
+            } /* end if */
+
+        /* start to dump - display file header information */
+        if (!doxml) {
+            begin_obj(h5tools_dump_header_format->filebegin, fname, h5tools_dump_header_format->fileblockbegin);
+        } 
+        else {
+            HDfprintf(rawoutstream, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+
+            /* alternative first element, depending on schema or DTD. */
+            if (useschema) {
+                if (HDstrcmp(xmlnsprefix,"") == 0) {
+                    HDfprintf(rawoutstream, "<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
+                            xml_dtd_uri);
+                } 
+                else {
+                    /*  TO DO: make -url option work in this case (may need new option) */
+                    char *ns;
+                    char *indx;
+
+                    ns = HDstrdup(xmlnsprefix);
+                    indx = HDstrrchr(ns,(int)':');
+                    if (indx) *indx = '\0';
+
+                    HDfprintf(rawoutstream, "<%sHDF5-File xmlns:%s=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File\" "
+                            "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                            "xsi:schemaLocation=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File "
+                            "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\">\n",xmlnsprefix,ns);
+                    HDfree(ns);
+                }
+            } 
+            else {
+                HDfprintf(rawoutstream, "<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n", xml_dtd_uri);
+                HDfprintf(rawoutstream, "<HDF5-File>\n");
             }
         }
-        HDfprintf(rawoutstream, "\n");
-    }
 
-    if (!doxml) {
-        end_obj(h5tools_dump_header_format->fileend, h5tools_dump_header_format->fileblockend);
-        HDfprintf(rawoutstream, "\n");
-    } 
-    else {
-        HDfprintf(rawoutstream, "</%sHDF5-File>\n", xmlnsprefix);
-    }
+        if (!doxml) {
+            if (display_fi) {
+                HDfprintf(rawoutstream, "\n");
+                dump_fcontents(fid);
+                end_obj(h5tools_dump_header_format->fileend,h5tools_dump_header_format->fileblockend);
+                HDfprintf(rawoutstream, "\n");
+                goto done;
+            }
+
+            if (display_bb)
+                dump_fcpl(fid);
+        }
+
+        if(display_all) {
+            if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) {
+                error_msg("unable to open root group\n");
+                h5tools_setstatus(EXIT_FAILURE);
+            }
+            else {
+                if (!doxml)
+                    dump_indent += COL;
+                dump_function_table->dump_group_function(gid, "/" );
+                if (!doxml)
+                    dump_indent -= COL;
+                HDfprintf(rawoutstream, "\n");
+            }
+
+            if(H5Gclose(gid) < 0) {
+                error_msg("unable to close root group\n");
+                h5tools_setstatus(EXIT_FAILURE);
+            }
+
+        }
+        else {
+            /* Note: this option is not supported for XML */
+            if(doxml) {
+                error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
+                h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+            } /* end if */
+
+            for(i = 0; i < argc; i++) {
+                if(hand[i].func) {
+                    hand[i].func(fid, hand[i].obj, hand[i].subset_info, 1, NULL);
+                }
+            }
+            HDfprintf(rawoutstream, "\n");
+        }
+
+        if (!doxml) {
+            end_obj(h5tools_dump_header_format->fileend, h5tools_dump_header_format->fileblockend);
+            HDfprintf(rawoutstream, "\n");
+        } 
+        else {
+            HDfprintf(rawoutstream, "</%sHDF5-File>\n", xmlnsprefix);
+        }
+        /* Free tables for objects */
+        table_list_free();
+
+        if(fid >=0)
+            if (H5Fclose(fid) < 0)
+                h5tools_setstatus(EXIT_FAILURE);
+
+        if(prefix)
+            HDfree(prefix);
+        if(fname)
+            HDfree(fname);
+    } /* end while */
+
+    if(hand) 
+        free_handler(hand, argc);
+
+    /* To Do:  clean up XML table */
+
+    leave(h5tools_getstatus());
 
 done:
     /* Free tables for objects */
     table_list_free();
-
-    if(hand) 
-        free_handler(hand, argc);
 
     if(fid >=0)
         if (H5Fclose(fid) < 0)
@@ -1613,6 +1638,9 @@ done:
         HDfree(prefix);
     if(fname)
         HDfree(fname);
+
+    if(hand) 
+        free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
 

@@ -232,8 +232,8 @@ h5tools_dump_init(void)
  *      indicates whether the data supplied in this call falls at the
  *      beginning or end of the total data to be printed (START_OF_DATA and
  *      END_OF_DATA).
- * Return:
- *      None
+ * Return: Success:    SUCCEED
+ *         Failure:    FAIL
  * Programmer:
  *      Robb Matzke, Monday, April 26, 1999
  * Modifications:
@@ -256,11 +256,12 @@ h5tools_dump_init(void)
  *        new field sm_pos in h5tools_context_t, the current stripmine element position
  *-------------------------------------------------------------------------
  */
-void
+int
 h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t container,
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,
                          hsize_t nelmts, hid_t type, void *_mem)
 {
+    HERR_INIT(int, SUCCEED)
     unsigned char *mem = (unsigned char*) _mem;
     hsize_t        i;         /*element counter  */
     size_t         size;      /*size of each datum  */
@@ -357,8 +358,10 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Dclose failed");
 
                 } /* if (region_id >= 0) */
-                else
-                    HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdereference failed");
+                else {
+                    /* if (region_id < 0) - could mean that no reference was written do not throw failure */
+                    H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_id_g, "H5Rdereference failed");
+                }
 
                 ctx->need_prefix = TRUE;
                 
@@ -386,6 +389,9 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
 
         h5tools_str_close(&buffer);
     }/* else bin */
+
+CATCH
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
@@ -1226,7 +1232,8 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
 
             ctx->need_prefix = TRUE;
 
-            h5tools_dump_simple_data(stream, info, dset, ctx, flags, sm_nelmts, p_type, sm_buf);
+            if(h5tools_dump_simple_data(stream, info, dset, ctx, flags, sm_nelmts, p_type, sm_buf) < 0)
+                HERROR(H5E_tools_g, H5E_tools_min_id_g, "h5tools_dump_simple_data failed");
 
             /* Reclaim any VL memory, if necessary */
             if (vl_data)
@@ -1484,7 +1491,8 @@ static int
 h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx,
                          hid_t dset, hid_t p_type)
 {
-    hid_t               f_space;                  /* file data space */
+    HERR_INIT(herr_t, SUCCEED)
+    hid_t               f_space = -1;                  /* file data space */
     hsize_t             elmtno;                   /* counter  */
     size_t              i;                        /* counter  */
     int                 carry;                    /* counter carry value */
@@ -1501,7 +1509,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
     hsize_t             sm_nbytes;                /* bytes per stripmine */
     hsize_t             sm_nelmts;                /* elements per stripmine*/
     unsigned char      *sm_buf = NULL;            /* buffer for raw data */
-    hid_t               sm_space;                 /* stripmine data space */
+    hid_t               sm_space = -1;                 /* stripmine data space */
 
     /* Hyperslab info */
     hsize_t             hs_offset[H5S_MAX_RANK];  /* starting offset */
@@ -1514,13 +1522,12 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
     f_space = H5Dget_space(dset);
 
     if (f_space == FAIL)
-        return FAIL;
+        H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
 
     ctx->ndims = H5Sget_simple_extent_ndims(f_space);
 
     if ((size_t)ctx->ndims > NELMTS(sm_size)) {
-        H5Sclose(f_space);
-        return FAIL;
+        H5E_THROW(FAIL, H5E_tools_min_id_g, "ctx->ndims > NELMTS(sm_size) failed");
     }
 
     /* Assume entire data space to be printed */
@@ -1542,9 +1549,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
         ctx->size_last_dim = 0;
 
     if (p_nelmts == 0) {
-        /* nothing to print */
-        H5Sclose(f_space);
-        return SUCCEED;
+        H5_LEAVE(SUCCEED); /* nothing to print */
     }
 
     /* Check if we have VL data in the dataset's datatype */
@@ -1606,10 +1611,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
 
         /* Read the data */
         if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0) {
-            H5Sclose(f_space);
-            H5Sclose(sm_space);
-            HDfree(sm_buf);
-            return FAIL;
+            H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Dread failed");
         }
 
         /* Print the data */
@@ -1620,7 +1622,8 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
          indices */
         ctx->sm_pos = elmtno;
 
-        h5tools_dump_simple_data(stream, info, dset, ctx, flags, hs_nelmts, p_type, sm_buf);
+        if(h5tools_dump_simple_data(stream, info, dset, ctx, flags, hs_nelmts, p_type, sm_buf) < 0)
+            HERROR(H5E_tools_g, H5E_tools_min_id_g, "h5tools_dump_simple_data failed");
 
         /* Reclaim any VL memory, if necessary */
         if (vl_data)
@@ -1640,13 +1643,17 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
         ctx->continuation++;
     }
 
-    HDfree(sm_buf);
+CATCH
+    if(sm_buf)
+        HDfree(sm_buf);
 
 done:
-    H5Sclose(sm_space);
-    H5Sclose(f_space);
+    if(sm_space >= 0 && H5Sclose(sm_space) < 0)
+        H5E_THROW(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
+    if(f_space >= 0 && H5Sclose(f_space) < 0)
+        H5E_THROW(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
 
-    return SUCCEED;
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
@@ -1664,13 +1671,14 @@ static int
 h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t obj_id,
                         hid_t type, hid_t space, void *mem)
 {
+    HERR_INIT(herr_t, SUCCEED)
     int                 i; /*counters  */
     hsize_t        nelmts; /*total selected elmts */
 
     ctx->ndims = H5Sget_simple_extent_ndims(space);
 
     if ((size_t) ctx->ndims > NELMTS(ctx->p_min_idx))
-        return FAIL;
+        H5E_THROW(FAIL, H5E_tools_min_id_g, "ctx->ndims > NELMTS(ctx->p_min_idx) failed");
 
     /* Assume entire data space to be printed */
     for (i = 0; i < ctx->ndims; i++)
@@ -1682,7 +1690,7 @@ h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, h5tools_conte
         nelmts *= ctx->p_max_idx[i] - ctx->p_min_idx[i];
 
     if (nelmts == 0)
-        return SUCCEED; /*nothing to print*/
+        H5_LEAVE(SUCCEED); /* nothing to print */
     if (ctx->ndims > 0) {
         HDassert(ctx->p_max_idx[ctx->ndims - 1] == (hsize_t) ((int) ctx->p_max_idx[ctx->ndims - 1]));
         ctx->size_last_dim = (int) (ctx->p_max_idx[ctx->ndims - 1]);
@@ -1693,9 +1701,11 @@ h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, h5tools_conte
     if (ctx->ndims > 0)
         init_acc_pos(ctx, ctx->p_max_idx);
 
-    h5tools_dump_simple_data(stream, info, obj_id, ctx, START_OF_DATA | END_OF_DATA, nelmts, type, mem);
+    if(h5tools_dump_simple_data(stream, info, obj_id, ctx, START_OF_DATA | END_OF_DATA, nelmts, type, mem) < 0)
+        HERROR(H5E_tools_g, H5E_tools_min_id_g, "h5tools_dump_simple_data failed");
 
-    return SUCCEED;
+CATCH
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------

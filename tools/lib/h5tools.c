@@ -35,6 +35,7 @@
 #define ALIGN(A,Z)  ((((A) + (Z) - 1) / (Z)) * (Z))
 
 /* global variables */
+hid_t H5tools_ERR_STACK_g = 0;
 hid_t H5tools_ERR_CLS_g = -1;
 hid_t H5E_tools_g = -1;
 hid_t H5E_tools_min_id_g = -1;
@@ -114,7 +115,8 @@ h5tools_init(void)
     if (!h5tools_init_g) {
         /* register the error class */
         HDsnprintf(lib_str, sizeof(lib_str), "%d.%d.%d",H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
-
+        
+        H5tools_ERR_STACK_g = H5Ecreate_stack();
         H5TOOLS_INIT_ERROR()
 
         if (!rawdatastream)
@@ -149,7 +151,12 @@ h5tools_init(void)
 void
 h5tools_close(void)
 {
+    H5E_auto2_t         tools_func;
+    void               *tools_edata;
     if (h5tools_init_g) {
+        H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
+        if(tools_func!=NULL)
+            H5Eprint(H5tools_ERR_STACK_g, rawerrorstream);
         if (rawdatastream && rawdatastream != stdout) {
             if (fclose(rawdatastream))
                 perror("closing rawdatastream");
@@ -173,7 +180,7 @@ h5tools_close(void)
         term_ref_path_table();
 
         H5TOOLS_CLOSE_ERROR()
-
+        H5Eclose_stack(H5tools_ERR_STACK_g);
         /* Shut down the library */
         H5close();
 
