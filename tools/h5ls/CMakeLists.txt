@@ -5,7 +5,6 @@ PROJECT (HDF5_TOOLS_H5LS)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
-INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 #-----------------------------------------------------------------------------
 # Add the h5ls executable
