@@ -1395,10 +1395,10 @@ h5tools_str_replace ( const char *string, const char *substr, const char *replac
 	head = newstr;
 	while ( (tok = strstr ( head, substr ))){
 		oldstr = newstr;
-		newstr = malloc ( strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) + 1 );
+		newstr = HDmalloc ( strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) + 1 );
 
         if ( newstr == NULL ){
-			free (oldstr);
+			HDfree (oldstr);
 			return NULL;
         }
         memcpy ( newstr, oldstr, tok - oldstr );
@@ -1407,7 +1407,7 @@ h5tools_str_replace ( const char *string, const char *substr, const char *replac
         memset ( newstr + strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) , 0, 1 );
         /* move back head right after the last replacement */
         head = newstr + (tok - oldstr) + strlen( replacement );
-        free (oldstr);
+        HDfree (oldstr);
     }
 	
     return newstr;
