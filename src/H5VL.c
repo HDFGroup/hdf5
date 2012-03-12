@@ -692,7 +692,7 @@ H5VL_flush(hid_t uid, H5F_scope_t scope)
 
     /* Check/fix arguments. */
     if(H5I_UID != H5I_get_type(uid))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
     if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))

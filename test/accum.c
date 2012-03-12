@@ -92,7 +92,7 @@ main(void)
     if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Get H5F_t * to internal file structure */
-    if(NULL == (f = (H5F_t *)H5I_object(fid))) FAIL_STACK_ERROR
+    if(NULL == (f = (H5F_t *)H5I_object_verify(fid, H5I_FILE))) FAIL_STACK_ERROR
 
     /* We'll be writing lots of garbage data, so extend the
         file a ways. 10MB should do. */

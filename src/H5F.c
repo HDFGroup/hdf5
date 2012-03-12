@@ -323,7 +323,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")
     if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &(f->shared->lf->driver_id)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID")
-#if 0
+#if 1
     /* Increment the reference count on the VOL ID and insert it into the property list */
     if(H5I_inc_ref(f->vol_id, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL")
@@ -1337,6 +1337,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
+    /* Store the VOL id in the file struct */
+    if(H5P_get(a_plist, H5F_ACS_VOL_ID_NAME, &(file->vol_id)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
+
     /*
      * Decide the file close degree.  If it's the first time to open the
      * file, set the degree to access property list value; if it's the
@@ -1438,15 +1442,6 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     else
         if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
-
-    /*
-     * Adjust bit flags by turning on the creation bit and making sure that
-     * the EXCL or TRUNC bit is set.  All newly-created files are opened for
-     * reading and writing.
-     */
-    if (0==(flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
-	flags |= H5F_ACC_EXCL;	 /*default*/
-    flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /*
      * Create a new file or truncate an existing file.
@@ -2022,13 +2017,26 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
     HDassert(file);
 
     if(file->file_id == -1) {
+        H5I_t               *uid_info;                /* user id structure */
         /* Get an atom for the file */
         if((file->file_id = H5I_register(H5I_FILE, file, app_ref)) < 0)
 	    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
+
+        /* Create a new id that points to a struct that holds the file id and the VOL id */
+        if(NULL == (uid_info = H5FL_MALLOC(H5I_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        uid_info->obj_id = file->file_id;
+        uid_info->vol_id = file->vol_id;
+        if((H5I_register(H5I_UID, uid_info, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
     } else {
         /* Increment reference count on atom. */
         if(H5I_inc_ref(file->file_id, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
+
+        /* Increment reference count on upper level ID. */
+        if(H5I_inc_ref_uid(file->file_id, app_ref) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing user ID failed")
     } /* end else */
 
     ret_value = file->file_id;
@@ -2671,11 +2679,44 @@ H5Fget_name(hid_t uid, char *name/*out*/, size_t size)
     FUNC_ENTER_API(FAIL)
     H5TRACE3("Zs", "ixz", uid, name, size);
 
-    argv[0] = &ret_value;
-    argv[1] = &size;
-    if(H5VL_get(uid, H5F_GET_NAME, (void *)name, 2, argv) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file name")
+    /* MSC - temp fix to handle later when all user level ids are of type UID */
+    if (H5I_UID == H5I_get_type(uid)) {
+        argv[0] = &ret_value;
+        argv[1] = &size;
+        if(H5VL_get(uid, H5F_GET_NAME, (void *)name, 2, argv) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file name")
+    }
+    else {
+        H5F_t         *f;           /* Top file in mount hierarchy */
+        size_t        len;
+        /* For file IDs, get the file object directly */
+        /* (This prevents the H5G_loc() call from returning the file pointer for
+         * the top file in a mount hierarchy)
+         */
+        if(H5I_get_type(uid) == H5I_FILE ) {
+            if(NULL == (f = (H5F_t *)H5I_object(uid)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+        } /* end if */
+        else {
+            H5G_loc_t     loc;        /* Object location */
 
+            /* Get symbol table entry */
+            if(H5G_loc(uid, &loc) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object ID")
+            f = loc.oloc->file;
+        } /* end else */
+
+        len = HDstrlen(H5F_OPEN_NAME(f));
+
+        if(name) {
+            HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
+            if(len >= size)
+                name[size-1]='\0';
+        } /* end if */
+
+        /* Set return value */
+        ret_value = (ssize_t)len;
+    }
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_name() */

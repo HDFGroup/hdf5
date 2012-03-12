@@ -73,7 +73,7 @@ test_cont(char *filename, hid_t fapl)
 
     /* Create the file to operate on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
-    if(NULL == (f = (H5F_t *)H5I_object(file))) FAIL_STACK_ERROR
+        if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE))) FAIL_STACK_ERROR
     if (H5AC_ignore_tags(f) < 0) {
 	H5_FAILED();
 	H5Eprint2(H5E_DEFAULT, stdout);
@@ -200,7 +200,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
     if(H5Pclose(my_fapl) < 0)
 	FAIL_STACK_ERROR
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+            if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
         FAIL_STACK_ERROR
     if(H5AC_ignore_tags(f) < 0)
         FAIL_STACK_ERROR
@@ -348,7 +348,7 @@ main(void)
         /* Create the file to operate on */
         if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+                if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
             FAIL_STACK_ERROR
         if (H5AC_ignore_tags(f) < 0) {
 	    H5_FAILED();
@@ -449,7 +449,7 @@ main(void)
             FAIL_STACK_ERROR
         if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
             FAIL_STACK_ERROR
-        if(NULL == (f = (H5F_t *)H5I_object(file)))
+                if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
             FAIL_STACK_ERROR
         if (H5AC_ignore_tags(f) < 0)
             FAIL_STACK_ERROR

@@ -2691,7 +2691,7 @@ test_acc_perm(hid_t fapl)
     if((gidAMZ = H5Gcreate2(fid1, "/A/M/Z", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    /* Get and verify file name */
+    /* get and verify file name */
     if(H5Fget_name(gidAMZ, name, NAME_BUF_SIZE) < 0)
         TEST_ERROR
     if(HDstrcmp(name, filename3) != 0)
@@ -4286,7 +4286,6 @@ test_multisharedclose(hid_t fapl)
     if (H5Idec_ref(fid2) < 0) TEST_ERROR
     if (H5Idec_ref(fid1) < 0) TEST_ERROR
 
-
     /* Open master and child 2 and mount child 2 to master */
     if ((fid1 = H5Fopen(filename4, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
     if ((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -4311,7 +4310,6 @@ test_multisharedclose(hid_t fapl)
     /* Close both files.  They will be held open by gid3 */
     if (H5Idec_ref(fid2) < 0) TEST_ERROR
     if (H5Idec_ref(fid1) < 0) TEST_ERROR
-
 
     /* Close gid1.  This will close child 1. */
     if (H5Idec_ref(gid1) < 0) TEST_ERROR

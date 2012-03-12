@@ -237,7 +237,7 @@ static int print_index(hid_t fid) {
     H5C_cache_entry_t *next_entry_ptr = NULL; /* entry pointer */
 
     /* Get Internal File / Cache Pointers */
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if ( NULL == (f = (H5F_t *)H5I_object_verify(fid, H5I_FILE)) ) TEST_ERROR;
     cache_ptr = f->shared->cache;
 
     /* Initial (debugging) loop */
@@ -294,7 +294,7 @@ static int verify_no_unknown_tags(hid_t fid)
     H5C_cache_entry_t *next_entry_ptr = NULL; /* entry pointer */
 
     /* Get Internal File / Cache Pointers */
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if ( NULL == (f = (H5F_t *)H5I_object_verify(fid, H5I_FILE)) ) TEST_ERROR;
     cache_ptr = f->shared->cache;
 
     for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
@@ -346,7 +346,7 @@ static int mark_all_entries_investigated(hid_t fid)
     H5C_cache_entry_t *next_entry_ptr = NULL; /* entry pointer */
 
     /* Get Internal File / Cache Pointers */
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if ( NULL == (f = (H5F_t *)H5I_object_verify(fid, H5I_FILE)) ) TEST_ERROR;
     cache_ptr = f->shared->cache;
 
     for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
@@ -403,7 +403,7 @@ static int verify_tag(hid_t fid, int id, haddr_t tag)
     H5C_cache_entry_t *next_entry_ptr = NULL; /* entry pointer */
 
     /* Get Internal File / Cache Pointers */
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if ( NULL == (f = (H5F_t *)H5I_object_verify(fid, H5I_FILE)) ) TEST_ERROR;
     cache_ptr = f->shared->cache;
 
     for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
@@ -448,7 +448,7 @@ static int evict_entries(hid_t fid)
     H5F_t * f = NULL;         /* File Pointer */
 
     /* Get Internal File / Cache Pointers */
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if ( NULL == (f = (H5F_t *)H5I_object_verify(fid, H5I_FILE)) ) TEST_ERROR;
 
     /* Mark all entries investigated */
     mark_all_entries_investigated(fid);
@@ -493,7 +493,7 @@ static int get_new_object_header_tag(hid_t fid, haddr_t *tag)
     int found = FALSE;                      /* If entry is found */
 
     /* Get Internal File / Cache Pointers */
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if ( NULL == (f = (H5F_t *)H5I_object_verify(fid, H5I_FILE)) ) TEST_ERROR;
     cache_ptr = f->shared->cache;
 
     for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
@@ -3831,7 +3831,7 @@ check_invalid_tag_application(void)
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Get internal file pointer*/
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if ( NULL == (f = (H5F_t *)H5I_object_verify(fid, H5I_FILE)) ) TEST_ERROR;
 
     /* Create dxpl */
     if ( (dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;

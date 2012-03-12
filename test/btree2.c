@@ -104,7 +104,7 @@ create_file(hid_t *file, H5F_t **f, hid_t fapl)
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (*f = (H5F_t *)H5I_object(*file)))
+    if(NULL == (*f = (H5F_t *)H5I_object_verify(*file, H5I_FILE)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -2806,7 +2806,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -2845,7 +2845,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6375,7 +6375,7 @@ gen_l4_btree2(const char *filename, hid_t fapl, const H5B2_create_t *cparam,
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6531,7 +6531,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6627,7 +6627,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6716,7 +6716,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6802,7 +6802,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7153,7 +7153,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7198,7 +7198,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7256,7 +7256,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7314,7 +7314,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */

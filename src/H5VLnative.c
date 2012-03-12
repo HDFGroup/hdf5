@@ -46,12 +46,8 @@ static hid_t H5VL_NATIVE_g = 0;
 
 
 /* Prototypes */
-static hid_t  H5VL_native_open(const char *name, unsigned flags, hid_t fcpl_id, 
-                               hid_t fapl_id, hid_t dxpl_id);
-static herr_t H5VL_native_close(hid_t fid);
-static hid_t  H5VL_native_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-static herr_t H5VL_native_flush(hid_t fid, H5F_scope_t scope);
-static herr_t H5VL_native_get(hid_t file_id, H5VL_file_get_t get_type, void *data, int argc, void **argv);
+static herr_t H5VL_native_get(hid_t file_id, H5VL_file_get_t get_type, 
+                              void *data, int argc, void **argv);
 static herr_t H5VL_native_term(void);
 
 static const H5VL_class_t H5VL_native_g = {
@@ -226,7 +222,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hid_t
+hid_t
 H5VL_native_open(const char *name, unsigned flags, hid_t fcpl_id, 
                  hid_t fapl_id, hid_t dxpl_id)
 {
@@ -273,13 +269,22 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hid_t
+hid_t
 H5VL_native_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t *new_file;           /* file struct */
     hid_t ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Adjust bit flags by turning on the creation bit and making sure that
+     * the EXCL or TRUNC bit is set.  All newly-created files are opened for
+     * reading and writing.
+     */
+    if (0==(flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
+	flags |= H5F_ACC_EXCL;	 /*default*/
+    flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create the file */ 
     if(NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
@@ -313,7 +318,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5VL_native_close(hid_t file_id)
 {
     int nref;
@@ -367,7 +372,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5VL_native_flush(hid_t object_id, H5F_scope_t scope)
 {
     H5F_t	*f = NULL;              /* File to flush */
@@ -461,7 +466,7 @@ H5VL_native_flush(hid_t object_id, H5F_scope_t scope)
             /* Call the flush routine for mounted file hierarchies */
             if(H5F_flush_mounts(f, H5AC_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
-            } /* end if */
+        } /* end if */
         else {
             /* Call the flush routine, for this file */
             if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
@@ -631,16 +636,6 @@ H5VL_native_get(hid_t obj_id, H5VL_file_get_t get_type, void *data, int argc, vo
 
             /* Set the return value for the API call */
             ret = (ssize_t)len;
-            break;
-        }
-    /* H5Fget_ */
-    case H5F_GET_OBJ_COUNT:
-        {
-            break;
-        }
-    /* H5Fget_create_plist */
-    case H5F_GET_OBJ_IDS:
-        {
             break;
         }
     /* H5Fget_vfd_handle */

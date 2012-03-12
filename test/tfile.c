@@ -989,7 +989,7 @@ test_get_file_id(void)
     //printf ("REF COUNT = %d\n", H5I_get_ref (fid, FALSE));
 
     /* Test H5Iget_file_id() */
-    //MSC - check_file_id(-1, group_id);
+    check_file_id(-1, group_id);
 
     ret = H5Gclose(group_id);
     CHECK(ret, FAIL, "H5Gclose");
@@ -1765,9 +1765,9 @@ test_file_getname(void)
     CHECK(group_id, FAIL, "H5Gcreate2");
 
     /* Get and verify file name */
-    //MSC - name_len = H5Fget_name(group_id, name, (size_t)TESTA_NAME_BUF_SIZE);
-    //MSC - CHECK(name_len, FAIL, "H5Fget_name");
-    //MSC - VERIFY_STR(name, FILE1, "H5Fget_name");
+    name_len = H5Fget_name(group_id, name, (size_t)TESTA_NAME_BUF_SIZE);
+    CHECK(name_len, FAIL, "H5Fget_name");
+    VERIFY_STR(name, FILE1, "H5Fget_name");
 
     /* Create the data space  */
     space_id = H5Screate_simple(TESTA_RANK, dims, NULL);
@@ -1785,18 +1785,18 @@ test_file_getname(void)
     CHECK(dataset_id, FAIL, "H5Dcreate2");
 
     /* Get and verify file name */
-    //MSC - name_len = H5Fget_name(dataset_id, name, (size_t)TESTA_NAME_BUF_SIZE);
-    //MSC - CHECK(name_len, FAIL, "H5Fget_name");
-    //MSC - VERIFY_STR(name, FILE1, "H5Fget_name");
+    name_len = H5Fget_name(dataset_id, name, (size_t)TESTA_NAME_BUF_SIZE);
+    CHECK(name_len, FAIL, "H5Fget_name");
+    VERIFY_STR(name, FILE1, "H5Fget_name");
 
     /* Create an attribute for the dataset */
     attr_id = H5Acreate2(dataset_id, TESTA_ATTRNAME, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr_id, FAIL, "H5Acreate2");
 
     /* Get and verify file name */
-    //MSC - name_len = H5Fget_name(attr_id, name, (size_t)TESTA_NAME_BUF_SIZE);
-    //MSC - CHECK(name_len, FAIL, "H5Fget_name");
-    //MSC - VERIFY_STR(name, FILE1, "H5Fget_name");
+    name_len = H5Fget_name(attr_id, name, (size_t)TESTA_NAME_BUF_SIZE);
+    CHECK(name_len, FAIL, "H5Fget_name");
+    VERIFY_STR(name, FILE1, "H5Fget_name");
 
     /* Create a compound datatype */
     type_id = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
@@ -1814,9 +1814,9 @@ test_file_getname(void)
     CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Get and verify file name */
-    //MSC - name_len = H5Fget_name(type_id, name, (size_t)TESTA_NAME_BUF_SIZE);
-    //MSC - CHECK(name_len, FAIL, "H5Fget_name");
-    //MSC - VERIFY_STR(name, FILE1, "H5Fget_name");
+    name_len = H5Fget_name(type_id, name, (size_t)TESTA_NAME_BUF_SIZE);
+    CHECK(name_len, FAIL, "H5Fget_name");
+    VERIFY_STR(name, FILE1, "H5Fget_name");
 
     /* Close things down */
     ret = H5Tclose(type_id);

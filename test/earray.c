@@ -319,7 +319,7 @@ create_file(hid_t fapl, hid_t *file, H5F_t **f)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (*f = (H5F_t *)H5I_object(*file)))
+    if(NULL == (*f = (H5F_t *)H5I_object_verify(*file, H5I_FILE)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -451,7 +451,7 @@ reopen_file(hid_t *file, H5F_t **f, hid_t fapl, hid_t dxpl,
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (*f = (H5F_t *)H5I_object(*file)))
+        if(NULL == (*f = (H5F_t *)H5I_object_verify(*file, H5I_FILE)))
             FAIL_STACK_ERROR
 
         /* Ignore metadata tags in the file's cache */
@@ -1156,7 +1156,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f2 = (H5F_t *)H5I_object(file2)))
+            if(NULL == (f2 = (H5F_t *)H5I_object_verify(file2, H5I_FILE)))
         FAIL_STACK_ERROR
 
     /* Open the extensible array through the second file handle */

@@ -81,5 +81,6 @@ H5_DLL int H5I_inc_type_ref(H5I_type_t type);
 H5_DLL herr_t H5I_dec_type_ref(H5I_type_t type);
 H5_DLL int H5I_get_type_ref(H5I_type_t type);
 H5_DLL herr_t H5I_replace_with_uids(hid_t *oid_list, ssize_t num_ids);
+H5_DLL int H5I_inc_ref_uid(hid_t fid, hbool_t app_ref);
 #endif /* _H5Iprivate_H */
 
