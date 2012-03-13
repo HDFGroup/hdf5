@@ -425,6 +425,7 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
     udata.layout = &(dset->shared->layout.u.chunk);
     udata.storage = &(dset->shared->layout.storage.u.chunk);
     udata.offset = ent->offset;
+    udata.rdcc = &(dset->shared->cache.chunk);
 
     /* Remove flush dependency between the proxy (as the child) and the
      *  metadata object in the index (as the parent).

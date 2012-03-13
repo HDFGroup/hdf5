@@ -151,7 +151,7 @@ static herr_t H5D_btree_idx_size(const H5D_chk_idx_info_t *idx_info,
     hsize_t *size);
 static herr_t H5D_btree_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
 static herr_t H5D_btree_idx_support(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry);
+    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
 static herr_t H5D_btree_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
 static herr_t H5D_btree_idx_dump(const H5O_storage_chunk_t *storage,
@@ -993,6 +993,7 @@ H5D_btree_idx_create(const H5D_chk_idx_info_t *idx_info)
     /* Initialize "user" data for B-tree callbacks, etc. */
     udata.layout = idx_info->layout;
     udata.storage = idx_info->storage;
+    udata.rdcc = NULL;
 
     /* Check for SWMR writes to the file */
     if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
@@ -1614,7 +1615,7 @@ H5D_btree_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
  */
 static htri_t
 H5D_btree_idx_support(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry)
+    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry)
 {
     H5O_loc_t oloc;                     /* Temporary object header location for dataset */
     H5O_t *oh = NULL;                   /* Dataset's object header */
@@ -1698,7 +1699,7 @@ H5D_btree_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
     if(NULL == (oh = H5O_pin(&oloc, idx_info->dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
-    /* Add the flush dependency on the chunk */
+    /* Remove the flush dependency on the chunk */
     if((ret_value = H5B_unsupport(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr,
     udata, oh, child_entry)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency on b-tree array metadata")

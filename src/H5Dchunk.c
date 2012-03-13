@@ -219,6 +219,9 @@ static herr_t H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id,
 static htri_t H5D_chunk_is_partial_edge_chunk(const hsize_t offset[],
     const H5D_t *dset, unsigned dset_ndims, const hsize_t *dset_dims,
     const uint32_t *chunk_dims);
+static herr_t H5D_chunk_find_flush_dep(const H5D_rdcc_t *rdcc,
+    const H5O_layout_chunk_t *layout, const hsize_t offset[],
+    H5D_rdcc_ent_t **ent);
 
 
 /*********************/
@@ -2644,8 +2647,23 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
 	rdcc->tail = ent->prev;
     ent->prev = ent->next = NULL;
 
+    /* Unlink from temporary list */
+    if(ent->tmp_prev) {
+        HDassert(rdcc->tmp_head->tmp_next);
+        ent->tmp_prev->tmp_next = ent->tmp_next;
+        if(ent->tmp_next) {
+            ent->tmp_next->tmp_prev = ent->tmp_prev;
+            ent->tmp_next = NULL;
+        } /* end if */
+        ent->tmp_prev = NULL;
+    } /* end if */
+    else
+        /* Only clear hash table slot if the chunk was not on the temporary list
+         */
+        rdcc->slot[ent->idx] = NULL;
+
     /* Remove from cache */
-    rdcc->slot[ent->idx] = NULL;
+    HDassert(rdcc->slot[ent->idx] != ent);
     ent->idx = UINT_MAX;
     rdcc->nbytes_used -= dset->shared->layout.u.chunk.size;
     --rdcc->nused;
@@ -2822,6 +2840,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     HDassert(dset);
     HDassert(TRUE == H5P_isa_class(io_info->dxpl_id, H5P_DATASET_XFER));
     HDassert(!(udata->new_unfilt_chunk && prev_unfilt_chunk));
+    HDassert(!rdcc->tmp_head);
 
     /* Get the chunk's size */
     HDassert(layout->u.chunk.size > 0);
@@ -3129,6 +3148,8 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                 rdcc->head = rdcc->tail = ent;
                 ent->prev = NULL;
             } /* end else */
+            ent->tmp_next = NULL;
+            ent->tmp_prev = NULL;
 
             /* Check for SWMR writes to the file */
             if(io_info->dset->shared->layout.storage.u.chunk.ops->can_swim
@@ -3744,7 +3765,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             udata.common.layout = &layout->u.chunk;
             udata.common.storage = &layout->storage.u.chunk;
             udata.common.offset = chunk_offset;
-            udata.common.rdcc = NULL;
+            udata.common.rdcc = &dset->shared->cache.chunk;
             H5_ASSIGN_OVERFLOW(udata.nbytes, chunk_size, size_t, uint32_t);
             udata.filter_mask = filter_mask;
             udata.addr = HADDR_UNDEF;
@@ -4414,6 +4435,7 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     /* Initialize user data for removal */
     idx_udata.layout = &layout->u.chunk;
     idx_udata.storage = &layout->storage.u.chunk;
+    idx_udata.rdcc = rdcc;
 
     /* Determine if partial edge chunk filters are disabled */
     disable_edge_filters = (layout->u.chunk.flags
@@ -4861,6 +4883,8 @@ H5D_chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
     H5D_rdcc_t         *rdcc = &(dset->shared->cache.chunk);	/*raw data chunk cache */
     H5D_rdcc_ent_t     *ent, *next;	/*cache entry  */
     H5D_rdcc_ent_t     *old_ent;	/* Old cache entry  */
+    H5D_rdcc_ent_t     tmp_head;        /* Sentinel entry for temporary entry list */
+    H5D_rdcc_ent_t     *tmp_tail;       /* Tail pointer for temporary entry list */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     unsigned            rank;	        /*current # of dimensions */
@@ -4884,6 +4908,11 @@ H5D_chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
     if(H5D_get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
+    /* Add temporary entry list to rdcc */
+    (void)HDmemset(&tmp_head, 0, sizeof(tmp_head));
+    rdcc->tmp_head = &tmp_head;
+    tmp_tail = &tmp_head;
+
     /* Recompute the index for each cached chunk that is in a dataset */
     for(ent = rdcc->head; ent; ent = next) {
         hsize_t             idx;        /* Chunk index */
@@ -4906,24 +4935,58 @@ H5D_chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
             if(old_ent != NULL) {
                 HDassert(old_ent->locked == 0);
 
-                /* Check if we are removing the entry we would walk to next */
-                if(old_ent == next)
-                    next = old_ent->next;
-
-                /* Remove the old entry from the cache */
-                if(H5D_chunk_cache_evict(dset, dxpl_id, dxpl_cache, old_ent, TRUE) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
+                /* Insert the old entry into the temporary list, but do not
+                 * evict (yet).  Make sure we do not make any calls to the index
+                 * until all chunks have updated indices! */
+                HDassert(!old_ent->tmp_next);
+                HDassert(!old_ent->tmp_prev);
+                tmp_tail->tmp_next = old_ent;
+                old_ent->tmp_prev = tmp_tail;
+                tmp_tail = old_ent;
             } /* end if */
 
             /* Insert this chunk into correct location in hash table */
             rdcc->slot[ent->idx] = ent;
 
-            /* Null out previous location */
-            rdcc->slot[old_idx] = NULL;
+            /* If this chunk was previously on the temporary list and therefore
+             * not in the hash table, remove it from the temporary list.
+             * Otherwise clear the old hash table slot. */
+            if(ent->tmp_prev) {
+                HDassert(tmp_head.tmp_next);
+                HDassert(tmp_tail != &tmp_head);
+                ent->tmp_prev->tmp_next = ent->tmp_next;
+                if(ent->tmp_next) {
+                    ent->tmp_next->tmp_prev = ent->tmp_prev;
+                    ent->tmp_next = NULL;
+                } /* end if */
+                else {
+                    HDassert(tmp_tail == ent);
+                    tmp_tail = ent->tmp_prev;
+                } /* end else */
+                ent->tmp_prev = NULL;
+            } /* end if */
+            else
+                rdcc->slot[old_idx] = NULL;
         } /* end if */
     } /* end for */
 
+    /* tmp_tail is no longer needed, and will be invalidated by
+     * H5D_chunk_cache_evict anyways. */
+    tmp_tail = NULL;
+
+    /* Evict chunks that are still on the temporary list */
+    while(tmp_head.tmp_next) {
+        ent = tmp_head.tmp_next;
+
+        /* Remove the old entry from the cache */
+        if(H5D_chunk_cache_evict(dset, dxpl_id, dxpl_cache, ent, TRUE) < 0)
+            HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
+    } /* end while */
+
 done:
+    /* Remove temporary list from rdcc */
+    rdcc->tmp_head = NULL;
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_update_cache() */
 
@@ -5875,6 +5938,78 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D_chunk_create_flush_dep
  *
+ * Purpose:     Check cache (including temporary list of entries to be
+ *              evicted) for the specified chunk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, March 12, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_chunk_find_flush_dep(const H5D_rdcc_t *rdcc,
+    const H5O_layout_chunk_t *layout, const hsize_t offset[],
+    H5D_rdcc_ent_t **ent)
+{
+    hsize_t         chunk_idx;          /* Chunk index */
+    hbool_t         found = FALSE;      /* In cache? */
+    unsigned        u;                  /* Local index variable */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_find_flush_dep)
+
+    /* Check args */
+    HDassert(rdcc);
+    HDassert(layout);
+    HDassert(offset);
+    HDassert(ent);
+
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index(layout->ndims - 1, offset, layout->dim,
+            layout->down_chunks, &chunk_idx) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+
+    /* Check for chunk in cache */
+    if(rdcc->nslots > 0) {
+        *ent = rdcc->slot[H5F_addr_hash(chunk_idx, rdcc->nslots)];
+
+        if(*ent)
+            for(u = 0; u < layout->ndims - 1; u++)
+                if(offset[u] != (*ent)->offset[u]) {
+                    *ent = NULL;
+                    break;
+                } /* end if */
+
+        /* Search temporary list if present */
+        if(!(*ent) && rdcc->tmp_head) {
+            *ent = rdcc->tmp_head->tmp_next;
+
+            while(*ent) {
+                for(u = 0, found = TRUE; u < layout->ndims - 1; u++)
+                    if(offset[u] != (*ent)->offset[u]) {
+                        found = FALSE;
+                        break;
+                    } /* end if */
+                if(found)
+                    break;
+                else
+                    *ent = (*ent)->tmp_next;
+            } /* end while */
+
+            HDassert(!(*ent) == !found);
+        } /* end if */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5D_chunk_find_flush_dep() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_chunk_create_flush_dep
+ *
  * Purpose:     Creates a flush dependency between the specified chunk
  *              (child) and parent.
  *
@@ -5889,10 +6024,7 @@ herr_t
 H5D_chunk_create_flush_dep(const H5D_rdcc_t *rdcc,
     const H5O_layout_chunk_t *layout, const hsize_t offset[], void *parent)
 {
-    hsize_t         chunk_idx;          /* Chunk index */
     H5D_rdcc_ent_t  *ent = NULL;        /* Cache entry */
-    hbool_t         found = FALSE;      /* In cache? */
-    unsigned        u;                  /* Local index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_create_flush_dep)
@@ -5903,25 +6035,12 @@ H5D_chunk_create_flush_dep(const H5D_rdcc_t *rdcc,
     HDassert(offset);
     HDassert(parent);
 
-    /* Calculate the index of this chunk */
-    if(H5V_chunk_index(layout->ndims - 1, offset, layout->dim,
-            layout->down_chunks, &chunk_idx) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
-
-    /* Check for chunk in cache */
-    if(rdcc->nslots > 0) {
-        ent = rdcc->slot[H5F_addr_hash(chunk_idx, rdcc->nslots)];
-
-        if(ent)
-            for(u = 0, found = TRUE; u < layout->ndims - 1; u++)
-                if(offset[u] != ent->offset[u]) {
-                    found = FALSE;
-                    break;
-                } /* end if */
-    } /* end if */
+    /* Look for this chunk in cache */
+    if(H5D_chunk_find_flush_dep(rdcc, layout, offset, &ent) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk entry")
 
     /* Create the dependency on the chunk proxy */
-    if(found)
+    if(ent)
         if(H5D_chunk_proxy_create_flush_dep(ent, parent) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
 
@@ -5949,10 +6068,7 @@ H5D_chunk_update_flush_dep(const H5D_rdcc_t *rdcc,
     const H5O_layout_chunk_t *layout, const hsize_t offset[], void *old_parent,
     void *new_parent)
 {
-    hsize_t         chunk_idx;          /* Chunk index */
     H5D_rdcc_ent_t  *ent = NULL;        /* Cache entry */
-    hbool_t         found = FALSE;      /* In cache? */
-    unsigned        u;                  /* Local index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_update_flush_dep)
@@ -5964,25 +6080,12 @@ H5D_chunk_update_flush_dep(const H5D_rdcc_t *rdcc,
     HDassert(old_parent);
     HDassert(new_parent);
 
-    /* Calculate the index of this chunk */
-    if(H5V_chunk_index(layout->ndims - 1, offset, layout->dim,
-            layout->down_chunks, &chunk_idx) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
-
-    /* Check for chunk in cache */
-    if(rdcc->nslots > 0) {
-        ent = rdcc->slot[H5F_addr_hash(chunk_idx, rdcc->nslots)];
-
-        if(ent)
-            for(u = 0, found = TRUE; u < layout->ndims - 1; u++)
-                if(offset[u] != ent->offset[u]) {
-                    found = FALSE;
-                    break;
-                } /* end if */
-    } /* end if */
+    /* Look for this chunk in cache */
+    if(H5D_chunk_find_flush_dep(rdcc, layout, offset, &ent) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk entry")
 
     /* Update the dependencies on the chunk proxy */
-    if(found)
+    if(ent)
         if(H5D_chunk_proxy_update_flush_dep(ent, old_parent, new_parent) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
 
