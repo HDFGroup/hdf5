@@ -241,6 +241,8 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                 mesg->ops = H5D_LOPS_CHUNK;
                 break;
 
+            case H5D_LAYOUT_ERROR:
+            case H5D_NLAYOUTS:
             default:
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "Invalid layout class")
         } /* end switch */
@@ -342,6 +344,8 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
                 UINT32ENCODE(p, mesg->u.chunk.dim[u]);
             break;
 
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "Invalid layout class")
     } /* end switch */
@@ -556,6 +560,8 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "not valid storage type")
     } /* end switch */
@@ -641,6 +647,8 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
             } /* end if */
             break;
 
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "Invalid layout class")
     } /* end switch */
@@ -737,6 +745,8 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                       "Data Size:", mesg->storage.u.compact.size);
             break;
 
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
                       "Type:", "Unknown", (unsigned)mesg->type);
