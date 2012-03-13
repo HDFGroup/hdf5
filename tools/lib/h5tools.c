@@ -156,7 +156,7 @@ h5tools_close(void)
     if (h5tools_init_g) {
         H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
         if(tools_func!=NULL)
-            H5Eprint(H5tools_ERR_STACK_g, rawerrorstream);
+            H5Eprint2(H5tools_ERR_STACK_g, rawerrorstream);
         if (rawdatastream && rawdatastream != stdout) {
             if (fclose(rawdatastream))
                 perror("closing rawdatastream");
