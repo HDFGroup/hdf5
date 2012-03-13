@@ -1596,15 +1596,20 @@ H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_al
         switch(layout->type) {
             case H5D_CONTIGUOUS:
                 if(!(*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
-                    /* Reserve space in the file for the entire array */
-                    if(H5D_contig_alloc(f, dxpl_id, &layout->storage.u.contig/*out*/) < 0)
-                        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize contiguous storage")
+                    /* Check if we have a zero-sized dataset */
+                    if(layout->storage.u.contig.size > 0) {
+                        /* Reserve space in the file for the entire array */
+                        if(H5D_contig_alloc(f, dxpl_id, &layout->storage.u.contig/*out*/) < 0)
+                            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize contiguous storage")
+
+                        /* Indicate that we should initialize storage space */
+                        must_init_space = TRUE;
+                    } /* end if */
+                    else
+                        layout->storage.u.contig.addr = HADDR_UNDEF;
 
                     /* Indicate that we set the storage addr */
                     addr_set = TRUE;
-
-                    /* Indicate that we should initialize storage space */
-                    must_init_space = TRUE;
                 } /* end if */
                 break;
 
