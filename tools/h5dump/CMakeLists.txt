@@ -127,6 +127,9 @@ IF (BUILD_TESTING)
       tlonglinks.ddl
       tloop-1.ddl
       tmulti.ddl
+      tmultifile.ddl
+      tqmarkfile.ddl
+      tstarfile.ddl
       tnamed_dtype_attr.ddl
       tnestcomp-1.ddl
       tnbit.ddl
@@ -831,6 +834,12 @@ IF (BUILD_TESTING)
           tloop-1.out.err
           tmulti.out
           tmulti.out.err
+          tmultifile.out
+          tmultifile.out.err
+          tqmarkfile.out
+          tqmarkfile.out.err
+          tstarfile.out
+          tstarfile.out.err
           tnamed_dtype_attr.out
           tnamed_dtype_attr.out.err
           tnestcomp-1.out
@@ -937,7 +946,7 @@ IF (BUILD_TESTING)
   # test for displaying attributes
   ADD_H5_TEST (tattr-1 0 --enable-error-stack tattr.h5)
   # test for displaying the selected attributes of string type and scalar space
-  ADD_H5_TEST (tattr-2 0 --enable-error-stack -a "/\/attr1" --attribute /attr4 --attribute=/attr5 tattr.h5)
+  ADD_H5_TEST (tattr-2 0 --enable-error-stack -a /\\\\/attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
   # test for header and error messages
   ADD_H5_MASK_TEST (tattr-3 1 --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5)
   # test for displaying attributes in shared datatype (also in group and dataset)
@@ -1014,6 +1023,11 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tarray7 0 --enable-error-stack tarray7.h5)
   ADD_H5_TEST (tarray8 0 --enable-error-stack tarray8.h5)
 
+  # test for wildcards in filename (does not work with cmake)
+  #ADD_H5_MASK_TEST (tstarfile 0 --enable-error-stack -H -d Dataset1 tarr*.h5)
+  #ADD_H5_MASK_TEST (tqmarkfile 0 --enable-error-stack -H -d Dataset1 tarray?.h5)
+  #ADD_H5_TEST (tmultifile 0 --enable-error-stack -H -d Dataset1 tarray[2-7].h5)
+  
   # test for files with empty data
   ADD_H5_TEST (tempty 0 --enable-error-stack tempty.h5)
 
