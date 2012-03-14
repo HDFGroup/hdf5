@@ -151,9 +151,23 @@ H5I_init_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Register high level file user id */ 
     if(H5I_register_type(H5I_UID, (size_t)H5I_UID_HASHSIZE, 0, (H5I_free_t)NULL)<H5I_UID)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize interface")
-
+#if 0
+    /* Register high level dataset user id */ 
+    if(H5I_register_type(H5I_DSID, (size_t)H5I_DSID_HASHSIZE, 0, (H5I_free_t)NULL)<H5I_DSID)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize interface")
+    /* Register high level attribute user id */ 
+    if(H5I_register_type(H5I_AID, (size_t)H5I_AID_HASHSIZE, 0, (H5I_free_t)NULL)<H5I_AID)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize interface")
+    /* Register high level group user id */ 
+    if(H5I_register_type(H5I_GID, (size_t)H5I_GID_HASHSIZE, 0, (H5I_free_t)NULL)<H5I_GID)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize interface")
+    /* Register high level datatype user id */ 
+    if(H5I_register_type(H5I_DTID, (size_t)H5I_DTID_HASHSIZE, 0, (H5I_free_t)NULL)<H5I_DTID)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize interface")
+#endif
 done:
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5I_init_interface() */

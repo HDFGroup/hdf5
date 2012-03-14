@@ -45,7 +45,10 @@
 /* Includes needed to set as default file driver */
 #include "H5FDsec2.h"		/* Posix unbuffered I/O	file driver	*/
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
-#include "H5VLnative.h"		/* Native HDF5 VOL plugin       	*/
+
+/* Includes needed to set as default VOL driver */
+#include "H5VLnative.h" 	/* Native H5 VOL plugin	*/
+
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Windows buffered I/O     */
 #endif

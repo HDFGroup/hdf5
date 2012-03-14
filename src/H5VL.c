@@ -509,13 +509,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_open
+ * Function:	H5VL_file_open
  *
- * Purpose:	Private version of H5VLopen()
+ * Purpose:	Opens a file through the VOL.
  *
- * Return:	Success:	Pointer to a new file struct
+ * Return:      Success: User ID of the new file. This ID is of type
+ *                       H5I_UID which contains the VOL id and the actual file ID
  *
- *		Failure:	NULL
+ *		Failure: FAIL
  *
  * Programmer:	Mohamad Chaarawi
  *              January, 2012
@@ -523,7 +524,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
+H5VL_file_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
 {
     H5VL_class_t	*vol_plugin;            /* VOL for file */
     H5I_t               *uid_info;                /* user id structure */
@@ -560,17 +561,18 @@ H5VL_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t 
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_open() */
+} /* end H5VL_file_open() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_create
+ * Function:	H5VL_file_create
  *
- * Purpose:	Private version of H5VLcreate()
+ * Purpose:	Creates a file through the VOL
  *
- * Return:	Success:	Pointer to a new file struct
+ * Return:      Success: User ID of the new file. This ID is of type
+ *                       H5I_UID which contains the VOL id and the actual file ID
  *
- *		Failure:	FAIL
+ *		Failure: FAIL
  *
  * Programmer:	Mohamad Chaarawi
  *              January, 2012
@@ -578,7 +580,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5VL_class_t	*vol_plugin;            /* VOL for file */
     H5I_t               *uid_info;                /* user id structure */
@@ -617,13 +619,13 @@ H5VL_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_create() */
+} /* end H5VL_file_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_close
+ * Function:	H5VL_file_close
  *
- * Purpose:	Private version of H5VLclose()
+ * Purpose:	Closes a file through the VOL
  *
  * Return:	Success:	Non Negative
  *
@@ -635,7 +637,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_close(hid_t uid)
+H5VL_file_close(hid_t uid)
 {
     H5VL_class_t	*vol_plugin;            /* VOL for file */
     H5I_t               *uid_info;              /* user id structure */
@@ -664,17 +666,17 @@ H5VL_close(hid_t uid)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to decrement ref count on user ID")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_close() */
+} /* end H5VL_file_close() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_flush
+ * Function:	H5VL_file_flush
  *
- * Purpose:	Private version of H5VLflush()
+ * Purpose:	Flushes a file through the VOL
  *
- * Return:	Success:	Pointer to a new file struct
+ * Return:	Success:	Non Negative
  *
- *		Failure:	FAIL
+ *		Failure:	Negative
  *
  * Programmer:	Mohamad Chaarawi
  *              February, 2012
@@ -682,7 +684,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_flush(hid_t uid, H5F_scope_t scope)
+H5VL_file_flush(hid_t uid, H5F_scope_t scope)
 {
     H5VL_class_t	*vol_plugin;            /* VOL for file */
     H5I_t               *uid_info;              /* user id structure */
@@ -709,13 +711,13 @@ H5VL_flush(hid_t uid, H5F_scope_t scope)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_flush() */
+} /* end H5VL_file_flush() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_get
+ * Function:	H5VL_file_get
  *
- * Purpose:	Private version of H5VLget()
+ * Purpose:	Get specific information about the file through the VOL
  *
  * Return:	Success:        non negative
  *
@@ -727,7 +729,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_get(hid_t uid, H5VL_file_get_t get_type, void *data, int argc, void **argv)
+H5VL_file_get(hid_t uid, H5VL_file_get_t get_type, void *data, int argc, void **argv)
 {
     H5VL_class_t     *vol_plugin;            /* VOL for file */
     H5I_t            *uid_info;              /* user id structure */
@@ -754,4 +756,70 @@ H5VL_get(hid_t uid, H5VL_file_get_t get_type, void *data, int argc, void **argv)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_get() */
+} /* end H5VL_file_get() */
+#if 0
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_group_create
+ *
+ * Purpose:	Creates a group through the VOL
+ *
+ * Return:      Success: User ID of the new group. This ID is of type
+ *                       H5I_UID which contains the VOL id and the actual group ID
+ *
+ *		Failure: FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VL_group_create(hid_t uid, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id)
+{
+    H5VL_class_t	*vol_plugin;            /* VOL for group */
+    H5I_t               *uid_info1;             /* user id structure of the location where the group will be created */
+    H5I_t               *uid_info2;             /* user id structure of new created group*/
+    hid_t               group_id;               /* actual group ID */
+    hid_t		ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check/fix arguments. */
+    if(H5I_UID != H5I_get_type(uid))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
+
+    /* get the ID struct */
+    if(NULL == (uid_info1 = (H5I_t *)H5I_object(uid)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+
+    /* get VOL plugin info */
+    if(NULL == (vol_plugin = (H5VL_class_t *)H5I_object(uid_info1->vol_id)))
+	HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid vol plugin ID in file")
+
+    /* check if the corresponding VOL create callback exists */
+    if(NULL == vol_plugin->object_cls.create)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group create' method")
+    /* call the corresponding VOL create callback */
+    if((group_id = (vol_plugin->object_cls.create)
+        (uid_info1->obj_id, name, lcpl_id, gcpl_id, gapl_id)) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "create failed")
+
+    /* Create a new id that points to a struct that holds the group id and the VOL id */
+    /* Allocate new id structure */
+    if(NULL == (uid_info2 = H5FL_MALLOC(H5I_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    uid_info2->obj_id = group_id;
+    uid_info2->vol_id = uid_info1->vol_id;
+
+    /* increment ref count on the VOL id */
+    if(H5I_inc_ref(uid_info2->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on vol plugin")
+
+    if((ret_value = H5I_register(H5I_UID, uid_info2, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_group_create() */
+#endif

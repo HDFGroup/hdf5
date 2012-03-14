@@ -261,8 +261,7 @@ H5G_term_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
-    hid_t gapl_id)
+H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id)
 {
     H5G_loc_t	    loc;                /* Location to create group */
     H5G_t	   *grp = NULL;         /* New group created */
@@ -274,6 +273,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
@@ -297,6 +297,12 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
     else
         if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+
+#if 0
+    /* Create the group through the VOL */
+    if((ret_value = H5VL_group_create(loc_id, name, lcpl_id, gcpl_id, gapl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
+#endif
 
     /* Create the new group & get its ID */
     if(NULL == (grp = H5G__create_named(&loc, name, lcpl_id, gcpl_id, gapl_id, H5AC_dxpl_id)))

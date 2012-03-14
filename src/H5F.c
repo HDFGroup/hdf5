@@ -193,7 +193,7 @@ H5Fget_create_plist(hid_t uid)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", uid);
 
-    if(H5VL_get(uid, H5F_GET_FCPL, &ret_value, 0, NULL) < 0)
+    if(H5VL_file_get(uid, H5F_GET_FCPL, &ret_value, 0, NULL) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file creation properties")
 
 done:
@@ -230,7 +230,7 @@ H5Fget_access_plist(hid_t uid)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", uid);
 
-    if(H5VL_get(uid, H5F_GET_FAPL, &ret_value, 0, NULL) < 0)
+    if(H5VL_file_get(uid, H5F_GET_FAPL, &ret_value, 0, NULL) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file creation properties")
 
 done:
@@ -758,7 +758,7 @@ H5Fget_vfd_handle(hid_t uid, hid_t fapl, void **file_handle)
     if(!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle pointer")
 
-    if((ret_value = H5VL_get(uid, H5F_GET_VFD_HANDLE, &fapl, 1, file_handle)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5F_GET_VFD_HANDLE, &fapl, 1, file_handle)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file handle")
 
 done:
@@ -1446,7 +1446,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /*
      * Create a new file or truncate an existing file.
      */
-    if((ret_value = H5VL_create(filename, flags, fcpl_id, fapl_id)) < 0)
+    if((ret_value = H5VL_file_create(filename, flags, fcpl_id, fapl_id)) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
 done:
@@ -1516,7 +1516,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
     /* Open the file */
-    if((ret_value = H5VL_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id))<0)
+    if((ret_value = H5VL_file_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id))<0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
 
 #if 0
@@ -1557,7 +1557,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iFs", object_id, scope);
 
-    if((ret_value = H5VL_flush(object_id, scope)) < 0)
+    if((ret_value = H5VL_file_flush(object_id, scope)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
 
 done:
@@ -1873,7 +1873,7 @@ H5Fclose(hid_t file_id)
     H5TRACE1("e", "i", file_id);
 
     /* Close the file */
-    if((ret_value = H5VL_close(file_id)) < 0)
+    if((ret_value = H5VL_file_close(file_id)) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
 done:
@@ -1985,7 +1985,7 @@ H5Fget_intent(hid_t uid, unsigned *intent_flags)
 
     /* If no intent flags were passed in, exit quietly */
     if(intent_flags) {
-        if((ret_value = H5VL_get(uid, H5F_GET_INTENT, (void *)intent_flags, 0, NULL)) < 0)
+        if((ret_value = H5VL_file_get(uid, H5F_GET_INTENT, (void *)intent_flags, 0, NULL)) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file intent")
     }
 
@@ -2403,7 +2403,7 @@ H5Fget_freespace(hid_t uid)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("Hs", "i", uid);
 
-    if(H5VL_get(uid, H5F_GET_FREE_SPACE, &ret_value, 0, NULL) < 0)
+    if(H5VL_file_get(uid, H5F_GET_FREE_SPACE, &ret_value, 0, NULL) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file free space")
 
 done:
@@ -2437,7 +2437,7 @@ H5Fget_filesize(hid_t uid, hsize_t *size)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", uid, size);
 
-    if((ret_value = H5VL_get(uid, H5F_GET_SIZE, (void *)size, 0, NULL)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5F_GET_SIZE, (void *)size, 0, NULL)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file size")
 
 done:
@@ -2475,7 +2475,7 @@ H5Fget_mdc_config(hid_t uid, H5AC_cache_config_t *config_ptr)
     if((NULL == config_ptr) || (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
 
-    if((ret_value = H5VL_get(uid, H5F_GET_MDC_CONF, (void *)config_ptr, 0, NULL)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5F_GET_MDC_CONF, (void *)config_ptr, 0, NULL)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get mdc config")
 
 done:
@@ -2553,7 +2553,7 @@ H5Fget_mdc_hit_rate(hid_t uid, double *hit_rate_ptr)
     if(NULL == hit_rate_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL hit rate pointer")
 
-    if((ret_value = H5VL_get(uid, H5F_GET_MDC_HR, (void *)hit_rate_ptr, 0, NULL)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5F_GET_MDC_HR, (void *)hit_rate_ptr, 0, NULL)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get MDC hit rate")
 
 done:
@@ -2592,7 +2592,7 @@ H5Fget_mdc_size(hid_t uid, size_t *max_size_ptr, size_t *min_clean_size_ptr,
     argv[0] = (void *)max_size_ptr;
     argv[1] = (void *)min_clean_size_ptr;
     argv[2] = (void *)cur_size_ptr;
-    if((ret_value = H5VL_get(uid, H5F_GET_MDC_SIZE, (void *)cur_num_entries_ptr, 3, argv)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5F_GET_MDC_SIZE, (void *)cur_num_entries_ptr, 3, argv)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get MDC hit rate")
 
 done:
@@ -2683,7 +2683,7 @@ H5Fget_name(hid_t uid, char *name/*out*/, size_t size)
     if (H5I_UID == H5I_get_type(uid)) {
         argv[0] = &ret_value;
         argv[1] = &size;
-        if(H5VL_get(uid, H5F_GET_NAME, (void *)name, 2, argv) < 0)
+        if(H5VL_file_get(uid, H5F_GET_NAME, (void *)name, 2, argv) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file name")
     }
     else {
@@ -2751,7 +2751,7 @@ H5Fget_info2(hid_t uid, H5F_info2_t *finfo)
     if(!finfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-    if((ret_value = H5VL_get(uid, H5F_GET_INFO, (void *)finfo, 0, NULL)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5F_GET_INFO, (void *)finfo, 0, NULL)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file info")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2791,7 +2791,7 @@ H5Fget_free_sections(hid_t uid, H5F_mem_t type, size_t nsects,
     argv[1] = &type;
     argv[2] = &nsects;
 
-    if(H5VL_get(uid, H5F_GET_FREE_SECTIONS, (void *)sect_info, 3, argv) < 0)
+    if(H5VL_file_get(uid, H5F_GET_FREE_SECTIONS, (void *)sect_info, 3, argv) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file info")
 done:
     FUNC_LEAVE_API(ret_value)
