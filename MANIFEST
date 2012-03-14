@@ -1408,6 +1408,9 @@
 ./tools/testfiles/tmulti-o.h5
 ./tools/testfiles/tmulti-r.h5
 ./tools/testfiles/tmulti-s.h5
+./tools/testfiles/tmultifile.ddl
+./tools/testfiles/tqmarkfile.ddl
+./tools/testfiles/tstarfile.ddl
 ./tools/testfiles/tnbit.ddl
 ./tools/testfiles/tnestcomp-1.ddl
 ./tools/testfiles/tnestedcomp.h5

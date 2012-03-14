@@ -25,13 +25,13 @@ H5LS_BIN=`pwd`/$H5LS    # The path of the tool binary
 CMP='cmp -s'
 DIFF='diff -c'
 CP='cp'
-NLINES=20			# Max. lines of output to display if test fails
+NLINES=20      # Max. lines of output to display if test fails
 
 WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
 
 nerrors=0
 verbose=yes
-h5haveexitcode=yes	    # default is yes
+h5haveexitcode=yes      # default is yes
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
     srcdir=.
@@ -210,7 +210,7 @@ TOOLTEST() {
     # any unexpected output from that stream too.
     TESTING $H5LS $@
     (
-	cd $TESTDIR
+  cd $TESTDIR
         $RUNSERIAL $H5LS_BIN "$@"
     ) >$actual 2>$actual_err 
     
@@ -222,37 +222,37 @@ TOOLTEST() {
     STDERR_FILTER $actual_err
     cat $actual_err >> $actual
     if [ $h5haveexitcode = 'yes' -a $exitcode -ne $retvalexpect ]; then
-	echo "*FAILED*"
-	nerrors="`expr $nerrors + 1`"
-	if [ yes = "$verbose" ]; then
-	    echo "test returned with exit code $exitcode"
-	    echo "test output: (up to $NLINES lines)"
-	    head -$NLINES $actual
-	    echo "***end of test output***"
-	    echo ""
-	fi
+  echo "*FAILED*"
+  nerrors="`expr $nerrors + 1`"
+  if [ yes = "$verbose" ]; then
+      echo "test returned with exit code $exitcode"
+      echo "test output: (up to $NLINES lines)"
+      head -$NLINES $actual
+      echo "***end of test output***"
+      echo ""
+  fi
     elif [ ! -f $expect ]; then
-	# Create the expect file if it doesn't yet exist.
+  # Create the expect file if it doesn't yet exist.
         echo " CREATED"
         cp $actual $expect
     elif $CMP $expect $actual; then
         echo " PASSED"
     else
         echo "*FAILED*"
-	echo "    Expected result differs from actual result"
-	nerrors="`expr $nerrors + 1`"
-	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+  echo "    Expected result differs from actual result"
+  nerrors="`expr $nerrors + 1`"
+  test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual $actual_err $actual_sav $actual_err_sav
+  rm -f $actual $actual_err $actual_sav $actual_err_sav
     fi
 }
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                ###
+###        T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 # prepare for test
@@ -322,6 +322,11 @@ TOOLTEST tsoftlinks-nodangle-1.ls 1 -w80 --follow-symlinks --no-dangling-links t
 # when used file with no dangling links - expected exit code 0
 TOOLTEST thlinks-nodangle-1.ls 0 -w80 --follow-symlinks --no-dangling-links thlink.h5
 
+# test for wildcards in filename (does not work with cmake)
+# this h5ls test script does not pass the filename properly like the h5dump test script???
+#TOOLTEST tstarfile t*link.h5
+#TOOLTEST tqmarkfile t?link.h5
+#TOOLTEST tmultifile t[h,s]link.h5
 
 # tests for hard links
 TOOLTEST thlink-1.ls 0 -w80 thlink.h5
