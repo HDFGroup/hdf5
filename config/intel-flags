@@ -93,7 +93,7 @@ fi
 # Please follow the pattern below by adding new versions at the top, copying
 # the information from the previous version and adding modifications to that.
 case "$cc_vendor-$cc_version" in
-    icc-11*)
+    icc-11* | icc-12*)
         # -s became obsolete; we also fixed bugs that allow us to enable higher level
         # of optimization starting with 1.8.7
         PROD_CFLAGS="-O3"

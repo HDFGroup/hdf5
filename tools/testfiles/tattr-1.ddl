@@ -1,6 +1,6 @@
 HDF5 "tattr.h5" {
 GROUP "/" {
-   ATTRIBUTE "attr1" {
+   ATTRIBUTE "/attr1" {
       DATATYPE  H5T_STD_I8BE
       DATASPACE  SIMPLE { ( 24 ) / ( 24 ) }
       DATA {

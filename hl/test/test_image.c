@@ -525,7 +525,7 @@ static int test_generate(void)
     *-------------------------------------------------------------------------
     */
 
-    f  = fopen( data_file, "r" ) ;
+    f  = HDfopen( data_file, "r" ) ;
     if ( f == NULL )
     {
         printf( "Could not find file %s. Try set $srcdir \n", data_file );
@@ -572,15 +572,15 @@ static int test_generate(void)
     fscanf( f, "%d %d %d", &imax, &jmax, &kmax );
     fscanf( f, "%f %f %f", &valex, &xmin, &xmax );
 
-    data = (float*) malloc ( imax * jmax * kmax * sizeof( float ));
-    image_data = (unsigned char*) malloc ( imax * jmax * kmax * sizeof( unsigned char ));
+    data = (float*) HDmalloc ( imax * jmax * kmax * sizeof( float ));
+    image_data = (unsigned char*) HDmalloc ( imax * jmax * kmax * sizeof( unsigned char ));
 
     for ( i = 0; i < imax * jmax * kmax; i++ )
     {
         fscanf( f, "%f ", &value );
         data[i] = value;
     }
-    fclose( f );
+    HDfclose( f );
 
     /*-------------------------------------------------------------------------
     * transform the data from floating point to unsigned char
@@ -719,7 +719,7 @@ static int read_data( const char* fname, /*IN*/
     *-------------------------------------------------------------------------
     */
 
-    f = fopen(data_file, "r");
+    f = HDfopen(data_file, "r");
     if ( f == NULL )
     {
         printf( "Could not open file %s. Try set $srcdir \n", data_file );
@@ -738,18 +738,18 @@ static int read_data( const char* fname, /*IN*/
 
     if ( image_data )
     {
-        free( image_data );
+        HDfree( image_data );
         image_data=NULL;
     }
 
-    image_data = (unsigned char*) malloc (w * h * color_planes * sizeof( unsigned char ));
+    image_data = (unsigned char*) HDmalloc (w * h * color_planes * sizeof( unsigned char ));
 
     for (i = 0; i < h * w * color_planes ; i++)
     {
         fscanf( f, "%d",&n );
         image_data[i] = (unsigned char)n;
     }
-    fclose(f);
+    HDfclose(f);
 
     return 1;
 
@@ -794,46 +794,46 @@ static int read_palette(const char* fname,
         return -1;
 
     /* open the input file */
-    if (!(file = fopen(data_file, "r")))
+    if (!(file = HDfopen(data_file, "r")))
     {
         printf( "Could not open file %s. Try set $srcdir \n", data_file );
         return -1;
     }
 
     /* read the file ident string */
-    if (fgets(buffer, sizeof(buffer), file) == NULL)
+    if (HDfgets(buffer, sizeof(buffer), file) == NULL)
     {
-        fclose(file);
+        HDfclose(file);
         return -1;
     }
 
     /* ensure it matches the palette file ident string */
-    if ( strncmp(buffer, STRING_JASC, sizeof(STRING_JASC) - 1) != 0 &&
-        strncmp(buffer, STRING_CWPAL, sizeof(STRING_CWPAL) - 1) != 0 )
+    if ( HDstrncmp(buffer, STRING_JASC, sizeof(STRING_JASC) - 1) != 0 &&
+            HDstrncmp(buffer, STRING_CWPAL, sizeof(STRING_CWPAL) - 1) != 0 )
     {
-        fclose(file);
+        HDfclose(file);
         return -1;
     }
 
     /* read the version string */
-    if (fgets(buffer, sizeof(buffer), file) == NULL)
+    if (HDfgets(buffer, sizeof(buffer), file) == NULL)
     {
-        fclose(file);
+        HDfclose(file);
         return -1;
     }
 
     /* ensure it matches the palette file version string */
-    if ( strncmp(buffer, VERSION_JASC, sizeof(VERSION_JASC) - 1) != 0 &&
-        strncmp(buffer, VERSION_CWPAL, sizeof(VERSION_CWPAL) - 1) != 0 )
+    if ( HDstrncmp(buffer, VERSION_JASC, sizeof(VERSION_JASC) - 1) != 0 &&
+            HDstrncmp(buffer, VERSION_CWPAL, sizeof(VERSION_CWPAL) - 1) != 0 )
     {
-        fclose(file);
+        HDfclose(file);
         return -1;
     }
 
     /* read the number of colors */
-    if (fgets(buffer, sizeof(buffer), file) == NULL)
+    if (HDfgets(buffer, sizeof(buffer), file) == NULL)
     {
-        fclose(file);
+        HDfclose(file);
         return -1;
     }
 
@@ -842,22 +842,22 @@ static int read_palette(const char* fname,
     check for missing version or number of colors
     in this case it reads the first entry
     */
-    if ( strlen( buffer ) > 4 )
+    if ( HDstrlen( buffer ) > 4 )
     {
-        fclose(file);
+        HDfclose(file);
         return -1;
     }
 
     if (sscanf(buffer, "%u", &nentries) != 1)
     {
-        fclose(file);
+        HDfclose(file);
         return -1;
     }
 
     /* ensure there are a sensible number of colors in the palette */
     if ((nentries > 256) || (nentries > palette_size))
     {
-        fclose(file);
+        HDfclose(file);
         return(-1);
     }
 
@@ -867,7 +867,7 @@ static int read_palette(const char* fname,
         /* extract the red, green and blue color components.  */
         if (fscanf(file, "%u %u %u", &red, &green, &blue) != 3)
         {
-            fclose(file);
+            HDfclose(file);
             return -1;
         }
         /* store this palette entry */
@@ -877,7 +877,7 @@ static int read_palette(const char* fname,
     }
 
     /* close file */
-    fclose(file);
+    HDfclose(file);
 
     return nentries;
 }

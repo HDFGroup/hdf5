@@ -1428,6 +1428,7 @@
 ./tools/testfiles/tscaleoffset.ddl
 ./tools/testfiles/tslink-1.ddl
 ./tools/testfiles/tslink-2.ddl
+./tools/testfiles/tslink-D.ddl
 ./tools/testfiles/tslink.h5
 ./tools/testfiles/tsplit_file-m.h5
 ./tools/testfiles/tsplit_file-r.h5
@@ -1854,6 +1855,10 @@
 ./tools/h5diff/testfiles/h5diff_458.txt
 ./tools/h5diff/testfiles/h5diff_459.txt
 ./tools/h5diff/testfiles/h5diff_465.txt
+./tools/h5diff/testfiles/h5diff_466.txt
+./tools/h5diff/testfiles/h5diff_467.txt
+./tools/h5diff/testfiles/h5diff_468.txt
+./tools/h5diff/testfiles/h5diff_469.txt
 ./tools/h5diff/testfiles/h5diff_480.txt
 ./tools/h5diff/testfiles/h5diff_481.txt
 ./tools/h5diff/testfiles/h5diff_482.txt
