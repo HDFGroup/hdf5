@@ -127,9 +127,9 @@ IF (BUILD_TESTING)
       tlonglinks.ddl
       tloop-1.ddl
       tmulti.ddl
-      tmultifile.ddl
-      tqmarkfile.ddl
-      tstarfile.ddl
+#      tmultifile.ddl
+#      tqmarkfile.ddl
+#      tstarfile.ddl
       tnamed_dtype_attr.ddl
       tnestcomp-1.ddl
       tnbit.ddl
@@ -834,12 +834,12 @@ IF (BUILD_TESTING)
           tloop-1.out.err
           tmulti.out
           tmulti.out.err
-          tmultifile.out
-          tmultifile.out.err
-          tqmarkfile.out
-          tqmarkfile.out.err
-          tstarfile.out
-          tstarfile.out.err
+#          tmultifile.out
+#          tmultifile.out.err
+#          tqmarkfile.out
+#          tqmarkfile.out.err
+#          tstarfile.out
+#          tstarfile.out.err
           tnamed_dtype_attr.out
           tnamed_dtype_attr.out.err
           tnestcomp-1.out
