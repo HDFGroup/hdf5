@@ -557,6 +557,10 @@ H5VL_file_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, h
     uid_info->obj_id = file_id;
     uid_info->vol_id = plugin_id;
 
+    /* increment ref count on the VOL id */
+    if(H5I_inc_ref(uid_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on vol plugin")
+
     if((ret_value = H5I_register(H5I_UID, uid_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 done:
@@ -614,6 +618,10 @@ H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     uid_info->obj_id = file_id;
     uid_info->vol_id = plugin_id;
 
+    /* increment ref count on the VOL id */
+    if(H5I_inc_ref(uid_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on vol plugin")
+
     if((ret_value = H5I_register(H5I_UID, uid_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
@@ -661,6 +669,10 @@ H5VL_file_close(hid_t uid)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file close' method")
     if((ret_value = (vol_plugin->file_cls.close)(uid_info->obj_id)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed")
+
+    /* decrement ref count on the VOL id */
+    if(H5I_dec_ref(uid_info->vol_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement ref count on vol plugin")
 
     if(H5I_dec_app_ref(uid) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to decrement ref count on user ID")

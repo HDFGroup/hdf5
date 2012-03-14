@@ -176,8 +176,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if(NULL == (dset = H5D__create_named(&loc, name, type_id, space, lcpl_id, dcpl_id, dapl_id, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
     if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset")A
-
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset")
 
 done:
     if(ret_value < 0)

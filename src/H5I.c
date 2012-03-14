@@ -2448,6 +2448,9 @@ H5I_inc_ref_uid(hid_t fid, hbool_t app_ref)
                 if(NULL == (uid_info = (H5I_t *)H5I_object(id_ptr->id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
                 if (uid_info->obj_id == fid) {
+                    /* increment ref count on the VOL id */
+                    if(H5I_inc_ref(uid_info->vol_id, FALSE) < 0)
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on vol plugin")
                     /* Increment reference count on atom. */
                     if((ret_value = H5I_inc_ref(id_ptr->id, app_ref)) < 0)
                         HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")

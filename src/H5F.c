@@ -336,12 +336,6 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if(driver_info != NULL && H5P_set(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver info")
 
-    /* Set the vol "info" in the property list */
-            /* MSC - can't do that yet 
-    vol_info = H5VL_fapl_get(f);
-    if(vol_info != NULL && H5P_set(new_plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol info")
-            */
     /* Set the file close degree appropriately */
     if(f->shared->fc_degree == H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_ACS_CLOSE_DEGREE_NAME, &(f->shared->lf->cls->fc_degree)) < 0) {
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
@@ -1943,11 +1937,14 @@ H5Freopen(hid_t uid)
     /* Keep this ID in file object structure */
     new_file->file_id = new_file_id;
 
-#if 1
+#if 1 /*MSC - This needs to go through the VOL */
     if(NULL == (new_uid_info = H5FL_MALLOC(H5I_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     new_uid_info->obj_id = new_file_id;
     new_uid_info->vol_id = uid_info->vol_id;
+    /* increment ref count on the VOL id */
+    if(H5I_inc_ref(uid_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on vol plugin")
 
     if((ret_value = H5I_register(H5I_UID, new_uid_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
@@ -2027,6 +2024,11 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
         uid_info->obj_id = file->file_id;
         uid_info->vol_id = file->vol_id;
+
+        /* increment ref count on the VOL id */
+        if(H5I_inc_ref(uid_info->vol_id, FALSE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on vol plugin")
+
         if((H5I_register(H5I_UID, uid_info, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
     } else {
