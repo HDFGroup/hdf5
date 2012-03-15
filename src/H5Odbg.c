@@ -106,7 +106,7 @@ H5O_assert(const H5O_t *oh)
 
     /* Initialize the tracking variables */
     hdr_size = 0;
-    meta_space = H5O_SIZEOF_HDR(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
+    meta_space = (size_t)H5O_SIZEOF_HDR(oh) + (size_t)(H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
     mesg_space = 0;
     free_space = 0;
 
@@ -140,7 +140,7 @@ H5O_assert(const H5O_t *oh)
 
     /* Check for correct chunk #0 size flags */
     if(oh->version > H5O_VERSION_1) {
-        uint64_t chunk0_size = oh->chunk[0].size - H5O_SIZEOF_HDR(oh);
+        uint64_t chunk0_size = oh->chunk[0].size - (size_t)H5O_SIZEOF_HDR(oh);
 
         if(chunk0_size <= 255)
             HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_1);
@@ -154,9 +154,15 @@ H5O_assert(const H5O_t *oh)
 
     /* Loop over all messages in object header */
     for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
+        uint8_t *curr_hdr;      /* Start of current message header */
+        size_t  curr_tot_size;  /* Total size of current message (including header) */
+
+        curr_hdr = curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh);
+        curr_tot_size = curr_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh);
+
         /* Accumulate information, based on the type of message */
 	if(H5O_NULL_ID == curr_msg->type->id)
-            free_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
+            free_space += curr_tot_size;
         else if(H5O_CONT_ID == curr_msg->type->id) {
             H5O_cont_t *cont = (H5O_cont_t *)curr_msg->native;
             hbool_t found_chunk = FALSE;        /* Found a chunk that matches */
@@ -175,10 +181,10 @@ H5O_assert(const H5O_t *oh)
             } /* end for */
             HDassert(found_chunk);
 
-            meta_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
+            meta_space += curr_tot_size;
         } /* end if */
         else {
-            meta_space += H5O_SIZEOF_MSGHDR_OH(oh);
+            meta_space += (size_t)H5O_SIZEOF_MSGHDR_OH(oh);
             mesg_space += curr_msg->raw_size;
         } /* end else */
 
@@ -190,17 +196,19 @@ H5O_assert(const H5O_t *oh)
             HDassert(oh->chunk[curr_msg->chunkno].gap == 0);
 
         /* Make certain that the message is completely in a chunk message area */
-        HDassert(curr_msg->raw_size <= (oh->chunk[curr_msg->chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
+        HDassert(curr_tot_size <= (oh->chunk[curr_msg->chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
         if(curr_msg->chunkno == 0)
-            HDassert(curr_msg->raw >= oh->chunk[curr_msg->chunkno].image + (H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+            HDassert(curr_hdr >= oh->chunk[curr_msg->chunkno].image + (H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
         else
-            HDassert(curr_msg->raw >= oh->chunk[curr_msg->chunkno].image + (H5O_SIZEOF_CHKHDR_OH(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+            HDassert(curr_hdr >= oh->chunk[curr_msg->chunkno].image + (H5O_SIZEOF_CHKHDR_OH(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
         HDassert(curr_msg->raw + curr_msg->raw_size <= (oh->chunk[curr_msg->chunkno].image + oh->chunk[curr_msg->chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
 
         /* Make certain that no other messages overlap this message */
         for(v = 0, tmp_msg = &oh->mesg[0]; v < oh->nmesgs; v++, tmp_msg++) {
             if(u != v)
-                HDassert(!(tmp_msg->raw >= curr_msg->raw && tmp_msg->raw < (curr_msg->raw + curr_msg->raw_size)));
+                HDassert(!((tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)) >= curr_hdr
+                        && (tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh))
+                        < (curr_hdr + curr_tot_size)));
         } /* end for */
     } /* end for */
 
