@@ -647,16 +647,17 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
     /* Wipe new space for chunk */
     HDmemset(oh->chunk[chunkno].image + old_size, 0, oh->chunk[chunkno].size - old_size);
 
+    /* Move chunk 0 data up if the size flags changed */
+    if(adjust_size_flags)
+        HDmemmove(oh->chunk[0].image + H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh),
+                oh->chunk[0].image + H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh) - extra_prfx_size,
+                old_size - (size_t)H5O_SIZEOF_HDR(oh) + extra_prfx_size);
+
     /* Spin through existing messages, adjusting them */
     for(u = 0; u < oh->nmesgs; u++) {
         /* Adjust raw addresses for messages in this chunk to reflect new 'image' address */
-        if(oh->mesg[u].chunkno == chunkno) {
+        if(oh->mesg[u].chunkno == chunkno)
             oh->mesg[u].raw = oh->chunk[chunkno].image + extra_prfx_size + (oh->mesg[u].raw - old_image);
-
-            /* Flag message as dirty directly */
-            /* (we mark the entire chunk dirty when we update its size) */
-            oh->mesg[u].dirty = TRUE;
-        } /* endif */
 
         /* Find continuation message which points to this chunk and adjust chunk's size */
         /* (Chunk 0 doesn't have a continuation message that points to it and
@@ -1331,8 +1332,9 @@ H5O_move_cont(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned cont_u)
             move_end = cont_msg->raw + cont_msg->raw_size;
             cont_chunkno = cont_msg->chunkno;
 
-            /* Convert continuation message into a null message */
-            if(H5O_release_mesg(f, dxpl_id, oh, cont_msg, TRUE) < 0)
+            /* Convert continuation message into a null message.  Do not delete
+             * the target chunk yet, so we can still copy messages from it. */
+            if(H5O_release_mesg(f, dxpl_id, oh, cont_msg, FALSE) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to convert into null message")
 
             /* Protect chunk */
@@ -1354,13 +1356,16 @@ H5O_move_cont(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned cont_u)
                         HDmemcpy(move_start, curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh), move_size);
                         curr_msg->raw = move_start + H5O_SIZEOF_MSGHDR_OH(oh);
                         curr_msg->chunkno = cont_chunkno;
-                        curr_msg->dirty = TRUE;
                         chk_dirtied = TRUE;
 
                         /* Adjust location to move messages to */
                         move_start += move_size;
                     } /* end else */
                 } /* end if */
+
+            /* Delete the target chunk */
+            if(H5O_chunk_delete(f, dxpl_id, oh, deleted_chunkno) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove chunk from cache")
 
             HDassert(move_start <= (move_end + gap_size));
 

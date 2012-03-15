@@ -167,6 +167,8 @@ H5O_assert(const H5O_t *oh)
             H5O_cont_t *cont = (H5O_cont_t *)curr_msg->native;
             hbool_t found_chunk = FALSE;        /* Found a chunk that matches */
 
+            HDassert(cont);
+
             /* Increment # of continuation messages found */
             cont_msgs_found++;
 
@@ -186,6 +188,9 @@ H5O_assert(const H5O_t *oh)
         else {
             meta_space += (size_t)H5O_SIZEOF_MSGHDR_OH(oh);
             mesg_space += curr_msg->raw_size;
+
+            /* Make sure the message has a native form if it is marked dirty */
+            HDassert(curr_msg->native || !curr_msg->dirty);
         } /* end else */
 
         /* Make certain that the message is in a valid chunk */

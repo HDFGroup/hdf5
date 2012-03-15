@@ -365,6 +365,8 @@ Bug Fixes since HDF5-1.8.0 release
     Library
     -------
 
+      - Fixed rare corruption bugs that could occur when using the new object
+            header format. (NAF - 2012/3/15 - HDFFV-7879)
       - Creating a dataset in a read-only file caused seg fault when the file 
             is closed.  It's fixed.  The error stack is returned correctly
             now. (SLU - 2012/1/25. Issue 7756)
