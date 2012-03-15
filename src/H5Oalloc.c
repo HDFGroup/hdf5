@@ -559,26 +559,27 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
     /* Check for changing the chunk #0 data size enough to need adjusting the flags */
     if(oh->version > H5O_VERSION_1 && chunkno == 0) {
         uint64_t chunk0_size;           /* Size of chunk 0's data */
+        size_t   orig_prfx_size = (size_t)1 << (oh->flags & H5O_HDR_CHUNK0_SIZE); /* Original prefix size */
 
         HDassert(oh->chunk[0].size >= (size_t)H5O_SIZEOF_HDR(oh));
         chunk0_size = oh->chunk[0].size - (size_t)H5O_SIZEOF_HDR(oh);
 
-        /* Check for moving from a 1-byte to a 2-byte size encoding */
-        if(chunk0_size <= 255 && (chunk0_size + delta) > 255) {
-            extra_prfx_size = 1;
-            new_size_flags = H5O_HDR_CHUNK0_2;
+        /* Check for moving to a 8-byte size encoding */
+        if(orig_prfx_size < 8 && (chunk0_size + delta) > 4294967295) {
+            extra_prfx_size = 8 - orig_prfx_size;
+            new_size_flags = H5O_HDR_CHUNK0_8;
             adjust_size_flags = TRUE;
         } /* end if */
-        /* Check for moving from a 2-byte to a 4-byte size encoding */
-        else if(chunk0_size <= 65535 && (chunk0_size + delta) > 65535) {
-            extra_prfx_size = 2;
+        /* Check for moving to a 4-byte size encoding */
+        else if(orig_prfx_size < 4 && (chunk0_size + delta) > 65535) {
+            extra_prfx_size = 4 - orig_prfx_size;
             new_size_flags = H5O_HDR_CHUNK0_4;
             adjust_size_flags = TRUE;
         } /* end if */
-        /* Check for moving from a 4-byte to a 8-byte size encoding */
-        else if(chunk0_size <= 4294967295 && (chunk0_size + delta) > 4294967295) {
-            extra_prfx_size = 4;
-            new_size_flags = H5O_HDR_CHUNK0_8;
+        /* Check for moving to a 2-byte size encoding */
+        else if(orig_prfx_size < 2 && (chunk0_size + delta) > 255) {
+            extra_prfx_size = 2 - orig_prfx_size;
+            new_size_flags = H5O_HDR_CHUNK0_2;
             adjust_size_flags = TRUE;
         } /* end if */
     } /* end if */
