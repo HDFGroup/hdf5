@@ -326,7 +326,7 @@ TOOLTEST thlinks-nodangle-1.ls 0 -w80 --follow-symlinks --no-dangling-links thli
 # this h5ls test script does not pass the filename properly like the h5dump test script???
 #TOOLTEST tstarfile t*link.h5
 #TOOLTEST tqmarkfile t?link.h5
-#TOOLTEST tmultifile t[h,s]link.h5
+#TOOLTEST tmultifile t[hs]link.h5
 
 # tests for hard links
 TOOLTEST thlink-1.ls 0 -w80 thlink.h5
