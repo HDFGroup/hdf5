@@ -364,7 +364,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
-
+      - H5Pset_data_transform had seg fault in some cases like x*-100.  It
+            works correctly now and handles other cases like 100-x or 2/x.
+            (SLU - 2012/3/15.  Issue 7922) 
       - Fixed rare corruption bugs that could occur when using the new object
             header format. (NAF - 2012/3/15 - HDFFV-7879)
       - Creating a dataset in a read-only file caused seg fault when the file 
