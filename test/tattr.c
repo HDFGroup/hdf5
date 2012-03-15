@@ -128,6 +128,8 @@ float attr_data5=(float)-5.123;        /* Test data for 5th attribute */
 #define ATTR7_NAME      "attr 1 - 000000"
 #define ATTR8_NAME      "attr 2"
 
+#define LINK1_NAME      "Link1"
+
 #define NATTR_MANY_OLD  350
 #define NATTR_MANY_NEW  35000
 
@@ -10421,6 +10423,137 @@ test_attr_bug7(hid_t fcpl, hid_t fapl)
 
 /****************************************************************
 **
+**  test_attr_bug8(): Test basic H5A (attribute) code.
+**      (Really tests object header code).
+**      Tests adding a link and attribute to a group in such a
+**      way as to cause the "chunk #0 size" field to expand
+**      when some object header messages are not loaded into
+**      cache.  Before the bug was fixed, this would prevent
+**      these messages from being shifted to the correct
+**      position as the expansion algorithm marked them dirty,
+**      invalidating the raw form, when there was no native
+**      form to encode.
+**
+****************************************************************/
+static void
+test_attr_bug8(hid_t fcpl, hid_t fapl)
+{
+    hid_t   fid;            /* File ID */
+    hid_t   aid;            /* Attribute ID */
+    hid_t   sid;            /* Dataspace ID */
+    hid_t   gid;            /* Group ID */
+    hid_t   oid;            /* Object ID */
+    hsize_t dims = 256;     /* Attribute dimensions */
+    H5O_info_t oinfo;       /* Object info */
+    H5A_info_t ainfo;       /* Attribute info */
+    haddr_t root_addr;      /* Root group address */
+    herr_t  ret;            /* Generic return status */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing attribute expanding object header with undecoded messages\n"));
+
+
+    /* Create committed datatype to operate on.  Use a committed datatype so that
+     * there is nothing after the object header and the first chunk can expand and
+     * contract as necessary. */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+    gid = H5Gcreate2(fid, GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
+
+    /* Get root group address */
+    ret = H5Oget_info(fid, &oinfo);
+    CHECK(ret, FAIL, "H5Oget_info");
+    root_addr = oinfo.addr;
+
+    /*
+     * Create link to root group
+     */
+    ret = H5Lcreate_hard(fid, "/", gid, LINK1_NAME, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lcreate_hard");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Check link */
+    gid = H5Gopen2(fid, GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
+    oid = H5Oopen(gid, LINK1_NAME, H5P_DEFAULT);
+    CHECK(oid, FAIL, "H5Oopen");
+    ret = H5Oget_info(oid, &oinfo);
+    CHECK(ret, FAIL, "H5Oget_info");
+    if(oinfo.addr != root_addr)
+        TestErrPrintf("incorrect link target address: addr: %llu, expected: %llu\n", (long long unsigned)oinfo.addr, (long long unsigned)root_addr);
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Oclose(oid);
+    CHECK(ret, FAIL, "H5Oclose");
+
+    /* Open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /*
+     * Create attribute.  Should cause chunk size field to expand by 1 byte
+     * (1->2).
+     */
+    gid = H5Gopen2(fid, GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
+    sid = H5Screate_simple(1, &dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+    aid = H5Acreate2(gid, ATTR1_NAME, H5T_STD_I8LE, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
+
+    /* Close file */
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Check link and attribute */
+    gid = H5Gopen2(fid, GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
+    oid = H5Oopen(gid, LINK1_NAME, H5P_DEFAULT);
+    CHECK(oid, FAIL, "H5Oopen");
+    ret = H5Oget_info(oid, &oinfo);
+    CHECK(ret, FAIL, "H5Oget_info");
+    if(oinfo.addr != root_addr)
+        TestErrPrintf("incorrect link target address: addr: %llu, expected: %llu\n", (long long unsigned)oinfo.addr, (long long unsigned)root_addr);
+    ret = H5Aget_info_by_name(gid, ".", ATTR1_NAME, &ainfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Aget_info_by_name");
+    if(ainfo.data_size != dims)
+        TestErrPrintf("attribute data size different: data_size=%llu, should be %llu\n", (long long unsigned)ainfo.data_size, (long long unsigned)dims);
+
+    /* Close IDs */
+    ret = H5Oclose(oid);
+    CHECK(ret, FAIL, "H5Oclose");
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_bug8() */
+
+/****************************************************************
+**
 **  test_attr(): Main H5A (attribute) testing routine.
 **
 ****************************************************************/
@@ -10566,6 +10699,7 @@ test_attr(void)
                 test_attr_bug5(my_fcpl, my_fapl);               /* Test opening/closing attributes through different file handles */
                 test_attr_bug6(my_fcpl, my_fapl);               /* Test reading empty attribute */
                 test_attr_bug7(my_fcpl, my_fapl);               /* Test creating and deleting large attributes in ohdr chunk 0 */
+                test_attr_bug8(my_fcpl, my_fapl);               /* Test attribute expanding object header with undecoded messages */
             } /* end for */
         } /* end if */
         else {
@@ -10593,6 +10727,7 @@ test_attr(void)
             /* Skip test_attr_bug7 because it is specific to the new object
              * header format and in fact fails if used with the old format, due
              * to the attributes being larger than 64K */
+            test_attr_bug8(fcpl, my_fapl);                      /* Test attribute expanding object header with undecoded messages */
         } /* end else */
     } /* end for */
 
