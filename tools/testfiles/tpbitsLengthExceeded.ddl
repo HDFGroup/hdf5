@@ -1,4 +1,4 @@
-usage: h5dump [OPTIONS] file
+usage: h5dump [OPTIONS] files
   OPTIONS
      -h, --help           Print a usage message and exit
      -n, --contents       Print a list of the file contents and exit
@@ -93,5 +93,9 @@ usage: h5dump [OPTIONS] file
   4) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset
 
       h5dump -d /dset -M 0,1,4,3 quux.h5
+
+  5) Dataset foo in files multi1.h5 multi2.h5 multi3.h5
+
+      h5dump -d /foo multi1.h5 multi2.h5 multi3.h5
 
 h5dump error: Packed Bit offset+length value(65) too large. Max is 64

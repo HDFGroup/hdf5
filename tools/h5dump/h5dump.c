@@ -231,7 +231,7 @@ static void
 usage(const char *prog)
 {
     HDfflush(rawoutstream);
-    HDfprintf(rawoutstream, "usage: %s [OPTIONS] file\n", prog);
+    HDfprintf(rawoutstream, "usage: %s [OPTIONS] files\n", prog);
     HDfprintf(rawoutstream, "  OPTIONS\n");
     HDfprintf(rawoutstream, "     -h, --help           Print a usage message and exit\n");
     HDfprintf(rawoutstream, "     -n, --contents       Print a list of the file contents and exit\n");
@@ -328,6 +328,10 @@ usage(const char *prog)
     HDfprintf(rawoutstream, "  4) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset\n");
     HDfprintf(rawoutstream, "\n");
     HDfprintf(rawoutstream, "      h5dump -d /dset -M 0,1,4,3 quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  5) Dataset foo in files multi1.h5 multi2.h5 multi3.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -d /foo multi1.h5 multi2.h5 multi3.h5\n");
     HDfprintf(rawoutstream, "\n");
 }
 
