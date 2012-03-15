@@ -131,6 +131,7 @@ $SRC_H5LS_TESTFILES/tgroup-2.ls
 $SRC_H5LS_TESTFILES/tgroup-3.ls
 $SRC_H5LS_TESTFILES/thlink-1.ls
 $SRC_H5LS_TESTFILES/tloop-1.ls
+$SRC_H5LS_TESTFILES/tmultifile.ls
 $SRC_H5LS_TESTFILES/tnestcomp-1.ls
 $SRC_H5LS_TESTFILES/tnestcomp-2.ls
 $SRC_H5LS_TESTFILES/tnestcomp-3.ls
@@ -324,9 +325,9 @@ TOOLTEST thlinks-nodangle-1.ls 0 -w80 --follow-symlinks --no-dangling-links thli
 
 # test for wildcards in filename (does not work with cmake)
 # this h5ls test script does not pass the filename properly like the h5dump test script???
-#TOOLTEST tstarfile t*link.h5
-#TOOLTEST tqmarkfile t?link.h5
-#TOOLTEST tmultifile t[hs]link.h5
+#TOOLTEST tstarfile 0 -w80 t*link.h5
+#TOOLTEST tqmarkfile 0 -w80 t?link.h5
+TOOLTEST tmultifile 0 -w80 thlink.h5 tslink.h5
 
 # tests for hard links
 TOOLTEST thlink-1.ls 0 -w80 thlink.h5

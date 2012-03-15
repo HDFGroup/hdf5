@@ -1408,6 +1408,7 @@
 ./tools/testfiles/tmulti-o.h5
 ./tools/testfiles/tmulti-r.h5
 ./tools/testfiles/tmulti-s.h5
+./tools/testfiles/tmultifile.ls
 ./tools/testfiles/tmultifile.ddl
 ./tools/testfiles/tqmarkfile.ddl
 ./tools/testfiles/tstarfile.ddl

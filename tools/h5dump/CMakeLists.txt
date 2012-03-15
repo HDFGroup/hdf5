@@ -127,7 +127,7 @@ IF (BUILD_TESTING)
       tlonglinks.ddl
       tloop-1.ddl
       tmulti.ddl
-#      tmultifile.ddl
+      tmultifile.ddl
 #      tqmarkfile.ddl
 #      tstarfile.ddl
       tnamed_dtype_attr.ddl
@@ -834,8 +834,8 @@ IF (BUILD_TESTING)
           tloop-1.out.err
           tmulti.out
           tmulti.out.err
-#          tmultifile.out
-#          tmultifile.out.err
+          tmultifile.out
+          tmultifile.out.err
 #          tqmarkfile.out
 #          tqmarkfile.out.err
 #          tstarfile.out
@@ -1026,7 +1026,7 @@ IF (BUILD_TESTING)
   # test for wildcards in filename (does not work with cmake)
   #ADD_H5_MASK_TEST (tstarfile 0 --enable-error-stack -H -d Dataset1 tarr*.h5)
   #ADD_H5_MASK_TEST (tqmarkfile 0 --enable-error-stack -H -d Dataset1 tarray?.h5)
-  #ADD_H5_TEST (tmultifile 0 --enable-error-stack -H -d Dataset1 tarray[2-7].h5)
+  ADD_H5_TEST (tmultifile 0 --enable-error-stack -H -d Dataset1 tarray2.h5 tarray3.h5 tarray4.h5 tarray5.h5 tarray6.h5 tarray7.h5)
   
   # test for files with empty data
   ADD_H5_TEST (tempty 0 --enable-error-stack tempty.h5)

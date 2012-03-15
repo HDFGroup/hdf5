@@ -98,6 +98,7 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tgroup-3.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/thlink-1.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tmultifile.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestcomp-1.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestcomp-2.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestcomp-3.ls
@@ -353,6 +354,11 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tsoftlinks-nodangle-1 1 -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5)
   # when used file with no dangling links - expected exit code 0
   ADD_H5_TEST (thlinks-nodangle-1 0 -w80 --follow-symlinks --no-dangling-links thlink.h5)
+
+# test for wildcards in filename (does not work with cmake)
+#  ADD_H5_TEST (tstarfile 0 -w80 t*link.h5)
+#  ADD_H5_TEST (tqmarkfile 0 -w80 t?link.h5)
+  ADD_H5_TEST (tmultifile 0 -w80 thlink.h5 tslink.h5)
 
   # tests for hard links
   ADD_H5_TEST (thlink-1 0 -w80 thlink.h5)
