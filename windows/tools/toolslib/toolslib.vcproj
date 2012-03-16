@@ -356,6 +356,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\tools\lib\h5tools_dump.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\tools\lib\h5tools_utils.c"
 				>
 			</File>
@@ -382,6 +386,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\tools\lib\h5tools_str.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\tools\lib\h5tools_dump.h"
 				>
 			</File>
 			<File

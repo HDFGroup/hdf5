@@ -390,6 +390,14 @@
 			RelativePath="..\..\..\tools\h5dump\h5dump.c"
 			>
 		</File>
+		<File
+			RelativePath="..\..\..\tools\h5dump\h5dump_ddl.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\tools\h5dump\h5dump_xml.c"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
