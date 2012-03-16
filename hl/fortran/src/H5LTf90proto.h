@@ -149,7 +149,7 @@ H5_FCDLL void HD5packFstring (char *src, char *dest, size_t len);
 
 #define nh5ltget_attribute_ndims_c  H5_FC_FUNC_(h5ltget_attribute_ndims_c, H5LTGET_ATTRIBUTE_NDIMS_C)
 #define nh5ltget_attribute_info_c   H5_FC_FUNC_(h5ltget_attribute_info_c, H5LTGET_ATTRIBUTE_INFO_C)
-#define nh5ltpath_valid_c       H5_FC_FUNC_(h5ltpath_valid_c, H5LTPATH_VALID_C)
+#define nh5ltpath_valid_c           H5_FC_FUNC_(h5ltpath_valid_c, H5LTPATH_VALID_C)
 
 /*-------------------------------------------------------------------------
 * Image
