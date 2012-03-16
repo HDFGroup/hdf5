@@ -1867,7 +1867,7 @@ static int test_valid_path(void)
   /*
    * Create a group named "G2" in the file.
    */
-  if((group = H5Gcreate(file_id, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+  if((group = H5Gcreate2(file_id, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
     goto out;
 
   /*
@@ -1888,7 +1888,7 @@ static int test_valid_path(void)
   /*
    * Create a group named "G1" in the file.
    */
-  if((group = H5Gcreate(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+  if((group = H5Gcreate2(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
     goto out;
 
   /*
@@ -1908,7 +1908,7 @@ static int test_valid_path(void)
   /*
    * Create a group named "/G1/G2" in the file.
    */
-  if((group = H5Gcreate (file_id, "/G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+  if((group = H5Gcreate2(file_id, "/G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
     goto out;
 
   /*
@@ -1923,7 +1923,7 @@ static int test_valid_path(void)
   /*
    * Create a group named "/G1/G2/G6" in the file.
    */
-  if((group = H5Gcreate(file_id, "/G1/G2/G6", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+  if((group = H5Gcreate2(file_id, "/G1/G2/G6", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
     goto out;
 
   /*
@@ -1964,7 +1964,7 @@ static int test_valid_path(void)
   /*
    * Create a group named "G1" in the file.
    */
-  if((group = H5Gcreate(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+  if((group = H5Gcreate2(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
     goto out;
   /*
    * Create a dataset named "G1/DS1" in the file.
@@ -2034,7 +2034,7 @@ static int test_valid_path(void)
    * CHECK RELATIVE PATHS 
    ***************************************/
 
-  if( (group = H5Gopen(file_id, "/G1", H5P_DEFAULT)) < 0)
+  if( (group = H5Gopen2(file_id, "/G1", H5P_DEFAULT)) < 0)
     goto out;
 
   /* The identifier (file id) is the object itself, i.e. "." */
