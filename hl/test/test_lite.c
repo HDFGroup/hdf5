@@ -1991,12 +1991,10 @@ static int test_valid_path(void)
   /**************************************
    * CHECK ABSOLUTE PATHS 
    **************************************/
-
-  strncpy(path, "/G1",3);
-  if( (path_valid = H5LTpath_valid(file_id, path, TRUE)) != TRUE) {
+  if( (path_valid = H5LTpath_valid(file_id, "/G1", TRUE)) != TRUE) {
     goto out;
   }
-
+  
   if((path_valid = H5LTpath_valid(file_id, "/G1/DS1", TRUE)) != TRUE)
     goto out;
 
@@ -2019,7 +2017,6 @@ static int test_valid_path(void)
   /* check if path exist, but not the object */
   if( (path_valid = H5LTpath_valid(file_id, "/G2/G7", FALSE)) != TRUE )
     goto out;
-
   /* check if path exist and if the object exists. It should fail
    * since it is a dangling soft link
    */
