@@ -149,6 +149,7 @@ H5_FCDLL void HD5packFstring (char *src, char *dest, size_t len);
 
 #define nh5ltget_attribute_ndims_c  H5_FC_FUNC_(h5ltget_attribute_ndims_c, H5LTGET_ATTRIBUTE_NDIMS_C)
 #define nh5ltget_attribute_info_c   H5_FC_FUNC_(h5ltget_attribute_info_c, H5LTGET_ATTRIBUTE_INFO_C)
+#define nh5ltpath_valid_c       H5_FC_FUNC_(h5ltpath_valid_c, H5LTPATH_VALID_C)
 
 /*-------------------------------------------------------------------------
 * Image
@@ -1196,6 +1197,13 @@ nh5ltread_dataset_string_c (hid_t_f *loc_id,
                             int_f *namelen,
                             _fcd name,
                             char *buf);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+nh5ltpath_valid_c(hid_t_f *loc_id, 
+		  _fcd path, 
+		  int_f *pathlen, 
+		  int_f *check_object_valid_c);
 
 /*-------------------------------------------------------------------------
 * Image

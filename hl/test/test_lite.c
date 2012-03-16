@@ -21,6 +21,8 @@
 
 #define FILE_NAME "test_lite1.h5"
 #define FILE_NAME2 "test_lite2.h5"
+#define FILE_NAME3 "test_lite3.h5"
+#define FILE_NAME4 "test_lite4.h5"
 #define INPUT_FILE "dtype_file.txt"
 
 #define DSET0_NAME "2D int array"
@@ -1805,6 +1807,317 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+ * test H5LTpath_valid function
+ *-------------------------------------------------------------------------
+ */
+static int test_valid_path(void)
+{
+  hid_t file_id, group;
+  herr_t status;
+  FILE *fp = NULL;
+  htri_t path_valid;
+  char path[10];
+  const char *data_string_in = "test";
+  
+  TESTING("H5LTpath_valid");
+    
+  /* Create a new file using default properties. */
+
+  /**************************************************************
+   *  The file structure should look like this:
+   *
+   *        +----------------------------------+
+   *        |                 /                |
+   *        +----------------------------------+
+   *                  /       |   \       \
+   *                 /        |    \       \
+   *                /         |     \       \
+   *               /          |      \       G8 (dangled external link)
+   *              /          DS       \
+   *             /                     \
+   *            G1                    G2
+   *            | --> DS1              |
+   *           / \--> DS3             / \
+   *          /                      /   \
+   *        G2                     DS4    G7
+   *         |                 (hard link   (dangled soft link
+   *         |                  to /G1/DS3)  to /G1/G20 )
+   *        /  \     			     
+   *       /    \       
+   *     G5      \    
+   *  (soft link  G6 (external link /G1 in FILENAME4)
+   *  to /G2)   
+   *
+   ****************************************************************/
+
+  file_id = H5Fcreate(FILE_NAME3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  /*
+   * Create dataset "/DS"
+   */
+  if(H5LTmake_dataset_string(file_id, "DS", data_string_in)<0)
+    goto out;
+
+  /*
+   * Create an external dangled link
+   */
+  if(H5Lcreate_external("NonExistant_File.h5", "G8", file_id, "DangledExternalLink",  H5P_DEFAULT,  H5P_DEFAULT)<0)
+    goto out;
+
+  /*
+   * Create a group named "G2" in the file.
+   */
+  if((group = H5Gcreate(file_id, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+    goto out;
+
+  /*
+   * Create a dataset named "G2/DS4" in the file.
+   */
+  if(H5LTmake_dataset_string(group, "/G2/DS4", data_string_in)<0)
+    goto out;
+  
+  /*
+   * Create a soft link
+   */
+  if(H5Lcreate_soft("/G1/G20", file_id, "/G2/G7", H5P_DEFAULT, H5P_DEFAULT) <0)
+    goto out;
+
+  if(H5Gclose(group)<0)
+    goto out;
+
+  /*
+   * Create a group named "G1" in the file.
+   */
+  if((group = H5Gcreate(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+    goto out;
+
+  /*
+   * Create a group named "G1/DS1" in the file.
+   */
+  if(H5LTmake_dataset_string(group, "/G1/DS1", data_string_in)<0)
+    goto out;
+
+  if(H5Gclose(group)<0)
+     goto out;
+
+  /*
+   * Create a group named "/G3/G5" in the file.
+   */
+  if(H5Lcreate_hard(file_id, "/G2/DS4", file_id, "/G1/DS3",H5P_DEFAULT, H5P_DEFAULT)<0)
+       goto out;
+  /*
+   * Create a group named "/G1/G2" in the file.
+   */
+  if((group = H5Gcreate (file_id, "/G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+    goto out;
+
+  /*
+   * Create a soft link
+   */
+  if(H5Lcreate_soft("/G2", file_id, "/G1/G2/G5", H5P_DEFAULT, H5P_DEFAULT)<0)
+    goto out;
+
+  if(H5Gclose(group)<0)
+    goto out;
+
+  /*
+   * Create a group named "/G1/G2/G6" in the file.
+   */
+  if((group = H5Gcreate(file_id, "/G1/G2/G6", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+    goto out;
+
+  /*
+   * Create an external link
+   */
+  if(H5Lcreate_external( FILE_NAME4, "G1", group, "ExternalLink",  H5P_DEFAULT,  H5P_DEFAULT)<0)
+    goto out;
+
+  if(H5Gclose(group)<0)
+    goto out;
+  /*
+   * Close the file.
+   */
+  status = H5Fclose (file_id);
+
+  /* Create another file for checking external links */
+
+  /**************************************************************
+   *  The file structure should look like this:
+   *
+   *               +----+
+   *               |  / |
+   *               +----+
+   *                 |
+   *                 |
+   *                 |
+   *                 G1 
+   *                /  \
+   *               /	\
+   *            DS1      G2
+   *                    (dangled soft link to /G1/G20)
+   *
+   ****************************************************************/
+
+  /* Make external link file */
+  file_id = H5Fcreate(FILE_NAME4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  /*
+   * Create a group named "G1" in the file.
+   */
+  if((group = H5Gcreate(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+    goto out;
+  /*
+   * Create a dataset named "G1/DS1" in the file.
+   */
+  if(H5LTmake_dataset_string(group, "/G1/DS1", data_string_in)<0)
+    goto out;
+
+  /*
+   * Create a dangling soft link
+   */
+
+  if(H5Lcreate_soft("/G1/G2", file_id, "/G1/G20", H5P_DEFAULT, H5P_DEFAULT)<0)
+    goto out;
+
+  if(H5Gclose(group)<0)
+    goto out;
+
+  H5Fclose(file_id);
+ 
+  /* Open input file */
+  if((file_id = H5Fopen(FILE_NAME3,H5F_ACC_RDONLY, H5P_DEFAULT))<0)
+    goto out;
+
+  /**************************************
+   * CHECK ABSOLUTE PATHS 
+   **************************************/
+
+  strncpy(path, "/G1",3);
+  if( (path_valid = H5LTpath_valid(file_id, path, TRUE)) != TRUE) {
+    goto out;
+  }
+
+  if((path_valid = H5LTpath_valid(file_id, "/G1/DS1", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/DS3", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G5", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G2", TRUE)) != TRUE)
+    goto out;
+
+  /* check soft link points to a valid object*/
+  if( (path_valid = H5LTpath_valid(file_id, "/G2/DS4", TRUE)) != TRUE)
+    goto out;
+
+  /* check if path exist, but not the object */
+  if( (path_valid = H5LTpath_valid(file_id, "/G2/G7", FALSE)) != TRUE )
+    goto out;
+
+  /* check if path exist and if the object exists. It should fail
+   * since it is a dangling soft link
+   */
+  if( (path_valid = H5LTpath_valid(file_id, "/G2/G7", TRUE)) == TRUE)
+    goto out;
+
+  /* check soft links */
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G5/DS4", TRUE)) != TRUE)
+    goto out;
+    
+  /**************************************
+   * CHECK RELATIVE PATHS 
+   ***************************************/
+
+  if( (group = H5Gopen(file_id, "/G1", H5P_DEFAULT)) < 0)
+    goto out;
+
+  /* The identifier (file id) is the object itself, i.e. "." */
+
+  if((path_valid = H5LTpath_valid(file_id, ".", FALSE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, ".", TRUE)) != TRUE)
+    goto out;
+
+  /* The identifier (group id) is the object itself, i.e. "." */
+
+  if( (path_valid = H5LTpath_valid(group, ".", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(group, "DS3", FALSE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(group, "DS3", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(group, "G2/G5", TRUE)) != TRUE)
+    goto out; 
+
+  /* Check the "./" case */
+  if( (path_valid = H5LTpath_valid(group, "./DS3", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(group, "./G2/G5", TRUE)) != TRUE)
+    goto out; 
+
+  /* Should fail, does not exist */
+  if( (path_valid = H5LTpath_valid(group, "./G2/G20", FALSE)) == TRUE)
+    goto out; 
+
+  /* Should fail, does not exist */
+  if( (path_valid = H5LTpath_valid(group, "./G2/G20", TRUE)) == TRUE)
+    goto out; 
+
+  if(H5Gclose(group)<0)
+    goto out;
+
+  /*****************************
+   * Check external links
+   *****************************/
+
+  /* The dangled external link path is valid */
+  if( (path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", FALSE)) != TRUE)
+    goto out;
+
+  /* The file however does not exists, so the link dangles -> should return false */
+  if( (path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", TRUE)) == TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", FALSE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", FALSE)) != TRUE)
+    goto out;
+
+  /* Should fail, does not exist */
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", TRUE)) == TRUE)
+    goto out;
+
+  if(H5Fclose(file_id)<0)
+    goto out;
+
+  PASSED();
+  return 0;
+
+ out: 
+  H5_FAILED();
+  return -1;
+}
+
+
+/*-------------------------------------------------------------------------
 * the main program
 *-------------------------------------------------------------------------
 */
@@ -1819,7 +2132,7 @@ int main( void )
     nerrors += test_attr();
 
     /* test text-dtype functions */
-    nerrors += test_text_dtype();
+    nerrors += test_valid_path();
 
     /* check for errors */
     if (nerrors)
@@ -1832,4 +2145,3 @@ error:
 
 
 }
-

@@ -3030,4 +3030,110 @@ out:
 
 }
 
+htri_t
+H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
+ {
+     char *tmp_path = NULL; /* Temporary copy of the path */
+     char *curr_name;       /* Pointer to current component of path name */
+     char *delimit;         /* Pointer to path delimiter during traversal */
+     H5I_type_t obj_type;
+     htri_t link_exists, obj_exists;
+     size_t path_length;
+     htri_t ret_value;
 
+     /* Initialize */
+     ret_value = FALSE;
+
+     /* Find the type of loc_id */
+     if((obj_type = H5Iget_type(loc_id)) == H5I_BADID) {
+       ret_value = FAIL;
+       goto done;
+     }
+
+     /* Find the length of the path */
+     path_length = HDstrlen(path);
+
+     /* Check if the identifier is the object itself, i.e. path is '.' */
+     if(HDstrncmp(path, ".", path_length) == 0) {
+       if(check_object_valid) {
+         obj_exists = H5Oexists_by_name(loc_id, path, H5P_DEFAULT);
+	 ret_value = obj_exists;
+	 goto done;
+       } else {
+	 ret_value = TRUE; /* Since the object is the identifier itself,
+			    * we can only check if loc_id is a valid type */
+	 goto done;
+       }
+     }
+
+     /* Duplicate the path to use */
+     if(NULL == (tmp_path = HDstrdup(path))) {
+       ret_value = FAIL;
+       goto done;
+     }
+
+     curr_name = tmp_path;
+
+     /* check if absolute pathname */
+     if(HDstrncmp(path, "/", 1) == 0) curr_name++;
+
+     /* check if relative path name starts with "./" */
+     if(HDstrncmp(path, "./", 2) == 0) curr_name += 2;
+
+     while((delimit=HDstrchr(curr_name,'/'))!=NULL) {
+       /* Change the delimiter to terminate the string */
+       *delimit='\0';
+
+       obj_exists = FALSE;
+       if((link_exists = H5Lexists(loc_id, tmp_path, H5P_DEFAULT)) < 0) {
+	 ret_value = FAIL;
+	 goto done;
+       }
+
+       /* If target link does not exist then no reason to
+        *  continue checking the path */
+       if(link_exists != TRUE) {
+	 ret_value = FALSE;
+	 goto done;
+       }
+       
+       /* Determine if link resolves to an actual object */
+       if((obj_exists = H5Oexists_by_name(loc_id, tmp_path, H5P_DEFAULT)) < 0) {
+	 ret_value = FAIL;
+         goto done;
+       }
+
+       if(obj_exists != TRUE)
+         break;
+
+       /* Change the delimiter back to '/' */
+       *delimit='/';
+
+       /* Advance the pointer in the path to the start of the next component */
+       curr_name = delimit + 1;
+
+     } /* end while */
+
+     /* Should be pointing to the last component in the path name now... */
+
+     /* Check if link does not exist */
+     if((link_exists = H5Lexists(loc_id, tmp_path, H5P_DEFAULT)) < 0) {
+       ret_value = FAIL;
+     } else {
+       ret_value = link_exists;
+       /* Determine if link resolves to an actual object for check_object_valid TRUE */
+       if(check_object_valid == TRUE && link_exists == TRUE) {
+	 if((obj_exists = H5Oexists_by_name(loc_id, tmp_path, H5P_DEFAULT)) < 0) {
+	   ret_value = FAIL;
+	 } else {
+	   ret_value = obj_exists;
+	 }
+       }
+     }
+
+done:
+     if(tmp_path != NULL)
+       HDfree(tmp_path);
+
+     return ret_value;
+ }
