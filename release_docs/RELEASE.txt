@@ -117,8 +117,9 @@ Bug Fixes since HDF5-1.8.8
     - Fixed error when creating a contiguous dataset with a zero-sized dataspace
       and space allocation time set to 'early'. (QAK - 2012/3/12)
     - Creating a dataset in a read-only file caused seg fault when the file
-      is closed.  It's fixed.  The error stack is returned correctly
-      now. (SLU - 2012/1/25. Issue 7756)
+      is closed.  It's fixed. The attemp to create a dataset will fail
+      with the error stack indicating the file is read-only. (SLU -
+      2012/1/25. Issue 7756) 
     - Fixed a seg fault that could occur when shrinking a dataset with chunks
       larger than 1 MB. (NAF - 2011/11/30 - HDFFV-7833)
     - The library allowed the conversion of strings between ASCII and UTF8
