@@ -115,7 +115,7 @@ h5tools_init(void)
     if (!h5tools_init_g) {
         /* register the error class */
         HDsnprintf(lib_str, sizeof(lib_str), "%d.%d.%d",H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
-        
+
         H5tools_ERR_STACK_g = H5Ecreate_stack();
         H5TOOLS_INIT_ERROR()
 
