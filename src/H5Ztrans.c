@@ -107,6 +107,10 @@ static void H5Z_XFORM_DEBUG(H5Z_node *tree);
 static void H5Z_print(H5Z_node *tree, FILE *stream);
 #endif  /* H5Z_XFORM_DEBUG */
 
+/* PGCC (11.8-0) has trouble with the command *p++ = *p OP tree_val. It increments P first before 
+ * doing the operation.  So I break down the command into two lines:
+ *     *p = *p OP tree_val; p++;
+ * (SLU - 2012/3/19) */
 #define H5Z_XFORM_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                            \
 {   								  	    \
     size_t u;                                                               \
@@ -119,8 +123,10 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 	tree_val = ((RESR).type==H5Z_XFORM_INTEGER ? (double)(RESR).value.int_val : (RESR).value.float_val); \
 	p = (TYPE*)(RESL).value.dat_val;                                    \
                                                                             \
-	for(u=0; u<(SIZE); u++)                                             \
-	    *p++ = *p OP tree_val;                                          \
+	for(u=0; u<(SIZE); u++) {                                           \
+	    *p = *p OP tree_val;                                            \
+            p++;                                                            \
+        }                                                                   \
     }									    \
     else if(((RESR).type == H5Z_XFORM_SYMBOL) && ((RESL).type != H5Z_XFORM_SYMBOL)) \
     {   								    \
@@ -134,16 +140,20 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 	    tree_val = ((RESL).type==H5Z_XFORM_INTEGER ? (double)(RESL).value.int_val : (RESL).value.float_val); \
                                                                             \
 	p = (TYPE*)(RESR).value.dat_val;                                    \
-	for(u=0; u<(SIZE); u++)                                             \
-	    *p++ = tree_val OP *p;                                          \
+	for(u=0; u<(SIZE); u++) {                                           \
+	    *p = tree_val OP *p;                                            \
+            p++;                                                            \
+        }                                                                   \
     }									    \
     else if( ((RESL).type == H5Z_XFORM_SYMBOL) && ((RESR).type==H5Z_XFORM_SYMBOL))  \
     {										\
 	TYPE* pl = (TYPE*)(RESL).value.dat_val;                             	\
 	TYPE* pr = (TYPE*)(RESR).value.dat_val;                             	\
 										\
-	for(u=0; u<(SIZE); u++)                                             	\
-	    *pl++ = *pl OP *pr++;                                           	\
+	for(u=0; u<(SIZE); u++) {                                            	\
+	    *pl = *pl OP *pr;                                           	\
+            pl++; pr++;                                                         \
+        }                                                                       \
     }										\
     else									\
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unexpected type conversion operation")	\
