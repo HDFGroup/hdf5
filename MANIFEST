@@ -1960,12 +1960,12 @@
 ./tools/h5jam/getub.c
 
 # test files for jam
-./tools/h5jam/testfiles/twithub.h5
-./tools/h5jam/testfiles/twithub513.h5
 ./tools/h5jam/testfiles/h5jam-help.txt
 ./tools/h5jam/testfiles/h5unjam-help.txt
-./tools/h5jam/testfiles/u10.txt
 ./tools/h5jam/testfiles/tall.h5
+./tools/h5jam/testfiles/twithub.h5
+./tools/h5jam/testfiles/twithub513.h5
+./tools/h5jam/testfiles/u10.txt
 ./tools/h5jam/testfiles/u511.txt
 ./tools/h5jam/testfiles/u512.txt
 ./tools/h5jam/testfiles/u513.txt
