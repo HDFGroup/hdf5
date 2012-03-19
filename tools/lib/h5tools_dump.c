@@ -1645,7 +1645,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
 
 CATCH
     if(sm_buf)
-    HDfree(sm_buf);
+        HDfree(sm_buf);
 
 done:
     if(sm_space >= 0 && H5Sclose(sm_space) < 0)
