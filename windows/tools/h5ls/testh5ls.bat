@@ -161,6 +161,9 @@ rem ############################################################################
     call :tooltest tgroup-1.ls 1 -w80 -r -g tgroup.h5
     call :tooltest tgroup-2.ls 0 -w80 -g tgroup.h5/g1
 
+    rem test for files with groups that have long comments
+    call :tooltest tgrp_comments.ls 0 -w80 -v -g tgrp_comments.h5/glongcomment
+
     rem test for displaying simple space datasets
     call :tooltest tdset-1.ls 0 -w80 -r -d tdset.h5
 
@@ -204,6 +207,11 @@ rem ############################################################################
     call :tooltest tsoftlinks-nodangle-1.ls 1 -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5
     rem when used file with no dangling links - expected exit code 0
     call :tooltest thlinks-nodangle-1.ls 0 -w80 --follow-symlinks --no-dangling-links thlink.h5
+
+    rem test for wildcards in filename (does not work with cmake)
+    rem TOOLTEST tstarfile.ls 0 -w80 t*link.h5
+    rem TOOLTEST tqmarkfile.ls 0 -w80 t?link.h5
+    call :tooltest tmultifile.ls 0 -w80 thlink.h5 tslink.h5
 
     rem tests for hard links
     call :tooltest thlink-1.ls 0 -w80 thlink.h5

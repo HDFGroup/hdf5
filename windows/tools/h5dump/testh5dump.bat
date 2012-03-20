@@ -513,8 +513,8 @@ rem ############################################################################
     call :tooltest tarray8.ddl --enable-error-stack tarray8.h5
 
     rem test for wildcards in filename (does not work with cmake)
-    call :tooltest3 tstarfile.ddl --enable-error-stack -H -d Dataset1 tarr*.h5
-    call :tooltest3 tqmarkfile.ddl --enable-error-stack -H -d Dataset1 tarray?.h5
+    rem call :tooltest3 tstarfile.ddl --enable-error-stack -H -d Dataset1 tarr*.h5
+    rem call :tooltest3 tqmarkfile.ddl --enable-error-stack -H -d Dataset1 tarray?.h5
     call :tooltest tmultifile.ddl --enable-error-stack -H -d Dataset1 tarray2.h5 tarray3.h5 tarray4.h5 tarray5.h5 tarray6.h5 tarray7.h5
 
     rem test for files with empty data
