@@ -666,6 +666,11 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: If unique objects exists only in one file and try to exclude
+          the unique objects with --exclude-path option, h5diff missed 
+          excluding some objects. 
+          Fixed to exclude objects correctly in such case.
+          HDFFV-7837 (JKM 2012/03/20)
         - h5dump: Added tools library error stack to properly catch error
           information generated within the library.
           HDFFV-7958 (ADB 2012/03/12)

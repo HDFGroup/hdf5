@@ -1862,6 +1862,9 @@
 ./tools/h5diff/testfiles/h5diff_482.txt
 ./tools/h5diff/testfiles/h5diff_483.txt
 ./tools/h5diff/testfiles/h5diff_484.txt
+./tools/h5diff/testfiles/h5diff_485.txt
+./tools/h5diff/testfiles/h5diff_486.txt
+./tools/h5diff/testfiles/h5diff_487.txt
 ./tools/h5diff/testfiles/h5diff_500.txt
 ./tools/h5diff/testfiles/h5diff_501.txt
 ./tools/h5diff/testfiles/h5diff_502.txt
@@ -1916,6 +1919,8 @@
 ./tools/h5diff/testfiles/h5diff_exclude1-2.h5
 ./tools/h5diff/testfiles/h5diff_exclude2-1.h5
 ./tools/h5diff/testfiles/h5diff_exclude2-2.h5
+./tools/h5diff/testfiles/h5diff_exclude3-1.h5
+./tools/h5diff/testfiles/h5diff_exclude3-2.h5
 ./tools/h5diff/testfiles/h5diff_comp_vl_strs.h5
 ./tools/h5diff/testfiles/h5diff_dset_zero_dim_size1.h5
 ./tools/h5diff/testfiles/h5diff_dset_zero_dim_size2.h5
