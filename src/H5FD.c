@@ -559,15 +559,17 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_null_sb_verify
+ * Function:    H5FD_sb_verify
  *
  * Purpose:     Verify that the driver is compatable with the driver
- *              that created the file. driver_id is the driver identifier
- *              field stored in the superblock. This is called when
- *              reopening a file and ensures that the driver is able to
- *              decode the superblock info.
+ *              that created the file. During file creation, drivers that
+ *              modify the HDF5 file structure when interacting with the
+ *              filesystem identify themselves in the file superblock.
+ *              When the file is reopened, the opening driver must verify
+ *              that it can reconstruct a logical HDF5 file from the
+ *              modified structure in the filesystem.
  *
- * Return:      Success:    Non-negative
+ * Return:      Success:    TRUE if the driver is compatable, else FALSE
  *              Failure:    Negative
  *
  * Programmer:  Jacob Gruber
@@ -575,25 +577,24 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5FD_sb_verify(H5FD_t *file, const char *driver_id)
+htri_t
+H5FD_sb_verify(H5FD_t *file, const char *sb_driver_id)
 {
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    htri_t      ret_value = FALSE;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_sb_verify, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file && file->cls);
 
     /* Delegate to the driver if possible. If driver doesn't implement
-     * this function, it means that it can't support files with driver info
-     * in the superblock.
+     * an sb_verify callback, the default return valyue is used,
+     * indicating incompatablility.
      */
     if(file->cls->sb_verify) {
-        if((file->cls->sb_verify)(file, driver_id) < 0)
+        ret_value = (file->cls->sb_verify)(file, sb_driver_id);
+        if(ret_value < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_verify request failed")
-    }
-    else
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver doesn't support sb_verify")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

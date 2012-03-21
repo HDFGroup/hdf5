@@ -111,6 +111,8 @@ $SRC_H5DIFF_TESTFILES/h5diff_exclude1-1.h5
 $SRC_H5DIFF_TESTFILES/h5diff_exclude1-2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_exclude2-1.h5
 $SRC_H5DIFF_TESTFILES/h5diff_exclude2-2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_exclude3-1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_exclude3-2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_comp_vl_strs.h5
 $SRC_H5DIFF_TESTFILES/compounds_array_vlen1.h5
 $SRC_H5DIFF_TESTFILES/compounds_array_vlen2.h5
@@ -201,6 +203,10 @@ $SRC_H5DIFF_TESTFILES/h5diff_457.txt
 $SRC_H5DIFF_TESTFILES/h5diff_458.txt
 $SRC_H5DIFF_TESTFILES/h5diff_459.txt
 $SRC_H5DIFF_TESTFILES/h5diff_465.txt
+$SRC_H5DIFF_TESTFILES/h5diff_466.txt
+$SRC_H5DIFF_TESTFILES/h5diff_467.txt
+$SRC_H5DIFF_TESTFILES/h5diff_468.txt
+$SRC_H5DIFF_TESTFILES/h5diff_469.txt
 $SRC_H5DIFF_TESTFILES/h5diff_480.txt
 $SRC_H5DIFF_TESTFILES/h5diff_481.txt
 $SRC_H5DIFF_TESTFILES/h5diff_482.txt
@@ -943,6 +949,15 @@ TOOLTEST h5diff_459.txt  --follow-symlinks -v --no-dangling-links  h5diff_extlin
 # dangling link --follow-symlinks (obj vs obj)
 # (HDFFV-7836)
 TOOLTEST h5diff_465.txt --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1
+# (HDFFV-7835)
+# soft dangling vs. soft dangling
+TOOLTEST h5diff_466.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1
+# soft link  vs. soft dangling
+TOOLTEST h5diff_467.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link2
+# ext dangling vs. ext dangling
+TOOLTEST h5diff_468.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4 
+# ext link vs. ext dangling
+TOOLTEST h5diff_469.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link2
 
 # ##############################################################################
 # # test for group diff recursivly
@@ -1013,6 +1028,15 @@ TOOLTEST h5diff_483.txt -v --exclude-path "/group1" h5diff_exclude2-1.h5 h5diff_
 
 # Exclude from group compare
 TOOLTEST h5diff_484.txt -v --exclude-path "/dset3" h5diff_exclude1-1.h5 h5diff_exclude1-2.h5 /group1
+
+#
+# Only one file contains unique objs. Common objs are same.
+# (HDFFV-7837)
+#
+TOOLTEST h5diff_485.txt -v --exclude-path "/group1" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5
+TOOLTEST h5diff_486.txt -v --exclude-path "/group1" h5diff_exclude3-2.h5 h5diff_exclude3-1.h5
+TOOLTEST h5diff_487.txt -v --exclude-path "/group1/dset" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5
+
 
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset

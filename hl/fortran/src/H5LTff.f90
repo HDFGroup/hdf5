@@ -6308,6 +6308,73 @@ CONTAINS
     errcode = h5ltget_attribute_info_c(loc_id,namelen,dset_name,attrlen,attr_name,dims,type_class,type_size)
 
   END SUBROUTINE h5ltget_attribute_info_f
+
+  !-------------------------------------------------------------------------
+  ! Function: h5ltpath_valid_f
+  !
+  ! Purpose: Validates a path 
+  !
+  ! Return: Success: 0, Failure: -1
+  !
+  ! Programmer: M. Scot Breitenfeld
+  !
+  ! Date: February 18, 2012
+  !
+  ! Comments:
+  !
+  ! Modifications:
+  !
+  !-------------------------------------------------------------------------
+
+  SUBROUTINE h5ltpath_valid_f(loc_id, path, check_object_valid, path_valid, errcode)
+
+    IMPLICIT NONE
+    !
+    !This definition is needed for Windows DLLs
+    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$attributes dllexport :: h5ltpath_valid_f
+    !DEC$endif
+    !
+    INTEGER(hid_t)  , INTENT(IN)  :: loc_id              ! File or group identifier.
+    CHARACTER(LEN=*), INTENT(IN)  :: path                ! Path to the object to check, relative to loc_id.
+    LOGICAL         , INTENT(IN)  :: check_object_valid  ! Indicates whether to check if the final component 
+                                                         !  of the path resolves to a valid object 
+    LOGICAL         , INTENT(OUT) :: path_valid          ! Object status
+    INTEGER         , INTENT(OUT) :: errcode             ! Error code: 0 on success and -1 on failure
+
+    INTEGER :: pathlen
+    INTEGER :: check_object_valid_c
+    INTEGER :: status
+
+    INTERFACE
+       INTEGER FUNCTION h5ltpath_valid_c(loc_id, path, pathlen, check_object_valid_c)
+         USE h5global
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTPATH_VALID_C'::h5ltpath_valid_c
+         !DEC$ENDIF
+         !DEC$ATTRIBUTES reference :: path
+         INTEGER(hid_t),   INTENT(in) :: loc_id  
+         CHARACTER(len=*), INTENT(in) :: path
+         INTEGER :: pathlen
+         INTEGER :: check_object_valid_c
+       END FUNCTION h5ltpath_valid_c
+    END INTERFACE
+
+    check_object_valid_c = 0
+    IF(check_object_valid) check_object_valid_c = 1
+
+    pathlen = LEN(path)
+    status = h5ltpath_valid_c(loc_id, path, pathlen, check_object_valid_c)
+
+    path_valid = .FALSE.
+    errcode = 0
+    IF(status.EQ.1)THEN
+       path_valid = .TRUE.
+    ELSE IF(status.LT.0)THEN
+       errcode = -1
+    ENDIF
+    
+  END SUBROUTINE h5ltpath_valid_f
   !  end
   !
 END MODULE H5LT

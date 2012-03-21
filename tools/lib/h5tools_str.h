@@ -47,5 +47,7 @@ H5TOOLS_DLL void     h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_
 H5TOOLS_DLL char    *h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info,
                                    hid_t container, hid_t type, void *vp,
                                    h5tools_context_t *ctx);
+H5TOOLS_DLL char    *h5tools_str_replace ( const char *string, const char *substr, 
+									const char *replacement );
 
 #endif  /* H5TOOLS_STR_H__ */

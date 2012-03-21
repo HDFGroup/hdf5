@@ -5,7 +5,6 @@ PROJECT (HDF5_TOOLS_H5DUMP)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
-INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 # --------------------------------------------------------------------
 # Add the h5dump executables
@@ -128,10 +127,12 @@ IF (BUILD_TESTING)
       tlonglinks.ddl
       tloop-1.ddl
       tmulti.ddl
+      tmultifile.ddl
+#      tqmarkfile.ddl
+#      tstarfile.ddl
       tnamed_dtype_attr.ddl
       tnestcomp-1.ddl
       tnbit.ddl
-      tnofilename.ddl
       tno-subset.ddl
       tnullspace.ddl
       zerodim.ddl
@@ -151,6 +152,7 @@ IF (BUILD_TESTING)
       tshuffle.ddl
       tslink-1.ddl
       tslink-2.ddl
+      tslink-D.ddl
       tsplit_file.ddl
       tstr-1.ddl
       tstr-2.ddl
@@ -832,14 +834,18 @@ IF (BUILD_TESTING)
           tloop-1.out.err
           tmulti.out
           tmulti.out.err
+          tmultifile.out
+          tmultifile.out.err
+#          tqmarkfile.out
+#          tqmarkfile.out.err
+#          tstarfile.out
+#          tstarfile.out.err
           tnamed_dtype_attr.out
           tnamed_dtype_attr.out.err
           tnestcomp-1.out
           tnestcomp-1.out.err
           tnbit.out
           tnbit.out.err
-          tnofilename.out
-          tnofilename.out.err
           tno-subset.out
           tno-subset.out.err
           tnullspace.out
@@ -878,6 +884,8 @@ IF (BUILD_TESTING)
           tslink-1.out.err
           tslink-2.out
           tslink-2.out.err
+          tslink-D.out
+          tslink-D.out.err
           tsplit_file.out
           tsplit_file.out.err
           tstr-1.out
@@ -926,19 +934,21 @@ IF (BUILD_TESTING)
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 --enable-error-stack tgroup.h5)
   # test for displaying the selected groups
+  # JIRA HDFFV-7936 ADD_H5_MASK_TEST (tgroup-2 1 --enable-error-stack --group=/g2 --group / -g /y tgroup.h5)
+  # cannot use TEST_MASK_ERROR and --enable-error-stack on this test because group names are similar to version numbers
   ADD_H5_TEST (tgroup-2 1 --group=/g2 --group / -g /y tgroup.h5)
 
   # test for displaying simple space datasets
   ADD_H5_TEST (tdset-1 0 --enable-error-stack tdset.h5)
   # test for displaying selected datasets
-  ADD_H5_TEST (tdset-2 1 -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5)
+  ADD_H5_MASK_TEST (tdset-2 1 --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5)
 
   # test for displaying attributes
   ADD_H5_TEST (tattr-1 0 --enable-error-stack tattr.h5)
   # test for displaying the selected attributes of string type and scalar space
-  ADD_H5_TEST (tattr-2 0 --enable-error-stack -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
+  ADD_H5_TEST (tattr-2 0 --enable-error-stack -a /\\\\/attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
   # test for header and error messages
-  ADD_H5_TEST (tattr-3 1 --header -a /attr2 --attribute=/attr tattr.h5)
+  ADD_H5_MASK_TEST (tattr-3 1 --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5)
   # test for displaying attributes in shared datatype (also in group and dataset)
   ADD_H5_TEST (tnamed_dtype_attr 0 --enable-error-stack tnamed_dtype_attr.h5)
   # test for displaying at least 9 attributes on root from a be machine
@@ -950,6 +960,8 @@ IF (BUILD_TESTING)
   # test for displaying the selected link
   ADD_H5_TEST (tslink-2 0 --enable-error-stack -l slink2 tslink.h5)
   ADD_H5_TEST (tudlink-2 0 --enable-error-stack -l udlink2 tudlink.h5)
+  # test for displaying dangling soft links
+  ADD_H5_MASK_TEST (tslink-D 0 --enable-error-stack -d /slink1 tslink.h5)
 
   # tests for hard links
   ADD_H5_TEST (thlink-1 0 --enable-error-stack thlink.h5)
@@ -972,7 +984,8 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tnestcomp-1 0 --enable-error-stack tnestedcomp.h5)
 
   # test for options
-  # JIRA HDFFV-7936 ADD_H5_TEST (tall-1 0 --enable-error-stack tall.h5)
+  # JIRA HDFFV-7936 ADD_H5_MASK_TEST (tall-1 0 --enable-error-stack tall.h5)
+  # cannot use TEST_MASK_ERROR and --enable-error-stack on this test because group/dataset names are similar to version numbers
   ADD_H5_TEST (tall-1 0 tall.h5)
   ADD_H5_TEST (tall-2 0 --enable-error-stack --header -g /g1/g1.1 -a attr2 tall.h5)
   ADD_H5_TEST (tall-3 0 --enable-error-stack -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5)
@@ -1010,6 +1023,11 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tarray7 0 --enable-error-stack tarray7.h5)
   ADD_H5_TEST (tarray8 0 --enable-error-stack tarray8.h5)
 
+  # test for wildcards in filename (does not work with cmake)
+  #ADD_H5_MASK_TEST (tstarfile 0 --enable-error-stack -H -d Dataset1 tarr*.h5)
+  #ADD_H5_MASK_TEST (tqmarkfile 0 --enable-error-stack -H -d Dataset1 tarray?.h5)
+  ADD_H5_TEST (tmultifile 0 --enable-error-stack -H -d Dataset1 tarray2.h5 tarray3.h5 tarray4.h5 tarray5.h5 tarray6.h5 tarray7.h5)
+  
   # test for files with empty data
   ADD_H5_TEST (tempty 0 --enable-error-stack tempty.h5)
 
@@ -1025,7 +1043,8 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tlarge_objname 0 --enable-error-stack -w157 tlarge_objname.h5)
 
   # test '-A' to suppress data but print attr's
-  # JIRA HDFFV-7936 ADD_H5_TEST (tall-2A 0 --enable-error-stack -A tall.h5)
+  # JIRA HDFFV-7936 ADD_H5_MASK_TEST (tall-2A 0 --enable-error-stack -A tall.h5)
+  # cannot use TEST_MASK_ERROR and --enable-error-stack on this test because group/dataset names are similar to version numbers
   ADD_H5_TEST (tall-2A 0 -A tall.h5)
 
   # test '-r' to print attributes in ASCII instead of decimal
@@ -1048,7 +1067,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (file_space 0 --enable-error-stack -B file_space.h5)
 
   # test -p with a non existing dataset
-  ADD_H5_TEST (tperror 1 -p -d bogus tfcontents1.h5)
+  ADD_H5_MASK_TEST (tperror 1 --enable-error-stack -p -d bogus tfcontents1.h5)
 
   # test for file contents
   ADD_H5_TEST (tcontents 0 --enable-error-stack -n tfcontents1.h5)
@@ -1093,10 +1112,10 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tindicessub4 0 --enable-error-stack -d 4d -s 0,0,1,2  -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2  taindices.h5)
 
   # Exceed the dimensions for subsetting
-  ADD_H5_TEST (texceedsubstart 1 -d 1d -s 1,3 taindices.h5)
-  ADD_H5_TEST (texceedsubcount 1 -d 1d -c 1,3 taindices.h5)
-  ADD_H5_TEST (texceedsubstride 1 -d 1d -S 1,3 taindices.h5)
-  ADD_H5_TEST (texceedsubblock 1 -d 1d -k 1,3 taindices.h5)
+  ADD_H5_TEST (texceedsubstart 1 --enable-error-stack -d 1d -s 1,3 taindices.h5)
+  ADD_H5_TEST (texceedsubcount 1 --enable-error-stack -d 1d -c 1,3 taindices.h5)
+  ADD_H5_TEST (texceedsubstride 1 --enable-error-stack -d 1d -S 1,3 taindices.h5)
+  ADD_H5_TEST (texceedsubblock 1 --enable-error-stack -d 1d -k 1,3 taindices.h5)
 
   # tests for filters
   # SZIP
@@ -1104,49 +1123,49 @@ IF (BUILD_TESTING)
   IF (NOT USE_FILTER_SZIP)
     SET (TESTTYPE "SKIP")
   ENDIF (NOT USE_FILTER_SZIP)
-  ADD_SKIP_H5_TEST (tszip 0 ${TESTTYPE} -H -p -d szip tfilters.h5)
+  ADD_SKIP_H5_TEST (tszip 0 ${TESTTYPE} --enable-error-stack -H -p -d szip tfilters.h5)
 
   # deflate
   SET (TESTTYPE "TEST")
   IF (NOT USE_FILTER_DEFLATE)
     SET (TESTTYPE "SKIP")
   ENDIF (NOT USE_FILTER_DEFLATE)
-  ADD_SKIP_H5_TEST (tdeflate 0 ${TESTTYPE} -H -p -d deflate tfilters.h5)
+  ADD_SKIP_H5_TEST (tdeflate 0 ${TESTTYPE} --enable-error-stack -H -p -d deflate tfilters.h5)
 
   # shuffle
   SET (TESTTYPE "TEST")
   IF (NOT USE_FILTER_SHUFFLE)
     SET (TESTTYPE "SKIP")
   ENDIF (NOT USE_FILTER_SHUFFLE)
-  ADD_SKIP_H5_TEST (tshuffle 0 ${TESTTYPE} -H -p -d shuffle tfilters.h5)
+  ADD_SKIP_H5_TEST (tshuffle 0 ${TESTTYPE} --enable-error-stack -H -p -d shuffle tfilters.h5)
 
   # fletcher32
   SET (TESTTYPE "TEST")
   IF (NOT USE_FILTER_FLETCHER32)
     SET (TESTTYPE "SKIP")
   ENDIF (NOT USE_FILTER_FLETCHER32)
-  ADD_SKIP_H5_TEST (tfletcher32 0 ${TESTTYPE} -H -p -d fletcher32  tfilters.h5)
+  ADD_SKIP_H5_TEST (tfletcher32 0 ${TESTTYPE} --enable-error-stack -H -p -d fletcher32  tfilters.h5)
 
   # nbit
   SET (TESTTYPE "TEST")
   IF (NOT USE_FILTER_NBIT)
     SET (TESTTYPE "SKIP")
   ENDIF (NOT USE_FILTER_NBIT)
-  ADD_SKIP_H5_TEST (tnbit 0 ${TESTTYPE} -H -p -d nbit  tfilters.h5)
+  ADD_SKIP_H5_TEST (tnbit 0 ${TESTTYPE} --enable-error-stack -H -p -d nbit  tfilters.h5)
 
   # scaleoffset
   SET (TESTTYPE "TEST")
   IF (NOT USE_FILTER_SCALEOFFSET)
     SET (TESTTYPE "SKIP")
   ENDIF (NOT USE_FILTER_SCALEOFFSET)
-  ADD_SKIP_H5_TEST (tscaleoffset 0 ${TESTTYPE} -H -p -d scaleoffset  tfilters.h5)
+  ADD_SKIP_H5_TEST (tscaleoffset 0 ${TESTTYPE} --enable-error-stack -H -p -d scaleoffset  tfilters.h5)
 
   # all
   SET (TESTTYPE "TEST")
   IF (NOT USE_FILTER_SZIP OR NOT USE_FILTER_SHUFFLE OR NOT USE_FILTER_FLETCHER32 OR NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_NBIT OR NOT USE_FILTER_SCALEOFFSET)
     SET (TESTTYPE "SKIP")
   ENDIF (NOT USE_FILTER_SZIP OR NOT USE_FILTER_SHUFFLE OR NOT USE_FILTER_FLETCHER32 OR NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_NBIT OR NOT USE_FILTER_SCALEOFFSET)
-  ADD_SKIP_H5_TEST (tallfilters 0 ${TESTTYPE} -H -p -d all  tfilters.h5)
+  ADD_SKIP_H5_TEST (tallfilters 0 ${TESTTYPE} --enable-error-stack -H -p -d all  tfilters.h5)
 
   # user defined
   ADD_H5_TEST (tuserfilter 0 --enable-error-stack -H  -p -d myfilter  tfilters.h5)
@@ -1282,8 +1301,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (textlinkfar 0 textlinkfar.h5)
 
   # test for dangling external links
-  # JIRA HDFFV-7936 ADD_H5_TEST (textlink 0 --enable-error-stack textlink.h5)
-  ADD_H5_TEST (textlink 0 textlink.h5)
+  ADD_H5_MASK_TEST (textlink 0 --enable-error-stack textlink.h5)
 
   # test for error stack display (BZ2048)
   ADD_H5_MASK_TEST (filter_fail 1 --enable-error-stack filter_fail.h5)
@@ -1413,7 +1431,7 @@ IF (BUILD_TESTING)
 
   # test failure handling
   # Missing file name
-  ADD_H5_TEST (tnofilename-with-packed-bits 1)
+  ADD_H5_TEST (tnofilename-with-packed-bits 1 --enable-error-stack)
   # Limits:
   # Maximum number of packed bits is 8 (for now).
   # Maximum integer size is 8*sizeof(long long).
@@ -1472,23 +1490,23 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tpbitsArray 0 --enable-error-stack -d /Dataset1 -M 0,1,1,1 tarray1.h5)
   # Test Error handling.
   # Too many packed bits requested. Max is 8 for now.
-  ADD_H5_TEST (tpbitsMaxExceeded 1 -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5)
+  ADD_H5_TEST (tpbitsMaxExceeded 1 --enable-error-stack -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5)
   # Offset too large. Max is 8*sizeof(long long.
-  ADD_H5_TEST (tpbitsOffsetExceeded 1 -d /DS08BITS -M 64,1 packedbits.h5)
+  ADD_H5_TEST (tpbitsOffsetExceeded 1 --enable-error-stack -d /DS08BITS -M 64,1 packedbits.h5)
   ADD_H5_TEST (tpbitsCharOffsetExceeded 0 --enable-error-stack -d /DS08BITS -M 8,1 packedbits.h5)
   ADD_H5_TEST (tpbitsIntOffsetExceeded 0 --enable-error-stack -d /DS16BITS -M 16,1 packedbits.h5)
   ADD_H5_TEST (tpbitsLongOffsetExceeded 0 --enable-error-stack -d /DS32BITS -M 32,1 packedbits.h5)
   # Bad offset, must not be negative.
-  ADD_H5_TEST (tpbitsOffsetNegative 1 -d /DS08BITS -M -1,1 packedbits.h5)
+  ADD_H5_TEST (tpbitsOffsetNegative 1 --enable-error-stack -d /DS08BITS -M -1,1 packedbits.h5)
   # Bad length, must not be positive.
-  ADD_H5_TEST (tpbitsLengthPositive 1 -d /DS08BITS -M 4,0 packedbits.h5)
+  ADD_H5_TEST (tpbitsLengthPositive 1 --enable-error-stack -d /DS08BITS -M 4,0 packedbits.h5)
   # Offset+Length is too large. Max is 8*sizeof(long long).
-  ADD_H5_TEST (tpbitsLengthExceeded 1 -d /DS08BITS -M 37,28 packedbits.h5)
+  ADD_H5_TEST (tpbitsLengthExceeded 1 --enable-error-stack -d /DS08BITS -M 37,28 packedbits.h5)
   ADD_H5_TEST (tpbitsCharLengthExceeded 0 --enable-error-stack -d /DS08BITS -M 2,7 packedbits.h5)
   ADD_H5_TEST (tpbitsIntLengthExceeded 0 --enable-error-stack -d /DS16BITS -M 10,7 packedbits.h5)
   ADD_H5_TEST (tpbitsLongLengthExceeded 0 --enable-error-stack -d /DS32BITS -M 26,7 packedbits.h5)
   # Incomplete pair of packed bits request.
-  ADD_H5_TEST (tpbitsIncomplete 1 -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5)
+  ADD_H5_TEST (tpbitsIncomplete 1 --enable-error-stack -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5)
    
   IF (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run

@@ -5,7 +5,6 @@ PROJECT (HDF5_TOOLS_H5STAT)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
-INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 # --------------------------------------------------------------------
 # Add the h5stat executables
@@ -30,7 +29,7 @@ IF (BUILD_TESTING)
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5stat_gentest ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat_gentest.c)
     TARGET_NAMING (h5stat_gentest ${LIB_TYPE})
-    TARGET_LINK_LIBRARIES (h5stat_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+    TARGET_LINK_LIBRARIES (h5stat_gentest ${HDF5_LIB_TARGET})
     SET_TARGET_PROPERTIES (h5stat_gentest PROPERTIES FOLDER generator/tools)
     
     #ADD_TEST (NAME h5stat_gentest COMMAND $<TARGET_FILE:h5stat_gentest>)

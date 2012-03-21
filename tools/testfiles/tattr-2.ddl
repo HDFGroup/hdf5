@@ -7,14 +7,14 @@ ATTRIBUTE "/attr1" {
    (14): 111, 111, 116, 32, 103, 114, 111, 117, 112, 0
    }
 }
-ATTRIBUTE "/attr4" {
+ATTRIBUTE "attr4" {
    DATATYPE  H5T_STD_I32BE
    DATASPACE  SCALAR
    DATA {
    (0): 100
    }
 }
-ATTRIBUTE "/attr5" {
+ATTRIBUTE "attr5" {
    DATATYPE  H5T_STRING {
       STRSIZE 17;
       STRPAD H5T_STR_NULLTERM;

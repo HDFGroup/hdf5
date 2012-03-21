@@ -128,6 +128,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     uint8_t            *p;                  /* Temporary pointer into encoding buffer */
     unsigned            super_vers;         /* Superblock version          */
     hbool_t            *dirtied = (hbool_t *)_udata;  /* Set up dirtied out value */
+    htri_t              sb_verify_result;   /* Result of sb_verify call */
     H5F_super_t        *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -360,10 +361,10 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             drv_name[8] = '\0';
             p += 8; /* advance past name/version */
 
-            /* Check if driver matches driver information saved. Unfortunately, we can't push this
-             * function to each specific driver because we're checking if the driver is correct.
-             */
-            if(H5FD_sb_verify(lf, drv_name) < 0)
+            /* Check if the driver is compatible with the driver information saved. */
+            if((sb_verify_result = H5FD_sb_verify(lf, drv_name)) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to determine driver compatability")
+            else if(sb_verify_result == 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "driver does not support this file")
 
             /* Read in variable-sized portion of driver info block */
@@ -520,10 +521,10 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
                 if(NULL == H5O_msg_read(&ext_loc, H5O_DRVINFO_ID, &drvinfo, dxpl_id))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "driver info message not present")
 
-                /* Check if driver matches driver information saved. Unfortunately, we can't push this
-                 * function to each specific driver because we're checking if the driver is correct.
-                 */
-                if(H5FD_sb_verify(lf, drvinfo.name) < 0)
+                /* Check if the driver is compatible with the driver information saved. */
+                if((sb_verify_result = H5FD_sb_verify(lf, drvinfo.name)) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to determine driver compatability")
+                else if(sb_verify_result == 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "driver does not support this file")
 
                 /* Decode driver information */

@@ -35,11 +35,14 @@
 #define ALIGN(A,Z)  ((((A) + (Z) - 1) / (Z)) * (Z))
 
 /* global variables */
+hid_t H5tools_ERR_STACK_g = 0;
 hid_t H5tools_ERR_CLS_g = -1;
 hid_t H5E_tools_g = -1;
 hid_t H5E_tools_min_id_g = -1;
 int         compound_data;
 FILE       *rawdatastream;      /* should initialize to stdout but gcc moans about it */
+FILE       *rawoutstream;       /* should initialize to stdout but gcc moans about it */
+FILE       *rawerrorstream;     /* should initialize to stderr but gcc moans about it */
 int         bin_output;         /* binary output */
 int         bin_form;           /* binary form */
 int         region_output;      /* region output */
@@ -113,10 +116,15 @@ h5tools_init(void)
         /* register the error class */
         HDsnprintf(lib_str, sizeof(lib_str), "%d.%d.%d",H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
 
+        H5tools_ERR_STACK_g = H5Ecreate_stack();
         H5TOOLS_INIT_ERROR()
 
         if (!rawdatastream)
             rawdatastream = stdout;
+        if (!rawoutstream)
+            rawoutstream = stdout;
+        if (!rawerrorstream)
+            rawerrorstream = stderr;
 
         h5tools_dump_init();
 
@@ -143,19 +151,36 @@ h5tools_init(void)
 void
 h5tools_close(void)
 {
+    H5E_auto2_t         tools_func;
+    void               *tools_edata;
     if (h5tools_init_g) {
+        H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
+        if(tools_func!=NULL)
+            H5Eprint2(H5tools_ERR_STACK_g, rawerrorstream);
         if (rawdatastream && rawdatastream != stdout) {
             if (fclose(rawdatastream))
                 perror("closing rawdatastream");
             else
                 rawdatastream = NULL;
         }
+        if (rawoutstream && rawoutstream != stdout) {
+            if (fclose(rawoutstream))
+                perror("closing rawoutstream");
+            else
+                rawoutstream = NULL;
+        }
+        if (rawerrorstream && rawerrorstream != stderr) {
+            if (fclose(rawerrorstream))
+                perror("closing rawerrorstream");
+            else
+                rawerrorstream = NULL;
+        }
 
         /* Clean up the reference path table, if it's been used */
         term_ref_path_table();
 
         H5TOOLS_CLOSE_ERROR()
-
+        H5Eclose_stack(H5tools_ERR_STACK_g);
         /* Shut down the library */
         H5close();
 
@@ -1047,7 +1072,7 @@ init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
  *-------------------------------------------------------------------------
  */
 int
-do_bin_output(FILE *stream, hid_t container, hsize_t nelmts, hid_t tid, void *_mem)
+do_bin_output(FILE *stream, FILE *err_stream, hid_t container, hsize_t nelmts, hid_t tid, void *_mem)
 {
     HERR_INIT(int, SUCCEED)
     unsigned char *mem  = (unsigned char*)_mem;
@@ -1059,7 +1084,7 @@ do_bin_output(FILE *stream, hid_t container, hsize_t nelmts, hid_t tid, void *_m
 
     for (i = 0; i < nelmts; i++) {
         if (render_bin_output(stream, container, tid, mem + i * size) < 0) {
-            printf("\nError in writing binary stream\n");
+            HDfprintf(err_stream,"\nError in writing binary stream\n");
             return FAIL;
        }
     }

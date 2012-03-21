@@ -335,7 +335,7 @@ create_textfile(const char *name, size_t size)
 
     fd = HDcreat(name,0777);
     HDassert(fd >= 0);
-    buf = calloc(size, (size_t)1);
+    buf = HDcalloc(size, (size_t)1);
     HDassert(buf);
 
     /* fill buf with pattern */
@@ -363,7 +363,7 @@ create_binfile(char *name, off_t size)
     fd = creat(name,0777);
     HDassert(fd >= 0);
 
-    buf = calloc(size,1);
+    buf = HDcalloc(size,1);
     HDassert(buf);
 
     /* fill buf with pattern */

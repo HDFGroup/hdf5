@@ -123,7 +123,7 @@ static herr_t H5FD_multi_sb_encode(H5FD_t *file, char *name/*out*/,
 				   unsigned char *buf/*out*/);
 static herr_t H5FD_multi_sb_decode(H5FD_t *file, const char *name,
 				   const unsigned char *buf);
-static herr_t H5FD_multi_sb_verify(H5FD_t *file, const char *driver_id);
+static htri_t H5FD_multi_sb_verify(H5FD_t *file, const char *driver_id);
 static void *H5FD_multi_fapl_get(H5FD_t *file);
 static void *H5FD_multi_fapl_copy(const void *_old_fa);
 static herr_t H5FD_multi_fapl_free(void *_fa);
@@ -987,12 +987,9 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
  * Function:    H5FD_multi_sb_verify
  *
  * Purpose:     Verify that the multi driver is compatable with the driver
- *              that created the file. driver_id is the driver identifier
- *              field stored in the superblock. This is called when
- *              reopening a file and ensures that the driver is able to
- *              decode the superblock info.
+ *              that created the file.
  *
- * Return:      Success:    Non-negative
+ * Return:      Success:    TRUE if the driver is compatible, else FALSE
  *              Failure:    Negative
  *
  * Programmer:  Jacob Gruber
@@ -1000,20 +997,17 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
  *
  *-------------------------------------------------------------------------
  */ 
-static herr_t
-H5FD_multi_sb_verify(H5FD_t *_file, const char *driver_id)
+static htri_t
+H5FD_multi_sb_verify(H5FD_t *_file, const char *sb_driver_id)
 {
     static const char *func = "H5FD_multi_sb_verify";
     
-    if(strncmp(driver_id, "NCSAmult", (size_t)8)) {
-        char err_msg[128];
-
-        snprintf(err_msg, sizeof(err_msg), "File type %s not supported by the multi driver",
-            driver_id);
-
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, err_msg, -1);
+    /* Check that the superblock was written by the multi driver */
+    if(strncmp(sb_driver_id, "NCSAmult", (size_t)8) == 0) {
+        return 1;
     }
-   return 0; 
+
+    return 0;
 } /* end H5FD_family_sb_verify() */
 
 

@@ -236,7 +236,7 @@ typedef struct H5FD_class_t {
     herr_t  (*sb_encode)(H5FD_t *file, char *name/*out*/,
                          unsigned char *p/*out*/);
     herr_t  (*sb_decode)(H5FD_t *f, const char *name, const unsigned char *p);
-    herr_t  (*sb_verify)(H5FD_t *f, const char *name);
+    htri_t  (*sb_verify)(H5FD_t *file, const char *sb_driver_id);
     size_t  fapl_size;
     void *  (*fapl_get)(H5FD_t *file);
     void *  (*fapl_copy)(const void *fapl);

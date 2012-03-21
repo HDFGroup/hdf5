@@ -151,7 +151,7 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
         size_t base_len = HDstrlen(udata->base_grp_name);
         size_t add_slash = base_len ? ((udata->base_grp_name)[base_len-1] != '/') : 1;
 
-        if(NULL == (new_name = HDmalloc(base_len + add_slash + HDstrlen(path) + 1)))
+        if(NULL == (new_name = (char*)HDmalloc(base_len + add_slash + HDstrlen(path) + 1)))
             return(H5_ITER_ERROR);
         HDstrcpy(new_name, udata->base_grp_name);
         if (add_slash)
@@ -895,7 +895,7 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
     switch(linfo->type) {
         case H5L_TYPE_SOFT:
             if(linfo->u.val_size > 0) {
-                char *targbuf = HDmalloc(linfo->u.val_size + 1);
+                char *targbuf = (char*)HDmalloc(linfo->u.val_size + 1);
                 HDassert(targbuf);
 
                 H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT);
@@ -912,7 +912,7 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
                 const char *filename;
                 const char *objname;
 
-                targbuf = HDmalloc(linfo->u.val_size + 1);
+                targbuf = (char*)HDmalloc(linfo->u.val_size + 1);
                 HDassert(targbuf);
 
                 H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT);

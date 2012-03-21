@@ -99,7 +99,7 @@ static herr_t H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/,
 		     unsigned char *buf/*out*/);
 static herr_t H5FD_family_sb_decode(H5FD_t *_file, const char *name,
                     const unsigned char *buf);
-static herr_t H5FD_family_sb_verify(H5FD_t *_file, const char *driver_id);
+static htri_t H5FD_family_sb_verify(H5FD_t *_file, const char *driver_id);
 static H5FD_t *H5FD_family_open(const char *name, unsigned flags,
 				hid_t fapl_id, haddr_t maxaddr);
 static herr_t H5FD_family_close(H5FD_t *_file);
@@ -706,12 +706,9 @@ done:
  * Function:    H5FD_family_sb_verify
  *
  * Purpose:     Verify that the family driver is compatable with the driver
- *              that created the file. driver_id is the driver identifier
- *              field stored in the superblock. This is called when
- *              reopening a file and ensures that the driver is able to
- *              decode the superblock info.
+ *              that created the file.
  *
- * Return:      Success:    Non-negative
+ * Return:      Success:    TRUE if the driver is compatible, esle FALSE
  *              Failure:    Negative
  *
  * Programmer:  Jacob Gruber
@@ -719,20 +716,16 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5FD_family_sb_verify(H5FD_t UNUSED *_file, const char *driver_id)
+static htri_t
+H5FD_family_sb_verify(H5FD_t UNUSED *_file, const char *sb_driver_id)
 {
-    herr_t ret_value = SUCCEED;   /* Return value */
+    htri_t ret_value = FALSE;   /* Return value */
    
-    FUNC_ENTER_NOAPI(H5FD_family_sb_verify, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
-    if(HDstrncmp(driver_id, "NCSAfami", (size_t)8)) {
-        char err_msg[128];
-
-        HDsnprintf(err_msg, sizeof(err_msg), "File type %s not supported by the family driver",
-            driver_id);
-
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
+    /* Check if the suerblock was written by a family driver. */
+    if(HDstrncmp(sb_driver_id, "NCSAfami", (size_t)8) == 0) {
+        ret_value = TRUE;
     }
     
 done:

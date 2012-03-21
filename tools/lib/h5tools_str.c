@@ -157,7 +157,7 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
          */
         if (nchars < 0 
 #ifndef H5_VSNPRINTF_WORKS
-                && (strlen(str->s) < str->nalloc)
+                && (HDstrlen(str->s) < str->nalloc)
 #endif
                 ) {
             /* failure, such as bad format */
@@ -173,7 +173,7 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
              */
             size_t newsize = MAX(str->len + nchars + 1, 2 * str->nalloc);
             HDassert(newsize > str->nalloc); /*overflow*/
-            str->s = HDrealloc(str->s, newsize);
+            str->s = (char*)HDrealloc(str->s, newsize);
             HDassert(str->s);
             str->nalloc = newsize;
         }
@@ -209,7 +209,7 @@ h5tools_str_reset(h5tools_str_t *str/*in,out*/)
 {
     if (!str->s || str->nalloc <= 0) {
         str->nalloc = STR_INIT_LEN;
-        str->s = HDmalloc(str->nalloc);
+        str->s = (char*)HDmalloc(str->nalloc);
         HDassert(str->s);
     }
 
@@ -282,7 +282,7 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
         size_t n = sizeof(_temp);
         if (str->len - start + 1 > n) {
             n = str->len - start + 1; 
-            temp = HDmalloc(n);
+            temp = (char*)HDmalloc(n);
             HDassert(temp);
         }
 
@@ -1114,8 +1114,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 h5tools_str_append(str, "%s", OPT(info->arr_sep, "," OPTIONAL_LINE_BREAK));
 
             if (info->arr_linebreak && i && i % dims[ndims - 1] == 0) {
-                int x;
-
                 h5tools_str_append(str, "%s", "\n");
                 h5tools_str_indent(str, info, ctx);
 
@@ -1123,7 +1121,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             else if (i && info->arr_sep) {
                 /* if next element begin, add next line with indent */
                 if (is_next_arry_elmt) {
-                    int x;
                     is_next_arry_elmt = 0;
 
                     h5tools_str_append(str, "%s", "\n ");
@@ -1365,4 +1362,53 @@ h5tools_str_is_zero(const void *_mem, size_t size)
             return FALSE;
 
     return TRUE;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_str_replace
+ *
+ * Purpose:     replace all occurrences of substring.
+ *
+ * Return:      char * 
+ *
+ * Programmer:  Peter Cao
+ *              March 8, 2012
+ *
+ * Notes:
+ *   Applications need to call free() to free the memoery allocated for 
+ *   the return string 
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+h5tools_str_replace ( const char *string, const char *substr, const char *replacement )
+{
+	char *tok = NULL;
+	char *newstr = NULL;
+	char *oldstr = NULL;
+	char *head = NULL;
+     
+	if ( substr == NULL || replacement == NULL ) 
+		return strdup (string);
+		
+	newstr = strdup (string);
+	head = newstr;
+	while ( (tok = strstr ( head, substr ))){
+		oldstr = newstr;
+		newstr = HDmalloc ( strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) + 1 );
+
+        if ( newstr == NULL ){
+			HDfree (oldstr);
+			return NULL;
+        }
+        memcpy ( newstr, oldstr, tok - oldstr );
+        memcpy ( newstr + (tok - oldstr), replacement, strlen ( replacement ) );
+        memcpy ( newstr + (tok - oldstr) + strlen( replacement ), tok + strlen ( substr ), strlen ( oldstr ) - strlen ( substr ) - ( tok - oldstr ) );
+        memset ( newstr + strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) , 0, 1 );
+        /* move back head right after the last replacement */
+        head = newstr + (tok - oldstr) + strlen( replacement );
+        HDfree (oldstr);
+    }
+	
+    return newstr;
 }

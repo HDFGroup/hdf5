@@ -176,6 +176,12 @@ int main (void)
     int szip_can_encode = 0;
 #endif
 
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
+
+    /* Initialize h5tools lib */
+    h5tools_init();
+
     /* initialize */
     HDmemset(&diff_options, 0, sizeof (diff_opt_t));
     HDmemset(&pack_options, 0, sizeof (pack_opt_t));

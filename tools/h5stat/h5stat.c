@@ -232,28 +232,28 @@ static void
 leave(int ret)
 {
    h5tools_close();
-   exit(ret);
+   HDexit(ret);
 }
 
 
 static void usage(const char *prog)
 {
-     fflush(stdout);
-     fprintf(stdout, "Usage: %s [OPTIONS] file\n", prog);
-     fprintf(stdout, "\n");
-     fprintf(stdout, "      OPTIONS\n");
-     fprintf(stdout, "     -h, --help            Print a usage message and exit\n");
-     fprintf(stdout, "     -V, --version         Print version number and exit\n");
-     fprintf(stdout, "     -f, --file            Print file information\n");
-     fprintf(stdout, "     -F, --filemetadata    Print file space information for file's metadata\n");
-     fprintf(stdout, "     -g, --group           Print group information\n");
-     fprintf(stdout, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
-     fprintf(stdout, "     -d, --dset            Print dataset information\n");
-     fprintf(stdout, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
-     fprintf(stdout, "     -T, --dtypemetadata   Print datasets' datatype information\n");
-     fprintf(stdout, "     -A, --attribute       Print attribute information\n");
-     fprintf(stdout, "     -s, --freespace       Print free space information\n");
-     fprintf(stdout, "     -S, --summary         Print summary of file space information\n");
+     HDfflush(stdout);
+     HDfprintf(stdout, "Usage: %s [OPTIONS] file\n", prog);
+     HDfprintf(stdout, "\n");
+     HDfprintf(stdout, "      OPTIONS\n");
+     HDfprintf(stdout, "     -h, --help            Print a usage message and exit\n");
+     HDfprintf(stdout, "     -V, --version         Print version number and exit\n");
+     HDfprintf(stdout, "     -f, --file            Print file information\n");
+     HDfprintf(stdout, "     -F, --filemetadata    Print file space information for file's metadata\n");
+     HDfprintf(stdout, "     -g, --group           Print group information\n");
+     HDfprintf(stdout, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
+     HDfprintf(stdout, "     -d, --dset            Print dataset information\n");
+     HDfprintf(stdout, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
+     HDfprintf(stdout, "     -T, --dtypemetadata   Print datasets' datatype information\n");
+     HDfprintf(stdout, "     -A, --attribute       Print attribute information\n");
+     HDfprintf(stdout, "     -s, --freespace       Print free space information\n");
+     HDfprintf(stdout, "     -S, --summary         Print summary of file space information\n");
 }
 
 
@@ -318,7 +318,7 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
     /* Add attribute count to proper bin */
     bin = ceil_log10((unsigned long)oi->num_attrs);
     if((bin + 1) > iter->attr_nbins) {
-  iter->attr_bins = (unsigned long *)realloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
+  iter->attr_bins = (unsigned long *)HDrealloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
         HDassert(iter->attr_bins);
 
   /* Initialize counts for intermediate bins */
@@ -390,7 +390,7 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     bin = ceil_log10((unsigned long)ginfo.nlinks);
     if((bin + 1) > iter->group_nbins) {
         /* Allocate more storage for info about dataset's datatype */
-        iter->group_bins = (unsigned long *)realloc(iter->group_bins, (bin + 1) * sizeof(unsigned long));
+        iter->group_bins = (unsigned long *)HDrealloc(iter->group_bins, (bin + 1) * sizeof(unsigned long));
         HDassert(iter->group_bins);
 
   /* Initialize counts for intermediate bins */
@@ -521,7 +521,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
        bin = ceil_log10((unsigned long)dims[0]);
        if((bin + 1) > iter->dset_dim_nbins) {
           /* Allocate more storage for info about dataset's datatype */
-          iter->dset_dim_bins = (unsigned long *)realloc(iter->dset_dim_bins, (bin + 1) * sizeof(unsigned long));
+          iter->dset_dim_bins = (unsigned long *)HDrealloc(iter->dset_dim_bins, (bin + 1) * sizeof(unsigned long));
           HDassert(iter->dset_dim_bins);
 
           /* Initialize counts for intermediate bins */
@@ -558,7 +558,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
         iter->dset_ntypes++;
 
         /* Allocate more storage for info about dataset's datatype */
-        iter->dset_type_info = (dtype_info_t *)realloc(iter->dset_type_info, iter->dset_ntypes * sizeof(dtype_info_t));
+        iter->dset_type_info = (dtype_info_t *)HDrealloc(iter->dset_type_info, iter->dset_ntypes * sizeof(dtype_info_t));
         HDassert(iter->dset_type_info);
 
         /* Initialize information about datatype */
@@ -741,7 +741,7 @@ freespace_stats(hid_t fid, iter_t *iter)
     if((nsects = H5Fget_free_sections(fid, H5FD_MEM_DEFAULT, 0, NULL)) < 0)
   return(FAIL);
     else if(nsects) {
-  if(NULL == (sect_info = (H5F_sect_info_t *)calloc((size_t)nsects, sizeof(H5F_sect_info_t))))
+  if(NULL == (sect_info = (H5F_sect_info_t *)HDcalloc((size_t)nsects, sizeof(H5F_sect_info_t))))
       return(FAIL);
   nsects = H5Fget_free_sections(fid, H5FD_MEM_DEFAULT, (size_t)nsects, sect_info);
   HDassert(nsects);
@@ -757,7 +757,7 @@ freespace_stats(hid_t fid, iter_t *iter)
         bin = ceil_log10((unsigned long)sect_info[u].size);
         if(bin >= iter->sect_nbins) {
             /* Allocate more storage for section info */
-            iter->sect_bins = (unsigned long *)realloc(iter->sect_bins, (bin + 1) * sizeof(unsigned long));
+            iter->sect_bins = (unsigned long *)HDrealloc(iter->sect_bins, (bin + 1) * sizeof(unsigned long));
             HDassert(iter->sect_bins);
 
             /* Initialize counts for intermediate bins */
@@ -805,7 +805,7 @@ parse_command_line(int argc, const char *argv[])
     struct handler_t   *hand = NULL;
 
     /* Allocate space to hold the command line info */
-    if((hand = (struct handler_t *)calloc((size_t)argc, sizeof(struct handler_t)))==NULL) {
+    if((hand = (struct handler_t *)HDcalloc((size_t)argc, sizeof(struct handler_t)))==NULL) {
         error_msg("unable to parse command line arguments \n");
         goto error;
     }
@@ -1631,6 +1631,7 @@ main(int argc, const char *argv[])
 
     /* Initialize h5tools lib */
     h5tools_init();
+    
     if((hand = parse_command_line(argc, argv))==NULL) {
         goto done;
     }
