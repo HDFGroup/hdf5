@@ -69,7 +69,8 @@ New Features
     Tools
     -----
     - h5dump: Added ability to apply command options across multiple files using a
-      wildcard in the filename. Example; "h5dump -H -d Dataset1 tarr*.h5".
+      wildcard in the filename. Unix example; "h5dump -H -d Dataset1 tarr*.h5".
+      Cross platform example; "h5dump -H -d Dataset1 tarray1.h5 tarray2.h5 tarray3.h5".
       (ADB - 2012/03/12 - HDFFV-7876).
     - h5dump: Added new option --no-compact-subset. This option will not
       interpret the '[' character as starting the compact form of 
