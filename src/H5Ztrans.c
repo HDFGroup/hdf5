@@ -110,7 +110,8 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 /* PGCC (11.8-0) has trouble with the command *p++ = *p OP tree_val. It increments P first before 
  * doing the operation.  So I break down the command into two lines:
  *     *p = *p OP tree_val; p++;
- * (SLU - 2012/3/19) */
+ * Actually, the behavior of *p++ = *p OP tree_val is undefined. (SLU - 2012/3/19) 
+ */
 #define H5Z_XFORM_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                            \
 {   								  	    \
     size_t u;                                                               \
@@ -252,7 +253,6 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 }
 #endif /*H5_SIZEOF_LONG_DOUBLE */
 
-
 #define H5Z_XFORM_DO_OP3(OP)                                                                                                                    \
 {                                                                                                                                               \
         if((tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type==H5Z_XFORM_INTEGER))                                                \
@@ -277,9 +277,27 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
         }																	\
 }
 
+#define H5Z_XFORM_DO_OP4(TYPE)                                                                                          \
+{                                                                                                                       \
+    if ((ret_value = (H5Z_node*) H5MM_malloc(sizeof(H5Z_node))) == NULL)                                                \
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")                     \
+    else                                                                                                                \
+    {                                                                                                                   \
+        ret_value->type = (TYPE);                                                                                       \
+        ret_value->lchild = (H5Z_node*) H5Z_xform_copy_tree(tree->lchild, dat_val_pointers, new_dat_val_pointers);      \
+        ret_value->rchild = (H5Z_node*) H5Z_xform_copy_tree(tree->rchild, dat_val_pointers, new_dat_val_pointers);      \
+    }                                                                                                                   \
+}
+
+#define H5Z_XFORM_DO_OP5(TYPE, SIZE)                                                               \
+{                                                                                                  \
+    TYPE val = ((tree->type == H5Z_XFORM_INTEGER) ? (TYPE)tree->value.int_val : (TYPE)tree->value.float_val); \
+    H5V_array_fill(array, &val, sizeof(TYPE), (SIZE));                                             \
+}
+
 /* The difference of this macro from H5Z_XFORM_DO_OP3 is that it handles the operations when the left operand is empty, like -x or +x.  
  * The reason that it's seperated from H5Z_XFORM_DO_OP3 is because compilers don't accept operations like *x or /x.  So in H5Z_do_op, 
- * these two macros are called in different ways. 
+ * these two macros are called in different ways. (SLU 2012/3/20) 
  */
 #define H5Z_XFORM_DO_OP6(OP)                                                                                                                    \
 {                                                                                                                                               \
@@ -318,26 +336,6 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
             tree->rchild = NULL;														\
         }																	\
 }
-
-#define H5Z_XFORM_DO_OP4(TYPE)                                                                                          \
-{                                                                                                                       \
-    if ((ret_value = (H5Z_node*) H5MM_malloc(sizeof(H5Z_node))) == NULL)                                                \
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")                     \
-    else                                                                                                                \
-    {                                                                                                                   \
-        ret_value->type = (TYPE);                                                                                       \
-        ret_value->lchild = (H5Z_node*) H5Z_xform_copy_tree(tree->lchild, dat_val_pointers, new_dat_val_pointers);      \
-        ret_value->rchild = (H5Z_node*) H5Z_xform_copy_tree(tree->rchild, dat_val_pointers, new_dat_val_pointers);      \
-    }                                                                                                                   \
-}
-
-#define H5Z_XFORM_DO_OP5(TYPE, SIZE)                                                               \
-{                                                                                                  \
-    TYPE val = ((tree->type == H5Z_XFORM_INTEGER) ? (TYPE)tree->value.int_val : (TYPE)tree->value.float_val); \
-    H5V_array_fill(array, &val, sizeof(TYPE), (SIZE));                                             \
-}
-
-
 
 /*
  *  Programmer: Bill Wendling <wendling@ncsa.uiuc.edu>
@@ -1320,61 +1318,6 @@ H5Z_xform_copy_tree(H5Z_node* tree, H5Z_datval_ptrs* dat_val_pointers, H5Z_datva
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Z_xform_reduce_tree
- * Purpose:     Simplifies parse tree passed in by performing any obvious
- *              and trivial arithemtic calculations.
- *
- * Return:      None.
- * Programmer:  Leon Arber
- *              April 1, 2004.
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-H5Z_xform_reduce_tree(H5Z_node* tree)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if(tree) {
-        if((tree->type == H5Z_XFORM_DIVIDE) || (tree->type == H5Z_XFORM_MULT))
-        {
-            if(H5Z_op_is_numbs(tree))
-                H5Z_do_op(tree);
-            else
-            {
-                H5Z_xform_reduce_tree(tree->lchild);
-                if(H5Z_op_is_numbs(tree))
-                    H5Z_do_op(tree);
-                else {
-                    H5Z_xform_reduce_tree(tree->rchild);
-                    if(H5Z_op_is_numbs(tree))
-                        H5Z_do_op(tree);
-                }
-            }
-        } else if((tree->type == H5Z_XFORM_PLUS) || (tree->type == H5Z_XFORM_MINUS)) {
-            if(H5Z_op_is_numbs2(tree))
-                H5Z_do_op(tree);
-            else
-            {
-                H5Z_xform_reduce_tree(tree->lchild);
-                if(H5Z_op_is_numbs2(tree))
-                    H5Z_do_op(tree);
-                else {
-                    H5Z_xform_reduce_tree(tree->rchild);
-                    if(H5Z_op_is_numbs2(tree))
-                        H5Z_do_op(tree);
-                }
-            }
-        }
-
-    }
-
-    FUNC_LEAVE_NOAPI_VOID;
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5Z_op_is_numbs
  * Purpose:     Internal function to facilitate the condition check in 
  *              H5Z_xform_reduce_tree to reduce the bulkiness of the code.
@@ -1428,6 +1371,61 @@ H5Z_op_is_numbs2(H5Z_node* _tree)
       ret_value = TRUE;
 
     FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_xform_reduce_tree
+ * Purpose:     Simplifies parse tree passed in by performing any obvious
+ *              and trivial arithemtic calculations.
+ *
+ * Return:      None.
+ * Programmer:  Leon Arber
+ *              April 1, 2004.
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5Z_xform_reduce_tree(H5Z_node* tree)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(tree) {
+        if((tree->type == H5Z_XFORM_DIVIDE) || (tree->type == H5Z_XFORM_MULT))
+        {
+            if(H5Z_op_is_numbs(tree))
+                H5Z_do_op(tree);
+            else
+            {
+                H5Z_xform_reduce_tree(tree->lchild);
+                if(H5Z_op_is_numbs(tree))
+                    H5Z_do_op(tree);
+                else {
+                    H5Z_xform_reduce_tree(tree->rchild);
+                    if(H5Z_op_is_numbs(tree))
+                        H5Z_do_op(tree);
+                }
+            }
+        } else if((tree->type == H5Z_XFORM_PLUS) || (tree->type == H5Z_XFORM_MINUS)) {
+            if(H5Z_op_is_numbs2(tree))
+                H5Z_do_op(tree);
+            else
+            {
+                H5Z_xform_reduce_tree(tree->lchild);
+                if(H5Z_op_is_numbs2(tree))
+                    H5Z_do_op(tree);
+                else {
+                    H5Z_xform_reduce_tree(tree->rchild);
+                    if(H5Z_op_is_numbs2(tree))
+                        H5Z_do_op(tree);
+                }
+            }
+        }
+
+    }
+
+    FUNC_LEAVE_NOAPI_VOID;
 }
 
 
