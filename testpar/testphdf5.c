@@ -512,6 +512,18 @@ int main(int argc, char **argv)
     /* Parse command line arguments */
     TestParseCmdLine(argc, argv);
 
+    if((mpi_size < 2)&& MAINPROCESS ) {
+	printf("Atomicity tests need at least 2 processes to participate\n");
+	printf("8 is more recommended.. Atomicity tests will be skipped \n");
+    }
+    else if (facc_type != FACC_MPIO && MAINPROCESS) {
+	printf("Atomicity tests will not work with a non MPIO VFD\n");        
+    }
+    else if(mpi_size >= 2 && facc_type == FACC_MPIO){
+        AddTest("atomicity", dataset_atomicity, NULL,
+                "dataset atomic updates", PARATESTFILE);
+    }
+
     if (facc_type == FACC_MPIPOSIX && MAINPROCESS){
 	printf("===================================\n"
 	       "   Using MPIPOSIX driver\n"
