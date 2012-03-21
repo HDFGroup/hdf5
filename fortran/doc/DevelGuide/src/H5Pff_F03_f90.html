@@ -1,0 +1,832 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Pff_F03.f90</title>
+<!-- Source: ./src/H5Pff_F03.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5P2028F0329"></a>
+<a name="robo61"></a><h2>H5P (F03)</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  H5P_PROVISIONAL
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran 90 and Fortran 2003 interfaces for H5P functions.
+  It contains the same functions as H5Pff_DEPRECIATE.f90 but includes the
+  Fortran 2003 functions and the interface listings. This file will be compiled
+  instead of H5Pff_DEPRECIATE.f90 if Fortran 2003 functions are enabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new H5P function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5P2028F03292f20h5pget5fdouble"></a>
+<a name="robo80"></a><h2> h5pget_double</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <a href="./H5Pff_F90_f90.html#robo229">h5pget_double</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets a property list value
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  prp_id        - iproperty list identifier to modify
+  name          - name of property to modify
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  value         - value of property
+  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 9, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <a href="./H5Pff_F90_f90.html#robo229">h5pget_double</a><span class="sign">(</span>prp_id<span class="sign">,</span> name<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE<span class="sign">,</span> INTRINSIC <span class="sign">:</span><span class="sign">:</span> ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> prp_id  <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span> Name of property to modify
+    DOUBLE PRECISION<span class="sign">,</span>   INTENT<span class="sign">(</span>OUT<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pcreate5fclass5ff"></a>
+<a name="robo205"></a><h2>h5pcreate_class_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pcreate_class_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Create a new property list class
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  parent        - Property list identifier of the parent class
+                  Possible values include:
+                   H5P_ROOT_F
+                   H5P_FILE_CREATE_F
+                   H5P_FILE_ACCESS_F
+                   H5P_DATASET_CREATE_F
+                   H5P_DATASET_XFER_F
+                   H5P_FILE_MOUNT_F
+  name          - name of the class we are creating
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  class         - porperty list class identifier
+  hdferr:       - error code
+
+  Success: 0
+  Failure: -1
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  H5P_cls_create_func_t (create) - Callback routine called when a property list is created
+  create_data                    - User pointer to any class creation information needed
+  H5P_cls_copy_func_t   (copy)   - Callback routine called when a property list is copied
+  copy_data                      - User pointer to any class copy information needed
+  H5P_cls_close_func_t  (close)  - Callback routine called when a property list is being closed
+  close_data                     - User pointer to any class close information needed
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 9, 2002
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Added callback arguments
+  M. Scot Breitenfeld, July 3, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pcreate_class_f</strong><span class="sign">(</span>parent<span class="sign">,</span> name<span class="sign">,</span> class<span class="sign">,</span> hdferr<span class="sign">,</span> create<span class="sign">,</span> create_data<span class="sign">,</span> copy<span class="sign">,</span> copy_data<span class="sign">,</span> close<span class="sign">,</span> close_data<span class="sign">)</span>
+    USE iso_c_binding
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> parent  <span class="sign">!</span> parent property list class identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span> name of property tocreate
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> class  <span class="sign">!</span> property list class identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+    TYPE<span class="sign">(</span>C_PTR<span class="sign">)</span><span class="sign">,</span> OPTIONAL <span class="sign">:</span><span class="sign">:</span> create_data<span class="sign">,</span> copy_data<span class="sign">,</span> close_data
+    TYPE<span class="sign">(</span>C_FUNPTR<span class="sign">)</span><span class="sign">,</span> OPTIONAL <span class="sign">:</span><span class="sign">:</span> create<span class="sign">,</span> copy<span class="sign">,</span> close
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pget5fchar"></a>
+<a name="robo218"></a><h2>h5pget_char</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pget_char</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets a property list value
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  prp_id        - iproperty list identifier to modify
+  name          - name of property to modify
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  value         - value of property
+  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 9, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pget_char</strong><span class="sign">(</span>prp_id<span class="sign">,</span> name<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE<span class="sign">,</span> INTRINSIC <span class="sign">:</span><span class="sign">:</span> ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> prp_id   <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of property to modify
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pget5finteger"></a>
+<a name="robo247"></a><h2>h5pget_integer</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pget_integer</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets a property list value
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  prp_id        - iproperty list identifier to modify
+  name          - name of property to modify
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  value         - value of property
+  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 9, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pget_integer</strong><span class="sign">(</span>prp_id<span class="sign">,</span> name<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE<span class="sign">,</span> INTRINSIC <span class="sign">:</span><span class="sign">:</span> ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> prp_id    <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name    <span class="sign">!</span> Name of property to modify
+    INTEGER<span class="sign">,</span>   INTENT<span class="sign">(</span>OUT<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pget5freal"></a>
+<a name="robo261"></a><h2>h5pget_real</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pget_real</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets a property list value
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  prp_id        - iproperty list identifier to modify
+  name          - name of property to modify
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  value         - value of property
+  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 9, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pget_real</strong><span class="sign">(</span>prp_id<span class="sign">,</span> name<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE<span class="sign">,</span> INTRINSIC <span class="sign">:</span><span class="sign">:</span> ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> prp_id <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name <span class="sign">!</span> Name of property to modify
+    REAL<span class="sign">,</span>   INTENT<span class="sign">(</span>OUT<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pinsert5fchar"></a>
+<a name="robo273"></a><h2>h5pinsert_char</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pinsert_char</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Registers a temporary property with a property list class.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  plist         - property list identifier
+                  permanent property within
+  name          - name of property to insert
+  size          - size of property in bytes
+  value         - initial value for the property
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 10, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pinsert_char</strong><span class="sign">(</span>plist<span class="sign">,</span> name<span class="sign">,</span> size<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE iso_c_binding
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> plist      <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name     <span class="sign">!</span> Name of property to insert
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size      <span class="sign">!</span> Size of property value
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> value  <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr           <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pinsert5fdouble"></a>
+<a name="robo274"></a><h2>h5pinsert_double</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pinsert_double</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Registers a temporary property with a property list class.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  plist         - property list identifier
+                  permanent property within
+  name          - name of property to insert
+  size          - size of property in bytes
+  value         - initial value for the property
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  NONE
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 10, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pinsert_double</strong><span class="sign">(</span>plist<span class="sign">,</span> name<span class="sign">,</span> size<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE iso_c_binding
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> plist   <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span> Name of property to insert
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size   <span class="sign">!</span> Size of the property value
+    DOUBLE PRECISION<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pinsert5finteger"></a>
+<a name="robo276"></a><h2>h5pinsert_integer</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pinsert_integer</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Registers a temporary property with a property list class.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  plist         - property list identifier
+  name          - name of property to insert
+  size          - size of property in bytes
+  value         - initial value for the property
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 10, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pinsert_integer</strong><span class="sign">(</span>plist<span class="sign">,</span> name<span class="sign">,</span> size<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE iso_c_binding
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> plist    <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of property to insert
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size    <span class="sign">!</span> Size of the property value
+    INTEGER<span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pinsert5fptr"></a>
+<a name="robo278"></a><h2>h5pinsert_ptr</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pinsert_ptr</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Registers a temporary property with a property list class.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  plist         - property list identifier
+                  permanent property within
+  name          - name of property to insert
+  size          - size of property in bytes
+  value         - initial value for the property
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  June 24, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pinsert_ptr</strong><span class="sign">(</span>plist<span class="sign">,</span> name<span class="sign">,</span> size<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE iso_c_binding
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> plist  <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name <span class="sign">!</span> Name of property to insert
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size  <span class="sign">!</span> Size of property value
+    TYPE<span class="sign">(</span>c_ptr<span class="sign">)</span><span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> value   <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pinsert5freal"></a>
+<a name="robo280"></a><h2>h5pinsert_real</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pinsert_real</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Registers a temporary property with a property list class.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  plist         - property list identifier
+                  permanent property within
+  name          - name of property to insert
+  size          - size of property in bytes
+  value         - initial value for the property
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 10, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pinsert_real</strong><span class="sign">(</span>plist<span class="sign">,</span> name<span class="sign">,</span> size<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE iso_c_binding
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> plist   <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span> Name of property to insert
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size   <span class="sign">!</span> Size of the property value
+    REAL<span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> value   <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pregister5fchar"></a>
+<a name="robo283"></a><h2>h5pregister_char</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pregister_char</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Registers a permanent property with a property list class.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  class         - property list class to register
+                  permanent property within
+  name          - name of property to register
+  size          - size of property in bytes
+  value         - default value for property in newly
+                  created property lists
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 10, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pregister_char</strong><span class="sign">(</span>class<span class="sign">,</span> name<span class="sign">,</span> size<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> class     <span class="sign">!</span> Property list class identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name    <span class="sign">!</span> Name of property to <span class="keyword">register</span>
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size     <span class="sign">!</span> size of the property value
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pregister5fdouble"></a>
+<a name="robo286"></a><h2>h5pregister_double</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pregister_double</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Registers a permanent property with a property list class.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  class         - property list class to register
+                  permanent property within
+  name          - name of property to register
+  size          - size of property in bytes
+  value         - default value for property in newly
+                  created property lists
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 10, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pregister_double</strong><span class="sign">(</span>class<span class="sign">,</span> name<span class="sign">,</span> size<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> class  <span class="sign">!</span> Property list class identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name <span class="sign">!</span> Name of property to <span class="keyword">register</span>
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size  <span class="sign">!</span> size of the property value
+    DOUBLE PRECISION<span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pregister5finteger"></a>
+<a name="robo287"></a><h2>h5pregister_integer</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pregister_integer</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Registers a permanent property with a property list class.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  class         - property list class to register
+                  permanent property within
+  name          - name of property to register
+  size          - size of property in bytes
+  value         - default value for property in newly
+                  created property lists
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 10, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pregister_integer</strong><span class="sign">(</span>class<span class="sign">,</span> name<span class="sign">,</span> size<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> class    <span class="sign">!</span> Property list class identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of property to <span class="keyword">register</span>
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size    <span class="sign">!</span> Size of the property value
+    INTEGER<span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pregister5fptr"></a>
+<a name="robo289"></a><h2>h5pregister_ptr</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pregister_ptr</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Registers a permanent property with a property list class.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  class         - property list class to register
+                  permanent property within
+  name          - name of property to register
+  size          - size of property in bytes
+  value         - default value for property in newly
+                  created property lists
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  June 24, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pregister_ptr</strong><span class="sign">(</span>class<span class="sign">,</span> name<span class="sign">,</span> size<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> class   <span class="sign">!</span> Property list class identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span> Name of property to <span class="keyword">register</span>
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size   <span class="sign">!</span> Size of the property value
+    TYPE<span class="sign">(</span>C_PTR<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> value      <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pregister5freal"></a>
+<a name="robo291"></a><h2>h5pregister_real</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pregister_real</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Registers a permanent property with a property list class.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  class         - property list class to register
+                  permanent property within
+  name          - name of property to register
+  size          - size of property in bytes
+  value         - default value for property in newly
+                  created property lists
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 10, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pregister_real</strong><span class="sign">(</span>class<span class="sign">,</span> name<span class="sign">,</span> size<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> class   <span class="sign">!</span> Property list class identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span> Name of property to <span class="keyword">register</span>
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size   <span class="sign">!</span> size of the property value
+    REAL<span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> value   <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pset28get29fill5fvalue5ff"></a>
+<a name="robo294"></a><h2>h5pset(get)fill_value_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pset(get)fill_value_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets(gets) fill value for a dataset creation property list
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  prp_id        - dataset creation property list identifier
+  type_id       - datatype identifier for fill value
+  fillvalue     - fill value
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  type_id       - datatype identifier for fill value
+  fillvalue     - fill value
+  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 14, 2001
+
+  Added the recommended way of passing fillvalue
+  and that is by passing the C address, all other
+  ways are obsolete and should be avoided. June, 2008 MSB
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  <strong>h5pset(get)fill_value_f</strong> function is overloaded to support
+  INTEGER, REAL, DOUBLE PRECISION and CHARACTER dtatypes.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5pset_fill_value_integer<span class="sign">(</span>prp_id<span class="sign">,</span> type_id<span class="sign">,</span> fillvalue<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE<span class="sign">,</span> INTRINSIC <span class="sign">:</span><span class="sign">:</span> ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> prp_id  <span class="sign">!</span> Property list identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier of
+                                          <span class="sign">!</span> of fillvalue datatype
+                                          <span class="sign">!</span> <span class="sign">(</span>in memory<span class="sign">)</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> fillvalue   <span class="sign">!</span> Fillvalue
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr  <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pset5fchar"></a>
+<a name="robo303"></a><h2>h5pset_char</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pset_char</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets a property list value
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  prp_id        - iproperty list identifier to modify
+  name          - name of property to modify
+  value         - value to set property to
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  NONE
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 9, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pset_char</strong><span class="sign">(</span>prp_id<span class="sign">,</span> name<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE<span class="sign">,</span> INTRINSIC <span class="sign">:</span><span class="sign">:</span> ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> prp_id    <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name    <span class="sign">!</span> Name of property to modify
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pset5fdouble"></a>
+<a name="robo313"></a><h2>h5pset_double</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pset_double</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets a property list value
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  prp_id        - iproperty list identifier to modify
+  name          - name of property to modify
+  value         - value to set property to
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                    Success:  0
+                    Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 9, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pset_double</strong><span class="sign">(</span>prp_id<span class="sign">,</span> name<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE<span class="sign">,</span> INTRINSIC <span class="sign">:</span><span class="sign">:</span> ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> prp_id  <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span> Name of property to modify
+    DOUBLE PRECISION<span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr                  <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pset5finteger"></a>
+<a name="robo334"></a><h2>h5pset_integer</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pset_integer</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets a property list value
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  prp_id        - iproperty list identifier to modify
+  name          - name of property to modify
+  value         - value to set property to
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 9, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pset_integer</strong><span class="sign">(</span>prp_id<span class="sign">,</span> name<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE<span class="sign">,</span> INTRINSIC <span class="sign">:</span><span class="sign">:</span> ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> prp_id   <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of property to modify
+    INTEGER<span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5P2028F03292fh5pset5freal"></a>
+<a name="robo345"></a><h2>h5pset_real</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo61">H5P (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5pset_real</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets a property list value
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  prp_id        - iproperty list identifier to modify
+  name          - name of property to modify
+  value         - value to set property to
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr:       - error code
+                   Success:  0
+                    Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 9, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5pset_real</strong><span class="sign">(</span>prp_id<span class="sign">,</span> name<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+    USE<span class="sign">,</span> INTRINSIC <span class="sign">:</span><span class="sign">:</span> ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> prp_id <span class="sign">!</span> Property list identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name <span class="sign">!</span> Name of property to modify
+    REAL<span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span><span class="sign">,</span> TARGET <span class="sign">:</span><span class="sign">:</span> value  <span class="sign">!</span> Property value
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Pff_F03.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

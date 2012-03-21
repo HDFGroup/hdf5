@@ -35,24 +35,27 @@ print_dimensions (int rank, hsize_t *dims)
 {
     int  i;
 
-    if ( rank > 0 )
-    {
-
-        parallel_print("[" );
-        for ( i = 0; i < rank-1; i++)
-        {
-            parallel_print(HSIZE_T_FORMAT, dims[i]);
-            parallel_print("x");
-        }
-
-        parallel_print(HSIZE_T_FORMAT,  dims[rank-1]);
-        parallel_print("]" );
-    }
-    else
+    if ( rank <= 0 ) 
     {
         parallel_print("H5S_SCALAR" );
     }
+    else 
+    {
+        if (!dims)
+            parallel_print("dimension is NULL");
+        else 
+        {
+            parallel_print("[");
+            for ( i = 0; i < rank-1; i++)
+            {
+                parallel_print(HSIZE_T_FORMAT, dims[i]);
+                parallel_print("x");
+            }
 
+            parallel_print(HSIZE_T_FORMAT,  dims[rank-1]);
+            parallel_print("]" );
+        }
+    }
 }
 
 
@@ -180,7 +183,7 @@ diff_basename(const char *name)
         return NULL;
 
     /* Find the end of the base name */
-    i = strlen(name);
+    i = HDstrlen(name);
     while (i>0 && '/'==name[i-1])
         --i;
 

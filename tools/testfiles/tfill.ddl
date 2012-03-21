@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -p tfvalues.h5'
-#############################
 HDF5 "tfvalues.h5" {
 GROUP "/" {
    DATASET "fill_array" {
@@ -16,7 +13,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  [ 0, 0, 0 ]      
+         VALUE  [ 0, 0, 0 ]
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_LATE
@@ -42,9 +39,9 @@ GROUP "/" {
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
          VALUE  {
-         1,
-         2
-      }      
+            1,
+            2
+         }
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_LATE
@@ -73,7 +70,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_ALLOC
-         VALUE  -99      
+         VALUE  -99
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_LATE
@@ -95,7 +92,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  -99      
+         VALUE  -99
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_LATE
@@ -117,7 +114,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_NEVER
-         VALUE  -99      
+         VALUE  -99
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_LATE
@@ -139,7 +136,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_ALLOC
-         VALUE  ()      
+         VALUE  ()
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_LATE
@@ -161,7 +158,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0      
+         VALUE  0
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_LATE

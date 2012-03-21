@@ -21,6 +21,8 @@
 
 #define FILE_NAME "test_lite1.h5"
 #define FILE_NAME2 "test_lite2.h5"
+#define FILE_NAME3 "test_lite3.h5"
+#define FILE_NAME4 "test_lite4.h5"
 #define INPUT_FILE "dtype_file.txt"
 
 #define DSET0_NAME "2D int array"
@@ -367,7 +369,7 @@ static int test_dsets( void )
     if ( H5LTread_dataset_string(file_id,DSET7_NAME,data_string_out) < 0 )
         goto out;
 
-    if ( strcmp(data_string_in,data_string_out) != 0 )
+    if ( HDstrcmp(data_string_in,data_string_out) != 0 )
         goto out;
 
 
@@ -536,7 +538,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     if ( H5LTget_attribute_string( loc_id, obj_name, ATTR1_NAME, attr_str_out ) < 0 )
         return -1;
 
-    if ( strcmp( attr_str_in, attr_str_out ) != 0 )
+    if ( HDstrcmp( attr_str_in, attr_str_out ) != 0 )
     {
         return -1;
     }
@@ -1015,25 +1017,25 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     TESTING("H5LTget_attribute_info");
 
-    dims_out = (hsize_t*) malloc( sizeof(hsize_t) * rank_out );
+    if(NULL==(dims_out = (hsize_t*) HDmalloc( sizeof(hsize_t) * rank_out ))) return -1;
 
-    if ( H5LTget_attribute_info( loc_id, obj_name, ATTR2_NAME, dims_out, &type_class,
-        &type_size) < 0 )
+    if ( H5LTget_attribute_info( loc_id, obj_name, ATTR2_NAME, dims_out, &type_class, &type_size) < 0 ) {
+        HDfree( dims_out );
         return -1;
-
-    for (i = 0; i < rank_out; i++)
-    {
+    }
+    
+    for (i = 0; i < rank_out; i++) {
         if ( dims_out[i] != 5 ) {
+            HDfree( dims_out );
             return -1;
         }
     }
 
     if ( type_class != H5T_INTEGER ) {
+        HDfree( dims_out );
         return -1;
     }
-
-    if ( dims_out )
-        free( dims_out );
+    HDfree( dims_out );
 
     PASSED();
 
@@ -1066,12 +1068,18 @@ static int test_integers(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_STD_I8BE"))
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
-    free(dt_str);
+    }
+    if(HDstrcmp(dt_str, "H5T_STD_I8BE")) {
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1117,12 +1125,18 @@ static int test_fps(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_IEEE_F32BE"))
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
-    free(dt_str);
+    }
+    if(HDstrcmp(dt_str, "H5T_IEEE_F32BE")) {
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1180,14 +1194,18 @@ static int test_strings(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_STRING {\n      STRSIZE 13;\n      STRPAD H5T_STR_NULLTERM;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
     }
-    free(dt_str);
+    if(HDstrcmp(dt_str, "H5T_STRING {\n      STRSIZE 13;\n      STRPAD H5T_STR_NULLTERM;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }")) {
+        printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1208,14 +1226,18 @@ static int test_strings(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
     }
-    free(dt_str);
+    if(HDstrcmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }")) {
+        printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1257,14 +1279,18 @@ static int test_opaques(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
     }
-    free(dt_str);
+    if(HDstrcmp(dt_str, "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }")) {
+        printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1311,7 +1337,7 @@ static int test_enums(void)
 
     if(H5Tenum_nameof(dtype, &value1, name1, size)<0)
         goto out;
-    if(strcmp(name1, "BLUE"))
+    if(HDstrcmp(name1, "BLUE"))
         goto out;
 
     if(H5Tenum_valueof(dtype, name2, &value2)<0)
@@ -1328,16 +1354,20 @@ static int test_enums(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"            6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }")) {
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
+        goto out;
+    }
+    if(HDstrcmp(dt_str, "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"            6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }")) {
 
         printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
         goto out;
     }
 
-    free(dt_str);
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1373,30 +1403,34 @@ static int test_variables(void)
 
     if(H5Tis_variable_str(dtype))
         goto out;
-
+    
     if(H5Tclose(dtype)<0)
         goto out;
-
+    
     if((dtype = H5LTtext_to_dtype("H5T_VLEN { H5T_VLEN { H5T_STD_I32BE } }", H5LT_DDL))<0)
         goto out;
-
+    
     if(H5Tis_variable_str(dtype))
         goto out;
-
+    
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_VLEN {\n      H5T_VLEN {\n         H5T_STD_I32BE\n      }\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
     }
-    free(dt_str);
-
+    if(HDstrcmp(dt_str, "H5T_VLEN {\n      H5T_VLEN {\n         H5T_STD_I32BE\n      }\n   }")) {
+        printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
+    
     if(H5Tclose(dtype)<0)
         goto out;
-
+    
     PASSED();
     return 0;
 
@@ -1440,15 +1474,19 @@ static int test_arrays(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_ARRAY {\n      [5][7][13] H5T_ARRAY {\n         [17][19] H5T_COMPOUND {\n            H5T_STD_I8BE \"arr_compound_1\" : 0;\n            H5T_STD_I32BE \"arr_compound_2\" : 1;\n         }\n      }\n   }")) {
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
+        goto out;
+    }
+    if(HDstrcmp(dt_str, "H5T_ARRAY {\n      [5][7][13] H5T_ARRAY {\n         [17][19] H5T_COMPOUND {\n            H5T_STD_I8BE \"arr_compound_1\" : 0;\n            H5T_STD_I32BE \"arr_compound_2\" : 1;\n         }\n      }\n   }")) {
         printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
         goto out;
     }
 
-    free(dt_str);
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1492,14 +1530,18 @@ static int test_compounds(void)
 
     if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
         goto out;
-    dt_str = (char*)calloc(str_len, sizeof(char));
-    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
         goto out;
-    if(strcmp(dt_str, "H5T_COMPOUND {\n      H5T_STD_I16BE \"one_field\" : 2;\n      H5T_STD_U8LE \"two_field\" : 6;\n   }")) {
-        printf("dt=\n%s\n", dt_str);
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
         goto out;
     }
-    free(dt_str);
+    if(HDstrcmp(dt_str, "H5T_COMPOUND {\n      H5T_STD_I16BE \"one_field\" : 2;\n      H5T_STD_U8LE \"two_field\" : 6;\n   }")) {
+        printf("dt=\n%s\n", dt_str);
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
 
     if(H5Tclose(dtype)<0)
         goto out;
@@ -1509,13 +1551,130 @@ static int test_compounds(void)
 
     if((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
         goto out;
-    if(strcmp(memb_name, "i16_field"))
+    if(HDstrcmp(memb_name, "i16_field")) {
+        HDfree(memb_name);
         goto out;
-    free(memb_name);
+    }
+    HDfree(memb_name);
 
     if((memb_class = H5Tget_member_class(dtype, 2))<0)
         goto out;
     if(memb_class != H5T_COMPOUND)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+* subroutine for test_text_dtype(): test_compound_bug(). Test case for 
+* issue 7701.
+*-------------------------------------------------------------------------
+*/
+static int test_compound_bug(void)
+{
+    hid_t       dtype;
+    H5T_class_t type_class;
+    int         nmembs;
+    char*       memb_name = NULL;
+    char*       dt_str;
+    size_t      str_len;
+    char text[] = "H5T_COMPOUND { H5T_STD_I32LE \"state_________________________________________________________________________________\"; H5T_STD_I32LE \"desc_________________________________________________________________________________________\"; H5T_VLEN { H5T_COMPOUND { H5T_ENUM { H5T_STD_I16LE; \"ZERO\" 0; \"ONE\" 1; \"TWO\" 2;  \"THREE\" 3; } \"type____\"; H5T_STD_I32LE \"sub_______________________________________________________________________________________________________________\"; H5T_STRING { STRSIZE H5T_VARIABLE; STRPAD H5T_STR_SPACEPAD; CSET H5T_CSET_ASCII; CTYPE H5T_C_S1; } \"sub_desc\"; H5T_STD_I32LE \"final___________________________________________________________________________________________________\"; } } \"sub\"; }";
+    char text2[] =
+     "H5T_COMPOUND {\n"
+     "  H5T_STD_I16LE \"state___________________________"
+         "__________________________________________________"
+         "____\" : 0;\n"
+     "  H5T_STD_I16LE \"desc____________________________"
+         "__________________________________________________"
+         "___________\" : 2;\n"
+     "  H5T_VLEN { H5T_COMPOUND {\n"
+     "    H5T_ENUM { H5T_STD_I16LE; \"ZERO\" 0; \"ONE\" "
+         "1; \"TWO\" 2;  \"THREE\" 3; } \"type____\" : 0;\n"
+     "    H5T_STD_I32LE \"sub___________________________"
+         "__________________________________________________"
+         "__________________________________1\" : 4;\n"
+     "    H5T_STRING { STRSIZE H5T_VARIABLE; STRPAD H5T_"
+         "STR_SPACEPAD; CSET H5T_CSET_ASCII; CTYPE H5T_C_S1;"
+         " } \"sub_desc\" : 8;\n"
+     "    H5T_STD_I32LE \"final_________________________"
+         "__________________________________________________"
+         "________________________\" : 16;\n"
+     "  } } \"sub\" : 8;\n"
+     "}\n";
+
+    TESTING3("        text for compound type of bug fix");
+
+    if((dtype = H5LTtext_to_dtype(text, H5LT_DDL))<0)
+        goto out;
+
+    if((type_class = H5Tget_class(dtype))<0)
+        goto out;
+    if(type_class != H5T_COMPOUND)
+        goto out;
+
+    if((memb_name = H5Tget_member_name(dtype, 2)) == NULL)
+        goto out;
+    if(HDstrcmp(memb_name, "sub")) {
+        HDfree(memb_name);
+        goto out;
+    }
+    HDfree(memb_name);
+
+    if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
+        goto out;
+
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
+        goto out;
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
+        goto out;
+    }
+    HDfree(dt_str);
+
+    if(H5Tclose(dtype)<0)
+        goto out;
+
+
+    /* Test similar datatype in another format */
+    if((dtype = H5LTtext_to_dtype(text2, H5LT_DDL))<0)
+        goto out;
+
+    if((type_class = H5Tget_class(dtype))<0)
+        goto out;
+    if(type_class != H5T_COMPOUND)
+        goto out;
+
+    if((nmembs = H5Tget_nmembers(dtype))<0)
+        goto out;
+    if(nmembs != 3)
+        goto out;
+
+    if((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
+        goto out;
+    if(HDstrcmp(memb_name, "desc_________________________________________________________________________________________")) {
+        HDfree(memb_name);
+        goto out;
+    }
+    HDfree(memb_name);
+
+    if(H5LTdtype_to_text(dtype, NULL, H5LT_DDL, &str_len)<0)
+        goto out;
+
+    if(NULL==(dt_str = (char*)HDcalloc(str_len, sizeof(char))))
+        goto out;
+    if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0) {
+        HDfree(dt_str);
+        goto out;
+    }
+
+    HDfree(dt_str);
+
+    if(H5Tclose(dtype)<0)
         goto out;
 
     PASSED();
@@ -1543,7 +1702,7 @@ static int test_complicated_compound(void)
     TESTING3("        text for complicated compound types");
 
     /* Open input file */
-    fp = fopen(filename, "r");
+    fp = HDfopen(filename, "r");
     if(fp == NULL) {
         printf( "Could not find file %s. Try set $srcdir \n", filename);
         goto out;
@@ -1553,23 +1712,23 @@ static int test_complicated_compound(void)
     * Library has convenient function getline() but isn't available on
     * all machines.
     */
-    if((line = (char*)calloc(size, sizeof(char)))==NULL)
+    if((line = (char*)HDcalloc(size, sizeof(char)))==NULL)
         goto out;
-    if(fgets(line, (int)size, fp)==NULL)
+    if(HDfgets(line, (int)size, fp)==NULL)
         goto out;
-    while(strlen(line)==size-1) {
+    while(HDstrlen(line)==size-1) {
         size *= 2;
         if(line)
-            free(line);
-        if((line = (char*)calloc(size, sizeof(char)))==NULL)
+            HDfree(line);
+        if((line = (char*)HDcalloc(size, sizeof(char)))==NULL)
             goto out;
-        if(fseek(fp, 0L, SEEK_SET)!=0)
+        if(HDfseek(fp, 0L, SEEK_SET)!=0)
             goto out;
-        if(fgets(line, (int)size, fp)==NULL)
+        if(HDfgets(line, (int)size, fp)==NULL)
             goto out;
     }
 
-    fclose(fp);
+    HDfclose(fp);
     fp = NULL;
 
     if((dtype = H5LTtext_to_dtype(line, H5LT_DDL))<0)
@@ -1587,7 +1746,7 @@ static int test_complicated_compound(void)
         goto out;
 
     if(line)
-        free(line);
+        HDfree(line);
 
     PASSED();
     return 0;
@@ -1595,9 +1754,9 @@ static int test_complicated_compound(void)
 out:
 
     if(line)
-        free(line);
+        HDfree(line);
     if(fp)
-        fclose(fp);
+        HDfclose(fp);
 
     H5_FAILED();
     return -1;
@@ -1635,6 +1794,9 @@ static int test_text_dtype(void)
     if(test_compounds()<0)
         goto out;
 
+    if(test_compound_bug()<0)
+        goto out;
+
     if(test_complicated_compound()<0)
         goto out;
 
@@ -1643,6 +1805,314 @@ static int test_text_dtype(void)
 out:
     return -1;
 }
+
+/*-------------------------------------------------------------------------
+ * test H5LTpath_valid function
+ *-------------------------------------------------------------------------
+ */
+static int test_valid_path(void)
+{
+  hid_t file_id, group;
+  herr_t status;
+  FILE *fp = NULL;
+  htri_t path_valid;
+  char path[10];
+  const char *data_string_in = "test";
+  
+  TESTING("H5LTpath_valid");
+    
+  /* Create a new file using default properties. */
+
+  /**************************************************************
+   *  The file structure should look like this:
+   *
+   *        +----------------------------------+
+   *        |                 /                |
+   *        +----------------------------------+
+   *                  /       |   \       \
+   *                 /        |    \       \
+   *                /         |     \       \
+   *               /          |      \       G8 (dangled external link)
+   *              /          DS       \
+   *             /                     \
+   *            G1                    G2
+   *            | --> DS1              |
+   *           / \--> DS3             / \
+   *          /                      /   \
+   *        G2                     DS4    G7
+   *         |                 (hard link   (dangled soft link
+   *         |                  to /G1/DS3)  to /G1/G20 )
+   *        /  \     			     
+   *       /    \       
+   *     G5      \    
+   *  (soft link  G6 (external link /G1 in FILENAME4)
+   *  to /G2)   
+   *
+   ****************************************************************/
+
+  file_id = H5Fcreate(FILE_NAME3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  /*
+   * Create dataset "/DS"
+   */
+  if(H5LTmake_dataset_string(file_id, "DS", data_string_in)<0)
+    goto out;
+
+  /*
+   * Create an external dangled link
+   */
+  if(H5Lcreate_external("NonExistant_File.h5", "G8", file_id, "DangledExternalLink",  H5P_DEFAULT,  H5P_DEFAULT)<0)
+    goto out;
+
+  /*
+   * Create a group named "G2" in the file.
+   */
+  if((group = H5Gcreate2(file_id, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+    goto out;
+
+  /*
+   * Create a dataset named "G2/DS4" in the file.
+   */
+  if(H5LTmake_dataset_string(group, "/G2/DS4", data_string_in)<0)
+    goto out;
+  
+  /*
+   * Create a soft link
+   */
+  if(H5Lcreate_soft("/G1/G20", file_id, "/G2/G7", H5P_DEFAULT, H5P_DEFAULT) <0)
+    goto out;
+
+  if(H5Gclose(group)<0)
+    goto out;
+
+  /*
+   * Create a group named "G1" in the file.
+   */
+  if((group = H5Gcreate2(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+    goto out;
+
+  /*
+   * Create a group named "G1/DS1" in the file.
+   */
+  if(H5LTmake_dataset_string(group, "/G1/DS1", data_string_in)<0)
+    goto out;
+
+  if(H5Gclose(group)<0)
+     goto out;
+
+  /*
+   * Create a group named "/G3/G5" in the file.
+   */
+  if(H5Lcreate_hard(file_id, "/G2/DS4", file_id, "/G1/DS3",H5P_DEFAULT, H5P_DEFAULT)<0)
+       goto out;
+  /*
+   * Create a group named "/G1/G2" in the file.
+   */
+  if((group = H5Gcreate2(file_id, "/G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+    goto out;
+
+  /*
+   * Create a soft link
+   */
+  if(H5Lcreate_soft("/G2", file_id, "/G1/G2/G5", H5P_DEFAULT, H5P_DEFAULT)<0)
+    goto out;
+
+  if(H5Gclose(group)<0)
+    goto out;
+
+  /*
+   * Create a group named "/G1/G2/G6" in the file.
+   */
+  if((group = H5Gcreate2(file_id, "/G1/G2/G6", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+    goto out;
+
+  /*
+   * Create an external link
+   */
+  if(H5Lcreate_external( FILE_NAME4, "G1", group, "ExternalLink",  H5P_DEFAULT,  H5P_DEFAULT)<0)
+    goto out;
+
+  if(H5Gclose(group)<0)
+    goto out;
+  /*
+   * Close the file.
+   */
+  status = H5Fclose (file_id);
+
+  /* Create another file for checking external links */
+
+  /**************************************************************
+   *  The file structure should look like this:
+   *
+   *               +----+
+   *               |  / |
+   *               +----+
+   *                 |
+   *                 |
+   *                 |
+   *                 G1 
+   *                /  \
+   *               /	\
+   *            DS1      G2
+   *                    (dangled soft link to /G1/G20)
+   *
+   ****************************************************************/
+
+  /* Make external link file */
+  file_id = H5Fcreate(FILE_NAME4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  /*
+   * Create a group named "G1" in the file.
+   */
+  if((group = H5Gcreate2(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))<0)
+    goto out;
+  /*
+   * Create a dataset named "G1/DS1" in the file.
+   */
+  if(H5LTmake_dataset_string(group, "/G1/DS1", data_string_in)<0)
+    goto out;
+
+  /*
+   * Create a dangling soft link
+   */
+
+  if(H5Lcreate_soft("/G1/G2", file_id, "/G1/G20", H5P_DEFAULT, H5P_DEFAULT)<0)
+    goto out;
+
+  if(H5Gclose(group)<0)
+    goto out;
+
+  H5Fclose(file_id);
+ 
+  /* Open input file */
+  if((file_id = H5Fopen(FILE_NAME3,H5F_ACC_RDONLY, H5P_DEFAULT))<0)
+    goto out;
+
+  /**************************************
+   * CHECK ABSOLUTE PATHS 
+   **************************************/
+  if( (path_valid = H5LTpath_valid(file_id, "/G1", TRUE)) != TRUE) {
+    goto out;
+  }
+  
+  if((path_valid = H5LTpath_valid(file_id, "/G1/DS1", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/DS3", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G5", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G2", TRUE)) != TRUE)
+    goto out;
+
+  /* check soft link points to a valid object*/
+  if( (path_valid = H5LTpath_valid(file_id, "/G2/DS4", TRUE)) != TRUE)
+    goto out;
+
+  /* check if path exist, but not the object */
+  if( (path_valid = H5LTpath_valid(file_id, "/G2/G7", FALSE)) != TRUE )
+    goto out;
+  /* check if path exist and if the object exists. It should fail
+   * since it is a dangling soft link
+   */
+  if( (path_valid = H5LTpath_valid(file_id, "/G2/G7", TRUE)) == TRUE)
+    goto out;
+
+  /* check soft links */
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G5/DS4", TRUE)) != TRUE)
+    goto out;
+    
+  /**************************************
+   * CHECK RELATIVE PATHS 
+   ***************************************/
+
+  if( (group = H5Gopen2(file_id, "/G1", H5P_DEFAULT)) < 0)
+    goto out;
+
+  /* The identifier (file id) is the object itself, i.e. "." */
+
+  if((path_valid = H5LTpath_valid(file_id, ".", FALSE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, ".", TRUE)) != TRUE)
+    goto out;
+
+  /* The identifier (group id) is the object itself, i.e. "." */
+
+  if( (path_valid = H5LTpath_valid(group, ".", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(group, "DS3", FALSE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(group, "DS3", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(group, "G2/G5", TRUE)) != TRUE)
+    goto out; 
+
+  /* Check the "./" case */
+  if( (path_valid = H5LTpath_valid(group, "./DS3", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(group, "./G2/G5", TRUE)) != TRUE)
+    goto out; 
+
+  /* Should fail, does not exist */
+  if( (path_valid = H5LTpath_valid(group, "./G2/G20", FALSE)) == TRUE)
+    goto out; 
+
+  /* Should fail, does not exist */
+  if( (path_valid = H5LTpath_valid(group, "./G2/G20", TRUE)) == TRUE)
+    goto out; 
+
+  if(H5Gclose(group)<0)
+    goto out;
+
+  /*****************************
+   * Check external links
+   *****************************/
+
+  /* The dangled external link path is valid */
+  if( (path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", FALSE)) != TRUE)
+    goto out;
+
+  /* The file however does not exists, so the link dangles -> should return false */
+  if( (path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", TRUE)) == TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", FALSE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", FALSE)) != TRUE)
+    goto out;
+
+  /* Should fail, does not exist */
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", TRUE)) == TRUE)
+    goto out;
+
+  if(H5Fclose(file_id)<0)
+    goto out;
+
+  PASSED();
+  return 0;
+
+ out: 
+  H5_FAILED();
+  return -1;
+}
+
 
 /*-------------------------------------------------------------------------
 * the main program
@@ -1659,7 +2129,7 @@ int main( void )
     nerrors += test_attr();
 
     /* test text-dtype functions */
-    nerrors += test_text_dtype();
+    nerrors += test_valid_path();
 
     /* check for errors */
     if (nerrors)
@@ -1672,4 +2142,3 @@ error:
 
 
 }
-

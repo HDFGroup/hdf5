@@ -1,9 +1,6 @@
-#############################
-Expected output for 'h5dump tattr.h5'
-#############################
 HDF5 "tattr.h5" {
 GROUP "/" {
-   ATTRIBUTE "attr1" {
+   ATTRIBUTE "/attr1" {
       DATATYPE  H5T_STD_I8BE
       DATASPACE  SIMPLE { ( 24 ) / ( 24 ) }
       DATA {
@@ -34,11 +31,11 @@ GROUP "/" {
    }
    ATTRIBUTE "attr5" {
       DATATYPE  H5T_STRING {
-            STRSIZE 17;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 17;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SCALAR
       DATA {
       (0): "string attribute"

@@ -130,7 +130,7 @@ int main(void)
     /*
      * Dereference the first reference.
      */
-    dsetv_id = H5Rdereference(dsetr_id, H5R_DATASET_REGION, &ref_out[0]);
+    dsetv_id = H5Rdereference2(dsetr_id, H5P_DEFAULT, H5R_DATASET_REGION, &ref_out[0]);
     /*
      * Get name of the dataset the first region reference points to
      * using H5Rget_name
@@ -177,7 +177,7 @@ int main(void)
     /*
      * Dereference the second reference.
      */
-    dsetv_id = H5Rdereference(dsetr_id, H5R_DATASET_REGION, &ref_out[1]);
+    dsetv_id = H5Rdereference2(dsetr_id, H5P_DEFAULT, H5R_DATASET_REGION, &ref_out[1]);
     space_id = H5Rget_region(dsetv_id, H5R_DATASET_REGION,&ref_out[1]);
 
     /*

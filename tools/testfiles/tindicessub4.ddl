@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -d 4d -s 0,0,1,2 -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2 taindices.h5'
-#############################
 HDF5 "taindices.h5" {
 DATASET "4d" {
    DATATYPE  H5T_STD_I32LE

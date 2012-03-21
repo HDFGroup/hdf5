@@ -137,7 +137,7 @@ static int   not_comparable;
     is_zero=1;                                       \
 }
 
-#   define PDIFF(a,b)		( (b>a) ? (b-a) : (a-b))
+#   define PDIFF(a,b)    ( (b>a) ? (b-a) : (a-b))
 
 /*-------------------------------------------------------------------------
  * local prototypes
@@ -186,8 +186,8 @@ static int my_isnan(dtype_t type, void *val);
  * XCAO, 11/10/2010
  * added to improve performance for compound datasets
  */
-static void set_comp_members(hid_t tid, mcomp_t *members);
-static void free_comp_members(mcomp_t *members);
+static void get_member_types(hid_t tid, mcomp_t *members);
+static void close_member_types(mcomp_t *members);
 
 
 
@@ -234,11 +234,11 @@ hsize_t diff_array( void *_mem1,
     size = H5Tget_size( m_type );
     type_class = H5Tget_class(m_type);
 
-    /* Fast comparison first for atomic type by memcmp(). 
+    /* Fast comparison first for atomic type by memcmp().
      * It is OK not to list non-atomic type here because it will not be caught
-     * by the confition, but it gives more clarity for code planning 
+     * by the condition, but it gives more clarity for code planning
      */
-    if (type_class != H5T_REFERENCE && 
+    if (type_class != H5T_REFERENCE &&
         type_class != H5T_COMPOUND &&
         type_class != H5T_STRING &&
         type_class != H5T_VLEN &&
@@ -260,7 +260,7 @@ hsize_t diff_array( void *_mem1,
     switch (type_class)
     {
     default:
-        assert(0);
+        HDassert(0);
         break;
 
    /*-------------------------------------------------------------------------
@@ -269,7 +269,6 @@ hsize_t diff_array( void *_mem1,
     */
 
     case H5T_FLOAT:
-
         if (H5Tequal(m_type, H5T_NATIVE_FLOAT))
             nfound=diff_float(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
         else if (H5Tequal(m_type, H5T_NATIVE_DOUBLE))
@@ -319,7 +318,7 @@ hsize_t diff_array( void *_mem1,
     case H5T_VLEN:
     case H5T_REFERENCE:
         HDmemset(&members, 0, sizeof (mcomp_t));
-        set_comp_members(m_type, &members);
+        get_member_types(m_type, &members);
         for ( i = 0; i < nelmts; i++)
         {
             nfound+=diff_datum(
@@ -339,11 +338,11 @@ hsize_t diff_array( void *_mem1,
                 &ph, &members);
             if (options->n && nfound>=options->count)
             {
-                free_comp_members(&members);
+                close_member_types(&members);
                 return nfound;
             }
         } /* i */
-        free_comp_members(&members);
+        close_member_types(&members);
     } /* switch */
 
     return nfound;
@@ -427,11 +426,11 @@ hsize_t diff_datum(void       *_mem1,
     type_size = H5Tget_size( m_type );
     type_class = H5Tget_class(m_type);
 
-    /* Fast comparison first for atomic type by memcmp(). 
+    /* Fast comparison first for atomic type by memcmp().
      * It is OK not to list non-atomic type here because it will not be caught
-     * by the confition, but it gives more clarity for code planning 
+     * by the confition, but it gives more clarity for code planning
      */
-    if (type_class != H5T_REFERENCE && 
+    if (type_class != H5T_REFERENCE &&
         type_class != H5T_COMPOUND &&
         type_class != H5T_STRING &&
         type_class != H5T_VLEN &&
@@ -441,10 +440,10 @@ hsize_t diff_datum(void       *_mem1,
     switch (H5Tget_class(m_type))
     {
     default:
-        assert(0);
+        HDassert(0);
         break;
     case H5T_TIME:
-        assert(0);
+        HDassert(0);
         break;
 
    /*-------------------------------------------------------------------------
@@ -513,10 +512,10 @@ hsize_t diff_datum(void       *_mem1,
                 size2 = H5Tget_size(m_type);
             }
 
-            /* 
+            /*
              * compare for shorter string
-             * TODO: this code need to be improved to handle the difference 
-             *       of length of strings. 
+             * TODO: this code need to be improved to handle the difference
+             *       of length of strings.
              *       For now mimic the previous way.
              */
             if(size1 < size2)
@@ -621,12 +620,43 @@ hsize_t diff_datum(void       *_mem1,
             char enum_name1[1024];
             char enum_name2[1024];
 
+            herr_t err1;
+            herr_t err2;
+
             /* disable error reporting */
             H5E_BEGIN_TRY {
 
-                if ((H5Tenum_nameof(m_type, mem1, enum_name1, sizeof enum_name1) >= 0) &&
-                    (H5Tenum_nameof(m_type, mem2, enum_name2, sizeof enum_name2) >= 0))
+                /* If the enum value cannot be converted to a string
+                 * it is set to an error string for later output.
+                 */
+                err1 = H5Tenum_nameof(m_type, mem1, enum_name1, sizeof enum_name1);
+                if(err1 < 0)
+                    strcpy(enum_name1, "**INVALID VALUE**");
+
+                err2 = H5Tenum_nameof(m_type, mem2, enum_name2, sizeof enum_name2);
+                if(err2 < 0)
+                    strcpy(enum_name2, "**INVALID VALUE**");
+
+                if(err1 < 0 || err2 < 0)
                 {
+                    /* One or more bad enum values */
+
+                    /* If the two values cannot be converted to a string
+                     * (probably due to them being invalid enum values),
+                     * don't attempt to convert them - just report errors.
+                     */
+                    nfound += 1;
+                    if ( print_data(options) )
+                    {
+                        print_pos(ph,0,i,acc,pos,rank,dims,obj1,obj2);
+                        parallel_print(SPACES);
+                        parallel_print(S_FORMAT,enum_name1,enum_name2);
+                    }
+                }
+                else
+                {
+                    /* Both enum values were valid */
+
                     if (HDstrcmp(enum_name1,enum_name2)!=0)
                     {
                         nfound=1;
@@ -675,7 +705,7 @@ hsize_t diff_datum(void       *_mem1,
             size      = H5Tget_size(memb_type);
             ndims     = H5Tget_array_ndims(m_type);
             H5Tget_array_dims2(m_type, adims);
-            assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
+            HDassert(ndims >= 1 && ndims <= H5S_MAX_RANK);
 
             /* calculate the number of array elements */
             for (u = 0, nelmts = 1; u <ndims; u++)
@@ -696,7 +726,7 @@ hsize_t diff_datum(void       *_mem1,
                    obj2,
                    container1_id,
                    container2_id,
-                   ph, NULL);
+                   ph, members);
            }
             H5Tclose(memb_type);
         }
@@ -730,9 +760,9 @@ hsize_t diff_datum(void       *_mem1,
                 hid_t  region1_id;
                 hid_t  region2_id;
 
-                if ((obj1_id = H5Rdereference(container1_id, H5R_DATASET_REGION, _mem1))<0)
+                if ((obj1_id = H5Rdereference2(container1_id, H5P_DEFAULT, H5R_DATASET_REGION, _mem1))<0)
                     ret= -1;
-                if ((obj2_id = H5Rdereference(container2_id, H5R_DATASET_REGION, _mem2))<0)
+                if ((obj2_id = H5Rdereference2(container2_id, H5P_DEFAULT, H5R_DATASET_REGION, _mem2))<0)
                     ret= -1;
                 if ((region1_id = H5Rget_region(container1_id, H5R_DATASET_REGION, _mem1))<0)
                     ret= -1;
@@ -781,9 +811,9 @@ hsize_t diff_datum(void       *_mem1,
                     return 0;
                 }
 
-                if((obj1_id = H5Rdereference(container1_id, H5R_OBJECT, _mem1)) < 0)
+                if((obj1_id = H5Rdereference2(container1_id, H5P_DEFAULT, H5R_OBJECT, _mem1)) < 0)
                     ret = -1;
-                if((obj2_id = H5Rdereference(container2_id, H5R_OBJECT, _mem2)) < 0)
+                if((obj2_id = H5Rdereference2(container2_id, H5P_DEFAULT, H5R_OBJECT, _mem2)) < 0)
                     ret = -1;
                 if(ret == -1) {
                     options->err_stat = 1;
@@ -843,7 +873,7 @@ hsize_t diff_datum(void       *_mem1,
             obj2,
             container1_id,
             container2_id,
-            ph, NULL);
+            ph, members);
 
         H5Tclose(memb_type);
 
@@ -867,9 +897,9 @@ hsize_t diff_datum(void       *_mem1,
         {
             char        temp1_char;
             char        temp2_char;
-            assert(type_size==sizeof(char));
-            memcpy(&temp1_char, mem1, sizeof(char));
-            memcpy(&temp2_char, mem2, sizeof(char));
+            HDassert(type_size==sizeof(char));
+            HDmemcpy(&temp1_char, mem1, sizeof(char));
+            HDmemcpy(&temp2_char, mem2, sizeof(char));
             /* -d and !-p */
             if (options->d && !options->p)
             {
@@ -963,10 +993,10 @@ hsize_t diff_datum(void       *_mem1,
         {
             unsigned char      temp1_uchar;
             unsigned char      temp2_uchar;
-            assert(type_size==sizeof(unsigned char));
+            HDassert(type_size==sizeof(unsigned char));
 
-            memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
-            memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+            HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+            HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
             /* -d and !-p */
             if (options->d && !options->p)
             {
@@ -1062,10 +1092,10 @@ hsize_t diff_datum(void       *_mem1,
         {
             short       temp1_short;
             short       temp2_short;
-            assert(type_size==sizeof(short));
+            HDassert(type_size==sizeof(short));
 
-            memcpy(&temp1_short, mem1, sizeof(short));
-            memcpy(&temp2_short, mem2, sizeof(short));
+            HDmemcpy(&temp1_short, mem1, sizeof(short));
+            HDmemcpy(&temp2_short, mem2, sizeof(short));
             /* -d and !-p */
             if (options->d && !options->p)
             {
@@ -1161,10 +1191,10 @@ hsize_t diff_datum(void       *_mem1,
         {
             unsigned short       temp1_ushort;
             unsigned short       temp2_ushort;
-            assert(type_size==sizeof(short));
+            HDassert(type_size==sizeof(short));
 
-            memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
-            memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
+            HDmemcpy(&temp1_ushort, mem1, sizeof(unsigned short));
+            HDmemcpy(&temp2_ushort, mem2, sizeof(unsigned short));
             /* -d and !-p */
             if (options->d && !options->p)
             {
@@ -1261,10 +1291,10 @@ hsize_t diff_datum(void       *_mem1,
         {
             int         temp1_int;
             int         temp2_int;
-            assert(type_size==sizeof(int));
+            HDassert(type_size==sizeof(int));
 
-            memcpy(&temp1_int, mem1, sizeof(int));
-            memcpy(&temp2_int, mem2, sizeof(int));
+            HDmemcpy(&temp1_int, mem1, sizeof(int));
+            HDmemcpy(&temp2_int, mem2, sizeof(int));
             /* -d and !-p */
             if (options->d && !options->p)
             {
@@ -1359,10 +1389,10 @@ hsize_t diff_datum(void       *_mem1,
         {
             unsigned int         temp1_uint;
             unsigned int         temp2_uint;
-            assert(type_size==sizeof(int));
+            HDassert(type_size==sizeof(int));
 
-            memcpy(&temp1_uint, mem1, sizeof(unsigned int));
-            memcpy(&temp2_uint, mem2, sizeof(unsigned int));
+            HDmemcpy(&temp1_uint, mem1, sizeof(unsigned int));
+            HDmemcpy(&temp2_uint, mem2, sizeof(unsigned int));
             /* -d and !-p */
             if (options->d && !options->p)
             {
@@ -1457,10 +1487,10 @@ hsize_t diff_datum(void       *_mem1,
         {
             long        temp1_long;
             long        temp2_long;
-            assert(type_size==sizeof(long));
+            HDassert(type_size==sizeof(long));
 
-            memcpy(&temp1_long, mem1, sizeof(long));
-            memcpy(&temp2_long, mem2, sizeof(long));
+            HDmemcpy(&temp1_long, mem1, sizeof(long));
+            HDmemcpy(&temp2_long, mem2, sizeof(long));
             /* -d and !-p */
             if (options->d && !options->p)
             {
@@ -1557,10 +1587,10 @@ hsize_t diff_datum(void       *_mem1,
         {
             unsigned long        temp1_ulong;
             unsigned long        temp2_ulong;
-            assert(type_size==sizeof(unsigned long));
+            HDassert(type_size==sizeof(unsigned long));
 
-            memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
-            memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
+            HDmemcpy(&temp1_ulong, mem1, sizeof(unsigned long));
+            HDmemcpy(&temp2_ulong, mem2, sizeof(unsigned long));
             /* -d and !-p */
             if (options->d && !options->p)
             {
@@ -1656,10 +1686,10 @@ hsize_t diff_datum(void       *_mem1,
         {
             long long        temp1_llong;
             long long        temp2_llong;
-            assert(type_size==sizeof(long long));
+            HDassert(type_size==sizeof(long long));
 
-            memcpy(&temp1_llong, mem1, sizeof(long long));
-            memcpy(&temp2_llong, mem2, sizeof(long long));
+            HDmemcpy(&temp1_llong, mem1, sizeof(long long));
+            HDmemcpy(&temp2_llong, mem2, sizeof(long long));
             /* -d and !-p */
             if (options->d && !options->p)
             {
@@ -1754,10 +1784,10 @@ hsize_t diff_datum(void       *_mem1,
         {
             unsigned long long        temp1_ullong;
             unsigned long long        temp2_ullong;
-            assert(type_size==sizeof(unsigned long long));
+            HDassert(type_size==sizeof(unsigned long long));
 
-            memcpy(&temp1_ullong, mem1, sizeof(unsigned long long));
-            memcpy(&temp2_ullong, mem2, sizeof(unsigned long long));
+            HDmemcpy(&temp1_ullong, mem1, sizeof(unsigned long long));
+            HDmemcpy(&temp2_ullong, mem2, sizeof(unsigned long long));
             /* -d and !-p */
             if (options->d && !options->p)
             {
@@ -1874,10 +1904,10 @@ hsize_t diff_datum(void       *_mem1,
             int   isnan1=0;
             int   isnan2=0;
 
-            assert(type_size==sizeof(float));
+            HDassert(type_size==sizeof(float));
 
-            memcpy(&temp1_float, mem1, sizeof(float));
-            memcpy(&temp2_float, mem2, sizeof(float));
+            HDmemcpy(&temp1_float, mem1, sizeof(float));
+            HDmemcpy(&temp2_float, mem2, sizeof(float));
 
             /* logic for detecting NaNs is different with options -d, -p and no options */
 
@@ -1915,8 +1945,8 @@ hsize_t diff_datum(void       *_mem1,
                     }
 
                 }
-                /* one is NaN, assume difference */
-                else if ( isnan1==1 || isnan2==1)
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
                 {
                     if ( print_data(options) )
                     {
@@ -1978,8 +2008,8 @@ hsize_t diff_datum(void       *_mem1,
                         }
 
                 }
-                /* one is NaN, assume difference */
-                else if ( isnan1==1 || isnan2==1)
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
                 {
                     if ( print_data(options) )
                     {
@@ -2044,8 +2074,8 @@ hsize_t diff_datum(void       *_mem1,
                         }
 
                 }
-                /* one is NaN, assume difference */
-                else if ( isnan1==1 || isnan2==1)
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
                 {
                     if ( print_data(options) )
                     {
@@ -2087,10 +2117,10 @@ hsize_t diff_datum(void       *_mem1,
             int    isnan1=0;
             int    isnan2=0;
 
-            assert(type_size==sizeof(double));
+            HDassert(type_size==sizeof(double));
 
-            memcpy(&temp1_double, mem1, sizeof(double));
-            memcpy(&temp2_double, mem2, sizeof(double));
+            HDmemcpy(&temp1_double, mem1, sizeof(double));
+            HDmemcpy(&temp2_double, mem2, sizeof(double));
 
            /* logic for detecting NaNs is different with options -d, -p and no options */
 
@@ -2100,7 +2130,6 @@ hsize_t diff_datum(void       *_mem1,
             */
             if (options->d && !options->p)
             {
-
                /*-------------------------------------------------------------------------
                 * detect NaNs
                 *-------------------------------------------------------------------------
@@ -2127,8 +2156,8 @@ hsize_t diff_datum(void       *_mem1,
                     }
 
                 }
-                /* one is NaN, assume difference */
-                else if ( isnan1==1 || isnan2==1)
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
                 {
                     if ( print_data(options) )
                     {
@@ -2192,8 +2221,8 @@ hsize_t diff_datum(void       *_mem1,
                         }
 
                 }
-                /* one is NaN, assume difference */
-                else if ( isnan1==1 || isnan2==1)
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
                 {
                     if ( print_data(options) )
                     {
@@ -2258,8 +2287,8 @@ hsize_t diff_datum(void       *_mem1,
                         }
 
                 }
-                /* one is NaN, assume difference */
-                else if ( isnan1==1 || isnan2==1)
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
                 {
                     if ( print_data(options) )
                     {
@@ -2268,7 +2297,6 @@ hsize_t diff_datum(void       *_mem1,
                         parallel_print(F_FORMAT,temp1_double,temp2_double,ABS(temp1_double-temp2_double));
                     }
                     nfound++;
-
                 }
             }
 
@@ -2304,10 +2332,10 @@ hsize_t diff_datum(void       *_mem1,
             int         isnan2=0;
 
 
-            assert(type_size==sizeof(long double));
+            HDassert(type_size==sizeof(long double));
 
-            memcpy(&temp1_double, mem1, sizeof(long double));
-            memcpy(&temp2_double, mem2, sizeof(long double));
+            HDmemcpy(&temp1_double, mem1, sizeof(long double));
+            HDmemcpy(&temp2_double, mem2, sizeof(long double));
 
            /* logic for detecting NaNs is different with options -d, -p and no options */
 
@@ -2342,8 +2370,18 @@ hsize_t diff_datum(void       *_mem1,
                         }
                         nfound++;
                     }
-
                 } /* NaN */
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
+                {
+                    if ( print_data(options) )
+                    {
+                        print_pos(ph,0,i,acc,pos,rank,dims,obj1,obj2);
+                        parallel_print(SPACES);
+                        parallel_print(F_FORMAT,temp1_double,temp2_double,ABS(temp1_double-temp2_double));
+                    }
+                    nfound++;
+                }
             }
 
            /*-------------------------------------------------------------------------
@@ -2397,7 +2435,18 @@ hsize_t diff_datum(void       *_mem1,
                         }
 
                 } /* NaN */
-            }
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
+                {
+                    if ( print_data(options) )
+                    {
+                        print_pos(ph,0,i,acc,pos,rank,dims,obj1,obj2);
+                        parallel_print(SPACES);
+                        parallel_print(F_FORMAT,temp1_double,temp2_double,ABS(temp1_double-temp2_double));
+                    }
+                    nfound++;
+                }
+           }
 
            /*-------------------------------------------------------------------------
             * -d and -p
@@ -2451,6 +2500,17 @@ hsize_t diff_datum(void       *_mem1,
                         }
 
                 } /* NaN */
+                /* only one is NaN, assume difference */
+                else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
+                {
+                    if ( print_data(options) )
+                    {
+                        print_pos(ph,0,i,acc,pos,rank,dims,obj1,obj2);
+                        parallel_print(SPACES);
+                        parallel_print(F_FORMAT,temp1_double,temp2_double,ABS(temp1_double-temp2_double));
+                    }
+                    nfound++;
+                }
             }
 
            /*-------------------------------------------------------------------------
@@ -2608,13 +2668,13 @@ hsize_t diff_region(hid_t obj1_id,
     */
     if(nblocks1 > 0) {
         alloc_size = nblocks1 * ndims1 * 2 * sizeof(ptdata1[0]);
-        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+        HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
 
-        ptdata1 = malloc((size_t)alloc_size);
+        ptdata1 = HDmalloc((size_t)alloc_size);
         H5_CHECK_OVERFLOW(nblocks1, hssize_t, hsize_t);
         H5Sget_select_hyper_blocklist(region1_id, (hsize_t)0, (hsize_t)nblocks1, ptdata1);
 
-        ptdata2 = malloc((size_t)alloc_size);
+        ptdata2 = HDmalloc((size_t)alloc_size);
         H5_CHECK_OVERFLOW(nblocks2, hssize_t, hsize_t);
         H5Sget_select_hyper_blocklist(region2_id, (hsize_t)0, (hsize_t)nblocks2, ptdata2);
 
@@ -2663,13 +2723,13 @@ hsize_t diff_region(hid_t obj1_id,
     */
     if(npoints1 > 0) {
         alloc_size = npoints1 * ndims1 * sizeof(ptdata1[0]);
-        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+        HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
 
-        ptdata1 = malloc((size_t)alloc_size);
+        ptdata1 = HDmalloc((size_t)alloc_size);
         H5_CHECK_OVERFLOW(npoints1,hssize_t,hsize_t);
         H5Sget_select_elem_pointlist(region1_id, (hsize_t)0, (hsize_t)npoints1, ptdata1);
 
-        ptdata2 = malloc((size_t)alloc_size);
+        ptdata2 = HDmalloc((size_t)alloc_size);
         H5_CHECK_OVERFLOW(npoints1,hssize_t,hsize_t);
         H5Sget_select_elem_pointlist(region2_id, (hsize_t)0, (hsize_t)npoints2, ptdata2);
 
@@ -2760,8 +2820,8 @@ hsize_t character_compare(unsigned char *mem1,
     unsigned char      temp1_uchar;
     unsigned char      temp2_uchar;
 
-    memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
-    memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+    HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+    HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
 
     if (temp1_uchar != temp2_uchar)
     {
@@ -2809,8 +2869,8 @@ hsize_t character_compare_opt(unsigned char *mem1,
     double             per;
     int                both_zero;
 
-    memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
-    memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+    HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+    HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
 
     /* -d and !-p */
 
@@ -2915,8 +2975,8 @@ hsize_t diff_float(unsigned char *mem1,
     {
         for ( i = 0; i < nelmts; i++)
         {
-            memcpy(&temp1_float, mem1, sizeof(float));
-            memcpy(&temp2_float, mem2, sizeof(float));
+            HDmemcpy(&temp1_float, mem1, sizeof(float));
+            HDmemcpy(&temp2_float, mem2, sizeof(float));
 
            /*-------------------------------------------------------------------------
             * detect NaNs
@@ -2942,8 +3002,8 @@ hsize_t diff_float(unsigned char *mem1,
                     nfound++;
                 }
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -2969,8 +3029,8 @@ hsize_t diff_float(unsigned char *mem1,
     {
         for ( i = 0; i < nelmts; i++)
         {
-            memcpy(&temp1_float, mem1, sizeof(float));
-            memcpy(&temp2_float, mem2, sizeof(float));
+            HDmemcpy(&temp1_float, mem1, sizeof(float));
+            HDmemcpy(&temp2_float, mem2, sizeof(float));
 
            /*-------------------------------------------------------------------------
             * detect NaNs
@@ -3014,8 +3074,8 @@ hsize_t diff_float(unsigned char *mem1,
                         nfound++;
                     }
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3042,8 +3102,8 @@ hsize_t diff_float(unsigned char *mem1,
 
         for ( i = 0; i < nelmts; i++)
         {
-            memcpy(&temp1_float, mem1, sizeof(float));
-            memcpy(&temp2_float, mem2, sizeof(float));
+            HDmemcpy(&temp1_float, mem1, sizeof(float));
+            HDmemcpy(&temp2_float, mem2, sizeof(float));
 
             /*-------------------------------------------------------------------------
             * detect NaNs
@@ -3089,8 +3149,8 @@ hsize_t diff_float(unsigned char *mem1,
                     }
 
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3116,8 +3176,8 @@ hsize_t diff_float(unsigned char *mem1,
     {
         for ( i = 0; i < nelmts; i++)
         {
-            memcpy(&temp1_float, mem1, sizeof(float));
-            memcpy(&temp2_float, mem2, sizeof(float));
+            HDmemcpy(&temp1_float, mem1, sizeof(float));
+            HDmemcpy(&temp2_float, mem2, sizeof(float));
 
             if (equal_float(temp1_float,temp2_float,options)==FALSE)
             {
@@ -3179,7 +3239,6 @@ hsize_t diff_double(unsigned char *mem1,
     int         isnan1=0;
     int         isnan2=0;
 
-
  /*-------------------------------------------------------------------------
   * -d and !-p
   *-------------------------------------------------------------------------
@@ -3189,8 +3248,8 @@ hsize_t diff_double(unsigned char *mem1,
     {
         for ( i = 0; i < nelmts; i++)
         {
-            memcpy(&temp1_double, mem1, sizeof(double));
-            memcpy(&temp2_double, mem2, sizeof(double));
+            HDmemcpy(&temp1_double, mem1, sizeof(double));
+            HDmemcpy(&temp2_double, mem2, sizeof(double));
 
            /*-------------------------------------------------------------------------
             * detect NaNs
@@ -3216,8 +3275,8 @@ hsize_t diff_double(unsigned char *mem1,
                     nfound++;
                 }
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3243,8 +3302,8 @@ hsize_t diff_double(unsigned char *mem1,
     {
         for ( i = 0; i < nelmts; i++)
         {
-            memcpy(&temp1_double, mem1, sizeof(double));
-            memcpy(&temp2_double, mem2, sizeof(double));
+            HDmemcpy(&temp1_double, mem1, sizeof(double));
+            HDmemcpy(&temp2_double, mem2, sizeof(double));
 
            /*-------------------------------------------------------------------------
             * detect NaNs
@@ -3288,8 +3347,8 @@ hsize_t diff_double(unsigned char *mem1,
                         nfound++;
                     }
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3316,8 +3375,8 @@ hsize_t diff_double(unsigned char *mem1,
 
         for ( i = 0; i < nelmts; i++)
         {
-            memcpy(&temp1_double, mem1, sizeof(double));
-            memcpy(&temp2_double, mem2, sizeof(double));
+            HDmemcpy(&temp1_double, mem1, sizeof(double));
+            HDmemcpy(&temp2_double, mem2, sizeof(double));
 
             /*-------------------------------------------------------------------------
             * detect NaNs
@@ -3363,8 +3422,8 @@ hsize_t diff_double(unsigned char *mem1,
                     }
 
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3393,8 +3452,8 @@ hsize_t diff_double(unsigned char *mem1,
 
         for ( i = 0; i < nelmts; i++)
         {
-            memcpy(&temp1_double, mem1, sizeof(double));
-            memcpy(&temp2_double, mem2, sizeof(double));
+            HDmemcpy(&temp1_double, mem1, sizeof(double));
+            HDmemcpy(&temp2_double, mem2, sizeof(double));
 
 
             if (equal_double(temp1_double,temp2_double,options)==FALSE)
@@ -3472,8 +3531,8 @@ hsize_t diff_ldouble(unsigned char *mem1,
     {
         for ( i = 0; i < nelmts; i++)
         {
-            memcpy(&temp1_double, mem1, sizeof(long double));
-            memcpy(&temp2_double, mem2, sizeof(long double));
+            HDmemcpy(&temp1_double, mem1, sizeof(long double));
+            HDmemcpy(&temp2_double, mem2, sizeof(long double));
 
            /*-------------------------------------------------------------------------
             * detect NaNs
@@ -3499,8 +3558,8 @@ hsize_t diff_ldouble(unsigned char *mem1,
                     nfound++;
                 }
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3526,8 +3585,8 @@ hsize_t diff_ldouble(unsigned char *mem1,
     {
         for ( i = 0; i < nelmts; i++)
         {
-            memcpy(&temp1_double, mem1, sizeof(long double));
-            memcpy(&temp2_double, mem2, sizeof(long double));
+            HDmemcpy(&temp1_double, mem1, sizeof(long double));
+            HDmemcpy(&temp2_double, mem2, sizeof(long double));
 
            /*-------------------------------------------------------------------------
             * detect NaNs
@@ -3571,8 +3630,8 @@ hsize_t diff_ldouble(unsigned char *mem1,
                         nfound++;
                     }
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3599,8 +3658,8 @@ hsize_t diff_ldouble(unsigned char *mem1,
 
         for ( i = 0; i < nelmts; i++)
         {
-            memcpy(&temp1_double, mem1, sizeof(long double));
-            memcpy(&temp2_double, mem2, sizeof(long double));
+            HDmemcpy(&temp1_double, mem1, sizeof(long double));
+            HDmemcpy(&temp2_double, mem2, sizeof(long double));
 
             /*-------------------------------------------------------------------------
             * detect NaNs
@@ -3646,8 +3705,8 @@ hsize_t diff_ldouble(unsigned char *mem1,
                     }
 
             }
-            /* one is NaN, assume difference */
-            else if ( isnan1==1 || isnan2==1)
+            /* only one is NaN, assume difference */
+            else if (isnan1==1 && isnan2==0  || isnan1==0 && isnan2==1)
             {
                 if ( print_data(options) )
                 {
@@ -3676,8 +3735,8 @@ hsize_t diff_ldouble(unsigned char *mem1,
 
         for ( i = 0; i < nelmts; i++)
         {
-            memcpy(&temp1_double, mem1, sizeof(long double));
-            memcpy(&temp2_double, mem2, sizeof(long double));
+            HDmemcpy(&temp1_double, mem1, sizeof(long double));
+            HDmemcpy(&temp2_double, mem2, sizeof(long double));
 
 
             if (equal_ldouble(temp1_double,temp2_double,options)==FALSE)
@@ -3750,8 +3809,8 @@ hsize_t diff_schar(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_char, mem1, sizeof(char));
-         memcpy(&temp2_char, mem2, sizeof(char));
+         HDmemcpy(&temp1_char, mem1, sizeof(char));
+         HDmemcpy(&temp2_char, mem2, sizeof(char));
 
          if (ABS(temp1_char-temp2_char) > options->delta)
          {
@@ -3776,8 +3835,8 @@ hsize_t diff_schar(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_char, mem1, sizeof(char));
-         memcpy(&temp2_char, mem2, sizeof(char));
+         HDmemcpy(&temp1_char, mem1, sizeof(char));
+         HDmemcpy(&temp2_char, mem2, sizeof(char));
 
          PER(temp1_char,temp2_char);
 
@@ -3820,8 +3879,8 @@ hsize_t diff_schar(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_char, mem1, sizeof(char));
-         memcpy(&temp2_char, mem2, sizeof(char));
+         HDmemcpy(&temp1_char, mem1, sizeof(char));
+         HDmemcpy(&temp2_char, mem2, sizeof(char));
 
          PER(temp1_char,temp2_char);
 
@@ -3863,8 +3922,8 @@ hsize_t diff_schar(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_char, mem1, sizeof(char));
-         memcpy(&temp2_char, mem2, sizeof(char));
+         HDmemcpy(&temp1_char, mem1, sizeof(char));
+         HDmemcpy(&temp2_char, mem2, sizeof(char));
 
          if (temp1_char != temp2_char)
          {
@@ -3927,8 +3986,8 @@ hsize_t diff_uchar(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
-         memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+         HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+         HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
 
          if ( PDIFF(temp1_uchar,temp2_uchar) > options->delta)
          {
@@ -3954,8 +4013,8 @@ hsize_t diff_uchar(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
-         memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+         HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+         HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
 
          PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
 
@@ -3998,8 +4057,8 @@ hsize_t diff_uchar(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
-         memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+         HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+         HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
 
          PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
 
@@ -4041,8 +4100,8 @@ hsize_t diff_uchar(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
-         memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+         HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+         HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
 
          if (temp1_uchar != temp2_uchar)
          {
@@ -4102,8 +4161,8 @@ hsize_t diff_short(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_short, mem1, sizeof(short));
-         memcpy(&temp2_short, mem2, sizeof(short));
+         HDmemcpy(&temp1_short, mem1, sizeof(short));
+         HDmemcpy(&temp2_short, mem2, sizeof(short));
 
          if (ABS(temp1_short-temp2_short) > options->delta)
          {
@@ -4129,8 +4188,8 @@ hsize_t diff_short(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_short, mem1, sizeof(short));
-         memcpy(&temp2_short, mem2, sizeof(short));
+         HDmemcpy(&temp1_short, mem1, sizeof(short));
+         HDmemcpy(&temp2_short, mem2, sizeof(short));
 
          PER(temp1_short,temp2_short);
 
@@ -4175,8 +4234,8 @@ hsize_t diff_short(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_short, mem1, sizeof(short));
-         memcpy(&temp2_short, mem2, sizeof(short));
+         HDmemcpy(&temp1_short, mem1, sizeof(short));
+         HDmemcpy(&temp2_short, mem2, sizeof(short));
 
          PER(temp1_short,temp2_short);
 
@@ -4218,8 +4277,8 @@ hsize_t diff_short(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_short, mem1, sizeof(short));
-         memcpy(&temp2_short, mem2, sizeof(short));
+         HDmemcpy(&temp1_short, mem1, sizeof(short));
+         HDmemcpy(&temp2_short, mem2, sizeof(short));
 
          if (temp1_short != temp2_short)
          {
@@ -4280,8 +4339,8 @@ hsize_t diff_ushort(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
-         memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
+         HDmemcpy(&temp1_ushort, mem1, sizeof(unsigned short));
+         HDmemcpy(&temp2_ushort, mem2, sizeof(unsigned short));
 
          if ( PDIFF(temp1_ushort,temp2_ushort) > options->delta)
          {
@@ -4307,8 +4366,8 @@ hsize_t diff_ushort(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
-         memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
+         HDmemcpy(&temp1_ushort, mem1, sizeof(unsigned short));
+         HDmemcpy(&temp2_ushort, mem2, sizeof(unsigned short));
 
          PER_UNSIGN(signed short,temp1_ushort,temp2_ushort);
 
@@ -4353,8 +4412,8 @@ hsize_t diff_ushort(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
-         memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
+         HDmemcpy(&temp1_ushort, mem1, sizeof(unsigned short));
+         HDmemcpy(&temp2_ushort, mem2, sizeof(unsigned short));
 
          PER_UNSIGN(signed short,temp1_ushort,temp2_ushort);
 
@@ -4396,8 +4455,8 @@ hsize_t diff_ushort(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
-         memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
+         HDmemcpy(&temp1_ushort, mem1, sizeof(unsigned short));
+         HDmemcpy(&temp2_ushort, mem2, sizeof(unsigned short));
 
          if (temp1_ushort != temp2_ushort)
          {
@@ -4459,8 +4518,8 @@ hsize_t diff_int(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_int, mem1, sizeof(int));
-         memcpy(&temp2_int, mem2, sizeof(int));
+         HDmemcpy(&temp1_int, mem1, sizeof(int));
+         HDmemcpy(&temp2_int, mem2, sizeof(int));
 
          if (ABS(temp1_int-temp2_int) > options->delta)
          {
@@ -4486,8 +4545,8 @@ hsize_t diff_int(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_int, mem1, sizeof(int));
-         memcpy(&temp2_int, mem2, sizeof(int));
+         HDmemcpy(&temp1_int, mem1, sizeof(int));
+         HDmemcpy(&temp2_int, mem2, sizeof(int));
 
          PER(temp1_int,temp2_int);
 
@@ -4532,8 +4591,8 @@ hsize_t diff_int(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_int, mem1, sizeof(int));
-         memcpy(&temp2_int, mem2, sizeof(int));
+         HDmemcpy(&temp1_int, mem1, sizeof(int));
+         HDmemcpy(&temp2_int, mem2, sizeof(int));
 
          PER(temp1_int,temp2_int);
 
@@ -4575,8 +4634,8 @@ hsize_t diff_int(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_int, mem1, sizeof(int));
-         memcpy(&temp2_int, mem2, sizeof(int));
+         HDmemcpy(&temp1_int, mem1, sizeof(int));
+         HDmemcpy(&temp2_int, mem2, sizeof(int));
 
          if (temp1_int != temp2_int)
          {
@@ -4638,8 +4697,8 @@ hsize_t diff_uint(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_uint, mem1, sizeof(unsigned int));
-         memcpy(&temp2_uint, mem2, sizeof(unsigned int));
+         HDmemcpy(&temp1_uint, mem1, sizeof(unsigned int));
+         HDmemcpy(&temp2_uint, mem2, sizeof(unsigned int));
 
          if ( PDIFF(temp1_uint,temp2_uint) > options->delta)
          {
@@ -4665,8 +4724,8 @@ hsize_t diff_uint(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_uint, mem1, sizeof(unsigned int));
-         memcpy(&temp2_uint, mem2, sizeof(unsigned int));
+         HDmemcpy(&temp1_uint, mem1, sizeof(unsigned int));
+         HDmemcpy(&temp2_uint, mem2, sizeof(unsigned int));
 
          PER_UNSIGN(signed int,temp1_uint,temp2_uint);
 
@@ -4710,8 +4769,8 @@ hsize_t diff_uint(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_uint, mem1, sizeof(unsigned int));
-         memcpy(&temp2_uint, mem2, sizeof(unsigned int));
+         HDmemcpy(&temp1_uint, mem1, sizeof(unsigned int));
+         HDmemcpy(&temp2_uint, mem2, sizeof(unsigned int));
 
          PER_UNSIGN(signed int,temp1_uint,temp2_uint);
 
@@ -4752,8 +4811,8 @@ hsize_t diff_uint(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_uint, mem1, sizeof(unsigned int));
-         memcpy(&temp2_uint, mem2, sizeof(unsigned int));
+         HDmemcpy(&temp1_uint, mem1, sizeof(unsigned int));
+         HDmemcpy(&temp2_uint, mem2, sizeof(unsigned int));
 
          if (temp1_uint != temp2_uint)
          {
@@ -4818,8 +4877,8 @@ hsize_t diff_long(unsigned char *mem1,
 
          for ( i = 0; i < nelmts; i++)
          {
-             memcpy(&temp1_long, mem1, sizeof(long));
-             memcpy(&temp2_long, mem2, sizeof(long));
+             HDmemcpy(&temp1_long, mem1, sizeof(long));
+             HDmemcpy(&temp2_long, mem2, sizeof(long));
 
              if (ABS(temp1_long-temp2_long) > options->delta)
              {
@@ -4845,8 +4904,8 @@ hsize_t diff_long(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_long, mem1, sizeof(long));
-         memcpy(&temp2_long, mem2, sizeof(long));
+         HDmemcpy(&temp1_long, mem1, sizeof(long));
+         HDmemcpy(&temp2_long, mem2, sizeof(long));
 
          PER(temp1_long,temp2_long);
 
@@ -4891,8 +4950,8 @@ hsize_t diff_long(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_long, mem1, sizeof(long));
-         memcpy(&temp2_long, mem2, sizeof(long));
+         HDmemcpy(&temp1_long, mem1, sizeof(long));
+         HDmemcpy(&temp2_long, mem2, sizeof(long));
 
          PER(temp1_long,temp2_long);
 
@@ -4934,8 +4993,8 @@ hsize_t diff_long(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_long, mem1, sizeof(long));
-         memcpy(&temp2_long, mem2, sizeof(long));
+         HDmemcpy(&temp1_long, mem1, sizeof(long));
+         HDmemcpy(&temp2_long, mem2, sizeof(long));
 
          if (temp1_long != temp2_long)
          {
@@ -5002,8 +5061,8 @@ hsize_t diff_ulong(unsigned char *mem1,
 
          for ( i = 0; i < nelmts; i++)
          {
-             memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
-             memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
+             HDmemcpy(&temp1_ulong, mem1, sizeof(unsigned long));
+             HDmemcpy(&temp2_ulong, mem2, sizeof(unsigned long));
 
              if ( PDIFF(temp1_ulong,temp2_ulong) > options->delta)
              {
@@ -5031,8 +5090,8 @@ hsize_t diff_ulong(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
-         memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
+         HDmemcpy(&temp1_ulong, mem1, sizeof(unsigned long));
+         HDmemcpy(&temp2_ulong, mem2, sizeof(unsigned long));
 
          PER_UNSIGN(signed long,temp1_ulong,temp2_ulong);
 
@@ -5076,8 +5135,8 @@ hsize_t diff_ulong(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
-         memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
+         HDmemcpy(&temp1_ulong, mem1, sizeof(unsigned long));
+         HDmemcpy(&temp2_ulong, mem2, sizeof(unsigned long));
 
          PER_UNSIGN(signed long,temp1_ulong,temp2_ulong);
 
@@ -5118,8 +5177,8 @@ hsize_t diff_ulong(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
-         memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
+         HDmemcpy(&temp1_ulong, mem1, sizeof(unsigned long));
+         HDmemcpy(&temp2_ulong, mem2, sizeof(unsigned long));
 
          if (temp1_ulong != temp2_ulong)
          {
@@ -5181,8 +5240,8 @@ hsize_t diff_llong(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_llong, mem1, sizeof(long long));
-         memcpy(&temp2_llong, mem2, sizeof(long long));
+         HDmemcpy(&temp1_llong, mem1, sizeof(long long));
+         HDmemcpy(&temp2_llong, mem2, sizeof(long long));
 
          if (ABS( temp1_llong-temp2_llong) > options->delta)
          {
@@ -5208,8 +5267,8 @@ hsize_t diff_llong(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_llong, mem1, sizeof(long long));
-         memcpy(&temp2_llong, mem2, sizeof(long long));
+         HDmemcpy(&temp1_llong, mem1, sizeof(long long));
+         HDmemcpy(&temp2_llong, mem2, sizeof(long long));
 
          PER(temp1_llong,temp2_llong);
 
@@ -5251,8 +5310,8 @@ hsize_t diff_llong(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_llong, mem1, sizeof(long long));
-         memcpy(&temp2_llong, mem2, sizeof(long long));
+         HDmemcpy(&temp1_llong, mem1, sizeof(long long));
+         HDmemcpy(&temp2_llong, mem2, sizeof(long long));
 
          PER(temp1_llong,temp2_llong);
 
@@ -5291,8 +5350,8 @@ hsize_t diff_llong(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_llong, mem1, sizeof(long long));
-         memcpy(&temp2_llong, mem2, sizeof(long long));
+         HDmemcpy(&temp1_llong, mem1, sizeof(long long));
+         HDmemcpy(&temp2_llong, mem2, sizeof(long long));
 
          if (temp1_llong != temp2_llong)
          {
@@ -5355,8 +5414,8 @@ hsize_t diff_ullong(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_ullong, mem1, sizeof(unsigned long long));
-         memcpy(&temp2_ullong, mem2, sizeof(unsigned long long));
+         HDmemcpy(&temp1_ullong, mem1, sizeof(unsigned long long));
+         HDmemcpy(&temp2_ullong, mem2, sizeof(unsigned long long));
 
          if ( PDIFF(temp1_ullong,temp2_ullong) > (unsigned long long) options->delta)
          {
@@ -5382,8 +5441,8 @@ hsize_t diff_ullong(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_ullong, mem1, sizeof(unsigned long long));
-         memcpy(&temp2_ullong, mem2, sizeof(unsigned long long));
+         HDmemcpy(&temp1_ullong, mem1, sizeof(unsigned long long));
+         HDmemcpy(&temp2_ullong, mem2, sizeof(unsigned long long));
 
          ull2float(temp1_ullong,&f1);
          ull2float(temp2_ullong,&f2);
@@ -5427,8 +5486,8 @@ hsize_t diff_ullong(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_ullong, mem1, sizeof(unsigned long long));
-         memcpy(&temp2_ullong, mem2, sizeof(unsigned long long));
+         HDmemcpy(&temp1_ullong, mem1, sizeof(unsigned long long));
+         HDmemcpy(&temp2_ullong, mem2, sizeof(unsigned long long));
 
          ull2float(temp1_ullong,&f1);
          ull2float(temp2_ullong,&f2);
@@ -5469,8 +5528,8 @@ hsize_t diff_ullong(unsigned char *mem1,
 
      for ( i = 0; i < nelmts; i++)
      {
-         memcpy(&temp1_ullong, mem1, sizeof(unsigned long long));
-         memcpy(&temp2_ullong, mem2, sizeof(unsigned long long));
+         HDmemcpy(&temp1_ullong, mem1, sizeof(unsigned long long));
+         HDmemcpy(&temp2_ullong, mem2, sizeof(unsigned long long));
 
          if (temp1_ullong != temp2_ullong)
          {
@@ -5521,18 +5580,18 @@ int ull2float(unsigned long long ull_value, float *f_value)
 
  src_size = H5Tget_size(H5T_NATIVE_ULLONG);
  dst_size = H5Tget_size(H5T_NATIVE_FLOAT);
- buf = (unsigned char*)calloc(1, MAX(src_size, dst_size));
+ buf = (unsigned char*)HDcalloc(1, MAX(src_size, dst_size));
 
- memcpy(buf, &ull_value, src_size);
+ HDmemcpy(buf, &ull_value, src_size);
 
  /* do conversion */
  if(H5Tconvert(H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT, 1, buf, NULL, dxpl_id)<0)
   goto error;
 
- memcpy(f_value, buf, dst_size);
+ HDmemcpy(f_value, buf, dst_size);
 
  if(buf)
-  free(buf);
+     HDfree(buf);
 
  return 0;
 
@@ -5541,7 +5600,7 @@ error:
   H5Pclose(dxpl_id);
  } H5E_END_TRY;
  if(buf)
-  free(buf);
+     HDfree(buf);
 
  return -1;
 }
@@ -5715,13 +5774,13 @@ hbool_t equal_float(float value, float expected, diff_opt_t *options)
 
 
 /*-------------------------------------------------------------------------
- * Function:	my_isnan
+ * Function:  my_isnan
  *
- * Purpose:	Determines whether VAL points to NaN.
+ * Purpose:  Determines whether VAL points to NaN.
  *
- * Return:	TRUE or FALSE
+ * Return:  TRUE or FALSE
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, July  6, 1998
  *
  * Modifications:
@@ -5936,7 +5995,7 @@ void print_pos( int        *ph,       /* print header */
         pos[i] = curr_pos/acc[i];
         curr_pos -= acc[i]*pos[i];
     }
-    assert( curr_pos == 0 );
+    HDassert( curr_pos == 0 );
 
     if ( rank > 0 )
     {
@@ -5989,7 +6048,7 @@ void print_char_pos( int        *ph,       /* print header */
         pos[i] = curr_pos/acc[i];
         curr_pos -= acc[i]*pos[i];
     }
-    assert( curr_pos == 0 );
+    HDassert( curr_pos == 0 );
 
     parallel_print("[ " );
     if ( rank > 0 )
@@ -6058,36 +6117,46 @@ static void h5diff_print_char(char ch)
  * added to improve performance for compound datasets
  * set up compound datatype structures.
  */
-static void set_comp_members(hid_t tid, mcomp_t *members)
+static void get_member_types(hid_t tid, mcomp_t *members)
 {
     int i;
+    int tclass;
 
     if (tid <=0 || !members)
         return;
 
-    if (H5Tget_class(tid) != H5T_COMPOUND)
-        return;
-
-    members->n = H5Tget_nmembers( tid );
-    if (members->n <=0)
-        return;
-
-    members->ids = HDcalloc(members->n, sizeof(hid_t));
-    members->flags = HDcalloc(members->n, sizeof(unsigned char));
-    members->offsets = HDcalloc(members->n, sizeof(size_t));
-    members->m = HDcalloc(members->n, sizeof(mcomp_t *));
-   
-    for (i=0; i< members->n; i++) 
+    tclass = H5Tget_class(tid);
+    if (tclass == H5T_ARRAY || tclass == H5T_VLEN)
     {
-         members->ids[i] = H5Tget_member_type( tid, i );
-         members->flags[i] = H5Tis_variable_str( members->ids[i] );
-         members->offsets[i] = H5Tget_member_offset( tid, i );
-         if (H5Tget_class( members->ids[i])==H5T_COMPOUND) 
-         {
-              members->m[i] = (mcomp_t *)HDmalloc(sizeof(mcomp_t));
-              set_comp_members(members->ids[i], members->m[i]);
-         }
+        hid_t base_tid = H5Tget_super(tid);
+        get_member_types(base_tid, members);
+        H5Tclose(base_tid);
+    } 
+    else if (tclass == H5T_COMPOUND) 
+    {
+        members->n = H5Tget_nmembers( tid );
+        if (members->n <=0)
+            return;
+
+        members->ids = HDcalloc(members->n, sizeof(hid_t));
+        members->flags = HDcalloc(members->n, sizeof(unsigned char));
+        members->offsets = HDcalloc(members->n, sizeof(size_t));
+        members->m = HDcalloc(members->n, sizeof(mcomp_t *));
+
+        for (i=0; i< members->n; i++)
+        {
+             members->ids[i] = H5Tget_member_type( tid, i );
+             members->flags[i] = H5Tis_variable_str( members->ids[i] );
+             members->offsets[i] = H5Tget_member_offset( tid, i );
+             members->m[i] = (mcomp_t *)HDmalloc(sizeof(mcomp_t));
+             HDmemset(members->m[i], 0, sizeof(mcomp_t));
+             get_member_types(members->ids[i], members->m[i]);
+        }  
     }
+     
+   return;
+
+
 }
 
 /*-------------------------------------------------------------------------
@@ -6095,18 +6164,18 @@ static void set_comp_members(hid_t tid, mcomp_t *members)
  * added to improve performance for compound datasets
  * clean and close compound members.
  */
-static void free_comp_members(mcomp_t *members) 
+static void close_member_types(mcomp_t *members)
 {
     int i;
 
     if (!members || members->n<=0 || !members->ids)
         return;
 
-    for (i=0; i<members->n; i++) 
+    for (i=0; i<members->n; i++)
     {
-        if (members->m[i]) 
+        if (members->m[i])
         {
-            free_comp_members(members->m[i]);
+            close_member_types(members->m[i]);
             HDfree(members->m[i]);
         }
         H5Tclose(members->ids[i]);

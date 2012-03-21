@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tnullspace.h5'
-#############################
 HDF5 "tnullspace.h5" {
 GROUP "/" {
    ATTRIBUTE "attr" {

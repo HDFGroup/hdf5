@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -A tall.h5'
-#############################
 HDF5 "tall.h5" {
 GROUP "/" {
    ATTRIBUTE "attr1" {

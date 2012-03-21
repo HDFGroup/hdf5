@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Dff.f90</title>
+<!-- Source: ./src/H5Dff.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5D"></a>
+<a name="robo31"></a><h2>H5D</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  MODULE <strong>H5D</strong>
+</pre>
+<p class="item_name">FILE</p>
+<pre>  fortran/src/<a href="#robo_top_of_doc">H5Dff.f90</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran interfaces for <strong>H5D</strong> functions. It includes
+  all the functions that are independent on whether the Fortran 2003 functions
+  are enabled or disabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <strong>H5D</strong> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5D2fh5dclose5ff"></a>
+<a name="robo113"></a><h2>h5dclose_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dclose_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Closes a dataset.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dset_id       - dataset identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5dclose_f</strong><span class="sign">(</span>dset_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dset_id <span class="sign">!</span> Dataset identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5D2fh5dcreate5fanon5ff"></a>
+<a name="robo114"></a><h2>h5dcreate_anon_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dcreate_anon_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a dataset in a file without linking it into the file structure
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Identifier of the file or group within which to create the dataset.
+  type_id       - Identifier of the datatype to use when creating the dataset.
+  space_id      - Identifier of the dataspace to use when creating the dataset.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  dset_id       - dataset identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  dcpl_id       - Dataset creation property list identifier.
+  dapl_id       - Dataset access property list identifier.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 11, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5dcreate_anon_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> type_id<span class="sign">,</span> space_id<span class="sign">,</span> dset_id<span class="sign">,</span> hdferr<span class="sign">,</span> dcpl_id<span class="sign">,</span> dapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id  <span class="sign">!</span> Datatype identifier<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dset_id <span class="sign">!</span> Dataset identifier<span class="sign">.</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dcpl_id  <span class="sign">!</span> Dataset creation property list identifier<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dapl_id  <span class="sign">!</span> Dataset access property list identifier<span class="sign">.</span>
+</pre>
+
+<hr />
+<a name="H5D2fh5dcreate5ff"></a>
+<a name="robo115"></a><h2>h5dcreate_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dcreate_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a dataset at the specified location
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - file or group identifier
+  name          - dataset name
+  type_id       - dataset datatype identifier
+  space_id      - dataset dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  dset_id       - dataset identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  creation_prp  - Dataset creation property list
+  lcpl_id       - Link creation property list
+  dapl_id       - Dataset access property list
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  - Explicit Fortran interfaces were added for
+    called C functions (it is needed for Windows
+    port).  February 28, 2001
+
+  - Added version's 1.8 new optional parameters
+    February, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5dcreate_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> type_id<span class="sign">,</span> space_id<span class="sign">,</span> dset_id<span class="sign">,</span> <span class="sign">&amp;</span>
+       hdferr<span class="sign">,</span> dcpl_id<span class="sign">,</span> lcpl_id<span class="sign">,</span> dapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the dataset
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id  <span class="sign">!</span> Datatype identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dset_id <span class="sign">!</span> Dataset identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5D2fh5dget5faccess5fplist5ff"></a>
+<a name="robo116"></a><h2>h5dget_access_plist_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dget_access_plist_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns a copy of the dataset creation property list.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dset_id       - Dataset identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  plist_id      - Dataset access property list identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  April 13, 2009
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">SUBROUTINE <strong>h5dget_access_plist_f</strong><span class="sign">(</span>dset_id<span class="sign">,</span> plist_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+  IMPLICIT NONE
+  INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> dset_id
+  INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> plist_id 
+  INTEGER       <span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr  
+</pre>
+
+<hr />
+<a name="H5D2fh5dget5fcreate5fplist5ff"></a>
+<a name="robo117"></a><h2>h5dget_create_plist_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dget_create_plist_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns an identifier for a copy of the dataset creation
+  property list for a dataset.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dataset_id    - dataset identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  plist_id      - creation property list identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5dget_create_plist_f</strong><span class="sign">(</span>dataset_id<span class="sign">,</span> plist_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dataset_id   <span class="sign">!</span> Dataset identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> plist_id    <span class="sign">!</span> Dataset creation
+                                               <span class="sign">!</span> property list identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr             <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5D2fh5dget5fspace5ff"></a>
+<a name="robo118"></a><h2>h5dget_space_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dget_space_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns an identifier for a copy of the dataspace for a
+  dataset.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dataset_id    - dataset identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  dataspace_id  - dataspace identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5dget_space_f</strong><span class="sign">(</span>dataset_id<span class="sign">,</span> dataspace_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dataset_id      <span class="sign">!</span> Dataset identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dataspace_id   <span class="sign">!</span> Dataspace identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr                <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5D2fh5dget5fspace5fstatus5ff"></a>
+<a name="robo119"></a><h2>h5dget_space_status_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dget_space_status_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the status of data space allocation.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dset_id       - dataset identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  flag          - status; may have one of the following values:
+                   H5D_SPACE_STS_ERROR_F
+                   H5D_SPACE_STS_NOT_ALLOCATED_F
+                   H5D_SPACE_STS_PART_ALLOCATED_F
+                   H5D_SPACE_STS_ALLOCATED_F
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  March 12, 2003
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5dget_space_status_f</strong><span class="sign">(</span>dset_id<span class="sign">,</span> flag<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dset_id  <span class="sign">!</span> Dataspace identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>        <span class="sign">:</span><span class="sign">:</span> flag     <span class="sign">!</span> Memory buffer to fill in
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span>       <span class="sign">:</span><span class="sign">:</span> hdferr   <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5D2fh5dget5fstorage5fsize5ff"></a>
+<a name="robo120"></a><h2>h5dget_storage_size_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dget_storage_size_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the amount of storage requires by a dataset
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dataset_id    - dataset identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  size          - datastorage size
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 15, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5dget_storage_size_f</strong><span class="sign">(</span>dataset_id<span class="sign">,</span> size<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dataset_id <span class="sign">!</span> Dataset identifier
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span>  INTENT<span class="sign">(</span>OUT<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> size  <span class="sign">!</span> Amount of storage
+                                             <span class="sign">!</span> allocated <span class="keyword">for</span> dataset
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr           <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5D2fh5dget5ftype5ff"></a>
+<a name="robo121"></a><h2>h5dget_type_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dget_type_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns an identifier for a copy of the datatype for a
+  dataset.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dataset_id    - dataset identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  datatype_id   - dataspace identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">NOTES</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5dget_type_f</strong><span class="sign">(</span>dataset_id<span class="sign">,</span> datatype_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dataset_id      <span class="sign">!</span> Dataset identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> datatype_id    <span class="sign">!</span> Datatype identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr                <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5D2fh5dopen5ff"></a>
+<a name="robo123"></a><h2>h5dopen_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dopen_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens an existing dataset.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - file or group identifier
+  name          - dataset name
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  dset_id       - dataset identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  dapl_id       - Dataset access property list
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  -Explicit Fortran interfaces were added for
+   called C functions (it is needed for Windows
+   port).  February 28, 2001
+
+  -Added 1.8 (optional) parameter dapl_id
+   February, 2008, M. Scot Breitenfeld
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5dopen_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> dset_id<span class="sign">,</span> hdferr<span class="sign">,</span> dapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the dataset
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dset_id <span class="sign">!</span> Dataset identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dapl_id <span class="sign">!</span> Dataset access property list
+</pre>
+
+<hr />
+<a name="H5D2fh5dset5fextent"></a>
+<a name="robo125"></a><h2>h5dset_extent</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dset_extent</strong> (instead of obsolete name: h5dextend_f)
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Extends a dataset with unlimited dimension.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dataset_id    - dataset identifier
+  size          - array containing the new magnitude of
+                  each dimension
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+
+  Changed name from the now obsolete h5dextend_f
+  to h5dset_extent_f. Provided interface to old name
+  for backward compatability. -MSB- March 14, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5dset_extent_f<span class="sign">(</span>dataset_id<span class="sign">,</span> size<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dataset_id      <span class="sign">!</span> Dataset identifier
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="comment">(*), INTENT(IN)  :: size
+    ! Array containing
+    ! dimensions' sizes
+    INTEGER, INTENT(OUT) :: hdferr                ! Error code
+</pre>
+
+<hr />
+<a name="H5D2fh5dvlen5fget5fmax5flen5ff"></a>
+<a name="robo126"></a><h2>h5dvlen_get_max_len_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dvlen_get_max_len_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns maximum length of the VL array elements
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dataset_id    - dataset identifier
+  type_id       - datatype identifier
+  space_id      - dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  size          - buffer size
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  NONE
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 15, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5dvlen_get_max_len_f</strong><span class="sign">(</span>dataset_id<span class="sign">,</span> type_id<span class="sign">,</span> space_id<span class="sign">,</span> len<span class="sign">,</span>  hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dataset_id      <span class="sign">!</span> Dataset identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id         <span class="sign">!</span> Datatype identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id        <span class="sign">!</span> Dataspace identifier
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span>  INTENT<span class="sign">(</span>OUT<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> len         <span class="sign">!</span> Maximum length of the element
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr                <span class="sign">!</span> Error code
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Dff.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

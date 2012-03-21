@@ -77,7 +77,7 @@ DESCRIPTION
 static herr_t
 H5D_init_dbg_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_init_dbg_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5D_init())
 } /* H5D_init_dbg_interface() */
@@ -104,7 +104,7 @@ H5Ddebug(hid_t dset_id)
     H5D_t	*dset;                  /* Dataset to debug */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Ddebug, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 
     /* Check args */

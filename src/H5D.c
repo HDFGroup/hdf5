@@ -88,7 +88,7 @@ DESCRIPTION
 static herr_t
 H5D_init_pub_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_init_pub_interface)
+    FUNC_ENTER_NOAPI_NOINIT
 
     FUNC_LEAVE_NOAPI(H5D_init())
 } /* H5D_init_pub_interface() */
@@ -132,7 +132,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t           ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Dcreate2, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE7("i", "i*siiiii", loc_id, name, type_id, space_id, lcpl_id, dcpl_id,
              dapl_id);
 
@@ -166,7 +166,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     /* Create the new dataset & get its ID */
-    if(NULL == (dset = H5D_create_named(&loc, name, type_id, space, lcpl_id, dcpl_id, dapl_id, H5AC_dxpl_id)))
+    if(NULL == (dset = H5D__create_named(&loc, name, type_id, space, lcpl_id, dcpl_id, dapl_id, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
     if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset")
@@ -224,7 +224,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t           ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Dcreate_anon, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("i", "iiiii", loc_id, type_id, space_id, dcpl_id, dapl_id);
 
     /* Check arguments */
@@ -308,7 +308,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
     hid_t        dxpl_id = H5AC_dxpl_id;    /* dxpl to use to open datset */
     hid_t        ret_value;
 
-    FUNC_ENTER_API(H5Dopen2, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "i*si", loc_id, name, dapl_id);
 
     /* Check args */
@@ -383,7 +383,7 @@ H5Dclose(hid_t dset_id)
 {
     herr_t       ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API(H5Dclose, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 
     /* Check args */
@@ -429,7 +429,7 @@ H5Dget_space(hid_t dset_id)
     H5S_t	*space = NULL;
     hid_t	ret_value;
 
-    FUNC_ENTER_API(H5Dget_space, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
 
     /* Check args */
@@ -476,7 +476,7 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
     H5D_t 	*dset = NULL;
     herr_t 	ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5Dget_space_status, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Ds", dset_id, allocation);
 
     /* Check arguments */
@@ -516,12 +516,16 @@ H5Dget_type(hid_t dset_id)
     H5T_t	*dt = NULL;             /* Datatype to return */
     hid_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Dget_type, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
 
     /* Check args */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Patch the datatype's "top level" file pointer */
+    if(H5T_patch_file(dset->shared->type, dset->oloc.file) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to patch datatype's file pointer")
 
     /* Copy the dataset's datatype */
     if(NULL == (dt = H5T_copy(dset->shared->type, H5T_COPY_REOPEN)))
@@ -575,7 +579,7 @@ H5Dget_create_plist(hid_t dset_id)
     hid_t		new_dcpl_id = FAIL;
     hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Dget_create_plist, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
 
     /* Check args */
@@ -712,7 +716,7 @@ H5Dget_access_plist(hid_t dset_id)
     hid_t           new_dapl_id = FAIL;
     hid_t           ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Dget_access_plist, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
 
     /* Check args */
@@ -774,7 +778,7 @@ H5Dget_storage_size(hid_t dset_id)
     H5D_t	*dset;          /* Dataset to query */
     hsize_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Dget_storage_size, 0)
+    FUNC_ENTER_API(0)
     H5TRACE1("h", "i", dset_id);
 
     /* Check args */
@@ -809,7 +813,7 @@ H5Dget_offset(hid_t dset_id)
     H5D_t	*dset;          /* Dataset to query */
     haddr_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Dget_offset, HADDR_UNDEF)
+    FUNC_ENTER_API(HADDR_UNDEF)
     H5TRACE1("a", "i", dset_id);
 
     /* Check args */
@@ -890,7 +894,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
     H5S_t *space;               /* Dataspace for iteration */
     herr_t ret_value;           /* Return value */
 
-    FUNC_ENTER_API(H5Diterate, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "*xiix*x", buf, type_id, space_id, op, operator_data);
 
     /* Check args */
@@ -933,7 +937,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
     H5S_t *space;               /* Dataspace for iteration */
     herr_t ret_value;           /* Return value */
 
-    FUNC_ENTER_API(H5Dvlen_reclaim, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iii*x", type_id, space_id, plist_id, buf);
 
     /* Check args */
@@ -994,7 +998,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     H5P_genplist_t  *plist;     /* Property list */
     herr_t ret_value;           /* Return value */
 
-    FUNC_ENTER_API(H5Dvlen_get_buf_size, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iii*h", dataset_id, type_id, space_id, size);
 
     /* Check args */
@@ -1084,7 +1088,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
     H5D_t *dset;                /* Dataset for this operation */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5Dset_extent, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", dset_id, size);
 
     /* Check args */
@@ -1120,7 +1124,7 @@ H5Dflush(hid_t dset_id)
     H5D_t *dset; /* Dataset for this operation */
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Dflush, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
     
     /* Check args */
@@ -1158,7 +1162,7 @@ H5Drefresh(hid_t dset_id)
     H5D_t * dset = NULL;
     hid_t ret_value = SUCCEED; /* return value */
     
-    FUNC_ENTER_API(H5Drefresh, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 
     /* Check args */

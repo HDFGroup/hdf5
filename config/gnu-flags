@@ -28,8 +28,14 @@
 if test X = "X$cc_flags_set"; then
     # PathScale compiler spits out gcc version string too. Need to
     # filter it out.
+    # icc beginning with version 12 includes a "gcc version compatiblilty"
+    # string, causing the gcc H5_CFLAGS to be erroneously added.  The line
+    # "grep -v 'icc version'" causes the discarding of any output
+    # containing 'icc version'.  The cc_version for icc is correctly determined
+    # and flags added in the intel-flags script.
     cc_version="`$CC $CFLAGS $H5_CFLAGS -v 2>&1 | grep -v 'PathScale' |\
-	grep 'gcc version' | sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
+        grep -v 'icc version' |\
+        grep 'gcc version' | sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
     cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
     cc_version=`echo $cc_version |sed 's/[-a-z]//g'`
     if test X = "X$cc_vendor" -a X != "X$cc_version"; then
@@ -236,7 +242,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
 
     # Append more extra warning flags that only gcc 4.5+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wc++0x-compat -Wjump-misses-init -Wunsuffixed-float-constants"
+    H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
     # Append more extra warning flags that only gcc 4.6+ know about
     H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
@@ -300,7 +306,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
 
     # Append more extra warning flags that only gcc 4.5+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wc++0x-compat -Wjump-misses-init -Wunsuffixed-float-constants"
+    H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
     # Try out the new "stack protector" feature in gcc 4.1
     # (Strictly speaking this isn't really a "warning" flag, so it's added to

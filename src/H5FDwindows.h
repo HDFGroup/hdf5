@@ -23,20 +23,17 @@
 #ifndef H5FDwindows_H
 #define H5FDwindows_H
 
-#include "H5Ipublic.h"
-
-#define H5FD_WINDOWS	(H5FD_windows_init())
+#define H5FD_WINDOWS	(H5FD_sec2_init())
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
-H5_DLL hid_t H5FD_windows_init(void);
-H5_DLL void H5FD_windows_term(void);
 H5_DLL herr_t H5Pset_fapl_windows(hid_t fapl_id);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
-#endif
+#endif /* H5FDwindows_H */
+

@@ -22,7 +22,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <errno.h>
 
 #include "hdf5.h"
@@ -318,22 +320,22 @@ do_pio(parameters param)
     /* Need barrier to make sure everyone starts at the same time */
     MPI_Barrier(pio_comm_g);
 
-    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, START);
+    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
     hrc = do_fopen(&param, fname, &fd, PIO_CREATE | PIO_WRITE);
 
     VRFY((hrc == SUCCESS), "do_fopen failed");
 
-    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, START);
+    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
     hrc = do_write(&res, &fd, &param, ndsets, nbytes, buf_size, buffer);
     hrc == SUCCESS;
-    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, STOP);
+    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
 
     VRFY((hrc == SUCCESS), "do_write failed");
 
     /* Close file for write */
     hrc = do_fclose(iot, &fd);
 
-    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, STOP);
+    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
     VRFY((hrc == SUCCESS), "do_fclose failed");
 
     if (!param.h5_write_only) {
@@ -347,20 +349,20 @@ do_pio(parameters param)
         MPI_Barrier(pio_comm_g);
 
         /* Open file for read */
-        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, START);
+        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
         hrc = do_fopen(&param, fname, &fd, PIO_READ);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
-        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, START);
+        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
         hrc = do_read(&res, &fd, &param, ndsets, nbytes, buf_size, buffer);
-        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, STOP);
+        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_read failed");
 
         /* Close file for read */
         hrc = do_fclose(iot, &fd);
 
-        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, STOP);
+        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_fclose failed");
     }
 
@@ -411,14 +413,14 @@ done:
     static char *
 pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size)
 {
-    const char *prefix, *suffix="";
+    const char *prefix, *suffix = "";
     char *ptr, last = '\0';
     size_t i, j;
 
     if (!base_name || !fullname || size < 1)
-    return NULL;
+        return NULL;
 
-    memset(fullname, 0, size);
+    HDmemset(fullname, 0, size);
 
     switch (iot) {
     case POSIXIO:
@@ -433,77 +435,81 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     }
 
     /* First use the environment variable and then try the constant */
-    prefix = getenv("HDF5_PARAPREFIX");
+    prefix = HDgetenv("HDF5_PARAPREFIX");
 
 #ifdef HDF5_PARAPREFIX
     if (!prefix)
-    prefix = HDF5_PARAPREFIX;
+        prefix = HDF5_PARAPREFIX;
 #endif  /* HDF5_PARAPREFIX */
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-    /* If the prefix specifies the HDF5_PARAPREFIX directory, then
-     * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
-     * directory instead. */
-    register char *user, *login, *subdir;
+        /* If the prefix specifies the HDF5_PARAPREFIX directory, then
+         * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
+         * directory instead. */
+        register char *user, *login, *subdir;
 
-    user = getenv("USER");
-    login = getenv("LOGIN");
-    subdir = (user ? user : login);
+        user = HDgetenv("USER");
+        login = HDgetenv("LOGIN");
+        subdir = (user ? user : login);
 
-    if (subdir) {
-        for (i = 0; i < size && prefix[i]; i++)
-        fullname[i] = prefix[i];
+        if (subdir) {
+            for (i = 0; i < size && prefix[i]; i++)
+                fullname[i] = prefix[i];
 
-        fullname[i++] = '/';
+            fullname[i++] = '/';
 
-        for (j = 0; i < size && subdir[j]; i++, j++)
-        fullname[i] = subdir[j];
-    } else {
-        /* We didn't append the prefix yet */
-        strncpy(fullname, prefix, MIN(strlen(prefix), size));
-    }
-
-    if ((strlen(fullname) + strlen(base_name) + 1) < size) {
-        /* Append the base_name with a slash first. Multiple slashes are
-         * handled below. */
-        h5_stat_t buf;
-
-        if (HDstat(fullname, &buf) < 0)
-        /* The directory doesn't exist just yet */
-        if (mkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST) {
-            /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
-             * Default to PREFIX's original prefix value. */
-            strcpy(fullname, prefix);
+            for (j = 0; i < size && subdir[j]; i++, j++)
+                fullname[i] = subdir[j];
+        }
+        else {
+            /* We didn't append the prefix yet */
+            HDstrncpy(fullname, prefix, MIN(HDstrlen(prefix), size));
         }
 
-        strcat(fullname, "/");
-        strcat(fullname, base_name);
-    } else {
+        if ((HDstrlen(fullname) + HDstrlen(base_name) + 1) < size) {
+            /* Append the base_name with a slash first. Multiple slashes are
+             * handled below. */
+            h5_stat_t buf;
+
+            if (HDstat(fullname, &buf) < 0)
+                /* The directory doesn't exist just yet */
+                if (HDmkdir(fullname, (mode_t) 0755) < 0 && errno != EEXIST) {
+                    /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
+                     * Default to PREFIX's original prefix value. */
+                    HDstrcpy(fullname, prefix);
+                }
+
+            HDstrcat(fullname, "/");
+            HDstrcat(fullname, base_name);
+        }
+        else {
+            /* Buffer is too small */
+            return NULL;
+        }
+    }
+    else if (HDstrlen(base_name) >= size) {
         /* Buffer is too small */
         return NULL;
     }
-    } else if (strlen(base_name) >= size) {
-    /* Buffer is too small */
-    return NULL;
-    } else {
-    strcpy(fullname, base_name);
+    else {
+        HDstrcpy(fullname, base_name);
     }
 
     /* Append a suffix */
     if (suffix) {
-    if (strlen(fullname) + strlen(suffix) >= size)
-        return NULL;
+        if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
+            return NULL;
 
-    strcat(fullname, suffix);
+        HDstrcat(fullname, suffix);
     }
 
     /* Remove any double slashes in the filename */
     for (ptr = fullname, i = j = 0; ptr && i < size; i++, ptr++) {
-    if (*ptr != '/' || last != '/')
-        fullname[j++] = *ptr;
+        if (*ptr != '/' || last != '/')
+            fullname[j++] = *ptr;
 
-    last = *ptr;
+        last = *ptr;
     }
 
     return fullname;
@@ -962,7 +968,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end else */
 
     /* Start "raw data" write timer */
-    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, START);
+    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTART);
 
     while (nbytes_xfer < bytes_count){
         /* Write */
@@ -1393,7 +1399,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end while */
 
     /* Stop "raw data" write timer */
-    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, STOP);
+    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTOP);
 
     /* Calculate write time */
 
@@ -1893,7 +1899,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end else */
 
     /* Start "raw data" read timer */
-    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, START);
+    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTART);
 
     while (nbytes_xfer < bytes_count){
         /* Read */
@@ -2348,7 +2354,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end while */
 
     /* Stop "raw data" read timer */
-    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, STOP);
+    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTOP);
 
     /* Calculate read time */
 
@@ -3109,9 +3115,9 @@ int MPI_File_read_at(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_READ, START);
+    set_time(timer_g, HDF5_MPI_READ, TSTART);
     err=PMPI_File_read_at(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_READ, STOP);
+    set_time(timer_g, HDF5_MPI_READ, TSTOP);
     return err;
 }
 
@@ -3120,9 +3126,9 @@ int MPI_File_read_at_all(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_READ, START);
+    set_time(timer_g, HDF5_MPI_READ, TSTART);
     err=PMPI_File_read_at_all(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_READ, STOP);
+    set_time(timer_g, HDF5_MPI_READ, TSTOP);
     return err;
 }
 
@@ -3130,9 +3136,9 @@ int MPI_File_write_at(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_WRITE, START);
+    set_time(timer_g, HDF5_MPI_WRITE, TSTART);
     err=PMPI_File_write_at(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_WRITE, STOP);
+    set_time(timer_g, HDF5_MPI_WRITE, TSTOP);
     return err;
 }
 
@@ -3140,9 +3146,9 @@ int MPI_File_write_at_all(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_WRITE, START);
+    set_time(timer_g, HDF5_MPI_WRITE, TSTART);
     err=PMPI_File_write_at_all(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_WRITE, STOP);
+    set_time(timer_g, HDF5_MPI_WRITE, TSTOP);
     return err;
 }
 

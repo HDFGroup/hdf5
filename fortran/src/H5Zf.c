@@ -1,4 +1,9 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/****h* H5Zf/H5Zf
+ * PURPOSE
+ *   This file contains C stubs for H5Z Fortran APIs
+ *
+ * COPYRIGHT
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -11,23 +16,32 @@
  * is linked from the top-level documents page.  It can also be found at     *
  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
  * access to either file, you may request a copy from help@hdfgroup.org.     *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/* This files contains C stubs for H5Z Fortran APIs */
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ ******
+*/
 
 #include "H5f90.h"
 
-/*----------------------------------------------------------------------------
- * Name:        h5zunregister_c
- * Purpose:     Call H5Zunregister to unregister filter
- * Inputs:      filter identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+/****if* H5Zf/h5zunregister_c
+ * NAME
+ *        h5zunregister_c
+ * PURPOSE
+ *     Call H5Zunregister to unregister filter
+ * INPUTS
+ *      filter identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, March 12, 2003
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 int_f
 nh5zunregister_c (int_f *filter)
+/******/
 {
      int ret_value = -1;
      herr_t status;
@@ -44,19 +58,28 @@ nh5zunregister_c (int_f *filter)
      ret_value = 0;
      return ret_value;
 }
-/*----------------------------------------------------------------------------
- * Name:        h5zfiletr_avail_c
- * Purpose:     Call H5Zfilter_avail to find if filter is available
- * Inputs:      filter - filter identifier
- * Outputs:     flag - status flag
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+/****if* H5Zf/h5zfiletr_avail_c
+ * NAME
+ *        h5zfiletr_avail_c
+ * PURPOSE
+ *     Call H5Zfilter_avail to find if filter is available
+ * INPUTS
+ *      filter - filter identifier
+ * OUTPUTS
+ *     flag - status flag
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, March 12, 2003
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5zfilter_avail_c ( int_f *filter , int_f *flag )
+/******/
 {
   int ret_value = 0;
   H5Z_filter_t c_filter;
@@ -69,20 +92,29 @@ nh5zfilter_avail_c ( int_f *filter , int_f *flag )
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5zget_filter_info_c
- * Purpose:     Call H5Zget_filter_info to find if filter has its encoder
+/****if* H5Zf/h5zget_filter_info_c
+ * NAME
+ *        h5zget_filter_info_c
+ * PURPOSE
+ *     Call H5Zget_filter_info to find if filter has its encoder
  *              and/or its decoder available
- * Inputs:      filter - filter identifier
- * Outputs:     flag - status flag
- * Returns:     0 on success, -1 on failure
- * Programmer:  Nat Furrer and James Laird
+ * INPUTS
+ *      filter - filter identifier
+ * OUTPUTS
+ *     flag - status flag
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Nat Furrer and James Laird
  *              Wednesday, June 16, 2004
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5zget_filter_info_c ( int_f *filter , int_f *flag )
+/******/
 {
   int ret_value = 0;
   H5Z_filter_t c_filter;

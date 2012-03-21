@@ -1,11 +1,10 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.6)
 PROJECT (HDF5_TOOLS_H5COPY)
 
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
-INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 # --------------------------------------------------------------------
 # Add the h5copy and test executables
@@ -13,6 +12,7 @@ INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 ADD_EXECUTABLE (h5copy ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copy.c)
 TARGET_NAMING (h5copy ${LIB_TYPE})
 TARGET_LINK_LIBRARIES (h5copy  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+SET_TARGET_PROPERTIES (h5copy PROPERTIES FOLDER tools)
 
 SET (H5_DEP_EXECUTABLES h5copy)
 
@@ -26,56 +26,56 @@ IF (BUILD_TESTING)
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5copygentest ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copygentest.c)
     TARGET_NAMING (h5copygentest ${LIB_TYPE})
-    TARGET_LINK_LIBRARIES (h5copygentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+    TARGET_LINK_LIBRARIES (h5copygentest ${HDF5_LIB_TARGET})
+    SET_TARGET_PROPERTIES (h5copygentest PROPERTIES FOLDER generator/tools)
 
     #ADD_TEST (NAME h5copygentest COMMAND $<TARGET_FILE:h5copygentest>)
   ENDIF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
   
   # --------------------------------------------------------------------
-  # Copy all the HDF5 files from the test directory into the source directory
+  # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
-  SET (HDF5_REFERENCE_FILES
-      h5copy_extlinks_src.out.ls
-      h5copy_ref.out.ls
-      h5copytst.out.ls
+  SET (LIST_HDF5_TEST_FILES
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_extlinks_src.h5
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_extlinks_trg.h5
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_ref.h5
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copytst.h5
   )
-  SET (HDF5_REFERENCE_TEST_FILES
-      h5copy_extlinks_src.h5
-      h5copy_extlinks_trg.h5
-      h5copy_ref.h5
-      h5copytst.h5
-      h5copy_misc1.out
+
+  SET (LIST_OTHER_TEST_FILES
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_misc1.out
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_extlinks_src.out.ls
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_ref.out.ls
+      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copytst.out.ls
   )
 
   FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-  FOREACH (ls_file ${HDF5_REFERENCE_FILES})
-    SET (lsdest "${PROJECT_BINARY_DIR}/testfiles/${ls_file}")
-    #MESSAGE (STATUS " Translating ${ls_file}")
-    ADD_CUSTOM_COMMAND (
-        TARGET     h5copy
-        POST_BUILD
-        COMMAND    ${XLATE_UTILITY}
-        ARGS       ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/${ls_file} ${lsdest} -l3
-    )
-  ENDFOREACH (ls_file ${HDF5_REFERENCE_FILES})
 
-  FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    SET (dest "${PROJECT_BINARY_DIR}/testfiles/${h5_file}")
-    #MESSAGE (STATUS " Copying ${h5_file}")
+  FOREACH (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+    GET_FILENAME_COMPONENT(fname "${listfiles}" NAME)
+    SET (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
+    #MESSAGE (STATUS " Copying ${listfiles}")
     ADD_CUSTOM_COMMAND (
         TARGET     h5copy
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/${h5_file} ${dest}
+        ARGS       -E copy_if_different ${listfiles} ${dest}
     )
-  ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-  
-  ADD_CUSTOM_COMMAND (
-      TARGET     h5copy
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copytst.h5 ${PROJECT_BINARY_DIR}/h5copytst.h5
-  )
+  ENDFOREACH (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+
+  #
+  # This section can be removed, but leave here for a reference later.
+  # Purpose: '-l3' ignores top 3 lines when copy text file.
+  #
+  #FOREACH (listfiles ${LIST_OTHER_TEST_FILES})
+  #  SET (lsdest "${PROJECT_BINARY_DIR}/testfiles/${listfiles}")
+  #  ADD_CUSTOM_COMMAND (
+  #      TARGET     h5copy
+  #      POST_BUILD
+  #      COMMAND    ${XLATE_UTILITY}
+  #      ARGS       ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/${listfiles} ${lsdest} -l3
+  #  )
+  #ENDFOREACH (listfiles ${LIST_OTHER_TEST_FILES})
   
 ##############################################################################
 ##############################################################################
@@ -131,10 +131,10 @@ IF (BUILD_TESTING)
   MACRO (ADD_H5LS_TEST file filetest)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME H5COPY-H5LS_${file}-${filetest} COMMAND $<TARGET_FILE:h5ls> -Svr ./testfiles/${file}.out.h5)
+      ADD_TEST (NAME H5COPY-h5ls_${file}-${filetest} COMMAND $<TARGET_FILE:h5ls> -Svr ./testfiles/${file}.out.h5)
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
-          NAME H5COPY-H5LS_${file}-${filetest}
+          NAME H5COPY-h5ls_${file}-${filetest}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=-Svr;./testfiles/${file}.out.h5"
@@ -147,9 +147,9 @@ IF (BUILD_TESTING)
       )
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
     IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5COPY-H5LS_${file}-${filetest} PROPERTIES DEPENDS ${last_test})
+      SET_TESTS_PROPERTIES (H5COPY-h5ls_${file}-${filetest} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5COPY-H5LS_${file}-${filetest}")
+    SET (last_test "H5COPY-h5ls_${file}-${filetest}")
   ENDMACRO (ADD_H5LS_TEST)
 
   #
@@ -159,7 +159,7 @@ IF (BUILD_TESTING)
   MACRO (ADD_H5_CMP_TEST testname resultcode infile outfile vparam sparam srcname dparam dstname)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME H5COPY-CMP-${testname} COMMAND $<TARGET_FILE:h5copy> -i ${infile} -o ./testfiles/${outfile} ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
+      ADD_TEST (NAME H5COPY-CMP-${testname} COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${outfile} ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
       IF (${resultcode} STREQUAL "1")
         SET_TESTS_PROPERTIES (H5COPY-CMP-${testname} PROPERTIES WILL_FAIL "true")
       ENDIF (${resultcode} STREQUAL "1")
@@ -168,7 +168,7 @@ IF (BUILD_TESTING)
           NAME H5COPY-CMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-              -D "TEST_ARGS=-i;${infile};-o;./testfiles/${outfile};${vparam};${sparam};${srcname};${dparam};${dstname}"
+              -D "TEST_ARGS=-i;./testfiles/${infile};-o;./testfiles/${outfile};${vparam};${sparam};${srcname};${dparam};${dstname}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=./testfiles/${testname}.out.out"
               -D "TEST_EXPECT=${resultcode}"

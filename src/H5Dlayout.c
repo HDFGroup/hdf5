@@ -78,7 +78,7 @@ H5D_layout_set_io_ops(const H5D_t *dataset)
 {
     herr_t ret_value = SUCCEED;		/* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_layout_set_io_ops, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(dataset);
@@ -158,7 +158,7 @@ H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include
 {
     size_t                  ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_layout_meta_size)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -273,7 +273,7 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_layout_set_latest_version, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(layout);
@@ -313,7 +313,7 @@ H5D_layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
     unsigned ndims;                     /* Rank of dataspace */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_layout_set_latest_indexing, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(layout);
@@ -428,7 +428,7 @@ H5D_layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_layout_oh_create, dxpl_id, dset->oloc.addr, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
     /* Sanity checking */
     HDassert(file);
@@ -564,7 +564,7 @@ H5D_layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t 
     htri_t msg_exists;                  /* Whether a particular type of message exists */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_layout_oh_read)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checking */
     HDassert(dataset);
@@ -704,7 +704,7 @@ H5D_layout_oh_write(H5D_t *dataset, hid_t dxpl_id, H5O_t *oh, unsigned update_fl
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_layout_oh_write)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checking */
     HDassert(dataset);

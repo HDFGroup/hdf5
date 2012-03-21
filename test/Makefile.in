@@ -59,7 +59,9 @@ DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 bin_PROGRAMS = swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) \
-	swmr_writer$(EXEEXT) swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT)
+	swmr_writer$(EXEEXT) swmr_remove_reader$(EXEEXT) \
+	swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
+	swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT)
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
 	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT) \
 	links_env$(EXEEXT) flushrefresh$(EXEEXT)
@@ -368,6 +370,10 @@ stab_SOURCES = stab.c
 stab_OBJECTS = stab.$(OBJEXT)
 stab_LDADD = $(LDADD)
 stab_DEPENDENCIES = libh5test.la $(LIBHDF5)
+swmr_addrem_writer_SOURCES = swmr_addrem_writer.c
+swmr_addrem_writer_OBJECTS = swmr_addrem_writer.$(OBJEXT)
+swmr_addrem_writer_LDADD = $(LDADD)
+swmr_addrem_writer_DEPENDENCIES = libh5test.la $(LIBHDF5)
 swmr_generator_SOURCES = swmr_generator.c
 swmr_generator_OBJECTS = swmr_generator.$(OBJEXT)
 swmr_generator_LDADD = $(LDADD)
@@ -376,10 +382,6 @@ swmr_reader_SOURCES = swmr_reader.c
 swmr_reader_OBJECTS = swmr_reader.$(OBJEXT)
 swmr_reader_LDADD = $(LDADD)
 swmr_reader_DEPENDENCIES = libh5test.la $(LIBHDF5)
-swmr_writer_SOURCES = swmr_writer.c
-swmr_writer_OBJECTS = swmr_writer.$(OBJEXT)
-swmr_writer_LDADD = $(LDADD)
-swmr_writer_DEPENDENCIES = libh5test.la $(LIBHDF5)
 swmr_remove_reader_SOURCES = swmr_remove_reader.c
 swmr_remove_reader_OBJECTS = swmr_remove_reader.$(OBJEXT)
 swmr_remove_reader_LDADD = $(LDADD)
@@ -388,10 +390,6 @@ swmr_remove_writer_SOURCES = swmr_remove_writer.c
 swmr_remove_writer_OBJECTS = swmr_remove_writer.$(OBJEXT)
 swmr_remove_writer_LDADD = $(LDADD)
 swmr_remove_writer_DEPENDENCIES = libh5test.la $(LIBHDF5)
-swmr_addrem_writer_SOURCES = swmr_addrem_writer.c
-swmr_addrem_writer_OBJECTS = swmr_addrem_writer.$(OBJEXT)
-swmr_addrem_writer_LDADD = $(LDADD)
-swmr_addrem_writer_DEPENDENCIES = libh5test.la $(LIBHDF5)
 swmr_sparse_reader_SOURCES = swmr_sparse_reader.c
 swmr_sparse_reader_OBJECTS = swmr_sparse_reader.$(OBJEXT)
 swmr_sparse_reader_LDADD = $(LDADD)
@@ -400,6 +398,10 @@ swmr_sparse_writer_SOURCES = swmr_sparse_writer.c
 swmr_sparse_writer_OBJECTS = swmr_sparse_writer.$(OBJEXT)
 swmr_sparse_writer_LDADD = $(LDADD)
 swmr_sparse_writer_DEPENDENCIES = libh5test.la $(LIBHDF5)
+swmr_writer_SOURCES = swmr_writer.c
+swmr_writer_OBJECTS = swmr_writer.$(OBJEXT)
+swmr_writer_LDADD = $(LDADD)
+swmr_writer_DEPENDENCIES = libh5test.la $(LIBHDF5)
 tcheck_version_SOURCES = tcheck_version.c
 tcheck_version_OBJECTS = tcheck_version.$(OBJEXT)
 tcheck_version_LDADD = $(LDADD)
@@ -473,7 +475,9 @@ SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c bittests.c \
 	gen_udlinks.c getname.c gheap.c hyperslab.c istore.c lheap.c \
 	links.c links_env.c mf.c mount.c mtime.c ntypes.c objcopy.c \
 	ohdr.c pool.c reserved.c set_extent.c space_overflow.c stab.c \
-	swmr_generator.c swmr_reader.c swmr_writer.c swmr_remove_reader.c swmr_remove_writer.c swmr_addrem_writer.c swmr_sparse_reader.c swmr_sparse_writer.c tcheck_version.c \
+	swmr_addrem_writer.c swmr_generator.c swmr_reader.c \
+	swmr_remove_reader.c swmr_remove_writer.c swmr_sparse_reader.c \
+	swmr_sparse_writer.c swmr_writer.c tcheck_version.c \
 	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
 	vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c \
@@ -489,8 +493,10 @@ DIST_SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c \
 	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
 	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
 	ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c \
-	space_overflow.c stab.c swmr_generator.c swmr_reader.c \
-	swmr_writer.c swmr_remove_reader.c swmr_remove_writer.c swmr_addrem_writer.c swmr_sparse_reader.c swmr_sparse_writer.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
+	space_overflow.c stab.c swmr_addrem_writer.c swmr_generator.c \
+	swmr_reader.c swmr_remove_reader.c swmr_remove_writer.c \
+	swmr_sparse_reader.c swmr_sparse_writer.c swmr_writer.c \
+	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
 	$(ttsafe_SOURCES) unlink.c vfd.c
 ETAGS = etags
 CTAGS = ctags
@@ -562,6 +568,7 @@ F9XMODEXT = @F9XMODEXT@
 F9XMODFLAG = @F9XMODFLAG@
 F9XSUFFIXFLAG = @F9XSUFFIXFLAG@
 FC = @FC@
+FC2003 = @FC2003@
 FCFLAGS = @FCFLAGS@
 FCFLAGS_f90 = @FCFLAGS_f90@
 FCLIBS = @FCLIBS@
@@ -582,10 +589,12 @@ H5_LONE_COLON = @H5_LONE_COLON@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
+HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
+HDF_FORTRAN2003 = @HDF_FORTRAN2003@
 HID_T = @HID_T@
 HL = @HL@
 HL_FOR = @HL_FOR@
@@ -790,7 +799,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 	extern_[1-4][ab].raw gheap[0-4].h5 dt_arith[1-2] links.h5 \
 	links[0-6]*.h5 extlinks[0-15].h5 tmp big.data \
 	big[0-9][0-9][0-9][0-9][0-9].h5 stdio.h5 sec2.h5 \
-	dtypes[1-8].h5 dt_arith[1-2].h5 tattr.h5 tselect.h5 mtime.h5 \
+	dtypes[0-9].h5 dt_arith[1-2].h5 tattr.h5 tselect.h5 mtime.h5 \
 	unlink.h5 unicode.h5 coord.h5 fillval_[0-9].h5 fillval.raw \
 	mount_[0-9].h5 testmeta.h5 ttime.h5 trefer[1-3].h5 tvltypes.h5 \
 	tvlstr.h5 tvlstr2.h5 flush.h5 enum1.h5 titerate.h5 ttsafe.h5 \
@@ -803,7 +812,8 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 	tstint[1-2].h5 unlink_chunked.h5 btree2.h5 objcopy_src.h5 \
 	objcopy_dst.h5 objcopy_ext.dat trefer1.h5 trefer2.h5 \
 	app_ref.h5 farray.h5 earray.h5 efc[0-5].h5 log_vfd_out.log \
-	swmr_data.h5 flushrefresh.h5 flushrefresh_VERIFICATION_START \
+	new_multi_file_v16-r.h5 new_multi_file_v16-s.h5 swmr_data.h5 \
+	flushrefresh.h5 flushrefresh_VERIFICATION_START \
 	flushrefresh_VERIFICATION_CHECKPOINT1 \
 	flushrefresh_VERIFICATION_CHECKPOINT2 \
 	flushrefresh_VERIFICATION_DONE
@@ -1199,30 +1209,30 @@ space_overflow$(EXEEXT): $(space_overflow_OBJECTS) $(space_overflow_DEPENDENCIES
 stab$(EXEEXT): $(stab_OBJECTS) $(stab_DEPENDENCIES) 
 	@rm -f stab$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(stab_OBJECTS) $(stab_LDADD) $(LIBS)
+swmr_addrem_writer$(EXEEXT): $(swmr_addrem_writer_OBJECTS) $(swmr_addrem_writer_DEPENDENCIES) 
+	@rm -f swmr_addrem_writer$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(swmr_addrem_writer_OBJECTS) $(swmr_addrem_writer_LDADD) $(LIBS)
 swmr_generator$(EXEEXT): $(swmr_generator_OBJECTS) $(swmr_generator_DEPENDENCIES) 
 	@rm -f swmr_generator$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(swmr_generator_OBJECTS) $(swmr_generator_LDADD) $(LIBS)
 swmr_reader$(EXEEXT): $(swmr_reader_OBJECTS) $(swmr_reader_DEPENDENCIES) 
 	@rm -f swmr_reader$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(swmr_reader_OBJECTS) $(swmr_reader_LDADD) $(LIBS)
+swmr_remove_reader$(EXEEXT): $(swmr_remove_reader_OBJECTS) $(swmr_remove_reader_DEPENDENCIES) 
+	@rm -f swmr_remove_reader$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(swmr_remove_reader_OBJECTS) $(swmr_remove_reader_LDADD) $(LIBS)
+swmr_remove_writer$(EXEEXT): $(swmr_remove_writer_OBJECTS) $(swmr_remove_writer_DEPENDENCIES) 
+	@rm -f swmr_remove_writer$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(swmr_remove_writer_OBJECTS) $(swmr_remove_writer_LDADD) $(LIBS)
+swmr_sparse_reader$(EXEEXT): $(swmr_sparse_reader_OBJECTS) $(swmr_sparse_reader_DEPENDENCIES) 
+	@rm -f swmr_sparse_reader$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(swmr_sparse_reader_OBJECTS) $(swmr_sparse_reader_LDADD) $(LIBS)
+swmr_sparse_writer$(EXEEXT): $(swmr_sparse_writer_OBJECTS) $(swmr_sparse_writer_DEPENDENCIES) 
+	@rm -f swmr_sparse_writer$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(swmr_sparse_writer_OBJECTS) $(swmr_sparse_writer_LDADD) $(LIBS)
 swmr_writer$(EXEEXT): $(swmr_writer_OBJECTS) $(swmr_writer_DEPENDENCIES) 
 	@rm -f swmr_writer$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(swmr_writer_OBJECTS) $(swmr_writer_LDADD) $(LIBS)
-swmr_remove_reader$(EXEEXT): $(swmr_remove_reader_OBJECTS) $(swmr_remove_reader_DEPENDENCIES)
-	@rm -f swmr_remove_reader$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(swmr_remove_reader_OBJECTS) $(swmr_remove_reader_LDADD) $(LIBS)
-swmr_remove_writer$(EXEEXT): $(swmr_remove_writer_OBJECTS) $(swmr_remove_writer_DEPENDENCIES)
-	@rm -f swmr_remove_writer$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(swmr_remove_writer_OBJECTS) $(swmr_remove_writer_LDADD) $(LIBS)
-swmr_addrem_writer$(EXEEXT): $(swmr_addrem_writer_OBJECTS) $(swmr_addrem_writer_DEPENDENCIES)
-	@rm -f swmr_addrem_writer$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(swmr_addrem_writer_OBJECTS) $(swmr_addrem_writer_LDADD) $(LIBS)
-swmr_sparse_reader$(EXEEXT): $(swmr_sparse_reader_OBJECTS) $(swmr_sparse_reader_DEPENDENCIES)
-	@rm -f swmr_sparse_reader$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(swmr_sparse_reader_OBJECTS) $(swmr_sparse_reader_LDADD) $(LIBS)
-swmr_sparse_writer$(EXEEXT): $(swmr_sparse_writer_OBJECTS) $(swmr_sparse_writer_DEPENDENCIES)
-	@rm -f swmr_sparse_writer$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(swmr_sparse_writer_OBJECTS) $(swmr_sparse_writer_LDADD) $(LIBS)
 tcheck_version$(EXEEXT): $(tcheck_version_OBJECTS) $(tcheck_version_DEPENDENCIES) 
 	@rm -f tcheck_version$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(tcheck_version_OBJECTS) $(tcheck_version_LDADD) $(LIBS)
@@ -1315,15 +1325,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set_extent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/space_overflow.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stab.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_addrem_writer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_common.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_generator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_reader.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_writer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_remove_reader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_remove_writer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_addrem_writer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_sparse_reader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_sparse_writer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_writer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tarray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tattr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcheck_version.Po@am__quote@

@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -H -p -d contiguous tfilters.h5'
-#############################
 HDF5 "tfilters.h5" {
 DATASET "contiguous" {
 COMMENT "This is a dataset with contiguous storage"
@@ -16,7 +13,7 @@ COMMENT "This is a dataset with contiguous storage"
    }
    FILLVALUE {
       FILL_TIME H5D_FILL_TIME_IFSET
-      VALUE  0   
+      VALUE  0
    }
    ALLOCATION_TIME {
       H5D_ALLOC_TIME_LATE

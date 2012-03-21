@@ -186,7 +186,7 @@ H5_DLL herr_t H5Orefresh(hid_t oid);
 
 /* Typedefs */
 
-/* A struct that's part of the H5G_stat_t routine (deprecated) */
+/* A struct that's part of the H5G_stat_t structure (deprecated) */
 typedef struct H5O_stat_t {
     hsize_t size;               /* Total size of object header in file */
     hsize_t free;               /* Free space within object header */

@@ -75,7 +75,7 @@ H5S_init_interface(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the file IDs */
     if(H5I_register_type(H5I_DATASPACE, (size_t)H5I_DATASPACEID_HASHSIZE, H5S_RESERVED_ATOMS, (H5I_free_t)H5S_close) < 0)
@@ -86,7 +86,7 @@ H5S_init_interface(void)
         /* Allow MPI buf-and-file-type optimizations? */
         const char *s = HDgetenv ("HDF5_MPI_OPT_TYPES");
         if (s && HDisdigit(*s))
-            H5S_mpi_opt_types_g = (int)HDstrtol (s, NULL, 0);
+            H5S_mpi_opt_types_g = (hbool_t)HDstrtol (s, NULL, 0);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -117,7 +117,7 @@ H5S_term_interface(void)
 {
     int	n = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_term_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
 	if((n = H5I_nmembers(H5I_DATASPACE))) {
@@ -161,7 +161,7 @@ H5S_create(H5S_class_t type)
     H5S_t *new_ds = NULL;    /* New dataspace created */
     H5S_t *ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_create, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Create a new dataspace */
     if(NULL == (new_ds = H5FL_MALLOC(H5S_t)))
@@ -186,6 +186,7 @@ H5S_create(H5S_class_t type)
             new_ds->extent.nelem = 0;
             break;
 
+        case H5S_NO_CLASS:
         default:
             HDassert("unknown dataspace (extent) type" && 0);
             break;
@@ -239,7 +240,7 @@ H5Screate(H5S_class_t type)
     H5S_t *new_ds=NULL;         /* New dataspace structure */
     hid_t ret_value;            /* Return value */
 
-    FUNC_ENTER_API(H5Screate, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "Sc", type);
 
     /* Check args */
@@ -282,7 +283,7 @@ H5S_extent_release(H5S_extent_t *extent)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_extent_release, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(extent);
 
@@ -316,7 +317,7 @@ H5S_close(H5S_t *ds)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_close, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(ds);
 
@@ -357,7 +358,7 @@ H5Sclose(hid_t space_id)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API(H5Sclose, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", space_id);
 
     /* Check args */
@@ -396,7 +397,7 @@ H5Scopy(hid_t space_id)
     H5S_t	*dst = NULL;
     hid_t	ret_value;
 
-    FUNC_ENTER_API(H5Scopy, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", space_id);
 
     /* Check args */
@@ -442,7 +443,7 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
     H5S_t	*dst;
     hid_t	ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5Sextent_copy, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ii", dst_id, src_id);
 
     /* Check args */
@@ -480,7 +481,7 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src, hbool_t copy_max)
     unsigned u;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_extent_copy, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Copy the regular fields */
     dst->type = src->type;
@@ -512,6 +513,7 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src, hbool_t copy_max)
                 dst->max = NULL;
             break;
 
+        case H5S_NO_CLASS:
         default:
             HDassert("unknown dataspace type" && 0);
             break;
@@ -553,7 +555,7 @@ H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max)
     H5S_t		   *dst = NULL;
     H5S_t		   *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_copy, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     if(NULL == (dst = H5FL_MALLOC(H5S_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -604,7 +606,7 @@ H5S_get_simple_extent_npoints(const H5S_t *ds)
 {
     hssize_t    ret_value;
 
-    FUNC_ENTER_NOAPI(H5S_get_simple_extent_npoints, -1)
+    FUNC_ENTER_NOAPI(-1)
 
     /* check args */
     HDassert(ds);
@@ -640,7 +642,7 @@ H5Sget_simple_extent_npoints(hid_t space_id)
     H5S_t		   *ds;
     hssize_t		    ret_value;
 
-    FUNC_ENTER_API(H5Sget_simple_extent_npoints, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("Hs", "i", space_id);
 
     /* Check args */
@@ -681,7 +683,7 @@ H5S_get_npoints_max(const H5S_t *ds)
     hsize_t	    ret_value;
     unsigned	    u;
 
-    FUNC_ENTER_NOAPI(H5S_get_npoints_max, 0)
+    FUNC_ENTER_NOAPI(0)
 
     /* check args */
     assert(ds);
@@ -712,6 +714,7 @@ H5S_get_npoints_max(const H5S_t *ds)
             }
             break;
 
+        case H5S_NO_CLASS:
         default:
             assert("unknown dataspace class" && 0);
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0, "internal error (unknown dataspace class)")
@@ -744,7 +747,7 @@ H5Sget_simple_extent_ndims(hid_t space_id)
     H5S_t		   *ds;
     int		   ret_value;
 
-    FUNC_ENTER_API(H5Sget_simple_extent_ndims, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("Is", "i", space_id);
 
     /* Check args */
@@ -784,7 +787,7 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
 {
     int	ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_get_simple_extent_ndims, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(ds);
@@ -796,6 +799,7 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
             ret_value = (int)ds->extent.rank;
             break;
 
+        case H5S_NO_CLASS:
         default:
             HDassert("unknown dataspace class" && 0);
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown dataspace class)")
@@ -835,7 +839,7 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
     H5S_t		   *ds;
     int		   ret_value;
 
-    FUNC_ENTER_API(H5Sget_simple_extent_dims, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("Is", "ixx", space_id, dims, maxdims);
 
     /* Check args */
@@ -869,7 +873,7 @@ H5S_extent_get_dims(const H5S_extent_t *ext, hsize_t dims[], hsize_t max_dims[])
     int	i;              /* Local index variable */
     int	ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_extent_get_dims, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(ext);
@@ -894,6 +898,7 @@ H5S_extent_get_dims(const H5S_extent_t *ext, hsize_t dims[], hsize_t max_dims[])
             } /* end for */
             break;
 
+        case H5S_NO_CLASS:
         default:
             HDassert("unknown dataspace class" && 0);
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown dataspace class)")
@@ -926,7 +931,7 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
 {
     int	ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_get_simple_extent_dims, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(ds);
@@ -958,7 +963,7 @@ H5S_write(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned update_flags, H5S_t *ds)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_write, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(f);
     HDassert(oh);
@@ -999,7 +1004,7 @@ H5S_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5S_t *ds)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_append, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(f);
     HDassert(oh);
@@ -1035,7 +1040,7 @@ H5S_read(const H5O_loc_t *loc, hid_t dxpl_id)
     H5S_t	   *ds = NULL;          /* Dataspace to return */
     H5S_t	   *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_read, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* check args */
     HDassert(loc);
@@ -1082,7 +1087,7 @@ H5S_is_simple(const H5S_t *sdim)
 {
     htri_t		    ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_is_simple)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args and all the boring stuff. */
     HDassert(sdim);
@@ -1115,7 +1120,7 @@ H5Sis_simple(hid_t space_id)
     H5S_t		   *space;	/* dataspace to modify */
     htri_t		    ret_value;
 
-    FUNC_ENTER_API(H5Sis_simple, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "i", space_id);
 
     /* Check args and all the boring stuff. */
@@ -1172,7 +1177,7 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
     int	        u;	/* local counting variable */
     herr_t      ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API(H5Sset_extent_simple, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iIs*[a1]h*[a1]h", space_id, rank, dims, max);
 
     /* Check args */
@@ -1228,7 +1233,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_set_extent_simple)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(rank <= H5S_MAX_RANK);
@@ -1321,7 +1326,7 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
     int		i;
     hid_t	ret_value;
 
-    FUNC_ENTER_API(H5Screate_simple, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "Is*[a0]h*[a0]h", rank, dims, maxdims);
 
     /* Check arguments */
@@ -1387,7 +1392,7 @@ H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
 {
     H5S_t	*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_create_simple, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 
     /* Check arguments */
     assert(rank <=H5S_MAX_RANK);
@@ -1427,7 +1432,7 @@ H5Sencode(hid_t obj_id, void *buf, size_t *nalloc)
     H5S_t       *dspace;
     herr_t      ret_value=SUCCEED;
 
-    FUNC_ENTER_API (H5Sencode, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*x*z", obj_id, buf, nalloc);
 
     /* Check argument and retrieve object */
@@ -1467,7 +1472,7 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
     H5F_t       *f = NULL;      /* Fake file structure*/
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_encode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Allocate "fake" file structure */
     if(NULL == (f = H5F_fake_alloc((uint8_t)0)))
@@ -1540,7 +1545,7 @@ H5Sdecode(const void *buf)
     H5S_t       *ds;
     hid_t       ret_value;
 
-    FUNC_ENTER_API (H5Sdecode, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "*x", buf);
 
     if(buf == NULL)
@@ -1584,7 +1589,7 @@ H5S_decode(const unsigned char *buf)
     uint8_t     sizeof_size;            /* 'Size of sizes' for file */
     H5S_t       *ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Decode the type of the information */
     if(*buf++ != H5O_SDSPACE_ID)
@@ -1666,7 +1671,7 @@ H5S_get_simple_extent_type(const H5S_t *space)
 {
     H5S_class_t	ret_value;
 
-    FUNC_ENTER_NOAPI(H5S_get_simple_extent_type, H5S_NO_CLASS)
+    FUNC_ENTER_NOAPI(H5S_NO_CLASS)
 
     assert(space);
 
@@ -1701,7 +1706,7 @@ H5Sget_simple_extent_type(hid_t sid)
     H5S_t	*space;
     H5S_class_t	ret_value;
 
-    FUNC_ENTER_API(H5Sget_simple_extent_type, H5S_NO_CLASS)
+    FUNC_ENTER_API(H5S_NO_CLASS)
     H5TRACE1("Sc", "i", sid);
 
     /* Check arguments */
@@ -1735,7 +1740,7 @@ H5Sset_extent_none(hid_t space_id)
     H5S_t		   *space;	/* dataspace to modify */
     herr_t                  ret_value=SUCCEED;  /* Return value */
 
-    FUNC_ENTER_API(H5Sset_extent_none, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", space_id);
 
     /* Check args */
@@ -1775,7 +1780,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
     H5S_t		   *space;	/* dataspace to modify */
     herr_t                  ret_value=SUCCEED;  /* Return value */
 
-    FUNC_ENTER_API(H5Soffset_simple, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Hs", space_id, offset);
 
     /* Check args */
@@ -1815,7 +1820,7 @@ H5S_set_extent(H5S_t *space, const hsize_t *size)
     unsigned u;                 /* Local index variable */
     htri_t ret_value = FALSE;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_set_extent, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));
@@ -1827,7 +1832,7 @@ H5S_set_extent(H5S_t *space, const hsize_t *size)
             /* Check for invalid dimension size modification */
             if(space->extent.max && H5S_UNLIMITED != space->extent.max[u] &&
                      space->extent.max[u] < size[u])
-                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "dimension cannot exceed the existing maximal size")
+                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "dimension cannot exceed the existing maximal size (new: %llu max: %llu)", (unsigned long long)size[u], (unsigned long long)space->extent.max[u])
 
             /* Indicate that dimension size can be modified */
             ret_value = TRUE;
@@ -1864,7 +1869,7 @@ H5S_has_extent(const H5S_t *ds)
 {
     hbool_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_has_extent)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(ds);
 
@@ -1897,7 +1902,7 @@ H5S_set_extent_real(H5S_t *space, const hsize_t *size)
     unsigned u;         /* Local index variable */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_set_extent_real, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));
@@ -1944,7 +1949,7 @@ H5Sextent_equal(hid_t space1_id, hid_t space2_id)
     const H5S_t	*ds1, *ds2;     /* Dataspaces to compare */
     htri_t	ret_value;
 
-    FUNC_ENTER_API(H5Sextent_equal, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "ii", space1_id, space2_id);
 
     /* check args */
@@ -1980,7 +1985,7 @@ H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
     unsigned u;                 /* Local index variable */
     htri_t ret_value = TRUE;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_extent_equal)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(ds1);
@@ -2038,7 +2043,7 @@ done:
 hsize_t
 H5S_extent_nelem(const H5S_extent_t *ext)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_extent_nelem)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(ext);
@@ -2063,9 +2068,7 @@ H5S_extent_nelem(const H5S_extent_t *ext)
 herr_t
 H5S_set_latest_version(H5S_t *ds)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_set_latest_version, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ds);
@@ -2073,8 +2076,7 @@ H5S_set_latest_version(H5S_t *ds)
     /* Set encoding of extent to latest version */
     ds->extent.version = H5O_SDSPACE_VERSION_LATEST;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S_set_latest_version() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -2099,7 +2101,7 @@ H5S_extend(H5S_t *space, const hsize_t *size)
     unsigned	u;
     int	ret_value = 0;
 
-    FUNC_ENTER_NOAPI(H5S_extend, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));

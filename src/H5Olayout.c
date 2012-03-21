@@ -106,7 +106,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     unsigned               u;
     void                   *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_decode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -350,6 +350,8 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                 mesg->ops = H5D_LOPS_CHUNK;
                 break;
 
+            case H5D_LAYOUT_ERROR:
+            case H5D_NLAYOUTS:
             default:
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "Invalid layout class")
         } /* end switch */
@@ -408,7 +410,7 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
     unsigned               u;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_encode)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -514,6 +516,8 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
             } /* end else */
             break;
 
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "Invalid layout class")
     } /* end switch */
@@ -545,7 +549,7 @@ H5O_layout_copy(const void *_mesg, void *_dest)
     H5O_layout_t           *dest = (H5O_layout_t *) _dest;
     void                   *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_copy)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(mesg);
@@ -605,7 +609,7 @@ H5O_layout_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     size_t                  ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_layout_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);
@@ -638,7 +642,7 @@ H5O_layout_reset(void *_mesg)
     H5O_layout_t     *mesg = (H5O_layout_t *)_mesg;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_reset)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(mesg) {
         /* Reset associated storage information, if it's been initialized */
@@ -674,7 +678,7 @@ H5O_layout_free(void *_mesg)
     H5O_layout_t     *mesg = (H5O_layout_t *) _mesg;
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_free)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(mesg);
 
@@ -707,7 +711,7 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
     H5O_layout_t *mesg = (H5O_layout_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_delete)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);
@@ -734,6 +738,8 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
                 break;
 
+            case H5D_LAYOUT_ERROR:
+            case H5D_NLAYOUTS:
             default:
                 HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "not valid storage type")
         } /* end switch */
@@ -766,7 +772,7 @@ H5O_layout_pre_copy_file(H5F_t UNUSED *file_src, const void *mesg_src,
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     herr_t             ret_value = SUCCEED;                     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_pre_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(layout_src);
@@ -810,7 +816,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     hbool_t             copied = FALSE;                         /* Whether the data was copied */
     void               *ret_value;                              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(file_src);
@@ -860,6 +866,8 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
                 } /* end if */
                 break;
 
+            case H5D_LAYOUT_ERROR:
+            case H5D_NLAYOUTS:
             default:
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "Invalid layout class")
         } /* end switch */
@@ -905,7 +913,7 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     unsigned                    u;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_layout_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(f);
@@ -986,6 +994,8 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                           "Data Size:", mesg->storage.u.compact.size);
             break;
 
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
                       "Type:", "Unknown", (unsigned)mesg->type);

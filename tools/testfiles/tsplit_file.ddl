@@ -1,15 +1,12 @@
-#############################
-Expected output for 'h5dump --filedriver=split tsplit_file'
-#############################
 HDF5 "tsplit_file" {
 GROUP "/" {
    ATTRIBUTE "Metadata" {
       DATATYPE  H5T_STRING {
-            STRSIZE 35;
-            STRPAD H5T_STR_NULLTERM;
-            CSET H5T_CSET_ASCII;
-            CTYPE H5T_C_S1;
-         }
+         STRSIZE 35;
+         STRPAD H5T_STR_NULLTERM;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
       DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
       DATA {
       (0): "this is some metadata on this file"

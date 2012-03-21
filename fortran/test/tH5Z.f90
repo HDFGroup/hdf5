@@ -1,3 +1,12 @@
+!****h* root/fortran/test/tH5Z.f90
+!
+! NAME
+!  tH5Z.f90
+!
+! FUNCTION
+!  Basic testing of Fortran H5Z szip APIs.
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,6 +22,11 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+! CONTAINS SUBROUTINES
+!  filters_test, szip_test
+!
+!*****
+
     SUBROUTINE filters_test(cleanup, total_error)
 
 !   This subroutine tests following functionalities: h5zfilter_avail_f, h5zunregister_f

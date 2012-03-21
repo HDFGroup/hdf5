@@ -81,7 +81,7 @@ void pause_proc(void)
     MPI_Get_processor_name(mpi_name, &mpi_namelen);
 
     if (MAINPROCESS)
-	while ((stat(greenlight, &statbuf) == -1) && loops < maxloop){
+  while ((HDstat(greenlight, &statbuf) == -1) && loops < maxloop){
 	    if (!loops++){
 		printf("Proc %d (%*s, %d): to debug, attach %d\n",
 		    mpi_rank, mpi_namelen, mpi_name, pid, pid);
@@ -498,6 +498,9 @@ int main(int argc, char **argv)
             "test mpi derived type management", 
             PARATESTFILE);
 
+    AddTest("actualio", actual_io_mode_tests, NULL,
+            "test actual io mode proprerty",
+            PARATESTFILE);
 
     /* Display testing information */
     TestInfo(argv[0]);

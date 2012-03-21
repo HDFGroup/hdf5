@@ -87,7 +87,7 @@ Preconditions:
       Variables" box.
 
       In the New Variable window, set "Variable name" as HDF5_EXT_ZLIB and 
-      "Variable value" as zlib1.lib, then click OK.
+      "Variable value" as zlib.lib, then click OK.
 
       Similarly, you can set:
 
@@ -98,7 +98,7 @@ Preconditions:
          a. You will have to close and reopen running programs for the new 
             environment variable settings to take effect.
 
-         b. c:\zlib\zlib1.dll and c:\szip\dll\szip.dll should be copied 
+         b. c:\zlib\zlib.dll and c:\szip\dll\szip.dll should be copied 
             into a location that the application can find.
 
    9. Set up path for libraries and headers
@@ -123,6 +123,16 @@ Preconditions:
           
       9.4 If building Fortran applications, you will also need to setup the path
           for the Intel Fortran compiler.  Please see Section VI.
+          
+      NOTE:
+          If you are using VS2010, the path settings will need to be in project
+          property sheets per project. Go to "Project" and select "Properties", find 
+          "Configuration Properties", and then "VC++ Directories".
+          
+          9.1 If you are building on 64-bit Windows, find the "Platform" dropdown
+              and select "x64".
+          9.2 Add the header path to the "Include Directories" setting.
+          9.3 Add the library path to the "Library Directories" setting.
 
 Notes:
 
@@ -595,7 +605,7 @@ Building with Visual Studio 2010 is very similar to building with Visual Studio
 with the following considerations:
 
     1. Visual Studio 2010 uses a new format for project files, but Visual Studio
-       2008 project files can be easily converted.  The HDF5 project files
+       2008 project files can be converted.  The HDF5 project files
        will need to be converted on first use.  To do so:
        
        1.1. Open the HDF5 Visual Studio 2008 solution file as in Section II
@@ -610,7 +620,8 @@ with the following considerations:
        1.3. When it is finished, it should state that all projects were
             converted successfully with no errors.  Warnings can be ignored.
             
-    2. Once the project files have been converted, build and test normally.
+    2. Once the project files have been converted you will need to create project 
+       property sheets for the library and include paths. Then build and test normally.
        Note that the converted project files aren't backwards compatible with
        previous versions of Visual Studio.
 

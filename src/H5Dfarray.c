@@ -239,7 +239,7 @@ H5D_farray_crt_context(void *_udata)
     H5D_farray_ctx_ud_t *udata = (H5D_farray_ctx_ud_t *)_udata; /* User data for fixed array context */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_crt_context)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(udata);
@@ -286,7 +286,7 @@ H5D_farray_dst_context(void *_ctx)
 {
     H5D_farray_ctx_t *ctx = (H5D_farray_ctx_t *)_ctx;   /* Fixed array callback context */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_dst_context)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(ctx);
@@ -316,7 +316,7 @@ H5D_farray_fill(void *nat_blk, size_t nelmts)
 {
     haddr_t fill_val = H5D_FARRAY_FILL;          /* Value to fill elements with */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_fill)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(nat_blk);
@@ -347,7 +347,7 @@ H5D_farray_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
     H5D_farray_ctx_t *ctx = (H5D_farray_ctx_t *)_ctx;   /* Fixed array callback context */
     const haddr_t *elmt = (const haddr_t *)_elmt;     /* Convenience pointer to native elements */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(raw);
@@ -392,7 +392,7 @@ H5D_farray_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
     haddr_t *elmt = (haddr_t *)_elmt;           /* Convenience pointer to native elements */
     const uint8_t *raw = (const uint8_t *)_raw; /* Convenience pointer to raw elements */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_decode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(raw);
@@ -435,7 +435,7 @@ H5D_farray_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
 {
     char temp_str[128];     /* Temporary string, for formatting */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(stream);
@@ -473,7 +473,7 @@ H5D_farray_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr)
     H5O_layout_t layout;        /* Layout message */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_crt_dbg_context)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(f);
     HDassert(H5F_addr_defined(obj_addr));
@@ -544,7 +544,7 @@ H5D_farray_dst_dbg_context(void *_dbg_ctx)
 {
     H5D_farray_ctx_ud_t	*dbg_ctx = (H5D_farray_ctx_ud_t	*)_dbg_ctx; /* Context for fixed array callback */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_dst_dbg_context)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(dbg_ctx);
 
@@ -573,7 +573,7 @@ H5D_farray_filt_fill(void *nat_blk, size_t nelmts)
 {
     H5D_farray_filt_elmt_t fill_val = H5D_FARRAY_FILT_FILL;     /* Value to fill elements with */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_filt_fill)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(nat_blk);
@@ -606,7 +606,7 @@ H5D_farray_filt_encode(void *_raw, const void *_elmt, size_t nelmts, void *_ctx)
     uint8_t *raw = (uint8_t *)_raw;             /* Convenience pointer to raw elements */
     const H5D_farray_filt_elmt_t *elmt = (const H5D_farray_filt_elmt_t *)_elmt;     /* Convenience pointer to native elements */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_filt_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(raw);
@@ -653,7 +653,7 @@ H5D_farray_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
     H5D_farray_filt_elmt_t *elmt = (H5D_farray_filt_elmt_t *)_elmt;           /* Convenience pointer to native elements */
     const uint8_t *raw = (const uint8_t *)_raw; /* Convenience pointer to raw elements */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_filt_decode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(raw);
@@ -699,7 +699,7 @@ H5D_farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
     const H5D_farray_filt_elmt_t *elmt = (const H5D_farray_filt_elmt_t *)_elmt;           /* Convenience pointer to native elements */
     char temp_str[128];     /* Temporary string, for formatting */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_filt_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(stream);
@@ -734,7 +734,7 @@ H5D_farray_idx_open(const H5D_chk_idx_info_t *idx_info)
     H5D_farray_ctx_ud_t udata;          /* User data for fixed array open call */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_open)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(idx_info);
@@ -790,7 +790,7 @@ H5D_farray_idx_create(const H5D_chk_idx_info_t *idx_info)
     H5D_farray_ctx_ud_t udata;  /* User data for fixed array create call */
     herr_t 	ret_value = SUCCEED; 	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(idx_info);
@@ -858,7 +858,7 @@ H5D_farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
     hbool_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_idx_is_space_alloc)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(storage);
@@ -895,7 +895,7 @@ H5D_farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     hsize_t     idx;	/* Array index of chunk */
     herr_t	ret_value = SUCCEED;		/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_insert)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -1046,7 +1046,7 @@ H5D_farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     hsize_t     idx;   	/* Array index of chunk */
     herr_t	ret_value = SUCCEED;		/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_get_addr)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -1123,7 +1123,7 @@ H5D_farray_idx_iterate_cb(hsize_t UNUSED idx, const void *_elmt, void *_udata)
     int curr_dim;                   /* Current dimension */
     int ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_iterate_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Compose generic chunk record for callback */
     if(udata->filtered) {
@@ -1187,7 +1187,7 @@ H5D_farray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5FA_stat_t fa_stat;        /* Fixed array statistics */
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_iterate)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -1265,7 +1265,7 @@ H5D_farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
     hsize_t     idx;   	/* Array index of chunk */
     herr_t	ret_value = SUCCEED;		/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_remove)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -1355,7 +1355,7 @@ H5D_farray_idx_delete_cb(hsize_t UNUSED idx, const void *_elmt, void *_udata)
     uint32_t nbytes;                    /* Size of chunk */
     int ret_value = H5_ITER_CONT;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_delete_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(_elmt);
@@ -1403,7 +1403,7 @@ H5D_farray_idx_delete(const H5D_chk_idx_info_t *idx_info)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_delete)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -1487,7 +1487,7 @@ H5D_farray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_copy_setup)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(idx_info_src);
@@ -1543,7 +1543,7 @@ H5D_farray_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_copy_shutdown)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(storage_src);
@@ -1584,7 +1584,7 @@ H5D_farray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     H5FA_stat_t fa_stat;                /* Fixed array statistics */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_farray_idx_size, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(idx_info);
@@ -1635,7 +1635,7 @@ done:
 static herr_t
 H5D_farray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_idx_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(storage);
@@ -1664,7 +1664,7 @@ H5D_farray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 static herr_t
 H5D_farray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_idx_dump)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(storage);
@@ -1693,7 +1693,7 @@ H5D_farray_idx_dest(const H5D_chk_idx_info_t *idx_info)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_idx_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(idx_info);

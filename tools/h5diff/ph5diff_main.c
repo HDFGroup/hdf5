@@ -19,6 +19,7 @@
 #include <string.h>
 #include <assert.h>
 #include "h5diff_common.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 /* Name of tool */
@@ -67,6 +68,9 @@ int main(int argc, const char *argv[])
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
+
+    /* Initialize h5tools lib */
+    h5tools_init();
 
     outBuffOffset = 0;
     g_Parallel = 1;
@@ -136,7 +140,7 @@ int main(int argc, const char *argv[])
 static void
 ph5diff_worker(int nID)
 {
-    struct diff_args args;
+    struct diff_mpi_args args;
     hid_t file1_id, file2_id;
     char    filenames[2][MAX_FILENAME];
     char    out_data[PRINT_DATA_MAX_SIZE] = {0};
@@ -177,7 +181,7 @@ ph5diff_worker(int nID)
                 /*Recv parameters for diff from manager task */
                 MPI_Recv(&args, sizeof(args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
                 /*Do the diff */
-                diffs.nfound = diff(file1_id, args.name1, file2_id, args.name2, &(args.options), args.type);
+                diffs.nfound = diff(file1_id, args.name1, file2_id, args.name2, &(args.options), &(args.argdata));
                 diffs.not_cmp = args.options.not_cmp;
 
                 /*If print buffer has something in it, request print token.*/
@@ -243,5 +247,34 @@ ph5diff_worker(int nID)
 
         }
     }
+}
+
+/*-------------------------------------------------------------------------
+ * Function: h5diff_exit
+ *
+ * Purpose: dismiss phdiff worker processes and exit
+ *
+ * Return: none
+ *
+ * Programmer: Albert Cheng
+ * Date: Feb 6, 2005
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void h5diff_exit(int status)
+{
+    /* if in parallel mode, dismiss workers, close down MPI, then exit */
+    if((g_nTasks > 1) && g_Parallel) {
+        phdiff_dismiss_workers();
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+    if(g_Parallel)
+        MPI_Finalize();
+
+    exit(status);
 }
 

@@ -1,16 +1,13 @@
-#############################
-Expected output for 'h5dump tstr2.h5'
-#############################
 HDF5 "tstr2.h5" {
 GROUP "/" {
    GROUP "g1" {
       DATASET "dset1" {
          DATATYPE  H5T_STRING {
-               STRSIZE 50;
-               STRPAD H5T_STR_NULLTERM;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 50;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
          DATA {
          (0): "This is row 0 of type H5T_STR_NULLTERM of",
@@ -26,11 +23,11 @@ GROUP "/" {
          }
          ATTRIBUTE "attr1" {
             DATATYPE  H5T_STRING {
-                  STRSIZE 11;
-                  STRPAD H5T_STR_NULLTERM;
-                  CSET H5T_CSET_ASCII;
-                  CTYPE H5T_C_S1;
-               }
+               STRSIZE 11;
+               STRPAD H5T_STR_NULLTERM;
+               CSET H5T_CSET_ASCII;
+               CTYPE H5T_C_S1;
+            }
             DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
             DATA {
             (0): "0123456789", "abcdefghij", "ABCDEFGHIJ"
@@ -41,11 +38,11 @@ GROUP "/" {
    GROUP "g2" {
       DATASET "dset2" {
          DATATYPE  H5T_STRING {
-               STRSIZE 50;
-               STRPAD H5T_STR_NULLTERM;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 50;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
          DATA {
          (0): "This is row 0 of type H5T_STR_NULLTERM of string ",
@@ -64,11 +61,11 @@ GROUP "/" {
    GROUP "g3" {
       DATASET "dset3" {
          DATATYPE  H5T_STRING {
-               STRSIZE 50;
-               STRPAD H5T_STR_NULLPAD;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 50;
+            STRPAD H5T_STR_NULLPAD;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
          DATA {
          (0): "This is row 0 of type H5T_STR_NULLPAD of\000\000\000\000\000\000\000\000\000\000",
@@ -87,11 +84,11 @@ GROUP "/" {
    GROUP "g4" {
       DATASET "dset4" {
          DATATYPE  H5T_STRING {
-               STRSIZE 50;
-               STRPAD H5T_STR_NULLPAD;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 50;
+            STRPAD H5T_STR_NULLPAD;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
          DATA {
          (0): "This is row 0 of type H5T_STR_NULLPAD of string ar",
@@ -110,11 +107,11 @@ GROUP "/" {
    GROUP "g5" {
       DATASET "dset5" {
          DATATYPE  H5T_STRING {
-               STRSIZE 50;
-               STRPAD H5T_STR_SPACEPAD;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 50;
+            STRPAD H5T_STR_SPACEPAD;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
          DATA {
          (0): "This is row 0 of type H5T_STR_SPACEPAD of         ",
@@ -133,11 +130,11 @@ GROUP "/" {
    GROUP "g6" {
       DATASET "dset6" {
          DATATYPE  H5T_STRING {
-               STRSIZE 50;
-               STRPAD H5T_STR_SPACEPAD;
-               CSET H5T_CSET_ASCII;
-               CTYPE H5T_C_S1;
-            }
+            STRSIZE 50;
+            STRPAD H5T_STR_SPACEPAD;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
          DATASPACE  SIMPLE { ( 10 ) / ( 10 ) }
          DATA {
          (0): "This is row 0 of type H5T_STR_SPACEPAD of string a",

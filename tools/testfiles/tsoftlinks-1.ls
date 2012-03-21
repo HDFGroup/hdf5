@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls --follow-symlinks tsoftlinks.h5'
-#############################
 dset1                    Dataset {4, 2}
 dset2                    Dataset {4, 2}
 dtype                    Type

@@ -41,6 +41,7 @@
 
 /* Predefined file drivers */
 #include "H5FDcore.h"		/* Files stored entirely in memory	*/
+#include "H5FDdirect.h"     	/* Linux direct I/O			*/
 #include "H5FDfamily.h"		/* File families 			*/
 #include "H5FDlog.h"        	/* sec2 driver with I/O logging (for debugging) */
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
@@ -50,6 +51,5 @@
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Windows buffered I/O     */
 #endif
-#include "H5FDdirect.h"     	/* Linux direct I/O			*/
 
 #endif

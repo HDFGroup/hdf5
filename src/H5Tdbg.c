@@ -109,7 +109,7 @@ H5T_print_stats(H5T_path_t UNUSED * path, int UNUSED * nprint/*in,out*/)
     char	bandwidth[32];
 #endif
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_print_stats)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef H5T_DEBUG
     if(H5DEBUG(T) && path->stats.ncalls > 0) {
@@ -166,7 +166,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
     const char	*s1 = "", *s2 = "";
     unsigned	i;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5T_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(dt);

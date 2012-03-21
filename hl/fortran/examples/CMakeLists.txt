@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.6)
 PROJECT (HDF5_HL_F90_EXAMPLES C CXX Fortran)
 
 #-----------------------------------------------------------------------------
@@ -12,6 +12,7 @@ INCLUDE_DIRECTORIES (
 
 SET (examples
     exlite
+    ex_ds1
 )
 
 FOREACH (example ${examples})
@@ -24,6 +25,7 @@ FOREACH (example ${examples})
       ${HDF5_LIB_TARGET}
   )
   SET_TARGET_PROPERTIES (hl_f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
+  SET_TARGET_PROPERTIES (hl_f90_ex_${example} PROPERTIES FOLDER examples/hl/fortran)
 
   IF (BUILD_TESTING)
     ADD_TEST (NAME hl_f90_ex_${example} COMMAND $<TARGET_FILE:hl_f90_ex_${example}>)

@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tcompound.h5'
-#############################
 HDF5 "tcompound.h5" {
 GROUP "/" {
    DATATYPE "#6632" H5T_COMPOUND {

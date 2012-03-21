@@ -260,7 +260,7 @@ H5D_bt2_crt_context(void *_udata)
     H5D_bt2_ctx_t *ctx;   	/* Callback context structure */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_crt_context)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(udata);
@@ -308,7 +308,7 @@ H5D_bt2_dst_context(void *_ctx)
 {
     H5D_bt2_ctx_t *ctx = (H5D_bt2_ctx_t *)_ctx;       /* Callback context structure */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_dst_context)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -336,7 +336,7 @@ H5D_bt2_dst_context(void *_ctx)
 static herr_t
 H5D_bt2_store(void *record, const void *_udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_store)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     const H5D_bt2_find_ud_t *udata = (const H5D_bt2_find_ud_t *)_udata;	/* User data */
 
@@ -369,7 +369,7 @@ H5D_bt2_compare(const void *_udata, const void *_rec2)
     const H5D_bt2_rec_t *rec2 = (const H5D_bt2_rec_t *)_rec2;		/* The native record */
     herr_t ret_value; 	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_compare)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(rec1);
     HDassert(rec2);
@@ -401,7 +401,7 @@ H5D_bt2_encode(uint8_t *raw, const void *_record, void *_ctx)
     const H5D_bt2_rec_t *record = (const H5D_bt2_rec_t *)_record; /* The native record */
     unsigned	i;	/* Local index varible */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -435,7 +435,7 @@ H5D_bt2_decode(const uint8_t *raw, void *_record, void *_ctx)
     H5D_bt2_rec_t *record = (H5D_bt2_rec_t *)_record;	/* The native record */
     unsigned	i;	/* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_decode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -469,7 +469,7 @@ H5D_bt2_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
     const H5D_bt2_ctx_ud_t *u_ctx = (const H5D_bt2_ctx_ud_t *)_u_ctx; 	  /* User data for creating callback context */
     unsigned u;		/* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(record);
 
@@ -499,7 +499,7 @@ H5D_bt2_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
 static herr_t
 H5D_bt2_filt_store(void *record, const void *_udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_filt_store)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     const H5D_bt2_find_ud_t *udata = (const H5D_bt2_find_ud_t *)_udata;	/* User data */
 
@@ -532,7 +532,7 @@ H5D_bt2_filt_compare(const void *_udata, const void *_rec2)
     const H5D_bt2_filt_rec_t *rec2 = (const H5D_bt2_filt_rec_t *)_rec2;		/* The native record */
     herr_t ret_value;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_filt_compare)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(rec1);
     HDassert(rec2);
@@ -564,7 +564,7 @@ H5D_bt2_filt_encode(uint8_t *raw, const void *_record, void *_ctx)
     const H5D_bt2_filt_rec_t *record = (const H5D_bt2_filt_rec_t *)_record;  /* The native record */
     unsigned i;	/* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_filt_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -600,7 +600,7 @@ H5D_bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
     H5D_bt2_filt_rec_t *record = (H5D_bt2_filt_rec_t *)_record;	/* The native record */
     unsigned i;	/* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_filt_decode)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -636,7 +636,7 @@ H5D_bt2_filt_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
     const H5D_bt2_ctx_ud_t *u_ctx = (const H5D_bt2_ctx_ud_t *)_u_ctx; /* User data for creating callback context */
     unsigned u;		/* Local index variable */
  
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_filt_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(record);
 
@@ -674,7 +674,7 @@ H5D_bt2_crt_dbg_context(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t obj_addr)
     H5O_layout_t layout;        /* Layout message */
     void *ret_value;      	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_crt_dbg_context)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);
@@ -745,7 +745,7 @@ H5D_bt2_dst_dbg_context(void *_u_ctx)
 {
     H5D_bt2_ctx_ud_t *u_ctx = (H5D_bt2_ctx_ud_t *)_u_ctx; /* User data for creating callback context */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_dst_dbg_context)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(u_ctx);
@@ -780,7 +780,7 @@ H5D_bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
     H5D_bt2_ctx_ud_t u_ctx;	/* user data for creating context */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_open)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(idx_info);
@@ -824,7 +824,7 @@ H5D_bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     H5D_bt2_ctx_ud_t u_ctx;		/* data for context call */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(idx_info);
@@ -892,7 +892,7 @@ H5D_bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
     hbool_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_idx_is_space_alloc)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(storage);
@@ -922,7 +922,7 @@ H5D_bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 static herr_t
 H5D_bt2_mod_filt_cb(void *_record, void *_op_data, hbool_t *changed)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_mod_filt_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     *(H5D_bt2_filt_rec_t *)_record = *(H5D_bt2_filt_rec_t *)_op_data;
 
@@ -958,7 +958,7 @@ H5D_bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     unsigned u;				/* Local index variable */
     herr_t ret_value = SUCCEED;		/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_insert)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -1111,7 +1111,7 @@ done:
 static herr_t
 H5D_bt2_found_cb(const void *nrecord, void *op_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_found_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     *(H5D_bt2_rec_t *)op_data = *(const H5D_bt2_rec_t *)nrecord;
 
@@ -1137,7 +1137,7 @@ H5D_bt2_found_cb(const void *nrecord, void *op_data)
 static herr_t
 H5D_bt2_filt_found_cb(const void *nrecord, void *op_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_filt_found_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     *(H5D_bt2_filt_rec_t *)op_data = *(const H5D_bt2_filt_rec_t *)nrecord;
 
@@ -1166,7 +1166,7 @@ H5D_bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     unsigned	u;			/* Local index variable */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_get_addr)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -1267,7 +1267,7 @@ H5D_bt2_idx_iterate_cb(const void *_record, void *_udata)
     unsigned u;		        /* Local index variable */
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR(H5D_bt2_idx_iterate_cb, -)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Compose generic chunk record for callback */
     if(udata->filtered) { /* filtered record */
@@ -1317,7 +1317,7 @@ H5D_bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_bt2_it_ud_t udata; 	/* User data for B-tree iterator callback */
     int ret_value;		/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_iterate)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -1380,7 +1380,7 @@ H5D_bt2_remove_cb(const void *record, void *_udata)
     H5D_bt2_remove_ud_t *udata = (H5D_bt2_remove_ud_t *)_udata;	/* User data for removal callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_remove_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Free the space in the file for the object being removed */
     H5_CHECK_OVERFLOW(udata->unfilt_size, uint32_t, hsize_t);
@@ -1414,7 +1414,7 @@ H5D_bt2_filt_remove_cb(const void *_record, void *_udata)
     const H5D_bt2_filt_rec_t *record = (const H5D_bt2_filt_rec_t *)_record;	/* The native record */
     herr_t ret_value = SUCCEED;  	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_filt_remove_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Free the space in the file for the object being removed */
     H5_CHECK_OVERFLOW(record->nbytes, uint32_t, hsize_t);
@@ -1446,7 +1446,7 @@ H5D_bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *ud
     unsigned 	u;			/* Local index variable */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_remove)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -1534,7 +1534,7 @@ H5D_bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
     H5D_bt2_ctx_ud_t u_ctx;		/* data for context call */
     herr_t ret_value = SUCCEED;     	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_delete)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -1591,7 +1591,7 @@ H5D_bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
 {
     herr_t      ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_copy_setup)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Source file */
     HDassert(idx_info_src);
@@ -1647,7 +1647,7 @@ H5D_bt2_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_copy_shutdown)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(storage_src);
@@ -1688,7 +1688,7 @@ H5D_bt2_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     H5B2_t *bt2_cdset = NULL;		/* Pointer to v2 B-tree structure */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_bt2_idx_size, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(idx_info);
@@ -1733,7 +1733,7 @@ done:
 static herr_t
 H5D_bt2_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_idx_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(storage);
 
@@ -1760,7 +1760,7 @@ H5D_bt2_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 static herr_t
 H5D_bt2_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_bt2_idx_dump)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(storage);
     HDassert(stream);
@@ -1787,7 +1787,7 @@ H5D_bt2_idx_dest(const H5D_chk_idx_info_t *idx_info)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_bt2_idx_dest)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(idx_info);

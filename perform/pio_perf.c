@@ -339,6 +339,11 @@ main(int argc, char **argv)
     int exit_value = EXIT_SUCCESS;
     struct options *opts = NULL;
 
+#ifndef STANDALONE
+    /* Initialize h5tools lib */
+    h5tools_init();
+#endif
+
     output = stdout;
 
     /* initialize MPI and get the maximum num of processors we started with */
@@ -1312,11 +1317,11 @@ parse_command_line(int argc, char *argv[])
                         if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
-                    if (!strcasecmp(buf, "phdf5")) {
+                    if (!HDstrcasecmp(buf, "phdf5")) {
                         cl_opts->io_types |= PIO_HDF5;
-                    } else if (!strcasecmp(buf, "mpiio")) {
+                    } else if (!HDstrcasecmp(buf, "mpiio")) {
                         cl_opts->io_types |= PIO_MPI;
-                    } else if (!strcasecmp(buf, "posix")) {
+                    } else if (!HDstrcasecmp(buf, "posix")) {
                         cl_opts->io_types |= PIO_POSIX;
                     } else {
                         fprintf(stderr, "pio_perf: invalid --api option %s\n",

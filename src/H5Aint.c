@@ -138,12 +138,12 @@ H5FL_SEQ_DEFINE(H5A_t_ptr);
  */
 static herr_t
 H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned sequence, hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
+    unsigned sequence, unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5A_compact_bt_ud_t *udata = (H5A_compact_bt_ud_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_compact_build_table_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(mesg);
@@ -204,7 +204,7 @@ H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_index_t idx_type,
     H5O_mesg_operator_t op;             /* Wrapper for operator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_compact_build_table)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);
@@ -265,7 +265,7 @@ H5A_dense_build_table_cb(const H5A_t *attr, void *_udata)
     H5A_dense_bt_ud_t *udata = (H5A_dense_bt_ud_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_build_table_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(attr);
@@ -314,7 +314,7 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     hsize_t nrec;                       /* # of records in v2 B-tree */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_build_table)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(f);
@@ -395,7 +395,7 @@ done:
 static int
 H5A_attr_cmp_name_inc(const void *attr1, const void *attr2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_name_inc)
+    FUNC_ENTER_NOAPI_NOINIT
 
     FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t * const *)attr1)->shared->name,
             (*(const H5A_t * const *)attr2)->shared->name))
@@ -423,7 +423,7 @@ H5A_attr_cmp_name_inc(const void *attr1, const void *attr2)
 static int
 H5A_attr_cmp_name_dec(const void *attr1, const void *attr2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_name_dec)
+    FUNC_ENTER_NOAPI_NOINIT
 
     FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t * const *)attr2)->shared->name,
             (*(const H5A_t * const *)attr1)->shared->name))
@@ -452,7 +452,7 @@ H5A_attr_cmp_corder_inc(const void *attr1, const void *attr2)
 {
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_corder_inc)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if((*(const H5A_t * const *)attr1)->shared->crt_idx < (*(const H5A_t * const *)attr2)->shared->crt_idx)
         ret_value = -1;
@@ -487,7 +487,7 @@ H5A_attr_cmp_corder_dec(const void *attr1, const void *attr2)
 {
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_corder_dec)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if((*(const H5A_t * const *)attr1)->shared->crt_idx < (*(const H5A_t * const *)attr2)->shared->crt_idx)
         ret_value = 1;
@@ -517,7 +517,7 @@ static herr_t
 H5A_attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
     H5_iter_order_t order)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_sort_table)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(atable);
@@ -567,7 +567,7 @@ H5A_attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip,
     size_t u;                           /* Local index variable */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5A_attr_iterate_table, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(atable);
@@ -646,7 +646,7 @@ H5A_attr_release_table(H5A_attr_table_t *atable)
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_attr_release_table)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(atable);
@@ -691,7 +691,7 @@ H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     htri_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5A_get_ainfo, dxpl_id, oh->cache_info.addr, FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, oh->cache_info.addr, FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -756,7 +756,7 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
     hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
     hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5A_set_version)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -820,7 +820,7 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
 
     H5A_t       *ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_attr_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(attr_src);
@@ -851,7 +851,8 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     HDassert(attr_dst->shared->name);
 
     /* Copy attribute's datatype */
-    /* (Start destination datatype as transient, even if source is named) */
+    /* If source is named, we will keep dst as named, but we will not actually
+     * copy the target and update the message until post copy */
     if(NULL == (attr_dst->shared->dt = H5T_copy(attr_src->shared->dt, H5T_COPY_ALL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "cannot copy datatype")
 
@@ -859,37 +860,14 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     if(H5T_set_loc(attr_dst->shared->dt, file_dst, H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "cannot mark datatype on disk")
 
-    /* Check for named datatype being copied */
-    if(H5T_committed(attr_src->shared->dt)) {
-        H5O_loc_t         *src_oloc;           /* Pointer to source datatype's object location */
-        H5O_loc_t         *dst_oloc;           /* Pointer to dest. datatype's object location */
-
-        /* Get group entries for source & destination */
-        src_oloc = H5T_oloc(attr_src->shared->dt);
-        HDassert(src_oloc);
-        dst_oloc = H5T_oloc(attr_dst->shared->dt);
-        HDassert(dst_oloc);
-
-        /* Reset object location for new object */
-        H5O_loc_reset(dst_oloc);
-        dst_oloc->file = file_dst;
-
-        /* Copy the shared object from source to destination */
-        if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, cpy_info, FALSE,
-                NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
-
-        /* Update shared message info from named datatype info */
-        H5T_update_shared(attr_dst->shared->dt);
-    } /* end if */
-    else {
+    if(!H5T_committed(attr_src->shared->dt)) {
         /* If the datatype is not named, it may have been shared in the
          * source file's heap.  Un-share it for now. We'll try to shared
          * it in the destination file below.
          */
         if(H5O_msg_reset_share(H5O_DTYPE_ID, attr_dst->shared->dt) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset datatype sharing")
-    } /* end else */
+    } /* end if */
 
     /* Copy the dataspace for the attribute. Make sure the maximal dimension is also copied.
      * Otherwise the comparison in the test may complain about it. SLU 2011/4/12 */
@@ -902,13 +880,13 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     if(H5O_msg_reset_share(H5O_SDSPACE_ID, attr_dst->shared->ds) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset dataspace sharing")
 
-
-    /* Try to share both the datatype and dataset.  This does nothing if the
-     * datatype is committed or sharing is disabled.
+    /* Simulate trying to share both the datatype and dataset, to determine the
+     * final size of the messages.  This does nothing if the datatype is
+     * committed or sharing is disabled.
      */
-    if(H5SM_try_share(file_dst, dxpl_id, NULL, H5O_DTYPE_ID, attr_dst->shared->dt, NULL) < 0)
+    if(H5SM_try_share(file_dst, dxpl_id, NULL, H5SM_DEFER, H5O_DTYPE_ID, attr_dst->shared->dt, NULL) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "can't share attribute datatype")
-    if(H5SM_try_share(file_dst, dxpl_id, NULL, H5O_SDSPACE_ID, attr_dst->shared->ds, NULL) < 0)
+    if(H5SM_try_share(file_dst, dxpl_id, NULL, H5SM_DEFER, H5O_SDSPACE_ID, attr_dst->shared->ds, NULL) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "can't share attribute dataspace")
 
     /* Compute the sizes of the datatype and dataspace. This is their raw
@@ -1029,6 +1007,10 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     if(H5A_set_version(file_dst, attr_dst) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, NULL, "unable to update attribute version")
 
+    /* Recompute the destination attribute's size, if it's a different version */
+    if(attr_src->shared->version != attr_dst->shared->version)
+        *recompute_size = TRUE;
+
     /* Set return value */
     ret_value = attr_dst;
 
@@ -1077,20 +1059,55 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t UNUSED *attr_src,
+H5A_attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
     H5O_loc_t *dst_oloc, const H5A_t *attr_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
-    H5F_t  *file_src = src_oloc->file;
-    H5F_t  *file_dst = dst_oloc->file;
+    H5F_t  *file_src, *file_dst;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-
-    FUNC_ENTER_NOAPI_NOINIT(H5A_attr_post_copy_file)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
+    HDassert(src_oloc);
+    HDassert(dst_oloc);
     HDassert(attr_dst);
+    HDassert(attr_src);
+
+    file_src = src_oloc->file;
+    file_dst = dst_oloc->file;
+
+    HDassert(file_src);
     HDassert(file_dst);
 
+    if(H5T_committed(attr_src->shared->dt)) {
+        H5O_loc_t         *src_oloc_dt;           /* Pointer to source datatype's object location */
+        H5O_loc_t         *dst_oloc_dt;           /* Pointer to dest. datatype's object location */
+
+        /* Get group entries for source & destination */
+        src_oloc_dt = H5T_oloc(attr_src->shared->dt);
+        HDassert(src_oloc_dt);
+        dst_oloc_dt = H5T_oloc(attr_dst->shared->dt);
+        HDassert(dst_oloc_dt);
+
+        /* Reset object location for new object */
+        H5O_loc_reset(dst_oloc_dt);
+        dst_oloc_dt->file = file_dst;
+
+        /* Copy the shared object from source to destination */
+        if(H5O_copy_header_map(src_oloc_dt, dst_oloc_dt, dxpl_id, cpy_info, FALSE, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+        /* Update shared message info from named datatype info */
+        H5T_update_shared(attr_dst->shared->dt);
+    } /* end if */
+
+    /* Try to share both the datatype and dataset.  This does nothing if the
+     * datatype is committed or sharing is disabled.
+     */
+    if(H5SM_try_share(file_dst, dxpl_id, NULL, H5SM_WAS_DEFERRED, H5O_DTYPE_ID, attr_dst->shared->dt, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "can't share attribute datatype")
+    if(H5SM_try_share(file_dst, dxpl_id, NULL, H5SM_WAS_DEFERRED, H5O_SDSPACE_ID, attr_dst->shared->ds, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "can't share attribute dataspace")
 
     /* Only need to fix reference attribute with real data being copied to
      *  another file.
@@ -1124,7 +1141,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5A_dense_copy_file_cb
+ * Function:    H5A_dense_post_copy_file_cb
  *
  * Purpose:     Callback routine for copying a dense attribute from SRC to DST.
  *
@@ -1138,13 +1155,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A_dense_copy_file_cb(const H5A_t *attr_src, void *_udata)
+H5A_dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
 {
     H5A_dense_file_cp_ud_t *udata = (H5A_dense_file_cp_ud_t *)_udata;
     H5A_t *attr_dst = NULL;
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_copy_file_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(attr_src);
@@ -1155,6 +1172,10 @@ H5A_dense_copy_file_cb(const H5A_t *attr_src, void *_udata)
 
     if(NULL == (attr_dst = H5A_attr_copy_file(attr_src, udata->file,
             udata->recompute_size, udata->cpy_info,  udata->dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
+
+    if(H5A_attr_post_copy_file(udata->oloc_src, attr_src, udata->oloc_dst, attr_dst,
+            udata->dxpl_id, udata->cpy_info) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
 
     /* Reset shared location information */
@@ -1176,11 +1197,11 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close destination attribute")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_dense_copy_file_cb() */
+} /* end H5A_dense_post_copy_file_cb() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5A_dense_copy_file_all
+ * Function:    H5A_dense_post_copy_file_all
  *
  * Purpose:     Copy all dense attributes from SRC to DST.
  *
@@ -1194,110 +1215,23 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_copy_file_all(H5F_t *file_src, H5O_ainfo_t *ainfo_src, H5F_t *file_dst,
-    const H5O_ainfo_t *ainfo_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, hid_t dxpl_id)
-{
-    H5A_dense_file_cp_ud_t udata;       /* User data for iteration callback */
-    H5A_attr_iter_op_t attr_op;    /* Attribute operator */
-    herr_t ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_copy_file_all)
-
-    /* check arguments */
-    HDassert(ainfo_src);
-    HDassert(ainfo_dst);
-
-    udata.ainfo = ainfo_dst;             /* Destination dense information    */
-    udata.file = file_dst;                /* Destination file                 */
-    udata.recompute_size = recompute_size;    /* Flag to indicate if size changed */
-    udata.cpy_info = cpy_info;                /* Information on copying options   */
-    udata.dxpl_id = dxpl_id;                  /* DXPL for operation               */
-
-    attr_op.op_type = H5A_ATTR_OP_LIB;
-    attr_op.u.lib_op = H5A_dense_copy_file_cb;
-
-     if(H5A_dense_iterate(file_src, dxpl_id, (hid_t)0, ainfo_src, H5_INDEX_NAME,
-            H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, &udata) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_dense_copy_file_all */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5A_dense_post_copy_file_cb
- *
- * Purpose:     Callback routine to perfom post copy for a dense attribute.
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- * Programmer:  Peter Cao
- *              xcao@hdfgroup.org
- *              July 25, 2007
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5A_dense_post_copy_file_cb(const H5A_t *attr_dst, void *_udata)
-{
-    H5A_dense_file_cp_ud_t *udata = (H5A_dense_file_cp_ud_t *)_udata;
-    herr_t ret_value = H5_ITER_CONT;   /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_post_copy_file_cb)
-
-    /* check arguments */
-    HDassert(attr_dst);
-    HDassert(udata);
-    HDassert(udata->ainfo);
-    HDassert(udata->file);
-    HDassert(udata->cpy_info);
-
-    if ( H5A_attr_post_copy_file(udata->oloc_src, NULL,
-         udata->oloc_dst, attr_dst, udata->dxpl_id, udata->cpy_info) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_dense_post_copy_file_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5A_dense_post_copy_file_all
- *
- * Purpose:     Do post copy for all dense attributes.
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- * Programmer:  Peter Cao
- *              xcao@hdfgroup.org
- *              July 25, 2007
- *
- *-------------------------------------------------------------------------
- */
-herr_t
 H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t *ainfo_src,
     H5O_loc_t *dst_oloc, H5O_ainfo_t *ainfo_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
     H5A_dense_file_cp_ud_t udata;       /* User data for iteration callback */
-    H5A_attr_iter_op_t attr_op;    /* Attribute operator */
-    herr_t ret_value = SUCCEED;    /* Return value */
+    H5A_attr_iter_op_t attr_op;         /* Attribute operator */
+    hbool_t recompute_size = FALSE;     /* recompute the size */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_post_copy_file_all)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     HDassert(ainfo_src);
     HDassert(ainfo_dst);
-    HDassert(src_oloc);
-    HDassert(dst_oloc);
-    HDassert(src_oloc->file);
-    HDassert(dst_oloc->file);
 
-    udata.ainfo = ainfo_src;
-    udata.file = src_oloc->file;
+    udata.ainfo = ainfo_dst;                  /* Destination dense information    */
+    udata.file = dst_oloc->file;              /* Destination file                 */
+    udata.recompute_size = &recompute_size;   /* Flag to indicate if size changed */
     udata.cpy_info = cpy_info;                /* Information on copying options   */
     udata.dxpl_id = dxpl_id;                  /* DXPL for operation               */
     udata.oloc_src = src_oloc;
@@ -1306,11 +1240,12 @@ H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t *ainfo
     attr_op.op_type = H5A_ATTR_OP_LIB;
     attr_op.u.lib_op = H5A_dense_post_copy_file_cb;
 
-     if(H5A_dense_iterate(dst_oloc->file, dxpl_id, (hid_t)0, ainfo_dst, H5_INDEX_NAME,
+
+     if(H5A_dense_iterate(src_oloc->file, dxpl_id, (hid_t)0, ainfo_src, H5_INDEX_NAME,
             H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, &udata) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5A_dense_post_copy_file_all */
 

@@ -49,6 +49,9 @@ hid_t noblock_dxpl_id=(-1);
 #define NFILENAME 2
 #define PARATESTFILE filenames[0]
 const char *FILENAME[NFILENAME]={"CacheTestDummy", NULL};
+#ifndef PATH_MAX
+#define PATH_MAX    512
+#endif  /* !PATH_MAX */
 char    filenames[NFILENAME][PATH_MAX];
 hid_t   fapl;                           /* file access property list */
 

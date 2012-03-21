@@ -97,7 +97,7 @@ H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_block_read, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(f);
     HDassert(f->shared);
@@ -138,7 +138,7 @@ H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_block_write, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 #ifdef QAK
 HDfprintf(stderr, "%s: write to addr = %a, size = %Zu\n", FUNC, addr, size);
 #endif /* QAK */
@@ -180,7 +180,7 @@ H5F_flush_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5F_flush_tagged_metadata, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Use tag to search for and flush associated metadata */
     if(H5AC_flush_tagged_metadata(f, tag, dxpl_id)<0)
@@ -216,7 +216,7 @@ H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5F_evict_tagged_metadata, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Unpin the superblock, as this will be marked for eviction and it can't 
         be pinned. */

@@ -1,8 +1,5 @@
-#############################
-Expected output for 'h5dump --xml tcompound2.h5'
-#############################
 <?xml version="1.0" encoding="UTF-8"?>
-<hdf5:HDF5-File xmlns:hdf5="http://hdfgroup.org/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/DTDs/HDF5-File http://www.hdfgroup.org/DTDs/HDF5-File.xsd">
+<hdf5:HDF5-File xmlns:hdf5="http://hdfgroup.org/HDF5/XML/schema/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/HDF5/XML/schema/HDF5-File http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd">
 <hdf5:RootGroup OBJ-XID="xid_696" H5Path="/">
    <hdf5:NamedDataType Name="#9560" OBJ-XID="xid_18446744073709551614" Parents="xid_696" H5ParentPaths="/">
       <hdf5:DataType>
@@ -34,7 +31,7 @@ Expected output for 'h5dump --xml tcompound2.h5'
       </hdf5:StorageLayout>
       <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
          <hdf5:FillValue>
-               <hdf5:NoFill/>
+            <hdf5:NoFill/>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>
@@ -70,7 +67,12 @@ Expected output for 'h5dump --xml tcompound2.h5'
    <!-- Note: format of compound data not specified -->
       <hdf5:Data>
          <hdf5:DataFromFile>
-         0 0 1 1 1 0.5 2 4 0.333333 3 9 0.25 4 16 0.2 5 25 0.166667
+         0 0 1
+         1 1 0.5
+         2 4 0.333333
+         3 9 0.25
+         4 16 0.2
+         5 25 0.166667
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>
@@ -85,7 +87,7 @@ Expected output for 'h5dump --xml tcompound2.h5'
          </hdf5:StorageLayout>
          <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -97,7 +99,12 @@ Expected output for 'h5dump --xml tcompound2.h5'
       <!-- Note: format of compound data not specified -->
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 1 1.1 2 2.2 3 3.3 4 4.4 5 5.5
+            0 0
+            1 1.1
+            2 2.2
+            3 3.3
+            4 4.4
+            5 5.5
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
@@ -111,7 +118,7 @@ Expected output for 'h5dump --xml tcompound2.h5'
          </hdf5:StorageLayout>
          <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -123,7 +130,12 @@ Expected output for 'h5dump --xml tcompound2.h5'
       <!-- Note: format of compound data not specified -->
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 1 1 2 2 3 3 4 4 5 5
+            0 0
+            1 1
+            2 2
+            3 3
+            4 4
+            5 5
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
@@ -159,7 +171,7 @@ Expected output for 'h5dump --xml tcompound2.h5'
          </hdf5:StorageLayout>
          <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Incremental">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -171,7 +183,12 @@ Expected output for 'h5dump --xml tcompound2.h5'
       <!-- Note: format of compound data not specified -->
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 1 1 2 2 3 3 4 4 5 5
+            0 0
+            1 1
+            2 2
+            3 3
+            4 4
+            5 5
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>

@@ -62,9 +62,6 @@ TOOLTEST() {
    # Run test.
    TESTING $DUMPER $@
    (
-      echo "#############################"
-      echo "Expected output for '$DUMPER $@'" 
-      echo "#############################"
       cd $srcdir/../testfiles
       $RUNSERIAL $DUMPER_BIN $@
    ) >$actual 2>$actual_err
@@ -74,7 +71,7 @@ TOOLTEST() {
    if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
     echo " CREATED"
-     cp $actual $expect		  
+     cp $actual $expect      
    elif  $CMP $expect $actual; then
       echo " PASSED"
    else
@@ -99,7 +96,7 @@ SKIP() {
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                ###
+###        T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 

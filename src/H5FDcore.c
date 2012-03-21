@@ -53,7 +53,7 @@ typedef struct H5FD_core_t {
     hbool_t	backing_store;		/*write to file name on flush	*/
     int		fd;			/*backing store file descriptor	*/
     /* Information for determining uniqueness of a file with a backing store */
-#ifndef _WIN32
+#ifndef H5_HAVE_WIN32_API
     /*
      * On most systems the combination of device and i-node number uniquely
      * identify a file.
@@ -66,7 +66,7 @@ typedef struct H5FD_core_t {
 #endif /*H5_VMS*/
 #else
     /*
-     * On _WIN32 the low-order word of a unique identifier associated with the
+     * On H5_HAVE_WIN32_API the low-order word of a unique identifier associated with the
      * file and the volume serial number uniquely identify a file. This number
      * (which, both? -rpm) may change when the system is restarted or when the
      * file is opened. After a process opens a file, the identifier is
@@ -114,6 +114,7 @@ typedef struct H5FD_core_fapl_t {
 				 (size_t)((A)+(Z))<(size_t)(A))
 
 /* Prototypes */
+static herr_t H5FD_core_term(void);
 static void *H5FD_core_fapl_get(H5FD_t *_file);
 static H5FD_t *H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
@@ -135,6 +136,7 @@ static const H5FD_class_t H5FD_core_g = {
     "core",					/*name			*/
     MAXADDR,					/*maxaddr		*/
     H5F_CLOSE_WEAK,				/*fc_degree		*/
+    H5FD_core_term,                             /*terminate             */
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
@@ -182,7 +184,7 @@ DESCRIPTION
 static herr_t
 H5FD_core_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_core_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5FD_core_init())
 } /* H5FD_core_init_interface() */
@@ -210,7 +212,7 @@ H5FD_core_init(void)
 {
     hid_t ret_value=H5FD_CORE_g;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_init, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     if (H5I_VFL!=H5Iget_type(H5FD_CORE_g))
         H5FD_CORE_g = H5FD_register(&H5FD_core_g,sizeof(H5FD_class_t),FALSE);
@@ -228,24 +230,22 @@ done:
  *
  * Purpose:	Shut down the VFD
  *
- * Return:	<none>
+ * Returns:     Non-negative on success or negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Friday, Jan 30, 2004
  *
- * Modification:
- *
  *---------------------------------------------------------------------------
  */
-void
+static herr_t
 H5FD_core_term(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_core_term)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Reset VFL ID */
     H5FD_CORE_g=0;
 
-    FUNC_LEAVE_NOAPI_VOID
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_core_term() */
 
 
@@ -279,7 +279,7 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_fapl_core, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "izb", fapl_id, increment, backing_store);
 
     /* Check argument */
@@ -326,7 +326,7 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_fapl_core, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", fapl_id, increment, backing_store);
 
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -369,7 +369,7 @@ H5FD_core_fapl_get(H5FD_t *_file)
     H5FD_core_fapl_t	*fa;
     void      *ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_fapl_get, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (fa = (H5FD_core_fapl_t *)H5MM_calloc(sizeof(H5FD_core_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -419,7 +419,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_core_t		*file=NULL;
     H5FD_core_fapl_t	*fa=NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
     HFILE filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
@@ -427,7 +427,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     int			fd=-1;
     H5FD_t		*ret_value;
 
-    FUNC_ENTER_NOAPI(H5FD_core_open, NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     if(!name || !*name)
@@ -476,12 +476,12 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
 
     if(fd >= 0) {
         /* Retrieve information for determining uniqueness of file */
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
         filehandle = _get_osfhandle(fd);
         (void)GetFileInformationByHandle((HANDLE)filehandle, &fileinfo);
         file->fileindexhi = fileinfo.nFileIndexHigh;
         file->fileindexlo = fileinfo.nFileIndexLow;
-#else /* _WIN32 */
+#else /* H5_HAVE_WIN32_API */
         file->device = sb.st_dev;
 #ifdef H5_VMS
         file->inode[0] = sb.st_ino[0];
@@ -491,7 +491,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
         file->inode = sb.st_ino;
 #endif /* H5_VMS */
 
-#endif /* _WIN32 */
+#endif /* H5_HAVE_WIN32_API */
     } /* end if */
 
     /* If an existing file is opened, load the whole file into memory. */
@@ -548,7 +548,7 @@ H5FD_core_close(H5FD_t *_file)
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_close, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Flush any changed buffers */
     if(H5FD_core_flush(_file, (hid_t)-1, TRUE) < 0)
@@ -601,11 +601,11 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_core_t	*f2 = (const H5FD_core_t*)_f2;
     int			ret_value = 0;
 
-    FUNC_ENTER_NOAPI(H5FD_core_cmp, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(f1->fd >= 0 && f2->fd >= 0) {
         /* Compare low level file information for backing store */
-#ifdef _WIN32
+#ifdef H5_HAVE_WIN32_API
         if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)
         if (f1->fileindexhi > f2->fileindexhi) HGOTO_DONE(1)
 
@@ -633,7 +633,7 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
         if(HDmemcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))>0) HGOTO_DONE(1)
 #endif /* H5_VMS */
 
-#endif /*_WIN32*/
+#endif /*H5_HAVE_WIN32_API*/
     } /* end if */
     else {
         if (NULL==f1->name && NULL==f2->name) {
@@ -676,7 +676,7 @@ H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
 {
     const H5FD_core_t	*file = (const H5FD_core_t*)_file;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_core_query)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -720,15 +720,10 @@ static haddr_t
 H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 {
     const H5FD_core_t	*file = (const H5FD_core_t*)_file;
-    haddr_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_get_eoa, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Set return value */
-    ret_value=file->eoa;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(file->eoa)
 }
 
 
@@ -759,7 +754,7 @@ H5FD_core_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_set_eoa, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(ADDR_OVERFLOW(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "address overflow")
@@ -794,17 +789,11 @@ done:
 static haddr_t
 H5FD_core_get_eof(const H5FD_t *_file)
 {
-    haddr_t ret_value;   /* Return value */
-
     const H5FD_core_t	*file = (const H5FD_core_t*)_file;
 
-    FUNC_ENTER_NOAPI(H5FD_core_get_eof, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Set return value */
-    ret_value=MAX(file->eof, file->eoa);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(MAX(file->eof, file->eoa))
 }
 
 
@@ -828,7 +817,7 @@ H5FD_core_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
     H5FD_core_t *file = (H5FD_core_t *)_file;   /* core VFD info */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_get_handle, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     if(!file_handle)
@@ -897,7 +886,7 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_read, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     assert(file && file->pub.cls);
     assert(buf);
@@ -970,7 +959,7 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
     H5FD_core_t *file = (H5FD_core_t*)_file;
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_write, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -998,7 +987,7 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
 
         /* (Re)allocate memory for the file buffer */
         if(NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block of %llu bytes", (unsigned long long)new_eof)
 #ifdef H5_CLEAR_MEMORY
 HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
 #endif /* H5_CLEAR_MEMORY */
@@ -1042,7 +1031,7 @@ H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Write to backing store */
     if (file->dirty && file->fd>=0 && file->backing_store) {
@@ -1094,7 +1083,7 @@ H5FD_core_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
     size_t new_eof;                             /* New size of memory buffer */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_truncate, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file);
 

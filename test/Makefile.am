@@ -119,7 +119,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     stab.h5 extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 \
     dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
-    stdio.h5 sec2.h5 dtypes[1-8].h5 dt_arith[1-2].h5 tattr.h5        \
+    stdio.h5 sec2.h5 dtypes[0-9].h5 dt_arith[1-2].h5 tattr.h5        \
     tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
     fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
     trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 flush.h5         \
@@ -132,7 +132,8 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
     objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5       \
-    earray.h5 efc[0-5].h5 log_vfd_out.log swmr_data.h5 \
+    earray.h5 efc[0-5].h5 log_vfd_out.log new_multi_file_v16-r.h5    \
+    new_multi_file_v16-s.h5 swmr_data.h5 \
     flushrefresh.h5 flushrefresh_VERIFICATION_START \
     flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \
     flushrefresh_VERIFICATION_DONE

@@ -42,7 +42,6 @@ extern "C" {
 #endif
 
 H5_DLL hid_t H5FD_mpiposix_init(void);
-H5_DLL void H5FD_mpiposix_term(void);
 H5_DLL herr_t H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm, hbool_t use_gpfs);
 H5_DLL herr_t H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/, hbool_t *use_gpfs/*out*/);
 

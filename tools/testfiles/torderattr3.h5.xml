@@ -1,8 +1,5 @@
-#############################
-Expected output for 'h5dump --xml -H --sort_by=creation_order --sort_order=ascending torderattr.h5'
-#############################
 <?xml version="1.0" encoding="UTF-8"?>
-<hdf5:HDF5-File xmlns:hdf5="http://hdfgroup.org/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/DTDs/HDF5-File http://www.hdfgroup.org/DTDs/HDF5-File.xsd">
+<hdf5:HDF5-File xmlns:hdf5="http://hdfgroup.org/HDF5/XML/schema/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/HDF5/XML/schema/HDF5-File http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd">
 <hdf5:RootGroup OBJ-XID="xid_96" H5Path="/">
    <hdf5:Attribute Name="a">
       <hdf5:Dataspace>
@@ -47,9 +44,9 @@ Expected output for 'h5dump --xml -H --sort_by=creation_order --sort_order=ascen
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
-         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <hdf5:FillValue>
-               <hdf5:NoFill/>
+            <hdf5:NoFill/>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>
@@ -107,9 +104,9 @@ Expected output for 'h5dump --xml -H --sort_by=creation_order --sort_order=ascen
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
-         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <hdf5:FillValue>
-               <hdf5:NoFill/>
+            <hdf5:NoFill/>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>

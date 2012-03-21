@@ -1,8 +1,5 @@
-#############################
-Expected output for 'h5dump --xml -A tall.h5'
-#############################
 <?xml version="1.0" encoding="UTF-8"?>
-<hdf5:HDF5-File xmlns:hdf5="http://hdfgroup.org/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/DTDs/HDF5-File http://www.hdfgroup.org/DTDs/HDF5-File.xsd">
+<hdf5:HDF5-File xmlns:hdf5="http://hdfgroup.org/HDF5/XML/schema/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/HDF5/XML/schema/HDF5-File http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd">
 <hdf5:RootGroup OBJ-XID="xid_96" H5Path="/">
    <hdf5:Attribute Name="attr1">
       <hdf5:Dataspace>
@@ -17,7 +14,16 @@ Expected output for 'h5dump --xml -A tall.h5'
       </hdf5:DataType>
       <hdf5:Data>
          <hdf5:DataFromFile>
-         97 98 99 100 101 102 103 104 105 0
+         97
+         98
+         99
+         100
+         101
+         102
+         103
+         104
+         105
+         0
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Attribute>
@@ -35,8 +41,10 @@ Expected output for 'h5dump --xml -A tall.h5'
       </hdf5:DataType>
       <hdf5:Data>
          <hdf5:DataFromFile>
-         0 1
-         2 3
+         0
+         1
+         2
+         3
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Attribute>
@@ -46,9 +54,9 @@ Expected output for 'h5dump --xml -A tall.h5'
             <hdf5:StorageLayout>
                <hdf5:ContiguousLayout/>
             </hdf5:StorageLayout>
-                     <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
                <hdf5:FillValue>
-                     <hdf5:NoFill/>
+                  <hdf5:NoFill/>
                </hdf5:FillValue>
             </hdf5:FillValueInfo>
             <hdf5:Dataspace>
@@ -75,8 +83,33 @@ Expected output for 'h5dump --xml -A tall.h5'
                </hdf5:DataType>
                <hdf5:Data>
                   <hdf5:DataFromFile>
-                  49 115 116 32 97 116 116 114 105 98 117 116 101 32 111 102 32
-                  100 115 101 116 49 46 49 46 49 0
+                  49
+                  115
+                  116
+                  32
+                  97
+                  116
+                  116
+                  114
+                  105
+                  98
+                  117
+                  116
+                  101
+                  32
+                  111
+                  102
+                  32
+                  100
+                  115
+                  101
+                  116
+                  49
+                  46
+                  49
+                  46
+                  49
+                  0
                   </hdf5:DataFromFile>
                </hdf5:Data>
             </hdf5:Attribute>
@@ -93,8 +126,33 @@ Expected output for 'h5dump --xml -A tall.h5'
                </hdf5:DataType>
                <hdf5:Data>
                   <hdf5:DataFromFile>
-                  50 110 100 32 97 116 116 114 105 98 117 116 101 32 111 102 32
-                  100 115 101 116 49 46 49 46 49 0
+                  50
+                  110
+                  100
+                  32
+                  97
+                  116
+                  116
+                  114
+                  105
+                  98
+                  117
+                  116
+                  101
+                  32
+                  111
+                  102
+                  32
+                  100
+                  115
+                  101
+                  116
+                  49
+                  46
+                  49
+                  46
+                  49
+                  0
                   </hdf5:DataFromFile>
                </hdf5:Data>
             </hdf5:Attribute>
@@ -106,9 +164,9 @@ Expected output for 'h5dump --xml -A tall.h5'
             <hdf5:StorageLayout>
                <hdf5:ContiguousLayout/>
             </hdf5:StorageLayout>
-                     <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
                <hdf5:FillValue>
-                     <hdf5:NoFill/>
+                  <hdf5:NoFill/>
                </hdf5:FillValue>
             </hdf5:FillValueInfo>
             <hdf5:Dataspace>
@@ -138,9 +196,9 @@ Expected output for 'h5dump --xml -A tall.h5'
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
-               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -161,9 +219,9 @@ Expected output for 'h5dump --xml -A tall.h5'
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
-               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>

@@ -77,8 +77,8 @@ void
 h5tools_str_close(h5tools_str_t *str)
 {
     if (str && str->nalloc) {
-        free(str->s);
-        memset(str, 0, sizeof(h5tools_str_t));
+        HDfree(str->s);
+        HDmemset(str, 0, sizeof(h5tools_str_t));
     }
 }
 
@@ -132,18 +132,13 @@ char *
 h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
 {
     va_list ap;
-    hbool_t isReallocated = FALSE;
 
     /* Make sure we have some memory into which to print */
     if (!str->s || str->nalloc <= 0) {
-        str->nalloc = STR_INIT_LEN;
-        str->s = malloc(str->nalloc);
-        assert(str->s);
-        str->s[0] = '\0';
-        str->len = 0;
+        h5tools_str_reset(str);
     }
 
-    if (strlen(fmt) == 0) {
+    if (HDstrlen(fmt) == 0) {
         /* nothing to print */
         return str->s;
     }
@@ -154,9 +149,9 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
         size_t avail = str->nalloc - str->len;
         int nchars = -1;
 
-        va_start(ap, fmt);
+        HDva_start(ap, fmt);
         nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
-        va_end(ap);
+        HDva_end(ap);
 
         /* Note: HDvsnprintf() behaves differently on Windows as Unix, when 
          * buffer is smaller than source string. On Unix, this function 
@@ -164,17 +159,21 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
          * buffer size with NULL at the end of the buffer. However on 
          * Windows with the same condition, this function returns -1 and 
          * doesn't add NULL at the end of the buffer.
-         * Because of this different return results, isReallocated variable
+         * Because of this different return results, the strlen of the new string
          * is used to handle when HDvsnprintf() returns -1 on Windows due
          * to lack of buffer size, so try one more time after realloc more
          * buffer size before return NULL. 
          */
-        if (nchars < 0 && isReallocated == TRUE) {
+        if (nchars < 0 
+#ifndef H5_VSNPRINTF_WORKS
+                && (HDstrlen(str->s) < str->nalloc)
+#endif
+                ) {
             /* failure, such as bad format */
             return NULL;
         }
 
-        if (nchars < 0 || (size_t) nchars >= avail || (0 == nchars && (strcmp(fmt, "%s")))) {
+        if (nchars < 0 || (size_t) nchars >= avail || (0 == nchars && (HDstrcmp(fmt, "%s")))) {
             /* Truncation return value as documented by C99, or zero return value with either of the
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is
@@ -182,11 +181,10 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
              * Alocate at least twice as much space and try again.
              */
             size_t newsize = MAX(str->len + nchars + 1, 2 * str->nalloc);
-            assert(newsize > str->nalloc); /*overflow*/
-            str->s = realloc(str->s, newsize);
-            assert(str->s);
+            HDassert(newsize > str->nalloc); /*overflow*/
+            str->s = (char*)HDrealloc(str->s, newsize);
+            HDassert(str->s);
             str->nalloc = newsize;
-            isReallocated = TRUE;
         }
         else {
             /* Success */
@@ -220,8 +218,8 @@ h5tools_str_reset(h5tools_str_t *str/*in,out*/)
 {
     if (!str->s || str->nalloc <= 0) {
         str->nalloc = STR_INIT_LEN;
-        str->s = malloc(str->nalloc);
-        assert(str->s);
+        str->s = (char*)HDmalloc(str->nalloc);
+        HDassert(str->s);
     }
 
     str->s[0] = '\0';
@@ -281,21 +279,26 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
 {
     char _temp[1024], *temp = _temp;
 
+    HDassert(str);
+    HDassert(fmt);
+
     /* If the format string is simply "%s" then don't bother doing anything */
-    if (!strcmp(fmt, "%s"))
+    if (!HDstrcmp(fmt, "%s"))
         return str->s;
 
     /*
      * Save the input value if there is a `%' anywhere in FMT.  Otherwise
      * don't bother because we don't need a temporary copy.
      */
-    if (strchr(fmt, '%')) {
-        if (str->len - start + 1 > sizeof(_temp)) {
-            temp = malloc(str->len - start + 1);
-            assert(temp);
+    if (HDstrchr(fmt, '%')) {
+        size_t n = sizeof(_temp);
+        if (str->len - start + 1 > n) {
+            n = str->len - start + 1; 
+            temp = (char*)HDmalloc(n);
+            HDassert(temp);
         }
 
-        strcpy(temp, str->s + start);
+        HDstrncpy(temp, str->s + start, n);
     }
 
     /* Reset the output string and append a formatted version */
@@ -304,7 +307,7 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
 
     /* Free the temp buffer if we allocated one */
     if (temp != _temp)
-        free(temp);
+        HDfree(temp);
 
     return str->s;
 }
@@ -343,7 +346,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
             ctx->pos[i] = curr_pos / ctx->acc[i];
             curr_pos -= ctx->acc[i] * ctx->pos[i];
         }
-        assert(curr_pos == 0);
+        HDassert(curr_pos == 0);
 
         /* Print the index values */
         for (i = 0; i < (size_t) ndims; i++) {
@@ -397,8 +400,12 @@ h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
             p_prod[i - 1] = (max_idx[i]) * p_prod[i];
 
         for (i = 0; i < (size_t) ndims; i++) {
-            ctx->pos[i] = curr_pos / p_prod[i];
-            curr_pos -= p_prod[i] * ctx->pos[i];
+            if(curr_pos > 0) {
+                ctx->pos[i] = curr_pos / p_prod[i];
+                curr_pos -= p_prod[i] * ctx->pos[i];
+            }
+            else
+                ctx->pos[i] = 0;
             ctx->pos[i] += (unsigned long) ptdata[ctx->sm_pos+i];
         }
 
@@ -454,8 +461,8 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
         int i;
 
         alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
-        assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
-        ptdata = (hsize_t *)malloc((size_t) alloc_size);
+        HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
+        ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(nblocks, hssize_t, hsize_t);
         H5Sget_select_hyper_blocklist(region, (hsize_t)0, (hsize_t)nblocks, ptdata);
 
@@ -467,17 +474,17 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
 
             /* Start coordinates and opposite corner */
             for (j = 0; j < ndims; j++)
-                h5tools_str_append(str, "%s%lu", j ? "," : "(",
-                                    (unsigned long) ptdata[i * 2 * ndims + j]);
+                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(",
+                                    ptdata[i * 2 * ndims + j]);
 
             for (j = 0; j < ndims; j++)
-                h5tools_str_append(str, "%s%lu", j ? "," : ")-(",
-                                    (unsigned long) ptdata[i * 2 * ndims + j + ndims]);
+                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : ")-(",
+                                    ptdata[i * 2 * ndims + j + ndims]);
 
             h5tools_str_append(str, ")");
         }
 
-        free(ptdata);
+        HDfree(ptdata);
     } /* end if (nblocks > 0) */
 }
 
@@ -515,8 +522,8 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
         int i;
 
         alloc_size = npoints * ndims * sizeof(ptdata[0]);
-        assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
-        ptdata = (hsize_t *)malloc((size_t) alloc_size);
+        HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
+        ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(npoints, hssize_t, hsize_t);
         H5Sget_select_elem_pointlist(region, (hsize_t)0, (hsize_t)npoints, ptdata);
 
@@ -527,13 +534,13 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
                                (unsigned long)i);
 
             for (j = 0; j < ndims; j++)
-                h5tools_str_append(str, "%s%lu", j ? "," : "(",
-                                  (unsigned long) (ptdata[i * ndims + j]));
+                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(",
+                                  (ptdata[i * ndims + j]));
 
             h5tools_str_append(str, ")");
         }
 
-        free(ptdata);
+        HDfree(ptdata);
     } /* end if (npoints > 0) */
 }
 
@@ -613,6 +620,32 @@ h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch)
         }
     }
 }
+void
+h5tools_str_indent(h5tools_str_t *str, const h5tool_format_t *info,
+                      h5tools_context_t *ctx)
+{
+    int i, indentlevel = 0;
+
+    /* Write new prefix */
+    if (ctx->indent_level >= 0) {
+        indentlevel = ctx->indent_level;
+    }
+    else {
+        /*
+         * This is because sometimes we don't print out all the header
+         * info for the data (like the tattr-2.ddl example). If that happens
+         * the ctx->indent_level is negative so we need to skip the above and
+         * just print out the default indent levels.
+         */
+        indentlevel = ctx->default_indent_level;
+    }
+
+    for (i = 0; i < indentlevel; i++) {
+        h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
+    }
+
+//    ctx->need_prefix = 0;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    h5tools_str_sprint
@@ -650,10 +683,17 @@ h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch)
  *
  *  PVN, 28 March 2006
  *  added H5T_NATIVE_LDOUBLE case
- *
+ * 
  *  Vailin Choi; August 2010
  *	Modified to handle printing of selected compound fields for h5watch.
  *
+ *  Raymond Lu, 2011-09-01
+ *  CLANG compiler complained about the line (about 800):
+ *    tempint = (tempint >> packed_data_offset) & packed_data_mask;
+ *  The right shift may cause undefined behavior if PACKED_DATA_OFFSET is 
+ *  32-bit or more. For every kind of native integers, I changed the code 
+ *  to make it zero if PACKED_DATA_OFFSET is greater than or equal to the
+ *  size of integer.
  *-------------------------------------------------------------------------
  */
 char *
@@ -682,8 +722,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
-        sprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH);
-        sprintf(fmt_ullong, "%%%su", H5_PRINTF_LL_WIDTH);
+        HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%%sd", H5_PRINTF_LL_WIDTH);
+        HDsnprintf(fmt_ullong, sizeof(fmt_ullong), "%%%su", H5_PRINTF_LL_WIDTH);
     }
 
     /* Append value depending on data type */
@@ -808,83 +848,153 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     }
     else if (H5Tequal(type, H5T_NATIVE_INT)) {
         HDmemcpy(&tempint, vp, sizeof(int));
+        if(packed_bits_num) {
+            if(packed_data_offset >= 8*sizeof(int))
+                tempint = 0;
+            else
+                tempint = (tempint >> packed_data_offset) & packed_data_mask;
+        }
         h5tools_str_append(str, OPT(info->fmt_int, "%d"), tempint);
     }
     else if (H5Tequal(type, H5T_NATIVE_UINT)) {
         HDmemcpy(&tempuint, vp, sizeof(unsigned int));
+        if(packed_bits_num) {
+            if(packed_data_offset >= 8*sizeof(unsigned int))
+                tempuint = 0;
+            else
+                tempuint = (tempuint >> packed_data_offset) & packed_data_mask;
+        }
         h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
     }
     else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-        h5tools_str_append(str, OPT(info->fmt_schar, "%hhd"), *cp_vp);
+        signed char        tempchar;
+        HDmemcpy(&tempchar, cp_vp, sizeof(char));
+        if(packed_bits_num) {
+            if(packed_data_offset >= 8*sizeof(char))
+                tempchar = 0;
+            else
+                tempchar = (tempchar >> packed_data_offset) & packed_data_mask;
+        }
+#ifdef H5_VMS
+        h5tools_str_append(str, OPT(info->fmt_schar, "%hd"), tempchar);
+#else
+        h5tools_str_append(str, OPT(info->fmt_schar, "%hhd"), tempchar);
+#endif      
     }
     else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
-        h5tools_str_append(str, OPT(info->fmt_uchar, "%u"), *ucp_vp);
+        unsigned char      tempuchar;
+        HDmemcpy(&tempuchar, ucp_vp, sizeof(unsigned char));
+        if(packed_bits_num) {
+            if(packed_data_offset >= 8*sizeof(unsigned char))
+                tempuchar = 0;
+            else
+                tempuchar = (tempuchar >> packed_data_offset) & packed_data_mask;
+        }
+        h5tools_str_append(str, OPT(info->fmt_uchar, "%u"), tempuchar);
     }
     else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
         short tempshort;
 
         HDmemcpy(&tempshort, vp, sizeof(short));
+        if(packed_bits_num) {
+            if(packed_data_offset >= 8*sizeof(short))
+                tempshort = 0;
+            else
+                tempshort = (tempshort >> packed_data_offset) & packed_data_mask;
+        }
         h5tools_str_append(str, OPT(info->fmt_short, "%d"), tempshort);
     }
     else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
         unsigned short tempushort;
 
         HDmemcpy(&tempushort, vp, sizeof(unsigned short));
+        if(packed_bits_num) {
+            if(packed_data_offset >= 8*sizeof(unsigned short))
+                tempushort = 0;
+            else
+                tempushort = (tempushort >> packed_data_offset) & packed_data_mask;
+        }
         h5tools_str_append(str, OPT(info->fmt_ushort, "%u"), tempushort);
     }
     else if (H5Tequal(type, H5T_NATIVE_LONG)) {
         HDmemcpy(&templong, vp, sizeof(long));
+        if(packed_bits_num) {
+            if(packed_data_offset >= 8*sizeof(long))
+                templong = 0;
+            else
+                templong = (templong >> packed_data_offset) & packed_data_mask;
+        }
         h5tools_str_append(str, OPT(info->fmt_long, "%ld"), templong);
     }
     else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
         HDmemcpy(&tempulong, vp, sizeof(unsigned long));
+        if(packed_bits_num) {
+            if(packed_data_offset >= 8*sizeof(unsigned long))
+                tempulong = 0;
+            else
+                tempulong = (tempulong >> packed_data_offset) & packed_data_mask;
+        }
         h5tools_str_append(str, OPT(info->fmt_ulong, "%lu"), tempulong);
     }
     else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
         HDmemcpy(&templlong, vp, sizeof(long long));
+        if(packed_bits_num) {
+            if(packed_data_offset >= 8*sizeof(long long))
+                templlong = 0;
+            else
+                templlong = (templlong >> packed_data_offset) & packed_data_mask;
+        }
         h5tools_str_append(str, OPT(info->fmt_llong, fmt_llong), templlong);
     }
     else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
         HDmemcpy(&tempullong, vp, sizeof(unsigned long long));
+        if(packed_bits_num) {
+            if(packed_data_offset >= 8*sizeof(unsigned long long))
+                tempullong = 0;
+            else
+                tempullong = (tempullong >> packed_data_offset) & packed_data_mask;
+        }
         h5tools_str_append(str, OPT(info->fmt_ullong, fmt_ullong), tempullong);
     }
     else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
         if (sizeof(hssize_t) == sizeof(int)) {
-            memcpy(&tempint, vp, sizeof(int));
+            HDmemcpy(&tempint, vp, sizeof(int));
             h5tools_str_append(str, OPT(info->fmt_int, "%d"), tempint);
         }
         else if (sizeof(hssize_t) == sizeof(long)) {
-            memcpy(&templong, vp, sizeof(long));
+            HDmemcpy(&templong, vp, sizeof(long));
             h5tools_str_append(str, OPT(info->fmt_long, "%ld"), templong);
         }
         else {
-            memcpy(&templlong, vp, sizeof(long long));
+            HDmemcpy(&templlong, vp, sizeof(long long));
             h5tools_str_append(str, OPT(info->fmt_llong, fmt_llong), templlong);
         }
     }
     else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
         if (sizeof(hsize_t) == sizeof(int)) {
-            memcpy(&tempuint, vp, sizeof(unsigned int));
+            HDmemcpy(&tempuint, vp, sizeof(unsigned int));
             h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
         }
         else if (sizeof(hsize_t) == sizeof(long)) {
-            memcpy(&tempulong, vp, sizeof(long));
+            HDmemcpy(&tempulong, vp, sizeof(long));
             h5tools_str_append(str, OPT(info->fmt_ulong, "%lu"), tempulong);
         }
         else {
-            memcpy(&tempullong, vp, sizeof(unsigned long long));
+            HDmemcpy(&tempullong, vp, sizeof(unsigned long long));
             h5tools_str_append(str, OPT(info->fmt_ullong, fmt_ullong), tempullong);
         }
     }
     else if (H5Tget_class(type) == H5T_COMPOUND) {
 	if(ctx->cmpd_listv) { /* there is <list_of_fields> */
 	    int save_indent_level;  	/* The indentation level */
-	    int i = 0, n = 0, x = 0; 	/* Local index variable */
+            size_t curr_field;          /* Current field to display */
+	    int i = 0, x = 0; 		/* Local index variable */
 	    H5LD_memb_t **listv;  	/* Vector of information for <list_of_fields> */
 
 	    listv = ctx->cmpd_listv;	    
 	    ctx->cmpd_listv = NULL;
-	    h5tools_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
+
+            h5tools_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
 
 	    /* 
 	     * Go through the vector containing info about the comma-separated list of
@@ -892,105 +1002,78 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 	     *	   put in "{", "}", ",", member name and value accordingly.
 	     */
 	    save_indent_level = ctx->indent_level;
-	    for(n = 0; listv[n] != NULL; n++) {
-		if(n)
-		    h5tools_str_append(str, "%s", OPT(info->cmpd_sep, ", " OPTIONAL_LINE_BREAK));
+	    for(curr_field = 0; listv[curr_field] != NULL; curr_field++) {
+                if (curr_field)
+                    h5tools_str_append(str, "%s", OPT(info->cmpd_sep, ", "OPTIONAL_LINE_BREAK));
+                else 
+                    h5tools_str_append(str, "%s", OPT(info->cmpd_end, ""));
 
-		/* See notes for RPM 2000-10-31 below (copied) */
-                if (ctx->indent_level >= 0 && str->len && str->s[str->len - 1] == '\n') {
-
-                    h5tools_str_append(str, OPT(info->line_pre, ""), "");
-
-                    for (x = 0; x < ctx->indent_level + 1; x++)
-                        h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
-                }
-
+                if(info->arr_linebreak)
+                    h5tools_str_indent(str, info, ctx);
+                
 		/* Process members of each field */
-		for(i = 0; listv[n]->names[i] != NULL; i++) {
-		    h5tools_str_append(str, OPT(info->cmpd_name, ""), listv[n]->names[i]);
+		for(i = 0; listv[curr_field]->names[i] != NULL; i++) {
+		    h5tools_str_append(str, OPT(info->cmpd_name, ""), listv[curr_field]->names[i]);
 		    if(i) {
 			ctx->indent_level++;
 			h5tools_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
 		    }
 		}
-		h5tools_str_sprint(str, info, container, listv[n]->last_tid, cp_vp + listv[n]->tot_offset, ctx);
+		h5tools_str_sprint(str, info, container, listv[curr_field]->last_tid, cp_vp + listv[curr_field]->tot_offset, ctx);
 		if(ctx->indent_level >= 0)
 		    for(x = ctx->indent_level; x >= 0; x--)
 			h5tools_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
 		ctx->indent_level = save_indent_level;
-	    }
-
-	    /* See notes for RPM 2000-10-31 below (copied) */
-            h5tools_str_append(str, "%s", OPT(info->cmpd_end, ""));
-
-            if (ctx->indent_level >= 0 && str->len && str->s[str->len - 1] == '\n') {
-
-                h5tools_str_append(str, OPT(info->line_pre, ""), "");
-
-                for (x = 0; x < ctx->indent_level; x++)
-                    h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
             }
 
-	    h5tools_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
+
+            if(info->arr_linebreak) {
+                h5tools_str_append(str, "%s", OPT(info->cmpd_end, ""));
+                h5tools_str_indent(str, info, ctx);
+            }
+            h5tools_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
+
 	    ctx->cmpd_listv = info->cmpd_listv;
+
 	} else {
-	    unsigned j = 0;
+            unsigned j;
 
-	    nmembs = H5Tget_nmembers(type);
-	    h5tools_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
+            nmembs = H5Tget_nmembers(type);
+            h5tools_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
 
-	    for (j = 0; j < nmembs; j++) {
-		if (j)
-		    h5tools_str_append(str, "%s", OPT(info->cmpd_sep, ", " OPTIONAL_LINE_BREAK));
+            ctx->indent_level++;
 
-		/* RPM 2000-10-31
-		 * If the previous character is a line-feed (which is true when
-		 * h5dump is running) then insert some white space for
-		 * indentation. Be warned that column number calculations will be
-		 * incorrect and that object indices at the beginning of the line
-		 * will be missing (h5dump doesn't display them anyway).  */
-		if (ctx->indent_level >= 0 && str->len && str->s[str->len - 1] == '\n') {
-		    int x;
+            for (j = 0; j < nmembs; j++) {
+                if (j)
+                    h5tools_str_append(str, "%s", OPT(info->cmpd_sep, ", "OPTIONAL_LINE_BREAK));
+                else 
+                    h5tools_str_append(str, "%s", OPT(info->cmpd_end, ""));
 
-		    h5tools_str_append(str, OPT(info->line_pre, ""), "");
+                if(info->arr_linebreak)
+                    h5tools_str_indent(str, info, ctx);
+                
+                /* The name */
+                name = H5Tget_member_name(type, j);
+                h5tools_str_append(str, OPT(info->cmpd_name, ""), name);
+                HDfree(name);
 
-		    for (x = 0; x < ctx->indent_level + 1; x++)
-			h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
-	       	}
+                /* The value */
+                offset = H5Tget_member_offset(type, j);
+                memb = H5Tget_member_type(type, j);
 
-		/* The name */
-		name = H5Tget_member_name(type, j);
-		h5tools_str_append(str, OPT(info->cmpd_name, ""), name);
-		free(name);
+                h5tools_str_sprint(str, info, container, memb, cp_vp + offset, ctx);
 
-		/* The value */
-		offset = H5Tget_member_offset(type, j);
-		memb = H5Tget_member_type(type, j);
+                H5Tclose(memb);
+            }
+            ctx->indent_level--;
 
-		ctx->indent_level++;
-		h5tools_str_sprint(str, info, container, memb, cp_vp + offset, ctx);
-		ctx->indent_level--;
 
-		H5Tclose(memb);
-	    }
+            if(info->arr_linebreak) {
+                h5tools_str_append(str, "%s", OPT(info->cmpd_end, ""));
+                h5tools_str_indent(str, info, ctx);
+            }
+            h5tools_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
 
-	    /* RPM 2000-10-31
-	     * If the previous character is a line feed (which is true when
-	     * h5dump is running) then insert some white space for indentation.
-	     * Be warned that column number calculations will be incorrect and
-	     * that object indices at the beginning of the line will be missing
-	     * (h5dump doesn't display them anyway). */
-	    h5tools_str_append(str, "%s", OPT(info->cmpd_end, ""));
-
-	    if (ctx->indent_level >= 0 && str->len && str->s[str->len - 1] == '\n') {
-		int x;
-
-		h5tools_str_append(str, OPT(info->line_pre, ""), "");
-
-		for (x = 0; x < ctx->indent_level; x++)
-		    h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
-	    }
-	    h5tools_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
 	}
     }
     else if (H5Tget_class(type) == H5T_ENUM) {
@@ -1031,7 +1114,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             H5O_info_t oi;
             const char *path;
 
-            obj = H5Rdereference(container, H5R_OBJECT, vp);
+            obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, vp);
             H5Oget_info(obj, &oi);
 
             /* Print object type and close object */
@@ -1072,54 +1155,61 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     else if (H5Tget_class(type) == H5T_ARRAY) {
         int k, ndims;
         hsize_t i, dims[H5S_MAX_RANK], temp_nelmts;
+        static int is_next_arry_elmt = 0;
 
         /* Get the array's base datatype for each element */
         memb = H5Tget_super(type);
         size = H5Tget_size(memb);
         ndims = H5Tget_array_ndims(type);
         H5Tget_array_dims2(type, dims);
-        assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
+        HDassert(ndims >= 1 && ndims <= H5S_MAX_RANK);
 
         /* Calculate the number of array elements */
         for (k = 0, nelmts = 1; k < ndims; k++) {
             temp_nelmts = nelmts;
             temp_nelmts *= dims[k];
-            assert(temp_nelmts == (hsize_t) ((size_t) temp_nelmts));
+            HDassert(temp_nelmts == (hsize_t) ((size_t) temp_nelmts));
             nelmts = (size_t) temp_nelmts;
         }
         /* Print the opening bracket */
         h5tools_str_append(str, "%s", OPT(info->arr_pre, "["));
+
+        ctx->indent_level++;
 
         for (i = 0; i < nelmts; i++) {
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->arr_sep, "," OPTIONAL_LINE_BREAK));
 
             if (info->arr_linebreak && i && i % dims[ndims - 1] == 0) {
-                int x;
-
                 h5tools_str_append(str, "%s", "\n");
+                h5tools_str_indent(str, info, ctx);
 
-                /* need to indent some more here*/
-                if (ctx->indent_level >= 0)
-                    if (!info->pindex)
-                        h5tools_str_append(str, "%s", OPT(info->line_pre, ""));
-
-                for (x = 0; x < ctx->indent_level + 1; x++)
-                    h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
             } /* end if */
-            else if (i && info->arr_sep)
-                h5tools_str_append(str, " ");
+            else if (i && info->arr_sep) {
+                /* if next element begin, add next line with indent */
+                if (is_next_arry_elmt) {
+                    is_next_arry_elmt = 0;
 
-            ctx->indent_level++;
+                    h5tools_str_append(str, "%s", "\n ");
+                    h5tools_str_indent(str, info, ctx);
 
-            /* Dump the array element */
+                }
+                /* otherwise just add space */
+                else
+                    h5tools_str_append(str, " ");
+                
+            } /* end else if */
+
+            /* Dump values in an array element */
+            is_next_arry_elmt = 0; /* dump all values in the array element, so turn it off */
             h5tools_str_sprint(str, info, container, memb, cp_vp + i * size, ctx);
-
-            ctx->indent_level--;
         } /* end for */
+
+        ctx->indent_level--;
 
         /* Print the closing bracket */
         h5tools_str_append(str, "%s", OPT(info->arr_suf, "]"));
+        is_next_arry_elmt = 1; /* set for begining of next array element */
         H5Tclose(memb);
     }
     else if (H5Tget_class(type) == H5T_VLEN) {
@@ -1200,7 +1290,7 @@ h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
     char    ref_name[1024];
     H5S_sel_type region_type;
 
-    obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
+    obj = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, vp);
     if (obj >= 0) {
         region = H5Rget_region(container, H5R_DATASET_REGION, vp);
         if (region >= 0) {
@@ -1247,7 +1337,7 @@ static char *
 h5tools_escape(char *s/*in,out*/, size_t size)
 {
     register size_t i;
-    size_t n = strlen(s);
+    size_t n = HDstrlen(s);
     const char *escape;
     char octal[8];
 
@@ -1288,7 +1378,7 @@ h5tools_escape(char *s/*in,out*/, size_t size)
             break;
         default:
             if (!isprint(s[i])) {
-                sprintf(octal, "\\%03o", (unsigned char) s[i]);
+                HDsnprintf(octal, sizeof(octal), "\\%03o", (unsigned char) s[i]);
                 escape = octal;
             }
             else {
@@ -1299,14 +1389,14 @@ h5tools_escape(char *s/*in,out*/, size_t size)
         }
 
         if (escape) {
-            size_t esc_size = strlen(escape);
+            size_t esc_size = HDstrlen(escape);
 
             if (n + esc_size + 1 > size)
                 /*would overflow*/
                 return NULL;
 
-            memmove(s + i + esc_size, s + i + 1, n - i); /*make room*/
-            memcpy(s + i, escape, esc_size); /*insert*/
+            HDmemmove(s + i + esc_size, s + i + 1, n - i); /*make room*/
+            HDmemcpy(s + i, escape, esc_size); /*insert*/
             n += esc_size - 1; /* adjust total string size */
             i += esc_size; /* adjust string position */
         }
@@ -1339,4 +1429,53 @@ h5tools_str_is_zero(const void *_mem, size_t size)
             return FALSE;
 
     return TRUE;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_str_replace
+ *
+ * Purpose:     replace all occurrences of substring.
+ *
+ * Return:      char * 
+ *
+ * Programmer:  Peter Cao
+ *              March 8, 2012
+ *
+ * Notes:
+ *   Applications need to call free() to free the memoery allocated for 
+ *   the return string 
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+h5tools_str_replace ( const char *string, const char *substr, const char *replacement )
+{
+	char *tok = NULL;
+	char *newstr = NULL;
+	char *oldstr = NULL;
+	char *head = NULL;
+     
+	if ( substr == NULL || replacement == NULL ) 
+		return strdup (string);
+		
+	newstr = strdup (string);
+	head = newstr;
+	while ( (tok = strstr ( head, substr ))){
+		oldstr = newstr;
+		newstr = HDmalloc ( strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) + 1 );
+
+        if ( newstr == NULL ){
+			HDfree (oldstr);
+			return NULL;
+        }
+        memcpy ( newstr, oldstr, tok - oldstr );
+        memcpy ( newstr + (tok - oldstr), replacement, strlen ( replacement ) );
+        memcpy ( newstr + (tok - oldstr) + strlen( replacement ), tok + strlen ( substr ), strlen ( oldstr ) - strlen ( substr ) - ( tok - oldstr ) );
+        memset ( newstr + strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) , 0, 1 );
+        /* move back head right after the last replacement */
+        head = newstr + (tok - oldstr) + strlen( replacement );
+        HDfree (oldstr);
+    }
+	
+    return newstr;
 }

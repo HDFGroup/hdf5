@@ -1,4 +1,9 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/****h* H5Df/H5Df
+ * PURPOSE
+ *   This file contains C stubs for H5D Fortran APIs
+ *
+ * COPYRIGHT
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -11,32 +16,42 @@
  * is linked from the top-level documents page.  It can also be found at     *
  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
  * access to either file, you may request a copy from help@hdfgroup.org.     *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/* This files contains C stubs for H5D Fortran APIs */
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ ******
+*/
 
 #include "H5f90.h"
 
-/*----------------------------------------------------------------------------
- * Name:        h5dcreate_c
- * Purpose:     Call H5Dcreate2 to create a dataset
- * Inputs:      loc_id - file or group identifier
+/****if* H5Df/h5dcreate_c
+ * NAME
+ *        h5dcreate_c
+ * PURPOSE
+ *     Call H5Dcreate2 to create a dataset
+ * INPUTS
+ *      loc_id - file or group identifier
  *              name - name of the dataset
  *              namelen - name length
  *              type_id - datatype identifier
  *              space_id - dataspace identifier
  *              crt_pr  - identifier of creation property list
- * Outputs:     dset_id - dataset identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * OUTPUTS
+ *     dset_id - dataset identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, August 4, 1999
- * Modifications:
+ * HISTORY
+ *
  *               - Added optional parameters introduced in version 1.8
  *                 February, 2008
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5dcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f *space_id,
 	      hid_t_f *lcpl_id, hid_t_f *dcpl_id, hid_t_f *dapl_id, hid_t_f *dset_id)
+/******/
 {
      char *c_name = NULL;
      hid_t c_dset_id;
@@ -64,21 +79,30 @@ DONE:
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dopen_c
- * Purpose:     Call H5Dopen2 to open a dataset
- * Inputs:      loc_id - file or group identifier
+/****if* H5Df/h5dopen_c
+ * NAME
+ *        h5dopen_c
+ * PURPOSE
+ *     Call H5Dopen2 to open a dataset
+ * INPUTS
+ *      loc_id - file or group identifier
  *              name - name of the dataset
  *              namelen - name length
  *              dapl_id	- Dataset access property list
- * Outputs:     dset_id - dataset identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * OUTPUTS
+ *     dset_id - dataset identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, August 4, 1999
- * Modifications: Added 1.8 parameter: dapl_id
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ * Added 1.8 parameter: dapl_id
+ * SOURCE
+*/
 int_f
 nh5dopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *dapl_id, hid_t_f *dset_id)
+/******/
 {
      char *c_name = NULL;
      hid_t c_dset_id;
@@ -105,24 +129,33 @@ DONE:
      return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dwritec_c
- * Purpose:     Call h5dwrite_c to write a dataset of characters
- * Inputs:      dset_id - dataset identifier
+
+/****if* H5Df/h5dwritec_c
+ * NAME
+ *        h5dwritec_c
+ * PURPOSE
+ *     Call h5dwrite_c to write a dataset of characters
+ * INPUTS
+ *      dset_id - dataset identifier
  *              mem_type_id - memory datatype identifier
  *              mem_space_id - memory dataspace identifier
  *              file_space_id - memory dataspace identifier
  *              xfer_pr  - identifier of transfer property list
  *              buf      - character data buffer
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Tuesday, May 14, 2002
- * Modifications: This function is added to accomodate oveloaded h5dwrite_f
+ * HISTORY
+ * This function is added to accomodate oveloaded h5dwrite_f
  *                with the dims argument being of INTEGER(HSIZE_T) type
 
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5dwritec_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+/******/
 {
      int ret_value = -1;
 
@@ -136,6 +169,7 @@ nh5dwritec_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid
 
 int_f
 nh5dwritec_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -149,6 +183,7 @@ nh5dwritec_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, h
 
 int_f
 nh5dwritec_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -162,6 +197,7 @@ nh5dwritec_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, h
 
 int_f
 nh5dwritec_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -175,6 +211,7 @@ nh5dwritec_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, h
 
 int_f
 nh5dwritec_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -188,6 +225,7 @@ nh5dwritec_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, h
 
 int_f
 nh5dwritec_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -201,6 +239,7 @@ nh5dwritec_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, h
 
 int_f
 nh5dwritec_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -214,6 +253,7 @@ nh5dwritec_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, h
 
 int_f
 nh5dwritec_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -227,6 +267,7 @@ nh5dwritec_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, h
 
 int_f
 nh5dwritec_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -238,19 +279,25 @@ nh5dwritec_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, h
      return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dwrite_c
- * Purpose:     Call H5Dwrite to write a dataset
- * Inputs:      dset_id - dataset identifier
+/****if* H5Df/h5dwrite_c
+ * NAME
+ *        h5dwrite_c
+ * PURPOSE
+ *     Call H5Dwrite to write a dataset
+ * INPUTS
+ *      dset_id - dataset identifier
  *              mem_type_id - memory datatype identifier
  *              mem_space_id - memory dataspace identifier
  *              file_space_id - memory dataspace identifier
  *              xfer_pr  - identifier of transfer property list
  *              buf      - data buffer
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Tuesday, May 14, 2002
- * Modifications: This function is added to accomodate oveloaded h5dwrite_f
+ * HISTORY
+ * This function is added to accomodate oveloaded h5dwrite_f
  *                with the dims argument being of INTEGER(HSIZE_T) type
  *
  *                Added nh5dwrite_integer(real,double)_s,1-7_c functions to eliminate
@@ -258,9 +305,11 @@ nh5dwritec_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, h
  *                called by Fortran rouitnes
  *                                           October 10, 2006 EIP
  *
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f UNUSED *dims)
+/******/
 {
      int ret_value = -1;
      herr_t ret;
@@ -291,6 +340,7 @@ nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
 
 int_f
 nh5dwrite_integer_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -301,6 +351,7 @@ nh5dwrite_integer_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_spac
 
 int_f
 nh5dwrite_integer_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -311,6 +362,7 @@ nh5dwrite_integer_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_spac
 
 int_f
 nh5dwrite_integer_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -321,6 +373,7 @@ nh5dwrite_integer_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_spac
 
 int_f
 nh5dwrite_integer_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -331,6 +384,7 @@ nh5dwrite_integer_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_spac
 
 int_f
 nh5dwrite_integer_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -341,6 +395,7 @@ nh5dwrite_integer_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_spac
 
 int_f
 nh5dwrite_integer_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -351,6 +406,7 @@ nh5dwrite_integer_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_spac
 
 int_f
 nh5dwrite_integer_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -361,6 +417,7 @@ nh5dwrite_integer_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_spac
 
 int_f
 nh5dwrite_integer_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -371,6 +428,7 @@ nh5dwrite_integer_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_spac
 
 int_f
 nh5dwrite_real_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -380,6 +438,7 @@ nh5dwrite_real_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
 
 int_f
 nh5dwrite_real_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -389,6 +448,7 @@ nh5dwrite_real_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
 
 int_f
 nh5dwrite_real_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -398,6 +458,7 @@ nh5dwrite_real_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
 
 int_f
 nh5dwrite_real_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -407,6 +468,7 @@ nh5dwrite_real_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
 
 int_f
 nh5dwrite_real_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -416,6 +478,7 @@ nh5dwrite_real_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
 
 int_f
 nh5dwrite_real_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -425,6 +488,7 @@ nh5dwrite_real_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
 
 int_f
 nh5dwrite_real_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -434,6 +498,7 @@ nh5dwrite_real_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
 
 int_f
 nh5dwrite_real_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -443,6 +508,7 @@ nh5dwrite_real_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
 
 int_f
 nh5dwrite_double_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -452,6 +518,7 @@ nh5dwrite_double_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dwrite_double_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -461,6 +528,7 @@ nh5dwrite_double_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dwrite_double_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -470,6 +538,7 @@ nh5dwrite_double_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dwrite_double_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -479,6 +548,7 @@ nh5dwrite_double_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dwrite_double_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -488,6 +558,7 @@ nh5dwrite_double_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dwrite_double_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -497,6 +568,7 @@ nh5dwrite_double_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dwrite_double_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -506,6 +578,7 @@ nh5dwrite_double_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dwrite_double_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dwrite_c  function.
@@ -514,24 +587,32 @@ nh5dwrite_double_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 }
 
 
-/*----------------------------------------------------------------------------
- * Name:        h5dwrite_ref_obj_c
- * Purpose:     Call H5Dwrite to write a dataset  of object references
- * Inputs:      dset_id - dataset identifier
+/****if* H5Df/h5dwrite_ref_obj_c
+ * NAME
+ *        h5dwrite_ref_obj_c
+ * PURPOSE
+ *     Call H5Dwrite to write a dataset  of object references
+ * INPUTS
+ *      dset_id - dataset identifier
  *              mem_type_id - memory datatype identifier
  *              mem_space_id - memory dataspace identifier
  *              file_space_id - memory dataspace identifier
  *              xfer_pr  - identifier of transfer property list
  *              buf      - data buffer with references to the objects.
  *              n - number of references to be stored.
- * Returns:     0 on success,e-1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success,e-1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Tuesday, May 14, 2002
- * Modifications: This function was added to accomodate h5dwrite_f with the
+ * HISTORY
+ * This function was added to accomodate h5dwrite_f with the
  *                dims argumnet being of INTEGER(HSIZE_T) type.
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, haddr_t_f *buf, hsize_t_f *dims)
+/******/
 {
     int ret_value = -1;
     herr_t ret;
@@ -573,24 +654,32 @@ nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dwrite_ref_reg_c
- * Purpose:     Call H5Dwrite to write a dataset of dataset region references
- * Inputs:      dset_id - dataset identifier
+/****if* H5Df/h5dwrite_ref_reg_c
+ * NAME
+ *        h5dwrite_ref_reg_c
+ * PURPOSE
+ *     Call H5Dwrite to write a dataset of dataset region references
+ * INPUTS
+ *      dset_id - dataset identifier
  *              mem_type_id - memory datatype identifier
  *              mem_space_id - memory dataspace identifier
  *              file_space_id - memory dataspace identifier
  *              xfer_pr  - identifier of transfer property list
  *              buf      - data buffer with references to the objects.
  *              n - number of references to be stored.
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Tuesday, May 14, 2002
- * Modifications: This function was added to accomodate h5dwrite_f with the
+ * HISTORY
+ * This function was added to accomodate h5dwrite_f with the
  *                dims argument being of INTEGER(HSIZE_T) type
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims)
+/******/
 {
      int ret_value = -1;
      herr_t ret;
@@ -637,23 +726,32 @@ nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
 
 
 
-/*----------------------------------------------------------------------------
- * Name:        h5dreadc_c
- * Purpose:     Call h5dread_c to read a dataset of characters
- * Inputs:      dset_id - dataset identifier
+/****if* H5Df/h5dreadc_c
+ * NAME
+ *        h5dreadc_c
+ * PURPOSE
+ *     Call h5dread_c to read a dataset of characters
+ * INPUTS
+ *      dset_id - dataset identifier
  *              mem_type_id - memory datatype identifier
  *              mem_space_id - memory dataspace identifier
  *              file_space_id - memory dataspace identifier
  *              xfer_pr  - identifier of transfer property list
- * Outputs:     buf      - character data buffer
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * OUTPUTS
+ *     buf      - character data buffer
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, May 15, 2002
- * Modifications: This function was added to accomodate h5dread_f subroutine
+ * HISTORY
+ * This function was added to accomodate h5dread_f subroutine
  *                with the dims parameter being of INTEGER(HSIZE_T_F) size.
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5dreadc_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+/******/
 {
      int ret_value = -1;
 
@@ -667,6 +765,7 @@ nh5dreadc_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
 
 int_f
 nh5dreadc_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -680,6 +779,7 @@ nh5dreadc_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hi
 
 int_f
 nh5dreadc_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -693,6 +793,7 @@ nh5dreadc_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hi
 
 int_f
 nh5dreadc_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -706,6 +807,7 @@ nh5dreadc_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hi
 
 int_f
 nh5dreadc_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -719,6 +821,7 @@ nh5dreadc_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hi
 
 int_f
 nh5dreadc_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -732,6 +835,7 @@ nh5dreadc_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hi
 
 int_f
 nh5dreadc_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -745,6 +849,7 @@ nh5dreadc_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hi
 
 int_f
 nh5dreadc_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -758,6 +863,7 @@ nh5dreadc_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hi
 
 int_f
 nh5dreadc_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
+
 {
      int ret_value = -1;
 
@@ -769,19 +875,26 @@ nh5dreadc_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hi
      return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dread_c
- * Purpose:     Call H5Draed to read a dataset
- * Inputs:      dset_id - dataset identifier
+/****if* H5Df/h5dread_c
+ * NAME
+ *        h5dread_c
+ * PURPOSE
+ *     Call H5Draed to read a dataset
+ * INPUTS
+ *      dset_id - dataset identifier
  *              mem_type_id - memory datatype identifier
  *              mem_space_id - memory dataspace identifier
  *              file_space_id - memory dataspace identifier
  *              xfer_pr  - identifier of transfer property list
- * Outputs:     buf      - data buffer
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * OUTPUTS
+ *     buf      - data buffer
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, May 15, 2002
- * Modifications: This function was added to accomodate h5dread_f subroutine
+ * HISTORY
+ * This function was added to accomodate h5dread_f subroutine
  *                with the dims parameter being of INTEGER(HSIZE_T_F) size.
  *
  *                Added nh5dread_integer(real,double)_s,1-7_c functions to eliminate
@@ -789,9 +902,11 @@ nh5dreadc_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hi
  *                called by Fortran rouitnes
  *                                           October 10, 2006 EIP
  *
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f UNUSED *dims)
+/******/
 {
      int ret_value = -1;
      herr_t ret;
@@ -822,6 +937,7 @@ nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t
 
 int_f
 nh5dread_integer_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -831,6 +947,7 @@ nh5dread_integer_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dread_integer_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -840,6 +957,7 @@ nh5dread_integer_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dread_integer_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -849,6 +967,7 @@ nh5dread_integer_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dread_integer_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -858,6 +977,7 @@ nh5dread_integer_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dread_integer_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -867,6 +987,7 @@ nh5dread_integer_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dread_integer_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -876,6 +997,7 @@ nh5dread_integer_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dread_integer_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -885,6 +1007,7 @@ nh5dread_integer_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dread_integer_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -894,6 +1017,7 @@ nh5dread_integer_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
 
 int_f
 nh5dread_real_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -903,6 +1027,7 @@ nh5dread_real_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
 
 int_f
 nh5dread_real_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -912,6 +1037,7 @@ nh5dread_real_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
 
 int_f
 nh5dread_real_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -921,6 +1047,7 @@ nh5dread_real_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
 
 int_f
 nh5dread_real_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -930,6 +1057,7 @@ nh5dread_real_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
 
 int_f
 nh5dread_real_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -939,6 +1067,7 @@ nh5dread_real_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
 
 int_f
 nh5dread_real_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -948,6 +1077,7 @@ nh5dread_real_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
 
 int_f
 nh5dread_real_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -957,6 +1087,7 @@ nh5dread_real_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
 
 int_f
 nh5dread_real_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -966,6 +1097,7 @@ nh5dread_real_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
 
 int_f
 nh5dread_double_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -975,6 +1107,7 @@ nh5dread_double_s_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
 
 int_f
 nh5dread_double_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -984,6 +1117,7 @@ nh5dread_double_1_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
 
 int_f
 nh5dread_double_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -993,6 +1127,7 @@ nh5dread_double_2_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
 
 int_f
 nh5dread_double_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -1002,6 +1137,7 @@ nh5dread_double_3_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
 
 int_f
 nh5dread_double_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -1011,6 +1147,7 @@ nh5dread_double_4_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
 
 int_f
 nh5dread_double_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -1020,6 +1157,7 @@ nh5dread_double_5_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
 
 int_f
 nh5dread_double_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -1029,6 +1167,7 @@ nh5dread_double_6_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
 
 int_f
 nh5dread_double_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
+
 {
      /*
       * Call h5dread_c  function.
@@ -1036,24 +1175,32 @@ nh5dread_double_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      return nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, dims);
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dread_ref_obj_c
- * Purpose:     Call H5Dread to read a dataset  of object references
- * Inputs:      dset_id - dataset identifier
+/****if* H5Df/h5dread_ref_obj_c
+ * NAME
+ *        h5dread_ref_obj_c
+ * PURPOSE
+ *     Call H5Dread to read a dataset  of object references
+ * INPUTS
+ *      dset_id - dataset identifier
  *              mem_type_id - memory datatype identifier
  *              mem_space_id - memory dataspace identifier
  *              file_space_id - memory dataspace identifier
  *              xfer_pr  - identifier of transfer property list
  *              buf      - data buffer to store references to the objects.
  *              n - number of references to be stored.
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, May 15, 2002
- * Modifications: This function was added to accomodate h5dread_f subroutine
+ * HISTORY
+ * This function was added to accomodate h5dread_f subroutine
  *                with the dims parameter being of INTEGER(HSIZE_T_F) size.
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, haddr_t_f * buf, hsize_t_f *dims)
+/******/
 {
     int ret_value = -1;
     herr_t ret = -1;
@@ -1095,24 +1242,32 @@ nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
     return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dread_ref_reg_c
- * Purpose:     Call H5Dread to read a dataset of dataset region references
- * Inputs:      dset_id - dataset identifier
+/****if* H5Df/h5dread_ref_reg_c
+ * NAME
+ *        h5dread_ref_reg_c
+ * PURPOSE
+ *     Call H5Dread to read a dataset of dataset region references
+ * INPUTS
+ *      dset_id - dataset identifier
  *              mem_type_id - memory datatype identifier
  *              mem_space_id - memory dataspace identifier
  *              file_space_id - memory dataspace identifier
  *              xfer_pr  - identifier of transfer property list
  *              buf      - data buffer to store references to the objects.
  *              n - number of references to be stored.
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, May 15, 2002
- * Modifications: This function was added to accomodate h5dread_f subroutine
+ * HISTORY
+ * This function was added to accomodate h5dread_f subroutine
  *                with the dims parameter being of INTEGER(HSIZE_T_F) size.
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f * buf, hsize_t_f *dims)
+/******/
 {
      int ret_value = -1;
      herr_t ret = -1;
@@ -1157,18 +1312,26 @@ nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
 
 
 
-/*----------------------------------------------------------------------------
- * Name:        h5dclose_c
- * Purpose:     Call H5Dclose to close a dataset
- * Inputs:      dset_id - identifier of the dataset to be closed
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+/****if* H5Df/h5dclose_c
+ * NAME
+ *        h5dclose_c
+ * PURPOSE
+ *     Call H5Dclose to close a dataset
+ * INPUTS
+ *      dset_id - identifier of the dataset to be closed
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, August 4, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5dclose_c ( hid_t_f *dset_id )
+/******/
 {
   int ret_value = 0;
   hid_t c_dset_id;
@@ -1177,19 +1340,28 @@ nh5dclose_c ( hid_t_f *dset_id )
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dget_space_c
- * Purpose:     Call H5Dget_space to obtain dataspace of a dataset
- * Inputs:      dset_id - identifier of the dataset
- * Outputs:     space_id - identifier of the dataset's dataspace
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+/****if* H5Df/h5dget_space_c
+ * NAME
+ *        h5dget_space_c
+ * PURPOSE
+ *     Call H5Dget_space to obtain dataspace of a dataset
+ * INPUTS
+ *      dset_id - identifier of the dataset
+ * OUTPUTS
+ *     space_id - identifier of the dataset's dataspace
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Thursday, August 19, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5dget_space_c ( hid_t_f *dset_id , hid_t_f *space_id)
+/******/
 {
   int ret_value = -1;
   hid_t c_dset_id;
@@ -1203,19 +1375,28 @@ nh5dget_space_c ( hid_t_f *dset_id , hid_t_f *space_id)
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dget_type_c
- * Purpose:     Call H5Dget_type to obtain datatype of a dataset
- * Inputs:      dset_id - identifier of the dataset
- * Outputs:     type_id - identifier of the dataset's datatype
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+/****if* H5Df/h5dget_type_c
+ * NAME
+ *        h5dget_type_c
+ * PURPOSE
+ *     Call H5Dget_type to obtain datatype of a dataset
+ * INPUTS
+ *      dset_id - identifier of the dataset
+ * OUTPUTS
+ *     type_id - identifier of the dataset's datatype
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Thursday, August 19, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5dget_type_c ( hid_t_f *dset_id , hid_t_f *type_id)
+/******/
 {
   int ret_value = -1;
   hid_t c_dset_id;
@@ -1231,20 +1412,29 @@ nh5dget_type_c ( hid_t_f *dset_id , hid_t_f *type_id)
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dget_create_plist_c
- * Purpose:     Call H5Dget_create_plist to obtain creation property list
+/****if* H5Df/h5dget_create_plist_c
+ * NAME
+ *        h5dget_create_plist_c
+ * PURPOSE
+ *     Call H5Dget_create_plist to obtain creation property list
  *              of a dataset
- * Inputs:      dset_id - identifier of the dataset
- * Outputs:     plist_id - identifier of he dataset creation property list
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * INPUTS
+ *      dset_id - identifier of the dataset
+ * OUTPUTS
+ *     plist_id - identifier of he dataset creation property list
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Thursday, August 19, 1999
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5dget_create_plist_c ( hid_t_f *dset_id , hid_t_f *plist_id)
+/******/
 {
   int ret_value = -1;
   hid_t c_dset_id;
@@ -1261,22 +1451,31 @@ nh5dget_create_plist_c ( hid_t_f *dset_id , hid_t_f *plist_id)
 }
 
 
-/*----------------------------------------------------------------------------
- * Name:        h5dset_extent_c
- * Purpose:     Call H5Dset_extent to extend dataset with unlimited dimensions
- * Inputs:      dset_id - identifier of the dataset
- * Outputs:     dims - array with the dimension sizes
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+/****if* H5Df/h5dset_extent_c
+ * NAME
+ *        h5dset_extent_c
+ * PURPOSE
+ *     Call H5Dset_extent to extend dataset with unlimited dimensions
+ * INPUTS
+ *      dset_id - identifier of the dataset
+ * OUTPUTS
+ *     dims - array with the dimension sizes
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Thursday, August 19, 1999
  *
- * Modifications: Changed name from the now obsolete h5dextend
+ * HISTORY
+ * Changed name from the now obsolete h5dextend
  *                to h5dset_extent in order to match new fortran interface.
  *                -MSB- March 14, 2008
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 
 int_f
 nh5dset_extent_c ( hid_t_f *dset_id , hsize_t_f *dims)
+/******/
 {
   hid_t c_space_id;
   hsize_t c_dims[H5S_MAX_RANK];
@@ -1305,20 +1504,29 @@ nh5dset_extent_c ( hid_t_f *dset_id , hsize_t_f *dims)
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        nh5dget_storage_size_c
- * Purpose:     Call H5Dget_storage_size to return the amount of storage
+/****if* H5Df/nh5dget_storage_size_c
+ * NAME
+ *        nh5dget_storage_size_c
+ * PURPOSE
+ *     Call H5Dget_storage_size to return the amount of storage
  *              required for a dataset
- * Inputs:      dset_id - identifier of the dataset
- * Outputs:     size    - the amount of storage required for a dataset
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * INPUTS
+ *      dset_id - identifier of the dataset
+ * OUTPUTS
+ *     size    - the amount of storage required for a dataset
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Tuesday, October 22, 2002
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5dget_storage_size_c ( hid_t_f *dset_id , hsize_t_f *size)
+/******/
 {
   int ret_value = -1;
   hsize_t c_size;
@@ -1332,21 +1540,30 @@ nh5dget_storage_size_c ( hid_t_f *dset_id , hsize_t_f *size)
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        nh5dvlen_get_max_len_c
- * Purpose:     Get the maximum size of the VL dataset element
- * Inputs:      dset_id - identifier of the dataset
+/****if* H5Df/nh5dvlen_get_max_len_c
+ * NAME
+ *        nh5dvlen_get_max_len_c
+ * PURPOSE
+ *     Get the maximum size of the VL dataset element
+ * INPUTS
+ *      dset_id - identifier of the dataset
  *              type_id - datatype identifier
  *              space_id - dataspace identifier
- * Outputs:     len      - maximum length of the VL dataset element
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * OUTPUTS
+ *     len      - maximum length of the VL dataset element
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Tuesday, October 22, 2002
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5dvlen_get_max_len_c ( hid_t_f *dset_id ,  hid_t_f *type_id, hid_t_f *space_id, size_t_f *len)
+/******/
 {
   int ret_value = -1;
   size_t c_len;
@@ -1381,10 +1598,13 @@ DONE:
   free(c_buf);
   return ret_value;
 }
-/*----------------------------------------------------------------------------
- * Name:        nh5dwrite_vl_integer_c
- * Purpose:     Write variable length dataset
- * Inputs:      dset_id - identifier of the dataset
+/****if* H5Df/nh5dwrite_vl_integer_c
+ * NAME
+ *        nh5dwrite_vl_integer_c
+ * PURPOSE
+ *     Write variable length dataset
+ * INPUTS
+ *      dset_id - identifier of the dataset
  *              mem_type_id - datatype identifier
  *              mem_space_id - dataspace identifier
  *              file_space_id - file dataspace identifier
@@ -1394,14 +1614,19 @@ DONE:
  *                              dims[0] = MAXLENGTH
  *                              dims[1] = number of elements of VL type
  *              len           - array element lenghts
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, October 23, 2002
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5dwrite_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims, size_t_f *len)
+/******/
 {
   int ret_value = -1;
   hid_t c_dset_id;
@@ -1446,10 +1671,13 @@ DONE:
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        nh5dread_vl_integer_c
- * Purpose:     Read variable length dataset
- * Inputs:      dset_id - identifier of the dataset
+/****if* H5Df/nh5dread_vl_integer_c
+ * NAME
+ *        nh5dread_vl_integer_c
+ * PURPOSE
+ *     Read variable length dataset
+ * INPUTS
+ *      dset_id - identifier of the dataset
  *              mem_type_id - datatype identifier
  *              mem_space_id - dataspace identifier
  *              file_space_id - file dataspace identifier
@@ -1457,16 +1685,22 @@ DONE:
  *              dims          - one-demnsional array of size 2
  *                              dims[0] = MAXLENGTH
  *                              dims[1] = number of elements of VL type
- * Outputs:     buf           - data buffer
+ * OUTPUTS
+ *     buf           - data buffer
  *              len           - array element lenghts
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, October 24, 2002
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5dread_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims, size_t_f *len)
+/******/
 {
   int ret_value = -1;
   hid_t c_dset_id;
@@ -1509,10 +1743,13 @@ DONE:
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        nh5dwrite_vl_string_c
- * Purpose:     Write variable length strings from Fortran program
- * Inputs:      dset_id - identifier of the dataset
+/****if* H5Df/nh5dwrite_vl_string_c
+ * NAME
+ *        nh5dwrite_vl_string_c
+ * PURPOSE
+ *     Write variable length strings from Fortran program
+ * INPUTS
+ *      dset_id - identifier of the dataset
  *              mem_type_id - datatype identifier
  *              mem_space_id - dataspace identifier
  *              file_space_id - file dataspace identifier
@@ -1521,14 +1758,19 @@ DONE:
  *              dims          - one-demnsional array of size 2
  *                              dims[0] = number of strings of size max_len
  *              len           - array of strings lengths
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Monday, October 28, 2002
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5dwrite_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims, size_t_f *len)
+/******/
 {
   int ret_value = -1;
   hid_t c_dset_id;
@@ -1588,10 +1830,13 @@ DONE:
   free(tmp);
   return ret_value;
 }
-/*----------------------------------------------------------------------------
- * Name:        nh5dread_vl_string_c
- * Purpose:     Read variable length strings from Fortran program
- * Inputs:      dset_id - identifier of the dataset
+/****if* H5Df/nh5dread_vl_string_c
+ * NAME
+ *        nh5dread_vl_string_c
+ * PURPOSE
+ *     Read variable length strings from Fortran program
+ * INPUTS
+ *      dset_id - identifier of the dataset
  *              mem_type_id - datatype identifier
  *              mem_space_id - dataspace identifier
  *              file_space_id - file dataspace identifier
@@ -1600,14 +1845,19 @@ DONE:
  *                              dims[0] = number of strings of size max_len
  * Output:      buf           - data buffer
  *              len           - array of strings lengths
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Friday, November 1, 2002
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims, size_t_f *len)
+/******/
 {
   int ret_value = -1;
   hid_t c_dset_id;
@@ -1663,10 +1913,13 @@ nh5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        nh5dwrite_vl_real_c
- * Purpose:     Write variable length dataset
- * Inputs:      dset_id - identifier of the dataset
+/****if* H5Df/nh5dwrite_vl_real_c
+ * NAME
+ *        nh5dwrite_vl_real_c
+ * PURPOSE
+ *     Write variable length dataset
+ * INPUTS
+ *      dset_id - identifier of the dataset
  *              mem_type_id - datatype identifier
  *              mem_space_id - dataspace identifier
  *              file_space_id - file dataspace identifier
@@ -1676,14 +1929,19 @@ nh5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
  *                              dims[0] = MAXLENGTH
  *                              dims[1] = number of elements of VL type
  *              len           - array element lenghts
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Monday, November 11, 2002
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5dwrite_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, real_f *buf, hsize_t_f *dims, size_t_f *len)
+/******/
 {
   int ret_value = -1;
   hid_t c_dset_id;
@@ -1728,10 +1986,13 @@ DONE:
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        nh5dread_vl_real_c
- * Purpose:     Read variable length dataset
- * Inputs:      dset_id - identifier of the dataset
+/****if* H5Df/nh5dread_vl_real_c
+ * NAME
+ *        nh5dread_vl_real_c
+ * PURPOSE
+ *     Read variable length dataset
+ * INPUTS
+ *      dset_id - identifier of the dataset
  *              mem_type_id - datatype identifier
  *              mem_space_id - dataspace identifier
  *              file_space_id - file dataspace identifier
@@ -1739,16 +2000,22 @@ DONE:
  *              dims          - one-demnsional array of size 2
  *                              dims[0] = MAXLENGTH
  *                              dims[1] = number of elements of VL type
- * Outputs:     buf           - data buffer
+ * OUTPUTS
+ *     buf           - data buffer
  *              len           - array element lenghts
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Monday, November 11, 2002
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 
 int_f
 nh5dread_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, real_f *buf, hsize_t_f *dims, size_t_f *len)
+/******/
 {
   int ret_value = -1;
   hid_t c_dset_id;
@@ -1792,21 +2059,29 @@ DONE:
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dfillc_c
- * Purpose:     Call h5fill_c to fill memory buffer with a fill value
- * Inputs:      fill_value - fill value
+/****if* H5Df/h5dfillc_c
+ * NAME
+ *        h5dfillc_c
+ * PURPOSE
+ *     Call h5fill_c to fill memory buffer with a fill value
+ * INPUTS
+ *      fill_value - fill value
  *              fill_type_id - fill value datatype identifier
  *              space_id - memory space selection identifier
  *              buf      - memory buffer to fill
  *              mem_type_id - memory buffer dtatype identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, March 12, 2003
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 int_f
 nh5dfillc_c (_fcd fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, _fcd buf, hid_t_f *mem_type_id)
+/******/
 {
      int ret_value = -1;
 
@@ -1817,22 +2092,29 @@ nh5dfillc_c (_fcd fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, _fcd buf
 
      return ret_value;
 }
-/*----------------------------------------------------------------------------
- * Name:        h5dfill_c
- * Purpose:     Call H5Dfill to fill memory buffer with a fill value
- * Inputs:      fill_value - fill value
+/****if* H5Df/h5dfill_c
+ * NAME
+ *        h5dfill_c
+ * PURPOSE
+ *     Call H5Dfill to fill memory buffer with a fill value
+ * INPUTS
+ *      fill_value - fill value
  *              fill_type_id - fill value datatype identifier
  *              space_id - memory space selection identifier
  *              buf      - memory buffer to fill
  *              mem_type_id - memory buffer dtatype identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, March 12, 2003
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 int_f
 nh5dfill_c (void * fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, void * buf, hid_t_f *mem_type_id)
-
+/******/
 {
      int ret_value = -1;
      herr_t ret;
@@ -1926,19 +2208,27 @@ nh5dfill_double_c (void * fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, 
      return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dget_space_status_c
- * Purpose:     Call H5Dget_space_status to request dataspace allocation status
- * Inputs:      dset_id - dataset identifier
- * Outputs:     flag - status flag
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
+/****if* H5Df/h5dget_space_status_c
+ * NAME
+ *        h5dget_space_status_c
+ * PURPOSE
+ *     Call H5Dget_space_status to request dataspace allocation status
+ * INPUTS
+ *      dset_id - dataset identifier
+ * OUTPUTS
+ *     flag - status flag
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
  *              Wednesday, March 12, 2003
- * Modifications:
- *---------------------------------------------------------------------------*/
+ * HISTORY
+ *
+ * SOURCE
+*/
 int_f
 nh5dget_space_status_c ( hid_t_f *dset_id, int_f *flag)
-
+/******/
 {
      int ret_value = -1;
      herr_t ret;
@@ -1957,25 +2247,33 @@ nh5dget_space_status_c ( hid_t_f *dset_id, int_f *flag)
      ret_value = 0;
      return ret_value;
 }
-/*----------------------------------------------------------------------------
- * Name:        h5dcreate_anon_c
- * Purpose:     Call H5Dcreate_anon
- * Inputs:
+/****if* H5Df/h5dcreate_anon_c
+ * NAME
+ *        h5dcreate_anon_c
+ * PURPOSE
+ *     Call H5Dcreate_anon
+ * INPUTS
+ *
  *		loc_id	   - Identifier of the file or group within which to create the dataset.
  *		type_id	   - Identifier of the datatype to use when creating the dataset.
  *		space_id   - Identifier of the dataspace to use when creating the dataset.
  *              dcpl_id    - Dataset creation property list identifier.
  *              dapl_id    - Dataset access property list identifier.
- * Outputs:
+ * OUTPUTS
+ *
  *              dset_id - dataset identifier
  *
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
  *              February, 2008
- *---------------------------------------------------------------------------*/
+ * SOURCE
+*/
 int_f
 nh5dcreate_anon_c (hid_t_f *loc_id, hid_t_f *type_id, hid_t_f *space_id,
 		   hid_t_f *dcpl_id, hid_t_f *dapl_id, hid_t_f *dset_id)
+/******/
 {
   int ret_value = -1;
 
@@ -1992,20 +2290,174 @@ nh5dcreate_anon_c (hid_t_f *loc_id, hid_t_f *type_id, hid_t_f *space_id,
   return ret_value;
 }
 
-/*----------------------------------------------------------------------------
- * Name:        h5dget_access_plist_c
- * Purpose:     Call H5Dget_access_plist
- * Inputs:
- *              dset_id   - dataset identifier
- * Outputs:
- *              plist_id  - the dataset access property list identifier.
+/****if* H5Df/nh5dwrite_f_c
+ * NAME
+ *        nh5dwrite_f_c
+ * PURPOSE
+ *     Call H5Dwrite to write a dataset
+ * INPUTS
+ *      dset_id - dataset identifier
+ *              mem_type_id - memory datatype identifier
+ *              mem_space_id - memory dataspace identifier
+ *              file_space_id - memory dataspace identifier
+ *              xfer_pr  - identifier of transfer property list
+ *              buf      - data buffer
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
+ *              May 28, 2008
+ * HISTORY
  *
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
- *              April 13, 2009
- *---------------------------------------------------------------------------*/
+ *
+ * SOURCE
+*/
+int_f
+nh5dwrite_f_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id,
+		    hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf)
+/******/
+{
+  int ret_value = -1;
+  herr_t ret;
+  hid_t c_dset_id;
+  hid_t c_mem_type_id;
+  hid_t c_mem_space_id;
+  hid_t c_file_space_id;
+  hid_t c_xfer_prp;
+
+/*   int i, j; */
+/*   typedef struct { */
+/*     int x; */
+/*     float y; */
+/*   } r_dual_c; */
+
+/*   const r_dual_c *name=buf; */
+
+/*   r_dual_c access[4][4]; */
+
+/*   for ( i=0; i<4; ++i) */
+/*     for (j = 0; j<4; ++j) { */
+/*       access[i][j] = name[i*4+j]; */
+/*     /\* access[i].x = access[i].x + 1; *\/ */
+/*       printf("x = %i \n", access[i][j].x); */
+/*       printf("y = %f \n", access[i][j].y); */
+/*     } */
+
+  /*
+   * Define transfer property
+   */
+  c_xfer_prp = (hid_t)*xfer_prp;
+
+  /*
+   * Call H5Dwrite function.
+   */
+  c_dset_id = (hid_t)*dset_id;
+  c_mem_type_id = (hid_t)*mem_type_id;
+  c_mem_space_id = (hid_t)*mem_space_id;
+  c_file_space_id = (hid_t)*file_space_id;
+  ret = H5Dwrite(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf);
+
+  if (ret < 0) return ret_value;
+  ret_value = 0;
+  return ret_value;
+}
+/****if* H5Df/nh5dread_f_c
+ * NAME
+ *        nh5dread_f_c
+ * PURPOSE
+ *     Read variable length dataset
+ * INPUTS
+ *      dset_id - identifier of the dataset
+ *              mem_type_id - datatype identifier
+ *              mem_space_id - dataspace identifier
+ *              file_space_id - file dataspace identifier
+ *              xfer          - file transfer property
+ *              dims          - one-demnsional array of size 2
+ *                              dims[0] = MAXLENGTH
+ *                              dims[1] = number of elements of VL type
+ * OUTPUTS
+ *     buf           - data buffer
+ *              len           - array element lenghts
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *  Elena Pourmal
+ *              Wednesday, October 24, 2002
+ * HISTORY
+ *
+ * SOURCE
+*/
+
+int_f
+nh5dread_f_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id,
+		    hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf)
+/******/
+{
+  int ret_value = -1;
+  hid_t c_dset_id;
+  hid_t c_mem_type_id;
+  hid_t c_mem_space_id;
+  hid_t c_file_space_id;
+  hid_t c_xfer_prp;
+  herr_t status;
+
+/*   int i, j; */
+/*   typedef struct { */
+/*     int x; */
+/*     float y; */
+/*   } r_dual_c; */
+
+/*   r_dual_c *name=buf; */
+
+/*   r_dual_c access[4][4]; */
+
+  c_dset_id       = (hid_t)*dset_id;
+  c_mem_type_id   = (hid_t)*mem_type_id;
+  c_mem_space_id  = (hid_t)*mem_space_id;
+  c_file_space_id = (hid_t)*file_space_id;
+  c_xfer_prp      = (hid_t)*xfer_prp;
+  /*
+   * Call H5Dread function.
+   */
+
+/*   printf("%i %i %i %i %i \n",c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp); */
+
+  status = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf);
+  if ( status < 0 ) return ret_value;
+
+/*   for ( i=0; i<4; ++i) */
+/*     for (j = 0; j<4; ++j) { */
+/*       access[i][j] = name[i*4+j]; */
+/*     /\* access[i].x = access[i].x + 1; *\/ */
+/*       printf("x = %i \n", access[i][j].x); */
+/*       printf("y = %f \n", access[i][j].y); */
+/*      } */
+
+
+  ret_value = 1;
+  return ret_value;
+}
+/****if* H5Df/nh5dget_access_plist_c
+ * NAME
+ *     nh5dget_access_plist_c
+ * PURPOSE
+ *     Call H5Dget_access_plist
+ * INPUTS
+ *     dset_id   - dataset identifier
+ * OUTPUTS
+ *     plist_id  - the dataset access property list identifier
+ * RETURNS
+ *     0 on success, -1 on failure
+ * AUTHOR
+ *     M. Scot Breitenfeld
+ *     April 13, 2009
+ *
+ * SOURCE
+*/
+
 int_f
 nh5dget_access_plist_c (hid_t_f *dset_id, hid_t_f *plist_id)
+/******/
 {
   int ret_value = -1;
   /*
@@ -2020,4 +2472,38 @@ nh5dget_access_plist_c (hid_t_f *dset_id, hid_t_f *plist_id)
   return ret_value;
 }
 
+/****if* H5Df/nh5dvlen_reclaim_c
+ * NAME
+ *     nh5dvlen_reclaim_c
+ * PURPOSE
+ *     Call H5Dvlen_reclaim
+ * INPUTS
+ *    type_id  - Identifier of the datatype. 
+ *   space_id  - Identifier of the dataspace. 
+ *   plist_id  - Identifier of the property list used to create the buffer. 
+ *   buf       - Pointer to the buffer to be reclaimed.    
+ *
+ * RETURNS
+ *   0 on success, -1 on failure
+ * AUTHOR
+ *   M. Scot Breitenfeld
+ *   January 15, 2011 
+ *
+ * SOURCE
+*/
+int_f
+nh5dvlen_reclaim_c(hid_t_f *type_id, hid_t_f *space_id, hid_t_f *plist_id, void *buf)
+/******/
+{
+  int ret_value = -1;
+  herr_t status;
 
+  /*
+   * Call H5Dvlen_reclaim function.
+   */
+  status = H5Dvlen_reclaim((hid_t)*type_id, (hid_t)*space_id, (hid_t)*plist_id, buf);
+  if ( status < 0 ) return ret_value;
+
+  ret_value = 0;
+  return ret_value;
+}

@@ -1,7 +1,4 @@
-#############################
-Expected output for 'h5dump '
-#############################
-usage: h5dump [OPTIONS] file
+usage: h5dump [OPTIONS] files
   OPTIONS
      -h, --help           Print a usage message and exit
      -n, --contents       Print a list of the file contents and exit
@@ -28,6 +25,12 @@ usage: h5dump [OPTIONS] file
      -m T, --format=T     Set the floating point output format
      -q Q, --sort_by=Q    Sort groups and attributes by index Q
      -z Z, --sort_order=Z Sort groups and attributes by order Z
+     -M L, --packedbits=L Print packed bits as unsigned integers, using mask
+                          format L for an integer dataset specified with
+                          option -d. L is a list of offset,length values,
+                          separated by commas. Offset is the beginning bit in
+                          the data value and length is the number of bits of
+                          the mask.
      -R, --region         Print dataset pointed by region references
      -x, --xml            Output in XML using Schema
      -u, --use-dtd        Output in XML using DTD
@@ -37,6 +40,8 @@ usage: h5dump [OPTIONS] file
                           E.g., to dump a file called `-f', use h5dump -- -f
      --enable-error-stack Prints messages from the HDF5 error stack as they
                           occur.
+     --no-compact-subset  Disable compact form of subsetting and allow the use
+                          of "[" in datset names.
 
  Subsetting is available by using the following options with a dataset
  attribute. Subsetting is done by selecting a hyperslab from the data.
@@ -74,7 +79,7 @@ usage: h5dump [OPTIONS] file
 
   1) Attribute foo of the group /bar_none in file quux.h5
 
-     	h5dump -a /bar_none/foo quux.h5
+      h5dump -a /bar_none/foo quux.h5
 
   2) Selecting a subset from dataset /foo in file quux.h5
 
@@ -85,3 +90,12 @@ usage: h5dump [OPTIONS] file
 
       h5dump -d /dset -b LE -o out.bin quux.h5
 
+  4) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset
+
+      h5dump -d /dset -M 0,1,4,3 quux.h5
+
+  5) Dataset foo in files multi1.h5 multi2.h5 multi3.h5
+
+      h5dump -d /foo multi1.h5 multi2.h5 multi3.h5
+
+h5dump error: Bad mask list(-1,1)

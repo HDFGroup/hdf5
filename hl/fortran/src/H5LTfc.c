@@ -2124,3 +2124,54 @@ done:
 
     return ret_value;
 }
+
+/*-------------------------------------------------------------------------
+* Function: h5ltpath_valid_c
+*
+* Purpose: Calls h5ltpath_valid
+*
+* Return: Success: 0, Failure: -1
+*
+* Programmer: M. Scot Breitenfeld
+*
+* Date: February 18, 2012
+*
+* Comments:
+*
+* Modifications:
+*
+*
+*-------------------------------------------------------------------------
+*/
+
+int_f
+nh5ltpath_valid_c(hid_t_f *loc_id, 
+		  _fcd path, 
+		  int_f *pathlen, 
+		  int_f *check_object_valid_c)
+{
+    htri_t ret = -1;
+    char *c_path = NULL;
+    hbool_t check_object_valid;
+
+    /*
+     * convert FORTRAN name to C name
+     */
+    if( NULL == (c_path = (char *)HD5f2cstring(path, (int)*pathlen)))
+      goto done;
+    
+    check_object_valid = FALSE;
+    if(*check_object_valid_c == 1)
+      check_object_valid = TRUE;
+
+    /*
+     * call H5LTpath_valid function.
+     */
+    ret = H5LTpath_valid( (hid_t)*loc_id, c_path, check_object_valid );
+
+done:
+    if(c_path != NULL)
+      free(c_path);
+
+    return (int_f)ret;
+}

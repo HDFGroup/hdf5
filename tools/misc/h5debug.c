@@ -62,15 +62,15 @@
 /*-------------------------------------------------------------------------
  * Function:    get_H5B2_class
  *
- * Purpose:	Determine the v2 B-tree class from the buffer read in.
+ * Purpose:  Determine the v2 B-tree class from the buffer read in.
  *              B-trees are debugged through the B-tree subclass.  The subclass
  *              identifier is two bytes after the B-tree signature.
  *
- * Return:	Non-NULL on success/NULL on failure
+ * Return:  Non-NULL on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Sep 11 2008
+ * Programmer:  Quincey Koziol
+ *    koziol@hdfgroup.org
+ *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -130,7 +130,7 @@ get_H5B2_class(const uint8_t *sig)
             break;
 
         default:
-            fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
+            HDfprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
             HDexit(4);
     } /* end switch */
 
@@ -141,15 +141,15 @@ get_H5B2_class(const uint8_t *sig)
 /*-------------------------------------------------------------------------
  * Function:    get_H5EA_class
  *
- * Purpose:	Determine the extensible array class from the buffer read in.
+ * Purpose:  Determine the extensible array class from the buffer read in.
  *              Extensible arrays are debugged through the array subclass.
  *              The subclass identifier is two bytes after the signature.
  *
- * Return:	Non-NULL on success/NULL on failure
+ * Return:  Non-NULL on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Sep 11 2008
+ * Programmer:  Quincey Koziol
+ *    koziol@hdfgroup.org
+ *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -173,7 +173,7 @@ get_H5EA_class(const uint8_t *sig)
             break;
 
         default:
-            fprintf(stderr, "Unknown array class %u\n", (unsigned)(clsid));
+            HDfprintf(stderr, "Unknown array class %u\n", (unsigned)(clsid));
             HDexit(4);
     } /* end switch */
 
@@ -184,15 +184,15 @@ get_H5EA_class(const uint8_t *sig)
 /*-------------------------------------------------------------------------
  * Function:    get_H5FA_class
  *
- * Purpose:	Determine the fixed array class from the buffer read in.
+ * Purpose:  Determine the fixed array class from the buffer read in.
  *              Extensible arrays are debugged through the array subclass.
  *              The subclass identifier is two bytes after the signature.
  *
- * Return:	Non-NULL on success/NULL on failure
+ * Return:  Non-NULL on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Sep 11 2008
+ * Programmer:  Quincey Koziol
+ *    koziol@hdfgroup.org
+ *    Sep 11 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -216,7 +216,7 @@ get_H5FA_class(const uint8_t *sig)
             break;
 
         default:
-            fprintf(stderr, "Unknown array class %u\n", (unsigned)(clsid));
+            HDfprintf(stderr, "Unknown array class %u\n", (unsigned)(clsid));
             HDexit(4);
     } /* end switch */
 
@@ -242,7 +242,7 @@ get_H5FA_class(const uint8_t *sig)
 int
 main(int argc, char *argv[])
 {
-    hid_t	fid, fapl, dxpl;
+    hid_t  fid, fapl, dxpl;
     H5F_t       *f;
     haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
     uint8_t     sig[H5F_SIGNATURE_LEN];
@@ -250,13 +250,13 @@ main(int argc, char *argv[])
     herr_t      status = SUCCEED;
 
     if(argc == 1) {
-	fprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
-	HDexit(1);
+  		HDfprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
+  		HDexit(1);
     } /* end if */
 
     /* Initialize the library */
     if(H5open() < 0) {
-        fprintf(stderr, "cannot initialize the library\n");
+        HDfprintf(stderr, "cannot initialize the library\n");
         HDexit(1);
     } /* end if */
 
@@ -264,27 +264,27 @@ main(int argc, char *argv[])
      * Open the file and get the file descriptor.
      */
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0) {
-        fprintf(stderr, "cannot create dataset transfer property list\n");
+        HDfprintf(stderr, "cannot create dataset transfer property list\n");
         HDexit(1);
     } /* end if */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-        fprintf(stderr, "cannot create file access property list\n");
+        HDfprintf(stderr, "cannot create file access property list\n");
         HDexit(1);
     } /* end if */
-    if(strchr(argv[1], '%'))
-	H5Pset_fapl_family (fapl, (hsize_t)0, H5P_DEFAULT);
+    if(HDstrchr(argv[1], '%'))
+  		H5Pset_fapl_family (fapl, (hsize_t)0, H5P_DEFAULT);
     if((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, fapl)) < 0) {
-        fprintf(stderr, "cannot open file\n");
+        HDfprintf(stderr, "cannot open file\n");
         HDexit(1);
     } /* end if */
     if(NULL == (f = (H5F_t *)H5I_object(fid))) {
-        fprintf(stderr, "cannot obtain H5F_t pointer\n");
+        HDfprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
     } /* end if */
 
     /* Ignore metadata tags while using h5debug */
     if(H5AC_ignore_tags(f) < 0) {
-        fprintf(stderr, "cannot ignore metadata tags\n");
+        HDfprintf(stderr, "cannot ignore metadata tags\n");
         HDexit(1);
     }
 
@@ -307,7 +307,7 @@ main(int argc, char *argv[])
      */
     HDfprintf(stdout, "Reading signature at address %a (rel)\n", addr);
     if(H5F_block_read(f, H5FD_MEM_SUPER, addr, sizeof(sig), dxpl, sig) < 0) {
-        fprintf(stderr, "cannot read signature\n");
+        HDfprintf(stderr, "cannot read signature\n");
         HDexit(3);
     }
     if(!HDmemcmp(sig, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN)) {
@@ -335,9 +335,9 @@ main(int argc, char *argv[])
 
         /* Check for extra parameters */
         if(extra == 0) {
-            fprintf(stderr, "\nWarning: Providing the group's local heap address will give more information\n");
-            fprintf(stderr, "Symbol table node usage:\n");
-            fprintf(stderr, "\th5debug <filename> <Symbol table node address> <address of local heap>\n\n");
+            HDfprintf(stderr, "\nWarning: Providing the group's local heap address will give more information\n");
+            HDfprintf(stderr, "Symbol table node usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <Symbol table node address> <address of local heap>\n\n");
         } /* end if */
 
         status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
@@ -355,9 +355,9 @@ main(int argc, char *argv[])
             case H5B_SNODE_ID:
                 /* Check for extra parameters */
                 if(extra == 0) {
-                    fprintf(stderr, "\nWarning: Providing the group's local heap address will give more information\n");
-                    fprintf(stderr, "B-tree symbol table node usage:\n");
-                    fprintf(stderr, "\th5debug <filename> <B-tree node address> <address of local heap>\n\n");
+                    HDfprintf(stderr, "\nWarning: Providing the group's local heap address will give more information\n");
+                    HDfprintf(stderr, "B-tree symbol table node usage:\n");
+                    HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <address of local heap>\n\n");
                 } /* end if */
 
                 status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
@@ -366,9 +366,9 @@ main(int argc, char *argv[])
             case H5B_CHUNK_ID:
                 /* Check for extra parameters */
                 if(extra == 0) {
-                    fprintf(stderr, "ERROR: Need number of dimensions of chunk in order to dump chunk B-tree node\n");
-                    fprintf(stderr, "B-tree chunked storage node usage:\n");
-                    fprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions>\n");
+                    HDfprintf(stderr, "ERROR: Need number of dimensions of chunk in order to dump chunk B-tree node\n");
+                    HDfprintf(stderr, "B-tree chunked storage node usage:\n");
+                    HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions>\n");
                     HDexit(4);
                 } /* end if */
 
@@ -377,7 +377,7 @@ main(int argc, char *argv[])
                 break;
 
             default:
-                fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
+                HDfprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
                 HDexit(4);
         }
 
@@ -415,10 +415,10 @@ main(int argc, char *argv[])
             HDexit(4);
 
         } else if(extra == 0 || extra2 == 0 || extra3 == 0) {
-            fprintf(stderr, "ERROR: Need v2 B-tree header address and the node's number of records and depth in order to dump internal node\n");
-            fprintf(stderr, "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
-            fprintf(stderr, "v2 B-tree internal node usage:\n");
-            fprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> <number of records> <depth>\n");
+            HDfprintf(stderr, "ERROR: Need v2 B-tree header address and the node's number of records and depth in order to dump internal node\n");
+            HDfprintf(stderr, "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
+            HDfprintf(stderr, "v2 B-tree internal node usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> <number of records> <depth>\n");
             HDexit(4);
         } /* end if */
 
@@ -441,9 +441,9 @@ main(int argc, char *argv[])
             HDexit(4);
 
         } else if(extra == 0 || extra2 == 0) {
-            fprintf(stderr, "ERROR: Need v2 B-tree header address and number of records in order to dump leaf node\n");
-            fprintf(stderr, "v2 B-tree leaf node usage:\n");
-            fprintf(stderr, "\th5debug <filename> <leaf node address> <v2 B-tree header address> <number of records>\n");
+            HDfprintf(stderr, "ERROR: Need v2 B-tree header address and number of records in order to dump leaf node\n");
+            HDfprintf(stderr, "v2 B-tree leaf node usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <leaf node address> <v2 B-tree header address> <number of records>\n");
             HDexit(4);
         } /* end if */
 
@@ -462,9 +462,9 @@ main(int argc, char *argv[])
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0) {
-            fprintf(stderr, "ERROR: Need fractal heap header address and size of direct block in order to dump direct block\n");
-            fprintf(stderr, "Fractal heap direct block usage:\n");
-            fprintf(stderr, "\th5debug <filename> <direct block address> <heap header address> <size of direct block>\n");
+            HDfprintf(stderr, "ERROR: Need fractal heap header address and size of direct block in order to dump direct block\n");
+            HDfprintf(stderr, "Fractal heap direct block usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <direct block address> <heap header address> <size of direct block>\n");
             HDexit(4);
         } /* end if */
 
@@ -477,9 +477,9 @@ main(int argc, char *argv[])
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0) {
-            fprintf(stderr, "ERROR: Need fractal heap header address and number of rows in order to dump indirect block\n");
-            fprintf(stderr, "Fractal heap indirect block usage:\n");
-            fprintf(stderr, "\th5debug <filename> <indirect block address> <heap header address> <number of rows>\n");
+            HDfprintf(stderr, "ERROR: Need fractal heap header address and number of rows in order to dump indirect block\n");
+            HDfprintf(stderr, "Fractal heap indirect block usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <indirect block address> <heap header address> <number of rows>\n");
             HDexit(4);
         } /* end if */
 
@@ -499,9 +499,9 @@ main(int argc, char *argv[])
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0) {
-            fprintf(stderr, "ERROR: Need free space header address and client address in order to dump serialized sections\n");
-            fprintf(stderr, "Free space serialized sections usage:\n");
-            fprintf(stderr, "\th5debug <filename> <serialized sections address> <free space header address> <client address>\n");
+            HDfprintf(stderr, "ERROR: Need free space header address and client address in order to dump serialized sections\n");
+            HDfprintf(stderr, "Free space serialized sections usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <serialized sections address> <free space header address> <client address>\n");
             HDexit(4);
         } /* end if */
 
@@ -521,9 +521,9 @@ main(int argc, char *argv[])
 
         /* Check for enough valid parameters */
         if(extra2 == 0) {
-            fprintf(stderr, "ERROR: Need list format version and number of messages in order to shared message list\n");
-            fprintf(stderr, "Shared message list usage:\n");
-            fprintf(stderr, "\th5debug <filename> <shared message list address> <list format version> <number of mesages in list>\n");
+            HDfprintf(stderr, "ERROR: Need list format version and number of messages in order to shared message list\n");
+            HDfprintf(stderr, "Shared message list usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <shared message list address> <list format version> <number of mesages in list>\n");
             HDexit(4);
         } /* end if */
 
@@ -536,11 +536,11 @@ main(int argc, char *argv[])
         const H5EA_class_t *cls = get_H5EA_class(sig);
         HDassert(cls);
 
-	 /* Check for enough valid parameters */
+   /* Check for enough valid parameters */
         if(extra == 0) {
-            fprintf(stderr, "ERROR: Need object header address containing the layout message in order to dump header\n");
-            fprintf(stderr, "Extensible array header block usage:\n");
-            fprintf(stderr, "\th5debug <filename> <Extensible Array header address> <object header address>\n");
+            HDfprintf(stderr, "ERROR: Need object header address containing the layout message in order to dump header\n");
+            HDfprintf(stderr, "Extensible array header block usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <Extensible Array header address> <object header address>\n");
             HDexit(4);
         } /* end if */
 
@@ -555,9 +555,9 @@ main(int argc, char *argv[])
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0) {
-            fprintf(stderr, "ERROR: Need extensible array header address and object header address containing the layout message in order to dump index block\n");
-            fprintf(stderr, "Extensible array index block usage:\n");
-            fprintf(stderr, "\th5debug <filename> <index block address> <array header address> <object header address\n");
+            HDfprintf(stderr, "ERROR: Need extensible array header address and object header address containing the layout message in order to dump index block\n");
+            HDfprintf(stderr, "Extensible array index block usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <index block address> <array header address> <object header address\n");
             HDexit(4);
         } /* end if */
 
@@ -572,9 +572,9 @@ main(int argc, char *argv[])
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0 || extra3 == 0) {
-            fprintf(stderr, "ERROR: Need extensible array header address, super block index and object header address containing the layout message in order to dump super block\n");
-            fprintf(stderr, "Extensible array super block usage:\n");
-            fprintf(stderr, "\th5debug <filename> <super block address> <array header address> <super block index> <object header address>\n");
+            HDfprintf(stderr, "ERROR: Need extensible array header address, super block index and object header address containing the layout message in order to dump super block\n");
+            HDfprintf(stderr, "Extensible array super block usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <super block address> <array header address> <super block index> <object header address>\n");
             HDexit(4);
         } /* end if */
 
@@ -589,9 +589,9 @@ main(int argc, char *argv[])
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0 || extra3 == 0) {
-            fprintf(stderr, "ERROR: Need extensible array header address, # of elements in data block and object header address containing the layout message in order to dump data block\n");
-            fprintf(stderr, "Extensible array data block usage:\n");
-            fprintf(stderr, "\th5debug <filename> <data block address> <array header address> <# of elements in data block> <object header address\n");
+            HDfprintf(stderr, "ERROR: Need extensible array header address, # of elements in data block and object header address containing the layout message in order to dump data block\n");
+            HDfprintf(stderr, "Extensible array data block usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <data block address> <array header address> <# of elements in data block> <object header address\n");
             HDexit(4);
         } /* end if */
 
@@ -604,11 +604,11 @@ main(int argc, char *argv[])
         const H5FA_class_t *cls = get_H5FA_class(sig);
         HDassert(cls);
 
-	/* Check for enough valid parameters */
+  /* Check for enough valid parameters */
         if(extra == 0) {
-	    fprintf(stderr, "ERROR: Need object header address containing the layout message in order to dump header\n");
-            fprintf(stderr, "Fixed array header block usage:\n");
-	    fprintf(stderr, "\th5debug <filename> <Fixed Array header address> <object header address>\n");
+      HDfprintf(stderr, "ERROR: Need object header address containing the layout message in order to dump header\n");
+            HDfprintf(stderr, "Fixed array header block usage:\n");
+      HDfprintf(stderr, "\th5debug <filename> <Fixed Array header address> <object header address>\n");
             HDexit(4);
         } /* end if */
 
@@ -623,9 +623,9 @@ main(int argc, char *argv[])
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0) {
-            fprintf(stderr, "ERROR: Need fixed array header address and object header address containing the layout message in order to dump data block\n");
-            fprintf(stderr, "fixed array data block usage:\n");
-            fprintf(stderr, "\th5debug <filename> <data block address> <array header address> <object header address>\n");
+            HDfprintf(stderr, "ERROR: Need fixed array header address and object header address containing the layout message in order to dump data block\n");
+            HDfprintf(stderr, "fixed array data block usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <data block address> <array header address> <object header address>\n");
             HDexit(4);
         } /* end if */
 
@@ -661,13 +661,13 @@ main(int argc, char *argv[])
         }
         HDputchar('\n');
 
-        fprintf(stderr, "unknown signature\n");
+        HDfprintf(stderr, "unknown signature\n");
         HDexit(4);
     } /* end else */
 
     /* Check for an error when dumping information */
     if(status < 0) {
-        fprintf(stderr, "An error occurred!\n");
+        HDfprintf(stderr, "An error occurred!\n");
         H5Eprint2(H5E_DEFAULT, stderr);
         HDexit(5);
     } /* end if */

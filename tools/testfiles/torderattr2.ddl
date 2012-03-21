@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -H --sort_by=name --sort_order=descending torderattr.h5'
-#############################
 HDF5 "torderattr.h5" {
 GROUP "/" {
    ATTRIBUTE "c" {
@@ -28,7 +25,6 @@ GROUP "/" {
          DATATYPE  H5T_STD_U8LE
          DATASPACE  SCALAR
       }
-
    DATATYPE "t" H5T_STD_I32LE;
       ATTRIBUTE "c" {
          DATATYPE  H5T_STD_U8LE
@@ -42,7 +38,6 @@ GROUP "/" {
          DATATYPE  H5T_STD_U8LE
          DATASPACE  SCALAR
       }
-
    GROUP "gt" {
       ATTRIBUTE "c" {
          DATATYPE  H5T_STD_U8LE

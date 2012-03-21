@@ -105,7 +105,7 @@ H5MF_sects_debug_cb(const H5FS_section_info_t *_sect, void *_udata)
     H5MF_debug_iter_ud_t *udata = (H5MF_debug_iter_ud_t *)_udata;         /* User data for callbacks */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5MF_sects_debug_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -158,7 +158,7 @@ H5MF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, FILE *stream, int ind
     herr_t      ret_value = SUCCEED;    /* Return value */
     H5FD_mem_t 	type;                    /* Memory type for iteration */
 
-    FUNC_ENTER_NOAPI(H5MF_sects_debug, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -226,7 +226,7 @@ H5MF_sects_dump(H5F_t *f, hid_t dxpl_id, FILE *stream)
     int fwidth = 50;                    /* Field width */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_sects_dump, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Dumping file free space sections\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */

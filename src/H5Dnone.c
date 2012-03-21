@@ -130,7 +130,7 @@ H5D_none_create(const H5D_chk_idx_info_t *idx_info)
     haddr_t	addr;			/* The address of dataset chunks */
     herr_t 	ret_value = SUCCEED; 	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_none_create)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(idx_info);
@@ -172,7 +172,7 @@ done:
 static hbool_t
 H5D_none_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_none_is_space_alloc)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(storage);
@@ -198,7 +198,7 @@ H5D_none_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     hsize_t     idx;			/* Array index of chunk */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_none_insert)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -245,7 +245,7 @@ H5D_none_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     hsize_t     idx;   	                /* Array index of chunk */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_none_get_addr)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -296,7 +296,7 @@ H5D_none_iterate(const H5D_chk_idx_info_t *idx_info,
     hsize_t idx;    	/* Array index of chunk */
     int ret_value;    	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_none_iterate)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -373,7 +373,7 @@ done:
 static herr_t
 H5D_none_remove(const H5D_chk_idx_info_t UNUSED *idx_info, H5D_chunk_common_ud_t UNUSED *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_none_remove)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* NO OP */
 
@@ -399,7 +399,7 @@ H5D_none_delete(const H5D_chk_idx_info_t *idx_info)
     hsize_t nbytes;                 /* Size of all chunks */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_none_delete)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -438,7 +438,7 @@ H5D_none_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_none_copy_setup)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(idx_info_src);
@@ -486,7 +486,7 @@ done:
 static herr_t
 H5D_none_size(const H5D_chk_idx_info_t UNUSED *idx_info, hsize_t *index_size)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_none_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(index_size);
@@ -511,7 +511,7 @@ H5D_none_size(const H5D_chk_idx_info_t UNUSED *idx_info, hsize_t *index_size)
 static herr_t
 H5D_none_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_none_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(storage);
@@ -538,7 +538,7 @@ H5D_none_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 static herr_t
 H5D_none_dump(const H5O_storage_chunk_t *storage, FILE *stream)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_none_dump)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(storage);

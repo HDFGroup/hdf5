@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump -B file_space.h5'
-#############################
 HDF5 "file_space.h5" {
 SUPER_BLOCK {
    SUPERBLOCK_VERSION 2
@@ -14,9 +11,9 @@ SUPER_BLOCK {
    ISTORE_K 32
    FILE_SPACE_STRATEGY H5F_FILE_SPACE_AGGR_VFD
    FREE_SPACE_THRESHOLD 10
-}
-USER_BLOCK {
-   USERBLOCK_SIZE 0
+   USER_BLOCK {
+      USERBLOCK_SIZE 0
+   }
 }
 GROUP "/" {
 }

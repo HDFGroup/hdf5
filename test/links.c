@@ -5521,7 +5521,7 @@ external_link_unlink_dense(hid_t fapl, hbool_t new_format)
     if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check on root group's status */
-    if(H5G_is_empty_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) != TRUE) TEST_ERROR
 
     /* Query the group creation properties */
     if((gcpl = H5Gget_create_plist(gid)) < 0) TEST_ERROR
@@ -5532,10 +5532,10 @@ external_link_unlink_dense(hid_t fapl, hbool_t new_format)
     if(H5Lcreate_external(filename2, "/dst", gid, "src", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Check on root group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR
     if(nmsgs != 1) TEST_ERROR
-    if(H5G_has_stab_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(gid) == TRUE) TEST_ERROR
 
     /* Create enough objects in the root group to change it into a "dense" group */
     for(u = 0; u < max_compact; u++) {
@@ -5545,9 +5545,9 @@ external_link_unlink_dense(hid_t fapl, hbool_t new_format)
     } /* end for */
 
     /* Check on root group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Close group creation property list */
     if(H5Pclose(gcpl) < 0) TEST_ERROR
@@ -5587,11 +5587,11 @@ external_link_unlink_dense(hid_t fapl, hbool_t new_format)
     } /* end for */
 
     /* Check on root group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR
     if(nmsgs != (min_dense - 1)) TEST_ERROR
-    if(H5G_is_new_dense_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_stab_test(gid) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(gid) == TRUE) TEST_ERROR
 
     /* Close root group */
     if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
@@ -5859,7 +5859,7 @@ external_link_ride(hid_t fapl, hbool_t new_format)
     if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check on root group's status */
-    if(H5G_is_empty_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) != TRUE) TEST_ERROR
 
     /* Query the group creation properties */
     if((gcpl = H5Gget_create_plist(gid)) < 0) TEST_ERROR
@@ -5873,13 +5873,13 @@ external_link_ride(hid_t fapl, hbool_t new_format)
     } /* end for */
 
     /* Check on root group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
     if(new_format) {
-        if(H5G_is_new_dense_test(gid) != TRUE) TEST_ERROR
+        if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
     } /* end if */
     else {
-        if(H5G_has_stab_test(gid) != TRUE) TEST_ERROR
+        if(H5G__has_stab_test(gid) != TRUE) TEST_ERROR
     } /* end else */
 
     /* Create external link */
@@ -5887,9 +5887,9 @@ external_link_ride(hid_t fapl, hbool_t new_format)
     if(H5Lcreate_external(filename2, "/dst", gid, "src", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Check on root group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, NULL) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(gid) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, NULL) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Close group creation property list */
     if(H5Pclose(gcpl) < 0) TEST_ERROR
@@ -5941,11 +5941,11 @@ external_link_ride(hid_t fapl, hbool_t new_format)
     } /* end for */
 
     /* Check on root group's status */
-    if(H5G_is_empty_test(gid) == TRUE) TEST_ERROR
-    if(H5G_has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_links_test(gid, &nmsgs) != TRUE) TEST_ERROR
     if(nmsgs != (min_dense - 1)) TEST_ERROR
-    if(H5G_has_stab_test(gid) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(gid) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(gid) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(gid) == TRUE) TEST_ERROR
 
     /* Close root group */
     if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
@@ -7031,9 +7031,9 @@ external_file_cache(hid_t fapl, hbool_t new_format)
     if(H5F_sfile_assert_num(0) < 0)
         TEST_ERROR
 
-
+#ifndef H5_CANNOT_OPEN_TWICE
     /*
-     * Test 3: 3 file cycle
+     * Test 5: 3 file cycle
      */
     /* Create files */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
@@ -7084,7 +7084,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
 
 
     /*
-     * Test 3: 3 file cycle, release parent's EFC
+     * Test 6: 3 file cycle, release parent's EFC
      */
     /* Create files */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
@@ -7140,7 +7140,10 @@ external_file_cache(hid_t fapl, hbool_t new_format)
     /* Verify that all files are now closed */
     if(H5F_sfile_assert_num(0) < 0)
         TEST_ERROR
+#endif /* H5_CANNOT_OPEN_TWICE */
 
+    /* Close fapl */
+    H5Pclose(my_fapl);
 
     PASSED();
     return 0;
@@ -7157,6 +7160,246 @@ error:
 
     return -1;
 } /* end external_file_cache */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    external_open_twice
+ *
+ * Purpose:     Test opening the same object twice, both times through an
+ *              external links.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              Saturday, April 30, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_open_twice(hid_t fapl, hbool_t new_format)
+{
+    hid_t       fid1 = (-1);                    /* File ID */
+    hid_t       fid2 = (-1);                    /* File ID */
+    hid_t       oid1 = (-1);                    /* Object ID */
+    hid_t       oid2 = (-1);                    /* Object ID */
+    hid_t       type = (-1);                    /* Datatype ID */
+    hid_t       space = (-1);                   /* Dataspace ID */
+    char        filename1[NAME_BUF_SIZE];
+    char        filename2[NAME_BUF_SIZE];
+
+    if(new_format)
+        TESTING("opening object twice through elink (w/new group format)")
+    else
+        TESTING("opening object twice through elink")
+
+    /* Set up filenames */
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+
+
+    /*
+     * Test 1: Open root group twice
+     */
+    /* Create files */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create link */
+    if(H5Lcreate_external(filename2, "/", fid1, "link_to_2", H5P_DEFAULT,
+            H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Close file 2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Open the target of the external link twice */
+    if((oid1 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((oid2 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Close both objects, in the reverse opening order (necessary to duplicate
+     * bug */
+    if(H5Oclose(oid2) < 0)
+        TEST_ERROR
+    if(H5Oclose(oid1) < 0)
+        TEST_ERROR
+
+    /* Close file 1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Verify that both files are now closed */
+    if(H5F_sfile_assert_num(0) < 0)
+        TEST_ERROR
+
+
+    /*
+     * Test 2: Open group twice
+     */
+    /* Create files */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create target group */
+    if((oid1 = H5Gcreate2(fid2, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))
+            < 0)
+        TEST_ERROR
+    if(H5Gclose(oid1) < 0)
+        TEST_ERROR
+
+    /* Create link */
+    if(H5Lcreate_external(filename2, "/group", fid1, "link_to_2", H5P_DEFAULT,
+            H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Close file 2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Open the target of the external link twice */
+    if((oid1 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((oid2 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Close both objects, in the reverse opening order (necessary to duplicate
+     * bug */
+    if(H5Oclose(oid2) < 0)
+        TEST_ERROR
+    if(H5Oclose(oid1) < 0)
+        TEST_ERROR
+
+    /* Close file 1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Verify that both files are now closed */
+    if(H5F_sfile_assert_num(0) < 0)
+        TEST_ERROR
+
+
+    /*
+     * Test 3: Open dataset twice
+     */
+    /* Create files */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create target dataset */
+    if((space = H5Screate(H5S_SCALAR)) < 0)
+        TEST_ERROR
+    if((oid1 = H5Dcreate2(fid2, "dset", H5T_NATIVE_INT, space, H5P_DEFAULT,
+            H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Dclose(oid1) < 0)
+        TEST_ERROR
+    if(H5Sclose(space) < 0)
+        TEST_ERROR
+
+    /* Create link */
+    if(H5Lcreate_external(filename2, "/dset", fid1, "link_to_2", H5P_DEFAULT,
+            H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Close file 2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Open the target of the external link twice */
+    if((oid1 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((oid2 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Close both objects, in the reverse opening order (necessary to duplicate
+     * bug */
+    if(H5Oclose(oid2) < 0)
+        TEST_ERROR
+    if(H5Oclose(oid1) < 0)
+        TEST_ERROR
+
+    /* Close file 1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Verify that both files are now closed */
+    if(H5F_sfile_assert_num(0) < 0)
+        TEST_ERROR
+
+
+    /*
+     * Test 4: Open datatype twice
+     */
+    /* Create files */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create target datatype */
+    if((type = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR
+    if(H5Tcommit2(fid2, "dtype", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)
+            < 0)
+        TEST_ERROR
+    if(H5Tclose(type) < 0)
+        TEST_ERROR
+
+    /* Create link */
+    if(H5Lcreate_external(filename2, "/dtype", fid1, "link_to_2", H5P_DEFAULT,
+            H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Close file 2 */
+    if(H5Fclose(fid2) < 0)
+        TEST_ERROR
+
+    /* Open the target of the external link twice */
+    if((oid1 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((oid2 = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Close both objects, in the reverse opening order (necessary to duplicate
+     * bug */
+    if(H5Oclose(oid2) < 0)
+        TEST_ERROR
+    if(H5Oclose(oid1) < 0)
+        TEST_ERROR
+
+    /* Close file 1 */
+    if(H5Fclose(fid1) < 0)
+        TEST_ERROR
+
+    /* Verify that both files are now closed */
+    if(H5F_sfile_assert_num(0) < 0)
+        TEST_ERROR
+
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Oclose(oid1);
+        H5Oclose(oid2);
+        H5Tclose(type);
+        H5Fclose(fid1);
+        H5Fclose(fid2);
+        H5Sclose(space);
+    } H5E_END_TRY
+
+    return -1;
+} /* end efc_open_twice */
 
 
 /*-------------------------------------------------------------------------
@@ -10015,7 +10258,7 @@ corder_create_empty(hid_t fapl)
     if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on group's status */
-    if(H5G_is_empty_test(group_id) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(group_id) != TRUE) TEST_ERROR
 
     /* Close the group */
     if(H5Gclose(group_id) < 0) TEST_ERROR
@@ -10034,7 +10277,7 @@ corder_create_empty(hid_t fapl)
     if((group_id = H5Gopen2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check on group's status */
-    if(H5G_is_empty_test(group_id) != TRUE) TEST_ERROR
+    if(H5G__is_empty_test(group_id) != TRUE) TEST_ERROR
 
     /* Retrieve group creation property list for group */
     if((gcpl_id = H5Gget_create_plist(group_id)) < 0) TEST_ERROR
@@ -10108,9 +10351,9 @@ corder_create_compact(hid_t fapl)
     if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on group's initial status */
-    if(H5G_is_empty_test(group_id) != TRUE) TEST_ERROR
-    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_empty_test(group_id) != TRUE) TEST_ERROR
+    if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(group_id) == TRUE) TEST_ERROR
 
     /* Query the group creation properties */
     if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) TEST_ERROR
@@ -10122,10 +10365,10 @@ corder_create_compact(hid_t fapl)
         if(H5Gclose(group_id2) < 0) TEST_ERROR
 
         /* Verify state of group */
-        if(H5G_has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
+        if(H5G__has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
         if(nlinks != (u + 1)) TEST_ERROR
-        if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-        if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
+        if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+        if(H5G__is_new_dense_test(group_id) == TRUE) TEST_ERROR
     } /* end for */
 
     /* Close the group */
@@ -10145,10 +10388,10 @@ corder_create_compact(hid_t fapl)
     if((group_id = H5Gopen2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Verify state of group */
-    if(H5G_has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
+    if(H5G__has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
     if(nlinks != max_compact) TEST_ERROR
-    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(group_id) == TRUE) TEST_ERROR
 
     /* Loop through links, checking their creation order values */
     /* (the name index is used, but the creation order value is in the same order) */
@@ -10228,9 +10471,9 @@ corder_create_dense(hid_t fapl)
     if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on group's initial status */
-    if(H5G_is_empty_test(group_id) != TRUE) TEST_ERROR
-    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_empty_test(group_id) != TRUE) TEST_ERROR
+    if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(group_id) == TRUE) TEST_ERROR
 
     /* Query the group creation properties */
     if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) TEST_ERROR
@@ -10242,10 +10485,10 @@ corder_create_dense(hid_t fapl)
         if(H5Gclose(group_id2) < 0) TEST_ERROR
 
         /* Verify state of group */
-        if(H5G_has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
+        if(H5G__has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
         if(nlinks != (u + 1)) TEST_ERROR
-        if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-        if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
+        if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+        if(H5G__is_new_dense_test(group_id) == TRUE) TEST_ERROR
     } /* end for */
 
     /* Create another link, to push group into dense form */
@@ -10254,12 +10497,12 @@ corder_create_dense(hid_t fapl)
     if(H5Gclose(group_id2) < 0) TEST_ERROR
 
     /* Verify state of group */
-    if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+    if(H5G__has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
     /* Retrieve & verify # of records in the name & creation order indices */
-    if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+    if(H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
     if(name_count != corder_count) TEST_ERROR
 
     /* Close the group */
@@ -10279,9 +10522,9 @@ corder_create_dense(hid_t fapl)
     if((group_id = H5Gopen2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Verify state of group */
-    if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+    if(H5G__has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
     /* Loop through links, checking their creation order values */
     /* (the name index is used, but the creation order value is in the same order) */
@@ -10402,12 +10645,12 @@ corder_transition(hid_t fapl)
     if(H5Gclose(group_id2) < 0) TEST_ERROR
 
     /* Verify state of group */
-    if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+    if(H5G__has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
     /* Retrieve & verify # of records in the name & creation order indices */
-    if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+    if(H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
     if(name_count != corder_count) TEST_ERROR
 
     /* Delete several links from group, until it resumes compact form */
@@ -10416,12 +10659,12 @@ corder_transition(hid_t fapl)
         if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Verify state of group */
-        if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-        if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-        if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+        if(H5G__has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+        if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+        if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
         /* Retrieve & verify # of records in the name & creation order indices */
-        if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+        if(H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
         if(name_count != corder_count) TEST_ERROR
     } /* end for */
 
@@ -10430,10 +10673,10 @@ corder_transition(hid_t fapl)
     if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Verify state of group */
-    if(H5G_has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
+    if(H5G__has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
     if(nlinks != (min_dense - 1)) TEST_ERROR
-    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(group_id) == TRUE) TEST_ERROR
 
     /* Re-add links to get back into dense form */
     for(u = (min_dense - 1); u < (max_compact + 1); u++) {
@@ -10443,12 +10686,12 @@ corder_transition(hid_t fapl)
     } /* end for */
 
     /* Verify state of group */
-    if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+    if(H5G__has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
     /* Retrieve & verify # of records in the name & creation order indices */
-    if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+    if(H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
     if(name_count != corder_count) TEST_ERROR
 
     /* Close the group */
@@ -10465,12 +10708,12 @@ corder_transition(hid_t fapl)
     if((group_id = H5Gopen2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Verify state of group */
-    if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+    if(H5G__has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
     /* Retrieve & verify # of records in the name & creation order indices */
-    if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+    if(H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
     if(name_count != corder_count) TEST_ERROR
 
     /* Delete several links from group, until it resumes compact form */
@@ -10479,12 +10722,12 @@ corder_transition(hid_t fapl)
         if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Verify state of group */
-        if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-        if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-        if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+        if(H5G__has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+        if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+        if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
         /* Retrieve & verify # of records in the name & creation order indices */
-        if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+        if(H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
         if(name_count != corder_count) TEST_ERROR
     } /* end for */
 
@@ -10493,10 +10736,10 @@ corder_transition(hid_t fapl)
     if(H5Ldelete(group_id, objname, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Verify state of group */
-    if(H5G_has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
+    if(H5G__has_links_test(group_id, &nlinks) != TRUE) TEST_ERROR
     if(nlinks != (min_dense - 1)) TEST_ERROR
-    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(group_id) == TRUE) TEST_ERROR
 
     /* Re-add links to get back into dense form */
     for(u = (min_dense - 1); u < (max_compact + 1); u++) {
@@ -10506,12 +10749,12 @@ corder_transition(hid_t fapl)
     } /* end for */
 
     /* Verify state of group */
-    if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-    if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-    if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+    if(H5G__has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+    if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+    if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
     /* Retrieve & verify # of records in the name & creation order indices */
-    if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+    if(H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
     if(name_count != corder_count) TEST_ERROR
 
     /* Delete all the links */
@@ -10623,12 +10866,12 @@ corder_delete(hid_t fapl)
         } /* end for */
 
         /* Verify state of group */
-        if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-        if(H5G_has_stab_test(group_id) == TRUE) TEST_ERROR
-        if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+        if(H5G__has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+        if(H5G__has_stab_test(group_id) == TRUE) TEST_ERROR
+        if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
         /* Retrieve & verify # of records in the name & creation order indices */
-        if(H5G_new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
+        if(H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0) TEST_ERROR
         if(name_count != corder_count) TEST_ERROR
 
         /* Close the group */
@@ -10932,7 +11175,7 @@ link_info_by_idx(hid_t fapl)
             } /* end for */
 
             /* Verify state of group */
-            if(H5G_has_links_test(group_id, NULL) != TRUE) TEST_ERROR
+            if(H5G__has_links_test(group_id, NULL) != TRUE) TEST_ERROR
 
             /* Check for out of bound offset queries */
             H5E_BEGIN_TRY {
@@ -10970,7 +11213,7 @@ link_info_by_idx(hid_t fapl)
                 } /* end else */
 
                 /* Verify state of group */
-                if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+                if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
                 /* Verify link information for new link */
                 if(link_info_by_idx_check(group_id, objname, (hsize_t)u, hard_link, use_index) < 0) TEST_ERROR
@@ -11159,7 +11402,7 @@ link_info_by_idx_old(hid_t fapl)
         if(ret >= 0) TEST_ERROR
 
         /* Verify state of group */
-        if(H5G_has_stab_test(group_id) != TRUE) TEST_ERROR
+        if(H5G__has_stab_test(group_id) != TRUE) TEST_ERROR
 
         /* Close the group */
         if(H5Gclose(group_id) < 0) TEST_ERROR
@@ -11291,7 +11534,7 @@ delete_by_idx(hid_t fapl)
                 } /* end for */
 
                 /* Verify state of group (compact) */
-                if(H5G_has_links_test(group_id, NULL) != TRUE) TEST_ERROR
+                if(H5G__has_links_test(group_id, NULL) != TRUE) TEST_ERROR
 
                 /* Check for out of bound deletion */
                 H5E_BEGIN_TRY {
@@ -11328,7 +11571,7 @@ delete_by_idx(hid_t fapl)
                 if(H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
 
                 /* Verify state of group (empty) */
-                if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+                if(H5G__has_links_test(group_id, NULL) == TRUE) TEST_ERROR
 
                 /* Create more links, to push group into dense form */
                 for(u = 0; u < (max_compact * 2); u++) {
@@ -11343,7 +11586,7 @@ delete_by_idx(hid_t fapl)
 
                     /* Verify state of group (dense) */
                     if(u >= max_compact)
-                        if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+                        if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
                     /* Verify link information for new link */
                     if(link_info_by_idx_check(group_id, objname, (hsize_t)u, TRUE, use_index) < 0) TEST_ERROR
@@ -11384,8 +11627,8 @@ delete_by_idx(hid_t fapl)
                 if(H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
 
                 /* Verify state of group (empty) */
-                if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-                if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
+                if(H5G__has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+                if(H5G__is_new_dense_test(group_id) == TRUE) TEST_ERROR
 
                 /* Check for deletion on empty group again */
                 H5E_BEGIN_TRY {
@@ -11410,7 +11653,7 @@ delete_by_idx(hid_t fapl)
 
                     /* Verify state of group (dense) */
                     if(u >= max_compact)
-                        if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+                        if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
                     /* Verify link information for new link */
                     if(link_info_by_idx_check(group_id, objname, (hsize_t)u, TRUE, use_index) < 0) TEST_ERROR
@@ -11470,8 +11713,8 @@ delete_by_idx(hid_t fapl)
                 if(H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
 
                 /* Verify state of group (empty) */
-                if(H5G_has_links_test(group_id, NULL) == TRUE) TEST_ERROR
-                if(H5G_is_new_dense_test(group_id) == TRUE) TEST_ERROR
+                if(H5G__has_links_test(group_id, NULL) == TRUE) TEST_ERROR
+                if(H5G__is_new_dense_test(group_id) == TRUE) TEST_ERROR
 
 
 
@@ -11621,7 +11864,7 @@ delete_by_idx_old(hid_t fapl)
         if(ret >= 0) TEST_ERROR
 
         /* Verify state of group */
-        if(H5G_has_stab_test(group_id) != TRUE) TEST_ERROR
+        if(H5G__has_stab_test(group_id) != TRUE) TEST_ERROR
 
 
         /* Delete links in middle */
@@ -11703,7 +11946,7 @@ delete_by_idx_old(hid_t fapl)
         if(H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* Verify state of group */
-        if(H5G_has_stab_test(group_id) != TRUE) TEST_ERROR
+        if(H5G__has_stab_test(group_id) != TRUE) TEST_ERROR
 
         /* Close the group */
         if(H5Gclose(group_id) < 0) TEST_ERROR
@@ -12130,7 +12373,7 @@ link_iterate(hid_t fapl)
                 } /* end for */
 
                 /* Verify state of group (compact) */
-                if(H5G_has_links_test(group_id, NULL) != TRUE) TEST_ERROR
+                if(H5G__has_links_test(group_id, NULL) != TRUE) TEST_ERROR
 
                 /* Check for out of bound iteration on compact group */
                 skip = (hsize_t)u;
@@ -12156,7 +12399,7 @@ link_iterate(hid_t fapl)
                 } /* end for */
 
                 /* Verify state of group (dense) */
-                if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+                if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
                 /* Check for out of bound iteration on dense group */
                 skip = (hsize_t)u;
@@ -12543,7 +12786,7 @@ link_iterate_old(hid_t fapl)
         } /* end for */
 
         /* Verify state of group (symbol table) */
-        if(H5G_has_stab_test(group_id) != TRUE) TEST_ERROR
+        if(H5G__has_stab_test(group_id) != TRUE) TEST_ERROR
 
         /* Check for out of bound iteration on old-style group */
         skip = (hsize_t)u;
@@ -12834,7 +13077,7 @@ open_by_idx(hid_t fapl)
                 } /* end for */
 
                 /* Verify state of group (compact) */
-                if(H5G_has_links_test(group_id, NULL) != TRUE) TEST_ERROR
+                if(H5G__has_links_test(group_id, NULL) != TRUE) TEST_ERROR
 
                 /* Check for out of bound open by index on compact group */
                 H5E_BEGIN_TRY {
@@ -12869,7 +13112,7 @@ open_by_idx(hid_t fapl)
                 } /* end for */
 
                 /* Verify state of group (dense) */
-                if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+                if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
                 /* Check for out of bound open by index on compact group */
                 H5E_BEGIN_TRY {
@@ -13011,7 +13254,7 @@ open_by_idx_old(hid_t fapl)
         } /* end for */
 
         /* Verify state of group (symbol table) */
-        if(H5G_has_stab_test(group_id) != TRUE) TEST_ERROR
+        if(H5G__has_stab_test(group_id) != TRUE) TEST_ERROR
 
         /* Check for out of bound open by index */
         H5E_BEGIN_TRY {
@@ -13282,7 +13525,7 @@ object_info(hid_t fapl)
                 } /* end for */
 
                 /* Verify state of group (compact) */
-                if(H5G_has_links_test(group_id, NULL) != TRUE) TEST_ERROR
+                if(H5G__has_links_test(group_id, NULL) != TRUE) TEST_ERROR
 
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY {
@@ -13330,7 +13573,7 @@ object_info(hid_t fapl)
                 } /* end for */
 
                 /* Verify state of group (dense) */
-                if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+                if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY {
@@ -13479,7 +13722,7 @@ object_info_old(hid_t fapl)
         } /* end for */
 
         /* Verify state of group (symbol table) */
-        if(H5G_has_stab_test(group_id) != TRUE) TEST_ERROR
+        if(H5G__has_stab_test(group_id) != TRUE) TEST_ERROR
 
         /* Check for out of bound query by index */
         H5E_BEGIN_TRY {
@@ -13767,7 +14010,7 @@ group_info(hid_t fapl)
                 } /* end for */
 
                 /* Verify state of group (compact) */
-                if(H5G_has_links_test(group_id, NULL) != TRUE) TEST_ERROR
+                if(H5G__has_links_test(group_id, NULL) != TRUE) TEST_ERROR
 
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY {
@@ -13908,7 +14151,7 @@ group_info(hid_t fapl)
                 } /* end for */
 
                 /* Verify state of group (dense) */
-                if(H5G_is_new_dense_test(group_id) != TRUE) TEST_ERROR
+                if(H5G__is_new_dense_test(group_id) != TRUE) TEST_ERROR
 
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY {
@@ -14138,7 +14381,7 @@ group_info_old(hid_t fapl)
         } /* end for */
 
         /* Verify state of group (old-style) */
-        if(H5G_has_stab_test(group_id) != TRUE) TEST_ERROR
+        if(H5G__has_stab_test(group_id) != TRUE) TEST_ERROR
 
         /* Check for out of bound query by index */
         H5E_BEGIN_TRY {
@@ -14478,6 +14721,9 @@ main(void)
             nerrors += external_symlink(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
+#ifndef H5_CANNOT_OPEN_TWICE
+            nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
+#endif /* H5_CANNOT_OPEN_TWICE */
         } /* end for */
 
         /* These tests assume that external links are a form of UD links,

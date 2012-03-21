@@ -23,6 +23,7 @@
 
 /* our header files */
 #include "h5test.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -66,9 +67,9 @@
 #endif
 
 /* internal variables */
-static const char *prog;
-static const char *option_prefix;
-static char *filename;
+static const char *prog=NULL;
+static const char *option_prefix=NULL;
+static char *filename=NULL;
 static int compress_percent = 0;
 static int compress_level = Z_DEFAULT_COMPRESSION;
 static int output, random_test = FALSE;
@@ -175,6 +176,7 @@ cleanup(void)
 {
     if (!getenv("HDF5_NOCLEANUP"))
         unlink(filename);
+    free(filename);
 }
 
 static void
@@ -292,10 +294,11 @@ uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
  * Programmer:  Bill Wendling, 06. June 2002
  * Modifications:
  */
+#define ZIP_PERF_FILE "zip_perf.data"
 static void
 get_unique_name(void)
 {
-    const char *prefix = NULL, *tmpl = "zip_perf.data";
+    const char *prefix = NULL;
     const char *env = getenv("HDF5_PREFIX");
 
     if (env)
@@ -305,19 +308,20 @@ get_unique_name(void)
         prefix = option_prefix;
 
     if (prefix)
-	/* 2 = 1 for '/' + 1 for null terminator */
-	filename = (char *) HDmalloc(strlen(prefix) + strlen(tmpl) + 2);
+        /* 2 = 1 for '/' + 1 for null terminator */
+        filename = (char *) HDmalloc(strlen(prefix) + strlen(ZIP_PERF_FILE) + 2);
     else
-	filename = (char *) HDmalloc(strlen(tmpl) + 1);
+        filename = (char *) HDmalloc(strlen(ZIP_PERF_FILE) + 1);
 
     if (!filename)
         error("out of memory");
 
+    filename[0] = 0;
     if (prefix){
-	strcpy(filename, prefix);
-	strcat(filename, "/");
+        strcpy(filename, prefix);
+        strcat(filename, "/");
     }
-    strcat(filename, tmpl);
+    strcat(filename, ZIP_PERF_FILE);
 }
 
 /*
@@ -410,7 +414,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
     register unsigned u;
     h5_stat_t stat_buf;
 
-    if (stat("/dev/urandom", &stat_buf) == 0) {
+    if (HDstat("/dev/urandom", &stat_buf) == 0) {
         uLongf len = src_len;
         Bytef *buf = src;
         int fd = HDopen("/dev/urandom", O_RDONLY, 0);
@@ -570,6 +574,9 @@ main(int argc, char **argv)
     int opt;
 
     prog = argv[0];
+    
+    /* Initialize h5tools lib */
+    h5tools_init();
 
     while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) > 0) {
         switch ((char)opt) {

@@ -115,7 +115,7 @@ H5O_add_gap(H5F_t *f, H5O_t *oh, unsigned chunkno, hbool_t *chk_dirtied,
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_add_gap)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -240,7 +240,7 @@ H5O_eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg,
     uint8_t *move_start, *move_end;     /* Pointers to area of messages to move */
     hbool_t null_before_gap;            /* Flag whether the null message is before the gap or not */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_eliminate_gap)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(oh);
@@ -343,7 +343,7 @@ H5O_alloc_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned null_idx,
     H5O_mesg_t *alloc_msg;              /* Pointer to null message to allocate out of */
     herr_t ret_value = SUCCEED; 	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_null)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -450,7 +450,7 @@ H5O_alloc_msgs(H5O_t *oh, size_t min_alloc)
     H5O_mesg_t *new_mesg;               /* Pointer to new message array */
     herr_t ret_value = SUCCEED; 	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_msgs)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -521,7 +521,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
     unsigned    u;              /* Local index variable */
     htri_t      ret_value = TRUE; 	/* return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_extend_chunk)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f != NULL);
@@ -559,26 +559,27 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
     /* Check for changing the chunk #0 data size enough to need adjusting the flags */
     if(oh->version > H5O_VERSION_1 && chunkno == 0) {
         uint64_t chunk0_size;           /* Size of chunk 0's data */
+        size_t   orig_prfx_size = (size_t)1 << (oh->flags & H5O_HDR_CHUNK0_SIZE); /* Original prefix size */
 
         HDassert(oh->chunk[0].size >= (size_t)H5O_SIZEOF_HDR(oh));
         chunk0_size = oh->chunk[0].size - (size_t)H5O_SIZEOF_HDR(oh);
 
-        /* Check for moving from a 1-byte to a 2-byte size encoding */
-        if(chunk0_size <= 255 && (chunk0_size + delta) > 255) {
-            extra_prfx_size = 1;
-            new_size_flags = H5O_HDR_CHUNK0_2;
+        /* Check for moving to a 8-byte size encoding */
+        if(orig_prfx_size < 8 && (chunk0_size + delta) > 4294967295) {
+            extra_prfx_size = 8 - orig_prfx_size;
+            new_size_flags = H5O_HDR_CHUNK0_8;
             adjust_size_flags = TRUE;
         } /* end if */
-        /* Check for moving from a 2-byte to a 4-byte size encoding */
-        else if(chunk0_size <= 65535 && (chunk0_size + delta) > 65535) {
-            extra_prfx_size = 2;
+        /* Check for moving to a 4-byte size encoding */
+        else if(orig_prfx_size < 4 && (chunk0_size + delta) > 65535) {
+            extra_prfx_size = 4 - orig_prfx_size;
             new_size_flags = H5O_HDR_CHUNK0_4;
             adjust_size_flags = TRUE;
         } /* end if */
-        /* Check for moving from a 4-byte to a 8-byte size encoding */
-        else if(chunk0_size <= 4294967295 && (chunk0_size + delta) > 4294967295) {
-            extra_prfx_size = 4;
-            new_size_flags = H5O_HDR_CHUNK0_8;
+        /* Check for moving to a 2-byte size encoding */
+        else if(orig_prfx_size < 2 && (chunk0_size + delta) > 255) {
+            extra_prfx_size = 2 - orig_prfx_size;
+            new_size_flags = H5O_HDR_CHUNK0_2;
             adjust_size_flags = TRUE;
         } /* end if */
     } /* end if */
@@ -646,16 +647,17 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
     /* Wipe new space for chunk */
     HDmemset(oh->chunk[chunkno].image + old_size, 0, oh->chunk[chunkno].size - old_size);
 
+    /* Move chunk 0 data up if the size flags changed */
+    if(adjust_size_flags)
+        HDmemmove(oh->chunk[0].image + H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh),
+                oh->chunk[0].image + H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh) - extra_prfx_size,
+                old_size - (size_t)H5O_SIZEOF_HDR(oh) + extra_prfx_size);
+
     /* Spin through existing messages, adjusting them */
     for(u = 0; u < oh->nmesgs; u++) {
         /* Adjust raw addresses for messages in this chunk to reflect new 'image' address */
-        if(oh->mesg[u].chunkno == chunkno) {
+        if(oh->mesg[u].chunkno == chunkno)
             oh->mesg[u].raw = oh->chunk[chunkno].image + extra_prfx_size + (oh->mesg[u].raw - old_image);
-
-            /* Flag message as dirty directly */
-            /* (we mark the entire chunk dirty when we update its size) */
-            oh->mesg[u].dirty = TRUE;
-        } /* endif */
 
         /* Find continuation message which points to this chunk and adjust chunk's size */
         /* (Chunk 0 doesn't have a continuation message that points to it and
@@ -762,7 +764,7 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size)
     unsigned    u;                      /* Local index variable */
     int         ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_new_chunk)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -1121,7 +1123,7 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     int idx;                /* Index of message which fits allocation */
     int ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_alloc, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(oh);
@@ -1205,7 +1207,7 @@ H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
     hbool_t chk_dirtied = FALSE;            /* Flag for unprotecting chunk */
     herr_t ret_value = SUCCEED; 	    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_release_mesg, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -1278,7 +1280,7 @@ H5O_move_cont(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned cont_u)
     hbool_t     chk_dirtied = FALSE;    /* Flags for unprotecting chunk */
     htri_t 	ret_value = TRUE;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_move_cont)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
     HDassert(f);
@@ -1330,8 +1332,9 @@ H5O_move_cont(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned cont_u)
             move_end = cont_msg->raw + cont_msg->raw_size;
             cont_chunkno = cont_msg->chunkno;
 
-            /* Convert continuation message into a null message */
-            if(H5O_release_mesg(f, dxpl_id, oh, cont_msg, TRUE) < 0)
+            /* Convert continuation message into a null message.  Do not delete
+             * the target chunk yet, so we can still copy messages from it. */
+            if(H5O_release_mesg(f, dxpl_id, oh, cont_msg, FALSE) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to convert into null message")
 
             /* Protect chunk */
@@ -1353,13 +1356,16 @@ H5O_move_cont(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned cont_u)
                         HDmemcpy(move_start, curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh), move_size);
                         curr_msg->raw = move_start + H5O_SIZEOF_MSGHDR_OH(oh);
                         curr_msg->chunkno = cont_chunkno;
-                        curr_msg->dirty = TRUE;
                         chk_dirtied = TRUE;
 
                         /* Adjust location to move messages to */
                         move_start += move_size;
                     } /* end else */
                 } /* end if */
+
+            /* Delete the target chunk */
+            if(H5O_chunk_delete(f, dxpl_id, oh, deleted_chunkno) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove chunk from cache")
 
             HDassert(move_start <= (move_end + gap_size));
 
@@ -1450,7 +1456,7 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     hbool_t did_packing = FALSE;        /* Whether any messages were packed */
     htri_t ret_value; 	                /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_move_msgs_forward)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh);
@@ -1734,7 +1740,7 @@ H5O_merge_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     hbool_t did_merging = FALSE;        /* Whether any messages were merged */
     htri_t ret_value; 	                /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_merge_null)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh != NULL);
@@ -1869,7 +1875,7 @@ H5O_remove_empty_chunks(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     hbool_t did_deleting = FALSE;       /* Whether any chunks were deleted */
     htri_t ret_value; 	                /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_remove_empty_chunks)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(oh != NULL);
@@ -2059,7 +2065,7 @@ H5O_condense_header(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
     htri_t result;                      /* Result from packing/merging/etc */
     herr_t ret_value = SUCCEED; 	/* return value */
 
-    FUNC_ENTER_NOAPI(H5O_condense_header, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(oh != NULL);
@@ -2132,7 +2138,7 @@ H5O_alloc_shrink_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno)
     herr_t      ret_value = SUCCEED;            /* Return value */
     unsigned    u;                              /* Index */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_shrink_chunk)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(f);

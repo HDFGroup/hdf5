@@ -1,17 +1,14 @@
-#############################
-Expected output for 'h5dump --xml tref-escapes-at.h5'
-#############################
 <?xml version="1.0" encoding="UTF-8"?>
-<hdf5:HDF5-File xmlns:hdf5="http://hdfgroup.org/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/DTDs/HDF5-File http://www.hdfgroup.org/DTDs/HDF5-File.xsd">
+<hdf5:HDF5-File xmlns:hdf5="http://hdfgroup.org/HDF5/XML/schema/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/HDF5/XML/schema/HDF5-File http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd">
 <hdf5:RootGroup OBJ-XID="xid_696" H5Path="/">
    <hdf5:Group Name="Group1" OBJ-XID="xid_1344" H5Path="/Group1" Parents="xid_696" H5ParentPaths="/" >
       <hdf5:Dataset Name="Dataset space" OBJ-XID="xid_3716" H5Path= "/Group1/Dataset space" Parents="xid_1344" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
-               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -26,7 +23,10 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          </hdf5:DataType>
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 0 0
+            0
+            0
+            0
+            0
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
@@ -34,9 +34,9 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
-               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -51,7 +51,10 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          </hdf5:DataType>
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 3 6 9
+            0
+            3
+            6
+            9
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
@@ -59,9 +62,9 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
-               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -76,7 +79,10 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          </hdf5:DataType>
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 0 0
+            0
+            0
+            0
+            0
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
@@ -84,9 +90,9 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
-               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -101,7 +107,10 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          </hdf5:DataType>
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 0 0
+            0
+            0
+            0
+            0
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
@@ -109,9 +118,9 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
-               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -126,7 +135,10 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          </hdf5:DataType>
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 0 0
+            0
+            0
+            0
+            0
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
@@ -134,9 +146,9 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
-               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -151,7 +163,10 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          </hdf5:DataType>
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 0 0
+            0
+            0
+            0
+            0
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
@@ -159,9 +174,9 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
-               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
             <hdf5:FillValue>
-                  <hdf5:NoFill/>
+               <hdf5:NoFill/>
             </hdf5:FillValue>
          </hdf5:FillValueInfo>
          <hdf5:Dataspace>
@@ -176,7 +191,10 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
          </hdf5:DataType>
          <hdf5:Data>
             <hdf5:DataFromFile>
-            0 0 0 0
+            0
+            0
+            0
+            0
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
@@ -185,9 +203,9 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
             <hdf5:StorageLayout>
                <hdf5:ContiguousLayout/>
             </hdf5:StorageLayout>
-                     <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
                <hdf5:FillValue>
-                     <hdf5:NoFill/>
+                  <hdf5:NoFill/>
                </hdf5:FillValue>
             </hdf5:FillValueInfo>
             <hdf5:Dataspace>
@@ -213,11 +231,11 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
                      </hdf5:ReferenceType>
                   </hdf5:AtomicType>
                </hdf5:DataType>
-            <hdf5:Data>
-            <hdf5:DataFromFile>
-               "/Group1/Dataset&amp;amp"
-            </hdf5:DataFromFile>
-            </hdf5:Data>
+               <hdf5:Data>
+               <hdf5:DataFromFile>
+                  "/Group1/Dataset&amp;amp"
+               </hdf5:DataFromFile>
+               </hdf5:Data>
             </hdf5:Attribute>
             <hdf5:Attribute Name="reftoapos">
                <hdf5:Dataspace>
@@ -232,11 +250,11 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
                      </hdf5:ReferenceType>
                   </hdf5:AtomicType>
                </hdf5:DataType>
-            <hdf5:Data>
-            <hdf5:DataFromFile>
-               "/Group1/Dataset&apos;apos"
-            </hdf5:DataFromFile>
-            </hdf5:Data>
+               <hdf5:Data>
+               <hdf5:DataFromFile>
+                  "/Group1/Dataset&apos;apos"
+               </hdf5:DataFromFile>
+               </hdf5:Data>
             </hdf5:Attribute>
             <hdf5:Attribute Name="reftogt">
                <hdf5:Dataspace>
@@ -251,11 +269,11 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
                      </hdf5:ReferenceType>
                   </hdf5:AtomicType>
                </hdf5:DataType>
-            <hdf5:Data>
-            <hdf5:DataFromFile>
-               "/Group1/Dataset&gt;gt"
-            </hdf5:DataFromFile>
-            </hdf5:Data>
+               <hdf5:Data>
+               <hdf5:DataFromFile>
+                  "/Group1/Dataset&gt;gt"
+               </hdf5:DataFromFile>
+               </hdf5:Data>
             </hdf5:Attribute>
             <hdf5:Attribute Name="reftolt">
                <hdf5:Dataspace>
@@ -270,11 +288,11 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
                      </hdf5:ReferenceType>
                   </hdf5:AtomicType>
                </hdf5:DataType>
-            <hdf5:Data>
-            <hdf5:DataFromFile>
-               "/Group1/Dataset&lt;lt"
-            </hdf5:DataFromFile>
-            </hdf5:Data>
+               <hdf5:Data>
+               <hdf5:DataFromFile>
+                  "/Group1/Dataset&lt;lt"
+               </hdf5:DataFromFile>
+               </hdf5:Data>
             </hdf5:Attribute>
             <hdf5:Attribute Name="reftoquote">
                <hdf5:Dataspace>
@@ -289,11 +307,11 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
                      </hdf5:ReferenceType>
                   </hdf5:AtomicType>
                </hdf5:DataType>
-            <hdf5:Data>
-            <hdf5:DataFromFile>
-               "/Group1/Dataset\"quote"
-            </hdf5:DataFromFile>
-            </hdf5:Data>
+               <hdf5:Data>
+               <hdf5:DataFromFile>
+                  "/Group1/Dataset\"quote"
+               </hdf5:DataFromFile>
+               </hdf5:Data>
             </hdf5:Attribute>
             <hdf5:Attribute Name="reftoslash">
                <hdf5:Dataspace>
@@ -308,11 +326,11 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
                      </hdf5:ReferenceType>
                   </hdf5:AtomicType>
                </hdf5:DataType>
-            <hdf5:Data>
-            <hdf5:DataFromFile>
-               "/Group1/Dataset\\slash"
-            </hdf5:DataFromFile>
-            </hdf5:Data>
+               <hdf5:Data>
+               <hdf5:DataFromFile>
+                  "/Group1/Dataset\\slash"
+               </hdf5:DataFromFile>
+               </hdf5:Data>
             </hdf5:Attribute>
             <hdf5:Attribute Name="reftospace">
                <hdf5:Dataspace>
@@ -327,11 +345,11 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
                      </hdf5:ReferenceType>
                   </hdf5:AtomicType>
                </hdf5:DataType>
-            <hdf5:Data>
-            <hdf5:DataFromFile>
-               "/Group1/Dataset space"
-            </hdf5:DataFromFile>
-            </hdf5:Data>
+               <hdf5:Data>
+               <hdf5:DataFromFile>
+                  "/Group1/Dataset space"
+               </hdf5:DataFromFile>
+               </hdf5:Data>
             </hdf5:Attribute>
             <hdf5:Data>
                <hdf5:DataFromFile>

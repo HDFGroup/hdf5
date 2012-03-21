@@ -28,7 +28,6 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE /* suppress error about including H5Fpkg */
 #define H5O_PACKAGE /* suppress error about including H5Opkg */
 
 /***********/
@@ -37,7 +36,9 @@
 
 #include "H5Dprivate.h"     /* Datasets */
 #include "H5Eprivate.h"     /* Errors   */
-#include "H5Fpkg.h"         /* Files    */
+#include "H5Fprivate.h"     /* Files    */
+#include "H5Gprivate.h"	    /* Groups	*/
+#include "H5Iprivate.h"	    /* IDs	*/
 #include "H5Opkg.h"         /* Objects  */
 
 /*************/
@@ -63,7 +64,7 @@ H5Oflush(hid_t obj_id)
     H5O_loc_t *oloc;            /* object location */
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Oflush, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", obj_id);
 
     /* Check args */
@@ -99,7 +100,7 @@ H5O_flush_metadata(const H5O_loc_t *oloc, hid_t dxpl_id)
     herr_t      ret_value = SUCCEED;    /* Return value */
     haddr_t tag = 0;
 
-    FUNC_ENTER_NOAPI(H5O_flush_metadata, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(oloc);
@@ -150,7 +151,7 @@ H5Orefresh(hid_t oid)
     H5O_loc_t *oloc;            /* object location */
     hid_t ret_value = SUCCEED; /* return value */
     
-    FUNC_ENTER_API(H5Orefresh, FAIL)
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", oid);
 
     /* Check args */
@@ -193,7 +194,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
     hid_t ret_value = SUCCEED;
     H5I_type_t type;
 
-    FUNC_ENTER_NOAPI(H5O_refresh_metadata, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
     
     /* Get the object's object header */
     if(NULL == (oh = H5O_protect(&oloc, dxpl_id, H5AC_READ)))
@@ -210,11 +211,8 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
     H5G_loc_copy(&obj_loc, &tmp_loc, H5_COPY_DEEP);
 
     /* Get object header's address (i.e. the tag value for this object) */
-    if (HADDR_UNDEF == (tag = H5O_OH_GET_ADDR(oh)))
+    if(HADDR_UNDEF == (tag = H5O_OH_GET_ADDR(oh)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get address of object header")
-
-    /* Get object's type */
-    type = H5I_get_type(oid);
 
     /* Unprotect object header before attempting to flush it */
     if(oh && H5O_unprotect(&oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
@@ -224,15 +222,15 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
     oh = NULL;
 
     /* Close the object */
-    if(H5I_dec_ref(oid, TRUE) < 0)
+    if(H5I_dec_ref(oid) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to close object")
 
     /* Flush the object's metadata before evicting it */
-    if (H5O_flush_metadata(&oloc, dxpl_id) < 0)
+    if(H5O_flush_metadata(&oloc, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush object's metadata")
 
     /* Evict the object's tagged metadata */
-    if (H5F_evict_tagged_metadata(oloc.file, tag, dxpl_id)<0)
+    if(H5F_evict_tagged_metadata(oloc.file, tag, dxpl_id)<0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to evict metadata")
 
     switch (type)

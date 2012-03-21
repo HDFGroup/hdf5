@@ -1,6 +1,3 @@
-#############################
- output for 'h5ls -w80 -r -d tdset.h5'
-#############################
 /                        Group
 /dset1                   Dataset {10, 20}
     Data:

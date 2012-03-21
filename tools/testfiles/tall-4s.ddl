@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5'
-#############################
 HDF5 "tall.h5" {
 DATASET "/g1/g1.1/dset1.1.1" {
    DATATYPE  H5T_STD_I32BE

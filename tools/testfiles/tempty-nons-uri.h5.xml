@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net tempty.h5'
-#############################
 <?xml version="1.0" encoding="UTF-8"?>
 <HDF5-File xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://somewhere.net">
 <RootGroup OBJ-XID="xid_928" H5Path="/">
@@ -8,9 +5,9 @@ Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net temp
       <StorageLayout>
          <ContiguousLayout/>
       </StorageLayout>
-         <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <FillValue>
-               <NoFill/>
+            <NoFill/>
          </FillValue>
       </FillValueInfo>
       <Dataspace>
@@ -30,7 +27,10 @@ Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net temp
 <!-- Note: format of VL data not specified -->
       <Data>
          <DataFromFile>
-                
+          
+          
+          
+          
          </DataFromFile>
       </Data>
    </Dataset>
@@ -38,9 +38,9 @@ Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net temp
       <StorageLayout>
          <ContiguousLayout/>
       </StorageLayout>
-         <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <FillValue>
-               <NoFill/>
+            <NoFill/>
          </FillValue>
       </FillValueInfo>
       <Dataspace>
@@ -55,7 +55,10 @@ Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net temp
       </DataType>
       <Data>
          <DataFromFile>
-         0 0 0 0
+         0
+         0
+         0
+         0
          </DataFromFile>
       </Data>
    </Dataset>
@@ -63,9 +66,9 @@ Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net temp
       <StorageLayout>
          <ContiguousLayout/>
       </StorageLayout>
-         <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <FillValue>
-               <NoFill/>
+            <NoFill/>
          </FillValue>
       </FillValueInfo>
       <Dataspace>
@@ -80,7 +83,10 @@ Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net temp
       </DataType>
       <Data>
          <DataFromFile>
-         0 0 0 0
+         0
+         0
+         0
+         0
          </DataFromFile>
       </Data>
    </Dataset>
@@ -88,9 +94,9 @@ Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net temp
       <StorageLayout>
          <ContiguousLayout/>
       </StorageLayout>
-         <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <FillValue>
-               <NoFill/>
+            <NoFill/>
          </FillValue>
       </FillValueInfo>
       <Dataspace>
@@ -110,7 +116,10 @@ Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net temp
       </DataType>
       <Data>
          <DataFromFile>
-          0 0 0 0  0 0 0 0  0 0 0 0  0 0 0 0
+         0 0 0 0
+         0 0 0 0
+         0 0 0 0
+         0 0 0 0
          </DataFromFile>
       </Data>
    </Dataset>
@@ -118,9 +127,9 @@ Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net temp
       <StorageLayout>
          <ContiguousLayout/>
       </StorageLayout>
-         <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <FillValue>
-               <NoFill/>
+            <NoFill/>
          </FillValue>
       </FillValueInfo>
       <Dataspace>
@@ -156,7 +165,10 @@ Expected output for 'h5dump --xml --xml-ns=: --xml-dtd=http://somewhere.net temp
    <!-- Note: format of compound data not specified -->
       <Data>
          <DataFromFile>
-         0 0 0 0 0 0 0 0 0 0 0 0
+         0 0 0
+         0 0 0
+         0 0 0
+         0 0 0
          </DataFromFile>
       </Data>
    </Dataset>

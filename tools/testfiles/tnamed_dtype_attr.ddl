@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5dump tnamed_dtype_attr.h5'
-#############################
 HDF5 "tnamed_dtype_attr.h5" {
 GROUP "/" {
    DATASET "Dataset" {
@@ -25,9 +22,7 @@ GROUP "/" {
          (0): 8
          }
       }
-
    DATATYPE "Link_to_Datatype" HARDLINK "/Datatype"
-
    GROUP "g1" {
       ATTRIBUTE "Attribute" {
          DATATYPE  "/Datatype"

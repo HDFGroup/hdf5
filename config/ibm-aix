@@ -36,11 +36,44 @@ fi
 # Ask for more memory so that "make check" will pass. Not necessary for -q64
 # mode but it does no harm.
 if test "X-$enable_parallel" = "X-yes" -o X-$CC_BASENAME = X-mpcc_r; then
-    RUNPARALLEL=${RUNPARALLEL="env LDR_CNTRL=MAXDATA=0x20000000@DSA MP_PROCS=\$\${NPROCS:=6} MP_TASKS_PER_NODE=\$\${NPROCS:=6} poe"}
-    RUNSERIAL=${RUNSERIAL="env LDR_CNTRL=MAXDATA=0x20000000@DSA MP_PROCS=1 MP_TASKS_PER_NODE=1 poe"}
-else
-    RUNSERIAL=${RUNSERIAL="env LDR_CNTRL=MAXDATA=0x20000000@DSA"}
+    RUNPARALLEL=${RUNPARALLEL="env MP_PROCS=\$\${NPROCS:=6} MP_TASKS_PER_NODE=\$\${NPROCS:=6} poe"}
 fi
+
+# The default Fortran 90 compiler
+
+if test "X-" = "X-$FC"; then
+  if test "X-$enable_parallel" = "X-yes"; then
+    FC=mpxlf90_r
+  else
+    FC=xlf90
+  fi
+fi
+
+# While we try to avoid setting FCFLAGS directly for use in compilation, in 
+# this case we need the -k flag present for some configure checks. As such, 
+# the configure script saves the user's set FCFLAGS before running, and 
+# restores them when complete. We must then set up both FCFLAGS and H5_FCFLAGS 
+# to ensure the flag is present for both configure as well as for the build.
+if test "X-" = "X-$f9x_flags_set"; then
+  F9XSUFFIXFLAG="-qsuffix=f=f90"
+  FCFLAGS="$FCFLAGS -O ${F9XSUFFIXFLAG}"
+  H5_FCFLAGS="$H5_FCFLAGS -O ${F9XSUFFIXFLAG}"
+  FSEARCH_DIRS="-I./ -I../src"
+  DEBUG_FCFLAGS="-O"
+  PROD_FCFLAGS="-O"
+  PROFILE_FCFLAGS="-O"
+  f9x_flags_set=yes
+fi
+
+# The default C++ compiler
+
+# Use AIX supplied C++ compiler by default.
+CXX=${CXX=xlC}
+
+# Added -qweaksymbol to suppress linker messages warning of duplicate
+# symbols; these warnings are harmless. - BMR
+H5_CXXFLAGS="$H5_CXXFLAGS -qweaksymbol"
+AM_CXXFLAGS="$AM_CXXFLAGS"
 
 
 #----------------------------------------------------------------------------
@@ -49,7 +82,7 @@ fi
 # `--enable-debug' switch of configure.
 
 case $CC_BASENAME in
-  xlc|xlc-*|mpcc_r|mpcc_r-*)
+  xlc|xlc-*|xlc_r|xlc_r-*|mpcc_r|mpcc_r-*)
     . $srcdir/config/ibm-flags
     ;;
 
@@ -115,46 +148,3 @@ ac_cv_sizeof_uint_fast64_t=${ac_cv_sizeof_uint_fast64_t=8}
 
 # Don't cache long since it varies between 32 and 64 bits
 #ac_cv_sizeof_long=${ac_cv_sizeof_long=4}
-
-# The default Fortran 90 compiler
-
-if test "X-" = "X-$FC"; then
-  if test "X-$enable_parallel" = "X-yes"; then
-    FC=mpxlf90_r
-  else
-    FC=xlf90
-  fi
-fi
-
-# While we try to avoid setting FCFLAGS directly for use in compilation, in 
-# this case we need the -k flag present for some configure checks. As such, 
-# the configure script saves the user's set FCFLAGS before running, and 
-# restores them when complete. We must then set up both FCFLAGS and H5_FCFLAGS 
-# to ensure the flag is present for both configure as well as for the build.
-if test "X-" = "X-$f9x_flags_set"; then
-  F9XSUFFIXFLAG="-qsuffix=f=f90"
-  FCFLAGS="$FCFLAGS -O ${F9XSUFFIXFLAG}"
-  H5_FCFLAGS="$H5_FCFLAGS -O ${F9XSUFFIXFLAG}"
-  FSEARCH_DIRS="-I./ -I../src"
-  DEBUG_FCFLAGS="-O"
-  PROD_FCFLAGS="-O"
-  PROFILE_FCFLAGS="-O"
-  f9x_flags_set=yes
-fi
-
-# With poe version 3.2.0.19 or lower(using lpp -l all | grep ppe.poe to check the version number, 
-# IBM MPI-IO implementation has a bug, 
-#it cannot generate correct MPI derived datatype. Please uncomment the following line:
-#hdf5_cv_mpi_complex_derived_datatype_works=${hdf5_cv_mpi_complex_derived_datatype_works='no'}
-
-# The default C++ compiler
-
-# Use AIX supplied C++ compiler by default.
-CXX=${CXX=xlC}
-
-# Added -qweaksymbol to suppress linker messages warning of duplicate
-# symbols; these warnings are harmless. - BMR
-H5_CXXFLAGS="$H5_CXXFLAGS -qweaksymbol"
-AM_CXXFLAGS="$AM_CXXFLAGS"
-
-

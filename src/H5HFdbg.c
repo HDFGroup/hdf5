@@ -115,7 +115,7 @@ static herr_t H5HF_dtable_debug(H5HF_dtable_t *dtable, FILE *stream,
 static herr_t
 H5HF_dtable_debug(H5HF_dtable_t *dtable, FILE *stream, int indent, int fwidth)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_dtable_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -190,7 +190,7 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     H5HF_hdr_t	*hdr = NULL;             /* Fractal heap header info */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HF_hdr_debug, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -310,7 +310,7 @@ H5HF_dblock_debug_cb(const H5FS_section_info_t *_sect, void *_udata)
     haddr_t sect_start, sect_end;       /* Section's beginning and ending offsets */
     haddr_t dblock_start, dblock_end;   /* Direct block's beginning and ending offsets */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_dblock_debug_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -397,7 +397,7 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     uint8_t	*marker = NULL;         /* Track free space for block */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HF_dblock_debug, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -524,7 +524,7 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     size_t	u, v;                   /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HF_iblock_debug, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.
@@ -653,7 +653,7 @@ H5HF_sects_debug_cb(const H5FS_section_info_t *_sect, void *_udata)
     H5HF_debug_iter_ud2_t *udata = (H5HF_debug_iter_ud2_t *)_udata;         /* User data for callbacks */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_sects_debug_cb)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
@@ -708,7 +708,7 @@ H5HF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr,
     H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HF_sects_debug, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.

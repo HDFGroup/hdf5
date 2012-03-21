@@ -1,16 +1,13 @@
-#############################
-Expected output for 'h5dump --xml tvldtypes1.h5'
-#############################
 <?xml version="1.0" encoding="UTF-8"?>
-<hdf5:HDF5-File xmlns:hdf5="http://hdfgroup.org/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/DTDs/HDF5-File http://www.hdfgroup.org/DTDs/HDF5-File.xsd">
+<hdf5:HDF5-File xmlns:hdf5="http://hdfgroup.org/HDF5/XML/schema/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdfgroup.org/HDF5/XML/schema/HDF5-File http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd">
 <hdf5:RootGroup OBJ-XID="xid_928" H5Path="/">
    <hdf5:Dataset Name="Dataset1.0" OBJ-XID="xid_976" H5Path= "/Dataset1.0" Parents="xid_928" H5ParentPaths="/">
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
-         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <hdf5:FillValue>
-               <hdf5:NoFill/>
+            <hdf5:NoFill/>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>
@@ -30,7 +27,10 @@ Expected output for 'h5dump --xml tvldtypes1.h5'
 <!-- Note: format of VL data not specified -->
       <hdf5:Data>
          <hdf5:DataFromFile>
-          0  10 11  20 21 22  30 31 32 33
+          0
+          10 11
+          20 21 22
+          30 31 32 33
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>
@@ -38,9 +38,9 @@ Expected output for 'h5dump --xml tvldtypes1.h5'
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
-         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <hdf5:FillValue>
-               <hdf5:NoFill/>
+            <hdf5:NoFill/>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>
@@ -60,7 +60,10 @@ Expected output for 'h5dump --xml tvldtypes1.h5'
 <!-- Note: format of VL data not specified -->
       <hdf5:Data>
          <hdf5:DataFromFile>
-          0  10 10.1  20 20.1 20.2  30 30.1 30.2 30.3
+          0
+          10 10.1
+          20 20.1 20.2
+          30 30.1 30.2 30.3
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>
@@ -68,9 +71,9 @@ Expected output for 'h5dump --xml tvldtypes1.h5'
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
-         <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+      <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <hdf5:FillValue>
-               <hdf5:NoFill/>
+            <hdf5:NoFill/>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>
