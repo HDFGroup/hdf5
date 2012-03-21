@@ -38,8 +38,24 @@
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_CORE_g = 0;
 
-/*
- * The description of a file belonging to this driver. The `eoa' and `eof'
+/* Since Windows doesn't follow the rest of the world when it comes
+ * to POSIX I/O types, some typedefs and constants are needed to avoid
+ * making the code messy with #ifdefs.
+ * NOTE: These are only used when writing data to the backing store on
+ * file close.
+ */
+#ifdef H5_HAVE_WIN32_API
+typedef unsigned int    h5_core_io_t;
+typedef int             h5_core_io_ret_t;
+static int H5_CORE_MAX_IO_BYTES_g = INT_MAX;
+#else
+/* Unix, everyone else */
+typedef size_t          h5_core_io_t;
+typedef ssize_t         h5_core_io_ret_t;
+static size_t H5_CORE_MAX_IO_BYTES_g = SSIZET_MAX;
+#endif /* H5_HAVE_WIN32_API */
+
+/* The description of a file belonging to this driver. The `eoa' and `eof'
  * determine the amount of hdf5 address space in use and the high-water mark
  * of the file (the current size of the underlying memory).
  */
@@ -54,8 +70,7 @@ typedef struct H5FD_core_t {
     int		fd;			/*backing store file descriptor	*/
     /* Information for determining uniqueness of a file with a backing store */
 #ifndef H5_HAVE_WIN32_API
-    /*
-     * On most systems the combination of device and i-node number uniquely
+    /* On most systems the combination of device and i-node number uniquely
      * identify a file.
      */
     dev_t       device;                 /*file device number            */
@@ -65,18 +80,26 @@ typedef struct H5FD_core_t {
     ino_t       inode;                  /*file i-node number            */
 #endif /*H5_VMS*/
 #else
-    /*
-     * On H5_HAVE_WIN32_API the low-order word of a unique identifier associated with the
-     * file and the volume serial number uniquely identify a file. This number
-     * (which, both? -rpm) may change when the system is restarted or when the
-     * file is opened. After a process opens a file, the identifier is
-     * constant until the file is closed. An application can use this
-     * identifier and the volume serial number to determine whether two
-     * handles refer to the same file.
+    /* Files in windows are uniquely identified by the volume serial
+     * number and the file index (both low and high parts).
+     *
+     * There are caveats where these numbers can change, especially
+     * on FAT file systems.  On NTFS, however, a file should keep
+     * those numbers the same until renamed or deleted (though you
+     * can use ReplaceFile() on NTFS to keep the numbers the same
+     * while renaming).
+     *
+     * See the MSDN "BY_HANDLE_FILE_INFORMATION Structure" entry for
+     * more information.
+     *
+     * http://msdn.microsoft.com/en-us/library/aa363788(v=VS.85).aspx
      */
-    DWORD fileindexlo;
-    DWORD fileindexhi;
-#endif
+    DWORD           nFileIndexLow;
+    DWORD           nFileIndexHigh;
+    DWORD           dwVolumeSerialNumber;
+    
+    HANDLE          hFile;      /* Native windows file handle */
+#endif /* H5_HAVE_WIN32_API */
     hbool_t	dirty;			/*changes not saved?		*/
 } H5FD_core_t;
 
@@ -89,8 +112,7 @@ typedef struct H5FD_core_fapl_t {
 /* Allocate memory in multiples of this size by default */
 #define H5FD_CORE_INCREMENT		8192
 
-/*
- * These macros check for overflow of various quantities.  These macros
+/* These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
  *
  * ADDR_OVERFLOW:	Checks whether a file address of type `haddr_t'
@@ -200,8 +222,6 @@ H5FD_core_init_interface(void)
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -258,15 +278,6 @@ H5FD_core_term(void)
  * Programmer:	Robb Matzke
  *		Thursday, February 19, 1998
  *
- * Modifications:
- * 		Robb Matzke, 1999-10-19
- *		Added the BACKING_STORE argument. If set then the entire file
- *		contents are flushed to a file with the same name as this
- *		core file.
- *
- *		Raymond Lu, 2001-10-25
- *		Changed the file access list to the new generic list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -304,14 +315,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August 10, 1999
- *
- * Modifications:
- *		Robb Matzke, 1999-10-19
- *		Added the BACKING_STORE argument.
- *
- *		Raymond Lu
- *		2001-10-25
- *		Changed file access list to the new generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -355,8 +358,6 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, August 13, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -396,16 +397,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
  *
- * Modifications:
- *		Robb Matzke, 1999-10-19
- *		The backing store file is created and opened if specified.
- *
- *              Raymond Lu, 2006-11-30
- *              Enabled the driver to read an existing file depending on
- *              the setting of the backing_store and file open flags.
- *
- *              Allen Byrne, 2008-1-23
- *              changed if of fapl_id to assert
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -417,7 +408,6 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_core_fapl_t	*fa=NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
 #ifdef H5_HAVE_WIN32_API
-    HFILE filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
     h5_stat_t		sb;
@@ -461,8 +451,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     if(name && *name)
         file->name = H5MM_xstrdup(name);
 
-    /*
-     * The increment comes from either the file access property list or the
+    /* The increment comes from either the file access property list or the
      * default value. But if the file access property list was zero then use
      * the default value instead.
      */
@@ -474,10 +463,16 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     if(fd >= 0) {
         /* Retrieve information for determining uniqueness of file */
 #ifdef H5_HAVE_WIN32_API
-        filehandle = _get_osfhandle(fd);
-        (void)GetFileInformationByHandle((HANDLE)filehandle, &fileinfo);
-        file->fileindexhi = fileinfo.nFileIndexHigh;
-        file->fileindexlo = fileinfo.nFileIndexLow;
+        file->hFile = (HANDLE)_get_osfhandle(fd);
+        if(INVALID_HANDLE_VALUE == file->hFile)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get Windows file handle")
+
+        if(!GetFileInformationByHandle((HANDLE)file->hFile, &fileinfo))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get Windows file information")
+
+        file->nFileIndexHigh = fileinfo.nFileIndexHigh;
+        file->nFileIndexLow = fileinfo.nFileIndexLow;
+        file->dwVolumeSerialNumber = fileinfo.dwVolumeSerialNumber;
 #else /* H5_HAVE_WIN32_API */
         file->device = sb.st_dev;
 #ifdef H5_VMS
@@ -496,7 +491,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
         size_t size;
 
         /* Retrieve file size */
-	size = (size_t)sb.st_size;
+        size = (size_t)sb.st_size;
 
         /* Check if we should allocate the memory buffer and read in existing data */
         if(size) {
@@ -507,9 +502,40 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
             /* Set up data structures */
             file->eof = size;
 
-            /* Read in existing data */
-            if(HDread(file->fd, file->mem, size) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read file")
+            /* Read in existing data, being careful of interrupted system calls,
+             * partial results, and the end of the file.
+             */
+            while(size > 0) {
+
+                h5_core_io_t        bytes_in        = 0;    /* # of bytes to read       */
+                h5_core_io_ret_t    bytes_read      = -1;   /* # of bytes actually read */
+                
+                /* Trying to read more bytes than the return type can handle is
+                 * undefined behavior in POSIX.
+                 */
+                if(size > H5_CORE_MAX_IO_BYTES_g)
+                    bytes_in = H5_CORE_MAX_IO_BYTES_g;
+                else
+                    bytes_in = (h5_core_io_t)size;
+                
+                do {
+                    bytes_read = HDread(file->fd, file->mem, bytes_in);
+                } while(-1 == bytes_read && EINTR == errno);
+                
+                if(-1 == bytes_read) { /* error */
+                    int myerrno = errno;
+                    time_t mytime = HDtime(NULL);
+                    HDoff_t myoffset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+
+                    HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', file->mem = %p, size = %lu, offset = %llu", HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), file->mem, (unsigned long)size, (unsigned long long)myoffset);
+                } /* end if */
+                
+                HDassert(bytes_read >= 0);
+                HDassert((size_t)bytes_read <= size);
+                
+                size -= (size_t)bytes_read;
+                
+            } /* end while */
         } /* end if */
     } /* end if */
 
@@ -578,13 +604,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
  *
- * Modifications:
- *              Neil Fortner
- *              Tuesday, March 9, 2010
- *              Modified function to compare low level file information if
- *              a backing store is opened for both files, similar to the
- *              sec2 file driver.
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -599,11 +618,14 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     if(f1->fd >= 0 && f2->fd >= 0) {
         /* Compare low level file information for backing store */
 #ifdef H5_HAVE_WIN32_API
-        if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)
-        if (f1->fileindexhi > f2->fileindexhi) HGOTO_DONE(1)
+        if(f1->dwVolumeSerialNumber < f2->dwVolumeSerialNumber) HGOTO_DONE(-1)
+        if(f1->dwVolumeSerialNumber > f2->dwVolumeSerialNumber) HGOTO_DONE(1)
 
-        if (f1->fileindexlo < f2->fileindexlo) HGOTO_DONE(-1)
-        if (f1->fileindexlo > f2->fileindexlo) HGOTO_DONE(1)
+        if(f1->nFileIndexHigh < f2->nFileIndexHigh) HGOTO_DONE(-1)
+        if(f1->nFileIndexHigh > f2->nFileIndexHigh) HGOTO_DONE(1)
+
+        if(f1->nFileIndexLow < f2->nFileIndexLow) HGOTO_DONE(-1)
+        if(f1->nFileIndexLow > f2->nFileIndexLow) HGOTO_DONE(1)
 
 #else
 #ifdef H5_DEV_T_IS_SCALAR
@@ -702,11 +724,6 @@ H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
  * Programmer:	Robb Matzke
  *              Monday, August  2, 1999
  *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -733,11 +750,6 @@ H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
  *
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
- *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
@@ -775,8 +787,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -799,8 +809,6 @@ H5FD_core_get_eof(const H5FD_t *_file)
  *
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -867,8 +875,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -881,8 +887,8 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    assert(file && file->pub.cls);
-    assert(buf);
+    HDassert(file && file->pub.cls);
+    HDassert(buf);
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF == addr)
@@ -933,8 +939,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1005,10 +1009,6 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, October 15, 1999
  *
- * Modifications:
- *              Raymond Lu, 2006-11-30
- *              Added a condition check for backing store flag, for an
- *              existing file can be opened for read and write now.
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -1027,19 +1027,40 @@ H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 
         if (0!=HDlseek(file->fd, (off_t)0, SEEK_SET))
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store")
+        
+        while (size > 0) {
 
-        while (size) {
-            ssize_t n;
+            h5_core_io_t        bytes_in        = 0;    /* # of bytes to write  */
+            h5_core_io_ret_t    bytes_wrote     = -1;   /* # of bytes written   */ 
 
-            H5_CHECK_OVERFLOW(size,hsize_t,size_t);
-            n = HDwrite(file->fd, ptr, (size_t)size);
-            if (n<0 && EINTR==errno)
-                continue;
-            if (n<0)
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "error writing backing store")
-            ptr += (size_t)n;
-            size -= (size_t)n;
-        }
+            /* Trying to write more bytes than the return type can handle is
+             * undefined behavior in POSIX.
+             */
+            if(size > H5_CORE_MAX_IO_BYTES_g)
+                bytes_in = H5_CORE_MAX_IO_BYTES_g;
+            else
+                bytes_in = (h5_core_io_t)size;
+
+            do {
+                bytes_wrote = HDwrite(file->fd, ptr, bytes_in);
+            } while(-1 == bytes_wrote && EINTR == errno);
+            
+            if(-1 == bytes_wrote) { /* error */
+                int myerrno = errno;
+                time_t mytime = HDtime(NULL);
+                HDoff_t myoffset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write to backing store failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', ptr = %p, size = %lu, offset = %llu", HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), ptr, (unsigned long)size, (unsigned long long)myoffset);
+            } /* end if */
+            
+            HDassert(bytes_wrote > 0);
+            HDassert((size_t)bytes_wrote <= size);
+
+            size -= (size_t)bytes_wrote;
+            ptr = (unsigned char *)ptr + bytes_wrote;
+            
+        } /* end while */
+        
         file->dirty = FALSE;
     }
 
@@ -1094,6 +1115,43 @@ if(file->eof < new_eof)
 
         /* Update backing store, if using it */
         if(file->fd >= 0 && file->backing_store) {
+#ifdef H5_HAVE_WIN32_API
+            LARGE_INTEGER   li;         /* 64-bit (union) integer for SetFilePointer() call */
+            DWORD           dwPtrLow;   /* Low-order pointer bits from SetFilePointer()
+                                         * Only used as an error code here.
+                                         */
+            DWORD           dwError;    /* DWORD error code from GetLastError() */
+            BOOL            bError;     /* Boolean error flag */
+
+            /* Windows uses this odd QuadPart union for 32/64-bit portability */
+            li.QuadPart = (__int64)file->eoa;
+
+            /* Extend the file to make sure it's large enough.
+             *
+             * Since INVALID_SET_FILE_POINTER can technically be a valid return value
+             * from SetFilePointer(), we also need to check GetLastError().
+             */
+            dwPtrLow = SetFilePointer(file->hFile, li.LowPart, &li.HighPart, FILE_BEGIN);
+            if(INVALID_SET_FILE_POINTER == dwPtrLow) {
+                dwError = GetLastError();
+                if(dwError != NO_ERROR )
+                    HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL, "unable to set file pointer")
+            }
+
+            bError = SetEndOfFile(file->hFile);
+            if(0 == bError)
+                HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+#else /* H5_HAVE_WIN32_API */
+#ifdef H5_VMS
+            /* Reset seek offset to the beginning of the file, so that the file isn't
+             * re-extended later.  This may happen on Open VMS. */
+            if(-1 == HDlseek(file->fd, (HDoff_t)0, SEEK_SET))
+                HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+#endif
+            if(-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
+                HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+#endif /* H5_HAVE_WIN32_API */
+
 #ifdef H5_VMS
             /* Reset seek offset to the beginning of the file, so that the file isn't
              * re-extended later.  This may happen on Open VMS. */
@@ -1112,4 +1170,3 @@ if(file->eof < new_eof)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_truncate() */
-
