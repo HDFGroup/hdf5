@@ -415,13 +415,20 @@ add_obj(H5HF_t *fh, hid_t dxpl, size_t obj_off,
     if(keep_ids) {
         /* Check for needing to increase size of heap ID array */
         if(keep_ids->num_ids + 1 > keep_ids->alloc_ids) {
+            unsigned char *tmp_ids;
+            size_t *tmp_lens;
+            size_t *tmp_offs;
+
             keep_ids->alloc_ids = MAX(1024, (keep_ids->alloc_ids * 2));
-            if(NULL == (keep_ids->ids = (unsigned char *)H5MM_realloc(keep_ids->ids, id_len * keep_ids->alloc_ids)))
+            if(NULL == (tmp_ids = (unsigned char *)H5MM_realloc(keep_ids->ids, id_len * keep_ids->alloc_ids)))
                 TEST_ERROR
-            if(NULL == (keep_ids->lens = (size_t *)H5MM_realloc(keep_ids->lens, sizeof(size_t) * keep_ids->alloc_ids)))
+            keep_ids->ids = tmp_ids;
+            if(NULL == (tmp_lens = (size_t *)H5MM_realloc(keep_ids->lens, sizeof(size_t) * keep_ids->alloc_ids)))
                 TEST_ERROR
-            if(NULL == (keep_ids->offs = (size_t *)H5MM_realloc(keep_ids->offs, sizeof(size_t) * keep_ids->alloc_ids)))
+            keep_ids->lens = tmp_lens;
+            if(NULL == (tmp_offs = (size_t *)H5MM_realloc(keep_ids->offs, sizeof(size_t) * keep_ids->alloc_ids)))
                 TEST_ERROR
+            keep_ids->offs = tmp_offs;
         } /* end if */
 
         /* Append the object info onto the array */

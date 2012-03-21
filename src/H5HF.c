@@ -361,7 +361,6 @@ H5HF_insert(H5HF_t *fh, hid_t dxpl_id, size_t size, const void *obj,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
-
 #ifdef QAK
 HDfprintf(stderr, "%s: size = %Zu\n", FUNC, size);
 #endif /* QAK */
