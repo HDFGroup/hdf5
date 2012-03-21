@@ -426,7 +426,7 @@ gent_attribute(void)
     /* attribute 1 */
     dims[0] = 24;
     space = H5Screate_simple(1, dims, NULL);
-    attr = H5Acreate2(root, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
+    attr = H5Acreate2(root, "/attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
     sprintf(buf, "attribute of root group");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
