@@ -8410,7 +8410,7 @@ test_chunk_fast(hid_t fapl)
                             if(H5V_array_calc_pre(u, ndims, down, hs_offset) < 0) FAIL_STACK_ERROR
 
                             /* Un-swizzle hyperslab offset in same way as swizzled dimensions */
-                            H5V_unswizzle_coords(hs_offset, unlim_dim);
+                            H5V_unswizzle_coords(hsize_t, hs_offset, unlim_dim);
 
                             /* Select a single element in the dataset */
                             if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0) FAIL_STACK_ERROR
@@ -8460,7 +8460,7 @@ test_chunk_fast(hid_t fapl)
                                 if(H5V_array_calc(u, ndims, swizzled_dim, hs_offset) < 0) FAIL_STACK_ERROR
 
                                 /* Un-swizzle hyperslab offset in same way as swizzled dimensions */
-                                H5V_unswizzle_coords(hs_offset, unlim_dim);
+                                H5V_unswizzle_coords(hsize_t, hs_offset, unlim_dim);
 
                                 /* Select a single element in the dataset */
                                 if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0) FAIL_STACK_ERROR
@@ -8524,7 +8524,7 @@ test_chunk_fast(hid_t fapl)
                         if(H5Sget_simple_extent_dims(sid, swizzled_dim, NULL) < 0) FAIL_STACK_ERROR
 
                         /* Generate the swizzled dimensions */
-                        H5V_swizzle_coords(swizzled_dim, unlim_dim);
+                        H5V_swizzle_coords(hsize_t, swizzled_dim, unlim_dim);
 
                         /* Compute the "down" dimension values */
                         if(H5V_array_down(ndims, swizzled_dim, down) < 0) FAIL_STACK_ERROR
@@ -8535,7 +8535,7 @@ test_chunk_fast(hid_t fapl)
                             if(H5V_array_calc_pre(u, ndims, down, hs_offset) < 0) FAIL_STACK_ERROR
 
                             /* Unswizzle hyperslab offset in same way as swizzled dimensions */
-                            H5V_unswizzle_coords(hs_offset, unlim_dim);
+                            H5V_unswizzle_coords(hsize_t, hs_offset, unlim_dim);
 
                             /* Select a single element in the dataset */
                             if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0) FAIL_STACK_ERROR
@@ -8592,6 +8592,7 @@ error:
     return -1;
 } /* end test_chunk_fast() */
 
+
 /*-------------------------------------------------------------------------
  * Function: test_reopen_chunk_fast
  *
@@ -8713,6 +8714,114 @@ error:
     } H5E_END_TRY;
     return -1;
 } /* end test_reopen_chunk_fast() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_chunk_fast_bug1
+ *
+ * Purpose:     Test extensible arrays where the first dimension in the
+ *              chunk size is the same as the second dimension in the
+ *              dataset size.  This helps to confirm that all dimensions
+ *              are being "swizzled" correctly in the earray chunk index
+ *              code.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Neil Fortner
+ *              March 22, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_chunk_fast_bug1(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       dcpl = -1;      /* Dataset creation property list ID */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hid_t       dsid = -1;      /* Dataset ID */
+    hsize_t     dim[2], max_dim[2], chunk_dim[2]; /* Dataset and chunk dimensions */
+    H5D_alloc_time_t alloc_time;        /* Storage allocation time */
+    static unsigned wbuf[40][20], rbuf[40][20];  /* Element written/read */
+    unsigned    i, j;            /* Local index variables */
+
+    TESTING("datasets w/extensible array chunk indexing bug");
+
+    h5_fixname(FILENAME[10], fapl, filename, sizeof filename);
+
+    /* Initialize write buffer */
+    for(i=0; i<40; i++)
+        for(j=0; j<20; j++)
+            wbuf[i][j] = (i * 20) + j;
+
+    /* Create 2-D dataspace */
+    dim[0] = 40;
+    dim[1] = 20;
+    max_dim[0] = 40;
+    max_dim[1] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(2, dim, max_dim)) < 0) FAIL_STACK_ERROR
+
+    /* Loop over storage allocation time */
+    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+        /* Create file */
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+        /* Create dataset creation property list */
+        if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+
+        /* Set chunking */
+        chunk_dim[0] = 20;
+        chunk_dim[1] = 10;
+        if(H5Pset_chunk(dcpl, 2, chunk_dim) < 0) FAIL_STACK_ERROR
+
+        /* Set allocation time */
+        if(H5Pset_alloc_time(dcpl, alloc_time) < 0) FAIL_STACK_ERROR
+
+        /* Create chunked dataset */
+        if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Write buffer to dataset */
+        if(H5Dwrite(dsid, H5T_NATIVE_UINT, sid, sid, H5P_DEFAULT, &wbuf) < 0)
+            FAIL_STACK_ERROR
+
+        /* Close everything */
+        if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+        /* Reopen the dataset */
+        if((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+        /* Read from dataset */
+        if(H5Dread(dsid, H5T_NATIVE_UINT, sid, sid, H5P_DEFAULT, &rbuf) < 0)
+            FAIL_STACK_ERROR
+
+        /* Verify read data */
+        for(i=0; i<40; i++)
+            for(j=0; j<20; j++)
+                if(wbuf[i][j] != rbuf[i][j])
+                    FAIL_PUTS_ERROR("invalid element read");
+
+        if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+        if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+        if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    } /* end for */
+
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_chunk_fast_bug1() */
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_EXPAND[1] = {{
@@ -10021,6 +10130,7 @@ main(void)
         nerrors += (test_big_chunks_bypass_cache(my_fapl) < 0   ? 1 : 0);
         nerrors += (test_chunk_fast(my_fapl) < 0		? 1 : 0);
         nerrors += (test_reopen_chunk_fast(my_fapl) < 0		? 1 : 0);
+        nerrors += (test_chunk_fast_bug1(my_fapl) < 0           ? 1 : 0);
         nerrors += (test_chunk_expand(my_fapl) < 0		? 1 : 0);
 	nerrors += (test_layout_extend(my_fapl) < 0		? 1 : 0);
         nerrors += (test_fixed_array(my_fapl) < 0		? 1 : 0);

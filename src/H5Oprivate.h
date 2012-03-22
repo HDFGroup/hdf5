@@ -467,6 +467,7 @@ typedef struct H5O_layout_chunk_earray_t {
     } cparam;
 
     unsigned    unlim_dim;              /* Rank of unlimited dimension for dataset */
+    uint32_t    swizzled_dim[H5O_LAYOUT_NDIMS]; /* swizzled chunk dimensions */
     hsize_t    	swizzled_down_chunks[H5O_LAYOUT_NDIMS];	/* swizzled "down" size of number of chunks in each dimension */
 } H5O_layout_chunk_earray_t;
 

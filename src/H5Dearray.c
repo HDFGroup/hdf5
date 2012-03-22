@@ -1104,10 +1104,10 @@ H5D_earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 
         /* Set up the swizzled chunk coordinates */
         HDmemcpy(swizzled_coords, udata->common.offset, ndims * sizeof(udata->common.offset[0]));
-        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.earray.unlim_dim);
+        H5V_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end if */
     else {
@@ -1270,10 +1270,10 @@ H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
 
         /* Set up the swizzled chunk coordinates */
         HDmemcpy(swizzled_coords, udata->common.offset, ndims * sizeof(udata->common.offset[0]));
-        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.earray.unlim_dim);
+        H5V_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end if */
     else {
@@ -1333,12 +1333,18 @@ H5D_earray_idx_resize(H5O_layout_chunk_t *layout)
     /* Check args */
     HDassert(layout);
 
-    /* Set up the swizzled "down" chunk information */
+
+    /* "Swizzle" constant dimensions for this dataset */
     if(layout->u.earray.unlim_dim > 0) {
         hsize_t swizzled_chunks[H5O_LAYOUT_NDIMS];    /* Swizzled form of # of chunks in each dimension */
 
+        /* Get the swizzled chunk dimensions */
+        HDmemcpy(layout->u.earray.swizzled_dim, layout->dim, (layout->ndims - 1) * sizeof(layout->dim[0]));
+        H5V_swizzle_coords(uint32_t, layout->u.earray.swizzled_dim, layout->u.earray.unlim_dim);
+
+        /* Get the swizzled number of chunks in each dimension */
         HDmemcpy(swizzled_chunks, layout->chunks, (layout->ndims - 1) * sizeof(swizzled_chunks[0]));
-        H5V_swizzle_coords(swizzled_chunks, layout->u.earray.unlim_dim);
+        H5V_swizzle_coords(hsize_t, swizzled_chunks, layout->u.earray.unlim_dim);
 
         /* Get the swizzled "down" sizes for each dimension */
         if(H5V_array_down((layout->ndims - 1), swizzled_chunks, layout->u.earray.swizzled_down_chunks) < 0)
@@ -1511,10 +1517,11 @@ H5D_earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
 
         /* Set up the swizzled chunk coordinates */
         HDmemcpy(swizzled_coords, udata->offset, ndims * sizeof(udata->offset[0]));
-        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.earray.unlim_dim);
+        H5V_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
+
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end if */
     else {
@@ -1911,10 +1918,10 @@ H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
 
         /* Set up the swizzled chunk coordinates */
         HDmemcpy(swizzled_coords, udata->offset, ndims * sizeof(udata->offset[0]));
-        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.earray.unlim_dim);
+        H5V_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end if */
     else {
@@ -1981,10 +1988,11 @@ H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
 
         /* Set up the swizzled chunk coordinates */
         HDmemcpy(swizzled_coords, udata->offset, ndims * sizeof(udata->offset[0]));
-        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.earray.unlim_dim);
+        H5V_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
+
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end if */
     else {
