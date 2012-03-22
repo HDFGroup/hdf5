@@ -139,6 +139,9 @@ IF (BUILD_TESTING)
       h5diff_482.txt
       h5diff_483.txt
       h5diff_484.txt
+      h5diff_485.txt
+      h5diff_486.txt
+      h5diff_487.txt
       h5diff_50.txt
       h5diff_51.txt
       h5diff_52.txt
@@ -253,6 +256,8 @@ IF (BUILD_TESTING)
       h5diff_exclude1-2.h5
       h5diff_exclude2-1.h5
       h5diff_exclude2-2.h5
+      h5diff_exclude3-1.h5
+      h5diff_exclude3-2.h5
       h5diff_comp_vl_strs.h5
       h5diff_attr_v_level1.h5
       h5diff_attr_v_level2.h5
@@ -490,6 +495,9 @@ IF (BUILD_TESTING)
   # different structure and obj names
   SET (EXCLUDE_FILE2_1 h5diff_exclude2-1.h5)
   SET (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
+  # Only one file contains unique objs. Common objs are same.
+  SET (EXCLUDE_FILE3_1 h5diff_exclude3-1.h5)
+  SET (EXCLUDE_FILE3_2 h5diff_exclude3-2.h5)
   # compound type with multiple vlen string types
   SET (COMP_VL_STRS_FILE h5diff_comp_vl_strs.h5)
   # container types (array,vlen) with multiple nested compound types
@@ -1358,6 +1366,16 @@ ADD_H5_TEST (h5diff_483 1 -v --exclude-path "/group1" ${EXCLUDE_FILE2_1} ${EXCLU
 
 # Exclude from group compare
 ADD_H5_TEST (h5diff_484 0 -v --exclude-path "/dset3" ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2} /group1)
+
+#
+# Only one file contains unique objs. Common objs are same.
+# (HDFFV-7837)
+#
+ADD_H5_TEST (h5diff_485 0 -v --exclude-path "/group1" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5)
+ADD_H5_TEST (h5diff_486 0 -v --exclude-path "/group1" h5diff_exclude3-2.h5 h5diff_exclude3-1.h5)
+ADD_H5_TEST (h5diff_487 1 -v --exclude-path "/group1/dset" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5)
+
+
 
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset

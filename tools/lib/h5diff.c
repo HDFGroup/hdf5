@@ -270,12 +270,12 @@ static int is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *options
     /* search objects in exclude list */
     while (NULL != exclude_path_ptr)
     {
-        /* if given object is group, exclude its members as well */
+        /* if exclude path is is group, exclude its members as well */
         if (exclude_path_ptr->obj_type == H5TRAV_TYPE_GROUP)
         {
             ret_cmp = HDstrncmp(exclude_path_ptr->obj_path, path,
                                 HDstrlen(exclude_path_ptr->obj_path));
-            if (ret_cmp == 0)
+            if (ret_cmp == 0)  /* found matching members */
             {
                 /* check if given path belong to an excluding group, if so 
                  * exclude it as well.
@@ -295,12 +295,13 @@ static int is_exclude_path (char * path, h5trav_type_t type, diff_opt_t *options
         else  
         {
             ret_cmp = HDstrcmp(exclude_path_ptr->obj_path, path);
-            if (ret_cmp == 0)
+            if (ret_cmp == 0)  /* found matching object */
             {
                 /* excluded non-group object */
                 ret = 1;
-                /* assign type as scan progress, which is sufficient to 
-                 * determine type for excluding groups from the above if. */
+                /* remember the type of this maching object. 
+                 * if it's group, it can be used for excluding its member 
+                 * objects in this while() loop */
                 exclude_path_ptr->obj_type = type;
                 break; /* while */
             }
@@ -443,9 +444,11 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
     infile[1] = 0;
     while(curr1 < info1->nused)
     {
+        path1_lp = (info1->paths[curr1].path) + path1_offset;
+        type1_l = info1->paths[curr1].type;
+
         if(!is_exclude_path(path1_lp, type1_l, options))
         {
-            path1_lp = (info1->paths[curr1].path) + path1_offset;
             trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
         }
         curr1++;
@@ -456,9 +459,11 @@ static void build_match_list (const char *objname1, trav_info_t *info1, const ch
     infile[1] = 1;
     while(curr2 < info2->nused)
     {
+        path2_lp = (info2->paths[curr2].path) + path2_offset;
+        type2_l = info2->paths[curr2].type;
+
         if (!is_exclude_path(path2_lp, type2_l, options))
         {
-            path2_lp = (info2->paths[curr2].path) + path2_offset;
             trav_table_addflags(infile, path2_lp, info2->paths[curr2].type, table);
         } 
         curr2++;

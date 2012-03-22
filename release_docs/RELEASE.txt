@@ -68,6 +68,11 @@ New Features
  
     Tools
     -----
+    - h5dump: Added capability for "-a" option to show attributes containing "/" 
+      by using an escape character. For example, for a dataset "/dset" 
+      containing attribute "speed(m/h)", use "h5dump -a "/dset/speed(\/h)" 
+      to show the content of the attribute. See details at HDFFV-7523
+      (PC -- 2012/03/12)
     - h5dump: Added ability to apply command options across multiple files using a
       wildcard in the filename. Unix example; "h5dump -H -d Dataset1 tarr*.h5".
       Cross platform example; "h5dump -H -d Dataset1 tarray1.h5 tarray2.h5 tarray3.h5".
@@ -139,6 +144,11 @@ Bug Fixes since HDF5-1.8.8
 
     Tools
     -----
+    - h5diff: If unique objects exists only in one file and try to exclude
+      the unique objects with --exclude-path option, h5diff missed 
+      excluding some objects. 
+      Fixed to exclude objects correctly in such case.
+      HDFFV-7837 (JKM 2012/03/20)
     - h5diff: When two symbolic dangling links are compared with
       --follow-symlinks option, the result should be same. It worked for
       comparing two files, but didn't work for comparing two objects.

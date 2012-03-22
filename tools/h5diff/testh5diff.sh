@@ -111,6 +111,8 @@ $SRC_H5DIFF_TESTFILES/h5diff_exclude1-1.h5
 $SRC_H5DIFF_TESTFILES/h5diff_exclude1-2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_exclude2-1.h5
 $SRC_H5DIFF_TESTFILES/h5diff_exclude2-2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_exclude3-1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_exclude3-2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_comp_vl_strs.h5
 $SRC_H5DIFF_TESTFILES/compounds_array_vlen1.h5
 $SRC_H5DIFF_TESTFILES/compounds_array_vlen2.h5
@@ -1026,6 +1028,15 @@ TOOLTEST h5diff_483.txt -v --exclude-path "/group1" h5diff_exclude2-1.h5 h5diff_
 
 # Exclude from group compare
 TOOLTEST h5diff_484.txt -v --exclude-path "/dset3" h5diff_exclude1-1.h5 h5diff_exclude1-2.h5 /group1
+
+#
+# Only one file contains unique objs. Common objs are same.
+# (HDFFV-7837)
+#
+TOOLTEST h5diff_485.txt -v --exclude-path "/group1" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5
+TOOLTEST h5diff_486.txt -v --exclude-path "/group1" h5diff_exclude3-2.h5 h5diff_exclude3-1.h5
+TOOLTEST h5diff_487.txt -v --exclude-path "/group1/dset" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5
+
 
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset
