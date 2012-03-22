@@ -156,6 +156,13 @@ typedef struct H5D_copy_file_ud_t {
 /******************************/
 /* Library Private Prototypes */
 /******************************/
+/* Internal I/O routines */
+H5_DLL herr_t H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, 
+                       const H5S_t *file_space, hid_t dset_xfer_plist,
+                       void *buf/*out*/);
+H5_DLL herr_t H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, 
+                        const H5S_t *file_space, hid_t dset_xfer_plist,
+                        const void *buf);
 
 H5_DLL herr_t H5D_init(void);
 H5_DLL H5D_t *H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id);

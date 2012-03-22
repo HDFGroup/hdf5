@@ -106,7 +106,7 @@ H5F_get_sohm_mesg_count_test(hid_t uid, unsigned type_id,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5I_UID == H5I_get_type(uid)) {
+    if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
         if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         file_id = uid_info->obj_id;
@@ -154,7 +154,7 @@ H5F_check_cached_stab_test(hid_t uid)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5I_UID == H5I_get_type(uid)) {
+    if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
         if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         file_id = uid_info->obj_id;
@@ -199,7 +199,7 @@ H5F_get_maxaddr_test(hid_t uid, haddr_t *maxaddr)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5I_UID == H5I_get_type(uid)) {
+    if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
         if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         file_id = uid_info->obj_id;

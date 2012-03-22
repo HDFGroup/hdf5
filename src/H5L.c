@@ -1164,7 +1164,7 @@ H5Literate(hid_t uid, H5_index_t idx_type, H5_iter_order_t order,
     /* Check arguments */
     id_type = H5I_get_type(uid);
 
-    if (H5I_UID == id_type) {
+    if (H5I_FILE_PUBLIC == id_type) {
         if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         grp_id = uid_info->obj_id;
@@ -1318,7 +1318,7 @@ H5Lvisit(hid_t uid, H5_index_t idx_type, H5_iter_order_t order,
 
     id_type = H5I_get_type(uid);
 
-    if (H5I_UID == id_type) {
+    if (H5I_FILE_PUBLIC == id_type) {
         if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         grp_id = uid_info->obj_id;

@@ -28,6 +28,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5VLprivate.h"	/* VOL plugins				*/
 
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
@@ -48,14 +49,6 @@
 /********************/
 /* Local Prototypes */
 /********************/
-
-/* Internal I/O routines */
-static herr_t H5D_read(H5D_t *dataset, hid_t mem_type_id,
-    const H5S_t *mem_space, const H5S_t *file_space, hid_t dset_xfer_plist,
-    void *buf/*out*/);
-static herr_t H5D_write(H5D_t *dataset, hid_t mem_type_id,
-    const H5S_t *mem_space, const H5S_t *file_space, hid_t dset_xfer_plist,
-    const void *buf);
 
 /* Setup/teardown routines */
 static herr_t H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
@@ -121,37 +114,11 @@ herr_t
 H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
 {
-    H5D_t		   *dset = NULL;
-    const H5S_t		   *mem_space = NULL;
-    const H5S_t		   *file_space = NULL;
-    char                    fake_char;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
              plist_id, buf);
-
-    /* check arguments */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-    if(NULL == dset->oloc.file)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-    if(H5S_ALL != mem_space_id) {
-	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(mem_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
-    } /* end if */
-    if(H5S_ALL != file_space_id) {
-	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(file_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
-    } /* end if */
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == plist_id)
@@ -159,19 +126,12 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     else
         if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
-    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-     * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-     * doesn't support this feature.
-     */
-    if(!buf)
-        buf = &fake_char;
-
-    /* read raw data */
-    if(H5D_read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
+    /* Read the data through the VOL */
+    if((ret_value = H5VL_dataset_read(dset_id, mem_type_id, mem_space_id, 
+                                      file_space_id, plist_id, buf)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -213,10 +173,6 @@ herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
 {
-    H5D_t		   *dset = NULL;
-    const H5S_t		   *mem_space = NULL;
-    const H5S_t		   *file_space = NULL;
-    char                    fake_char;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -224,26 +180,6 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
              dxpl_id, buf);
 
     /* check arguments */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-    if(NULL == dset->oloc.file)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-    if(H5S_ALL != mem_space_id) {
-	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(mem_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
-    } /* end if */
-    if(H5S_ALL != file_space_id) {
-	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(file_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
-    } /* end if */
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
@@ -251,18 +187,10 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
-    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-     * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-     * doesn't support this feature.
-     */
-    if(!buf)
-        buf = &fake_char;
-
-    /* write raw data */
-    if(H5D_write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
+    /* Write the data through the VOL */
+    if((ret_value = H5VL_dataset_write(dset_id, mem_type_id, mem_space_id, 
+                                       file_space_id, dxpl_id, buf)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
@@ -283,7 +211,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 	 const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/)
 {
@@ -484,7 +412,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 	  const H5S_t *file_space, hid_t dxpl_id, const void *buf)
 {

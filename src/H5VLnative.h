@@ -30,11 +30,6 @@ extern "C" {
 
 H5_DLL hid_t H5VL_native_init(void);
 H5_DLL herr_t H5Pset_fapl_native(hid_t fapl_id);
-H5_DLL hid_t  H5VL_native_open(const char *name, unsigned flags, hid_t fcpl_id, 
-                               hid_t fapl_id, hid_t dxpl_id);
-H5_DLL herr_t H5VL_native_close(hid_t fid);
-H5_DLL hid_t  H5VL_native_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-H5_DLL herr_t H5VL_native_flush(hid_t fid, H5F_scope_t scope);
 
 #ifdef __cplusplus
 }

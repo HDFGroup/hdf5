@@ -161,11 +161,19 @@ H5G_loc(hid_t id, H5G_loc_t *loc)
 {
     H5I_t       *uid_info;              /* user id structure */
     hid_t       loc_id;
+    H5I_type_t  id_type;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5I_UID == H5I_get_type(id)) {
+    id_type = H5I_get_type(id);
+    /* get the actual ID from an upper ID level */
+    /* MSC - this is a workaround to allow the test suite to pass and
+     at some point needs to be removed once all high level operations
+     that needs to go through the VOL actually go through the VOL*/
+    if (H5I_FILE_PUBLIC == id_type || H5I_GROUP_PUBLIC == id_type ||
+        H5I_DATASET_PUBLIC == id_type || H5I_DATATYPE_PUBLIC == id_type ||
+        H5I_ATTRIBUTE_PUBLIC == id_type) {
         if(NULL == (uid_info = (H5I_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         loc_id = uid_info->obj_id;
@@ -174,7 +182,6 @@ H5G_loc(hid_t id, H5G_loc_t *loc)
         loc_id = id;
     }
     switch(H5I_get_type(loc_id)) {
-        case H5I_UID:
         case H5I_FILE:
             {
                 H5F_t	*f;

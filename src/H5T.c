@@ -1716,16 +1716,22 @@ H5Tclose(hid_t type_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", type_id);
 
-    /* Check args */
-    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-    if(H5T_STATE_IMMUTABLE == dt->shared->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
+    /* if this is a named datatype, go through the VOL layer */
+    if (H5I_DATATYPE_PUBLIC == H5I_get_type(type_id)) {
+        if(H5VL_object_close(type_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to free datatype")
+    }
+    else {
+        /* Check args */
+        if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        if(H5T_STATE_IMMUTABLE == dt->shared->state)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
 
-    /* When the reference count reaches zero the resources are freed */
-    if(H5I_dec_app_ref(type_id) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
-
+        /* When the reference count reaches zero the resources are freed */
+        if(H5I_dec_app_ref(type_id) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
+    }
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tclose() */

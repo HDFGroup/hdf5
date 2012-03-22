@@ -27,7 +27,6 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
-#include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/* File memory management		*/
@@ -35,6 +34,7 @@
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tprivate.h"		/* Datatypes				*/
+#include "H5VLprivate.h"	/* VOL plugins				*/
 
 /* Declare a free list to manage the H5I_t struct */
 H5FL_DEFINE_STATIC(H5I_t);
@@ -377,7 +377,7 @@ H5Fget_obj_count(hid_t uid, unsigned types)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("Zs", "iIu", uid, types);
 
-    if (H5I_UID == H5I_get_type(uid)) {
+    if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
         if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         id = uid_info->obj_id;
@@ -462,7 +462,7 @@ H5Fget_obj_ids(hid_t uid, unsigned types, size_t max_objs, hid_t *oid_list)
     FUNC_ENTER_API(FAIL)
     H5TRACE4("Zs", "iIuz*i", uid, types, max_objs, oid_list);
 
-    if (H5I_UID == H5I_get_type(uid)) {
+    if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
         if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         id = uid_info->obj_id;
@@ -483,6 +483,7 @@ H5Fget_obj_ids(hid_t uid, unsigned types, size_t max_objs, hid_t *oid_list)
 
     if (H5I_replace_with_uids (oid_list, ret_value) <= 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get IDs")
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_obj_ids() */
@@ -683,7 +684,6 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 	    case H5I_REFERENCE:
 	    case H5I_VFL:
 	    case H5I_VOL:
-	    case H5I_UID:
 	    case H5I_GENPROP_CLS:
 	    case H5I_GENPROP_LST:
 	    case H5I_ERROR_CLASS:
@@ -1909,7 +1909,7 @@ H5Freopen(hid_t uid)
     H5TRACE1("i", "i", file_id);
 
     /* Get the file */
-    if(H5I_UID != H5I_get_type(uid))
+    if(H5I_FILE_PUBLIC != H5I_get_type(uid))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
     if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
@@ -1941,12 +1941,9 @@ H5Freopen(hid_t uid)
     if(NULL == (new_uid_info = H5FL_MALLOC(H5I_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     new_uid_info->obj_id = new_file_id;
-    new_uid_info->vol_id = uid_info->vol_id;
-    /* increment ref count on the VOL id */
-    if(H5I_inc_ref(uid_info->vol_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on vol plugin")
+    new_uid_info->vol_plugin = uid_info->vol_plugin;
 
-    if((ret_value = H5I_register(H5I_UID, new_uid_info, TRUE)) < 0)
+    if((ret_value = H5I_register(H5I_FILE_PUBLIC, new_uid_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 #endif
 
@@ -2023,13 +2020,13 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
         if(NULL == (uid_info = H5FL_MALLOC(H5I_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
         uid_info->obj_id = file->file_id;
-        uid_info->vol_id = file->vol_id;
+        uid_info->vol_plugin = (H5VL_class_t *)H5I_object(file->vol_id);
 
         /* increment ref count on the VOL id */
-        if(H5I_inc_ref(uid_info->vol_id, FALSE) < 0)
+        if(H5I_inc_ref(file->vol_id, FALSE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on vol plugin")
 
-        if((H5I_register(H5I_UID, uid_info, TRUE)) < 0)
+        if((H5I_register(H5I_FILE_PUBLIC, uid_info, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
     } else {
         /* Increment reference count on atom. */
@@ -2510,7 +2507,7 @@ H5Fset_mdc_config(hid_t uid, H5AC_cache_config_t *config_ptr)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", uid, config_ptr);
 
-    if(H5I_UID != H5I_get_type(uid))
+    if(H5I_FILE_PUBLIC != H5I_get_type(uid))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
     if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
@@ -2632,7 +2629,7 @@ H5Freset_mdc_hit_rate_stats(hid_t uid)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", uid);
 
-    if(H5I_UID != H5I_get_type(uid))
+    if(H5I_FILE_PUBLIC != H5I_get_type(uid))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
     if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
@@ -2682,11 +2679,13 @@ H5Fget_name(hid_t uid, char *name/*out*/, size_t size)
     H5TRACE3("Zs", "ixz", uid, name, size);
 
     /* MSC - temp fix to handle later when all user level ids are of type UID */
-    if (H5I_UID == H5I_get_type(uid)) {
+    if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
         argv[0] = &ret_value;
         argv[1] = &size;
         if(H5VL_file_get(uid, H5F_GET_NAME, (void *)name, 2, argv) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file name")
+
+        ret_value = *((ssize_t *)argv[0]);
     }
     else {
         H5F_t         *f;           /* Top file in mount hierarchy */
@@ -2825,7 +2824,7 @@ H5Fclear_elink_file_cache(hid_t uid)
     H5TRACE1("e", "i", uid);
 
     /* Check args */
-    if(H5I_UID != H5I_get_type(uid))
+    if(H5I_FILE_PUBLIC != H5I_get_type(uid))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
     if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")

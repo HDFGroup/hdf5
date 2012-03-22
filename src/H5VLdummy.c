@@ -81,7 +81,8 @@ static const H5VL_class_t H5VL_dummy_g = {
         NULL                                    /* write */
     },
     {                                           /* datatype_cls */
-        NULL                                   /* open */
+        NULL,                                   /* commit */
+        NULL                                    /* open */
     },
     {                                           /* link_cls */
         NULL,                                   /* create */
@@ -94,7 +95,9 @@ static const H5VL_class_t H5VL_dummy_g = {
         NULL,                                   /* open */
         NULL,                                   /* close */
         NULL,                                   /* move */
-        NULL                                    /* copy */
+        NULL,                                   /* copy */
+        NULL,                                   /* lookup */
+        NULL                                    /* get */
     }
 };
 

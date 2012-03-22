@@ -93,11 +93,11 @@ test_h5o_open(void)
 
     /* Make sure that each is the right kind of ID */
     id_type = H5Iget_type(grp);
-    VERIFY(id_type, H5I_GROUP, "H5Iget_type for group ID");
+    VERIFY(id_type, H5I_GROUP_PUBLIC, "H5Iget_type for group ID");
     id_type = H5Iget_type(dtype);
-    VERIFY(id_type, H5I_DATATYPE, "H5Iget_type for datatype ID");
+    VERIFY(id_type, H5I_DATATYPE_PUBLIC, "H5Iget_type for datatype ID");
     id_type = H5Iget_type(dset);
-    VERIFY(id_type, H5I_DATASET, "H5Iget_type for dataset ID");
+    VERIFY(id_type, H5I_DATASET_PUBLIC, "H5Iget_type for dataset ID");
 
     /* Do something more complex with each of the IDs to make sure they "work" */
     ret = H5Gget_info(grp, &ginfo);
@@ -162,7 +162,7 @@ test_h5o_close(void)
     /* Create the group and close it with H5Oclose */
     grp = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(grp, FAIL, "H5Gcreate2");
-    VERIFY(H5Iget_type(grp), H5I_GROUP, "H5Iget_type");
+    VERIFY(H5Iget_type(grp), H5I_GROUP_PUBLIC, "H5Iget_type");
     ret = H5Oclose(grp);
     CHECK(ret, FAIL, "H5Oclose");
 
@@ -306,11 +306,11 @@ test_h5o_open_by_addr(void)
 
     /* Make sure that each is the right kind of ID */
     id_type = H5Iget_type(grp);
-    VERIFY(id_type, H5I_GROUP, "H5Iget_type for group ID");
+    VERIFY(id_type, H5I_GROUP_PUBLIC, "H5Iget_type for group ID");
     id_type = H5Iget_type(dtype);
-    VERIFY(id_type, H5I_DATATYPE, "H5Iget_type for datatype ID");
+    VERIFY(id_type, H5I_DATATYPE_PUBLIC, "H5Iget_type for datatype ID");
     id_type = H5Iget_type(dset);
-    VERIFY(id_type, H5I_DATASET, "H5Iget_type for dataset ID");
+    VERIFY(id_type, H5I_DATASET_PUBLIC, "H5Iget_type for dataset ID");
 
     /* Do something more complex with each of the IDs to make sure they "work" */
     ret = H5Gget_info(grp, &ginfo);

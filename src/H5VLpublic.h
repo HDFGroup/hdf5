@@ -42,6 +42,25 @@ typedef enum H5VL_file_get_t {
     H5F_GET_FREE_SECTIONS   = 13        /*file free selections                  */
 } H5VL_file_get_t;
 
+/* types for all group get API routines */
+typedef enum H5VL_group_get_t {
+    H5G_GET_GCPL	    = 0,	/*group creation property list		*/
+    H5G_GET_INFO	    = 1 	/*group info             		*/
+} H5VL_group_get_t;
+
+/* types for all object get API routines */
+typedef enum H5VL_object_get_t {
+    H5O_GET_INFO	    = 0,	/*object info	                	*/
+    H5O_GET_COMMENT	    = 1 	/*object comment            		*/
+} H5VL_object_get_t;
+
+/* types for all object lookup API routines */
+typedef enum H5VL_object_lookup_t {
+    H5O_LOOKUP_BY_NAME	    = 0,
+    H5O_LOOKUP_BY_IDX	    = 1,
+    H5O_LOOKUP_BY_ADDR	    = 2 
+} H5VL_object_lookup_t;
+
 #define H5VL_VOL_DEFAULT 0   /* Default VOL plugin value */
 
 /* H5F routines */
@@ -80,6 +99,8 @@ typedef struct H5VL_attribute_class_t {
 
 /* H5T routines*/
 typedef struct H5VL_datatype_class_t {
+    herr_t (*commit)(hid_t loc_id, const char *name, hid_t type_id, 
+                     hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id);
     hid_t  (*open)  (hid_t loc_id, const char * name, hid_t tapl_id);
 }H5VL_datatype_class_t;
 
@@ -94,15 +115,24 @@ typedef struct H5VL_link_class_t {
                       const char *dest_name, hid_t lcpl_id, hid_t lapl_id);
 } H5VL_link_class_t;
 
+/* H5G routines */
+typedef struct H5VL_group_class_t {
+    hid_t  (*create)(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id);
+    hid_t  (*open)  (hid_t loc_id, const char *name, hid_t gapl_id);
+    herr_t (*close) (hid_t group_id);
+    herr_t (*get)   (hid_t file_id, H5VL_group_get_t get_type, void *data, int argc, void **argv);
+} H5VL_group_class_t;
+
 /* H5O routines */
 typedef struct H5VL_object_class_t {
-    hid_t  (*create)(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id);
-    hid_t  (*open)  (hid_t loc_id, const char *name, hid_t lapl_id);
+    hid_t  (*open)  (hid_t loc_id, void *obj_loc, hid_t lapl_id);
     herr_t (*close) (hid_t obj_id);
     herr_t (*move)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
                      const char *dest_name, hid_t lcpl, hid_t lapl);
     herr_t (*copy)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name,
                      hid_t ocpypl_id, hid_t lcpl_id );
+    herr_t (*lookup)(hid_t loc_id, H5VL_object_lookup_t lookup_type, void **location, int argc, void **argv);
+    herr_t (*get)   (hid_t loc_id, H5VL_object_get_t get_type, void *data, int argc, void **argv);
 } H5VL_object_class_t;
 
 /* Class information for each VOL driver */
@@ -110,13 +140,14 @@ typedef struct H5VL_class_t {
     const char *name;
     herr_t  (*terminate)(void);
     size_t  fapl_size;
-    void *  (*fapl_get)(H5F_t *file);
+    void *  (*fapl_get)(hid_t fid);
     void *  (*fapl_copy)(const void *fapl);
     herr_t  (*fapl_free)(void *fapl);
-    H5VL_file_class_t          file_cls;
-    H5VL_dataset_class_t       dataset_cls;
     H5VL_attribute_class_t     attribute_cls;
     H5VL_datatype_class_t      datatype_cls;
+    H5VL_dataset_class_t       dataset_cls;
+    H5VL_group_class_t         group_cls;
+    H5VL_file_class_t          file_cls;
     H5VL_link_class_t          link_cls;
     H5VL_object_class_t        object_cls;
 } H5VL_class_t;

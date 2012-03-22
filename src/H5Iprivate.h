@@ -24,6 +24,7 @@
 
 /* Include package's public header */
 #include "H5Ipublic.h"
+#include "H5VLpublic.h"
 
 /* Private headers needed by this file */
 #include "H5private.h"
@@ -34,18 +35,22 @@
 
 /* Default sizes of the hash-tables for various atom types */
 #define H5I_ERRSTACK_HASHSIZE		64
-#define H5I_FILEID_HASHSIZE		64
+#define H5I_FILEID_HASHSIZE     	64
 #define H5I_TEMPID_HASHSIZE		64
 #define H5I_DATATYPEID_HASHSIZE		64
 #define H5I_DATASPACEID_HASHSIZE	64
 #define H5I_DATASETID_HASHSIZE		64
 #define H5I_OID_HASHSIZE		64
-#define H5I_GROUPID_HASHSIZE		64
+#define H5I_GROUPID_HASHSIZE	        64
 #define H5I_ATTRID_HASHSIZE		64
 #define H5I_REFID_HASHSIZE		64
 #define H5I_VFL_HASHSIZE		64
 #define H5I_VOL_HASHSIZE		64
-#define H5I_UID_HASHSIZE		64
+#define H5I_FILE_PUBLIC_HASHSIZE	64
+#define H5I_GROUP_PUBLIC_HASHSIZE	64
+#define H5I_DATASET_PUBLIC_HASHSIZE	64
+#define H5I_ATTRIBUTE_PUBLIC_HASHSIZE	64
+#define H5I_DATATYPE_PUBLIC_HASHSIZE	64
 #define H5I_GENPROPCLS_HASHSIZE		64
 #define H5I_GENPROPOBJ_HASHSIZE		128
 #define H5I_ERRCLS_HASHSIZE		64
@@ -54,8 +59,8 @@
 
 /* type of the ID passed to users */
 typedef struct H5I_t {
-    hid_t vol_id;  /* ID for VOL plugin */
     hid_t obj_id;  /* actual id for object */
+    H5VL_class_t *vol_plugin;  /* pointer to the VOL structure */
 } H5I_t;
 
 /* Private Functions in H5I.c */

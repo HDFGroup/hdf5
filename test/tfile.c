@@ -701,7 +701,6 @@ test_file_close(void)
     ret = H5Fclose(fid2);
     CHECK(ret, FAIL, "H5Fclose");
 
-
     /* Test behavior while opening file multiple times with file close
      * degree WEAK */
     ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_WEAK);
@@ -751,7 +750,6 @@ test_file_close(void)
 
     ret = H5Gclose(group_id3);
     CHECK(ret, FAIL, "H5Gclose");
-
 
     /* Test behavior while opening file multiple times with file close
      * degree DEFAULT */
@@ -1123,7 +1121,7 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
     fid4 = H5Fcreate(FILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid4, FAIL, "H5Fcreate");
 
-    /* test object count of all files IDs open */
+    /* test object count of all files open */
     oid_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_FILE);
     CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, OBJ_ID_COUNT_4, "H5Fget_obj_count");
@@ -1152,7 +1150,7 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
     oid_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL);
     CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, OBJ_ID_COUNT_8, "H5Fget_obj_count");
- 
+
     if(oid_count > 0) {
         hid_t *oid_list;
 
@@ -1168,19 +1166,19 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
 
                 id_type = H5Iget_type(oid_list[i]);
                 switch(id_type) {
-                    case H5I_FILE:
+                    case H5I_FILE_PUBLIC:
                         if(oid_list[i] != fid1 && oid_list[i] != fid2
-                                && oid_list[i] != fid3 && oid_list[i] != fid4)
+                           && oid_list[i] != fid3 && oid_list[i] != fid4)
                             ERROR("H5Fget_obj_ids");
                         break;
 
-                    case H5I_GROUP:
+                    case H5I_GROUP_PUBLIC:
                         if(oid_list[i] != gid1 && oid_list[i] != gid2
-                                && oid_list[i] != gid3)
+                           && oid_list[i] != gid3)
                             ERROR("H5Fget_obj_ids");
                         break;
 
-                    case H5I_DATASET:
+                    case H5I_DATASET_PUBLIC:
                         VERIFY(oid_list[i], did, "H5Fget_obj_ids");
                         break;
 

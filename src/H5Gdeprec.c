@@ -47,7 +47,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
 #include "H5Pprivate.h"         /* Property lists                       */
-
+#include "H5VLprivate.h"	/* VOL plugins				*/
 
 /****************/
 /* Local Macros */
@@ -201,8 +201,6 @@ H5G_map_obj_type(H5O_type_t obj_type)
 hid_t
 H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 {
-    H5G_loc_t	    loc;                /* Location to create group */
-    H5G_t	   *grp = NULL;         /* New group created */
     hid_t           tmp_gcpl = (-1);    /* Temporary group creation property list */
     hid_t	    ret_value;          /* Return value */
 
@@ -210,8 +208,6 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     H5TRACE3("i", "i*sz", loc_id, name, size_hint);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
 
@@ -244,21 +240,15 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     else
         tmp_gcpl = H5P_GROUP_CREATE_DEFAULT;
 
-    /* Create the new group & get its ID */
-    if(NULL == (grp = H5G__create_named(&loc, name, H5P_LINK_CREATE_DEFAULT,
-            tmp_gcpl, H5P_GROUP_ACCESS_DEFAULT, H5AC_dxpl_id)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
-    if((ret_value = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+    /* Create the group through the VOL */
+    if((ret_value = H5VL_group_create(loc_id, name, H5P_LINK_CREATE_DEFAULT, tmp_gcpl, 
+                                      H5P_GROUP_ACCESS_DEFAULT)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
 done:
     if(tmp_gcpl > 0 && tmp_gcpl != H5P_GROUP_CREATE_DEFAULT)
         if(H5I_dec_ref(tmp_gcpl) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release property list")
-
-    if(ret_value < 0)
-        if(grp && H5G_close(grp) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate1() */
@@ -284,33 +274,20 @@ done:
 hid_t
 H5Gopen1(hid_t loc_id, const char *name)
 {
-    H5G_t       *grp = NULL;            /* Group opened */
-    H5G_loc_t	loc;                    /* Location of parent for group */
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Open the group */
-    if((grp = H5G__open_name(&loc, name, H5P_DEFAULT, H5AC_dxpl_id)) == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-
-    /* Register an atom for the group */
-    if((ret_value = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+    /* Open the group through the VOL */
+    if((ret_value = H5VL_group_open(loc_id, name, H5P_DEFAULT)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
 done:
-    if(ret_value < 0) {
-        if(grp && H5G_close(grp) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
-    } /* end if */
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen1() */
 
