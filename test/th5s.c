@@ -544,69 +544,12 @@ test_h5s_zero_dim(void)
     hssize_t            nelem;          /* Number of elements           */
     H5S_sel_type        sel_type;       /* Type of selection currently  */
     H5S_class_t         stype;          /* dataspace type               */
+    H5D_alloc_time_t    alloc_time;     /* Space allocation time        */
     herr_t		ret;		/* Generic return value	        */
     unsigned int        i, j, k;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspace with zero dimension size\n"));
-
-    /* Make sure we can create the space with the dimension size 0 (starting from v1.8.7).
-     * The dimension doesn't need to be unlimited. */
-    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
-    CHECK(sid1, FAIL, "H5Screate_simple");
-
-    ret = H5Sclose(sid1);
-    CHECK(ret, FAIL, "H5Sclose");
-
-    sid1 = H5Screate(H5S_SIMPLE);
-    CHECK(sid1, FAIL, "H5Screate");
-
-    /* SID1 has the 1st dimension size as zero.  The maximal dimension will be
-     * the same as the dimension because of the NULL passed in. */
-    ret = H5Sset_extent_simple(sid1,SPACE1_RANK,dims1,NULL);
-    CHECK(ret, FAIL, "H5Sset_extent_simple");
-
-    /* Check that the dataspace actually has 0 elements */
-    nelem = H5Sget_simple_extent_npoints(sid1);
-    VERIFY(nelem, 0, "H5Sget_simple_extent_npoints");
-
-    /* Check that the dataspace was created with an "all" selection */
-    sel_type = H5Sget_select_type(sid1);
-    VERIFY(sel_type, H5S_SEL_ALL, "H5Sget_select_type");
-
-    /* Check that the dataspace has 0 elements selected */
-    nelem = H5Sget_select_npoints(sid1);
-    VERIFY(nelem, 0, "H5Sget_select_npoints");
-
-    /* Change to "none" selection */
-    ret = H5Sselect_none(sid1);
-    CHECK(ret, FAIL, "H5Sselect_none");
-
-    /* Check that the dataspace has 0 elements selected */
-    nelem = H5Sget_select_npoints(sid1);
-    VERIFY(nelem, 0, "H5Sget_select_npoints");
-
-    /* Try to select all dataspace */
-    ret = H5Sselect_all(sid1);
-    CHECK(ret, FAIL, "H5Sselect_all");
-
-    /* Check that the dataspace has 0 elements selected */
-    nelem = H5Sget_select_npoints(sid1);
-    VERIFY(nelem, 0, "H5Sget_select_npoints");
-
-    /* Create the dataspace for chunked dataset with the first dimension size as zero.
-     * The maximal dimensions are bigger than the dimensions for later expansion. */
-    sid_chunk = H5Screate_simple(SPACE1_RANK, dims1, max_dims);
-    CHECK(sid_chunk, FAIL, "H5Screate_simple");
-
-    /*============================================
-     * Make sure we can use 0-dimension to create 
-     * contiguous, chunked, compact, and external 
-     * datasets, and also attribute.
-     *============================================
-     */
-    fid1 = H5Fcreate(ZEROFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Initialize the data */
     for(i=0; i<SPACE1_DIM2; i++)
@@ -622,509 +565,588 @@ test_h5s_zero_dim(void)
             for(k=0; k<SPACE1_DIM3; k++)
                 wdata_real[i][j][k] = i + j + k;
 
+    /* Test with different space allocation times */
+    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
 
-    /*===================== Contiguous dataset =======================*/
-    dset1 = H5Dcreate2(fid1, BASICDATASET, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(dset1, FAIL, "H5Dcreate2");
+        /* Make sure we can create the space with the dimension size 0 (starting from v1.8.7).
+         * The dimension doesn't need to be unlimited. */
+        dims1[0] = 0;
+        dims1[1] = SPACE1_DIM2;
+        dims1[2] = SPACE1_DIM3;
+        sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+        CHECK(sid1, FAIL, "H5Screate_simple");
 
-    /* Write "nothing" to the dataset */
-    ret = H5Dwrite(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, wdata);
-    CHECK(ret, FAIL, "H5Dwrite");
+        ret = H5Sclose(sid1);
+        CHECK(ret, FAIL, "H5Sclose");
 
-    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
-    CHECK(ret, FAIL, "H5Fflush");
+        sid1 = H5Screate(H5S_SIMPLE);
+        CHECK(sid1, FAIL, "H5Screate");
 
-    /* Try reading from the dataset (make certain our buffer is unmodified) */
-    ret = H5Dread(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, rdata);
-    CHECK(ret, FAIL, "H5Dread");
+        /* SID1 has the 1st dimension size as zero.  The maximal dimension will be
+         * the same as the dimension because of the NULL passed in. */
+        ret = H5Sset_extent_simple(sid1,SPACE1_RANK,dims1,NULL);
+        CHECK(ret, FAIL, "H5Sset_extent_simple");
 
-    /* Check results */
-    for(i=0; i<SPACE1_DIM2; i++) {
-        for(j=0; j<SPACE1_DIM3; j++) {
-            if(rdata[i][j] != 7) {
-                H5_FAILED();
-                printf("element [%d][%d] is %d but should have been 7\n",
-                       i, j, rdata[i][j]);
-            }
-        }
-    }
+        /* Check that the dataspace actually has 0 elements */
+        nelem = H5Sget_simple_extent_npoints(sid1);
+        VERIFY(nelem, 0, "H5Sget_simple_extent_npoints");
 
-    /* Write "nothing" to the dataset (with type conversion :-) */
-    ret = H5Dwrite(dset1, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata_short);
-    CHECK(ret, FAIL, "H5Dwrite");
+        /* Check that the dataspace was created with an "all" selection */
+        sel_type = H5Sget_select_type(sid1);
+        VERIFY(sel_type, H5S_SEL_ALL, "H5Sget_select_type");
 
-    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
-    CHECK(ret, FAIL, "H5Fflush");
+        /* Check that the dataspace has 0 elements selected */
+        nelem = H5Sget_select_npoints(sid1);
+        VERIFY(nelem, 0, "H5Sget_select_npoints");
 
-    /* Try reading from the dataset (make certain our buffer is unmodified) */
-    ret = H5Dread(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, rdata_short);
-    CHECK(ret, FAIL, "H5Dread");
+        /* Change to "none" selection */
+        ret = H5Sselect_none(sid1);
+        CHECK(ret, FAIL, "H5Sselect_none");
 
-    /* Check results */
-    for(i=0; i<SPACE1_DIM2; i++) {
-        for(j=0; j<SPACE1_DIM3; j++) {
-            if(rdata_short[i][j] != 7) {
-                H5_FAILED();
-                printf("element [%d][%d] is %d but should have been 7\n",
-                       i, j, rdata_short[i][j]);
-            }
-        }
-    }
+        /* Check that the dataspace has 0 elements selected */
+        nelem = H5Sget_select_npoints(sid1);
+        VERIFY(nelem, 0, "H5Sget_select_npoints");
 
-    /* Select a hyperslab beyond its current dimension sizes, then try to write 
-     * the data.  It should fail. */
-    ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL);
-    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+        /* Try to select all dataspace */
+        ret = H5Sselect_all(sid1);
+        CHECK(ret, FAIL, "H5Sselect_all");
 
-    H5E_BEGIN_TRY {
-        ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, wdata);
-    } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Dwrite");
+        /* Check that the dataspace has 0 elements selected */
+        nelem = H5Sget_select_npoints(sid1);
+        VERIFY(nelem, 0, "H5Sget_select_npoints");
 
-    /* Change to "none" selection */
-    ret = H5Sselect_none(sid1);
-    CHECK(ret, FAIL, "H5Sselect_none");
+        /* Create the dataspace for chunked dataset with the first dimension size as zero.
+         * The maximal dimensions are bigger than the dimensions for later expansion. */
+        sid_chunk = H5Screate_simple(SPACE1_RANK, dims1, max_dims);
+        CHECK(sid_chunk, FAIL, "H5Screate_simple");
 
-    /* Select a point beyond the dimension size, then try to write the data. 
-     * It should fail. */
-    coord[0][0]=2; coord[0][1]=5; coord[0][2]=3;
-    ret = H5Sselect_elements(sid1, H5S_SELECT_SET, (size_t)1, (const hsize_t *)coord);
-    CHECK(ret, FAIL, "H5Sselect_elements");
+        /*============================================
+         * Make sure we can use 0-dimension to create 
+         * contiguous, chunked, compact, and external 
+         * datasets, and also attribute.
+         *============================================
+         */
+        fid1 = H5Fcreate(ZEROFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(fid1, FAIL, "H5Fcreate");
 
-    H5E_BEGIN_TRY {
-        ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &val);
-    } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Dwrite");
+        /*===================== Contiguous dataset =======================*/
+        plist_id = H5Pcreate(H5P_DATASET_CREATE);
+        CHECK(plist_id, FAIL, "H5Pcreate");
 
-    /* Restore the selection to all */
-    ret = H5Sselect_all(sid1);
-    CHECK(ret, FAIL, "H5Sselect_all");
+        ret = H5Pset_alloc_time(plist_id, alloc_time);
+        CHECK(ret, FAIL, "H5Pset_alloc_time");
 
-    ret = H5Dclose(dset1);
-    CHECK(ret, FAIL, "H5Dclose");
+        dset1 = H5Dcreate2(fid1, BASICDATASET, H5T_NATIVE_INT, sid1, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+        CHECK(dset1, FAIL, "H5Dcreate2");
 
-    /*=================== Chunked dataset ====================*/
-    plist_id = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(plist_id, FAIL, "H5Pcreate");
+        ret = H5Pclose(plist_id);
+        CHECK(ret, FAIL, "H5Pclose");
 
-    ret = H5Pset_chunk(plist_id, SPACE1_RANK, chunk_dims);
-    CHECK(ret, FAIL, "H5Pset_chunk");
+        /* Write "nothing" to the dataset */
+        ret = H5Dwrite(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, wdata);
+        CHECK(ret, FAIL, "H5Dwrite");
 
-    dset1 = H5Dcreate2(fid1, BASICDATASET1, H5T_NATIVE_INT, sid_chunk, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    CHECK(dset1, FAIL, "H5Dcreate2");
+        ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
+        CHECK(ret, FAIL, "H5Fflush");
 
-    /* Write "nothing" to the dataset */
-    ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
-    CHECK(ret, FAIL, "H5Dwrite");
+        /* Try reading from the dataset (make certain our buffer is unmodified) */
+        ret = H5Dread(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, rdata);
+        CHECK(ret, FAIL, "H5Dread");
 
-    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
-    CHECK(ret, FAIL, "H5Fflush");
-
-    /* Try reading from the dataset (make certain our buffer is unmodified) */
-    ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
-    CHECK(ret, FAIL, "H5Dread");
-
-    /* Check results */
-    for(i=0; i<SPACE1_DIM2; i++)
-        for(j=0; j<SPACE1_DIM3; j++) {
-            if(rdata[i][j] != 7) {
-                H5_FAILED();
-                printf("element [%d][%d] is %d but should have been 7\n",
-                       i, j, rdata[i][j]);
-            }
-    }
-
-    /* Now extend the dataset to SPACE1_DIM1*SPACE1_DIM2*SPACE1_DIM3 and make sure 
-     * we can write data to it */ 
-    ret = H5Dset_extent(dset1, extend_dims);
-    CHECK(ret, FAIL, "H5Dset_extent");
-
-    ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata_real);
-    CHECK(ret, FAIL, "H5Dwrite");
-
-    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
-    CHECK(ret, FAIL, "H5Fflush");
-
-    ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata_real);
-    CHECK(ret, FAIL, "H5Dread");
-
-    /* Check results */
-    for(i=0; i<SPACE1_DIM1; i++) {
-        for(j=0; j<SPACE1_DIM2; j++) {
-            for(k=0; k<SPACE1_DIM3; k++) {
-                if(rdata_real[i][j][k] != wdata_real[i][j][k]) {
+        /* Check results */
+        for(i=0; i<SPACE1_DIM2; i++) {
+            for(j=0; j<SPACE1_DIM3; j++) {
+                if(rdata[i][j] != 7) {
                     H5_FAILED();
-                    printf("element [%d][%d][%d] is %d but should have been %d\n",
-                       i, j, k, rdata_real[i][j][k], wdata_real[i][j][k]);
+                    printf("element [%d][%d] is %d but should have been 7\n",
+                           i, j, rdata[i][j]);
                 }
             }
         }
-    }
 
-    /* Now shrink the first dimension size of the dataset to 0 and make sure no data is in it */
-    extend_dims[0] = 0;
-    ret = H5Dset_extent(dset1, extend_dims);
-    CHECK(ret, FAIL, "H5Dset_extent");
+        /* Write "nothing" to the dataset (with type conversion :-) */
+        ret = H5Dwrite(dset1, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata_short);
+        CHECK(ret, FAIL, "H5Dwrite");
 
-    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
-    CHECK(ret, FAIL, "H5Fflush");
+        ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
+        CHECK(ret, FAIL, "H5Fflush");
 
-    /* Try reading from the dataset (make certain our buffer is unmodified) */
-    ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
-    CHECK(ret, FAIL, "H5Dread");
+        /* Try reading from the dataset (make certain our buffer is unmodified) */
+        ret = H5Dread(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, rdata_short);
+        CHECK(ret, FAIL, "H5Dread");
 
-    /* Check results */
-    for(i=0; i<SPACE1_DIM2; i++)
-        for(j=0; j<SPACE1_DIM3; j++) {
-            if(rdata[i][j] != 7) {
-                H5_FAILED();
-                printf("element [%d][%d] is %d but should have been 7\n",
-                       i, j, rdata[i][j]);
+        /* Check results */
+        for(i=0; i<SPACE1_DIM2; i++) {
+            for(j=0; j<SPACE1_DIM3; j++) {
+                if(rdata_short[i][j] != 7) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %d but should have been 7\n",
+                           i, j, rdata_short[i][j]);
+                }
             }
-    }
+        }
 
-    /* Now extend the first dimension size of the dataset to SPACE1_DIM1*3 past the maximal size.
-     * It is supposed to fail. */
-    extend_dims[0] = SPACE1_DIM1*3;
-    H5E_BEGIN_TRY {
+        /* Select a hyperslab beyond its current dimension sizes, then try to write 
+         * the data.  It should fail. */
+        ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+        H5E_BEGIN_TRY {
+            ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, wdata);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Dwrite");
+
+        /* Change to "none" selection */
+        ret = H5Sselect_none(sid1);
+        CHECK(ret, FAIL, "H5Sselect_none");
+
+        /* Select a point beyond the dimension size, then try to write the data. 
+         * It should fail. */
+        coord[0][0]=2; coord[0][1]=5; coord[0][2]=3;
+        ret = H5Sselect_elements(sid1, H5S_SELECT_SET, (size_t)1, (const hsize_t *)coord);
+        CHECK(ret, FAIL, "H5Sselect_elements");
+
+        H5E_BEGIN_TRY {
+            ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &val);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Dwrite");
+
+        /* Restore the selection to all */
+        ret = H5Sselect_all(sid1);
+        CHECK(ret, FAIL, "H5Sselect_all");
+
+        ret = H5Dclose(dset1);
+        CHECK(ret, FAIL, "H5Dclose");
+
+        /*=================== Chunked dataset ====================*/
+        plist_id = H5Pcreate(H5P_DATASET_CREATE);
+        CHECK(plist_id, FAIL, "H5Pcreate");
+
+        ret = H5Pset_chunk(plist_id, SPACE1_RANK, chunk_dims);
+        CHECK(ret, FAIL, "H5Pset_chunk");
+
+        // ret = H5Pset_alloc_time(plist_id, alloc_time);
+        // CHECK(ret, FAIL, "H5Pset_alloc_time");
+
+        dset1 = H5Dcreate2(fid1, BASICDATASET1, H5T_NATIVE_INT, sid_chunk, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+        CHECK(dset1, FAIL, "H5Dcreate2");
+
+        /* Write "nothing" to the dataset */
+        ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+        CHECK(ret, FAIL, "H5Dwrite");
+
+        ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
+        CHECK(ret, FAIL, "H5Fflush");
+
+        /* Try reading from the dataset (make certain our buffer is unmodified) */
+        ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+        CHECK(ret, FAIL, "H5Dread");
+
+        /* Check results */
+        for(i=0; i<SPACE1_DIM2; i++)
+            for(j=0; j<SPACE1_DIM3; j++) {
+                if(rdata[i][j] != 7) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %d but should have been 7\n",
+                           i, j, rdata[i][j]);
+                }
+        }
+
+        /* Now extend the dataset to SPACE1_DIM1*SPACE1_DIM2*SPACE1_DIM3 and make sure 
+         * we can write data to it */ 
+        extend_dims[0] = SPACE1_DIM1;
         ret = H5Dset_extent(dset1, extend_dims);
-    } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Dset_extent");
+        CHECK(ret, FAIL, "H5Dset_extent");
 
-    ret = H5Pclose(plist_id);
-    CHECK(ret, FAIL, "H5Pclose");
+        ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata_real);
+        CHECK(ret, FAIL, "H5Dwrite");
 
-    ret = H5Dclose(dset1);
-    CHECK(ret, FAIL, "H5Dclose");
+        ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
+        CHECK(ret, FAIL, "H5Fflush");
 
-    /*=================== Compact dataset =====================*/
-    plist_id = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(plist_id, FAIL, "H5Pcreate");
+        ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata_real);
+        CHECK(ret, FAIL, "H5Dread");
 
-    ret = H5Pset_layout(plist_id, H5D_COMPACT);
-    CHECK(ret, FAIL, "H5Pset_layout");
-
-    ret = H5Pset_alloc_time(plist_id, H5D_ALLOC_TIME_EARLY);
-    CHECK(ret, FAIL, "H5Pset_alloc_time");
-
-    dset1 = H5Dcreate2(fid1, BASICDATASET2, H5T_NATIVE_INT, sid1, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    CHECK(dset1, FAIL, "H5Dcreate2");
-
-    /* Write "nothing" to the dataset */
-    ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
-    CHECK(ret, FAIL, "H5Dwrite");
-
-    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
-    CHECK(ret, FAIL, "H5Fflush");
-
-    /* Try reading from the dataset (make certain our buffer is unmodified) */
-    ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
-    CHECK(ret, FAIL, "H5Dread");
-
-    /* Check results */
-    for(i=0; i<SPACE1_DIM2; i++)
-        for(j=0; j<SPACE1_DIM3; j++) {
-            if(rdata[i][j] != 7) {
-                H5_FAILED();
-                printf("element [%d][%d] is %d but should have been 7\n",
-                       i, j, rdata[i][j]);
-            }
-    }
-
-    ret = H5Pclose(plist_id);
-    CHECK(ret, FAIL, "H5Pclose");
-
-    ret = H5Dclose(dset1);
-    CHECK(ret, FAIL, "H5Dclose");
-
-    /*=========== Contiguous dataset with external storage ============*/
-    plist_id = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(plist_id, FAIL, "H5Pcreate");
-
-    ret = H5Pset_layout(plist_id, H5D_CONTIGUOUS);
-    CHECK(ret, FAIL, "H5Pset_layout");
-
-    /* Change the DCPL for contiguous layout with external storage.  The size of the reserved
-     * space in the external file is the size of the dataset (zero because one dimension size is zero).
-     * There's no need to clean up the external file since the library doesn't create it
-     * until the data is written to it. */
-    ret = H5Pset_external(plist_id, EXTFILE_NAME, (off_t)0, (hsize_t)0);
-    CHECK(ret, FAIL, "H5Pset_external");
-
-    dset1 = H5Dcreate2(fid1, BASICDATASET3, H5T_NATIVE_INT, sid1, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    CHECK(dset1, FAIL, "H5Dcreate2");
-
-    /* Write "nothing" to the dataset */
-    ret = H5Dwrite(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, wdata);
-    CHECK(ret, FAIL, "H5Dwrite");
-
-    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
-    CHECK(ret, FAIL, "H5Fflush");
-
-    /* Try reading from the dataset (make certain our buffer is unmodified) */
-    ret = H5Dread(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, rdata);
-    CHECK(ret, FAIL, "H5Dread");
-
-    /* Check results */
-    for(i=0; i<SPACE1_DIM2; i++) {
-        for(j=0; j<SPACE1_DIM3; j++) {
-            if(rdata[i][j] != 7) {
-                H5_FAILED();
-                printf("element [%d][%d] is %d but should have been 7\n",
-                       i, j, rdata[i][j]);
-            }
-        }
-    }
-
-    ret = H5Pclose(plist_id);
-    CHECK(ret, FAIL, "H5Pclose");
-
-    ret = H5Dclose(dset1);
-    CHECK(ret, FAIL, "H5Dclose");
-
-    /*=============== Create an attribute for the file ================*/
-    attr = H5Acreate2(fid1, NULLATTR, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(attr, FAIL, "H5Acreate2");
-
-    /* Write "nothing" to the attribute */
-    ret = H5Awrite(attr, H5T_NATIVE_INT, wdata);
-    CHECK(ret, FAIL, "H5Awrite");
-
-    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
-    CHECK(ret, FAIL, "H5Fflush");
-
-    /* Try reading from the attribute (make certain our buffer is unmodified) */
-    ret = H5Aread(attr, H5T_NATIVE_INT, rdata);
-    CHECK(ret, FAIL, "H5Aread");
-
-    /* Check results */
-    for(i=0; i<SPACE1_DIM2; i++) {
-        for(j=0; j<SPACE1_DIM3; j++) {
-            if(rdata[i][j] != 7) {
-                H5_FAILED();
-                printf("element [%d][%d] is %d but should have been 7\n",
-                       i, j, rdata[i][j]);
-            }
-        }
-    }
-
-    /* Write "nothing" to the attribute (with type conversion :-) */
-    ret = H5Awrite(attr, H5T_NATIVE_SHORT, wdata_short);
-    CHECK(ret, FAIL, "H5Awrite");
-
-    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
-    CHECK(ret, FAIL, "H5Fflush");
-
-    /* Try reading from the attribute (with type conversion :-) (make certain our buffer is unmodified) */
-    ret = H5Aread(attr, H5T_NATIVE_SHORT, rdata_short);
-    CHECK(ret, FAIL, "H5Aread");
-
-    /* Check results */
-    for(i=0; i<SPACE1_DIM2; i++) {
-        for(j=0; j<SPACE1_DIM3; j++) {
-            if(rdata_short[i][j] != 7) {
-                H5_FAILED();
-                printf("element [%d][%d] is %d but should have been 7\n",
-                       i, j, rdata_short[i][j]);
-            }
-        }
-    }
-
-    /* Close attribute */
-    ret = H5Aclose(attr);
-    CHECK(ret, FAIL, "H5Aclose");
-
-    /*===============================================================
-     * Extend the dimension to make it a normal dataspace (3x15x13).  
-     * Verify that data can be written to and read from the chunked 
-     * dataset now. 
-     *=============================================================== 
-     */
-    dims1[0]=SPACE1_DIM1;
-    ret = H5Sset_extent_simple(sid_chunk,SPACE1_RANK,dims1,max_dims);
-    CHECK(ret, FAIL, "H5Sset_extent_simple");
-
-    nelem = H5Sget_simple_extent_npoints(sid_chunk);
-    CHECK(nelem, FAIL, "H5Sget_simple_extent_npoints");
-    VERIFY(nelem, SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3,
-	   "H5Sget_simple_extent_npoints");
-
-    rank = H5Sget_simple_extent_ndims(sid_chunk);
-    CHECK(rank, FAIL, "H5Sget_simple_extent_ndims");
-    VERIFY(rank, SPACE1_RANK, "H5Sget_simple_extent_ndims");
-
-    rank = H5Sget_simple_extent_dims(sid_chunk, tdims, NULL);
-    CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
-    VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0,
-	   "H5Sget_simple_extent_dims");
-
-    /* Set it to chunked dataset */
-    plist_id = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(plist_id, FAIL, "H5Pcreate");
-
-    ret = H5Pset_chunk(plist_id, SPACE1_RANK, chunk_dims);
-    CHECK(ret, FAIL, "H5Pset_chunk");
-
-    dset1 = H5Dcreate2(fid1, BASICDATASET4, H5T_NATIVE_INT, sid_chunk, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    CHECK(dset1, FAIL, "H5Dcreate2");
-
-    ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata_real);
-    CHECK(ret, FAIL, "H5Dwrite");
-
-    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
-    CHECK(ret, FAIL, "H5Fflush");
-
-    ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata_real);
-    CHECK(ret, FAIL, "H5Dread");
-
-    /* Check results */
-    for(i=0; i<SPACE1_DIM1; i++) {
-        for(j=0; j<SPACE1_DIM2; j++) {
-            for(k=0; k<SPACE1_DIM3; k++) {
-                if(rdata_real[i][j][k] != wdata_real[i][j][k]) {
-                    H5_FAILED();
-                    printf("element [%d][%d][%d] is %d but should have been %d\n",
-                       i, j, k, rdata_real[i][j][k], wdata_real[i][j][k]);
+        /* Check results */
+        for(i=0; i<SPACE1_DIM1; i++) {
+            for(j=0; j<SPACE1_DIM2; j++) {
+                for(k=0; k<SPACE1_DIM3; k++) {
+                    if(rdata_real[i][j][k] != wdata_real[i][j][k]) {
+                        H5_FAILED();
+                        printf("element [%d][%d][%d] is %d but should have been %d\n",
+                           i, j, k, rdata_real[i][j][k], wdata_real[i][j][k]);
+                    }
                 }
             }
         }
-    }
 
-    ret = H5Pclose(plist_id);
-    CHECK(ret, FAIL, "H5Pclose");
+        /* Now shrink the first dimension size of the dataset to 0 and make sure no data is in it */
+        extend_dims[0] = 0;
+        ret = H5Dset_extent(dset1, extend_dims);
+        CHECK(ret, FAIL, "H5Dset_extent");
 
-    ret = H5Dclose(dset1);
-    CHECK(ret, FAIL, "H5Dclose");
+        ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
+        CHECK(ret, FAIL, "H5Fflush");
 
-    /* Change the dimensions to make them zero size again (0x0x0).  Verify that
-     * no element is in the dataspace. */
-    dims1[0]=dims1[1]=dims1[2]=0;
-    ret = H5Sset_extent_simple(sid_chunk,SPACE1_RANK,dims1,NULL);
-    CHECK(ret, FAIL, "H5Sset_extent_simple");
+        /* Try reading from the dataset (make certain our buffer is unmodified) */
+        ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+        CHECK(ret, FAIL, "H5Dread");
 
-    /* Check that the dataspace actually has 0 elements */
-    nelem = H5Sget_simple_extent_npoints(sid_chunk);
-    VERIFY(nelem, 0, "H5Sget_simple_extent_npoints");
+        /* Check results */
+        for(i=0; i<SPACE1_DIM2; i++)
+            for(j=0; j<SPACE1_DIM3; j++) {
+                if(rdata[i][j] != 7) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %d but should have been 7\n",
+                           i, j, rdata[i][j]);
+                }
+        }
 
-    /* Check that the dataspace was created with an "all" selection */
-    sel_type = H5Sget_select_type(sid_chunk);
-    VERIFY(sel_type, H5S_SEL_ALL, "H5Sget_select_type");
+        /* Now extend the first dimension size of the dataset to SPACE1_DIM1*3 past the maximal size.
+         * It is supposed to fail. */
+        extend_dims[0] = SPACE1_DIM1*3;
+        H5E_BEGIN_TRY {
+            ret = H5Dset_extent(dset1, extend_dims);
+        } H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Dset_extent");
 
-    /* Check that the dataspace has 0 elements selected */
-    nelem = H5Sget_select_npoints(sid_chunk);
-    VERIFY(nelem, 0, "H5Sget_select_npoints");
+        ret = H5Pclose(plist_id);
+        CHECK(ret, FAIL, "H5Pclose");
 
-    /* Change to "none" selection */
-    ret = H5Sselect_none(sid_chunk);
-    CHECK(ret, FAIL, "H5Sselect_none");
+        ret = H5Dclose(dset1);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    /* Check that the dataspace has 0 elements selected */
-    nelem = H5Sget_select_npoints(sid_chunk);
-    VERIFY(nelem, 0, "H5Sget_select_npoints");
+        /*=================== Compact dataset =====================*/
+        plist_id = H5Pcreate(H5P_DATASET_CREATE);
+        CHECK(plist_id, FAIL, "H5Pcreate");
 
-    ret = H5Sclose(sid_chunk);
-    CHECK(ret, FAIL, "H5Sclose");
+        ret = H5Pset_layout(plist_id, H5D_COMPACT);
+        CHECK(ret, FAIL, "H5Pset_layout");
 
-    ret = H5Sclose(sid1);
-    CHECK(ret, FAIL, "H5Sclose");
+        /* Don't set the allocation time for compact storage datasets (must be early) */
 
-    ret = H5Fclose(fid1);
-    CHECK(ret, FAIL, "H5Fclose");
+        dset1 = H5Dcreate2(fid1, BASICDATASET2, H5T_NATIVE_INT, sid1, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+        CHECK(dset1, FAIL, "H5Dcreate2");
 
-    /*============================================
-     *  Reopen the file to check the data space
-     *============================================
-     */
-    fid1 = H5Fopen(ZEROFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
-    CHECK(fid1, FAIL, "H5Fopen");
+        /* Write "nothing" to the dataset */
+        ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+        CHECK(ret, FAIL, "H5Dwrite");
 
-    /* Reopen the chunked dataset */
-    dset1 = H5Dopen2(fid1, BASICDATASET1, H5P_DEFAULT);
-    CHECK(dset1, FAIL, "H5Dopen2");
+        ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
+        CHECK(ret, FAIL, "H5Fflush");
 
-    /* Get the space of the dataset and querry it */
-    sid1 = H5Dget_space(dset1);
-    CHECK(sid1, FAIL, "H5Dget_space");
+        /* Try reading from the dataset (make certain our buffer is unmodified) */
+        ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+        CHECK(ret, FAIL, "H5Dread");
 
-    /* Verify the class type of dataspace */
-    stype = H5Sget_simple_extent_type(sid1);
-    VERIFY(stype, H5S_SIMPLE, "H5Sget_simple_extent_type");
+        /* Check results */
+        for(i=0; i<SPACE1_DIM2; i++)
+            for(j=0; j<SPACE1_DIM3; j++) {
+                if(rdata[i][j] != 7) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %d but should have been 7\n",
+                           i, j, rdata[i][j]);
+                }
+        }
 
-    /* Verify there is zero element in the dataspace */
-    nelem = H5Sget_simple_extent_npoints(sid1);
-    VERIFY(nelem, 0, "H5Sget_simple_extent_npoints");
+        ret = H5Pclose(plist_id);
+        CHECK(ret, FAIL, "H5Pclose");
 
-    /* Verify the dimension sizes are correct */
-    rank = H5Sget_simple_extent_dims(sid1, tdims, NULL);
-    CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
-    VERIFY(tdims[0], 0, "H5Sget_simple_extent_dims");
-    VERIFY(tdims[1], SPACE1_DIM2, "H5Sget_simple_extent_dims");
-    VERIFY(tdims[2], SPACE1_DIM3, "H5Sget_simple_extent_dims");
+        ret = H5Dclose(dset1);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    /* Try reading from the dataset (make certain our buffer is unmodified) */
-    ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
-    CHECK(ret, FAIL, "H5Dread");
+        /*=========== Contiguous dataset with external storage ============*/
+        plist_id = H5Pcreate(H5P_DATASET_CREATE);
+        CHECK(plist_id, FAIL, "H5Pcreate");
 
-    /* Check results */
-    for(i=0; i<SPACE1_DIM2; i++) {
-        for(j=0; j<SPACE1_DIM3; j++) {
-            if(rdata[i][j] != 7) {
-                H5_FAILED();
-                printf("element [%d][%d] is %d but should have been 7\n",
-                       i, j, rdata[i][j]);
+        /* Change the DCPL for contiguous layout with external storage.  The size of the reserved
+         * space in the external file is the size of the dataset (zero because one dimension size is zero).
+         * There's no need to clean up the external file since the library doesn't create it
+         * until the data is written to it. */
+        ret = H5Pset_external(plist_id, EXTFILE_NAME, (off_t)0, (hsize_t)0);
+        CHECK(ret, FAIL, "H5Pset_external");
+
+        ret = H5Pset_alloc_time(plist_id, alloc_time);
+        CHECK(ret, FAIL, "H5Pset_alloc_time");
+
+        dset1 = H5Dcreate2(fid1, BASICDATASET3, H5T_NATIVE_INT, sid1, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+        CHECK(dset1, FAIL, "H5Dcreate2");
+
+        /* Write "nothing" to the dataset */
+        ret = H5Dwrite(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, wdata);
+        CHECK(ret, FAIL, "H5Dwrite");
+
+        ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
+        CHECK(ret, FAIL, "H5Fflush");
+
+        /* Try reading from the dataset (make certain our buffer is unmodified) */
+        ret = H5Dread(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, rdata);
+        CHECK(ret, FAIL, "H5Dread");
+
+        /* Check results */
+        for(i=0; i<SPACE1_DIM2; i++) {
+            for(j=0; j<SPACE1_DIM3; j++) {
+                if(rdata[i][j] != 7) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %d but should have been 7\n",
+                           i, j, rdata[i][j]);
+                }
             }
         }
-    }
 
-    /* Close the dataset and its dataspace */
-    ret = H5Dclose(dset1);
-    CHECK(ret, FAIL, "H5Dclose");
+        ret = H5Pclose(plist_id);
+        CHECK(ret, FAIL, "H5Pclose");
 
-    ret = H5Sclose(sid1);
-    CHECK(ret, FAIL, "H5Sclose");
+        ret = H5Dclose(dset1);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    /* Open the attribute for the file */
-    attr = H5Aopen(fid1, NULLATTR, H5P_DEFAULT);
-    CHECK(attr, FAIL, "H5Aopen");
+        /*=============== Create an attribute for the file ================*/
+        attr = H5Acreate2(fid1, NULLATTR, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Acreate2");
 
-    /* Get the space of the dataset */
-    attr_sid = H5Aget_space(attr);
-    CHECK(attr_sid, FAIL, "H5Aget_space");
+        /* Write "nothing" to the attribute */
+        ret = H5Awrite(attr, H5T_NATIVE_INT, wdata);
+        CHECK(ret, FAIL, "H5Awrite");
 
-    /* Verify the class type of dataspace */
-    stype = H5Sget_simple_extent_type(attr_sid);
-    VERIFY(stype, H5S_SIMPLE, "H5Sget_simple_extent_type");
+        ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
+        CHECK(ret, FAIL, "H5Fflush");
 
-    /* Verify there is zero element in the dataspace */
-    nelem = H5Sget_simple_extent_npoints(attr_sid);
-    VERIFY(nelem, 0, "H5Sget_simple_extent_npoints");
+        /* Try reading from the attribute (make certain our buffer is unmodified) */
+        ret = H5Aread(attr, H5T_NATIVE_INT, rdata);
+        CHECK(ret, FAIL, "H5Aread");
 
-    /* Try reading from the attribute (make certain our buffer is unmodified) */
-    ret = H5Aread(attr, H5T_NATIVE_SHORT, rdata_short);
-    CHECK(ret, FAIL, "H5Aread");
-
-    /* Check results */
-    for(i=0; i<SPACE1_DIM2; i++) {
-        for(j=0; j<SPACE1_DIM3; j++) {
-            if(rdata_short[i][j] != 7) {
-                H5_FAILED();
-                printf("element [%d][%d] is %d but should have been 7\n",
-                       i, j, rdata_short[i][j]);
+        /* Check results */
+        for(i=0; i<SPACE1_DIM2; i++) {
+            for(j=0; j<SPACE1_DIM3; j++) {
+                if(rdata[i][j] != 7) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %d but should have been 7\n",
+                           i, j, rdata[i][j]);
+                }
             }
         }
-    }
 
-    /* Close attribute */
-    ret=H5Aclose(attr);
-    CHECK(ret, FAIL, "H5Aclose");
+        /* Write "nothing" to the attribute (with type conversion :-) */
+        ret = H5Awrite(attr, H5T_NATIVE_SHORT, wdata_short);
+        CHECK(ret, FAIL, "H5Awrite");
 
-    /* Close the dataspace */
-    ret = H5Sclose(attr_sid);
-    CHECK(ret, FAIL, "H5Sclose");
+        ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
+        CHECK(ret, FAIL, "H5Fflush");
 
-    ret = H5Fclose(fid1);
-    CHECK(ret, FAIL, "H5Fclose");
-}	/* test_h5s_zero_dim() */
+        /* Try reading from the attribute (with type conversion :-) (make certain our buffer is unmodified) */
+        ret = H5Aread(attr, H5T_NATIVE_SHORT, rdata_short);
+        CHECK(ret, FAIL, "H5Aread");
+
+        /* Check results */
+        for(i=0; i<SPACE1_DIM2; i++) {
+            for(j=0; j<SPACE1_DIM3; j++) {
+                if(rdata_short[i][j] != 7) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %d but should have been 7\n",
+                           i, j, rdata_short[i][j]);
+                }
+            }
+        }
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+
+        /*===============================================================
+         * Extend the dimension to make it a normal dataspace (3x15x13).  
+         * Verify that data can be written to and read from the chunked 
+         * dataset now. 
+         *=============================================================== 
+         */
+        dims1[0]=SPACE1_DIM1;
+        ret = H5Sset_extent_simple(sid_chunk,SPACE1_RANK,dims1,max_dims);
+        CHECK(ret, FAIL, "H5Sset_extent_simple");
+
+        nelem = H5Sget_simple_extent_npoints(sid_chunk);
+        CHECK(nelem, FAIL, "H5Sget_simple_extent_npoints");
+        VERIFY(nelem, SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3,
+               "H5Sget_simple_extent_npoints");
+
+        rank = H5Sget_simple_extent_ndims(sid_chunk);
+        CHECK(rank, FAIL, "H5Sget_simple_extent_ndims");
+        VERIFY(rank, SPACE1_RANK, "H5Sget_simple_extent_ndims");
+
+        rank = H5Sget_simple_extent_dims(sid_chunk, tdims, NULL);
+        CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
+        VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0,
+               "H5Sget_simple_extent_dims");
+
+        /* Set it to chunked dataset */
+        plist_id = H5Pcreate(H5P_DATASET_CREATE);
+        CHECK(plist_id, FAIL, "H5Pcreate");
+
+        ret = H5Pset_chunk(plist_id, SPACE1_RANK, chunk_dims);
+        CHECK(ret, FAIL, "H5Pset_chunk");
+
+        ret = H5Pset_alloc_time(plist_id, alloc_time);
+        CHECK(ret, FAIL, "H5Pset_alloc_time");
+
+        dset1 = H5Dcreate2(fid1, BASICDATASET4, H5T_NATIVE_INT, sid_chunk, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+        CHECK(dset1, FAIL, "H5Dcreate2");
+
+        ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata_real);
+        CHECK(ret, FAIL, "H5Dwrite");
+
+        ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
+        CHECK(ret, FAIL, "H5Fflush");
+
+        ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata_real);
+        CHECK(ret, FAIL, "H5Dread");
+
+        /* Check results */
+        for(i=0; i<SPACE1_DIM1; i++) {
+            for(j=0; j<SPACE1_DIM2; j++) {
+                for(k=0; k<SPACE1_DIM3; k++) {
+                    if(rdata_real[i][j][k] != wdata_real[i][j][k]) {
+                        H5_FAILED();
+                        printf("element [%d][%d][%d] is %d but should have been %d\n",
+                           i, j, k, rdata_real[i][j][k], wdata_real[i][j][k]);
+                    }
+                }
+            }
+        }
+
+        ret = H5Pclose(plist_id);
+        CHECK(ret, FAIL, "H5Pclose");
+
+        ret = H5Dclose(dset1);
+        CHECK(ret, FAIL, "H5Dclose");
+
+        /* Change the dimensions to make them zero size again (0x0x0).  Verify that
+         * no element is in the dataspace. */
+        dims1[0]=dims1[1]=dims1[2]=0;
+        ret = H5Sset_extent_simple(sid_chunk,SPACE1_RANK,dims1,NULL);
+        CHECK(ret, FAIL, "H5Sset_extent_simple");
+
+        /* Check that the dataspace actually has 0 elements */
+        nelem = H5Sget_simple_extent_npoints(sid_chunk);
+        VERIFY(nelem, 0, "H5Sget_simple_extent_npoints");
+
+        /* Check that the dataspace was created with an "all" selection */
+        sel_type = H5Sget_select_type(sid_chunk);
+        VERIFY(sel_type, H5S_SEL_ALL, "H5Sget_select_type");
+
+        /* Check that the dataspace has 0 elements selected */
+        nelem = H5Sget_select_npoints(sid_chunk);
+        VERIFY(nelem, 0, "H5Sget_select_npoints");
+
+        /* Change to "none" selection */
+        ret = H5Sselect_none(sid_chunk);
+        CHECK(ret, FAIL, "H5Sselect_none");
+
+        /* Check that the dataspace has 0 elements selected */
+        nelem = H5Sget_select_npoints(sid_chunk);
+        VERIFY(nelem, 0, "H5Sget_select_npoints");
+
+        ret = H5Sclose(sid_chunk);
+        CHECK(ret, FAIL, "H5Sclose");
+
+        ret = H5Sclose(sid1);
+        CHECK(ret, FAIL, "H5Sclose");
+
+        ret = H5Fclose(fid1);
+        CHECK(ret, FAIL, "H5Fclose");
+
+        /*============================================
+         *  Reopen the file to check the data space
+         *============================================
+         */
+        fid1 = H5Fopen(ZEROFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+        CHECK(fid1, FAIL, "H5Fopen");
+
+        /* Reopen the chunked dataset */
+        dset1 = H5Dopen2(fid1, BASICDATASET1, H5P_DEFAULT);
+        CHECK(dset1, FAIL, "H5Dopen2");
+
+        /* Get the space of the dataset and querry it */
+        sid1 = H5Dget_space(dset1);
+        CHECK(sid1, FAIL, "H5Dget_space");
+
+        /* Verify the class type of dataspace */
+        stype = H5Sget_simple_extent_type(sid1);
+        VERIFY(stype, H5S_SIMPLE, "H5Sget_simple_extent_type");
+
+        /* Verify there is zero element in the dataspace */
+        nelem = H5Sget_simple_extent_npoints(sid1);
+        VERIFY(nelem, 0, "H5Sget_simple_extent_npoints");
+
+        /* Verify the dimension sizes are correct */
+        rank = H5Sget_simple_extent_dims(sid1, tdims, NULL);
+        CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
+        VERIFY(tdims[0], 0, "H5Sget_simple_extent_dims");
+        VERIFY(tdims[1], SPACE1_DIM2, "H5Sget_simple_extent_dims");
+        VERIFY(tdims[2], SPACE1_DIM3, "H5Sget_simple_extent_dims");
+
+        /* Try reading from the dataset (make certain our buffer is unmodified) */
+        ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+        CHECK(ret, FAIL, "H5Dread");
+
+        /* Check results */
+        for(i=0; i<SPACE1_DIM2; i++) {
+            for(j=0; j<SPACE1_DIM3; j++) {
+                if(rdata[i][j] != 7) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %d but should have been 7\n",
+                           i, j, rdata[i][j]);
+                }
+            }
+        }
+
+        /* Close the dataset and its dataspace */
+        ret = H5Dclose(dset1);
+        CHECK(ret, FAIL, "H5Dclose");
+
+        ret = H5Sclose(sid1);
+        CHECK(ret, FAIL, "H5Sclose");
+
+        /* Open the attribute for the file */
+        attr = H5Aopen(fid1, NULLATTR, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Aopen");
+
+        /* Get the space of the dataset */
+        attr_sid = H5Aget_space(attr);
+        CHECK(attr_sid, FAIL, "H5Aget_space");
+
+        /* Verify the class type of dataspace */
+        stype = H5Sget_simple_extent_type(attr_sid);
+        VERIFY(stype, H5S_SIMPLE, "H5Sget_simple_extent_type");
+
+        /* Verify there is zero element in the dataspace */
+        nelem = H5Sget_simple_extent_npoints(attr_sid);
+        VERIFY(nelem, 0, "H5Sget_simple_extent_npoints");
+
+        /* Try reading from the attribute (make certain our buffer is unmodified) */
+        ret = H5Aread(attr, H5T_NATIVE_SHORT, rdata_short);
+        CHECK(ret, FAIL, "H5Aread");
+
+        /* Check results */
+        for(i=0; i<SPACE1_DIM2; i++) {
+            for(j=0; j<SPACE1_DIM3; j++) {
+                if(rdata_short[i][j] != 7) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %d but should have been 7\n",
+                           i, j, rdata_short[i][j]);
+                }
+            }
+        }
+
+        /* Close attribute */
+        ret=H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+
+        /* Close the dataspace */
+        ret = H5Sclose(attr_sid);
+        CHECK(ret, FAIL, "H5Sclose");
+
+        ret = H5Fclose(fid1);
+        CHECK(ret, FAIL, "H5Fclose");
+    } /* end for */
+} /* test_h5s_zero_dim() */
 
 
 /****************************************************************

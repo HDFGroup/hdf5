@@ -2161,9 +2161,8 @@ H5O_msg_flush(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg)
     /* Make certain that null messages aren't in chunks w/gaps */
     if(H5O_NULL_ID == msg_id)
         HDassert(oh->chunk[mesg->chunkno].gap == 0);
-
-    /* Unknown messages should always have a native pointer */
-    if(mesg->type == H5O_MSG_UNKNOWN)
+    else
+        /* Non-null messages should always have a native pointer */
         HDassert(mesg->native);
 #endif /* NDEBUG */
 

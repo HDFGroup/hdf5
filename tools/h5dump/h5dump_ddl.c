@@ -1322,7 +1322,7 @@ handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int UNUSED pe
     hid_t  oid = -1;
     hid_t  attr_id = -1;
     char *obj_name;
-    const char *attr_name;
+    char *attr_name;
     int j;
     h5tools_str_t buffer;          /* string into which to render   */
     h5tools_context_t ctx;            /* print context  */
@@ -1337,7 +1337,7 @@ handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int UNUSED pe
 
     /* find the last / */
     while(j >= 0) {
-        if (attr[j] == '/')
+        if (attr[j] == '/' && (j==0 || (j>0 && attr[j-1]!='\\'))) 
             break;
         j--;
     }
@@ -1372,9 +1372,12 @@ handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int UNUSED pe
     string_dataformat.do_escape = display_escape;
     outputformat = &string_dataformat;
 
-    attr_name = attr + j + 1;
+    //attr_name = attr + j + 1;
+	// need to replace escape characters
+	attr_name = h5tools_str_replace(attr + j + 1, "\\/", "/");
 
-    /* Open the object with the attribute */
+
+    /* handle error case: cannot open the object with the attribute */
     if((oid = H5Oopen(fid, obj_name, H5P_DEFAULT)) < 0) {
         /* setup */
         HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -1415,7 +1418,7 @@ handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int UNUSED pe
     attr_data_output = display_attr_data;
 
     h5dump_type_table = type_table;
-    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, oid, attr, attr_id, display_ai, display_char);
+    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, oid, attr_name, attr_id, display_ai, display_char);
     h5dump_type_table = NULL;
 
     if(attr_id < 0) {
@@ -1428,6 +1431,7 @@ handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int UNUSED pe
     } /* end if */
 
     HDfree(obj_name);
+	HDfree(attr_name);
     dump_indent -= COL;
     return;
 
@@ -1435,6 +1439,9 @@ error:
     h5tools_setstatus(EXIT_FAILURE);
     if(obj_name)
         HDfree(obj_name);
+		
+	if (attr_name)
+		HDfree(attr_name);
 
     H5E_BEGIN_TRY {
         H5Oclose(oid);

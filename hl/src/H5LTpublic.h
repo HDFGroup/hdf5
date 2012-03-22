@@ -340,8 +340,9 @@ H5_HLDLL herr_t H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type,
  *-------------------------------------------------------------------------
  */
 
-H5_HLDLL herr_t  H5LTfind_attribute( hid_t loc_id, const char *name );
+H5_HLDLL herr_t H5LTfind_attribute( hid_t loc_id, const char *name );
 
+H5_HLDLL htri_t H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid);
 
 #ifdef __cplusplus
 }
