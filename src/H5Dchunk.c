@@ -974,7 +974,7 @@ H5D_free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata)
         H5S_select_all(chunk_info->fspace, TRUE);
 
     /* Close the chunk's memory dataspace, if it's not shared */
-    if(!chunk_info->mspace_shared)
+    if(!chunk_info->mspace_shared && chunk_info->mspace)
         (void)H5S_close(chunk_info->mspace);
 
     /* Free the actual chunk info */
