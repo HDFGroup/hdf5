@@ -61,7 +61,7 @@ static herr_t H5VL_native_file_close(hid_t fid);
 static hid_t  H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 static herr_t H5VL_native_file_flush(hid_t fid, H5F_scope_t scope);
 static herr_t H5VL_native_file_get(hid_t file_id, H5VL_file_get_t get_type, 
-                                   void *data, int argc, void **argv);
+                                   int num_args, va_list arguments);
 
 static hid_t H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
                                         hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
@@ -80,15 +80,15 @@ static hid_t H5VL_native_group_create(hid_t loc_id, const char *name, hid_t lcpl
                                       hid_t gcpl_id, hid_t gapl_id);
 static hid_t H5VL_native_group_open(hid_t loc_id, const char *name, hid_t gapl_id);
 static herr_t H5VL_native_group_close(hid_t group_id);
-static herr_t H5VL_native_group_get(hid_t file_id, H5VL_group_get_t get_type, 
-                                    void *data, int argc, void **argv);
+static herr_t H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, 
+                                    int num_args, va_list arguments);
 
 static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id);
 static herr_t H5VL_native_object_close(hid_t object_id);
-static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, void *data, 
-                                     int argc, void **argv);
+static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, 
+                                     int num_args, va_list arguments);
 static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, 
-                                        void **location, int argc, void **argv);
+                                        int num_args, va_list arguments);
 
 static const H5VL_class_t H5VL_native_g = {
     "native",					/* name */
@@ -540,7 +540,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, void *data, int argc, void **argv)
+H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, int num_args, va_list arguments)
 {
     H5F_t	*f = NULL;              /* File struct */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -564,65 +564,70 @@ H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, void *data, int arg
     /* H5Fget_access_plist */
     case H5F_GET_FAPL:
         {
-            hid_t plist_id;
+            hid_t *plist_id = va_arg (arguments, hid_t *);
 
             /* Retrieve the file's access property list */
-            if((plist_id = H5F_get_access_plist(f, TRUE)) < 0)
+            if((*plist_id = H5F_get_access_plist(f, TRUE)) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
-            *((hid_t *)data) = plist_id;
             break;
         }
     /* H5Fget_create_plist */
     case H5F_GET_FCPL:
         {
             H5P_genplist_t *plist;      /* Property list */
-            hid_t plist_id;
+            hid_t *plist_id = va_arg (arguments, hid_t *);
 
             if(NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
             /* Create the property list object to return */
-            if((plist_id = H5P_copy_plist(plist, TRUE)) < 0)
+            if((*plist_id = H5P_copy_plist(plist, TRUE)) < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
-            *((hid_t *)data) = plist_id;
+
             break;
         }
     /* H5Fget_filesize */
     case H5F_GET_SIZE:
         {
             haddr_t    eof;                     /* End of file address */
+            hsize_t    *ret = va_arg (arguments, hsize_t *);
 
             /* Go get the actual file size */
             if(HADDR_UNDEF == (eof = H5FDget_eof(f->shared->lf)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
-            *((hsize_t *)data) = (hsize_t)eof;
+            *ret = (hsize_t)eof;
             break;
         }
     /* H5Fget_freespace */
     case H5F_GET_FREE_SPACE:
         {
             hsize_t	tot_space;	/* Amount of free space in the file */
+            hssize_t    *ret = va_arg (arguments, hssize_t *);
 
             /* Go get the actual amount of free space in the file */
             if(H5MF_get_freespace(f, H5AC_ind_dxpl_id, &tot_space, NULL) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
-            *((hssize_t *)data) = (hssize_t)tot_space;
+            *ret = (hssize_t)tot_space;
             break;
         }
     case H5F_GET_FREE_SECTIONS:
         {
+            H5F_sect_info_t *sect_info = va_arg (arguments, H5F_sect_info_t *);
+            ssize_t         *ret       = va_arg (arguments, ssize_t *);
+            H5F_mem_t       type       = va_arg (arguments, H5F_mem_t);
+            size_t          nsects     = va_arg (arguments, size_t);
+
             /* Go get the free-space section information in the file */
-            if((*((ssize_t *)argv[0]) = H5MF_get_free_sections(f, H5AC_ind_dxpl_id, 
-                                                   *((H5F_mem_t *)argv[1]), 
-                                                   *((size_t *)argv[2]), 
-                                                   (H5F_sect_info_t *)data)) < 0)
+            if((*ret = H5MF_get_free_sections(f, H5AC_ind_dxpl_id, 
+                                              type, nsects, sect_info)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
             break;
         }
     /* H5Fget_info2 */
     case H5F_GET_INFO:
         {
-            H5F_info2_t *finfo = (H5F_info2_t *)data;
+            H5F_info2_t *finfo = va_arg (arguments, H5F_info2_t *);
+
             /* For file IDs, get the file object directly */
             /* (This prevents the H5G_loc() call from returning the file pointer for
              * the top file in a mount hierarchy)
@@ -656,22 +661,25 @@ H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, void *data, int arg
     /* H5Fget_intent */
     case H5F_GET_INTENT:
         {
+            unsigned *ret = va_arg (arguments, unsigned *);
+
             /* HDF5 uses some flags internally that users don't know about.
              * Simplify things for them so that they only get either H5F_ACC_RDWR
              * or H5F_ACC_RDONLY.
              */
             if(H5F_INTENT(f) & H5F_ACC_RDWR)
-                *((unsigned *)data) = H5F_ACC_RDWR;
+                *ret = H5F_ACC_RDWR;
             else
-                *((unsigned *)data) = H5F_ACC_RDONLY;
+                *ret = H5F_ACC_RDONLY;
             break;
         }
     /* H5Fget_name */
     case H5F_GET_NAME:
         {
-            size_t    len, size = *((size_t *)argv[1]);
-            ssize_t   ret;
-            char      *name = (char *)data;
+            char      *name = va_arg (arguments, char *);
+            ssize_t   *ret  = va_arg (arguments, ssize_t *);
+            size_t     size = va_arg (arguments, size_t);
+            size_t     len;
 
             len = HDstrlen(H5F_OPEN_NAME(f));
 
@@ -682,50 +690,56 @@ H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, void *data, int arg
             } /* end if */
 
             /* Set the return value for the API call */
-            ret = (ssize_t)len;
-            memcpy (argv[0], &ret, sizeof(ssize_t));
-
+            *ret = (ssize_t)len;
             break;
         }
     /* H5Fget_vfd_handle */
     case H5F_GET_VFD_HANDLE:
         {
-            hid_t fapl;
+            void **file_handle = va_arg (arguments, void **);
+            hid_t  fapl        = va_arg (arguments, hid_t);
 
-            fapl = *((hid_t *)data);
             /* Retrieve the VFD handle for the file */
-            if(H5F_get_vfd_handle(f, fapl, argv) < 0)
+            if(H5F_get_vfd_handle(f, fapl, file_handle) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
             break;
         }
     /* H5Fget_mdc_config */
     case H5F_GET_MDC_CONF:
         {
+            H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
+
             /* Go get the resize configuration */
-            if(H5AC_get_cache_auto_resize_config(f->shared->cache, (H5AC_cache_config_t *)data) < 0)
+            if(H5AC_get_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_auto_resize_config() failed.")
             break;
         }
     /* H5Fget_mdc_hit_rate */
     case H5F_GET_MDC_HR:
         {
+            double *hit_rate_ptr = va_arg (arguments, double *);
+
             /* Go get the current hit rate */
-            if(H5AC_get_cache_hit_rate(f->shared->cache, (double *)data) < 0)
+            if(H5AC_get_cache_hit_rate(f->shared->cache, hit_rate_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_hit_rate() failed.")
             break;
         }
     /* H5Fget_mdc_size */
     case H5F_GET_MDC_SIZE:
         {
-            int32_t    cur_num_entries;
+            size_t *max_size_ptr        = va_arg (arguments, size_t *);
+            size_t *min_clean_size_ptr  = va_arg (arguments, size_t *);
+            size_t *cur_size_ptr        = va_arg (arguments, size_t *); 
+            int    *cur_num_entries_ptr = va_arg (arguments, int *); 
+            int32_t cur_num_entries;
 
             /* Go get the size data */
-            if(H5AC_get_cache_size(f->shared->cache, (size_t *)argv[0], (size_t *)argv[1], 
-                                   (size_t *)argv[2], &cur_num_entries) < 0)
+            if(H5AC_get_cache_size(f->shared->cache, max_size_ptr, min_clean_size_ptr, 
+                                   cur_size_ptr, &cur_num_entries) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_size() failed.")
 
-            if(data != NULL)
-                *((int *)data) = (int)cur_num_entries;   
+            if(cur_num_entries_ptr != NULL)
+                *cur_num_entries_ptr = (int)cur_num_entries;
             break;
         }
     default:
@@ -899,10 +913,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, void *data, int argc, void **argv)
+H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, int num_args, va_list arguments)
 {
+    H5G_loc_t   grp_loc;                /* Location used to open group */
+    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
+    hid_t	*new_gcpl_id, new_id = FAIL;
     herr_t      ret_value = SUCCEED;    /* Return value */
-    hid_t	new_gcpl_id = FAIL;
+
     FUNC_ENTER_NOAPI_NOINIT
 
     switch (get_type) {
@@ -916,7 +933,8 @@ H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, void *data, int a
             H5G_t		*grp = NULL;
             H5P_genplist_t      *gcpl_plist;
             H5P_genplist_t      *new_plist;
-
+            
+            new_gcpl_id = va_arg (arguments, hid_t *);
             /* Check args */
             if(NULL == (grp = (H5G_t *)H5I_object_verify(obj_id, H5I_GROUP)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
@@ -924,9 +942,9 @@ H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, void *data, int a
             /* Copy the default group creation property list */
             if(NULL == (gcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_GROUP_CREATE_g)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default group creation property list")
-            if((new_gcpl_id = H5P_copy_plist(gcpl_plist, TRUE)) < 0)
+            if((new_id = H5P_copy_plist(gcpl_plist, TRUE)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to copy the creation property list")
-            if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_gcpl_id)))
+            if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
             /* Retrieve any object creation properties */
@@ -973,42 +991,85 @@ H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, void *data, int a
             } /* end if */
 
             /* Set the return value */
-            *((hid_t *)data) = new_gcpl_id;
+            *new_gcpl_id = new_id;
             break;
         }
     /* H5Fget_info2 */
     case H5G_GET_INFO:
         {
-            H5I_type_t  id_type;                /* Type of ID */
-            H5G_loc_t	loc;                    /* Location of group */
-            H5G_info_t  *grp_info = (H5G_info_t *)data;
-
-            /* Check args */
-            id_type = H5I_get_type(obj_id);
-            if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
-            if(!grp_info)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+            H5G_loc_t	loc;
+            H5G_info_t  *grp_info = va_arg (arguments, H5G_info_t *);
 
             /* Get group location */
             if(H5G_loc(obj_id, &loc) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
-            /* Retrieve the group's information */
-            if(H5G__obj_info(loc.oloc, grp_info/*out*/, H5AC_ind_dxpl_id) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+            /* Retrieve the object's information */
+            if(1 == num_args) {                
+                /* Retrieve the group's information */
+                if(H5G__obj_info(loc.oloc, grp_info/*out*/, H5AC_ind_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+            }
+            else if(3 == num_args) {
+                H5G_name_t  grp_path;            	/* Opened object group hier. path */
+                H5O_loc_t   grp_oloc;            	/* Opened object object location */
+                char *name    = va_arg (arguments, char *);
+                hid_t lapl_id = va_arg (arguments, hid_t);
+
+                /* Set up opened group location to fill in */
+                grp_loc.oloc = &grp_oloc;
+                grp_loc.path = &grp_path;
+                H5G_loc_reset(&grp_loc);
+
+                /* Find the group object */
+                if(H5G_loc_find(&loc, name, &grp_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+                loc_found = TRUE;
+
+                /* Retrieve the group's information */
+                if(H5G__obj_info(grp_loc.oloc, grp_info/*out*/, H5AC_ind_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+            }
+            else if (6 == num_args) {
+                H5G_name_t  grp_path;            	/* Opened object group hier. path */
+                H5O_loc_t   grp_oloc;            	/* Opened object object location */
+                char              *group_name =  va_arg (arguments, char *);
+                H5_index_t        idx_type    =  va_arg (arguments, H5_index_t);
+                H5_iter_order_t   order       =  va_arg (arguments, H5_iter_order_t);
+                hsize_t           n           =  va_arg (arguments, hsize_t);
+                hid_t             lapl_id     =  va_arg (arguments, hid_t);
+
+                /* Set up opened group location to fill in */
+                grp_loc.oloc = &grp_oloc;
+                grp_loc.path = &grp_path;
+                H5G_loc_reset(&grp_loc);
+
+                /* Find the object's location, according to the order in the index */
+                if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &grp_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+                loc_found = TRUE;
+
+                /* Retrieve the group's information */
+                if(H5G__obj_info(grp_loc.oloc, grp_info/*out*/, H5AC_ind_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+            }
             break;
         }
     default:
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from group")
     }
+
 done:
     if (H5G_GET_GCPL == get_type) {
-        if(*((hid_t *)data) < 0) {
-            if(new_gcpl_id > 0)
-                if(H5I_dec_app_ref(new_gcpl_id) < 0)
+        if(*new_gcpl_id < 0) {
+            if(new_id > 0)
+                if(H5I_dec_app_ref(new_id) < 0)
                     HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't free")
         } /* end if */
+    }
+    if (H5G_GET_INFO == get_type) {
+        if(loc_found && H5G_loc_free(&grp_loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
     }
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -1112,7 +1173,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, void *data, int argc, void **argv)
+H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, int num_args, va_list arguments)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
     H5G_loc_t	loc;                    /* Location of group */
@@ -1128,27 +1189,29 @@ H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, void *data, int arg
     /* H5Oget_info / H5Oget_info_by_name / H5Oget_info_by_idx */
     case H5O_GET_INFO:
         {
-            H5O_info_t  *obj_info = (H5O_info_t *)data;
+            H5O_info_t  *obj_info = va_arg (arguments, H5O_info_t *);
+
             /* Retrieve the object's information */
-            if(1 == argc) {
+            if(1 == num_args) {
                 if(H5G_loc_info(&loc, ".", TRUE, obj_info/*out*/, H5P_LINK_ACCESS_DEFAULT, 
                                 H5AC_ind_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
             }
-            else if(2 == argc) {
-                hid_t lapl_id = *((hid_t *)argv[0]);
-                char *name = (char *)argv[1];
+            else if(3 == num_args) {
+                char *name    = va_arg (arguments, char *);
+                hid_t lapl_id = va_arg (arguments, hid_t);
+
                 if(H5G_loc_info(&loc, name, TRUE, obj_info/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
             }
-            else if (5 == argc) {
-                H5G_name_t  obj_path;            	/* Opened object group hier. path */
-                H5O_loc_t   obj_oloc;            	/* Opened object object location */
-                char       *group_name = (char *)argv[0];
-                H5_index_t  idx_type = *((H5_index_t *)argv[1]);
-                H5_iter_order_t order = *((H5_iter_order_t *)argv[2]);
-                hsize_t     n = *((hsize_t *)argv[3]);
-                hid_t       lapl_id = *((hid_t *)argv[4]);
+            else if (6 == num_args) {
+                H5G_name_t        obj_path;            	/* Opened object group hier. path */
+                H5O_loc_t         obj_oloc;            	/* Opened object object location */
+                char              *group_name =  va_arg (arguments, char *);
+                H5_index_t        idx_type    =  va_arg (arguments, H5_index_t);
+                H5_iter_order_t   order       =  va_arg (arguments, H5_iter_order_t);
+                hsize_t           n           =  va_arg (arguments, hsize_t);
+                hid_t             lapl_id     =  va_arg (arguments, hid_t);
                 
                 /* Set up opened group location to fill in */
                 obj_loc.oloc = &obj_oloc;
@@ -1169,26 +1232,24 @@ H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, void *data, int arg
     /* H5Oget_comment / H5Oget_comment_by_name */
     case H5O_GET_COMMENT:
         {
-            size_t   bufsize = *((size_t *)argv[1]);
-            ssize_t   ret;
-            char      *comment = (char *)data;
+            ssize_t  *ret     =  va_arg (arguments, ssize_t *);
+            char     *comment =  va_arg (arguments, char *);
+            size_t   bufsize  =  va_arg (arguments, size_t);
 
-            if(2 == argc) {
+            if(3 == num_args) {
                 /* Retrieve the object's comment */
-                if((ret = H5G_loc_get_comment(&loc, ".", comment/*out*/, bufsize, 
+                if((*ret = H5G_loc_get_comment(&loc, ".", comment/*out*/, bufsize, 
                                               H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
             }
-            else if(4 == argc) {
-                char *name = (char *) argv[2];
-                hid_t lapl_id = *((hid_t *)argv[3]);
+            else if(5 == num_args) {
+                char *name    = va_arg (arguments, char *);
+                hid_t lapl_id = va_arg (arguments, hid_t);
 
                 /* Retrieve the object's comment */
-                if((ret = H5G_loc_get_comment(&loc, name, comment/*out*/, bufsize, lapl_id, H5AC_ind_dxpl_id)) < 0)
+                if((*ret = H5G_loc_get_comment(&loc, name, comment/*out*/, bufsize, lapl_id, H5AC_ind_dxpl_id)) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
             }
-
-            memcpy (argv[0], &ret, sizeof(ssize_t));
             break;
         }
     default:
@@ -1216,10 +1277,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, void **location, int argc, void **argv)
+H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, 
+                          int num_args, va_list arguments)
 {
     H5G_loc_t	loc;
-    H5G_loc_t   *obj_loc;        /* Location used to open group */
+    H5G_loc_t   *obj_loc, **location;        /* Location used to open group */
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1227,6 +1289,8 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, void *
 
     if(H5G_loc(loc_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    location = va_arg (arguments, H5G_loc_t **);
 
     if (NULL == (*location = (H5G_loc_t *)malloc(sizeof(H5G_loc_t))))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "memory allocation failed for object location")
@@ -1241,8 +1305,8 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, void *
     switch (lookup_type) {
     case H5O_LOOKUP_BY_NAME:
         {
-            char        *name = (char *)argv[0];
-            hid_t       lapl_id = *((hid_t *)argv[1]);
+            char        *name   = va_arg (arguments, char *);
+            hid_t       lapl_id = va_arg (arguments, hid_t);
 
             HDassert(&loc);
             HDassert(name && *name);
@@ -1255,11 +1319,11 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, void *
         }
     case H5O_LOOKUP_BY_IDX:
         {
-            char *group_name = (char *)argv[0];
-            H5_index_t idx_type = *((H5_index_t *)argv[1]);
-            H5_iter_order_t order = *((H5_iter_order_t *)argv[2]);
-            hsize_t n = *((hsize_t *)argv[3]);
-            hid_t       lapl_id = *((hid_t *)argv[4]);
+            char            *group_name   = va_arg (arguments, char *);
+            H5_index_t      idx_type      = va_arg (arguments, H5_index_t);
+            H5_iter_order_t order         = va_arg (arguments, H5_iter_order_t);
+            hsize_t         n             = va_arg (arguments, hsize_t);
+            hid_t           lapl_id       = va_arg (arguments, hid_t);
 
             /* Find the object's location, according to the order in the index */
             if((ret_value = H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n,
@@ -1270,7 +1334,7 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, void *
         }
     case H5O_LOOKUP_BY_ADDR:
         {
-            haddr_t addr = *((haddr_t *)argv[0]);
+            haddr_t addr = va_arg (arguments, haddr_t);
 
             if(!H5F_addr_defined(addr))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no address supplied")

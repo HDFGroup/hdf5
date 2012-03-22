@@ -233,7 +233,6 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     hid_t       ret_value = FAIL;
     void       *location = NULL; /* a pointer to VOL specific token that indicates 
                                     the location of the object */
-    void       *argv[2];
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "i*si", loc_id, name, lapl_id);
@@ -241,17 +240,19 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    argv[0] = (void *)name;
-    argv[1] = &lapl_id;
-
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5O_LOOKUP_BY_NAME, &location, 2, argv) < 0)
+    if(H5VL_object_lookup (loc_id, H5O_LOOKUP_BY_NAME, 3, &location, name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the object through the VOL */
     if((ret_value = H5VL_object_open(loc_id, location, lapl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+
 done:
+    if (NULL != location) {
+        free (location);
+        location = NULL;
+    }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen() */
 
@@ -284,7 +285,6 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t lapl_id)
 {
     void       *location = NULL;
-    void       *argv[5];
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
@@ -303,14 +303,9 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    argv[0] = (void *)group_name;
-    argv[1] = &idx_type;
-    argv[2] = &order;
-    argv[3] = &n;
-    argv[4] = &lapl_id;
-    
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5O_LOOKUP_BY_IDX, &location, 5, argv) < 0)
+    if(H5VL_object_lookup (loc_id, H5O_LOOKUP_BY_IDX, 6, &location, group_name,
+                           idx_type, order, n, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the object through the VOL */
@@ -318,6 +313,10 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
+    if (NULL != location) {
+        free (location);
+        location = NULL;
+    }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_idx() */
 
@@ -362,16 +361,13 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 {
     hid_t       lapl_id = H5P_LINK_ACCESS_DEFAULT; /* lapl to use to open this object */
     void       *location = NULL;
-    void       *argv[1];
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("i", "ia", loc_id, addr);
 
-    argv[0] = &addr;
-    
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5O_LOOKUP_BY_ADDR, &location, 1, argv) < 0)
+    if(H5VL_object_lookup (loc_id, H5O_LOOKUP_BY_ADDR, 2, &location, addr) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the object through the VOL */
@@ -379,7 +375,10 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
-
+    if (NULL != location) {
+        free (location);
+        location = NULL;
+    }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_addr() */
 
@@ -582,8 +581,6 @@ done:
 herr_t
 H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
 {
-    void        *argv[1];
-    hid_t       lapl_id;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -593,10 +590,7 @@ H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
     if(!oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-    lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    argv[0] = &lapl_id;
-
-    if((ret_value = H5VL_object_get(loc_id, H5O_GET_INFO, (void *)oinfo, 1, argv)) < 0)
+    if((ret_value = H5VL_object_get(loc_id, H5O_GET_INFO, 1, oinfo)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object info")
 
 done:
@@ -620,7 +614,6 @@ done:
 herr_t
 H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
 {
-    void        *argv[2];
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -637,10 +630,9 @@ H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lap
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    argv[0] = &lapl_id;
-    argv[1] = (void *)name;
-    if((ret_value = H5VL_object_get(loc_id, H5O_GET_INFO, (void *)oinfo, 2, argv)) < 0)
+    if((ret_value = H5VL_object_get(loc_id, H5O_GET_INFO, 3, oinfo, name, lapl_id)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object info")
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_name() */
@@ -664,7 +656,6 @@ herr_t
 H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo, hid_t lapl_id)
 {
-    void        *argv[5];
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -686,14 +677,10 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    argv[0] = (void *)group_name;
-    argv[1] = &idx_type;
-    argv[2] = &order;
-    argv[3] = &n;
-    argv[4] = &lapl_id;
-
-    if((ret_value = H5VL_object_get(loc_id, H5O_GET_INFO, (void *)oinfo, 5, argv)) < 0)
+    if((ret_value = H5VL_object_get(loc_id, H5O_GET_INFO, 6, oinfo, group_name, idx_type, 
+                                    order, n, lapl_id)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object info")
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_idx() */
@@ -804,19 +791,14 @@ done:
 ssize_t
 H5Oget_comment(hid_t loc_id, char *comment, size_t bufsize)
 {
-    void       *argv[2];
     ssize_t     ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("Zs", "i*sz", loc_id, comment, bufsize);
 
-    argv[0] = &ret_value;
-    argv[1] = &bufsize;
+    if(H5VL_object_get(loc_id, H5O_GET_COMMENT, 3, &ret_value, comment, bufsize) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object info")
 
-    if(H5VL_object_get(loc_id, H5O_GET_COMMENT, (void *)comment, 2, argv) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object comment")
-
-    ret_value = *((ssize_t *)argv[0]);
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_comment() */
@@ -842,7 +824,6 @@ ssize_t
 H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t bufsize,
     hid_t lapl_id)
 {
-    void       *argv[4];
     ssize_t     ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -857,14 +838,9 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t buf
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    argv[0] = &ret_value;
-    argv[1] = &bufsize;
-    argv[2] = (void *)name;
-    argv[3] = &lapl_id;
-    if(H5VL_object_get(loc_id, H5O_GET_COMMENT, (void *)comment, 4, argv) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object comment")
-
-    ret_value = *((ssize_t *)argv[0]);
+    if(H5VL_object_get(loc_id, H5O_GET_COMMENT, 5, &ret_value, comment, bufsize, 
+                       name, lapl_id) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object info")
 
 done:
     FUNC_LEAVE_API(ret_value)
