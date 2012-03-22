@@ -1520,3 +1520,47 @@ herr_t H5VL_dataset_write(hid_t uid, hid_t mem_type_id, hid_t mem_space_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_dataset_get
+ *
+ * Purpose:	Get specific information about the dataset through the VOL
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, int num_args, ...)
+{
+    H5I_t            *uid_info;              /* user id structure */
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check id */
+    if(H5I_DATASET_PUBLIC != H5I_get_type(uid))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
+
+    /* get the ID struct */
+    if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+
+    if(NULL == uid_info->vol_plugin->dataset_cls.get)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset get' method")
+
+    va_start (arguments, num_args);
+    if((ret_value = (uid_info->vol_plugin->dataset_cls.get)(uid_info->obj_id, get_type, 
+                                                           num_args, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+    va_end (arguments);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_dataset_get() */

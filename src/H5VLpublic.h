@@ -42,6 +42,17 @@ typedef enum H5VL_file_get_t {
     H5F_GET_FREE_SECTIONS   = 13        /*file free selections                  */
 } H5VL_file_get_t;
 
+/* types for all dataset get API routines */
+typedef enum H5VL_dataset_get_t {
+    H5D_GET_SPACE           = 0,         /* dataspace                           */
+    H5D_GET_SPACE_STATUS    = 1,         /* space  status                       */
+    H5D_GET_TYPE            = 2,         /* datatype                            */
+    H5D_GET_DCPL            = 3,         /* creation property list              */
+    H5D_GET_DAPL            = 4,         /* access property list                */
+    H5D_GET_STORAGE_SIZE    = 5,         /* storage size                        */
+    H5D_GET_OFFSET          = 6          /* offset                              */
+} H5VL_dataset_get_t;
+
 /* types for all group get API routines */
 typedef enum H5VL_group_get_t {
     H5G_GET_GCPL	    = 0,	/*group creation property list		*/
@@ -82,7 +93,7 @@ typedef struct H5VL_dataset_class_t {
                      hid_t xfer_plist_id, void * buf);
     herr_t (*write) (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                      hid_t xfer_plist_id, const void * buf );
-    herr_t (*extend)(hid_t dset_id, const hsize_t size[] );
+    herr_t (*get)   (hid_t file_id, H5VL_dataset_get_t get_type, int num_args, va_list arguments);
 } H5VL_dataset_class_t;
 
 /* H5A routines */
