@@ -10,6 +10,9 @@ usage: h5dump [OPTIONS] files
      -e, --escape         Escape non printing characters
      -V, --version        Print version number and exit
      -a P, --attribute=P  Print the specified attribute
+                          If an attribute name contains a slash (/), escape the
+                          slash with a preceding backslash (\).
+                          (See example section below.)
      -d P, --dataset=P    Print the specified dataset
      -y, --noindex        Do not print array indices with the data
      -p, --properties     Print dataset filters, storage layout and fill value
@@ -80,6 +83,10 @@ usage: h5dump [OPTIONS] files
   1) Attribute foo of the group /bar_none in file quux.h5
 
       h5dump -a /bar_none/foo quux.h5
+
+     Attribute "high/low" of the group /bar_none in the file quux.h5
+
+      h5dump -a "/bar_none/high\/low" quux.h5
 
   2) Selecting a subset from dataset /foo in file quux.h5
 
