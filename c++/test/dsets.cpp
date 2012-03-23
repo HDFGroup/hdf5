@@ -268,6 +268,77 @@ test_simple_io( H5File& file)
 }   // test_simple_io
 
 /*-------------------------------------------------------------------------
+ * Function:	test_datasize
+ *
+ * Purpose:	Tests DataSet::getInMemDataSize().  
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Binh-Minh Ribler
+ *		Thursday, March 22, 2012
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_datasize()
+{
+
+    SUBTEST("DataSet::getInMemDataSize()");
+
+    int	points[100][200];
+    int	check[100][200];
+    int		i, j, n;
+
+    try
+    {
+	// Open FILE1.
+	H5File file(FILE1, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, FileAccPropList::DEFAULT);
+
+	// Open dataset DSET_SIMPLE_IO_NAME.
+	DataSet dset = file.openDataSet (DSET_SIMPLE_IO_NAME);
+
+	// Get the dataset's dataspace to calculate the size for verification.
+	DataSpace space(dset.getSpace());
+
+	// Get the dimension sizes.
+	hsize_t dims[2];
+	int n_dims = space.getSimpleExtentDims(dims);
+
+	// Calculate the supposed size.  Size of each value is int (4), from
+	// test_simple_io.
+	int expected_size = 4 * dims[0] * dims[1];
+
+	// getInMemDataSize() returns the in memory size of the data.
+	size_t ds_size = dset.getInMemDataSize();
+
+	// Verify the data size.
+	if (ds_size != expected_size)
+	{
+	    H5_FAILED();
+	    cerr << " Expected data size = " << expected_size;
+	    cerr << " but dset.getInMemDataSize() returned " << ds_size << endl;
+	    throw Exception("test_compression", "Failed in testing DataSet::getInMemDataSize()");
+	}
+
+	PASSED();
+	return 0;
+    }  // end try
+
+    // catch all dataset, space, plist exceptions
+    catch (Exception E)
+    {
+	cerr << " FAILED" << endl;
+	cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
+
+	return -1;
+    }
+}   // test_datasize
+
+/*-------------------------------------------------------------------------
  * Function:	test_tconv
  *
  * Purpose:	Test some simple data type conversion stuff.
@@ -1004,6 +1075,10 @@ void test_dset()
 	nerrors += test_compression(file)<0	?1:0;
 	nerrors += test_multiopen (file)<0	?1:0;
 	nerrors += test_types(file)<0       ?1:0;
+
+	// Close the file before testing data size.
+	file.close();
+	nerrors += test_datasize() <0 ? 1:0;
     }
     catch (Exception E)
     {

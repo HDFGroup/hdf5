@@ -238,7 +238,8 @@ size_t DataSet::getInMemDataSize() const
 	throw DataSetIException(func, "H5Dget_type failed");
     }
 
-    // Get the data type's size
+    // Get the data type's size by first getting its native type then getting
+    // the native type's size.
     hid_t native_type = H5Tget_native_type(mem_type_id, H5T_DIR_DEFAULT);
     if (native_type < 0)
     {
@@ -250,8 +251,19 @@ size_t DataSet::getInMemDataSize() const
 	throw DataSetIException(func, "H5Tget_size failed");
     }
 
-    // Get number of elements of the dataset
-    hid_t space_id = H5Dget_space(id); // first get its data space
+    // Close the native type and the datatype of this dataset.
+    if (H5Tclose(native_type) < 0)
+    {
+	throw DataSetIException(func, "H5Tclose(native_type) failed");
+    }
+    if (H5Tclose(mem_type_id) < 0)
+    {
+	throw DataSetIException(func, "H5Tclose(mem_type_id) failed");
+    }
+
+    // Get number of elements of the dataset by first getting its dataspace,
+    // then getting the number of elements in the dataspace
+    hid_t space_id = H5Dget_space(id);
     if (space_id < 0)
     {
 	throw DataSetIException(func, "H5Dget_space failed");
@@ -260,6 +272,12 @@ size_t DataSet::getInMemDataSize() const
     if (num_elements < 0)
     {
 	throw DataSetIException(func, "H5Sget_simple_extent_npoints failed");
+    }
+
+    // Close the dataspace
+    if (H5Sclose(space_id) < 0)
+    {
+	throw DataSetIException(func, "H5Sclose failed");
     }
 
     // Calculate and return the size of the data
