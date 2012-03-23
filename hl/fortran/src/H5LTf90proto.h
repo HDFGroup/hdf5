@@ -1140,7 +1140,8 @@ nh5ltget_attribute_string_c(hid_t_f *loc_id,
                             _fcd dsetname,
                             int_f *attrnamelen,
                             _fcd attrname,
-                            void *buf);
+                            _fcd buf,
+			    size_t_f *buf_size);
 
 HDF5_HL_F90CSTUBDLL
 int_f

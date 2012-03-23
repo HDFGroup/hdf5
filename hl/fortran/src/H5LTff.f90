@@ -5969,9 +5969,10 @@ CONTAINS
     CHARACTER(len=*), INTENT(inout) :: buf             ! data buffer
     INTEGER :: namelen                                 ! name length
     INTEGER :: attrlen                                 ! name length
+    INTEGER(size_t) :: buf_size                        ! buf size
 
     INTERFACE
-       INTEGER FUNCTION h5ltget_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
+       INTEGER FUNCTION h5ltget_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buf,buf_size)
          USE h5global
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_STRING_C'::h5ltget_attribute_string_c
@@ -5984,12 +5985,15 @@ CONTAINS
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(in) :: attr_name               ! name of the attribute
          CHARACTER(len=*), INTENT(inout) :: buf                  ! data buffer
+         INTEGER(size_t) :: buf_size                 ! data buffer size
        END FUNCTION h5ltget_attribute_string_c
     END INTERFACE
 
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltget_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
+    buf_size = LEN(buf)
+
+    errcode = h5ltget_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buf,buf_size)
 
   END SUBROUTINE h5ltget_attribute_string_f
 
@@ -6360,14 +6364,16 @@ CONTAINS
        END FUNCTION h5ltpath_valid_c
     END INTERFACE
 
+    ! Initialize
+    path_valid = .FALSE.
+    errcode = 0
+    
     check_object_valid_c = 0
     IF(check_object_valid) check_object_valid_c = 1
 
     pathlen = LEN(path)
     status = h5ltpath_valid_c(loc_id, path, pathlen, check_object_valid_c)
 
-    path_valid = .FALSE.
-    errcode = 0
     IF(status.EQ.1)THEN
        path_valid = .TRUE.
     ELSE IF(status.LT.0)THEN
