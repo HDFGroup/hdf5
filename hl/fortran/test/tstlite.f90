@@ -1342,7 +1342,9 @@ SUBROUTINE test_attributes()
   IMPLICIT NONE
 
   CHARACTER(len=9), PARAMETER :: filename = "dsetf5.h5"! File name
+  CHARACTER(len=9), PARAMETER :: filename1 ="tattr.h5" ! C written attribute file
   INTEGER(HID_T) :: file_id                            ! File identifier
+  INTEGER(HID_T) :: file_id1
   INTEGER, PARAMETER :: DIM1 = 10;                     ! Dimension of array
   CHARACTER(LEN=5), PARAMETER :: attrname1 = "attr1"   ! Attribute name
   CHARACTER(LEN=5), PARAMETER :: attrname2 = "attr2"   ! Attribute name
@@ -1350,9 +1352,11 @@ SUBROUTINE test_attributes()
   CHARACTER(LEN=5), PARAMETER :: attrname4 = "attr4"   ! Attribute name
   CHARACTER(LEN=5), PARAMETER :: attrname5 = "attr5"   ! Attribute name
   CHARACTER(LEN=8), PARAMETER :: buf1 = "mystring"     ! Data buffer
+  CHARACTER(LEN=16), PARAMETER :: buf_c = "string attribute"
   CHARACTER(LEN=8)                  :: bufr1           ! Data buffer
   CHARACTER(LEN=10)                 :: bufr1_lg        ! Data buffer
-  CHARACTER(LEN=6)                  :: bufr1_sm        ! Data buffer
+  CHARACTER(LEN=16)                 :: bufr_c          ! Data buffer
+  CHARACTER(LEN=18)                 :: bufr_c_lg       ! Data buffer
   INTEGER, DIMENSION(DIM1)          :: buf2            ! Data buffer
   INTEGER, DIMENSION(DIM1)          :: bufr2           ! Data buffer
   REAL, DIMENSION(DIM1)             :: buf3            ! Data buffer
@@ -1370,6 +1374,7 @@ SUBROUTINE test_attributes()
   INTEGER        :: rank = 1                           ! Dataset rank
   CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"   ! Dataset name
   INTEGER, DIMENSION(DIM1)    :: buf                   ! Data buffer
+  
 
   !
   ! Initialize FORTRAN predefined datatypes.
@@ -1488,14 +1493,11 @@ SUBROUTINE test_attributes()
 
   CALL passed()
 
-
-
   !-------------------------------------------------------------------------
   ! string
   !-------------------------------------------------------------------------
 
   CALL test_begin(' Set/Get attributes string      ')
-
 
   !
   ! write attribute.
@@ -1530,19 +1532,36 @@ SUBROUTINE test_attributes()
      STOP
   ENDIF
 
+  ! 
+  ! ** Test reading a string that was created with a C program **
   !
-  ! read attribute into a fortran character buf that is smaller then buf1.
-  !
-  CALL h5ltget_attribute_string_f(file_id,dsetname1,attrname5,bufr1_sm,errcode)
 
-  !
-  ! compare read and write buffers.
-  !
-  IF ( buf1(1:6) .NE. bufr1_sm(1:6) ) THEN
-     PRINT *, 'smaller read buffer differs from write buffer'
-     PRINT *,  buf1, ' and ',   bufr1_sm
-     STOP
-  ENDIF
+!!$  CALL h5fopen_f(filename1, H5F_ACC_RDONLY_F, file_id1, errcode)
+!!$
+!!$  CALL h5ltget_attribute_string_f(file_id1, "/", "attr5", bufr_c, errcode)
+!!$  !
+!!$  ! compare read and write buffers.
+!!$  !
+!!$  IF ( bufr_c .NE. buf_c ) THEN
+!!$     PRINT *, 'read buffer differs from write buffer'
+!!$     PRINT *,  bufr1, ' and ',  buf_c 
+!!$     STOP
+!!$  ENDIF
+!!$  !
+!!$  ! read attribute into a fortran character buf that is larger then buf_c.
+!!$  !
+!!$  CALL h5ltget_attribute_string_f(file_id1, "/", "attr5", bufr_c_lg, errcode)
+!!$
+!!$  !
+!!$  ! compare read and write buffers, make sure C NULL character was removed.
+!!$  !
+!!$  IF ( buf_c(1:16) .NE. bufr_c_lg(1:16) .AND. bufr_c_lg(17:18) .NE. '  ' ) THEN
+!!$     PRINT *, 'larger read buffer differs from write buffer'
+!!$     PRINT *,  buf_c, ' and ',  bufr_c_lg 
+!!$     STOP
+!!$  ENDIF  
+
+  CALL h5fclose_f(file_id1,  errcode)
 
   CALL passed()
 
