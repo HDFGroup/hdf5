@@ -1561,7 +1561,7 @@ SUBROUTINE test_attributes()
 !!$     STOP
 !!$  ENDIF  
 
-  CALL h5fclose_f(file_id1,  errcode)
+!!$  CALL h5fclose_f(file_id1,  errcode)
 
   CALL passed()
 
