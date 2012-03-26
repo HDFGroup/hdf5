@@ -805,10 +805,12 @@ H5_FCDLL int_f nh5tconvert_c(hid_t_f *src_id, hid_t_f *dst_id, size_t_f *nelmts,
 
 #define nh5olink_c       H5_FC_FUNC_(h5olink_c, H5OLINK_C)
 #define nh5oopen_c       H5_FC_FUNC_(h5oopen_c, H5OOPEN_C)
-#define nh5oclose_c       H5_FC_FUNC_(h5oclose_c, H5OCLOSE_C)
+#define nh5oclose_c      H5_FC_FUNC_(h5oclose_c, H5OCLOSE_C)
 #define nh5ovisit_c      H5_FC_FUNC_(h5ovisit_c,H5OVISIT_C)
 #define nh5oget_info_by_name_c H5_FC_FUNC_(h5oget_info_by_name_c ,H5OGET_INFO_BY_NAME_C)
 #define nh5oopen_by_addr_c H5_FC_FUNC_(h5oopen_by_addr_c, H5OOPEN_BY_ADDR_C)
+#define nh5ocopy_c         H5_FC_FUNC_(h5ocopy_c, H5OCOPY_C)
+
 
 H5_FCDLL int_f nh5oopen_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, hid_t_f *obj_id);
 H5_FCDLL int_f nh5oclose_c (hid_t_f *object_id );
@@ -818,6 +820,9 @@ H5_FCDLL int_f nh5olink_c (hid_t_f *object_id, hid_t_f *new_loc_id, _fcd name, s
 H5_FCDLL int_f nh5ovisit_c (hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate_t op, void *op_data);
 H5_FCDLL int_f nh5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen,hid_t_f *lapl_id,
 				       H5O_info_t_f *object_info);
+H5_FCDLL int_f nh5ocopy_c (hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len,
+			   hid_t_f *dst_loc_id, _fcd dst_name, size_t_f *dst_name_len, 
+			   hid_t_f *ocpypl_id, hid_t_f *lcpl_id );
 /*
  * Functions from H5Pf.c
  */

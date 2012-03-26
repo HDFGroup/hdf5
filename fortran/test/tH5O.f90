@@ -87,6 +87,11 @@ SUBROUTINE test_h5o_link(total_error)
   INTEGER :: i, n, j
   INTEGER ::  error  ! /* Value returned from API calls */
 
+  CHARACTER(LEN=14) :: NAME_DATATYPE_SIMPLE="H5T_NATIVE_INT"
+  CHARACTER(LEN=16) :: NAME_DATATYPE_SIMPLE2="H5T_NATIVE_INT-2"
+  INTEGER(HID_T) :: tid, tid2
+  LOGICAL :: flag
+
   ! /* Initialize the raw data */
   DO i = 1, TEST6_DIM1
      DO j = 1, TEST6_DIM2
@@ -222,14 +227,58 @@ SUBROUTINE test_h5o_link(total_error)
   CALL h5tclose_f(type_id, error)
   CALL check("h5tclose_f",error,total_error)
 
-  CALL h5fclose_f(file_id, error)
-  CALL check("h5fclose_f",error,total_error)
 
   ! /* Close remaining IDs */
   CALL h5sclose_f(space_id, error)
   CALL check("h5sclose_f",error,total_error)
   CALL h5pclose_f(lcpl_id,error)
   CALL check("h5pclose_f", error, total_error)
+
+  
+  ! *********************
+  !    CHECK H5OCOPY_F
+  ! *********************
+
+  ! create datatype
+  CALL h5tcopy_f(H5T_NATIVE_INTEGER, tid, error)
+  CALL check("h5tcopy_f", error, total_error)
+
+  ! create named datatype
+  CALL h5tcommit_f(file_id, NAME_DATATYPE_SIMPLE, tid, error)
+  CALL check("h5tcommit_f", error, total_error)
+
+  ! close the datatype
+  CALL h5tclose_f(tid, error)
+  CALL check("h5tclose_f",error)
+
+  CALL h5ocopy_f(file_id, NAME_DATATYPE_SIMPLE, file_id, NAME_DATATYPE_SIMPLE2, error)
+  CALL check("h5ocopy_f",error,total_error)
+
+  ! open the datatype for copy
+  CALL h5topen_f(file_id, NAME_DATATYPE_SIMPLE, tid, error)
+  CALL check("h5topen_f",error,total_error)
+
+  ! open the copied datatype
+  CALL h5topen_f(file_id, NAME_DATATYPE_SIMPLE2, tid2, error)
+  CALL check("h5topen_f",error,total_error)
+
+  ! Compare the datatypes
+  CALL h5tequal_f(tid, tid2, flag, error)
+  IF(.NOT.flag)THEN
+     WRITE(*,*) "h5ocopy_f FAILED" 
+     total_error = total_error + 1
+  ENDIF
+
+  ! close the destination datatype
+  CALL h5tclose_f(tid, error)
+  CALL check("h5tclose_f",error,total_error)
+
+  ! close the destination datatype
+  CALL h5tclose_f(tid2, error)
+  CALL check("h5tclose_f",error,total_error)
+
+  CALL h5fclose_f(file_id, error)
+  CALL check("h5fclose_f",error,total_error)
 
 END SUBROUTINE test_h5o_link
 
