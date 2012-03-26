@@ -49,19 +49,13 @@
 #define H5I_FILE_PUBLIC_HASHSIZE	64
 #define H5I_GROUP_PUBLIC_HASHSIZE	64
 #define H5I_DATASET_PUBLIC_HASHSIZE	64
-#define H5I_ATTRIBUTE_PUBLIC_HASHSIZE	64
+#define H5I_ATTR_PUBLIC_HASHSIZE	64
 #define H5I_DATATYPE_PUBLIC_HASHSIZE	64
 #define H5I_GENPROPCLS_HASHSIZE		64
 #define H5I_GENPROPOBJ_HASHSIZE		128
 #define H5I_ERRCLS_HASHSIZE		64
 #define H5I_ERRMSG_HASHSIZE		64
 #define H5I_ERRSTK_HASHSIZE		64
-
-/* type of the ID passed to users */
-typedef struct H5I_t {
-    hid_t obj_id;  /* actual id for object */
-    H5VL_class_t *vol_plugin;  /* pointer to the VOL structure */
-} H5I_t;
 
 /* Private Functions in H5I.c */
 H5_DLL H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved, H5I_free_t free_func);

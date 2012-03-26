@@ -47,6 +47,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
+#include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
 
 /****************/
@@ -306,7 +307,7 @@ H5Aget_num_attrs(hid_t id)
 {
     H5O_loc_t    	*loc;	/* Object location for attribute */
     void           	*obj;
-    H5I_t               *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t               *uid_info;              /* user id structure */
     hid_t               loc_id;
     H5I_type_t          id_type;
     int			ret_value;
@@ -321,8 +322,8 @@ H5Aget_num_attrs(hid_t id)
      that needs to go through the VOL actually go through the VOL*/
     if (H5I_FILE_PUBLIC == id_type || H5I_GROUP_PUBLIC == id_type ||
         H5I_DATASET_PUBLIC == id_type || H5I_DATATYPE_PUBLIC == id_type ||
-        H5I_ATTRIBUTE_PUBLIC == id_type) {
-        if(NULL == (uid_info = (H5I_t *)H5I_object(id)))
+        H5I_ATTR_PUBLIC == id_type) {
+        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, NULL, "invalid user identifier")
         loc_id = uid_info->obj_id;
     }

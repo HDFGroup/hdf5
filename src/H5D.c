@@ -333,7 +333,7 @@ H5Dget_space(hid_t dset_id)
     H5TRACE1("i", "i", dset_id);
 
     /* get the dataspace through the VOL */
-    if(H5VL_dataset_get(dset_id, H5D_GET_SPACE, 1, &ret_value) < 0)
+    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_SPACE, 1, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get data space")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -363,7 +363,7 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
     H5TRACE2("e", "i*Ds", dset_id, allocation);
 
     /* Read data space address through the VOL and return */
-    if((ret_value=H5VL_dataset_get(dset_id, H5D_GET_SPACE_STATUS, 1, allocation)) < 0)
+    if((ret_value=H5VL_dataset_get(dset_id, H5VL_DATASET_GET_SPACE_STATUS, 1, allocation)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get space status")
 
 done:
@@ -396,7 +396,7 @@ H5Dget_type(hid_t dset_id)
     H5TRACE1("i", "i", dset_id);
 
     /* get the datatype through the VOL */
-    if(H5VL_dataset_get(dset_id, H5D_GET_TYPE, 1, &ret_value) < 0)
+    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_TYPE, 1, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get datatype")
 
 done:
@@ -428,7 +428,7 @@ H5Dget_create_plist(hid_t dset_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
 
-    if(H5VL_dataset_get(dset_id, H5D_GET_DCPL, 1, &ret_value) < 0)
+    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_DCPL, 1, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataset creation properties")
 
 done:
@@ -477,7 +477,7 @@ H5Dget_access_plist(hid_t dset_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
 
-    if(H5VL_dataset_get(dset_id, H5D_GET_DAPL, 1, &ret_value) < 0)
+    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_DAPL, 1, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataset access properties")
 done:
 
@@ -512,7 +512,7 @@ H5Dget_storage_size(hid_t dset_id)
     H5TRACE1("h", "i", dset_id);
 
     /* get storage size through the VOL */
-    if(H5VL_dataset_get(dset_id, H5D_GET_STORAGE_SIZE, 1, &ret_value) < 0)
+    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_STORAGE_SIZE, 1, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get storage size")
 
 done:
@@ -543,7 +543,7 @@ H5Dget_offset(hid_t dset_id)
     H5TRACE1("a", "i", dset_id);
 
     /* get offset through the VOL */
-    if(H5VL_dataset_get(dset_id, H5D_GET_OFFSET, 1, &ret_value) < 0)
+    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_OFFSET, 1, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get offset")
 
 done:

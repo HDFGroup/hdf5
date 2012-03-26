@@ -567,190 +567,190 @@ H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, int num_args, va_li
     } /* end else */
 
     switch (get_type) {
-    /* H5Fget_access_plist */
-    case H5F_GET_FAPL:
-        {
-            hid_t *plist_id = va_arg (arguments, hid_t *);
+        /* H5Fget_access_plist */
+        case H5VL_FILE_GET_FAPL:
+            {
+                hid_t *plist_id = va_arg (arguments, hid_t *);
 
-            /* Retrieve the file's access property list */
-            if((*plist_id = H5F_get_access_plist(f, TRUE)) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
-            break;
-        }
-    /* H5Fget_create_plist */
-    case H5F_GET_FCPL:
-        {
-            H5P_genplist_t *plist;      /* Property list */
-            hid_t *plist_id = va_arg (arguments, hid_t *);
+                /* Retrieve the file's access property list */
+                if((*plist_id = H5F_get_access_plist(f, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
+                break;
+            }
+        /* H5Fget_create_plist */
+        case H5VL_FILE_GET_FCPL:
+            {
+                H5P_genplist_t *plist;      /* Property list */
+                hid_t *plist_id = va_arg (arguments, hid_t *);
 
-            if(NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
-            /* Create the property list object to return */
-            if((*plist_id = H5P_copy_plist(plist, TRUE)) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
+                /* Create the property list object to return */
+                if((*plist_id = H5P_copy_plist(plist, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
 
-            break;
-        }
-    /* H5Fget_filesize */
-    case H5F_GET_SIZE:
-        {
-            haddr_t    eof;                     /* End of file address */
-            hsize_t    *ret = va_arg (arguments, hsize_t *);
+                break;
+            }
+        /* H5Fget_filesize */
+        case H5VL_FILE_GET_SIZE:
+            {
+                haddr_t    eof;                     /* End of file address */
+                hsize_t    *ret = va_arg (arguments, hsize_t *);
 
-            /* Go get the actual file size */
-            if(HADDR_UNDEF == (eof = H5FDget_eof(f->shared->lf)))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
-            *ret = (hsize_t)eof;
-            break;
-        }
-    /* H5Fget_freespace */
-    case H5F_GET_FREE_SPACE:
-        {
-            hsize_t	tot_space;	/* Amount of free space in the file */
-            hssize_t    *ret = va_arg (arguments, hssize_t *);
+                /* Go get the actual file size */
+                if(HADDR_UNDEF == (eof = H5FDget_eof(f->shared->lf)))
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+                *ret = (hsize_t)eof;
+                break;
+            }
+        /* H5Fget_freespace */
+        case H5VL_FILE_GET_FREE_SPACE:
+            {
+                hsize_t	tot_space;	/* Amount of free space in the file */
+                hssize_t    *ret = va_arg (arguments, hssize_t *);
 
-            /* Go get the actual amount of free space in the file */
-            if(H5MF_get_freespace(f, H5AC_ind_dxpl_id, &tot_space, NULL) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
-            *ret = (hssize_t)tot_space;
-            break;
-        }
-    case H5F_GET_FREE_SECTIONS:
-        {
-            H5F_sect_info_t *sect_info = va_arg (arguments, H5F_sect_info_t *);
-            ssize_t         *ret       = va_arg (arguments, ssize_t *);
-            H5F_mem_t       type       = va_arg (arguments, H5F_mem_t);
-            size_t          nsects     = va_arg (arguments, size_t);
+                /* Go get the actual amount of free space in the file */
+                if(H5MF_get_freespace(f, H5AC_ind_dxpl_id, &tot_space, NULL) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
+                *ret = (hssize_t)tot_space;
+                break;
+            }
+        case H5VL_FILE_GET_FREE_SECTIONS:
+            {
+                H5F_sect_info_t *sect_info = va_arg (arguments, H5F_sect_info_t *);
+                ssize_t         *ret       = va_arg (arguments, ssize_t *);
+                H5F_mem_t       type       = va_arg (arguments, H5F_mem_t);
+                size_t          nsects     = va_arg (arguments, size_t);
 
-            /* Go get the free-space section information in the file */
-            if((*ret = H5MF_get_free_sections(f, H5AC_ind_dxpl_id, 
-                                              type, nsects, sect_info)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
-            break;
-        }
-    /* H5Fget_info2 */
-    case H5F_GET_INFO:
-        {
-            H5F_info2_t *finfo = va_arg (arguments, H5F_info2_t *);
+                /* Go get the free-space section information in the file */
+                if((*ret = H5MF_get_free_sections(f, H5AC_ind_dxpl_id, 
+                                                  type, nsects, sect_info)) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
+                break;
+            }
+        /* H5Fget_info2 */
+        case H5VL_FILE_GET_INFO:
+            {
+                H5F_info2_t *finfo = va_arg (arguments, H5F_info2_t *);
 
-            /* For file IDs, get the file object directly */
-            /* (This prevents the H5G_loc() call from returning the file pointer for
-             * the top file in a mount hierarchy)
-             */
-            HDassert(f->shared);
+                /* For file IDs, get the file object directly */
+                /* (This prevents the H5G_loc() call from returning the file pointer for
+                 * the top file in a mount hierarchy)
+                 */
+                HDassert(f->shared);
 
-            /* Reset file info struct */
-            HDmemset(finfo, 0, sizeof(*finfo));
+                /* Reset file info struct */
+                HDmemset(finfo, 0, sizeof(*finfo));
 
-            /* Get the size of the superblock and any superblock extensions */
-            if(H5F_super_size(f, H5AC_ind_dxpl_id, &finfo->super.super_size, 
-                              &finfo->super.super_ext_size) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
+                /* Get the size of the superblock and any superblock extensions */
+                if(H5F_super_size(f, H5AC_ind_dxpl_id, &finfo->super.super_size, 
+                                  &finfo->super.super_ext_size) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
 
-            /* Get the size of any persistent free space */
-            if(H5MF_get_freespace(f, H5AC_ind_dxpl_id, &finfo->free.tot_space, 
-                                  &finfo->free.meta_size) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
+                /* Get the size of any persistent free space */
+                if(H5MF_get_freespace(f, H5AC_ind_dxpl_id, &finfo->free.tot_space, 
+                                      &finfo->free.meta_size) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
 
-            /* Check for SOHM info */
-            if(H5F_addr_defined(f->shared->sohm_addr))
-                if(H5SM_ih_size(f, H5AC_ind_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM index & heap storage info")
+                /* Check for SOHM info */
+                if(H5F_addr_defined(f->shared->sohm_addr))
+                    if(H5SM_ih_size(f, H5AC_ind_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM index & heap storage info")
 
-            /* Set version # fields */
-            finfo->super.version = f->shared->sblock->super_vers;
-            finfo->sohm.version = f->shared->sohm_vers;
-            finfo->free.version = HDF5_FREESPACE_VERSION;
-            break;
-        }
-    /* H5Fget_intent */
-    case H5F_GET_INTENT:
-        {
-            unsigned *ret = va_arg (arguments, unsigned *);
+                /* Set version # fields */
+                finfo->super.version = f->shared->sblock->super_vers;
+                finfo->sohm.version = f->shared->sohm_vers;
+                finfo->free.version = HDF5_FREESPACE_VERSION;
+                break;
+            }
+        /* H5Fget_intent */
+        case H5VL_FILE_GET_INTENT:
+            {
+                unsigned *ret = va_arg (arguments, unsigned *);
 
-            /* HDF5 uses some flags internally that users don't know about.
-             * Simplify things for them so that they only get either H5F_ACC_RDWR
-             * or H5F_ACC_RDONLY.
-             */
-            if(H5F_INTENT(f) & H5F_ACC_RDWR)
-                *ret = H5F_ACC_RDWR;
-            else
-                *ret = H5F_ACC_RDONLY;
-            break;
-        }
-    /* H5Fget_name */
-    case H5F_GET_NAME:
-        {
-            char      *name = va_arg (arguments, char *);
-            ssize_t   *ret  = va_arg (arguments, ssize_t *);
-            size_t     size = va_arg (arguments, size_t);
-            size_t     len;
+                /* HDF5 uses some flags internally that users don't know about.
+                 * Simplify things for them so that they only get either H5F_ACC_RDWR
+                 * or H5F_ACC_RDONLY.
+                 */
+                if(H5F_INTENT(f) & H5F_ACC_RDWR)
+                    *ret = H5F_ACC_RDWR;
+                else
+                    *ret = H5F_ACC_RDONLY;
+                break;
+            }
+        /* H5Fget_name */
+        case H5VL_FILE_GET_NAME:
+            {
+                char      *name = va_arg (arguments, char *);
+                ssize_t   *ret  = va_arg (arguments, ssize_t *);
+                size_t     size = va_arg (arguments, size_t);
+                size_t     len;
 
-            len = HDstrlen(H5F_OPEN_NAME(f));
+                len = HDstrlen(H5F_OPEN_NAME(f));
 
-            if(name) {
-                HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
-                if(len >= size)
-                    name[size-1]='\0';
-            } /* end if */
+                if(name) {
+                    HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
+                    if(len >= size)
+                        name[size-1]='\0';
+                } /* end if */
 
-            /* Set the return value for the API call */
-            *ret = (ssize_t)len;
-            break;
-        }
-    /* H5Fget_vfd_handle */
-    case H5F_GET_VFD_HANDLE:
-        {
-            void **file_handle = va_arg (arguments, void **);
-            hid_t  fapl        = va_arg (arguments, hid_t);
+                /* Set the return value for the API call */
+                *ret = (ssize_t)len;
+                break;
+            }
+        /* H5Fget_vfd_handle */
+        case H5VL_FILE_GET_VFD_HANDLE:
+            {
+                void **file_handle = va_arg (arguments, void **);
+                hid_t  fapl        = va_arg (arguments, hid_t);
 
-            /* Retrieve the VFD handle for the file */
-            if(H5F_get_vfd_handle(f, fapl, file_handle) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
-            break;
-        }
-    /* H5Fget_mdc_config */
-    case H5F_GET_MDC_CONF:
-        {
-            H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
+                /* Retrieve the VFD handle for the file */
+                if(H5F_get_vfd_handle(f, fapl, file_handle) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
+                break;
+            }
+        /* H5Fget_mdc_config */
+        case H5VL_FILE_GET_MDC_CONF:
+            {
+                H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
 
-            /* Go get the resize configuration */
-            if(H5AC_get_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_auto_resize_config() failed.")
-            break;
-        }
-    /* H5Fget_mdc_hit_rate */
-    case H5F_GET_MDC_HR:
-        {
-            double *hit_rate_ptr = va_arg (arguments, double *);
+                /* Go get the resize configuration */
+                if(H5AC_get_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_auto_resize_config() failed.")
+                break;
+            }
+        /* H5Fget_mdc_hit_rate */
+        case H5VL_FILE_GET_MDC_HR:
+            {
+                double *hit_rate_ptr = va_arg (arguments, double *);
 
-            /* Go get the current hit rate */
-            if(H5AC_get_cache_hit_rate(f->shared->cache, hit_rate_ptr) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_hit_rate() failed.")
-            break;
-        }
-    /* H5Fget_mdc_size */
-    case H5F_GET_MDC_SIZE:
-        {
-            size_t *max_size_ptr        = va_arg (arguments, size_t *);
-            size_t *min_clean_size_ptr  = va_arg (arguments, size_t *);
-            size_t *cur_size_ptr        = va_arg (arguments, size_t *); 
-            int    *cur_num_entries_ptr = va_arg (arguments, int *); 
-            int32_t cur_num_entries;
+                /* Go get the current hit rate */
+                if(H5AC_get_cache_hit_rate(f->shared->cache, hit_rate_ptr) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_hit_rate() failed.")
+                break;
+            }
+        /* H5Fget_mdc_size */
+        case H5VL_FILE_GET_MDC_SIZE:
+            {
+                size_t *max_size_ptr        = va_arg (arguments, size_t *);
+                size_t *min_clean_size_ptr  = va_arg (arguments, size_t *);
+                size_t *cur_size_ptr        = va_arg (arguments, size_t *); 
+                int    *cur_num_entries_ptr = va_arg (arguments, int *); 
+                int32_t cur_num_entries;
 
-            /* Go get the size data */
-            if(H5AC_get_cache_size(f->shared->cache, max_size_ptr, min_clean_size_ptr, 
-                                   cur_size_ptr, &cur_num_entries) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_size() failed.")
+                /* Go get the size data */
+                if(H5AC_get_cache_size(f->shared->cache, max_size_ptr, min_clean_size_ptr, 
+                                       cur_size_ptr, &cur_num_entries) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_size() failed.")
 
-            if(cur_num_entries_ptr != NULL)
-                *cur_num_entries_ptr = (int)cur_num_entries;
-            break;
-        }
-    default:
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information")
-    }
+                if(cur_num_entries_ptr != NULL)
+                    *cur_num_entries_ptr = (int)cur_num_entries;
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information")
+    } /* end switch */
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_file_get() */
@@ -930,7 +930,7 @@ H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, int num_args, va_
 
     switch (get_type) {
     /* H5Gget_create_plist */
-    case H5G_GET_GCPL:
+    case H5VL_GROUP_GET_GCPL:
         {
             H5O_linfo_t         linfo;		        /* Link info message            */
             htri_t	        ginfo_exists;
@@ -1001,7 +1001,7 @@ H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, int num_args, va_
             break;
         }
     /* H5Fget_info2 */
-    case H5G_GET_INFO:
+    case H5VL_GROUP_GET_INFO:
         {
             H5G_info_t  *grp_info = va_arg (arguments, H5G_info_t *);
             haddr_t     *addr = va_arg (arguments, haddr_t *);
@@ -1027,7 +1027,7 @@ H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, int num_args, va_
     }
 
 done:
-    if (H5G_GET_GCPL == get_type) {
+    if (H5VL_GROUP_GET_GCPL == get_type) {
         if(*new_gcpl_id < 0) {
             if(new_id > 0)
                 if(H5I_dec_app_ref(new_id) < 0)
@@ -1167,7 +1167,7 @@ H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, int num_args, va_li
 
     switch (get_type) {
     /* H5Oget_info / H5Oget_info_by_name / H5Oget_info_by_idx */
-    case H5O_GET_INFO:
+    case H5VL_OBJECT_GET_INFO:
         {
             H5O_info_t  *obj_info = va_arg (arguments, H5O_info_t *);
             haddr_t     *addr = va_arg (arguments, haddr_t *);
@@ -1185,7 +1185,7 @@ H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, int num_args, va_li
             break;
         }
     /* H5Oget_comment / H5Oget_comment_by_name */
-    case H5O_GET_COMMENT:
+    case H5VL_OBJECT_GET_COMMENT:
         {
             ssize_t  *ret     =  va_arg (arguments, ssize_t *);
             char     *comment =  va_arg (arguments, char *);
@@ -1258,12 +1258,12 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type,
     H5G_loc_reset(&obj_loc);
 
     switch (lookup_type) {
-    case H5O_LOOKUP:
+    case H5VL_OBJECT_LOOKUP:
         {
             obj_addr = loc.oloc->addr;
             break;
         }
-    case H5O_LOOKUP_BY_NAME:
+    case H5VL_OBJECT_LOOKUP_BY_NAME:
         {
             char        *name   = va_arg (arguments, char *);
             hid_t       lapl_id = va_arg (arguments, hid_t);
@@ -1277,7 +1277,7 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type,
             obj_addr = (haddr_t)obj_loc.oloc->addr;
             break;
         }
-    case H5O_LOOKUP_BY_IDX:
+    case H5VL_OBJECT_LOOKUP_BY_IDX:
         {
             char            *group_name   = va_arg (arguments, char *);
             H5_index_t      idx_type      = va_arg (arguments, H5_index_t);
@@ -1293,7 +1293,7 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type,
             obj_addr = (haddr_t)obj_loc.oloc->addr;
             break;
         }
-    case H5O_LOOKUP_BY_ADDR:
+    case H5VL_OBJECT_LOOKUP_BY_ADDR:
         {
             obj_addr = va_arg (arguments, haddr_t);
             break;
@@ -1771,7 +1771,7 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, int num_args, va_
 
     switch (get_type) {
     /* H5Dget_space */
-    case H5D_GET_SPACE:
+    case H5VL_DATASET_GET_SPACE:
         {
             ret_id = va_arg (arguments, hid_t *);
 
@@ -1788,7 +1788,7 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, int num_args, va_
             break;
         }
     /* H5Dget_space_statuc */
-    case H5D_GET_SPACE_STATUS:
+    case H5VL_DATASET_GET_SPACE_STATUS:
         {
             H5D_space_status_t *allocation = va_arg (arguments, H5D_space_status_t *);
 
@@ -1799,7 +1799,7 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, int num_args, va_
             break;
         }
     /* H5Dget_type */
-    case H5D_GET_TYPE:
+    case H5VL_DATASET_GET_TYPE:
         {
             ret_id = va_arg (arguments, hid_t *);
 
@@ -1829,7 +1829,7 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, int num_args, va_
             break;
         }
     /* H5Dget_create_plist */
-    case H5D_GET_DCPL:
+    case H5VL_DATASET_GET_DCPL:
         {
             H5P_genplist_t      *dcpl_plist;            /* Dataset's DCPL */
             H5P_genplist_t      *new_plist;             /* Copy of dataset's DCPL */
@@ -1919,7 +1919,7 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, int num_args, va_
             break;
         }
     /* H5Dget_type */
-    case H5D_GET_DAPL:
+    case H5VL_DATASET_GET_DAPL:
         {
             H5P_genplist_t  *old_plist;     /* Default DAPL */
             H5P_genplist_t  *new_plist;     /* New DAPL */
@@ -1949,7 +1949,7 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, int num_args, va_
             break;
         }
     /* H5Dget_type */
-    case H5D_GET_STORAGE_SIZE:
+    case H5VL_DATASET_GET_STORAGE_SIZE:
         {
             hsize_t *ret = va_arg (arguments, hsize_t *);
 
@@ -1958,7 +1958,7 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, int num_args, va_
             break;
         }
     /* H5Dget_type */
-    case H5D_GET_OFFSET:
+    case H5VL_DATASET_GET_OFFSET:
         {
             haddr_t *ret = va_arg (arguments, haddr_t *);
 
@@ -1970,14 +1970,14 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, int num_args, va_
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset")
     }
 done:
-    if (H5D_GET_DCPL == get_type || H5D_GET_DAPL == get_type) {
+    if (H5VL_DATASET_GET_DCPL == get_type || H5VL_DATASET_GET_DAPL == get_type) {
         if(*ret_id < 0) {
             if(new_id > 0)
                 if(H5I_dec_app_ref(new_id) < 0)
                     HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't free")
         } /* end if */
     }
-    if (H5D_GET_SPACE == get_type) {
+    if (H5VL_DATASET_GET_SPACE == get_type) {
         if(*ret_id < 0) {
             if(space!=NULL) {
                 if(H5S_close(space) < 0)
@@ -1985,7 +1985,7 @@ done:
             } /* end if */
         } /* end if */
     }
-    if (H5D_GET_TYPE == get_type) {
+    if (H5VL_DATASET_GET_TYPE == get_type) {
         if(*ret_id < 0) {
             if(dt && H5T_close(dt) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")

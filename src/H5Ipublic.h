@@ -48,7 +48,7 @@ typedef enum H5I_type_t {
     H5I_FILE_PUBLIC,		/*type ID for upper level file ID objects   */
     H5I_GROUP_PUBLIC,		/*type ID for upper level group ID objects  */
     H5I_DATASET_PUBLIC,		/*type ID for upper level dataset ID objects    */
-    H5I_ATTRIBUTE_PUBLIC,	/*type ID for upper level attribute ID objects  */
+    H5I_ATTR_PUBLIC,	/*type ID for upper level attribute ID objects  */
     H5I_DATATYPE_PUBLIC,	/*type ID for upper level datatype ID objects   */
     H5I_GENPROP_CLS,            /*type ID for generic property list classes */
     H5I_GENPROP_LST,            /*type ID for generic property lists        */

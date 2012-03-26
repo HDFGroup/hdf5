@@ -29,7 +29,11 @@
 /****************************/
 /* Library Private Typedefs */
 /****************************/
-
+/* type of the ID passed to users */
+typedef struct H5VL_id_wrapper_t {
+    hid_t obj_id;  /* actual id for object */
+    H5VL_class_t *vol_plugin;  /* pointer to the VOL structure */
+} H5VL_id_wrapper_t;
 
 /*****************************/
 /* Library Private Variables */

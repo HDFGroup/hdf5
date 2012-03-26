@@ -36,8 +36,8 @@
 #include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
-/* Declare a free list to manage the H5I_t struct */
-H5FL_DEFINE_STATIC(H5I_t);
+/* Declare a free list to manage the H5VL_id_wrapper_t struct */
+H5FL_DEFINE_STATIC(H5VL_id_wrapper_t);
 
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
 typedef struct H5F_olist_t {
@@ -193,7 +193,7 @@ H5Fget_create_plist(hid_t uid)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", uid);
 
-    if(H5VL_file_get(uid, H5F_GET_FCPL, 1, &ret_value) < 0)
+    if(H5VL_file_get(uid, H5VL_FILE_GET_FCPL, 1, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file creation properties")
 
 done:
@@ -230,7 +230,7 @@ H5Fget_access_plist(hid_t uid)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", uid);
 
-    if(H5VL_file_get(uid, H5F_GET_FAPL, 1, &ret_value) < 0)
+    if(H5VL_file_get(uid, H5VL_FILE_GET_FAPL, 1, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file creation properties")
 
 done:
@@ -370,7 +370,7 @@ ssize_t
 H5Fget_obj_count(hid_t uid, unsigned types)
 {
     H5F_t    *f = NULL;         /* File to query */
-    H5I_t    *uid_info;         /* user id structure */
+    H5VL_id_wrapper_t    *uid_info;         /* user id structure */
     hid_t    id;
     ssize_t  ret_value;         /* Return value */
 
@@ -378,7 +378,7 @@ H5Fget_obj_count(hid_t uid, unsigned types)
     H5TRACE2("Zs", "iIu", uid, types);
 
     if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
-        if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         id = uid_info->obj_id;
     }
@@ -455,7 +455,7 @@ ssize_t
 H5Fget_obj_ids(hid_t uid, unsigned types, size_t max_objs, hid_t *oid_list)
 {
     H5F_t     *f = NULL;        /* File to query */
-    H5I_t     *uid_info;        /* user id structure */
+    H5VL_id_wrapper_t     *uid_info;        /* user id structure */
     hid_t     id;
     ssize_t   ret_value;        /* Return value */
 
@@ -463,7 +463,7 @@ H5Fget_obj_ids(hid_t uid, unsigned types, size_t max_objs, hid_t *oid_list)
     H5TRACE4("Zs", "iIuz*i", uid, types, max_objs, oid_list);
 
     if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
-        if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         id = uid_info->obj_id;
     }
@@ -752,7 +752,7 @@ H5Fget_vfd_handle(hid_t uid, hid_t fapl, void **file_handle)
     if(!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle pointer")
 
-    if((ret_value = H5VL_file_get(uid, H5F_GET_VFD_HANDLE, 2, file_handle, fapl)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_VFD_HANDLE, 2, file_handle, fapl)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file handle")
 
 done:
@@ -1902,7 +1902,7 @@ H5Freopen(hid_t uid)
 {
     H5F_t	*old_file = NULL;
     H5F_t	*new_file = NULL;
-    H5I_t       *uid_info, *new_uid_info;
+    H5VL_id_wrapper_t       *uid_info, *new_uid_info;
     hid_t	file_id, new_file_id, ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -1911,7 +1911,7 @@ H5Freopen(hid_t uid)
     /* Get the file */
     if(H5I_FILE_PUBLIC != H5I_get_type(uid))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
-    if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
     file_id = uid_info->obj_id;
@@ -1938,7 +1938,7 @@ H5Freopen(hid_t uid)
     new_file->file_id = new_file_id;
 
 #if 1 /*MSC - This needs to go through the VOL */
-    if(NULL == (new_uid_info = H5FL_MALLOC(H5I_t)))
+    if(NULL == (new_uid_info = H5FL_MALLOC(H5VL_id_wrapper_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     new_uid_info->obj_id = new_file_id;
     new_uid_info->vol_plugin = uid_info->vol_plugin;
@@ -1979,7 +1979,7 @@ H5Fget_intent(hid_t uid, unsigned *intent_flags)
 
     /* If no intent flags were passed in, exit quietly */
     if(intent_flags) {
-        if((ret_value = H5VL_file_get(uid, H5F_GET_INTENT, 1, intent_flags)) < 0)
+        if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_INTENT, 1, intent_flags)) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file intent")
     }
 
@@ -2011,13 +2011,13 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
     HDassert(file);
 
     if(file->file_id == -1) {
-        H5I_t               *uid_info;                /* user id structure */
+        H5VL_id_wrapper_t               *uid_info;                /* user id structure */
         /* Get an atom for the file */
         if((file->file_id = H5I_register(H5I_FILE, file, app_ref)) < 0)
 	    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
 
         /* Create a new id that points to a struct that holds the file id and the VOL id */
-        if(NULL == (uid_info = H5FL_MALLOC(H5I_t)))
+        if(NULL == (uid_info = H5FL_MALLOC(H5VL_id_wrapper_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
         uid_info->obj_id = file->file_id;
         uid_info->vol_plugin = (H5VL_class_t *)H5I_object(file->vol_id);
@@ -2402,7 +2402,7 @@ H5Fget_freespace(hid_t uid)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("Hs", "i", uid);
 
-    if(H5VL_file_get(uid, H5F_GET_FREE_SPACE, 1, &ret_value) < 0)
+    if(H5VL_file_get(uid, H5VL_FILE_GET_FREE_SPACE, 1, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file free space")
 
 done:
@@ -2436,7 +2436,7 @@ H5Fget_filesize(hid_t uid, hsize_t *size)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", uid, size);
 
-    if((ret_value = H5VL_file_get(uid, H5F_GET_SIZE, 1, size)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_SIZE, 1, size)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file size")
 
 done:
@@ -2474,7 +2474,7 @@ H5Fget_mdc_config(hid_t uid, H5AC_cache_config_t *config_ptr)
     if((NULL == config_ptr) || (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
 
-    if((ret_value = H5VL_file_get(uid, H5F_GET_MDC_CONF, 1, config_ptr)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_MDC_CONF, 1, config_ptr)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get mdc config")
 
 done:
@@ -2501,7 +2501,7 @@ herr_t
 H5Fset_mdc_config(hid_t uid, H5AC_cache_config_t *config_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
-    H5I_t      *uid_info;               /* user id structure */
+    H5VL_id_wrapper_t      *uid_info;               /* user id structure */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2509,7 +2509,7 @@ H5Fset_mdc_config(hid_t uid, H5AC_cache_config_t *config_ptr)
 
     if(H5I_FILE_PUBLIC != H5I_get_type(uid))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
-    if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
     /* Check args */
@@ -2552,7 +2552,7 @@ H5Fget_mdc_hit_rate(hid_t uid, double *hit_rate_ptr)
     if(NULL == hit_rate_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL hit rate pointer")
 
-    if((ret_value = H5VL_file_get(uid, H5F_GET_MDC_HR, 1, hit_rate_ptr)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_MDC_HR, 1, hit_rate_ptr)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get MDC hit rate")
 
 done:
@@ -2587,7 +2587,7 @@ H5Fget_mdc_size(hid_t uid, size_t *max_size_ptr, size_t *min_clean_size_ptr,
     H5TRACE5("e", "i*z*z*z*Is", uid, max_size_ptr, min_clean_size_ptr,
              cur_size_ptr, cur_num_entries_ptr);
 
-    if((ret_value = H5VL_file_get(uid, H5F_GET_MDC_SIZE, 4, max_size_ptr, 
+    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_MDC_SIZE, 4, max_size_ptr, 
                                   min_clean_size_ptr, cur_size_ptr, cur_num_entries_ptr)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get MDC hit rate")
 
@@ -2620,7 +2620,7 @@ herr_t
 H5Freset_mdc_hit_rate_stats(hid_t uid)
 {
     H5F_t      *file;                   /* File object for file ID */
-    H5I_t      *uid_info;               /* user id structure */
+    H5VL_id_wrapper_t      *uid_info;               /* user id structure */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2628,7 +2628,7 @@ H5Freset_mdc_hit_rate_stats(hid_t uid)
 
     if(H5I_FILE_PUBLIC != H5I_get_type(uid))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
-    if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
     /* Check args */
@@ -2677,8 +2677,8 @@ H5Fget_name(hid_t uid, char *name/*out*/, size_t size)
     /* MSC - temp fix to handle later when all user level ids are of type UID */
     if (H5I_FILE_PUBLIC == H5I_get_type(uid) || H5I_GROUP_PUBLIC == H5I_get_type(uid) ||
         H5I_DATATYPE_PUBLIC == H5I_get_type(uid) || H5I_DATASET_PUBLIC == H5I_get_type(uid) ||
-        H5I_ATTRIBUTE_PUBLIC == H5I_get_type(uid)) {
-        if(H5VL_file_get(uid, H5F_GET_NAME, 3, name, &ret_value, size) < 0)
+        H5I_ATTR_PUBLIC == H5I_get_type(uid)) {
+        if(H5VL_file_get(uid, H5VL_FILE_GET_NAME, 3, name, &ret_value, size) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file name")
     }
     else {
@@ -2746,7 +2746,7 @@ H5Fget_info2(hid_t uid, H5F_info2_t *finfo)
     if(!finfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-    if((ret_value = H5VL_file_get(uid, H5F_GET_INFO, 1, finfo)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_INFO, 1, finfo)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file info")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2781,7 +2781,7 @@ H5Fget_free_sections(hid_t uid, H5F_mem_t type, size_t nsects,
     if(sect_info && nsects == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "nsects must be > 0")
 
-    if(H5VL_file_get(uid, H5F_GET_FREE_SECTIONS, 4, sect_info, &ret_value, 
+    if(H5VL_file_get(uid, H5VL_FILE_GET_FREE_SECTIONS, 4, sect_info, &ret_value, 
                      type, nsects) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file info")
 done:
@@ -2807,7 +2807,7 @@ herr_t
 H5Fclear_elink_file_cache(hid_t uid)
 {
     H5F_t         *file;        /* File */
-    H5I_t      *uid_info;               /* user id structure */
+    H5VL_id_wrapper_t      *uid_info;               /* user id structure */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2816,7 +2816,7 @@ H5Fclear_elink_file_cache(hid_t uid)
     /* Check args */
     if(H5I_FILE_PUBLIC != H5I_get_type(uid))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
-    if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
     if(NULL == (file = (H5F_t *)H5I_object_verify(uid_info->obj_id, H5I_FILE)))

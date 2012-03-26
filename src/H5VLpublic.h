@@ -26,51 +26,51 @@
 
 /* types for all file get API routines */
 typedef enum H5VL_file_get_t {
-    H5F_GET_FAPL	    = 0, 	/*file access property list		*/
-    H5F_GET_FCPL	    = 1,	/*file creation property list		*/
-    H5F_GET_SIZE	    = 2,	/*file size             		*/
-    H5F_GET_FREE_SPACE	    = 3,	/*file freespace         		*/
-    H5F_GET_INFO	    = 4,	/*file info             		*/
-    H5F_GET_INTENT	    = 5,	/*file intent           		*/
-    H5F_GET_NAME	    = 6,	/*file name             		*/
-    H5F_GET_OBJ_COUNT	    = 7,	/*object count in file	        	*/
-    H5F_GET_OBJ_IDS	    = 8,	/*object ids in file     		*/
-    H5F_GET_VFD_HANDLE	    = 9,	/*file VFD handle       		*/
-    H5F_GET_MDC_CONF	    = 10,	/*file metadata cache configuration	*/
-    H5F_GET_MDC_HR	    = 11,	/*file metadata cache hit rate		*/
-    H5F_GET_MDC_SIZE	    = 12,       /*file metadata cache size		*/
-    H5F_GET_FREE_SECTIONS   = 13        /*file free selections                  */
+    H5VL_FILE_GET_FAPL	            = 0, 	/*file access property list		*/
+    H5VL_FILE_GET_FCPL	            = 1,	/*file creation property list		*/
+    H5VL_FILE_GET_SIZE	            = 2,	/*file size             		*/
+    H5VL_FILE_GET_FREE_SPACE	    = 3,	/*file freespace         		*/
+    H5VL_FILE_GET_INFO	            = 4,	/*file info             		*/
+    H5VL_FILE_GET_INTENT	    = 5,	/*file intent           		*/
+    H5VL_FILE_GET_NAME	            = 6,	/*file name             		*/
+    H5VL_FILE_GET_OBJ_COUNT	    = 7,	/*object count in file	        	*/
+    H5VL_FILE_GET_OBJ_IDS	    = 8,	/*object ids in file     		*/
+    H5VL_FILE_GET_VFD_HANDLE	    = 9,	/*file VFD handle       		*/
+    H5VL_FILE_GET_MDC_CONF	    = 10,	/*file metadata cache configuration	*/
+    H5VL_FILE_GET_MDC_HR	    = 11,	/*file metadata cache hit rate		*/
+    H5VL_FILE_GET_MDC_SIZE	    = 12,       /*file metadata cache size		*/
+    H5VL_FILE_GET_FREE_SECTIONS     = 13        /*file free selections                  */
 } H5VL_file_get_t;
 
 /* types for all dataset get API routines */
 typedef enum H5VL_dataset_get_t {
-    H5D_GET_SPACE           = 0,         /* dataspace                           */
-    H5D_GET_SPACE_STATUS    = 1,         /* space  status                       */
-    H5D_GET_TYPE            = 2,         /* datatype                            */
-    H5D_GET_DCPL            = 3,         /* creation property list              */
-    H5D_GET_DAPL            = 4,         /* access property list                */
-    H5D_GET_STORAGE_SIZE    = 5,         /* storage size                        */
-    H5D_GET_OFFSET          = 6          /* offset                              */
+    H5VL_DATASET_GET_SPACE           = 0,         /* dataspace                           */
+    H5VL_DATASET_GET_SPACE_STATUS    = 1,         /* space  status                       */
+    H5VL_DATASET_GET_TYPE            = 2,         /* datatype                            */
+    H5VL_DATASET_GET_DCPL            = 3,         /* creation property list              */
+    H5VL_DATASET_GET_DAPL            = 4,         /* access property list                */
+    H5VL_DATASET_GET_STORAGE_SIZE    = 5,         /* storage size                        */
+    H5VL_DATASET_GET_OFFSET          = 6          /* offset                              */
 } H5VL_dataset_get_t;
 
 /* types for all group get API routines */
 typedef enum H5VL_group_get_t {
-    H5G_GET_GCPL	    = 0,	/*group creation property list		*/
-    H5G_GET_INFO	    = 1 	/*group info             		*/
+    H5VL_GROUP_GET_GCPL	    = 0,	/*group creation property list		*/
+    H5VL_GROUP_GET_INFO	    = 1 	/*group info             		*/
 } H5VL_group_get_t;
 
 /* types for all object get API routines */
 typedef enum H5VL_object_get_t {
-    H5O_GET_INFO	    = 0,	/*object info	                	*/
-    H5O_GET_COMMENT	    = 1 	/*object comment            		*/
+    H5VL_OBJECT_GET_INFO	    = 0,	/*object info	                	*/
+    H5VL_OBJECT_GET_COMMENT	    = 1 	/*object comment            		*/
 } H5VL_object_get_t;
 
 /* types for all object lookup API routines */
 typedef enum H5VL_object_lookup_t {
-    H5O_LOOKUP              = 0,
-    H5O_LOOKUP_BY_NAME	    = 1,
-    H5O_LOOKUP_BY_IDX	    = 2,
-    H5O_LOOKUP_BY_ADDR	    = 3 
+    H5VL_OBJECT_LOOKUP              = 0,
+    H5VL_OBJECT_LOOKUP_BY_NAME	    = 1,
+    H5VL_OBJECT_LOOKUP_BY_IDX	    = 2,
+    H5VL_OBJECT_LOOKUP_BY_ADDR	    = 3 
 } H5VL_object_lookup_t;
 
 #define H5VL_VOL_DEFAULT 0   /* Default VOL plugin value */

@@ -437,7 +437,7 @@ H5Gget_create_plist(hid_t uid)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", uid);
 
-    if(H5VL_group_get(uid, H5G_GET_GCPL, 1, &ret_value) < 0)
+    if(H5VL_group_get(uid, H5VL_GROUP_GET_GCPL, 1, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group creation properties")
 
 done:
@@ -477,11 +477,11 @@ H5Gget_info(hid_t loc_id, H5G_info_t *grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5O_LOOKUP, 1, &location) < 0)
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP, 1, &location) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_group_get(loc_id, H5G_GET_INFO, 2, grp_info, location)) < 0)
+    if((ret_value = H5VL_group_get(loc_id, H5VL_GROUP_GET_INFO, 2, grp_info, location)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -529,11 +529,11 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5O_LOOKUP_BY_NAME, 3, &location, name, lapl_id) < 0)
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, 3, &location, name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_group_get(loc_id, H5G_GET_INFO, 2, grp_info, location)) < 0)
+    if((ret_value = H5VL_group_get(loc_id, H5VL_GROUP_GET_INFO, 2, grp_info, location)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -587,12 +587,12 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup(loc_id, H5O_LOOKUP_BY_IDX, 6, &location, group_name,
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_IDX, 6, &location, group_name,
                           idx_type, order, n, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_group_get(loc_id, H5G_GET_INFO, 2, grp_info, location)) < 0)
+    if((ret_value = H5VL_group_get(loc_id, H5VL_GROUP_GET_INFO, 2, grp_info, location)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:

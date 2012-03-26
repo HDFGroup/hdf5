@@ -41,7 +41,7 @@
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"		/* Links				*/
-
+#include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
 /****************/
 /* Local Macros */
@@ -159,7 +159,7 @@ static herr_t H5G_loc_get_comment_cb(H5G_loc_t *grp_loc, const char *name,
 herr_t
 H5G_loc(hid_t id, H5G_loc_t *loc)
 {
-    H5I_t       *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t       *uid_info;              /* user id structure */
     hid_t       loc_id;
     H5I_type_t  id_type;
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -173,8 +173,8 @@ H5G_loc(hid_t id, H5G_loc_t *loc)
      that needs to go through the VOL actually go through the VOL*/
     if (H5I_FILE_PUBLIC == id_type || H5I_GROUP_PUBLIC == id_type ||
         H5I_DATASET_PUBLIC == id_type || H5I_DATATYPE_PUBLIC == id_type ||
-        H5I_ATTRIBUTE_PUBLIC == id_type) {
-        if(NULL == (uid_info = (H5I_t *)H5I_object(id)))
+        H5I_ATTR_PUBLIC == id_type) {
+        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         loc_id = uid_info->obj_id;
     }

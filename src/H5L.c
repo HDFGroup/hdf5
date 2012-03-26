@@ -36,6 +36,7 @@
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Oprivate.h"         /* File objects                         */
 #include "H5Pprivate.h"         /* Property lists                       */
+#include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
 /****************/
 /* Local Macros */
@@ -1154,7 +1155,7 @@ H5Literate(hid_t id, H5_index_t idx_type, H5_iter_order_t order,
     H5G_link_iterate_t lnk_op;  /* Link operator */
     hsize_t     last_lnk;       /* Index of last object looked at */
     hsize_t	idx;            /* Internal location to hold index */
-    H5I_t *uid_info;            /* user id structure */
+    H5VL_id_wrapper_t *uid_info;            /* user id structure */
     hid_t grp_id;
     herr_t ret_value;           /* Return value */
 
@@ -1168,7 +1169,7 @@ H5Literate(hid_t id, H5_index_t idx_type, H5_iter_order_t order,
      at some point needs to be removed once all high level operations
      that needs to go through the VOL actually go through the VOL*/
     if (H5I_FILE_PUBLIC == id_type || H5I_GROUP_PUBLIC == id_type) {
-        if(NULL == (uid_info = (H5I_t *)H5I_object(id)))
+        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         grp_id = uid_info->obj_id;
         id_type = H5I_get_type(grp_id);
@@ -1312,7 +1313,7 @@ H5Lvisit(hid_t uid, H5_index_t idx_type, H5_iter_order_t order,
     H5L_iterate_t op, void *op_data)
 {
     H5I_type_t  id_type;                /* Type of ID */
-    H5I_t *uid_info;            /* user id structure */
+    H5VL_id_wrapper_t *uid_info;            /* user id structure */
     hid_t grp_id;
     herr_t      ret_value;              /* Return value */
 
@@ -1322,7 +1323,7 @@ H5Lvisit(hid_t uid, H5_index_t idx_type, H5_iter_order_t order,
     id_type = H5I_get_type(uid);
 
     if (H5I_FILE_PUBLIC == id_type) {
-        if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         grp_id = uid_info->obj_id;
         id_type = H5I_get_type(grp_id);
