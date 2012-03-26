@@ -67,9 +67,10 @@ typedef enum H5VL_object_get_t {
 
 /* types for all object lookup API routines */
 typedef enum H5VL_object_lookup_t {
-    H5O_LOOKUP_BY_NAME	    = 0,
-    H5O_LOOKUP_BY_IDX	    = 1,
-    H5O_LOOKUP_BY_ADDR	    = 2 
+    H5O_LOOKUP              = 0,
+    H5O_LOOKUP_BY_NAME	    = 1,
+    H5O_LOOKUP_BY_IDX	    = 2,
+    H5O_LOOKUP_BY_ADDR	    = 3 
 } H5VL_object_lookup_t;
 
 #define H5VL_VOL_DEFAULT 0   /* Default VOL plugin value */

@@ -302,14 +302,33 @@ done:
     Deprecated in favor of H5Oget_info
 --------------------------------------------------------------------------*/
 int
-H5Aget_num_attrs(hid_t loc_id)
+H5Aget_num_attrs(hid_t id)
 {
     H5O_loc_t    	*loc;	/* Object location for attribute */
     void           	*obj;
+    H5I_t               *uid_info;              /* user id structure */
+    hid_t               loc_id;
+    H5I_type_t          id_type;
     int			ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Is", "i", loc_id);
+    H5TRACE1("Is", "i", id);
+
+    id_type = H5I_get_type(id);
+    /* get the actual ID from an upper ID level */
+    /* MSC - this is a workaround to allow the test suite to pass and
+     at some point needs to be removed once all high level operations
+     that needs to go through the VOL actually go through the VOL*/
+    if (H5I_FILE_PUBLIC == id_type || H5I_GROUP_PUBLIC == id_type ||
+        H5I_DATASET_PUBLIC == id_type || H5I_DATATYPE_PUBLIC == id_type ||
+        H5I_ATTRIBUTE_PUBLIC == id_type) {
+        if(NULL == (uid_info = (H5I_t *)H5I_object(id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, NULL, "invalid user identifier")
+        loc_id = uid_info->obj_id;
+    }
+    else {
+        loc_id = id;
+    }
 
     /* check arguments */
     if(H5I_BADID == H5I_get_type(loc_id))

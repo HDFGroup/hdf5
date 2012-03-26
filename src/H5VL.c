@@ -938,12 +938,14 @@ H5VL_group_get(hid_t uid, H5VL_group_get_t get_type, int num_args, ...)
 {
     H5I_t            *uid_info;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
+    H5I_type_t        id_type;               /* Type of ID */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    id_type = H5I_get_type(uid);
     /* Check/fix arguments. */
-    if(H5I_GROUP_PUBLIC != H5I_get_type(uid))
+    if(H5I_GROUP_PUBLIC != id_type && H5I_FILE_PUBLIC != id_type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
@@ -1115,12 +1117,16 @@ H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, int num_args, ..
 {
     H5I_t            *uid_info;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
+    H5I_type_t        id_type;
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    id_type = H5I_get_type(uid);
     /* Check id */
-    if(H5I_FILE_PUBLIC != H5I_get_type(uid) && H5I_GROUP_PUBLIC != H5I_get_type(uid))
+    if(H5I_FILE_PUBLIC != id_type && H5I_GROUP_PUBLIC != id_type &&
+       H5I_DATASET_PUBLIC != id_type && H5I_DATATYPE_PUBLIC !=  id_type &&
+       H5I_ATTRIBUTE_PUBLIC != id_type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* lookup the ID struct */
@@ -1159,13 +1165,16 @@ H5VL_object_get(hid_t uid, H5VL_object_get_t get_type, int num_args, ...)
 {
     H5I_t            *uid_info;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
+    H5I_type_t        id_type;
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    id_type = H5I_get_type(uid);
     /* Check id */
-    if(H5I_GROUP_PUBLIC != H5I_get_type(uid) && H5I_DATASET_PUBLIC != H5I_get_type(uid) && 
-       H5I_DATATYPE_PUBLIC !=  H5I_get_type(uid) && H5I_FILE_PUBLIC !=  H5I_get_type(uid))
+    if(H5I_GROUP_PUBLIC != id_type && H5I_DATASET_PUBLIC != id_type && 
+       H5I_DATATYPE_PUBLIC !=  id_type && H5I_FILE_PUBLIC !=  id_type &&
+       H5I_ATTRIBUTE_PUBLIC !=  id_type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */

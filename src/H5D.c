@@ -725,8 +725,8 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     H5TRACE4("e", "iii*h", dataset_id, type_id, space_id, size);
 
     /* Check args */
-    if(H5I_DATASET != H5I_get_type(dataset_id) ||
-            H5I_DATATYPE != H5I_get_type(type_id) || size == NULL)
+    if(H5I_DATASET_PUBLIC != H5I_get_type(dataset_id) ||
+       H5I_DATATYPE != H5I_get_type(type_id) || size == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")

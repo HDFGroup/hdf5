@@ -1147,7 +1147,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Literate(hid_t uid, H5_index_t idx_type, H5_iter_order_t order,
+H5Literate(hid_t id, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t *idx_p, H5L_iterate_t op, void *op_data)
 {
     H5I_type_t  id_type;        /* Type of ID */
@@ -1159,19 +1159,22 @@ H5Literate(hid_t uid, H5_index_t idx_type, H5_iter_order_t order,
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "iIiIo*hx*x", grp_id, idx_type, order, idx_p, op, op_data);
+    H5TRACE6("e", "iIiIo*hx*x", id, idx_type, order, idx_p, op, op_data);
 
     /* Check arguments */
-    id_type = H5I_get_type(uid);
-
-    if (H5I_FILE_PUBLIC == id_type) {
-        if(NULL == (uid_info = (H5I_t *)H5I_object(uid)))
+    id_type = H5I_get_type(id);
+    /* get the actual ID from an upper ID level */
+    /* MSC - this is a workaround to allow the test suite to pass and
+     at some point needs to be removed once all high level operations
+     that needs to go through the VOL actually go through the VOL*/
+    if (H5I_FILE_PUBLIC == id_type || H5I_GROUP_PUBLIC == id_type) {
+        if(NULL == (uid_info = (H5I_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
         grp_id = uid_info->obj_id;
         id_type = H5I_get_type(grp_id);
     }
     else {
-        grp_id = uid;
+        grp_id = id;
     }
 
     if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
