@@ -54,6 +54,42 @@ hsize_t zero[H5O_LAYOUT_NDIMS];
 
 
 /*-------------------------------------------------------------------------
+ * Function:	is_sparse
+ *
+ * Purpose:	Determines if the file system of the current working
+ *		directory supports holes.
+ *
+ * Return:	Success:	Non-zero if holes are supported; zero
+ *				otherwise.
+ *
+ *		Failure:	zero
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, July 15, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+is_sparse(void)
+{
+    int		fd;
+    h5_stat_t	sb;
+
+    if ((fd=HDopen("x.h5", O_RDWR|O_TRUNC|O_CREAT, 0666)) < 0) return 0;
+    if (HDlseek(fd, (off_t)(1024*1024), SEEK_SET)!=1024*1024) return 0;
+    if (5!=HDwrite(fd, "hello", (size_t)5)) return 0;
+    if (HDclose(fd) < 0) return 0;
+    if (HDstat("x.h5", &sb) < 0) return 0;
+    if (HDremove("x.h5") < 0) return 0;
+#ifdef H5_HAVE_STAT_ST_BLOCKS
+    return ((unsigned long)sb.st_blocks*512 < (unsigned long)sb.st_size);
+#else
+    return (0);
+#endif
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	print_array
  *
  * Purpose:	Prints the values in an array
@@ -565,6 +601,7 @@ main(int argc, char *argv[])
     unsigned		size_of_test;
     unsigned            u;              /* Local index variable */
     char		filename[1024];
+    int                 has_sparse_support = 0;
 
     /* Parse arguments or assume these tests (`small', `medium' ) */
     if (1 == argc) {
@@ -597,6 +634,12 @@ main(int argc, char *argv[])
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
+
+    /* Check to see if the file system supports POSIX-style sparse files.
+     * Windows NTFS does not, so we want to avoid tests which create
+     * very large files.
+     */
+    has_sparse_support = is_sparse();
 
     /* Reset library */
     h5_reset();
@@ -656,7 +699,10 @@ main(int argc, char *argv[])
         status = test_sparse(file, "sparse", (size_t)2000, (size_t)4, (size_t)2, (size_t)3);
         nerrors += status < 0 ? 1 : 0;
     }
-    if (size_of_test & TEST_LARGE) {
+    if (has_sparse_support && size_of_test & TEST_LARGE) {
+        /* This test is skipped if there is no POSIX-style sparse file support
+         * e.g.: Windows NTFS filesystems
+         */
         status = test_sparse(file, "sparse", (size_t)800, (size_t)50, (size_t)50, (size_t)50);
         nerrors += status < 0 ? 1 : 0;
     }
