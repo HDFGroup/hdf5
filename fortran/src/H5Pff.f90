@@ -53,11 +53,23 @@ CONTAINS
 ! INPUTS
 !  class  - type of the property class to be created.
 !	    Possible values are:
-!	      H5P_FILE_CREATE_F
-!	      H5P_FILE_ACCESS_F
-!	      H5P_DATASET_CREATE_F
-!	      H5P_DATASET_XFER_F
-!	      H5P_FILE_MOUNT_F
+!             H5P_OBJECT_CREATE_F
+!             H5P_FILE_CREATE_F
+!             H5P_FILE_ACCESS_F
+!             H5P_DATASET_CREATE_F
+!             H5P_DATASET_ACCESS_F
+!             H5P_DATASET_XFER_F
+!             H5P_FILE_MOUNT_F
+!             H5P_GROUP_CREATE_F
+!             H5P_GROUP_ACCESS_F
+!             H5P_DATATYPE_CREATE_F
+!             H5P_DATATYPE_ACCESS_F
+!             H5P_STRING_CREATE_F
+!             H5P_ATTRIBUTE_CREATE _F
+!             H5P_OBJECT_COPY_F
+!             H5P_LINK_CREATE_F
+!             H5P_LINK_ACCESS_F
+!
 ! OUTPUTS
 !  prp_id - property list identifier
 !  hdferr - error code		
@@ -76,16 +88,9 @@ CONTAINS
 ! Fortran90 Interface:
   SUBROUTINE h5pcreate_f(class, prp_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: class   ! The type of the property list 
-                                          ! to be created. Possible values are: 
-                                          !  H5P_FILE_CREATE_F
-                                          !  H5P_FILE_ACCESS_F
-                                          !  H5P_DATASET_CREATE_F
-                                          !  H5P_DATASET_XFER_F
-                                          !  H5P_FILE_MOUNT_F
-    INTEGER(HID_T), INTENT(OUT) :: prp_id ! Property list identifier 
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code
-                                          ! 0 on success and -1 on failure
+    INTEGER(HID_T), INTENT(IN)  :: class
+    INTEGER(HID_T), INTENT(OUT) :: prp_id
+    INTEGER       , INTENT(OUT) :: hdferr
 !*****
 !            INTEGER, EXTERNAL :: h5pcreate_c
 !  MS FORTRAN needs explicit interface for C functions called here.
