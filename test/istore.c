@@ -711,6 +711,8 @@ main(int argc, char *argv[])
          * e.g.: Windows NTFS filesystems
          */
         status = test_sparse(file, "sparse", (size_t)800, (size_t)50, (size_t)50, (size_t)50, skip_test);
+        if(skip_test)
+            printf("    The current VFD does not support sparse files on this platform.\n");
         nerrors += status < 0 ? 1 : 0;
     }
 
