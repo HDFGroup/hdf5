@@ -150,8 +150,12 @@ Bug Fixes since HDF5-1.8.8
     - The istore test will now skip the sparse 50x50x50 test when the VFD does
       not support sparse files on that platform.  The most important platforms
       on which this will be skipped are Windows (NTFS sparse files are not
-      supported) and Mac OS-X (HFS sparse files are not supported).  This fixes
-      CTest timeout issues on Windows.  (DER - 2012/3/27, HDFFV-7769)
+      supported) and Mac OS-X (HFS sparse files are not supported).  This
+      fixes CTest timeout issues on Windows.  (DER - 2012/3/27, HDFFV-7769)
+    - Windows and POSIX correctness changes have been propagated from the SEC2
+      VFD to the core VFD.  This mainly affects file operations on the
+      driver's backing store and fixes a problem on Windows where large files
+      could not be read. (DER - 2012/3/27, HDFFV-7916, HDFFV-7603)
 
     Parallel Library
     ----------------
