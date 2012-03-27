@@ -467,7 +467,7 @@ error:
  */
 static herr_t
 test_sparse(hid_t f, const char *prefix, size_t nblocks,
-	    size_t nx, size_t ny, size_t nz)
+	    size_t nx, size_t ny, size_t nz, int skip_test)
 {
     hid_t               dataset;        /* Dataset ID */
     hid_t               fspace;         /* Dataset's file dataspace */
@@ -499,6 +499,10 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
 
     sprintf(s, "istore sparse: %s", dims);
     TESTING(s);
+    if(skip_test){
+        SKIPPED()
+        return SUCCEED;
+    }
     buf = (uint8_t *)HDmalloc(nx * ny * nz);
     HDmemset(buf, 128, nx * ny * nz);
 
@@ -601,6 +605,7 @@ main(int argc, char *argv[])
     unsigned		size_of_test;
     unsigned            u;              /* Local index variable */
     char		filename[1024];
+    int                 skip_test = 0;
     int                 has_sparse_support = 0;
 
     /* Parse arguments or assume these tests (`small', `medium' ) */
@@ -683,27 +688,29 @@ main(int argc, char *argv[])
         status = test_extend(file, "extend", (size_t)10, (size_t)400, (size_t)10);
         nerrors += status < 0 ? 1 : 0;
     }
+    skip_test = 0;
     if (size_of_test & TEST_SMALL) {
-        status = test_sparse(file, "sparse", (size_t)100, (size_t)5, (size_t)0, (size_t)0);
+        status = test_sparse(file, "sparse", (size_t)100, (size_t)5, (size_t)0, (size_t)0, skip_test);
         nerrors += status < 0 ? 1 : 0;
-        status = test_sparse(file, "sparse", (size_t)100, (size_t)3, (size_t)4, (size_t)0);
+        status = test_sparse(file, "sparse", (size_t)100, (size_t)3, (size_t)4, (size_t)0, skip_test);
         nerrors += status < 0 ? 1 : 0;
-        status = test_sparse(file, "sparse", (size_t)100, (size_t)2, (size_t)3, (size_t)4);
+        status = test_sparse(file, "sparse", (size_t)100, (size_t)2, (size_t)3, (size_t)4, skip_test);
         nerrors += status < 0 ? 1 : 0;
     }
     if (size_of_test & TEST_MEDIUM) {
-        status = test_sparse(file, "sparse", (size_t)1000, (size_t)30, (size_t)0, (size_t)0);
+        status = test_sparse(file, "sparse", (size_t)1000, (size_t)30, (size_t)0, (size_t)0, skip_test);
         nerrors += status < 0 ? 1 : 0;
-        status = test_sparse(file, "sparse", (size_t)2000, (size_t)7, (size_t)3, (size_t)0);
+        status = test_sparse(file, "sparse", (size_t)2000, (size_t)7, (size_t)3, (size_t)0, skip_test);
         nerrors += status < 0 ? 1 : 0;
-        status = test_sparse(file, "sparse", (size_t)2000, (size_t)4, (size_t)2, (size_t)3);
+        status = test_sparse(file, "sparse", (size_t)2000, (size_t)4, (size_t)2, (size_t)3, skip_test);
         nerrors += status < 0 ? 1 : 0;
     }
-    if (has_sparse_support && size_of_test & TEST_LARGE) {
+    skip_test = !has_sparse_support;
+    if (size_of_test & TEST_LARGE) {
         /* This test is skipped if there is no POSIX-style sparse file support
          * e.g.: Windows NTFS filesystems
          */
-        status = test_sparse(file, "sparse", (size_t)800, (size_t)50, (size_t)50, (size_t)50);
+        status = test_sparse(file, "sparse", (size_t)800, (size_t)50, (size_t)50, (size_t)50, skip_test);
         nerrors += status < 0 ? 1 : 0;
     }
 
