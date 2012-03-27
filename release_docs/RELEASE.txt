@@ -255,21 +255,19 @@ The following platforms and compilers have been tested for this release.
 
     Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
                                   Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
-                                  Visual Studio 2010 (cmake)
-                                  Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
 
     Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
                                   Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
-                                  Visual Studio 2010 (cmake)
-                                  Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
-
-    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
-
-    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
 
     Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
 
     Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
 
     Mac OS X 10.7.0 (Intel 64-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1
     Darwin Kernel Version 10.7.0  GNU Fortran (GCC) 4.6.0 20101106 (experimental)
