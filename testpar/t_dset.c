@@ -3047,3 +3047,328 @@ actual_io_mode_tests(void) {
     test_actual_io_mode(TEST_ACTUAL_IO_RESET);
     return;
 }
+
+/*
+ * Test consistency semantics of atomic mode
+ */
+
+/*
+ * Example of using the parallel HDF5 library to create a dataset,
+ * where process 0 writes and the other processes read at the same
+ * time. If atomic mode is set correctly, the other processes should
+ * read the old values in the dataset or the new ones.
+ */
+
+void
+dataset_atomicity(void)
+{
+    hid_t fid;                  /* HDF5 file ID */
+    hid_t acc_tpl;		/* File access templates */
+    hid_t sid;   		/* Dataspace ID */
+    hid_t dataset1;      	/* Dataset IDs */
+    hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
+    hsize_t dims[RANK];   	/* dataset dim sizes */
+    int *write_buf = NULL;	/* data buffer */
+    int *read_buf = NULL;	/* data buffer */
+    int buf_size;
+    hid_t dataset2;
+    hid_t file_dataspace;	/* File dataspace ID */
+    hid_t mem_dataspace;	/* Memory dataspace ID */
+    hsize_t start[RANK];
+    hsize_t stride[RANK];
+    hsize_t count[RANK];
+    hsize_t block[RANK];
+    const char *filename;
+    herr_t ret;         	/* Generic return value */
+    int mpi_size, mpi_rank;
+    int i, j, k;
+    hbool_t atomicity = FALSE;
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info = MPI_INFO_NULL;
+
+    dim0 = 64; dim1 = 32;
+    filename = GetTestParameters();
+    if(VERBOSE_MED)
+	printf("Independent write test on file %s\n", filename);
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    buf_size = dim0 * dim1;
+    /* allocate memory for data buffer */
+    write_buf = (int *)calloc(buf_size, sizeof(int));
+    VRFY((write_buf != NULL), "write_buf malloc succeeded");
+    /* allocate memory for data buffer */
+    read_buf = (int *)calloc(buf_size, sizeof(int));
+    VRFY((read_buf != NULL), "read_buf malloc succeeded");
+
+    /* setup file access template */
+    acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
+    VRFY((acc_tpl >= 0), "");
+
+    /* create the file collectively */
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
+
+    /* Release file-access template */
+    ret = H5Pclose(acc_tpl);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+    /* setup dimensionality object */
+    dims[0] = dim0;
+    dims[1] = dim1;
+    sid = H5Screate_simple (RANK, dims, NULL);
+    VRFY((sid >= 0), "H5Screate_simple succeeded");
+
+    /* create datasets */
+    dataset1 = H5Dcreate2(fid, DATASETNAME5, H5T_NATIVE_INT, sid,
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((dataset1 >= 0), "H5Dcreate2 succeeded");
+
+    dataset2 = H5Dcreate2(fid, DATASETNAME6, H5T_NATIVE_INT, sid,
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((dataset2 >= 0), "H5Dcreate2 succeeded");
+
+    /* initialize datasets to 0s */
+    if (0 == mpi_rank) {
+        ret = H5Dwrite(dataset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                       H5P_DEFAULT, write_buf);
+        VRFY((ret >= 0), "H5Dwrite dataset1 succeeded");
+
+        ret = H5Dwrite(dataset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                       H5P_DEFAULT, write_buf);
+        VRFY((ret >= 0), "H5Dwrite dataset2 succeeded");
+    }
+    
+    ret = H5Dclose(dataset1);
+    VRFY((ret >= 0), "H5Dclose succeeded");
+    ret = H5Dclose(dataset2);
+    VRFY((ret >= 0), "H5Dclose succeeded");
+    ret = H5Sclose(sid);
+    VRFY((ret >= 0), "H5Sclose succeeded");
+    ret = H5Fclose(fid);
+    VRFY((ret >= 0), "H5Fclose succeeded");
+
+    MPI_Barrier (comm);
+
+    /* make sure setting atomicity fails on a serial file ID */
+    /* open the file collectively */
+    fid=H5Fopen(filename,H5F_ACC_RDWR,H5P_DEFAULT);
+    VRFY((fid >= 0), "H5Fopen succeeed");
+
+    /* should fail */
+    ret = H5Fset_mpi_atomicity (fid , TRUE);
+    VRFY((ret == FAIL), "H5Fset_mpi_atomicity failed");
+
+    ret = H5Fclose(fid);
+    VRFY((ret >= 0), "H5Fclose succeeded");
+
+    MPI_Barrier (comm);
+
+    /* setup file access template */
+    acc_tpl = create_faccess_plist(comm, info, facc_type, use_gpfs);
+    VRFY((acc_tpl >= 0), "");
+
+    /* open the file collectively */
+    fid=H5Fopen(filename,H5F_ACC_RDWR,acc_tpl);
+    VRFY((fid >= 0), "H5Fopen succeeded");
+
+    /* Release file-access template */
+    ret = H5Pclose(acc_tpl);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+    ret = H5Fset_mpi_atomicity (fid , TRUE);
+    VRFY((ret >= 0), "H5Fset_mpi_atomicity succeeded");
+
+    /* open dataset1 (contiguous case) */
+    dataset1 = H5Dopen2(fid, DATASETNAME5, H5P_DEFAULT);
+    VRFY((dataset1 >= 0), "H5Dopen2 succeeded");
+
+    if (0 == mpi_rank) {
+        for (i=0 ; i<buf_size ; i++) {
+            write_buf[i] = 5;
+        }
+    }
+    else {
+        for (i=0 ; i<buf_size ; i++) {
+            read_buf[i] = 8;
+        }
+    }
+
+    /* check that the atomicity flag is set */
+    ret = H5Fget_mpi_atomicity (fid , &atomicity);
+    VRFY((ret >= 0), "atomcity get failed");
+    VRFY((atomicity == TRUE), "atomcity set failed");
+
+    MPI_Barrier (comm);
+
+    /* Process 0 writes contiguously to the entire dataset */
+    if (0 == mpi_rank) {
+        ret = H5Dwrite(dataset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, write_buf);
+        VRFY((ret >= 0), "H5Dwrite dataset1 succeeded");
+    }
+    /* The other processes read the entire dataset */
+    else {
+        ret = H5Dread(dataset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf);
+        VRFY((ret >= 0), "H5Dwrite() dataset multichunk write succeeded");
+    }
+
+    if(VERBOSE_MED) {
+        i=0;j=0;k=0;
+        for (i=0 ; i<dim0 ; i++) {
+            printf ("\n");
+            for (j=0 ; j<dim1 ; j++)
+                printf ("%d ", read_buf[k++]);
+        }
+    }
+
+    /* The processes that read the dataset must either read all values
+    as 0 (read happened before process 0 wrote to dataset 1), or 5
+    (read happened after process 0 wrote to dataset 1) */
+    if (0 != mpi_rank) { 
+        int compare = read_buf[0];
+
+        VRFY((compare == 0 || compare == 5), 
+             "Atomicity Test Failed Process %d: Value read should be 0 or 5\n");
+        for (i=1; i<buf_size; i++) {
+            if (read_buf[i] != compare) {
+                printf("Atomicity Test Failed Process %d: read_buf[%d] is %d, should be %d\n", mpi_rank, i, read_buf[i], compare);
+                nerrors ++;
+            }
+        }
+    }
+
+    ret = H5Dclose(dataset1);
+    VRFY((ret >= 0), "H5D close succeeded");
+
+    /* release data buffers */
+    if(write_buf) free(write_buf);
+    if(read_buf) free(read_buf);
+
+    /* open dataset2 (non-contiguous case) */
+    dataset2 = H5Dopen2(fid, DATASETNAME6, H5P_DEFAULT);
+    VRFY((dataset2 >= 0), "H5Dopen2 succeeded");
+
+    /* allocate memory for data buffer */
+    write_buf = (int *)calloc(buf_size, sizeof(int));
+    VRFY((write_buf != NULL), "write_buf malloc succeeded");
+    /* allocate memory for data buffer */
+    read_buf = (int *)calloc(buf_size, sizeof(int));
+    VRFY((read_buf != NULL), "read_buf malloc succeeded");
+
+    for (i=0 ; i<buf_size ; i++) {
+        write_buf[i] = 5;
+    }
+    for (i=0 ; i<buf_size ; i++) {
+        read_buf[i] = 8;
+    }
+
+    atomicity = FALSE;
+    /* check that the atomicity flag is set */
+    ret = H5Fget_mpi_atomicity (fid , &atomicity);
+    VRFY((ret >= 0), "atomcity get failed");
+    VRFY((atomicity == TRUE), "atomcity set failed");
+
+
+    block[0] = dim0/mpi_size - 1;
+    block[1] = dim1/mpi_size - 1;
+    stride[0] = block[0] + 1;
+    stride[1] = block[1] + 1;
+    count[0] = mpi_size;
+    count[1] = mpi_size;
+    start[0] = 0;
+    start[1] = 0;
+
+    /* create a file dataspace */
+    file_dataspace = H5Dget_space (dataset2);
+    VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
+    ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
+
+    /* create a memory dataspace */
+    mem_dataspace = H5Screate_simple (RANK, dims, NULL);
+    VRFY((mem_dataspace >= 0), "");
+
+    ret = H5Sselect_hyperslab(mem_dataspace, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
+
+    MPI_Barrier (comm);
+
+    /* Process 0 writes to the dataset */
+    if (0 == mpi_rank) {
+        ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+                       H5P_DEFAULT, write_buf);
+        VRFY((ret >= 0), "H5Dwrite dataset2 succeeded");
+    }
+    /* All processes wait for the write to finish. This works because
+       atomicity is set to true */
+    MPI_Barrier (comm);
+    /* The other processes read the entire dataset */
+    if (0 != mpi_rank) {
+        ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+                       H5P_DEFAULT, read_buf);
+        VRFY((ret >= 0), "H5Dread dataset2 succeeded");
+    }
+
+    if(VERBOSE_MED) {
+        if (mpi_rank == 1) {
+            i=0;j=0;k=0;
+            for (i=0 ; i<dim0 ; i++) {
+                printf ("\n");
+                for (j=0 ; j<dim1 ; j++)
+                    printf ("%d ", read_buf[k++]);
+            }
+            printf ("\n");
+        }
+    }
+
+    /* The processes that read the dataset must either read all values
+    as 5 (read happened after process 0 wrote to dataset 1) */
+    if (0 != mpi_rank) { 
+        int compare;
+        i=0;j=0;k=0;
+
+        compare = 5;
+
+        for (i=0 ; i<dim0 ; i++) {
+            if (i >= mpi_rank*(block[0]+1)) {
+                break;
+            }
+            if ((i+1)%(block[0]+1)==0) {
+                k += dim1;
+                continue;
+            }
+            for (j=0 ; j<dim1 ; j++) {
+                if (j >= mpi_rank*(block[1]+1)) {
+                    k += dim1 - mpi_rank*(block[1]+1);
+                    break;
+                }
+                if ((j+1)%(block[1]+1)==0) {
+                    k++;
+                    continue;
+                }
+                else if (compare != read_buf[k]) {
+                    printf("Atomicity Test Failed Process %d: read_buf[%d] is %d, should be %d\n", mpi_rank, k, read_buf[k], compare);
+                    nerrors++;
+                }
+                k ++;
+            }
+        }
+    }
+
+    ret = H5Dclose(dataset2);
+    VRFY((ret >= 0), "H5Dclose succeeded");
+    ret = H5Sclose(file_dataspace);
+    VRFY((ret >= 0), "H5Sclose succeeded");
+    ret = H5Sclose(mem_dataspace);
+    VRFY((ret >= 0), "H5Sclose succeeded");
+
+    /* release data buffers */
+    if(write_buf) free(write_buf);
+    if(read_buf) free(read_buf);
+
+    ret = H5Fclose(fid);
+    VRFY((ret >= 0), "H5Fclose succeeded");
+
+}

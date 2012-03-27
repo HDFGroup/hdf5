@@ -183,6 +183,10 @@ H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
 H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 H5_DLL herr_t H5Fget_info(hid_t obj_id, H5F_info_t *bh_info);
 H5_DLL herr_t H5Fclear_elink_file_cache(hid_t file_id);
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
+H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
+#endif /* H5_HAVE_PARALLEL */
 
 #ifdef __cplusplus
 }
