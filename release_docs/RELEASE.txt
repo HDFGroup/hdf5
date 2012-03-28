@@ -373,6 +373,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed an error that would occur when copying an object with attribute
+            creation order tracked and indexed. (NAF - 2012/3/28 - HDFFV-7762)
       - Fixed a bug in H5Ocopy(): When copying an opened object, call the
 	    object's flush class action to ensure that cached data is flushed
             so that H5Ocopy will get the correct data.  

@@ -795,6 +795,12 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
  *
  * Purpose:     Copies a message from _MESG to _DEST in file
  *
+ *              Note that this function assumes that it is copying *all*
+ *              the attributes in the object, specifically when it copies
+ *              the creation order from source to destination.  If this is
+ *              to be used to copy only a single attribute, then the
+ *              creation order must be handled differently.  -NAF
+ *
  * Return:      Success:        Ptr to _DEST
  *
  *              Failure:        NULL
@@ -849,6 +855,7 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     /* Copy attribute's name */
     attr_dst->shared->name = H5MM_strdup(attr_src->shared->name);
     HDassert(attr_dst->shared->name);
+    attr_dst->shared->encoding = attr_src->shared->encoding;
 
     /* Copy attribute's datatype */
     /* If source is named, we will keep dst as named, but we will not actually
@@ -1002,6 +1009,9 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
             HDmemcpy(attr_dst->shared->data, attr_src->shared->data, attr_src->shared->data_size);
         } /* end else */
     } /* end if(attr_src->shared->data) */
+
+    /* Copy the creation order */
+    attr_dst->shared->crt_idx = attr_src->shared->crt_idx;
 
     /* Recompute the version to encode the destination attribute */
     if(H5A_set_version(file_dst, attr_dst) < 0)

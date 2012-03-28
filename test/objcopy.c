@@ -545,10 +545,15 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
     char attr_name[ATTR_NAME_LEN];
     int  attr_data[2];
     hsize_t dim1 = 2;
+    hid_t acpl = -1;
     unsigned  u;
     int ret_value = -1;
 
     if((sid = H5Screate_simple(1, &dim1, NULL)) < 0 )
+        goto done;
+
+    /* Create attribute creation plist */
+    if((acpl = H5Pcreate(H5P_ATTRIBUTE_CREATE)) < 0)
         goto done;
 
     for(u = 0; u < num_attributes_g; u++) {
@@ -558,7 +563,16 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
         attr_data[0] = (int)(100 * u);
         attr_data[1] = (int)(200 * u);
 
-        if((aid = H5Acreate2(loc_id, attr_name, type_id, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        /* Set attribute character set (alternate) */
+        if(u % 2) {
+            if(H5Pset_char_encoding(acpl, H5T_CSET_ASCII) < 0)
+                goto done;
+        } /* end if */
+        else
+            if(H5Pset_char_encoding(acpl, H5T_CSET_UTF8) < 0)
+                goto done;
+
+        if((aid = H5Acreate2(loc_id, attr_name, type_id, sid, acpl, H5P_DEFAULT)) < 0)
             goto done;
 
         if(H5Awrite(aid, H5T_NATIVE_INT, attr_data) < 0)
@@ -577,6 +591,8 @@ done:
         H5Sclose(sid);
     if(aid > 0)
         H5Aclose(aid);
+    if(acpl > 0)
+        H5Pclose(acpl);
 
     return ret_value;
 }
@@ -600,10 +616,14 @@ test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
     hid_t aid = -1, sid = -1;
     char attr_name[ATTR_NAME_LEN];
     int  attr_data[2];
+    hid_t acpl = -1;
     unsigned  u;
     hsize_t dim1 = 2;
 
     if((sid = H5Screate_simple(1, &dim1, NULL)) < 0 ) goto done;
+
+    /* Create attribute creation plist */
+    if((acpl = H5Pcreate(H5P_ATTRIBUTE_CREATE)) < 0) goto done;
 
     for(u = 0; u < num_attributes_g; u++) {
         sprintf(attr_name, "%u attr", u);
@@ -611,6 +631,13 @@ test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);
         attr_data[1] = (int)(200 * u);
+
+        /* Set attribute character set (alternate) */
+        if(u % 2) {
+            if(H5Pset_char_encoding(acpl, H5T_CSET_ASCII) < 0) goto done;
+        } /* end if */
+        else
+            if(H5Pset_char_encoding(acpl, H5T_CSET_UTF8) < 0) goto done;
 
         /* Add attribute to first object */
         if((aid = H5Acreate2(loc_id, attr_name, type_id, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto done;
@@ -624,6 +651,7 @@ test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
     }
 
     if(H5Sclose(sid) < 0) goto done;
+    if(H5Pclose(acpl) < 0) goto done;
 
     return 0;
 
@@ -632,6 +660,8 @@ done:
         H5Sclose(sid);
     if(aid > 0)
         H5Aclose(aid);
+    if(acpl > 0)
+        H5Pclose(acpl);
 
     return -1;
 } /* end test_copy_attach_paired_attributes() */
@@ -657,9 +687,21 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
     size_t elmt_size;                           /* Size of datatype */
     htri_t is_committed;                        /* If the datatype is committed */
     htri_t is_committed2;                       /* If the datatype is committed */
+    H5A_info_t ainfo;                           /* Attribute info */
+    H5A_info_t ainfo2;                          /* Attribute info */
     hssize_t nelmts;                            /* # of elements in dataspace */
     void *rbuf = NULL;                          /* Buffer for reading raw data */
     void *rbuf2 = NULL;                         /* Buffer for reading raw data */
+
+    /* Check the character sets are equal */
+    if(H5Aget_info(aid, &ainfo) < 0) TEST_ERROR
+    if(H5Aget_info(aid2, &ainfo2) < 0) TEST_ERROR
+    if(ainfo.cset != ainfo2.cset) TEST_ERROR
+
+    /* Check the creation orders are equal (if appropriate) */
+    if(ainfo.corder_valid != ainfo2.corder_valid) TEST_ERROR
+    if(ainfo.corder_valid)
+        if(ainfo.corder != ainfo2.corder) TEST_ERROR
 
     /* Check the datatypes are equal */
 
@@ -1276,7 +1318,9 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
 
     /* Release raw data buffers */
     HDfree(rbuf);
+    rbuf = NULL;
     HDfree(rbuf2);
+    rbuf2 = NULL;
 
     /* close the source dataspace */
     if(H5Sclose(sid) < 0) TEST_ERROR
@@ -8102,6 +8146,128 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_copy_attr_crt_order
+ *
+ * Purpose:     Tests copying attributes with creation order tracked, with
+ *              and without creation order being indexed.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, January 20, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_attr_crt_order(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
+{
+    hid_t fid1 = -1, fid2 = -1;                 /* File IDs */
+    hid_t gcplid = -1;                          /* Group creation property list ID */
+    hid_t gid1 = -1, gid2 = -1;                 /* Group IDs */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+
+    TESTING("H5Ocopy(): attributes with creation order");
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], src_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* Create source file */
+    if((fid1 = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0)
+        TEST_ERROR
+
+    /* Create GCPL */
+    if((gcplid = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
+
+    /* Create group with creation order tracked */
+    if(H5Pset_attr_creation_order(gcplid, H5P_CRT_ORDER_TRACKED) < 0) TEST_ERROR
+    if((gid1 = H5Gcreate2(fid1, NAME_GROUP_TOP, H5P_DEFAULT, gcplid, H5P_DEFAULT))
+            < 0)
+        TEST_ERROR
+
+    /* Add attributes to group */
+    if(test_copy_attach_attributes(gid1, H5T_NATIVE_INT) < 0) TEST_ERROR
+
+    /* Close group */
+    if(H5Gclose(gid1) < 0) TEST_ERROR
+
+    /* Create group with creation order tracked and indexed */
+    if(H5Pset_attr_creation_order(gcplid, H5P_CRT_ORDER_TRACKED
+            | H5P_CRT_ORDER_INDEXED) < 0)
+        TEST_ERROR
+    if((gid1 = H5Gcreate2(fid1, NAME_GROUP_TOP2, H5P_DEFAULT, gcplid,
+            H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Add attributes to group */
+    if(test_copy_attach_attributes(gid1, H5T_NATIVE_INT) < 0) TEST_ERROR
+
+    /* Close group */
+    if(H5Gclose(gid1) < 0) TEST_ERROR
+
+    /* Close GCPL */
+    if(H5Pclose(gcplid) < 0) TEST_ERROR
+
+
+    /* Create destination file */
+    if((fid2 = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0)
+        TEST_ERROR
+
+    /* Copy the groups to the destination file */
+    if(H5Ocopy(fid1, NAME_GROUP_TOP, fid2, NAME_GROUP_TOP, H5P_DEFAULT,
+            H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Ocopy(fid1, NAME_GROUP_TOP2, fid2, NAME_GROUP_TOP2, H5P_DEFAULT,
+            H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Open groups with creation order tracked */
+    if((gid1 = H5Gopen2(fid1, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid2, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Compare the attributes */
+    if(compare_std_attributes(gid1, gid2, H5P_DEFAULT) != TRUE) TEST_ERROR
+
+    /* Close groups */
+    if(H5Gclose(gid1) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
+
+    /* Open groups with creation order tracked and indexed */
+    if((gid1 = H5Gopen2(fid1, NAME_GROUP_TOP2, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid2, NAME_GROUP_TOP2, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Compare the attributes */
+    if(compare_std_attributes(gid1, gid2, H5P_DEFAULT) != TRUE) TEST_ERROR
+
+    /* Close groups */
+    if(H5Gclose(gid1) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
+
+    /* Close */
+    if(H5Fclose(fid1) < 0) TEST_ERROR
+    if(H5Fclose(fid2) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Gclose(gid1);
+        H5Gclose(gid2);
+        H5Pclose(gcplid);
+        H5Fclose(fid1);
+        H5Fclose(fid2);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_attr_crt_order */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_copy_committed_datatype_merge
  *
  * Purpose:     Tests the "merge committed datatypes" feature of H5Ocopy.
@@ -12037,6 +12203,8 @@ main(void)
         nerrors += test_copy_path(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
 
         nerrors += test_copy_named_datatype_attr_self(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
+
+        nerrors += test_copy_attr_crt_order(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
 
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
                     H5O_COPY_WITHOUT_ATTR_FLAG,

@@ -434,8 +434,10 @@ H5O_attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
         if(NULL == (udata->attr = H5A_copy(NULL, (H5A_t *)mesg->native)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy attribute")
 
-        /* Assign [somewhat arbitrary] creation order value, for older versions of the format */
-        if(oh->version == H5O_VERSION_1)
+        /* Assign [somewhat arbitrary] creation order value, for older versions
+         * of the format or if creation order is not tracked */
+        if(oh->version == H5O_VERSION_1
+                || !(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED))
             udata->attr->shared->crt_idx = sequence;
 
         /* Stop iterating */
