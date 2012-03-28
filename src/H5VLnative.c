@@ -96,13 +96,10 @@ static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type,
 static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, 
                                         int num_args, va_list arguments);
 
-static const H5VL_class_t H5VL_native_g = {
+H5VL_class_t H5VL_native_g = {
     "native",					/* name */
-    H5VL_native_term,                           /*terminate             */
-    0, 						/*fapl_size		*/
-    NULL,					/*fapl_get		*/
-    NULL,					/*fapl_copy		*/
-    NULL, 					/*fapl_free		*/
+    0,                                          /* nrefs */
+    H5VL_native_term,                           /*terminate */
     {                                           /* attribute_cls */
         NULL,                                   /* create */
         NULL,                                   /* open */
@@ -171,7 +168,7 @@ H5VL_native_init_interface(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI(H5VL_native_init())
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5VL_native_init_interface() */
 
 
@@ -189,20 +186,17 @@ H5VL_native_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+H5VL_class_t *
 H5VL_native_init(void)
 {
-    hid_t ret_value;            /* Return value */
+    H5VL_class_t *ret_value = NULL;            /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(H5I_VOL != H5I_get_type(H5VL_NATIVE_g))
-        H5VL_NATIVE_g = H5VL_register(&H5VL_native_g, sizeof(H5VL_class_t), FALSE);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set return value */
-    ret_value = H5VL_NATIVE_g;
+    ret_value = &H5VL_native_g;
+    ret_value->nrefs ++;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_init() */
 
@@ -226,6 +220,7 @@ H5VL_native_term(void)
 
     /* Reset VOL ID */
     H5VL_NATIVE_g = 0;
+    H5VL_native_g.nrefs = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_native_term() */
@@ -256,7 +251,7 @@ H5Pset_fapl_native(hid_t fapl_id)
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    ret_value = H5P_set_vol(plist, H5VL_NATIVE, NULL);
+    ret_value = H5P_set_vol(plist, &H5VL_native_g);
 
 done:
     FUNC_LEAVE_API(ret_value)

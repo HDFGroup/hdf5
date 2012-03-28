@@ -125,13 +125,9 @@
 /* Definition for external file cache size */
 #define H5F_ACS_EFC_SIZE_SIZE                   sizeof(unsigned)
 #define H5F_ACS_EFC_SIZE_DEF                    0
-
-/* Definition for vol ID */
-#define H5F_ACS_VOL_ID_SIZE                sizeof(hid_t)
-#define H5F_ACS_VOL_ID_DEF                 H5_DEFAULT_VOL
-/* Definition for vol info */
-#define H5F_ACS_VOL_INFO_SIZE              sizeof(void*)
-#define H5F_ACS_VOL_INFO_DEF               NULL
+/* Definition for VOL plugin */
+#define H5F_ACS_VOL_SIZE                sizeof(void *)
+#define H5F_ACS_VOL_DEF                 H5VL_NATIVE
 
 /******************/
 /* Local Typedefs */
@@ -224,8 +220,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     hbool_t latest_format = H5F_ACS_LATEST_FORMAT_DEF;          /* Default setting for "use the latest version of the format" flag */
     hbool_t want_posix_fd = H5F_ACS_WANT_POSIX_FD_DEF;          /* Default setting for retrieving 'handle' from core VFD */
     unsigned efc_size = H5F_ACS_EFC_SIZE_DEF;                   /* Default external file cache size */
-    hid_t vol_id = H5F_ACS_VOL_ID_DEF;                          /* Default VOL plugin ID */
-    void *vol_info = H5F_ACS_VOL_INFO_DEF;                      /* Default VOL plugin info */
+    H5VL_class_t *vol_cls = H5F_ACS_VOL_DEF;                    /* Default VOL plugin */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -312,11 +307,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file VOL ID */
-    if(H5P_register_real(pclass, H5F_ACS_VOL_ID_NAME, H5F_ACS_VOL_ID_SIZE, &vol_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the file VOL info */
-    if(H5P_register_real(pclass, H5F_ACS_VOL_INFO_NAME, H5F_ACS_VOL_INFO_SIZE, &vol_info, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_VOL_NAME, H5F_ACS_VOL_SIZE, &vol_cls, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -344,7 +335,8 @@ done:
 static herr_t
 H5P_facc_create(hid_t fapl_id, void UNUSED *copy_data)
 {
-    hid_t          driver_id, vol_id;
+    hid_t          driver_id;
+    H5VL_class_t   *vol_cls;
     H5P_genplist_t *plist;              /* Property list */
     herr_t         ret_value = SUCCEED;
 
@@ -354,12 +346,17 @@ H5P_facc_create(hid_t fapl_id, void UNUSED *copy_data)
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
+    /* Retrieve VOL plugin property */
+    if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin")
+
+    /* Set the vol for the property list */
+    if(H5VL_fapl_open(plist, vol_cls) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
+
     /* Retrieve driver ID property */
     if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
-
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol ID")
 
     if(driver_id > 0) {
         void *driver_info;
@@ -371,18 +368,6 @@ H5P_facc_create(hid_t fapl_id, void UNUSED *copy_data)
         /* Set the driver for the property list */
         if(H5FD_fapl_open(plist, driver_id, driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
-    } /* end if */
-
-    if(vol_id > 0) {
-        void *vol_info;
-
-        /* Retrieve driver info property */
-        if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol info")
-
-        /* Set the vol for the property list */
-        if(H5VL_fapl_open(plist, vol_id, vol_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
     } /* end if */
 
 done:
@@ -409,46 +394,39 @@ done:
 static herr_t
 H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void UNUSED *copy_data)
 {
-    hid_t          driver_id, vol_id;
+    hid_t          driver_id;
+    H5VL_class_t   *vol_cls;
     H5P_genplist_t *src_plist;              /* Source property list */
+    H5P_genplist_t *dst_plist;              /* Destination property list */
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Get driver ID from source property list */
+
     if(NULL == (src_plist = (H5P_genplist_t *)H5I_object(src_fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-    if(H5P_get(src_plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
-    if(H5P_get(src_plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
+    if(NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
+    /* get VOL plugin from source property list */
+    if(H5P_get(src_plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol ID")
-
-    if(vol_id > 0) {
-        H5P_genplist_t *dst_plist;              /* Destination property list */
-        void *vol_info;
-
-        /* Get vol info from source property list */
-        if(H5P_get(src_plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol info")
-
+    if(NULL != vol_cls) {
         /* Set the vp; for the destination property list */
-        if(NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_fapl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-        if(H5VL_fapl_open(dst_plist, vol_id, vol_info) < 0)
+        if(H5VL_fapl_open(dst_plist, vol_cls) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
     } /* end if */
 
+    /* Get driver ID from source property list */
+    if(H5P_get(src_plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
     if(driver_id > 0) {
-        H5P_genplist_t *dst_plist;              /* Destination property list */
         void *driver_info;
 
         /* Get driver info from source property list */
         if(H5P_get(src_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver info")
 
-        /* Set the driver for the destination property list */
-        if(NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_fapl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
         if(H5FD_fapl_open(dst_plist, driver_id, driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
     } /* end if */
@@ -477,9 +455,10 @@ done:
 herr_t
 H5P_facc_close(hid_t fapl_id, void UNUSED *close_data)
 {
-    hid_t      driver_id, vol_id;
+    hid_t          driver_id; 
+    H5VL_class_t   *vol_cls;
     H5P_genplist_t *plist;              /* Property list */
-    herr_t     ret_value = SUCCEED;
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -487,25 +466,18 @@ H5P_facc_close(hid_t fapl_id, void UNUSED *close_data)
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
+    /* Get vol plugin */
+    if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
+        HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
+    if(NULL != vol_cls) {
+        /* Close the driver for the property list */
+        if(H5VL_fapl_close(vol_cls) < 0)
+            HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
+    } /* end if */
+
     /* Get driver ID property */
     if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
         HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
-
-    /* Get vol ID property */
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
-        HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
-
-    if(vol_id > 0) {
-        void *vol_info;
-
-        /* Get driver info property */
-        if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
-            HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
-
-        /* Close the driver for the property list */
-        if(H5VL_fapl_close(vol_id, vol_info) < 0)
-            HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
-    } /* end if */
 
     if(driver_id > 0) {
         void *driver_info;
@@ -2190,224 +2162,25 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_set_vol(H5P_genplist_t *plist, hid_t new_vol_id, const void *new_vol_info)
+H5P_set_vol(H5P_genplist_t *plist, H5VL_class_t *vol_cls)
 {
-    hid_t vol_id;            /* VFL vol ID */
-    void *vol_info;          /* VFL vol info */
+    H5VL_class_t *old_vol_cls;
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == H5I_object_verify(new_vol_id, H5I_VOL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file vol ID")
-
     /* Get the current vol information */
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
+    if(H5P_get(plist, H5F_ACS_VOL_NAME, old_vol_cls) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol ID")
-    if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,"can't get vol info")
 
     /* Close the vol for the property list */
-    if(H5VL_fapl_close(vol_id, vol_info)<0)
+    if(H5VL_fapl_close(old_vol_cls)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset vol")
 
     /* Set the vol for the property list */
-    if(H5VL_fapl_open(plist, new_vol_id, new_vol_info)<0)
+    if(H5VL_fapl_open(plist, vol_cls)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_set_vol() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5P_get_vol
- *
- * Purpose:	Return the ID of the vol plugin.  PLIST_ID should
- *		be a file access property list.
- *
- * Return:	Success:	VOL ID
- *
- *		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *		January, 2012
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5P_get_vol(H5P_genplist_t *plist)
-{
-    hid_t	ret_value=FAIL;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL);
-
-    /* Get the current vol ID */
-    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
-        if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &ret_value) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol ID");
-    } else {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
-    }
-
-    if (H5VL_VOL_DEFAULT==ret_value)
-        ret_value = H5_DEFAULT_VOL;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5P_get_vol_info
- *
- * Purpose:	Returns a pointer directly to the vol-specific 
- *              information of a fapl.
- * Return:	Success:	Ptr to *uncopied* vol specific data
- *				structure if any.
- *
- *		Failure:	NULL. Null is also returned if the vol has
- *				not registered any vol-specific properties
- *				although no error is pushed on the stack in
- *				this case.
- *
- * Programmer:	Mohamad Chaarawi
- *		January, 2012
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5P_get_vol_info(H5P_genplist_t *plist)
-{
-    void	*ret_value=NULL;
-
-    FUNC_ENTER_NOAPI(NULL);
-
-    /* Get the current vol info */
-    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
-        if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &ret_value) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,NULL,"can't get vol info");
-    } else {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5P_get_vol_info() */
-
-#if 0
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_vol
- *
- * Purpose:	Set the file vol (VOL_ID) for a file access property list 
- *              (PLIST_ID) and supply an optional struct containing the 
- *              vol-specific properites (VOL_INFO).  The vol properties will 
- *              be copied into the property list and the reference count on 
- *              the vol will be incremented, allowing the caller to close the 
- *              vol ID but still use the property list.
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *              January, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii*x", plist_id, new_vol_id, new_vol_info);
-
-    /* Check arguments */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-    if(NULL == H5I_object_verify(new_vol_id, H5I_VFL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a vol ID")
-
-    /* Set the vol */
-    if(H5P_set_vol(plist, new_vol_id, new_vol_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol info")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_vol() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_vol_info
- *
- * Purpose:	Returns a pointer directly to the vol-specific 
- *              information of a fapl.
- * Return:	Success:	Ptr to *uncopied* vol specific data
- *				structure if any.
- *
- *		Failure:	NULL. Null is also returned if the vol has
- *				not registered any vol-specific properties
- *				although no error is pushed on the stack in
- *				this case.
- *
- * Programmer:	Mohamad Chaarawi
- *		January, 2012
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5Pget_vol_info(hid_t plist_id)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    void	*ret_value;     /* Return value */
-
-    FUNC_ENTER_API(NULL);
-
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
-
-    if(NULL == (ret_value = H5P_get_vol_info(plist)))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol info")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_vol_info() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_vol
- *
- * Purpose:	Return the ID of the vol plugin.  PLIST_ID should
- *		be a file access property list.
- *
- * Return:	Success:	VOL ID
- *
- *		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *		January, 2012
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5Pget_vol(hid_t plist_id)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    hid_t	ret_value;      /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("i", "i", plist_id);
-
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
-    ret_value = H5P_get_vol(plist);
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_vol() */
-
-#endif

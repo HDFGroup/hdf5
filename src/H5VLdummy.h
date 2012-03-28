@@ -28,12 +28,8 @@
 extern "C" {
 #endif
 
-H5_DLL hid_t H5VL_dummy_init(void);
+H5_DLL H5VL_class_t *H5VL_dummy_init(void);
 H5_DLL herr_t H5Pset_fapl_dummy(hid_t fapl_id);
-H5_DLL hid_t  H5VL_dummy_open(const char *name, unsigned flags, hid_t fcpl_id, 
-                               hid_t fapl_id, hid_t dxpl_id);
-H5_DLL hid_t H5VL_dummy_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-H5_DLL herr_t H5VL_dummy_close(hid_t fid);
 
 #ifdef __cplusplus
 }

@@ -323,13 +323,11 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")
     if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &(f->shared->lf->driver_id)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID")
-#if 1
-    /* Increment the reference count on the VOL ID and insert it into the property list */
-    if(H5I_inc_ref(f->vol_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL")
-    if(H5P_set(new_plist, H5F_ACS_VOL_ID_NAME, &(f->vol_id)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file VOL ID")
-#endif
+
+    /* Increment the reference count on the VOL struct and insert it into the property list */
+    f->vol_cls->nrefs ++;
+    if(H5P_set(new_plist, H5F_ACS_VOL_NAME, &(f->vol_cls)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file VOL plugin")
 
     /* Set the driver "info" in the property list */
     driver_info = H5FD_fapl_get(f->shared->lf);
@@ -481,7 +479,7 @@ H5Fget_obj_ids(hid_t uid, unsigned types, size_t max_objs, hid_t *oid_list)
     /* H5F_get_objects doesn't fail */
     ret_value = (ssize_t)H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE);
 
-    if (H5I_replace_with_uids (oid_list, ret_value) <= 0)
+    if (H5VL_replace_with_uids (oid_list, ret_value) <= 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get IDs")
 
 done:
@@ -1331,9 +1329,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
-    /* Store the VOL id in the file struct */
-    if(H5P_get(a_plist, H5F_ACS_VOL_ID_NAME, &(file->vol_id)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
+    /* Store a pointer to the VOL plugin in the file struct */
+    if(H5P_get(a_plist, H5F_ACS_VOL_NAME, &(file->vol_cls)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin")
 
     /*
      * Decide the file close degree.  If it's the first time to open the
@@ -1942,6 +1940,7 @@ H5Freopen(hid_t uid)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     new_uid_info->obj_id = new_file_id;
     new_uid_info->vol_plugin = uid_info->vol_plugin;
+    new_uid_info->vol_plugin->nrefs ++;
 
     if((ret_value = H5I_register(H5I_FILE_PUBLIC, new_uid_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
@@ -2020,11 +2019,8 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
         if(NULL == (uid_info = H5FL_MALLOC(H5VL_id_wrapper_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
         uid_info->obj_id = file->file_id;
-        uid_info->vol_plugin = (H5VL_class_t *)H5I_object(file->vol_id);
-
-        /* increment ref count on the VOL id */
-        if(H5I_inc_ref(file->vol_id, FALSE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on vol plugin")
+        uid_info->vol_plugin = file->vol_cls;
+        uid_info->vol_plugin->nrefs ++;
 
         if((H5I_register(H5I_FILE_PUBLIC, uid_info, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
@@ -2034,7 +2030,7 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
 
         /* Increment reference count on upper level ID. */
-        if(H5I_inc_ref_uid(file->file_id, app_ref) < 0)
+        if(H5VL_inc_ref_uid(file->file_id, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing user ID failed")
     } /* end else */
 

@@ -2206,7 +2206,7 @@ H5Iget_file_id(hid_t uid)
     if((ret_value = H5I_get_file_id(id, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
-    if (H5I_replace_with_uids (&ret_value, 1) < 0)
+    if (H5VL_replace_with_uids (&ret_value, 1) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
 done:
@@ -2244,7 +2244,7 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
 
         /* Increment reference count on upper level ID. */
-        if(H5I_inc_ref_uid(obj_id, app_ref) < 0)
+        if(H5VL_inc_ref_uid(obj_id, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing user ID failed")
 
         /* Set return value */
@@ -2271,7 +2271,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I_replace_with_uids
+ * Function:	H5VL_replace_with_uids
  *
  * Purpose:     change the ids used by the HDF5 libraries to the UIDs that
  *              are provided to the user
@@ -2284,7 +2284,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5I_replace_with_uids(hid_t *old_list, ssize_t num_ids)
+H5VL_replace_with_uids(hid_t *old_list, ssize_t num_ids)
 {
     ssize_t j;
     H5I_type_t type;
@@ -2342,11 +2342,11 @@ H5I_replace_with_uids(hid_t *old_list, ssize_t num_ids)
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I_replace_with_uids() */
+} /* end H5VL_replace_with_uids() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5I_inc_ref_uid
+ * Function:	H5VL_inc_ref_uid
  *
  * Purpose:     increment the ref count on the high level ID given the low level ID
  *
@@ -2358,7 +2358,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5I_inc_ref_uid(hid_t id, hbool_t app_ref)
+H5VL_inc_ref_uid(hid_t id, hbool_t app_ref)
 {
     H5I_id_type_t   *type_ptr;      /*ptr to the type       */
     H5I_type_t type;
@@ -2406,7 +2406,7 @@ H5I_inc_ref_uid(hid_t id, hbool_t app_ref)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I_inc_ref_uid() */
+} /* end H5VL_inc_ref_uid() */
 
 
 /*-------------------------------------------------------------------------

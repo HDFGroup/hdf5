@@ -21,68 +21,81 @@
  *              using HDF5 VFDs. 
  */
 
+#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5VL_dummy_init_interface
 
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Aprivate.h"		/* Attributes				*/
+#include "H5Dpkg.h"             /* Dataset pkg                          */
+#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Fpkg.h"             /* File pkg                             */
+#include "H5FLprivate.h"	/* Free lists                           */
+#include "H5Gpkg.h"		/* Groups		  		*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
+#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5SMprivate.h"	/* Shared Object Header Messages	*/
+#include "H5Tpkg.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLdummy.h"         /* Dummy VOL plugin			*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Aprivate.h"		/* Attributes				*/
-#include "H5MFprivate.h"	/* File memory management		*/
-#include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5VL_DUMMY_g = 0;
 
-
 /* Prototypes */
-static herr_t H5VL_dummy_get(hid_t file_id, H5VL_file_get_t get_type, 
-                              void *data, int argc, void **argv);
 static herr_t H5VL_dummy_term(void);
+static hid_t  H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fcpl_id, 
+                                   hid_t fapl_id, hid_t dxpl_id);
+static herr_t H5VL_dummy_file_close(hid_t fid);
+static hid_t  H5VL_dummy_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 
-static const H5VL_class_t H5VL_dummy_g = {
+H5VL_class_t H5VL_dummy_g = {
     "dummy",					/* name */
-    H5VL_dummy_term,                           /*terminate             */
-    0, 						/*fapl_size		*/
-    NULL,					/*fapl_get		*/
-    NULL,					/*fapl_copy		*/
-    NULL, 					/*fapl_free		*/
-    {                                           /* file_cls */
-        H5VL_dummy_create,                     /* create */
-        H5VL_dummy_open,                       /* open */
-        NULL,                                  /* flush */
-        NULL,                                  /* get */
-        H5VL_dummy_close                       /* close */
-    },
-    {                                           /* dataset_cls */
-        NULL,                                   /* open */
-        NULL,                                   /* close */
+    0,                                          /* nrefs */
+    H5VL_dummy_term,                           /*terminate */
+    {                                           /* attribute_cls */
         NULL,                                   /* create */
+        NULL,                                   /* open */
         NULL,                                   /* read */
         NULL,                                   /* write */
-        NULL                                    /* set_extent */
-    },
-    {                                           /* attribute_cls */
-        NULL,                                   /* open */
-        NULL,                                   /* close */
-        NULL,                                   /* create */
         NULL,                                   /* delete */
-        NULL,                                   /* read */
-        NULL                                    /* write */
+        NULL                                    /* close */
     },
     {                                           /* datatype_cls */
-        NULL,                                   /* commit */
-        NULL                                    /* open */
+        NULL,            /* commit */
+        NULL               /* open */
+    },
+    {                                           /* dataset_cls */
+        NULL,             /* create */
+        NULL,               /* open */
+        NULL,
+        NULL,
+        NULL,
+        NULL
+    },
+    {                                           /* group_cls */
+        NULL,
+        NULL,
+        NULL,
+        NULL
+    },
+    {                                           /* file_cls */
+        H5VL_dummy_file_create,                /* create */
+        H5VL_dummy_file_open,                  /* open */
+        NULL,
+        NULL,
+        H5VL_dummy_file_close                  /* close */
     },
     {                                           /* link_cls */
         NULL,                                   /* create */
@@ -91,13 +104,12 @@ static const H5VL_class_t H5VL_dummy_g = {
         NULL                                    /* copy */
     },
     {                                           /* object_cls */
-        NULL,                                   /* create */
-        NULL,                                   /* open */
-        NULL,                                   /* close */
+        NULL,
         NULL,                                   /* move */
         NULL,                                   /* copy */
-        NULL,                                   /* lookup */
-        NULL                                    /* get */
+        NULL,
+        NULL,
+        NULL
     }
 };
 
@@ -120,7 +132,7 @@ H5VL_dummy_init_interface(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI(H5VL_dummy_init())
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5VL_dummy_init_interface() */
 
 
@@ -138,20 +150,17 @@ H5VL_dummy_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+H5VL_class_t *
 H5VL_dummy_init(void)
 {
-    hid_t ret_value;            /* Return value */
+    H5VL_class_t *ret_value = NULL;            /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(H5I_VOL != H5I_get_type(H5VL_DUMMY_g))
-        H5VL_DUMMY_g = H5VL_register(&H5VL_dummy_g, sizeof(H5VL_class_t), FALSE);
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set return value */
-    ret_value = H5VL_DUMMY_g;
+    ret_value = &H5VL_dummy_g;
+    ret_value->nrefs ++;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dummy_init() */
 
@@ -175,6 +184,7 @@ H5VL_dummy_term(void)
 
     /* Reset VOL ID */
     H5VL_DUMMY_g = 0;
+    H5VL_dummy_g.nrefs = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_dummy_term() */
@@ -205,7 +215,7 @@ H5Pset_fapl_dummy(hid_t fapl_id)
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    ret_value = H5P_set_vol(plist, H5VL_DUMMY, NULL);
+    ret_value = H5P_set_vol(plist, &H5VL_dummy_g);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -226,7 +236,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_dummy_open(const char *name, unsigned flags, hid_t fcpl_id, 
+H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fcpl_id, 
                  hid_t fapl_id, hid_t dxpl_id)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -251,7 +261,7 @@ H5VL_dummy_open(const char *name, unsigned flags, hid_t fcpl_id,
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_dummy_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+H5VL_dummy_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -275,7 +285,7 @@ H5VL_dummy_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dummy_close(hid_t file_id)
+H5VL_dummy_file_close(hid_t file_id)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

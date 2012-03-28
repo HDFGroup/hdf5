@@ -28,7 +28,7 @@
 extern "C" {
 #endif
 
-H5_DLL hid_t H5VL_native_init(void);
+H5_DLL H5VL_class_t *H5VL_native_init(void);
 H5_DLL herr_t H5Pset_fapl_native(hid_t fapl_id);
 
 #ifdef __cplusplus

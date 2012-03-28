@@ -33,6 +33,7 @@
 
 /* Other public headers needed by this file */
 #include "H5Bpublic.h"          /* B-tree header, for H5B_NUM_BTREE_ID */
+#include "H5VLpublic.h"
 
 /* Other private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
@@ -274,8 +275,7 @@ struct H5F_t {
     hbool_t             closing;        /* File is in the process of being closed */
     struct H5F_t        *parent;        /* Parent file that this file is mounted to */
     unsigned            nmounts;        /* Number of children mounted to this file */
-    hid_t               vol_id;         /* id of the vol plugin used to open the file */
-    //H5VL_class_t       vol_cls;        /* class of the VOL plugin */
+    struct H5VL_class_t *vol_cls;         /* class of the VOL plugin */
 };
 
 

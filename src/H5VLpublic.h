@@ -149,11 +149,8 @@ typedef struct H5VL_object_class_t {
 /* Class information for each VOL driver */
 typedef struct H5VL_class_t {
     const char *name;
+    unsigned	nrefs;		/* Ref count for times struct is pointed to */
     herr_t  (*terminate)(void);
-    size_t  fapl_size;
-    void *  (*fapl_get)(hid_t fid);
-    void *  (*fapl_copy)(const void *fapl);
-    herr_t  (*fapl_free)(void *fapl);
     H5VL_attribute_class_t     attribute_cls;
     H5VL_datatype_class_t      datatype_cls;
     H5VL_dataset_class_t       dataset_cls;

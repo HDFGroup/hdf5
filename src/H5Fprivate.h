@@ -407,9 +407,8 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_ACS_SDATA_BLOCK_SIZE_NAME           "sdata_block_size" /* Minimum "small data" allocation block size (when aggregating "small" raw data allocations) */
 #define H5F_ACS_GARBG_COLCT_REF_NAME            "gc_ref"        /* Garbage-collect references */
 #define H5F_ACS_FILE_DRV_ID_NAME                "driver_id"     /* File driver ID */
-#define H5F_ACS_VOL_ID_NAME                     "vol_id"        /* File VOL ID */
+#define H5F_ACS_VOL_NAME                        "vol_cls"       /* File VOL plugin */
 #define H5F_ACS_FILE_DRV_INFO_NAME              "driver_info"   /* File driver info */
-#define H5F_ACS_VOL_INFO_NAME                   "vol_info"      /* File VOL info */
 #define H5F_ACS_CLOSE_DEGREE_NAME		"close_degree"  /* File close degree */
 #define H5F_ACS_FAMILY_OFFSET_NAME              "family_offset" /* Offset position in file for family file driver */
 #define H5F_ACS_FAMILY_NEWSIZE_NAME             "family_newsize" /* New member size of family driver.  (private property only used by h5repart) */

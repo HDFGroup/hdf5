@@ -28,6 +28,7 @@
 /****************/
 
 #define H5VL_PACKAGE		/*suppress error about including H5VLpkg  */
+#define H5I_PACKAGE		/*suppress error about including H5Ipkg  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5VL_init_interface
@@ -39,6 +40,7 @@
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Ipkg.h"		/* IDs Package header	  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
@@ -107,6 +109,7 @@ H5VL_init_interface(void)
     /* register VOL ID type */
     if(H5I_register_type(H5I_VOL, (size_t)H5I_VOL_HASHSIZE, 0, (H5I_free_t)H5VL_free_cls)<H5I_FILE)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
     /* Register high level file user id */ 
     if(H5I_register_type(H5I_FILE_PUBLIC, (size_t)H5I_FILE_PUBLIC_HASHSIZE, 0, (H5I_free_t)H5VL_free_id_wrapper)<H5I_FILE)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize interface")
@@ -235,7 +238,6 @@ H5VL_free_id_wrapper(H5VL_id_wrapper_t *id_struct)
 
     /* MSC need to decrement the ref count on the VOL struct */
 
-done:
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_free_id_wrapper() */
 
@@ -395,16 +397,14 @@ H5VL_get_class(hid_t id)
 	ret_value = (H5VL_class_t *)H5I_object(id);
     else {
         H5P_genplist_t *plist;      /* Property list pointer */
-        hid_t vol_id = -1;
 
         /* Get the plist structure */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
 
         if(TRUE == H5P_isa_class(id, H5P_FILE_ACCESS)) {
-            if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol ID")
-            ret_value = H5VL_get_class(vol_id);
+            if(H5P_get(plist, H5F_ACS_VOL_NAME, &ret_value) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin")
         } else {
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a vol plugin id, file access property list")
         }
@@ -432,86 +432,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_fapl_open(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
+H5VL_fapl_open(H5P_genplist_t *plist, H5VL_class_t *vol_cls)
 {
-    void *copied_vol_info = NULL;   /* Temporary VOL vol info */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Increment the reference count on vol and copy vol info */
-    if(H5I_inc_ref(vol_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on vol plugin")
-    if(H5VL_fapl_copy(vol_id, vol_info, &copied_vol_info) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "can't copy vol info")
+    vol_cls->nrefs++;
 
     /* Set the vol properties for the list */
-    if(H5P_set(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
+    if(H5P_set(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set vol ID")
-    if(H5P_set(plist, H5F_ACS_VOL_INFO_NAME, &copied_vol_info) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set vol info")
-    copied_vol_info = NULL;
 
 done:
-    if(ret_value < 0)
-        if(copied_vol_info && H5VL_fapl_close(vol_id, copied_vol_info) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close copy of vol info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_fapl_open() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_fapl_copy
- *
- * Purpose:	Copies the vol-specific part of the file access property
- *		list.
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Mohamad Chaarawi
- *              January, 2012
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_fapl_copy(hid_t vol_id, const void *old_fapl, void **copied_fapl)
-{
-    H5VL_class_t *vol;
-    void *new_pl = NULL;        /* Copy of property list */
-    herr_t ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Check args */
-    if(NULL == (vol = (H5VL_class_t *)H5I_object(vol_id)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a vol ID")
-
-    /* Copy the file access property list */
-    if(old_fapl) {
-        if(vol->fapl_copy) {
-            new_pl = (vol->fapl_copy)(old_fapl);
-            if(new_pl==NULL)
-                HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "property list copy failed")
-        }
-        else if(vol->fapl_size > 0) {
-            if((new_pl = H5MM_malloc(vol->fapl_size))==NULL)
-                HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "property list allocation failed")
-            HDmemcpy(new_pl, old_fapl, vol->fapl_size);
-        } else
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "no way to copy vol property list")
-    } /* end if */
-
-    /* Set copied value */
-    *copied_fapl=new_pl;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
 
 
 /*-------------------------------------------------------------------------
@@ -530,30 +466,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_fapl_close(hid_t vol_id, void *fapl)
+H5VL_fapl_close(H5VL_class_t *vol_cls)
 {
-    H5VL_class_t	*vol = NULL;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check args */
-    if(vol_id > 0) {
-        if(NULL == (vol = (H5VL_class_t *)H5I_object(vol_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a vol ID")
-
-        /* Allow driver to free or do it ourselves */
-        if(fapl && vol->fapl_free) {
-            if((vol->fapl_free)(fapl) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "driver free request failed")
-        } /* end if */
-        else
-            H5MM_xfree(fapl);
-
-        /* Decrement reference count for driver */
-        if(H5I_dec_ref(vol_id) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "can't decrement reference count for vol plugin")
-    } /* end if */
+    if(NULL != vol_cls) {
+        vol_cls->nrefs--;
+        //H5MM_xfree(vol_cls);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -579,9 +501,8 @@ hid_t
 H5VL_file_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
 {
     H5VL_class_t	*vol_plugin;            /* VOL for file */
-    H5VL_id_wrapper_t               *uid_info;                /* user id structure */
+    H5VL_id_wrapper_t   *uid_info;              /* user id structure */
     H5P_genplist_t      *plist;                 /* Property list pointer */
-    hid_t               plugin_id = -1;         /* VOL ID */
     hid_t               file_id;
     hid_t		ret_value;              /* Return value */
 
@@ -590,10 +511,8 @@ H5VL_file_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, h
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
-    if(NULL == (vol_plugin = (H5VL_class_t *)H5I_object(plugin_id)))
-	HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid vol plugin ID in file access property list")
+    if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_plugin) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin")
 
     /* check if the corresponding VOL open callback exists */
     if(NULL == vol_plugin->file_cls.open)
@@ -602,17 +521,13 @@ H5VL_file_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, h
     if((file_id = (vol_plugin->file_cls.open)(name, flags, fcpl_id, fapl_id, dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
-    /* Create a new id that points to a struct that holds the file id and the VOL id */
+    /* Create a new id that points to a struct that holds the file id and the VOL plugin */
     /* Allocate new id structure */
     if(NULL == (uid_info = H5FL_MALLOC(H5VL_id_wrapper_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     uid_info->obj_id = file_id;
-    //uid_info->vol_id = plugin_id;
     uid_info->vol_plugin = vol_plugin;
-
-    /* increment ref count on the VOL id */
-    if(H5I_inc_ref(plugin_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on vol plugin")
+    vol_plugin->nrefs ++;
 
     if((ret_value = H5I_register(H5I_FILE_PUBLIC, uid_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
@@ -640,9 +555,8 @@ hid_t
 H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5VL_class_t	*vol_plugin;            /* VOL for file */
-    H5VL_id_wrapper_t               *uid_info;                /* user id structure */
+    H5VL_id_wrapper_t   *uid_info;              /* user id structure */
     H5P_genplist_t      *plist;                 /* Property list pointer */
-    hid_t               plugin_id = -1;         /* VOL ID */
     hid_t               file_id;
     hid_t		ret_value;              /* Return value */
 
@@ -651,10 +565,8 @@ H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
+    if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_plugin) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
-    if(NULL == (vol_plugin = (H5VL_class_t *)H5I_object(plugin_id)))
-	HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid vol plugin ID in file access property list")
 
     /* check if the corresponding VOL create callback exists */
     if(NULL == vol_plugin->file_cls.create)
@@ -669,11 +581,7 @@ H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     uid_info->obj_id = file_id;
     uid_info->vol_plugin = vol_plugin;
-    //uid_info->vol_id = plugin_id;
-
-    /* increment ref count on the VOL id */
-    if(H5I_inc_ref(plugin_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on vol plugin")
+    vol_plugin->nrefs ++;
 
     if((ret_value = H5I_register(H5I_FILE_PUBLIC, uid_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
@@ -700,7 +608,7 @@ done:
 herr_t
 H5VL_file_close(hid_t uid)
 {
-    H5VL_id_wrapper_t               *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t   *uid_info;              /* user id structure */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -713,21 +621,12 @@ H5VL_file_close(hid_t uid)
     if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-#if 0
-    /* get VOL plugin info */
-    if(NULL == (vol_plugin = (H5VL_class_t *)H5I_object(uid_info->vol_id)))
-	HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid vol plugin ID in file")
-#endif
     if(NULL == uid_info->vol_plugin->file_cls.close)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file close' method")
     if((ret_value = (uid_info->vol_plugin->file_cls.close)(uid_info->obj_id)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed")
-#if 0
-    /* decrement ref count on the VOL id */
-    if(H5I_dec_ref(uid_info->vol_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement ref count on vol plugin")
-#endif
 
+    uid_info->vol_plugin->nrefs--;
     if(H5I_dec_app_ref(uid) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to decrement ref count on user ID")
 
@@ -753,7 +652,7 @@ done:
 herr_t
 H5VL_file_flush(hid_t uid, H5F_scope_t scope)
 {
-    H5VL_id_wrapper_t               *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t   *uid_info;              /* user id structure */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -793,7 +692,7 @@ done:
 herr_t
 H5VL_file_get(hid_t uid, H5VL_file_get_t get_type, int num_args, ...)
 {
-    H5VL_id_wrapper_t            *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t *uid_info;             /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
@@ -828,7 +727,7 @@ done:
  * Purpose:	Creates a group through the VOL
  *
  * Return:      Success: User ID of the new group. This ID is of type
- *                       H5I_GROUP_PUBLIC which contains the VOL id and the actual group ID
+ *                       H5I_GROUP_PUBLIC which contains the VOL plugin and the actual group ID
  *
  *		Failure: FAIL
  *
@@ -840,8 +739,8 @@ done:
 hid_t
 H5VL_group_create(hid_t uid, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id)
 {
-    H5VL_id_wrapper_t               *uid_info1;             /* user id structure of the location where the group will be created */
-    H5VL_id_wrapper_t               *uid_info2;             /* user id structure of new created group*/
+    H5VL_id_wrapper_t   *uid_info1;             /* user id structure of the location where the group will be created */
+    H5VL_id_wrapper_t   *uid_info2;             /* user id structure of new created group*/
     hid_t               group_id;               /* actual group ID */
     hid_t		ret_value;              /* Return value */
 
@@ -860,7 +759,7 @@ H5VL_group_create(hid_t uid, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid
         (uid_info1->obj_id, name, lcpl_id, gcpl_id, gapl_id)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "create failed")
 
-    /* Create a new id that points to a struct that holds the group id and the VOL id */
+    /* Create a new id that points to a struct that holds the group id and the VOL plugin */
     /* Allocate new id structure */
     if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -881,7 +780,7 @@ done:
  * Purpose:	Opens a group through the VOL
  *
  * Return:      Success: User ID of the new group. This ID is of type
- *                       H5I_GROUP_PUBLIC which contains the VOL id and the actual group ID
+ *                       H5I_GROUP_PUBLIC which contains the VOL plugin and the actual group ID
  *
  *		Failure: FAIL
  *
@@ -893,8 +792,8 @@ done:
 hid_t
 H5VL_group_open(hid_t uid, const char *name, hid_t gapl_id)
 {
-    H5VL_id_wrapper_t               *uid_info1;             /* user id structure of the location where the group will be opend */
-    H5VL_id_wrapper_t               *uid_info2;             /* user id structure of new opend group*/
+    H5VL_id_wrapper_t   *uid_info1;             /* user id structure of the location where the group will be opend */
+    H5VL_id_wrapper_t   *uid_info2;             /* user id structure of new opend group*/
     hid_t               group_id;               /* actual group ID */
     hid_t		ret_value;              /* Return value */
 
@@ -912,7 +811,7 @@ H5VL_group_open(hid_t uid, const char *name, hid_t gapl_id)
         (uid_info1->obj_id, name, gapl_id)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
-    /* Create a new id that points to a struct that holds the group id and the VOL id */
+    /* Create a new id that points to a struct that holds the group id and the VOL plugin */
     /* Allocate new id structure */
     if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -1023,7 +922,7 @@ done:
  * Purpose:	Opens a object through the VOL
  *
  * Return:      Success: User ID of the new object. This ID is of type
- *                       H5I_OBJECT_PUBLIC which contains the VOL id and the actual object ID
+ *                       H5I_OBJECT_PUBLIC which contains the VOL plugin and the actual object ID
  *
  *		Failure: FAIL
  *
@@ -1056,7 +955,7 @@ H5VL_object_open(hid_t uid, void *obj_loc, hid_t lapl_id)
         (uid_info1->obj_id, obj_loc, lapl_id)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
-    /* Create a new id that points to a struct that holds the object id and the VOL id */
+    /* Create a new id that points to a struct that holds the object id and the VOL plugin */
     /* Allocate new id structure */
     if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -1282,7 +1181,7 @@ H5VL_datatype_commit(hid_t uid, const char *name, hid_t type_id, hid_t lcpl_id,
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "commit failed")
 
 #if 0
-    /* Create a new id that points to a struct that holds the datatype id and the VOL id */
+    /* Create a new id that points to a struct that holds the datatype id and the VOL plugin */
     /* Allocate new id structure */
     if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -1304,7 +1203,7 @@ done:
  * Purpose:	Opens a named datatype through the VOL
  *
  * Return:      Success: User ID of the datatype. This ID is of type
- *                       H5I_DATATYPE_PUBLIC which contains the VOL id and the actual datatype ID
+ *                       H5I_DATATYPE_PUBLIC which contains the VOL plugin and the actual datatype ID
  *
  *		Failure: FAIL
  *
@@ -1336,7 +1235,7 @@ H5VL_datatype_open(hid_t uid, const char *name, hid_t tapl_id)
         (uid_info1->obj_id, name, tapl_id)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
-    /* Create a new id that points to a struct that holds the datatype id and the VOL id */
+    /* Create a new id that points to a struct that holds the datatype id and the VOL plugin */
     /* Allocate new id structure */
     if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -1357,7 +1256,7 @@ done:
  * Purpose:	Creates a dataset through the VOL
  *
  * Return:      Success: User ID of the new dataset. This ID is of type
- *                       H5I_DATASET_PUBLIC which contains the VOL id and the actual dataset ID
+ *                       H5I_DATASET_PUBLIC which contains the VOL plugin and the actual dataset ID
  *
  *		Failure: FAIL
  *
@@ -1390,7 +1289,7 @@ H5VL_dataset_create(hid_t uid, const char *name, hid_t dtype_id, hid_t space_id,
         (uid_info1->obj_id, name, dtype_id, space_id, lcpl_id, dcpl_id, dapl_id)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "create failed")
 
-    /* Create a new id that points to a struct that holds the dataset id and the VOL id */
+    /* Create a new id that points to a struct that holds the dataset id and the VOL plugin */
     /* Allocate new id structure */
     if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -1411,7 +1310,7 @@ done:
  * Purpose:	Opens a dataset through the VOL
  *
  * Return:      Success: User ID of the new dataset. This ID is of type
- *                       H5I_DATASET_PUBLIC which contains the VOL id and the actual dataset ID
+ *                       H5I_DATASET_PUBLIC which contains the VOL plugin and the actual dataset ID
  *
  *		Failure: FAIL
  *
@@ -1442,7 +1341,7 @@ H5VL_dataset_open(hid_t uid, const char *name, hid_t dapl_id)
         (uid_info1->obj_id, name, dapl_id)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
-    /* Create a new id that points to a struct that holds the dataset id and the VOL id */
+    /* Create a new id that points to a struct that holds the dataset id and the VOL plugin */
     /* Allocate new id structure */
     if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")

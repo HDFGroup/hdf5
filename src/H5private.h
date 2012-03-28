@@ -1535,6 +1535,7 @@ typedef enum {
     H5_PKG_S,        /*Data spaces      */
     H5_PKG_T,        /*Data types      */
     H5_PKG_V,        /*Vector functions    */
+    H5_PKG_VL,        /*VOL functions    */
     H5_PKG_Z,        /*Raw data filters    */
     H5_NPKGS        /*Must be last      */
 } H5_pkg_t;
