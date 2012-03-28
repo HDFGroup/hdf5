@@ -121,6 +121,8 @@ Bug Fixes since HDF5-1.8.8
 
     Library
     -------
+    - Fixed an error that would occur when copying an object with attribute
+      creation order tracked and indexed. (NAF - 2012/3/28 - HDFFV-7762)
     - When an application tries to write or read many small data chunks and
       runs out of memory, the library had a seg fault.  The fix is to
       return the error stack with proper information. (SLU - 2012/3/23.
