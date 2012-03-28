@@ -1147,20 +1147,10 @@ if(file->eof < new_eof)
              * re-extended later.  This may happen on Open VMS. */
             if(-1 == HDlseek(file->fd, (HDoff_t)0, SEEK_SET))
                 HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
-#endif
-            if(-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
+#endif /* H5_VMS */
+            if(-1 == HDftruncate(file->fd, (HDoff_t)new_eof))
                 HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #endif /* H5_HAVE_WIN32_API */
-
-#ifdef H5_VMS
-            /* Reset seek offset to the beginning of the file, so that the file isn't
-             * re-extended later.  This may happen on Open VMS. */
-            if(-1 == HDlseek(file->fd, 0, SEEK_SET))
-                HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
-#endif
-
-            if(-1 == HDftruncate(file->fd, (off_t)new_eof))
-                HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
         } /* end if */
 
         /* Update the eof value */
