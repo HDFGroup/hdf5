@@ -155,7 +155,8 @@ static void test_comps_array (const char *fname, const char *dset, const char *a
 static void test_comps_vlen (const char *fname, const char *dset,const char *attr, int diff, int is_file_new);
 static void test_comps_array_vlen (const char *fname, const char *dset, const char *attr, int diff, int is_file_new);
 static void test_comps_vlen_arry (const char *fname, const char *dset,const char *attr, int diff, int is_file_new);
-static void test_non_comparables (const char *fname, int diff);
+static void test_data_nocomparables (const char *fname, int diff);
+static void test_objs_nocomparables (const char *fname1, const char *fname2);
 
 /* called by test_attributes() and test_datasets() */
 static void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
@@ -250,8 +251,11 @@ int main(void)
      * comparable datasets and attributes.  All the comparables should display 
      * differences.
      */
-    test_non_comparables(NON_COMPARBLES1,0);
-    test_non_comparables(NON_COMPARBLES2,5);
+    test_data_nocomparables(NON_COMPARBLES1,0);
+    test_data_nocomparables(NON_COMPARBLES2,5);
+
+    /* common objects (same name) with different object types. HDFFV-7644 */
+    test_objs_nocomparables(NON_COMPARBLES1, NON_COMPARBLES2);
 
     return 0;
 }
@@ -4787,7 +4791,7 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
 
 
 /*-------------------------------------------------------------------------
-* Function: test_non_comparables
+* Function: test_data_nocomparables
 *
 * Purpose: 
 *   Create test files with non-comparable dataset and attributes with 
@@ -4796,7 +4800,7 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
 *
 *-------------------------------------------------------------------------*/
 #define DIM_ARRY 3
-static void test_non_comparables (const char * fname, int make_diffs)
+static void test_data_nocomparables (const char * fname, int make_diffs)
 {
     hid_t   fid=0;
     hid_t   gid1=0;
@@ -4995,6 +4999,155 @@ out:
         H5Tclose(tid_dset1);
     if(tid_attr1)
         H5Tclose(tid_attr1);
+}
+
+/*-------------------------------------------------------------------------
+* Function: test_objs_nocomparables
+*
+* Purpose: 
+*   Create test files with common objects (same name) but different object
+*   types. 
+*   h5diff should show non-comparable output from these common objects.
+*-------------------------------------------------------------------------*/
+static void test_objs_nocomparables(const char *fname1, const char *fname2)
+{
+    herr_t  status = SUCCEED;
+    hid_t   fid1=0;
+    hid_t   fid2=0;
+    hid_t   topgid1=0;
+    hid_t   topgid2=0;
+    hid_t   gid1=0;
+    hid_t   did1=0;
+    hid_t   tid1=0;
+    hid_t   gid2=0;
+    hid_t   did2=0;
+    hid_t   tid2=0;
+    hsize_t dims[1] = {DIM_ARRY};
+    int data1[DIM_ARRY] = {1,1,1};
+    int data2[DIM_ARRY] = {2,2,2};
+
+   /*-----------------------------------------------------------------------
+    * Open file(s) to add objects
+    *------------------------------------------------------------------------*/
+    /* file1 */
+    fid1 = H5Fopen (fname1, H5F_ACC_RDWR, H5P_DEFAULT);
+    if (fid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fopen failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* file2 */
+    fid2 = H5Fopen (fname2, H5F_ACC_RDWR, H5P_DEFAULT);
+    if (fid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fopen failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * in file1 : add member objects
+    *------------------------------------------------------------------------*/
+    /* parent group */
+    topgid1 = H5Gcreate2(fid1, "diffobjtypes", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (topgid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* dataset */
+    status = write_dset(topgid1, 1, dims,"obj1", H5T_NATIVE_INT, data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        goto out;
+    }
+
+    /* group */
+    gid1 = H5Gcreate2(topgid1, "obj2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* committed type */
+    tid1 = H5Tcopy(H5T_NATIVE_INT);
+    status = H5Tcommit2(topgid1, "obj3", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", fname1);
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * in file2 : add member objects
+    *------------------------------------------------------------------------*/
+    /* parent group */
+    topgid2 = H5Gcreate2(fid2, "diffobjtypes", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (topgid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /* group */
+    gid2 = H5Gcreate2(topgid2, "obj1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /* committed type */
+    tid2 = H5Tcopy(H5T_NATIVE_INT);
+    status = H5Tcommit2(topgid2, "obj2", tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", fname2);
+        goto out;
+    }
+
+    /* dataset */
+    status = write_dset(topgid2, 1, dims,"obj3", H5T_NATIVE_INT, data2);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        goto out;
+    }
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close IDs
+    *-----------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    if(fid2)
+        H5Fclose(fid2);
+    if(topgid1)
+        H5Gclose(topgid1);
+    if(topgid2)
+        H5Gclose(topgid2);
+    if(did1)
+        H5Dclose(did1);
+    if(did2)
+        H5Dclose(did2);
+    if(gid1)
+        H5Gclose(gid1);
+    if(gid2)
+        H5Gclose(gid2);
+    if(tid1)
+        H5Tclose(tid1);
+    if(tid2)
+        H5Tclose(tid2);
+
 }
 
 /*-------------------------------------------------------------------------

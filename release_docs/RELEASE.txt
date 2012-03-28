@@ -691,6 +691,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: Fixed failure for comparing same named object with different
+          object types in comparing groups. Prior to the fix, h5diff resulted
+          in error. After the fix, h5diff detects such case as non-comparable
+          and display messages accordingly. HDFFV-7664 (JKM 2012/03/28)
         - h5diff: If unique objects exists only in one file and try to exclude
           the unique objects with --exclude-path option, h5diff missed 
           excluding some objects. 

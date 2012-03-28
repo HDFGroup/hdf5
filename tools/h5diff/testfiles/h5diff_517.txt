@@ -10,6 +10,9 @@ group1   group2
 
 group  : </g1> and </g1>
 0 differences found
-group  : </g1/g2> and </g1/g2>
-0 differences found
+Not comparable: </g1/g2> is of type H5G_GROUP and </g1/g2> is of type H5G_UDLINK
+--------------------------------
+Some objects are not comparable
+--------------------------------
+Use -c for a list of objects without details of differences.
 EXIT CODE: 1
