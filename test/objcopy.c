@@ -8388,6 +8388,319 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_copy_dataset_open
+ *
+ * Purpose:     To ensure that H5Ocopy() copies data of opened dataset correctly.
+ *		This is for bug fix HDFFV-7853.
+ *
+ *		Test Case 1:
+ *		Create a dataset with attributes in SRC file
+ *		Copy the opened dataset to another location in the same file
+ *		Copy the opened dataset to DST file
+ *		Close the dataset
+ *
+ *		Test Case 2:
+ *		Reopen the dataset, write new data to the dataset
+ *		Copy the opened dataset to another location in the same file
+ *		Copy the opened dataset to to DST file
+ *		Close the dataset
+ *
+ *		Test Case 3:
+ *		Create a committed datatype
+ *		Create a dataset with the committed datatype in SRC file
+ *		Open the committed datatype
+ *		Copy the opened dataset (with the opened committed datatype) to another location in the same file
+ *		Copy the opened dataset (with the opened committed datatype) to DST file
+ *		Close the dataset and the committed datatype
+ *
+ *		Test Case 4:
+ *		Create a group with attributes, create a dataset in the group
+ *		Copy the opened group (together with the opened dataset) to another location in the same file
+ *		Copy the opened group (together with the opened dataset) to DST file
+ *		Close the group and the dataset
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Vailin Choi
+ *              Feb 7, 2012
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t tid = -1;                             /* Datatype ID */
+    hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t gid = -1, gid2 = -1;                  /* Group IDs */
+    int buf[DIM_SIZE_1][DIM_SIZE_2];            /* Buffer for writing data */
+    int newbuf[DIM_SIZE_1][DIM_SIZE_2];		/* Buffer for writing data */
+    hsize_t dim2d[2];                           /* Dataset dimensions */
+    int i, j;                                   /* local index variables */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+
+    TESTING("H5Ocopy(): copying objects while opened");
+
+    /* Initialize write buffer */
+    for (i=0; i<DIM_SIZE_1; i++)
+        for (j=0; j<DIM_SIZE_2; j++)
+            buf[i][j] = 10000 + 100*i+j;
+
+    /* Initialize another write buffer */
+    for (i=0; i<DIM_SIZE_1; i++)
+        for (j=0; j<DIM_SIZE_2; j++)
+            newbuf[i][j] = 100*i+j;
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
+
+    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim2d[0] = DIM_SIZE_1;
+    dim2d[1] = DIM_SIZE_2;
+
+    /* create 2D dataspace */
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
+
+    /* create 2D int dataset in SRC file */
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data to the dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* attach attributes to the dataset */
+    if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
+
+    /* 
+     * Test case 1 
+     */
+
+    /* 
+     * Copy within the same file
+     */
+    /* copy the opened dataset to another location in SRC file */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_src, NAME_DATASET_SIMPLE2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the copied dataset */
+    if((did2 = H5Dopen2(fid_src, NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the datasets are equal */
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+
+    /* close the copied dataset */
+    if(H5Dclose(did2) < 0) TEST_ERROR
+
+    /* 
+     * Copy to another file
+     */
+    /* copy the opened dataset from SRC to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the copied dataset in DST file */
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the datasets are equal */
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+
+    /* close the copied dataset in DST file */
+    if(H5Dclose(did2) < 0) TEST_ERROR
+
+    /* close the dataset in SRC file */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* 
+     * Test case 2 
+     */
+    /* reopen the dataset in SRC file */
+    if((did = H5Dopen2(fid_src, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write another set of data to the dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, newbuf) < 0) TEST_ERROR
+
+    /* 
+     * Copy within the same file
+     */
+    /* copy the opened dataset to another location in SRC file */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_src, "NEW_DATASET", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the copied dataset */
+    if((did2 = H5Dopen2(fid_src, "NEW_DATASET", H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the datasets are equal */
+    if(compare_datasets(did, did2, H5P_DEFAULT, newbuf) != TRUE) TEST_ERROR
+
+    /* close the copied dataset in SRC file */
+    if(H5Dclose(did2) < 0) TEST_ERROR
+    /* 
+     * Copy to another file
+     */
+    /* copy the opened dataset from SRC to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, "NEW_DATASET", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the copied dataset in DST file */
+    if((did2 = H5Dopen2(fid_dst, "NEW_DATASET", H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the datasets are equal */
+    if(compare_datasets(did, did2, H5P_DEFAULT, newbuf) != TRUE) TEST_ERROR
+
+    /* close the copied dataset in DST file */
+    if(H5Dclose(did2) < 0) TEST_ERROR
+
+    /* close the dataset at SRC file */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* 
+     * Test case 3 
+     */
+
+    /* make a copy of the datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* commit the datatype */
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* open the committed datatype */
+    tid = H5Topen2(fid_src, NAME_DATATYPE_SIMPLE, H5P_DEFAULT);
+
+    /* create 2D dataset with the opened committed datatype in SRC file */
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data to the dataset */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* 
+     * Copy within the same file
+     */
+    /* copy the opened dataset (with the opened committed datatype) to another location in SRC file */
+    if(H5Ocopy(fid_src, NAME_DATASET_NAMED_DTYPE, fid_src, NAME_DATASET_NAMED_DTYPE2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the copied dataset */
+    if((did2 = H5Dopen2(fid_src, NAME_DATASET_NAMED_DTYPE2, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the datasets are equal */
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+
+    /* close the copied dataset in SRC file */
+    if(H5Dclose(did2) < 0) TEST_ERROR
+
+    /* 
+     * Copy to another file
+     */
+    /* copy the opened dataset (with the opened committed datatype) from SRC to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_NAMED_DTYPE, fid_dst, NAME_DATASET_NAMED_DTYPE2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the copied dataset in DST file */
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_NAMED_DTYPE2, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the datasets are equal */
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+
+    /* close the copied dataset in DST file */
+    if(H5Dclose(did2) < 0) TEST_ERROR
+
+    /* close the dataset at SRC file */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the committed datatype at SRC file */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* 
+     * Test case 4 
+     */
+    /* create a group in SRC file */
+    if((gid = H5Gcreate2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* attach attributes to the group */
+    if(test_copy_attach_attributes(gid, H5T_NATIVE_INT) < 0) TEST_ERROR
+
+    /* create 2D int dataset in the group at SRC file */
+    if((did = H5Dcreate2(gid, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data to the dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    /* 
+     * Copy within the same file
+     */
+    /* copy the opened group (together with opened dataset) to another location in SRC file */
+    if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_src, "COPIED_GROUP", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the copied group at SRC */
+    if((gid2 = H5Gopen2(fid_src, "COPIED_GROUP", H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the groups are equal */
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
+
+    /* close the DST dataset */
+    if(H5Gclose(gid2) < 0) TEST_ERROR
+
+    /* 
+     * Copy to another file
+     */
+    /* copy the opened group (together with opened dataset) to DST file */
+    if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, "COPIED_GROUP", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the copied group at DST */
+    if((gid2 = H5Gopen2(fid_dst, "COPIED_GROUP", H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the groups are equal */
+    if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
+
+    /* close the group in DST file */
+    if(H5Gclose(gid2) < 0) TEST_ERROR
+
+    /* close the group in SRC file */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* close the dataset in SRC file */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+    	H5Dclose(did);
+    	H5Dclose(did2);
+    	H5Sclose(sid);
+    	H5Gclose(gid);
+    	H5Gclose(gid2);
+    	H5Fclose(fid_dst);
+    	H5Fclose(fid_src);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_dataset_open */
+
+
+/*-------------------------------------------------------------------------
  * Function:   	main
  *
  * Purpose:     Test H5Ocopy()
@@ -8555,6 +8868,7 @@ main(void)
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
                     H5O_COPY_WITHOUT_ATTR_FLAG | H5O_COPY_PRESERVE_NULL_FLAG,
                     TRUE, "H5Ocopy(): preserve NULL messages");
+        nerrors += test_copy_dataset_open(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
 
         /* Tests that do not use attributes and do not need to be tested
          * multiple times for different attribute configurations */

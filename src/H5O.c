@@ -79,12 +79,12 @@ typedef struct {
 /********************/
 
 static herr_t H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
-static const H5O_obj_class_t *H5O_obj_class(const H5O_loc_t *loc, hid_t dxpl_id);
 static herr_t H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type);
 static herr_t H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id,
     hid_t dxpl_id);
 static herr_t H5O_get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr);
+static const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
 
 
 /*********************/
@@ -2364,7 +2364,7 @@ H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type)
  *
  *-------------------------------------------------------------------------
  */
-static const H5O_obj_class_t *
+const H5O_obj_class_t *
 H5O_obj_class(const H5O_loc_t *loc, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;                     /* Object header for location */
@@ -2401,7 +2401,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-const H5O_obj_class_t *
+static const H5O_obj_class_t *
 H5O_obj_class_real(H5O_t *oh)
 {
     size_t	i;                      /* Local index variable */

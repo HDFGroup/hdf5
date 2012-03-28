@@ -38,6 +38,7 @@
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5HGprivate.h"        /* Global Heaps                         */
+#include "H5FOprivate.h"        /* File objects                         */
 #include "H5Lprivate.h"         /* Links			  	*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -281,6 +282,13 @@ done:
  * Programmer:  Peter Cao
  *              May 30, 2005
  *
+ * Modifications:
+ *	Vailin Choi; Feb 2012
+ *	Bug fix for HDFFV-7853
+ *	When the object is opened, call the object's flush class action
+ *	to ensure that cached data is flushed so that H5Ocopy will get
+ *	the correct data.
+ *	
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -316,13 +324,32 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     HDassert(oloc_dst->file);
     HDassert(cpy_info);
 
+    /* Get pointer to object class for this object */
+    if((obj_class = H5O_obj_class(oloc_src, dxpl_id)) == NULL)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
+
+    /* Check if the object at the address is already open in the file */
+    if(H5FO_opened(oloc_src->file, oloc_src->addr) != NULL) {
+	
+	H5G_loc_t   tmp_loc; 	/* Location of object */
+	H5O_loc_t   tmp_oloc; 	/* Location of object */
+	H5G_name_t  tmp_path;	/* Object's path */
+
+	tmp_loc.oloc = &tmp_oloc;
+	tmp_loc.path = &tmp_path;
+	tmp_oloc.file = oloc_src->file;
+	tmp_oloc.addr = oloc_src->addr;
+	tmp_oloc.holding_file = oloc_src->holding_file;
+	H5G_name_reset(tmp_loc.path);
+
+	/* Flush the object of this class */
+        if(obj_class->flush && obj_class->flush(&tmp_loc, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
+    }
+
     /* Get source object header */
     if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC_READ)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
-
-    /* Get pointer to object class for this object */
-    if(NULL == (obj_class = H5O_obj_class_real(oh_src)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
 
     /* Retrieve user data for particular type of object to copy */
     if(obj_class->get_copy_file_udata &&

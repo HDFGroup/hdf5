@@ -548,6 +548,7 @@ H5_DLL herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
 H5_DLL herr_t H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
 H5_DLL herr_t H5D_flush_sieve_buf(H5D_t *dataset, hid_t dxpl_id);
 H5_DLL herr_t H5D_mark(H5D_t *dataset, hid_t dxpl_id, unsigned flags);
+H5_DLL herr_t H5D_flush_real(H5D_t *dataset, hid_t dxpl_id);
 
 /* Functions that perform direct serial I/O operations */
 H5_DLL herr_t H5D_select_read(const H5D_io_info_t *io_info,
