@@ -104,37 +104,37 @@ static const H5VL_class_t H5VL_native_g = {
     NULL,					/*fapl_copy		*/
     NULL, 					/*fapl_free		*/
     {                                           /* attribute_cls */
-        NULL,                                   /* open */
-        NULL,                                   /* close */
         NULL,                                   /* create */
-        NULL,                                   /* delete */
+        NULL,                                   /* open */
         NULL,                                   /* read */
-        NULL                                    /* write */
+        NULL,                                   /* write */
+        NULL,                                   /* delete */
+        NULL                                    /* close */
     },
     {                                           /* datatype_cls */
         H5VL_native_datatype_commit,            /* commit */
         H5VL_native_datatype_open               /* open */
     },
     {                                           /* dataset_cls */
-        H5VL_native_dataset_open,               /* open */
-        H5VL_native_dataset_close,              /* close */
         H5VL_native_dataset_create,             /* create */
+        H5VL_native_dataset_open,               /* open */
         H5VL_native_dataset_read,               /* read */
         H5VL_native_dataset_write,              /* write */
-        H5VL_native_dataset_get                 /* get */
+        H5VL_native_dataset_get,                /* get */
+        H5VL_native_dataset_close               /* close */
     },
     {                                           /* group_cls */
         H5VL_native_group_create,               /* create */
         H5VL_native_group_open,                 /* open */
-        H5VL_native_group_close,                /* close */
-        H5VL_native_group_get                   /* get */
+        H5VL_native_group_get,                  /* get */
+        H5VL_native_group_close                 /* close */
     },
     {                                           /* file_cls */
-        H5VL_native_file_open,                  /* open */
-        H5VL_native_file_close,                 /* close */
         H5VL_native_file_create,                /* create */
+        H5VL_native_file_open,                  /* open */
         H5VL_native_file_flush,                 /* flush */
-        H5VL_native_file_get                    /* get */
+        H5VL_native_file_get,                   /* get */
+        H5VL_native_file_close                  /* close */
     },
     {                                           /* link_cls */
         NULL,                                   /* create */
@@ -144,11 +144,11 @@ static const H5VL_class_t H5VL_native_g = {
     },
     {                                           /* object_cls */
         H5VL_native_object_open,                /* open */
-        H5VL_native_object_close,               /* close */
         NULL,                                   /* move */
         NULL,                                   /* copy */
         H5VL_native_object_lookup,              /* lookup */
-        H5VL_native_object_get                  /* get */
+        H5VL_native_object_get,                 /* get */
+        H5VL_native_object_close                /* close */
     }
 };
 
@@ -295,12 +295,6 @@ H5VL_native_file_open(const char *name, unsigned flags, hid_t fcpl_id,
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
-
-#if 0
-    new_file->vol_id = plugin_id;
-    if(H5I_inc_ref(new_file->vol_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
-#endif
 
 done:
     if(ret_value < 0 && new_file && H5F_try_close(new_file) < 0)

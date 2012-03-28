@@ -58,11 +58,11 @@ static const H5VL_class_t H5VL_dummy_g = {
     NULL,					/*fapl_copy		*/
     NULL, 					/*fapl_free		*/
     {                                           /* file_cls */
-        H5VL_dummy_open,                       /* open */
-        H5VL_dummy_close,                      /* close */
         H5VL_dummy_create,                     /* create */
+        H5VL_dummy_open,                       /* open */
         NULL,                                  /* flush */
-        NULL                                   /* get */
+        NULL,                                  /* get */
+        H5VL_dummy_close                       /* close */
     },
     {                                           /* dataset_cls */
         NULL,                                   /* open */
