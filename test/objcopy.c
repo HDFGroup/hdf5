@@ -47,6 +47,7 @@ const char *FILENAME[] = {
     "objcopy_src",
     "objcopy_dst",
     "objcopy_ext",
+    "objcopy_src2",
     NULL
 };
 
@@ -73,6 +74,7 @@ const char *FILENAME[] = {
 #define NAME_DATATYPE_VL_VL 	"vlen of vlen of int"
 #define NAME_DATASET_SIMPLE 	"dataset_simple"
 #define NAME_DATASET_SIMPLE2    "dataset_simple_copy"
+#define NAME_DATASET_SIMPLE3    "dataset_simple_another_copy"
 #define NAME_DATASET_COMPOUND 	"dataset_compound"
 #define NAME_DATASET_CHUNKED 	"dataset_chunked"
 #define NAME_DATASET_CHUNKED2 	"dataset_chunked2"
@@ -89,6 +91,9 @@ const char *FILENAME[] = {
 #define NAME_GROUP_UNCOPIED 	"/uncopied"
 #define NAME_GROUP_EMPTY 	"/empty"
 #define NAME_GROUP_TOP 		"/g0"
+#define NAME_GROUP_TOP2         "/g1"
+#define NAME_GROUP_TOP3         "/g2"
+#define NAME_GROUP_TOP4         "/g3"
 #define NAME_GROUP_SUB 		"/g0/g00"
 #define NAME_GROUP_SUB_2	"/g0/g01"
 #define NAME_GROUP_SUB_SUB 	"/g0/g00/g000"
@@ -8097,6 +8102,3190 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_copy_committed_datatype_merge
+ *
+ * Purpose:     Tests the "merge committed datatypes" feature of H5Ocopy.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, October 11, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
+    hid_t dst_fapl, hbool_t reopen)
+{
+    hid_t fid_src1 = -1, fid_src2 = -1, fid_dst = -1; /* File IDs */
+    hid_t tid = -1;                             /* Datatype ID */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t did = -1;                             /* Dataset ID */
+    hid_t ocpypl_id = -1;                       /* Object copy plist ID */
+    unsigned int i;                             /* Local index variables */
+    hsize_t dim1d[1];                           /* Dataset dimensions */
+    int buf[DIM_SIZE_1];                        /* Buffer for writing data */
+    H5O_info_t oinfo;                           /* Object info */
+    haddr_t exp_addr;                           /* Expected object address */
+    char src1_filename[NAME_BUF_SIZE];
+    char src2_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+
+    if(reopen) {
+        TESTING("H5Ocopy(): merging committed datatypes with reopen")
+    } /* end if */
+    else
+        TESTING("H5Ocopy(): merging committed datatypes")
+
+    /* set initial data values */
+    for(i = 0; i < DIM_SIZE_1; i++)
+        buf[i] = (int)i;
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src1_filename, sizeof src1_filename);
+    h5_fixname(FILENAME[3], src_fapl, src2_filename, sizeof src2_filename);
+    h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source files */
+    if((fid_src1 = H5Fcreate(src1_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
+    if((fid_src2 = H5Fcreate(src2_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim1d[0]=DIM_SIZE_1;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /*
+     * Populate source file 1
+     */
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type */
+    if((H5Tcommit2(fid_src1, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create dataset at SRC file */
+    if((did = H5Dcreate2(fid_src1, NAME_DATASET_SIMPLE, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file 1 */
+    if(H5Fclose(fid_src1) < 0) TEST_ERROR
+
+    /*
+     * Populate source file 2
+     */
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type */
+    if((H5Tcommit2(fid_src2, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create dataset at SRC file */
+    if((did = H5Dcreate2(fid_src2, NAME_DATASET_SIMPLE, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file 1 */
+    if(H5Fclose(fid_src2) < 0) TEST_ERROR
+
+
+    /* open the source files with read-only */
+    if((fid_src1 = H5Fopen(src1_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
+    if((fid_src2 = H5Fopen(src2_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
+
+    /* Create ocpl and set merge named dtype flag */
+    if((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if(H5Pset_copy_object(ocpypl_id, H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG) < 0) TEST_ERROR
+
+    /*
+     * First copy each entire file to the destination file (each with their own
+     * group), and verify the committed datatypes are merged
+     */
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
+
+    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* copy SRC1 to DST */
+    if(H5Ocopy(fid_src1, "/", fid_dst, NAME_GROUP_TOP, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* copy SRC2 to DST */
+    if(H5Ocopy(fid_src2, "/", fid_dst, NAME_GROUP_TOP2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open SRC1 committed dtype, get address */
+    if((tid = H5Topen2(fid_dst, NAME_GROUP_TOP "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open SRC1 dset dtype, check address */
+    if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Open SRC2 committed dtype, check address */
+    if((tid = H5Topen2(fid_dst, NAME_GROUP_TOP2 "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open SRC2 dset dtype, check address */
+    if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /*
+     * Now copy only the datasets to the destination file, and verify the committed
+     * datatypes are merged
+     */
+    /* recreate destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
+
+    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* copy SRC1 to DST */
+    if(H5Ocopy(fid_src1, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* copy SRC2 to DST */
+    if(H5Ocopy(fid_src2, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open SRC1 dset dtype, get address */
+    if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Open SRC2 dset dtype, check address */
+    if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* close the SRC files */
+    if(H5Fclose(fid_src1) < 0) TEST_ERROR
+    if(H5Fclose(fid_src2) < 0) TEST_ERROR
+
+    /* close property list */
+    if(H5Pclose(ocpypl_id) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid_src1);
+        H5Fclose(fid_src2);
+        H5Fclose(fid_dst);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Pclose(ocpypl_id);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_committed_datatype_merge */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_committed_datatype_merge_same_file
+ *
+ * Purpose:     Tests the "merge committed datatypes" feature of H5Ocopy,
+ *              while copying to the same file.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, October 11, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reopen)
+{
+    hid_t fid = -1;                             /* File ID */
+    hid_t tid = -1;                             /* Datatype ID */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t did = -1;                             /* Dataset ID */
+    hid_t gid = -1;                             /* Group ID */
+    hid_t ocpypl_id = -1;                       /* Object copy plist ID */
+    unsigned int i;                             /* Local index variables */
+    hsize_t dim1d[1];                           /* Dataset dimensions */
+    int buf[DIM_SIZE_1];                        /* Buffer for writing data */
+    H5O_info_t oinfo;                           /* Object info */
+    haddr_t exp_addr;                           /* Expected object address */
+    char filename[NAME_BUF_SIZE];
+
+    if(reopen)
+        TESTING("H5Ocopy(): merging committed datatypes to the source file with reopen")
+    else
+        TESTING("H5Ocopy(): merging committed datatypes to the source file")
+
+    /* set initial data values */
+    for(i = 0; i < DIM_SIZE_1; i++)
+        buf[i] = (int)i;
+
+    /* Initialize the filename */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim1d[0]=DIM_SIZE_1;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /*
+     * Populate first group
+     */
+    /* Create group */
+    if((gid = H5Gcreate2(fid, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type */
+    if((H5Tcommit2(fid, NAME_GROUP_TOP "/" NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create dataset */
+    if((did = H5Dcreate2(fid, NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the group */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /*
+     * Populate second group
+     */
+    /* Create group */
+    if((gid = H5Gcreate2(fid, NAME_GROUP_TOP2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type */
+    if((H5Tcommit2(fid, NAME_GROUP_TOP2 "/" NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create dataset */
+    if((did = H5Dcreate2(fid, NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the group */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+
+    /* Create ocpl and set merge committed dtype flag */
+    if((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if(H5Pset_copy_object(ocpypl_id, H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG) < 0) TEST_ERROR
+
+    /*
+     * First copy each group to the destination group 3 (each with their own
+     * group), and verify the committed datatypes are merged as expected.  All
+     * datatypes copied should reference (share an address with) the
+     * corresponding source datatype.
+     */
+    /* Create destination group */
+    if((gid = H5Gcreate2(fid, NAME_GROUP_TOP3, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* copy group 1 to DST */
+    if(H5Ocopy(fid, NAME_GROUP_TOP, fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* copy group 2 to DST */
+    if(H5Ocopy(fid, NAME_GROUP_TOP2, fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid) < 0) TEST_ERROR
+        if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open group 1 source committed dtype, get address */
+    if((tid = H5Topen2(fid, NAME_GROUP_TOP "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open group 1 source dset dtype, check address */
+    if((did = H5Dopen2(fid, NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Open group 1 committed dtype, check address */
+    if((tid = H5Topen2(fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open group 1 dset dtype, check address */
+    if((did = H5Dopen2(fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Open group 2 source committed dtype, get address and make sure it is
+     * different from group 1 source committed dtype */
+    if((tid = H5Topen2(fid, NAME_GROUP_TOP2 "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr == exp_addr) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open group 2 source dset dtype, check address */
+    if((did = H5Dopen2(fid, NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Open group 2 committed dtype, check address */
+    if((tid = H5Topen2(fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP2 "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open group 2 dset dtype, check address */
+    if((did = H5Dopen2(fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /*
+     * Now copy only the datasets to the destination group, and verify the committed
+     * datatypes are merged as expected
+     */
+    /* Create destination group */
+    if((gid = H5Gcreate2(fid, NAME_GROUP_TOP4, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* copy SRC1 to DST */
+    if(H5Ocopy(fid, NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, fid, NAME_GROUP_TOP4 "/" NAME_DATASET_SIMPLE, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* copy SRC2 to DST */
+    if(H5Ocopy(fid, NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, fid, NAME_GROUP_TOP4 "/" NAME_DATASET_SIMPLE2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid) < 0) TEST_ERROR
+        if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open group 1 source dset dtype, get address */
+    if((did = H5Dopen2(fid, NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Open group 1 dset dtype, check address */
+    if((did = H5Dopen2(fid, NAME_GROUP_TOP4 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Open group 2 source dset dtype, get address and make sure it is
+     * different from group 1 source dset dtype */
+    if((did = H5Dopen2(fid, NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr == exp_addr) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Open group 2 dset dtype, check address */
+    if((did = H5Dopen2(fid, NAME_GROUP_TOP4 "/" NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    /* close property list */
+    if(H5Pclose(ocpypl_id) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Pclose(ocpypl_id);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_committed_datatype_merge_same_file */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_committed_dt_merge_sugg
+ *
+ * Purpose:     Tests the "merge committed datatypes" feature of H5Ocopy, and
+ *              uses the suggestion list feature
+ *              (H5Padd_merge_committed_dtype_path).
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Thursday, November 3, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
+    hid_t dst_fapl, hbool_t reopen)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t tid = -1;                             /* Datatype ID */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t did = -1;                             /* Dataset ID */
+    hid_t ocpypl_id = -1;                       /* Object copy plist ID */
+    unsigned int i;                             /* Local index variables */
+    hsize_t dim1d[1];                           /* Dataset dimensions */
+    int buf[DIM_SIZE_1];                        /* Buffer for writing data */
+    H5O_info_t oinfo;                           /* Object info */
+    haddr_t exp_addr;                           /* Expected object address */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+
+    if(reopen)
+        TESTING("H5Ocopy(): merging committed datatypes with suggestions and reopen")
+    else
+        TESTING("H5Ocopy(): merging committed datatypes with suggestions")
+
+    /* set initial data values */
+    for(i = 0; i < DIM_SIZE_1; i++)
+        buf[i] = (int)i;
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim1d[0]=DIM_SIZE_1;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /*
+     * Populate source file
+     */
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type */
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create dataset at SRC file */
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
+
+    /*
+     * Populate destination file
+     */
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type "a" */
+    if((H5Tcommit2(fid_dst, "/a", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type "b" */
+    if((H5Tcommit2(fid_dst, "/b", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
+
+    /* Create ocpl and set merge committed dtype flag */
+    if((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if(H5Pset_copy_object(ocpypl_id, H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG) < 0) TEST_ERROR
+
+    /*
+     * First copy dataset using "/b" as a suggestion, and verify that it uses
+     * datatype "b" in the destination file
+     */
+    /* Add datatype suggestion */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, "/b") < 0) TEST_ERROR
+
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* copy SRC dset to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open committed dtype "b", get address */
+    if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open dset dtype, check address */
+    if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /*
+     * Now free suggestions, copy dataset without any suggestions, and verify
+     * that it uses datatype "a" in the destination file
+     */
+    /* Free suggestions */
+    if(H5Pfree_merge_committed_dtype_paths(ocpypl_id) < 0) TEST_ERROR
+
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* Delete destination dataset */
+
+    /* copy SRC dset to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open committed dtype "a", get address */
+    if((tid = H5Topen2(fid_dst, "/a", H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open dset 2 dtype, check address */
+    if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Open committed dtype "b", get address */
+    if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open dset dtype, check address */
+    if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close property list */
+    if(H5Pclose(ocpypl_id) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid_src);
+        H5Fclose(fid_dst);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Pclose(ocpypl_id);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_committed_dt_merge_sugg */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_committed_dt_merge_attr
+ *
+ * Purpose:     Tests the "merge committed datatypes" feature of H5Ocopy, with
+ *              an attribute using an anonymous committed type in the
+ *              destination.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Thursday, November 3, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
+    hid_t dst_fapl, hbool_t reopen)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t tid = -1;                             /* Datatype ID */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t did = -1;                             /* Dataset ID */
+    hid_t aid = -1;                             /* Attribute ID */
+    hid_t gid = -1;                             /* Group ID */
+    hid_t ocpypl_id = -1;                       /* Object copy plist ID */
+    unsigned int i;                             /* Local index variables */
+    hsize_t dim1d[1];                           /* Dataset dimensions */
+    int buf[DIM_SIZE_1];                        /* Buffer for writing data */
+    H5O_info_t oinfo;                           /* Object info */
+    haddr_t exp_addr;                           /* Expected object address */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+
+    if(reopen)
+        TESTING("H5Ocopy(): merging committed datatypes with attributes and reopen")
+    else
+        TESTING("H5Ocopy(): merging committed datatypes with attributes")
+
+    /* set initial data values */
+    for(i = 0; i < DIM_SIZE_1; i++)
+        buf[i] = (int)i;
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim1d[0]=DIM_SIZE_1;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /*
+     * Populate source file
+     */
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type */
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create dataset at SRC file */
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
+
+    /*
+     * Populate destination file
+     */
+    /* Create group */
+    if((gid = H5Gcreate2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* create anonymous committed data type */
+    if((H5Tcommit_anon(fid_dst, tid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create attribute at SRC file */
+    if((aid = H5Acreate2(gid, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Awrite(aid, tid, buf) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the attribute */
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* close the group */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
+
+    /* Create ocpl and set merge committed dtype flag */
+    if((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if(H5Pset_copy_object(ocpypl_id, H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG) < 0) TEST_ERROR
+
+    /*
+     * Copy dataset and verify that it uses the same committed datatype as the
+     * already existing attribute in the destination file.
+     */
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* copy SRC dset to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open attribute dtype, get address */
+    if((aid = H5Aopen_by_name(fid_dst, NAME_GROUP_TOP, "attr", H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* Open dset dtype, check address */
+    if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close property list */
+    if(H5Pclose(ocpypl_id) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid_src);
+        H5Fclose(fid_dst);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Aclose(aid);
+        H5Gclose(gid);
+        H5Pclose(ocpypl_id);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_committed_dt_merge_attr */
+
+/*
+ * Defines used for the committed datatype tests
+ */
+#define SRC_ROOT_GROUP "src_root"
+#define ROOT_NDT_INT "root_ndt_int"
+#define GROUP_NDT_SHORT "group_ndt_short"
+
+#define SRC_GRP 	"src_grp"
+#define DST_GRP 	"dst_grp"
+#define DST_GRP2 	"dst_grp2"
+
+#define SRC_NDT_SHORT	"src_ndt_short"
+#define SRC_NDT_INT	"src_ndt_int"
+#define SRC_NDT_INT2	"src_ndt_int2"
+#define SRC_NDT_FLOAT	"src_ndt_float"
+#define SRC_NDT_DOUBLE	"src_ndt_double"
+
+#define DST_NDT_SHORT	"dst_ndt_short"
+#define DST_NDT_INT	"dst_ndt_int"
+#define DST_NDT_FLOAT	"dst_ndt_float"
+#define DST_NDT_DOUBLE	"dst_ndt_double"
+
+#define SRC_NDT_DSET	"src_ndt_dset"
+#define SRC_NDT_DSET2	"src_ndt_dset2"
+#define SRC_NDT_DSET3	"src_ndt_dset3"
+
+#define SRC_DSET	"src_dset"
+#define SRC_DSET1	"src_dset1"
+
+#define SRC_ATTR  "src_attr"
+
+#define DST_ATTR_ANON_SHORT  "dst_attr_anon_short"
+#define DST_ATTR_ANON_INT  "dst_attr_anon_int"
+
+#define DST_ATTR  "dst_attr"
+#define DST_ATTR2  "dst_attr2"
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_cdt_hier_merge
+ *
+ * Purpose:     Tests the "merge committed datatypes" feature of H5Ocopy:
+ *		SRC file:
+ *		  Create committed datatypes at / and /g0
+ *		  Create datasets with native type and committed datatypes at /g0
+ *		DST file:
+ *		  Create attributes with anonymous committed datatypes at /uncopied
+ *
+ *		Copy / at SRC to DST
+ *		Copy /g0 at SRC to DST
+ *		Copy the datasets in /g0 at SRC to DST /uncopied
+ *		Verify that committed datatypes are copied and merged correctly
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Vailin Choi; January 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, hbool_t reopen)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t tid = -1;                             /* Datatype ID */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t did = -1;                             /* Dataset ID */
+    hid_t gid = -1; 	                 	/* Group IDs */
+    hid_t f_tid = -1;				/* Datatype ID for root group */
+    hid_t g_tid = -1;				/* Datatype ID for group */
+    hid_t anon_tid = -1;			/* Anonymous datatype */
+    hid_t aid = -1;				/* Attribute ID */
+    hid_t ocpypl_id = -1;                       /* Object copy plist ID */
+    int i;					/* Local index variable */
+    hsize_t dim1d[1];				/* dimension sizes */
+    int buf[DIM_SIZE_1];			/* Buffer for data */
+    haddr_t exp_addr_int, exp_addr_short;     	/* Expected object addresses */
+    H5O_info_t oinfo;                           /* Object info */
+    char src_filename[NAME_BUF_SIZE];		/* Source file name */
+    char dst_filename[NAME_BUF_SIZE];		/* Destination file name */
+
+    if(reopen)
+        TESTING("H5Ocopy(): hier. of committed datatypes and merging with reopen")
+    else
+        TESTING("H5Ocopy(): hier. of committed datatypes and merging ")
+
+    /* set initial data values */
+    for (i=0; i<DIM_SIZE_1; i++)
+        buf[i] = i;
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* 
+     * Populate source file 
+     */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
+
+    /* create and commit committed datatype (int) to root group */
+    if((f_tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, ROOT_NDT_INT, f_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create group /g0 */
+    if((gid = H5Gcreate2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create and commit committed datatype (short) to group /g0 */
+    if((g_tid = H5Tcopy(H5T_NATIVE_SHORT)) < 0) TEST_ERROR
+    if((H5Tcommit2(gid, GROUP_NDT_SHORT, g_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim1d[0]=DIM_SIZE_1;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /* create dataset of native int in /g0 */
+    if((did = H5Dcreate2(gid, SRC_DSET1, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data to dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* create dataset of committed datatype (short) in /g0 */
+    if((did = H5Dcreate2(gid, SRC_NDT_DSET2, g_tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data to dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* create dataset of committed datatype (int) in /g0 */
+    if((did = H5Dcreate2(gid, SRC_NDT_DSET3, f_tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data to dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the datatypes */
+    if(H5Tclose(f_tid) < 0) TEST_ERROR
+    if(H5Tclose(g_tid) < 0) TEST_ERROR
+
+    /* close group */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* 
+     * Populate destination file 
+     */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
+
+    /* create group /uncopied */
+    if((gid = H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create and commit anonymous datatype (short) to /uncopied */
+    if((anon_tid = H5Tcopy(H5T_NATIVE_SHORT)) < 0) TEST_ERROR
+    if((H5Tcommit_anon(gid, anon_tid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create attribute of anon ndt (short) in /uncopied */
+    if((aid = H5Acreate2(gid, DST_ATTR_ANON_SHORT, anon_tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+	TEST_ERROR
+
+    /* close the attribute */
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(anon_tid) < 0) TEST_ERROR
+
+    /* create and commit anonymous datatype (int) to /uncopied */
+    if((anon_tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((H5Tcommit_anon(gid, anon_tid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create attribute of anon ndt (int) in /uncopied */
+    if((aid = H5Acreate2(gid, DST_ATTR_ANON_INT, anon_tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+	TEST_ERROR
+
+    /* close the attribute */
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(anon_tid) < 0) TEST_ERROR
+
+    /* close the group */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+    }
+
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
+
+    /* create ocpl and set merge committed datatype flag */
+    if((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if(H5Pset_copy_object(ocpypl_id, H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG) < 0) TEST_ERROR
+
+    /*
+     * Test 1 : copy / in SRC file to DST file
+     */
+    if(H5Ocopy(fid_src, "/", fid_dst, SRC_ROOT_GROUP, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* get address of committed datatype at root group */
+    if((tid = H5Topen2(fid_dst, SRC_ROOT_GROUP "/" ROOT_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr_int = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* get address of committed datatype at /g0 */
+    if((tid = H5Topen2(fid_dst, SRC_ROOT_GROUP NAME_GROUP_TOP "/" GROUP_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr_short = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* verify the datatype of first dataset is not committed */
+    if((did = H5Dopen2(fid_dst, SRC_ROOT_GROUP NAME_GROUP_TOP "/" SRC_DSET1, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Tcommitted(tid)) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* check address of datatype for second dataset */
+    if((did = H5Dopen2(fid_dst, SRC_ROOT_GROUP NAME_GROUP_TOP "/" SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr_short) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* check address of datatype for third dataset */
+    if((did = H5Dopen2(fid_dst, SRC_ROOT_GROUP NAME_GROUP_TOP "/" SRC_NDT_DSET3, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr_int) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /*
+     * Test 2: copy /g0 in SRC to DST
+     */
+    if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* get address of committed datatype at /g0 */
+    if((tid = H5Topen2(fid_dst, NAME_GROUP_TOP "/" GROUP_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr_short) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* verify the datatype of first dataset is not committed */
+    if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP "/" SRC_DSET1, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Tcommitted(tid)) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* check address of datatype for second dataset */
+    if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP "/" SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr_short) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* check address of datatype for third dataset */
+    if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP "/" SRC_NDT_DSET3, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr_int) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /*
+     * Test 3: copy datsets in /g0 at SRC to DST group /uncopied
+     */
+    if(H5Ocopy(fid_src, NAME_GROUP_TOP "/" SRC_DSET1, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_DSET1, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ocopy(fid_src, NAME_GROUP_TOP "/" SRC_NDT_DSET2, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ocopy(fid_src, NAME_GROUP_TOP "/" SRC_NDT_DSET3, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET3, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Open attribute with anon ndt (short), get address */
+    if((aid = H5Aopen_by_name(fid_dst, NAME_GROUP_UNCOPIED, DST_ATTR_ANON_SHORT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr_short) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* Open attribute with anon ndt (int), get address */
+    if((aid = H5Aopen_by_name(fid_dst, NAME_GROUP_UNCOPIED, DST_ATTR_ANON_INT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr_int) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* verify the datatype of first dataset is not committed */
+    if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_DSET1, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Tcommitted(tid)) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* check address of datatype for second dataset */
+    if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr_short) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* check address of datatype for third dataset */
+    if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET3, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr_int) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* close property list */
+    if(H5Pclose(ocpypl_id) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+    	H5Tclose(tid);
+    	H5Tclose(f_tid);
+    	H5Tclose(g_tid);
+    	H5Tclose(anon_tid);
+	H5Pclose(ocpypl_id);
+	H5Aclose(aid);
+    	H5Dclose(did);
+    	H5Sclose(sid);
+    	H5Gclose(gid);
+    	H5Fclose(fid_dst);
+    	H5Fclose(fid_src);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_cdt_hier_merge */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_cdt_merge_cdt
+ *
+ * Purpose:     Tests the "merge committed datatypes" feature of H5Ocopy:
+ *		SRC file:
+ *			Create committed datatype (short)
+ *			Create committed datatype (float)
+ *			Create committed datatype (int), with attribute of ndt int
+ *			Create committed datatype (double), with attribute of anon ndt short
+ *		DST file:
+ *			Create committed datatype (int)
+ *			Create committed datatype (float), with attribute of native int
+ *			Create committed datatype (double), with attribute of anon ndt short 
+ *
+ *		Copy / at SRC to DST
+ *		Verify that committed datatypes are copied and merged correctly
+ *
+ *		NOTE: 
+ *		  Comparison of attributes are not implemented yet.
+ *		  Further tests will be added in the future.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Vailin Choi; January 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, hbool_t reopen)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t tid1 = -1, tid2 = -1;                 /* Datatype IDs */
+    hid_t tid3 = -1, tid4 = -1;                 /* Datatype IDs */
+    hid_t tid5 = -1, tid = -1;                 	/* Datatype IDs */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t aid = -1;				/* Attribute ID */
+    hid_t ocpypl_id = -1;                       /* Object copy plist ID */
+    int i;					/* Local index variable */
+    hsize_t dim1d[1];				/* dimension sizes */
+    int buf[DIM_SIZE_1];			/* Buffer for data */
+    H5O_info_t oinfo;                           /* Object info */
+    haddr_t exp_addr;      			/* Expected object addresses */
+    char src_filename[NAME_BUF_SIZE];		/* Source file name */
+    char dst_filename[NAME_BUF_SIZE];		/* Destination file name */
+
+    if(reopen)
+        TESTING("H5Ocopy(): merging various committed datatypes with reopen")
+    else
+        TESTING("H5Ocopy(): merging various committed datatypes")
+
+    /* set initial data values */
+    for (i=0; i<DIM_SIZE_1; i++)
+        buf[i] = i;
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* 
+     * Populate source file 
+     */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
+
+    /* create committed datatype (short) */
+    if((tid1 = H5Tcopy(H5T_NATIVE_SHORT)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, SRC_NDT_SHORT, tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create committed datatype (float) */
+    if((tid2 = H5Tcopy(H5T_NATIVE_FLOAT)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, SRC_NDT_FLOAT, tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create committed datatype (int) */
+    if((tid3 = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, SRC_NDT_INT, tid3, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* set dataspace dimensions */
+    dim1d[0]=DIM_SIZE_1;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /* create an attribute of committed datatype (int); attach to committed datatype (int) */
+    if((aid = H5Acreate2(tid3, SRC_ATTR, tid3, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* create committed datatype (double) */
+    if((tid4 = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, SRC_NDT_DOUBLE, tid4, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create an anonymous committed datatype (short) */
+    if((tid5 = H5Tcopy(H5T_NATIVE_SHORT)) < 0) TEST_ERROR
+    if((H5Tcommit_anon(fid_src, tid5, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create an attribute of anon ndt (short); attach to committed datatype (double) */
+    if((aid = H5Acreate2(tid4, SRC_ATTR, tid5, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* close the committed datatypes */
+    if(H5Tclose(tid1) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid3) < 0) TEST_ERROR
+    if(H5Tclose(tid4) < 0) TEST_ERROR
+    if(H5Tclose(tid5) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* 
+     * Populate destination file 
+     */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
+
+    /* create committed datatype (integer) */
+    if((tid1 = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_dst, DST_NDT_INT, tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create committed datatype (float) */
+    if((tid2 = H5Tcopy(H5T_NATIVE_FLOAT)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_dst, DST_NDT_FLOAT, tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create an attribute of native integer; attach to committed datatype (float) */
+    if((aid = H5Acreate2(tid2, DST_ATTR, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* create committed datatype (double) */
+    if((tid3 = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_dst, DST_NDT_DOUBLE, tid3, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create anonymous committed datatype (short) */
+    if((tid4 = H5Tcopy(H5T_NATIVE_SHORT)) < 0) TEST_ERROR
+    if((H5Tcommit_anon(fid_dst, tid4, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create an attribute of anon ndt (short); attach to ndt (double) */
+    if((aid = H5Acreate2(tid3, DST_ATTR, tid4, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* close the committed datatypes */
+    if(H5Tclose(tid1) < 0) TEST_ERROR
+    if(H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid3) < 0) TEST_ERROR
+    if(H5Tclose(tid4) < 0) TEST_ERROR
+
+    /* close the dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
+
+    /* create ocpl and set merge committed dtype flag */
+    if((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if(H5Pset_copy_object(ocpypl_id, H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG) < 0) TEST_ERROR
+
+    /* copy everything in SRC to DST */
+    if(H5Ocopy(fid_src, "/", fid_dst, SRC_ROOT_GROUP, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* 
+     * Verification 
+     */
+    /* get address of committed datatype: /src_root/src_ndt_double */
+    if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_DOUBLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* get address of committed datatype: /dst_ndt_double */
+    if((tid = H5Topen2(fid_dst, "/" DST_NDT_DOUBLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* get address of committed datatype: /src_root/src_ndt_float */
+    if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_FLOAT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* get address of committed datatype: /dst_ndt_float */
+    if((tid = H5Topen2(fid_dst, "/" DST_NDT_FLOAT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* get address of committed datatype: /src_root/src_ndt_int */
+    if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* get address of committed datatype: /dst_ndt_int */
+    if((tid = H5Topen2(fid_dst, "/" DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* get address of committed datatype: /src_root/src_ndt_short */
+    if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* open attribute; get its dtype; get dtype's address: /src_root/src_ndt_double/dst_attr */
+    if((aid = H5Aopen_by_name(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_DOUBLE, DST_ATTR, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+    /* close the files */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* close the object copy property list */
+    if(H5Pclose(ocpypl_id) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Pclose(ocpypl_id);
+	H5Tclose(tid);
+	H5Tclose(tid1);
+	H5Tclose(tid2);
+	H5Tclose(tid3);
+	H5Tclose(tid4);
+	H5Tclose(tid5);
+	H5Aclose(aid);
+    	H5Sclose(sid);
+    	H5Fclose(fid_dst);
+    	H5Fclose(fid_src);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_cdt_merge_cdt */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_cdt_merge_suggs
+ *
+ * Purpose:     Tests the suggested searching paths feature (H5Padd_merge_committed_dtype_path)
+ *		is correctly applied in merging the committed datatypes.
+ *		
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Vailin Choi; January 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
+    hid_t dst_fapl, hbool_t reopen)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t tid = -1;                             /* Datatype ID */
+    hid_t ocpypl_id = -1;                       /* Object copy plist ID */
+    unsigned int i;                             /* Local index variables */
+    int buf[DIM_SIZE_1];                        /* Buffer for writing data */
+    H5O_info_t oinfo;                           /* Object info */
+    haddr_t exp_addr;                           /* Expected object address */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+
+    if(reopen)
+        TESTING("H5Ocopy(): merging committed datatypes with suggestions and reopen")
+    else
+        TESTING("H5Ocopy(): merging committed datatypes with suggestions")
+
+    /* set initial data values */
+    for(i = 0; i < DIM_SIZE_1; i++)
+        buf[i] = (int)i;
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /*
+     * Populate source file
+     */
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
+
+    /* create committed datatype: "/src_ndt_int" */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+    if((H5Tcommit2(fid_src, SRC_NDT_INT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /*
+     * Populate destination file
+     */
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
+
+    /* create committed datatype: "/dst_ndt_int"  */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_dst, DST_NDT_INT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Create a group /uncopied */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /*
+     * Test 1 
+     */
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
+
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* Create ocpl and set merge committed dtype flag */
+    if((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if(H5Pset_copy_object(ocpypl_id, H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG) < 0) TEST_ERROR
+
+    /* copy "/src_ndt_int" from SRC file to "/uncopied/src_ndt_int" at DST file */
+    if(H5Ocopy(fid_src, SRC_NDT_INT, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* open committed dtype "/dst_ndt_int", get its address */
+    if((tid = H5Topen2(fid_dst, DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* check address of "/uncopied/src_ndt_int" */
+    if((tid = H5Topen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* 
+     * Test 2 
+     */
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* add committed datatype search suggestion: "/uncopied/src_ndt_int" */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT) < 0) TEST_ERROR
+
+    /* copy "/src_ndt_int" from SRC file to "/src_ndt_int" at DST file */
+    if(H5Ocopy(fid_src, SRC_NDT_INT, fid_dst, SRC_NDT_INT, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* open committed dtype "/uncopied/src_ndt_int", get its address */
+    if((tid = H5Topen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* check address of "/src_ndt_int" */
+    if((tid = H5Topen2(fid_dst, SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* 
+     * Test 3 
+     */
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* remove "/uncopied/src_ndt_int" from DST file */
+    if(H5Ldelete(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT, H5P_DEFAULT) < 0) TEST_ERROR 
+
+    /* copy "/src_ndt_int" from SRC file to "/uncopied/src_ndt_int" at DST file */
+    /* use default ocpypl_id -- without merging and suggestion */
+    if(H5Ocopy(fid_src, SRC_NDT_INT, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* copy "/src_ndt_int" from SRC file to "/src_ndt_int2" at DST file */
+    /* copy with merging and search suggestion: "/uncopied/src_ndt_int" */
+    if(H5Ocopy(fid_src, SRC_NDT_INT, fid_dst, SRC_NDT_INT2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+    
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open committed dtype "/uncopied/src_ndt_int", get its address */
+    if((tid = H5Topen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* check address of "/src_ndt_int2" */
+    if((tid = H5Topen2(fid_dst, SRC_NDT_INT2, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* 
+     * Test 4 
+     */
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* add committed datatype search suggestion */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, DST_NDT_INT) < 0) TEST_ERROR
+
+    /* copy "src_ndt_int" from SRC file to "/uncopied/src_ndt_int2" at DST file */
+    /* copy with merging and search suggestion: "/dst_ndt_int, /uncopied/src_ndt_int" */
+    if(H5Ocopy(fid_src, SRC_NDT_INT, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open committed dtype "/dst_dt_int", get its address */
+    if((tid = H5Topen2(fid_dst, DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* check address of "/uncopied/src_ndt_int2" */
+    if((tid = H5Topen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT2, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close property list */
+    if(H5Pclose(ocpypl_id) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid_src);
+        H5Fclose(fid_dst);
+        H5Tclose(tid);
+        H5Pclose(ocpypl_id);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_cdt_merge_suggs */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_cdt_merge_dset_suggs
+ *
+ * Purpose:     Tests the suggested searching paths feature (H5Padd_merge_committed_dtype_path)
+ *		is correctly applied in merging the committed datatypes of datasets.
+ *		
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Vailin Choi; Dec 12, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
+    hid_t dst_fapl, hbool_t reopen)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t tid = -1;                             /* Datatype ID */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t did = -1;                             /* Dataset ID */
+    hid_t ocpypl_id = -1;                       /* Object copy plist ID */
+    unsigned int i;                             /* Local index variables */
+    hsize_t dim1d[1];                           /* Dataset dimensions */
+    int buf[DIM_SIZE_1];                        /* Buffer for writing data */
+    H5O_info_t oinfo;                           /* Object info */
+    haddr_t exp_addr;                           /* Expected object address */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+
+    if(reopen)
+        TESTING("H5Ocopy(): merging committed datatypes of datasets with suggestions and reopen")
+    else
+        TESTING("H5Ocopy(): merging committed datatypes of datasets with suggestions")
+
+    /* set initial data values */
+    for(i = 0; i < DIM_SIZE_1; i++)
+        buf[i] = (int)i;
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /*
+     * Populate source file
+     */
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
+
+    /* create committed datatype: "/src_ndt_int" */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+    if((H5Tcommit2(fid_src, SRC_NDT_INT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim1d[0] = DIM_SIZE_1;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /* create dataset */
+    if((did = H5Dcreate2(fid_src, SRC_NDT_DSET, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data to dataset */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+     /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /*
+     * Populate destination file
+     */
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
+
+    /* create committed datatype: "/dst_ndt_int" */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+    if((H5Tcommit2(fid_dst, DST_NDT_INT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create a group "/uncopied" */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    /*
+     * Test 1 
+     */
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
+
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* Create ocpl and set merge committed dtype flag */
+    if((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if(H5Pset_copy_object(ocpypl_id, H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG) < 0) TEST_ERROR
+
+    /* copy "/src_ndt_dset" from SRC file to "/uncopied/src_ndt_dset" at DST file */
+    if(H5Ocopy(fid_src, SRC_NDT_DSET, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open committed dtype "/dst_ndt_int", get its address */
+    if((tid = H5Topen2(fid_dst, DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* check address of datatype for the copied dataset: "/uncopied/src_ndt_dset"  */
+    if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* 
+     * Test 2 
+     */
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* add committed datatype search suggestion: "/uncopied/src_ndt_dset" */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET) < 0) TEST_ERROR
+
+    /* copy "/src_ndt_dset" from SRC file to "/src_ndt_dset" at DST file */
+    if(H5Ocopy(fid_src, SRC_NDT_DSET, fid_dst, SRC_NDT_DSET, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open committed dtype dataset "/uncopied/src_ndt_dset", get its datatype address */
+    if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* check address of datatype for the copied dataset: "/src_ndt_dset" */
+    if((did = H5Dopen2(fid_dst, SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* 
+     * Test 3 
+     */
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* remove "/uncopied/src_ndt_dset" */
+    if(H5Ldelete(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET, H5P_DEFAULT) < 0) TEST_ERROR 
+
+    /* copy "src_ndt_dset" from SRC file to "/uncopied/src_ndt_dset" at DST file */
+    /* use default ocpypl_id -- without merging and suggestion */
+    if(H5Ocopy(fid_src, SRC_NDT_DSET, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* copy "src_ndt_dset" from SRC file to "/src_ndt_dset2" at DST file */
+    /* use merging and suggested searching path: "/uncopied/src_ndt_dset" */
+    if(H5Ocopy(fid_src, SRC_NDT_DSET, fid_dst, SRC_NDT_DSET2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+    
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* open the copied dataset: /uncopied/src_ndt_dset", get its address  */
+    if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* check address of datatype for the copied dataset: "/src_ndt_dset2" */
+    if((did = H5Dopen2(fid_dst, SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* 
+     * Test 4 
+     */
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* add committed datatype search suggestion: "/src_ndt_dset" */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, SRC_NDT_DSET) < 0) TEST_ERROR
+
+    /* copy /src_ndt_dset from SRC file to /uncopied/src_ndt_dset2 at DST */
+    /* use merging and suggested search paths: "/src_ndt_dset, /uncopied/src_ndt_dset" */
+    if(H5Ocopy(fid_src, SRC_NDT_DSET, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* open the copied dataset: "/src_ndt_dset", get its datatype address */
+    if((did = H5Dopen2(fid_dst, SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* check address of datatype for the copied dataset: /uncopied/src_ndt_dset2 */
+    if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close property list */
+    if(H5Pclose(ocpypl_id) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid_src);
+        H5Fclose(fid_dst);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Pclose(ocpypl_id);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_cdt_merge_dset_suggs */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_cdt_merge_all_suggs
+ *
+ * Purpose:     Tests the merging committed datatype + search suggestion feature.
+ *		
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Vailin Choi; January 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
+    hid_t dst_fapl, hbool_t reopen)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t gid = -1;                             /* Group ID */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t tid = -1;                             /* Datatype ID */
+    hid_t aid = -1;                             /* Attribute ID */
+    hid_t did = -1;                             /* Dataset ID */
+    hid_t exp_did = -1;                          /* Dataset ID */
+    hid_t tid_short = -1; 			/* Datatype ID */
+    hid_t exp_tid;				/* Expected datatype ID */
+    hid_t ocpypl_id = -1;                       /* Object copy plist ID */
+    unsigned int i;                             /* Local index variables */
+    hsize_t dim1d[1];                           /* Dataset dimensions */
+    int buf[DIM_SIZE_1];                        /* Buffer for writing data */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+
+    if(reopen)
+        TESTING("H5Ocopy(): merging different committed datatypes with suggestions and reopen")
+    else
+        TESTING("H5Ocopy(): merging different committed datatypes with suggestions")
+
+    /* set initial data values */
+    for(i = 0; i < DIM_SIZE_1; i++)
+        buf[i] = (int)i;
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /*
+     * Populate source file
+     */
+
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
+
+    /* set dataspace dimension, create dataspace */
+    dim1d[0] = DIM_SIZE_1;
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /* create a group */
+    if((gid = H5Gcreate2(fid_src, SRC_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create committed datatype in group */
+    if((tid = H5Tcopy(H5T_NATIVE_SHORT)) < 0) TEST_ERROR
+    if((H5Tcommit2(gid, SRC_NDT_SHORT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create first dataset in group */
+    if((did = H5Dcreate2(gid, SRC_NDT_DSET, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* closing */
+    if(H5Dclose(did) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* create committed datatype in group */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((H5Tcommit2(gid, SRC_NDT_INT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create second dataset in group */
+    if((did = H5Dcreate2(gid, SRC_NDT_DSET2, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* closing */
+    if(H5Dclose(did) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* create third dataset in group */
+    if((did = H5Dcreate2(gid, SRC_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    
+    /* get datatype */
+    if((tid_short = H5Topen2(fid_src, "/" SRC_GRP "/" SRC_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create an attribute attached to the dataset */
+    if((aid = H5Acreate2(did, SRC_ATTR, tid_short, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* closing */
+    if(H5Aclose(aid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+    if(H5Tclose(tid_short) < 0) TEST_ERROR
+
+    /* close the group */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* close the dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /*
+     * Populate DST file
+     */
+
+    /* create DST file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
+
+    /* set dataspace dimension, create dataspace */
+    dim1d[0] = DIM_SIZE_2;
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /* create committed datatype in root group */
+    if((tid = H5Tcopy(H5T_NATIVE_SHORT)) < 0)TEST_ERROR
+    if((H5Tcommit2(fid_dst, DST_NDT_SHORT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* create committed datatype in root group */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+    if((H5Tcommit2(fid_dst, DST_NDT_INT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create an attribute attached to committed datatype */
+    if((aid = H5Acreate2(tid, DST_ATTR, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* closing */
+    if(H5Aclose(aid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+
+    /* create committed datatype in root group */
+    if((tid = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)TEST_ERROR
+    if((H5Tcommit2(fid_dst, DST_NDT_FLOAT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create an attribute attached to committed datatype */
+    if((aid = H5Acreate2(tid, DST_ATTR, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* create a group */
+    if((gid = H5Gcreate2(fid_dst, DST_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create a committed datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((H5Tcommit2(gid, DST_NDT_INT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create an attribute attached to committed datatype */
+    if((aid = H5Acreate2(gid, DST_ATTR, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* closing */
+    if(H5Aclose(aid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* create an attribute attached to group */
+    if((aid = H5Acreate2(gid, DST_ATTR2, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* closing */
+    if(H5Aclose(aid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* create a group */
+    if((gid = H5Gcreate2(fid_dst, DST_GRP2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create a committed datatype in group */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+    if((H5Tcommit2(gid, DST_NDT_INT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create an attribute attached to group */
+    if((aid = H5Acreate2(gid, DST_ATTR, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* closing */
+    if(H5Aclose(aid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* create a committed datatype in group */
+    if((tid = H5Tcopy(H5T_NATIVE_SHORT)) < 0)TEST_ERROR
+    if((H5Tcommit2(gid, DST_NDT_SHORT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* closing */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* create a committed datatype at root group */
+    if((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)TEST_ERROR
+    if((H5Tcommit2(fid_dst, DST_NDT_DOUBLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* get datatype */
+    if((tid_short = H5Topen2(fid_dst, "/" DST_GRP2 "/" DST_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create an attribute attached to committed datatype */
+    if((aid = H5Acreate2(tid, DST_ATTR, tid_short, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* closing */
+    if(H5Aclose(aid) < 0) TEST_ERROR
+    if(H5Tclose(tid_short) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* 
+     * Test 1
+     */
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
+
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* Create ocpl and set merge committed dtype flag */
+    if((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if(H5Pset_copy_object(ocpypl_id, H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG) < 0) TEST_ERROR
+
+    /* copy "/src_grp/src_ndt_dset2" from SRC file to DST file */
+    if(H5Ocopy(fid_src, "/" SRC_GRP "/" SRC_NDT_DSET2, fid_dst, "A_src_dset2", ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* get datatype for attribute attached to the group */
+    if((aid = H5Aopen_by_name(fid_dst, DST_GRP, DST_ATTR, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((exp_tid = H5Aget_type(aid)) < 0) TEST_ERROR
+
+    /* open datatype of dataset */
+    if((did = H5Dopen2(fid_dst, "A_src_dset2", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+
+    /* should be the same */
+    if(!H5Tequal(exp_tid, tid)) TEST_ERROR
+
+    /* closing */
+    if(H5Tclose(exp_tid) < 0) TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* 
+     * Test 2
+     */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* add committed datatype search suggestion */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, "/" DST_GRP2) < 0) TEST_ERROR
+
+    /* copy "/src_grp/src_ndt_dset2" from SRC file to DST file */
+    if(H5Ocopy(fid_src, "/" SRC_GRP "/" SRC_NDT_DSET2, fid_dst, "B_src_dset2", ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* get datatype for attribute attached to the group */
+    if((aid = H5Aopen_by_name(fid_dst, DST_GRP2, DST_ATTR, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((exp_tid = H5Aget_type(aid)) < 0) TEST_ERROR
+
+    /* open datatype of dataset */
+    if((did = H5Dopen2(fid_dst, "B_src_dset2", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+
+    /* should be the same */
+    if(!H5Tequal(exp_tid, tid)) TEST_ERROR
+
+    /* closing */
+    if(H5Tclose(exp_tid) < 0) TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* 
+     * Test 3
+     */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* add another committed datatype search suggestion */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, "/" DST_GRP "/" DST_NDT_INT) < 0) TEST_ERROR
+
+    /* copy "/src_grp/src_ndt_dset2" from SRC file to DST file */
+    if(H5Ocopy(fid_src, "/" SRC_GRP "/" SRC_NDT_DSET2, fid_dst, "C_src_dset2", ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* open committed dtype "/dst_grp/dst_dt_int", get its address */
+    if((exp_tid = H5Topen2(fid_dst, "/" DST_GRP "/" DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* open datatype of dataset */
+    if((did = H5Dopen2(fid_dst, "C_src_dset2", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+
+    /* should be the same */
+    if(!H5Tequal(exp_tid, tid)) TEST_ERROR
+
+    /* closing */
+    if(H5Tclose(exp_tid) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* 
+     * Test 4
+     */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* delete the group */
+    if(H5Ldelete(fid_dst, "/" DST_GRP, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* free the search suggestion paths */
+    if(H5Pfree_merge_committed_dtype_paths(ocpypl_id) < 0) TEST_ERROR
+
+    /* copy "/src_grp/src_ndt_dset2" from SRC file to DST file */
+    if(H5Ocopy(fid_src, "/" SRC_GRP "/" SRC_NDT_DSET2, fid_dst, "D_src_dset2", ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* open datatype of dataset */
+    if((exp_did = H5Dopen2(fid_dst, "A_src_dset2", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((exp_tid = H5Dget_type(exp_did)) < 0) TEST_ERROR
+
+    /* Open datatype of dataset */
+    if((did = H5Dopen2(fid_dst, "C_src_dset2", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+
+    /* should be the same */
+    if(!H5Tequal(exp_tid, tid)) TEST_ERROR
+
+    /* closing */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* open datatype of dataset */
+    if((did = H5Dopen2(fid_dst, "D_src_dset2", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+
+    /* should be the same */
+    if(!H5Tequal(exp_tid, tid)) TEST_ERROR
+
+    /* closing */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* closing */
+    if(H5Tclose(exp_tid) < 0) TEST_ERROR
+    if(H5Dclose(exp_did) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* 
+     * Test 5
+     */
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* Add committed datatype search suggestion */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, "/" DST_NDT_DOUBLE) < 0) TEST_ERROR
+
+    /* copy "/src_grp/src_ndt_dset" from SRC file to DST file */
+    if(H5Ocopy(fid_src, "/" SRC_GRP "/" SRC_NDT_DSET, fid_dst, "A_src_dset", ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* open attribute's dtype attached to committed datatype /dst_ndt_double */
+    if((aid = H5Aopen_by_name(fid_dst, DST_NDT_DOUBLE, DST_ATTR, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((exp_tid = H5Aget_type(aid)) < 0) TEST_ERROR
+
+    /* Open datatype of dataset, check address */
+    if((did = H5Dopen2(fid_dst, "A_src_dset", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+
+    /* should be the same */
+    if(!H5Tequal(exp_tid, tid)) TEST_ERROR
+
+    /* closing */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+    if(H5Tclose(exp_tid) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* 
+     * Test 6
+     */
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* Add committed datatype search suggestion */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, "/" DST_NDT_SHORT) < 0) TEST_ERROR
+
+    /* copy "/src_grp/src_ndt_dset" from SRC file to DST file */
+    if(H5Ocopy(fid_src, "/" SRC_GRP "/" SRC_NDT_DSET, fid_dst, "B_src_dset", ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* open committed dtype "/dst_ndt_short" */
+    if((exp_tid = H5Topen2(fid_dst, "/" DST_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* open datatype of dataset, check address */
+    if((did = H5Dopen2(fid_dst, "B_src_dset", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+
+    /* should be the same */
+    if(!H5Tequal(exp_tid, tid)) TEST_ERROR
+
+    /* closing */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+    if(H5Tclose(exp_tid) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+     /* close property list */
+    if(H5Pclose(ocpypl_id) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid_src);
+        H5Fclose(fid_dst);
+        H5Tclose(tid);
+        H5Tclose(tid_short);
+        H5Tclose(exp_tid);
+        H5Dclose(did);
+        H5Dclose(exp_did);
+        H5Aclose(aid);
+        H5Sclose(sid);
+        H5Pclose(ocpypl_id);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_cdt_merge_all_suggs */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_set_mcdt_search_cb
+ *
+ * Purpose:     Tests the "H5Pset_mcdt_search_cb" feature of H5Ocopy to
+ *              stop or continue the search of global list
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Vailin Choi; January 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+/* User data struct for the callback */
+typedef struct mcdt_search_cb_ud {
+    H5O_mcdt_search_ret_t       search_action;  /* Return value for callback */
+    unsigned                    called;         /* # of times callback has been called */
+} mcdt_search_cb_ud;
+
+/* The user callback function */
+static H5O_mcdt_search_ret_t
+mcdt_search_cb(void *_udata)
+{
+    mcdt_search_cb_ud   *udata = (mcdt_search_cb_ud *)_udata;
+
+    udata->called++;
+    return(udata->search_action);
+} /* mcdt_search_cb() */
+
+static int
+test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
+    hid_t dst_fapl, hbool_t reopen)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t tid = -1;                             /* Datatype ID */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t did = -1;                             /* Dataset ID */
+    hid_t ocpypl_id = -1;                       /* Object copy plist ID */
+    unsigned int i;                             /* Local index variables */
+    hsize_t dim1d[1];                           /* Dataset dimensions */
+    int buf[DIM_SIZE_1];                        /* Buffer for writing data */
+    H5O_info_t oinfo;                           /* Object info */
+    haddr_t exp_addr;                           /* Expected object address */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+    mcdt_search_cb_ud cb_udata;                 /* User data for callback */
+
+    if(reopen)
+        TESTING("H5Ocopy(): H5Pset_mcdt_search_cb and reopen")
+    else
+        TESTING("H5Ocopy(): H5Pset_mcdt_search_cb")
+
+    /* set initial data values */
+    for(i = 0; i < DIM_SIZE_1; i++)
+        buf[i] = (int)i;
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim1d[0]=DIM_SIZE_1;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /*
+     * Populate source file
+     */
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* named data type */
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create dataset at SRC file */
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
+
+    /* Create an uncopied group in destination file */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /*
+     * Populate destination file
+     */
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type "a" */
+    if((H5Tcommit2(fid_dst, "/a", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type "b" */
+    if((H5Tcommit2(fid_dst, "/b", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
+
+    /* Create ocpl and set merge committed dtype flag */
+    if((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if(H5Pset_copy_object(ocpypl_id, H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG) < 0) TEST_ERROR
+
+    /*
+     * First copy dataset using "/b" as a suggestion, and verify that it uses
+     * datatype "b" in the destination file
+     */
+    /* Add datatype suggestion */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, "/b") < 0) TEST_ERROR
+
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* copy SRC dset to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open committed dtype "b", get address */
+    if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open dset dtype, check address */
+    if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /*
+     * Set callback to continue the search
+     */
+    cb_udata.search_action = H5O_MCDT_SEARCH_CONT;
+    cb_udata.called = 0;
+
+    /* Free suggestions */
+    if(H5Pfree_merge_committed_dtype_paths(ocpypl_id) < 0) TEST_ERROR
+
+    /* Add datatype suggestion to group "/uncopied" */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, NAME_GROUP_UNCOPIED) < 0) TEST_ERROR
+
+    /* Continue the global search */
+    if(H5Pset_mcdt_search_cb(ocpypl_id, mcdt_search_cb, &cb_udata) < 0)
+	TEST_ERROR
+
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* copy SRC dset to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify callback has been called exactly once */
+    if(cb_udata.called != 1) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open committed dtype "a", get address */
+    if((tid = H5Topen2(fid_dst, "/a", H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open copied dataset and its dtype, check address */
+    if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+
+    /* 
+     * Stop the search, default action is to create an anonymous committed datatype
+     */
+    cb_udata.search_action = H5O_MCDT_SEARCH_STOP;
+    cb_udata.called = 0;
+
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* copy SRC dset to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE3, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify callback has been called exactly once */
+    if(cb_udata.called != 1) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open committed dtype "a", get address */
+    if((tid = H5Topen2(fid_dst, "/a", H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open the copied dataset and get its dtype, addresses should not be equal */
+    if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr == exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Open committed dtype "b", get address */
+    if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open the copied dataset and get its dtype, addresses should not be equal */
+    if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr == exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+
+    /*
+     * Stop the search, default action is to create an anonymous committed datatype.
+     * Disable suggestion list.
+     */
+    cb_udata.search_action = H5O_MCDT_SEARCH_STOP;
+    cb_udata.called = 0;
+
+    /* Free suggestions */
+    if(H5Pfree_merge_committed_dtype_paths(ocpypl_id) < 0) TEST_ERROR
+
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* Delete dataset */
+    if(H5Ldelete(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* copy SRC dset to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE3, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Verify callback has been called exactly once */
+    if(cb_udata.called != 1) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Open committed dtype "a", get address */
+    if((tid = H5Topen2(fid_dst, "/a", H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open the copied dataset and get its dtype, addresses should not be equal */
+    if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr == exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Open committed dtype "b", get address */
+    if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    exp_addr = oinfo.addr;
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open the copied dataset and get its dtype, addresses should not be equal */
+    if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Dget_type(did)) < 0) TEST_ERROR
+    if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR
+    if(oinfo.addr == exp_addr) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close property list */
+    if(H5Pclose(ocpypl_id) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid_src);
+        H5Fclose(fid_dst);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Pclose(ocpypl_id);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_set_mcdt_search_cb */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_set_get_mcdt_cb
+ *
+ * Purpose:     Tests for the "H5Pset/get_mcdt_search_cb" feature of H5Ocopy.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Vailin Choi; January 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* The user callback functions */
+static H5O_mcdt_search_ret_t
+mcdt_search_cbA(void *_udata)
+{
+    H5O_mcdt_search_ret_t *action = (H5O_mcdt_search_ret_t *)_udata;
+
+    return(*action);
+} /* mcdt_search_cb() */
+
+static H5O_mcdt_search_ret_t
+mcdt_search_cbB(void *_udata)
+{
+    H5O_mcdt_search_ret_t *action = (H5O_mcdt_search_ret_t *)_udata;
+
+    return(*action);
+} /* mnt_search_cb() */
+
+/* The main test function */
+static int
+test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
+    hid_t dst_fapl, hbool_t reopen)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t tid = -1;                             /* Datatype ID */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t did = -1;                             /* Dataset ID */
+    hid_t ocpypl_id = -1;                       /* Object copy plist ID */
+    unsigned int i;                             /* Local index variables */
+    hsize_t dim1d[1];                           /* Dataset dimensions */
+    int buf[DIM_SIZE_1];                        /* Buffer for writing data */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+    H5O_mcdt_search_cb_t mcdt_cb = NULL;	/* The callback function */
+    H5O_mcdt_search_ret_t mcdt_udataA;		/* User data for callback */
+    H5O_mcdt_search_ret_t mcdt_udataB;		/* User data for callback */
+    H5O_mcdt_search_ret_t *mcdt_udata_p = NULL;	/* Pointer to user data for callback */
+
+    if(reopen)
+        TESTING("H5Ocopy(): H5Pset/get_mcdt_search_cb and reopen")
+    else
+        TESTING("H5Ocopy(): H5Pset/get_mcdt_search_cb")
+
+    /* set initial data values */
+    for(i = 0; i < DIM_SIZE_1; i++)
+        buf[i] = (int)i;
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim1d[0]=DIM_SIZE_1;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /*
+     * Populate source file
+     */
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type */
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* create dataset at SRC file */
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
+
+    /* Create an uncopied group in destination file */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /*
+     * Populate destination file
+     */
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type "a" */
+    if((H5Tcommit2(fid_dst, "/a", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* create datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
+
+    /* committed data type "b" */
+    if((H5Tcommit2(fid_dst, "/b", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close the datatype */
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
+
+    /* Create ocpl and set merge committed dtype flag */
+    if((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if(H5Pset_copy_object(ocpypl_id, H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG) < 0) TEST_ERROR
+
+    /*
+     * First copy dataset using "/b" as a suggestion, and verify that it uses
+     * datatype "b" in the destination file
+     */
+    /* Add datatype suggestion */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, "/b") < 0) TEST_ERROR
+
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* copy SRC dset to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    /* Verify "get" routine functionality */
+    if(H5Pget_mcdt_search_cb(ocpypl_id, &mcdt_cb, (void **) &mcdt_udata_p) < 0) TEST_ERROR
+
+    if(mcdt_cb != NULL) TEST_ERROR
+    if(mcdt_udata_p != NULL) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /*
+     * Set callback to continue the search
+     */
+    mcdt_udataA = H5O_MCDT_SEARCH_CONT;
+
+    /* Free suggestions */
+    if(H5Pfree_merge_committed_dtype_paths(ocpypl_id) < 0) TEST_ERROR
+
+    /* Add datatype suggestion to group "/uncopied" */
+    if(H5Padd_merge_committed_dtype_path(ocpypl_id, NAME_GROUP_UNCOPIED) < 0) TEST_ERROR
+
+    /* Continue the global search */
+    if(H5Pset_mcdt_search_cb(ocpypl_id, mcdt_search_cbA, &mcdt_udataA) < 0)
+	TEST_ERROR
+
+    /* open the destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* copy SRC dset to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    mcdt_cb = NULL;
+    mcdt_udata_p = NULL;
+
+    /* Verify "get" routine functionality */
+    if(H5Pget_mcdt_search_cb(ocpypl_id, &mcdt_cb, (void **) &mcdt_udata_p) < 0) TEST_ERROR
+
+    if(mcdt_cb != mcdt_search_cbA) TEST_ERROR
+    if(mcdt_udata_p != &mcdt_udataA) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+
+    /*
+     * Stop the search, default action is to create an anonymous committed datatype
+     */
+    mcdt_udataB = H5O_MCDT_SEARCH_STOP;
+
+    if(H5Pset_mcdt_search_cb(ocpypl_id, mcdt_search_cbA, &mcdt_udataB) < 0)
+	TEST_ERROR
+
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+     /* copy SRC dset to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE3, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    mcdt_cb = NULL;
+    mcdt_udata_p = NULL;
+
+    /* Verify "get" routine functionality */
+    if(H5Pget_mcdt_search_cb(ocpypl_id, &mcdt_cb, (void **) &mcdt_udata_p) < 0) TEST_ERROR
+
+    if(mcdt_cb != mcdt_search_cbA) TEST_ERROR
+    if(mcdt_udata_p != &mcdt_udataB) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+     /* Free suggestions */
+    if(H5Pfree_merge_committed_dtype_paths(ocpypl_id) < 0) TEST_ERROR
+
+    if(H5Pset_mcdt_search_cb(ocpypl_id, mcdt_search_cbB, &mcdt_udataB) < 0)
+	TEST_ERROR
+
+    /* open destination file */
+    if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
+
+    /* Delete dataset */
+    if(H5Ldelete(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* copy SRC dset to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE3, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
+
+    if(reopen) {
+        /* Reopen file */
+        if(H5Fclose(fid_dst) < 0) TEST_ERROR
+        if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
+    } /* end if */
+
+    mcdt_cb = NULL;
+    mcdt_udata_p = NULL;
+
+    /* Verify "get" routine functionality */
+    if(H5Pget_mcdt_search_cb(ocpypl_id, &mcdt_cb, (void **) &mcdt_udata_p) < 0) TEST_ERROR
+
+    if(mcdt_cb != mcdt_search_cbB) TEST_ERROR
+    if(mcdt_udata_p != &mcdt_udataB) TEST_ERROR
+
+    /* Close destination file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close property list */
+    if(H5Pclose(ocpypl_id) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid_src);
+        H5Fclose(fid_dst);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Pclose(ocpypl_id);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_set_get_mcdt_search_cb */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_copy_option
  *
  * Purpose:     Create a group in SRC file and copy it to DST file
@@ -8727,6 +11916,7 @@ main(void)
     unsigned    max_compact, min_dense;
     int     configuration;  /* Configuration of tests. */
     int	ExpressMode;
+    hbool_t same_file;  /* Whether to run tests that only use one file */
 
     /* Setup */
     h5_reset();
@@ -8759,6 +11949,11 @@ main(void)
         hid_t fcpl_src;
         hid_t fcpl_dst;
 
+        /* Start with same_file == TRUE.  Use source file settings for these
+         * tests.  Don't run with a non-default destination file setting, as
+         * destination settings have no effect. */
+        same_file = TRUE;
+
         /* No need to test dense attributes with old format */
         if(!(configuration & CONFIG_SRC_NEW_FORMAT) && (configuration & CONFIG_DENSE))
             continue;
@@ -8775,6 +11970,7 @@ main(void)
         if(configuration & CONFIG_SHARE_DST) {
             puts("Testing with shared dst messages:");
             fcpl_dst = fcpl_shared;
+            same_file = FALSE;
         }
         else {
             puts("Testing without shared dst messages:");
@@ -8797,7 +11993,7 @@ main(void)
             }
         } /* end if */
         else {
-            puts("Testing with oldest file format for source file:");
+	    puts("Testing with oldest file format for source file:");
             src_fapl = fapl;
             num_attributes_g = 4;
         } /* end else */
@@ -8806,6 +12002,7 @@ main(void)
         if(configuration & CONFIG_DST_NEW_FORMAT) {
             puts("Testing with latest format for destination file:");
             dst_fapl = fapl2;
+            same_file = FALSE;
         } /* end if */
         else {
             puts("Testing with oldest file format for destination file:");
@@ -8873,9 +12070,31 @@ main(void)
         /* Tests that do not use attributes and do not need to be tested
          * multiple times for different attribute configurations */
         if(configuration < CONFIG_DENSE) {
+            hbool_t reopen;
+
             nerrors += test_copy_named_datatype(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
             nerrors += test_copy_named_datatype_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
             nerrors += test_copy_named_datatype_vl_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
+
+            /* Loop over reopening the file */
+            for(reopen = FALSE; reopen <= TRUE; reopen++) {
+                nerrors += test_copy_committed_datatype_merge(fcpl_src, fcpl_dst, src_fapl, dst_fapl, reopen);
+
+                if(same_file)
+                    nerrors += test_copy_committed_datatype_merge_same_file(fcpl_src, src_fapl, reopen);
+
+                nerrors += test_copy_committed_dt_merge_sugg(fcpl_src, fcpl_dst, src_fapl, dst_fapl, reopen);
+                nerrors += test_copy_committed_dt_merge_attr(fcpl_src, fcpl_dst, src_fapl, dst_fapl, reopen);
+
+                /* tests added for merging committed datatypes + suggestions + callback */
+                nerrors += test_copy_cdt_hier_merge(fcpl_src, fcpl_dst, src_fapl, dst_fapl, reopen);
+                nerrors += test_copy_cdt_merge_cdt(fcpl_src, fcpl_dst, src_fapl, dst_fapl, reopen);
+                nerrors += test_copy_cdt_merge_suggs(fcpl_src, fcpl_dst, src_fapl, dst_fapl, reopen);
+                nerrors += test_copy_cdt_merge_dset_suggs(fcpl_src, fcpl_dst, src_fapl, dst_fapl, reopen);
+                nerrors += test_copy_cdt_merge_all_suggs(fcpl_src, fcpl_dst, src_fapl, dst_fapl, reopen);
+                nerrors += test_copy_set_mcdt_search_cb(fcpl_src, fcpl_dst, src_fapl, dst_fapl, reopen);
+                nerrors += test_copy_set_get_mcdt_search_cb(fcpl_src, fcpl_dst, src_fapl, dst_fapl, reopen);
+            } /* end for */
 
             nerrors += test_copy_dataset_external(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
             nerrors += test_copy_dataset_named_dtype(fcpl_src, fcpl_dst, src_fapl, dst_fapl);

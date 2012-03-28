@@ -392,7 +392,7 @@ H5P_dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t UNUSED si
 
     /* Sanity check */
     HDassert(layout1);
-    HDassert(layout1);
+    HDassert(layout2);
     HDassert(size == sizeof(H5O_layout_t));
 
     /* Check for different layout type */

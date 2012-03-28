@@ -589,8 +589,8 @@ done:
 herr_t
 H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst,
     const H5O_msg_class_t *mesg_type, const void *_native_src, void *_native_dst,
-    hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void UNUSED *udata,
-    hid_t dxpl_id)
+    hbool_t UNUSED *recompute_size, unsigned *mesg_flags, H5O_copy_t *cpy_info,
+    void UNUSED *udata, hid_t dxpl_id)
 {
     const H5O_shared_t  *shared_src = (const H5O_shared_t *)_native_src; /* Alias to shared info in native source */
     H5O_shared_t        *shared_dst = (H5O_shared_t *)_native_dst; /* Alias to shared info in native destination message */
@@ -621,16 +621,18 @@ H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst,
         /* Set copied metadata tag */
         H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, FAIL);
 
-        if(H5SM_try_share(file_dst, dxpl_id, NULL, H5SM_DEFER, mesg_type->id, _native_dst, NULL) < 0)
+        if(H5SM_try_share(file_dst, dxpl_id, NULL, H5SM_DEFER, mesg_type->id, _native_dst, mesg_flags) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to determine if message should be shared")
 
         /* Reset metadata tag */
         H5_END_TAG(FAIL);
     } /* end if */
-    else
+    else {
         /* Mark the message as committed - as it will be committed in post copy
          */
         H5O_UPDATE_SHARED(shared_dst, H5O_SHARE_TYPE_COMMITTED, file_dst, mesg_type->id, 0, HADDR_UNDEF)
+        *mesg_flags |= H5O_MSG_FLAG_SHARED;
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -657,8 +659,8 @@ done:
  */
 herr_t
 H5O_shared_post_copy_file(H5F_t *f, const H5O_msg_class_t *mesg_type,
-    const H5O_shared_t *shared_src, H5O_shared_t *shared_dst, hid_t dxpl_id,
-    H5O_copy_t *cpy_info)
+    const H5O_shared_t *shared_src, H5O_shared_t *shared_dst,
+    unsigned *mesg_flags, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -675,6 +677,7 @@ H5O_shared_post_copy_file(H5F_t *f, const H5O_msg_class_t *mesg_type,
         H5O_loc_t src_oloc;
 
         /* Copy the shared object from source to destination */
+        H5O_loc_reset(&dst_oloc);
         dst_oloc.file = f;
         src_oloc.file = shared_src->file;
         src_oloc.addr = shared_src->u.loc.oh_addr;
@@ -688,7 +691,7 @@ H5O_shared_post_copy_file(H5F_t *f, const H5O_msg_class_t *mesg_type,
     else
         /* Share the message */
         if(H5SM_try_share(f, dxpl_id, NULL, H5SM_WAS_DEFERRED, mesg_type->id,
-                shared_dst, NULL) < 0)
+                shared_dst, mesg_flags) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't share message")
 
 done:

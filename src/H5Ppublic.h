@@ -30,6 +30,7 @@
 #include "H5FDpublic.h"
 #include "H5Ipublic.h"
 #include "H5Lpublic.h"
+#include "H5Opublic.h"
 #include "H5MMpublic.h"
 #include "H5Tpublic.h"
 #include "H5Zpublic.h"
@@ -427,6 +428,10 @@ H5_DLL herr_t H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **
 /* Object copy property list (OCPYPL) routines */
 H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned crt_intmd);
 H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *crt_intmd /*out*/);
+H5_DLL herr_t H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path);
+H5_DLL herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id);
+H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data);
+H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

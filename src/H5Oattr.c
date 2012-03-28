@@ -61,6 +61,7 @@ static herr_t H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 #define H5O_SHARED_COPY_FILE_REAL	H5O_attr_copy_file
 #define H5O_SHARED_POST_COPY_FILE	H5O_attr_shared_post_copy_file
 #define H5O_SHARED_POST_COPY_FILE_REAL	H5O_attr_post_copy_file
+#undef  H5O_SHARED_POST_COPY_FILE_UPD
 #define H5O_SHARED_DEBUG		H5O_attr_shared_debug
 #define H5O_SHARED_DEBUG_REAL		H5O_attr_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */

@@ -392,6 +392,10 @@ Bug Fixes since HDF5-1.8.0 release
             2012/1/25. Issue 7756)
       - Fixed a seg fault that could occur when shrinking a dataset with chunks
             larger than 1 MB. (NAF - 2011/11/30 - HDFFV-7833)
+      - Fixed a bug that could cause file corruption when copying named
+            datatypes to a file using shared messages. (NAF - 2011/11/14)
+      - Fixed a bug that could cause H5Oget_info to return the wrong address
+            after copying a named datatype. (NAF - 2011/11/14)
       - The library allowed the conversion of strings between ASCII and UTF8
             (Issue 7582).  We have corrected it to report an error under this
             situation. (SLU - 2011/11/8)
