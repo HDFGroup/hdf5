@@ -849,7 +849,7 @@ H5D_btree_create_flush_dep(void *_key, void *_udata, void *parent)
 {
     H5D_btree_key_t             *key = (H5D_btree_key_t *)_key;
     H5D_chunk_common_ud_t       *udata = (H5D_chunk_common_ud_t *) _udata;
-    int                         ret_value;
+    int                         ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -892,7 +892,7 @@ H5D_btree_update_flush_dep(void *_key, void *_udata, void *old_parent,
 {
     H5D_btree_key_t             *key = (H5D_btree_key_t *)_key;
     H5D_chunk_common_ud_t       *udata = (H5D_chunk_common_ud_t *) _udata;
-    int                         ret_value;
+    int                         ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 

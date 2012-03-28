@@ -5941,7 +5941,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D_chunk_create_flush_dep
+ * Function:    H5D_chunk_find_flush_dep
  *
  * Purpose:     Check cache (including temporary list of entries to be
  *              evicted) for the specified chunk.
