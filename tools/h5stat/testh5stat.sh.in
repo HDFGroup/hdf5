@@ -209,7 +209,6 @@ TOOLTEST h5stat_newgrat.ddl h5stat_newgrat.h5
 TOOLTEST h5stat_newgrat-UG.ddl -G h5stat_newgrat.h5
 TOOLTEST h5stat_newgrat-UA.ddl -A h5stat_newgrat.h5
 
-
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."
     exit $EXIT_SUCCESS

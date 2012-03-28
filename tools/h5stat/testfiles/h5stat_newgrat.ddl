@@ -76,3 +76,8 @@ Attribute bins:
 	# of objects with 100 - 999 attributes: 1
 	Total # of objects with attributes: 1
 	Max. # of attributes to objects: 100
+Summary of file space information:
+  File metadata: 6361757 bytes
+  Raw data: 0 bytes
+  Unaccounted space: 1324 bytes
+Total space: 6363081 bytes
