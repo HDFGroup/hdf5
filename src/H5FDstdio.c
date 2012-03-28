@@ -44,6 +44,10 @@
 #endif
 
 #ifdef H5_HAVE_WIN32_API
+/* The following two defines must be before any windows headers are included */
+#define WIN32_LEAN_AND_MEAN    /* Exclude rarely-used stuff from Windows headers */
+#define NOGDI                  /* Exclude Graphic Display Interface macros */
+
 #include <windows.h>
 #include <io.h>
 
@@ -115,10 +119,12 @@ typedef struct H5FD_stdio_t {
 
 /* Use similar structure as in H5private.h by defining Windows stuff first. */
 #ifdef H5_HAVE_WIN32_API
+  #ifndef H5_HAVE_MINGW
     #   define file_fseek  _fseeki64
     #   define file_offset_t  __int64
     #   define file_ftruncate  _chsize_s   /* Supported in VS 2005 or newer */
     #   define file_ftell  _ftelli64
+  #endif
 #endif
 
 /* Use file_xxx to indicate these are local macros, avoiding confusing 
