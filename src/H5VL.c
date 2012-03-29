@@ -513,7 +513,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_file_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
+H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id)
 {
     H5VL_class_t	*vol_plugin;            /* VOL for file */
     H5VL_id_wrapper_t   *uid_info;              /* user id structure */
@@ -533,7 +533,7 @@ H5VL_file_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, h
     if(NULL == vol_plugin->file_cls.open)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file open' method")
     /* call the corresponding VOL open callback */
-    if((file_id = (vol_plugin->file_cls.open)(name, flags, fcpl_id, fapl_id, dxpl_id)) < 0)
+    if((file_id = (vol_plugin->file_cls.open)(name, flags, fapl_id)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
     /* Create a new id that points to a struct that holds the file id and the VOL plugin */

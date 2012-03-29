@@ -1508,19 +1508,8 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
     /* Open the file */
-    if((ret_value = H5VL_file_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id))<0)
+    if((ret_value = H5VL_file_open(filename, flags, fapl_id))<0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
-
-#if 0
-    /* Open the file  */
-    if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
-    /* Get an atom for the file */
-    if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
-    /* Keep this ID in file object structure */
-    new_file->file_id = ret_value;
-#endif
 
 done:
     FUNC_LEAVE_API(ret_value)

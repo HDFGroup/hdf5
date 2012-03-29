@@ -78,7 +78,7 @@ typedef enum H5VL_object_lookup_t {
 /* H5F routines */
 typedef struct H5VL_file_class_t {
     hid_t  (*create)(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-    hid_t  (*open)  (const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id);
+    hid_t  (*open)  (const char *name, unsigned flags, hid_t fapl_id);
     herr_t (*flush) (hid_t file_id, H5F_scope_t scope);
     herr_t (*get)   (hid_t file_id, H5VL_file_get_t get_type, int num_args, va_list arguments);
     herr_t (*close) (hid_t file_id);

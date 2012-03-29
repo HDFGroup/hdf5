@@ -55,8 +55,7 @@ H5_DLL hid_t  H5VL_register(const void *cls, size_t size, hbool_t app_ref);
 H5_DLL herr_t H5VL_replace_with_uids(hid_t *oid_list, ssize_t num_ids);
 H5_DLL int H5VL_inc_ref_uid(hid_t fid, hbool_t app_ref);
 
-H5_DLL hid_t  H5VL_file_open(const char *name, unsigned flags, hid_t fcpl_id, 
-                             hid_t fapl_id, hid_t dxpl_id);
+H5_DLL hid_t  H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id);
 H5_DLL hid_t  H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5VL_file_close(hid_t file_id);
 H5_DLL herr_t H5VL_file_flush(hid_t file_id, H5F_scope_t scope);
