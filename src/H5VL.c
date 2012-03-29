@@ -1497,6 +1497,45 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_dataset_set_extent
+ *
+ * Purpose:	Modifies the dimensions of a dataset
+ *
+ * Return:	Success:	Non Negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5VL_dataset_set_extent(hid_t uid, const hsize_t size[])
+{
+    H5VL_id_wrapper_t   *uid_info;              /* user id structure */
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check/fix arguments. */
+    if(H5I_DATASET_PUBLIC != H5I_get_type(uid))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset ID")
+
+    /* get the ID struct */
+    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+
+    if(NULL == uid_info->vol_plugin->dataset_cls.set_extent)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset set_extent' method")
+    if((ret_value = (uid_info->vol_plugin->dataset_cls.set_extent)(uid_info->obj_id, size)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "set_extent failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_dataset_set_extent() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_dataset_get
  *
  * Purpose:	Get specific information about the dataset through the VOL

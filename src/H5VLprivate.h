@@ -66,6 +66,7 @@ H5_DLL hid_t H5VL_dataset_open(hid_t uid, const char *name, hid_t dapl_id);
 H5_DLL herr_t H5VL_dataset_close(hid_t uid);
 H5_DLL herr_t H5VL_dataset_read(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, void *buf);
 H5_DLL herr_t H5VL_dataset_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf);
+H5_DLL herr_t H5VL_dataset_set_extent(hid_t uid, const hsize_t size[]);
 H5_DLL herr_t H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, int num_args, ...);
 
 H5_DLL herr_t H5VL_datatype_commit(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id);

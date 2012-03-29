@@ -93,6 +93,7 @@ typedef struct H5VL_dataset_class_t {
                      hid_t xfer_plist_id, void * buf);
     herr_t (*write) (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                      hid_t xfer_plist_id, const void * buf );
+    herr_t (*set_extent) (hid_t uid, const hsize_t size[]);
     herr_t (*get)   (hid_t file_id, H5VL_dataset_get_t get_type, int num_args, va_list arguments);
     herr_t (*close) (hid_t dataset_id);
 } H5VL_dataset_class_t;

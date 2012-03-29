@@ -82,6 +82,7 @@ H5VL_class_t H5VL_dummy_g = {
         NULL,
         NULL,
         NULL,
+        NULL,
         NULL
     },
     {                                           /* group_cls */

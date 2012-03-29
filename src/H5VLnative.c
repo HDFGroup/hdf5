@@ -56,23 +56,25 @@ static hid_t H5VL_NATIVE_g = 0;
 
 /* Prototypes */
 static herr_t H5VL_native_term(void);
-static hid_t  H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id);
-static herr_t H5VL_native_file_close(hid_t fid);
+
 static hid_t  H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+static hid_t  H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id);
 static herr_t H5VL_native_file_flush(hid_t fid, H5F_scope_t scope);
 static herr_t H5VL_native_file_get(hid_t file_id, H5VL_file_get_t get_type, 
                                    int num_args, va_list arguments);
+static herr_t H5VL_native_file_close(hid_t fid);
 
 static hid_t H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
                                         hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
 static hid_t H5VL_native_dataset_open(hid_t loc_id, const char *name, hid_t dapl_id);
-static herr_t H5VL_native_dataset_close(hid_t dataset_id);
 static herr_t H5VL_native_dataset_read(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
                                        hid_t file_space_id, hid_t plist_id, void *buf);
 static herr_t H5VL_native_dataset_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
                                         hid_t file_space_id, hid_t plist_id, const void *buf);
+static herr_t H5VL_native_dataset_set_extent(hid_t dset_id, const hsize_t size[]);
 static herr_t H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, 
                                       int num_args, va_list arguments);
+static herr_t H5VL_native_dataset_close(hid_t dataset_id);
 
 static herr_t H5VL_native_datatype_commit(hid_t loc_id, const char *name, hid_t type_id, 
                                           hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id);
@@ -81,16 +83,16 @@ static hid_t H5VL_native_datatype_open(hid_t loc_id, const char *name, hid_t tap
 static hid_t H5VL_native_group_create(hid_t loc_id, const char *name, hid_t lcpl_id, 
                                       hid_t gcpl_id, hid_t gapl_id);
 static hid_t H5VL_native_group_open(hid_t loc_id, const char *name, hid_t gapl_id);
-static herr_t H5VL_native_group_close(hid_t group_id);
 static herr_t H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, 
                                     int num_args, va_list arguments);
+static herr_t H5VL_native_group_close(hid_t group_id);
 
 static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id);
-static herr_t H5VL_native_object_close(hid_t object_id);
 static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, 
                                      int num_args, va_list arguments);
 static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, 
                                         int num_args, va_list arguments);
+static herr_t H5VL_native_object_close(hid_t object_id);
 
 H5VL_class_t H5VL_native_g = {
     "native",					/* name */
@@ -113,6 +115,7 @@ H5VL_class_t H5VL_native_g = {
         H5VL_native_dataset_open,               /* open */
         H5VL_native_dataset_read,               /* read */
         H5VL_native_dataset_write,              /* write */
+        H5VL_native_dataset_set_extent,         /* set extent */
         H5VL_native_dataset_get,                /* get */
         H5VL_native_dataset_close               /* close */
     },
@@ -1654,9 +1657,43 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_native_dataset_set_extent
+ *
+ * Purpose:	Set Extent of dataset
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL_native_dataset_set_extent(hid_t dset_id, const hsize_t size[])
+{
+    H5D_t	*dset = NULL;
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check args */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Private function */
+    if(H5D_set_extent(dset, size, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_dataset_set_extent() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_native_dataset_get
  *
- * Purpose:	Gets certain data about a file
+ * Purpose:	Gets certain information about a dataset
  *
  * Return:	Success:	0
  *		Failure:	-1
