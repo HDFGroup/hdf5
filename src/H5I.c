@@ -1267,33 +1267,21 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5Idec_ref(hid_t uid)
+H5Idec_ref(hid_t id)
 {
-    H5VL_id_wrapper_t *uid_info;                    /* user id structure */
     int ret_value;                      /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Is", "i", uid);
+    H5TRACE1("Is", "i", id);
 
     /* Check arguments */
-    if(uid < 0)
+    if(id < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID")
 
-    if (H5I_FILE_PUBLIC == H5I_get_type(uid) || H5I_GROUP_PUBLIC == H5I_get_type(uid)) {
-        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+    /* Do actual decrement operation */
+    if((ret_value = H5I_dec_app_ref(id)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, FAIL, "can't decrement ID ref count")
 
-        if((ret_value = H5I_dec_app_ref(uid_info->obj_id)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, FAIL, "can't decrement ID ref count")
-
-        if((ret_value = H5I_dec_app_ref(uid)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, FAIL, "can't decrement ID ref count")
-    }
-    else {
-        /* Do actual decrement operation */
-        if((ret_value = H5I_dec_app_ref(uid)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, FAIL, "can't decrement ID ref count")
-    }
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Idec_ref() */
@@ -1482,35 +1470,20 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5Iinc_ref(hid_t uid)
+H5Iinc_ref(hid_t id)
 {
-    H5VL_id_wrapper_t *uid_info;                    /* user id structure */
     int ret_value;                      /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Is", "i", uid);
+    H5TRACE1("Is", "i", id);
 
     /* Check arguments */
-    if(uid < 0)
+    if(id < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID")
 
-    if (H5I_FILE_PUBLIC == H5I_get_type(uid) || H5I_GROUP_PUBLIC == H5I_get_type(uid)) {
-        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-
-        if((ret_value = H5I_inc_ref(uid_info->obj_id, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "can't increment ID ref count")
-
-        if((ret_value = H5I_inc_ref(uid, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "can't increment ID ref count")
-    }
-    else {
-        /* Do actual increment operation */
-        if((ret_value = H5I_inc_ref(uid, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "can't increment ID ref count")
-    }
-
-
+    /* Do actual increment operation */
+    if((ret_value = H5I_inc_ref(id, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "can't increment ID ref count")
 
 done:
     FUNC_LEAVE_API(ret_value)

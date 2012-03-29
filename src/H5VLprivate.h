@@ -85,4 +85,4 @@ H5_DLL herr_t H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, in
 H5_DLL herr_t H5VL_fapl_open(struct H5P_genplist_t *plist, H5VL_class_t *vol_cls);
 H5_DLL herr_t H5VL_fapl_close(H5VL_class_t *vol_cls);
 
-#endif /* !_H5VLprivate_H */
+#endif /* _H5VLprivate_H */

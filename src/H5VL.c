@@ -228,17 +228,32 @@ done:
 static herr_t
 H5VL_free_id_wrapper(H5VL_id_wrapper_t *id_struct)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    int               ref_count;
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(id_struct);
 
+    /* If we are freeing the id wrapper, then we need to call the free
+       callback on the object ID in this wrapper, so just keep
+       decrementing the ref count on the object id till it gets to 0
+       and calls its free function */
+    ref_count = H5I_get_ref(id_struct->obj_id, TRUE);
+    while (ref_count > 0) {
+        if((ref_count = H5I_dec_app_ref(id_struct->obj_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't free")
+    }
+
+    /* decrement the number of reference on the VOL plugin */
+    id_struct->vol_plugin->nrefs --;
+
     /* free the ID wrapper */
     H5MM_xfree(id_struct);
 
-    /* MSC need to decrement the ref count on the VOL struct */
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_free_id_wrapper() */
 
 

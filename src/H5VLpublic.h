@@ -164,4 +164,4 @@ typedef struct H5VL_class_t {
 H5_DLL hid_t H5VLregister(const H5VL_class_t *cls);
 H5_DLL herr_t H5VLunregister(hid_t driver_id);
 
-#endif
+#endif /* _H5VLpublic_H */
