@@ -128,9 +128,9 @@ static herr_t H5D_earray_idx_size(const H5D_chk_idx_info_t *idx_info,
     hsize_t *size);
 static herr_t H5D_earray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
 static herr_t H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
+    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry);
 static herr_t H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
+    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry);
 static herr_t H5D_earray_idx_dump(const H5O_storage_chunk_t *storage,
     FILE *stream);
 static herr_t H5D_earray_idx_dest(const H5D_chk_idx_info_t *idx_info);
@@ -1886,7 +1886,7 @@ H5D_earray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
  */
 static htri_t
 H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry)
+    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry)
 {
     H5EA_t      *ea;                    /* Pointer to extensible array structure */
     hsize_t     idx;                    /* Array index of chunk */
@@ -1917,7 +1917,7 @@ H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
         unsigned ndims = (idx_info->layout->ndims - 1); /* Number of dimensions */
 
         /* Set up the swizzled chunk coordinates */
-        HDmemcpy(swizzled_coords, udata->offset, ndims * sizeof(udata->offset[0]));
+        HDmemcpy(swizzled_coords, udata->common.offset, ndims * sizeof(udata->common.offset[0]));
         H5V_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
@@ -1926,7 +1926,7 @@ H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
     } /* end if */
     else {
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
+        if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end else */
 
@@ -1956,7 +1956,7 @@ done:
  */
 static herr_t
 H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry)
+    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry)
 {
     H5EA_t      *ea;                    /* Pointer to extensible array structure */
     hsize_t     idx;                    /* Array index of chunk */
@@ -1987,7 +1987,7 @@ H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
         unsigned ndims = (idx_info->layout->ndims - 1); /* Number of dimensions */
 
         /* Set up the swizzled chunk coordinates */
-        HDmemcpy(swizzled_coords, udata->offset, ndims * sizeof(udata->offset[0]));
+        HDmemcpy(swizzled_coords, udata->common.offset, ndims * sizeof(udata->common.offset[0]));
         H5V_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
 
@@ -1997,7 +1997,7 @@ H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
     } /* end if */
     else {
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
+        if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end else */
 

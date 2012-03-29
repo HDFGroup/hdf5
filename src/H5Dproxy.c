@@ -397,7 +397,7 @@ herr_t
 H5D_chunk_proxy_remove(const H5D_t *dset, hid_t dxpl_id, H5D_rdcc_ent_t *ent)
 {
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
-    H5D_chunk_common_ud_t udata;        /* User-data for chunk */
+    H5D_chunk_ud_t udata;               /* User-data for chunk */
     H5D_chunk_proxy_t *proxy = NULL;    /* Chunk proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -422,10 +422,13 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
     idx_info.storage = &(dset->shared->layout.storage.u.chunk);
 
     /* Compose user-data for chunk */
-    udata.layout = &(dset->shared->layout.u.chunk);
-    udata.storage = &(dset->shared->layout.storage.u.chunk);
-    udata.offset = ent->offset;
-    udata.rdcc = &(dset->shared->cache.chunk);
+    udata.common.layout = &(dset->shared->layout.u.chunk);
+    udata.common.storage = &(dset->shared->layout.storage.u.chunk);
+    udata.common.offset = ent->offset;
+    udata.common.rdcc = &(dset->shared->cache.chunk);
+    /* Non-"common" data is not actually needed, except to provide a space to
+     * store this information if it is to be filled in as a side-effect of the
+     * unsupport callback (i.e. in H5D_btree_found) */
 
     /* Remove flush dependency between the proxy (as the child) and the
      *  metadata object in the index (as the parent).

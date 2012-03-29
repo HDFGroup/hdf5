@@ -151,9 +151,9 @@ static herr_t H5D_btree_idx_size(const H5D_chk_idx_info_t *idx_info,
     hsize_t *size);
 static herr_t H5D_btree_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
 static herr_t H5D_btree_idx_support(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
+    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry);
 static herr_t H5D_btree_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
+    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry);
 static herr_t H5D_btree_idx_dump(const H5O_storage_chunk_t *storage,
     FILE *stream);
 static herr_t H5D_btree_idx_dest(const H5D_chk_idx_info_t *idx_info);
@@ -1614,8 +1614,8 @@ H5D_btree_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5D_btree_idx_support(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry)
+H5D_btree_idx_support(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
+    H5AC_info_t *child_entry)
 {
     H5O_loc_t oloc;                     /* Temporary object header location for dataset */
     H5O_t *oh = NULL;                   /* Dataset's object header */
@@ -1671,7 +1671,7 @@ done:
  */
 static herr_t
 H5D_btree_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry)
+    H5D_chunk_ud_t *udata, H5AC_info_t *child_entry)
 {
     H5O_loc_t oloc;                     /* Temporary object header location for dataset */
     H5O_t *oh = NULL;                   /* Dataset's object header */
