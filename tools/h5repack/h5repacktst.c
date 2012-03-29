@@ -78,7 +78,6 @@
 #define FNAME17OUT  "h5repack_named_dtypes_out.h5"
 
 #define FNAME18     "h5repack_layout2.h5"
-#define FNAME18OUT  "h5repack_layout2_out.h5"
 
 #define FNAME_UB   "ublock.bin"
 
@@ -1559,6 +1558,25 @@ int main (void)
 
 
     PASSED();
+
+    /*-------------------------------------------------------------------------
+    * test --metadata_block_size option
+    *-------------------------------------------------------------------------
+    */
+    TESTING("    metadata block size option");
+    if (h5repack_init (&pack_options, 0, fs_type, fs_size) < 0)
+        GOERROR;
+    pack_options.meta_block_size = 8192;
+    if(h5repack(FNAME1, FNAME1OUT, &pack_options) < 0)
+        GOERROR;
+    if(h5diff(FNAME1, FNAME1OUT, NULL, NULL, &diff_options) > 0)
+        GOERROR;
+    if(h5repack_verify(FNAME1, FNAME1OUT, &pack_options) <= 0)
+        GOERROR;
+    if(h5repack_end(&pack_options) < 0)
+        GOERROR;
+    PASSED();
+
 
     /*-------------------------------------------------------------------------
     * clean temporary test files
@@ -3253,7 +3271,7 @@ make_userblock(void)
 
     /* Initialize userblock data */
     for(u = 0; u < USERBLOCK_SIZE; u++)
-        ub[u] = 'a' + (u % 26);
+        ub[u] = 'a' + (char)(u % 26);
 
     /* Re-open HDF5 file, as "plain" file */
     if((fd = HDopen(FNAME16, O_WRONLY, 0644)) < 0)
@@ -3366,7 +3384,7 @@ make_userblock_file(void)
 
     /* initialize userblock data */
     for(u = 0; u < USERBLOCK_SIZE; u++)
-        ub[u] = 'a' + (u % 26);
+        ub[u] = 'a' + (char)(u % 26);
 
     /* open file */
     if((fd = HDopen(FNAME_UB,O_WRONLY|O_CREAT|O_TRUNC, 0644 )) < 0)
@@ -3842,7 +3860,7 @@ int write_dset_in(hid_t loc_id,
             int l;
 
             buf52[i][j].p = malloc((i + 1) * sizeof(int));
-            buf52[i][j].len = i + 1;
+            buf52[i][j].len = (size_t)(i + 1);
             for(l = 0; l < i + 1; l++)
             {
                 if(make_diffs)
@@ -4063,7 +4081,7 @@ int write_dset_in(hid_t loc_id,
                 int l;
 
                 buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
-                buf53[i][j][k].len = i + 1;
+                buf53[i][j][k].len = (size_t)(i + 1);
                 for(l = 0; l < i + 1; l++)
                 {
                     if(make_diffs)
@@ -4854,7 +4872,7 @@ int write_attr_in(hid_t loc_id,
         {
             int l;
             buf52[i][j].p = malloc((i + 1) * sizeof(int));
-            buf52[i][j].len = i + 1;
+            buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++)
                 if (make_diffs)((int *)buf52[i][j].p)[l] = 0;
                 else ((int *)buf52[i][j].p)[l] = n++;
@@ -5320,7 +5338,7 @@ int write_attr_in(hid_t loc_id,
             {
                 int l;
                 buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
-                buf53[i][j][k].len = i + 1;
+                buf53[i][j][k].len = (size_t)i + 1;
                 for (l = 0; l < i + 1; l++)
                     if (make_diffs)
                     {

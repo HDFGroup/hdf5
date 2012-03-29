@@ -801,13 +801,16 @@ TOOLTEST h5repack_refs.h5
 # the references in attribute of compund or vlen datatype 
 TOOLTEST h5repack_attr_refs.h5 
 
-
 # Add test for memory leak in attirbute. This test is verified by CTEST.   
 # 1. leak from vlen string  
 # 2. leak from compound type without reference member
 # (HDFFV-7840, )
 # Note: this test is experimental for sharing test file among tools
 TOOLTEST h5diff_attr1.h5
+
+# tests for metadata block size option ('-M')
+TOOLTEST h5diff_layout.h5 -M 8192
+TOOLTEST h5diff_layout.h5 --metadata_block_size=8192
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."
