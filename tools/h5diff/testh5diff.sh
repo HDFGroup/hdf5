@@ -156,6 +156,8 @@ $SRC_H5DIFF_TESTFILES/h5diff_208.txt
 $SRC_H5DIFF_TESTFILES/h5diff_220.txt
 $SRC_H5DIFF_TESTFILES/h5diff_221.txt
 $SRC_H5DIFF_TESTFILES/h5diff_222.txt
+$SRC_H5DIFF_TESTFILES/h5diff_223.txt
+$SRC_H5DIFF_TESTFILES/h5diff_224.txt
 $SRC_H5DIFF_TESTFILES/h5diff_21.txt
 $SRC_H5DIFF_TESTFILES/h5diff_22.txt
 $SRC_H5DIFF_TESTFILES/h5diff_23.txt
@@ -827,6 +829,12 @@ if test -n "$pmode" -a "$mydomainname" = hdfgroup.uiuc.edu; then
 else
     TOOLTEST h5diff_222.txt -c non_comparables1.h5 non_comparables2.h5
 fi    
+
+# non-comparable test for common objects (same name) with different object types
+# (HDFFV-7644)
+TOOLTEST h5diff_223.txt -c non_comparables1.h5 non_comparables2.h5 /diffobjtypes
+# swap files
+TOOLTEST h5diff_224.txt -c non_comparables2.h5 non_comparables1.h5 /diffobjtypes
     
 # ##############################################################################
 # # Links compare without --follow-symlinks nor --no-dangling-links

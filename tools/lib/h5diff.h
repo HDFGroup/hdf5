@@ -28,7 +28,7 @@
  * as it doesn't require interface change.
  *------------------------------------------------------------------------*/
 typedef struct {
-    h5trav_type_t   type;
+    h5trav_type_t   type[2];
     hbool_t is_same_trgobj;
 } diff_args_t;
 /*-------------------------------------------------------------------------

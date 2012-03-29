@@ -84,6 +84,8 @@ IF (BUILD_TESTING)
       h5diff_220.txt
       h5diff_221.txt
       h5diff_222.txt
+      h5diff_223.txt
+      h5diff_224.txt
       h5diff_21.txt
       h5diff_22.txt
       h5diff_23.txt
@@ -577,6 +579,10 @@ IF (BUILD_TESTING)
           h5diff_221.out.err
           h5diff_222.out
           h5diff_222.out.err
+          h5diff_223.out
+          h5diff_223.out.err
+          h5diff_224.out
+          h5diff_224.out.err
           h5diff_21.out
           h5diff_21.out.err
           h5diff_22.out
@@ -1163,6 +1169,12 @@ ADD_H5_TEST (h5diff_221 1 -c non_comparables1.h5 non_comparables2.h5 /g2)
 # entire file
 # All the rest comparables should display differences
 ADD_H5_TEST (h5diff_222 1 -c non_comparables1.h5 non_comparables2.h5)
+
+# non-comparable test for common objects (same name) with different object types
+# (HDFFV-7644)
+ADD_H5_TEST (h5diff_223 0 -c non_comparables1.h5 non_comparables2.h5 /diffobjtypes)
+# swap files
+ADD_H5_TEST (h5diff_224 0 -c non_comparables2.h5 non_comparables1.h5 /diffobjtypes)
 
 # ##############################################################################
 # # Links compare without --follow-symlinks nor --no-dangling-links
