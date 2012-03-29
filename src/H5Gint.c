@@ -44,7 +44,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
 #include "H5MMprivate.h"	/* Memory management			*/
-
+#include "H5Pprivate.h"		/* Property lists			*/
 
 /****************/
 /* Local Macros */
@@ -1191,3 +1191,96 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_visit() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_get_create_plist
+ *
+ * Purpose:	Returns a copy of the group creation property list.
+ *
+ * Return:	Success:	ID for a copy of the group creation
+ *				property list. 
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5G_get_create_plist(H5G_t *grp)
+{
+    H5O_linfo_t         linfo;		        /* Link info message            */
+    htri_t	        ginfo_exists;
+    htri_t	        linfo_exists;
+    htri_t              pline_exists;
+    H5P_genplist_t      *gcpl_plist;
+    H5P_genplist_t      *new_plist;
+    hid_t               new_id = FAIL;
+    hid_t               ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Copy the default group creation property list */
+    if(NULL == (gcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_GROUP_CREATE_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default group creation property list")
+    if((new_id = H5P_copy_plist(gcpl_plist, TRUE)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to copy the creation property list")
+    if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
+    /* Retrieve any object creation properties */
+    if(H5O_get_create_plist(&grp->oloc, H5AC_ind_dxpl_id, new_plist) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object creation info")
+
+    /* Check for the group having a group info message */
+    if((ginfo_exists = H5O_msg_exists(&(grp->oloc), H5O_GINFO_ID, H5AC_ind_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(ginfo_exists) {
+        H5O_ginfo_t ginfo;		/* Group info message            */
+
+        /* Read the group info */
+        if(NULL == H5O_msg_read(&(grp->oloc), H5O_GINFO_ID, &ginfo, H5AC_ind_dxpl_id))
+            HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
+
+        /* Set the group info for the property list */
+        if(H5P_set(new_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
+    } /* end if */
+
+    /* Check for the group having a link info message */
+    if((linfo_exists = H5G__obj_get_linfo(&(grp->oloc), &linfo, H5AC_ind_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+    if(linfo_exists) {
+        /* Set the link info for the property list */
+        if(H5P_set(new_plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set link info")
+    } /* end if */
+
+    /* Check for the group having a pipeline message */
+    if((pline_exists = H5O_msg_exists(&(grp->oloc), H5O_PLINE_ID, H5AC_ind_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read object header")
+    if(pline_exists) {
+        H5O_pline_t pline;      /* Pipeline message */
+
+        /* Read the pipeline */
+        if(NULL == H5O_msg_read(&(grp->oloc), H5O_PLINE_ID, &pline, H5AC_ind_dxpl_id))
+            HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link pipeline")
+
+        /* Set the pipeline for the property list */
+        if(H5P_set(new_plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set link pipeline")
+    } /* end if */
+
+    /* Set the return value */
+    ret_value = new_id;
+
+done:
+    if(ret_value < 0) {
+        if(new_id > 0)
+            if(H5I_dec_app_ref(new_id) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't free")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_get_create_plist() */
