@@ -193,7 +193,7 @@ H5Fget_create_plist(hid_t uid)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", uid);
 
-    if(H5VL_file_get(uid, H5VL_FILE_GET_FCPL, 1, &ret_value) < 0)
+    if(H5VL_file_get(uid, H5VL_FILE_GET_FCPL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file creation properties")
 
 done:
@@ -230,7 +230,7 @@ H5Fget_access_plist(hid_t uid)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", uid);
 
-    if(H5VL_file_get(uid, H5VL_FILE_GET_FAPL, 1, &ret_value) < 0)
+    if(H5VL_file_get(uid, H5VL_FILE_GET_FAPL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file creation properties")
 
 done:
@@ -750,7 +750,7 @@ H5Fget_vfd_handle(hid_t uid, hid_t fapl, void **file_handle)
     if(!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle pointer")
 
-    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_VFD_HANDLE, 2, file_handle, fapl)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_VFD_HANDLE, file_handle, fapl)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file handle")
 
 done:
@@ -1967,7 +1967,7 @@ H5Fget_intent(hid_t uid, unsigned *intent_flags)
 
     /* If no intent flags were passed in, exit quietly */
     if(intent_flags) {
-        if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_INTENT, 1, intent_flags)) < 0)
+        if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_INTENT, intent_flags)) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file intent")
     }
 
@@ -2387,7 +2387,7 @@ H5Fget_freespace(hid_t uid)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("Hs", "i", uid);
 
-    if(H5VL_file_get(uid, H5VL_FILE_GET_FREE_SPACE, 1, &ret_value) < 0)
+    if(H5VL_file_get(uid, H5VL_FILE_GET_FREE_SPACE, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file free space")
 
 done:
@@ -2421,7 +2421,7 @@ H5Fget_filesize(hid_t uid, hsize_t *size)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", uid, size);
 
-    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_SIZE, 1, size)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_SIZE, size)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file size")
 
 done:
@@ -2459,7 +2459,7 @@ H5Fget_mdc_config(hid_t uid, H5AC_cache_config_t *config_ptr)
     if((NULL == config_ptr) || (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
 
-    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_MDC_CONF, 1, config_ptr)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_MDC_CONF, config_ptr)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get mdc config")
 
 done:
@@ -2537,7 +2537,7 @@ H5Fget_mdc_hit_rate(hid_t uid, double *hit_rate_ptr)
     if(NULL == hit_rate_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL hit rate pointer")
 
-    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_MDC_HR, 1, hit_rate_ptr)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_MDC_HR, hit_rate_ptr)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get MDC hit rate")
 
 done:
@@ -2572,7 +2572,7 @@ H5Fget_mdc_size(hid_t uid, size_t *max_size_ptr, size_t *min_clean_size_ptr,
     H5TRACE5("e", "i*z*z*z*Is", uid, max_size_ptr, min_clean_size_ptr,
              cur_size_ptr, cur_num_entries_ptr);
 
-    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_MDC_SIZE, 4, max_size_ptr, 
+    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_MDC_SIZE, max_size_ptr, 
                                   min_clean_size_ptr, cur_size_ptr, cur_num_entries_ptr)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get MDC hit rate")
 
@@ -2663,7 +2663,7 @@ H5Fget_name(hid_t uid, char *name/*out*/, size_t size)
     if (H5I_FILE_PUBLIC == H5I_get_type(uid) || H5I_GROUP_PUBLIC == H5I_get_type(uid) ||
         H5I_DATATYPE_PUBLIC == H5I_get_type(uid) || H5I_DATASET_PUBLIC == H5I_get_type(uid) ||
         H5I_ATTR_PUBLIC == H5I_get_type(uid)) {
-        if(H5VL_file_get(uid, H5VL_FILE_GET_NAME, 3, name, &ret_value, size) < 0)
+        if(H5VL_file_get(uid, H5VL_FILE_GET_NAME, name, &ret_value, size) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file name")
     }
     else {
@@ -2731,7 +2731,7 @@ H5Fget_info2(hid_t uid, H5F_info2_t *finfo)
     if(!finfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_INFO, 1, finfo)) < 0)
+    if((ret_value = H5VL_file_get(uid, H5VL_FILE_GET_INFO, finfo)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file info")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2766,7 +2766,7 @@ H5Fget_free_sections(hid_t uid, H5F_mem_t type, size_t nsects,
     if(sect_info && nsects == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "nsects must be > 0")
 
-    if(H5VL_file_get(uid, H5VL_FILE_GET_FREE_SECTIONS, 4, sect_info, &ret_value, 
+    if(H5VL_file_get(uid, H5VL_FILE_GET_FREE_SECTIONS, sect_info, &ret_value, 
                      type, nsects) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file info")
 done:

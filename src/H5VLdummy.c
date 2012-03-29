@@ -55,8 +55,7 @@ static hid_t H5VL_DUMMY_g = 0;
 
 /* Prototypes */
 static herr_t H5VL_dummy_term(void);
-static hid_t  H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fcpl_id, 
-                                   hid_t fapl_id, hid_t dxpl_id);
+static hid_t  H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fapl_id);
 static herr_t H5VL_dummy_file_close(hid_t fid);
 static hid_t  H5VL_dummy_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 
@@ -237,8 +236,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fcpl_id, 
-                 hid_t fapl_id, hid_t dxpl_id)
+H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fapl_id)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

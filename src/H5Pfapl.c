@@ -2170,7 +2170,7 @@ H5P_set_vol(H5P_genplist_t *plist, H5VL_class_t *vol_cls)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the current vol information */
-    if(H5P_get(plist, H5F_ACS_VOL_NAME, old_vol_cls) < 0)
+    if(H5P_get(plist, H5F_ACS_VOL_NAME, &old_vol_cls) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol ID")
 
     /* Close the vol for the property list */

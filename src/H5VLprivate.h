@@ -59,7 +59,7 @@ H5_DLL hid_t  H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id);
 H5_DLL hid_t  H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5VL_file_close(hid_t file_id);
 H5_DLL herr_t H5VL_file_flush(hid_t file_id, H5F_scope_t scope);
-H5_DLL herr_t H5VL_file_get(hid_t uid, H5VL_file_get_t get_type, int num_args, ...);
+H5_DLL herr_t H5VL_file_get(hid_t uid, H5VL_file_get_t get_type, ...);
 
 H5_DLL hid_t H5VL_dataset_create(hid_t uid, const char *name, hid_t dtype_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
 H5_DLL hid_t H5VL_dataset_open(hid_t uid, const char *name, hid_t dapl_id);
@@ -67,7 +67,7 @@ H5_DLL herr_t H5VL_dataset_close(hid_t uid);
 H5_DLL herr_t H5VL_dataset_read(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, void *buf);
 H5_DLL herr_t H5VL_dataset_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf);
 H5_DLL herr_t H5VL_dataset_set_extent(hid_t uid, const hsize_t size[]);
-H5_DLL herr_t H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, int num_args, ...);
+H5_DLL herr_t H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, ...);
 
 H5_DLL herr_t H5VL_datatype_commit(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id);
 H5_DLL hid_t H5VL_datatype_open(hid_t loc_id, const char *name, hid_t tapl_id);
@@ -75,12 +75,12 @@ H5_DLL hid_t H5VL_datatype_open(hid_t loc_id, const char *name, hid_t tapl_id);
 H5_DLL hid_t H5VL_group_create(hid_t uid, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id);
 H5_DLL hid_t H5VL_group_open(hid_t uid, const char *name, hid_t gapl_id);
 H5_DLL herr_t H5VL_group_close(hid_t uid);
-H5_DLL herr_t H5VL_group_get(hid_t uid, H5VL_group_get_t get_type, int num_args, ...);
+H5_DLL herr_t H5VL_group_get(hid_t uid, H5VL_group_get_t get_type, ...);
 
 H5_DLL hid_t H5VL_object_open(hid_t uid, void *obj_loc, hid_t lapl_id);
 H5_DLL herr_t H5VL_object_close(hid_t uid);
-H5_DLL herr_t H5VL_object_get(hid_t uid, H5VL_object_get_t get_type, int num_args, ...);
-H5_DLL herr_t H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, int num_args, ...);
+H5_DLL herr_t H5VL_object_get(hid_t uid, H5VL_object_get_t get_type, ...);
+H5_DLL herr_t H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, ...);
 
 H5_DLL herr_t H5VL_fapl_open(struct H5P_genplist_t *plist, H5VL_class_t *vol_cls);
 H5_DLL herr_t H5VL_fapl_close(H5VL_class_t *vol_cls);

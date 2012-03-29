@@ -60,8 +60,7 @@ static herr_t H5VL_native_term(void);
 static hid_t  H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 static hid_t  H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id);
 static herr_t H5VL_native_file_flush(hid_t fid, H5F_scope_t scope);
-static herr_t H5VL_native_file_get(hid_t file_id, H5VL_file_get_t get_type, 
-                                   int num_args, va_list arguments);
+static herr_t H5VL_native_file_get(hid_t file_id, H5VL_file_get_t get_type, va_list arguments);
 static herr_t H5VL_native_file_close(hid_t fid);
 
 static hid_t H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
@@ -72,8 +71,7 @@ static herr_t H5VL_native_dataset_read(hid_t dset_id, hid_t mem_type_id, hid_t m
 static herr_t H5VL_native_dataset_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
                                         hid_t file_space_id, hid_t plist_id, const void *buf);
 static herr_t H5VL_native_dataset_set_extent(hid_t dset_id, const hsize_t size[]);
-static herr_t H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, 
-                                      int num_args, va_list arguments);
+static herr_t H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, va_list arguments);
 static herr_t H5VL_native_dataset_close(hid_t dataset_id);
 
 static herr_t H5VL_native_datatype_commit(hid_t loc_id, const char *name, hid_t type_id, 
@@ -83,15 +81,12 @@ static hid_t H5VL_native_datatype_open(hid_t loc_id, const char *name, hid_t tap
 static hid_t H5VL_native_group_create(hid_t loc_id, const char *name, hid_t lcpl_id, 
                                       hid_t gcpl_id, hid_t gapl_id);
 static hid_t H5VL_native_group_open(hid_t loc_id, const char *name, hid_t gapl_id);
-static herr_t H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, 
-                                    int num_args, va_list arguments);
+static herr_t H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, va_list arguments);
 static herr_t H5VL_native_group_close(hid_t group_id);
 
 static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id);
-static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, 
-                                     int num_args, va_list arguments);
-static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, 
-                                        int num_args, va_list arguments);
+static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, va_list arguments);
+static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, va_list arguments);
 static herr_t H5VL_native_object_close(hid_t object_id);
 
 H5VL_class_t H5VL_native_g = {
@@ -529,7 +524,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, int num_args, va_list arguments)
+H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, va_list arguments)
 {
     H5F_t	*f = NULL;              /* File struct */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -902,7 +897,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, int num_args, va_list arguments)
+H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, va_list arguments)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1073,7 +1068,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, int num_args, va_list arguments)
+H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, va_list arguments)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
     H5G_loc_t	loc;                    /* Location of group */
@@ -1108,31 +1103,20 @@ H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, int num_args, va_li
                 ssize_t  *ret     =  va_arg (arguments, ssize_t *);
                 char     *comment =  va_arg (arguments, char *);
                 size_t   bufsize  =  va_arg (arguments, size_t);
+                char     *name    =  va_arg (arguments, char *);
+                hid_t    lapl_id  =  va_arg (arguments, hid_t);
 
-                if(3 == num_args) {
-                    /* Retrieve the object's comment */
-                    if((*ret = H5G_loc_get_comment(&loc, ".", comment/*out*/, bufsize, 
-                                                   H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
-                }
-                else if(5 == num_args) {
-                    char *name    = va_arg (arguments, char *);
-                    hid_t lapl_id = va_arg (arguments, hid_t);
+                /* Retrieve the object's comment */
+                if((*ret = H5G_loc_get_comment(&loc, name, comment/*out*/, bufsize, 
+                                               lapl_id, H5AC_ind_dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
-                    /* Retrieve the object's comment */
-                    if((*ret = H5G_loc_get_comment(&loc, name, comment/*out*/, bufsize, lapl_id, H5AC_ind_dxpl_id)) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
-                }
                 break;
             }
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from object")
     }
 done:
-    /* Release the object location 
-    if(loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-    */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_object_get() */
 
@@ -1150,8 +1134,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, 
-                          int num_args, va_list arguments)
+H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, va_list arguments)
 {
     H5G_loc_t	loc;
     H5G_loc_t   obj_loc;
@@ -1704,7 +1687,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, int num_args, va_list arguments)
+H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, va_list arguments)
 {
     H5D_t	*dset = NULL;
     herr_t       ret_value = SUCCEED;    /* Return value */

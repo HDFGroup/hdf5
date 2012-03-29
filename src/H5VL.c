@@ -705,18 +705,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_get(hid_t uid, H5VL_file_get_t get_type, int num_args, ...)
+H5VL_file_get(hid_t uid, H5VL_file_get_t get_type, ...)
 {
     H5VL_id_wrapper_t *uid_info;             /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
+    H5I_type_t        id_type;               /* Type of ID */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    id_type = H5I_get_type(uid);
     /* Check/fix arguments. */
-    if (H5I_FILE_PUBLIC != H5I_get_type(uid) && H5I_GROUP_PUBLIC != H5I_get_type(uid) &&
-        H5I_DATATYPE_PUBLIC != H5I_get_type(uid) && H5I_DATASET_PUBLIC != H5I_get_type(uid) &&
-        H5I_ATTR_PUBLIC != H5I_get_type(uid))
+    if (H5I_FILE_PUBLIC != id_type && H5I_GROUP_PUBLIC != id_type &&
+        H5I_DATATYPE_PUBLIC != id_type && H5I_DATASET_PUBLIC != id_type &&
+        H5I_ATTR_PUBLIC != id_type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
@@ -726,8 +728,8 @@ H5VL_file_get(hid_t uid, H5VL_file_get_t get_type, int num_args, ...)
     if(NULL == uid_info->vol_plugin->file_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file get' method")
 
-    va_start(arguments, num_args);
-    if((ret_value = (uid_info->vol_plugin->file_cls.get)(uid_info->obj_id, get_type, num_args, arguments)) < 0)
+    va_start(arguments, get_type);
+    if((ret_value = (uid_info->vol_plugin->file_cls.get)(uid_info->obj_id, get_type, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end(arguments);
 
@@ -899,7 +901,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_group_get(hid_t uid, H5VL_group_get_t get_type, int num_args, ...)
+H5VL_group_get(hid_t uid, H5VL_group_get_t get_type, ...)
 {
     H5VL_id_wrapper_t            *uid_info;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
@@ -920,9 +922,9 @@ H5VL_group_get(hid_t uid, H5VL_group_get_t get_type, int num_args, ...)
     if(NULL == uid_info->vol_plugin->group_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group get' method")
 
-    va_start (arguments, num_args);
+    va_start (arguments, get_type);
     if((ret_value = (uid_info->vol_plugin->group_cls.get)(uid_info->obj_id, get_type, 
-                                                          num_args, arguments)) < 0)
+                                                          arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 
@@ -1078,9 +1080,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, int num_args, ...)
+H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, ...)
 {
-    H5VL_id_wrapper_t            *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t *uid_info;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
     H5I_type_t        id_type;
     herr_t            ret_value = SUCCEED;
@@ -1101,9 +1103,9 @@ H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, int num_args, ..
     if(NULL == uid_info->vol_plugin->object_cls.lookup)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object lookup' method")
 
-    va_start (arguments, num_args);
+    va_start (arguments, lookup_type);
     if((ret_value = (uid_info->vol_plugin->object_cls.lookup)(uid_info->obj_id, lookup_type, 
-                                                              num_args, arguments)) < 0)
+                                                              arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "lookup of object location failed")
     va_end (arguments);
 done:
@@ -1126,7 +1128,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_get(hid_t uid, H5VL_object_get_t get_type, int num_args, ...)
+H5VL_object_get(hid_t uid, H5VL_object_get_t get_type, ...)
 {
     H5VL_id_wrapper_t            *uid_info;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
@@ -1149,9 +1151,9 @@ H5VL_object_get(hid_t uid, H5VL_object_get_t get_type, int num_args, ...)
     if(NULL == uid_info->vol_plugin->object_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object get' method")
 
-    va_start (arguments, num_args);
+    va_start (arguments, get_type);
     if((ret_value = (uid_info->vol_plugin->object_cls.get)(uid_info->obj_id, get_type, 
-                                                           num_args, arguments)) < 0)
+                                                           arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 done:
@@ -1550,7 +1552,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, int num_args, ...)
+H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, ...)
 {
     H5VL_id_wrapper_t            *uid_info;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
@@ -1569,9 +1571,9 @@ H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, int num_args, ...)
     if(NULL == uid_info->vol_plugin->dataset_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset get' method")
 
-    va_start (arguments, num_args);
+    va_start (arguments, get_type);
     if((ret_value = (uid_info->vol_plugin->dataset_cls.get)(uid_info->obj_id, get_type, 
-                                                           num_args, arguments)) < 0)
+                                                           arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 done:

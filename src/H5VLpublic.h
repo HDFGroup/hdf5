@@ -80,7 +80,7 @@ typedef struct H5VL_file_class_t {
     hid_t  (*create)(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
     hid_t  (*open)  (const char *name, unsigned flags, hid_t fapl_id);
     herr_t (*flush) (hid_t file_id, H5F_scope_t scope);
-    herr_t (*get)   (hid_t file_id, H5VL_file_get_t get_type, int num_args, va_list arguments);
+    herr_t (*get)   (hid_t file_id, H5VL_file_get_t get_type, va_list arguments);
     herr_t (*close) (hid_t file_id);
 } H5VL_file_class_t;
 
@@ -94,7 +94,7 @@ typedef struct H5VL_dataset_class_t {
     herr_t (*write) (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                      hid_t xfer_plist_id, const void * buf );
     herr_t (*set_extent) (hid_t uid, const hsize_t size[]);
-    herr_t (*get)   (hid_t file_id, H5VL_dataset_get_t get_type, int num_args, va_list arguments);
+    herr_t (*get)   (hid_t file_id, H5VL_dataset_get_t get_type, va_list arguments);
     herr_t (*close) (hid_t dataset_id);
 } H5VL_dataset_class_t;
 
@@ -131,7 +131,7 @@ typedef struct H5VL_link_class_t {
 typedef struct H5VL_group_class_t {
     hid_t  (*create)(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id);
     hid_t  (*open)  (hid_t loc_id, const char *name, hid_t gapl_id);
-    herr_t (*get)   (hid_t file_id, H5VL_group_get_t get_type, int num_args, va_list arguments);
+    herr_t (*get)   (hid_t file_id, H5VL_group_get_t get_type, va_list arguments);
     herr_t (*close) (hid_t group_id);
 } H5VL_group_class_t;
 
@@ -142,8 +142,8 @@ typedef struct H5VL_object_class_t {
                      const char *dest_name, hid_t lcpl, hid_t lapl);
     herr_t (*copy)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name,
                      hid_t ocpypl_id, hid_t lcpl_id );
-    herr_t (*lookup)(hid_t loc_id, H5VL_object_lookup_t lookup_type, int num_args, va_list arguments);
-    herr_t (*get)   (hid_t loc_id, H5VL_object_get_t get_type, int num_args, va_list arguments);
+    herr_t (*lookup)(hid_t loc_id, H5VL_object_lookup_t lookup_type, va_list arguments);
+    herr_t (*get)   (hid_t loc_id, H5VL_object_get_t get_type, va_list arguments);
     herr_t (*close) (hid_t obj_id);
 } H5VL_object_class_t;
 
