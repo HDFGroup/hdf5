@@ -6,6 +6,9 @@
 /* Define if the Windows virtual file driver should be compiled */
 #cmakedefine H5_HAVE_WINDOWS @H5_HAVE_WINDOWS@
 
+/* Define if using MinGW */
+#cmakedefine H5_HAVE_MINGW @H5_HAVE_MINGW@
+
 /* Define if on the Windows platform and default WIN32 API */
 #cmakedefine H5_HAVE_WIN32_API @H5_HAVE_WIN32_API@
 

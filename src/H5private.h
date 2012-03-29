@@ -151,7 +151,9 @@
 
 
 #ifdef H5_HAVE_WIN32_API
+/* The following two defines must be before any windows headers are included */
 #define WIN32_LEAN_AND_MEAN    /* Exclude rarely-used stuff from Windows headers */
+#define NOGDI                  /* Exclude Graphic Display Interface macros */
 
 #ifdef H5_HAVE_WINSOCK_H
 #include <winsock2.h>

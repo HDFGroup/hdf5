@@ -129,6 +129,10 @@ ENDMACRO (CHECK_LIBRARY_EXISTS_CONCAT)
 
 SET (WINDOWS)
 IF (WIN32)
+  IF (MINGW)
+    SET (H5_HAVE_MINGW 1)
+    SET (WINDOWS 1) # MinGW tries to imitate Windows
+  ENDIF (MINGW)
   SET (H5_HAVE_WIN32_API 1)
   IF (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
     SET (WINDOWS 1)
@@ -174,7 +178,9 @@ IF (WINDOWS)
   SET (H5_HAVE_DIFFTIME 1)
   SET (H5_HAVE_LONGJMP 1)
   SET (H5_STDC_HEADERS 1)
-  SET (H5_HAVE_GETHOSTNAME 1)
+  IF (NOT MINGW)
+    SET (H5_HAVE_GETHOSTNAME 1)
+  ENDIF (NOT MINGW)
   SET (H5_HAVE_GETCONSOLESCREENBUFFERINFO 1)
   SET (H5_HAVE_FUNCTION 1)
   SET (H5_GETTIMEOFDAY_GIVES_TZ 1)
@@ -302,7 +308,7 @@ IF (NOT WINDOWS)
   IF (HDF5_ENABLE_LARGE_FILE)
     SET (msg "Performing TEST_LFS_WORKS")
     TRY_RUN (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
-        ${CMAKE_BINARY_DIR}
+        ${HDF5_BINARY_DIR}/CMake
         ${HDF5_RESOURCES_DIR}/HDF5Tests.c
         CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=-DTEST_LFS_WORKS
         OUTPUT_VARIABLE OUTPUT
@@ -615,7 +621,8 @@ ENDIF (NOT WINDOWS)
 #-----------------------------------------------------------------------------
 # Check if InitOnceExecuteOnce is available
 #-----------------------------------------------------------------------------
-IF (WINDOWS AND NOT HDF5_NO_IOEO_TEST)
+IF (WINDOWS)
+  IF (NOT HDF5_NO_IOEO_TEST)
   MESSAGE (STATUS "Checking for InitOnceExecuteOnce:")
   IF("${H5_HAVE_IOEO}" MATCHES "^${H5_HAVE_IOEO}$")
     IF (LARGEFILE)
@@ -673,7 +680,8 @@ IF (WINDOWS AND NOT HDF5_NO_IOEO_TEST)
         "Return value: ${HAVE_IOEO_EXITCODE}\n")
     ENDIF("${HAVE_IOEO_EXITCODE}" EQUAL 0)
   ENDIF("${H5_HAVE_IOEO}" MATCHES "^${H5_HAVE_IOEO}$")
-ENDIF (WINDOWS AND NOT HDF5_NO_IOEO_TEST)
+  ENDIF (NOT HDF5_NO_IOEO_TEST)
+ENDIF (WINDOWS)
   
 
 #-----------------------------------------------------------------------------
