@@ -44,11 +44,11 @@ MACRO (SZIP_ADJUST_LIB_VARS basename)
       # if the generator supports configuration types then set
       # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
       IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-    SET (${basename}_LIBRARY       optimized ${${basename}_LIBRARY_RELEASE} debug ${${basename}_LIBRARY_DEBUG})
+        SET (${basename}_LIBRARY       optimized ${${basename}_LIBRARY_RELEASE} debug ${${basename}_LIBRARY_DEBUG})
       ELSE(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-    # if there are no configuration types and CMAKE_BUILD_TYPE has no value
-    # then just use the release libraries
-    SET (${basename}_LIBRARY       ${${basename}_LIBRARY_RELEASE} )
+        # if there are no configuration types and CMAKE_BUILD_TYPE has no value
+        # then just use the release libraries
+        SET (${basename}_LIBRARY       ${${basename}_LIBRARY_RELEASE} )
       ENDIF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
       SET (${basename}_LIBRARIES       optimized ${${basename}_LIBRARY_RELEASE} debug ${${basename}_LIBRARY_DEBUG})
     ENDIF (${basename}_LIBRARY_DEBUG AND ${basename}_LIBRARY_RELEASE)
@@ -90,7 +90,7 @@ FIND_PATH (SZIP_INCLUDE_DIR
     NO_DEFAULT_PATH
 )
 
-IF (WIN32W)
+IF (WIN32)
     SET (SZIP_SEARCH_DEBUG_NAMES "sz_d;libsz_d")
     SET (SZIP_SEARCH_RELEASE_NAMES "sz;libsz")
 ELSE (WIN32)
