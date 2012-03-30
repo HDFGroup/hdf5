@@ -9520,7 +9520,7 @@ static herr_t link_filter_set_local(hid_t dcpl_id, hid_t type_id, hid_t space_id
 
 static size_t link_filter_filter(unsigned int flags, size_t cd_nelmts,
     const unsigned int cd_values[], size_t nbytes, size_t UNUSED *buf_size,
-    void UNUSED **buf)
+    void UNUSED **buf, void UNUSED *lib_data)
 {
     if(flags & H5Z_FLAG_OPTIONAL || cd_nelmts != 1 || cd_values[0] != 2112)
         return 0;
@@ -9553,7 +9553,7 @@ link_filters(hid_t fapl, hbool_t new_format)
     unsigned    flags_out;
     unsigned    filter_config_out;
     int         nfilters = 0;
-    H5Z_class2_t filter_class;
+    H5Z_class3_t filter_class;
     char        name_out[24];
     char	filename[NAME_BUF_SIZE];
     htri_t      tri_ret;
@@ -9593,7 +9593,7 @@ link_filters(hid_t fapl, hbool_t new_format)
     } /* end if */
 
     /* Register and add custom filter */
-    filter_class.version = H5Z_CLASS_T_VERS;
+    filter_class.version = H5Z_CLASS_T_VERS_3;
     filter_class.id = H5Z_FILTER_RESERVED + 42;
     filter_class.encoder_present = TRUE;
     filter_class.decoder_present = TRUE;

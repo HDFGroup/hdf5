@@ -15767,7 +15767,7 @@ error:
 static hbool_t test_write_filter_called;
 static size_t test_write_filter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
     const unsigned int UNUSED cd_values[], size_t nbytes, size_t UNUSED *buf_size,
-    void UNUSED **buf)
+    void UNUSED **buf, void UNUSED *lib_data)
 {
     test_write_filter_called = TRUE;
 
@@ -15813,7 +15813,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 
     /* Check if we are compressing the blocks */
     if(tparam->comp == FHEAP_TEST_COMPRESS) {
-        H5Z_class2_t filter_class;          /* Custom filter */
+        H5Z_class3_t filter_class;          /* Custom filter */
         unsigned    deflate_level;          /* Deflation level */
 
         /* Set an I/O filter for heap data */
@@ -15822,7 +15822,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
             FAIL_STACK_ERROR
 
         /* Register and append custom filter */
-        filter_class.version = H5Z_CLASS_T_VERS;
+        filter_class.version = H5Z_CLASS_T_VERS_3;
         filter_class.id = H5Z_FILTER_RESERVED + 43;
         filter_class.encoder_present = TRUE;
         filter_class.decoder_present = TRUE;

@@ -80,11 +80,11 @@ static hid_t	fapl_g = -1;
 static size_t
 counter (unsigned UNUSED flags, size_t cd_nelmts,
 	 const unsigned *cd_values, size_t nbytes,
-	 size_t *buf_size, void **buf);
+	 size_t *buf_size, void **buf, void *lib_data);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_COUNTER[1] = {{
-    H5Z_CLASS_T_VERS,		/* H5Z_class_t version		*/
+const H5Z_class3_t H5Z_COUNTER[1] = {{
+    H5Z_CLASS_T_VERS_3,		/* H5Z_class_t version		*/
     FILTER_COUNTER,		/* Filter id number		*/
     1, 1,			/* Encoding and decoding enabled */
     "counter",			/* Filter name for debugging	*/
@@ -113,7 +113,7 @@ const H5Z_class2_t H5Z_COUNTER[1] = {{
 static size_t
 counter (unsigned UNUSED flags, size_t UNUSED cd_nelmts,
 	 const unsigned UNUSED *cd_values, size_t nbytes,
-	 size_t UNUSED *buf_size, void UNUSED **buf)
+	 size_t UNUSED *buf_size, void UNUSED **buf, void UNUSED *lib_data)
 {
     nio_g += nbytes;
     return nbytes;

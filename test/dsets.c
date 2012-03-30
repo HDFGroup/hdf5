@@ -205,17 +205,22 @@ double	points_dbl[DSET_DIM1][DSET_DIM2], check_dbl[DSET_DIM1][DSET_DIM2];
 
 /* Local prototypes for filter functions */
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
-    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf,
+    void *lib_data);
 static htri_t can_apply_bogus(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t filter_bogus2(unsigned int flags, size_t cd_nelmts,
-    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf,
+    void *lib_data);
 static size_t filter_bogus3(unsigned int flags, size_t cd_nelmts,
-    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf,
+    void *lib_data);
 static size_t filter_corrupt(unsigned int flags, size_t cd_nelmts,
-    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf,
+    void *lib_data);
 static size_t filter_expand(unsigned int flags, size_t cd_nelmts,
-    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf,
+    void *lib_data);
 
 
 /*-------------------------------------------------------------------------
@@ -1201,8 +1206,8 @@ error:
 }
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_BOGUS[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
+const H5Z_class3_t H5Z_BOGUS[1] = {{
+    H5Z_CLASS_T_VERS_3,     /* H5Z_class_t version */
     H5Z_FILTER_BOGUS,		/* Filter id number		*/
     1, 1,               /* Encoding and decoding enabled */
     "bogus",			/* Filter name for debugging	*/
@@ -1255,7 +1260,7 @@ can_apply_bogus(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 static size_t
 filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
       const unsigned int UNUSED *cd_values, size_t nbytes,
-      size_t UNUSED *buf_size, void UNUSED **buf)
+      size_t UNUSED *buf_size, void UNUSED **buf, void UNUSED *lib_data)
 {
     return nbytes;
 }
@@ -1330,7 +1335,7 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 static size_t
 filter_bogus2(unsigned int flags, size_t cd_nelmts,
       const unsigned int *cd_values, size_t nbytes,
-      size_t *buf_size, void **buf)
+      size_t *buf_size, void **buf, void UNUSED *lib_data)
 {
     /* Check for the correct number of parameters */
     if(cd_nelmts!=BOGUS2_ALL_NPARMS)
@@ -1386,14 +1391,14 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
 static size_t
 filter_bogus3(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
       const unsigned int UNUSED *cd_values, size_t UNUSED nbytes,
-      size_t UNUSED *buf_size, void UNUSED **buf)
+      size_t UNUSED *buf_size, void UNUSED **buf, void UNUSED *lib_data)
 {
     return 0;
 }
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_CORRUPT[1] = {{
-    H5Z_CLASS_T_VERS,            /* H5Z_class_t version */
+const H5Z_class3_t H5Z_CORRUPT[1] = {{
+    H5Z_CLASS_T_VERS_3,          /* H5Z_class_t version */
     H5Z_FILTER_CORRUPT,		/* Filter id number		*/
     1, 1,               /* Encoding and decoding enabled */
     "corrupt",			/* Filter name for debugging	*/
@@ -1422,7 +1427,7 @@ const H5Z_class2_t H5Z_CORRUPT[1] = {{
 static size_t
 filter_corrupt(unsigned int flags, size_t cd_nelmts,
       const unsigned int *cd_values, size_t nbytes,
-      size_t *buf_size, void **buf)
+      size_t *buf_size, void **buf, void UNUSED *lib_data)
 {
     void  *data = NULL;
     unsigned char  *dst = (unsigned char*)(*buf);
@@ -5314,8 +5319,8 @@ test_types(hid_t file)
 }
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_CAN_APPLY_TEST[1] = {{
-    H5Z_CLASS_T_VERS,
+const H5Z_class3_t H5Z_CAN_APPLY_TEST[1] = {{
+    H5Z_CLASS_T_VERS_3,
     H5Z_FILTER_CAN_APPLY_TEST,	/* Filter id number		*/
     1, 1,
     "can_apply_test",		/* Filter name for debugging	*/
@@ -5495,8 +5500,8 @@ error:
 } /* end test_can_apply() */
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_CAN_APPLY_TEST2[1] = {{
-    H5Z_CLASS_T_VERS,
+const H5Z_class3_t H5Z_CAN_APPLY_TEST2[1] = {{
+    H5Z_CLASS_T_VERS_3,
     H5Z_FILTER_CAN_APPLY_TEST2,	/* Filter id number		*/
     1, 1,
     "can_apply_test",		/* Filter name for debugging	*/
@@ -5849,8 +5854,8 @@ error:
 
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_SET_LOCAL_TEST[1] = {{
-    H5Z_CLASS_T_VERS,
+const H5Z_class3_t H5Z_SET_LOCAL_TEST[1] = {{
+    H5Z_CLASS_T_VERS_3,
     H5Z_FILTER_SET_LOCAL_TEST,	/* Filter id number		*/
     1, 1,
     "set_local_test",		/* Filter name for debugging	*/
@@ -7721,8 +7726,8 @@ error:
 } /* end test_big_chunks_bypass_cache() */
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_EXPAND[1] = {{
-    H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
+const H5Z_class3_t H5Z_EXPAND[1] = {{
+    H5Z_CLASS_T_VERS_3,           /* H5Z_class_t version */
     H5Z_FILTER_EXPAND,		/* Filter id number		*/
     1, 1,                       /* Encoding and decoding enabled */
     "expand",			/* Filter name for debugging	*/
@@ -7757,7 +7762,7 @@ static size_t filter_expand_factor_g = 0;
 static size_t
 filter_expand(unsigned int flags, size_t UNUSED cd_nelmts,
       const unsigned int UNUSED *cd_values, size_t nbytes,
-      size_t *buf_size, void UNUSED **buf)
+      size_t *buf_size, void UNUSED **buf, void UNUSED *lib_data)
 {
     size_t         ret_value = 0;
 

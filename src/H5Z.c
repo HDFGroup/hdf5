@@ -1615,8 +1615,7 @@ H5Z_aligned_free(void *buf, void *_lib_data)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    if(!lib_data)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "lib_data not provided")
+    HDassert(lib_data);
 
     /* Mark the dxpl as unaligned.  Do this first so if it fails mem is not
      * freed. */
@@ -1669,6 +1668,9 @@ H5Z_aligned_realloc(void *buf, size_t old_size, size_t new_size,
     void *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check args */
+    HDassert(lib_data);
 
     if(!lib_data->align) {
         if(NULL == (ret_value = H5MM_realloc(buf, new_size)) && new_size > 0)

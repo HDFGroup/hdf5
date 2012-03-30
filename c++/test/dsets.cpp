@@ -59,7 +59,8 @@ const int H5Z_FILTER_BOGUS = 305;
 
 // Local prototypes
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
-    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf,
+    void *lib_data);
 
 
 /*-------------------------------------------------------------------------
@@ -351,14 +352,14 @@ test_tconv( H5File& file)
 }   // test_tconv
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_BOGUS[1] = {{
-    H5Z_CLASS_T_VERS,		/* H5Z_class_t version number   */
+const H5Z_class3_t H5Z_BOGUS[1] = {{
+    H5Z_CLASS_T_VERS_3,		/* H5Z_class_t version number   */
     H5Z_FILTER_BOGUS,		/* Filter id number		*/
     1, 1,			/* Encode and decode enabled    */
     "bogus",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
-    (H5Z_func_t)filter_bogus,   /* The actual filter function	*/
+    (H5Z_func2_t)filter_bogus,  /* The actual filter function	*/
 }};
 
 /*-------------------------------------------------------------------------
@@ -384,7 +385,7 @@ static size_t
 BMR: removed UNUSED for now until asking Q. or R. to pass compilation*/
 filter_bogus(unsigned int flags, size_t cd_nelmts,
       const unsigned int cd_values[], size_t nbytes,
-      size_t *buf_size, void **buf)
+      size_t *buf_size, void **buf, void *lib_data)
 {
     return nbytes;
 }

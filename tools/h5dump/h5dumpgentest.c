@@ -120,7 +120,7 @@ write_dset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
 static size_t
 myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
       const unsigned int UNUSED *cd_values, size_t nbytes,
-      size_t UNUSED *buf_size, void UNUSED **buf);
+      size_t UNUSED *buf_size, void UNUSED **buf, void UNUSED *lib_data);
 
 /* a "set local" callback     */
 static herr_t
@@ -129,8 +129,8 @@ set_local_myfilter(hid_t dcpl_id, hid_t tid, hid_t UNUSED sid);
 #define MYFILTER_ID 405
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_MYFILTER[1] = {{
-    H5Z_CLASS_T_VERS,
+const H5Z_class3_t H5Z_MYFILTER[1] = {{
+    H5Z_CLASS_T_VERS_3,
     MYFILTER_ID,               /* Filter id number      */
     1, 1,
     "myfilter",                /* Filter name for debugging */
@@ -5557,7 +5557,7 @@ static void gent_filters(void)
 static size_t
 myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
       const unsigned int UNUSED *cd_values, size_t nbytes,
-      size_t UNUSED *buf_size, void UNUSED **buf)
+      size_t UNUSED *buf_size, void UNUSED **buf, void UNUSED *lib_data)
 {
  return nbytes;
 }

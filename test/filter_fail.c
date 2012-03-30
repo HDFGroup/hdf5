@@ -36,11 +36,12 @@ const char *FILENAME[] = {
 };
 
 static size_t filter_fail(unsigned int flags, size_t cd_nelmts,
-    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf,
+    void *lib_data);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_FAIL_TEST[1] = {{
-    H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
+const H5Z_class3_t H5Z_FAIL_TEST[1] = {{
+    H5Z_CLASS_T_VERS_3,           /* H5Z_class_t version */
     H5Z_FILTER_FAIL_TEST,	/* Filter id number		*/
     1, 1,                       /* Encoding and decoding enabled */
     "filter_fail_test",		/* Filter name for debugging	*/
@@ -67,7 +68,7 @@ const H5Z_class2_t H5Z_FAIL_TEST[1] = {{
 static size_t
 filter_fail(unsigned int flags, size_t cd_nelmts,
       const unsigned int *cd_values, size_t nbytes,
-      size_t *buf_size, void **buf)
+      size_t *buf_size, void **buf, void UNUSED *lib_data)
 {
     int   *dst = (int*)(*buf);
     size_t         ret_value = 0;
