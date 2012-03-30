@@ -250,5 +250,77 @@ CONTAINS
 
   END SUBROUTINE h5oopen_by_addr_f
 
+!
+!****s* H5O/h5ocopy_f
+! NAME		
+!  h5ocopy_f 
+!
+! PURPOSE
+!  Copies an object in an HDF5 file.
+!
+! INPUTS  
+!  src_loc_id - Object identifier indicating the location of the source object to be copied 
+!  src_name   - Name of the source object to be copied 
+!  dst_loc_id - Location identifier specifying the destination 
+!  dst_name   - Name to be assigned to the new copy
+!
+! OPTIONAL PARAMETERS
+!  ocpypl_id  - Object copy property list
+!  lcpl_id    - Link creation property list for the new hard link
+!
+! OUTPUTS: 
+!  hdferr     - Returns 0 if successful and -1 if fails
+!
+! AUTHOR	
+!  M. Scot Breitenfeld
+!  March 14, 2012
+! 
+! SOURCE
+  SUBROUTINE h5ocopy_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr, ocpypl_id, lcpl_id)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN) :: src_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: src_name
+    INTEGER(HID_T)  , INTENT(IN) :: dst_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: dst_name
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: ocpypl_id
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lcpl_id
+!*****
+
+    INTEGER(SIZE_T) :: src_name_len, dst_name_len
+    INTEGER(HID_T)  :: ocpypl_id_default, lcpl_id_default
+
+    INTERFACE
+       INTEGER FUNCTION h5ocopy_c(src_loc_id, src_name, src_name_len, &
+            dst_loc_id, dst_name, dst_name_len, ocpypl_id_default, lcpl_id_default)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OCOPY_C'::h5ocopy_c
+         !DEC$ENDIF
+         !DEC$ATTRIBUTES reference :: src_name, dst_name
+         INTEGER(HID_T)  , INTENT(IN) :: src_loc_id
+         CHARACTER(LEN=*), INTENT(IN) :: src_name
+         INTEGER(HID_T)  , INTENT(IN) :: dst_loc_id
+         CHARACTER(LEN=*), INTENT(IN) :: dst_name
+         INTEGER(HID_T)  , INTENT(IN) :: ocpypl_id_default
+         INTEGER(HID_T)  , INTENT(IN) :: lcpl_id_default
+         INTEGER(SIZE_T)              :: src_name_len, dst_name_len
+
+       END FUNCTION h5ocopy_c
+    END INTERFACE
+
+    src_name_len = LEN(src_name)
+    dst_name_len = LEN(dst_name)
+
+    ocpypl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(ocpypl_id)) ocpypl_id_default = ocpypl_id
+    lcpl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
+
+    hdferr = h5ocopy_c(src_loc_id, src_name, src_name_len, &
+         dst_loc_id, dst_name, dst_name_len, ocpypl_id_default, lcpl_id_default)
+
+  END SUBROUTINE h5ocopy_f
+
 END MODULE H5O
 

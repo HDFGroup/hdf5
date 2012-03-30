@@ -334,3 +334,60 @@ nh5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *
   return ret_value;
 }
 
+/* ***if* H5Of/H5Ocopy_c
+ * NAME
+ *  H5Ocopy_c
+ * PURPOSE
+ *  Calls H5Ocopy
+ * INPUTS  
+ *  src_loc_id   - Object identifier indicating the location of the source object to be copied 
+ *  src_name     - Name of the source object to be copied 
+ *  src_name_len - Length of src_name
+ *  dst_loc_id   - Location identifier specifying the destination 
+ *  dst_name     - Name to be assigned to the new copy 
+ *  dst_name_len - Length of dst_name
+ *  ocpypl_id    - Object copy property list
+ *  lcpl_id      - Link creation property list for the new hard link
+ *
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
+ *  March 14, 2012
+ * SOURCE
+*/
+int_f
+nh5ocopy_c (hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len,
+	    hid_t_f *dst_loc_id, _fcd dst_name, size_t_f *dst_name_len, 
+	    hid_t_f *ocpypl_id, hid_t_f *lcpl_id )
+/******/
+{
+  char *c_src_name = NULL;  /* Buffer to hold C string */
+  char *c_dst_name = NULL;  /* Buffer to hold C string */
+  
+  int_f ret_value = 0;      /* Return value */
+  
+  /*
+   * Convert FORTRAN name to C name
+   */
+  if((c_src_name = HD5f2cstring(src_name, (size_t)*src_name_len)) == NULL)
+    HGOTO_DONE(FAIL);
+  if((c_dst_name = HD5f2cstring(dst_name, (size_t)*dst_name_len)) == NULL)
+    HGOTO_DONE(FAIL);
+
+  /*
+   * Call H5Ocopy function.
+   */
+  if(H5Ocopy( (hid_t)*src_loc_id, c_src_name, (hid_t)*dst_loc_id, c_dst_name, 
+	      (hid_t)*ocpypl_id, (hid_t)*lcpl_id) < 0)
+    HGOTO_DONE(FAIL);
+
+ done:
+  if(c_src_name)
+    HDfree(c_src_name);
+  if(c_dst_name)
+    HDfree(c_dst_name);
+
+  return ret_value;
+
+}
