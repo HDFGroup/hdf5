@@ -1067,6 +1067,9 @@ SUBROUTINE test_datasets()
   INTEGER          :: has                              ! general purpose integer
   INTEGER          :: type_class
   INTEGER(SIZE_T)  :: type_size
+  LOGICAL :: path_valid  ! status of the path
+  CHARACTER(LEN=6) :: chr_exact
+  CHARACTER(LEN=8) :: chr_lg
 
   !
   ! Initialize FORTRAN predefined datatypes.
@@ -1117,6 +1120,7 @@ SUBROUTINE test_datasets()
   END DO
 
   CALL passed()
+
 
   !-------------------------------------------------------------------------
   ! real
@@ -1207,9 +1211,60 @@ SUBROUTINE test_datasets()
 
   CALL passed()
 
+  CALL test_begin(' Test h5ltpath_valid_f          ')
+  !
+  ! test function h5ltpath_valid_f
+  !
+  chr_exact = "/"//dsetname2 ! test character buffer the exact size needed
+  CALL h5ltpath_valid_f(file_id, chr_exact, .TRUE., path_valid, errcode)
+  IF(errcode.LT.0.OR..NOT.path_valid)THEN
+     PRINT *, 'error in h5ltpath_valid_f'
+     STOP
+  ENDIF
+  chr_lg = "/"//dsetname2 ! test character buffer larger then needed
+  CALL h5ltpath_valid_f(file_id, chr_lg, .TRUE., path_valid, errcode)
+  IF(errcode.LT.0.OR..NOT.path_valid)THEN
+     PRINT *, 'error in h5ltpath_valid_f'
+     STOP
+  ENDIF
 
+  CALL h5ltpath_valid_f(file_id, chr_lg, .FALSE., path_valid, errcode)
+  IF(errcode.LT.0.OR..NOT.path_valid)THEN
+     PRINT *, 'error in h5ltpath_valid_f'
+     STOP
+  ENDIF 
 
+  ! Should fail, dataset does not exist
+  CALL h5ltpath_valid_f(file_id, "/"//dsetname2//"junk", .TRUE., path_valid, errcode)
+  IF(errcode.LT.0.OR.path_valid)THEN
+     PRINT *, 'error in h5ltpath_valid_f'
+     STOP
+  ENDIF
 
+  CALL h5ltpath_valid_f(file_id, "/"//dsetname2//"junk", .FALSE., path_valid, errcode)
+  IF(errcode.LT.0.OR.path_valid)THEN
+     PRINT *, 'error in h5ltpath_valid_f'
+     STOP
+  ENDIF
+
+  ! Create a dangling soft link
+  CALL h5lcreate_soft_f("/G2", file_id, "/G3", errcode)
+  
+  ! Should pass, does not check for dangled link
+  CALL h5ltpath_valid_f(file_id, "/G3", .FALSE., path_valid, errcode)
+  IF(.NOT.path_valid)THEN
+     PRINT *, 'error in h5ltpath_valid_f'
+     STOP
+  ENDIF
+     
+  ! Should fail, dangled link
+  CALL h5ltpath_valid_f(file_id, "/G2", .TRUE., path_valid, errcode)
+  IF(path_valid)THEN
+     PRINT *, 'error in h5ltpath_valid_f'
+     STOP
+  ENDIF
+
+  CALL passed()
 
 
   CALL test_begin(' Get dataset dimensions/info    ')
@@ -1287,7 +1342,9 @@ SUBROUTINE test_attributes()
   IMPLICIT NONE
 
   CHARACTER(len=9), PARAMETER :: filename = "dsetf5.h5"! File name
+  CHARACTER(len=9), PARAMETER :: filename1 ="tattr.h5" ! C written attribute file
   INTEGER(HID_T) :: file_id                            ! File identifier
+  INTEGER(HID_T) :: file_id1
   INTEGER, PARAMETER :: DIM1 = 10;                     ! Dimension of array
   CHARACTER(LEN=5), PARAMETER :: attrname1 = "attr1"   ! Attribute name
   CHARACTER(LEN=5), PARAMETER :: attrname2 = "attr2"   ! Attribute name
@@ -1295,7 +1352,11 @@ SUBROUTINE test_attributes()
   CHARACTER(LEN=5), PARAMETER :: attrname4 = "attr4"   ! Attribute name
   CHARACTER(LEN=5), PARAMETER :: attrname5 = "attr5"   ! Attribute name
   CHARACTER(LEN=8), PARAMETER :: buf1 = "mystring"     ! Data buffer
+  CHARACTER(LEN=16), PARAMETER :: buf_c = "string attribute"
   CHARACTER(LEN=8)                  :: bufr1           ! Data buffer
+  CHARACTER(LEN=10)                 :: bufr1_lg        ! Data buffer
+  CHARACTER(LEN=16)                 :: bufr_c          ! Data buffer
+  CHARACTER(LEN=18)                 :: bufr_c_lg       ! Data buffer
   INTEGER, DIMENSION(DIM1)          :: buf2            ! Data buffer
   INTEGER, DIMENSION(DIM1)          :: bufr2           ! Data buffer
   REAL, DIMENSION(DIM1)             :: buf3            ! Data buffer
@@ -1313,6 +1374,7 @@ SUBROUTINE test_attributes()
   INTEGER        :: rank = 1                           ! Dataset rank
   CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"   ! Dataset name
   INTEGER, DIMENSION(DIM1)    :: buf                   ! Data buffer
+  
 
   !
   ! Initialize FORTRAN predefined datatypes.
@@ -1431,14 +1493,11 @@ SUBROUTINE test_attributes()
 
   CALL passed()
 
-
-
   !-------------------------------------------------------------------------
   ! string
   !-------------------------------------------------------------------------
 
   CALL test_begin(' Set/Get attributes string      ')
-
 
   !
   ! write attribute.
@@ -1446,20 +1505,63 @@ SUBROUTINE test_attributes()
   CALL h5ltset_attribute_string_f(file_id,dsetname1,attrname5,buf1,errcode)
 
   !
-  ! read attribute.
+  ! read attribute into a fortran character buf that is the same size as buf1.
   !
   CALL h5ltget_attribute_string_f(file_id,dsetname1,attrname5,bufr1,errcode)
 
   !
   ! compare read and write buffers.
   !
-
   IF ( buf1 .NE. bufr1 ) THEN
      PRINT *, 'read buffer differs from write buffer'
      PRINT *,  buf1, ' and ',   bufr1
      STOP
   ENDIF
 
+  !
+  ! read attribute into a fortran character buf that is larger then buf1.
+  !
+  CALL h5ltget_attribute_string_f(file_id,dsetname1,attrname5,bufr1_lg,errcode)
+
+  !
+  ! compare read and write buffers, make sure C NULL character was removed.
+  !
+  IF ( buf1(1:8) .NE. bufr1_lg(1:8) .AND. bufr1_lg(9:10) .NE. '  ' ) THEN
+     PRINT *, 'larger read buffer differs from write buffer'
+     PRINT *,  buf1, ' and ',   bufr1_lg
+     STOP
+  ENDIF
+
+  ! 
+  ! ** Test reading a string that was created with a C program **
+  !
+
+!!$  CALL h5fopen_f(filename1, H5F_ACC_RDONLY_F, file_id1, errcode)
+!!$
+!!$  CALL h5ltget_attribute_string_f(file_id1, "/", "attr5", bufr_c, errcode)
+!!$  !
+!!$  ! compare read and write buffers.
+!!$  !
+!!$  IF ( bufr_c .NE. buf_c ) THEN
+!!$     PRINT *, 'read buffer differs from write buffer'
+!!$     PRINT *,  bufr1, ' and ',  buf_c 
+!!$     STOP
+!!$  ENDIF
+!!$  !
+!!$  ! read attribute into a fortran character buf that is larger then buf_c.
+!!$  !
+!!$  CALL h5ltget_attribute_string_f(file_id1, "/", "attr5", bufr_c_lg, errcode)
+!!$
+!!$  !
+!!$  ! compare read and write buffers, make sure C NULL character was removed.
+!!$  !
+!!$  IF ( buf_c(1:16) .NE. bufr_c_lg(1:16) .AND. bufr_c_lg(17:18) .NE. '  ' ) THEN
+!!$     PRINT *, 'larger read buffer differs from write buffer'
+!!$     PRINT *,  buf_c, ' and ',  bufr_c_lg 
+!!$     STOP
+!!$  ENDIF  
+
+!!$  CALL h5fclose_f(file_id1,  errcode)
 
   CALL passed()
 
