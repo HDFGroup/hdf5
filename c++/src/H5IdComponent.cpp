@@ -13,11 +13,13 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef H5_VMS
+#ifdef OLD_HEADER_FILENAME
+#include <iostream.h>
+#else
 #include <iostream>
-#endif /*H5_VMS*/
-
+#endif
 #include <string>
+
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5Library.h"

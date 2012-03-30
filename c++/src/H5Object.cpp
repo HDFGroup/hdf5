@@ -201,7 +201,7 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
 ///\exception	H5::AttributeIException
 ///\par Description
 ///		The signature of user_op is
-///		void (*)(H5::H5Object&, std::string, void*).
+///		void (*)(H5::H5Object&, H5std_string, void*).
 ///		For information, please refer to the C layer Reference Manual
 ///		at:
 /// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5A.html#Annot-Iterate
@@ -368,9 +368,9 @@ void H5Object::p_reference(void* ref, const char* name, hid_t space_id, H5R_type
 ///\param       name - IN: Name of the object to be referenced
 ///\param       dataspace - IN: Dataspace with selection
 ///\param       ref_type - IN: Type of reference to query, valid values are:
-///             \li \c H5R_OBJECT         - Reference is an object reference.
-///             \li \c H5R_DATASET_REGION - Reference is a dataset region
-///                     reference. - this is the default
+///		\li \c H5R_OBJECT         - Reference is an object reference.
+///		\li \c H5R_DATASET_REGION - Reference is a dataset region
+///			reference. - this is the default
 ///\exception   H5::IdComponentException
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------

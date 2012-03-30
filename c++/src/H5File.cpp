@@ -512,8 +512,8 @@ H5std_string H5File::getFileName() const
 ///\brief	Retrieves the type of object that an object reference points to.
 ///\param	ref      - IN: Reference to query
 ///\param	ref_type - IN: Type of reference, valid values are:
-///		\li \c H5R_OBJECT         - Reference is an object reference.
-///		\li \c H5R_DATASET_REGION - Reference is a dataset region reference.
+///		\li \c H5R_OBJECT         - Reference is an object reference
+///		\li \c H5R_DATASET_REGION - Reference is a dataset region reference
 ///\return	Object type, which can be one of the following:
 ///		\li \c H5G_LINK    - Object is a symbolic link.
 ///		\li \c H5G_GROUP   - Object is a group.
@@ -600,9 +600,9 @@ void H5File::p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t
 ///\param       name - IN: Name of the object to be referenced
 ///\param       dataspace - IN: Dataspace with selection
 ///\param       ref_type - IN: Type of reference to query, valid values are:
-///             \li \c H5R_OBJECT         - Reference is an object reference.
+///             \li \c H5R_OBJECT         - Reference is an object reference
 ///             \li \c H5R_DATASET_REGION - Reference is a dataset region
-///                     reference. - this is the default
+///                     reference - this is the default
 ///\exception   H5::IdComponentException
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------

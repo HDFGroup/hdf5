@@ -26,11 +26,20 @@ namespace H5 {
 
 class H5_DLLCPP CompType : public DataType {
    public:
+	// Default constructor
+	CompType();
+
+	// Creates a compound datatype using an existing id
+	CompType( const hid_t existing_id );
+
 	// Creates a new compound datatype, given the type's size
 	CompType( size_t size ); // H5Tcreate
 
 	// Gets the compound datatype of the specified dataset
 	CompType( const DataSet& dataset );  // H5Dget_type
+
+	// Copy constructor - makes a copy of original object
+	CompType( const CompType& original );
 
 	// Returns the type class of the specified member of this compound
 	// datatype.  It provides to the user a way of knowing what type
@@ -90,15 +99,6 @@ class H5_DLLCPP CompType : public DataType {
 
 	///\brief Returns this class name
 	virtual H5std_string fromClass () const { return("CompType"); }
-
-	// Default constructor
-	CompType();
-
-	// Creates a compound datatype using an existing id
-	CompType( const hid_t existing_id );
-
-	// Copy constructor - makes a copy of original object
-	CompType( const CompType& original );
 
 	// Noop destructor.
 	virtual ~CompType();

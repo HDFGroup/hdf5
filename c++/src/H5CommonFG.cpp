@@ -322,7 +322,7 @@ void CommonFG::unlink( const H5std_string& name ) const
 ///\note
 ///		Exercise care in moving groups as it is possible to render
 ///		data in a file inaccessible with Group::move. Please refer
-///		to the Group Interface in the HDF5 User's Guide at:
+///		to the Group Interface in the HDF5 User's Guide for details at:
 /// http://www.hdfgroup.org/HDF5/doc/UG/UG_frame09Groups.html
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
@@ -1073,7 +1073,7 @@ ssize_t CommonFG::getObjnameByIdx(hsize_t idx, char* name, size_t size) const
 // Function:	CommonFG::getObjnameByIdx
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - January, 2003
 //--------------------------------------------------------------------------
 ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) const
