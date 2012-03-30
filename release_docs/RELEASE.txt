@@ -94,11 +94,15 @@ New Features
 
     High-Level APIs
     ---------------
-    - None
+    - New API: h5ltpath_valid (Fortran: h5ltpath_valid_f) which checks
+      if a path is correct and determines if a link resolves to a valid
+      object and checks that the link does not dangle. (MSB- 2012/3/15)
 
     Fortran API
     -----------
-    - None
+
+    - Added for the C API the Fortran wrapper:
+       h5ocopy_f (MSB - 2012/03/22)
 
     C++ API
     -------
@@ -213,7 +217,10 @@ Bug Fixes since HDF5-1.8.8
 
     Fortran High-Level APIs:
     ------
-    - None
+    - h5ltget_attribute_string_f: The h5ltget_attribute_string_f used to return 
+         the C NULL character in the returned character buffer. The returned 
+	 charactor buffer now does not return the C NULL character; the buffer 
+	 is blank-padded if needed. (MSB - 2012/3/23)
 
 
 Platforms Tested
