@@ -202,7 +202,7 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
     herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iMi", file_id, flag);
+    H5TRACE2("e", "ib", file_id, flag);
 
     /* Check args */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -242,7 +242,7 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag)
     herr_t     ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iMi", file_id, flag);
+    H5TRACE2("e", "i*b", file_id, flag);
 
     /* Check args */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
