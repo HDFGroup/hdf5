@@ -168,6 +168,8 @@ Bug Fixes since HDF5-1.8.8
       VFD to the core VFD.  This mainly affects file operations on the
       driver's backing store and fixes a problem on Windows where large files
       could not be read. (DER - 2012/3/27, HDFFV-7916, HDFFV-7603)
+    - Windows and STDIO correctness changes have been propagated from the SEC2
+      and old Windows drivers to the STDIO VFD.  (DER - 2012/3/30, HDFFV-7917)
 
     Parallel Library
     ----------------
