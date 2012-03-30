@@ -147,20 +147,25 @@ COPY_TESTFILES_TO_TESTDIR()
     done
 }
 
+# Print a $* message left justified in a field of 70 characters
+#
+MESSAGE() {
+   SPACES="                                                               "
+   echo "$* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
 #
 TESTING() {
-   SPACES="                                                               "
-   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+    MESSAGE "Testing $*"
 }
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Verifying".
 #
 VERIFY() {
- SPACES="                                                               "
- echo "Verifying h5diff output $* $SPACES" | cut -c1-70 | tr -d '\012'
+    MESSAGE "Verifying h5diff output $*"
 }
 
 # Print a message that a test has been skipped (because a required filter
@@ -383,6 +388,49 @@ TOOLTESTV()
     fi
     
    rm -f $actual $actual_err $actual_sav
+}
+
+# TOOLTEST_META:
+# Test metadata block size option.
+# Reason to create a function here is to localize all special steps related to
+# metadata block size option in one place.  This is a quick solution.  More
+# thought out solution needed when there is more time.
+#
+# $1: test input file
+# $2:$: metadata options (either "-M size" or "--metadata_block_size=size")
+#
+# Algorithm:
+# Run it once without the metadata option ($2-$);
+# Save the result output file;
+# Run it second time with the metadata option;
+# Verify the output file of second run is larger than the one of 1st run.
+TOOLTEST_META()
+{
+    input_file=$1
+    outfile="$TESTDIR/out.$1"
+
+    # Use TOOLTEST_MAIN to run because it does not remove the output file.
+    # 1st run, without metadata option
+    TOOLTEST_MAIN $1
+    # get the size of the first output file
+    size1=`wc -c $outfile | cut -d' ' -f1`
+
+    # 2nd run with metadata option
+    TOOLTEST_MAIN $*
+    # get the size of the second output file
+    size2=`wc -c $outfile | cut -d' ' -f1`
+
+    # verify sizes.
+    MESSAGE "Verify the sizes of both output files ($size1 vs $size2)"
+    if [ $size1 -lt $size2 ]; then
+    	# pass
+	echo " PASSED"
+    else
+	#fail
+	echo "*FAILED*"
+    fi
+    
+    rm -f $outfile
 }
 
 # This is different from $srcdir/../../bin/output_filter.sh
@@ -809,8 +857,8 @@ TOOLTEST h5repack_attr_refs.h5
 TOOLTEST h5diff_attr1.h5
 
 # tests for metadata block size option ('-M')
-TOOLTEST h5repack_layout.h5 -M 8192
-TOOLTEST h5repack_layout.h5 --metadata_block_size=8192
+TOOLTEST_META h5repack_layout.h5 -M 8192
+TOOLTEST_META h5repack_layout.h5 --metadata_block_size=8192
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."
