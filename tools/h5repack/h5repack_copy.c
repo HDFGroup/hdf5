@@ -236,108 +236,89 @@ int copy_objects(const char* fnamein,
             } /* end if */
         } /* end if */
     } /* end if */
-
-
-
-
 #if defined (H5REPACK_DEBUG_USER_BLOCK)
-    print_user_block(fnamein,fidin);
+    print_user_block(fnamein, fidin);
 #endif
-
 
     /*-------------------------------------------------------------------------
     * set the new user userblock options in the FCPL (before H5Fcreate )
     *-------------------------------------------------------------------------
     */
-
     if ( options->ublock_size > 0 )
     {
         /* either use the FCPL already created or create a new one */
-        if(fcpl != H5P_DEFAULT)
+        if(fcpl == H5P_DEFAULT)
         {
-            /* set user block size */
-            if(H5Pset_userblock(fcpl, options->ublock_size) < 0)
-            {
-                error_msg("failed to set userblock size\n");
-                goto out;
-            }
-
-        }
-
-        else
-        {
-
             /* create a file creation property list */
             if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
             {
                 error_msg("fail to create a file creation property list\n");
                 goto out;
             }
-
-            /* set user block size */
-            if(H5Pset_userblock(fcpl, options->ublock_size) < 0)
-            {
-                error_msg("failed to set userblock size\n");
-                goto out;
-            }
-
         }
 
-
-
+        /* set user block size */
+        if(H5Pset_userblock(fcpl, options->ublock_size) < 0)
+        {
+            error_msg("failed to set userblock size\n");
+            goto out;
+        }
     }
-
 
     /*-------------------------------------------------------------------------
     * set alignment options
     *-------------------------------------------------------------------------
     */
-
-
     if (  options->alignment > 0 )
     {
         /* either use the FAPL already created or create a new one */
-        if (fapl != H5P_DEFAULT)
+        if (fapl == H5P_DEFAULT)
         {
-
-            if (H5Pset_alignment(fapl, options->threshold, options->alignment) < 0)
-            {
-                error_msg("failed to set alignment\n");
-                goto out;
-            }
-
-        }
-
-        else
-        {
-
             /* create a file access property list */
             if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
             {
                 error_msg("Could not create file access property list\n");
                 goto out;
             }
-
-            if (H5Pset_alignment(fapl, options->threshold, options->alignment) < 0)
-            {
-                error_msg("failed to set alignment\n");
-                goto out;
-            }
-
         }
 
+        if (H5Pset_alignment(fapl, options->threshold, options->alignment) < 0)
+        {
+            error_msg("failed to set alignment\n");
+            goto out;
+        }
     }
 
+    /*-------------------------------------------------------------------------
+    * set metadata block size option
+    *-------------------------------------------------------------------------
+    */
+    if (  options->meta_block_size > 0 )
+    {
+        /* either use the FAPL already created or create a new one */
+        if (fapl == H5P_DEFAULT)
+        {
+            /* create a file access property list */
+            if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            {
+                error_msg("Could not create file access property list\n");
+                goto out;
+            }
+        }
+
+        if (H5Pset_meta_block_size(fapl, options->meta_block_size) < 0)
+        {
+            error_msg("failed to set metadata block size\n");
+            goto out;
+        }
+    }
 
     /*-------------------------------------------------------------------------
     * create the output file
     *-------------------------------------------------------------------------
     */
-
-
     if(options->verbose)
         printf("Making file <%s>...\n",fnameout);
-
 
     if((fidout = H5Fcreate(fnameout,H5F_ACC_TRUNC, fcpl, fapl)) < 0)
     {

@@ -111,6 +111,7 @@ typedef struct {
                                  datatype, fill value, filter pipleline, attribute */
  const char      *ublock_filename; /* user block file name */
  hsize_t         ublock_size;      /* user block size */
+ hsize_t         meta_block_size;  /* metadata aggregation block size (for H5Pset_meta_block_size) */
  hsize_t         threshold;        /* alignment threshold for H5Pset_alignment */
  hsize_t         alignment ;       /* alignment for H5Pset_alignment */
 } pack_opt_t;

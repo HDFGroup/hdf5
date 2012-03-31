@@ -85,12 +85,12 @@ int h5repack(const char* infile,
 *
 *-------------------------------------------------------------------------
 */
-
-int h5repack_init (pack_opt_t *options,
+int h5repack_init(pack_opt_t *options,
                    int verbose)
 {
     int k, n;
-    HDmemset(options,0,sizeof(pack_opt_t));
+
+    HDmemset(options, 0, sizeof(pack_opt_t));
     options->min_comp = 1024;
     options->verbose  = verbose;
 
