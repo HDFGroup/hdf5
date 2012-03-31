@@ -320,7 +320,8 @@ done:
  */
 static H5_inline void *
 H5O_SHARED_COPY_FILE(H5F_t *file_src, void *_native_src, H5F_t *file_dst,
-    hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id)
+    hbool_t *recompute_size, unsigned *mesg_flags, H5O_copy_t *cpy_info,
+    void *udata, hid_t dxpl_id)
 {
     void *dst_mesg = NULL;      /* Destination message */
     void *ret_value;            /* Return value */
@@ -348,8 +349,8 @@ H5O_SHARED_COPY_FILE(H5F_t *file_src, void *_native_src, H5F_t *file_dst,
     HDmemset(dst_mesg, 0, sizeof(H5O_shared_t));
 
     /* Handle sharing destination message */
-    if(H5O_shared_copy_file(file_src, file_dst, H5O_SHARED_TYPE,
-            _native_src, dst_mesg, recompute_size, cpy_info, udata, dxpl_id) < 0)
+    if(H5O_shared_copy_file(file_src, file_dst, H5O_SHARED_TYPE, _native_src,
+            dst_mesg, recompute_size, mesg_flags, cpy_info, udata, dxpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "unable to determine if message should be shared")
 
     /* Set return value */
@@ -383,7 +384,8 @@ done:
  */
 static H5_inline herr_t
 H5O_SHARED_POST_COPY_FILE(const H5O_loc_t *oloc_src, const void *mesg_src,
-    H5O_loc_t *oloc_dst, void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
+    H5O_loc_t *oloc_dst, void *mesg_dst, unsigned *mesg_flags, hid_t dxpl_id,
+    H5O_copy_t *cpy_info)
 {
     const H5O_shared_t  *shared_src = (const H5O_shared_t *)mesg_src; /* Alias to shared info in native source */
     H5O_shared_t        *shared_dst = (H5O_shared_t *)mesg_dst; /* Alias to shared info in native destination */
@@ -405,7 +407,7 @@ H5O_SHARED_POST_COPY_FILE(const H5O_loc_t *oloc_src, const void *mesg_src,
 #endif /* H5O_SHARED_POST_COPY_FILE */
 
 #ifdef H5O_SHARED_POST_COPY_FILE_REAL
-    /* Call native message's copy file callback to copy the message */
+    /* Call native message's post copy file callback to copy the message */
     if(H5O_SHARED_POST_COPY_FILE_REAL(oloc_src, mesg_src, oloc_dst, mesg_dst, dxpl_id, cpy_info) <0 )
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy native message to another file")
 #endif /* H5O_SHARED_POST_COPY_FILE_REAL */
@@ -414,8 +416,15 @@ H5O_SHARED_POST_COPY_FILE(const H5O_loc_t *oloc_src, const void *mesg_src,
      * production if the DEFER pass determined it will not be shared; debug mode
      * verifies that it is indeed the case */
     if(H5O_shared_post_copy_file(oloc_dst->file, H5O_SHARED_TYPE,
-            shared_src, shared_dst, dxpl_id, cpy_info) < 0)
+            shared_src, shared_dst, mesg_flags, dxpl_id, cpy_info) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to fix shared message in post copy")
+
+#ifdef H5O_SHARED_POST_COPY_FILE_UPD
+    /* Call native message's post copy file update callback to update the
+     * message */
+    if(H5O_SHARED_POST_COPY_FILE_UPD(oloc_src, mesg_src, oloc_dst, mesg_dst, dxpl_id, cpy_info) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to update native message")
+#endif /* H5O_SHARED_POST_COPY_FILE_UPD */
 
     /* Make sure that if the the source or destination is committed, both are
      * committed */

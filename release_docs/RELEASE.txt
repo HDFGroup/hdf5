@@ -60,6 +60,11 @@ New Features
     
     Library
     -------
+    - Added new feature to merge committed datatypes when copying objects,
+      using new H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG, modified by new API
+      routines: H5Padd_merge_committed_dtype_path(),
+      H5Pfree_merge_committed_dtype_paths(), H5Pset_mcdt_search_cb() and
+      H5_DLL herr_t H5Pget_mcdt_search_cb().  (QAK - 2012/03/30)
     - None
  
     Parallel Library
@@ -131,8 +136,22 @@ Bug Fixes since HDF5-1.8.8
 
     Library
     -------
+    - Windows and STDIO correctness changes have been propagated from the SEC2
+      and old Windows drivers to the STDIO VFD.  (DER - 2012/3/30, HDFFV-7917)
     - Fixed an error that would occur when copying an object with attribute
       creation order tracked and indexed. (NAF - 2012/3/28 - HDFFV-7762)
+    - Fixed a bug in H5Ocopy(): When copying an opened object, call the
+      object's flush class action to ensure that cached data is flushed so
+      that H5Ocopy will get the correct data.  (VC - 2012/3/27 - HDFFV-7853)
+    - The istore test will now skip the sparse 50x50x50 test when the VFD does
+      not support sparse files on that platform.  The most important platforms
+      on which this will be skipped are Windows (NTFS sparse files are not
+      supported) and Mac OS-X (HFS sparse files are not supported).  This
+      fixes CTest timeout issues on Windows.  (DER - 2012/3/27, HDFFV-7769)
+    - Windows and POSIX correctness changes have been propagated from the SEC2
+      VFD to the core VFD.  This mainly affects file operations on the
+      driver's backing store and fixes a problem on Windows where large files
+      could not be read. (DER - 2012/3/27, HDFFV-7916, HDFFV-7603)
     - When an application tries to write or read many small data chunks and
       runs out of memory, the library had a seg fault.  The fix is to
       return the error stack with proper information. (SLU - 2012/3/23.
@@ -144,32 +163,23 @@ Bug Fixes since HDF5-1.8.8
       header format. (NAF - 2012/3/15 - HDFFV-7879)
     - Fixed error when creating a contiguous dataset with a zero-sized dataspace
       and space allocation time set to 'early'. (QAK - 2012/3/12)
+    - Changed Windows thread creation to use _beginthread() instead of
+      CreateThread().  Threads created by the latter can be killed in
+      low-memory situations. (DER - 2012/2/10, HDFFV-7780)
     - Creating a dataset in a read-only file caused seg fault when the file
       is closed.  It's fixed. The attemp to create a dataset will fail
       with the error stack indicating the file is read-only. (SLU -
       2012/1/25. Issue 7756) 
     - Fixed a seg fault that could occur when shrinking a dataset with chunks
       larger than 1 MB. (NAF - 2011/11/30 - HDFFV-7833)
+    - Fixed a bug that could cause H5Oget_info to return the wrong address
+      after copying a named datatype. (NAF - 2011/11/14)
     - The library allowed the conversion of strings between ASCII and UTF8
       (Issue 7582).  We have corrected it to report an error under this
       situation. (SLU - 2011/11/8)
-    - The library had seg fault when it tried to shrink the size of compound
+    - Fixed seg fault when library tried to shrink the size of compound
       type through H5Tset_size immediately after the type was created (Issue
-      7618). It's fixed now. (SLU - 2011/11/4)
-    - Changed Windows thread creation to use _beginthread() instead of
-      CreateThread().  Threads created by the latter can be killed in
-      low-memory situations. (DER - 2012/2/10, HDFFV-7780)
-    - The istore test will now skip the sparse 50x50x50 test when the VFD does
-      not support sparse files on that platform.  The most important platforms
-      on which this will be skipped are Windows (NTFS sparse files are not
-      supported) and Mac OS-X (HFS sparse files are not supported).  This
-      fixes CTest timeout issues on Windows.  (DER - 2012/3/27, HDFFV-7769)
-    - Windows and POSIX correctness changes have been propagated from the SEC2
-      VFD to the core VFD.  This mainly affects file operations on the
-      driver's backing store and fixes a problem on Windows where large files
-      could not be read. (DER - 2012/3/27, HDFFV-7916, HDFFV-7603)
-    - Windows and STDIO correctness changes have been propagated from the SEC2
-      and old Windows drivers to the STDIO VFD.  (DER - 2012/3/30, HDFFV-7917)
+      7618). (SLU - 2011/11/4)
 
     Parallel Library
     ----------------
