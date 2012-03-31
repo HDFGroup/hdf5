@@ -70,6 +70,10 @@ static herr_t H5FD_pl_copy(void *(*copy_func)(const void *), size_t pl_size,
 static herr_t H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *),
     void *pl);
 static herr_t H5FD_free_cls(H5FD_class_t *cls);
+static herr_t H5FD_fapl_copy(hid_t driver_id, const void *fapl, void **copied_fapl);
+static herr_t H5FD_dxpl_copy(hid_t driver_id, const void *dxpl, void **copied_dxpl);
+static int H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/);
+static int H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/);
 
 /*********************/
 /* Package Variables */
@@ -750,17 +754,15 @@ done:
  * Programmer:	Robb Matzke
  *              Tuesday, August  3, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5FD_fapl_copy(hid_t driver_id, const void *old_fapl, void **copied_fapl)
 {
     H5FD_class_t *driver;
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
@@ -871,17 +873,15 @@ done:
  * Programmer:	Robb Matzke
  *              Tuesday, August  3, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl, void **copied_dxpl)
 {
     H5FD_class_t *driver;
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
@@ -1039,6 +1039,8 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_t		*file = NULL;           /* VFD file struct */
     hid_t               driver_id = -1;         /* VFD ID */
     H5P_genplist_t      *plist;                 /* Property list pointer */
+    unsigned long       driver_flags = 0;       /* File-inspecific driver feature flags */
+    H5FD_file_image_info_t file_image_info;     /* Initial file image */
     H5FD_t		*ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1060,6 +1062,19 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 	HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list")
     if(NULL == driver->open)
 	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method")
+
+    /* Query driver flag */
+    H5FD_driver_query(driver, &driver_flags);
+
+    /* Get initial file image info */
+    if(H5P_get(plist, H5F_ACS_FILE_IMAGE_INFO_NAME, &file_image_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file image info")
+
+    /* If an image is provided, make sure the driver supports this feature */
+    HDassert(((file_image_info.buffer != NULL) && (file_image_info.size > 0)) ||
+             ((file_image_info.buffer == NULL) && (file_image_info.size == 0)));
+    if((file_image_info.buffer != NULL) && !(driver_flags & H5FD_FEAT_ALLOW_FILE_IMAGE))
+        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file image set, but not supported.")
 
     /* Dispatch to file driver */
     if(HADDR_UNDEF == maxaddr)
@@ -1318,19 +1333,17 @@ done:
  * Programmer:	Quincey Koziol
  *              Friday, August 25, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-int
+static int
 H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
 {
-    int	ret_value=0;
+    int	ret_value = 0;          /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
-    assert(f);
-    assert(flags);
+    HDassert(f);
+    HDassert(flags);
 
     /* Check for query driver and call it */
     if(f->cls->query)
@@ -1340,7 +1353,44 @@ H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_query() */
+
+
+/*-------------------------------------------------------------------------
+* Function:    H5FD_driver_query
+*
+* Purpose: Similar to H5FD_query(), but intended for cases when we don't
+*          have a file available (e.g. before one is opened). Since we
+*          can't use the file to get the driver, the driver is passed in
+*          as a parameter.
+*
+* Return:  Success:    non-negative
+*          Failure:    negative
+*
+* Programmer:  Jacob Gruber
+*              Wednesday, August 17, 2011
+*
+*-------------------------------------------------------------------------
+*/
+static int
+H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/)
+{
+    int ret_value = 0;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(driver);
+    HDassert(flags);
+
+    /* Check for the driver to query and then query it */
+    if(driver->query)
+        ret_value = (driver->query)(NULL, flags);
+    else 
+        *flags = 0;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_driver_query() */
 
 
 /*-------------------------------------------------------------------------

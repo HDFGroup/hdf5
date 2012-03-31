@@ -963,32 +963,35 @@
 ./test/filespace_1_8.h5
 ./test/filespace_1_6.h5
 ./test/freespace.c
+./test/file_image.c
+./test/file_image_core_test.h5
 ./test/fill_old.h5
 ./test/fillval.c
 ./test/filter_fail.c
 ./test/flush1.c
 ./test/flush2.c
-./test/gen_bad_ohdr.c                   _DO_NOT_DISTRIBUTE_
-./test/gen_bad_compound.c               _DO_NOT_DISTRIBUTE_
-./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
-./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_
-./test/gen_deflate.c      _DO_NOT_DISTRIBUTE_
-./test/gen_filespace.c                  _DO_NOT_DISTRIBUTE_
-./test/gen_mergemsg.c      _DO_NOT_DISTRIBUTE_
-./test/gen_new_array.c      _DO_NOT_DISTRIBUTE_
-./test/gen_new_fill.c      _DO_NOT_DISTRIBUTE_
-./test/gen_new_group.c      _DO_NOT_DISTRIBUTE_
-./test/gen_new_mtime.c      _DO_NOT_DISTRIBUTE_
-./test/gen_new_super.c      _DO_NOT_DISTRIBUTE_
-./test/gen_noencoder.c      _DO_NOT_DISTRIBUTE_
-./test/gen_nullspace.c      _DO_NOT_DISTRIBUTE_
-./test/gen_old_array.c      _DO_NOT_DISTRIBUTE_
-./test/gen_old_group.c      _DO_NOT_DISTRIBUTE_
-./test/gen_old_layout.c      _DO_NOT_DISTRIBUTE_
-./test/gen_old_mtime.c      _DO_NOT_DISTRIBUTE_
-./test/gen_sizes_lheap.c                _DO_NOT_DISTRIBUTE_
-./test/gen_specmetaread.c    _DO_NOT_DISTRIBUTE_
-./test/gen_udlinks.c      _DO_NOT_DISTRIBUTE_
+./test/gen_bad_ohdr.c           _DO_NOT_DISTRIBUTE_
+./test/gen_bad_compound.c       _DO_NOT_DISTRIBUTE_
+./test/gen_bogus.c              _DO_NOT_DISTRIBUTE_
+./test/gen_cross.c              _DO_NOT_DISTRIBUTE_
+./test/gen_deflate.c            _DO_NOT_DISTRIBUTE_
+./test/gen_file_image.c         _DO_NOT_DISTRIBUTE_
+./test/gen_filespace.c          _DO_NOT_DISTRIBUTE_
+./test/gen_mergemsg.c           _DO_NOT_DISTRIBUTE_
+./test/gen_new_array.c          _DO_NOT_DISTRIBUTE_
+./test/gen_new_fill.c           _DO_NOT_DISTRIBUTE_
+./test/gen_new_group.c          _DO_NOT_DISTRIBUTE_
+./test/gen_new_mtime.c          _DO_NOT_DISTRIBUTE_
+./test/gen_new_super.c          _DO_NOT_DISTRIBUTE_
+./test/gen_noencoder.c          _DO_NOT_DISTRIBUTE_
+./test/gen_nullspace.c          _DO_NOT_DISTRIBUTE_
+./test/gen_old_array.c          _DO_NOT_DISTRIBUTE_
+./test/gen_old_group.c          _DO_NOT_DISTRIBUTE_
+./test/gen_old_layout.c         _DO_NOT_DISTRIBUTE_
+./test/gen_old_mtime.c          _DO_NOT_DISTRIBUTE_
+./test/gen_sizes_lheap.c        _DO_NOT_DISTRIBUTE_
+./test/gen_specmetaread.c       _DO_NOT_DISTRIBUTE_
+./test/gen_udlinks.c            _DO_NOT_DISTRIBUTE_
 ./test/getname.c
 ./test/gheap.c
 ./test/group_old.h5
@@ -1083,6 +1086,7 @@
 ./testpar/t_cache.c
 ./testpar/t_dset.c
 ./testpar/t_file.c
+./testpar/t_file_image.c
 ./testpar/t_mdset.c
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c
@@ -2075,6 +2079,7 @@
 ./hl/test/sepia.pal
 ./hl/test/gen_test_ds.c
 ./hl/test/test_ds.c
+./hl/test/test_file_image.c
 ./hl/test/test_image.c
 ./hl/test/test_lite.c
 ./hl/test/test_packet.c

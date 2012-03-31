@@ -995,7 +995,7 @@ H5FD_family_query(const H5FD_t * _file, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
 
         /* Check for flags that are set by h5repart */
-        if(file->repart_members)
+        if(file && file->repart_members)
             *flags |= H5FD_FEAT_DIRTY_SBLK_LOAD; /* Mark the superblock dirty when it is loaded (so the family member sizes are rewritten) */
     } /* end if */
 

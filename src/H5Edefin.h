@@ -93,6 +93,7 @@ hid_t H5E_CANTRELEASE_g    = FAIL;      /* Unable to release object */
 hid_t H5E_CANTGET_g        = FAIL;      /* Can't get value */
 hid_t H5E_CANTSET_g        = FAIL;      /* Can't set value */
 hid_t H5E_DUPCLASS_g       = FAIL;      /* Duplicate class name in parent class */
+hid_t H5E_SETDISALLOWED_g  = FAIL;      /* Disallowed operation */
 
 /* Free space errors */
 hid_t H5E_CANTMERGE_g      = FAIL;      /* Can't merge objects */

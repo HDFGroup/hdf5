@@ -339,6 +339,11 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Duplicate class name in parent class")
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_DUPCLASS_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_SETDISALLOWED_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Disallowed operation"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_SETDISALLOWED_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Free space errors */
 assert(H5E_CANTMERGE_g==(-1));

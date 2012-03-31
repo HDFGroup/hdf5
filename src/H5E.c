@@ -107,7 +107,7 @@ static H5E_cls_t *H5E_register_class(const char *cls_name, const char *lib_name,
                                 const char *version);
 static herr_t  H5E_unregister_class(H5E_cls_t *cls);
 static ssize_t H5E_get_class_name(const H5E_cls_t *cls, char *name, size_t size);
-static int H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata);
 static herr_t  H5E_close_msg(H5E_msg_t *err);
 static H5E_msg_t *H5E_create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg);
 static H5E_t  *H5E_get_current_stack(void);
@@ -543,8 +543,8 @@ H5E_unregister_class(H5E_cls_t *cls)
     HDassert(cls);
 
     /* Iterate over all the messages and delete those in this error class */
-    /* (Ignore return value, since callback isn't designed to return a particular object) */
-    (void)H5I_search(H5I_ERROR_MSG, H5E_close_msg_cb, cls, FALSE);
+    if(H5I_iterate(H5I_ERROR_MSG, H5E_close_msg_cb, cls, FALSE) < 0)
+        HGOTO_ERROR(H5E_ERROR, H5E_BADITER, FAIL, "unable to free all messages in this error class")
 
     /* Free error class structure */
     if(H5E_free_class(cls) < 0)
@@ -631,7 +631,7 @@ H5E_get_class_name(const H5E_cls_t *cls, char *name, size_t size)
 /*-------------------------------------------------------------------------
  * Function:    H5E_close_msg_cb
  *
- * Purpose:     H5I_search callback function to close error messages in the
+ * Purpose:     H5I_iterate callback function to close error messages in the
  *              error class.
  *
  * Return:	Non-negative value on success/Negative on failure
@@ -642,10 +642,10 @@ H5E_get_class_name(const H5E_cls_t *cls, char *name, size_t size)
  *-------------------------------------------------------------------------
  */
 static int
-H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key)
+H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata)
 {
     H5E_msg_t   *err_msg = (H5E_msg_t*)obj_ptr;
-    H5E_cls_t   *cls = (H5E_cls_t*)key;
+    H5E_cls_t   *cls = (H5E_cls_t*)udata;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

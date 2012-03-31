@@ -155,9 +155,11 @@ H5_DLLVAR hid_t H5E_CANTRELEASE_g;   /* Unable to release object */
 #define H5E_CANTGET          (H5OPEN H5E_CANTGET_g)
 #define H5E_CANTSET          (H5OPEN H5E_CANTSET_g)
 #define H5E_DUPCLASS         (H5OPEN H5E_DUPCLASS_g)
+#define H5E_SETDISALLOWED    (H5OPEN H5E_SETDISALLOWED_g)
 H5_DLLVAR hid_t H5E_CANTGET_g;       /* Can't get value */
 H5_DLLVAR hid_t H5E_CANTSET_g;       /* Can't set value */
 H5_DLLVAR hid_t H5E_DUPCLASS_g;      /* Duplicate class name in parent class */
+H5_DLLVAR hid_t H5E_SETDISALLOWED_g; /* Disallowed operation */
 
 /* Free space errors */
 #define H5E_CANTMERGE        (H5OPEN H5E_CANTMERGE_g)

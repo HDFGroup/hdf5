@@ -94,7 +94,8 @@ H5E_CANTRELEASE_g=
 /* Property list errors */    
 H5E_CANTGET_g=    
 H5E_CANTSET_g=    
-H5E_DUPCLASS_g=
+H5E_DUPCLASS_g=    
+H5E_SETDISALLOWED_g=
 
 /* Free space errors */    
 H5E_CANTMERGE_g=    

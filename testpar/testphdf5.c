@@ -502,6 +502,13 @@ int main(int argc, char **argv)
             "test actual io mode proprerty",
             PARATESTFILE);
 
+    if((mpi_size < 2) && MAINPROCESS) {
+        printf("File Image Ops daisy chain test needs at least 2 processes.\n");
+        printf("File Image Ops daisy chain test will be skipped \n");
+    }
+    AddTest((mpi_size < 2)? "-fiodc" : "fiodc", file_image_daisy_chain_test, NULL,
+            "file image ops daisy chain", NULL);
+
     /* Display testing information */
     TestInfo(argv[0]);
 

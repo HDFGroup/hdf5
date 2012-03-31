@@ -109,6 +109,7 @@ $Source = "";
                "H5FD_t"                     => "x",
                "H5FD_class_t"               => "x",
                "H5FD_stream_fapl_t"         => "x",
+               "H5FD_file_image_callbacks_t" => "x",
                "H5G_iterate_t"              => "x",
 	       "H5G_info_t"                 => "x",
 	       "H5I_free_t"                 => "x",
