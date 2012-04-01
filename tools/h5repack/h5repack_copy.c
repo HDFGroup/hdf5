@@ -42,7 +42,7 @@
             int _err_num = 0; \
             char _msg[80]; \
             H5Ewalk2(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, &_err_num); \
-            H5Eget_msg(_err_num, NULL, _msg, 80); \
+            H5Eget_msg(_err_num, NULL, _msg, (size_t)80); \
             error_msg("%s %s -- %s\n", #_fun, "failed", _msg); \
             goto error; \
         } \
@@ -311,7 +311,7 @@ int copy_objects(const char* fnamein,
     * set metadata block size option
     *-------------------------------------------------------------------------
     */
-    if (  options->meta_block_size > 0 )
+    if ( options->meta_block_size > 0 )
     {
         /* either use the FAPL already created or create a new one */
         if (fapl == H5P_DEFAULT)
