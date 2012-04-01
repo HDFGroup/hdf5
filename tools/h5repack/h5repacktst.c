@@ -165,6 +165,8 @@ int main (void)
 {
     pack_opt_t  pack_options;
     diff_opt_t  diff_options;
+    h5_stat_t		file_stat;
+    h5_stat_size_t	fsize1, fsize2;	/* file sizes */
 #if defined (H5_HAVE_FILTER_SZIP)
     int szip_can_encode = 0;
 #endif
@@ -1548,17 +1550,40 @@ int main (void)
 
     /*-------------------------------------------------------------------------
     * test --metadata_block_size option
+    * Also verify that output file using the metadata_block_size option is
+    * larger than the output file one not using it.
     *-------------------------------------------------------------------------
     */
     TESTING("    metadata block size option");
-    if (h5repack_init (&pack_options, 0) < 0)
+    /* First run without metadata option. No need to verify the correctness */
+    /* since this has been verified by earlier tests. Just record the file */
+    /* size of the output file. */
+    if(h5repack_init(&pack_options, 0) < 0)
+        GOERROR;
+    if(h5repack(FNAME4, FNAME4OUT, &pack_options) < 0)
+        GOERROR;
+    if(HDstat(FNAME4OUT, &file_stat) < 0)
+        GOERROR;
+    fsize1 = file_stat.st_size;
+    if(h5repack_end(&pack_options) < 0)
+        GOERROR;
+
+    /* run it again with metadata option */
+    if(h5repack_init(&pack_options, 0) < 0)
         GOERROR;
     pack_options.meta_block_size = 8192;
-    if(h5repack(FNAME1, FNAME1OUT, &pack_options) < 0)
+    if(h5repack(FNAME4, FNAME4OUT, &pack_options) < 0)
         GOERROR;
-    if(h5diff(FNAME1, FNAME1OUT, NULL, NULL, &diff_options) > 0)
+    if(h5diff(FNAME4, FNAME4OUT, NULL, NULL, &diff_options) > 0)
         GOERROR;
-    if(h5repack_verify(FNAME1OUT, &pack_options) <= 0)
+    if(h5repack_verify(FNAME4OUT, &pack_options) <= 0)
+        GOERROR;
+    /* record the file size of the output file */
+    if(HDstat(FNAME4OUT, &file_stat) < 0)
+        GOERROR;
+    fsize2 = file_stat.st_size;
+    /* verify second file size is larger than the first one */
+    if(fsize2 <= fsize1)
         GOERROR;
     if(h5repack_end(&pack_options) < 0)
         GOERROR;
@@ -5814,7 +5839,7 @@ static herr_t add_attr_with_regref(hid_t file_id, hid_t obj_id)
     }
 
     /* select elements space for reference */
-    status = H5Sselect_elements (sid_regrefed_dset, H5S_SELECT_SET, 3, coords_regrefed_dset[0]);
+    status = H5Sselect_elements (sid_regrefed_dset, H5S_SELECT_SET, (size_t)3, coords_regrefed_dset[0]);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
@@ -6136,7 +6161,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     }
 
     /* select elements space for reference */
-    status = H5Sselect_elements (sid_trg, H5S_SELECT_SET, 4, coords[0]);
+    status = H5Sselect_elements (sid_trg, H5S_SELECT_SET, (size_t)4, coords[0]);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
