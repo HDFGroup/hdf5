@@ -1575,7 +1575,7 @@ int main (void)
     /* size of the output file. */
     if(h5repack(FNAME1, FNAME1OUT, &pack_options) < 0)
         GOERROR;
-    if (HDstat(FNAME1OUT, &file_stat) < 0)
+    if(HDstat(FNAME1OUT, &file_stat) < 0)
         GOERROR;
     fsize1 = file_stat.st_size;
     /* run it again with metadata option */
@@ -1584,12 +1584,12 @@ int main (void)
         GOERROR;
     if(h5diff(FNAME1, FNAME1OUT, NULL, NULL, &diff_options) > 0)
         GOERROR;
-    /* record the file size of the output file */
-    if (HDstat(FNAME1OUT, &file_stat) < 0)
-        GOERROR;
-    fsize2 = file_stat.st_size;
     if(h5repack_verify(FNAME1, FNAME1OUT, &pack_options) <= 0)
         GOERROR;
+    /* record the file size of the output file */
+    if(HDstat(FNAME1OUT, &file_stat) < 0)
+        GOERROR;
+    fsize2 = file_stat.st_size;
     /* verify second file size is larger than the first one */
     if(fsize2 <= fsize1)
         GOERROR;
