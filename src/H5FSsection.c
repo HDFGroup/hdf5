@@ -2244,7 +2244,7 @@ H5FS_sect_assert(const H5FS_t *fspace)
     hsize_t separate_obj;       /* The number of separate objects managed */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
-#ifndef QAK
+#ifdef QAK
 HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS_sect_assert", fspace->tot_sect_count);
 #endif /* QAK */
 

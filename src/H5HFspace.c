@@ -168,7 +168,7 @@ herr_t
 H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node,
     unsigned flags)
 {
-    H5HF_sect_add_ud1_t udata;          /* User data for free space manager 'add' */
+    H5HF_sect_add_ud_t udata;          /* User data for free space manager 'add' */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -243,6 +243,185 @@ H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request, H5HF_free_secti
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_space_find() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_space_revert_root_cb
+ *
+ * Purpose:	Callback routine from iterator, to reset 'parent' pointers in
+ *		sections, when the heap is changing from having a root indirect
+ *		block to a direct block.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb 24 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF_space_revert_root_cb(H5FS_section_info_t *_sect, void UNUSED *_udata)
+{
+    H5HF_free_section_t *sect = (H5HF_free_section_t *)_sect;       /* Section to dump info */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(sect);
+
+    /* Only modify "live" single blocks... */
+    if(sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE && sect->sect_info.state == H5FS_SECT_LIVE) {
+        /* Release hold on previous indirect block (we must have one) */
+        HDassert(sect->u.single.parent);
+        if(H5HF_iblock_decr(sect->u.single.parent) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on section's indirect block")
+
+        /* Reset parent information */
+        sect->u.single.parent = NULL;
+        sect->u.single.par_entry = 0;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_space_revert_root_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_space_revert_root
+ *
+ * Purpose:	Reset 'parent' pointers in sections, when the heap is
+ *		changing from having a root indirect block to a direct block.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb 23 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_space_revert_root(const H5HF_hdr_t *hdr, hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+
+    /* Only need to scan the sections if the free space has been initialized */
+    if(hdr->fspace) {
+	/* Iterate over all sections, reseting the parent pointers in 'single' sections */
+        if(H5FS_sect_iterate(hdr->f, dxpl_id, hdr->fspace, H5HF_space_revert_root_cb, NULL) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over sections to reset parent pointers")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_space_revert_root() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_space_create_root_cb
+ *
+ * Purpose:	Callback routine from iterator, to set 'parent' pointers in
+ *		sections to newly created root indirect block, when the heap
+ *		is changing from having a root direct block to an indirect block.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb 24 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF_space_create_root_cb(H5FS_section_info_t *_sect, void *_udata)
+{
+    H5HF_free_section_t *sect = (H5HF_free_section_t *)_sect;       /* Section to dump info */
+    H5HF_indirect_t *root_iblock = (H5HF_indirect_t *)_udata;	/* User data for callback */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(sect);
+    HDassert(root_iblock);
+
+    /* Sanity check sections */
+    /* (If we are switching from a direct block for the root block of the heap, */
+    /*	there should only be 'single' type sections. -QAK) */
+    HDassert(sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
+
+    /* Increment ref. count on new root indirect block */
+    if(H5HF_iblock_incr(root_iblock) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on section's indirect block")
+
+    /* Set parent info ("live" section must _NOT_ have a parent right now) */
+    if(sect->sect_info.state == H5FS_SECT_SERIALIZED)
+        sect->sect_info.state = H5FS_SECT_LIVE;         /* Mark "live" now */
+    else
+         HDassert(!sect->u.single.parent);
+    sect->u.single.parent = root_iblock;
+    sect->u.single.par_entry = 0;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_space_create_root_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_space_create_root
+ *
+ * Purpose:	Set 'parent' pointers in sections to new indirect block, when
+ *		the heap is changing from having a root direct block to a
+ *		indirect block.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb 24 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_space_create_root(const H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *root_iblock)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(root_iblock);
+
+    /* Only need to scan the sections if the free space has been initialized */
+    if(hdr->fspace) {
+	/* Iterate over all sections, seting the parent pointers in 'single' sections to the new indirect block */
+        if(H5FS_sect_iterate(hdr->f, dxpl_id, hdr->fspace, H5HF_space_create_root_cb, root_iblock) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over sections to set parent pointers")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_space_create_root() */
 
 
 /*-------------------------------------------------------------------------
