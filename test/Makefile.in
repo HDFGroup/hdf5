@@ -101,7 +101,8 @@ am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_new_super$(EXEEXT) gen_noencoder$(EXEEXT) \
 	gen_nullspace$(EXEEXT) gen_udlinks$(EXEEXT) \
 	space_overflow$(EXEEXT) gen_filespace$(EXEEXT) \
-	gen_specmetaread$(EXEEXT) gen_sizes_lheap$(EXEEXT) gen_file_image$(EXEEXT)
+	gen_specmetaread$(EXEEXT) gen_sizes_lheap$(EXEEXT) \
+	gen_file_image$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 accum_SOURCES = accum.c
 accum_OBJECTS = accum.$(OBJEXT)
@@ -239,6 +240,10 @@ gen_deflate_SOURCES = gen_deflate.c
 gen_deflate_OBJECTS = gen_deflate.$(OBJEXT)
 gen_deflate_LDADD = $(LDADD)
 gen_deflate_DEPENDENCIES = libh5test.la $(LIBHDF5)
+gen_file_image_SOURCES = gen_file_image.c
+gen_file_image_OBJECTS = gen_file_image.$(OBJEXT)
+gen_file_image_LDADD = $(LDADD)
+gen_file_image_DEPENDENCIES = libh5test.la $(LIBHDF5)
 gen_filespace_SOURCES = gen_filespace.c
 gen_filespace_OBJECTS = gen_filespace.$(OBJEXT)
 gen_filespace_LDADD = $(LDADD)
@@ -287,10 +292,6 @@ gen_udlinks_SOURCES = gen_udlinks.c
 gen_udlinks_OBJECTS = gen_udlinks.$(OBJEXT)
 gen_udlinks_LDADD = $(LDADD)
 gen_udlinks_DEPENDENCIES = libh5test.la $(LIBHDF5)
-gen_file_image_SOURCES = gen_file_image.c
-gen_file_image_OBJECTS = gen_file_image.$(OBJEXT)
-gen_file_image_LDADD = $(LDADD)
-gen_file_image_DEPENDENCIES = libh5test.la $(LIBHDF5)
 getname_SOURCES = getname.c
 getname_OBJECTS = getname.$(OBJEXT)
 getname_LDADD = $(LDADD)
@@ -429,15 +430,15 @@ SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c bittests.c \
 	earray.c efc.c enum.c err_compat.c error_test.c extend.c \
 	external.c farray.c fheap.c file_image.c fillval.c \
 	filter_fail.c flush1.c flush2.c freespace.c gen_bad_ohdr.c \
-	gen_bogus.c gen_cross.c gen_deflate.c gen_filespace.c \
-	gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c \
-	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
-	gen_nullspace.c gen_sizes_lheap.c gen_specmetaread.c \
-	gen_udlinks.c gen_file_image.c getname.c gheap.c hyperslab.c istore.c lheap.c \
-	links.c links_env.c mf.c mount.c mtime.c ntypes.c objcopy.c \
-	ohdr.c pool.c reserved.c set_extent.c space_overflow.c stab.c \
-	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c vfd.c
+	gen_bogus.c gen_cross.c gen_deflate.c gen_file_image.c \
+	gen_filespace.c gen_filters.c gen_new_array.c gen_new_fill.c \
+	gen_new_group.c gen_new_mtime.c gen_new_super.c \
+	gen_noencoder.c gen_nullspace.c gen_sizes_lheap.c \
+	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
+	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
+	ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c \
+	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
+	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c \
 	bittests.c btree2.c cache.c cache_api.c cache_tagging.c \
 	cmpd_dset.c cross_read.c dangle.c dsets.c dt_arith.c \
@@ -445,10 +446,10 @@ DIST_SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c \
 	error_test.c extend.c external.c farray.c fheap.c file_image.c \
 	fillval.c filter_fail.c flush1.c flush2.c freespace.c \
 	gen_bad_ohdr.c gen_bogus.c gen_cross.c gen_deflate.c \
-	gen_filespace.c gen_filters.c gen_new_array.c gen_new_fill.c \
-	gen_new_group.c gen_new_mtime.c gen_new_super.c \
+	gen_file_image.c gen_filespace.c gen_filters.c gen_new_array.c \
+	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
 	gen_noencoder.c gen_nullspace.c gen_sizes_lheap.c \
-	gen_specmetaread.c gen_udlinks.c gen_file_image.c getname.c gheap.c hyperslab.c \
+	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
 	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
 	ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c \
 	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
@@ -1018,6 +1019,9 @@ gen_cross$(EXEEXT): $(gen_cross_OBJECTS) $(gen_cross_DEPENDENCIES)
 gen_deflate$(EXEEXT): $(gen_deflate_OBJECTS) $(gen_deflate_DEPENDENCIES) 
 	@rm -f gen_deflate$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(gen_deflate_OBJECTS) $(gen_deflate_LDADD) $(LIBS)
+gen_file_image$(EXEEXT): $(gen_file_image_OBJECTS) $(gen_file_image_DEPENDENCIES) 
+	@rm -f gen_file_image$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(gen_file_image_OBJECTS) $(gen_file_image_LDADD) $(LIBS)
 gen_filespace$(EXEEXT): $(gen_filespace_OBJECTS) $(gen_filespace_DEPENDENCIES) 
 	@rm -f gen_filespace$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(gen_filespace_OBJECTS) $(gen_filespace_LDADD) $(LIBS)
@@ -1054,9 +1058,6 @@ gen_specmetaread$(EXEEXT): $(gen_specmetaread_OBJECTS) $(gen_specmetaread_DEPEND
 gen_udlinks$(EXEEXT): $(gen_udlinks_OBJECTS) $(gen_udlinks_DEPENDENCIES) 
 	@rm -f gen_udlinks$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(gen_udlinks_OBJECTS) $(gen_udlinks_LDADD) $(LIBS)
-gen_file_image$(EXEEXT): $(gen_file_image_OBJECTS) $(gen_file_image_DEPENDENCIES) 
-	@rm -f gen_file_image$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(gen_file_image_OBJECTS) $(gen_file_image_LDADD) $(LIBS)
 getname$(EXEEXT): $(getname_OBJECTS) $(getname_DEPENDENCIES) 
 	@rm -f getname$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(getname_OBJECTS) $(getname_LDADD) $(LIBS)
@@ -1171,6 +1172,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_bogus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_cross.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_deflate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_file_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_filespace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_filters.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_new_array.Po@am__quote@
@@ -1183,7 +1185,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_sizes_lheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_specmetaread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_udlinks.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_file_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getname.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5test.Plo@am__quote@

@@ -469,6 +469,7 @@ H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*s", plist_id, path);
 
     /* Check parameters */
     if(!path)
@@ -528,6 +529,7 @@ H5Pfree_merge_committed_dtype_paths(hid_t plist_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", plist_id);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
@@ -575,6 +577,7 @@ H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data)
     herr_t ret_value = SUCCEED; 	/* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ix*x", plist_id, func, op_data);
 
     /* Check if the callback function is NULL and the user data is non-NULL.
      * This is almost certainly an error as the user data will not be used. */
@@ -623,6 +626,7 @@ H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*x**x", plist_id, func, op_data);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))

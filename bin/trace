@@ -120,6 +120,7 @@ $Source = "";
                "H5MM_free_t"                => "x",
 	       "H5O_info_t"                 => "x",
                "H5O_iterate_t"              => "x",
+               "H5O_mcdt_search_cb_t"       => "x",
                "H5P_cls_create_func_t"      => "x",
                "H5P_cls_copy_func_t"        => "x",
                "H5P_cls_close_func_t"       => "x",
