@@ -1565,8 +1565,8 @@ int main (void)
     * test --metadata_block_size option
     * Also verify that output file using the metadata_block_size option is
     * larger than the output file one not using it.
-    * FNAME4 is used because it works for this test.  Other files, such as
-    * FNAME1, fails this test.
+    * FNAME4 is used because it is the same as the test file used for the
+    * shell script version of this test (h5repack.sh).
     *-------------------------------------------------------------------------
     */
     TESTING("    metadata block size option");
