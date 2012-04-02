@@ -128,6 +128,7 @@ static struct long_options l_opts[] = {
 static herr_t
 doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
 {
+    h5tools_context_t   ctx;  	/* print context  */
     h5tool_format_t  info;	/* Format info for the tools library */
     static char fmt_double[16], fmt_float[16];	/* Format info */
     struct subset_t subset;	/* Subsetting info */
@@ -151,6 +152,8 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
 	subset.start.data[i] = start[i];
 	subset.block.data[i] = block[i];
     }
+
+    HDmemset(&ctx, 0, sizeof(ctx));
 
     /* Set to all default values and then override */
     HDmemset(&info, 0, sizeof info);
@@ -222,8 +225,10 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
     } 
 
     /* Print the values. */
-    if((ret_value = h5tools_dump_dset(stdout, &info, did, -1, &subset, -1)) < 0)
+    if((ret_value = h5tools_dump_dset(stdout, &info, &ctx, did, -1, &subset)) < 0)
 	error_msg("unable to print data\n");
+
+    HDfprintf(stdout, "\n");
 
     return(ret_value);
 

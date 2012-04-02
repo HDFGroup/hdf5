@@ -1020,8 +1020,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 		    }
 		}
 		h5tools_str_sprint(str, info, container, listv[curr_field]->last_tid, cp_vp + listv[curr_field]->tot_offset, ctx);
-		if(ctx->indent_level >= 0)
-		    for(x = ctx->indent_level; x >= 0; x--)
+		if(ctx->indent_level > 0)
+		    for(x = ctx->indent_level; x > 0; x--)
 			h5tools_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
 		ctx->indent_level = save_indent_level;
             }
