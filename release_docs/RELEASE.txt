@@ -93,6 +93,11 @@ New Features
 
     Library:
     --------
+    - The data sieve buffer size was for all the datasets in the file.  It
+      could waste memory if any dataset size is smaller than the sieve buffer
+      size.  Now the library picks the smaller one between the dataset size
+      and the sieve buffer size from the file access property. See Issue 7934.
+      (SLU - 2012/4/2)
     - I added a new parameter of object access property list to the function 
       H5Rdereference (Issue 2763).  It's called H5Rdereference2 now.  The former
       H5Rdereference function has been deprecated to H5Rdereference1. (SLU -
