@@ -140,8 +140,17 @@ H5HF_iblock_pin(H5HF_indirect_t *iblock)
     else {
         /* Check for pinning the root indirect block */
         if(iblock->block_off == 0) {
-            HDassert(iblock->hdr->root_iblock == NULL);
-            iblock->hdr->root_iblock = iblock;
+            /* Sanity check - shouldn't be recursively pinning root indirect block */
+            HDassert(0 == (iblock->hdr->root_iblock_flags & H5HF_ROOT_IBLOCK_PINNED));
+
+            /* Check if we should set the root iblock pointer */
+            if(0 == iblock->hdr->root_iblock_flags) {
+                HDassert(NULL == iblock->hdr->root_iblock);
+                iblock->hdr->root_iblock = iblock;
+            } /* end if */
+
+            /* Indicate that the root indirect block is pinned */
+            iblock->hdr->root_iblock_flags |= H5HF_ROOT_IBLOCK_PINNED;
         } /* end if */
     } /* end if */
 
@@ -192,12 +201,21 @@ H5HF_iblock_unpin(H5HF_indirect_t *iblock)
         par_iblock->child_iblocks[indir_idx] = NULL;
     } /* end if */
     else {
-        /* Check for unpinning the root indirect block */
+        /* Check for root indirect block */
         if(iblock->block_off == 0) {
-            HDassert(iblock->hdr->root_iblock);
-            iblock->hdr->root_iblock = NULL;
+            /* Sanity check - shouldn't be recursively unpinning root indirect block */
+            HDassert(iblock->hdr->root_iblock_flags & H5HF_ROOT_IBLOCK_PINNED);
+
+            /* Check if we should reset the root iblock pointer */
+            if(H5HF_ROOT_IBLOCK_PINNED == iblock->hdr->root_iblock_flags) {
+                HDassert(NULL != iblock->hdr->root_iblock);
+                iblock->hdr->root_iblock = NULL;
+            } /* end if */
+
+            /* Indicate that the root indirect block is unpinned */
+            iblock->hdr->root_iblock_flags &= ~(H5HF_ROOT_IBLOCK_PINNED);
         } /* end if */
-    } /* end if */
+    } /* end else */
 
     /* Mark block as evictable again */
     if(H5AC_unpin_entry(iblock) < 0)
@@ -273,18 +291,23 @@ H5HF_iblock_decr(H5HF_indirect_t *iblock)
 
     /* Mark block as evictable again when no child blocks depend on it */
     if(iblock->rc == 0) {
-        if(H5HF_iblock_unpin(iblock) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap indirect block")
+        H5HF_hdr_t *hdr;			/* Fractal heap header */
+        haddr_t iblock_addr;		/* Address of fractal heap */
+        hbool_t expunge_iblock = FALSE;     /* Whether to expunge indirect block from heap */
+
+        /* Set up convenience variables */
+        hdr = iblock->hdr;
+        iblock_addr = iblock->addr;
 
         if(iblock->nchildren == 0) {
             /* Check for deleting root indirect block (and no root direct block) */
-            if(iblock->block_off == 0 && iblock->hdr->man_dtable.curr_root_rows > 0) {
+            if(iblock->block_off == 0 && hdr->man_dtable.curr_root_rows > 0) {
                 /* Reset root pointer information */
-                iblock->hdr->man_dtable.curr_root_rows = 0;
-                iblock->hdr->man_dtable.table_addr = HADDR_UNDEF;
+                hdr->man_dtable.curr_root_rows = 0;
+                hdr->man_dtable.table_addr = HADDR_UNDEF;
 
                 /* Reset header information back to "empty heap" state */
-                if(H5HF_hdr_empty(iblock->hdr) < 0)
+                if(H5HF_hdr_empty(hdr) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL, "can't make heap empty")
             } /* end if */
 
@@ -297,8 +320,18 @@ H5HF_iblock_decr(H5HF_indirect_t *iblock)
                 iblock->par_entry = 0;
             } /* end if */
 
+	    /* Mark indirect block for removal from the metadata cache */
+	    expunge_iblock = TRUE;
+        } /* end if */
+
+	/* Unpin the indirect block */
+        if(H5HF_iblock_unpin(iblock) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap indirect block")
+
+	/* Check for expunging the indirect block from the metadata cache */
+	if(expunge_iblock) {
             /* Evict the indirect block from the metadata cache */
-            if(H5AC_expunge_entry(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr, H5AC__FREE_FILE_SPACE_FLAG) < 0)
+            if(H5AC_expunge_entry(hdr->f, H5AC_dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, H5AC__FREE_FILE_SPACE_FLAG) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove indirect block from cache")
         } /* end if */
     } /* end if */
@@ -419,6 +452,10 @@ H5HF_man_iblock_root_create(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
             hdr->pline_root_direct_size = 0;
             hdr->pline_root_direct_filter_mask = 0;
         } /* end if */
+
+        /* Scan free space sections to set any 'parent' pointers to new indirect block */
+        if(H5HF_space_create_root(hdr, dxpl_id, iblock) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, FAIL, "can't set free space section info to new root indirect block")
 
         /* Unlock first (previously the root) direct block */
         if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
@@ -859,6 +896,11 @@ H5HF_man_iblock_root_revert(H5HF_indirect_t *root_iblock, hid_t dxpl_id)
     if(H5HF_hdr_adjust_heap(hdr, (hsize_t)hdr->man_dtable.cparam.start_block_size, (hssize_t)hdr->man_dtable.row_tot_dblock_free[0]) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "can't increase space to cover root direct block")
 
+    /* Scan free space sections to reset any 'parent' pointers */
+    if(H5HF_space_revert_root(hdr, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRESET, FAIL, "can't reset free space section info")
+
+
 done:
     if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
@@ -1126,11 +1168,20 @@ H5HF_man_iblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t iblock_addr,
         else {
             /* Check for root indirect block */
             if(H5F_addr_eq(iblock_addr, hdr->man_dtable.table_addr)) {
-                /* Check for pointer to pinned indirect block in root */
-                if(hdr->root_iblock)
+                /* Check for valid pointer to pinned indirect block in root */
+                if(H5HF_ROOT_IBLOCK_PINNED == hdr->root_iblock_flags) {
+                    /* Sanity check */
+                    HDassert(NULL != hdr->root_iblock);
+
+                    /* Return the pointer to the pinned root indirect block */
                     iblock = hdr->root_iblock;
-                else
+                } /* end if */
+                else {
+                    /* Sanity check */
+                    HDassert(NULL == hdr->root_iblock);
+
                     should_protect = TRUE;
+                } /* end else */
             } /* end if */
             else
                 should_protect = TRUE;
@@ -1157,6 +1208,21 @@ H5HF_man_iblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t iblock_addr,
 
         /* Set the indirect block's address */
         iblock->addr = iblock_addr;
+
+        /* Check for root indirect block */
+        if(iblock->block_off == 0) {
+            /* Sanity check - shouldn't be recursively protecting root indirect block */
+            HDassert(0 == (hdr->root_iblock_flags & H5HF_ROOT_IBLOCK_PROTECTED));
+
+            /* Check if we should set the root iblock pointer */
+            if(0 == hdr->root_iblock_flags) {
+                HDassert(NULL == hdr->root_iblock);
+                hdr->root_iblock = iblock;
+            } /* end if */
+
+            /* Indicate that the root indirect block is protected */
+            hdr->root_iblock_flags |= H5HF_ROOT_IBLOCK_PROTECTED;
+        } /* end if */
 
         /* Indicate that the indirect block was protected */
         *did_protect = TRUE;
@@ -1202,6 +1268,21 @@ H5HF_man_iblock_unprotect(H5HF_indirect_t *iblock, hid_t dxpl_id,
     /* Check if we previously protected this indirect block */
     /* (as opposed to using an existing pointer to a pinned child indirect block) */
     if(did_protect) {
+        /* Check for root indirect block */
+        if(iblock->block_off == 0) {
+            /* Sanity check - shouldn't be recursively unprotecting root indirect block */
+            HDassert(iblock->hdr->root_iblock_flags & H5HF_ROOT_IBLOCK_PROTECTED);
+
+            /* Check if we should reset the root iblock pointer */
+            if(H5HF_ROOT_IBLOCK_PROTECTED == iblock->hdr->root_iblock_flags) {
+                HDassert(NULL != iblock->hdr->root_iblock);
+                iblock->hdr->root_iblock = NULL;
+            } /* end if */
+
+            /* Indicate that the root indirect block is unprotected */
+            iblock->hdr->root_iblock_flags &= ~(H5HF_ROOT_IBLOCK_PROTECTED);
+        } /* end if */
+
         /* Unprotect the indirect block */
         if(H5AC_unprotect(iblock->hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr, iblock, cache_flags) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
@@ -1215,7 +1296,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5HF_man_iblock_attach
  *
- * Purpose:	Attach a block to an indirect block
+ * Purpose:	Attach a child block (direct or indirect) to an indirect block
  *
  * Return:	SUCCEED/FAIL
  *
@@ -1243,7 +1324,7 @@ H5HF_man_iblock_attach(H5HF_indirect_t *iblock, unsigned entry, haddr_t child_ad
     if(H5HF_iblock_incr(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, FAIL, "can't increment reference count on shared indirect block")
 
-    /* Point at the direct block */
+    /* Point at the child block */
     iblock->ents[entry].addr = child_addr;
 
     /* Check for I/O filters on this heap */
@@ -1280,7 +1361,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5HF_man_iblock_detach
  *
- * Purpose:	Detach a block from an indirect block
+ * Purpose:	Detach a child block (direct or indirect) from an indirect block
  *
  * Return:	SUCCEED/FAIL
  *
@@ -1293,6 +1374,7 @@ done:
 herr_t
 H5HF_man_iblock_detach(H5HF_indirect_t *iblock, hid_t dxpl_id, unsigned entry)
 {
+    unsigned row;                       /* Row for entry */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1306,21 +1388,37 @@ H5HF_man_iblock_detach(H5HF_indirect_t *iblock, hid_t dxpl_id, unsigned entry)
     /* Reset address of entry */
     iblock->ents[entry].addr = HADDR_UNDEF;
 
+    /* Compute row for entry */
+    row = entry / iblock->hdr->man_dtable.cparam.width;
+
     /* Check for I/O filters on this heap */
     if(iblock->hdr->filter_len > 0) {
-        unsigned row;           /* Row for entry */
-
         /* Sanity check */
         HDassert(iblock->filt_ents);
-
-        /* Compute row for entry */
-        row = entry / iblock->hdr->man_dtable.cparam.width;
 
         /* If this is a direct block, reset its initial size */
         if(row < iblock->hdr->man_dtable.max_direct_rows) {
             iblock->filt_ents[entry].size = 0;
             iblock->filt_ents[entry].filter_mask = 0;
         } /* end if */
+    } /* end if */
+
+    /* Check for indirect block being detached */
+    if(row >= iblock->hdr->man_dtable.max_direct_rows) {
+        unsigned indir_idx;             /* Index in parent's child iblock pointer array */
+
+        /* Sanity check */
+        HDassert(iblock->child_iblocks);
+
+        /* Compute index in child iblock pointer array */
+        indir_idx = entry - (iblock->hdr->man_dtable.max_direct_rows
+                * iblock->hdr->man_dtable.cparam.width);
+
+        /* Sanity check */
+        HDassert(iblock->child_iblocks[indir_idx]);
+
+        /* Reset pointer to child indirect block in parent */
+        iblock->child_iblocks[indir_idx] = NULL;
     } /* end if */
 
     /* Decrement the # of child blocks */
