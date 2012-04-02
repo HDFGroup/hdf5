@@ -1565,6 +1565,8 @@ int main (void)
     * test --metadata_block_size option
     * Also verify that output file using the metadata_block_size option is
     * larger than the output file one not using it.
+    * FNAME4 is used because it works for this test.  Other files, such as
+    * FNAME1, fails this test.
     *-------------------------------------------------------------------------
     */
     TESTING("    metadata block size option");
