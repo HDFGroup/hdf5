@@ -13,11 +13,13 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef H5_VMS
+#ifdef OLD_HEADER_FILENAME
+#include <iostream.h>
+#else
 #include <iostream>
-#endif /*H5_VMS*/
-
+#endif
 #include <string>
+
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5Library.h"
@@ -129,7 +131,7 @@ int IdComponent::getCounter() const
 //--------------------------------------------------------------------------
 // Function:	hdfObjectType
 ///\brief	Given an id, returns the type of the object.
-///return	a valid HDF object type, which may be one of the following:
+///\return	a valid HDF object type, which may be one of the following:
 ///		\li \c H5I_FILE
 ///		\li \c H5I_GROUP
 ///		\li \c H5I_DATATYPE

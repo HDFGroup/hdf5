@@ -52,16 +52,14 @@ namespace H5 {
 // Function:	DataType overloaded constructor
 ///\brief	Creates a datatype using an existing datatype's id
 ///\param	existing_id - IN: Id of the existing datatype
-///\param	predefined  - IN: Indicates whether or not this datatype is
-///		a predefined datatype; default to \c false
 // Description
 //		Constructor creates a copy of an existing DataType using
-//		its id.  The argument "predefined" is default to false;
-//		when a default datatype is created, this argument is set
-//		to true so H5Tclose will not be called on it later. - need
-//		a reassessment after changing to the new ref counting mech.
-//		- BMR 5/2004
+//		its id.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//	Dec, 2005
+//		Removed second argument, "predefined", after changing to the
+//		new ref counting mechanism that relies on C's ref counting.
 //--------------------------------------------------------------------------
 DataType::DataType(const hid_t existing_id) : H5Object()
 {
@@ -210,7 +208,7 @@ void DataType::copy( const DataType& like_type )
 ///\param	dset - IN: Dataset
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - Jan, 2007
-///\parDescription
+///\par Description
 ///		The resulted dataset will be transient and modifiable.
 //--------------------------------------------------------------------------
 void DataType::copy(const DataSet& dset)
@@ -517,7 +515,7 @@ DataType DataType::getSuper() const
 ///\exception	H5::DataTypeIException
 ///\par Description
 ///		For more information, please see:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-Register
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5T.html#Datatype-Register
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataType::registerFunc( H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func ) const
@@ -794,17 +792,33 @@ void DataType::close()
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
 //		- Replaced resetIdComponent() with decRefCount() to use C
-//		library ID reference counting mechanism - BMR, Jun 1, 2004
+//		  library ID reference counting mechanism - BMR, Jun 1, 2004
 //		- Replaced decRefCount with close() to let the C library
-//		handle the reference counting - BMR, Jun 1, 2006
+//		  handle the reference counting - BMR, Jun 1, 2006
+//		- Added the use of H5CPP_EXITED to terminate the HDF5 library
+//		  and elimiate previous memory leaks.  See comments in the
+//		  header file "H5PredType.h" for details. - BMR, Mar 30, 2012
 //--------------------------------------------------------------------------
 DataType::~DataType()
 {
-	try {
-	    close();
-	} catch (Exception close_error) {
-	    cerr << inMemFunc("~DataType - ") << close_error.getDetailMsg() << endl;
+    try
+    {
+	/* If this is the object AtExit, terminate the HDF5 library.  This is
+	   to eliminate memory leaks due to the library being re-initiated
+	   (after the program has ended) and not re-terminated. */
+	if (id == H5CPP_EXITED)
+	{
+	    herr_t ret_value = H5close();
+	    if (ret_value == FAIL)
+		throw DataTypeIException(inMemFunc("~DataType - "), "H5close failed");
 	}
+	// Close the HDF5 datatype
+	else
+	    close();
+    }
+    catch (Exception close_error) {
+	cerr << inMemFunc("~DataType - ") << close_error.getDetailMsg() << endl;
+    }
 }
 #ifndef H5_NO_NAMESPACE
 } // end namespace

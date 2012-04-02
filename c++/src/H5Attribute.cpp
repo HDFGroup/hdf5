@@ -223,11 +223,11 @@ size_t Attribute::getInMemDataSize() const
     // Close the native type and the datatype of this attribute.
     if (H5Tclose(native_type) < 0)
     {
-        throw DataSetIException(func, "H5Tclose(native_type) failed");
+	throw DataSetIException(func, "H5Tclose(native_type) failed");
     }
     if (H5Tclose(mem_type_id) < 0)
     {
-        throw DataSetIException(func, "H5Tclose(mem_type_id) failed");
+	throw DataSetIException(func, "H5Tclose(mem_type_id) failed");
     }
 
     // Get number of elements of the attribute by first getting its dataspace
@@ -246,7 +246,7 @@ size_t Attribute::getInMemDataSize() const
     // Close the dataspace
     if (H5Sclose(space_id) < 0)
     {
-        throw DataSetIException(func, "H5Sclose failed");
+	throw DataSetIException(func, "H5Sclose failed");
     }
 
     // Calculate and return the size of the data
@@ -469,7 +469,6 @@ void Attribute::p_read_fixed_len(const DataType& mem_type, H5std_string& strg) c
 //--------------------------------------------------------------------------
 void Attribute::p_read_variable_len(const DataType& mem_type, H5std_string& strg) const
 {
-
     // Prepare and call C API to read attribute.
     char *strg_C;
 
