@@ -937,7 +937,7 @@ hid_t H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
         file_open_flags = H5F_ACC_RDONLY;
 
     /* define a unique file name */
-    snprintf(file_name, (sizeof(file_name) - 1), "file_image_%ld", file_name_counter++);
+    HDsnprintf(file_name, (sizeof(file_name) - 1), "file_image_%ld", file_name_counter++);
    
     /* Assign file image in FAPL to the core file driver */ 
     if ((file_id = H5Fopen(file_name, file_open_flags, fapl)) < 0) 
