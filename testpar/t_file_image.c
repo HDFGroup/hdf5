@@ -209,7 +209,7 @@ file_image_daisy_chain_test(void)
         file_id = H5Fopen(file_name, H5F_ACC_RDWR, fapl_id);
         VRFY((file_id >= 0), "opened received file image file");
 
-	dset_id = H5Dopen1(file_id, "v");
+	dset_id = H5Dopen2(file_id, "v", H5P_DEFAULT);
         VRFY((dset_id >= 0), "opened data set");
 
 	dset_type_id = H5Dget_type(dset_id);
@@ -290,10 +290,10 @@ file_image_daisy_chain_test(void)
         VRFY((err >= 0), "set file image in fapl.");
 
         file_id = H5Fopen(file_name, H5F_ACC_RDWR, fapl_id);
-	H5Eprint1(stderr);
+	H5Eprint2(H5P_DEFAULT, stderr);
         VRFY((file_id >= 0), "opened received file image file");
 
-	dset_id = H5Dopen1(file_id, "v");
+	dset_id = H5Dopen2(file_id, "v", H5P_DEFAULT);
         VRFY((dset_id >= 0), "opened data set");
 
 	dset_type_id = H5Dget_type(dset_id);
