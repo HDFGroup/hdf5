@@ -6339,7 +6339,7 @@ CONTAINS
     !DEC$attributes dllexport :: h5ltpath_valid_f
     !DEC$endif
     !
-    INTEGER(hid_t)  , INTENT(IN)  :: loc_id              ! File or group identifier.
+    INTEGER(hid_t)  , INTENT(IN)  :: loc_id              ! An identifier of an object in the file.
     CHARACTER(LEN=*), INTENT(IN)  :: path                ! Path to the object to check, relative to loc_id.
     LOGICAL         , INTENT(IN)  :: check_object_valid  ! Indicates whether to check if the final component 
                                                          !  of the path resolves to a valid object 
