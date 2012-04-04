@@ -100,16 +100,16 @@ H5F_get_sohm_mesg_count_test(hid_t uid, unsigned type_id,
     size_t *mesg_count)
 {
     H5F_t	*file;                  /* File info */
-    H5VL_id_wrapper_t       *uid_info;
+    H5VL_id_wrapper_t       *id_wrapper;
     hid_t       file_id;
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
-        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        file_id = uid_info->obj_id;
+        file_id = id_wrapper->obj_id;
     }
     else {
         file_id = uid;
@@ -148,16 +148,16 @@ herr_t
 H5F_check_cached_stab_test(hid_t uid)
 {
     H5F_t	*file;                  /* File info */
-    H5VL_id_wrapper_t       *uid_info; 
+    H5VL_id_wrapper_t       *id_wrapper; 
     hid_t       file_id;
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
-        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        file_id = uid_info->obj_id;
+        file_id = id_wrapper->obj_id;
     }
     else {
         file_id = uid;
@@ -193,16 +193,16 @@ herr_t
 H5F_get_maxaddr_test(hid_t uid, haddr_t *maxaddr)
 {
     H5F_t	*file;                  /* File info */
-    H5VL_id_wrapper_t       *uid_info;
+    H5VL_id_wrapper_t       *id_wrapper;
     hid_t       file_id;
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
-        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        file_id = uid_info->obj_id;
+        file_id = id_wrapper->obj_id;
     }
     else {
         file_id = uid;

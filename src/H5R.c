@@ -29,6 +29,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Rpkg.h"		/* References				*/
 #include "H5Sprivate.h"		/* Dataspaces 				*/
+#include "H5VLprivate.h"	/* VOL plugins				*/
 
 /* Local macro definitions */
 
@@ -523,29 +524,28 @@ done:
 hid_t
 H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_ref)
 {
-    H5G_loc_t loc;      /* Group location */
-    H5F_t *file = NULL; /* File object */
+    void       *location = NULL; /* a pointer to VOL specific token that indicates 
+                                    the location of the object */
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("i", "iiRt*x", obj_id, oapl_id, ref_type, _ref);
 
     /* Check args */
-    if(H5G_loc(obj_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(oapl_id < 0)
+     if(oapl_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
     if(ref_type <= H5R_BADTYPE || ref_type >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
     if(_ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
-    /* Get the file pointer from the entry */
-    file = loc.oloc->file;
+    /* Get the token for the Object location through the VOL */
+    if(H5VL_object_lookup (obj_id, H5VL_OBJECT_LOOKUP_BY_REF, &location, ref_type, _ref) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
-    /* Create reference */
-    if((ret_value = H5R_dereference(file, oapl_id, H5AC_dxpl_id, ref_type, _ref, TRUE)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable dereference object")
+    /* Open the object through the VOL */
+    if((ret_value = H5VL_object_open_by_loc(obj_id, location, oapl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
     FUNC_LEAVE_API(ret_value)

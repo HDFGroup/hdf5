@@ -41,14 +41,12 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Ipkg.h"		/* IDs Package header	  		*/
+#include "H5Lprivate.h"		/* Links        		  	*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5VLpkg.h"		/* VOL package header		  	*/
 #include "H5VLprivate.h"	/* VOL          		  	*/
-
-/* Declare a free list to manage the H5VL_id_wrapper_t struct */
-H5FL_DEFINE_STATIC(H5VL_id_wrapper_t);
 
 /********************/
 /* Local Prototypes */
@@ -154,19 +152,63 @@ done:
 int
 H5VL_term_interface(void)
 {
-    int	n = 0;
+    int	n = 0, n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0;
+    hbool_t term = TRUE;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n=H5I_nmembers(H5I_VOL))!=0) {
+	if((n1=H5I_nmembers(H5I_VOL))!=0) {
 	    H5I_clear_type(H5I_VOL, FALSE, FALSE);
+            term = FALSE;
 	} else {
 	    H5I_dec_type_ref(H5I_VOL);
-	    H5_interface_initialize_g = 0;
-	    n = 1; /*H5I*/
 	}
+
+	if((n2=H5I_nmembers(H5I_FILE_PUBLIC))!=0) {
+	    H5I_clear_type(H5I_FILE_PUBLIC, FALSE, FALSE);
+            term = FALSE;
+	} else {
+	    H5I_dec_type_ref(H5I_FILE_PUBLIC);
+	}
+
+	if((n3=H5I_nmembers(H5I_DATASET_PUBLIC))!=0) {
+	    H5I_clear_type(H5I_DATASET_PUBLIC, FALSE, FALSE);
+            term = FALSE;
+	} else {
+	    H5I_dec_type_ref(H5I_DATASET_PUBLIC);
+	}
+
+	if((n4=H5I_nmembers(H5I_DATATYPE_PUBLIC))!=0) {
+	    H5I_clear_type(H5I_DATATYPE_PUBLIC, FALSE, FALSE);
+            term = FALSE;
+	} else {
+	    H5I_dec_type_ref(H5I_DATATYPE_PUBLIC);
+	}
+
+	if((n5=H5I_nmembers(H5I_GROUP_PUBLIC))!=0) {
+	    H5I_clear_type(H5I_GROUP_PUBLIC, FALSE, FALSE);
+            term = FALSE;
+	} else {
+	    H5I_dec_type_ref(H5I_GROUP_PUBLIC);
+	}
+
+	if((n6=H5I_nmembers(H5I_ATTR_PUBLIC))!=0) {
+	    H5I_clear_type(H5I_ATTR_PUBLIC, FALSE, FALSE);
+            term = FALSE;
+	} else {
+	    H5I_dec_type_ref(H5I_ATTR_PUBLIC);
+	}
+
+        if (term) {
+            H5_interface_initialize_g = 0;
+            n = 1;
+        }
+        else {
+            n = n1 + n2 + n3 + n4 + n5 + n6;
+        }
     }
+
     FUNC_LEAVE_NOAPI(n)
 }
 
@@ -516,7 +558,7 @@ hid_t
 H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id)
 {
     H5VL_class_t	*vol_plugin;            /* VOL for file */
-    H5VL_id_wrapper_t   *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t   *id_wrapper;              /* user id structure */
     H5P_genplist_t      *plist;                 /* Property list pointer */
     hid_t               file_id;
     hid_t		ret_value;              /* Return value */
@@ -538,13 +580,13 @@ H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id)
 
     /* Create a new id that points to a struct that holds the file id and the VOL plugin */
     /* Allocate new id structure */
-    if(NULL == (uid_info = H5FL_MALLOC(H5VL_id_wrapper_t)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    uid_info->obj_id = file_id;
-    uid_info->vol_plugin = vol_plugin;
+    id_wrapper->obj_id = file_id;
+    id_wrapper->vol_plugin = vol_plugin;
     vol_plugin->nrefs ++;
 
-    if((ret_value = H5I_register(H5I_FILE_PUBLIC, uid_info, TRUE)) < 0)
+    if((ret_value = H5I_register(H5I_FILE_PUBLIC, id_wrapper, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -570,7 +612,7 @@ hid_t
 H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5VL_class_t	*vol_plugin;            /* VOL for file */
-    H5VL_id_wrapper_t   *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t   *id_wrapper;              /* user id structure */
     H5P_genplist_t      *plist;                 /* Property list pointer */
     hid_t               file_id;
     hid_t		ret_value;              /* Return value */
@@ -592,13 +634,13 @@ H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* Create a new id that points to a struct that holds the file id and the VOL id */
     /* Allocate new id structure */
-    if(NULL == (uid_info = H5FL_MALLOC(H5VL_id_wrapper_t)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    uid_info->obj_id = file_id;
-    uid_info->vol_plugin = vol_plugin;
+    id_wrapper->obj_id = file_id;
+    id_wrapper->vol_plugin = vol_plugin;
     vol_plugin->nrefs ++;
 
-    if((ret_value = H5I_register(H5I_FILE_PUBLIC, uid_info, TRUE)) < 0)
+    if((ret_value = H5I_register(H5I_FILE_PUBLIC, id_wrapper, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
 done:
@@ -623,7 +665,7 @@ done:
 herr_t
 H5VL_file_close(hid_t uid)
 {
-    H5VL_id_wrapper_t   *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t   *id_wrapper;              /* user id structure */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -633,15 +675,15 @@ H5VL_file_close(hid_t uid)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == uid_info->vol_plugin->file_cls.close)
+    if(NULL == id_wrapper->vol_plugin->file_cls.close)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file close' method")
-    if((ret_value = (uid_info->vol_plugin->file_cls.close)(uid_info->obj_id)) < 0)
+    if((ret_value = (id_wrapper->vol_plugin->file_cls.close)(id_wrapper->obj_id)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed")
 
-    uid_info->vol_plugin->nrefs--;
+    id_wrapper->vol_plugin->nrefs--;
     if(H5I_dec_app_ref(uid) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to decrement ref count on user ID")
 
@@ -667,7 +709,7 @@ done:
 herr_t
 H5VL_file_flush(hid_t uid, H5F_scope_t scope)
 {
-    H5VL_id_wrapper_t   *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t   *id_wrapper;              /* user id structure */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -677,12 +719,12 @@ H5VL_file_flush(hid_t uid, H5F_scope_t scope)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == uid_info->vol_plugin->file_cls.flush)
+    if(NULL == id_wrapper->vol_plugin->file_cls.flush)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file flush' method")
-    if((ret_value = (uid_info->vol_plugin->file_cls.flush)(uid_info->obj_id, scope)) < 0)
+    if((ret_value = (id_wrapper->vol_plugin->file_cls.flush)(id_wrapper->obj_id, scope)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTFLUSH, FAIL, "flush failed")
 
 done:
@@ -707,7 +749,7 @@ done:
 herr_t
 H5VL_file_get(hid_t uid, H5VL_file_get_t get_type, ...)
 {
-    H5VL_id_wrapper_t *uid_info;             /* user id structure */
+    H5VL_id_wrapper_t *id_wrapper;             /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
     H5I_type_t        id_type;               /* Type of ID */
     herr_t            ret_value = SUCCEED;
@@ -722,14 +764,14 @@ H5VL_file_get(hid_t uid, H5VL_file_get_t get_type, ...)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == uid_info->vol_plugin->file_cls.get)
+    if(NULL == id_wrapper->vol_plugin->file_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file get' method")
 
     va_start(arguments, get_type);
-    if((ret_value = (uid_info->vol_plugin->file_cls.get)(uid_info->obj_id, get_type, arguments)) < 0)
+    if((ret_value = (id_wrapper->vol_plugin->file_cls.get)(id_wrapper->obj_id, get_type, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end(arguments);
 
@@ -754,36 +796,36 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_group_create(hid_t uid, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id)
+H5VL_group_create(hid_t uid, const char *name, hid_t gcpl_id, hid_t gapl_id)
 {
-    H5VL_id_wrapper_t   *uid_info1;             /* user id structure of the location where the group will be created */
-    H5VL_id_wrapper_t   *uid_info2;             /* user id structure of new created group*/
+    H5VL_id_wrapper_t   *id_wrapper1;             /* user id structure of the location where the group will be created */
+    H5VL_id_wrapper_t   *id_wrapper2;             /* user id structure of new created group*/
     hid_t               group_id;               /* actual group ID */
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* get the ID struct */
-    if(NULL == (uid_info1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
     /* check if the corresponding VOL create callback exists */
-    if(NULL == uid_info1->vol_plugin->group_cls.create)
+    if(NULL == id_wrapper1->vol_plugin->group_cls.create)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group create' method")
 
     /* call the corresponding VOL create callback */
-    if((group_id = (uid_info1->vol_plugin->group_cls.create)
-        (uid_info1->obj_id, name, lcpl_id, gcpl_id, gapl_id)) < 0)
+    if((group_id = (id_wrapper1->vol_plugin->group_cls.create)
+        (id_wrapper1->obj_id, name, gcpl_id, gapl_id)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "create failed")
 
     /* Create a new id that points to a struct that holds the group id and the VOL plugin */
     /* Allocate new id structure */
-    if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
+    if(NULL == (id_wrapper2 = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    uid_info2->obj_id = group_id;
-    uid_info2->vol_plugin = uid_info1->vol_plugin;
+    id_wrapper2->obj_id = group_id;
+    id_wrapper2->vol_plugin = id_wrapper1->vol_plugin;
 
-    if((ret_value = H5I_register(H5I_GROUP_PUBLIC, uid_info2, TRUE)) < 0)
+    if((ret_value = H5I_register(H5I_GROUP_PUBLIC, id_wrapper2, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
 
 done:
@@ -807,37 +849,48 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_group_open(hid_t uid, const char *name, hid_t gapl_id)
+H5VL_group_open(hid_t loc_id, const char *name, hid_t gapl_id)
 {
-    H5VL_id_wrapper_t   *uid_info1;             /* user id structure of the location where the group will be opend */
-    H5VL_id_wrapper_t   *uid_info2;             /* user id structure of new opend group*/
+    H5VL_id_wrapper_t   *id_wrapper1;             /* user id structure of the location where the group will be opend */
+    H5VL_id_wrapper_t   *id_wrapper2;             /* user id structure of new opend group*/
     hid_t               group_id;               /* actual group ID */
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* get the ID struct */
-    if(NULL == (uid_info1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    /* check if the corresponding VOL open callback exists */
-    if(NULL == uid_info1->vol_plugin->group_cls.open)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group open' method")
-    /* call the corresponding VOL open callback */
-    if((group_id = (uid_info1->vol_plugin->group_cls.open)
-        (uid_info1->obj_id, name, gapl_id)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
+    /* check if the type specific corresponding VOL open callback exists */
+    if(NULL == id_wrapper1->vol_plugin->group_cls.open) {
+        void       *location = NULL; /* a pointer to VOL specific token that indicates 
+                                        the location of the object */
 
-    /* Create a new id that points to a struct that holds the group id and the VOL plugin */
-    /* Allocate new id structure */
-    if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    uid_info2->obj_id = group_id;
-    uid_info2->vol_plugin = uid_info1->vol_plugin;
+        /* Get the token for the Object location through the VOL */
+        if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, name, gapl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
-    if((ret_value = H5I_register(H5I_GROUP_PUBLIC, uid_info2, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
+        /* Open the object through the VOL */
+        if((ret_value = H5VL_object_open_by_loc(loc_id, location, gapl_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+    }
+    else {
+        /* call the corresponding VOL open callback */
+        if((group_id = (id_wrapper1->vol_plugin->group_cls.open)
+            (id_wrapper1->obj_id, name, gapl_id)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
+        /* Create a new id that points to a struct that holds the group id and the VOL plugin */
+        /* Allocate new id structure */
+        if(NULL == (id_wrapper2 = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        id_wrapper2->obj_id = group_id;
+        id_wrapper2->vol_plugin = id_wrapper1->vol_plugin;
+
+        if((ret_value = H5I_register(H5I_GROUP_PUBLIC, id_wrapper2, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_open() */
@@ -860,7 +913,7 @@ done:
 herr_t
 H5VL_group_close(hid_t uid)
 {
-    H5VL_id_wrapper_t               *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t               *id_wrapper;              /* user id structure */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -870,17 +923,24 @@ H5VL_group_close(hid_t uid)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == uid_info->vol_plugin->group_cls.close)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group close' method")
-    if((ret_value = (uid_info->vol_plugin->group_cls.close)(uid_info->obj_id)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
+    /* if the VOL class does not implement a specific group close
+       callback, try the generic object close */
+    if(NULL == id_wrapper->vol_plugin->group_cls.close) {
+        if(H5VL_object_close(uid) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close object")
+    }
+    else {
+        if((ret_value = (id_wrapper->vol_plugin->group_cls.close)(id_wrapper->obj_id)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
 
-    if(H5I_dec_app_ref(uid) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on user ID")
+        id_wrapper->vol_plugin->nrefs--;
 
+        if(H5I_dec_app_ref(uid) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on user ID")
+   }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_close() */
@@ -903,7 +963,7 @@ done:
 herr_t
 H5VL_group_get(hid_t uid, H5VL_group_get_t get_type, ...)
 {
-    H5VL_id_wrapper_t            *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t            *id_wrapper;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
     H5I_type_t        id_type;               /* Type of ID */
     herr_t            ret_value = SUCCEED;
@@ -916,15 +976,15 @@ H5VL_group_get(hid_t uid, H5VL_group_get_t get_type, ...)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == uid_info->vol_plugin->group_cls.get)
+    if(NULL == id_wrapper->vol_plugin->group_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group get' method")
 
     va_start (arguments, get_type);
-    if((ret_value = (uid_info->vol_plugin->group_cls.get)(uid_info->obj_id, get_type, 
-                                                          arguments)) < 0)
+    if((ret_value = (id_wrapper->vol_plugin->group_cls.get)
+        (id_wrapper->obj_id, get_type, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 
@@ -934,7 +994,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_object_open
+ * Function:	H5VL_object_open_by_loc
  *
  * Purpose:	Opens a object through the VOL
  *
@@ -949,10 +1009,10 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_object_open(hid_t uid, void *obj_loc, hid_t lapl_id)
+H5VL_object_open_by_loc(hid_t uid, void *obj_loc, hid_t lapl_id)
 {
-    H5VL_id_wrapper_t               *uid_info1;             /* user id structure of the location where the object will be opend */
-    H5VL_id_wrapper_t               *uid_info2;             /* user id structure of new opend object*/
+    H5VL_id_wrapper_t               *id_wrapper1;             /* user id structure of the location where the object will be opend */
+    H5VL_id_wrapper_t               *id_wrapper2;             /* user id structure of new opend object*/
     H5I_type_t          id_type;
     hid_t               object_id;               /* actual object ID */
     hid_t		ret_value;              /* Return value */
@@ -960,41 +1020,41 @@ H5VL_object_open(hid_t uid, void *obj_loc, hid_t lapl_id)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* get the ID struct */
-    if(NULL == (uid_info1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
     /* check if the corresponding VOL open callback exists */
-    if(NULL == uid_info1->vol_plugin->object_cls.open)
+    if(NULL == id_wrapper1->vol_plugin->object_cls.open)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object open' method")
 
     /* call the corresponding VOL open callback */
-    if((object_id = (uid_info1->vol_plugin->object_cls.open)
-        (uid_info1->obj_id, obj_loc, lapl_id)) < 0)
+    if((object_id = (id_wrapper1->vol_plugin->object_cls.open)
+        (id_wrapper1->obj_id, obj_loc, lapl_id)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
     /* Create a new id that points to a struct that holds the object id and the VOL plugin */
     /* Allocate new id structure */
-    if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
+    if(NULL == (id_wrapper2 = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    uid_info2->obj_id = object_id;
-    uid_info2->vol_plugin = uid_info1->vol_plugin;
+    id_wrapper2->obj_id = object_id;
+    id_wrapper2->vol_plugin = id_wrapper1->vol_plugin;
 
     id_type = H5I_get_type(object_id);
 
     if (H5I_FILE == id_type) {
-        if((ret_value = H5I_register(H5I_FILE_PUBLIC, uid_info2, TRUE)) < 0)
+        if((ret_value = H5I_register(H5I_FILE_PUBLIC, id_wrapper2, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
     }
     else if (H5I_GROUP == id_type) {
-        if((ret_value = H5I_register(H5I_GROUP_PUBLIC, uid_info2, TRUE)) < 0)
+        if((ret_value = H5I_register(H5I_GROUP_PUBLIC, id_wrapper2, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
     }
     else if (H5I_DATATYPE == id_type) {
-        if((ret_value = H5I_register(H5I_DATATYPE_PUBLIC, uid_info2, TRUE)) < 0)
+        if((ret_value = H5I_register(H5I_DATATYPE_PUBLIC, id_wrapper2, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
     }
     else if (H5I_DATASET == id_type) {
-        if((ret_value = H5I_register(H5I_DATASET_PUBLIC, uid_info2, TRUE)) < 0)
+        if((ret_value = H5I_register(H5I_DATASET_PUBLIC, id_wrapper2, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
     }
     else {
@@ -1003,7 +1063,7 @@ H5VL_object_open(hid_t uid, void *obj_loc, hid_t lapl_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_object_open() */
+} /* end H5VL_object_open_by_loc() */
 
 
 /*-------------------------------------------------------------------------
@@ -1023,7 +1083,7 @@ done:
 herr_t
 H5VL_object_close(hid_t uid)
 {
-    H5VL_id_wrapper_t               *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t   *id_wrapper;              /* user id structure */
     H5I_type_t          id_type;
     herr_t              ret_value = SUCCEED;
 
@@ -1049,14 +1109,15 @@ H5VL_object_close(hid_t uid)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == uid_info->vol_plugin->object_cls.close)
+    if(NULL == id_wrapper->vol_plugin->object_cls.close)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object close' method")
-    if((ret_value = (uid_info->vol_plugin->object_cls.close)(uid_info->obj_id)) < 0)
+    if((ret_value = (id_wrapper->vol_plugin->object_cls.close)(id_wrapper->obj_id)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
 
+    id_wrapper->vol_plugin->nrefs--;
     if(H5I_dec_app_ref(uid) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on user ID")
 
@@ -1082,7 +1143,7 @@ done:
 herr_t
 H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, ...)
 {
-    H5VL_id_wrapper_t *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t *id_wrapper;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
     H5I_type_t        id_type;
     herr_t            ret_value = SUCCEED;
@@ -1097,15 +1158,15 @@ H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, ...)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* lookup the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == uid_info->vol_plugin->object_cls.lookup)
+    if(NULL == id_wrapper->vol_plugin->object_cls.lookup)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object lookup' method")
 
     va_start (arguments, lookup_type);
-    if((ret_value = (uid_info->vol_plugin->object_cls.lookup)(uid_info->obj_id, lookup_type, 
-                                                              arguments)) < 0)
+    if((ret_value = (id_wrapper->vol_plugin->object_cls.lookup)(id_wrapper->obj_id, lookup_type, 
+                                                                arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "lookup of object location failed")
     va_end (arguments);
 done:
@@ -1130,7 +1191,7 @@ done:
 herr_t
 H5VL_object_get(hid_t uid, H5VL_object_get_t get_type, ...)
 {
-    H5VL_id_wrapper_t            *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t            *id_wrapper;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
     H5I_type_t        id_type;
     herr_t            ret_value = SUCCEED;
@@ -1145,15 +1206,15 @@ H5VL_object_get(hid_t uid, H5VL_object_get_t get_type, ...)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == uid_info->vol_plugin->object_cls.get)
+    if(NULL == id_wrapper->vol_plugin->object_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object get' method")
 
     va_start (arguments, get_type);
-    if((ret_value = (uid_info->vol_plugin->object_cls.get)(uid_info->obj_id, get_type, 
-                                                           arguments)) < 0)
+    if((ret_value = (id_wrapper->vol_plugin->object_cls.get)(id_wrapper->obj_id, get_type, 
+                                                             arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 done:
@@ -1179,33 +1240,33 @@ herr_t
 H5VL_datatype_commit(hid_t uid, const char *name, hid_t type_id, hid_t lcpl_id, 
                      hid_t tcpl_id, hid_t tapl_id)
 {
-    H5VL_id_wrapper_t               *uid_info1;             /* user id structure of the location where the datatype will be commitd */
+    H5VL_id_wrapper_t               *id_wrapper1;             /* user id structure of the location where the datatype will be commitd */
     herr_t		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* get the ID struct */
-    if(NULL == (uid_info1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
     /* check if the corresponding VOL commit callback exists */
-    if(NULL == uid_info1->vol_plugin->datatype_cls.commit)
+    if(NULL == id_wrapper1->vol_plugin->datatype_cls.commit)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype commit' method")
 
     /* call the corresponding VOL commit callback */
-    if((ret_value = (uid_info1->vol_plugin->datatype_cls.commit)
-        (uid_info1->obj_id, name, type_id, lcpl_id, tcpl_id, tapl_id)) < 0)
+    if((ret_value = (id_wrapper1->vol_plugin->datatype_cls.commit)
+        (id_wrapper1->obj_id, name, type_id, lcpl_id, tcpl_id, tapl_id)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "commit failed")
 
 #if 0
     /* Create a new id that points to a struct that holds the datatype id and the VOL plugin */
     /* Allocate new id structure */
-    if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
+    if(NULL == (id_wrapper2 = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    uid_info2->obj_id = type_id;
-    uid_info2->vol_plugin = uid_info1->vol_plugin;
+    id_wrapper2->obj_id = type_id;
+    id_wrapper2->vol_plugin = id_wrapper1->vol_plugin;
 
-    if((ret_value = H5I_register(H5I_DATATYPE_PUBLIC, uid_info2, TRUE)) < 0)
+    if((ret_value = H5I_register(H5I_DATATYPE_PUBLIC, id_wrapper2, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
 #endif
 
@@ -1230,38 +1291,48 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_datatype_open(hid_t uid, const char *name, hid_t tapl_id)
+H5VL_datatype_open(hid_t loc_id, const char *name, hid_t tapl_id)
 {
-    H5VL_id_wrapper_t               *uid_info1;             /* user id structure of the location where the datatype will be opend */
-    H5VL_id_wrapper_t               *uid_info2;             /* user id structure of new opend datatype*/
+    H5VL_id_wrapper_t   *id_wrapper1;             /* user id structure of the location where the datatype will be opend */
+    H5VL_id_wrapper_t   *id_wrapper2;             /* user id structure of new opend datatype*/
     hid_t               datatype_id;               /* actual datatype ID */
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* get the ID struct */
-    if(NULL == (uid_info1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    /* check if the corresponding VOL open callback exists */
-    if(NULL == uid_info1->vol_plugin->datatype_cls.open)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype open' method")
+    /* check if the type specific corresponding VOL open callback exists */
+    if(NULL == id_wrapper1->vol_plugin->datatype_cls.open) {
+        void       *location = NULL; /* a pointer to VOL specific token that indicates 
+                                        the location of the object */
 
-    /* call the corresponding VOL open callback */
-    if((datatype_id = (uid_info1->vol_plugin->datatype_cls.open)
-        (uid_info1->obj_id, name, tapl_id)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
+        /* Get the token for the Object location through the VOL */
+        if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, name, tapl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
-    /* Create a new id that points to a struct that holds the datatype id and the VOL plugin */
-    /* Allocate new id structure */
-    if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    uid_info2->obj_id = datatype_id;
-    uid_info2->vol_plugin = uid_info1->vol_plugin;
+        /* Open the object through the VOL */
+        if((ret_value = H5VL_object_open_by_loc(loc_id, location, tapl_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+    }
+    else {
+        /* call the corresponding VOL open callback */
+        if((datatype_id = (id_wrapper1->vol_plugin->datatype_cls.open)
+            (id_wrapper1->obj_id, name, tapl_id)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
-    if((ret_value = H5I_register(H5I_DATATYPE_PUBLIC, uid_info2, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
+        /* Create a new id that points to a struct that holds the datatype id and the VOL plugin */
+        /* Allocate new id structure */
+        if(NULL == (id_wrapper2 = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        id_wrapper2->obj_id = datatype_id;
+        id_wrapper2->vol_plugin = id_wrapper1->vol_plugin;
 
+        if((ret_value = H5I_register(H5I_DATATYPE_PUBLIC, id_wrapper2, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_open() */
@@ -1283,37 +1354,36 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_dataset_create(hid_t uid, const char *name, hid_t dtype_id, hid_t space_id, 
-                    hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id)
+H5VL_dataset_create(hid_t uid, const char *name, hid_t dcpl_id, hid_t dapl_id)
 {
-    H5VL_id_wrapper_t    *uid_info1;             /* user id structure of the location where the dataset will be created */
-    H5VL_id_wrapper_t    *uid_info2;             /* user id structure of new created dataset*/
+    H5VL_id_wrapper_t    *id_wrapper1;             /* user id structure of the location where the dataset will be created */
+    H5VL_id_wrapper_t    *id_wrapper2;             /* user id structure of new created dataset*/
     hid_t     dataset_id;            /* actual dataset ID */
     hid_t     ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* get the ID struct */
-    if(NULL == (uid_info1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
     /* check if the corresponding VOL create callback exists */
-    if(NULL == uid_info1->vol_plugin->dataset_cls.create)
+    if(NULL == id_wrapper1->vol_plugin->dataset_cls.create)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset create' method")
 
     /* call the corresponding VOL create callback */
-    if((dataset_id = (uid_info1->vol_plugin->dataset_cls.create)
-        (uid_info1->obj_id, name, dtype_id, space_id, lcpl_id, dcpl_id, dapl_id)) < 0)
+    if((dataset_id = (id_wrapper1->vol_plugin->dataset_cls.create)
+        (id_wrapper1->obj_id, name, dcpl_id, dapl_id)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "create failed")
 
     /* Create a new id that points to a struct that holds the dataset id and the VOL plugin */
     /* Allocate new id structure */
-    if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
+    if(NULL == (id_wrapper2 = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    uid_info2->obj_id = dataset_id;
-    uid_info2->vol_plugin = uid_info1->vol_plugin;
+    id_wrapper2->obj_id = dataset_id;
+    id_wrapper2->vol_plugin = id_wrapper1->vol_plugin;
 
-    if((ret_value = H5I_register(H5I_DATASET_PUBLIC, uid_info2, TRUE)) < 0)
+    if((ret_value = H5I_register(H5I_DATASET_PUBLIC, id_wrapper2, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
 
 done:
@@ -1337,37 +1407,48 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_dataset_open(hid_t uid, const char *name, hid_t dapl_id)
+H5VL_dataset_open(hid_t loc_id, const char *name, hid_t dapl_id)
 {
-    H5VL_id_wrapper_t               *uid_info1;             /* user id structure of the location where the dataset will be opend */
-    H5VL_id_wrapper_t               *uid_info2;             /* user id structure of new opend dataset*/
+    H5VL_id_wrapper_t   *id_wrapper1;             /* user id structure of the location where the dataset will be opend */
+    H5VL_id_wrapper_t   *id_wrapper2;             /* user id structure of new opend dataset*/
     hid_t               dataset_id;               /* actual dataset ID */
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* get the ID struct */
-    if(NULL == (uid_info1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    /* check if the corresponding VOL open callback exists */
-    if(NULL == uid_info1->vol_plugin->dataset_cls.open)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset open' method")
-    /* call the corresponding VOL open callback */
-    if((dataset_id = (uid_info1->vol_plugin->dataset_cls.open)
-        (uid_info1->obj_id, name, dapl_id)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
+    /* check if the type specific corresponding VOL open callback exists */
+    if(NULL == id_wrapper1->vol_plugin->dataset_cls.open) {
+        void       *location = NULL; /* a pointer to VOL specific token that indicates 
+                                        the location of the object */
 
-    /* Create a new id that points to a struct that holds the dataset id and the VOL plugin */
-    /* Allocate new id structure */
-    if(NULL == (uid_info2 = H5FL_MALLOC(H5VL_id_wrapper_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    uid_info2->obj_id = dataset_id;
-    uid_info2->vol_plugin = uid_info1->vol_plugin;
+        /* Get the token for the Object location through the VOL */
+        if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, name, dapl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
-    if((ret_value = H5I_register(H5I_DATASET_PUBLIC, uid_info2, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+        /* Open the object through the VOL */
+        if((ret_value = H5VL_object_open_by_loc(loc_id, location, dapl_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+    }
+    else {
+        /* call the corresponding VOL open callback */
+        if((dataset_id = (id_wrapper1->vol_plugin->dataset_cls.open)
+            (id_wrapper1->obj_id, name, dapl_id)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
+        /* Create a new id that points to a struct that holds the dataset id and the VOL plugin */
+        /* Allocate new id structure */
+        if(NULL == (id_wrapper2 = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        id_wrapper2->obj_id = dataset_id;
+        id_wrapper2->vol_plugin = id_wrapper1->vol_plugin;
+
+        if((ret_value = H5I_register(H5I_DATASET_PUBLIC, id_wrapper2, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_open() */
@@ -1390,7 +1471,7 @@ done:
 herr_t
 H5VL_dataset_close(hid_t uid)
 {
-    H5VL_id_wrapper_t               *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t   *id_wrapper;              /* user id structure */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1400,17 +1481,23 @@ H5VL_dataset_close(hid_t uid)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+            
+    /* if the VOL class does not implement a specific dataset close
+       callback, try the generic object close */    
+    if(NULL == id_wrapper->vol_plugin->dataset_cls.close){
+        if(H5VL_object_close(uid) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close object")
+    }
+    else {
+        if((ret_value = (id_wrapper->vol_plugin->dataset_cls.close)(id_wrapper->obj_id)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
 
-    if(NULL == uid_info->vol_plugin->dataset_cls.close)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset close' method")
-    if((ret_value = (uid_info->vol_plugin->dataset_cls.close)(uid_info->obj_id)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
-
-    if(H5I_dec_app_ref(uid) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on user ID")
-
+        id_wrapper->vol_plugin->nrefs--;
+        if(H5I_dec_app_ref(uid) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on user ID")
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_close() */
@@ -1433,7 +1520,7 @@ done:
 herr_t H5VL_dataset_read(hid_t uid, hid_t mem_type_id, hid_t mem_space_id, 
                          hid_t file_space_id, hid_t plist_id, void *buf)
 {
-    H5VL_id_wrapper_t               *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t               *id_wrapper;              /* user id structure */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1443,13 +1530,13 @@ herr_t H5VL_dataset_read(hid_t uid, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == uid_info->vol_plugin->dataset_cls.read)
+    if(NULL == id_wrapper->vol_plugin->dataset_cls.read)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset read' method")
-    if((ret_value = (uid_info->vol_plugin->dataset_cls.read)
-        (uid_info->obj_id, mem_type_id, mem_space_id, file_space_id, plist_id, buf)) < 0)
+    if((ret_value = (id_wrapper->vol_plugin->dataset_cls.read)
+        (id_wrapper->obj_id, mem_type_id, mem_space_id, file_space_id, plist_id, buf)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "read failed")
 
 done:
@@ -1474,7 +1561,7 @@ done:
 herr_t H5VL_dataset_write(hid_t uid, hid_t mem_type_id, hid_t mem_space_id, 
                           hid_t file_space_id, hid_t plist_id, const void *buf)
 {
-    H5VL_id_wrapper_t               *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t               *id_wrapper;              /* user id structure */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1484,13 +1571,13 @@ herr_t H5VL_dataset_write(hid_t uid, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == uid_info->vol_plugin->dataset_cls.write)
+    if(NULL == id_wrapper->vol_plugin->dataset_cls.write)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset write' method")
-    if((ret_value = (uid_info->vol_plugin->dataset_cls.write)
-        (uid_info->obj_id, mem_type_id, mem_space_id, file_space_id, plist_id, buf)) < 0)
+    if((ret_value = (id_wrapper->vol_plugin->dataset_cls.write)
+        (id_wrapper->obj_id, mem_type_id, mem_space_id, file_space_id, plist_id, buf)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "write failed")
 
 done:
@@ -1514,7 +1601,7 @@ done:
  */
 herr_t H5VL_dataset_set_extent(hid_t uid, const hsize_t size[])
 {
-    H5VL_id_wrapper_t   *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t   *id_wrapper;              /* user id structure */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1524,12 +1611,12 @@ herr_t H5VL_dataset_set_extent(hid_t uid, const hsize_t size[])
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset ID")
 
     /* get the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == uid_info->vol_plugin->dataset_cls.set_extent)
+    if(NULL == id_wrapper->vol_plugin->dataset_cls.set_extent)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset set_extent' method")
-    if((ret_value = (uid_info->vol_plugin->dataset_cls.set_extent)(uid_info->obj_id, size)) < 0)
+    if((ret_value = (id_wrapper->vol_plugin->dataset_cls.set_extent)(id_wrapper->obj_id, size)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "set_extent failed")
 
 done:
@@ -1554,7 +1641,7 @@ done:
 herr_t
 H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, ...)
 {
-    H5VL_id_wrapper_t            *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t            *id_wrapper;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
@@ -1565,17 +1652,160 @@ H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, ...)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == uid_info->vol_plugin->dataset_cls.get)
+    if(NULL == id_wrapper->vol_plugin->dataset_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset get' method")
 
     va_start (arguments, get_type);
-    if((ret_value = (uid_info->vol_plugin->dataset_cls.get)(uid_info->obj_id, get_type, 
+    if((ret_value = (id_wrapper->vol_plugin->dataset_cls.get)(id_wrapper->obj_id, get_type, 
                                                            arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_link_create
+ *
+ * Purpose:	Creates a hard link through the VOL
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_link_create(H5VL_link_create_type_t create_type, hid_t loc_id, const char *new_name, 
+                 hid_t lcpl_id, hid_t lapl_id)
+{
+    H5VL_class_t	 *vol_plugin = NULL;   /* VOL plugin */
+    hid_t                new_id;       /* unwrapped IDs */
+    herr_t               ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* unwrap the higher level user ids. */ 
+    if(H5L_SAME_LOC != loc_id) {
+        H5VL_id_wrapper_t    *id_wrapper;
+
+        /* get the ID struct */
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")        
+
+        /* set the vol plugin sturcture if it hasn't been done yet */
+        if (NULL == vol_plugin)
+            vol_plugin = id_wrapper->vol_plugin;
+
+        new_id = id_wrapper->obj_id;
+    }
+    else {
+        new_id = loc_id;
+    }
+
+    /* unwrap the high level ID if the creation call is H5Lcreate_hard */
+    if(H5VL_CREATE_HARD_LINK == create_type) {
+        H5P_genplist_t *plist;      /* Property list pointer */
+        hid_t cur_id;
+
+        /* Get the plist structure */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        if(H5P_get(plist, H5L_CRT_TARGET_ID_NAME, &cur_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current location id")
+
+        /* Only one of the IDs can be H5L_SAME_LOC, and the other one must
+           be of the wrapper type. Get the VOL plugin struct in case the 
+           link id is H5L_SAME_LOC*/
+        if (H5L_SAME_LOC != cur_id) {
+            H5VL_id_wrapper_t    *id_wrapper;
+
+            /* get the ID struct */
+            if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(cur_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")        
+
+            vol_plugin = id_wrapper->vol_plugin;
+            if(H5P_set(plist, H5L_CRT_TARGET_ID_NAME, &(id_wrapper->obj_id)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current location id")
+        }
+    }
+
+    /* check if the corresponding VOL create callback exists */
+    if(NULL == vol_plugin->link_cls.create)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link create' method")
+
+    /* call the corresponding VOL create callback */
+    if((ret_value = (vol_plugin->link_cls.create)
+        (create_type, new_id, new_name, lcpl_id, lapl_id)) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link create failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_link_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_link_create
+ *
+ * Purpose:	Copy or move a link from src to dst.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5VL_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
+                             const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id)
+{
+    H5VL_class_t	 *vol_plugin = NULL;   /* VOL plugin */
+    H5VL_id_wrapper_t    *id_wrapper;
+    hid_t                new_src_id, new_dst_id;       /* unwrapped IDs */
+    herr_t               ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* unwrap the higher level user ids. */ 
+    if(H5L_SAME_LOC != src_loc_id) {
+        /* get the ID struct */
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(src_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")        
+
+        vol_plugin = id_wrapper->vol_plugin;
+        new_src_id = id_wrapper->obj_id;
+    }
+    else {
+        new_src_id = src_loc_id;
+    }
+
+    if(H5L_SAME_LOC != dst_loc_id) {
+        /* get the ID struct */
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(dst_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")        
+        if(NULL == vol_plugin)
+            vol_plugin = id_wrapper->vol_plugin;
+        new_dst_id = id_wrapper->obj_id;
+    }
+    else {
+        new_dst_id = dst_loc_id;
+    }
+
+    /* check if the corresponding VOL move callback exists */
+    if(NULL == vol_plugin->link_cls.move)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link move' method")
+
+    /* call the corresponding VOL move callback */
+    if((ret_value = (vol_plugin->link_cls.move)
+        (new_src_id, src_name, new_dst_id, dst_name, copy_flag, lcpl_id, lapl_id)) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link move failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_link_move() */

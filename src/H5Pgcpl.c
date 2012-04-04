@@ -108,6 +108,7 @@ H5P_gcrt_reg_prop(H5P_genclass_t *pclass)
 {
     H5O_ginfo_t ginfo = H5G_CRT_GROUP_INFO_DEF;     /* Default group info settings */
     H5O_linfo_t linfo = H5G_CRT_LINK_INFO_DEF;      /* Default link info settings */
+    hid_t lcpl_id     = H5P_LINK_CREATE_DEFAULT;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -119,6 +120,11 @@ H5P_gcrt_reg_prop(H5P_genclass_t *pclass)
     /* Register link info property */
     if(H5P_register_real(pclass, H5G_CRT_LINK_INFO_NAME, H5G_CRT_LINK_INFO_SIZE, &linfo, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the lcpl ID property */
+    if(H5P_register_real(pclass, H5G_CRT_LCPL_ID_NAME, sizeof(hid_t), &lcpl_id, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

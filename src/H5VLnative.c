@@ -24,6 +24,7 @@
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
+#define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
@@ -38,9 +39,11 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Fpkg.h"             /* File pkg                             */
-#include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
+#include "H5HGprivate.h"	/* Global Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Lprivate.h"         /* links                                */
+#include "H5Lpkg.h"             /* links headers			*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
@@ -63,8 +66,7 @@ static herr_t H5VL_native_file_flush(hid_t fid, H5F_scope_t scope);
 static herr_t H5VL_native_file_get(hid_t file_id, H5VL_file_get_t get_type, va_list arguments);
 static herr_t H5VL_native_file_close(hid_t fid);
 
-static hid_t H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
-                                        hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
+static hid_t H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t dcpl_id, hid_t dapl_id);
 static hid_t H5VL_native_dataset_open(hid_t loc_id, const char *name, hid_t dapl_id);
 static herr_t H5VL_native_dataset_read(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
                                        hid_t file_space_id, hid_t plist_id, void *buf);
@@ -78,11 +80,15 @@ static herr_t H5VL_native_datatype_commit(hid_t loc_id, const char *name, hid_t 
                                           hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id);
 static hid_t H5VL_native_datatype_open(hid_t loc_id, const char *name, hid_t tapl_id);
 
-static hid_t H5VL_native_group_create(hid_t loc_id, const char *name, hid_t lcpl_id, 
-                                      hid_t gcpl_id, hid_t gapl_id);
+static hid_t H5VL_native_group_create(hid_t loc_id, const char *name, hid_t gcpl_id, hid_t gapl_id);
 static hid_t H5VL_native_group_open(hid_t loc_id, const char *name, hid_t gapl_id);
 static herr_t H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, va_list arguments);
 static herr_t H5VL_native_group_close(hid_t group_id);
+
+static herr_t H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t loc_id, 
+                                      const char *link_name, hid_t lcpl_id, hid_t lapl_id);
+static herr_t H5VL_native_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
+                                    const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id);
 
 static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id);
 static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, va_list arguments);
@@ -128,10 +134,10 @@ H5VL_class_t H5VL_native_g = {
         H5VL_native_file_close                  /* close */
     },
     {                                           /* link_cls */
-        NULL,                                   /* create */
-        NULL,                                   /* delete */
-        NULL,                                   /* move */
-        NULL                                    /* copy */
+        H5VL_native_link_create,                /* create */
+        H5VL_native_link_move,                  /* move */
+        NULL,                   /* get */
+        NULL                 /* delete */
     },
     {                                           /* object_cls */
         H5VL_native_object_open,                /* open */
@@ -748,13 +754,23 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_group_create(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id)
+H5VL_native_group_create(hid_t loc_id, const char *name, hid_t gcpl_id, hid_t gapl_id)
 {
-    H5G_loc_t	    loc;                /* Location to create group */
+    H5P_genplist_t *plist;              /* Property list pointer */
+    H5G_loc_t      loc;                 /* Location to create group */
     H5G_t	   *grp = NULL;         /* New group created */
-    hid_t           ret_value;
+    hid_t          lcpl_id;
+    hid_t          ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* get creation properties */
+    if(H5P_get(plist, H5G_CRT_LCPL_ID_NAME, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for lcpl id")
 
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
@@ -1197,14 +1213,65 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, va_lis
                 obj_addr = va_arg (arguments, haddr_t);
                 break;
             }
+        case H5VL_OBJECT_LOOKUP_BY_REF:
+            {
+                H5R_type_t      ref_type      = va_arg (arguments, H5R_type_t);
+                void            *_ref         = va_arg (arguments, void *);
+                H5F_t *file = NULL; /* File object */
+
+                /* Get the file pointer from the entry */
+                file = loc.oloc->file;
+
+                HDassert(_ref);
+                HDassert(ref_type > H5R_BADTYPE || ref_type < H5R_MAXTYPE);
+                HDassert(file);
+
+                switch(ref_type) {
+                    case H5R_OBJECT:
+                        obj_addr = *(const hobj_ref_t *)_ref; /* Only object references currently supported */
+                        break;
+
+                    case H5R_DATASET_REGION:
+                        {
+                            H5HG_t hobjid;  /* Heap object ID */
+                            uint8_t *buf;   /* Buffer to store serialized selection in */
+                            const uint8_t *p;           /* Pointer to OID to store */
+
+                            /* Get the heap ID for the dataset region */
+                            p = (const uint8_t *)_ref;
+                            H5F_addr_decode(file, &p, &(hobjid.addr));
+                            INT32DECODE(p, hobjid.idx);
+
+                            /* Get the dataset region from the heap (allocate inside routine) */
+                            if(NULL == (buf = (uint8_t *)H5HG_read(file, H5AC_dxpl_id, 
+                                                                   &hobjid, NULL, NULL)))
+                                HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL, "Unable to read dataset region information")
+
+                            /* Get the object oid for the dataset */
+                            p = buf;
+                            H5F_addr_decode(file, &p, &(obj_addr));
+
+                            /* Free the buffer allocated in H5HG_read() */
+                            H5MM_xfree(buf);
+                        } /* end case */
+                        break;
+
+                    case H5R_BADTYPE:
+                    case H5R_MAXTYPE:
+                    default:
+                        HDassert("unknown reference type" && 0);
+                        HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
+                } /* end switch */
+                break;
+            }
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't lookup this object")
-    }
+    } /* end switch */
 
     *location[0] = obj_addr;
 done:
     /* Release the object location if we failed after copying it */
-    if(ret_value == FAIL && loc_found)
+    if(loc_found)
         if(H5G_loc_free(&obj_loc) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
 
@@ -1336,15 +1403,28 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
-                           hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id)
+H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t dcpl_id, hid_t dapl_id)
 {
+    H5P_genplist_t *plist;              /* Property list pointer */
     H5G_loc_t	   loc;                 /* Object location to insert dataset into */
+    hid_t          type_id, space_id, lcpl_id;
     H5D_t	   *dset = NULL;        /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
-    hid_t           ret_value;
+    hid_t          ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* get creation properties */
+    if(H5P_get(plist, H5D_CRT_TYPE_ID_NAME, &type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for datatype id")
+    if(H5P_get(plist, H5D_CRT_SPACE_ID_NAME, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for space id")
+    if(H5P_get(plist, H5D_CRT_LCPL_ID_NAME, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for lcpl id")
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -1355,7 +1435,7 @@ H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t type_id, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace ID")
 
     /* H5Dcreate_anon */
-    if (NULL == name && lcpl_id == 0) {
+    if (NULL == name) {
         /* build and open the new dataset */
         if(NULL == (dset = H5D_create(loc.oloc->file, type_id, space, dcpl_id, dapl_id, H5AC_dxpl_id)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
@@ -1374,7 +1454,7 @@ H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t type_id, hid_t 
             HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset")
     }
 done:
-    if(NULL == name && lcpl_id == 0) {
+    if(NULL == name) {
         /* Release the dataset's object header, if it was created */
         if(dset) {
             H5O_loc_t *oloc;         /* Object location for dataset */
@@ -1775,3 +1855,205 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, va_list arguments
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_dataset_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_link_create
+ *
+ * Purpose:	Creates an hard link from NEW_NAME to CUR_NAME.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t loc_id, const char *link_name, 
+                        hid_t lcpl_id, hid_t lapl_id)
+{
+
+    H5P_genplist_t   *plist;                     /* Property list pointer */
+    herr_t           ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    switch (create_type) {
+        case H5VL_CREATE_HARD_LINK:
+            {
+                H5G_loc_t    cur_loc, *cur_loc_p;
+                H5G_loc_t    new_loc, *new_loc_p;
+                hid_t        cur_loc_id;
+                char         *cur_name;
+
+                if(H5P_get(plist, H5L_CRT_TARGET_ID_NAME, &cur_loc_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current location id")
+                if(H5P_get(plist, H5L_CRT_TARGET_NAME_NAME, &cur_name) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current name")
+
+                if(cur_loc_id != H5L_SAME_LOC && H5G_loc(cur_loc_id, &cur_loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+                if(loc_id != H5L_SAME_LOC && H5G_loc(loc_id, &new_loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+                /* Set up current & new location pointers */
+                cur_loc_p = &cur_loc;
+                new_loc_p = &new_loc;
+                if(cur_loc_id == H5L_SAME_LOC)
+                    cur_loc_p = new_loc_p;
+                else if(loc_id == H5L_SAME_LOC)
+                    new_loc_p = cur_loc_p;
+                else if(cur_loc_p->oloc->file != new_loc_p->oloc->file)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should be in the same file.")
+
+                /* Create the link */
+                if((ret_value = H5L_create_hard(cur_loc_p, cur_name, new_loc_p, link_name,
+                                                lcpl_id, lapl_id, H5AC_dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+                break;
+            }
+        case H5VL_CREATE_SOFT_LINK:
+            {
+                char        *target_name;
+                H5G_loc_t   link_loc;               /* Group location for new link */
+
+                if(H5G_loc(loc_id, &link_loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+                if(H5P_get(plist, H5L_CRT_TARGET_NAME_NAME, &target_name) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for targe name")
+
+                /* Create the link */
+                if((ret_value = H5L_create_soft(target_name, &link_loc, link_name, 
+                                                lcpl_id, lapl_id, H5AC_dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+                break;
+            }
+        case H5VL_CREATE_UD_LINK:
+            {
+                H5G_loc_t   link_loc;               /* Group location for new link */
+                H5L_type_t link_type;
+                void *udata;
+                size_t udata_size;
+
+                if(H5G_loc(loc_id, &link_loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+                if(H5P_get(plist, H5L_CRT_LINK_TYPE_NAME, &link_type) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for link type")
+                if(H5P_get(plist, H5L_CRT_UDATA_NAME, &udata) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for udata")
+                if(H5P_get(plist, H5L_CRT_UDATA_SIZE_NAME, &udata_size) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for udata size")
+
+                /* Create link */
+                if(H5L_create_ud(&link_loc, link_name, udata, udata_size, link_type, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "invalid link creation call")
+    }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_link_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_link_move
+ *
+ * Purpose:	Renames an object within an HDF5 file and moves it to a new
+ *              group.  The original name SRC is unlinked from the group graph
+ *              and then inserted with the new name DST (which can specify a
+ *              new path for the object) as an atomic operation. The names
+ *              are interpreted relative to SRC_LOC_ID and
+ *              DST_LOC_ID, which are either file IDs or group ID.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_native_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
+                      const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id)
+{
+    H5G_loc_t	src_loc, *src_loc_p;
+    H5G_loc_t	dst_loc, *dst_loc_p;
+    herr_t      ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(src_loc_id != H5L_SAME_LOC && H5G_loc(src_loc_id, &src_loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(dst_loc_id != H5L_SAME_LOC && H5G_loc(dst_loc_id, &dst_loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    /* Set up src & dst location pointers */
+    src_loc_p = &src_loc;
+    dst_loc_p = &dst_loc;
+    if(src_loc_id == H5L_SAME_LOC)
+        src_loc_p = dst_loc_p;
+    else if(dst_loc_id == H5L_SAME_LOC)
+        dst_loc_p = src_loc_p;
+
+    /* Move/Copy the link */
+    if(H5L_move(src_loc_p, src_name, dst_loc_p, dst_name, copy_flag, lcpl_id,
+                lapl_id, H5AC_dxpl_id) < 0)
+	HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_link_move() */
+
+#if 0
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_attr_create
+ *
+ * Purpose:	Creates an attribute on an object.
+ *
+ * Return:	Success:	attr id. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5VL_native_attr_create(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
+                        hid_t acpl_id, hid_t UNUSED aapl_id)
+{
+    H5G_loc_t       loc;                    /* Object location */
+    H5T_t	    *type;                  /* Datatype to use for attribute */
+    H5S_t	    *space;                 /* Dataspace to use for attribute */
+    hid_t           ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(0 == (H5F_INTENT(loc.oloc->file) & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, FAIL, "no write intent on file")
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type")
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+    /* Go do the real work for attaching the attribute to the dataset */
+    if((ret_value = H5A_create(&loc, attr_name, type, space, acpl_id, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_attr_create() */
+
+#endif

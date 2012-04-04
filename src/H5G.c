@@ -263,6 +263,7 @@ H5G_term_interface(void)
 hid_t
 H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id)
 {
+    H5P_genplist_t  *plist;            /* Property list pointer */
     hid_t	    ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -293,8 +294,15 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
         if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    if(H5P_set(plist, H5G_CRT_LCPL_ID_NAME, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
+
     /* Create the group through the VOL */
-    if((ret_value = H5VL_group_create(loc_id, name, lcpl_id, gcpl_id, gapl_id)) < 0)
+    if((ret_value = H5VL_group_create(loc_id, name, gcpl_id, gapl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
 done:
@@ -360,7 +368,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 
     /* Create the group through the VOL */
-    if((ret_value = H5VL_group_create(loc_id, NULL, 0, gcpl_id, gapl_id)) < 0)
+    if((ret_value = H5VL_group_create(loc_id, NULL, gcpl_id, gapl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
 done:

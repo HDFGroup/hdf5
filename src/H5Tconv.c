@@ -629,7 +629,8 @@
     case H5T_CONV_INIT:							      \
 	/* Sanity check and initialize statistics */			      \
 	cdata->need_bkg = H5T_BKG_NO;					      \
-        if (NULL==(st=(H5T_t*)H5I_object(src_id)) || NULL==(dt=(H5T_t*)H5I_object(dst_id)))   \
+        if (NULL==(st=(H5T_t*)H5I_object_verify(src_id, H5I_DATATYPE)) ||     \ 
+            NULL==(dt=(H5T_t*)H5I_object_verify(dst_id, H5I_DATATYPE)))       \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
                           "unable to dereference datatype object ID")	      \
 	if (st->shared->size!=sizeof(ST) || dt->shared->size!=sizeof(DT))     \
@@ -676,7 +677,8 @@
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get conversion exception callback") \
                                                                               \
         /* Get source and destination datatypes */			      \
-        if(NULL == (st = (H5T_t *)H5I_object(src_id)) || NULL == (dt = (H5T_t *)H5I_object(dst_id))) \
+        if (NULL==(st=(H5T_t*)H5I_object_verify(src_id, H5I_DATATYPE)) ||     \ 
+            NULL==(dt=(H5T_t*)H5I_object_verify(dst_id, H5I_DATATYPE)))       \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to dereference datatype object ID") \
 									      \
         /* Get source & destination precisions into a variable */	      \
@@ -1050,7 +1052,7 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     switch(cdata->command) {
         case H5T_CONV_INIT:
             /* Capability query */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             if(src->shared->size != dst->shared->size ||
                     0 != src->shared->u.atomic.offset ||
@@ -1093,7 +1095,7 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
         case H5T_CONV_CONV:
             /* The conversion */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
             /* Check for "no op" reference conversion */
@@ -1458,8 +1460,8 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     switch(cdata->command) {
         case H5T_CONV_INIT:
             /* Capability query */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) ||
-                    NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) ||
+                    NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             if(src->shared->size != dst->shared->size || 0 != src->shared->u.atomic.offset ||
                     0 != dst->shared->u.atomic.offset ||
@@ -1495,7 +1497,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
         case H5T_CONV_CONV:
             /* The conversion */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
             buf_stride = buf_stride ? buf_stride : src->shared->size;
@@ -1563,8 +1565,8 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     switch(cdata->command) {
         case H5T_CONV_INIT:
             /* Capability query */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) ||
-                    NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) ||
+                    NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_ORDER_LE != src->shared->u.atomic.order &&
                     H5T_ORDER_BE != src->shared->u.atomic.order)
@@ -1580,7 +1582,7 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
         case H5T_CONV_CONV:
             /* Get the datatypes */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
             /*
@@ -2108,7 +2110,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              * otherwise initialize the `priv' field of `cdata' with information
              * that remains (almost) constant for this conversion path.
              */
-            if (NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if (NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_COMPOUND != src->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_COMPOUND datatype")
@@ -2130,7 +2132,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             /*
              * Conversion.
              */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
             HDassert(priv);
             HDassert(bkg && cdata->need_bkg);
@@ -2358,7 +2360,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
              * otherwise initialize the `priv' field of `cdata' with information
              * that remains (almost) constant for this conversion path.
              */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_COMPOUND != src->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_COMPOUND datatype")
@@ -2417,7 +2419,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
             /*
              * Conversion.
              */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
             /* Update cached data if necessary */
@@ -2739,7 +2741,7 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              * the `priv' field of `cdata' with information about the underlying
              * integer conversion.
              */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_ENUM != src->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_ENUM datatype")
@@ -2766,7 +2768,7 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             break;
 
         case H5T_CONV_CONV:
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_ENUM != src->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_ENUM datatype")
@@ -2970,7 +2972,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              * information that remains (almost) constant for this
              * conversion path.
              */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_VLEN != src->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_VLEN datatype")
@@ -2995,7 +2997,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             /*
              * Conversion.
              */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
             /* Initialize source & destination strides */
@@ -3278,7 +3280,7 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              * information that remains (almost) constant for this
              * conversion path.
              */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             HDassert(H5T_ARRAY==src->shared->type);
             HDassert(H5T_ARRAY==dst->shared->type);
@@ -3303,7 +3305,7 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             /*
              * Conversion.
              */
-            if (NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if (NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
             /*
@@ -3436,7 +3438,8 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || 
+               NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_ORDER_LE != src->shared->u.atomic.order && H5T_ORDER_BE != src->shared->u.atomic.order)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order")
@@ -3452,7 +3455,8 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
         case H5T_CONV_CONV:
             /* Get the datatypes */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || 
+               NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
             /*
@@ -3858,7 +3862,8 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
-            if(NULL == (src_p = (H5T_t *)H5I_object(src_id)) || NULL == (dst_p = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src_p = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || 
+               NULL == (dst_p = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;
@@ -3878,7 +3883,8 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
         case H5T_CONV_CONV:
             /* Get the datatypes */
-            if(NULL == (src_p = (H5T_t *)H5I_object(src_id)) || NULL == (dst_p = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src_p = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || 
+               NULL == (dst_p = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;
@@ -4403,7 +4409,7 @@ H5T_conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             if(8 * src->shared->size != src->shared->u.atomic.prec || 8 * dst->shared->size != dst->shared->u.atomic.prec)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad precision")
@@ -4427,7 +4433,7 @@ H5T_conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
         case H5T_CONV_CONV:
             /* Get the datatypes */
-            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
             /*
@@ -8697,7 +8703,8 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
-            if(NULL == (src_p = (H5T_t*)H5I_object(src_id)) || NULL == (dst_p = (H5T_t*)H5I_object(dst_id)))
+            if(NULL == (src_p = (H5T_t*)H5I_object_verify(src_id, H5I_DATATYPE)) || 
+               NULL == (dst_p = (H5T_t*)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;
@@ -8715,7 +8722,8 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
         case H5T_CONV_CONV:
             /* Get the datatypes */
-            if(NULL == (src_p = (H5T_t*)H5I_object(src_id)) || NULL == (dst_p = (H5T_t*)H5I_object(dst_id)))
+            if(NULL == (src_p = (H5T_t*)H5I_object_verify(src_id, H5I_DATATYPE)) || 
+               NULL == (dst_p = (H5T_t*)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;
@@ -9286,7 +9294,8 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
-            if(NULL == (src_p = (H5T_t *)H5I_object(src_id)) || NULL == (dst_p = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src_p = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || 
+               NULL == (dst_p = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;
@@ -9304,7 +9313,8 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
         case H5T_CONV_CONV:
             /* Get the datatypes */
-            if(NULL == (src_p = (H5T_t *)H5I_object(src_id)) || NULL == (dst_p = (H5T_t *)H5I_object(dst_id)))
+            if(NULL == (src_p = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) || 
+               NULL == (dst_p = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;

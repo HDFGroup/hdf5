@@ -98,6 +98,8 @@
                                                     H5G_CRT_GINFO_EST_NAME_LEN \
                                                 }
 
+#define H5G_CRT_LCPL_ID_NAME "group_lcpl_id"
+
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5G_PACKAGE
 #define H5G_MOUNTED(G)              ((G)->shared->mounted)

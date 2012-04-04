@@ -245,7 +245,22 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     /* Go do the real work for attaching the attribute to the dataset */
     if((ret_value = H5A_create(&loc, attr_name, type, space, acpl_id, H5AC_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
+#if 0
+    hid_t		ret_value;              /* Return value */
 
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("i", "i*siiii", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id);
+
+    /* check arguments */
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!attr_name || !*attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+
+    /* Create the attribute through the VOL */
+    if((ret_value = H5VL_attr_create(loc_id, attr_name, type_id, space_id, acpl_id, aapl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
+#endif
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate2() */
@@ -329,6 +344,16 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     /* Go do the real work for attaching the attribute to the dataset */
     if((ret_value = H5A_create(&obj_loc, attr_name, type, space, acpl_id, H5AC_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
+
+#if 0
+    /* Get the token for the Object location through the VOL */
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, obj_name, lapl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
+
+    /* Create the attribute through the VOL */
+    if((ret_value = H5VL_attr_create(loc_id, attr_name, type_id, space_id, acpl_id, aapl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
+#endif
 
 done:
     /* Release resources */

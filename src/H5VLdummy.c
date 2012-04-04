@@ -101,7 +101,7 @@ H5VL_class_t H5VL_dummy_g = {
         NULL,                                   /* create */
         NULL,                                   /* delete */
         NULL,                                   /* move */
-        NULL                                    /* copy */
+        NULL
     },
     {                                           /* object_cls */
         NULL,

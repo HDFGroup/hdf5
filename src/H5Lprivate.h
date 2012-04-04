@@ -37,6 +37,11 @@
 
 /* ========  Link creation property names ======== */
 #define H5L_CRT_INTERMEDIATE_GROUP_NAME         "intermediate_group" /* Create intermediate groups flag */
+#define H5L_CRT_TARGET_ID_NAME                  "target location id"
+#define H5L_CRT_TARGET_NAME_NAME                "target name"
+#define H5L_CRT_LINK_TYPE_NAME                  "link type"
+#define H5L_CRT_UDATA_NAME                      "udata"
+#define H5L_CRT_UDATA_SIZE_NAME                 "udata size"
 
 /* ========  Link access property names ======== */
 #define H5L_ACS_NLINKS_NAME        "max soft links"         /* Number of soft links to traverse */

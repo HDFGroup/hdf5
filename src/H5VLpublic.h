@@ -59,6 +59,13 @@ typedef enum H5VL_group_get_t {
     H5VL_GROUP_GET_INFO	    = 1 	/*group info             		*/
 } H5VL_group_get_t;
 
+/* types for all link get API routines */
+typedef enum H5VL_link_get_t {
+    H5VL_LINK_GET_INFO	    = 0, 	/*link info             		*/
+    H5VL_LINK_GET_NAME	    = 1,	/*link name                             */
+    H5VL_LINK_GET_VAL       = 2         /*link value                            */
+} H5VL_link_get_t;
+
 /* types for all object get API routines */
 typedef enum H5VL_object_get_t {
     H5VL_OBJECT_GET_INFO	    = 0,	/*object info	                	*/
@@ -70,8 +77,16 @@ typedef enum H5VL_object_lookup_t {
     H5VL_OBJECT_LOOKUP              = 0,
     H5VL_OBJECT_LOOKUP_BY_NAME	    = 1,
     H5VL_OBJECT_LOOKUP_BY_IDX	    = 2,
-    H5VL_OBJECT_LOOKUP_BY_ADDR	    = 3 
+    H5VL_OBJECT_LOOKUP_BY_ADDR	    = 3,
+    H5VL_OBJECT_LOOKUP_BY_REF       = 4
 } H5VL_object_lookup_t;
+
+/* types for all object lookup API routines */
+typedef enum H5VL_link_create_type_t {
+    H5VL_CREATE_HARD_LINK           = 0,
+    H5VL_CREATE_SOFT_LINK	    = 1,
+    H5VL_CREATE_UD_LINK	            = 2
+} H5VL_link_create_type_t;
 
 #define H5VL_VOL_DEFAULT 0   /* Default VOL plugin value */
 
@@ -86,8 +101,7 @@ typedef struct H5VL_file_class_t {
 
 /* H5D routines */
 typedef struct H5VL_dataset_class_t {
-    hid_t  (*create)(hid_t loc_id, const char *name, hid_t dtype_id, hid_t space_id, 
-                     hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
+    hid_t  (*create)(hid_t loc_id, const char *name, hid_t dcpl_id, hid_t dapl_id);
     hid_t  (*open)  (hid_t loc_id, const char *name, hid_t dapl_id);
     herr_t (*read)  (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                      hid_t xfer_plist_id, void * buf);
@@ -100,8 +114,7 @@ typedef struct H5VL_dataset_class_t {
 
 /* H5A routines */
 typedef struct H5VL_attribute_class_t {
-    hid_t  (*create)( hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, 
-                      hid_t acpl_id, hid_t aapl_id);
+    hid_t  (*create)( hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id);
     hid_t  (*open)  (hid_t obj_id, const char *attr_name, hid_t aapl_id);
     herr_t (*read)  (hid_t attr_id, hid_t mem_type_id, void *buf );
     herr_t (*write) (hid_t attr_id, hid_t mem_type_id, const void *buf );
@@ -118,18 +131,17 @@ typedef struct H5VL_datatype_class_t {
 
 /* H5L routines */
 typedef struct H5VL_link_class_t {
-    herr_t (*create) (hid_t obj_id, const char *name, hid_t loc_id, const char *link_name, 
-                      hid_t lcpl_id, hid_t lapl_id);
-    herr_t (*delete) (hid_t loc_id, const char *name, hid_t lapl_id);
-    herr_t (*move)   (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
-                      const char *dest_name, hid_t lcpl, hid_t lapl);
-    herr_t (*copy)   (hid_t src_loc_id, const char *src_name, hid_t dest_loc_id, 
-                      const char *dest_name, hid_t lcpl_id, hid_t lapl_id);
+    herr_t (*create)(H5VL_link_create_type_t create_type, hid_t link_loc_id, const char *link_name, 
+                     hid_t lcpl_id, hid_t lapl_id);
+    herr_t (*move)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
+                     const char *dest_name, hbool_t copy_flag, hid_t lcpl, hid_t lapl);
+    herr_t (*get)   (hid_t loc_id, H5VL_link_get_t get_type, va_list arguments);
+    herr_t (*delete)(hid_t loc_id, const char *name, hid_t lapl_id);
 } H5VL_link_class_t;
 
 /* H5G routines */
 typedef struct H5VL_group_class_t {
-    hid_t  (*create)(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id);
+    hid_t  (*create)(hid_t loc_id, const char *name, hid_t gcpl_id, hid_t gapl_id);
     hid_t  (*open)  (hid_t loc_id, const char *name, hid_t gapl_id);
     herr_t (*get)   (hid_t file_id, H5VL_group_get_t get_type, va_list arguments);
     herr_t (*close) (hid_t group_id);

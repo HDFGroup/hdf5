@@ -45,6 +45,7 @@
 #include "H5Lprivate.h"         /* Links                                */
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5VLprivate.h"	/* VOL          		  	*/
 
 /****************/
 /* Local Macros */
@@ -106,7 +107,6 @@ H5FL_DEFINE(H5G_shared_t);
 
 /* Declare the free list to manage H5_obj_t's */
 H5FL_DEFINE(H5_obj_t);
-
 
 /*****************************/
 /* Library Private Variables */
@@ -814,6 +814,8 @@ H5G_iterate(hid_t loc_id, const char *group_name,
     hid_t gid = -1;             /* ID of group to iterate over */
     H5G_t *grp = NULL;          /* Pointer to group data structure to iterate over */
     H5G_iter_appcall_ud_t udata; /* User data for callback */
+    H5VL_id_wrapper_t   *id_wrapper1;     /* user id structure of the location where the group will be opend */
+    H5VL_id_wrapper_t   *id_wrapper2;     /* user id structure of new opend group*/
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -822,6 +824,10 @@ H5G_iterate(hid_t loc_id, const char *group_name,
     HDassert(group_name);
     HDassert(last_lnk);
     HDassert(lnk_op && lnk_op->op_func.op_new);
+
+    /* get the ID struct */
+    if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
     /*
      * Open the group on which to operate.  We also create a group ID which
@@ -833,6 +839,16 @@ H5G_iterate(hid_t loc_id, const char *group_name,
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     if((gid = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+
+    /* Create a new id that points to a struct that holds the group id and the VOL plugin */
+    /* Allocate new id structure */
+    if(NULL == (id_wrapper2 = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    id_wrapper2->obj_id = gid;
+    id_wrapper2->vol_plugin = id_wrapper1->vol_plugin;
+
+    if((gid = H5I_register(H5I_GROUP_PUBLIC, id_wrapper2, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
 
     /* Set up user data for callback */
     udata.gid = gid;

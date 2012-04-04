@@ -49,6 +49,25 @@
 #define H5L_CRT_INTERMEDIATE_GROUP_SIZE         sizeof(unsigned)
 #define H5L_CRT_INTERMEDIATE_GROUP_DEF          0
 
+/* Definitions for target object ID */
+#define H5L_CRT_TARGET_ID_SIZE     sizeof(hid_t)
+#define H5L_CRT_TARGET_ID_DEF      0
+
+/* Definitions for target object NAME */
+#define H5L_CRT_TARGET_NAME_SIZE   sizeof(char *)
+#define H5L_CRT_TARGET_NAME_DEF    NULL
+
+/* Definitions for link type */
+#define H5L_CRT_LINK_TYPE_SIZE     sizeof(link_type)
+#define H5L_CRT_LINK_TYPE_DEF      H5L_TYPE_ERROR
+
+/* Definitions for UDATA */
+#define H5L_CRT_UDATA_SIZE   sizeof(void *)
+#define H5L_CRT_UDATA_DEF    NULL
+
+/* Definitions for UDATA_SIZE */
+#define H5L_CRT_UDATA_SIZE_SIZE   sizeof(size_t)
+#define H5L_CRT_UDATA_SIZE_DEF    0
 
 /******************/
 /* Local Typedefs */
@@ -114,6 +133,11 @@ herr_t
 H5P_lcrt_reg_prop(H5P_genclass_t *pclass)
 {
     unsigned intmd_group = H5L_CRT_INTERMEDIATE_GROUP_DEF;      /* Default setting for creating intermediate groups */
+    hid_t target_id = H5L_CRT_TARGET_ID_DEF;
+    char *target_name = H5L_CRT_TARGET_NAME_DEF;
+    H5L_type_t link_type = H5L_CRT_LINK_TYPE_DEF;
+    void *udata = H5L_CRT_UDATA_DEF;
+    size_t udata_size = H5L_CRT_UDATA_SIZE_DEF;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -121,6 +145,26 @@ H5P_lcrt_reg_prop(H5P_genclass_t *pclass)
     /* Register create intermediate groups property */
     if(H5P_register_real(pclass, H5L_CRT_INTERMEDIATE_GROUP_NAME, H5L_CRT_INTERMEDIATE_GROUP_SIZE, &intmd_group, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5L_CRT_TARGET_ID_NAME, H5L_CRT_TARGET_ID_SIZE, &target_id,
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5L_CRT_TARGET_NAME_NAME, H5L_CRT_TARGET_NAME_SIZE, &target_name,
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5L_CRT_LINK_TYPE_NAME, H5L_CRT_LINK_TYPE_SIZE, &link_type,
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5L_CRT_UDATA_NAME, H5L_CRT_UDATA_SIZE, &udata,
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5L_CRT_UDATA_SIZE_NAME, H5L_CRT_UDATA_SIZE_SIZE, &udata_size,
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

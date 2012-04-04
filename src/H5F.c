@@ -36,9 +36,6 @@
 #include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
-/* Declare a free list to manage the H5VL_id_wrapper_t struct */
-H5FL_DEFINE_STATIC(H5VL_id_wrapper_t);
-
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
 typedef struct H5F_olist_t {
     H5I_type_t obj_type;        /* Type of object to look for */
@@ -368,7 +365,7 @@ ssize_t
 H5Fget_obj_count(hid_t uid, unsigned types)
 {
     H5F_t    *f = NULL;         /* File to query */
-    H5VL_id_wrapper_t    *uid_info;         /* user id structure */
+    H5VL_id_wrapper_t    *id_wrapper;         /* user id structure */
     hid_t    id;
     ssize_t  ret_value;         /* Return value */
 
@@ -376,9 +373,9 @@ H5Fget_obj_count(hid_t uid, unsigned types)
     H5TRACE2("Zs", "iIu", uid, types);
 
     if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
-        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        id = uid_info->obj_id;
+        id = id_wrapper->obj_id;
     }
     else {
         id = uid;
@@ -453,7 +450,7 @@ ssize_t
 H5Fget_obj_ids(hid_t uid, unsigned types, size_t max_objs, hid_t *oid_list)
 {
     H5F_t     *f = NULL;        /* File to query */
-    H5VL_id_wrapper_t     *uid_info;        /* user id structure */
+    H5VL_id_wrapper_t     *id_wrapper;        /* user id structure */
     hid_t     id;
     ssize_t   ret_value;        /* Return value */
 
@@ -461,9 +458,9 @@ H5Fget_obj_ids(hid_t uid, unsigned types, size_t max_objs, hid_t *oid_list)
     H5TRACE4("Zs", "iIuz*i", uid, types, max_objs, oid_list);
 
     if (H5I_FILE_PUBLIC == H5I_get_type(uid)) {
-        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        id = uid_info->obj_id;
+        id = id_wrapper->obj_id;
     }
     else {
         id = uid;
@@ -1889,7 +1886,7 @@ H5Freopen(hid_t uid)
 {
     H5F_t	*old_file = NULL;
     H5F_t	*new_file = NULL;
-    H5VL_id_wrapper_t       *uid_info, *new_uid_info;
+    H5VL_id_wrapper_t       *id_wrapper, *new_id_wrapper;
     hid_t	file_id, new_file_id, ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -1898,10 +1895,10 @@ H5Freopen(hid_t uid)
     /* Get the file */
     if(H5I_FILE_PUBLIC != H5I_get_type(uid))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    file_id = uid_info->obj_id;
+    file_id = id_wrapper->obj_id;
 
     /* Check arguments */
     if(NULL == (old_file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -1925,13 +1922,13 @@ H5Freopen(hid_t uid)
     new_file->file_id = new_file_id;
 
 #if 1 /*MSC - This needs to go through the VOL */
-    if(NULL == (new_uid_info = H5FL_MALLOC(H5VL_id_wrapper_t)))
+    if(NULL == (new_id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    new_uid_info->obj_id = new_file_id;
-    new_uid_info->vol_plugin = uid_info->vol_plugin;
-    new_uid_info->vol_plugin->nrefs ++;
+    new_id_wrapper->obj_id = new_file_id;
+    new_id_wrapper->vol_plugin = id_wrapper->vol_plugin;
+    new_id_wrapper->vol_plugin->nrefs ++;
 
-    if((ret_value = H5I_register(H5I_FILE_PUBLIC, new_uid_info, TRUE)) < 0)
+    if((ret_value = H5I_register(H5I_FILE_PUBLIC, new_id_wrapper, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 #endif
 
@@ -1999,19 +1996,19 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
     HDassert(file);
 
     if(file->file_id == -1) {
-        H5VL_id_wrapper_t               *uid_info;                /* user id structure */
+        H5VL_id_wrapper_t               *id_wrapper;                /* user id structure */
         /* Get an atom for the file */
         if((file->file_id = H5I_register(H5I_FILE, file, app_ref)) < 0)
 	    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
 
         /* Create a new id that points to a struct that holds the file id and the VOL id */
-        if(NULL == (uid_info = H5FL_MALLOC(H5VL_id_wrapper_t)))
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        uid_info->obj_id = file->file_id;
-        uid_info->vol_plugin = file->vol_cls;
-        uid_info->vol_plugin->nrefs ++;
+        id_wrapper->obj_id = file->file_id;
+        id_wrapper->vol_plugin = file->vol_cls;
+        id_wrapper->vol_plugin->nrefs ++;
 
-        if((H5I_register(H5I_FILE_PUBLIC, uid_info, TRUE)) < 0)
+        if((H5I_register(H5I_FILE_PUBLIC, id_wrapper, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
     } else {
         /* Increment reference count on atom. */
@@ -2486,7 +2483,7 @@ herr_t
 H5Fset_mdc_config(hid_t uid, H5AC_cache_config_t *config_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
-    H5VL_id_wrapper_t      *uid_info;               /* user id structure */
+    H5VL_id_wrapper_t      *id_wrapper;               /* user id structure */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2494,11 +2491,11 @@ H5Fset_mdc_config(hid_t uid, H5AC_cache_config_t *config_ptr)
 
     if(H5I_FILE_PUBLIC != H5I_get_type(uid))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
     /* Check args */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(uid_info->obj_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5I_object_verify(id_wrapper->obj_id, H5I_FILE)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* set the resize configuration  */
@@ -2605,7 +2602,7 @@ herr_t
 H5Freset_mdc_hit_rate_stats(hid_t uid)
 {
     H5F_t      *file;                   /* File object for file ID */
-    H5VL_id_wrapper_t      *uid_info;               /* user id structure */
+    H5VL_id_wrapper_t      *id_wrapper;               /* user id structure */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2613,11 +2610,11 @@ H5Freset_mdc_hit_rate_stats(hid_t uid)
 
     if(H5I_FILE_PUBLIC != H5I_get_type(uid))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
     /* Check args */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(uid_info->obj_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5I_object_verify(id_wrapper->obj_id, H5I_FILE)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Reset the hit rate statistic */
@@ -2792,7 +2789,7 @@ herr_t
 H5Fclear_elink_file_cache(hid_t uid)
 {
     H5F_t         *file;        /* File */
-    H5VL_id_wrapper_t      *uid_info;               /* user id structure */
+    H5VL_id_wrapper_t      *id_wrapper;               /* user id structure */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2801,10 +2798,10 @@ H5Fclear_elink_file_cache(hid_t uid)
     /* Check args */
     if(H5I_FILE_PUBLIC != H5I_get_type(uid))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
-    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if(NULL == (file = (H5F_t *)H5I_object_verify(uid_info->obj_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5I_object_verify(id_wrapper->obj_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Release the EFC */

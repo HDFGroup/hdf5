@@ -245,7 +245,7 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_open(loc_id, location, lapl_id)) < 0)
+    if((ret_value = H5VL_object_open_by_loc(loc_id, location, lapl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
@@ -309,7 +309,7 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_open(loc_id, location, lapl_id)) < 0)
+    if((ret_value = H5VL_object_open_by_loc(loc_id, location, lapl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
@@ -371,7 +371,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_open(loc_id, location, lapl_id)) < 0)
+    if((ret_value = H5VL_object_open_by_loc(loc_id, location, lapl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
@@ -592,27 +592,12 @@ H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
     if(!oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-    /* Check id */
-    if(H5I_GROUP_PUBLIC != H5I_get_type(loc_id) && H5I_DATASET_PUBLIC != H5I_get_type(loc_id) && 
-       H5I_DATATYPE_PUBLIC !=  H5I_get_type(loc_id) && H5I_FILE_PUBLIC !=  H5I_get_type(loc_id)) {
-        H5G_loc_t	loc;                    /* Location of group */
-
-        if(H5G_loc(loc_id, &loc) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-
-        if(H5G_loc_info(&loc, ".", TRUE, oinfo/*out*/, H5P_LINK_ACCESS_DEFAULT, 
-                        H5AC_ind_dxpl_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
-    }
-
-    else {
-        /* Get the token for the Object location through the VOL */
-        if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP, &location) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
-        /* Get the group info through the VOL using the location token */
-        if((ret_value = H5VL_object_get(loc_id, H5VL_OBJECT_GET_INFO, oinfo, location)) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
-    }
+    /* Get the token for the Object location through the VOL */
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP, &location) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
+    /* Get the group info through the VOL using the location token */
+    if((ret_value = H5VL_object_get(loc_id, H5VL_OBJECT_GET_INFO, oinfo, location)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
     if (NULL != location) {
@@ -2417,7 +2402,7 @@ done:
 H5O_loc_t *
 H5O_get_loc(hid_t id)
 {
-    H5VL_id_wrapper_t       *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t       *id_wrapper;              /* user id structure */
     hid_t       object_id;
     H5I_type_t  id_type;
     H5O_loc_t   *ret_value;     /* Return value */
@@ -2432,9 +2417,9 @@ H5O_get_loc(hid_t id)
      that needs to go through the VOL actually go through the VOL*/
     if (H5I_GROUP_PUBLIC == id_type || H5I_DATASET_PUBLIC == id_type || 
         H5I_DATATYPE_PUBLIC == id_type) {
-        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(id)))
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, NULL, "invalid user identifier")
-        object_id = uid_info->obj_id;
+        object_id = id_wrapper->obj_id;
     }
     else {
         object_id = id;

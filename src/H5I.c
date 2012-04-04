@@ -1012,7 +1012,7 @@ void *
 H5I_object_verify(hid_t id, H5I_type_t id_type)
 {
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
-    H5VL_id_wrapper_t               *uid_info;              /* user id structure */
+    H5VL_id_wrapper_t               *id_wrapper;              /* user id structure */
     void		*ret_value = NULL;	/*return value		*/
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1026,9 +1026,9 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
         (H5I_DATATYPE_PUBLIC == H5I_get_type(id) && H5I_DATATYPE_PUBLIC != id_type) ||
         (H5I_DATASET_PUBLIC == H5I_get_type(id) && H5I_DATASET_PUBLIC != id_type) ||
         (H5I_ATTR_PUBLIC == H5I_get_type(id) && H5I_ATTR_PUBLIC != id_type)) {
-        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(id)))
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        id = uid_info->obj_id;       
+        id = id_wrapper->obj_id;       
     }
 #endif
 
@@ -2158,7 +2158,7 @@ done:
 hid_t
 H5Iget_file_id(hid_t uid)
 {
-    H5VL_id_wrapper_t *uid_info;                    /* user id structure */
+    H5VL_id_wrapper_t *id_wrapper;                    /* user id structure */
     hid_t id;
     hid_t ret_value;            /* Return value */
 
@@ -2168,9 +2168,9 @@ H5Iget_file_id(hid_t uid)
     if (H5I_FILE_PUBLIC == H5I_get_type(uid) || H5I_GROUP_PUBLIC == H5I_get_type(uid) ||
         H5I_DATASET_PUBLIC == H5I_get_type(uid) || H5I_DATATYPE_PUBLIC == H5I_get_type(uid) ||
         H5I_ATTR_PUBLIC == H5I_get_type(uid)) {
-        if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(uid)))
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        id = uid_info->obj_id;
+        id = id_wrapper->obj_id;
     }
     else {
         id = uid;
@@ -2291,16 +2291,16 @@ H5VL_replace_with_uids(hid_t *old_list, ssize_t num_ids)
         /* Only iterate through hash table if there are IDs in group */
         if(type_ptr->ids > 0) {
             H5I_id_info_t       *id_ptr;        /*ptr to the new ID     */
-            H5VL_id_wrapper_t *uid_info;                    /* user id structure */
+            H5VL_id_wrapper_t *id_wrapper;                    /* user id structure */
             unsigned i;                 /*counter               */
 
             /* Start at the beginning of the array */
             for(i = 0; i < type_ptr->hash_size; i++) {
                 id_ptr = type_ptr->id_list[i];
                 while(id_ptr) {
-                    if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(id_ptr->id)))
+                    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(id_ptr->id)))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-                    if (uid_info->obj_id == old_list[j]) {
+                    if (id_wrapper->obj_id == old_list[j]) {
                         old_list[j] = id_ptr->id;
                         ret_value ++;
                         replaced = TRUE;
@@ -2357,16 +2357,16 @@ H5VL_inc_ref_uid(hid_t id, hbool_t app_ref)
     /* Only iterate through hash table if there are IDs in group */
     if(type_ptr->ids > 0) {
         H5I_id_info_t       *id_ptr;        /*ptr to the new ID     */
-        H5VL_id_wrapper_t *uid_info;                    /* user id structure */
+        H5VL_id_wrapper_t *id_wrapper;                    /* user id structure */
         unsigned i;                 /*counter               */
 
         /* Start at the beginning of the array */
         for(i = 0; i < type_ptr->hash_size; i++) {
             id_ptr = type_ptr->id_list[i];
             while(id_ptr) {
-                if(NULL == (uid_info = (H5VL_id_wrapper_t *)H5I_object(id_ptr->id)))
+                if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(id_ptr->id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-                if (uid_info->obj_id == id) {
+                if (id_wrapper->obj_id == id) {
                     /* Increment reference count on atom. */
                     if((ret_value = H5I_inc_ref(id_ptr->id, app_ref)) < 0)
                         HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")

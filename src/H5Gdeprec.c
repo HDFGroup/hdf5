@@ -202,6 +202,8 @@ hid_t
 H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 {
     hid_t           tmp_gcpl = (-1);    /* Temporary group creation property list */
+    hid_t           lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    H5P_genplist_t  *plist;
     hid_t	    ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -213,8 +215,8 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 
     /* Check if we need to create a non-standard GCPL */
     if(size_hint > 0) {
-        H5P_genplist_t  *gc_plist;  /* Property list created */
         H5O_ginfo_t     ginfo;          /* Group info property */
+        H5P_genplist_t  *gc_plist;      /* Property list created */
 
         /* Get the default property list */
         if(NULL == (gc_plist = (H5P_genplist_t *)H5I_object(H5P_GROUP_CREATE_DEFAULT)))
@@ -240,9 +242,16 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     else
         tmp_gcpl = H5P_GROUP_CREATE_DEFAULT;
 
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(tmp_gcpl)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* get creation properties */
+    if(H5P_set(plist, H5G_CRT_LCPL_ID_NAME, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for lcpl id")
+
     /* Create the group through the VOL */
-    if((ret_value = H5VL_group_create(loc_id, name, H5P_LINK_CREATE_DEFAULT, tmp_gcpl, 
-                                      H5P_GROUP_ACCESS_DEFAULT)) < 0)
+    if((ret_value = H5VL_group_create(loc_id, name, tmp_gcpl, H5P_GROUP_ACCESS_DEFAULT)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
 done:

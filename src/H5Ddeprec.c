@@ -141,6 +141,7 @@ hid_t
 H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t dcpl_id)
 {
+    H5P_genplist_t  *plist;            /* Property list pointer */
     hid_t           ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -152,9 +153,18 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
 
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* set creation properties */
+    if(H5P_set(plist, H5D_CRT_TYPE_ID_NAME, &type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
+    if(H5P_set(plist, H5D_CRT_SPACE_ID_NAME, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
+
     /* Create the dataset through the VOL */
-    if((ret_value = H5VL_dataset_create(loc_id, name, type_id, space_id, H5P_LINK_CREATE_DEFAULT, 
-                                        dcpl_id, H5P_DATASET_ACCESS_DEFAULT)) < 0)
+    if((ret_value = H5VL_dataset_create(loc_id, name, dcpl_id, H5P_DATASET_ACCESS_DEFAULT)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
 done:

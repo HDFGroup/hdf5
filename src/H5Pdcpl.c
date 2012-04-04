@@ -180,6 +180,9 @@ H5P_dcrt_reg_prop(H5P_genclass_t *pclass)
     H5O_fill_t fill = H5D_CRT_FILL_VALUE_DEF;           /* Default fill value */
     unsigned alloc_time_state = H5D_CRT_ALLOC_TIME_STATE_DEF;   /* Default allocation time state */
     H5O_efl_t efl = H5D_CRT_EXT_FILE_LIST_DEF;          /* Default external file list */
+    hid_t type_id = FAIL;
+    hid_t space_id = FAIL;
+    hid_t lcpl_id = H5P_LINK_CREATE_DEFAULT;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -199,6 +202,21 @@ H5P_dcrt_reg_prop(H5P_genclass_t *pclass)
     /* Register the external file list property */
     if(H5P_register_real(pclass, H5D_CRT_EXT_FILE_LIST_NAME, H5D_CRT_EXT_FILE_LIST_SIZE, &efl, NULL, NULL, NULL, NULL, NULL, H5D_CRT_EXT_FILE_LIST_CMP, NULL) < 0)
        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the type ID property*/
+    if(H5P_register_real(pclass, H5D_CRT_TYPE_ID_NAME, sizeof(hid_t), &type_id, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the space ID property */
+    if(H5P_register_real(pclass, H5D_CRT_SPACE_ID_NAME, sizeof(hid_t), &space_id, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the lcpl ID property */
+    if(H5P_register_real(pclass, H5D_CRT_LCPL_ID_NAME, sizeof(hid_t), &lcpl_id, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
