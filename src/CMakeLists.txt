@@ -110,6 +110,7 @@ SET (H5D_SRCS
     ${HDF5_SRC_DIR}/H5Dio.c
     ${HDF5_SRC_DIR}/H5Dlayout.c
     ${HDF5_SRC_DIR}/H5Dmpio.c
+    ${HDF5_SRC_DIR}/H5Dnone.c
     ${HDF5_SRC_DIR}/H5Doh.c
     ${HDF5_SRC_DIR}/H5Dproxy.c
     ${HDF5_SRC_DIR}/H5Dscatgath.c
@@ -434,6 +435,7 @@ SET (H5O_SRCS
     ${HDF5_SRC_DIR}/H5Oshared.c
     ${HDF5_SRC_DIR}/H5Oshmesg.c
     ${HDF5_SRC_DIR}/H5Ostab.c
+    ${HDF5_SRC_DIR}/H5Ostorage.c
     ${HDF5_SRC_DIR}/H5Otest.c
     ${HDF5_SRC_DIR}/H5Ounknown.c
 )
