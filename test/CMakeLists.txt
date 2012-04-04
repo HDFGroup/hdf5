@@ -87,6 +87,7 @@ SET (HDF5_REFERENCE_TEST_FILES
     family_v16_00003.h5
     filespace_1_6.h5
     filespace_1_8.h5
+    file_image_core_test.h5
     fill_old.h5
     filter_error.h5
     group_old.h5
@@ -307,6 +308,7 @@ SET (H5_TESTS
     tcheck_version
     testmeta
     #links_env
+    file_image
 )
 
 FOREACH (test ${H5_TESTS})
@@ -630,6 +632,7 @@ IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
       gen_filespace
       gen_specmetaread
       gen_sizes_lheap
+      gen_file_image
   )
 
   FOREACH (gen ${H5_GENERATORS})

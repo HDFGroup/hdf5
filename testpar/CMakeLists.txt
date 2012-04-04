@@ -11,6 +11,7 @@ SET (testphdf5_SRCS
     ${HDF5_TEST_PAR_SOURCE_DIR}/testphdf5.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_dset.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_file.c
+    ${HDF5_TEST_PAR_SOURCE_DIR}/t_file_image.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_mdset.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_ph5basic.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_coll_chunk.c
