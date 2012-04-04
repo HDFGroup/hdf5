@@ -145,6 +145,31 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
+  MACRO (ADD_H5_TEST_OLD testname testtype testfile)
+    IF (${testtype} STREQUAL "SKIP")
+      IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+        ADD_TEST (
+            NAME H5REPACK-${testname}-SKIPPED
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out.${testfile}"
+        )
+      ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    ELSE (${testtype} STREQUAL "SKIP")
+      ADD_TEST (
+          NAME H5REPACK-${testname}
+          COMMAND $<TARGET_FILE:h5repack> ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out.${testfile}
+      )
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5REPACK-${testname} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+      ADD_TEST (
+          NAME H5REPACK-DIFF_${testname}
+          COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out.${testfile}
+      )
+      SET_TESTS_PROPERTIES (H5REPACK-DIFF_${testname} PROPERTIES DEPENDS H5REPACK-${testname})
+      SET (last_test "H5REPACK-DIFF_${testname}")
+    ENDIF (${testtype} STREQUAL "SKIP")
+  ENDMACRO (ADD_H5_TEST_OLD)
+
   MACRO (ADD_H5_TEST testname testtype testfile)
     IF (${testtype} STREQUAL "SKIP")
       IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -261,6 +286,29 @@ IF (BUILD_TESTING)
     ENDIF (${testtype} STREQUAL "SKIP")
   ENDMACRO (ADD_H5_VERIFY_TEST)
 
+  MACRO (ADD_H5_TEST_META testname testfile)
+      ADD_TEST (
+          NAME H5REPACK-${testname}_N
+          COMMAND $<TARGET_FILE:h5repack> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out_N.${testname}.h5
+      )
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5REPACK-${testname}_N PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+      ADD_TEST (
+          NAME H5REPACK-${testname}_M
+          COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out_M.${testname}.h5
+      )
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5REPACK-${testname}_M PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+      ADD_TEST (NAME H5REPACK-${testname} COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/testfiles/out_N.${testname}.h5 ${PROJECT_BINARY_DIR}/testfiles/out_M.${testname}.h5)
+      SET_TESTS_PROPERTIES (H5REPACK-${testname} PROPERTIES WILL_FAIL "true")
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5REPACK-${testname} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+      SET (last_test "H5REPACK-${testname}")
+  ENDMACRO (ADD_H5_TEST_META)
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S                                            ###
@@ -278,8 +326,10 @@ IF (BUILD_TESTING)
          ./testfiles/h5repack_layout2.h5-v.out.err
          ./testfiles/h5repack_layout.h5-v.out
          ./testfiles/h5repack_layout.h5-v.out.err
+         ./testfiles/out.tfamily%05d.h5
          ./testfiles/out.h5diff_attr1.h5
          ./testfiles/out.h5repack_attr.h5
+         ./testfiles/out.h5repack_attr_refs.h5
          ./testfiles/out.h5repack_deflate.h5
          ./testfiles/out.h5repack_early.h5
          ./testfiles/out.h5repack_fill.h5
@@ -295,6 +345,10 @@ IF (BUILD_TESTING)
          ./testfiles/out.h5repack_refs.h5
          ./testfiles/out.h5repack_shuffle.h5
          ./testfiles/out.h5repack_soffset.h5
+         ./testfiles/out_M.meta_short.h5
+         ./testfiles/out_N.meta_short.h5
+         ./testfiles/out_M.meta_long.h5
+         ./testfiles/out_N.meta_long.h5
          # from the h5repacktst
          h5repack_attr.h5
          h5repack_attr_out.h5
@@ -762,7 +816,7 @@ IF (BUILD_TESTING)
   IF (NOT USE_FILTER_DEFLATE)
     SET (TESTTYPE "SKIP")
   ENDIF (NOT USE_FILTER_DEFLATE)
-#  ADD_H5_TEST (old_style_layout_short_switches ${TESTTYPE} ${arg})
+  ADD_H5_TEST_OLD (old_style_layout_short_switches ${TESTTYPE} ${arg})
 
 # add a userblock to file
   SET (arg ${FILE1} -u ${PROJECT_BINARY_DIR}/testfiles/ublock.bin -b 2048)
@@ -783,16 +837,14 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (committed_dt "TEST" ${FILE15})
 
 # tests family driver (file is located in common testfiles folder, uses TOOLTEST1
-#  ADD_H5_TEST ( family "FAMILY" ${FILE16})
+  ADD_H5_TEST (family "TEST" ${FILE16})
 
 # test various references (bug 1814 and 1726)
   ADD_H5_TEST (bug1814 "TEST" ${FILE_REF})
 
-# test attribute with various references in attribute of compund 
-# or vlen datatype 
-# (HDFFV-2605, 7513)
-# TODO: include this test when code portion is completed.
-  ADD_H5_TEST (HDFFV-2605 "SKIP" ${FILE_ATTR_REF})
+# test attribute with various references (bug1797 / HDFFV-5932)
+# the references in attribute of compund or vlen datatype 
+  ADD_H5_TEST (HDFFV-5932 "TEST" ${FILE_ATTR_REF})
 
 # Add test for memory leak in attirbute. This test is verified by CTEST.   
 # 1. leak from vlen string  
@@ -800,6 +852,10 @@ IF (BUILD_TESTING)
 # (HDFFV-7840, )
 # Note: this test is experimental for sharing test file among tools
   ADD_H5_TEST (HDFFV-7840 "TEST" h5diff_attr1.h5)
+
+# tests for metadata block size option ('-M')
+  ADD_H5_TEST_META (meta_short h5repack_layout.h5 -M 8192)
+  ADD_H5_TEST_META (meta_long h5repack_layout.h5 --metadata_block_size=8192)
 
   IF (HDF5_TEST_VFD)
     # Run test with different Virtual File Driver

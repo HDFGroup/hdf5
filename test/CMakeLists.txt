@@ -85,6 +85,7 @@ SET (HDF5_REFERENCE_TEST_FILES
     family_v16_00001.h5
     family_v16_00002.h5
     family_v16_00003.h5
+    file_image_core_test.h5
     fill_old.h5
     fixed_idx.h5
     filter_error.h5
@@ -106,6 +107,7 @@ SET (HDF5_REFERENCE_TEST_FILES
     tlayouto.h5
     tmtimen.h5
     tmtimeo.h5
+    tsizeslheap.h5
 )
 
 FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
@@ -302,6 +304,7 @@ SET (H5_TESTS
     tcheck_version
     testmeta
     #links_env
+    file_image
 )
 
 FOREACH (test ${H5_TESTS})
@@ -607,6 +610,7 @@ IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
       gen_udlinks
       space_overflow
       gen_sizes_lheap
+      gen_file_image
   )
 
   FOREACH (gen ${H5_GENERATORS})
