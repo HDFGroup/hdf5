@@ -25,3 +25,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Data filters
     minor: Read failed
 h5dump error: unable to print data
+H5tools-DIAG: Error detected in HDF5:tools (version (number)) thread (IDs):
+  #000: (file name) line (number) in h5tools_dump_simple_dset(): H5Dread failed
+    major: Failure in tools library
+    minor: error in function

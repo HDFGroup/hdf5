@@ -172,38 +172,30 @@ H5HF_dtable_debug(H5HF_dtable_t *dtable, FILE *stream, int indent, int fwidth)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_hdr_debug
+ * Function:	H5HF_hdr_print
  *
- * Purpose:	Prints debugging info about a fractal heap header.
+ * Purpose:	Prints info about a fractal heap header.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Feb 24 2006
+ *		koziol@hdfgroup.org
+ *		Feb 23 2012
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
+void
+H5HF_hdr_print(const H5HF_hdr_t *hdr, hid_t dxpl_id, hbool_t dump_internal, FILE *stream, int indent, int fwidth)
 {
-    H5HF_hdr_t	*hdr = NULL;             /* Fractal heap header info */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(hdr);
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
-
-    /* Load the fractal heap header */
-    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, addr, H5AC_READ)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
 
     /* Print opening message */
     HDfprintf(stream, "%*sFractal Heap Header...\n", indent, "");
@@ -277,9 +269,65 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
                       "Filter mask for root direct block:",
                       hdr->pline_root_direct_filter_mask);
         } /* end if */
-        H5O_debug_id(H5O_PLINE_ID, f, dxpl_id, &(hdr->pline), stream,
+        H5O_debug_id(H5O_PLINE_ID, hdr->f, dxpl_id, &(hdr->pline), stream,
                              indent + 3, MAX(0, fwidth - 3));
     } /* end if */
+
+    /* Print internal (runtime) information, if requested */
+    if(dump_internal) {
+        HDfprintf(stream, "%*sFractal Heap Header Internal Information:\n", indent, "");
+
+        /* Dump root iblock, if there is one */
+        HDfprintf(stream, "%*s%-*s %x\n", indent + 3, "", MAX(0, fwidth - 3),
+                  "Root indirect block flags:",
+                  hdr->root_iblock_flags);
+        HDfprintf(stream, "%*s%-*s %p\n", indent + 3, "", MAX(0, fwidth - 3),
+                  "Root indirect block pointer:",
+                  hdr->root_iblock);
+        if(hdr->root_iblock)
+            H5HF_iblock_print(hdr->root_iblock, dump_internal, stream, indent + 3, fwidth);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5HF_hdr_print() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_debug
+ *
+ * Purpose:	Prints debugging info about a fractal heap header.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 24 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
+{
+    H5HF_hdr_t	*hdr = NULL;             /* Fractal heap header info */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
+
+    /* Load the fractal heap header */
+    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, addr, H5AC_READ)))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
+
+    /* Print the information about the heap's header */
+    H5HF_hdr_print(hdr, dxpl_id, FALSE, stream, indent, fwidth);
 
 done:
     if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
@@ -303,9 +351,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_dblock_debug_cb(const H5FS_section_info_t *_sect, void *_udata)
+H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
 {
-    const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;       /* Section to dump info */
+    H5HF_free_section_t *sect = (H5HF_free_section_t *)_sect;       /* Section to dump info */
     H5HF_debug_iter_ud1_t *udata = (H5HF_debug_iter_ud1_t *)_udata;         /* User data for callbacks */
     haddr_t sect_start, sect_end;       /* Section's beginning and ending offsets */
     haddr_t dblock_start, dblock_end;   /* Direct block's beginning and ending offsets */
@@ -501,51 +549,39 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_iblock_debug
+ * Function:	H5HF_iblock_print
  *
  * Purpose:	Prints debugging info about a fractal heap indirect block.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar  7 2006
+ *		koziol@hdfgroup.org
+ *		Feb 23 2012
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
-    int indent, int fwidth, haddr_t hdr_addr, unsigned nrows)
+void
+H5HF_iblock_print(const H5HF_indirect_t *iblock,
+    hbool_t dump_internal, FILE *stream, int indent, int fwidth)
 {
-    H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
-    H5HF_indirect_t *iblock = NULL;     /* Fractal heap direct block info */
-    hbool_t did_protect;                /* Whether we protected the indirect block or not */
+    const H5HF_hdr_t *hdr;              /* Pointer to heap's header */
     char temp_str[64];                  /* Temporary string, for formatting */
     size_t	u, v;                   /* Local index variable */
-    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(iblock);
+    HDassert(iblock->hdr);
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
-    HDassert(H5F_addr_defined(hdr_addr));
-    HDassert(nrows > 0);
 
-    /* Load the fractal heap header */
-    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, hdr_addr, H5AC_READ)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
-
-    /*
-     * Load the heap indirect block
-     */
-    if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, addr, nrows, NULL, 0, FALSE, H5AC_READ, &did_protect)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap indirect block")
+    /* Set up convenience variables */
+    hdr = iblock->hdr;
 
     /* Print opening message */
     HDfprintf(stream, "%*sFractal Heap Indirect Block...\n", indent, "");
@@ -623,6 +659,75 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                   "<none>");
 
+    /* Print internal (runtime) information, if requested */
+    if(dump_internal) {
+        HDfprintf(stream, "%*sFractal Indirect Block Internal Information:\n", indent, "");
+
+        /* Print general information */
+        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3),
+                  "Reference count:",
+                  iblock->rc);
+
+        /* Print parent's information */
+        HDfprintf(stream, "%*s%-*s %p\n", indent + 3, "", MAX(0, fwidth - 3),
+                  "Parent indirect block address:",
+                  iblock->parent);
+        if(iblock->parent)
+            H5HF_iblock_print(iblock->parent, TRUE, stream, indent + 6, fwidth);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5HF_iblock_print() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_iblock_debug
+ *
+ * Purpose:	Prints debugging info about a fractal heap indirect block.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar  7 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
+    int indent, int fwidth, haddr_t hdr_addr, unsigned nrows)
+{
+    H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
+    H5HF_indirect_t *iblock = NULL;     /* Fractal heap direct block info */
+    hbool_t did_protect;                /* Whether we protected the indirect block or not */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
+    HDassert(H5F_addr_defined(hdr_addr));
+    HDassert(nrows > 0);
+
+    /* Load the fractal heap header */
+    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, hdr_addr, H5AC_READ)))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
+
+    /*
+     * Load the heap indirect block
+     */
+    if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, addr, nrows, NULL, 0, FALSE, H5AC_READ, &did_protect)))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap indirect block")
+
+    /* Print the information about the heap's indirect block */
+    H5HF_iblock_print(iblock, FALSE, stream, indent, fwidth);
+
 done:
     if(iblock && H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap direct block")
@@ -647,9 +752,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sects_debug_cb(const H5FS_section_info_t *_sect, void *_udata)
+H5HF_sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
 {
-    const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;       /* Section to dump info */
+    H5HF_free_section_t *sect = (H5HF_free_section_t *)_sect;       /* Section to dump info */
     H5HF_debug_iter_ud2_t *udata = (H5HF_debug_iter_ud2_t *)_udata;         /* User data for callbacks */
     herr_t      ret_value = SUCCEED;    /* Return value */
 

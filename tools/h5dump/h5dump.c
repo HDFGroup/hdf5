@@ -210,7 +210,7 @@ leave(int ret)
 {
     h5tools_close();
 
-    exit(ret);
+    HDexit(ret);
 }
 
 
@@ -230,35 +230,38 @@ leave(int ret)
 static void
 usage(const char *prog)
 {
-    fflush(stdout);
-    fprintf(stdout, "usage: %s [OPTIONS] file\n", prog);
-    fprintf(stdout, "  OPTIONS\n");
-    fprintf(stdout, "     -h, --help           Print a usage message and exit\n");
-    fprintf(stdout, "     -n, --contents       Print a list of the file contents and exit\n");
-    fprintf(stdout, "     -B, --superblock     Print the content of the super block\n");
-    fprintf(stdout, "     -H, --header         Print the header only; no data is displayed\n");
-    fprintf(stdout, "     -A, --onlyattr       Print the header and value of attributes\n");
-    fprintf(stdout, "     -i, --object-ids     Print the object ids\n");
-    fprintf(stdout, "     -r, --string         Print 1-byte integer datasets as ASCII\n");
-    fprintf(stdout, "     -e, --escape         Escape non printing characters\n");
-    fprintf(stdout, "     -V, --version        Print version number and exit\n");
-    fprintf(stdout, "     -a P, --attribute=P  Print the specified attribute\n");
-    fprintf(stdout, "     -d P, --dataset=P    Print the specified dataset\n");
-    fprintf(stdout, "     -y, --noindex        Do not print array indices with the data\n");
-    fprintf(stdout, "     -p, --properties     Print dataset filters, storage layout and fill value\n");
-    fprintf(stdout, "     -f D, --filedriver=D Specify which driver to open the file with\n");
-    fprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
-    fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
-    fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
-    fprintf(stdout, "     -b B, --binary=B     Binary file output, of form B\n");
-    fprintf(stdout, "     -t P, --datatype=P   Print the specified named datatype\n");
-    fprintf(stdout, "     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)\n");
-    fprintf(stdout, "                          sets the number of columns to the maximum (65535).\n");
-    fprintf(stdout, "                          Default width is 80 columns.\n");
-    fprintf(stdout, "     -m T, --format=T     Set the floating point output format\n");
-    fprintf(stdout, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
-    fprintf(stdout, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
-    fprintf(stdout,
+    HDfflush(rawoutstream);
+    HDfprintf(rawoutstream, "usage: %s [OPTIONS] files\n", prog);
+    HDfprintf(rawoutstream, "  OPTIONS\n");
+    HDfprintf(rawoutstream, "     -h, --help           Print a usage message and exit\n");
+    HDfprintf(rawoutstream, "     -n, --contents       Print a list of the file contents and exit\n");
+    HDfprintf(rawoutstream, "     -B, --superblock     Print the content of the super block\n");
+    HDfprintf(rawoutstream, "     -H, --header         Print the header only; no data is displayed\n");
+    HDfprintf(rawoutstream, "     -A, --onlyattr       Print the header and value of attributes\n");
+    HDfprintf(rawoutstream, "     -i, --object-ids     Print the object ids\n");
+    HDfprintf(rawoutstream, "     -r, --string         Print 1-byte integer datasets as ASCII\n");
+    HDfprintf(rawoutstream, "     -e, --escape         Escape non printing characters\n");
+    HDfprintf(rawoutstream, "     -V, --version        Print version number and exit\n");
+    HDfprintf(rawoutstream, "     -a P, --attribute=P  Print the specified attribute\n");
+    HDfprintf(rawoutstream, "                          If an attribute name contains a slash (/), escape the\n");
+    HDfprintf(rawoutstream, "                          slash with a preceding backslash (\\).\n");
+    HDfprintf(rawoutstream, "                          (See example section below.)\n");
+    HDfprintf(rawoutstream, "     -d P, --dataset=P    Print the specified dataset\n");
+    HDfprintf(rawoutstream, "     -y, --noindex        Do not print array indices with the data\n");
+    HDfprintf(rawoutstream, "     -p, --properties     Print dataset filters, storage layout and fill value\n");
+    HDfprintf(rawoutstream, "     -f D, --filedriver=D Specify which driver to open the file with\n");
+    HDfprintf(rawoutstream, "     -g P, --group=P      Print the specified group and all members\n");
+    HDfprintf(rawoutstream, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
+    HDfprintf(rawoutstream, "     -o F, --output=F     Output raw data into file F\n");
+    HDfprintf(rawoutstream, "     -b B, --binary=B     Binary file output, of form B\n");
+    HDfprintf(rawoutstream, "     -t P, --datatype=P   Print the specified named datatype\n");
+    HDfprintf(rawoutstream, "     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)\n");
+    HDfprintf(rawoutstream, "                          sets the number of columns to the maximum (65535).\n");
+    HDfprintf(rawoutstream, "                          Default width is 80 columns.\n");
+    HDfprintf(rawoutstream, "     -m T, --format=T     Set the floating point output format\n");
+    HDfprintf(rawoutstream, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
+    HDfprintf(rawoutstream, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
+    HDfprintf(rawoutstream,
   "     -M L, --packedbits=L Print packed bits as unsigned integers, using mask\n"
   "                          format L for an integer dataset specified with\n"
   "                          option -d. L is a list of offset,length values,\n"
@@ -266,69 +269,77 @@ usage(const char *prog)
   "                          the data value and length is the number of bits of\n"
   "                          the mask.\n"
   );
-    fprintf(stdout, "     -R, --region         Print dataset pointed by region references\n");
-    fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
-    fprintf(stdout, "     -u, --use-dtd        Output in XML using DTD\n");
-    fprintf(stdout, "     -D U, --xml-dtd=U    Use the DTD or schema at U\n");
-    fprintf(stdout, "     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML\n");
-    fprintf(stdout, "                          \":\": no namespace, default: \"hdf5:\"\n");
-    fprintf(stdout, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
-    fprintf(stdout, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
-    fprintf(stdout, "                          occur.\n");
-    fprintf(stdout, "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
-    fprintf(stdout, "                          of \"[\" in datset names.\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
-    fprintf(stdout, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
-    fprintf(stdout, " Thus, the options mirror those for performing a hyperslab selection.\n");
-    fprintf(stdout, " One of the START, COUNT, STRIDE, or BLOCK parameters are mandatory if you do subsetting.\n");
-    fprintf(stdout, " The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in\n");
-    fprintf(stdout, " each dimension. START is optional and will default to 0 in each dimension.\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "      -s START,  --start=START    Offset of start of subsetting selection\n");
-    fprintf(stdout, "      -S STRIDE, --stride=STRIDE  Hyperslab stride\n");
-    fprintf(stdout, "      -c COUNT,  --count=COUNT    Number of blocks to include in selection\n");
-    fprintf(stdout, "      -k BLOCK,  --block=BLOCK    Size of block in hyperslab\n");
-    fprintf(stdout, "  START, COUNT, STRIDE, and BLOCK - is a list of integers the number of which are equal to the\n");
-    fprintf(stdout, "        number of dimensions in the dataspace being queried\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "  D - is the file driver to use in opening the file. Acceptable values\n");
-    fprintf(stdout, "        are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
-    fprintf(stdout, "        the file driver flag, the file will be opened with each driver in\n");
-    fprintf(stdout, "        turn and in the order specified above until one driver succeeds\n");
-    fprintf(stdout, "        in opening the file.\n");
-    fprintf(stdout, "  F - is a filename.\n");
-    fprintf(stdout, "  P - is the full path from the root group to the object.\n");
-    fprintf(stdout, "  N - is an integer greater than 1.\n");
-    fprintf(stdout, "  T - is a string containing the floating point format, e.g '%%.3f'\n");
-    fprintf(stdout, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
-    fprintf(stdout, "        updated by [IETF RFC 2732])\n");
-    fprintf(stdout, "  B - is the form of binary output: NATIVE for a memory type, FILE for the\n");
-    fprintf(stdout, "        file type, LE or BE for pre-existing little or big endian types.\n");
-    fprintf(stdout, "        Must be used with -o (output file) and it is recommended that\n");
-    fprintf(stdout, "        -d (dataset) is used. B is an optional argument, defaults to NATIVE\n");
-    fprintf(stdout, "  Q - is the sort index type. It can be \"creation_order\" or \"name\" (default)\n");
-    fprintf(stdout, "  Z - is the sort order type. It can be \"descending\" or \"ascending\" (default)\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "  Examples:\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "  1) Attribute foo of the group /bar_none in file quux.h5\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "      h5dump -a /bar_none/foo quux.h5\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "  2) Selecting a subset from dataset /foo in file quux.h5\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "      h5dump -d /foo -s \"0,1\" -S \"1,1\" -c \"2,3\" -k \"2,2\" quux.h5\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "  3) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin'\n");
-    fprintf(stdout, "        using a little-endian type\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "      h5dump -d /dset -b LE -o out.bin quux.h5\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "  4) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "      h5dump -d /dset -M 0,1,4,3 quux.h5\n");
-    fprintf(stdout, "\n");
+    HDfprintf(rawoutstream, "     -R, --region         Print dataset pointed by region references\n");
+    HDfprintf(rawoutstream, "     -x, --xml            Output in XML using Schema\n");
+    HDfprintf(rawoutstream, "     -u, --use-dtd        Output in XML using DTD\n");
+    HDfprintf(rawoutstream, "     -D U, --xml-dtd=U    Use the DTD or schema at U\n");
+    HDfprintf(rawoutstream, "     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML\n");
+    HDfprintf(rawoutstream, "                          \":\": no namespace, default: \"hdf5:\"\n");
+    HDfprintf(rawoutstream, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
+    HDfprintf(rawoutstream, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
+    HDfprintf(rawoutstream, "                          occur.\n");
+    HDfprintf(rawoutstream, "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
+    HDfprintf(rawoutstream, "                          of \"[\" in datset names.\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, " Subsetting is available by using the following options with a dataset\n");
+    HDfprintf(rawoutstream, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
+    HDfprintf(rawoutstream, " Thus, the options mirror those for performing a hyperslab selection.\n");
+    HDfprintf(rawoutstream, " One of the START, COUNT, STRIDE, or BLOCK parameters are mandatory if you do subsetting.\n");
+    HDfprintf(rawoutstream, " The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in\n");
+    HDfprintf(rawoutstream, " each dimension. START is optional and will default to 0 in each dimension.\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      -s START,  --start=START    Offset of start of subsetting selection\n");
+    HDfprintf(rawoutstream, "      -S STRIDE, --stride=STRIDE  Hyperslab stride\n");
+    HDfprintf(rawoutstream, "      -c COUNT,  --count=COUNT    Number of blocks to include in selection\n");
+    HDfprintf(rawoutstream, "      -k BLOCK,  --block=BLOCK    Size of block in hyperslab\n");
+    HDfprintf(rawoutstream, "  START, COUNT, STRIDE, and BLOCK - is a list of integers the number of which are equal to the\n");
+    HDfprintf(rawoutstream, "        number of dimensions in the dataspace being queried\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  D - is the file driver to use in opening the file. Acceptable values\n");
+    HDfprintf(rawoutstream, "        are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
+    HDfprintf(rawoutstream, "        the file driver flag, the file will be opened with each driver in\n");
+    HDfprintf(rawoutstream, "        turn and in the order specified above until one driver succeeds\n");
+    HDfprintf(rawoutstream, "        in opening the file.\n");
+    HDfprintf(rawoutstream, "  F - is a filename.\n");
+    HDfprintf(rawoutstream, "  P - is the full path from the root group to the object.\n");
+    HDfprintf(rawoutstream, "  N - is an integer greater than 1.\n");
+    HDfprintf(rawoutstream, "  T - is a string containing the floating point format, e.g '%%.3f'\n");
+    HDfprintf(rawoutstream, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
+    HDfprintf(rawoutstream, "        updated by [IETF RFC 2732])\n");
+    HDfprintf(rawoutstream, "  B - is the form of binary output: NATIVE for a memory type, FILE for the\n");
+    HDfprintf(rawoutstream, "        file type, LE or BE for pre-existing little or big endian types.\n");
+    HDfprintf(rawoutstream, "        Must be used with -o (output file) and it is recommended that\n");
+    HDfprintf(rawoutstream, "        -d (dataset) is used. B is an optional argument, defaults to NATIVE\n");
+    HDfprintf(rawoutstream, "  Q - is the sort index type. It can be \"creation_order\" or \"name\" (default)\n");
+    HDfprintf(rawoutstream, "  Z - is the sort order type. It can be \"descending\" or \"ascending\" (default)\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  Examples:\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  1) Attribute foo of the group /bar_none in file quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -a /bar_none/foo quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "     Attribute \"high/low\" of the group /bar_none in the file quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -a \"/bar_none/high\\/low\" quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  2) Selecting a subset from dataset /foo in file quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -d /foo -s \"0,1\" -S \"1,1\" -c \"2,3\" -k \"2,2\" quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  3) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin'\n");
+    HDfprintf(rawoutstream, "        using a little-endian type\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -d /dset -b LE -o out.bin quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  4) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -d /dset -M 0,1,4,3 quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  5) Dataset foo in files multi1.h5 multi2.h5 multi3.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -d /foo multi1.h5 multi2.h5 multi3.h5\n");
+    HDfprintf(rawoutstream, "\n");
 }
 
 
@@ -454,9 +465,8 @@ table_list_free(void)
     table_list.nalloc = table_list.nused = 0;
 } /* end table_list_free() */
 
-
 /*-------------------------------------------------------------------------
- * Function:    set_output_file
+ * Function:    set_data_output_file
  *
  * Purpose:     Open fname as the output file for dataset raw data.
  *      Set rawdatastream as its file stream.
@@ -472,30 +482,94 @@ table_list_free(void)
  *-------------------------------------------------------------------------
  */
 static int
-set_output_file(const char *fname, int is_bin)
+set_data_output_file(const char *fname, int is_bin)
 {
     FILE    *f;    /* temporary holding place for the stream pointer
                     * so that rawdatastream is changed only when succeeded */
 
     if (rawdatastream && rawdatastream != stdout) {
-        if (fclose(rawdatastream))
-            perror("closing rawdatastream");
+        if (HDfclose(rawdatastream))
+            HDperror("closing rawdatastream");
         else
             rawdatastream = NULL;
     }
 
     /* binary output */
     if (is_bin) {
-        if ((f = fopen(fname, "wb")) != NULL) {
+        if ((f = HDfopen(fname, "wb")) != NULL) {
             rawdatastream = f;
             return 0;
         }
     }
     else {
-        if ((f = fopen(fname, "w")) != NULL) {
+        if ((f = HDfopen(fname, "w")) != NULL) {
             rawdatastream = f;
             return 0;
         }
+    }
+
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    set_output_file
+ *
+ * Purpose:     Open fname as the output file for raw output.
+ *      Set rawoutstream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+set_output_file(const char *fname)
+{
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawoutstream is changed only when succeeded */
+
+    if (rawoutstream && rawoutstream != stdout) {
+        if (HDfclose(rawoutstream))
+            HDperror("closing rawoutstream");
+        else
+            rawoutstream = NULL;
+    }
+
+    if ((f = HDfopen(fname, "w")) != NULL) {
+        rawoutstream = f;
+        return 0;
+    }
+
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    set_error_file
+ *
+ * Purpose:     Open fname as the error output file for dataset raw error.
+ *      Set rawerrorstream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+set_error_file(const char *fname)
+{
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawerrorstream is changed only when succeeded */
+
+    if (rawerrorstream && rawerrorstream != stderr) {
+        if (HDfclose(rawerrorstream))
+            HDperror("closing rawerrorstream");
+        else
+            rawerrorstream = NULL;
+    }
+
+    if ((f = HDfopen(fname, "w")) != NULL) {
+        rawerrorstream = f;
+        return 0;
     }
 
     return -1;
@@ -521,15 +595,15 @@ set_binary_form(const char *form)
 {
     int bform = -1;
 
-    if (strcmp(form,"NATIVE") == 0 || strcmp(form,"MEMORY") == 0) {
+    if (HDstrcmp(form,"NATIVE") == 0 || HDstrcmp(form,"MEMORY") == 0) {
         /* native form */
         bform = 0;
     }
-    else if (strcmp(form,"FILE") == 0) /* file type form */
+    else if (HDstrcmp(form,"FILE") == 0) /* file type form */
         bform = 1;
-    else if (strcmp(form,"LE") == 0) /* convert to little endian */
+    else if (HDstrcmp(form,"LE") == 0) /* convert to little endian */
         bform = 2;
-    else if (strcmp(form,"BE") == 0) /* convert to big endian */
+    else if (HDstrcmp(form,"BE") == 0) /* convert to big endian */
         bform = 3;
 
     return bform;
@@ -556,9 +630,9 @@ set_sort_by(const char *form)
 {
     H5_index_t idx_type = H5_INDEX_UNKNOWN;
 
-    if (strcmp(form,"name")==0) /* H5_INDEX_NAME */
+    if (HDstrcmp(form,"name")==0) /* H5_INDEX_NAME */
         idx_type = H5_INDEX_NAME;
-    else if (strcmp(form,"creation_order")==0) /* H5_INDEX_CRT_ORDER */
+    else if (HDstrcmp(form,"creation_order")==0) /* H5_INDEX_CRT_ORDER */
         idx_type = H5_INDEX_CRT_ORDER;
 
     return idx_type;
@@ -585,9 +659,9 @@ set_sort_order(const char *form)
 {
     H5_iter_order_t iter_order = H5_ITER_UNKNOWN;
 
-    if (strcmp(form,"ascending")==0) /* H5_ITER_INC */
+    if (HDstrcmp(form,"ascending")==0) /* H5_ITER_INC */
         iter_order = H5_ITER_INC;
-    else if (strcmp(form,"descending")==0) /* H5_ITER_DEC */
+    else if (HDstrcmp(form,"descending")==0) /* H5_ITER_DEC */
         iter_order = H5_ITER_DEC;
 
     return iter_order;
@@ -626,7 +700,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
 
     /* count how many integers do we have */
     for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (isdigit(*ptr)) {
+        if (HDisdigit(*ptr)) {
             if (!last_digit)
                 /* the last read character wasn't a digit */
                 size_count++;
@@ -642,14 +716,14 @@ parse_hsize_list(const char *h_list, subset_d *d)
         return;
 
     /* allocate an array for the integers in the list */
-    p_list = (hsize_t *)calloc(size_count, sizeof(hsize_t));
+    p_list = (hsize_t *)HDcalloc(size_count, sizeof(hsize_t));
 
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if(isdigit(*ptr)) {
+        if(HDisdigit(*ptr)) {
             /* we should have an integer now */
-            p_list[i++] = (hsize_t)atof(ptr);
+            p_list[i++] = (hsize_t)HDatof(ptr);
 
-            while (isdigit(*ptr))
+            while (HDisdigit(*ptr))
                 /* scroll to end of integer */
                 ptr++;
         }
@@ -681,10 +755,10 @@ parse_subset_params(char *dset)
     struct subset_t *s = NULL;
     register char   *brace;
 
-    if (!disable_compact_subset && ((brace = strrchr(dset, '[')) != NULL)) {
+    if (!disable_compact_subset && ((brace = HDstrrchr(dset, '[')) != NULL)) {
         *brace++ = '\0';
 
-        s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
+        s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
         parse_hsize_list(brace, &s->start);
 
         while (*brace && *brace != ';')
@@ -847,26 +921,26 @@ free_handler(struct handler_t *hand, int len)
     if(hand) {
         for (i = 0; i < len; i++) {
             if(hand[i].obj) {
-                free(hand[i].obj);
+                HDfree(hand[i].obj);
                 hand[i].obj=NULL;
             }
 
             if (hand[i].subset_info) {
                 if(hand[i].subset_info->start.data)
-                    free(hand[i].subset_info->start.data);
+                    HDfree(hand[i].subset_info->start.data);
                 if(hand[i].subset_info->stride.data)
-                    free(hand[i].subset_info->stride.data);
+                    HDfree(hand[i].subset_info->stride.data);
                 if(hand[i].subset_info->count.data)
-                    free(hand[i].subset_info->count.data);
+                    HDfree(hand[i].subset_info->count.data);
                 if(hand[i].subset_info->block.data)
-                    free(hand[i].subset_info->block.data);
+                    HDfree(hand[i].subset_info->block.data);
 
-                free(hand[i].subset_info);
+                HDfree(hand[i].subset_info);
                 hand[i].subset_info=NULL;
             }
         }
 
-        free(hand);
+        HDfree(hand);
     }
 }
 
@@ -906,7 +980,7 @@ parse_command_line(int argc, const char *argv[])
     }
 
     /* this will be plenty big enough to hold the info */
-    if((hand = (struct handler_t *)calloc((size_t)argc, sizeof(struct handler_t)))==NULL) {
+    if((hand = (struct handler_t *)HDcalloc((size_t)argc, sizeof(struct handler_t)))==NULL) {
             goto error;
     }
 
@@ -1031,13 +1105,13 @@ parse_start:
 
         case 'o':
             if ( bin_output ) {
-                if (set_output_file(opt_arg, 1) < 0) {
+                if (set_data_output_file(opt_arg, 1) < 0) {
                     usage(h5tools_getprogname());
                     goto error;
                 }
             }
             else {
-                if (set_output_file(opt_arg, 0) < 0) {
+                if (set_data_output_file(opt_arg, 0) < 0) {
                     usage(h5tools_getprogname());
                     goto error;
                 }
@@ -1058,7 +1132,7 @@ parse_start:
             }
             bin_output = TRUE;
             if (outfname!=NULL) {
-                if (set_output_file(outfname, 1) < 0)  {
+                if (set_data_output_file(outfname, 1) < 0)  {
                     /* failed to set output file */
                     usage(h5tools_getprogname());
                     goto error;
@@ -1133,7 +1207,7 @@ parse_start:
                 usage(h5tools_getprogname());
                 goto error;
             }
-            if (strcmp(opt_arg,":") == 0) {
+            if (HDstrcmp(opt_arg,":") == 0) {
                 xmlnsprefix = "";
             } 
             else {
@@ -1163,7 +1237,7 @@ parse_start:
                 s = last_dset->subset_info;
             } 
             else {
-                last_dset->subset_info = s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
+                last_dset->subset_info = s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
             }
 
             /*
@@ -1181,28 +1255,28 @@ parse_start:
                 switch ((char)opt) {
                 case 's':
                     if (s->start.data) {
-                        free(s->start.data);
+                        HDfree(s->start.data);
                         s->start.data = NULL;
                     }
                     parse_hsize_list(opt_arg, &s->start);
                     break;
                 case 'S':
                     if (s->stride.data) {
-                        free(s->stride.data);
+                        HDfree(s->stride.data);
                         s->stride.data = NULL;
                     }
                     parse_hsize_list(opt_arg, &s->stride);
                     break;
                 case 'c':
                     if (s->count.data) {
-                        free(s->count.data);
+                        HDfree(s->count.data);
                         s->count.data = NULL;
                 }
                     parse_hsize_list(opt_arg, &s->count);
                     break;
                 case 'k':
                     if (s->block.data) {
-                        free(s->block.data);
+                        HDfree(s->block.data);
                         s->block.data = NULL;
                     }
                     parse_hsize_list(opt_arg, &s->block);
@@ -1306,11 +1380,13 @@ main(int argc, const char *argv[])
     hid_t               fid = -1;
     hid_t               gid = -1;
     H5E_auto2_t         func;
+    H5E_auto2_t         tools_func;
     H5O_info_t          oi;
-    struct handler_t   *hand;
+    struct handler_t   *hand = NULL;
     int                 i;
     unsigned            u;
     void               *edata;
+    void               *tools_edata;
     char               *fname = NULL;
 
     h5tools_setprogname(PROGRAMNAME);
@@ -1325,6 +1401,10 @@ main(int argc, const char *argv[])
 
     /* Initialize h5tools lib */
     h5tools_init();
+    /* Disable tools error reporting */
+    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
+    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
+    
     if((hand = parse_command_line(argc, argv))==NULL) {
         goto done;
     }
@@ -1335,8 +1415,10 @@ main(int argc, const char *argv[])
         goto done;
     }
 
-    if (enable_error_stack)
+    if (enable_error_stack) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
+        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
+    }
 
     /* Check for conflicting options */
     if (doxml) {
@@ -1379,168 +1461,185 @@ main(int argc, const char *argv[])
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
-    fname = HDstrdup(argv[opt_ind]);
+    while(opt_ind < argc) {
+        fname = HDstrdup(argv[opt_ind++]);
 
-    fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, driver, NULL, 0);
+        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, driver, NULL, 0);
 
-    if (fid < 0) {
-        error_msg("unable to open file \"%s\"\n", fname);
-        h5tools_setstatus(EXIT_FAILURE);
-        goto done;
-    }
-
-    /* allocate and initialize internal data structure */
-    init_prefix(&prefix, prefix_len);
-
-    /* Prepare to find objects that might be targets of a reference */
-    fill_ref_path_table(fid);
-
-    if(doxml) {
-        /* initialize XML */
-        /* reset prefix! */
-        HDstrcpy(prefix, "");
-
-        /* make sure the URI is initialized to something */
-        if (xml_dtd_uri == NULL) {
-            if (useschema) {
-                xml_dtd_uri = DEFAULT_XSD;
-            } 
-            else {
-                xml_dtd_uri = DEFAULT_DTD;
-                xmlnsprefix = "";
-            }
-        } 
-        else {
-            if (useschema && strcmp(xmlnsprefix,"")) {
-                error_msg("Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
-                h5tools_setstatus(EXIT_FAILURE);
-                goto done;
-            }
-        }
-    }
-
-    /* Get object info for root group */
-    if(H5Oget_info_by_name(fid, "/", &oi, H5P_DEFAULT) < 0) {
-        error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
-        h5tools_setstatus(EXIT_FAILURE);
-        goto done;
-    }
-
-    /* Initialize object tables */
-    if(table_list_add(fid, oi.fileno) < 0) {
-        error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
-        h5tools_setstatus(EXIT_FAILURE);
-        goto done;
-    }
-    group_table = table_list.tables[0].group_table;
-    dset_table = table_list.tables[0].dset_table;
-    type_table = table_list.tables[0].type_table;
-
-    /* does there exist unamed committed datatype */
-    for (u = 0; u < type_table->nobjs; u++)
-        if (!type_table->objs[u].recorded) {
-            unamedtype = 1;
-            break;
-        } /* end if */
-
-    /* start to dump - display file header information */
-    if (!doxml) {
-        begin_obj(h5tools_dump_header_format->filebegin, fname, h5tools_dump_header_format->fileblockbegin);
-    } 
-    else {
-        HDfprintf(stdout, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-
-        /* alternative first element, depending on schema or DTD. */
-        if (useschema) {
-            if (strcmp(xmlnsprefix,"") == 0) {
-                HDfprintf(stdout, "<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
-                       xml_dtd_uri);
-            } 
-            else {
-/*  TO DO: make -url option work in this case (may need new option) */
-                char *ns;
-                char *indx;
-
-                ns = HDstrdup(xmlnsprefix);
-                indx = strrchr(ns,(int)':');
-                if (indx) *indx = '\0';
-
-                HDfprintf(stdout, "<%sHDF5-File xmlns:%s=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File\" "
-                       "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-                       "xsi:schemaLocation=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File "
-                       "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\">\n",xmlnsprefix,ns);
-                HDfree(ns);
-            }
-        } 
-        else {
-            HDfprintf(stdout, "<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n", xml_dtd_uri);
-            HDfprintf(stdout, "<HDF5-File>\n");
-        }
-    }
-
-    if (!doxml) {
-        if (display_fi) {
-            HDfprintf(stdout, "\n");
-            dump_fcontents(fid);
-            end_obj(h5tools_dump_header_format->fileend,h5tools_dump_header_format->fileblockend);
-            HDfprintf(stdout, "\n");
+        if (fid < 0) {
+            error_msg("unable to open file \"%s\"\n", fname);
+            h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
 
-        if (display_bb)
-            dump_fcpl(fid);
-    }
+        /* allocate and initialize internal data structure */
+        init_prefix(&prefix, prefix_len);
 
-    if(display_all) {
-        if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) {
-            error_msg("unable to open root group\n");
-            h5tools_setstatus(EXIT_FAILURE);
-        }
-        else {
-            if (!doxml)
-                dump_indent += COL;
-            dump_function_table->dump_group_function(gid, "/" );
-            if (!doxml)
-                dump_indent -= COL;
-            HDfprintf(stdout, "\n");
-        }
+        /* Prepare to find objects that might be targets of a reference */
+        fill_ref_path_table(fid);
 
-        if(H5Gclose(gid) < 0) {
-            error_msg("unable to close root group\n");
-            h5tools_setstatus(EXIT_FAILURE);
-        }
-
-    }
-    else {
-        /* Note: this option is not supported for XML */
         if(doxml) {
+            /* initialize XML */
+            /* reset prefix! */
+            HDstrcpy(prefix, "");
+
+            /* make sure the URI is initialized to something */
+            if (xml_dtd_uri == NULL) {
+                if (useschema) {
+                    xml_dtd_uri = DEFAULT_XSD;
+                } 
+                else {
+                    xml_dtd_uri = DEFAULT_DTD;
+                    xmlnsprefix = "";
+                }
+            } 
+            else {
+                if (useschema && HDstrcmp(xmlnsprefix,"")) {
+                    error_msg("Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    goto done;
+                }
+            }
+        }
+
+        /* Get object info for root group */
+        if(H5Oget_info_by_name(fid, "/", &oi, H5P_DEFAULT) < 0) {
             error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
-        } /* end if */
+        }
 
-        for(i = 0; i < argc; i++) {
-            if(hand[i].func) {
-                hand[i].func(fid, hand[i].obj, hand[i].subset_info, 1, NULL);
+        /* Initialize object tables */
+        if(table_list_add(fid, oi.fileno) < 0) {
+            error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
+            h5tools_setstatus(EXIT_FAILURE);
+            goto done;
+        }
+        group_table = table_list.tables[0].group_table;
+        dset_table = table_list.tables[0].dset_table;
+        type_table = table_list.tables[0].type_table;
+
+        /* does there exist unamed committed datatype */
+        for (u = 0; u < type_table->nobjs; u++)
+            if (!type_table->objs[u].recorded) {
+                unamedtype = 1;
+                break;
+            } /* end if */
+
+        /* start to dump - display file header information */
+        if (!doxml) {
+            begin_obj(h5tools_dump_header_format->filebegin, fname, h5tools_dump_header_format->fileblockbegin);
+        } 
+        else {
+            HDfprintf(rawoutstream, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+
+            /* alternative first element, depending on schema or DTD. */
+            if (useschema) {
+                if (HDstrcmp(xmlnsprefix,"") == 0) {
+                    HDfprintf(rawoutstream, "<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
+                            xml_dtd_uri);
+                } 
+                else {
+                    /*  TO DO: make -url option work in this case (may need new option) */
+                    char *ns;
+                    char *indx;
+
+                    ns = HDstrdup(xmlnsprefix);
+                    indx = HDstrrchr(ns,(int)':');
+                    if (indx) *indx = '\0';
+
+                    HDfprintf(rawoutstream, "<%sHDF5-File xmlns:%s=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File\" "
+                            "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                            "xsi:schemaLocation=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File "
+                            "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\">\n",xmlnsprefix,ns);
+                    HDfree(ns);
+                }
+            } 
+            else {
+                HDfprintf(rawoutstream, "<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n", xml_dtd_uri);
+                HDfprintf(rawoutstream, "<HDF5-File>\n");
             }
         }
-        HDfprintf(stdout, "\n");
-    }
 
-    if (!doxml) {
-        end_obj(h5tools_dump_header_format->fileend, h5tools_dump_header_format->fileblockend);
-        HDfprintf(stdout, "\n");
-    } 
-    else {
-        HDfprintf(stdout, "</%sHDF5-File>\n", xmlnsprefix);
-    }
+        if (!doxml) {
+            if (display_fi) {
+                HDfprintf(rawoutstream, "\n");
+                dump_fcontents(fid);
+                end_obj(h5tools_dump_header_format->fileend,h5tools_dump_header_format->fileblockend);
+                HDfprintf(rawoutstream, "\n");
+                goto done;
+            }
+
+            if (display_bb)
+                dump_fcpl(fid);
+        }
+
+        if(display_all) {
+            if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) {
+                error_msg("unable to open root group\n");
+                h5tools_setstatus(EXIT_FAILURE);
+            }
+            else {
+                if (!doxml)
+                    dump_indent += COL;
+                dump_function_table->dump_group_function(gid, "/" );
+                if (!doxml)
+                    dump_indent -= COL;
+                HDfprintf(rawoutstream, "\n");
+            }
+
+            if(H5Gclose(gid) < 0) {
+                error_msg("unable to close root group\n");
+                h5tools_setstatus(EXIT_FAILURE);
+            }
+
+        }
+        else {
+            /* Note: this option is not supported for XML */
+            if(doxml) {
+                error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
+                h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+            } /* end if */
+
+            for(i = 0; i < argc; i++) {
+                if(hand[i].func) {
+                    hand[i].func(fid, hand[i].obj, hand[i].subset_info, 1, NULL);
+                }
+            }
+            HDfprintf(rawoutstream, "\n");
+        }
+
+        if (!doxml) {
+            end_obj(h5tools_dump_header_format->fileend, h5tools_dump_header_format->fileblockend);
+            HDfprintf(rawoutstream, "\n");
+        } 
+        else {
+            HDfprintf(rawoutstream, "</%sHDF5-File>\n", xmlnsprefix);
+        }
+        /* Free tables for objects */
+        table_list_free();
+
+        if(fid >=0)
+            if (H5Fclose(fid) < 0)
+                h5tools_setstatus(EXIT_FAILURE);
+
+        if(prefix)
+            HDfree(prefix);
+        if(fname)
+            HDfree(fname);
+    } /* end while */
+
+    if(hand) 
+        free_handler(hand, argc);
+
+    /* To Do:  clean up XML table */
+
+    leave(h5tools_getstatus());
 
 done:
     /* Free tables for objects */
     table_list_free();
-
-    if(hand) 
-        free_handler(hand, argc);
 
     if(fid >=0)
         if (H5Fclose(fid) < 0)
@@ -1550,6 +1649,9 @@ done:
         HDfree(prefix);
     if(fname)
         HDfree(fname);
+
+    if(hand) 
+        free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
 
@@ -1629,7 +1731,7 @@ h5_fileaccess(void)
         HDmemset(memb_name, 0, sizeof memb_name);
         HDmemset(memb_addr, 0, sizeof memb_addr);
 
-        assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
+        HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
         for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
             memb_map[mt] = mt;

@@ -68,8 +68,8 @@ void
 h5tools_str_close(h5tools_str_t *str)
 {
     if (str && str->nalloc) {
-        free(str->s);
-        memset(str, 0, sizeof(h5tools_str_t));
+        HDfree(str->s);
+        HDmemset(str, 0, sizeof(h5tools_str_t));
     }
 }
 
@@ -123,18 +123,13 @@ char *
 h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
 {
     va_list ap;
-    hbool_t isReallocated = FALSE;
 
     /* Make sure we have some memory into which to print */
     if (!str->s || str->nalloc <= 0) {
-        str->nalloc = STR_INIT_LEN;
-        str->s = malloc(str->nalloc);
-        assert(str->s);
-        str->s[0] = '\0';
-        str->len = 0;
+        h5tools_str_reset(str);
     }
 
-    if (strlen(fmt) == 0) {
+    if (HDstrlen(fmt) == 0) {
         /* nothing to print */
         return str->s;
     }
@@ -145,9 +140,9 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
         size_t avail = str->nalloc - str->len;
         int nchars = -1;
 
-        va_start(ap, fmt);
+        HDva_start(ap, fmt);
         nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
-        va_end(ap);
+        HDva_end(ap);
 
         /* Note: HDvsnprintf() behaves differently on Windows as Unix, when 
          * buffer is smaller than source string. On Unix, this function 
@@ -155,17 +150,21 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
          * buffer size with NULL at the end of the buffer. However on 
          * Windows with the same condition, this function returns -1 and 
          * doesn't add NULL at the end of the buffer.
-         * Because of this different return results, isReallocated variable
+         * Because of this different return results, the strlen of the new string
          * is used to handle when HDvsnprintf() returns -1 on Windows due
          * to lack of buffer size, so try one more time after realloc more
          * buffer size before return NULL. 
          */
-        if (nchars < 0 && isReallocated == TRUE) {
+        if (nchars < 0 
+#ifndef H5_VSNPRINTF_WORKS
+                && (HDstrlen(str->s) < str->nalloc)
+#endif
+                ) {
             /* failure, such as bad format */
             return NULL;
         }
 
-        if (nchars < 0 || (size_t) nchars >= avail || (0 == nchars && (strcmp(fmt, "%s")))) {
+        if (nchars < 0 || (size_t) nchars >= avail || (0 == nchars && (HDstrcmp(fmt, "%s")))) {
             /* Truncation return value as documented by C99, or zero return value with either of the
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is
@@ -173,11 +172,10 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
              * Alocate at least twice as much space and try again.
              */
             size_t newsize = MAX(str->len + nchars + 1, 2 * str->nalloc);
-            assert(newsize > str->nalloc); /*overflow*/
-            str->s = realloc(str->s, newsize);
-            assert(str->s);
+            HDassert(newsize > str->nalloc); /*overflow*/
+            str->s = (char*)HDrealloc(str->s, newsize);
+            HDassert(str->s);
             str->nalloc = newsize;
-            isReallocated = TRUE;
         }
         else {
             /* Success */
@@ -211,8 +209,8 @@ h5tools_str_reset(h5tools_str_t *str/*in,out*/)
 {
     if (!str->s || str->nalloc <= 0) {
         str->nalloc = STR_INIT_LEN;
-        str->s = malloc(str->nalloc);
-        assert(str->s);
+        str->s = (char*)HDmalloc(str->nalloc);
+        HDassert(str->s);
     }
 
     str->s[0] = '\0';
@@ -273,19 +271,19 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
     char _temp[1024], *temp = _temp;
 
     /* If the format string is simply "%s" then don't bother doing anything */
-    if (!strcmp(fmt, "%s"))
+    if (!HDstrcmp(fmt, "%s"))
         return str->s;
 
     /*
      * Save the input value if there is a `%' anywhere in FMT.  Otherwise
      * don't bother because we don't need a temporary copy.
      */
-    if (strchr(fmt, '%')) {
+    if (HDstrchr(fmt, '%')) {
         size_t n = sizeof(_temp);
         if (str->len - start + 1 > n) {
             n = str->len - start + 1; 
-            temp = malloc(n);
-            assert(temp);
+            temp = (char*)HDmalloc(n);
+            HDassert(temp);
         }
 
         HDstrncpy(temp, str->s + start, n);
@@ -297,7 +295,7 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
 
     /* Free the temp buffer if we allocated one */
     if (temp != _temp)
-        free(temp);
+        HDfree(temp);
 
     return str->s;
 }
@@ -336,7 +334,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
             ctx->pos[i] = curr_pos / ctx->acc[i];
             curr_pos -= ctx->acc[i] * ctx->pos[i];
         }
-        assert(curr_pos == 0);
+        HDassert(curr_pos == 0);
 
         /* Print the index values */
         for (i = 0; i < (size_t) ndims; i++) {
@@ -451,8 +449,8 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
         int i;
 
         alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
-        assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
-        ptdata = (hsize_t *)malloc((size_t) alloc_size);
+        HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
+        ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(nblocks, hssize_t, hsize_t);
         H5Sget_select_hyper_blocklist(region, (hsize_t)0, (hsize_t)nblocks, ptdata);
 
@@ -464,17 +462,17 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
 
             /* Start coordinates and opposite corner */
             for (j = 0; j < ndims; j++)
-                h5tools_str_append(str, "%s%lu", j ? "," : "(",
-                                    (unsigned long) ptdata[i * 2 * ndims + j]);
+                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(",
+                                    ptdata[i * 2 * ndims + j]);
 
             for (j = 0; j < ndims; j++)
-                h5tools_str_append(str, "%s%lu", j ? "," : ")-(",
-                                    (unsigned long) ptdata[i * 2 * ndims + j + ndims]);
+                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : ")-(",
+                                    ptdata[i * 2 * ndims + j + ndims]);
 
             h5tools_str_append(str, ")");
         }
 
-        free(ptdata);
+        HDfree(ptdata);
     } /* end if (nblocks > 0) */
 }
 
@@ -512,8 +510,8 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
         int i;
 
         alloc_size = npoints * ndims * sizeof(ptdata[0]);
-        assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
-        ptdata = (hsize_t *)malloc((size_t) alloc_size);
+        HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
+        ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(npoints, hssize_t, hsize_t);
         H5Sget_select_elem_pointlist(region, (hsize_t)0, (hsize_t)npoints, ptdata);
 
@@ -524,13 +522,13 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
                                (unsigned long)i);
 
             for (j = 0; j < ndims; j++)
-                h5tools_str_append(str, "%s%lu", j ? "," : "(",
-                                  (unsigned long) (ptdata[i * ndims + j]));
+                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(",
+                                  (ptdata[i * ndims + j]));
 
             h5tools_str_append(str, ")");
         }
 
-        free(ptdata);
+        HDfree(ptdata);
     } /* end if (npoints > 0) */
 }
 
@@ -676,7 +674,7 @@ h5tools_str_indent(h5tools_str_t *str, const h5tool_format_t *info,
  * 
  *  Raymond Lu, 2011-09-01
  *  CLANG compiler complained about the line (about 800):
- *  	tempint = (tempint >> packed_data_offset) & packed_data_mask;
+ *    tempint = (tempint >> packed_data_offset) & packed_data_mask;
  *  The right shift may cause undefined behavior if PACKED_DATA_OFFSET is 
  *  32-bit or more. For every kind of native integers, I changed the code 
  *  to make it zero if PACKED_DATA_OFFSET is greater than or equal to the
@@ -945,29 +943,29 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     }
     else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
         if (sizeof(hssize_t) == sizeof(int)) {
-            memcpy(&tempint, vp, sizeof(int));
+            HDmemcpy(&tempint, vp, sizeof(int));
             h5tools_str_append(str, OPT(info->fmt_int, "%d"), tempint);
         }
         else if (sizeof(hssize_t) == sizeof(long)) {
-            memcpy(&templong, vp, sizeof(long));
+            HDmemcpy(&templong, vp, sizeof(long));
             h5tools_str_append(str, OPT(info->fmt_long, "%ld"), templong);
         }
         else {
-            memcpy(&templlong, vp, sizeof(long long));
+            HDmemcpy(&templlong, vp, sizeof(long long));
             h5tools_str_append(str, OPT(info->fmt_llong, fmt_llong), templlong);
         }
     }
     else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
         if (sizeof(hsize_t) == sizeof(int)) {
-            memcpy(&tempuint, vp, sizeof(unsigned int));
+            HDmemcpy(&tempuint, vp, sizeof(unsigned int));
             h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
         }
         else if (sizeof(hsize_t) == sizeof(long)) {
-            memcpy(&tempulong, vp, sizeof(long));
+            HDmemcpy(&tempulong, vp, sizeof(long));
             h5tools_str_append(str, OPT(info->fmt_ulong, "%lu"), tempulong);
         }
         else {
-            memcpy(&tempullong, vp, sizeof(unsigned long long));
+            HDmemcpy(&tempullong, vp, sizeof(unsigned long long));
             h5tools_str_append(str, OPT(info->fmt_ullong, fmt_ullong), tempullong);
         }
     }
@@ -991,7 +989,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             /* The name */
             name = H5Tget_member_name(type, j);
             h5tools_str_append(str, OPT(info->cmpd_name, ""), name);
-            free(name);
+            HDfree(name);
 
             /* The value */
             offset = H5Tget_member_offset(type, j);
@@ -1097,13 +1095,13 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         size = H5Tget_size(memb);
         ndims = H5Tget_array_ndims(type);
         H5Tget_array_dims2(type, dims);
-        assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
+        HDassert(ndims >= 1 && ndims <= H5S_MAX_RANK);
 
         /* Calculate the number of array elements */
         for (k = 0, nelmts = 1; k < ndims; k++) {
             temp_nelmts = nelmts;
             temp_nelmts *= dims[k];
-            assert(temp_nelmts == (hsize_t) ((size_t) temp_nelmts));
+            HDassert(temp_nelmts == (hsize_t) ((size_t) temp_nelmts));
             nelmts = (size_t) temp_nelmts;
         }
         /* Print the opening bracket */
@@ -1116,8 +1114,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 h5tools_str_append(str, "%s", OPT(info->arr_sep, "," OPTIONAL_LINE_BREAK));
 
             if (info->arr_linebreak && i && i % dims[ndims - 1] == 0) {
-                int x;
-
                 h5tools_str_append(str, "%s", "\n");
                 h5tools_str_indent(str, info, ctx);
 
@@ -1125,7 +1121,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             else if (i && info->arr_sep) {
                 /* if next element begin, add next line with indent */
                 if (is_next_arry_elmt) {
-                    int x;
                     is_next_arry_elmt = 0;
 
                     h5tools_str_append(str, "%s", "\n ");
@@ -1275,7 +1270,7 @@ static char *
 h5tools_escape(char *s/*in,out*/, size_t size)
 {
     register size_t i;
-    size_t n = strlen(s);
+    size_t n = HDstrlen(s);
     const char *escape;
     char octal[8];
 
@@ -1327,14 +1322,14 @@ h5tools_escape(char *s/*in,out*/, size_t size)
         }
 
         if (escape) {
-            size_t esc_size = strlen(escape);
+            size_t esc_size = HDstrlen(escape);
 
             if (n + esc_size + 1 > size)
                 /*would overflow*/
                 return NULL;
 
-            memmove(s + i + esc_size, s + i + 1, n - i); /*make room*/
-            memcpy(s + i, escape, esc_size); /*insert*/
+            HDmemmove(s + i + esc_size, s + i + 1, n - i); /*make room*/
+            HDmemcpy(s + i, escape, esc_size); /*insert*/
             n += esc_size - 1; /* adjust total string size */
             i += esc_size; /* adjust string position */
         }
@@ -1367,4 +1362,53 @@ h5tools_str_is_zero(const void *_mem, size_t size)
             return FALSE;
 
     return TRUE;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_str_replace
+ *
+ * Purpose:     replace all occurrences of substring.
+ *
+ * Return:      char * 
+ *
+ * Programmer:  Peter Cao
+ *              March 8, 2012
+ *
+ * Notes:
+ *   Applications need to call free() to free the memoery allocated for 
+ *   the return string 
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+h5tools_str_replace ( const char *string, const char *substr, const char *replacement )
+{
+	char *tok = NULL;
+	char *newstr = NULL;
+	char *oldstr = NULL;
+	char *head = NULL;
+     
+	if ( substr == NULL || replacement == NULL ) 
+		return strdup (string);
+		
+	newstr = strdup (string);
+	head = newstr;
+	while ( (tok = strstr ( head, substr ))){
+		oldstr = newstr;
+		newstr = HDmalloc ( strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) + 1 );
+
+        if ( newstr == NULL ){
+			HDfree (oldstr);
+			return NULL;
+        }
+        memcpy ( newstr, oldstr, tok - oldstr );
+        memcpy ( newstr + (tok - oldstr), replacement, strlen ( replacement ) );
+        memcpy ( newstr + (tok - oldstr) + strlen( replacement ), tok + strlen ( substr ), strlen ( oldstr ) - strlen ( substr ) - ( tok - oldstr ) );
+        memset ( newstr + strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) , 0, 1 );
+        /* move back head right after the last replacement */
+        head = newstr + (tok - oldstr) + strlen( replacement );
+        HDfree (oldstr);
+    }
+	
+    return newstr;
 }

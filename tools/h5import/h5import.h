@@ -47,7 +47,7 @@
 #define CHUNK            0
 #define COMPRESS         1
 #define EXTEND           2
-#define EXTERNAL         3
+#define EXTERNALSTORE    3
 #define DIM              4
 #define RANK             5
 #define PATH             6

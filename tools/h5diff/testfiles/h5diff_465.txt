@@ -1,2 +1,1 @@
-1 differences found
-EXIT CODE: 1
+EXIT CODE: 0

@@ -5,7 +5,6 @@ PROJECT (HDF5_TOOLS)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
-INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 # --------------------------------------------------------------------
 # If testing was NOT enabled, then we need to build the tools library

@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include "h5repack.h"
 #include "h5tools.h"
+#include "h5tools_utils.h"
 #include "h5test.h"
 
 
@@ -46,6 +47,9 @@ int main(void)
 {
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
+
+    /* Initialize h5tools lib */
+    h5tools_init();
 
 #ifdef H5_HAVE_FILTER_SZIP
     if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {

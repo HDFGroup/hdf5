@@ -2523,6 +2523,36 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5A_type
+ *
+ * Purpose:     Return the datatype for an attribute.
+ *
+ * Return:      Success:        Ptr to entry
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, November  11, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5A_type(const H5A_t *attr)
+{
+    H5T_t *ret_value;   /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    HDassert(attr);
+
+    /* Set return value */
+    ret_value = attr->shared->dt;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_type() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Aexists
  *
  * Purpose:	Checks if an attribute with a given name exists on an opened

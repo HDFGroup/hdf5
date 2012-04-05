@@ -5,7 +5,6 @@ PROJECT (HDF5_TOOLS_H5DIFF)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
-INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 # --------------------------------------------------------------------
 # Add the h5diff executables
@@ -43,7 +42,7 @@ IF (BUILD_TESTING)
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5diffgentest ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diffgentest.c)
     TARGET_NAMING (h5diffgentest ${LIB_TYPE})
-    TARGET_LINK_LIBRARIES (h5diffgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+    TARGET_LINK_LIBRARIES (h5diffgentest ${HDF5_LIB_TARGET})
     SET_TARGET_PROPERTIES (h5diffgentest PROPERTIES FOLDER generator/tools)
     
     #ADD_TEST (NAME h5diffgentest COMMAND $<TARGET_FILE:h5diffgentest>)
@@ -85,6 +84,8 @@ IF (BUILD_TESTING)
       h5diff_220.txt
       h5diff_221.txt
       h5diff_222.txt
+      h5diff_223.txt
+      h5diff_224.txt
       h5diff_21.txt
       h5diff_22.txt
       h5diff_23.txt
@@ -131,11 +132,18 @@ IF (BUILD_TESTING)
       h5diff_458.txt
       h5diff_459.txt
       h5diff_465.txt
+      h5diff_466.txt
+      h5diff_467.txt
+      h5diff_468.txt
+      h5diff_469.txt
       h5diff_480.txt
       h5diff_481.txt
       h5diff_482.txt
       h5diff_483.txt
       h5diff_484.txt
+      h5diff_485.txt
+      h5diff_486.txt
+      h5diff_487.txt
       h5diff_50.txt
       h5diff_51.txt
       h5diff_52.txt
@@ -250,6 +258,8 @@ IF (BUILD_TESTING)
       h5diff_exclude1-2.h5
       h5diff_exclude2-1.h5
       h5diff_exclude2-2.h5
+      h5diff_exclude3-1.h5
+      h5diff_exclude3-2.h5
       h5diff_comp_vl_strs.h5
       h5diff_attr_v_level1.h5
       h5diff_attr_v_level2.h5
@@ -487,6 +497,9 @@ IF (BUILD_TESTING)
   # different structure and obj names
   SET (EXCLUDE_FILE2_1 h5diff_exclude2-1.h5)
   SET (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
+  # Only one file contains unique objs. Common objs are same.
+  SET (EXCLUDE_FILE3_1 h5diff_exclude3-1.h5)
+  SET (EXCLUDE_FILE3_2 h5diff_exclude3-2.h5)
   # compound type with multiple vlen string types
   SET (COMP_VL_STRS_FILE h5diff_comp_vl_strs.h5)
   # container types (array,vlen) with multiple nested compound types
@@ -566,6 +579,10 @@ IF (BUILD_TESTING)
           h5diff_221.out.err
           h5diff_222.out
           h5diff_222.out.err
+          h5diff_223.out
+          h5diff_223.out.err
+          h5diff_224.out
+          h5diff_224.out.err
           h5diff_21.out
           h5diff_21.out.err
           h5diff_22.out
@@ -658,6 +675,14 @@ IF (BUILD_TESTING)
           h5diff_459.out.err
           h5diff_465.out
           h5diff_465.out.err
+          h5diff_466.out
+          h5diff_466.out.err
+          h5diff_467.out
+          h5diff_467.out.err
+          h5diff_468.out
+          h5diff_468.out.err
+          h5diff_469.out
+          h5diff_469.out.err
           h5diff_480.out
           h5diff_480.out.err
           h5diff_481.out
@@ -1145,6 +1170,12 @@ ADD_H5_TEST (h5diff_221 1 -c non_comparables1.h5 non_comparables2.h5 /g2)
 # All the rest comparables should display differences
 ADD_H5_TEST (h5diff_222 1 -c non_comparables1.h5 non_comparables2.h5)
 
+# non-comparable test for common objects (same name) with different object types
+# (HDFFV-7644)
+ADD_H5_TEST (h5diff_223 0 -c non_comparables1.h5 non_comparables2.h5 /diffobjtypes)
+# swap files
+ADD_H5_TEST (h5diff_224 0 -c non_comparables2.h5 non_comparables1.h5 /diffobjtypes)
+
 # ##############################################################################
 # # Links compare without --follow-symlinks nor --no-dangling-links
 # ##############################################################################
@@ -1267,7 +1298,16 @@ ADD_H5_TEST (h5diff_459 2  --follow-symlinks -v --no-dangling-links  ${FILE15} $
 
 # dangling link --follow-symlinks (obj vs obj)
 # (HDFFV-7836)
-ADD_H5_TEST (h5diff_465 1 --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
+ADD_H5_TEST (h5diff_465 0 --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
+# (HDFFV-7835)
+# soft dangling vs. soft dangling
+ADD_H5_TEST (h5diff_466 0 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
+# soft link  vs. soft dangling
+ADD_H5_TEST (h5diff_467 1 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link2)
+# ext dangling vs. ext dangling
+ADD_H5_TEST (h5diff_468 0 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4)
+# ext link vs. ext dangling
+ADD_H5_TEST (h5diff_469 1 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link2)
 
 # ##############################################################################
 # # test for group diff recursivly
@@ -1338,6 +1378,16 @@ ADD_H5_TEST (h5diff_483 1 -v --exclude-path "/group1" ${EXCLUDE_FILE2_1} ${EXCLU
 
 # Exclude from group compare
 ADD_H5_TEST (h5diff_484 0 -v --exclude-path "/dset3" ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2} /group1)
+
+#
+# Only one file contains unique objs. Common objs are same.
+# (HDFFV-7837)
+#
+ADD_H5_TEST (h5diff_485 0 -v --exclude-path "/group1" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5)
+ADD_H5_TEST (h5diff_486 0 -v --exclude-path "/group1" h5diff_exclude3-2.h5 h5diff_exclude3-1.h5)
+ADD_H5_TEST (h5diff_487 1 -v --exclude-path "/group1/dset" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5)
+
+
 
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset

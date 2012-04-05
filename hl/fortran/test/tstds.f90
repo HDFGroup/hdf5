@@ -186,7 +186,10 @@ SUBROUTINE test_testds(err)
   name_len = 25
   name = ''
   CALL H5DSget_scale_name_f(dsid, name, name_len, err)
-  IF(err.LT.0.OR.name_len.NE.21.OR.TRIM(name).NE."Dimension Scale Set 1")THEN
+  IF(err.LT.0 .OR. &
+       name_len.NE.21 .OR. &
+       TRIM(name).NE."Dimension Scale Set 1" .OR. &
+       name(22:25).NE.'   ')THEN
      err = FAILED
      CALL write_test_status(err)
      RETURN
@@ -293,7 +296,10 @@ SUBROUTINE test_testds(err)
   label_len = 25
   label = ''
   CALL H5DSget_label_f(did, DIM2, label, label_len, err)
-  IF(err.LT.0.OR.label(1:label_len).NE."Label12".OR.label_len.NE.7)THEN
+  IF(err.LT.0.OR. &
+       label(1:label_len).NE."Label12" .OR. &
+       label_len.NE.7 .OR. &
+       label(8:25).NE.'                  ')THEN
      err = FAILED
      CALL write_test_status(err)
      RETURN

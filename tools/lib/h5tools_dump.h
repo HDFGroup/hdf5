@@ -44,10 +44,10 @@ H5TOOLS_DLL int     h5tools_dump_dset(FILE *stream, const h5tool_format_t *info,
 H5TOOLS_DLL int     h5tools_dump_mem(FILE *stream, const h5tool_format_t *info,
                             h5tools_context_t *ctx/*in,out*/, hid_t obj_id,
                             hid_t type, hid_t space, void *mem);
-H5TOOLS_DLL void    h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t container,
+H5TOOLS_DLL int     h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t container,
                             h5tools_context_t *ctx/*in,out*/, unsigned flags,
                             hsize_t nelmts, hid_t type, void *_mem);
-H5TOOLS_DLL void     h5tools_dump_datatype(FILE *stream, const h5tool_format_t *info,
+H5TOOLS_DLL void    h5tools_dump_datatype(FILE *stream, const h5tool_format_t *info,
                             h5tools_context_t *ctx/*in,out*/, hid_t type);
 H5TOOLS_DLL void    h5tools_dump_dataspace(FILE *stream, const h5tool_format_t *info,
                             h5tools_context_t *ctx/*in,out*/, hid_t space);

@@ -17,6 +17,7 @@
 #include <stdlib.h>
 
 #include "gif.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 
@@ -48,6 +49,9 @@ main(int argv , char *argc[])
     GifMemoryStruct.GifPlainTextExtension      = NULL;
     GifMemoryStruct.GifApplicationExtension    = NULL;
     GifMemoryStruct.GifCommentExtension        = NULL;
+
+    /* Initialize h5tools lib */
+    h5tools_init();
 
     if ( argc[1] && (strcmp("-V",argc[1])==0) )
     {

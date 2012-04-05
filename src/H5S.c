@@ -86,7 +86,7 @@ H5S_init_interface(void)
         /* Allow MPI buf-and-file-type optimizations? */
         const char *s = HDgetenv ("HDF5_MPI_OPT_TYPES");
         if (s && HDisdigit(*s))
-            H5S_mpi_opt_types_g = (int)HDstrtol (s, NULL, 0);
+            H5S_mpi_opt_types_g = (hbool_t)HDstrtol (s, NULL, 0);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -186,6 +186,7 @@ H5S_create(H5S_class_t type)
             new_ds->extent.nelem = 0;
             break;
 
+        case H5S_NO_CLASS:
         default:
             HDassert("unknown dataspace (extent) type" && 0);
             break;
@@ -512,6 +513,7 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src, hbool_t copy_max)
                 dst->max = NULL;
             break;
 
+        case H5S_NO_CLASS:
         default:
             HDassert("unknown dataspace type" && 0);
             break;
@@ -712,6 +714,7 @@ H5S_get_npoints_max(const H5S_t *ds)
             }
             break;
 
+        case H5S_NO_CLASS:
         default:
             assert("unknown dataspace class" && 0);
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0, "internal error (unknown dataspace class)")
@@ -796,6 +799,7 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
             ret_value = (int)ds->extent.rank;
             break;
 
+        case H5S_NO_CLASS:
         default:
             HDassert("unknown dataspace class" && 0);
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown dataspace class)")
@@ -894,6 +898,7 @@ H5S_extent_get_dims(const H5S_extent_t *ext, hsize_t dims[], hsize_t max_dims[])
             } /* end for */
             break;
 
+        case H5S_NO_CLASS:
         default:
             HDassert("unknown dataspace class" && 0);
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown dataspace class)")
@@ -1827,7 +1832,7 @@ H5S_set_extent(H5S_t *space, const hsize_t *size)
             /* Check for invalid dimension size modification */
             if(space->extent.max && H5S_UNLIMITED != space->extent.max[u] &&
                      space->extent.max[u] < size[u])
-                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "dimension cannot exceed the existing maximal size")
+                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "dimension cannot exceed the existing maximal size (new: %llu max: %llu)", (unsigned long long)size[u], (unsigned long long)space->extent.max[u])
 
             /* Indicate that dimension size can be modified */
             ret_value = TRUE;

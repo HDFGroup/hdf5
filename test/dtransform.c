@@ -23,6 +23,7 @@ static int init_test(hid_t file_id);
 static int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_copy);
 static int test_trivial(const hid_t dxpl_id_simple);
 static int test_poly(const hid_t dxpl_id_polynomial);
+static int test_specials(hid_t file);
 static int test_set(void);
 static int test_getset(const hid_t dxpl_id_simple);
 
@@ -50,14 +51,14 @@ const float windchillFfloat[ROWS][COLS] =
 
 const int transformData[ROWS][COLS] =
     {   {36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22, 28, 34, 40, 46, 52, 57, 63 },
-        {34, 27, 21, 15, 9, 3, 4, 10, 16, 22, 28, 35, 41, 47, 53, 59, 66, 0 } ,
-        {32, 25, 19, 13, 6, 0, 7, 13, 19, 26, 32, 39, 45, 51, 58, 64, 71, 5 },
+        {34, 27, 21, 15, 9, 3, 4, 10, 16, 22, 28, 35, 41, 47, 53, 59, 66, 1 } ,
+        {32, 25, 19, 13, 6, 2, 7, 13, 19, 26, 32, 39, 45, 51, 58, 64, 71, 5 },
         {30, 24, 17, 11, 4, 2, 9, 15, 22, 29, 35, 42, 48, 55, 61, 68, 2, 9 },
         {29, 23, 16, 9, 3, 4, 11, 17, 24, 31, 37, 44, 51, 58, 64, 71, 6, 12 },
         {28, 22, 15, 8, 1, 5, 12, 19, 26, 33, 39, 46, 53, 60, 67, 1, 8, 15 },
-        {28, 21, 14, 7, 0, 7, 14, 21, 27, 34, 41, 48, 55, 62, 69, 4, 10, 17 },
+        {28, 21, 14, 7, 6, 7, 14, 21, 27, 34, 41, 48, 55, 62, 69, 4, 10, 17 },
         {27, 20, 13, 6, 1, 8, 15, 22, 29, 36, 43, 50, 57, 64, 71, 6, 12, 19 },
-        {26, 19, 12, 5, 2, 9, 16, 23, 30, 37, 44, 51, 58, 65, 0, 7, 14, 21 },
+        {26, 19, 12, 5, 2, 9, 16, 23, 30, 37, 44, 51, 58, 65, 5, 7, 14, 21 },
         {26, 19, 12, 4, 3, 10, 17, 24, 31, 38, 45, 52, 60, 67, 2, 9, 16, 23},
         {25, 18, 11, 4, 3, 11, 18, 25, 32, 39, 46, 54, 61, 68, 3, 10, 17, 25},
         {25, 17, 10, 3, 4, 11, 19, 26, 33, 40, 48, 55, 62, 69, 4, 12, 19, 26}
@@ -95,6 +96,22 @@ const int transformData[ROWS][COLS] =
             }						\
         }							\
     PASSED();						\
+}
+
+#define COMPARE_INT(VAR1,VAR2)			        \
+{							\
+    size_t i,j;						\
+							\
+    for(i=0; i<ROWS; i++)				\
+        for(j=0; j<COLS; j++)				\
+        {						\
+            if( (VAR1)[i][j] != (VAR2)[i][j] )	        \
+            {						\
+                H5_FAILED();				\
+                fprintf(stderr, "    ERROR: data  failed to match computed data\n");	\
+                goto error;				\
+            }						\
+        }						\
 }
 
 #define TEST_TYPE_CONTIG(XFORM, TYPE, HDF_TYPE, TEST_STR, COMPARE_DATA, SIGNED)	\
@@ -332,6 +349,7 @@ int main(void)
     if(test_trivial(dxpl_id_simple) < 0) TEST_ERROR;
     if(test_poly(dxpl_id_polynomial) < 0) TEST_ERROR;
     if(test_getset(dxpl_id_c_to_f) < 0) TEST_ERROR;
+    if(test_specials(file_id) < 0) TEST_ERROR;
 
     /* Close the objects we opened/created */
     if(H5Dclose(dset_id_int) < 0) TEST_ERROR;
@@ -495,6 +513,160 @@ test_poly(const hid_t dxpl_id_polynomial)
         
     COMPARE(int, polyintread, polyflres, 4)
 
+    return 0;
+
+error: 
+     return -1;
+}
+
+static int
+test_specials(hid_t file)
+{
+    hid_t dxpl_id, dset_id, dataspace;
+    hsize_t dim[2] = { ROWS, COLS };
+    int read_buf[ROWS][COLS];
+    int data_res[ROWS][COLS];
+    int row, col;
+    const char* special1 = "x*-100";
+    const char* special2 = "100-x";
+    const char* special3 = "1000/x";
+    const char* special4 = "-x";
+    const char* special5 = "+x";
+
+    TESTING("data transform of some special cases")
+
+    if((dataspace = H5Screate_simple(2, dim, NULL)) < 0)
+        TEST_ERROR
+
+    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
+
+    /*-----------------------------
+     * Operation 1: x*-100
+     *----------------------------*/
+    if(H5Pset_data_transform(dxpl_id, special1) < 0) TEST_ERROR;
+
+    for(row = 0; row < ROWS; row++)
+        for(col = 0; col < COLS; col++)
+            data_res[row][col] = transformData[row][col] * -100;
+
+    if((dset_id = H5Dcreate2(file, "/special1", H5T_NATIVE_INT,
+            dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+            dxpl_id, transformData) < 0)
+        TEST_ERROR
+    if(H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+            H5P_DEFAULT, read_buf) < 0)
+        TEST_ERROR
+ 
+    COMPARE_INT(read_buf, data_res)
+
+    if(H5Dclose(dset_id) < 0)
+        TEST_ERROR
+
+    /*-----------------------------
+     * Operation 2: 100-x
+     *----------------------------*/
+    if(H5Pset_data_transform(dxpl_id, special2) < 0) TEST_ERROR;
+
+    for(row = 0; row < ROWS; row++)
+        for(col = 0; col < COLS; col++)
+            data_res[row][col] = 100 - transformData[row][col];
+
+    if((dset_id = H5Dcreate2(file, "/special2", H5T_NATIVE_INT,
+            dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+            dxpl_id, transformData) < 0)
+        TEST_ERROR
+    if(H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+            H5P_DEFAULT, read_buf) < 0)
+        TEST_ERROR
+ 
+    COMPARE_INT(read_buf, data_res)
+
+    if(H5Dclose(dset_id) < 0)
+        TEST_ERROR
+
+    /*-----------------------------
+     * Operation 3: 1000/x
+     *----------------------------*/
+    if(H5Pset_data_transform(dxpl_id, special3) < 0) TEST_ERROR;
+
+    for(row = 0; row < ROWS; row++)
+        for(col = 0; col < COLS; col++)
+            data_res[row][col] = 1000 / transformData[row][col];
+
+    if((dset_id = H5Dcreate2(file, "/special3", H5T_NATIVE_INT,
+            dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+            dxpl_id, transformData) < 0)
+        TEST_ERROR
+    if(H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+            H5P_DEFAULT, read_buf) < 0)
+        TEST_ERROR
+ 
+    COMPARE_INT(read_buf, data_res)
+
+    if(H5Dclose(dset_id) < 0)
+        TEST_ERROR
+
+    /*-----------------------------
+     * Operation 4: -x
+     *----------------------------*/
+    if(H5Pset_data_transform(dxpl_id, special4) < 0) TEST_ERROR;
+
+    for(row = 0; row < ROWS; row++)
+        for(col = 0; col < COLS; col++)
+            data_res[row][col] = -1 * transformData[row][col];
+
+    if((dset_id = H5Dcreate2(file, "/special4", H5T_NATIVE_INT,
+            dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+            dxpl_id, transformData) < 0)
+        TEST_ERROR
+    if(H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+            H5P_DEFAULT, read_buf) < 0)
+        TEST_ERROR
+ 
+    COMPARE_INT(read_buf, data_res)
+
+    if(H5Dclose(dset_id) < 0)
+        TEST_ERROR
+
+    /*-----------------------------
+     * Operation 5: +x
+     *----------------------------*/
+    if(H5Pset_data_transform(dxpl_id, special5) < 0) TEST_ERROR;
+
+    for(row = 0; row < ROWS; row++)
+        for(col = 0; col < COLS; col++)
+            data_res[row][col] = transformData[row][col];
+
+    if((dset_id = H5Dcreate2(file, "/special5", H5T_NATIVE_INT,
+            dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if(H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+            dxpl_id, transformData) < 0)
+        TEST_ERROR
+    if(H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+            H5P_DEFAULT, read_buf) < 0)
+        TEST_ERROR
+ 
+    COMPARE_INT(read_buf, data_res)
+
+    if(H5Dclose(dset_id) < 0)
+        TEST_ERROR
+
+
+    if(H5Pclose(dxpl_id) < 0)
+        TEST_ERROR
+    if(H5Sclose(dataspace) < 0)
+        TEST_ERROR
+
+    PASSED();
     return 0;
 
 error: 

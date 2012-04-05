@@ -1855,7 +1855,7 @@ done:
 void *
 H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src,
     void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
-    H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id)
+    unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id)
 {
     void        *ret_value;
 
@@ -1873,7 +1873,7 @@ H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src,
     /* The copy_file callback will return an H5O_shared_t only if the message
      * to be copied is a committed datatype.
      */
-    if(NULL == (ret_value = (type->copy_file)(file_src, native_src, file_dst, recompute_size, cpy_info, udata, dxpl_id)))
+    if(NULL == (ret_value = (type->copy_file)(file_src, native_src, file_dst, recompute_size, mesg_flags, cpy_info, udata, dxpl_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object header message to file")
 
 done:
@@ -1986,7 +1986,7 @@ H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy message to object header")
 
     /* Update the message flags */
-    idx_msg->flags = mesg_flags;
+    idx_msg->flags = (uint8_t)mesg_flags;
 
     /* Mark the message as modified */
     idx_msg->dirty = TRUE;
@@ -2161,9 +2161,8 @@ H5O_msg_flush(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg)
     /* Make certain that null messages aren't in chunks w/gaps */
     if(H5O_NULL_ID == msg_id)
         HDassert(oh->chunk[mesg->chunkno].gap == 0);
-
-    /* Unknown messages should always have a native pointer */
-    if(mesg->type == H5O_MSG_UNKNOWN)
+    else
+        /* Non-null messages should always have a native pointer */
         HDassert(mesg->native);
 #endif /* NDEBUG */
 

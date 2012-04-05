@@ -17,6 +17,7 @@
 #include <string.h>
 #include "h5diff.h"
 #include "h5diff_common.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 static int check_n_input( const char* );
@@ -53,7 +54,7 @@ static struct long_options l_opts[] = {
  *
  *-------------------------------------------------------------------------
  */
-static check_options(diff_opt_t* options)
+static void check_options(diff_opt_t* options)
 {
     /*--------------------------------------------------------------
      * check for mutually exclusive options 
@@ -179,7 +180,7 @@ void parse_command_line(int argc,
             }
 
             /* init */
-            exclude_node->obj_path = opt_arg;
+            exclude_node->obj_path = (char*)opt_arg;
             exclude_node->obj_type = H5TRAV_TYPE_UNKNOWN;
             exclude_prev = exclude_head;
             

@@ -129,8 +129,8 @@ static hid_t h5file_open(const char *fname, unsigned flags)
     /* open */
     if ((fid = H5Fopen(data_file,flags,H5P_DEFAULT))<0)
     {
-        fprintf(stderr,"Error: Cannot open file <%s>\n",data_file );
-        exit(1);
+        HDfprintf(stderr,"Error: Cannot open file <%s>\n",data_file );
+        HDexit(1);
     }
 
     return fid;
@@ -142,16 +142,16 @@ static hid_t h5file_open(const char *fname, unsigned flags)
 */
 static int cmp_par(hsize_t i, hsize_t j, particle_t *rbuf, particle_t *wbuf )
 {
-    if ( ( strcmp( rbuf[i].name, wbuf[j].name ) != 0 ) ||
+    if ( ( HDstrcmp( rbuf[i].name, wbuf[j].name ) != 0 ) ||
         rbuf[i].lati != wbuf[j].lati ||
         rbuf[i].longi != wbuf[j].longi ||
         rbuf[i].pressure != wbuf[j].pressure ||
         rbuf[i].temperature != wbuf[j].temperature )
     {
-        fprintf(stderr,"read and write buffers have differences\n");
-        fprintf(stderr,"%s %ld %f %f %d\n",
+        HDfprintf(stderr,"read and write buffers have differences\n");
+        HDfprintf(stderr,"%s %ld %f %f %d\n",
             rbuf[i].name,rbuf[i].longi,rbuf[i].pressure,rbuf[i].temperature,rbuf[i].lati);
-        fprintf(stderr,"%s %ld %f %f %d\n",
+        HDfprintf(stderr,"%s %ld %f %f %d\n",
             wbuf[j].name,wbuf[j].longi,wbuf[j].pressure,wbuf[j].temperature,wbuf[j].lati);
         return -1;
     }
@@ -495,9 +495,9 @@ static int test_table(hid_t fid, int do_write)
     *-------------------------------------------------------------------------
     */
     if(do_write)
-        strcpy(tname,"table2");
+        HDstrcpy(tname,"table2");
     else
-        strcpy(tname,"table1");
+        HDstrcpy(tname,"table1");
 
     rstart=0;
     rrecords=8;
@@ -645,7 +645,7 @@ static int test_table(hid_t fid, int do_write)
             wbufd[i].longi = wbuf[i].longi;
             wbufd[i].pressure = wbuf[i].pressure;
             wbufd[i].temperature = wbuf[i].temperature;
-            strcpy(wbufd[i].name, wbuf[i].name );
+            HDstrcpy(wbufd[i].name, wbuf[i].name );
 
         }
 
@@ -1027,9 +1027,9 @@ static int test_table(hid_t fid, int do_write)
                         rbuf[i].longi       != position_in[i-NRECORDS_ADD+1].longi ||
                         rbuf[i].pressure    != pressure_in[i-NRECORDS_ADD+1] )
                     {
-                        fprintf(stderr,"%ld %f %d\n",
+                        HDfprintf(stderr,"%ld %f %d\n",
                             rbuf[i].longi,rbuf[i].pressure,rbuf[i].lati);
-                        fprintf(stderr,"%ld %f %d\n",
+                        HDfprintf(stderr,"%ld %f %d\n",
                             position_in[i].longi,pressure_in[i],position_in[i].lati);
                         goto out;
                     }
@@ -1144,7 +1144,7 @@ static int test_table(hid_t fid, int do_write)
     /* Compare the extracted table with the initial values */
     for( i = 0; i < NRECORDS; i++ )
     {
-        if ( ( strcmp( namepre_out[i].name,  namepre_in[i].name ) != 0 ) ||
+        if ( ( HDstrcmp( namepre_out[i].name,  namepre_in[i].name ) != 0 ) ||
             namepre_out[i].pressure != namepre_in[i].pressure ) {
                 goto out;
         }
@@ -1153,7 +1153,7 @@ static int test_table(hid_t fid, int do_write)
     /* reset buffer */
     for( i = 0; i < NRECORDS; i++ )
     {
-        strcpy( namepre_out[i].name,  "\0" );
+        HDstrcpy( namepre_out[i].name,  "\0" );
         namepre_out[i].pressure = -1;
     }
 
@@ -1173,7 +1173,7 @@ static int test_table(hid_t fid, int do_write)
     for( i = 0; i < 3; i++ )
     {
         hsize_t iistart = start;
-        if ( ( strcmp( namepre_out[i].name,  namepre_in[iistart+i].name ) != 0 ) ||
+        if ( ( HDstrcmp( namepre_out[i].name,  namepre_in[iistart+i].name ) != 0 ) ||
             namepre_out[i].pressure != namepre_in[iistart+i].pressure ) {
                 goto out;
         }
@@ -1351,7 +1351,7 @@ static int test_table(hid_t fid, int do_write)
     /* compare the extracted table with the initial values */
     for( i = 0; i < NRECORDS; i++ )
     {
-        if ( ( strcmp( namepre_out[i].name,  namepre_in[i].name ) != 0 ) ||
+        if ( ( HDstrcmp( namepre_out[i].name,  namepre_in[i].name ) != 0 ) ||
             namepre_out[i].pressure != namepre_in[i].pressure ) {
                 goto out;
         }
@@ -1360,7 +1360,7 @@ static int test_table(hid_t fid, int do_write)
     /* reset buffer */
     for( i = 0; i < NRECORDS; i++ )
     {
-        strcpy( namepre_out[i].name,  "\0" );
+        HDstrcpy( namepre_out[i].name,  "\0" );
         namepre_out[i].pressure = -1;
     }
 
@@ -1382,7 +1382,7 @@ static int test_table(hid_t fid, int do_write)
     for( i = 0; i < 3; i++ )
     {
         int iistart = (int) start;
-        if ( ( strcmp( namepre_out[i].name,  wbuf[iistart+i].name ) != 0 ) ||
+        if ( ( HDstrcmp( namepre_out[i].name,  wbuf[iistart+i].name ) != 0 ) ||
             namepre_out[i].pressure != wbuf[iistart+i].pressure ) {
                 goto out;
         }
@@ -1423,7 +1423,7 @@ static int test_table(hid_t fid, int do_write)
         /* compare the extracted table with the original array */
         for( i = 0; i < NRECORDS; i++ )
         {
-            if ( ( strcmp( rbuf2[i].name,  wbuf[i].name ) != 0 ) ||
+            if ( ( HDstrcmp( rbuf2[i].name,  wbuf[i].name ) != 0 ) ||
                 rbuf2[i].lati          != wbuf[i].lati ||
                 rbuf2[i].longi         != wbuf[i].longi ||
                 rbuf2[i].pressure      != wbuf[i].pressure ||
@@ -1464,7 +1464,7 @@ static int test_table(hid_t fid, int do_write)
         /* compare the extracted table with the original array */
         for( i = 0; i < NRECORDS; i++ )
         {
-            if ( ( strcmp( rbuf3[i].name, wbuf[i].name ) != 0 ) ||
+            if ( ( HDstrcmp( rbuf3[i].name, wbuf[i].name ) != 0 ) ||
                 rbuf3[i].lati != wbuf[i].lati ||
                 rbuf3[i].longi != wbuf[i].longi ||
                 rbuf3[i].temperature != wbuf[i].temperature ) {
@@ -1509,10 +1509,10 @@ static int test_table(hid_t fid, int do_write)
     TESTING2("getting field info");
 
     /* alocate */
-    names_out = (char**) malloc( sizeof(char*) * (size_t)NFIELDS );
+    names_out = (char**) HDmalloc( sizeof(char*) * (size_t)NFIELDS );
     for ( i = 0; i < NFIELDS; i++)
     {
-        names_out[i] = (char*) malloc( sizeof(char) * 255 );
+        names_out[i] = (char*) HDmalloc( sizeof(char) * 255 );
     }
 
     /* Get field info */
@@ -1521,7 +1521,7 @@ static int test_table(hid_t fid, int do_write)
 
     for ( i = 0; i < NFIELDS; i++)
     {
-        if ( (strcmp( field_names[i], names_out[i] ) != 0)) {
+        if ( (HDstrcmp( field_names[i], names_out[i] ) != 0)) {
             goto out;
         }
     }
@@ -1529,9 +1529,9 @@ static int test_table(hid_t fid, int do_write)
     /* release */
     for ( i = 0; i < NFIELDS; i++)
     {
-        free ( names_out[i] );
+        HDfree ( names_out[i] );
     }
-    free ( names_out );
+    HDfree ( names_out );
 
     PASSED();
 
@@ -1564,7 +1564,7 @@ int main(void)
     /* create a file using default properties */
     fid=H5Fcreate("test_table.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
 
-    puts("Testing table with file creation mode (read/write in native architecture):");
+    HDputs("Testing table with file creation mode (read/write in native architecture):");
 
     /* test, do write */
     if (test_table(fid,1)<0)
@@ -1577,7 +1577,7 @@ int main(void)
     * test2: open a file written in test1 on a big-endian machine
     *-------------------------------------------------------------------------
     */
-    puts("Testing table with file open mode (read big-endian data):");
+    HDputs("Testing table with file open mode (read big-endian data):");
 
     fid=h5file_open(TEST_FILE_BE,flags);
 
@@ -1592,7 +1592,7 @@ int main(void)
     * test3: open a file written in test1 on a little-endian machine
     *-------------------------------------------------------------------------
     */
-    puts("Testing table with file open mode (read little-endian data):");
+    HDputs("Testing table with file open mode (read little-endian data):");
 
     fid=h5file_open(TEST_FILE_LE,flags);
 
@@ -1607,7 +1607,7 @@ int main(void)
     * test4: open a file written in test1 on the Cray T3 machine
     *-------------------------------------------------------------------------
     */
-    puts("Testing table with file open mode (read Cray data):");
+    HDputs("Testing table with file open mode (read Cray data):");
 
     fid=h5file_open(TEST_FILE_CRAY,flags);
 

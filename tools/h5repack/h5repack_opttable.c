@@ -14,6 +14,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5repack.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 /*-------------------------------------------------------------------------
@@ -120,7 +121,7 @@ static int aux_inctable(pack_opttbl_t *table, int n_objs )
     unsigned int i;
 
     table->size += n_objs;
-    table->objs = (pack_info_t*)realloc(table->objs, table->size * sizeof(pack_info_t));
+    table->objs = (pack_info_t*)HDrealloc(table->objs, table->size * sizeof(pack_info_t));
     if (table->objs==NULL) {
         error_msg("not enough memory for options table\n");
         return -1;
@@ -147,7 +148,7 @@ int options_table_init( pack_opttbl_t **tbl )
     unsigned int i;
     pack_opttbl_t *table;
 
-    if(NULL == (table = (pack_opttbl_t *)malloc(sizeof(pack_opttbl_t))))
+    if(NULL == (table = (pack_opttbl_t *)HDmalloc(sizeof(pack_opttbl_t))))
     {
         error_msg("not enough memory for options table\n");
         return -1;
@@ -155,10 +156,10 @@ int options_table_init( pack_opttbl_t **tbl )
 
     table->size   = 30;
     table->nelems = 0;
-    if(NULL == (table->objs = (pack_info_t*)malloc(table->size * sizeof(pack_info_t))))
+    if(NULL == (table->objs = (pack_info_t*)HDmalloc(table->size * sizeof(pack_info_t))))
     {
         error_msg("not enough memory for options table\n");
-        free(table);
+        HDfree(table);
         return -1;
     }
 
@@ -182,8 +183,8 @@ int options_table_init( pack_opttbl_t **tbl )
 
 int options_table_free( pack_opttbl_t *table )
 {
-    free(table->objs);
-    free(table);
+    HDfree(table->objs);
+    HDfree(table);
     return 0;
 }
 
@@ -229,7 +230,7 @@ int options_add_layout( obj_list_t *obj_list,
                     if (table->objs[i].chunk.rank>0)
                     {
                         error_msg("chunk information already inserted for <%s>\n",obj_list[j].obj);
-                        exit(EXIT_FAILURE);
+                        HDexit(EXIT_FAILURE);
                     }
                     /* insert the layout info */
                     else

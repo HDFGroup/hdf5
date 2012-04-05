@@ -78,7 +78,6 @@
 #define FNAME17OUT  "h5repack_named_dtypes_out.h5"
 
 #define FNAME18     "h5repack_layout2.h5"
-#define FNAME18OUT  "h5repack_layout2_out.h5"
 
 #define FNAME_UB   "ublock.bin"
 
@@ -170,15 +169,23 @@ int main (void)
 {
     pack_opt_t  pack_options;
     diff_opt_t  diff_options;
-    hsize_t	fs_size = 0;	/* free space section threshold */
-    H5F_file_space_type_t fs_type = H5F_FILE_SPACE_DEFAULT;	/* file space handling strategy */
+    hsize_t  fs_size = 0;  /* free space section threshold */
+    H5F_file_space_type_t fs_type = H5F_FILE_SPACE_DEFAULT;  /* file space handling strategy */
+    h5_stat_t		file_stat;
+    h5_stat_size_t	fsize1, fsize2;	/* file sizes */
 #if defined (H5_HAVE_FILTER_SZIP)
     int szip_can_encode = 0;
 #endif
 
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
+
+    /* Initialize h5tools lib */
+    h5tools_init();
+
     /* initialize */
-    memset(&diff_options, 0, sizeof (diff_opt_t));
-    memset(&pack_options, 0, sizeof (pack_opt_t));
+    HDmemset(&diff_options, 0, sizeof (diff_opt_t));
+    HDmemset(&pack_options, 0, sizeof (pack_opt_t));
 
     /* run tests  */
     puts("Testing h5repack:");
@@ -938,7 +945,7 @@ int main (void)
 
 #if defined (H5_HAVE_FILTER_SZIP)
     if (szip_can_encode) {
-	/* fs_type = H5F_FILE_SPACE_AGGR_VFD; fs_size = 3 */
+  /* fs_type = H5F_FILE_SPACE_AGGR_VFD; fs_size = 3 */
         if (h5repack_init (&pack_options, 0, H5_INC_ENUM(H5F_file_space_type_t, fs_type), ++fs_size) < 0)
             GOERROR;
         if (h5repack(FNAME7,FNAME7OUT,&pack_options) < 0)
@@ -1255,7 +1262,7 @@ int main (void)
     && defined (H5_HAVE_FILTER_FLETCHER32) && defined (H5_HAVE_FILTER_SHUFFLE)
 
     if (szip_can_encode) {
-	/* fs_type = H5F_FILE_SPACE_VFD; fs_size = 4 */
+  /* fs_type = H5F_FILE_SPACE_VFD; fs_size = 4 */
         if (h5repack_init (&pack_options, 0, H5_INC_ENUM(H5F_file_space_type_t, fs_type), ++fs_size) < 0)
             GOERROR;
         if (h5repack_addfilter("dset_deflate:SZIP=8,NN",&pack_options) < 0)
@@ -1553,6 +1560,50 @@ int main (void)
 
 
     PASSED();
+
+    /*-------------------------------------------------------------------------
+    * test --metadata_block_size option
+    * Also verify that output file using the metadata_block_size option is
+    * larger than the output file one not using it.
+    * FNAME4 is used because it is the same as the test file used for the
+    * shell script version of this test (h5repack.sh).
+    *-------------------------------------------------------------------------
+    */
+    TESTING("    metadata block size option");
+    /* First run without metadata option. No need to verify the correctness */
+    /* since this has been verified by earlier tests. Just record the file */
+    /* size of the output file. */
+    if(h5repack_init(&pack_options, 0, H5F_FILE_SPACE_DEFAULT, (hsize_t)0) < 0)
+        GOERROR;
+    if(h5repack(FNAME4, FNAME4OUT, &pack_options) < 0)
+        GOERROR;
+    if(HDstat(FNAME4OUT, &file_stat) < 0)
+        GOERROR;
+    fsize1 = file_stat.st_size;
+    if(h5repack_end(&pack_options) < 0)
+        GOERROR;
+
+    /* run it again with metadata option */
+    if(h5repack_init(&pack_options, 0, H5F_FILE_SPACE_DEFAULT, (hsize_t)0) < 0)
+        GOERROR;
+    pack_options.meta_block_size = 8192;
+    if(h5repack(FNAME4, FNAME4OUT, &pack_options) < 0)
+        GOERROR;
+    if(h5diff(FNAME4, FNAME4OUT, NULL, NULL, &diff_options) > 0)
+        GOERROR;
+    if(h5repack_verify(FNAME4, FNAME4OUT, &pack_options) <= 0)
+        GOERROR;
+    /* record the file size of the output file */
+    if(HDstat(FNAME4OUT, &file_stat) < 0)
+        GOERROR;
+    fsize2 = file_stat.st_size;
+    /* verify second file size is larger than the first one */
+    if(fsize2 <= fsize1)
+        GOERROR;
+    if(h5repack_end(&pack_options) < 0)
+        GOERROR;
+    PASSED();
+
 
     /*-------------------------------------------------------------------------
     * clean temporary test files
@@ -2956,31 +3007,31 @@ out:
  *
  * Purpose: create datasets with contiguous and chunked layouts:
  *
- *	contig_small: < 1k, fixed dims datspace
- *	chunked_small_fixed: < 1k, fixed dims dataspace
+ *  contig_small: < 1k, fixed dims datspace
+ *  chunked_small_fixed: < 1k, fixed dims dataspace
  *
  *-------------------------------------------------------------------------
  */
-#define S_DIM1	4
-#define S_DIM2	10
-#define CONTIG_S	"contig_small"
-#define CHUNKED_S_FIX	"chunked_small_fixed"
+#define S_DIM1  4
+#define S_DIM2  10
+#define CONTIG_S  "contig_small"
+#define CHUNKED_S_FIX  "chunked_small_fixed"
 
 static
 int make_layout2(hid_t loc_id)
 {
 
-    hid_t    contig_dcpl = -1; 	/* dataset creation property list */
+    hid_t    contig_dcpl = -1;   /* dataset creation property list */
     hid_t    chunked_dcpl = -1; /* dataset creation property list */
 
-    int      i, j, n;		/* Local index variables */
-    int	     ret_value = -1;	/* Return value */
-    hid_t    s_sid = -1;	/* dataspace ID */
+    int      i, j, n;    /* Local index variables */
+    int       ret_value = -1;  /* Return value */
+    hid_t    s_sid = -1;  /* dataspace ID */
 
-    hsize_t  s_dims[RANK] = {S_DIM1,S_DIM2};	/* Dataspace (< 1 k) */
-    hsize_t  chunk_dims[RANK] = {S_DIM1/2, S_DIM2/2};	/* Dimension sizes for chunks */
+    hsize_t  s_dims[RANK] = {S_DIM1,S_DIM2};  /* Dataspace (< 1 k) */
+    hsize_t  chunk_dims[RANK] = {S_DIM1/2, S_DIM2/2};  /* Dimension sizes for chunks */
 
-    int      s_buf[S_DIM1][S_DIM2];	/* Temporary buffer */
+    int      s_buf[S_DIM1][S_DIM2];  /* Temporary buffer */
 
     for(i = n = 0; i < S_DIM1; i++) {
         for (j = 0; j < S_DIM2; j++) {
@@ -3130,7 +3181,7 @@ int make_big(hid_t loc_id)
     if (H5Dwrite (did,H5T_NATIVE_SCHAR,m_sid,f_sid,H5P_DEFAULT,buf) < 0)
         goto out;
 
-    free(buf);
+    HDfree(buf);
     buf=NULL;
 
     /* close */
@@ -3171,8 +3222,8 @@ int make_external(hid_t loc_id)
     hid_t   sid=-1;
     hid_t   dcpl;
     int     buf[2]={1,2};
-    hsize_t cur_size[1];		/* data space current size	*/
-    hsize_t max_size[1];		/* data space maximum size	*/
+    hsize_t cur_size[1];    /* data space current size  */
+    hsize_t max_size[1];    /* data space maximum size  */
     hsize_t size;
 
     cur_size[0] = max_size[0] = 2;
@@ -3247,7 +3298,7 @@ make_userblock(void)
 
     /* Initialize userblock data */
     for(u = 0; u < USERBLOCK_SIZE; u++)
-        ub[u] = 'a' + (u % 26);
+        ub[u] = 'a' + (char)(u % 26);
 
     /* Re-open HDF5 file, as "plain" file */
     if((fd = HDopen(FNAME16, O_WRONLY, 0644)) < 0)
@@ -3255,7 +3306,7 @@ make_userblock(void)
 
     /* Write userblock data */
     nwritten = HDwrite(fd, ub, (size_t)USERBLOCK_SIZE);
-    assert(nwritten == USERBLOCK_SIZE);
+    HDassert(nwritten == USERBLOCK_SIZE);
 
     /* Close file */
     HDclose(fd);
@@ -3319,7 +3370,7 @@ verify_userblock( const char* filename)
 
     /* Read userblock data */
     nread = HDread(fd, ub, (size_t)USERBLOCK_SIZE);
-    assert(nread == USERBLOCK_SIZE);
+    HDassert(nread == USERBLOCK_SIZE);
 
     /* Verify userblock data */
     for(u = 0; u < USERBLOCK_SIZE; u++)
@@ -3360,7 +3411,7 @@ make_userblock_file(void)
 
     /* initialize userblock data */
     for(u = 0; u < USERBLOCK_SIZE; u++)
-        ub[u] = 'a' + (u % 26);
+        ub[u] = 'a' + (char)(u % 26);
 
     /* open file */
     if((fd = HDopen(FNAME_UB,O_WRONLY|O_CREAT|O_TRUNC, 0644 )) < 0)
@@ -3368,7 +3419,7 @@ make_userblock_file(void)
 
     /* write userblock data */
     nwritten = HDwrite(fd, ub, (size_t)USERBLOCK_SIZE);
-    assert(nwritten == USERBLOCK_SIZE);
+    HDassert(nwritten == USERBLOCK_SIZE);
 
     /* close file */
     HDclose(fd);
@@ -3693,7 +3744,7 @@ int write_dset_in(hid_t loc_id,
         H5Dclose(did);
         H5Tclose(tid);
         H5Sclose(sid);
-        free( dbuf );
+        HDfree( dbuf );
     }
 
     /*-------------------------------------------------------------------------
@@ -3728,7 +3779,7 @@ int write_dset_in(hid_t loc_id,
 
     if (make_diffs)
     {
-        memset(buf12, 'z', sizeof buf12);
+        HDmemset(buf12, 'z', sizeof buf12);
     }
 
 
@@ -3749,7 +3800,7 @@ int write_dset_in(hid_t loc_id,
 
     if (make_diffs)
     {
-        memset(buf22,0,sizeof buf22);
+        HDmemset(buf22,0,sizeof buf22);
     }
 
     if ((tid = H5Tcopy(H5T_STD_B8LE)) < 0)
@@ -3779,7 +3830,7 @@ int write_dset_in(hid_t loc_id,
 
     if (make_diffs)
     {
-        memset(buf32,0,sizeof buf32);
+        HDmemset(buf32,0,sizeof buf32);
     }
 
     if ((tid = H5Tcreate (H5T_COMPOUND, sizeof(s_t))) < 0)
@@ -3836,7 +3887,7 @@ int write_dset_in(hid_t loc_id,
             int l;
 
             buf52[i][j].p = malloc((i + 1) * sizeof(int));
-            buf52[i][j].len = i + 1;
+            buf52[i][j].len = (size_t)(i + 1);
             for(l = 0; l < i + 1; l++)
             {
                 if(make_diffs)
@@ -3871,7 +3922,7 @@ int write_dset_in(hid_t loc_id,
 
     if (make_diffs)
     {
-        memset(buf62,0,sizeof buf62);
+        HDmemset(buf62,0,sizeof buf62);
     }
 
 
@@ -3889,8 +3940,8 @@ int write_dset_in(hid_t loc_id,
 
 
     if(make_diffs) {
-        memset(buf72, 0, sizeof buf72);
-        memset(buf82, 0, sizeof buf82);
+        HDmemset(buf72, 0, sizeof buf72);
+        HDmemset(buf82, 0, sizeof buf82);
     }
 
 
@@ -3930,7 +3981,7 @@ int write_dset_in(hid_t loc_id,
 
     if (make_diffs)
     {
-        memset(buf13,'z',sizeof buf13);
+        HDmemset(buf13,'z',sizeof buf13);
     }
 
     if ((tid = H5Tcopy(H5T_C_S1)) < 0)
@@ -4057,7 +4108,7 @@ int write_dset_in(hid_t loc_id,
                 int l;
 
                 buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
-                buf53[i][j][k].len = i + 1;
+                buf53[i][j][k].len = (size_t)(i + 1);
                 for(l = 0; l < i + 1; l++)
                 {
                     if(make_diffs)
@@ -4243,9 +4294,9 @@ int make_dset_reg_ref(hid_t loc_id)
 
 out:
     if(wbuf)
-        free(wbuf);
+        HDfree(wbuf);
     if(dwbuf)
-        free(dwbuf);
+        HDfree(dwbuf);
 
     H5E_BEGIN_TRY
     {
@@ -4650,7 +4701,7 @@ int write_attr_in(hid_t loc_id,
     */
     if (make_diffs)
     {
-        memset(buf12, 'z', sizeof buf12);
+        HDmemset(buf12, 'z', sizeof buf12);
     }
 
     /*
@@ -4690,7 +4741,7 @@ int write_attr_in(hid_t loc_id,
 
     if (make_diffs)
     {
-        memset(buf22,0,sizeof buf22);
+        HDmemset(buf22,0,sizeof buf22);
     }
 
     /*
@@ -4750,7 +4801,7 @@ int write_attr_in(hid_t loc_id,
     */
     if (make_diffs)
     {
-        memset(buf32,0,sizeof buf32);
+        HDmemset(buf32,0,sizeof buf32);
     }
 
     /*
@@ -4848,7 +4899,7 @@ int write_attr_in(hid_t loc_id,
         {
             int l;
             buf52[i][j].p = malloc((i + 1) * sizeof(int));
-            buf52[i][j].len = i + 1;
+            buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++)
                 if (make_diffs)((int *)buf52[i][j].p)[l] = 0;
                 else ((int *)buf52[i][j].p)[l] = n++;
@@ -4898,7 +4949,7 @@ int write_attr_in(hid_t loc_id,
 
     if (make_diffs)
     {
-        memset(buf62,0,sizeof buf62);
+        HDmemset(buf62,0,sizeof buf62);
     }
     /*
     buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};
@@ -4984,7 +5035,7 @@ int write_attr_in(hid_t loc_id,
 
     if (make_diffs)
     {
-        memset(buf13,'z',sizeof buf13);
+        HDmemset(buf13,'z',sizeof buf13);
     }
 
     /*
@@ -5314,7 +5365,7 @@ int write_attr_in(hid_t loc_id,
             {
                 int l;
                 buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
-                buf53[i][j][k].len = i + 1;
+                buf53[i][j][k].len = (size_t)i + 1;
                 for (l = 0; l < i + 1; l++)
                     if (make_diffs)
                     {
@@ -5813,7 +5864,7 @@ static herr_t add_attr_with_regref(hid_t file_id, hid_t obj_id)
     }
 
     /* select elements space for reference */
-    status = H5Sselect_elements (sid_regrefed_dset, H5S_SELECT_SET, 3, coords_regrefed_dset[0]);
+    status = H5Sselect_elements (sid_regrefed_dset, H5S_SELECT_SET, (size_t)3, coords_regrefed_dset[0]);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
@@ -6135,7 +6186,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     }
 
     /* select elements space for reference */
-    status = H5Sselect_elements (sid_trg, H5S_SELECT_SET, 4, coords[0]);
+    status = H5Sselect_elements (sid_trg, H5S_SELECT_SET, (size_t)4, coords[0]);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
@@ -6502,7 +6553,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     /*
      * create the region reference 
      */
-    status = H5Sselect_elements (objsid, H5S_SELECT_SET, 4, coords[0]);
+    status = H5Sselect_elements (objsid, H5S_SELECT_SET, (size_t)4, coords[0]);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
@@ -6613,7 +6664,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     /*
      * create region reference 
      */
-    status = H5Sselect_elements(objsid, H5S_SELECT_SET, 4, coords[0]);
+    status = H5Sselect_elements(objsid, H5S_SELECT_SET, (size_t)4, coords[0]);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);

@@ -4,8 +4,6 @@ PROJECT (HDF5_TOOLS_LIB)
 #-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------
-#INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
-#INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 
 SET (H5_TOOLS_LIB_SRCS
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff.c

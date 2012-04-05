@@ -53,8 +53,8 @@ typedef enum clock_type_ {
 
 /* Miscellaneous identifiers */
 enum {
-    START,          /* Start a specified timer              */
-    STOP            /* Stop a specified timer               */
+    TSTART,          /* Start a specified timer              */
+    TSTOP            /* Stop a specified timer               */
 };
 
 /* The performance time structure */

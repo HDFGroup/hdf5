@@ -525,6 +525,8 @@ H5TOOLS_DLLVAR int     packed_data_offset;  /* offset of packed bits to display 
 H5TOOLS_DLLVAR int     packed_data_length; /* lengtht of packed bits to display */
 H5TOOLS_DLLVAR unsigned long long packed_data_mask;  /* mask in which packed bits to display */
 H5TOOLS_DLLVAR FILE   *rawdatastream;       /* output stream for raw data */
+H5TOOLS_DLLVAR FILE   *rawoutstream;        /* output stream for raw output */
+H5TOOLS_DLLVAR FILE   *rawerrorstream;      /* output stream for raw error */
 H5TOOLS_DLLVAR int     bin_output;          /* binary output */
 H5TOOLS_DLLVAR int     bin_form;            /* binary form */
 H5TOOLS_DLLVAR int     region_output;       /* region output */
@@ -558,7 +560,7 @@ H5TOOLS_DLL void    h5tools_simple_prefix(FILE *stream, const h5tool_format_t *i
 H5TOOLS_DLL void    h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
                             h5tools_context_t *ctx, hsize_t elmtno, hsize_t *ptdata, int secnum);
 
-H5TOOLS_DLL int     do_bin_output(FILE *stream, hid_t container, hsize_t nelmts, hid_t tid, void *_mem);
+H5TOOLS_DLL int     do_bin_output(FILE *stream, FILE *err_stream, hid_t container, hsize_t nelmts, hid_t tid, void *_mem);
 H5TOOLS_DLL int     render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem);
 H5TOOLS_DLL int     render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
                             hid_t container, int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata);

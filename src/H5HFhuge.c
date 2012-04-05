@@ -899,7 +899,7 @@ done:
 herr_t
 H5HF_huge_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
 {
-    H5HF_huge_remove_ud1_t udata;       /* User callback data for v2 B-tree remove call */
+    H5HF_huge_remove_ud_t udata;       /* User callback data for v2 B-tree remove call */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1072,7 +1072,7 @@ done:
 herr_t
 H5HF_huge_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
 {
-    H5HF_huge_remove_ud1_t udata;       /* User callback data for v2 B-tree remove call */
+    H5HF_huge_remove_ud_t udata;       /* User callback data for v2 B-tree remove call */
     H5B2_remove_t op;                   /* Callback for v2 B-tree removal */
     herr_t ret_value = SUCCEED;         /* Return value */
 

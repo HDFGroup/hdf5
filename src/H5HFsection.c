@@ -665,42 +665,6 @@ H5HF_sect_single_dblock_info(H5HF_hdr_t *hdr, hid_t dxpl_id,
     HDassert(dblock_addr);
     HDassert(dblock_size);
 
-    /* Check for section in first direct block of heap */
-    if(sect->sect_info.addr < hdr->man_dtable.cparam.start_block_size) {
-        /* Check for heap changing from direct <-> indirect root (or vice versa)
-         *      while section was live.
-         */
-        if(sect->u.single.parent) {
-            /* Check for heap converting from indirect root to direct root while section was live */
-            if(hdr->man_dtable.curr_root_rows == 0) {
-                /* Release hold on parent indirect block */
-                if(H5HF_iblock_decr(sect->u.single.parent) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on section's indirect block")
-
-                /* Reset parent information */
-                sect->u.single.parent = NULL;
-                sect->u.single.par_entry = 0;
-            } /* end if */
-            else {
-                /* Check for heap converting from indirect to direct and back
-                 *      to indirect again, which would indicate a different
-                 *      indirect root block would be used for the parent of
-                 *      this section and the actual root indirect block.
-                 */
-                if(H5HF_sect_single_locate_parent(hdr, dxpl_id, TRUE, sect) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get section's parent info")
-            } /* end else */
-        } /* end if */
-        else {
-            /* Check for heap converting from direct root to indirect root while section was live */
-            if(hdr->man_dtable.curr_root_rows != 0) {
-                /* Look up indirect block information for section */
-                if(H5HF_sect_single_locate_parent(hdr, dxpl_id, FALSE, sect) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get section's parent info")
-            } /* end if */
-        } /* end else */
-    } /* end if */
-
     /* Check for root direct block */
     if(hdr->man_dtable.curr_root_rows == 0) {
         /* Retrieve direct block info from heap header */
@@ -860,7 +824,7 @@ H5HF_sect_single_add(H5FS_section_info_t *_sect, unsigned *flags, void *_udata)
      */
     if(!(*flags & H5FS_ADD_DESERIALIZING)) {
         H5HF_free_section_t *sect = (H5HF_free_section_t *)_sect;   /* Fractal heap free section */
-        H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
+        H5HF_sect_add_ud_t *udata = (H5HF_sect_add_ud_t *)_udata;   /* User callback data */
         H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
         hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
 
@@ -992,7 +956,7 @@ H5HF_sect_single_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
 {
     H5HF_free_section_t *sect1 = (H5HF_free_section_t *)_sect1;   /* Fractal heap free section */
     H5HF_free_section_t *sect2 = (H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
-    H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_sect_add_ud_t *udata = (H5HF_sect_add_ud_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1050,7 +1014,7 @@ static htri_t
 H5HF_sect_single_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 {
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Fractal heap free section */
-    H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_sect_add_ud_t *udata = (H5HF_sect_add_ud_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     htri_t ret_value = FALSE;           /* Return value */
 
@@ -1105,7 +1069,7 @@ static herr_t
 H5HF_sect_single_shrink(H5FS_section_info_t **_sect, void UNUSED *_udata)
 {
     H5HF_free_section_t **sect = (H5HF_free_section_t **)_sect;   /* Fractal heap free section */
-    H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_sect_add_ud_t *udata = (H5HF_sect_add_ud_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
     H5HF_direct_t *dblock;              /* Pointer to direct block for section */
@@ -1814,7 +1778,7 @@ H5HF_sect_row_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
 {
     H5HF_free_section_t *sect1 = (H5HF_free_section_t *)_sect1;   /* Fractal heap free section */
     H5HF_free_section_t *sect2 = (H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
-    H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_sect_add_ud_t *udata = (H5HF_sect_add_ud_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1881,7 +1845,7 @@ static htri_t
 H5HF_sect_row_can_shrink(const H5FS_section_info_t *_sect, void UNUSED *_udata)
 {
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Fractal heap free section */
-    H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_sect_add_ud_t *udata = (H5HF_sect_add_ud_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     htri_t ret_value = FALSE;           /* Return value */
 
@@ -1919,7 +1883,7 @@ H5HF_sect_row_shrink(H5FS_section_info_t **_sect, void *_udata)
 {
     H5HF_free_section_t **sect = (H5HF_free_section_t **)_sect;   /* Fractal heap free section */
     H5HF_free_section_t *top_indir_sect; /* Top indirect section for row */
-    H5HF_sect_add_ud1_t *udata = (H5HF_sect_add_ud1_t *)_udata;   /* User callback data */
+    H5HF_sect_add_ud_t *udata = (H5HF_sect_add_ud_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
     hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2161,7 +2125,7 @@ H5HF_sect_indirect_iblock_off(const H5HF_free_section_t *sect)
  *
  * Purpose:	Get the "top" indirect section
  *
- * Return:	Pointer to the top indirect sectin (can't fail)
+ * Return:	Pointer to the top indirect section (can't fail)
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu

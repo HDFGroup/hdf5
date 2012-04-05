@@ -17,6 +17,7 @@
 #include <assert.h>
 #include "gif.h"
 #include "H5IMpublic.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
 
 
@@ -69,6 +70,9 @@ int main(int argc , char **argv)
     int bool_is_image = 0; /* 0 = false , 1 = true */
     char *image_name = NULL;
     int idx;
+
+    /* Initialize h5tools lib */
+    h5tools_init();
 
     if ( argv[1] && (strcmp("-V",argv[1])==0) )
     {

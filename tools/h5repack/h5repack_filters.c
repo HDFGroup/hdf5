@@ -19,12 +19,12 @@
 
 /* number of members in an array */
 #ifndef NELMTS
-#    define NELMTS(X)		(sizeof(X)/sizeof(X[0]))
+#    define NELMTS(X)    (sizeof(X)/sizeof(X[0]))
 #endif
 
 /* minimum of two values */
 #undef MIN
-#define MIN(a,b)		(((a)<(b)) ? (a) : (b))
+#define MIN(a,b)    (((a)<(b)) ? (a) : (b))
 
 /*-------------------------------------------------------------------------
  * Function: aux_find_obj
@@ -330,7 +330,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
                     size = 1;
                 sm_size[i - 1] = MIN(dims[i - 1], size);
                 sm_nbytes *= sm_size[i - 1];
-                assert(sm_nbytes > 0);
+                HDassert(sm_nbytes > 0);
 
             }
 

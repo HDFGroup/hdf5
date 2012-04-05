@@ -42,7 +42,7 @@ static void gen_file(void)
 {
     hid_t	fcpl; 	/* File creation property */
     hid_t	fapl; 	/* File access property */
-    hid_t   	file;	/* File id */
+    hid_t   file;	/* File id */
     hid_t	gid;	/* Group id */
     hid_t	type_id;	/* Datatype id */
     hid_t	space_id; 	/* Dataspace id */
@@ -50,7 +50,7 @@ static void gen_file(void)
     hid_t	dset_id;	/* Dataset id */
     char	name[30];	/* Group name */
     char	attrname[30];	/* Attribute name */
-    int     	ret;	/* Return value */
+    int     ret;	/* Return value */
     int 	i;	/* Local index variable */
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);

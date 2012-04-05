@@ -320,22 +320,22 @@ do_pio(parameters param)
     /* Need barrier to make sure everyone starts at the same time */
     MPI_Barrier(pio_comm_g);
 
-    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, START);
+    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
     hrc = do_fopen(&param, fname, &fd, PIO_CREATE | PIO_WRITE);
 
     VRFY((hrc == SUCCESS), "do_fopen failed");
 
-    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, START);
+    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
     hrc = do_write(&res, &fd, &param, ndsets, nbytes, buf_size, buffer);
     hrc == SUCCESS;
-    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, STOP);
+    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
 
     VRFY((hrc == SUCCESS), "do_write failed");
 
     /* Close file for write */
     hrc = do_fclose(iot, &fd);
 
-    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, STOP);
+    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
     VRFY((hrc == SUCCESS), "do_fclose failed");
 
     if (!param.h5_write_only) {
@@ -349,20 +349,20 @@ do_pio(parameters param)
         MPI_Barrier(pio_comm_g);
 
         /* Open file for read */
-        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, START);
+        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
         hrc = do_fopen(&param, fname, &fd, PIO_READ);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
-        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, START);
+        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
         hrc = do_read(&res, &fd, &param, ndsets, nbytes, buf_size, buffer);
-        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, STOP);
+        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_read failed");
 
         /* Close file for read */
         hrc = do_fclose(iot, &fd);
 
-        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, STOP);
+        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_fclose failed");
     }
 
@@ -413,7 +413,7 @@ done:
     static char *
 pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size)
 {
-    const char *prefix, *suffix="";
+    const char *prefix, *suffix = "";
     char *ptr, last = '\0';
     size_t i, j;
 
@@ -968,7 +968,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end else */
 
     /* Start "raw data" write timer */
-    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, START);
+    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTART);
 
     while (nbytes_xfer < bytes_count){
         /* Write */
@@ -1399,7 +1399,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end while */
 
     /* Stop "raw data" write timer */
-    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, STOP);
+    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTOP);
 
     /* Calculate write time */
 
@@ -1899,7 +1899,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end else */
 
     /* Start "raw data" read timer */
-    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, START);
+    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTART);
 
     while (nbytes_xfer < bytes_count){
         /* Read */
@@ -2354,7 +2354,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end while */
 
     /* Stop "raw data" read timer */
-    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, STOP);
+    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTOP);
 
     /* Calculate read time */
 
@@ -3115,9 +3115,9 @@ int MPI_File_read_at(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_READ, START);
+    set_time(timer_g, HDF5_MPI_READ, TSTART);
     err=PMPI_File_read_at(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_READ, STOP);
+    set_time(timer_g, HDF5_MPI_READ, TSTOP);
     return err;
 }
 
@@ -3126,9 +3126,9 @@ int MPI_File_read_at_all(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_READ, START);
+    set_time(timer_g, HDF5_MPI_READ, TSTART);
     err=PMPI_File_read_at_all(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_READ, STOP);
+    set_time(timer_g, HDF5_MPI_READ, TSTOP);
     return err;
 }
 
@@ -3136,9 +3136,9 @@ int MPI_File_write_at(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_WRITE, START);
+    set_time(timer_g, HDF5_MPI_WRITE, TSTART);
     err=PMPI_File_write_at(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_WRITE, STOP);
+    set_time(timer_g, HDF5_MPI_WRITE, TSTOP);
     return err;
 }
 
@@ -3146,9 +3146,9 @@ int MPI_File_write_at_all(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_WRITE, START);
+    set_time(timer_g, HDF5_MPI_WRITE, TSTART);
     err=PMPI_File_write_at_all(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_WRITE, STOP);
+    set_time(timer_g, HDF5_MPI_WRITE, TSTOP);
     return err;
 }
 

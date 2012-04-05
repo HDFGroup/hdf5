@@ -22,6 +22,7 @@
 #include "H5Epublic.h"
 
 /* tools-HDF5 Error variables */
+H5TOOLS_DLLVAR hid_t H5tools_ERR_STACK_g;
 H5TOOLS_DLLVAR hid_t H5tools_ERR_CLS_g;
 H5TOOLS_DLLVAR hid_t H5E_tools_g;
 H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
@@ -66,7 +67,11 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
  * HERROR macro, used to facilitate error reporting .  The arguments are the major
  * error number, the minor error number, and a description of the error.
  */
-#define HERROR(maj_id, min_id, str) H5Epush2(H5E_DEFAULT, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, maj_id, min_id, str)
+#define HERROR(maj_id, min_id, str) {                                                                        \
+        H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, maj_id, min_id, str);     \
+        ret_value = FAIL;                                                                                    \
+}
+
 
 /* Macro for "catching" flow of control when an error occurs.  Note that the
  *      H5_LEAVE macro won't jump back here once it's past this point.

@@ -1099,7 +1099,7 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned defer_flags,
     /* Set flags if this message was "written" without error and wasn't a
      * 'defer' attempt; it is now either fully shared or "shareable".
      */
-    if(mesg_flags && !(defer_flags & H5SM_DEFER)) {
+    if(mesg_flags) {
         if(((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_HERE)
             *mesg_flags |= H5O_MSG_FLAG_SHAREABLE;
         else {
@@ -1109,7 +1109,8 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned defer_flags,
     } /* end if */
 
 done:
-    HDassert(!ret_value || ((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_HERE
+    HDassert((ret_value != TRUE)
+            || ((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_HERE
             || ((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_SOHM);
 #ifndef NDEBUG
     /* If we previously deferred this operation, make sure the saved message

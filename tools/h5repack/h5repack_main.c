@@ -13,6 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include "h5tools.h"
 #include "h5tools_utils.h"
 #include "h5repack.h"
 
@@ -34,7 +35,7 @@ const char  *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:t:a:i:o:S:T:";
+static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:S:T:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -50,6 +51,7 @@ static struct long_options l_opts[] = {
     { "ssize", require_arg, 's' },
     { "ublock", require_arg, 'u' },
     { "block", require_arg, 'b' },
+    { "metadata_block_size", require_arg, 'M' },
     { "threshold", require_arg, 't' },
     { "alignment", require_arg, 'a' },
     { "infile", require_arg, 'i' },   /* -i for backward compability */
@@ -77,24 +79,6 @@ static struct long_options l_opts[] = {
  *
  * Comments:
  *
- * Modifications:
- *  July 2004: Introduced the extra EC or NN option for SZIP
- *  October 2006: Added a new switch -n, that allows to write the dataset
- *                using a native type. The default to write is the file type.
- *
- * Modification:
- *   Peter Cao, June 13, 2007
- *    Add "-L, --latest" option to pack a file with the latest file format
- *   PVN, November 19, 2007
- *    adopted the syntax h5repack [OPTIONS]  file1 file2
- *   PVN, November 28, 2007
- *    added support for multiple global filters
- *   PVN, May 16, 2008
- *    added  backward compatibility for -i infile -o outfile
- *   PVN, August 20, 2008
- *    add a user block to repacked file (switches -u -b)
- *   PVN, August 28, 2008
- *    add options to set alignment (H5Pset_alignment) (switches -t -a)
  *-------------------------------------------------------------------------
  */
 int main(int argc, const char **argv)
@@ -106,12 +90,15 @@ int main(int argc, const char **argv)
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
+    /* Initialize h5tools lib */
+    h5tools_init();
+
     /* update hyperslab buffer size from H5TOOLS_BUFSIZE env if exist */
     if ( h5tools_getenv_update_hyperslab_bufsize() < 0)
-        exit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
 
     /* initialize options  */
-    h5repack_init(&options, 0, 0, (hsize_t)0);
+    h5repack_init(&options, 0, H5F_FILE_SPACE_DEFAULT, (hsize_t)0);
 
     parse_command_line(argc, argv, &options);
 
@@ -128,7 +115,7 @@ int main(int argc, const char **argv)
             {
                 error_msg("file names cannot be the same\n");
                 usage(h5tools_getprogname());
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
 
             }
         }
@@ -137,7 +124,7 @@ int main(int argc, const char **argv)
         {
             error_msg("file names missing\n");
             usage(h5tools_getprogname());
-            exit(EXIT_FAILURE);
+            HDexit(EXIT_FAILURE);
         }
     }
 
@@ -183,6 +170,7 @@ static void usage(const char *prog)
  printf("   -e E, --file=E          Name of file E with the -f and -l options\n");
  printf("   -u U, --ublock=U        Name of file U with user block data to be added\n");
  printf("   -b B, --block=B         Size of user block to be added\n");
+ printf("   -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size\n");
  printf("   -t T, --threshold=T     Threshold value for H5Pset_alignment\n");
  printf("   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
  printf("   -f FILT, --filter=FILT  Filter type\n");
@@ -320,10 +308,10 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
         case 'h':
             usage(h5tools_getprogname());
-            exit(EXIT_SUCCESS);
+            HDexit(EXIT_SUCCESS);
         case 'V':
             print_version(h5tools_getprogname());
-            exit(EXIT_SUCCESS);
+            HDexit(EXIT_SUCCESS);
         case 'v':
             options->verbose = 1;
             break;
@@ -333,7 +321,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             if (h5repack_addfilter( opt_arg, options)<0)
             {
                 error_msg("in parsing filter\n");
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
             break;
         case 'l':
@@ -342,18 +330,18 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             if (h5repack_addlayout( opt_arg, options)<0)
             {
                 error_msg("in parsing layout\n");
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
             break;
 
 
         case 'm':
 
-            options->min_comp = atoi( opt_arg );
+            options->min_comp = HDatoi( opt_arg );
             if ((int)options->min_comp<=0)
             {
                 error_msg("invalid minimum compress size <%s>\n", opt_arg );
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
             break;
 
@@ -371,7 +359,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
         case 'c':
 
-            options->grp_compact = atoi( opt_arg );
+            options->grp_compact = HDatoi( opt_arg );
             if (options->grp_compact>0)
                 options->latest = 1; /* must use latest format */
             break;
@@ -379,7 +367,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
         case 'd':
 
-            options->grp_indexed = atoi( opt_arg );
+            options->grp_indexed = HDatoi( opt_arg );
             if (options->grp_indexed>0)
                 options->latest = 1; /* must use latest format */
             break;
@@ -394,7 +382,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 options->latest = 1; /* must use latest format */
                 if (msgPtr == NULL)
                 {
-                    ssize = atoi( opt_arg );
+                    ssize = HDatoi( opt_arg );
                     for (idx=0; idx<5; idx++)
                         options->msg_size[idx] = ssize;
                 }
@@ -403,7 +391,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
                     char msgType[10];
                     HDstrcpy(msgType, msgPtr+1);
                     msgPtr[0] = '\0';
-                    ssize = atoi( opt_arg );
+                    ssize = HDatoi( opt_arg );
                     if (HDstrncmp(msgType, "dspace",6) == 0) {
                         options->msg_size[0] = ssize;
                     }
@@ -424,7 +412,6 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
             break;
 
-
         case 'u':
 
             options->ublock_filename = opt_arg;
@@ -432,26 +419,31 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
         case 'b':
 
-            options->ublock_size = (hsize_t)atol( opt_arg );
+            options->ublock_size = (hsize_t)HDatol( opt_arg );
+            break;
+
+        case 'M':
+
+            options->meta_block_size = (hsize_t)HDatol( opt_arg );
             break;
 
         case 't':
 
-            options->threshold = (hsize_t)atol( opt_arg );
+            options->threshold = (hsize_t)HDatol( opt_arg );
             break;
 
         case 'a':
 
-            options->alignment = atol( opt_arg );
+            options->alignment = HDatol( opt_arg );
             if ( options->alignment < 1 )
             {
                 error_msg("invalid alignment size\n", opt_arg );
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
             break;
 
         case 'S':
-	{
+            {
             char strategy[MAX_NC_NAME];
 
             HDstrcpy(strategy, opt_arg);
@@ -465,14 +457,14 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 options->fs_strategy = H5F_FILE_SPACE_VFD;
             else {
                 error_msg("invalid file space management strategy\n", opt_arg );
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
             break;
-        }
+            }
 
         case 'T':
 
-            options->fs_threshold = (hsize_t)atol( opt_arg );
+            options->fs_threshold = (hsize_t)HDatol( opt_arg );
             break;
         } /* switch */
 
@@ -486,7 +478,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
         {
             error_msg("missing file names\n");
             usage(h5tools_getprogname());
-            exit(EXIT_FAILURE);
+            HDexit(EXIT_FAILURE);
         }
     }
 
@@ -517,9 +509,9 @@ void read_info(const char *filename,
     char c;
     int  i, rc=1;
 
-    if ((fp = fopen(filename, "r")) == (FILE *)NULL) {
+    if ((fp = HDfopen(filename, "r")) == (FILE *)NULL) {
         error_msg("cannot open options file %s\n", filename);
-        exit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
     }
 
     /* cycle until end of file reached */
@@ -540,7 +532,7 @@ void read_info(const char *filename,
             while( c!=' ' )
             {
                 fscanf(fp, "%c", &c);
-                if (feof(fp)) break;
+                if (HDfeof(fp)) break;
             }
             c='0';
             /* go until end */
@@ -549,14 +541,14 @@ void read_info(const char *filename,
                 fscanf(fp, "%c", &c);
                 comp_info[i]=c;
                 i++;
-                if (feof(fp)) break;
+                if (HDfeof(fp)) break;
                 if (c==10 /*eol*/) break;
             }
             comp_info[i-1]='\0'; /*cut the last " */
 
             if (h5repack_addfilter(comp_info,options)==-1){
                 error_msg("could not add compression option\n");
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
         }
         /*-------------------------------------------------------------------------
@@ -570,7 +562,7 @@ void read_info(const char *filename,
             while( c!=' ' )
             {
                 fscanf(fp, "%c", &c);
-                if (feof(fp)) break;
+                if (HDfeof(fp)) break;
             }
             c='0';
             /* go until end */
@@ -579,14 +571,14 @@ void read_info(const char *filename,
                 fscanf(fp, "%c", &c);
                 comp_info[i]=c;
                 i++;
-                if (feof(fp)) break;
+                if (HDfeof(fp)) break;
                 if (c==10 /*eol*/) break;
             }
             comp_info[i-1]='\0'; /*cut the last " */
 
             if (h5repack_addlayout(comp_info,options)==-1){
                 error_msg("could not add chunck option\n");
-                exit(EXIT_FAILURE);
+                HDexit(EXIT_FAILURE);
             }
         }
         /*-------------------------------------------------------------------------
@@ -595,10 +587,10 @@ void read_info(const char *filename,
         */
         else {
             error_msg("bad file format for %s", filename);
-            exit(EXIT_FAILURE);
+            HDexit(EXIT_FAILURE);
         }
     }
 
-    fclose(fp);
+    HDfclose(fp);
     return;
 }

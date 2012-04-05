@@ -72,7 +72,7 @@ static particle_t testPart[NRECORDS] = {
  */
 static int cmp_par(size_t i, size_t j, particle_t *rbuf, particle_t *wbuf )
 {
- if ( ( strcmp( rbuf[i].name, wbuf[j].name ) != 0 ) ||
+ if ( ( HDstrcmp( rbuf[i].name, wbuf[j].name ) != 0 ) ||
   rbuf[i].lati != wbuf[j].lati ||
   rbuf[i].longi != wbuf[j].longi ||
   rbuf[i].pressure != wbuf[j].pressure ||
@@ -127,7 +127,7 @@ static int create_hl_table(hid_t fid)
 
     /* Define field information */
     const char *field_names[NFIELDS]  =
-		  { "Name","Latitude", "Longitude", "Pressure", "Temperature" };
+      { "Name","Latitude", "Longitude", "Pressure", "Temperature" };
     hid_t      field_type[NFIELDS];
     hid_t      string_type;
     hsize_t    chunk_size = 10;
@@ -182,7 +182,7 @@ static int test_create_close(hid_t fid)
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
 
-    assert(part_t != -1);
+    HDassert(part_t != -1);
 
     /* Create the table */
     table = H5PTcreate_fl(fid, PT_NAME, part_t, (hsize_t)100, -1);
@@ -460,7 +460,7 @@ static int    test_big_table(hid_t fid)
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
 
-    assert(part_t != -1);
+    HDassert(part_t != -1);
 
     /* Create a new table */
     table = H5PTcreate_fl(fid, "Packet Test Dataset2", part_t, (hsize_t)33, -1);
@@ -712,7 +712,7 @@ static int    test_opaque(hid_t fid)
     if ((part_t = H5Tcreate (H5T_OPAQUE, sizeof(particle_t) )) < 0 )
         return -1;
 
-    assert(part_t != -1);
+    HDassert(part_t != -1);
 
     /* Tag the opaque datatype */
     if ( H5Tset_tag(part_t,  "Opaque Particle"  ) < 0)
@@ -787,7 +787,7 @@ test_compress(void)
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
 
-    assert(part_t != -1);
+    HDassert(part_t != -1);
 
     /* Create a new table with compression level 8 */
     table = H5PTcreate_fl(fid1, "Compressed Test Dataset", part_t, (hsize_t)80, 8);
@@ -1059,7 +1059,7 @@ int main(void)
  /* create a file using default properties */
  fid=H5Fcreate(TEST_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
- puts("Testing packet table");
+ HDputs("Testing packet table");
 
  /* run tests */
  if ( test_packet_table(fid) < 0)
