@@ -141,6 +141,9 @@ Bug Fixes since HDF5-1.8.8
 
     Library
     -------
+    - Fixed a bug in H5Ocopy(): When copying an opened object, call the
+      object's flush class action to ensure that cached data is flushed
+      so that H5Ocopy will get the correct data.  (VC - 2012/3/27 - HDFFV-7853)
     - Windows and STDIO correctness changes have been propagated from the SEC2
       and old Windows drivers to the STDIO VFD.  (DER - 2012/3/30, HDFFV-7917)
     - Fixed an error that would occur when copying an object with attribute
