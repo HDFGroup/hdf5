@@ -57,8 +57,8 @@ static herr_t H5O_storage_free(void *_mesg);
 static herr_t H5O_storage_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     void *_mesg);
 static void *H5O_storage_copy_file(H5F_t *file_src, void *mesg_src,
-    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info,
-    void *udata, hid_t dxpl_id);
+    H5F_t *file_dst, hbool_t *recompute_size, unsigned UNUSED *mesg_flags,
+    H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
 static herr_t H5O_storage_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
 
@@ -522,8 +522,8 @@ done:
  */
 static void *
 H5O_storage_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
-    hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void *_udata,
-    hid_t dxpl_id)
+    hbool_t UNUSED *recompute_size, unsigned UNUSED *mesg_flags,
+    H5O_copy_t *cpy_info, void *_udata, hid_t dxpl_id)
 {
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     H5O_storage_t      *storage_src = (H5O_storage_t *)mesg_src;

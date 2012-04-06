@@ -222,6 +222,19 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * instead of the default H5D_ALLOC_TIME_LATE
      */
 #define H5FD_FEAT_ALLOCATE_EARLY        0x00000200
+    /* 
+     * Defining the H5FD_FEAT_ALLOW_FILE_IMAGE for a VFL driver means that
+     * the driver is able to use a file image in the fapl as the initial
+     * contents of a file.
+     */
+#define H5FD_FEAT_ALLOW_FILE_IMAGE      0x00000400
+    /*
+     * Defining the H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS for a VFL driver
+     * means that the driver is able to use callbacks to make a copy of the
+     * image to store in memory.
+     */
+#define H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS 0x00000800
+
 
 /* Forward declaration */
 typedef struct H5FD_t H5FD_t;
@@ -290,6 +303,33 @@ struct H5FD_t {
     hsize_t             threshold;      /* Threshold for alignment  */
     hsize_t             alignment;      /* Allocation alignment     */
 };
+
+/* Define enum for the source of file image callbacks */
+typedef enum {
+    H5FD_FILE_IMAGE_OP_NO_OP,
+    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,     
+    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
+    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET,
+    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE,
+    H5FD_FILE_IMAGE_OP_FILE_OPEN,
+    H5FD_FILE_IMAGE_OP_FILE_RESIZE,
+    H5FD_FILE_IMAGE_OP_FILE_CLOSE,
+} H5FD_file_image_op_t;
+
+/* Define structure to hold file image callbacks */
+typedef struct {
+    void   *(*image_malloc)(size_t size, H5FD_file_image_op_t file_image_op, 
+                            void *udata);
+    void   *(*image_memcpy)(void *dest, const void *src, size_t size,
+                            H5FD_file_image_op_t file_image_op, void *udata);
+    void   *(*image_realloc)(void *ptr, size_t size, 
+                            H5FD_file_image_op_t file_image_op, void *udata);
+    herr_t  (*image_free)(void *ptr, H5FD_file_image_op_t file_image_op, 
+                          void *udata);
+    void   *(*udata_copy)(void *udata);
+    herr_t  (*udata_free)(void *udata);
+    void *udata;
+} H5FD_file_image_callbacks_t;
 
 #ifdef __cplusplus
 extern "C" {

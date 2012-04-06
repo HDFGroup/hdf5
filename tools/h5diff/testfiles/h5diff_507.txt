@@ -1,4 +1,4 @@
-</grp1> is of type H5G_GROUP and </elink_grp1> is of type H5G_UDLINK
+Not comparable: </grp1> is of type H5G_GROUP and </elink_grp1> is of type H5G_UDLINK
 --------------------------------
 Some objects are not comparable
 --------------------------------

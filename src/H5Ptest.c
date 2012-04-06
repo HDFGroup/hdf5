@@ -165,9 +165,59 @@ H5P_reset_external_file_test(hid_t dcpl_id)
 
     /* set external file list */
     if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set external file list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_reset_external_file_test() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_reset_layout_test
+ PURPOSE
+    Routine to reset layout message
+ USAGE
+    herr_t H5P_reset_layout_test(plist)
+           hid_t dcpl_id; IN: the property list
+
+ RETURNS
+    Non-negative on success/Negative on failure
+
+ PROGRAMMER
+    Quincey Koziol
+    April 5, 2012
+--------------------------------------------------------------------------*/
+herr_t
+H5P_reset_layout_test(hid_t dcpl_id)
+{
+    H5O_layout_t    layout;             /* Layout message */
+    H5P_genplist_t *plist;              /* Property list */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check arguments */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
+
+    /* Get layout message */
+    if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get layout")
+
+    /* Clean up any values set for the layout */
+    if(H5O_msg_reset(H5O_LAYOUT_ID, &layout) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release layout info")
+
+    /* Set layout message */
+    if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
+
+    /* Remove layout message */
+    if(H5P_remove(dcpl_id, plist, H5D_CRT_LAYOUT_NAME) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "can't delete layout message property")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5P_reset_layout_test() */
 

@@ -1172,9 +1172,9 @@ HDfprintf(stderr, "%s: Leaving\n", FUNC);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF_sects_cb(const H5FS_section_info_t *_sect, void *_udata)
+H5MF_sects_cb(H5FS_section_info_t *_sect, void *_udata)
 {
-    const H5MF_free_section_t *sect = (const H5MF_free_section_t *)_sect;
+    H5MF_free_section_t *sect = (H5MF_free_section_t *)_sect;
     H5MF_sect_iter_ud_t *udata = (H5MF_sect_iter_ud_t *)_udata;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR

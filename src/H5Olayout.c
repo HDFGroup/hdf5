@@ -49,8 +49,8 @@ static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 static herr_t H5O_layout_pre_copy_file(H5F_t *file_src,
     const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static void *H5O_layout_copy_file(H5F_t *file_src, void *mesg_src,
-    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info,
-    void *udata, hid_t dxpl_id);
+    H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
+    H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
 static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
 
@@ -807,8 +807,8 @@ done:
  */
 static void *
 H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
-    hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void *_udata,
-    hid_t dxpl_id)
+    hbool_t UNUSED *recompute_size, unsigned UNUSED *mesg_flags,
+    H5O_copy_t *cpy_info, void *_udata, hid_t dxpl_id)
 {
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     H5O_layout_t       *layout_src = (H5O_layout_t *) mesg_src;

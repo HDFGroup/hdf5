@@ -243,6 +243,9 @@ usage(const char *prog)
     HDfprintf(rawoutstream, "     -e, --escape         Escape non printing characters\n");
     HDfprintf(rawoutstream, "     -V, --version        Print version number and exit\n");
     HDfprintf(rawoutstream, "     -a P, --attribute=P  Print the specified attribute\n");
+    HDfprintf(rawoutstream, "                          If an attribute name contains a slash (/), escape the\n");
+    HDfprintf(rawoutstream, "                          slash with a preceding backslash (\\).\n");
+    HDfprintf(rawoutstream, "                          (See example section below.)\n");
     HDfprintf(rawoutstream, "     -d P, --dataset=P    Print the specified dataset\n");
     HDfprintf(rawoutstream, "     -y, --noindex        Do not print array indices with the data\n");
     HDfprintf(rawoutstream, "     -p, --properties     Print dataset filters, storage layout and fill value\n");
@@ -315,6 +318,10 @@ usage(const char *prog)
     HDfprintf(rawoutstream, "  1) Attribute foo of the group /bar_none in file quux.h5\n");
     HDfprintf(rawoutstream, "\n");
     HDfprintf(rawoutstream, "      h5dump -a /bar_none/foo quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "     Attribute \"high/low\" of the group /bar_none in the file quux.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -a \"/bar_none/high\\/low\" quux.h5\n");
     HDfprintf(rawoutstream, "\n");
     HDfprintf(rawoutstream, "  2) Selecting a subset from dataset /foo in file quux.h5\n");
     HDfprintf(rawoutstream, "\n");

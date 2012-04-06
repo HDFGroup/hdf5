@@ -1841,8 +1841,11 @@ static int test_valid_path(void)
    *          /                      /   \
    *        G2                     DS4    G7
    *         |                 (hard link   (dangled soft link
-   *         |                  to /G1/DS3)  to /G1/G20 )
-   *        /  \     			     
+   *         |                 to /G1/DS3)  to /G1/G20 )
+   *         |
+   *         |
+   *         | --- Gcyc (soft link to /G1)
+   *        /  \    			     
    *       /    \       
    *     G5      \    
    *  (soft link  G6 (external link /G1 in FILENAME4)
@@ -1901,7 +1904,7 @@ static int test_valid_path(void)
      goto out;
 
   /*
-   * Create a group named "/G3/G5" in the file.
+   * Create a hard link
    */
   if(H5Lcreate_hard(file_id, "/G2/DS4", file_id, "/G1/DS3",H5P_DEFAULT, H5P_DEFAULT)<0)
        goto out;
@@ -1915,6 +1918,12 @@ static int test_valid_path(void)
    * Create a soft link
    */
   if(H5Lcreate_soft("/G2", file_id, "/G1/G2/G5", H5P_DEFAULT, H5P_DEFAULT)<0)
+    goto out;
+
+  /*
+   * Create a cyclic soft link
+   */
+  if(H5Lcreate_soft("/G1", file_id, "/G1/G2/Gcyc", H5P_DEFAULT, H5P_DEFAULT)<0)
     goto out;
 
   if(H5Gclose(group)<0)
@@ -2007,6 +2016,12 @@ static int test_valid_path(void)
   if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G5", TRUE)) != TRUE)
     goto out;
 
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", FALSE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", TRUE)) != TRUE)
+    goto out;
+  
   if( (path_valid = H5LTpath_valid(file_id, "/G2", TRUE)) != TRUE)
     goto out;
 
@@ -2092,6 +2107,12 @@ static int test_valid_path(void)
   if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", TRUE)) != TRUE)
     goto out;
 
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
+    goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", FALSE)) != TRUE)
+    goto out;
+
   if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
     goto out;
 
@@ -2101,6 +2122,10 @@ static int test_valid_path(void)
   /* Should fail, does not exist */
   if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", TRUE)) == TRUE)
     goto out;
+
+  if( (path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", TRUE)) == TRUE)
+    goto out;
+
 
   if(H5Fclose(file_id)<0)
     goto out;

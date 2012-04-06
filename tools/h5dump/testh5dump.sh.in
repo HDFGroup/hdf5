@@ -799,9 +799,9 @@ TOOLTEST tarray7.ddl --enable-error-stack tarray7.h5
 TOOLTEST tarray8.ddl --enable-error-stack tarray8.h5
 
 # test for wildcards in filename (does not work with cmake)
-TOOLTEST3 tstarfile --enable-error-stack -H -d Dataset1 tarr*.h5
-TOOLTEST3 tqmarkfile --enable-error-stack -H -d Dataset1 tarray?.h5
-TOOLTEST tmultifile --enable-error-stack -H -d Dataset1 tarray2.h5 tarray3.h5 tarray4.h5 tarray5.h5 tarray6.h5 tarray7.h5
+# inconsistent across platforms TOOLTEST3 tstarfile.ddl --enable-error-stack -H -d Dataset1 tarr*.h5
+TOOLTEST3 tqmarkfile.ddl --enable-error-stack -H -d Dataset1 tarray?.h5
+TOOLTEST tmultifile.ddl --enable-error-stack -H -d Dataset1 tarray2.h5 tarray3.h5 tarray4.h5 tarray5.h5 tarray6.h5 tarray7.h5
 
 # test for files with empty data
 TOOLTEST tempty.ddl --enable-error-stack tempty.h5

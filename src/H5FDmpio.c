@@ -876,6 +876,100 @@ fprintf(stderr, "leaving H5FD_mpio_fapl_free\n");
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_set_mpio_atomicity
+ *
+ * Purpose:	Sets the atomicity mode
+ *
+ * Return:	Success:	Non-negative
+ *
+ * 		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		Feb 14, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_set_mpio_atomicity(H5FD_t *_file, hbool_t flag)
+{
+    H5FD_mpio_t *file = (H5FD_mpio_t*)_file;
+    int          mpi_code;               /* MPI return code */
+    int          temp_flag;
+    herr_t       ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+#ifdef H5FDmpio_DEBUG
+    if (H5FD_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Entering H5FD_set_mpio_atomicity\n");
+#endif
+
+    if (FALSE == flag)
+        temp_flag = 0;
+    else
+        temp_flag = 1;
+
+    /* set atomicity value */
+    if (MPI_SUCCESS != (mpi_code=MPI_File_set_atomicity(file->f, temp_flag)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_File_set_atomicity", mpi_code)
+
+done:
+#ifdef H5FDmpio_DEBUG
+    if (H5FD_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Leaving H5FD_set_mpio_atomicity\n");
+#endif
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_get_mpio_atomicity
+ *
+ * Purpose:	Returns the atomicity mode
+ *
+ * Return:	Success:	Non-negative
+ *
+ * 		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		Feb 14, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_get_mpio_atomicity(H5FD_t *_file, hbool_t *flag)
+{
+    H5FD_mpio_t *file = (H5FD_mpio_t*)_file;
+    int          mpi_code;               /* MPI return code */
+    int          temp_flag;
+    herr_t       ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+#ifdef H5FDmpio_DEBUG
+    if (H5FD_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Entering H5FD_get_mpio_atomicity\n");
+#endif
+
+    /* get atomicity value */
+    if (MPI_SUCCESS != (mpi_code=MPI_File_get_atomicity(file->f, &temp_flag)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_File_get_atomicity", mpi_code)
+
+    if (0 != temp_flag)
+        *flag = TRUE;
+    else
+        *flag = FALSE;
+
+done:
+#ifdef H5FDmpio_DEBUG
+    if (H5FD_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Leaving H5FD_get_mpio_atomicity\n");
+#endif
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5FD_mpio_open
  *
  * Purpose:     Opens a file with name NAME.  The FLAGS are a bit field with

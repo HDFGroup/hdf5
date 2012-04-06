@@ -35,7 +35,7 @@ const char  *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:t:a:i:o:S:T:";
+static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:S:T:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -51,6 +51,7 @@ static struct long_options l_opts[] = {
     { "ssize", require_arg, 's' },
     { "ublock", require_arg, 'u' },
     { "block", require_arg, 'b' },
+    { "metadata_block_size", require_arg, 'M' },
     { "threshold", require_arg, 't' },
     { "alignment", require_arg, 'a' },
     { "infile", require_arg, 'i' },   /* -i for backward compability */
@@ -78,24 +79,6 @@ static struct long_options l_opts[] = {
  *
  * Comments:
  *
- * Modifications:
- *  July 2004: Introduced the extra EC or NN option for SZIP
- *  October 2006: Added a new switch -n, that allows to write the dataset
- *                using a native type. The default to write is the file type.
- *
- * Modification:
- *   Peter Cao, June 13, 2007
- *    Add "-L, --latest" option to pack a file with the latest file format
- *   PVN, November 19, 2007
- *    adopted the syntax h5repack [OPTIONS]  file1 file2
- *   PVN, November 28, 2007
- *    added support for multiple global filters
- *   PVN, May 16, 2008
- *    added  backward compatibility for -i infile -o outfile
- *   PVN, August 20, 2008
- *    add a user block to repacked file (switches -u -b)
- *   PVN, August 28, 2008
- *    add options to set alignment (H5Pset_alignment) (switches -t -a)
  *-------------------------------------------------------------------------
  */
 int main(int argc, const char **argv)
@@ -115,7 +98,7 @@ int main(int argc, const char **argv)
         HDexit(EXIT_FAILURE);
 
     /* initialize options  */
-    h5repack_init(&options, 0, 0, 0, (hsize_t)0);
+    h5repack_init(&options, 0, FALSE, H5F_FILE_SPACE_DEFAULT, (hsize_t)0);
 
     parse_command_line(argc, argv, &options);
 
@@ -187,6 +170,7 @@ static void usage(const char *prog)
  printf("   -e E, --file=E          Name of file E with the -f and -l options\n");
  printf("   -u U, --ublock=U        Name of file U with user block data to be added\n");
  printf("   -b B, --block=B         Size of user block to be added\n");
+ printf("   -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size\n");
  printf("   -t T, --threshold=T     Threshold value for H5Pset_alignment\n");
  printf("   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
  printf("   -f FILT, --filter=FILT  Filter type\n");
@@ -370,36 +354,32 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             break;
 
         case 'L':
-            options->latest = 1;
+            options->latest = TRUE;
             break;
 
         case 'c':
-
             options->grp_compact = HDatoi( opt_arg );
-            if (options->grp_compact>0)
-                options->latest = 1; /* must use latest format */
+            if (options->grp_compact > 0)
+                options->latest = TRUE; /* must use latest format */
             break;
 
 
         case 'd':
-
             options->grp_indexed = HDatoi( opt_arg );
-            if (options->grp_indexed>0)
-                options->latest = 1; /* must use latest format */
+            if (options->grp_indexed > 0)
+                options->latest = TRUE; /* must use latest format */
             break;
 
         case 's':
-
             {
-
                 int idx = 0;
                 int ssize = 0;
-                char *msgPtr = HDstrchr( opt_arg, ':');
-                options->latest = 1; /* must use latest format */
+                char *msgPtr = HDstrchr(opt_arg, ':');
+                options->latest = TRUE; /* must use latest format */
                 if (msgPtr == NULL)
                 {
                     ssize = HDatoi( opt_arg );
-                    for (idx=0; idx<5; idx++)
+                    for(idx = 0; idx < 5; idx++)
                         options->msg_size[idx] = ssize;
                 }
                 else
@@ -408,26 +388,19 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
                     HDstrcpy(msgType, msgPtr+1);
                     msgPtr[0] = '\0';
                     ssize = HDatoi( opt_arg );
-                    if (HDstrncmp(msgType, "dspace",6) == 0) {
+                    if(HDstrncmp(msgType, "dspace",6) == 0)
                         options->msg_size[0] = ssize;
-                    }
-                    else if (HDstrncmp(msgType, "dtype", 5) == 0) {
+                    else if (HDstrncmp(msgType, "dtype", 5) == 0)
                         options->msg_size[1] = ssize;
-                    }
-                    else if (HDstrncmp(msgType, "fill", 4) == 0) {
+                    else if (HDstrncmp(msgType, "fill", 4) == 0)
                         options->msg_size[2] = ssize;
-                    }
-                    else if (HDstrncmp(msgType, "pline", 5) == 0) {
+                    else if (HDstrncmp(msgType, "pline", 5) == 0)
                         options->msg_size[3] = ssize;
-                    }
-                    else if (HDstrncmp(msgType, "attr", 4) == 0) {
+                    else if (HDstrncmp(msgType, "attr", 4) == 0)
                         options->msg_size[4] = ssize;
-                    }
                 }
             }
-
             break;
-
 
         case 'u':
 
@@ -437,6 +410,11 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
         case 'b':
 
             options->ublock_size = (hsize_t)HDatol( opt_arg );
+            break;
+
+        case 'M':
+
+            options->meta_block_size = (hsize_t)HDatol( opt_arg );
             break;
 
         case 't':
@@ -455,7 +433,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             break;
 
         case 'S':
-  {
+            {
             char strategy[MAX_NC_NAME];
 
             HDstrcpy(strategy, opt_arg);
@@ -472,7 +450,7 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 HDexit(EXIT_FAILURE);
             }
             break;
-        }
+            }
 
         case 'T':
 

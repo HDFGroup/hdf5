@@ -46,10 +46,11 @@ static herr_t H5O_linfo_free(void *_mesg);
 static herr_t H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     void *_mesg);
 static void *H5O_linfo_copy_file(H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info,
-    void *udata, hid_t dxpl_id);
-static herr_t H5O_linfo_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
-    void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);
+    H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
+    H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
+static herr_t H5O_linfo_post_copy_file(const H5O_loc_t *parent_src_oloc,
+    const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst,
+    unsigned *mesg_flags, hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_linfo_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			     FILE * stream, int indent, int fwidth);
 
@@ -379,8 +380,8 @@ done:
  */
 static void *
 H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
-    hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void *_udata,
-    hid_t dxpl_id)
+    hbool_t UNUSED *recompute_size, unsigned UNUSED *mesg_flags,
+    H5O_copy_t *cpy_info, void *_udata, hid_t dxpl_id)
 {
     H5O_linfo_t          *linfo_src = (H5O_linfo_t *) native_src;
     H5O_linfo_t          *linfo_dst = NULL;
@@ -501,7 +502,8 @@ done:
  */
 static herr_t
 H5O_linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
-    H5O_loc_t *dst_oloc, void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
+    H5O_loc_t *dst_oloc, void *mesg_dst, unsigned UNUSED *mesg_flags,
+    hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
     const H5O_linfo_t   *linfo_src = (const H5O_linfo_t *)mesg_src;
     H5O_linfo_t         *linfo_dst = (H5O_linfo_t *)mesg_dst;

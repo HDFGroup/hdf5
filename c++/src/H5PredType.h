@@ -26,9 +26,17 @@
 namespace H5 {
 #endif
 
+/* This constant is defined for a workaround to eliminate memory leaks due to
+   the library being re-initiated when PredType destructors are invoked.  A
+   PredType instant with H5CPP_EXITED as the value of its "id" is constructed
+   before the other PredType objects are created.  At exit, when this special
+   PredType object is to be destructed, no HDF5 library function will be called
+   and the library will be terminated.  -BMR, Mar 30, 2012 */
+#define H5CPP_EXITED	-3  // -3 is less likely to be used elsewhere
+
 class H5_DLLCPP PredType : public AtomType {
    public:
-	// Returns this class name
+	///\brief Returns this class name
 	virtual H5std_string fromClass () const { return("PredType"); }
 
 	// Makes a copy of the predefined type and stores the new
@@ -229,9 +237,10 @@ class H5_DLLCPP PredType : public AtomType {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:
-	// added this to work around the atexit/global destructor problem
-	// temporarily - it'll prevent the use of atexit to clean up
-	static const PredType NotAtexit;	// not working yet
+	// Added this to work around the atexit/global destructor problem.
+	// It'll help to terminate the library after other PredType instances
+	// are closed.  -BMR, Mar 30, 2012
+	static const PredType AtExit;
 
    protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

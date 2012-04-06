@@ -51,6 +51,7 @@
 typedef struct {
     const H5P_genclass_t *parent;       /* Pointer to parent class */
     const char *name;                   /* Pointer to name to check */
+    H5P_genclass_t *new_class;          /* Pointer to class during path traversal */
 } H5P_check_class_t;
 
 
@@ -1358,11 +1359,11 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_check_class
+    H5P_open_class_path_cb
  PURPOSE
     Internal callback routine to check for duplicated names in parent class.
  USAGE
-    int H5P_check_class(obj, id, key)
+    int H5P_open_class_path_cb(obj, id, key)
         H5P_genclass_t *obj;    IN: Pointer to class
         hid_t id;               IN: ID of object being looked at
         const void *key;        IN: Pointer to information used to compare
@@ -1378,27 +1379,29 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static int
-H5P_check_class(void *_obj, hid_t UNUSED id, void *_key)
+H5P_open_class_path_cb(void *_obj, hid_t UNUSED id, void *_key)
 {
-    H5P_genclass_t *obj=(H5P_genclass_t *)_obj; /* Pointer to the class for this ID */
-    const H5P_check_class_t *key=(const H5P_check_class_t *)_key; /* Pointer to key information for comparison */
-    int ret_value=0;    /* Return value */
+    H5P_genclass_t *obj = (H5P_genclass_t *)_obj; /* Pointer to the class for this ID */
+    H5P_check_class_t *key = (H5P_check_class_t *)_key; /* Pointer to key information for comparison */
+    int ret_value = 0;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(obj);
-    HDassert(H5I_GENPROP_CLS==H5I_get_type(id));
+    HDassert(H5I_GENPROP_CLS == H5I_get_type(id));
     HDassert(key);
 
     /* Check if the class object has the same parent as the new class */
-    if(obj->parent==key->parent) {
+    if(obj->parent == key->parent) {
         /* Check if they have the same name */
-        if(HDstrcmp(obj->name,key->name)==0)
-            ret_value=1;        /* Indicate a match */
+        if(HDstrcmp(obj->name, key->name) == 0) {
+            key->new_class = obj;
+            ret_value = 1;        /* Indicate a match */
+        } /* end if */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_check_class() */
+} /* end H5P_open_class_path_cb() */
 
 
 /*--------------------------------------------------------------------------
@@ -4555,8 +4558,8 @@ H5P_open_class_path(const char *path)
     char *curr_name;            /* Pointer to current component of path name */
     char *delimit;              /* Pointer to path delimiter during traversal */
     H5P_genclass_t *curr_class; /* Pointer to class during path traversal */
-    H5P_genclass_t *ret_value;  /* Return value */
     H5P_check_class_t check_info;   /* Structure to hold the information for checking duplicate names */
+    H5P_genclass_t *ret_value;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -4569,20 +4572,24 @@ H5P_open_class_path(const char *path)
     /* Find the generic property class with this full path */
     curr_name = tmp_path;
     curr_class = NULL;
-    while((delimit=HDstrchr(curr_name,'/'))!=NULL) {
+    while(NULL != (delimit = HDstrchr(curr_name, '/'))) {
         /* Change the delimiter to terminate the string */
-        *delimit='\0';
+        *delimit = '\0';
 
         /* Set up the search structure */
-        check_info.parent=curr_class;
-        check_info.name=curr_name;
+        check_info.parent = curr_class;
+        check_info.name = curr_name;
+        check_info.new_class = NULL;
 
         /* Find the class with this name & parent by iterating over the open classes */
-        if(NULL == (curr_class = (H5P_genclass_t *)H5I_search(H5I_GENPROP_CLS, H5P_check_class, &check_info, FALSE)))
-            HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "can't locate class")
+        if(H5I_iterate(H5I_GENPROP_CLS, H5P_open_class_path_cb, &check_info, FALSE) < 0)
+	    HGOTO_ERROR(H5E_PLIST, H5E_BADITER, NULL, "can't iterate over classes")
+	else if(NULL == check_info.new_class)
+	    HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "can't locate class")
 
         /* Advance the pointer in the path to the start of the next component */
-        curr_name=delimit+1;
+        curr_class = check_info.new_class;
+        curr_name = delimit + 1;
     } /* end while */
 
     /* Should be pointing to the last component in the path name now... */
@@ -4590,13 +4597,16 @@ H5P_open_class_path(const char *path)
     /* Set up the search structure */
     check_info.parent = curr_class;
     check_info.name = curr_name;
+    check_info.new_class = NULL;
 
     /* Find the class with this name & parent by iterating over the open classes */
-    if(NULL == (curr_class = (H5P_genclass_t *)H5I_search(H5I_GENPROP_CLS, H5P_check_class, &check_info, FALSE)))
+    if(H5I_iterate(H5I_GENPROP_CLS, H5P_open_class_path_cb, &check_info, FALSE) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADITER, NULL, "can't iterate over classes")
+    else if(NULL == check_info.new_class)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "can't locate class")
 
     /* Copy it */
-    if(NULL == (ret_value = H5P_copy_pclass(curr_class)))
+    if(NULL == (ret_value = H5P_copy_pclass(check_info.new_class)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, NULL, "can't copy property class")
 
 done:
@@ -4604,7 +4614,7 @@ done:
     H5MM_xfree(tmp_path);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5P_open_class_path() */
+} /* H5P_open_class_path() */
 
 
 /*--------------------------------------------------------------------------

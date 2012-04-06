@@ -1449,7 +1449,8 @@ H5T_term_interface(void)
 	H5T_g.asoft = 0;
 
 	/* Unlock all datatypes, then free them */
-	H5I_search(H5I_DATATYPE, H5T_unlock_cb, NULL, FALSE);
+	/* note that we are ignoring the return value from H5I_iterate() */
+	H5I_iterate(H5I_DATATYPE, H5T_unlock_cb, NULL, FALSE);
 	H5I_dec_type_ref(H5I_DATATYPE);
 
         /* Reset all the datatype IDs */

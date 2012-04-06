@@ -237,7 +237,7 @@ usage(void)
 
 int main(int argc, const char *argv[])
 {
-    hid_t fid;          /* File ID for file opened */\
+    hid_t fid;          /* File ID for file opened */
     long nrecords = 0;  /* # of records to append */
     long flush_count = 1000;  /* # of records to write between flushing file */
     unsigned verbose = 1;       /* Whether to emit some informational messages */

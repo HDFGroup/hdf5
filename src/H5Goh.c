@@ -81,7 +81,8 @@ const H5O_obj_class_t H5O_OBJ_GROUP[1] = {{
     H5O_group_open, 		/* open an object of this class */
     H5O_group_create, 		/* create an object of this class */
     H5O_group_get_oloc,		/* get an object header location for an object */
-    H5O_group_bh_info 		/* get the index & heap info for an object */
+    H5O_group_bh_info, 		/* get the index & heap info for an object */
+    NULL 			/* flush an opened object of this class */
 }};
 
 /* Declare the external free list to manage the H5O_ginfo_t struct */
