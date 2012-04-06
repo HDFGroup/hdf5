@@ -15,9 +15,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FAprivate.h
+ * Created:        H5FAprivate.h
  *
- * Purpose:		Private header for library accessible Fixed
+ * Purpose:        Private header for library accessible Fixed
  *                      Array routines.
  *
  *-------------------------------------------------------------------------
@@ -32,7 +32,7 @@
 #endif /* NOT_YET */
 
 /* Private headers needed by this file */
-#include "H5Fprivate.h"		/* File access				*/
+#include "H5Fprivate.h"        /* File access                */
 
 
 /**************************/
@@ -51,7 +51,7 @@ typedef enum H5FA_cls_id_t {
 
     /* Start real class IDs at 0 -QAK */
     /* (keep these last) */
-    H5FA_CLS_TEST_ID,	        /* Fixed array is for testing (do not use for actual data) */
+    H5FA_CLS_TEST_ID,            /* Fixed array is for testing (do not use for actual data) */
     H5FA_NUM_CLS_ID             /* Number of Fixed Array class IDs (must be last) */
 } H5FA_cls_id_t;
 
@@ -80,9 +80,9 @@ typedef struct H5FA_create_t {
     const H5FA_class_t *cls;            /* Class of Fixed Array to create */
     uint8_t raw_elmt_size;              /* Element size in file (in bytes) */
     uint8_t max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in a data block page) -
-					   i.e. # of bits needed to store max. # of elements
-					   in a data block page */
-    hsize_t nelmts; 			/* # of elements in array */
+                       i.e. # of bits needed to store max. # of elements
+                       in a data block page */
+    hsize_t nelmts;             /* # of elements in array */
 } H5FA_create_t;
 
 /* Fixed array metadata statistics info */
@@ -105,6 +105,12 @@ typedef int (*H5FA_operator_t)(hsize_t idx, const void *_elmt, void *_udata);
 /*****************************/
 /* Library-private Variables */
 /*****************************/
+
+/* The Fixed Array class for dataset chunks w/o filters*/
+H5_DLLVAR const H5FA_class_t H5FA_CLS_CHUNK[1];
+
+/* The Fixed Array class for dataset chunks w/ filters*/
+H5_DLLVAR const H5FA_class_t H5FA_CLS_FILT_CHUNK[1];
 
 
 /***************************************/

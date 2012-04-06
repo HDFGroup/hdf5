@@ -34,11 +34,12 @@
 /* Headers */
 /***********/
 
+#include "H5private.h"      /* Generic Functions */
 #include "H5Dprivate.h"     /* Datasets */
 #include "H5Eprivate.h"     /* Errors   */
 #include "H5Fprivate.h"     /* Files    */
-#include "H5Gprivate.h"	    /* Groups	*/
-#include "H5Iprivate.h"	    /* IDs	*/
+#include "H5Gprivate.h"        /* Groups    */
+#include "H5Iprivate.h"        /* IDs    */
 #include "H5Opkg.h"         /* Objects  */
 
 /*************/
@@ -47,11 +48,11 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oflush
+ * Function:    H5Oflush
  *
- * Purpose:	Flushes all buffers associated with an object to disk.
+ * Purpose:    Flushes all buffers associated with an object to disk.
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:    Non-negative on success, negative on failure
  *
  * Programmer:  Mike McGreevy
  *              May 19, 2010
@@ -134,11 +135,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Orefresh
+ * Function:    H5Orefresh
  *
- * Purpose:	Refreshes all buffers associated with an object.
+ * Purpose:    Refreshes all buffers associated with an object.
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:    Non-negative on success, negative on failure
  *
  * Programmer:  Mike McGreevy
  *              July 28, 2010
@@ -170,7 +171,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O_refresh_metadata
  *
- * Purpose:	Internal routine that refreshes all buffers associated with 
+ * Purpose:    Internal routine that refreshes all buffers associated with 
  *          an object.
  *
  * Return:  Success:    Non-negative

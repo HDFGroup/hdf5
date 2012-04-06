@@ -15,11 +15,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5EAprivate.h
- *			Jun 17 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:        H5EAprivate.h
+ *            Jun 17 2008
+ *            Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:		Private header for library accessible extensible
+ * Purpose:        Private header for library accessible extensible
  *                      array routines.
  *
  *-------------------------------------------------------------------------
@@ -34,8 +34,8 @@
 #endif /* NOT_YET */
 
 /* Private headers needed by this file */
-#include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5Fprivate.h"		/* File access				*/
+#include "H5ACprivate.h"    /* Metadata cache            */
+#include "H5Fprivate.h"        /* File access                */
 
 
 /**************************/
@@ -54,7 +54,7 @@ typedef enum H5EA_cls_id_t {
 
     /* Start real class IDs at 0 -QAK */
     /* (keep these last) */
-    H5EA_CLS_TEST_ID,	        /* Extensible array is for testing (do not use for actual data) */
+    H5EA_CLS_TEST_ID,            /* Extensible array is for testing (do not use for actual data) */
     H5EA_NUM_CLS_ID             /* Number of Extensible Array class IDs (must be last) */
 } H5EA_cls_id_t;
 
@@ -119,6 +119,12 @@ typedef struct H5EA_t H5EA_t;
 /*****************************/
 /* Library-private Variables */
 /*****************************/
+
+/* The Extensible Array class for dataset chunks w/o filters*/
+H5_DLLVAR const H5EA_class_t H5EA_CLS_CHUNK[1];
+
+/* The Extensible Array class for dataset chunks w/ filters*/
+H5_DLLVAR const H5EA_class_t H5EA_CLS_FILT_CHUNK[1];
 
 
 /***************************************/

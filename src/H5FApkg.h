@@ -16,9 +16,9 @@
 /*
  * Programmer:
  *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5FA package.  Source files outside the H5FA package should
- *		include H5FAprivate.h instead.
+ * Purpose:    This file contains declarations which are visible only within
+ *        the H5FA package.  Source files outside the H5FA package should
+ *        include H5FAprivate.h instead.
  */
 #if !(defined(H5FA_PACKAGE) | defined(H5FA_MODULE))
 #error "Do not include this file outside the H5FA package!"
@@ -31,8 +31,8 @@
 #include "H5FAprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5ACprivate.h"    /* Metadata cache            */
+#include "H5FLprivate.h"    /* Free Lists                           */
 
 
 /**************************/
@@ -65,7 +65,7 @@
 #define H5FA_METADATA_PREFIX_SIZE(c) (                                        \
     H5_SIZEOF_MAGIC   /* Signature */                                         \
     + 1 /* Version */                                                         \
-    + 1	/* Array type */                                                \
+    + 1    /* Array type */                                                \
     + ((c) ? H5FA_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \
     )
 
@@ -79,10 +79,10 @@
     + 1 /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */ \
                                                                               \
     /* Fixed Array statistics fields */                                       \
-    + (h)->sizeof_size /* # of elements in the fixed array */    	      \
+    + (h)->sizeof_size /* # of elements in the fixed array */              \
                                                                               \
     /* Fixed Array Header specific fields */                                  \
-    + (h)->sizeof_addr /* File address of Fixed Array data block */  	      \
+    + (h)->sizeof_addr /* File address of Fixed Array data block */            \
     )
 
 /* Size of the Fixed Array data block prefix on disk */
@@ -91,27 +91,27 @@
     H5FA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* Sanity-checking fields */                                              \
-    + (d)->hdr->sizeof_addr    	/* File address of Fixed Array header owning the data block */  \
+    + (d)->hdr->sizeof_addr        /* File address of Fixed Array header owning the data block */  \
                                                                               \
-    /* Fixed Array Data Block specific fields */			      \
+    /* Fixed Array Data Block specific fields */                  \
     + (d)->dblk_page_init_size /* Fixed array data block 'page init' bitmasks (can be 0 if no pages) */ \
     )
 
 /* Size of the Fixed Array data block on disk */
-#define H5FA_DBLOCK_SIZE(d)  (					      	      \
+#define H5FA_DBLOCK_SIZE(d)  (                                    \
     /* Data block prefix size  */                                             \
     H5FA_DBLOCK_PREFIX_SIZE(d)                                                \
                                                                               \
-    /* Fixed Array Elements|Pages of Elements*/				      \
+    /* Fixed Array Elements|Pages of Elements*/                      \
     + ((d)->hdr->cparam.nelmts * (size_t)(d)->hdr->cparam.raw_elmt_size)      \
-    + ((d)->npages * H5FA_SIZEOF_CHKSUM)        /* Checksum */  	      \
+    + ((d)->npages * H5FA_SIZEOF_CHKSUM)        /* Checksum */            \
     )
 
 /* Size of the Fixed Array data block page on disk */
-#define H5FA_DBLK_PAGE_SIZE(d, nelmts)     (                                          	   \
-    /* Fixed Array Data Block Page */					      \
+#define H5FA_DBLK_PAGE_SIZE(d, nelmts)     (                                                 \
+    /* Fixed Array Data Block Page */                          \
     + (nelmts * (size_t)(d)->hdr->cparam.raw_elmt_size) /* Elements in data block page */  \
-    + H5FA_SIZEOF_CHKSUM                        	/* Checksum for each page */  	   \
+    + H5FA_SIZEOF_CHKSUM                            /* Checksum for each page */         \
     )
 
 /****************************/
@@ -127,7 +127,7 @@ typedef struct H5FA_hdr_t {
     H5FA_create_t cparam;               /* Creation parameters for Fixed Array */
 
     /* Fixed Array data block information (stored in header) */
-    haddr_t dblk_addr;               	/* Address of Fixed Array Data block */
+    haddr_t dblk_addr;                   /* Address of Fixed Array Data block */
 
     /* Statistics for Fixed Array (stored in header) */
     H5FA_stat_t stats;                  /* Statistcs for Fixed Array */
@@ -156,18 +156,18 @@ typedef struct H5FA_dblock_t {
     void        *elmts;         /* Buffer for elements stored in data block  */
 
     /* Internal array information (not stored) */
-    H5FA_hdr_t	*hdr;	        /* Shared array header info	              */
+    H5FA_hdr_t    *hdr;            /* Shared array header info                  */
 
     /* Computed/cached values (not stored) */
-    haddr_t     addr;           /* Address of this data block on disk	      */
-    hsize_t     size;           /* Size of data block on disk		      */
+    haddr_t     addr;           /* Address of this data block on disk          */
+    hsize_t     size;           /* Size of data block on disk              */
     size_t      npages;         /* Nummber of pages in data block (zero if not paged) */
     size_t      last_page_nelmts;  /* Nummber of elements in last page, if paged */
 
     /* Fixed Array data block information (not stored) */
-    size_t dblk_page_nelmts;         	/* # of elements per data block page */
-    size_t dblk_page_size; 		/* Size of a data block page */
-    size_t dblk_page_init_size;    	/* Size of 'page init' bitmask */
+    size_t dblk_page_nelmts;             /* # of elements per data block page */
+    size_t dblk_page_size;         /* Size of a data block page */
+    size_t dblk_page_init_size;        /* Size of 'page init' bitmask */
 } H5FA_dblock_t;
 
 /* The fixed array data block page information */
@@ -179,18 +179,18 @@ typedef struct H5FA_dbk_page_t {
     void        *elmts;         /* Buffer for elements stored in data block page */
 
     /* Internal array information (not stored) */
-    H5FA_hdr_t	*hdr;	        /* Shared array header info	              */
+    H5FA_hdr_t    *hdr;            /* Shared array header info                  */
 
     /* Computed/cached values (not stored) */
     haddr_t     addr;           /* Address of this data block page on disk    */
-    size_t      size;           /* Size of data block page on disk	      */
+    size_t      size;           /* Size of data block page on disk          */
     size_t      nelmts;         /* Number of elements in data block page      */
 } H5FA_dblk_page_t;
 
 /* Fixed array */
 struct H5FA_t {
-    H5FA_hdr_t  *hdr;           /* Pointer to internal fixed array header info 	*/
-    H5F_t      *f;              /* Pointer to file for fixed array 		*/
+    H5FA_hdr_t  *hdr;           /* Pointer to internal fixed array header info     */
+    H5F_t      *f;              /* Pointer to file for fixed array         */
 };
 
 
@@ -222,17 +222,11 @@ H5_DLLVAR const H5AC_class_t H5AC_FARRAY_DBLOCK[1];
 /* H5FA data block page inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1];
 
-/* The Fixed Array class for dataset chunks w/o filters*/
-H5_DLLVAR const H5FA_class_t H5FA_CLS_CHUNK[1];
-
-/* The Fixed Array class for dataset chunks w/ filters*/
-H5_DLLVAR const H5FA_class_t H5FA_CLS_FILT_CHUNK[1];
-
 /* Internal fixed array testing class */
 H5_DLLVAR const H5FA_class_t H5FA_CLS_TEST[1];
 
 /* Array of fixed array client ID -> client class mappings */
-extern const H5FA_class_t *const H5FA_client_class_g[H5FA_NUM_CLS_ID];
+H5_DLLVAR const H5FA_class_t *const H5FA_client_class_g[H5FA_NUM_CLS_ID];
 
 
 /******************************/
