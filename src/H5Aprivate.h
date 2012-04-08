@@ -29,7 +29,10 @@
 /**************************/
 /* Library Private Macros */
 /**************************/
-
+/* ========  Attribute creation property names ======== */
+#define H5A_CRT_TYPE_ID_NAME        "attr_type_id"
+#define H5A_CRT_SPACE_ID_NAME       "attr_space_id"
+#define H5A_CRT_LOCATION_NAME       "attr_location"
 
 /****************************/
 /* Library Private Typedefs */

@@ -36,6 +36,7 @@
 #include "H5Opkg.h"		/* Object headers			*/
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
+#include "H5VLprivate.h"	/* VOL plugins				*/
 
 /****************/
 /* Local Macros */
@@ -65,10 +66,6 @@ typedef struct H5A_iter_cb1 {
 /********************/
 /* Local Prototypes */
 /********************/
-
-static herr_t H5A_open_common(const H5G_loc_t *loc, H5A_t *attr);
-static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
-static herr_t H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id);
 
 
 /*********************/
@@ -220,32 +217,8 @@ hid_t
 H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     hid_t acpl_id, hid_t UNUSED aapl_id)
 {
-    H5G_loc_t           loc;                    /* Object location */
-    H5T_t		*type;                  /* Datatype to use for attribute */
-    H5S_t		*space;                 /* Dataspace to use for attribute */
-    hid_t		ret_value;              /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE6("i", "i*siiii", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id);
-
-    /* check arguments */
-    if(H5I_ATTR == H5I_get_type(loc_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(0 == (H5F_INTENT(loc.oloc->file) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, FAIL, "no write intent on file")
-    if(!attr_name || !*attr_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
-    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type")
-    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-
-    /* Go do the real work for attaching the attribute to the dataset */
-    if((ret_value = H5A_create(&loc, attr_name, type, space, acpl_id, H5AC_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
-#if 0
+    H5P_genplist_t      *plist;            /* Property list pointer */
+    void *location = NULL;
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -257,10 +230,26 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     if(!attr_name || !*attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
+    /* Get correct property list */
+    if(H5P_DEFAULT == acpl_id)
+        acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* set creation properties */
+    if(H5P_set(plist, H5A_CRT_TYPE_ID_NAME, &type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
+    if(H5P_set(plist, H5A_CRT_SPACE_ID_NAME, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
+    if(H5P_set(plist, H5A_CRT_LOCATION_NAME, &location) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for location")
+
     /* Create the attribute through the VOL */
-    if((ret_value = H5VL_attr_create(loc_id, attr_name, type_id, space_id, acpl_id, aapl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
-#endif
+    if((ret_value = H5VL_attr_create(loc_id, attr_name, acpl_id, aapl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate2() */
@@ -302,13 +291,9 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t UNUSED aapl_id,
     hid_t lapl_id)
 {
-    H5G_loc_t           loc;                    /* Object location */
-    H5G_loc_t           obj_loc;                /* Location used to open group */
-    H5G_name_t          obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t           obj_oloc;            	/* Opened object object location */
-    hbool_t             loc_found = FALSE;      /* Entry at 'obj_name' found */
-    H5T_t		*type;                  /* Datatype to use for attribute */
-    H5S_t		*space;                 /* Dataspace to use for attribute */
+    H5P_genplist_t      *plist;            /* Property list pointer */
+    void                *location = NULL;  /* a pointer to VOL specific token that indicates 
+                                              the location of the object */
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -316,50 +301,48 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
              acpl_id, aapl_id, lapl_id);
 
     /* check arguments */
-    if(H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(0 == (H5F_INTENT(loc.oloc->file) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, FAIL, "no write intent on file")
     if(!obj_name || !*obj_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
     if(!attr_name || !*attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
-    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type")
-    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
-    /* Set up opened group location to fill in */
-    obj_loc.oloc = &obj_oloc;
-    obj_loc.path = &obj_path;
-    H5G_loc_reset(&obj_loc);
 
-    /* Find the object's location */
-    if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+    /* Find the object's location 
+    if(H5G_loc_find(&loc, obj_name, &obj_loc, lapl_id, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
-    loc_found = TRUE;
+            */
 
-    /* Go do the real work for attaching the attribute to the dataset */
-    if((ret_value = H5A_create(&obj_loc, attr_name, type, space, acpl_id, H5AC_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
-
-#if 0
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, obj_name, lapl_id) < 0)
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, obj_name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
+    /* Get correct property list */
+    if(H5P_DEFAULT == acpl_id)
+        acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* set creation properties */
+    if(H5P_set(plist, H5A_CRT_TYPE_ID_NAME, &type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
+    if(H5P_set(plist, H5A_CRT_SPACE_ID_NAME, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
+    if(H5P_set(plist, H5A_CRT_LOCATION_NAME, &location) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for location")
+
     /* Create the attribute through the VOL */
-    if((ret_value = H5VL_attr_create(loc_id, attr_name, type_id, space_id, acpl_id, aapl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
-#endif
+    if((ret_value = H5VL_attr_create(loc_id, attr_name, acpl_id, aapl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
 
 done:
-    /* Release resources */
-    if(loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
-
+    if (NULL != location) {
+        free (location);
+        location = NULL;
+    }
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate_by_name() */
 
@@ -553,41 +536,24 @@ done:
     H5Aclose or resource leaks will develop.
 --------------------------------------------------------------------------*/
 hid_t
-H5Aopen(hid_t loc_id, const char *attr_name, hid_t UNUSED aapl_id)
+H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
 {
-    H5G_loc_t    	loc;            /* Object location */
-    H5A_t               *attr = NULL;   /* Attribute opened */
     hid_t		ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "i*si", loc_id, attr_name, aapl_id);
 
     /* check arguments */
-    if(H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!attr_name || !*attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
-    /* Read in attribute from object header */
-    if(NULL == (attr = H5O_attr_open_by_name(loc.oloc, attr_name, H5AC_ind_dxpl_id)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from object header for attribute: '%s'", attr_name)
-
-    /* Finish initializing attribute */
-    if(H5A_open_common(&loc, attr) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to initialize attribute")
-
-    /* Register the attribute and get an ID for it */
-    if((ret_value = H5I_register(H5I_ATTR, attr, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
+    /* Open the attribute through the VOL */
+    if((ret_value = H5VL_attr_open(loc_id, NULL, attr_name, aapl_id)) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open attribute")
 
 done:
-    /* Cleanup on failure */
-    if(ret_value < 0)
-        if(attr && H5A_close(attr) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
-
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen() */
 
@@ -617,18 +583,16 @@ hid_t
 H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t UNUSED aapl_id, hid_t lapl_id)
 {
-    H5G_loc_t    	loc;            /* Object location */
-    H5A_t               *attr = NULL;   /* Attribute opened */
+    void                *location = NULL;  /* a pointer to VOL specific token that indicates 
+                                              the location of the object */
     hid_t		ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("i", "i*s*sii", loc_id, obj_name, attr_name, aapl_id, lapl_id);
 
     /* check arguments */
-    if(H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!obj_name || !*obj_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
     if(!attr_name || !*attr_name)
@@ -639,20 +603,19 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Open the attribute on the object header */
-    if(NULL == (attr = H5A_open_by_name(&loc, obj_name, attr_name, lapl_id, H5AC_ind_dxpl_id)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
+    /* Get the token for the Object location through the VOL */
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, obj_name, lapl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
-    /* Register the attribute and get an ID for it */
-    if((ret_value = H5I_register(H5I_ATTR, attr, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
+    /* Open the attribute through the VOL */
+    if((ret_value = H5VL_attr_open(loc_id, location, attr_name, aapl_id)) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open attribute")
 
 done:
-    /* Cleanup on failure */
-    if(ret_value < 0)
-        if(attr && H5A_close(attr) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
-
+    if (NULL != location) {
+        free (location);
+        location = NULL;
+    }
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_by_name() */
 
@@ -685,8 +648,6 @@ hid_t
 H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t UNUSED aapl_id, hid_t lapl_id)
 {
-    H5A_t       *attr = NULL;   /* Attribute opened */
-    H5G_loc_t	loc;	        /* Object location */
     hid_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -694,10 +655,8 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
              lapl_id);
 
     /* check arguments */
-    if(H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!obj_name || !*obj_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -710,20 +669,11 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Open the attribute in the object header */
-    if(NULL == (attr = H5A_open_by_idx(&loc, obj_name, idx_type, order, n, lapl_id, H5AC_ind_dxpl_id)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
-
-    /* Register the attribute and get an ID for it */
-    if((ret_value = H5I_register(H5I_ATTR, attr, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
+    if(H5VL_attr_generic(loc_id, H5VL_ATTR_OPEN_BY_IDX, &ret_value, 
+                         obj_name, idx_type, order, n, aapl_id, lapl_id) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to open attribute")
 
 done:
-    /* Cleanup on failure */
-    if(ret_value < 0)
-        if(attr && H5A_close(attr) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
-
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_by_idx() */
 
@@ -746,7 +696,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5A_open_common(const H5G_loc_t *loc, H5A_t *attr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -933,24 +883,18 @@ done:
 herr_t
 H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
 {
-    H5A_t *attr;                /* Attribute object for ID */
-    H5T_t *mem_type;            /* Memory datatype */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
     /* check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if(NULL == (mem_type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
-    /* Go write the actual data to the attribute */
-    if((ret_value = H5A_write(attr, mem_type, buf, H5AC_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
+    /* write the data through the VOL */
+    if((ret_value = H5VL_attr_write(attr_id, dtype_id, buf)) < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -973,7 +917,7 @@ done:
  DESCRIPTION
     This function writes a complete attribute to disk.
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 {
     uint8_t		*tconv_buf = NULL;	/* datatype conv buffer */
@@ -1090,24 +1034,18 @@ done:
 herr_t
 H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
 {
-    H5A_t *attr;                /* Attribute object for ID */
-    H5T_t *mem_type;            /* Memory datatype */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
     /* check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-    if(NULL == (mem_type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
-    /* Go write the actual data to the attribute */
-    if((ret_value = H5A_read(attr, mem_type, buf, H5AC_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute")
+    /* Read the data through the VOL */
+    if((ret_value = H5VL_attr_read(attr_id, dtype_id, buf)) < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1130,7 +1068,7 @@ done:
  DESCRIPTION
     This function reads a complete attribute from disk.
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
 {
     uint8_t		*tconv_buf = NULL;	/* datatype conv buffer*/
@@ -1236,31 +1174,58 @@ done:
 hid_t
 H5Aget_space(hid_t attr_id)
 {
-    H5A_t	*attr;                  /* Attribute object for ID */
-    H5S_t	*ds = NULL;             /* Copy of dataspace for attribute */
     hid_t	ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", attr_id);
 
-    /* check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+    /* get the dataspace through the VOL */
+    if(H5VL_attr_get(attr_id, H5VL_ATTR_GET_SPACE, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get data space")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aget_space() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_get_space
+ *
+ * Purpose:	Returns and ID for the dataspace of the attribute.
+ *
+ * Return:	Success:	ID for dataspace
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5A_get_space(H5A_t *attr)
+{
+    H5S_t	*ds = NULL;
+    hid_t       ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Copy the attribute's dataspace */
     if(NULL == (ds = H5S_copy(attr->shared->ds, FALSE, TRUE)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to copy dataspace")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to copy dataspace")
 
     /* Atomize */
     if((ret_value = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
 
 done:
-    if(ret_value < 0 && ds)
-        (void)H5S_close(ds);
+    if(ret_value < 0 && ds) {
+        if(H5S_close(ds) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+    } /* end if */
 
-    FUNC_LEAVE_API(ret_value)
-} /* H5Aget_space() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_get_space() */
 
 
 /*--------------------------------------------------------------------------
@@ -1282,16 +1247,41 @@ done:
 hid_t
 H5Aget_type(hid_t attr_id)
 {
-    H5A_t	*attr;          /* Attribute object for ID */
-    H5T_t	*dt = NULL;     /* Copy of attribute's datatype */
     hid_t	 ret_value;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", attr_id);
 
-    /* check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+    /* get the datatype through the VOL */
+    if(H5VL_attr_get(attr_id, H5VL_ATTR_GET_TYPE, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get type")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aget_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_get_type
+ *
+ * Purpose:	Returns and ID for the datatype of the dataset.
+ *
+ * Return:	Success:	ID for datatype
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5A_get_type(H5A_t *attr)
+{
+    H5T_t	*dt = NULL;
+    hid_t       ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Patch the datatype's "top level" file pointer */
     if(H5T_patch_file(attr->shared->dt, attr->oloc.file) < 0)
@@ -1303,7 +1293,7 @@ H5Aget_type(hid_t attr_id)
      * read-only.
      */
     if(NULL == (dt = H5T_copy(attr->shared->dt, H5T_COPY_REOPEN)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to copy datatype")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to copy datatype")
 
     /* Mark any datatypes as being in memory now */
     if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
@@ -1311,7 +1301,7 @@ H5Aget_type(hid_t attr_id)
 
     /* Lock copied type */
     if(H5T_lock(dt, FALSE) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
 
     /* Atomize */
     if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
@@ -1320,11 +1310,11 @@ H5Aget_type(hid_t attr_id)
 done:
     if(ret_value < 0) {
         if(dt && H5T_close(dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
     } /* end if */
 
-    FUNC_LEAVE_API(ret_value)
-} /* H5Aget_type() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_get_type() */
 
 
 /*--------------------------------------------------------------------------
@@ -1349,10 +1339,6 @@ done:
 hid_t
 H5Aget_create_plist(hid_t attr_id)
 {
-    H5A_t		*attr;               /* Attribute object for ID */
-    H5P_genplist_t      *plist;              /* Default property list */
-    hid_t               new_plist_id;        /* ID of ACPL to return */
-    H5P_genplist_t      *new_plist;          /* ACPL to return */
     hid_t		ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -1360,9 +1346,40 @@ H5Aget_create_plist(hid_t attr_id)
 
     HDassert(H5P_LST_ATTRIBUTE_CREATE_g != -1);
 
-    /* Get attribute and default attribute creation property list*/
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+    /* get the acpl through the VOL */
+    if(H5VL_attr_get(attr_id, H5VL_ATTR_GET_ACPL, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get acpl")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Aget_create_plist() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5A_get_create_plist
+ PURPOSE
+    private version of H5Aget_create_plist
+ RETURNS
+    This function returns the ID of a copy of the attribute's creation
+    property list, or negative on failure.
+
+ ERRORS
+
+ DESCRIPTION
+        This function returns a copy of the creation property list for
+    an attribute.  The resulting ID must be closed with H5Pclose() or
+    resource leaks will occur.
+--------------------------------------------------------------------------*/
+hid_t
+H5A_get_create_plist(H5A_t* attr)
+{
+    H5P_genplist_t      *plist;              /* Default property list */
+    hid_t               new_plist_id;        /* ID of ACPL to return */
+    H5P_genplist_t      *new_plist;          /* ACPL to return */
+    hid_t               ret_value;
+    FUNC_ENTER_NOAPI_NOINIT
+
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(H5P_LST_ATTRIBUTE_CREATE_g)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get default ACPL")
 
@@ -1379,7 +1396,7 @@ H5Aget_create_plist(hid_t attr_id)
     ret_value = new_plist_id;
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Aget_create_plist() */
 
 
@@ -1407,21 +1424,18 @@ done:
 ssize_t
 H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
 {
-    H5A_t		*my_attr;               /* Attribute object for ID */
     ssize_t		ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("Zs", "iz*s", attr_id, buf_size, buf);
 
     /* check arguments */
-    if(NULL == (my_attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
     if(!buf && buf_size)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer")
 
-    /* Call private function in turn */
-    if(0 > (ret_value = H5A_get_name(my_attr, buf_size, buf)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute name")
+    /* get the name through the VOL */
+    if(H5VL_attr_get(attr_id, H5VL_ATTR_GET_NAME, &ret_value, buf_size, buf) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get name")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1497,8 +1511,7 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, char *name /*out*/, size_t size,
     hid_t lapl_id)
 {
-    H5G_loc_t   loc;            /* Object location */
-    H5A_t	*attr = NULL;   /* Attribute object for name */
+    hid_t       attr_id = -1;
     ssize_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1506,10 +1519,8 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
              lapl_id);
 
     /* Check args */
-    if(H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!obj_name || !*obj_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -1522,6 +1533,15 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
+    if(H5VL_attr_generic(loc_id, H5VL_ATTR_OPEN_BY_IDX, &attr_id, 
+                         obj_name, idx_type, order, n, H5P_DEFAULT, lapl_id) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to open attribute")
+
+    /* get the name through the VOL */
+    if(H5VL_attr_get(attr_id, H5VL_ATTR_GET_NAME, &ret_value, size, name) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get name")
+
+#if 0
     /* Open the attribute on the object header */
     if(NULL == (attr = H5A_open_by_idx(&loc, obj_name, idx_type, order, n, lapl_id, H5AC_ind_dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
@@ -1535,10 +1555,11 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         if((size_t)ret_value >= size)
             name[size - 1]='\0';
     } /* end if */
+#endif
 
 done:
     /* Release resources */
-    if(attr && H5A_close(attr) < 0)
+    if(attr_id > 0 && H5VL_attr_close(attr_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
 
     FUNC_LEAVE_API(ret_value)
@@ -1565,18 +1586,14 @@ done:
 hsize_t
 H5Aget_storage_size(hid_t attr_id)
 {
-    H5A_t	*attr;               /* Attribute object for ID */
     hsize_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(0)
     H5TRACE1("h", "i", attr_id);
 
-    /* Check args */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an attribute")
-
-    /* Set return value */
-    ret_value = attr->shared->data_size;
+    /* get the storage size through the VOL */
+    if(H5VL_attr_get(attr_id, H5VL_ATTR_GET_STORAGE_SIZE, &ret_value) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, 0, "unable to get acpl")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1599,19 +1616,14 @@ done:
 herr_t
 H5Aget_info(hid_t attr_id, H5A_info_t *ainfo)
 {
-    H5A_t	*attr;                  /* Attribute object for name */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", attr_id, ainfo);
 
-    /* Check args */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-
-    /* Get the attribute information */
-    if(H5A_get_info(attr, ainfo) < 0)
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
+    /* get the attribute info through the VOL */
+    if(H5VL_attr_get(attr_id, H5VL_ATTR_GET_INFO, ainfo) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1635,18 +1647,17 @@ herr_t
 H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     H5A_info_t *ainfo, hid_t lapl_id)
 {
-    H5G_loc_t   loc;                    /* Object location */
-    H5A_t	*attr = NULL;           /* Attribute object for name */
+    hid_t attr_id = -1;
+    void        *location = NULL;  /* a pointer to VOL specific token that indicates 
+                                      the location of the object */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*s*s*xi", loc_id, obj_name, attr_name, ainfo, lapl_id);
 
     /* Check args */
-    if(H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!obj_name || !*obj_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
     if(!attr_name || !*attr_name)
@@ -1658,7 +1669,7 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     else
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
-
+#if 0
     /* Open the attribute on the object header */
     if(NULL == (attr = H5A_open_by_name(&loc, obj_name, attr_name, lapl_id, H5AC_ind_dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
@@ -1666,12 +1677,28 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     /* Get the attribute information */
     if(H5A_get_info(attr, ainfo) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
+#endif
 
+    /* Get the token for the Object location through the VOL */
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, obj_name, lapl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
+
+    /* Open the attribute through the VOL */
+    if((attr_id = H5VL_attr_open(loc_id, location, attr_name, H5P_DEFAULT)) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open attribute")
+
+    /* get the attribute info through the VOL */
+    if(H5VL_attr_get(attr_id, H5VL_ATTR_GET_INFO, ainfo) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
 done:
-    /* Cleanup on failure */
-    if(attr && H5A_close(attr) < 0)
+    /* release resources */
+    if(attr_id > 0 && H5VL_attr_close(attr_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
 
+    if (NULL != location) {
+        free (location);
+        location = NULL;
+    }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Aget_info_by_name() */
 
@@ -1694,8 +1721,7 @@ herr_t
 H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5A_info_t *ainfo, hid_t lapl_id)
 {
-    H5G_loc_t   loc;                    /* Object location */
-    H5A_t	*attr = NULL;           /* Attribute object for name */
+    hid_t attr_id = FAIL;
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1703,10 +1729,8 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
              lapl_id);
 
     /* Check args */
-    if(H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!obj_name || !*obj_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -1721,6 +1745,7 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
+#if 0
     /* Open the attribute on the object header */
     if(NULL == (attr = H5A_open_by_idx(&loc, obj_name, idx_type, order, n, lapl_id, H5AC_ind_dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
@@ -1728,10 +1753,20 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     /* Get the attribute information */
     if(H5A_get_info(attr, ainfo) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
+#endif
+
+    /* open the attribute through the VOL */
+    if(H5VL_attr_generic(loc_id, H5VL_ATTR_OPEN_BY_IDX, &attr_id, 
+                         obj_name, idx_type, order, n, H5P_DEFAULT, lapl_id) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to open attribute")
+
+    /* get the attribute info through the VOL */
+    if(H5VL_attr_get(attr_id, H5VL_ATTR_GET_INFO, ainfo) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
     /* Release resources */
-    if(attr && H5A_close(attr) < 0)
+    if(attr_id && H5VL_attr_close(attr_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
 
     FUNC_LEAVE_API(ret_value)
@@ -2018,11 +2053,8 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data,
     hid_t lapl_id)
 {
-    H5G_loc_t	loc;	        /* Object location */
-    H5G_loc_t   obj_loc;        /* Location used to open group */
-    H5G_name_t  obj_path;       /* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;       /* Opened object object location */
-    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
+    void *location = NULL;
+
     hid_t       obj_loc_id = (-1);      /* ID for object located */
     H5A_attr_iter_op_t attr_op; /* Attribute operator */
     hsize_t	start_idx;      /* Index of attribute to start iterating at */
@@ -2034,10 +2066,8 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
              op_data, lapl_id);
 
     /* check arguments */
-    if(H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!obj_name || !*obj_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -2050,19 +2080,13 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Set up opened group location to fill in */
-    obj_loc.oloc = &obj_oloc;
-    obj_loc.path = &obj_path;
-    H5G_loc_reset(&obj_loc);
+    /* Get the token for the Object location through the VOL */
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, obj_name, lapl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
-    /* Find the object's location */
-    if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
-    loc_found = TRUE;
-
-    /* Open the object */
-    if((obj_loc_id = H5O_open_by_loc(&obj_loc, lapl_id, H5AC_ind_dxpl_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+    /* Open the object through the VOL */
+    if((obj_loc_id = H5VL_object_open_by_loc(loc_id, location, lapl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     /* Build attribute operator info */
     attr_op.op_type = H5A_ATTR_OP_APP2;
@@ -2083,8 +2107,6 @@ done:
         if(H5I_dec_app_ref(obj_loc_id) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
     } /* end if */
-    else if(loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
     FUNC_LEAVE_API(ret_value)
 } /* H5Aiterate_by_name() */
@@ -2299,13 +2321,9 @@ H5Aclose(hid_t attr_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", attr_id);
 
-    /* check arguments */
-    if(NULL == H5I_object_verify(attr_id, H5I_ATTR))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-
-    /* Decrement references to that atom (and close it) */
-    if(H5I_dec_app_ref(attr_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't close attribute")
+    /* Close the attribute through the VOL */
+    if((ret_value = H5VL_attr_close(attr_id)) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to close attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)

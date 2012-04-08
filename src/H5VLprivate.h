@@ -61,6 +61,14 @@ H5_DLL herr_t H5VL_file_close(hid_t file_id);
 H5_DLL herr_t H5VL_file_flush(hid_t file_id, H5F_scope_t scope);
 H5_DLL herr_t H5VL_file_get(hid_t uid, H5VL_file_get_t get_type, ...);
 
+H5_DLL hid_t H5VL_attr_create(hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id);
+H5_DLL hid_t H5VL_attr_open(hid_t loc_id, void *location, const char *name, hid_t aapl_id);
+H5_DLL herr_t H5VL_attr_read(hid_t attr_id, hid_t dtype_id, void *buf);
+H5_DLL herr_t H5VL_attr_write(hid_t attr_id, hid_t dtype_id, const void *buf);
+H5_DLL herr_t H5VL_attr_get(hid_t id, H5VL_attr_get_t get_type, ...);
+H5_DLL herr_t H5VL_attr_generic(hid_t id, H5VL_attr_generic_t generic_type, ...);
+H5_DLL herr_t H5VL_attr_close(hid_t attr_id);
+
 H5_DLL hid_t H5VL_dataset_create(hid_t uid, const char *name, hid_t dcpl_id, hid_t dapl_id);
 H5_DLL hid_t H5VL_dataset_open(hid_t uid, const char *name, hid_t dapl_id);
 H5_DLL herr_t H5VL_dataset_close(hid_t uid);

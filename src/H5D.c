@@ -535,7 +535,7 @@ H5Dget_storage_size(hid_t dset_id)
 
     /* get storage size through the VOL */
     if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_STORAGE_SIZE, &ret_value) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get storage size")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, 0, "unable to get storage size")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -566,7 +566,7 @@ H5Dget_offset(hid_t dset_id)
 
     /* get offset through the VOL */
     if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_OFFSET, &ret_value) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get offset")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, HADDR_UNDEF, "unable to get offset")
 
 done:
     FUNC_LEAVE_API(ret_value)

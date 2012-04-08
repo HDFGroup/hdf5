@@ -42,6 +42,21 @@ typedef enum H5VL_file_get_t {
     H5VL_FILE_GET_FREE_SECTIONS     = 13        /*file free selections                  */
 } H5VL_file_get_t;
 
+/* types for all attr get API routines */
+typedef enum H5VL_attr_get_t {
+    H5VL_ATTR_GET_SPACE           = 0,         /* dataspace                           */
+    H5VL_ATTR_GET_TYPE            = 1,         /* datatype                            */
+    H5VL_ATTR_GET_ACPL            = 2,         /* creation property list              */
+    H5VL_ATTR_GET_NAME            = 3,         /* access property list                */
+    H5VL_ATTR_GET_STORAGE_SIZE    = 4,         /* storage size                        */
+    H5VL_ATTR_GET_INFO            = 5          /* offset                              */
+} H5VL_attr_get_t;
+
+/* types for all attr general operations */
+typedef enum H5VL_attr_generic_t {
+    H5VL_ATTR_OPEN_BY_IDX           = 0         /* H5Aopen_by_idx                     */
+} H5VL_attr_generic_t;
+
 /* types for all dataset get API routines */
 typedef enum H5VL_dataset_get_t {
     H5VL_DATASET_GET_SPACE           = 0,         /* dataspace                           */
@@ -113,14 +128,16 @@ typedef struct H5VL_dataset_class_t {
 } H5VL_dataset_class_t;
 
 /* H5A routines */
-typedef struct H5VL_attribute_class_t {
-    hid_t  (*create)( hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id);
-    hid_t  (*open)  (hid_t obj_id, const char *attr_name, hid_t aapl_id);
-    herr_t (*read)  (hid_t attr_id, hid_t mem_type_id, void *buf );
-    herr_t (*write) (hid_t attr_id, hid_t mem_type_id, const void *buf );
-    herr_t (*delete)(hid_t loc_id, const char *attr_name );
+typedef struct H5VL_attr_class_t {
+    hid_t  (*create)(hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id);
+    hid_t  (*open)  (hid_t loc_id, void *location, const char *attr_name, hid_t aapl_id);
+    herr_t (*read)  (hid_t attr_id, hid_t mem_type_id, void *buf);
+    herr_t (*write) (hid_t attr_id, hid_t mem_type_id, const void *buf);
+    herr_t (*delete)(hid_t loc_id, const char *attr_name);
+    herr_t (*get)   (hid_t file_id, H5VL_attr_get_t get_type, va_list arguments);
+    herr_t (*generic)(hid_t id, H5VL_attr_generic_t generic_type, va_list arguments);
     herr_t (*close) (hid_t attr_id);
-} H5VL_attribute_class_t;
+} H5VL_attr_class_t;
 
 /* H5T routines*/
 typedef struct H5VL_datatype_class_t {
@@ -164,7 +181,7 @@ typedef struct H5VL_class_t {
     const char *name;
     unsigned	nrefs;		/* Ref count for times struct is pointed to */
     herr_t  (*terminate)(void);
-    H5VL_attribute_class_t     attribute_cls;
+    H5VL_attr_class_t     attr_cls;
     H5VL_datatype_class_t      datatype_cls;
     H5VL_dataset_class_t       dataset_cls;
     H5VL_group_class_t         group_cls;

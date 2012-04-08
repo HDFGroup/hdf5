@@ -491,9 +491,9 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
 
     /* set creation properties */
     if(H5P_set(plist, H5L_CRT_TARGET_ID_NAME, &cur_loc_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current location id")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
     if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &cur_name) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_create(H5VL_CREATE_HARD_LINK, new_loc_id, new_name, 

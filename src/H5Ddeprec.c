@@ -44,7 +44,7 @@
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
-
+#include "H5VLprivate.h"	/* VOL plugins				*/
 
 /****************/
 /* Local Macros */
@@ -142,6 +142,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t dcpl_id)
 {
     H5P_genplist_t  *plist;            /* Property list pointer */
+    hid_t lcpl_id = H5P_LINK_CREATE_DEFAULT;
     hid_t           ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -162,6 +163,8 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
     if(H5P_set(plist, H5D_CRT_SPACE_ID_NAME, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
+    if(H5P_set(plist, H5D_CRT_LCPL_ID_NAME, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
 
     /* Create the dataset through the VOL */
     if((ret_value = H5VL_dataset_create(loc_id, name, dcpl_id, H5P_DATASET_ACCESS_DEFAULT)) < 0)

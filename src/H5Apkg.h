@@ -217,10 +217,16 @@ H5_DLL H5A_t *H5A_open_by_idx(const H5G_loc_t *loc, const char *obj_name,
 H5_DLL ssize_t H5A_get_name(H5A_t *attr, size_t buf_size, char *buf);
 H5_DLL H5A_t *H5A_copy(H5A_t *new_attr, const H5A_t *old_attr);
 H5_DLL herr_t H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo);
+H5_DLL hid_t H5A_get_type(H5A_t *attr);
+H5_DLL hid_t H5A_get_space(H5A_t *attr);
+H5_DLL hid_t H5A_get_create_plist(H5A_t* attr);
 H5_DLL herr_t H5A_free(H5A_t *attr);
 H5_DLL herr_t H5A_close(H5A_t *attr);
 H5_DLL htri_t H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo);
 H5_DLL herr_t H5A_set_version(const H5F_t *f, H5A_t *attr);
+H5_DLL herr_t H5A_open_common(const H5G_loc_t *loc, H5A_t *attr);
+H5_DLL herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
+H5_DLL herr_t H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id);
 
 /* Attribute "dense" storage routines */
 H5_DLL herr_t H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo);

@@ -33,7 +33,9 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Aprivate.h"		/* Attributes				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
 
@@ -41,6 +43,9 @@
 /* Local Macros */
 /****************/
 
+/* Definitions for UDATA */
+#define H5A_CRT_LOCATION_SIZE   sizeof(void *)
+#define H5A_CRT_LOCATION_DEF    NULL
 
 /******************/
 /* Local Typedefs */
@@ -55,7 +60,8 @@
 /********************/
 /* Local Prototypes */
 /********************/
-
+/* Property class callbacks */
+static herr_t H5P_acrt_reg_prop(H5P_genclass_t *pclass);
 
 /*********************/
 /* Package Variables */
@@ -67,7 +73,7 @@ const H5P_libclass_t H5P_CLS_ACRT[1] = {{
     &H5P_CLS_STRING_CREATE_g,	/* Parent class ID              */
     &H5P_CLS_ATTRIBUTE_CREATE_g, /* Pointer to class ID          */
     &H5P_LST_ATTRIBUTE_CREATE_g, /* Pointer to default property list ID */
-    NULL,			/* Default property registration routine */
+    H5P_acrt_reg_prop,		/* Default property registration routine */
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
     NULL,			/* Class copy callback          */
@@ -82,3 +88,43 @@ const H5P_libclass_t H5P_CLS_ACRT[1] = {{
 /*****************************/
 
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_acrt_reg_prop
+ *
+ * Purpose:     Register the attribute creation property list class's properties
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April 5, 2012
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P_acrt_reg_prop(H5P_genclass_t *pclass)
+{
+    hid_t type_id = FAIL;
+    hid_t space_id = FAIL;
+    void *location = H5A_CRT_LOCATION_DEF;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Register the type ID property*/
+    if(H5P_register_real(pclass, H5A_CRT_TYPE_ID_NAME, sizeof(hid_t), &type_id, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the space ID property */
+    if(H5P_register_real(pclass, H5A_CRT_SPACE_ID_NAME, sizeof(hid_t), &space_id, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the lcpl ID property */
+    if(H5P_register_real(pclass, H5A_CRT_LOCATION_NAME, H5A_CRT_LOCATION_SIZE, &location, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_acrt_reg_prop() */

@@ -636,6 +636,7 @@ test_h5o_plist(void)
     /* Commit the type inside the group anonymously and link it in */
     dtype = H5Tcopy(H5T_NATIVE_INT);
     CHECK(dtype, FAIL, "H5Tcopy");
+
     ret = H5Tcommit_anon(fid, dtype, tcpl, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit_anon");
     ret = H5Olink(dtype, fid, "datatype", H5P_DEFAULT, H5P_DEFAULT);
