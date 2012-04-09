@@ -108,7 +108,7 @@ test_properties(void)
     buffer = (char *)HDmalloc(size);
     for(i = 0; i < count - 1; i++)
         buffer[i] = (char)(65 + i);
-    buffer[count] = '\0';
+    buffer[count - 1] = '\0';
 
     /* Create fapl */
     if((fapl_1 = H5Pcreate(H5P_FILE_ACCESS)) < 0) FAIL_STACK_ERROR
@@ -324,7 +324,7 @@ static int
 test_callbacks(void)
 {
     H5FD_file_image_callbacks_t real_callbacks = {&malloc_cb, &memcpy_cb, &realloc_cb, 
-	&free_cb, &udata_copy_cb, &udata_free_cb, NULL};
+    &free_cb, &udata_copy_cb, &udata_free_cb, NULL};
     H5FD_file_image_callbacks_t null_callbacks = {NULL, NULL, NULL, NULL, NULL, NULL, NULL};
     H5FD_file_image_callbacks_t callbacks;
     hid_t fapl_1;
@@ -351,7 +351,7 @@ test_callbacks(void)
     file_image = (char *)HDmalloc(size);
     for(i = 0; i < count - 1; i++)
         file_image[i] = (char)(65 + i);
-    file_image[count] = '\0';
+    file_image[count - 1] = '\0';
 
     /* Create fapl */
     if((fapl_1 = H5Pcreate(H5P_FILE_ACCESS)) < 0) FAIL_STACK_ERROR
@@ -527,7 +527,7 @@ test_core(void)
     h5_stat_t  sb;
     herr_t ret;
     H5FD_file_image_callbacks_t callbacks = {&malloc_cb, &memcpy_cb, &realloc_cb, 
-	&free_cb, &udata_copy_cb, &udata_free_cb, NULL};
+    &free_cb, &udata_copy_cb, &udata_free_cb, NULL};
 
     TESTING("Initial file image and callbacks in Core VFD");
     
@@ -786,10 +786,10 @@ test_get_file_image(const char * test_banner,
             VERIFY(fd >= 0, "HDopen() failed.");
 
             if(size_remaining >= FAMILY_SIZE ){
-	        bytes_to_read = FAMILY_SIZE;
+            bytes_to_read = FAMILY_SIZE;
                 size_remaining -= FAMILY_SIZE;
             } else {
-	        bytes_to_read = size_remaining;
+            bytes_to_read = size_remaining;
                 size_remaining = 0;
             }
 
@@ -816,7 +816,7 @@ test_get_file_image(const char * test_banner,
          */
         file_size = (ssize_t)stat_buf.st_size;
 
-	/* with latest mods to truncate call in core file drive, 
+    /* with latest mods to truncate call in core file drive, 
          * file size should match image size 
          */
         VERIFY(file_size == image_size, "file size != image size.");
@@ -940,9 +940,9 @@ test_get_file_image_error_rejection(void)
      * Since we have already done the necessary setup, verify that 
      * H5Fget_file_image() will fail with:
      *
-     *		bad file id, or
+     *        bad file id, or
      *
-     *		good id, but not a file id
+     *        good id, but not a file id
      */
 
 
