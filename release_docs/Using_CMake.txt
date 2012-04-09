@@ -9,7 +9,7 @@ Notes: This short instruction is written for users who want to quickly build
        www.cmake.org.
          
        CMake uses the command line, however the visual CMake tool is 
-       recommended for the configuration step. The steps are similiar for
+       available for the configuration step. The steps are similiar for
        all the operating systems supported by CMake.
        
        NOTES:
@@ -46,7 +46,7 @@ Notes: This short instruction is written for users who want to quickly build
       search list. See the "Using Static Libraries with Visual Studio" section.
  
    4. Set the environment variable HDF5_ROOT to the installed location of HDF5.
-      On Windows HDF5_ROOT=C:\Program Files\HDF Group\HDF5\hdf5-1.8.7
+      On Windows HDF5_ROOT=C:\Program Files\HDF Group\HDF5\hdf5-1.8.9
                                                                          
 ========================================================================
           Building HDF5 Examples with CMake
@@ -164,11 +164,11 @@ Notes: This short instruction is written for users who want to quickly build
           and select "x64".
 
       8.2 Find the box "Show directories for", choose "Include files", add the 
-          header path (i.e. c:\Program Files\HDF Group\HDF5\hdf5-1.8.7\include)
+          header path (i.e. c:\Program Files\HDF Group\HDF5\hdf5-1.8.9\include)
           to the included directories.
 
       8.3 Find the box "Show directories for", choose "Library files", add the
-          library path (i.e. c:\Program Files\HDF Group\HDF5\hdf5-1.8.7\lib)
+          library path (i.e. c:\Program Files\HDF Group\HDF5\hdf5-1.8.9\lib)
           to the library directories.
           
       8.4 If using Fortran libraries, you will also need to setup the path
