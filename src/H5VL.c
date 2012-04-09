@@ -166,7 +166,7 @@ H5VL_term_interface(void)
 	}
 
 	if((n2=H5I_nmembers(H5I_FILE_PUBLIC))!=0) {
-	    H5I_clear_type(H5I_FILE_PUBLIC, FALSE, FALSE);
+	    H5I_clear_type(H5I_FILE_PUBLIC, TRUE, FALSE);
             term = FALSE;
 	} else {
 	    H5I_dec_type_ref(H5I_FILE_PUBLIC);
@@ -1041,11 +1041,7 @@ H5VL_object_open_by_loc(hid_t uid, void *obj_loc, hid_t lapl_id)
 
     id_type = H5I_get_type(object_id);
 
-    if (H5I_FILE == id_type) {
-        if((ret_value = H5I_register(H5I_FILE_PUBLIC, id_wrapper2, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
-    }
-    else if (H5I_GROUP == id_type) {
+    if (H5I_GROUP == id_type) {
         if((ret_value = H5I_register(H5I_GROUP_PUBLIC, id_wrapper2, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
     }
@@ -1240,7 +1236,7 @@ herr_t
 H5VL_datatype_commit(hid_t uid, const char *name, hid_t type_id, hid_t lcpl_id, 
                      hid_t tcpl_id, hid_t tapl_id)
 {
-    H5VL_id_wrapper_t               *id_wrapper1;             /* user id structure of the location where the datatype will be commitd */
+    H5VL_id_wrapper_t   *id_wrapper1;             /* wrapper object of the location where the datatype will be commitd */
     herr_t		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1263,11 +1259,14 @@ H5VL_datatype_commit(hid_t uid, const char *name, hid_t type_id, hid_t lcpl_id,
     /* Allocate new id structure */
     if(NULL == (id_wrapper2 = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    id_wrapper2->obj_id = type_id;
+
+    if((id_wrapper2->obj_id = H5I_register(H5I_DATATYPE, H5I_object(type_id), TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
     id_wrapper2->vol_plugin = id_wrapper1->vol_plugin;
 
-    if((ret_value = H5I_register(H5I_DATATYPE_PUBLIC, id_wrapper2, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
+    H5I_subst(type_id, id_wrapper2);
+    //H5I_remove_verify(type_id, H5I_DATATYPE);
+    
 #endif
 
 done:
@@ -1363,6 +1362,28 @@ H5VL_dataset_create(hid_t uid, const char *name, hid_t dcpl_id, hid_t dapl_id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* unwrap the datatype id if it is a named datatype */
+    {
+        H5VL_id_wrapper_t    *id_wrapper;
+        hid_t                type_id;
+        H5P_genplist_t       *plist;
+        /* Get the plist structure */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        /* get creation properties */
+        if(H5P_get(plist, H5D_CRT_TYPE_ID_NAME, &type_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for datatype id")
+
+        if(H5I_DATATYPE_PUBLIC == H5I_get_type(type_id)) {
+            /* get the ID struct */
+            if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(type_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")        
+
+            if(H5P_set(plist, H5D_CRT_TYPE_ID_NAME, &(id_wrapper->obj_id)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
+        }
+    }
     /* get the ID struct */
     if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
@@ -1663,6 +1684,29 @@ H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, ...)
                                                            arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
+
+    /* if the get_type is a named datatype, create a wrapper for it */
+    if(H5VL_DATASET_GET_TYPE == get_type) {
+        H5VL_id_wrapper_t *temp_id_wrapper;              /* user id structure */
+        hid_t	        *ret_id;
+
+        va_start (arguments, get_type);
+        ret_id = va_arg (arguments, hid_t *);
+
+        if(H5T_committed((H5T_t *)H5I_object_verify(*ret_id, H5I_DATATYPE))) {
+            /* Create a new id that points to a struct that holds the attr id and the VOL plugin */
+            /* Allocate new id structure */
+            if(NULL == (temp_id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            temp_id_wrapper->obj_id = *ret_id;
+            temp_id_wrapper->vol_plugin = id_wrapper->vol_plugin;
+
+            if((*ret_id = H5I_register(H5I_DATATYPE_PUBLIC, temp_id_wrapper, TRUE)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize attr handle")
+        }
+        va_end (arguments);
+    }
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_get() */
@@ -1831,10 +1875,18 @@ H5VL_attr_create(hid_t uid, const char *name, hid_t acpl_id, hid_t aapl_id)
 {
     H5VL_id_wrapper_t    *id_wrapper1;             /* user id structure of the location where the attr will be created */
     H5VL_id_wrapper_t    *id_wrapper2;             /* user id structure of new created attr*/
-    hid_t     loc_id;            /* actual attr ID */
-    hid_t     ret_value;             /* Return value */
+    H5I_type_t           id_type;
+    hid_t                loc_id;            /* actual attr ID */
+    hid_t                ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    id_type = H5I_get_type(uid);
+    /* Check id */
+    if(H5I_FILE_PUBLIC != id_type && H5I_GROUP_PUBLIC != id_type &&
+       H5I_DATASET_PUBLIC != id_type && H5I_DATATYPE_PUBLIC !=  id_type &&
+       H5I_ATTR_PUBLIC != id_type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
     if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(uid)))
@@ -1884,10 +1936,18 @@ H5VL_attr_open(hid_t loc_id, void *location, const char *name, hid_t aapl_id)
 {
     H5VL_id_wrapper_t   *id_wrapper1;             /* user id structure of the location where the attr will be opend */
     H5VL_id_wrapper_t   *id_wrapper2;             /* user id structure of new opend attr*/
+    H5I_type_t          id_type;
     hid_t               attr_id;               /* actual attr ID */
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    id_type = H5I_get_type(loc_id);
+    /* Check id */
+    if(H5I_FILE_PUBLIC != id_type && H5I_GROUP_PUBLIC != id_type &&
+       H5I_DATASET_PUBLIC != id_type && H5I_DATATYPE_PUBLIC !=  id_type &&
+       H5I_ATTR_PUBLIC != id_type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
     if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(loc_id)))
@@ -2086,6 +2146,28 @@ H5VL_attr_get(hid_t uid, H5VL_attr_get_t get_type, ...)
                                                            arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
+
+    /* if the get_type is a named datatype, create a wrapper for it */
+    if(H5VL_ATTR_GET_TYPE == get_type) {
+        H5VL_id_wrapper_t *temp_id_wrapper;              /* user id structure */
+        hid_t	        *ret_id;
+
+        va_start (arguments, get_type);
+        ret_id = va_arg (arguments, hid_t *);
+
+        if(H5T_committed((H5T_t *)H5I_object_verify(*ret_id, H5I_DATATYPE))) {
+            /* Create a new id that points to a struct that holds the attr id and the VOL plugin */
+            /* Allocate new id structure */
+            if(NULL == (temp_id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            temp_id_wrapper->obj_id = *ret_id;
+            temp_id_wrapper->vol_plugin = id_wrapper->vol_plugin;
+
+            if((*ret_id = H5I_register(H5I_DATATYPE_PUBLIC, temp_id_wrapper, TRUE)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize attr handle")
+        }
+        va_end (arguments);
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_get() */
@@ -2109,9 +2191,17 @@ H5VL_attr_generic(hid_t uid, H5VL_attr_generic_t generic_type, ...)
 {
     H5VL_id_wrapper_t *id_wrapper;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
+    H5I_type_t        id_type;
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    id_type = H5I_get_type(uid);
+    /* Check id */
+    if(H5I_FILE_PUBLIC != id_type && H5I_GROUP_PUBLIC != id_type &&
+       H5I_DATASET_PUBLIC != id_type && H5I_DATATYPE_PUBLIC !=  id_type &&
+       H5I_ATTR_PUBLIC != id_type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
     if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
@@ -2142,6 +2232,7 @@ H5VL_attr_generic(hid_t uid, H5VL_attr_generic_t generic_type, ...)
 
         if((*ret_id = H5I_register(H5I_ATTR_PUBLIC, temp_id_wrapper, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize attr handle")
+        va_end (arguments);
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)

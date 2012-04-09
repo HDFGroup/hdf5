@@ -2987,6 +2987,11 @@ test_compound_16(void)
     if((int_id = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
     if(H5Tcommit2(file, "int", int_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
+    /* MSC - workaround datatypes */
+    if(H5Tclose(int_id) < 0) goto error;
+    if((int_id = H5Topen2(file, "int", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
     /* Create file compound datatype */
     if((cmpd_f_tid = H5Tcreate(H5T_COMPOUND, 2 * sizeof(int) + 2)) < 0) TEST_ERROR
     if(H5Tinsert(cmpd_f_tid, "i1", (size_t)0, int_id) < 0) TEST_ERROR
@@ -3733,6 +3738,11 @@ test_named (hid_t fapl)
 	HDputs ("    Committed types should not be recommitted!");
 	goto error;
     }
+
+    /* MSC - workaround datatypes */
+    if(H5Tclose(type) < 0) goto error;
+    if((type = H5Topen2(file, "native-int", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
 
     /* It should be possible to define an attribute for the named type */
     if((attr1 = H5Acreate2(type, "attr1", H5T_NATIVE_UCHAR, space,

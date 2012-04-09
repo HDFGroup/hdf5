@@ -29,6 +29,7 @@
 /****************/
 
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 
 /***********/
@@ -38,6 +39,7 @@
 #include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5Fpkg.h"		/* Files		  		*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs					*/
@@ -45,7 +47,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppublic.h"		/* Property Lists			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
-
+#include "H5VLprivate.h"	/* VOL          		  	*/
 
 /****************/
 /* Local Macros */
@@ -180,6 +182,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     hid_t               lapl_id = (-1);         /* LAPL local to this routine */
     H5P_genplist_t     *lapl;                   /* LAPL with nlinks set */
     hid_t               cur_grp = (-1);
+    H5VL_id_wrapper_t  *id_wrapper;              /* wrapper for the group ID */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -209,6 +212,17 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     if((cur_grp = H5I_register(H5I_GROUP, grp, FALSE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group")
+
+    /* MSC - Create a new id that points to a struct that holds the group id and the VOL plugin */
+    /* Allocate new id structure */
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    id_wrapper->obj_id = cur_grp;
+    id_wrapper->vol_plugin = grp_loc->oloc->file->vol_cls;
+    grp_loc->oloc->file->vol_cls->nrefs++;
+
+    if((cur_grp = H5I_register(H5I_GROUP_PUBLIC, id_wrapper, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
 
     /* Check for generic default property list and use link access default if so */
     if(_lapl_id == H5P_DEFAULT) {
@@ -280,7 +294,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
 
 done:
     /* Close location given to callback. */
-    if(cur_grp > 0 && H5I_dec_ref(cur_grp) < 0)
+    if(cur_grp > 0 && H5I_dec_ref(id_wrapper->obj_id) < 0 && H5I_dec_ref(cur_grp) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close atom for current location")
 
     if(ret_value < 0 && cb_return > 0 && H5I_dec_ref(cb_return) < 0)

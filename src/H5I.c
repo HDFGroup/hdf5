@@ -2156,25 +2156,12 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Iget_file_id(hid_t uid)
+H5Iget_file_id(hid_t id)
 {
-    H5VL_id_wrapper_t *id_wrapper;                    /* user id structure */
-    hid_t id;
     hid_t ret_value;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("i", "i", uid);
-
-    if (H5I_FILE_PUBLIC == H5I_get_type(uid) || H5I_GROUP_PUBLIC == H5I_get_type(uid) ||
-        H5I_DATASET_PUBLIC == H5I_get_type(uid) || H5I_DATATYPE_PUBLIC == H5I_get_type(uid) ||
-        H5I_ATTR_PUBLIC == H5I_get_type(uid)) {
-        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        id = id_wrapper->obj_id;
-    }
-    else {
-        id = uid;
-    }
+    H5TRACE1("i", "i", id);
 
     if((ret_value = H5I_get_file_id(id, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve file ID")
@@ -2205,9 +2192,24 @@ hid_t
 H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
 {
     H5I_type_t type;            /* ID type */
+    H5I_type_t  id_type;
     hid_t ret_value;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    id_type = H5I_get_type(obj_id);
+    /* get the actual OBJ_ID from an upper ID level */
+    /* MSC - this is a workaround to allow the test suite to pass and
+     at some point needs to be removed once all high level operations
+     that needs to go through the VOL actually go through the VOL*/
+    if (H5I_FILE_PUBLIC == id_type || H5I_GROUP_PUBLIC == id_type ||
+        H5I_DATASET_PUBLIC == id_type || H5I_DATATYPE_PUBLIC == id_type ||
+        H5I_ATTR_PUBLIC == id_type) {
+        H5VL_id_wrapper_t       *id_wrapper;              /* user id structure */
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(obj_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+        obj_id = id_wrapper->obj_id;
+    }
 
     /* Get object type */
     type = H5I_TYPE(obj_id);
@@ -2280,6 +2282,12 @@ H5VL_replace_with_uids(hid_t *old_list, ssize_t num_ids)
         else if (H5I_DATASET == type) {
             type_ptr = H5I_id_type_list_g[H5I_DATASET_PUBLIC];
         }
+        else if (H5I_DATATYPE == type) {
+            type_ptr = H5I_id_type_list_g[H5I_DATATYPE_PUBLIC];
+        }
+        else if (H5I_ATTR == type) {
+            type_ptr = H5I_id_type_list_g[H5I_ATTR_PUBLIC];
+        }
         else {
             ret_value ++;
             continue;
@@ -2341,11 +2349,20 @@ H5VL_inc_ref_uid(hid_t id, hbool_t app_ref)
         
     type = H5I_get_type(id);
 
-    if (type == H5I_FILE) {
+    if (H5I_FILE == type) {
         type_ptr = H5I_id_type_list_g[H5I_FILE_PUBLIC];
     }
-    else if (type = H5I_GROUP) {
+    else if (H5I_GROUP == type) {
         type_ptr = H5I_id_type_list_g[H5I_GROUP_PUBLIC];
+    }
+    else if (H5I_DATASET == type) {
+        type_ptr = H5I_id_type_list_g[H5I_DATASET_PUBLIC];
+    }
+    else if (H5I_DATATYPE == type) {
+        type_ptr = H5I_id_type_list_g[H5I_DATATYPE_PUBLIC];
+    }
+    else if (H5I_ATTR == type) {
+        type_ptr = H5I_id_type_list_g[H5I_ATTR_PUBLIC];
     }
     else {
         HGOTO_DONE(ret_value)

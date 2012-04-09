@@ -45,6 +45,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Tpkg.h"		/* Datatypes 				*/
+#include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
 /* Check for header needed for SGI floating-point code */
 #ifdef H5_HAVE_SYS_FPU_H
@@ -1634,12 +1635,22 @@ H5Tcopy(hid_t type_id)
 {
     H5T_t	*dt;                    /* Pointer to the datatype to copy */
     H5T_t	*new_dt = NULL;
+    H5I_type_t  id_type;
     hid_t	ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", type_id);
 
-    switch(H5I_get_type(type_id)) {
+    id_type = H5I_get_type(type_id);
+    if (H5I_DATATYPE_PUBLIC == id_type || H5I_DATASET_PUBLIC == id_type) {
+        H5VL_id_wrapper_t *id_wrapper;
+        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(type_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+        type_id = id_wrapper->obj_id;
+        id_type = H5I_get_type(type_id);
+    }
+
+    switch(id_type) {
         case H5I_DATATYPE:
             /* The argument is a datatype handle */
             if(NULL == (dt = (H5T_t *)H5I_object(type_id)))

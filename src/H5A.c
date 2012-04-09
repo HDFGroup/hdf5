@@ -225,7 +225,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     H5TRACE6("i", "i*siiii", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id);
 
     /* check arguments */
-    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id) || H5I_DATATYPE == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if(!attr_name || !*attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
@@ -301,7 +301,7 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
              acpl_id, aapl_id, lapl_id);
 
     /* check arguments */
-    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id) || H5I_DATATYPE == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if(!obj_name || !*obj_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")

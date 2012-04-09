@@ -1311,19 +1311,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lvisit(hid_t uid, H5_index_t idx_type, H5_iter_order_t order,
+H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     H5L_iterate_t op, void *op_data)
 {
     H5I_type_t  id_type;                /* Type of ID */
-    H5VL_id_wrapper_t *id_wrapper;            /* user id structure */
-    hid_t grp_id;
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "iIiIox*x", grp_id, idx_type, order, op, op_data);
 
-    id_type = H5I_get_type(uid);
+    id_type = H5I_get_type(grp_id);
 
+#if 0
     if (H5I_FILE_PUBLIC == id_type) {
         if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
@@ -1333,9 +1332,10 @@ H5Lvisit(hid_t uid, H5_index_t idx_type, H5_iter_order_t order,
     else {
         grp_id = uid;
     }
+#endif
 
     /* Check args */
-    if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
+    if(!(H5I_GROUP_PUBLIC == id_type || H5I_FILE_PUBLIC == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")

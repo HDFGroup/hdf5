@@ -1504,7 +1504,6 @@ test_mount_after_unmount(hid_t fapl)
     if(H5Fclose(fid4) < 0)
         TEST_ERROR
 
-
 /* Beginning of the actual test code */
 
    /*

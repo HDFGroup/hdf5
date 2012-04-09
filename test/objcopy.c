@@ -1801,6 +1801,11 @@ test_copy_named_datatype_attr_self(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* create named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
+    /* MSC - workaround named datatypes */
+    if(H5Tclose(tid) < 0) goto error;
+    if((tid = H5Topen2(fid_src, NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
     /* create dataspace */
     if((sid = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
 

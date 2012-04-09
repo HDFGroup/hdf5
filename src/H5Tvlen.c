@@ -1164,7 +1164,7 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, unsigned UNUSED ndim, const hsize_t 
 
     HDassert(elem);
     HDassert(vl_alloc_info);
-    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id) || H5I_DATATYPE_PUBLIC == H5I_get_type(type_id));
 
     /* Check args */
     if(NULL == (dt = H5I_object_verify(type_id, H5I_DATATYPE)))

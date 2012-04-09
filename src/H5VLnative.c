@@ -299,6 +299,9 @@ H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id)
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
+    /* store a pointer to the VOL class in the file structure */
+    new_file->vol_cls = &H5VL_native_g;
+
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
 
@@ -347,6 +350,9 @@ H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t f
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+
+    /* store a pointer to the VOL class in the file structure */
+    new_file->vol_cls = &H5VL_native_g;
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;

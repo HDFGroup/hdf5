@@ -840,7 +840,7 @@ H5G_iterate(hid_t loc_id, const char *group_name,
     if((gid = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
-    /* Create a new id that points to a struct that holds the group id and the VOL plugin */
+    /* MSC - Create a new id that points to a struct that holds the group id and the VOL plugin */
     /* Allocate new id structure */
     if(NULL == (id_wrapper2 = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
