@@ -4,22 +4,22 @@ HDF5 version 1.8.10-snap0 currently under development
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.8 and 
-HDF5 1.8.9-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.9-*. 
+This document describes the differences between HDF5-1.8.9 and 
+HDF5 1.8.10-*, and contains information on the platforms tested and 
+known problems in HDF5-1.8.10-*. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
-Links to the HDF5 1.8.9 source code, documentation, and additional materials
+Links to the HDF5 1.8.10 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.9 release can be obtained from:
+The HDF5 1.8.10 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.9 can be accessed directly at this location: 
+User documentation for 1.8.10 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
@@ -30,8 +30,8 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.9 (current 
-release) versus Release 1.8.8":
+from Release to Release" document, in the section "Release 1.8.10 (current 
+release) versus Release 1.8.9":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -45,7 +45,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
-- Bug Fixes since HDF5-1.8.8
+- Bug Fixes since HDF5-1.8.9
 - Platforms Tested
 - Supported Configuration Features Summary
 - Known Problems
@@ -60,59 +60,23 @@ New Features
     
     Library
     -------
-    - Added new feature to merge committed datatypes when copying objects,
-      using new H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG, modified by new API
-      routines: H5Padd_merge_committed_dtype_path(),
-      H5Pfree_merge_committed_dtype_paths(), H5Pset_mcdt_search_cb() and
-      H5_DLL herr_t H5Pget_mcdt_search_cb().  (QAK - 2012/03/30)
     - None
  
     Parallel Library
     ----------------
-    - Add two new routines to set/get the atomicity parameter in the
-      MPI library to perform atomic operations. Some file systems (for
-      example PVFS2) do not support atomic updates so those routines
-      would not be supported. See details at HDFFV-7961. (MSC - 2012/03/27)
+    - None
  
     Tools
     -----
-    - h5repack: Added ability to set the metadata block size of the output
-      file, with the '-M'/'--metadata_block_size' command line parameter.
-      (QAK - 2012/03/30)
-    - h5stat: Added ability to display a summary of the file space usage for a
-      file, with the '-S' command line parameter.  (QAK - 2012/03/28)
-    - h5dump: Added capability for "-a" option to show attributes containing "/" 
-      by using an escape character. For example, for a dataset "/dset" 
-      containing attribute "speed(m/h)", use "h5dump -a "/dset/speed(\/h)" 
-      to show the content of the attribute. See details at HDFFV-7523
-      (PC -- 2012/03/12)
-    - h5dump: Added ability to apply command options across multiple files using a
-      wildcard in the filename. Unix example; "h5dump -H -d Dataset1 tarr*.h5".
-      Cross platform example; "h5dump -H -d Dataset1 tarray1.h5 tarray2.h5 tarray3.h5".
-      (ADB - 2012/03/12 - HDFFV-7876).
-    - h5dump: Added new option --no-compact-subset. This option will not
-      interpret the '[' character as starting the compact form of 
-      subsetting. This is useful when the "h5dump error: unable to 
-      open dataset "datset_name"" message is output because a dataset
-      name contains a '[' character.(ADB - 2012/03/05 - HDFFV-7689).
-    - h5repack: Improved performance for big chunked datasets (size > 128MB)
-      when used with layout (-l) or compression (-f) option. It would perform
-      much better prior to the improvement, especially for cases that chunk 
-      dimensions looks like "1024x5x1" (compare to "1x5x1024"). When bigger 
-      numbers are toward front and small numbers are toward back in chunk 
-      dimensions.  HDFFV-7862 (JKM - 2012/03/01)
+    - None
 
     High-Level APIs
     ---------------
-    - New API: h5ltpath_valid (Fortran: h5ltpath_valid_f) which checks
-      if a path is correct and determines if a link resolves to a valid
-      object and checks that the link does not dangle. (MSB- 2012/3/15)
+    - None
 
     Fortran API
     -----------
-
-    - Added for the C API the Fortran wrapper:
-       h5ocopy_f (MSB - 2012/03/22)
+    - None
 
     C++ API
     -------
@@ -123,71 +87,16 @@ Support for New Platforms, Languages, and Compilers
 ===================================================
     - None
 
-Bug Fixes since HDF5-1.8.8
+Bug Fixes since HDF5-1.8.9
 ==========================
 
     Configuration
     -------------
-    - Fixed Makefile issue in which "-Wl," was not properly specified
-      prior to -rpath when building parallel fortran libraries with
-      an Intel compiler. (MAM - 2012/03/26)
-    - Makefiles generated by other packages using h5cc as the compiler
-      no longer error when 'make' is invoked more than once in order
-      to 'rebuild' after changes to source. (MAM - 2012/03/26)
-    - Added code to display the version information of XL fortran and C++
-      in the summary of configure. (AKC - 2012/02/28 - HDFFV-7793)
-    - Updated all CMakeLists.txt files to indicate minimum CMake version is
-      current standard of 2.8.6 (ADB -2011/12/05 - HDFFV-7854)
+    - None
 
     Library
     -------
-    - Fixed a bug in H5Ocopy(): When copying an opened object, call the
-      object's flush class action to ensure that cached data is flushed
-      so that H5Ocopy will get the correct data.  (VC - 2012/3/27 - HDFFV-7853)
-    - Windows and STDIO correctness changes have been propagated from the SEC2
-      and old Windows drivers to the STDIO VFD.  (DER - 2012/3/30, HDFFV-7917)
-    - Fixed an error that would occur when copying an object with attribute
-      creation order tracked and indexed. (NAF - 2012/3/28 - HDFFV-7762)
-    - Fixed a bug in H5Ocopy(): When copying an opened object, call the
-      object's flush class action to ensure that cached data is flushed so
-      that H5Ocopy will get the correct data.  (VC - 2012/3/27 - HDFFV-7853)
-    - The istore test will now skip the sparse 50x50x50 test when the VFD does
-      not support sparse files on that platform.  The most important platforms
-      on which this will be skipped are Windows (NTFS sparse files are not
-      supported) and Mac OS-X (HFS sparse files are not supported).  This
-      fixes CTest timeout issues on Windows.  (DER - 2012/3/27, HDFFV-7769)
-    - Windows and POSIX correctness changes have been propagated from the SEC2
-      VFD to the core VFD.  This mainly affects file operations on the
-      driver's backing store and fixes a problem on Windows where large files
-      could not be read. (DER - 2012/3/27, HDFFV-7916, HDFFV-7603)
-    - When an application tries to write or read many small data chunks and
-      runs out of memory, the library had a seg fault.  The fix is to
-      return the error stack with proper information. (SLU - 2012/3/23.
-      Issue 7785)
-    - H5Pset_data_transform had seg fault in some cases like x*-100.  It
-      works correctly now and handles other cases like 100-x or 2/x.
-      (SLU - 2012/3/15.  Issue 7922)
-    - Fixed rare corruption bugs that could occur when using the new object
-      header format. (NAF - 2012/3/15 - HDFFV-7879)
-    - Fixed error when creating a contiguous dataset with a zero-sized dataspace
-      and space allocation time set to 'early'. (QAK - 2012/3/12)
-    - Changed Windows thread creation to use _beginthread() instead of
-      CreateThread().  Threads created by the latter can be killed in
-      low-memory situations. (DER - 2012/2/10, HDFFV-7780)
-    - Creating a dataset in a read-only file caused seg fault when the file
-      is closed.  It's fixed. The attemp to create a dataset will fail
-      with the error stack indicating the file is read-only. (SLU -
-      2012/1/25. Issue 7756) 
-    - Fixed a seg fault that could occur when shrinking a dataset with chunks
-      larger than 1 MB. (NAF - 2011/11/30 - HDFFV-7833)
-    - Fixed a bug that could cause H5Oget_info to return the wrong address
-      after copying a named datatype. (NAF - 2011/11/14)
-    - The library allowed the conversion of strings between ASCII and UTF8
-      (Issue 7582).  We have corrected it to report an error under this
-      situation. (SLU - 2011/11/8)
-    - Fixed seg fault when library tried to shrink the size of compound
-      type through H5Tset_size immediately after the type was created (Issue
-      7618). (SLU - 2011/11/4)
+    - None
 
     Parallel Library
     ----------------
@@ -195,39 +104,7 @@ Bug Fixes since HDF5-1.8.8
 
     Tools
     -----
-    - h5diff: Fixed failure for comparing same named object with different
-      object types in comparing groups. Prior to the fix, h5diff resulted
-      in error. After the fix, h5diff detects such case as non-comparable
-      and display messages accordingly. HDFFV-7664 (JKM 2012/03/28)
-    - h5diff: If unique objects exists only in one file and try to exclude
-      the unique objects with --exclude-path option, h5diff missed 
-      excluding some objects. 
-      Fixed to exclude objects correctly in such case.
-      HDFFV-7837 (JKM 2012/03/20)
-    - h5diff: When two symbolic dangling links are compared with
-      --follow-symlinks option, the result should be same. It worked for
-      comparing two files, but didn't work for comparing two objects.
-      Now it works for comparing two objects. HDFFV-7835 (JKM 2012/03/09)
-    - h5dump: Added tools library error stack to properly catch error
-      information generated within the library.
-      HDFFV-7958 (ADB 2012/03/12)
-    - h5dump: Dangling links no longer throw error message, change process
-      when open link fails.
-      HDFFV-7839 (ADB 2012/03/12)
-    - h5dump: Refactored code to remove duplicated functions. Split XML 
-      functions from DDL functions. Corrected indentation and formatting
-      errors. Also fixed subsetting counting overflow (HDFFV-5874). Verified
-      all tools call tools_init() in main. The USER_BLOCK data now correctly
-      displays within the SUPER_BLOCK info. NOTE: WHITESPACE IN THE OUTPUT
-      HAS CHANGED.
-      HDFFV-7560 (ADB 2012/02/17)
-    - h5diff: fixed to prevent from displaying error stack message when 
-      comparing the two dangling symlinks with follow-symlinks option.
-      HDFFV-7836 (JKM 2012/01/13)
-    - h5repack: fixed memory leak for handling variable length string in 
-      attribute.  HDFFV-7840 (JKM 2012/01/10)
-    - h5ls: fixed segfault when access region reference data in an
-      attribute. HDFFV-7838 (JKM 2012/01/06)
+    - None
 
     F90 API
     -------
@@ -243,11 +120,7 @@ Bug Fixes since HDF5-1.8.8
 
     Fortran High-Level APIs:
     ------
-    - h5ltget_attribute_string_f: The h5ltget_attribute_string_f used to return 
-         the C NULL character in the returned character buffer. The returned 
-	 charactor buffer now does not return the C NULL character; the buffer 
-	 is blank-padded if needed. (MSB - 2012/3/23)
-
+    - None
 
 Platforms Tested
 ================
