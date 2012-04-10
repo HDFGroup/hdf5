@@ -33,9 +33,7 @@ typedef __int64             h5_stat_size_t;
 #define HDdup(F)            _dup(F)
 #define HDfdopen(N,S)       _fdopen(N,S)
 #define HDfileno(F)         _fileno(F)
-#define HDfseek(F,O,W)      _fseeki64(F,O,W)
 #define HDfstat(F,B)        _fstati64(F,B)
-#define HDftruncate(F,L)    _chsize_s(F,L)
 #define HDisatty(F)         _isatty(F)
 #define HDgetcwd(S,Z)       _getcwd(S,Z)
 #define HDgetdcwd(D,S,Z)    _getdcwd(D,S,Z)
@@ -91,4 +89,8 @@ struct timezone {
  * type cannot be cast as a ulong like other systems. */
 #define HDpthread_self_ulong() ((unsigned long)GetCurrentThreadId())
 
+#ifndef H5_HAVE_MINGW
+#define HDftruncate(F,L)    _chsize_s(F,L)
+#define HDfseek(F,O,W)      _fseeki64(F,O,W)
+#endif
 #endif /* H5_HAVE_WIN32_API */

@@ -68,7 +68,6 @@ static herr_t H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
 static herr_t H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset,
     hid_t dapl_id);
 static herr_t H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
-static herr_t H5D_flush_real(H5D_t *dataset, hid_t dxpl_id);
 
 
 /*********************/
@@ -2440,7 +2439,8 @@ H5D_flush(const H5F_t *f, hid_t dxpl_id)
     udata.dxpl_id = dxpl_id;
 
     /* Iterate over all the open datasets */
-    H5I_search(H5I_DATASET, H5D_flush_cb, &udata, FALSE);
+    if(H5I_iterate(H5I_DATASET, H5D_flush_cb, &udata, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to flush cached dataset info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

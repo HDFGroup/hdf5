@@ -1920,8 +1920,7 @@ H5VL_attr_create(hid_t uid, const char *name, hid_t acpl_id, hid_t aapl_id)
     id_type = H5I_get_type(uid);
     /* Check id */
     if(H5I_FILE_PUBLIC != id_type && H5I_GROUP_PUBLIC != id_type &&
-       H5I_DATASET_PUBLIC != id_type && H5I_DATATYPE_PUBLIC !=  id_type &&
-       H5I_ATTR_PUBLIC != id_type)
+       H5I_DATASET_PUBLIC != id_type && H5I_DATATYPE_PUBLIC != id_type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */

@@ -43,6 +43,9 @@ static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src,
 static void *H5O_dtype_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
     H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
+static herr_t H5O_dtype_shared_post_copy_upd(const H5O_loc_t *src_oloc,
+    const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst, hid_t dxpl_id,
+    H5O_copy_t *cpy_info);
 
 static herr_t H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
@@ -63,6 +66,7 @@ static herr_t H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 #define H5O_SHARED_COPY_FILE_REAL	H5O_dtype_copy_file
 #define H5O_SHARED_POST_COPY_FILE	H5O_dtype_shared_post_copy_file
 #undef  H5O_SHARED_POST_COPY_FILE_REAL
+#define H5O_SHARED_POST_COPY_FILE_UPD   H5O_dtype_shared_post_copy_upd
 #define H5O_SHARED_DEBUG		H5O_dtype_shared_debug
 #define H5O_SHARED_DEBUG_REAL		H5O_dtype_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
@@ -1573,6 +1577,40 @@ done:
         H5O_msg_free(mesg_type->id, dst_mesg);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dtype_copy_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_dtype_shared_post_copy_upd
+ *
+ * Purpose:     Update a message after the shared message operations
+ *              during the post-copy loop
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              November 8, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_dtype_shared_post_copy_upd(const H5O_loc_t UNUSED *src_oloc,
+    const void UNUSED *mesg_src, H5O_loc_t UNUSED *dst_oloc, void *mesg_dst,
+    hid_t UNUSED dxpl_id, H5O_copy_t UNUSED *cpy_info)
+{
+    H5T_t       *dt_dst = (H5T_t *)mesg_dst;    /* Destination datatype */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(dt_dst->sh_loc.type == H5O_SHARE_TYPE_COMMITTED) {
+        HDassert(H5T_committed(dt_dst));
+        dt_dst->oloc.file = dt_dst->sh_loc.file;
+        dt_dst->oloc.addr = dt_dst->sh_loc.u.loc.oh_addr;
+    } /* end if */
+    else
+        HDassert(!H5T_committed(dt_dst));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_dtype_shared_post_copy_upd */
 
 
 /*--------------------------------------------------------------------------

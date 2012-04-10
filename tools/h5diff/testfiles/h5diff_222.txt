@@ -1,3 +1,6 @@
+Not comparable: </diffobjtypes/obj1> is of type H5G_DATASET and </diffobjtypes/obj1> is of type H5G_GROUP
+Not comparable: </diffobjtypes/obj2> is of type H5G_GROUP and </diffobjtypes/obj2> is of type H5G_TYPE
+Not comparable: </diffobjtypes/obj3> is of type H5G_TYPE and </diffobjtypes/obj3> is of type H5G_DATASET
 Not comparable: </g1/dset1> is of class H5T_INTEGER and </g1/dset1> is of class H5T_STRING
 attribute: <attr of </g1/dset1>> and <attr of </g1/dset1>>
 3 differences found

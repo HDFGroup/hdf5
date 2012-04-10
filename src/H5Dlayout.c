@@ -384,6 +384,10 @@ H5D_layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t 
 
     switch(dataset->shared->layout.type) {
         case H5D_CONTIGUOUS:
+        {
+            hsize_t tmp_size;                   /* Temporary holder for raw data size */
+            size_t tmp_sieve_buf_size;          /* Temporary holder for sieve buffer size */
+
             /* Compute the size of the contiguous storage for versions of the
              * layout message less than version 3 because versions 1 & 2 would
              * truncate the dimension sizes to 32-bits of information. - QAK 5/26/04
@@ -392,7 +396,6 @@ H5D_layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t 
                 hssize_t snelmts;                   /* Temporary holder for number of elements in dataspace */
                 hsize_t nelmts;                     /* Number of elements in dataspace */
                 size_t dt_size;                     /* Size of datatype */
-                hsize_t tmp_size;                   /* Temporary holder for raw data size */
 
                 /* Retrieve the number of elements in the dataspace */
                 if((snelmts = H5S_GET_EXTENT_NPOINTS(dataset->shared->space)) < 0)
@@ -412,10 +415,19 @@ H5D_layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t 
 
                 /* Assign the dataset's contiguous storage size */
                 dataset->shared->layout.storage.u.contig.size = tmp_size;
-            } /* end if */
+            } else
+                tmp_size = dataset->shared->layout.storage.u.contig.size;
 
-            /* Get the sieve buffer size for this dataset */
-            dataset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(dataset->oloc.file);
+	    /* Get the sieve buffer size for the file */
+	    tmp_sieve_buf_size = H5F_SIEVE_BUF_SIZE(dataset->oloc.file);
+
+	    /* Adjust the sieve buffer size to the smaller one between the dataset size and the buffer size
+	     * from the file access property.  (SLU - 2012/3/30) */
+	    if(tmp_size < tmp_sieve_buf_size)
+		dataset->shared->cache.contig.sieve_buf_size = tmp_size;
+	    else
+		dataset->shared->cache.contig.sieve_buf_size = tmp_sieve_buf_size;
+        }
             break;
 
         case H5D_CHUNKED:

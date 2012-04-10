@@ -76,7 +76,7 @@ void FileAccPropList::setStdio() const
 ///		driver was set for the property list.  The driver ID is
 ///		only valid as long as the file driver remains registered.
 ///		Valid driver identifiers can be found at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-GetDriver
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetDriver
 ///\exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
@@ -99,7 +99,7 @@ hid_t FileAccPropList::getDriver() const
 ///\par Description
 ///		For a list of valid driver identifiers, please see the C
 ///		layer Reference Manual at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-GetDriver
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetDriver
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void FileAccPropList::setDriver(hid_t new_driver_id, const void *new_driver_info) const
@@ -157,7 +157,7 @@ hsize_t FileAccPropList::getFamilyOffset() const
 ///\par Description
 ///		For more details on the use of \c H5FD_CORE driver, please
 ///		refer to
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplCore
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFaplCore
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void FileAccPropList::setCore (size_t increment, hbool_t backing_store) const
@@ -261,7 +261,7 @@ FileAccPropList FileAccPropList::getFamily(hsize_t& memb_size) const
 ///\exception	H5::PropListIException
 ///\par Description
 ///		Temporary - For information, please refer to:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplSplit
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFaplSplit
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& raw_plist, const char* meta_ext, const char* raw_ext ) const
@@ -292,47 +292,9 @@ void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& ra
    setSplit( meta_plist, raw_plist, meta_ext.c_str(), raw_ext.c_str() );
 }
 
-#ifdef H5_HAVE_STREAM // for Stream Virtual File Driver
-//--------------------------------------------------------------------------
-// Function:	FileAccPropList::getStream
-///\brief	Retrieves the streaming I/O driver settings
-///\return	The streaming I/O file access property list structure
-///		For detail on this structure, please refer to
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplStream
-///\exception	H5::PropListIException
-// Programmer:  Binh-Minh Ribler - April, 2004
-//--------------------------------------------------------------------------
-H5FD_stream_fapl_t FileAccPropList::getStream() const
-{
-   H5FD_stream_fapl_t fapl;
-   herr_t ret_value = H5Pget_fapl_stream(id, &fapl);
-   if( ret_value < 0 )
-   {
-      throw PropListIException("FileAccPropList::getStream", "H5Pget_fapl_stream failed");
-   }
-   return(fapl);
-}
-
-//--------------------------------------------------------------------------
-// Function:	FileAccPropList::setStream
-///\brief	Modifies this file access property list to use the Stream
-///		driver.
-///\param	fapl - IN: The streaming I/O file access property list
-///\exception	H5::PropListIException
-///\par Description
-///		For detail on \a fapl, please refer to
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplStream
-// Programmer:  Binh-Minh Ribler - April, 2004
-//--------------------------------------------------------------------------
-void FileAccPropList::setStream(H5FD_stream_fapl_t &fapl) const
-{
-   herr_t ret_value = H5Pset_fapl_stream (id, &fapl);
-   if( ret_value < 0 )
-   {
-      throw PropListIException("FileAccPropList::setStream", "H5Pset_fapl_stream failed");
-   }
-}
-#endif // Stream Virtual File Driver
+// Stream Virtual File Driver had been removed from the main library.
+// FileAccPropList::[s,g]etStream are now removed from the C++ API.
+// -BMR, March, 2012
 
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::getSieveBufSize
@@ -360,7 +322,7 @@ size_t FileAccPropList::getSieveBufSize() const
 ///\exception	H5::PropListIException
 ///\par Description
 ///		For detail on data sieving, please refer to
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetSieveBufSize
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSieveBufSize
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void FileAccPropList::setSieveBufSize(size_t bufsize) const
@@ -380,7 +342,7 @@ void FileAccPropList::setSieveBufSize(size_t bufsize) const
 ///\exception	H5::PropListIException
 ///\par Description
 ///		For more detail, please see the C layer Reference Manual at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetMetaBlockSize
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetMetaBlockSize
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void FileAccPropList::setMetaBlockSize(hsize_t &block_size) const
@@ -420,7 +382,7 @@ hsize_t FileAccPropList::getMetaBlockSize() const
 ///\exception	H5::PropListIException
 ///\par Description
 ///		For detail on \a flags, please refer to
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplStream
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFaplLog
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void FileAccPropList::setLog(const char *logfile, unsigned flags, size_t buf_size) const
@@ -477,7 +439,7 @@ void FileAccPropList::setSec2() const
 ///		The parameter \a alignment must have a positive value.
 ///
 ///		For detail on \a setting alignment, please refer to
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetAlignment
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetAlignment
 // Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FileAccPropList::setAlignment( hsize_t threshold, hsize_t alignment ) const
@@ -514,7 +476,7 @@ void FileAccPropList::getAlignment( hsize_t &threshold, hsize_t &alignment ) con
 ///\exception	H5::PropListIException
 ///\par Description
 ///		More details and valid values for \a dtype can be found at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetMultiType
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetMultiType
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void FileAccPropList::setMultiType(H5FD_mem_t dtype) const
@@ -533,7 +495,7 @@ void FileAccPropList::setMultiType(H5FD_mem_t dtype) const
 ///\exception	H5::PropListIException
 ///\par Description
 ///		More details and possible returned values can be found at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-GetMultiType
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetMultiType
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 H5FD_mem_t FileAccPropList::getMultiType() const
@@ -634,7 +596,7 @@ H5F_close_degree_t FileAccPropList::getFcloseDegree()
 ///\exception	H5::PropListIException
 ///\par Description
 ///		For detail on \a fapl, please refer to
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFaplStream
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetGCReferences
 // Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void FileAccPropList::setGcReferences( unsigned gc_ref ) const

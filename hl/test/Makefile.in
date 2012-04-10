@@ -69,7 +69,8 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = H5srcdir_str.h
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = test_lite$(EXEEXT) test_image$(EXEEXT) \
-	test_table$(EXEEXT) test_ds$(EXEEXT) test_packet$(EXEEXT)
+	test_file_image$(EXEEXT) test_table$(EXEEXT) test_ds$(EXEEXT) \
+	test_packet$(EXEEXT)
 am__EXEEXT_2 = gen_test_ds$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 gen_test_ds_SOURCES = gen_test_ds.c
@@ -83,6 +84,10 @@ test_ds_SOURCES = test_ds.c
 test_ds_OBJECTS = test_ds.$(OBJEXT)
 test_ds_LDADD = $(LDADD)
 test_ds_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
+test_file_image_SOURCES = test_file_image.c
+test_file_image_OBJECTS = test_file_image.$(OBJEXT)
+test_file_image_LDADD = $(LDADD)
+test_file_image_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 test_image_SOURCES = test_image.c
 test_image_OBJECTS = test_image.$(OBJEXT)
 test_image_LDADD = $(LDADD)
@@ -125,10 +130,10 @@ am__v_CCLD_0 = @echo "  CCLD  " $@;
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
-SOURCES = gen_test_ds.c test_ds.c test_image.c test_lite.c \
-	test_packet.c test_table.c
-DIST_SOURCES = gen_test_ds.c test_ds.c test_image.c test_lite.c \
-	test_packet.c test_table.c
+SOURCES = gen_test_ds.c test_ds.c test_file_image.c test_image.c \
+	test_lite.c test_packet.c test_table.c
+DIST_SOURCES = gen_test_ds.c test_ds.c test_file_image.c test_image.c \
+	test_lite.c test_packet.c test_table.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -422,16 +427,16 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # Temporary files.  These files are the ones created by running `make test'.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog combine_tables[1-2].h5 \
-	test_ds[1-9].h5 test_image[1-3].h5 test_lite[1-2].h5 \
-	test_table.h5 test_packet_table.h5 test_packet_compress.h5 \
-	test_detach.h5
+	test_ds[1-9].h5 test_image[1-3].h5 file_img[1-2].h5 \
+	test_lite[1-2].h5 test_table.h5 test_packet_table.h5 \
+	test_packet_compress.h5 test_detach.h5
 
 # The tests depend on the hdf5, hdf5 test,  and hdf5_hl libraries
 LDADD = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.
-TEST_PROG = test_lite test_image test_table test_ds test_packet
+TEST_PROG = test_lite test_image test_file_image test_table test_ds test_packet
 
 # These programs generate test files for the tests.  They don't need to be
 # compiled every time we want to test the library.  However, putting
@@ -515,6 +520,9 @@ gen_test_ds$(EXEEXT): $(gen_test_ds_OBJECTS) $(gen_test_ds_DEPENDENCIES)
 test_ds$(EXEEXT): $(test_ds_OBJECTS) $(test_ds_DEPENDENCIES) 
 	@rm -f test_ds$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_ds_OBJECTS) $(test_ds_LDADD) $(LIBS)
+test_file_image$(EXEEXT): $(test_file_image_OBJECTS) $(test_file_image_DEPENDENCIES) 
+	@rm -f test_file_image$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_file_image_OBJECTS) $(test_file_image_LDADD) $(LIBS)
 test_image$(EXEEXT): $(test_image_OBJECTS) $(test_image_DEPENDENCIES) 
 	@rm -f test_image$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_image_OBJECTS) $(test_image_LDADD) $(LIBS)
@@ -536,6 +544,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_test_ds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ds.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_file_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_lite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_packet.Po@am__quote@

@@ -220,6 +220,7 @@ MINOR, DSPACE, H5E_CANTCOMPARE, Can't compare objects
 MINOR, PLIST, H5E_CANTGET, Can't get value
 MINOR, PLIST, H5E_CANTSET, Can't set value
 MINOR, PLIST, H5E_DUPCLASS, Duplicate class name in parent class
+MINOR, PLIST, H5E_SETDISALLOWED, Disallowed operation
 
 # Link errors
 MINOR, LINK, H5E_TRAVERSE, Link traversal failure

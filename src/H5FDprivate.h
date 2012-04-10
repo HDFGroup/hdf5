@@ -52,6 +52,29 @@ typedef enum {
 } H5FD_file_op_t;
 
 
+/* Define structure to hold initial file image and other relevant information */
+typedef struct {
+    void *buffer;
+    size_t size;
+    H5FD_file_image_callbacks_t callbacks;
+} H5FD_file_image_info_t;
+
+/* Define default file image info */
+#define H5FD_DEFAULT_FILE_IMAGE_INFO { \
+    /* file image buffer */ NULL,       \
+    /* buffer size */       0,          \
+    { /* Callbacks */                   \
+        /* image_malloc */      NULL,   \
+        /* image_memcpy */      NULL,   \
+        /* image_realloc */     NULL,   \
+        /* image_free */        NULL,   \
+        /* udata_copy */        NULL,   \
+        /* udata_free */        NULL,   \
+        /* udata */             NULL,   \
+    }                                   \
+}
+
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -72,17 +95,14 @@ H5_DLL herr_t H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf);
 H5_DLL herr_t H5FD_sb_decode(H5FD_t *file, const char *name, const uint8_t *buf);
 H5_DLL void *H5FD_fapl_get(H5FD_t *file);
 H5_DLL herr_t H5FD_fapl_open(struct H5P_genplist_t *plist, hid_t driver_id, const void *driver_info);
-H5_DLL herr_t H5FD_fapl_copy(hid_t driver_id, const void *fapl, void **copied_fapl);
 H5_DLL herr_t H5FD_fapl_close(hid_t driver_id, void *fapl);
 H5_DLL herr_t H5FD_dxpl_open(struct H5P_genplist_t *plist, hid_t driver_id, const void *driver_info);
-H5_DLL herr_t H5FD_dxpl_copy(hid_t driver_id, const void *dxpl, void **copied_dxpl);
 H5_DLL herr_t H5FD_dxpl_close(hid_t driver_id, void *dxpl);
 H5_DLL hid_t H5FD_register(const void *cls, size_t size, hbool_t app_ref);
 H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id,
 		  haddr_t maxaddr);
 H5_DLL herr_t H5FD_close(H5FD_t *file);
 H5_DLL int H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);
-H5_DLL int H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/);
 H5_DLL haddr_t H5FD_alloc(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, struct H5F_t *f,
     hsize_t size, haddr_t *align_addr, hsize_t *align_size);
 H5_DLL herr_t H5FD_free(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, struct H5F_t *f,

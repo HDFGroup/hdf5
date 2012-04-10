@@ -1121,6 +1121,8 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
     char * obj2_fullpath = NULL;
     h5trav_type_t objtype;
     diff_args_t argdata;
+    size_t idx1 = 0;
+    size_t idx2 = 0;
 
 
     /* 
@@ -1160,17 +1162,6 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
         }
     }
 
-    /* objects with the same name but different HDF5 types */
-    for( i = 0; i < table->nobjs; i++) 
-    {
-        if ( table->objs[i].flags[0] && table->objs[i].flags[1] )
-        {
-            if ( table->objs[i].type != table->objs[i].type )
-            {
-                options->contents = 0;
-            }
-        }
-    }
 
     /*-------------------------------------------------------------------------
     * do the diff for common objects
@@ -1205,8 +1196,18 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             HDstrcpy(obj2_fullpath, grp2_path);
             HDstrcat(obj2_fullpath, table->objs[i].name);
 
+            /* get index to figure out type of the object in file1 */
+            while ( info1->paths[idx1].path && 
+                    (HDstrcmp (obj1_fullpath, info1->paths[idx1].path) != 0) )
+                idx1++;
+            /* get index to figure out type of the object in file2 */
+            while ( info2->paths[idx2].path &&
+                    (HDstrcmp (obj2_fullpath, info2->paths[idx2].path) != 0) )
+                idx2++;
+
             /* Set argdata to pass other args into diff() */
-            argdata.type = objtype;
+            argdata.type[0] = info1->paths[idx1].type;
+            argdata.type[1] = info2->paths[idx2].type;
             argdata.is_same_trgobj = table->objs[i].is_same_trgobj;
 
             options->cmn_objs = 1;
@@ -1242,7 +1243,8 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 HDstrcpy(args.name1, obj1_fullpath);
                 HDstrcpy(args.name2, obj2_fullpath);
                 args.options = *options;
-                args.argdata.type = objtype;
+                args.argdata.type[0] = info1->paths[idx1].type;
+                args.argdata.type[1] = info2->paths[idx2].type;
                 args.argdata.is_same_trgobj = table->objs[i].is_same_trgobj;
 
                 h5diffdebug2("busyTasks=%d\n", busyTasks);
@@ -1576,176 +1578,9 @@ hsize_t diff_compare(hid_t file1_id,
     obj1type = info1->paths[i].type;
     obj2type = info2->paths[j].type;
 
-    /*-----------------------------------------------------------------
-     * follow link option, compare with target object 
-    */
-    if (options->follow_links)
-    {
-        /* pass how to handle printing warning to linkinfo option */
-        if(print_warn(options))
-            linkinfo1.opt.msg_mode = linkinfo2.opt.msg_mode = 1;
-
-        /*------------------------------------------------------------
-         * Soft links
-         *------------------------------------------------------------*/
-
-        /*--------------------------
-         * if object1 soft link   */
-        if (obj1type == H5TRAV_TYPE_LINK)
-        {
-            /* get type of target object */
-            l_ret = H5tools_get_symlink_info(file1_id, obj1name, &linkinfo1, TRUE);
-            /* dangling link */
-            if (l_ret == 0)
-            {
-                if (options->no_dangle_links)
-                {
-                    /* gangling link is error */
-                    if(options->m_verbose)
-                        parallel_print("Warning: <%s> is a dangling link.\n", obj1name);
-                    options->err_stat = 1;
-                    goto out;
-                }
-                else
-                    is_dangle_link1 = 1;
-            }
-            /* fail */
-            else if(l_ret < 0)
-            {
-                options->err_stat = 1;
-                goto out;
-            }
-            else /* OK */
-            {
-                /* target type for diff() */
-                obj1type = linkinfo1.trg_type;
-            }
-        }
-        
-        /*-----------------------------
-         * if object2 is soft link   */
-        if (obj2type == H5TRAV_TYPE_LINK)
-        {
-            /* get type target object */
-            l_ret = H5tools_get_symlink_info(file2_id, obj2name, &linkinfo2, TRUE);
-            /* dangling link */
-            if (l_ret == 0)
-            {
-                if (options->no_dangle_links)
-                {
-                    /* gangling link is error */
-                    if(options->m_verbose)
-                        parallel_print("Warning: <%s> is a dangling link.\n", obj2name);
-                    options->err_stat = 1;
-                    goto out;
-                }
-                else
-                    is_dangle_link2=1;
-            }
-            /* fail */
-            else if(l_ret < 0)
-            {
-                options->err_stat = 1;
-                goto out;
-            }
-            else /* OK */
-            {
-                /* target type for diff() */
-                obj2type = linkinfo2.trg_type;
-            }
-        }
-
-        /*------------------------------------------------------------
-         * External links
-         *------------------------------------------------------------*/
-
-        /*--------------------------------
-         * if object1 is external link  */
-        if (obj1type == H5TRAV_TYPE_UDLINK)
-        {
-            /* get type and name of target object */
-            l_ret = H5tools_get_symlink_info(file1_id, obj1name, &linkinfo1, TRUE);
-            /* dangling link */
-            if (l_ret == 0)
-            {
-                if (options->no_dangle_links)
-                {
-                    /* gangling link is error */
-                    if(options->m_verbose)
-                        parallel_print("Warning: <%s> is a dangling link.\n", obj1name);
-                    options->err_stat = 1;
-                    goto out;
-                }
-                else
-                    is_dangle_link1 = 1;
-            }
-            /* fail */
-            else if(l_ret < 0)
-            {
-                options->err_stat = 1;
-                goto out;
-            }
-            else /* OK */
-            {
-                /* for external link */
-                if(linkinfo1.linfo.type == H5L_TYPE_EXTERNAL)
-                    obj1type = linkinfo1.trg_type;
-            }
-        }
-
-        /*--------------------------------
-         * if object2 is external link  */
-        if (obj2type == H5TRAV_TYPE_UDLINK)
-        {
-            /* get type and name of target object */
-            l_ret = H5tools_get_symlink_info(file2_id, obj2name, &linkinfo2, TRUE);
-            /* dangling link */
-            if (l_ret == 0)
-            {
-                if (options->no_dangle_links)
-                {
-                    /* gangling link is error */
-                    if(options->m_verbose)
-                        parallel_print("Warning: <%s> is a dangling link.\n", obj2name);
-                    options->err_stat = 1;
-                    goto out;
-                }
-                else
-                    is_dangle_link2 = 1;
-            }
-            /* fail */
-            else if(l_ret < 0)
-            {
-                options->err_stat = 1;
-                goto out;
-            }
-            else /* OK */
-            {
-                /* for external link */
-                if(linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
-                    obj2type = linkinfo2.trg_type;
-            }
-        }
-        /* found dangling link */
-        if (is_dangle_link1 || is_dangle_link2)
-            goto out;
-    } /* end of follow_links */
-    
-    /* objects are not the same type */
-    if (obj1type != obj2type)
-    {
-        if (options->m_verbose||options->m_list_not_cmp)
-        {
-            parallel_print("<%s> is of type %s and <%s> is of type %s\n",
-            obj1name, get_type(obj1type), 
-            obj2name, get_type(obj2type));
-        }
-        options->not_cmp=1;
-        goto out;
-    }
-
     /* Set argdata to pass other args into diff() */
-    argdata.type = obj1type;
+    argdata.type[0] = obj1type;
+    argdata.type[1] = obj2type;
     argdata.is_same_trgobj = 0;
 
     nfound = diff(file1_id, obj1name,
@@ -1806,7 +1641,8 @@ out:
  * Return: Number of differences found
  *
  * Programmer: Jonathan Kim
- *  - add following links feature (Feb 11,2010)
+ *  - Move follow symlinks code toward top. (March 2812)
+ *  - Add following symlinks feature (Feb 11,2010)
  *  - Change to use diff_args_t to pass the rest of args.
  *    Passing through it instead of individual args provides smoother
  *    extensibility through its members along with MPI code update for ph5diff
@@ -1834,6 +1670,7 @@ hsize_t diff(hid_t file1_id,
     int     is_dangle_link2 = 0;
     int     is_hard_link = 0;
     hsize_t nfound = 0;
+    h5trav_type_t object_type;
 
 
     /* to get link info */
@@ -1848,52 +1685,86 @@ hsize_t diff(hid_t file1_id,
     if(print_warn(options))
         linkinfo1.opt.msg_mode = linkinfo2.opt.msg_mode = 1;
 
-    /* 
-     * Get target object info for obj1 and obj2 and check dangling links.
-     * (for hard-linked-objects, because diff() only get the obj1's type, 
-     *  so obj2's type should be check here when diff() is called from 
-     *  diff_match() for same-named objects with dangling link only one side.)
-     */
-
-    /* target object1 - get type and name */
-    ret = H5tools_get_symlink_info(file1_id, path1, &linkinfo1, TRUE);
-    /* dangling link */
-    if (ret == 0)
+    /* for symbolic links, take care follow symlink and no dangling link 
+     * options */
+    if (argdata->type[0] == H5TRAV_TYPE_LINK || 
+        argdata->type[0] == H5TRAV_TYPE_UDLINK ||
+        argdata->type[1] == H5TRAV_TYPE_LINK || 
+        argdata->type[1] == H5TRAV_TYPE_UDLINK )
     {
-        if (options->no_dangle_links)
-        {
-            /* gangling link is error */
-            if(options->m_verbose)
-                parallel_print("Warning: <%s> is a dangling link.\n", path1);
-            goto out;
-        }
-        else
-            is_dangle_link1 = 1;
-    }
-    else if (ret < 0)
-        goto out;
+        /* 
+         * check dangling links for path1 and path2
+         */
 
-    /* target object2 - get type and name */
-    ret = H5tools_get_symlink_info(file2_id, path2, &linkinfo2, TRUE);
-    /* dangling link */
-    if (ret == 0)
-    {
-        if (options->no_dangle_links)
+        /* target object1 - get type and name */
+        ret = H5tools_get_symlink_info(file1_id, path1, &linkinfo1, TRUE);
+        /* dangling link */
+        if (ret == 0)
         {
-            /* gangling link is error */
-            if(options->m_verbose)
-                parallel_print("Warning: <%s> is a dangling link.\n", path2);
-            goto out;
+            if (options->no_dangle_links)
+            {
+                /* gangling link is error */
+                if(options->m_verbose)
+                    parallel_print("Warning: <%s> is a dangling link.\n", path1);
+                goto out;
+            }
+            else
+                is_dangle_link1 = 1;
         }
-        else
-            is_dangle_link2 = 1;
+        else if (ret < 0)
+            goto out;
+
+        /* target object2 - get type and name */
+        ret = H5tools_get_symlink_info(file2_id, path2, &linkinfo2, TRUE);
+        /* dangling link */
+        if (ret == 0)
+        {
+            if (options->no_dangle_links)
+            {
+                /* gangling link is error */
+                if(options->m_verbose)
+                    parallel_print("Warning: <%s> is a dangling link.\n", path2);
+                goto out;
+            }
+            else
+                is_dangle_link2 = 1;
+        }
+        else if (ret < 0)
+            goto out;
+                    
+        /* found dangling link */
+        if (is_dangle_link1 || is_dangle_link2)
+            goto out2;
+
+        /* follow symbolic link option */
+        if (options->follow_links)
+        {
+            if (linkinfo1.linfo.type == H5L_TYPE_SOFT ||
+                linkinfo1.linfo.type == H5L_TYPE_EXTERNAL)
+                argdata->type[0] = linkinfo1.trg_type;
+
+            if (linkinfo2.linfo.type == H5L_TYPE_SOFT ||
+                linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
+                argdata->type[1] = linkinfo2.trg_type;
+        }
     }
-    else if (ret < 0)
-        goto out;
-                
-    /* found dangling link */
-    if (is_dangle_link1 || is_dangle_link2)
+    /* if objects are not the same type */
+    if (argdata->type[0] != argdata->type[1])
+    {
+        if (options->m_verbose||options->m_list_not_cmp)
+        {
+            parallel_print("Not comparable: <%s> is of type %s and <%s> is of type %s\n",
+            path1, get_type(argdata->type[0]), 
+            path2, get_type(argdata->type[1]));
+        }
+        options->not_cmp=1;
+        /* TODO: will need to update non-comparable is different
+         * options->contents = 0;
+         */
         goto out2;
+    }
+    else /* now both object types are same */
+        object_type = argdata->type[0];
   
     /* 
      * If both points to the same target object, skip comparing details inside
@@ -1903,17 +1774,17 @@ hsize_t diff(hid_t file1_id,
      *
      * Perform this to match the outputs as bypassing.
      */
-     is_hard_link = (argdata->type == H5TRAV_TYPE_DATASET ||
-                     argdata->type == H5TRAV_TYPE_NAMED_DATATYPE ||
-                     argdata->type == H5TRAV_TYPE_GROUP);
-     if (options->follow_links || is_hard_link)
+     if (argdata->is_same_trgobj)
      {
-        if (argdata->is_same_trgobj)
+        is_hard_link = (object_type == H5TRAV_TYPE_DATASET ||
+                        object_type == H5TRAV_TYPE_NAMED_DATATYPE ||
+                        object_type == H5TRAV_TYPE_GROUP);
+        if (options->follow_links || is_hard_link)
         {
             /* print information is only verbose option is used */
             if(options->m_verbose || options->m_report)
             {
-                switch(argdata->type)
+                switch(object_type)
                 {
                 case H5TRAV_TYPE_DATASET:
                     do_print_objname("dataset", path1, path2, options);
@@ -1935,7 +1806,7 @@ hsize_t diff(hid_t file1_id,
                     break; 
                 default:
                     parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
-                        path1, path2, get_type(argdata->type) );
+                        path1, path2, get_type(object_type) );
                     options->not_cmp = 1;
                     break;
                 } /* switch(type)*/
@@ -1943,11 +1814,12 @@ hsize_t diff(hid_t file1_id,
                 print_found(nfound);
             } /* if(options->m_verbose || options->m_report) */
 
+            /* exact same, so comparison is done */
             goto out2;
         }
     }
 
-    switch(argdata->type)
+    switch(object_type)
     {
        /*----------------------------------------------------------------------
         * H5TRAV_TYPE_DATASET
@@ -2064,30 +1936,6 @@ hsize_t diff(hid_t file1_id,
             if(print_objname(options, nfound))
                 do_print_objname("link", path1, path2, options);
 
-            if (options->follow_links)
-            {
-                /* objects are not the same type */
-                if (linkinfo1.trg_type != linkinfo2.trg_type)
-                {
-                    if (options->m_verbose||options->m_list_not_cmp)
-                    {
-                        parallel_print("<%s> is of type %s and <%s> is of type %s\n", path1, get_type(linkinfo1.trg_type), path2, get_type(linkinfo2.trg_type));
-                    }
-                    options->not_cmp=1;
-                    goto out;
-                }
-
-                /* Renew type in argdata to pass into diff(). 
-                 * For recursive call, argdata.is_same_trgobj is already
-                 * set from initial call, so don't reset here */
-                argdata->type = linkinfo1.trg_type;
-
-                /* call self to compare target object */
-                nfound += diff(file1_id, path1, 
-                               file2_id, path2, 
-                               options, argdata);
-            }
-
             /* always print the number of differences found in verbose mode */
             if(options->m_verbose)
                 print_found(nfound);
@@ -2121,28 +1969,6 @@ hsize_t diff(hid_t file1_id,
                 if(print_objname(options, nfound))
                     do_print_objname("external link", path1, path2, options);
 
-                if (options->follow_links)
-                {
-                    /* objects are not the same type */
-                    if (linkinfo1.trg_type != linkinfo2.trg_type)
-                    {
-                        if (options->m_verbose||options->m_list_not_cmp)
-                        {
-                            parallel_print("<%s> is of type %s and <%s> is of type %s\n", path1, get_type(linkinfo1.trg_type), path2, get_type(linkinfo2.trg_type));
-                        }
-                        options->not_cmp=1;
-                        goto out;
-                    }
-
-                    /* Renew type in argdata to pass into diff(). 
-                     * For recursive call, argdata.is_same_trgobj is already
-                     * set from initial call, so don't reset here */
-                    argdata->type = linkinfo1.trg_type;
-
-                    nfound = diff(file1_id, path1,  
-                                  file2_id, path2, 
-                                  options, argdata);
-                } 
             } /* end if */
             else 
             {
@@ -2172,7 +1998,7 @@ hsize_t diff(hid_t file1_id,
         default:
             if(options->m_verbose)
                 parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
-                    path1, path2, get_type(argdata->type) );
+                    path1, path2, get_type(object_type) );
             options->not_cmp = 1;
             break;
      }
