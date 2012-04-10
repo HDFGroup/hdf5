@@ -253,6 +253,7 @@ done:
         free (location);
         location = NULL;
     }
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen() */
 
@@ -409,7 +410,8 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     hid_t lapl_id)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    char           *name = NULL;
+    herr_t         ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "ii*sii", obj_id, new_loc_id, new_name, lcpl_id, lapl_id);
@@ -437,6 +439,8 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
 
     /* set creation properties */
     if(H5P_set(plist, H5L_CRT_TARGET_ID_NAME, &obj_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
+    if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &name) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
 
     /* Create the link through the VOL */

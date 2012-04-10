@@ -2958,4 +2958,3 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_store_msg_crt_idx() */
-

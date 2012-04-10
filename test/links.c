@@ -7380,17 +7380,17 @@ done:
     /* Close the target object if we opened it */
     if(target_obj >= 0) {
         switch(H5Iget_type(target_obj)) {
-            case H5I_GROUP:
+            case H5I_GROUP_PUBLIC:
                 if(H5Gclose(target_obj) < 0)
                     ret_value = -1;
                 break;
 
-            case H5I_DATASET:
+            case H5I_DATASET_PUBLIC:
                 if(H5Dclose(target_obj) < 0)
                     ret_value = -1;
                 break;
 
-            case H5I_DATATYPE:
+            case H5I_DATATYPE_PUBLIC:
                 if(H5Tclose(target_obj) < 0)
                     ret_value = -1;
                 break;
@@ -7467,17 +7467,17 @@ done:
     /* Close the target object if we opened it */
     if(target_obj >= 0) {
         switch(H5Iget_type(target_obj)) {
-            case H5I_GROUP:
+            case H5I_GROUP_PUBLIC:
                 if(H5Gclose(target_obj) < 0)
                     ret_value = -1;
                 break;
 
-            case H5I_DATASET:
+            case H5I_DATASET_PUBLIC:
                 if(H5Dclose(target_obj) < 0)
                     ret_value = -1;
                 break;
 
-            case H5I_DATATYPE:
+            case H5I_DATATYPE_PUBLIC:
                 if(H5Tclose(target_obj) < 0)
                     ret_value = -1;
                 break;

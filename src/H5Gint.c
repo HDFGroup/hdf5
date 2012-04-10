@@ -814,8 +814,7 @@ H5G_iterate(hid_t loc_id, const char *group_name,
     hid_t gid = -1;             /* ID of group to iterate over */
     H5G_t *grp = NULL;          /* Pointer to group data structure to iterate over */
     H5G_iter_appcall_ud_t udata; /* User data for callback */
-    H5VL_id_wrapper_t   *id_wrapper1;     /* user id structure of the location where the group will be opend */
-    H5VL_id_wrapper_t   *id_wrapper2;     /* user id structure of new opend group*/
+    H5VL_id_wrapper_t   *id_wrapper; /* user id structure of new opend group*/
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -824,10 +823,6 @@ H5G_iterate(hid_t loc_id, const char *group_name,
     HDassert(group_name);
     HDassert(last_lnk);
     HDassert(lnk_op && lnk_op->op_func.op_new);
-
-    /* get the ID struct */
-    if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
     /*
      * Open the group on which to operate.  We also create a group ID which
@@ -842,12 +837,12 @@ H5G_iterate(hid_t loc_id, const char *group_name,
 
     /* MSC - Create a new id that points to a struct that holds the group id and the VOL plugin */
     /* Allocate new id structure */
-    if(NULL == (id_wrapper2 = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    id_wrapper2->obj_id = gid;
-    id_wrapper2->vol_plugin = id_wrapper1->vol_plugin;
+    id_wrapper->obj_id = gid;
+    id_wrapper->vol_plugin = H5F_get_vol_cls(loc.oloc->file);
 
-    if((gid = H5I_register(H5I_GROUP_PUBLIC, id_wrapper2, TRUE)) < 0)
+    if((gid = H5I_register(H5I_GROUP_PUBLIC, id_wrapper, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
 
     /* Set up user data for callback */
@@ -862,7 +857,7 @@ H5G_iterate(hid_t loc_id, const char *group_name,
 done:
     /* Release the group opened */
     if(gid > 0) {
-        if(H5I_dec_app_ref(gid) < 0)
+        if(H5I_dec_app_ref(id_wrapper->obj_id) < 0 && H5I_dec_app_ref(gid) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
     } /* end if */
     else if(grp && H5G_close(grp) < 0)
@@ -1100,6 +1095,7 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5G_loc_t	loc;                /* Location of group passed in */
     H5G_loc_t	start_loc;          /* Location of starting group */
     unsigned    rc;		    /* Reference count of object    */
+    H5VL_id_wrapper_t  *id_wrapper; /* wrapper for the group ID */
     herr_t      ret_value;          /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
@@ -1122,6 +1118,16 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     /* Get the location of the starting group */
     if(H5G_loc(gid, &start_loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    /* MSC - Create a new id that points to a struct that holds the group id and the VOL plugin */
+    /* Allocate new id structure */
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    id_wrapper->obj_id = gid;
+    id_wrapper->vol_plugin = H5F_get_vol_cls(loc.oloc->file);
+
+    if((gid = H5I_register(H5I_GROUP_PUBLIC, id_wrapper, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
 
     /* Set up user data */
     udata.gid = gid;
@@ -1198,7 +1204,7 @@ done:
 
     /* Release the group opened */
     if(gid > 0) {
-        if(H5I_dec_app_ref(gid) < 0)
+        if(H5I_dec_app_ref(id_wrapper->obj_id) < 0 && H5I_dec_app_ref(gid) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
     } /* end if */
     else if(grp && H5G_close(grp) < 0)

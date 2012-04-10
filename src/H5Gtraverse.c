@@ -29,7 +29,6 @@
 /****************/
 
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 
 /***********/
@@ -39,7 +38,6 @@
 #include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
-#include "H5Fpkg.h"		/* Files		  		*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs					*/
@@ -218,8 +216,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     id_wrapper->obj_id = cur_grp;
-    id_wrapper->vol_plugin = grp_loc->oloc->file->vol_cls;
-    grp_loc->oloc->file->vol_cls->nrefs++;
+    id_wrapper->vol_plugin = H5F_get_vol_cls(grp_loc->oloc->file);
 
     if((cur_grp = H5I_register(H5I_GROUP_PUBLIC, id_wrapper, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
