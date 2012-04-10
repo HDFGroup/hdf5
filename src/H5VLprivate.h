@@ -89,6 +89,7 @@ H5_DLL herr_t H5VL_link_create(H5VL_link_create_type_t create_type, hid_t loc_id
                                const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5VL_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
                              const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id);
+H5_DLL herr_t H5VL_link_delete(hid_t loc_id, const char *name, hid_t lapl_id);
 
 H5_DLL hid_t H5VL_object_open_by_loc(hid_t uid, void *obj_loc, hid_t lapl_id);
 H5_DLL herr_t H5VL_object_close(hid_t uid);

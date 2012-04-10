@@ -99,6 +99,8 @@ static herr_t H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t
                                       const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 static herr_t H5VL_native_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
                                     const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id);
+//static herr_t H5VL_native_link_delete(hid_t loc_id, char *name, H5G_traverse_t op, void *udata, hid_t lapl_id);
+static herr_t H5VL_native_link_delete(hid_t loc_id, const char *name, hid_t lapl_id);
 
 static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id);
 static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, va_list arguments);
@@ -149,7 +151,7 @@ H5VL_class_t H5VL_native_g = {
         H5VL_native_link_create,                /* create */
         H5VL_native_link_move,                  /* move */
         NULL,                   /* get */
-        NULL                 /* delete */
+        H5VL_native_link_delete                 /* delete */
     },
     {                                           /* object_cls */
         H5VL_native_object_open,                /* open */
@@ -2036,6 +2038,48 @@ H5VL_native_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_link_move() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_link_delete
+ *
+ * Purpose:	Removes the specified NAME from the group graph and
+ *		decrements the link count for the object to which NAME
+ *		points.  If the link count reaches zero then all file-space
+ *		associated with the object will be reclaimed (but if the
+ *		object is open, then the reclamation of the file space is
+ *		delayed until all handles to the object are closed).
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL_native_link_delete(hid_t loc_id, const char *name, hid_t lapl_id)
+{
+    H5G_loc_t       loc;                /* Object location */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    /* Unlink */
+    if(H5L_delete(&loc, name, lapl_id, H5AC_dxpl_id) < 0)
+	HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
+
+    /* Traverse the group hierarchy to remove the link 
+    if(H5G_traverse(&loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK|H5G_TARGET_MOUNT, 
+                    op, (H5L_trav_rm_t *)udata, lapl_id, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
+    */
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_link_delete() */
 
 
 /*-------------------------------------------------------------------------

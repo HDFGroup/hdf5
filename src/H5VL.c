@@ -1795,7 +1795,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_link_create
+ * Function:	H5VL_link_move
  *
  * Purpose:	Copy or move a link from src to dst.
  *
@@ -1853,6 +1853,42 @@ H5_DLL herr_t H5VL_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_l
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_move() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_link_delete
+ *
+ * Purpose:	Copy or delete a link from src to dst.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_DLL herr_t H5VL_link_delete(hid_t loc_id, const char *name, hid_t lapl_id)
+{
+    H5VL_id_wrapper_t    *id_wrapper;
+    herr_t               ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")        
+
+    /* check if the corresponding VOL delete callback exists */
+    if(NULL == id_wrapper->vol_plugin->link_cls.delete)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link delete' method")
+
+    /* call the corresponding VOL delete callback */
+    if((ret_value = (id_wrapper->vol_plugin->link_cls.delete)
+        (id_wrapper->obj_id, name, lapl_id)) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link delete failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_link_delete() */
 
 
 /*-------------------------------------------------------------------------

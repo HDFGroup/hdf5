@@ -592,21 +592,18 @@ done:
 herr_t
 H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Group's location */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*si", loc_id, name, lapl_id);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Unlink */
-    if(H5L_delete(&loc, name, lapl_id, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
+    /* Delete the link through the VOL */
+    if((ret_value = H5VL_link_delete(loc_id, name, lapl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -667,7 +664,36 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     /* Traverse the group hierarchy to remove the link */
     if(H5G_traverse(&loc, group_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK|H5G_TARGET_MOUNT, H5L_delete_by_idx_cb, &udata, lapl_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
+#if 0
+    H5L_trav_rmbi_t udata;              /* User data for callback */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "i*sIiIohi", loc_id, group_name, idx_type, order, n, lapl_id);
+
+    /* Check arguments */
+    if(!group_name || !*group_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Set up user data for unlink operation */
+    udata.idx_type = idx_type;
+    udata.order = order;
+    udata.n = n;
+    udata.dxpl_id = H5AC_dxpl_id;
+
+    /* Delete the link through the VOL */
+    if((ret_value = H5VL_link_delete(loc_id, group_name, H5L_delete_by_idx_cb, &udata, lapl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
+#endif
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ldelete_by_idx() */
@@ -2381,6 +2407,7 @@ H5L_delete(H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 
     /* Set up user data for unlink operation */
     udata.dxpl_id = dxpl_id;
+
     if(H5G_traverse(loc, norm_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK|H5G_TARGET_MOUNT, H5L_delete_cb, &udata, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "can't unlink object")
 
