@@ -425,6 +425,8 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 HDexit(EXIT_FAILURE);
             }
             break;
+        default:
+            break;
         } /* switch */
 
 
