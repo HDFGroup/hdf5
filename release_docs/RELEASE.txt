@@ -696,6 +696,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5repack: Fixed a failure when change the chunk size of a specified
+          chunked dataset with unlimited max dims. HDFFV-7993 (JKM 2012/04/11)
         - h5diff: Fixed failure for comparing same named object with different
           object types in comparing groups. Prior to the fix, h5diff resulted
           in error. After the fix, h5diff detects such case as non-comparable

@@ -466,6 +466,8 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
             options->fs_threshold = (hsize_t)HDatol( opt_arg );
             break;
+        default:
+            break;
         } /* switch */
 
 

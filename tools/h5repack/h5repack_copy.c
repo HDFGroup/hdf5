@@ -778,6 +778,8 @@ int do_copy_objects(hid_t fidin,
     unsigned u;
     int      is_ref=0;
     htri_t   is_named;
+    hbool_t  limit_maxdims;
+    hsize_t size_dset;
 
 
     /*-------------------------------------------------------------------------
@@ -794,8 +796,10 @@ int do_copy_objects(hid_t fidin,
 
     for ( i = 0; i < travt->nobjs; i++)
     {
-
+        /* init variables per obj */
         buf = NULL;
+        limit_maxdims = FALSE;
+
         switch ( travt->objs[i].type )
         {
 
@@ -970,6 +974,9 @@ int do_copy_objects(hid_t fidin,
                 if((msize = H5Tget_size(wtype_id)) == 0)
                     goto error;
 
+                /* size of current dset */
+                size_dset = nelmts * msize;
+
                 /*-------------------------------------------------------------------------
                 * check if the dataset creation property list has filters that
                 * are not registered in the current configuration
@@ -999,7 +1006,7 @@ int do_copy_objects(hid_t fidin,
                          */
                         if (options->layout_g != H5D_COMPACT)
                         {
-                            if ( nelmts*msize < options->min_comp )
+                            if ( size_dset < options->min_comp )
                                 apply_s=0;
                         }
 
@@ -1016,9 +1023,38 @@ int do_copy_objects(hid_t fidin,
                                 goto error;
                         }
 
-                        /* unset the unlimimted dimensions, which cannot be applied to layout other than chunked. */ 
-                        if (options->layout_g != H5D_CHUNKED) {
-                             H5Sset_extent_simple( f_space_id, rank, dims, NULL );
+                        /*------------------------------------------------- 
+                         * Unset the unlimited max dims if convert to other
+                         * than chunk layouts, because unlimited max dims
+                         * only can be applied to chunk layout. 
+                         * Also perform only for targeted dataset
+                         * Also check for size limit to convert to compact
+                         *-------------------------------------------------*/
+                        if (options->layout_g != H5D_CHUNKED) 
+                        {
+                            /* any dataset is specified */
+                            if (options->op_tbl->nelems > 0)
+                            {
+                                /* if current obj match specified obj */
+                                if (options_get_object (travt->objs[i].name, options->op_tbl))
+                                    limit_maxdims = TRUE;
+                            }
+                            else /* no dataset is specified */
+                            {
+                                limit_maxdims = TRUE;
+                            }
+                        
+                            /* if convert to COMPACT */
+                            if (options->layout_g == H5D_COMPACT)
+                            {
+                                /* should be smaller than 64K */
+                                if ( size_dset > MAX_COMPACT_DSIZE )
+                                    limit_maxdims = FALSE;
+                            }
+                        
+                            /* unset unlimited max dims */
+                            if (limit_maxdims)
+                                H5Sset_extent_simple( f_space_id, rank, dims, NULL );
                         }
 
                         /*-------------------------------------------------------------------------
