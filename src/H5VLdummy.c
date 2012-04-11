@@ -84,18 +84,18 @@ H5VL_class_t H5VL_dummy_g = {
         NULL,
         NULL
     },
-    {                                           /* group_cls */
-        NULL,
-        NULL,
-        NULL,
-        NULL
-    },
     {                                           /* file_cls */
         H5VL_dummy_file_create,                /* create */
         H5VL_dummy_file_open,                  /* open */
         NULL,
         NULL,
         H5VL_dummy_file_close                  /* close */
+    },
+    {                                           /* group_cls */
+        NULL,
+        NULL,
+        NULL,
+        NULL
     },
     {                                           /* link_cls */
         NULL,                                   /* create */

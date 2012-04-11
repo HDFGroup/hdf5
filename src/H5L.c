@@ -951,7 +951,6 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     if(H5G_traverse(&loc, group_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_info_by_idx_cb, &udata, lapl_id, H5AC_ind_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
 
-
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lget_info_by_idx() */
@@ -1187,23 +1186,6 @@ H5Literate(hid_t id, H5_index_t idx_type, H5_iter_order_t order,
 
     /* Check arguments */
     id_type = H5I_get_type(id);
-
-#if 0
-    /* get the actual ID from an upper ID level */
-    /* MSC - this is a workaround to allow the test suite to pass and
-     at some point needs to be removed once all high level operations
-     that needs to go through the VOL actually go through the VOL*/
-    if (H5I_FILE_PUBLIC == id_type || H5I_GROUP_PUBLIC == id_type) {
-        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        grp_id = id_wrapper->obj_id;
-        id_type = H5I_get_type(grp_id);
-    }
-    else {
-        grp_id = id;
-    }
-#endif
-
     if(!(H5I_GROUP_PUBLIC == id_type || H5I_FILE_PUBLIC == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
