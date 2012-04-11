@@ -61,6 +61,7 @@ H5_DLL herr_t H5VL_attr_read(hid_t attr_id, hid_t dtype_id, void *buf);
 H5_DLL herr_t H5VL_attr_write(hid_t attr_id, hid_t dtype_id, const void *buf);
 H5_DLL herr_t H5VL_attr_get(hid_t id, H5VL_attr_get_t get_type, ...);
 H5_DLL herr_t H5VL_attr_generic(hid_t id, H5VL_attr_generic_t generic_type, ...);
+H5_DLL herr_t H5VL_attr_delete(hid_t loc_id, void *location, const char *attr_name);
 H5_DLL herr_t H5VL_attr_close(hid_t attr_id);
 
 H5_DLL hid_t H5VL_dataset_create(hid_t uid, const char *name, hid_t dcpl_id, hid_t dapl_id);

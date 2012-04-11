@@ -761,7 +761,8 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     vlen_bufsize.dataset_id = dataset_id;
 
     /* Get a copy of the dataspace ID */
-    if((vlen_bufsize.fspace_id = H5Dget_space(dataset_id)) < 0)
+    if(H5VL_dataset_get(dataset_id, H5VL_DATASET_GET_SPACE, &(vlen_bufsize.fspace_id)) < 0)
+        //if((vlen_bufsize.fspace_id = H5Dget_space(dataset_id)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy dataspace")
 
     /* Create a scalar for the memory dataspace */

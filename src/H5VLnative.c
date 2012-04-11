@@ -68,6 +68,7 @@ static herr_t H5VL_native_attr_read(hid_t attr_id, hid_t dtype_id, void *buf);
 static herr_t H5VL_native_attr_write(hid_t attr_id, hid_t dtype_id, const void *buf);
 static herr_t H5VL_native_attr_get(hid_t id, H5VL_attr_get_t get_type, va_list arguments);
 static herr_t H5VL_native_attr_generic(hid_t id, H5VL_attr_generic_t generic_type, va_list arguments);
+static herr_t H5VL_native_attr_delete(hid_t loc_id, void *location, const char *attr_name);
 static herr_t H5VL_native_attr_close(hid_t attr_id);
 
 static herr_t H5VL_native_datatype_commit(hid_t loc_id, const char *name, hid_t type_id, 
@@ -117,9 +118,9 @@ H5VL_class_t H5VL_native_g = {
         H5VL_native_attr_open,                  /* open */
         H5VL_native_attr_read,                  /* read */
         H5VL_native_attr_write,                 /* write */
-        NULL,                                   /* delete */
         H5VL_native_attr_get,                   /* get */
         H5VL_native_attr_generic,               /* generic */
+        H5VL_native_attr_delete,                /* delete */
         H5VL_native_attr_close                  /* close */
     },
     {                                           /* datatype_cls */
@@ -627,6 +628,50 @@ done:
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_attr_generic() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_attr_delete
+ *
+ * Purpose:	Deletes an attribute from a location
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, attr not deleted.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL_native_attr_delete(hid_t loc_id, void *location, const char *attr_name)
+{
+    H5G_loc_t   loc;                    /* Object location */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    if(NULL == location) { /* H5Adelete */
+        /* Delete the attribute from the location */
+        if(H5O_attr_remove(loc.oloc, attr_name, H5AC_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+    }
+    else { /* H5Adelete_by_name */
+        H5G_loc_t   *obj_loc = (H5G_loc_t *)location;
+
+        /* Delete the attribute from the location */
+        if(H5O_attr_remove(obj_loc->oloc, attr_name, H5AC_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+
+        if(H5G_loc_free(obj_loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")        
+    }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_attr_delete() */
 
 
 /*-------------------------------------------------------------------------

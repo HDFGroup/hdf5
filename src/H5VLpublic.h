@@ -116,9 +116,9 @@ typedef struct H5VL_attr_class_t {
     hid_t  (*open)  (hid_t loc_id, void *location, const char *attr_name, hid_t aapl_id);
     herr_t (*read)  (hid_t attr_id, hid_t mem_type_id, void *buf);
     herr_t (*write) (hid_t attr_id, hid_t mem_type_id, const void *buf);
-    herr_t (*delete)(hid_t loc_id, const char *attr_name);
     herr_t (*get)   (hid_t file_id, H5VL_attr_get_t get_type, va_list arguments);
     herr_t (*generic)(hid_t id, H5VL_attr_generic_t generic_type, va_list arguments);
+    herr_t (*delete)(hid_t loc_id, void *location, const char *attr_name);
     herr_t (*close) (hid_t attr_id);
 } H5VL_attr_class_t;
 

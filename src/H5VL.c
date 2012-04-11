@@ -874,6 +874,41 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_attr_delete
+ *
+ * Purpose:	Deletes an attribute through the VOL
+ *
+ * Return:	Success:	Non Negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_attr_delete(hid_t loc_id, void *location, const char *attr_name)
+{
+    H5VL_id_wrapper_t   *id_wrapper;              /* user id structure */
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* get the ID struct */
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+
+    if((ret_value = (id_wrapper->vol_plugin->attr_cls.delete)
+        (id_wrapper->obj_id, location, attr_name)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDELETE, FAIL, "delete failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_attr_close() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_attr_close
  *
  * Purpose:	Closes an attribute through the VOL

@@ -308,12 +308,6 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     if(!attr_name || !*attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
-
-    /* Find the object's location 
-    if(H5G_loc_find(&loc, obj_name, &obj_loc, lapl_id, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
-            */
-
     /* Get the token for the Object location through the VOL */
     if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, obj_name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
@@ -2054,7 +2048,6 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     hid_t lapl_id)
 {
     void *location = NULL;
-
     hid_t       obj_loc_id = (-1);      /* ID for object located */
     H5A_attr_iter_op_t attr_op; /* Attribute operator */
     hsize_t	start_idx;      /* Index of attribute to start iterating at */
@@ -2129,23 +2122,20 @@ done:
 herr_t
 H5Adelete(hid_t loc_id, const char *name)
 {
-    H5G_loc_t	loc;		        /* Object location */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*s", loc_id, name);
 
     /* check arguments */
-    if(H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Delete the attribute from the location */
-    if(H5O_attr_remove(loc.oloc, name, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+    /* Open the attribute through the VOL */
+    if(H5VL_attr_delete(loc_id, NULL, name) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2172,21 +2162,15 @@ herr_t
 H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t lapl_id)
 {
-    H5G_loc_t	loc;		        /* Object location */
-    H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
-    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
+    void        *location = NULL;
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
     /* check arguments */
-    if(H5I_ATTR == H5I_get_type(loc_id))
+    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!obj_name || !*obj_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
     if(!attr_name || !*attr_name)
@@ -2197,25 +2181,19 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Set up opened group location to fill in */
-    obj_loc.oloc = &obj_oloc;
-    obj_loc.path = &obj_path;
-    H5G_loc_reset(&obj_loc);
+    /* Get the token for the Object location through the VOL */
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, obj_name, lapl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
-    /* Find the object's location */
-    if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
-    loc_found = TRUE;
-
-    /* Delete the attribute from the location */
-    if(H5O_attr_remove(obj_loc.oloc, attr_name, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+    /* Open the attribute through the VOL */
+    if(H5VL_attr_delete(loc_id, location, attr_name) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:
-    /* Release resources */
-    if(loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
-
+    if(NULL != location) {
+        free (location);
+        location = NULL;
+    }
     FUNC_LEAVE_API(ret_value)
 } /* H5Adelete_by_name() */
 
