@@ -94,6 +94,7 @@ $SRC_H5REPACK_TESTFILES/h5repack_hlink.h5
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5
 $SRC_H5REPACK_TESTFILES/h5repack_layouto.h5
 $SRC_H5REPACK_TESTFILES/h5repack_layout2.h5
+$SRC_H5REPACK_TESTFILES/h5repack_layout3.h5
 $SRC_H5REPACK_TESTFILES/h5repack_named_dtypes.h5
 $SRC_H5REPACK_TESTFILES/h5repack_nbit.h5
 $SRC_H5REPACK_TESTFILES/h5repack_objs.h5
@@ -165,7 +166,7 @@ TESTING() {
 # beginning with the word "Verifying".
 #
 VERIFY() {
-    MESSAGE "Verifying h5diff output $*"
+    MESSAGE "Verifying $*"
 }
 
 # Print a message that a test has been skipped (because a required filter
@@ -179,7 +180,7 @@ SKIP() {
 #
 DIFFTEST() 
 {
-    VERIFY  $@
+    VERIFY h5diff output $@
     $RUNSERIAL $H5DIFF_BIN -q  "$@" 
     RET=$?
     if [ $RET != 0 ] ; then
@@ -235,7 +236,7 @@ VERIFY_LAYOUT_DSET()
     
     #---------------------------------
     # check the layout from a dataset
-    VERIFY  "Layout"
+    VERIFY  "a dataset layout"
     $RUNSERIAL $H5DUMP_BIN -d $dset -pH $outfile > $layoutfile
     $GREP $expectlayout $layoutfile > /dev/null
     if [ $? -eq 0 ]; then
@@ -260,7 +261,7 @@ VERIFY_LAYOUT_ALL()
     #---------------------------------
     # check the layout from a dataset
     # check if the other layouts still exsit
-    VERIFY  "Layout "
+    VERIFY  "layouts"
         # if CONTIGUOUS
         if [ $expectlayout = "CONTIGUOUS" ]; then
             $RUNSERIAL $H5DUMP_BIN -pH $outfile > $layoutfile
@@ -360,7 +361,8 @@ TOOLTEST1()
     rm -f $outfile
 }
           
-# Call h5repack and compare output to a text file for -v option
+# This is same as TOOLTEST() with comparing display output
+# from -v option
 #
 TOOLTESTV() 
 {
@@ -374,10 +376,20 @@ TOOLTESTV()
     outfile=$TESTDIR/out.$1
     shift
     $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile >$actual 2>$actual_err
-    cp $actual $actual_sav
+    RET=$?
+    if [ $RET != 0 ] ; then
+	echo "*FAILED*"
+	nerrors="`expr $nerrors + 1`"
+    else
+	echo " PASSED"
+	DIFFTEST $infile $outfile
+    fi
+
+    # display output compare
     STDOUT_FILTER $actual
     cat $actual_err >> $actual
 
+    VERIFY output from $H5REPACK $@
     if cmp -s $expect $actual; then
      echo " PASSED"
     else
@@ -387,7 +399,8 @@ TOOLTESTV()
      test yes = "$verbose" && diff -c $expect $actual |sed 's/^/    /'
     fi
     
-   rm -f $actual $actual_err $actual_sav
+   rm -f $actual $actual_err
+   rm -f $outfile
 }
 
 # TOOLTEST_META:
@@ -559,7 +572,8 @@ arg="h5repack_filters.h5 -v -f /dset_deflate:GZIP=9"
 if test  $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
- TOOLTEST $arg
+ # compare output
+ TOOLTESTV $arg
 fi
   
 ###########################################################
@@ -778,6 +792,24 @@ VERIFY_LAYOUT_DSET h5repack_layout2.h5 contig_small COMPACT
 TOOLTEST_MAIN h5repack_layout2.h5 -l chunked_small_fixed:COMPA
 VERIFY_LAYOUT_DSET h5repack_layout2.h5 chunked_small_fixed COMPACT
 
+#--------------------------------------------------------------------------- 
+# Test file contains chunked datasets (need multiple dsets) with 
+# unlimited max dims.   (HDFFV-7933)
+# Use first dset to test.
+#---------------------------------------------------------------------------
+# chunk to chunk - specify chunk dim bigger than any current dim
+TOOLTEST_MAIN h5repack_layout3.h5 -l chunk_unlimit1:CHUNK=100x300
+VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit1 CHUNK
+
+# chunk to contiguous 
+TOOLTEST_MAIN h5repack_layout3.h5 -l chunk_unlimit1:CONTI
+VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit1 CONTI
+
+# chunk to compact - convert big dataset (should be > 64k) for this purpose, 
+# should remain as original layout (chunk)
+TOOLTEST_MAIN h5repack_layout3.h5 -l chunk_unlimit1:COMPA
+VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit1 CHUNK
+
 # Native option
 # Do not use FILE1, as the named dtype will be converted to native, and h5diff will
 # report a difference.
@@ -856,8 +888,7 @@ TOOLTEST h5repack_attr_refs.h5
 # Note: this test is experimental for sharing test file among tools
 TOOLTEST h5diff_attr1.h5
 
-# tests for metadata block size option ('-M')
-TOOLTEST_META h5repack_layout.h5 -M 8192
+# tests for metadata block size option 
 TOOLTEST_META h5repack_layout.h5 --metadata_block_size=8192
 
 if test $nerrors -eq 0 ; then
