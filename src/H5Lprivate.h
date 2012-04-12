@@ -90,8 +90,17 @@ H5_DLL herr_t H5L_get_info(const H5G_loc_t *loc, const char *name,
     H5L_info_t *linkbuf/*out*/, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5L_delete(H5G_loc_t *loc, const char *name, hid_t lapl_id,
     hid_t dxpl_id);
+H5_DLL herr_t H5L_delete_by_idx(H5G_loc_t *loc, const char *name, 
+                                void *udata, hid_t lapl_id, hid_t dxpl_id);
+H5_DLL htri_t H5L_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5L_get_info_by_idx(H5G_loc_t *loc, const char *name, void *udata, 
+                                  hid_t lapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5L_get_name_by_idx(H5G_loc_t *loc, const char *name, void *udata, 
+                                  hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5L_get_val(H5G_loc_t *loc, const char *name, void *buf/*out*/,
     size_t size, hid_t lapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5L_get_val_by_idx(H5G_loc_t *loc, const char *name, void *udata, 
+                                  hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5L_register_external(void);
 
 /* User-defined link functions */

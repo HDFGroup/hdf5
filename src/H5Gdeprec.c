@@ -312,6 +312,8 @@ done:
 herr_t
 H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new_name)
 {
+    hid_t  lcpl_id   = H5P_LINK_CREATE_DEFAULT;
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -323,20 +325,31 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
     if(!new_name || !*new_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
 
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
     if(type == H5L_TYPE_HARD) {
-        if((ret_value = H5G_link_hard(cur_loc_id, cur_name, H5L_SAME_LOC, new_name)) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "couldn't create link")
+        /* set creation properties */
+        if(H5P_set(plist, H5L_CRT_TARGET_ID_NAME, &cur_loc_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
+        if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &cur_name) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
+
+        /* Create the link through the VOL */
+        if((ret_value = H5VL_link_create(H5VL_CREATE_HARD_LINK, H5L_SAME_LOC, new_name, 
+                                         lcpl_id, H5P_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
     else if(type == H5L_TYPE_SOFT) {
-        H5G_loc_t	cur_loc;                /* Group location for new link */
+        /* set creation properties */
+        if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &cur_name) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
-        /* Finish checking arguments */
-        if(H5G_loc(cur_loc_id, &cur_loc) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-
-        /* Create the link */
-        if(H5L_create_soft(cur_name, &cur_loc, new_name, H5P_DEFAULT, H5P_DEFAULT, H5AC_dxpl_id) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+        /* Create the link through the VOL */
+        if((ret_value = H5VL_link_create(H5VL_CREATE_SOFT_LINK, cur_loc_id, new_name, 
+                                         lcpl_id, H5P_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end else if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not a valid link type")
@@ -358,6 +371,8 @@ herr_t
 H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
     hid_t new_loc_id, const char *new_name)
 {
+    hid_t  lcpl_id   = H5P_LINK_CREATE_DEFAULT;
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -369,25 +384,36 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
     if(!new_name || !*new_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
 
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
     if(type == H5L_TYPE_HARD) {
-        if((ret_value = H5G_link_hard(cur_loc_id, cur_name, new_loc_id, new_name)) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "couldn't create link")
+        /* set creation properties */
+        if(H5P_set(plist, H5L_CRT_TARGET_ID_NAME, &cur_loc_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
+        if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &cur_name) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
+
+        /* Create the link through the VOL */
+        if((ret_value = H5VL_link_create(H5VL_CREATE_HARD_LINK, new_loc_id, new_name, 
+                                         lcpl_id, H5P_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
     else if(type == H5L_TYPE_SOFT) {
-        H5G_loc_t	new_loc;                /* Group location for new link */
-
         /* Soft links only need one location, the new_loc_id, but it's possible that
          * new_loc_id is H5L_SAME_LOC */
         if(new_loc_id == H5L_SAME_LOC)
             new_loc_id = cur_loc_id;
 
-        /* Finish checking arguments */
-        if(H5G_loc(new_loc_id, &new_loc) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+        /* set creation properties */
+        if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &cur_name) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
-        /* Create the link */
-        if(H5L_create_soft(cur_name, &new_loc, new_name, H5P_DEFAULT, H5P_DEFAULT, H5AC_dxpl_id) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+        /* Create the link through the VOL */
+        if((ret_value = H5VL_link_create(H5VL_CREATE_SOFT_LINK, new_loc_id, new_name, 
+                                         lcpl_id, H5P_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end else if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid link type")
@@ -466,9 +492,10 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*s*s", src_loc_id, src_name, dst_name);
 
-    /* Call common routine to move the link */
-    if(H5G_move(src_loc_id, src_name, H5L_SAME_LOC, dst_name) < 0)
-      HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "couldn't move link")
+    /* Create the link through the VOL */
+    if((ret_value = H5VL_link_move(src_loc_id, src_name, H5L_SAME_LOC, dst_name, 
+                                   FALSE, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -491,9 +518,10 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*si*s", src_loc_id, src_name, dst_loc_id, dst_name);
 
-    /* Call common routine to move the link */
-    if(H5G_move(src_loc_id, src_name, dst_loc_id, dst_name) < 0)
-      HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "couldn't move link")
+    /* Create the link through the VOL */
+    if((ret_value = H5VL_link_move(src_loc_id, src_name, dst_loc_id, dst_name, 
+                                   FALSE, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -567,21 +595,17 @@ done:
 herr_t
 H5Gunlink(hid_t loc_id, const char *name)
 {
-    H5G_loc_t	loc;                    /* Group's location */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*s", loc_id, name);
 
-    /* Check arguments */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Call H5L routine... */
-    if(H5L_delete(&loc, name, H5P_DEFAULT, H5AC_dxpl_id) < 0)
-      HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "couldn't delete link")
+    /* Delete the link through the VOL */
+    if((ret_value = H5VL_link_delete(loc_id, name, NULL, H5P_DEFAULT)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)

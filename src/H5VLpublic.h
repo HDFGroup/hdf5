@@ -57,11 +57,6 @@ typedef enum H5VL_attr_get_t {
     H5VL_ATTR_GET_INFO            = 5          /* offset                              */
 } H5VL_attr_get_t;
 
-/* types for all attr general operations */
-typedef enum H5VL_attr_generic_t {
-    H5VL_ATTR_OPEN_BY_IDX           = 0         /* H5Aopen_by_idx                     */
-} H5VL_attr_generic_t;
-
 /* types for all dataset get API routines */
 typedef enum H5VL_dataset_get_t {
     H5VL_DATASET_GET_SPACE           = 0,         /* dataspace                           */
@@ -81,9 +76,10 @@ typedef enum H5VL_group_get_t {
 
 /* types for all link get API routines */
 typedef enum H5VL_link_get_t {
-    H5VL_LINK_GET_INFO	    = 0, 	/*link info             		*/
-    H5VL_LINK_GET_NAME	    = 1,	/*link name                             */
-    H5VL_LINK_GET_VAL       = 2         /*link value                            */
+    H5VL_LINK_EXISTS        = 0,        /*link existence                        */
+    H5VL_LINK_GET_INFO	    = 1, 	/*link info             		*/
+    H5VL_LINK_GET_NAME	    = 2,	/*link name                             */
+    H5VL_LINK_GET_VAL       = 3         /*link value                            */
 } H5VL_link_get_t;
 
 /* types for all object get API routines */
@@ -101,6 +97,17 @@ typedef enum H5VL_object_lookup_t {
     H5VL_OBJECT_LOOKUP_BY_REF       = 4
 } H5VL_object_lookup_t;
 
+/* types for all attr general operations */
+typedef enum H5VL_object_generic_t {
+    H5VL_ATTR_DELETE_BY_IDX         = 0,        /* H5Adelete_by_idx                   */
+    H5VL_ATTR_EXISTS                = 1,        /* H5Aexists                          */
+    H5VL_ATTR_OPEN_BY_IDX           = 2,        /* H5Aopen_by_idx                     */
+    H5VL_ATTR_RENAME                = 3,        /* H5Arename                          */
+    H5VL_OBJECT_CHANGE_REF_COUNT    = 4,        /* H5Oincr/decr_refcount              */
+    H5VL_OBJECT_EXISTS              = 5,        /* H5Oexists(_by_name)                */
+    H5VL_OBJECT_SET_COMMENT         = 6         /* H5Oset_comment(_by_name)           */
+} H5VL_object_generic_t;
+
 /* types for all object lookup API routines */
 typedef enum H5VL_link_create_type_t {
     H5VL_CREATE_HARD_LINK           = 0,
@@ -117,7 +124,6 @@ typedef struct H5VL_attr_class_t {
     herr_t (*read)  (hid_t attr_id, hid_t mem_type_id, void *buf);
     herr_t (*write) (hid_t attr_id, hid_t mem_type_id, const void *buf);
     herr_t (*get)   (hid_t file_id, H5VL_attr_get_t get_type, va_list arguments);
-    herr_t (*generic)(hid_t id, H5VL_attr_generic_t generic_type, va_list arguments);
     herr_t (*delete)(hid_t loc_id, void *location, const char *attr_name);
     herr_t (*close) (hid_t attr_id);
 } H5VL_attr_class_t;
@@ -167,7 +173,7 @@ typedef struct H5VL_link_class_t {
     herr_t (*move)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
                      const char *dest_name, hbool_t copy_flag, hid_t lcpl, hid_t lapl);
     herr_t (*get)   (hid_t loc_id, H5VL_link_get_t get_type, va_list arguments);
-    herr_t (*delete)(hid_t loc_id, const char *name, hid_t lapl_id);
+    herr_t (*delete)(hid_t loc_id, const char *name, void *udata, hid_t lapl_id);
 } H5VL_link_class_t;
 
 /* H5O routines */
@@ -179,6 +185,7 @@ typedef struct H5VL_object_class_t {
                      hid_t ocpypl_id, hid_t lcpl_id );
     herr_t (*lookup)(hid_t loc_id, H5VL_object_lookup_t lookup_type, va_list arguments);
     herr_t (*get)   (hid_t loc_id, H5VL_object_get_t get_type, va_list arguments);
+    herr_t (*generic)(hid_t id, H5VL_object_generic_t generic_type, va_list arguments);
     herr_t (*close) (hid_t obj_id);
 } H5VL_object_class_t;
 

@@ -67,7 +67,6 @@ static hid_t H5VL_native_attr_open(hid_t loc_id, void *location, const char *att
 static herr_t H5VL_native_attr_read(hid_t attr_id, hid_t dtype_id, void *buf);
 static herr_t H5VL_native_attr_write(hid_t attr_id, hid_t dtype_id, const void *buf);
 static herr_t H5VL_native_attr_get(hid_t id, H5VL_attr_get_t get_type, va_list arguments);
-static herr_t H5VL_native_attr_generic(hid_t id, H5VL_attr_generic_t generic_type, va_list arguments);
 static herr_t H5VL_native_attr_delete(hid_t loc_id, void *location, const char *attr_name);
 static herr_t H5VL_native_attr_close(hid_t attr_id);
 
@@ -101,12 +100,13 @@ static herr_t H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t
                                       const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 static herr_t H5VL_native_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
                                     const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id);
-//static herr_t H5VL_native_link_delete(hid_t loc_id, char *name, H5G_traverse_t op, void *udata, hid_t lapl_id);
-static herr_t H5VL_native_link_delete(hid_t loc_id, const char *name, hid_t lapl_id);
+static herr_t H5VL_native_link_get(hid_t loc_id, H5VL_link_get_t get_type, va_list arguments);
+static herr_t H5VL_native_link_delete(hid_t loc_id, const char *name, void *udata, hid_t lapl_id);
 
 static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id);
-static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, va_list arguments);
 static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, va_list arguments);
+static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, va_list arguments);
+static herr_t H5VL_native_object_generic(hid_t id, H5VL_object_generic_t generic_type, va_list arguments);
 static herr_t H5VL_native_object_close(hid_t object_id);
 
 H5VL_class_t H5VL_native_g = {
@@ -119,7 +119,6 @@ H5VL_class_t H5VL_native_g = {
         H5VL_native_attr_read,                  /* read */
         H5VL_native_attr_write,                 /* write */
         H5VL_native_attr_get,                   /* get */
-        H5VL_native_attr_generic,               /* generic */
         H5VL_native_attr_delete,                /* delete */
         H5VL_native_attr_close                  /* close */
     },
@@ -153,7 +152,7 @@ H5VL_class_t H5VL_native_g = {
     {                                           /* link_cls */
         H5VL_native_link_create,                /* create */
         H5VL_native_link_move,                  /* move */
-        NULL,                   /* get */
+        H5VL_native_link_get,                   /* get */
         H5VL_native_link_delete                 /* delete */
     },
     {                                           /* object_cls */
@@ -162,6 +161,7 @@ H5VL_class_t H5VL_native_g = {
         NULL,                                   /* copy */
         H5VL_native_object_lookup,              /* lookup */
         H5VL_native_object_get,                 /* get */
+        H5VL_native_object_generic,             /* generic */
         H5VL_native_object_close                /* close */
     }
 };
@@ -380,7 +380,6 @@ H5VL_native_attr_open(hid_t loc_id, void *location, const char *attr_name, hid_t
 
         if(H5G_loc_free(obj_loc) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-
     }
     else { /* H5Aopen */
         /* Read in attribute from object header */
@@ -569,65 +568,6 @@ H5VL_native_attr_get(hid_t attr_id, H5VL_attr_get_t get_type, va_list arguments)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_attr_get() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_native_attr_generic
- *
- * Purpose:	Perform a plugin specific operation for an attribute
- *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              April, 2012
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5VL_native_attr_generic(hid_t loc_id, H5VL_attr_generic_t generic_type, va_list arguments)
-{
-    H5A_t        *attr = NULL;   /* Attribute opened */
-    herr_t       ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    switch (generic_type) {
-        /* H5Aopen_by_idx */
-        case H5VL_ATTR_OPEN_BY_IDX:
-            {
-                hid_t	        *ret_id       = va_arg (arguments, hid_t *);
-                char            *obj_name     = va_arg (arguments, char *);
-                H5_index_t      idx_type      = va_arg (arguments, H5_index_t);
-                H5_iter_order_t order         = va_arg (arguments, H5_iter_order_t);
-                hsize_t         n             = va_arg (arguments, hsize_t);
-                hid_t           aapl_id       = va_arg (arguments, hid_t);
-                hid_t           lapl_id       = va_arg (arguments, hid_t);
-                H5G_loc_t	loc;	        /* Object location */
-
-                if(H5G_loc(loc_id, &loc) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-
-                /* Open the attribute in the object header */
-                if(NULL == (attr = H5A_open_by_idx(&loc, obj_name, idx_type, order, n, lapl_id, H5AC_ind_dxpl_id)))
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
-
-                /* Register the attribute and get an ID for it */
-                if((*ret_id = H5I_register(H5I_ATTR, attr, TRUE)) < 0)
-                    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
-                break;
-            }
-        default:
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type")
-    }
-
-done:
-    /* Cleanup on failure */
-    if(H5VL_ATTR_OPEN_BY_IDX == generic_type && ret_value < 0)
-        if(attr && H5A_close(attr) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_native_attr_generic() */
 
 
 /*-------------------------------------------------------------------------
@@ -1944,7 +1884,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL_native_group_get
  *
- * Purpose:	Gets certain data about a file
+ * Purpose:	Gets certain data about a group
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -2212,6 +2152,107 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_native_link_get
+ *
+ * Purpose:	Gets certain data about a link
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_native_link_get(hid_t loc_id, H5VL_link_get_t get_type, va_list arguments)
+{
+    H5G_loc_t	loc;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check arguments */
+    if(H5G_loc(loc_id, &loc))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    switch (get_type) {
+        /* H5Lexists */
+        case H5VL_LINK_EXISTS:
+            {
+                char       *name   = va_arg (arguments, char *);
+                htri_t     *ret    = va_arg (arguments, htri_t *);
+                hid_t      lapl_id = va_arg (arguments, hid_t);
+
+                /* Check for the existence of the link */
+                if((*ret = H5L_exists(&loc, name, lapl_id, H5AC_ind_dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+                break;
+            }
+        /* H5Lget_info/H5Lget_info_by_idx */
+        case H5VL_LINK_GET_INFO:
+            {
+                char       *name   = va_arg (arguments, char *);
+                H5L_info_t *linfo  = va_arg (arguments, H5L_info_t *);
+                void       *udata  = va_arg (arguments, void *);
+                hid_t      lapl_id = va_arg (arguments, hid_t);
+
+                if(NULL == udata) { /* H5Lget_info */
+                    /* Get the link information */
+                    if(H5L_get_info(&loc, name, linfo, lapl_id, H5AC_ind_dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+                }
+                else { /* H5Lget_info_by_idx */
+                    /* Get the link information */
+                    if(H5L_get_info_by_idx(&loc, name, udata, lapl_id, H5AC_ind_dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+                }
+                break;
+            }
+        /* H5Lget_name_by_idx */
+        case H5VL_LINK_GET_NAME:
+            {
+                char       *name   = va_arg (arguments, char *);
+                void       *udata  = va_arg (arguments, void *);
+                hid_t      lapl_id = va_arg (arguments, hid_t);
+
+                /* Get the link name */
+                if(H5L_get_name_by_idx(&loc, name, udata, lapl_id, H5AC_ind_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+                break;
+            }
+        /* H5Lget_val/H5Lget_val_by_idx */
+        case H5VL_LINK_GET_VAL:
+            {
+                char       *name   = va_arg (arguments, char *);
+                void       *buf    = va_arg (arguments, void *);
+                size_t     size    = va_arg (arguments, size_t);
+                void       *udata  = va_arg (arguments, void *);
+                hid_t      lapl_id = va_arg (arguments, hid_t);
+
+                if(NULL == udata) { /* H5Lget_val */
+                    /* Get the link value */
+                    if(H5L_get_val(&loc, name, buf, size, lapl_id, H5AC_ind_dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, 
+                                    "unable to get link value for '%s'", name)
+                }
+                else { /* H5Lget_val_by_idx */
+                    /* Get the link information */
+                    if(H5L_get_val_by_idx(&loc, name, udata, lapl_id, H5AC_ind_dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link val")
+                }
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from link")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_link_get() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_native_link_delete
  *
  * Purpose:	Removes the specified NAME from the group graph and
@@ -2229,7 +2270,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL_native_link_delete(hid_t loc_id, const char *name, hid_t lapl_id)
+H5VL_native_link_delete(hid_t loc_id, const char *name, void *udata, hid_t lapl_id)
 {
     H5G_loc_t       loc;                /* Object location */
     herr_t ret_value = SUCCEED;
@@ -2239,15 +2280,16 @@ H5VL_native_link_delete(hid_t loc_id, const char *name, hid_t lapl_id)
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
-    /* Unlink */
-    if(H5L_delete(&loc, name, lapl_id, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
-
-    /* Traverse the group hierarchy to remove the link 
-    if(H5G_traverse(&loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK|H5G_TARGET_MOUNT, 
-                    op, (H5L_trav_rm_t *)udata, lapl_id, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
-    */
+    if(NULL == udata) { /* H5Ldelete */
+        /* Unlink */
+        if(H5L_delete(&loc, name, lapl_id, H5AC_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
+    }
+    else { /* H5Ldelete_by_idx */
+        /* Unlink */
+        if(H5L_delete_by_idx(&loc, name, udata, lapl_id, H5AC_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_link_delete() */
@@ -2431,6 +2473,184 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, va_lis
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_object_lookup() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_object_generic
+ *
+ * Purpose:	Perform a plugin specific operation for an objectibute
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_native_object_generic(hid_t loc_id, H5VL_object_generic_t generic_type, va_list arguments)
+{
+    herr_t       ret_value = SUCCEED;    /* Return value */
+    H5A_t        *attr = NULL;   /* Attribute opened */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (generic_type) {
+        /* H5Adelete_by_idx */
+        case H5VL_ATTR_DELETE_BY_IDX:
+            {
+                H5G_loc_t       *obj_loc      = va_arg (arguments, H5G_loc_t *);
+                H5_index_t      idx_type      = va_arg (arguments, H5_index_t);
+                H5_iter_order_t order         = va_arg (arguments, H5_iter_order_t);
+                hsize_t         n             = va_arg (arguments, hsize_t);
+
+                /* Delete the attribute from the location */
+                if(H5O_attr_remove_by_idx(obj_loc->oloc, idx_type, order, n, H5AC_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+
+                if(H5G_loc_free(obj_loc) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+
+                break;
+            }
+        /* H5Aexists/exists_by_name */
+        case H5VL_ATTR_EXISTS:
+            {
+                char    *name      = va_arg (arguments, char *);
+                void    *location  = va_arg (arguments, void *);
+                htri_t	*ret       = va_arg (arguments, htri_t *);
+                H5G_loc_t   loc;
+
+                if(H5G_loc(loc_id, &loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+                if(NULL == location) { /* H5Aexists */
+                    /* Check if the attribute exists */
+                    if((*ret = H5O_attr_exists(loc.oloc, name, H5AC_ind_dxpl_id)) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+                }
+                else {
+                    H5G_loc_t   *obj_loc = (H5G_loc_t *)location;
+                    /* Check if the attribute exists */
+                    if((*ret = H5O_attr_exists(obj_loc->oloc, name, H5AC_ind_dxpl_id)) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+
+                    if(H5G_loc_free(obj_loc) < 0)
+                        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+                }
+                break;
+            }
+        /* H5Aopen_by_idx */
+        case H5VL_ATTR_OPEN_BY_IDX:
+            {
+                hid_t	        *ret_id       = va_arg (arguments, hid_t *);
+                char            *obj_name     = va_arg (arguments, char *);
+                H5_index_t      idx_type      = va_arg (arguments, H5_index_t);
+                H5_iter_order_t order         = va_arg (arguments, H5_iter_order_t);
+                hsize_t         n             = va_arg (arguments, hsize_t);
+                hid_t           aapl_id       = va_arg (arguments, hid_t);
+                hid_t           lapl_id       = va_arg (arguments, hid_t);
+                H5G_loc_t	loc;	        /* Object location */
+
+                if(H5G_loc(loc_id, &loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+                /* Open the attribute in the object header */
+                if(NULL == (attr = H5A_open_by_idx(&loc, obj_name, idx_type, order, n, lapl_id, H5AC_ind_dxpl_id)))
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
+
+                /* Register the attribute and get an ID for it */
+                if((*ret_id = H5I_register(H5I_ATTR, attr, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
+                break;
+            }
+        /* H5Arename/rename_by_name */
+        case H5VL_ATTR_RENAME:
+            {
+                void    *location  = va_arg (arguments, void *);
+                char    *old_name  = va_arg (arguments, char *);
+                char    *new_name  = va_arg (arguments, char *);
+                H5G_loc_t   loc;
+
+                if(H5G_loc(loc_id, &loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+                if(NULL == location) { /* H5Arename */
+                    /* Call attribute rename routine */
+                    if(H5O_attr_rename(loc.oloc, H5AC_dxpl_id, old_name, new_name) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
+                }
+                else {
+                    H5G_loc_t   *obj_loc = (H5G_loc_t *)location;
+
+                    /* Call attribute rename routine */
+                    if(H5O_attr_rename(obj_loc->oloc, H5AC_dxpl_id, old_name, new_name) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
+
+                    if(H5G_loc_free(obj_loc) < 0)
+                        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+                }
+                break;
+            }
+        /* H5Oincr_refcount / H5Odecr_refcount */
+        case H5VL_OBJECT_CHANGE_REF_COUNT:
+            {
+                int update_ref  = va_arg (arguments, int);
+                H5O_loc_t  *oloc;
+
+                /* Get the object's oloc so we can adjust its link count */
+                if((oloc = H5O_get_loc(loc_id)) == NULL)
+                    HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
+
+                if(H5O_link(oloc, update_ref, H5AC_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
+
+                break;
+            }
+        /* H5Oexists_by_name */
+        case H5VL_OBJECT_EXISTS:
+            {
+                char      *name     = va_arg (arguments, char *);
+                hid_t     lapl_id   = va_arg (arguments, hid_t);
+                htri_t	  *ret      = va_arg (arguments, htri_t *);
+                H5G_loc_t loc;
+
+                if(H5G_loc(loc_id, &loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+                /* Check if the object exists */
+                if((*ret = H5G_loc_exists(&loc, name, lapl_id, H5AC_dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
+                break;
+            }
+        /* H5Oset_comment */
+        case H5VL_OBJECT_SET_COMMENT:
+            {
+                const char    *name     = va_arg (arguments, char *);
+                const char    *comment  = va_arg (arguments, char *);
+                hid_t         lapl_id   = va_arg (arguments, hid_t);
+                H5G_loc_t     loc;
+
+                if(H5G_loc(loc_id, &loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+                /* (Re)set the object's comment */
+                if(H5G_loc_set_comment(&loc, name, comment, lapl_id, H5AC_ind_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type")
+    }
+
+done:
+    /* Cleanup on failure */
+    if(H5VL_ATTR_OPEN_BY_IDX == generic_type && ret_value < 0)
+        if(attr && H5A_close(attr) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_object_generic() */
 
 
 /*-------------------------------------------------------------------------

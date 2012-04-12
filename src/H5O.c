@@ -476,17 +476,13 @@ done:
 herr_t
 H5Oincr_refcount(hid_t object_id)
 {
-    H5O_loc_t  *oloc;
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
 
-    /* Get the object's oloc so we can adjust its link count */
-    if((oloc = H5O_get_loc(object_id)) == NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
-
-    if(H5O_link(oloc, 1, H5AC_dxpl_id) < 0)
+    /* change the ref count through the VOL */
+    if(H5VL_object_generic(object_id, H5VL_OBJECT_CHANGE_REF_COUNT, 1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -517,17 +513,13 @@ done:
 herr_t
 H5Odecr_refcount(hid_t object_id)
 {
-    H5O_loc_t  *oloc;
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
 
-    /* Get the object's oloc so we can adjust its link count */
-    if((oloc = H5O_get_loc(object_id)) == NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
-
-    if(H5O_link(oloc, -1, H5AC_dxpl_id) < 0)
+    /* change the ref count through the VOL */
+    if(H5VL_object_generic(object_id, H5VL_OBJECT_CHANGE_REF_COUNT, -1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -551,15 +543,12 @@ done:
 htri_t
 H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Location info */
     hid_t       ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
     if(H5P_DEFAULT == lapl_id)
@@ -568,8 +557,8 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Check if the object exists */
-    if((ret_value = H5G_loc_exists(&loc, name, lapl_id, H5AC_dxpl_id)) < 0)
+    /* change the ref count through the VOL */
+    if(H5VL_object_generic(loc_id, H5VL_OBJECT_EXISTS, name, lapl_id, &ret_value) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
 
 done:
@@ -604,10 +593,6 @@ H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
     if(!oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-    /* Get the token for the Object location through the VOL 
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP, &location) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
-    */
     /* Get the group info through the VOL using the location token */
     if((ret_value = H5VL_object_get(loc_id, H5VL_OBJECT_GET_INFO, oinfo, NULL)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
@@ -637,7 +622,6 @@ done:
 herr_t
 H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
 {
-#if 1
     void        *location = NULL;       /* a pointer to VOL specific token that indicates 
                                            the location of the object */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -670,55 +654,6 @@ done:
         location = NULL;
     }
     FUNC_LEAVE_API(ret_value)
-#endif
-#if 0
-    H5G_loc_t   loc;                    /* Location of group */
-    H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;               /* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;               /* Opened object object location */
-    hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-        H5TRACE4("e", "i*s*xi", loc_id, name, oinfo, lapl_id);
-
-    /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-    if(!oinfo)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
-
-
-    obj_loc.oloc = &obj_oloc;
-    obj_loc.path = &obj_path;
-    H5G_loc_reset(&obj_loc);
-
-    /* Find the object's location */
-    if((ret_value = H5G_loc_find(&loc, name, &obj_loc, lapl_id, H5AC_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
-    loc_found = TRUE;
-    /* Retrieve the object's information */
-    if(H5O_get_info(obj_loc.oloc, H5AC_ind_dxpl_id, TRUE, oinfo) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve object info")
-
-    /* Retrieve the object's information 
-    if(H5G_loc_info(&loc, name, TRUE, oinfo, lapl_id, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
-            */
-done:
-    /* Release the object location */
-    if(loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-
-    FUNC_LEAVE_API(ret_value)
-#endif
 } /* end H5Oget_info_by_name() */
 
 
@@ -801,18 +736,13 @@ done:
 herr_t
 H5Oset_comment(hid_t obj_id, const char *comment)
 {
-    H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*s", obj_id, comment);
 
-    /* Check args */
-    if(H5G_loc(obj_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-
-    /* (Re)set the object's comment */
-    if(H5G_loc_set_comment(&loc, ".", comment, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id) < 0)
+    /* set comment on object through the VOL */
+    if(H5VL_object_generic(obj_id, H5VL_OBJECT_SET_COMMENT, ".", comment, H5P_LINK_ACCESS_DEFAULT) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
@@ -841,15 +771,12 @@ herr_t
 H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
     hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*s*si", loc_id, name, comment, lapl_id);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
     if(H5P_DEFAULT == lapl_id)
@@ -858,8 +785,8 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* (Re)set the object's comment */
-    if(H5G_loc_set_comment(&loc, name, comment, lapl_id, H5AC_ind_dxpl_id) < 0)
+    /* set comment on object through the VOL */
+    if(H5VL_object_generic(loc_id, H5VL_OBJECT_SET_COMMENT, name, comment, lapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
 done:

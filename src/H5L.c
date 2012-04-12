@@ -176,8 +176,6 @@ static herr_t H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
 static herr_t H5L_exists_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
-static htri_t H5L_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id,
-    hid_t dxpl_id);
 static herr_t H5L_get_info_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -602,7 +600,7 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_delete(loc_id, name, lapl_id)) < 0)
+    if((ret_value = H5VL_link_delete(loc_id, name, NULL, lapl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -633,38 +631,6 @@ herr_t
 H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Group's location */
-    H5L_trav_rmbi_t udata;              /* User data for callback */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*sIiIohi", loc_id, group_name, idx_type, order, n, lapl_id);
-
-    /* Check arguments */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!group_name || !*group_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
-    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
-
-    /* Set up user data for unlink operation */
-    udata.idx_type = idx_type;
-    udata.order = order;
-    udata.n = n;
-    udata.dxpl_id = H5AC_dxpl_id;
-
-    /* Traverse the group hierarchy to remove the link */
-    if(H5G_traverse(&loc, group_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK|H5G_TARGET_MOUNT, H5L_delete_by_idx_cb, &udata, lapl_id, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
-#if 0
     H5L_trav_rmbi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -691,9 +657,9 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     udata.dxpl_id = H5AC_dxpl_id;
 
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_delete(loc_id, group_name, H5L_delete_by_idx_cb, &udata, lapl_id)) < 0)
+    if((ret_value = H5VL_link_delete(loc_id, group_name, &udata, lapl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
-#endif
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ldelete_by_idx() */
@@ -722,15 +688,12 @@ herr_t
 H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
     hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Group location for location to query */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*sxzi", loc_id, name, buf, size, lapl_id);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(H5P_DEFAULT == lapl_id)
@@ -739,9 +702,9 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Get the link value */
-    if(H5L_get_val(&loc, name, buf, size, lapl_id, H5AC_ind_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link value for '%s'", name)
+    /* Get the link info through the VOL */
+    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_VAL, name, buf, size, NULL, lapl_id)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -771,7 +734,6 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, void *buf/*out*/, size_t size,
     hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Group location for location to query */
     H5L_trav_gvbi_t udata;              /* User data for callback */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -780,8 +742,6 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
              lapl_id);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -802,10 +762,9 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     udata.buf = buf;
     udata.size = size;
 
-    /* Traverse the group hierarchy to locate the object to get info about */
-    if(H5G_traverse(&loc, group_name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L_get_val_by_idx_cb, &udata, lapl_id, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
-
+    /* Get the link info through the VOL */
+    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_VAL, group_name, buf, size, &udata, lapl_id)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link val")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -828,15 +787,12 @@ done:
 htri_t
 H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5G_loc_t	loc;
     htri_t ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(H5P_DEFAULT == lapl_id)
@@ -845,9 +801,9 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Check for the existence of the link */
-    if((ret_value = H5L_exists(&loc, name, lapl_id, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+    /* check link existence through the VOL */
+    if(H5VL_link_get(loc_id, H5VL_LINK_EXISTS, name, &ret_value, lapl_id) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -872,15 +828,11 @@ herr_t
 H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
     hid_t lapl_id)
 {
-    H5G_loc_t	loc;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sxi", loc_id, name, linfo, lapl_id);
 
-    /* Check arguments */
-    if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(H5P_DEFAULT == lapl_id)
@@ -889,9 +841,9 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Get the link information */
-    if(H5L_get_info(&loc, name, linfo, lapl_id, H5AC_ind_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+    /* Get the link info through the VOL */
+    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_INFO, name, linfo, NULL, lapl_id)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -917,7 +869,6 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info_t *linfo /*out*/, hid_t lapl_id)
 {
-    H5G_loc_t	loc;                    /* Group location for group to query */
     H5L_trav_gibi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -926,8 +877,6 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
              lapl_id);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -947,9 +896,10 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     udata.dxpl_id = H5AC_ind_dxpl_id;
     udata.linfo = linfo;
 
-    /* Traverse the group hierarchy to locate the object to get info about */
-    if(H5G_traverse(&loc, group_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_info_by_idx_cb, &udata, lapl_id, H5AC_ind_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+    /* Get the link info through the VOL */
+    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_INFO, group_name, 
+                                  linfo, &udata, lapl_id)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1105,7 +1055,6 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id)
 {
-    H5G_loc_t	loc;            /* Location of group */
     H5L_trav_gnbi_t udata;      /* User data for callback */
     ssize_t ret_value;          /* Return value */
 
@@ -1114,8 +1063,6 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
              lapl_id);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -1137,9 +1084,9 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     udata.size = size;
     udata.name_len = -1;
 
-    /* Traverse the group hierarchy to locate the link to get name of */
-    if(H5G_traverse(&loc, group_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_name_by_idx_cb, &udata, lapl_id, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
+    /* Get the link info through the VOL */
+    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_NAME, group_name, &udata, lapl_id)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link name")
 
     /* Set the return value */
     ret_value = udata.name_len;
@@ -1327,18 +1274,6 @@ H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     H5TRACE5("e", "iIiIox*x", grp_id, idx_type, order, op, op_data);
 
     id_type = H5I_get_type(grp_id);
-
-#if 0
-    if (H5I_FILE_PUBLIC == id_type) {
-        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        grp_id = id_wrapper->obj_id;
-        id_type = H5I_get_type(grp_id);
-    }
-    else {
-        grp_id = uid;
-    }
-#endif
 
     /* Check args */
     if(!(H5I_GROUP_PUBLIC == id_type || H5I_FILE_PUBLIC == id_type))
@@ -2312,6 +2247,35 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5L_get_val_by_idx
+ *
+ * Purpose:	Get Value of a link
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5L_get_val_by_idx(H5G_loc_t *loc, const char *name, void *udata, hid_t lapl_id, hid_t dxpl_id)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Traverse the group hierarchy to locate the object to get val about */
+    if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_val_by_idx_cb, 
+                    (H5L_trav_gvbi_t *)udata, lapl_id, dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link val")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_get_val_by_idx() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5L_delete_cb
  *
  * Purpose:	Callback for deleting a link.  This routine
@@ -2440,6 +2404,39 @@ done:
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5L_delete_by_idx_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_delete_by_idx
+ *
+ * Purpose:	Delete a link from a group.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5L_delete_by_idx(H5G_loc_t *loc, const char *name, void *udata, hid_t lapl_id, hid_t dxpl_id)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(loc);
+    HDassert(name && *name);
+
+    /* Traverse the group hierarchy to remove the link */
+    if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK|H5G_TARGET_MOUNT, 
+                    H5L_delete_by_idx_cb, (H5L_trav_rmbi_t *)udata, lapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_delete_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -2802,7 +2799,7 @@ H5L_exists_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
+htri_t
 H5L_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 {
     hbool_t exists = FALSE;     /* Whether the link exists in the group */
@@ -2947,6 +2944,35 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5L_get_info_by_idx
+ *
+ * Purpose:	Get_Info a link from a group.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5L_get_info_by_idx(H5G_loc_t *loc, const char *name, void *udata, hid_t lapl_id, hid_t dxpl_id)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Traverse the group hierarchy to locate the object to get info about */
+    if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_info_by_idx_cb, 
+                    (H5L_trav_gibi_t *)udata, lapl_id, dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_get_info_by_idx() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5L_get_default_lcpl
  *
  * Purpose:	Accessor for the default Link Creation Property List
@@ -3013,6 +3039,35 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_get_name_by_idx_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_get_name_by_idx
+ *
+ * Purpose:	Get name of a link from a group.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5L_get_name_by_idx(H5G_loc_t *loc, const char *name, void *udata, hid_t lapl_id, hid_t dxpl_id)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Traverse the group hierarchy to locate the object to get name about */
+    if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_get_name_by_idx_cb, 
+                    (H5L_trav_gnbi_t *)udata, lapl_id, dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link name")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_get_name_by_idx() */
 
 
 /*-------------------------------------------------------------------------

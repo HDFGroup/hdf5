@@ -395,6 +395,12 @@ test_h5o_refcount(void)
     ret = H5Tcommit2(fid, "datatype", dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit2");
 
+    /* MSC - workaround committed datatypes */
+    ret = H5Tclose(dtype);
+    CHECK(ret, FAIL, "H5Tclose");
+    dtype = H5Topen2(fid, "datatype", H5P_DEFAULT);
+    CHECK(dtype, FAIL, "H5Topen2");
+
     /* Create the data space for the dataset. */
     dims[0] = DIM0;
     dims[1] = DIM1;
@@ -959,6 +965,12 @@ test_h5o_comment(void)
     CHECK(dtype, FAIL, "H5Tcopy");
     ret = H5Tcommit2(fid, "group/datatype", dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit2");
+
+    /* MSC - workaround committed datatypes */
+    ret = H5Tclose(dtype);
+    CHECK(ret, FAIL, "H5Tclose");
+    dtype = H5Topen2(fid, "group/datatype", H5P_DEFAULT);
+    CHECK(dtype, FAIL, "H5Topen2");
 
     /* Putting a comment on the committed data type */
     ret = H5Oset_comment(dtype, dtype_comment);

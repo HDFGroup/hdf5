@@ -256,8 +256,8 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
 
-    if(H5VL_attr_generic(loc_id, H5VL_ATTR_OPEN_BY_IDX, &ret_value, ".", H5_INDEX_CRT_ORDER, 
-                         H5_ITER_INC, (hsize_t)idx, H5P_DEFAULT, H5P_LINK_ACCESS_DEFAULT) < 0)
+    if(H5VL_object_generic(loc_id, H5VL_ATTR_OPEN_BY_IDX, &ret_value, ".", H5_INDEX_CRT_ORDER, 
+                           H5_ITER_INC, (hsize_t)idx, H5P_DEFAULT, H5P_LINK_ACCESS_DEFAULT) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataset access properties")
 
 done:
@@ -284,77 +284,19 @@ done:
     Deprecated in favor of H5Oget_info
 --------------------------------------------------------------------------*/
 int
-H5Aget_num_attrs(hid_t id)
+H5Aget_num_attrs(hid_t loc_id)
 {
-    H5O_loc_t    	*loc;	/* Object location for attribute */
-    void           	*obj;
-    H5VL_id_wrapper_t               *id_wrapper;              /* user id structure */
-    hid_t               loc_id;
-    H5I_type_t          id_type;
-    int			ret_value;
+    H5O_info_t oinfo;
+    int	       ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Is", "i", id);
+    H5TRACE1("Is", "i", loc_id);
 
-    id_type = H5I_get_type(id);
-    /* get the actual ID from an upper ID level */
-    /* MSC - this is a workaround to allow the test suite to pass and
-     at some point needs to be removed once all high level operations
-     that needs to go through the VOL actually go through the VOL*/
-    if (H5I_FILE_PUBLIC == id_type || H5I_GROUP_PUBLIC == id_type ||
-        H5I_DATASET_PUBLIC == id_type || H5I_DATATYPE_PUBLIC == id_type ||
-        H5I_ATTR_PUBLIC == id_type) {
-        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, NULL, "invalid user identifier")
-        loc_id = id_wrapper->obj_id;
-    }
-    else {
-        loc_id = id;
-    }
+    /* Get the group info through the VOL using the location token */
+    if(H5VL_object_get(loc_id, H5VL_OBJECT_GET_INFO, &oinfo, NULL) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
-    /* check arguments */
-    if(H5I_BADID == H5I_get_type(loc_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad location ID")
-    if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(NULL == (obj = H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADATOM, FAIL, "illegal object atom")
-    switch(H5I_get_type (loc_id)) {
-        case H5I_DATASET:
-            if(NULL == (loc = H5D_oloc((H5D_t*)obj)))
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get location for object")
-            break;
-
-        case H5I_DATATYPE:
-            if(NULL == (loc = H5T_oloc((H5T_t*)obj)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "target datatype is not committed")
-            break;
-
-        case H5I_GROUP:
-            if(NULL == (loc = H5G_oloc((H5G_t*)obj)))
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get location for object")
-            break;
-
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_FILE:
-        case H5I_DATASPACE:
-        case H5I_ATTR:
-        case H5I_REFERENCE:
-        case H5I_VFL:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "inappropriate attribute target")
-    } /*lint !e788 All appropriate cases are covered */
-
-    /* Look up the # of attributes for the object */
-    if((ret_value = H5O_attr_count(loc, H5AC_ind_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "can't get attribute count for object")
+    ret_value = oinfo.num_attrs;
 
 done:
     FUNC_LEAVE_API(ret_value)
