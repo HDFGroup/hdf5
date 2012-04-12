@@ -420,6 +420,7 @@ H5D_contig_construct(H5F_t *f, H5D_t *dset)
     hsize_t nelmts;                     /* Number of elements in dataspace */
     size_t dt_size;                     /* Size of datatype */
     hsize_t tmp_size;                   /* Temporary holder for raw data size */
+    size_t tmp_sieve_buf_size;          /* Temporary holder for sieve buffer size */
     hsize_t dim[H5O_LAYOUT_NDIMS];	/* Current size of data in elements */
     hsize_t max_dim[H5O_LAYOUT_NDIMS];  /* Maximum size of data in elements */
     int ndims;                          /* Rank of dataspace */
@@ -464,8 +465,15 @@ H5D_contig_construct(H5F_t *f, H5D_t *dset)
     /* Assign the dataset's contiguous storage size */
     dset->shared->layout.storage.u.contig.size = tmp_size;
 
-    /* Get the sieve buffer size for this dataset */
-    dset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(f);
+    /* Get the sieve buffer size for the file */
+    tmp_sieve_buf_size = H5F_SIEVE_BUF_SIZE(f);
+
+    /* Adjust the sieve buffer size to the smaller one between the dataset size and the buffer size
+     * from the file access property. (SLU - 2012/3/30) */
+    if(tmp_size < tmp_sieve_buf_size)
+        dset->shared->cache.contig.sieve_buf_size = tmp_size;
+    else
+        dset->shared->cache.contig.sieve_buf_size = tmp_sieve_buf_size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -965,6 +973,7 @@ H5D_contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
             /* Allocate room for the data sieve buffer */
             if(NULL == (dset_contig->sieve_buf = H5FL_BLK_MALLOC(sieve_buf, dset_contig->sieve_buf_size)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed")
+
 #ifdef H5_CLEAR_MEMORY
 if(dset_contig->sieve_size > len)
     HDmemset(dset_contig->sieve_buf + len, 0, (dset_contig->sieve_size - len));

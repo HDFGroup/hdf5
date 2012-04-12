@@ -1,4 +1,4 @@
-HDF5 version 1.8.10-snap0 currently under development
+HF5 version 1.8.10-snap0 currently under development
 ================================================================================
 
 INTRODUCTION
@@ -60,7 +60,11 @@ New Features
     
     Library
     -------
-    - None
+    - The data sieve buffer size was for all the datasets in the file.  It
+      could waste memory if any dataset size is smaller than the sieve buffer
+      size.  Now the library picks the smaller one between the dataset size
+      and the sieve buffer size from the file access property. See Issue 7934.
+      (SLU - 2012/4/11)
  
     Parallel Library
     ----------------
