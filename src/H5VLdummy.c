@@ -69,15 +69,16 @@ H5VL_class_t H5VL_dummy_g = {
         NULL,                                   /* read */
         NULL,                                   /* write */
         NULL,                                   /* delete */
+        NULL,                                   /* delete */
         NULL                                    /* close */
     },
     {                                           /* datatype_cls */
-        NULL,            /* commit */
-        NULL               /* open */
+        NULL,                                   /* commit */
+        NULL                                    /* open */
     },
     {                                           /* dataset_cls */
-        NULL,             /* create */
-        NULL,               /* open */
+        NULL,                                   /* create */
+        NULL,                                   /* open */
         NULL,
         NULL,
         NULL,
@@ -85,11 +86,12 @@ H5VL_class_t H5VL_dummy_g = {
         NULL
     },
     {                                           /* file_cls */
-        H5VL_dummy_file_create,                /* create */
-        H5VL_dummy_file_open,                  /* open */
+        H5VL_dummy_file_create,                 /* create */
+        H5VL_dummy_file_open,                   /* open */
         NULL,
         NULL,
-        H5VL_dummy_file_close                  /* close */
+        NULL,
+        H5VL_dummy_file_close                   /* close */
     },
     {                                           /* group_cls */
         NULL,
@@ -105,7 +107,6 @@ H5VL_class_t H5VL_dummy_g = {
     },
     {                                           /* object_cls */
         NULL,
-        NULL,                                   /* move */
         NULL,                                   /* copy */
         NULL,
         NULL,

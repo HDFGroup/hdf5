@@ -104,6 +104,8 @@ static herr_t H5VL_native_link_get(hid_t loc_id, H5VL_link_get_t get_type, va_li
 static herr_t H5VL_native_link_delete(hid_t loc_id, const char *name, void *udata, hid_t lapl_id);
 
 static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id);
+static herr_t H5VL_native_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
+                                      const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id );
 static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, va_list arguments);
 static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, va_list arguments);
 static herr_t H5VL_native_object_generic(hid_t id, H5VL_object_generic_t generic_type, va_list arguments);
@@ -157,8 +159,7 @@ H5VL_class_t H5VL_native_g = {
     },
     {                                           /* object_cls */
         H5VL_native_object_open,                /* open */
-        NULL,                                   /* move */
-        NULL,                                   /* copy */
+        H5VL_native_object_copy,                /* copy */
         H5VL_native_object_lookup,              /* lookup */
         H5VL_native_object_get,                 /* get */
         H5VL_native_object_generic,             /* generic */
@@ -2334,6 +2335,43 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_object_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_object_copy
+ *
+ * Purpose:	Copys a object inside a native h5 file.
+ *
+ * Return:	Success:	object id. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL_native_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
+                        const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id )
+{
+    H5G_loc_t	src_loc;                /* Source object group location */
+    H5G_loc_t	dst_loc;                /* Destination group location */
+    hid_t       ret_value = FAIL;
+    
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check arguments */
+    if(H5G_loc(src_loc_id, &src_loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(H5G_loc(dst_loc_id, &dst_loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    /* Open the object */
+    if((ret_value = H5O_copy(&src_loc, src_name, &dst_loc, dst_name, ocpypl_id, lcpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "unable to copy object")    
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_object_copy() */
 
 
 /*-------------------------------------------------------------------------

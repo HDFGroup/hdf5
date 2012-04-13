@@ -94,10 +94,12 @@ H5_DLL herr_t H5VL_link_get(hid_t loc_id, H5VL_link_get_t get_type, ...);
 H5_DLL herr_t H5VL_link_delete(hid_t loc_id, const char *name, void *udata, hid_t lapl_id);
 
 H5_DLL hid_t H5VL_object_open_by_loc(hid_t uid, void *obj_loc, hid_t lapl_id);
-H5_DLL herr_t H5VL_object_close(hid_t uid);
+H5_DLL herr_t H5VL_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
+                               const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id );
 H5_DLL herr_t H5VL_object_get(hid_t uid, H5VL_object_get_t get_type, ...);
 H5_DLL herr_t H5VL_object_generic(hid_t id, H5VL_object_generic_t generic_type, ...);
 H5_DLL herr_t H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, ...);
+H5_DLL herr_t H5VL_object_close(hid_t uid);
 
 H5_DLL herr_t H5VL_fapl_open(struct H5P_genplist_t *plist, H5VL_class_t *vol_cls);
 H5_DLL herr_t H5VL_fapl_close(H5VL_class_t *vol_cls);

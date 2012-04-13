@@ -2049,7 +2049,6 @@ H5VL_link_get(hid_t uid, H5VL_link_get_t get_type, ...)
 {
     H5VL_id_wrapper_t *id_wrapper;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
-    H5I_type_t        id_type;               /* Type of ID */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2126,8 +2125,8 @@ done:
 hid_t
 H5VL_object_open_by_loc(hid_t uid, void *obj_loc, hid_t lapl_id)
 {
-    H5VL_id_wrapper_t               *id_wrapper1;             /* user id structure of the location where the object will be opend */
-    H5VL_id_wrapper_t               *id_wrapper2;             /* user id structure of new opend object*/
+    H5VL_id_wrapper_t   *id_wrapper1;             /* user id structure of the location where the object will be opend */
+    H5VL_id_wrapper_t   *id_wrapper2;             /* user id structure of new opend object*/
     H5I_type_t          id_type;
     hid_t               object_id;               /* actual object ID */
     hid_t		ret_value;              /* Return value */
@@ -2175,6 +2174,49 @@ H5VL_object_open_by_loc(hid_t uid, void *obj_loc, hid_t lapl_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_open_by_loc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_object_copy
+ *
+ * Purpose:	Copies an object to another destination through the VOL
+ *
+ * Return:	Success:	Non Negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
+                 const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id )
+{
+    H5VL_id_wrapper_t   *id_wrapper1;             /* user id structure of the location where the object will be opend */
+    H5VL_id_wrapper_t   *id_wrapper2;             /* user id structure of new opend object*/
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* unwrap the IDs and return an error if they belong to different VOL plugins */
+    if(NULL == (id_wrapper1 = (H5VL_id_wrapper_t *)H5I_object(src_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+    if(NULL == (id_wrapper2 = (H5VL_id_wrapper_t *)H5I_object(dst_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+
+    if (id_wrapper1->vol_plugin != id_wrapper2->vol_plugin)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be copied")
+
+    if(NULL == id_wrapper1->vol_plugin->object_cls.copy)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object copy' method")
+    if((ret_value = (id_wrapper1->vol_plugin->object_cls.copy)
+        (id_wrapper1->obj_id, src_name, id_wrapper2->obj_id, dst_name, ocpypl_id, lcpl_id)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "copy failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_object_copy() */
 
 
 /*-------------------------------------------------------------------------

@@ -45,7 +45,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"         /* Property lists                       */
-
+#include "H5VLprivate.h"	/* VOL          		  	*/
 
 /****************/
 /* Local Macros */
@@ -205,64 +205,11 @@ herr_t
 H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id)
 {
-    H5G_loc_t	loc;                    /* Source group group location */
-    H5G_loc_t	src_loc;                /* Source object group location */
-    H5G_loc_t	dst_loc;                /* Destination group location */
-
-    /* for opening the destination object */
-    H5G_name_t  src_path;               /* Opened source object hier. path */
-    H5O_loc_t   src_oloc;               /* Opened source object object location */
-    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
-    hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
-
     herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name,
              ocpypl_id, lcpl_id);
-
-    /* Check arguments */
-    if(H5G_loc(src_loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(H5G_loc(dst_loc_id, &dst_loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!src_name || !*src_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no source name specified")
-    if(!dst_name || !*dst_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
-
-    /* check if destination name already exists */
-    {
-        H5G_name_t  tmp_path;
-        H5O_loc_t   tmp_oloc;
-        H5G_loc_t   tmp_loc;
-
-        /* Set up group location */
-        tmp_loc.oloc = &tmp_oloc;
-        tmp_loc.path = &tmp_path;
-        H5G_loc_reset(&tmp_loc);
-
-        /* Check if object already exists in destination */
-        if(H5G_loc_find(&dst_loc, dst_name, &tmp_loc, H5P_DEFAULT, H5AC_dxpl_id) >= 0) {
-            H5G_name_free(&tmp_path);
-            HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "destination object already exists")
-        } /* end if */
-    }
-
-    /* Set up opened group location to fill in */
-    src_loc.oloc = &src_oloc;
-    src_loc.path = &src_path;
-    H5G_loc_reset(&src_loc);
-
-    /* Find the source object to copy */
-    if(H5G_loc_find(&loc, src_name, &src_loc/*out*/, H5P_DEFAULT, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found")
-    loc_found = TRUE;
-
-    /* Open source object's object header */
-    if(H5O_open(&src_oloc) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
-    obj_open = TRUE;
 
     /* Get correct property lists */
     if(H5P_DEFAULT == lcpl_id) {
@@ -280,8 +227,76 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         if(TRUE != H5P_isa_class(ocpypl_id, H5P_OBJECT_COPY))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not object copy property list")
 
+    /* Open the object through the VOL */
+    if((ret_value = H5VL_object_copy(src_loc_id, src_name, dst_loc_id, dst_name, 
+                                     ocpypl_id, lcpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Ocopy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_copy
+ *
+ * Purpose:     private version of H5Ocopy
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5O_copy(H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc, const char *dst_name,
+                hid_t ocpypl_id, hid_t lcpl_id)
+{
+    H5G_loc_t	src_loc;                /* Source object group location */
+    /* for opening the destination object */
+    H5G_name_t  src_path;               /* Opened source object hier. path */
+    H5O_loc_t   src_oloc;               /* Opened source object object location */
+    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
+    hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
+
+    herr_t      ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check if destination name already exists */
+    {
+        H5G_name_t  tmp_path;
+        H5O_loc_t   tmp_oloc;
+        H5G_loc_t   tmp_loc;
+
+        /* Set up group location */
+        tmp_loc.oloc = &tmp_oloc;
+        tmp_loc.path = &tmp_path;
+        H5G_loc_reset(&tmp_loc);
+
+        /* Check if object already exists in destination */
+        if(H5G_loc_find(dst_loc, dst_name, &tmp_loc, H5P_DEFAULT, H5AC_dxpl_id) >= 0) {
+            H5G_name_free(&tmp_path);
+            HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "destination object already exists")
+        } /* end if */
+    }
+
+    /* Set up opened group location to fill in */
+    src_loc.oloc = &src_oloc;
+    src_loc.path = &src_path;
+    H5G_loc_reset(&src_loc);
+
+    /* Find the source object to copy */
+    if(H5G_loc_find(loc, src_name, &src_loc/*out*/, H5P_DEFAULT, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found")
+    loc_found = TRUE;
+
+    /* Open source object's object header */
+    if(H5O_open(&src_oloc) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+    obj_open = TRUE;
+
     /* Do the actual copying of the object */
-    if(H5O_copy_obj(&src_loc, &dst_loc, dst_name, ocpypl_id, lcpl_id) < 0)
+    if(H5O_copy_obj(&src_loc, dst_loc, dst_name, ocpypl_id, lcpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
@@ -290,8 +305,8 @@ done:
     if(obj_open)
         H5O_close(&src_oloc);
 
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Ocopy() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_copy() */
 
 
 /*-------------------------------------------------------------------------

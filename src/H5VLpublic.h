@@ -179,8 +179,6 @@ typedef struct H5VL_link_class_t {
 /* H5O routines */
 typedef struct H5VL_object_class_t {
     hid_t  (*open)  (hid_t loc_id, void *obj_loc, hid_t lapl_id);
-    herr_t (*move)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
-                     const char *dest_name, hid_t lcpl, hid_t lapl);
     herr_t (*copy)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name,
                      hid_t ocpypl_id, hid_t lcpl_id );
     herr_t (*lookup)(hid_t loc_id, H5VL_object_lookup_t lookup_type, va_list arguments);
