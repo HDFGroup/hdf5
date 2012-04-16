@@ -1917,6 +1917,30 @@ static herr_t    H5_INTERFACE_INIT_FUNC(void);
     H5_PUSH_FUNC                                                              \
     {
 
+/* Use this macro for all "normal" staticly-scoped functions */
+#define FUNC_ENTER_STATIC {                                                   \
+    FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
+    H5_PUSH_FUNC                                                              \
+    {
+
+/* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
+#define FUNC_ENTER_STATIC_NOERR {                                             \
+    FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(FUNC));                                 \
+    H5_PUSH_FUNC                                                              \
+    {
+
+/* Use the following macro as replacement for the FUNC_ENTER_STATIC
+ * macro when the function needs to set up a metadata tag. */
+#define FUNC_ENTER_STATIC_TAG(dxpl_id, tag, err) {                            \
+    haddr_t prev_tag = HADDR_UNDEF;                                           \
+    hid_t tag_dxpl_id = dxpl_id;                                              \
+                                                                              \
+    FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
+    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag) < 0)                             \
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    H5_PUSH_FUNC                                                              \
+    {
+
 /* Use this macro for all non-API functions, which propagate errors, but don't issue them */
 #define FUNC_ENTER_NOAPI_NOERR {                               \
     FUNC_ENTER_COMMON_NOERR(!H5_IS_API(FUNC));               \
@@ -2160,11 +2184,11 @@ extern hbool_t H5_api_entered_g;    /* Has library already been entered through 
     {{{
 
 /* Macros for substituting the package name */
-#define FUNC_ENTER_STATIC  H5_PACKAGE_ENTER(H5_MY_PKG, H5_MY_PKG_INIT, REG)
-#define FUNC_ENTER_PKGINIT  H5_PACKAGE_ENTER(H5_MY_PKG, H5_MY_PKG_INIT, INIT)
-#define FUNC_ENTER_PKG    H5_PACKAGE_ENTER(H5_MY_PKG, H5_MY_PKG_INIT, REG)
-#define FUNC_ENTER_PRIV    H5_PRIVATE_ENTER(H5_MY_PKG, H5_MY_PKG_INIT)
-#define FUNC_ENTER_PUB    H5_PUBLIC_ENTER(H5_MY_PKG, H5_MY_PKG_INIT)
+#define FUNC_ENT_STATIC  H5_PACKAGE_ENTER(H5_MY_PKG, H5_MY_PKG_INIT, REG)
+#define FUNC_ENT_PKGINIT  H5_PACKAGE_ENTER(H5_MY_PKG, H5_MY_PKG_INIT, INIT)
+#define FUNC_ENT_PKG    H5_PACKAGE_ENTER(H5_MY_PKG, H5_MY_PKG_INIT, REG)
+#define FUNC_ENT_PRIV    H5_PRIVATE_ENTER(H5_MY_PKG, H5_MY_PKG_INIT)
+#define FUNC_ENT_PUB    H5_PUBLIC_ENTER(H5_MY_PKG, H5_MY_PKG_INIT)
 
 /* Macros for substituting a function prefix */
 #define FUNC_PREFIX_STATIC  static
@@ -2190,7 +2214,7 @@ func                        \
 {                        \
     ret_typ ret_value = ret_init;                \
     H5_GLUE(FUNC_ERR_VAR_, use_err)(ret_typ, err)            \
-    H5_GLUE(FUNC_ENTER_, scope)
+    H5_GLUE(FUNC_ENT_, scope)
 
 /* Macros for label when a function initialization can fail */
 #define H5_PRIV_YES_FUNC_INIT_FAILED func_init_failed:

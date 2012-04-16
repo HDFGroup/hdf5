@@ -61,7 +61,7 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_layout_set_io_ops
+ * Function:	H5D__layout_set_io_ops
  *
  * Purpose:	Set the I/O operation function pointers for a dataset,
  *              according to the dataset's layout
@@ -74,11 +74,11 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_layout_set_io_ops(const H5D_t *dataset)
+H5D__layout_set_io_ops(const H5D_t *dataset)
 {
     herr_t ret_value = SUCCEED;		/* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(dataset);
@@ -112,11 +112,11 @@ H5D_layout_set_io_ops(const H5D_t *dataset)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_layout_set_io_ops() */
+} /* end H5D__layout_set_io_ops() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D_layout_meta_size
+ * Function:    H5D__layout_meta_size
  *
  * Purpose:     Returns the size of the raw message in bytes except raw data
  *              part for compact dataset.  This function doesn't take into
@@ -131,11 +131,11 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include_compact_data)
+H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include_compact_data)
 {
     size_t                  ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -177,11 +177,11 @@ H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_layout_meta_size() */
+} /* end H5D__layout_meta_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_layout_oh_create
+ * Function:	H5D__layout_oh_create
  *
  * Purpose:	Create layout/pline/efl information for dataset
  *
@@ -194,7 +194,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
+H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
     hid_t dapl_id)
 {
     H5O_layout_t        *layout;         /* Dataset's layout information */
@@ -202,7 +202,7 @@ H5D_layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, dset->oloc.addr, FAIL)
+    FUNC_ENTER_PACKAGE_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
     /* Sanity checking */
     HDassert(file);
@@ -234,7 +234,7 @@ H5D_layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
      * allocation until later.
      */
     if(fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY)
-        if(H5D_alloc_storage(dset, dxpl_id, H5D_ALLOC_CREATE, FALSE, NULL) < 0)
+        if(H5D__alloc_storage(dset, dxpl_id, H5D_ALLOC_CREATE, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
 
     /* Update external storage message, if it's used */
@@ -289,7 +289,7 @@ H5D_layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
 
     /* Create layout message */
     /* (Don't make layout message constant unless allocation time is early, since space may not be allocated) */
-    /* (Note: this is relying on H5D_alloc_storage not calling H5O_msg_write during dataset creation) */
+    /* (Note: this is relying on H5D__alloc_storage not calling H5O_msg_write during dataset creation) */
     if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, ((fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type) ? H5O_MSG_FLAG_CONSTANT : 0), 0, layout) < 0)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
 
@@ -297,17 +297,17 @@ done:
     /* Error cleanup */
     if(ret_value < 0) {
         if(dset->shared->layout.type == H5D_CHUNKED && layout_init) {
-            if(H5D_chunk_dest(file, dxpl_id, dset) < 0)
+            if(H5D__chunk_dest(file, dxpl_id, dset) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
         } /* end if */
     } /* end if */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-} /* end H5D_layout_oh_create() */
+} /* end H5D__layout_oh_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_layout_oh_read
+ * Function:	H5D__layout_oh_read
  *
  * Purpose:	Read layout/pline/efl information for dataset
  *
@@ -320,12 +320,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t *plist)
+H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t *plist)
 {
     htri_t msg_exists;                  /* Whether a particular type of message exists */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
     HDassert(dataset);
@@ -432,7 +432,7 @@ H5D_layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t 
 
         case H5D_CHUNKED:
             /* Initialize the chunk cache for the dataset */
-            if(H5D_chunk_init(dataset->oloc.file, dxpl_id, dataset, dapl_id) < 0)
+            if(H5D__chunk_init(dataset->oloc.file, dxpl_id, dataset, dapl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize chunk cache")
             break;
 
@@ -447,11 +447,11 @@ H5D_layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t 
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_layout_oh_read() */
+} /* end H5D__layout_oh_read() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_layout_oh_write
+ * Function:	H5D__layout_oh_write
  *
  * Purpose:	Write layout/pline/efl information for dataset
  *
@@ -464,11 +464,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_layout_oh_write(H5D_t *dataset, hid_t dxpl_id, H5O_t *oh, unsigned update_flags)
+H5D__layout_oh_write(H5D_t *dataset, hid_t dxpl_id, H5O_t *oh, unsigned update_flags)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
     HDassert(dataset);
@@ -480,5 +480,5 @@ H5D_layout_oh_write(H5D_t *dataset, hid_t dxpl_id, H5O_t *oh, unsigned update_fl
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_layout_oh_write() */
+} /* end H5D__layout_oh_write() */
 

@@ -76,7 +76,7 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_print_stats
+ * Function:	H5T__print_stats
  *
  * Purpose:	Print statistics about a conversion path.  Statistics are
  *		printed only if all the following conditions are true:
@@ -102,14 +102,14 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_print_stats(H5T_path_t UNUSED * path, int UNUSED * nprint/*in,out*/)
+H5T__print_stats(H5T_path_t UNUSED * path, int UNUSED * nprint/*in,out*/)
 {
 #ifdef H5T_DEBUG
     hsize_t	nbytes;
     char	bandwidth[32];
 #endif
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef H5T_DEBUG
     if(H5DEBUG(T) && path->stats.ncalls > 0) {
@@ -143,7 +143,7 @@ H5T_print_stats(H5T_path_t UNUSED * path, int UNUSED * nprint/*in,out*/)
     }
 #endif
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5T_print_stats() */
+} /* end H5T__print_stats() */
 
 
 /*-------------------------------------------------------------------------
