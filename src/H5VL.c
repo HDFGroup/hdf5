@@ -365,7 +365,6 @@ H5VL_register(const void *_cls, size_t size, hbool_t app_ref)
 
     /* Check arguments */
     HDassert(cls);
-    /*MSC - check required funciton pointers */
 
     /* Copy the class structure so the caller can reuse or free it */
     if(NULL == (saved = (H5VL_class_t *)H5MM_malloc(size)))

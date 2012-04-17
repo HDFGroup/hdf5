@@ -152,7 +152,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
         if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 
-    /* Open the object through the VOL */
+    /* commite the datatype through the VOL */
     if((ret_value = H5VL_datatype_commit(loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 done:

@@ -20,6 +20,8 @@
 #ifndef _H5VLpublic_H
 #define _H5VLpublic_H
 
+#include "stdarg.h"
+
 #include "H5public.h"
 #include "H5Fpublic.h"
 #include "H5Lpublic.h"
@@ -201,8 +203,16 @@ typedef struct H5VL_class_t {
     H5VL_object_class_t        object_cls;
 } H5VL_class_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Function prototypes */
 H5_DLL hid_t H5VLregister(const H5VL_class_t *cls);
 H5_DLL herr_t H5VLunregister(hid_t driver_id);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _H5VLpublic_H */

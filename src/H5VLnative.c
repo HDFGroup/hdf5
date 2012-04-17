@@ -1929,15 +1929,19 @@ H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, va_list arguments
                 if(H5G_loc(obj_id, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
-                if(!H5F_addr_defined(obj_loc->oloc->addr))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no address supplied")
+                if (NULL == obj_loc) {
+                    /* Retrieve the group's information */
+                    if(H5G__obj_info(loc.oloc, grp_info, H5AC_ind_dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+                }
+                else {
+                    /* Retrieve the group's information */
+                    if(H5G__obj_info(obj_loc->oloc, grp_info, H5AC_ind_dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
-                /* Retrieve the group's information */
-                if(H5G__obj_info(obj_loc->oloc, grp_info, H5AC_ind_dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
-
-                if(H5G_loc_free(obj_loc) < 0)
-                    HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+                    if(H5G_loc_free(obj_loc) < 0)
+                        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+                }
                 break;
             }
         default:

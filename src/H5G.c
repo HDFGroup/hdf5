@@ -470,8 +470,6 @@ herr_t
 H5Gget_info(hid_t loc_id, H5G_info_t *grp_info)
 {
     H5I_type_t  id_type;                /* Type of ID */
-    void        *location = NULL;       /* a pointer to VOL specific token that indicates 
-                                           the location of the object */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -484,19 +482,11 @@ H5Gget_info(hid_t loc_id, H5G_info_t *grp_info)
     if(!grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-    /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP, &location) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
-
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_group_get(loc_id, H5VL_GROUP_GET_INFO, grp_info, location)) < 0)
+    if((ret_value = H5VL_group_get(loc_id, H5VL_GROUP_GET_INFO, grp_info, NULL)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
-    if (NULL != location) {
-        free (location);
-        location = NULL;
-    }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_info() */
 

@@ -236,7 +236,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+static hid_t
 H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fapl_id)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -260,7 +260,7 @@ H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fapl_id)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+static hid_t
 H5VL_dummy_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -284,7 +284,7 @@ H5VL_dummy_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5VL_dummy_file_close(hid_t file_id)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR

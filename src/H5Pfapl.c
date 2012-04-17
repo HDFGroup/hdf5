@@ -2204,6 +2204,46 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pset_vol
+ *
+ * Purpose:	Set the file vol plugin (VOL_ID) for a file access 
+ *              property list (PLIST_ID)
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_vol(hid_t plist_id, hid_t new_vol_id)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    H5VL_class_t *vol_cls;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", plist_id, new_vol_id);
+
+    /* Check arguments */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(new_vol_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file vol ID")
+
+    /* Set the vol */
+    if(H5P_set_vol(plist, vol_cls) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_vol() */
+
+
+/*-------------------------------------------------------------------------
  * Function: H5Pset_file_image
  *
  * Purpose:     Sets the initial file image. Some file drivers can initialize 
