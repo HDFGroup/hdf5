@@ -66,7 +66,11 @@ New Features
       routines: H5Padd_merge_committed_dtype_path(),
       H5Pfree_merge_committed_dtype_paths(), H5Pset_mcdt_search_cb() and
       H5_DLL herr_t H5Pget_mcdt_search_cb().  (QAK - 2012/03/30)
-    - None
+    - Added new feature which allows working with files in memory in the 
+      same ways files are worked with on disk. New API routines include 
+      H5Pset_file_image, H5Pget_file_image, H5Pset_file_image_callbacks, 
+      H5Pget_file_image_callbacks, H5Fget_file_image, and 
+      H5LTopen_file_image. (QAK - 2012/04/17)
  
     Parallel Library
     ----------------
