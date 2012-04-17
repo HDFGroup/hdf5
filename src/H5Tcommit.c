@@ -186,7 +186,7 @@ H5T__commit_named(const H5G_loc_t *loc, const char *name, H5T_t *dt,
 {
     H5O_obj_create_t ocrt_info;             /* Information for object creation */
     H5T_obj_create_t tcrt_info;             /* Information for named datatype creation */
-    H5T_state_t old_state = H5T_STATE_TRANSIENT;        /* The state of the datatype before H5T_commit. */
+    H5T_state_t old_state = H5T_STATE_TRANSIENT;        /* The state of the datatype before H5T__commit. */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -299,7 +299,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 
     /* Commit the type */
-    if(H5T_commit(loc.oloc->file, type, tcpl_id, H5AC_dxpl_id) < 0)
+    if(H5T__commit(loc.oloc->file, type, tcpl_id, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* Release the datatype's object header */
@@ -321,7 +321,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_commit
+ * Function:	H5T__commit
  *
  * Purpose:	Commit a type, giving it a name and causing it to become
  *		immutable.
@@ -334,7 +334,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id)
+H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id)
 {
     H5O_loc_t   temp_oloc;              /* Temporary object header location */
     H5G_name_t  temp_path;              /* Temporary path */
@@ -342,7 +342,7 @@ H5T_commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id)
     size_t      dtype_size;             /* Size of the datatype message */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
     HDassert(type);
@@ -439,7 +439,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5T_commit() */
+} /* H5T__commit() */
 
 
 /*-------------------------------------------------------------------------

@@ -34,7 +34,7 @@
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg   */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5D_init_deprec_interface
+#define H5_INTERFACE_INIT_FUNC	H5D__init_deprec_interface
 
 
 /***********/
@@ -66,7 +66,7 @@
 /********************/
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
+static herr_t H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
@@ -88,9 +88,9 @@ static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 
 /*--------------------------------------------------------------------------
 NAME
-   H5D_init_deprec_interface -- Initialize interface-specific information
+   H5D__init_deprec_interface -- Initialize interface-specific information
 USAGE
-    herr_t H5D_init_deprec_interface()
+    herr_t H5D__init_deprec_interface()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -99,12 +99,12 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5D_init_deprec_interface(void)
+H5D__init_deprec_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI(H5D_init())
-} /* H5D_init_deprec_interface() */
+} /* H5D__init_deprec_interface() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
@@ -293,7 +293,7 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 
     /* Increase size */
-    if(H5D_extend(dset, size, H5AC_dxpl_id) < 0)
+    if(H5D__extend(dset, size, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset")
 
 done:
@@ -302,7 +302,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_extend
+ * Function:	H5D__extend
  *
  * Purpose:	Increases the size of a dataset.
  *
@@ -314,7 +314,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
+H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
 {
     htri_t changed;                     /* Flag to indicate that the dataspace was successfully extended */
     H5S_t *space;                       /* Dataset's dataspace */
@@ -323,14 +323,14 @@ H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
     H5O_fill_t *fill;                   /* Dataset's fill value */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(dataset);
     HDassert(size);
 
     /* Check if the filters in the DCPL will need to encode, and if so, can they? */
-    if(H5D_check_filters(dataset) < 0)
+    if(H5D__check_filters(dataset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't apply filters")
 
     /*
@@ -352,26 +352,26 @@ H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
     if(changed) {
         /* Update the index values for the cached chunks for this dataset */
         if(H5D_CHUNKED == dataset->shared->layout.type) {
-            if(H5D_chunk_set_info(dataset) < 0)
+            if(H5D__chunk_set_info(dataset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to update # of chunks")
-            if(H5D_chunk_update_cache(dataset, dxpl_id) < 0)
+            if(H5D__chunk_update_cache(dataset, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
         } /* end if */
 
 	/* Allocate space for the new parts of the dataset, if appropriate */
         fill = &dataset->shared->dcpl_cache.fill;
         if(fill->alloc_time == H5D_ALLOC_TIME_EARLY)
-            if(H5D_alloc_storage(dataset, dxpl_id, H5D_ALLOC_EXTEND, FALSE,
+            if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_EXTEND, FALSE,
                     curr_dims) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
 
         /* Mark the dataspace as dirty, for later writing to the file */
-        if(H5D_mark(dataset, dxpl_id, H5D_MARK_SPACE) < 0)
+        if(H5D__mark(dataset, dxpl_id, H5D_MARK_SPACE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")
     } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_extend() */
+} /* end H5D__extend() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

@@ -306,9 +306,9 @@ static int without_hardware_g = 0;
      *00000111,..., until 11111111.*/                                                           \
     memset(tmp1, 0, SRC_SIZE);                                                                  \
     memset(tmp2, 0, SRC_SIZE);                                                                  \
-    H5T_bit_set (tmp2, SRC_PREC-1, (size_t)1, TRUE);       /*the negative value*/                       \
+    H5T__bit_set (tmp2, SRC_PREC-1, (size_t)1, TRUE);       /*the negative value*/                       \
     for(n=0; n<SRC_MANT_DIG-1; n++) {                                                           \
-        H5T_bit_set (tmp1, n, (size_t)1, TRUE);            /*turn on 1 bit each time*/                  \
+        H5T__bit_set (tmp1, n, (size_t)1, TRUE);            /*turn on 1 bit each time*/                  \
         CHANGE_ORDER(tmp1, SRC_ORDR, SRC_SIZE);    /*change order for big endian*/              \
         memcpy(buf_p, tmp1, SRC_SIZE);                                                          \
         memcpy(saved_p, tmp1, SRC_SIZE);                                                        \
@@ -317,7 +317,7 @@ static int without_hardware_g = 0;
         saved_p += SRC_SIZE;                                                                    \
                                                                                                 \
         /*negative values*/                                                                     \
-        H5T_bit_set (tmp2, n, (size_t)1, TRUE);                                                         \
+        H5T__bit_set (tmp2, n, (size_t)1, TRUE);                                                         \
         CHANGE_ORDER(tmp2, SRC_ORDR, SRC_SIZE);                                                 \
         memcpy(buf_p, tmp2, SRC_SIZE);                                                          \
         memcpy(saved_p, tmp2, SRC_SIZE);                                                        \
@@ -353,7 +353,7 @@ static int without_hardware_g = 0;
     buf_p = BUF;                                                                                \
                                                                                                 \
     /* +0 */                                                                                    \
-    H5T_bit_set(value, (size_t)0, SRC_PREC, FALSE);                                                     \
+    H5T__bit_set(value, (size_t)0, SRC_PREC, FALSE);                                                     \
     memcpy(buf_p, value, SRC_SIZE*sizeof(unsigned char));                                       \
     buf_p += SRC_SIZE;                                                                          \
                                                                                                 \
@@ -361,7 +361,7 @@ static int without_hardware_g = 0;
         if(n==1) {                                                                              \
             memset(value, 0, SRC_SIZE*sizeof(unsigned char));                                   \
             /* -0 */                                                                            \
-            H5T_bit_set(value, (size_t)(SRC_PREC - 1), (size_t)1, TRUE);                                            \
+            H5T__bit_set(value, (size_t)(SRC_PREC - 1), (size_t)1, TRUE);                                            \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);/*change order for big endian*/             \
             HDmemcpy(buf_p, value, SRC_SIZE*sizeof(unsigned char));                               \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);/*change back the order for bit operation*/ \
@@ -369,21 +369,21 @@ static int without_hardware_g = 0;
         }                                                                                       \
                                                                                                 \
         /* +/-infinity */                                                                       \
-        H5T_bit_set(value, (size_t)(SRC_MANT_DIG - 1), SRC_PREC-SRC_MANT_DIG, TRUE);                        \
+        H5T__bit_set(value, (size_t)(SRC_MANT_DIG - 1), SRC_PREC-SRC_MANT_DIG, TRUE);                        \
         CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);    /*change order for big endian*/             \
         HDmemcpy(buf_p, value, SRC_SIZE*sizeof(unsigned char));                                   \
         CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);    /*change back the order for bit operation*/ \
         buf_p += SRC_SIZE;                                                                      \
                                                                                                 \
         /* +/-SNaN */                                                                           \
-        H5T_bit_set(value, (size_t)0, (size_t)1, TRUE);                                                         \
+        H5T__bit_set(value, (size_t)0, (size_t)1, TRUE);                                                         \
         CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);    /*change order for big endian*/             \
         HDmemcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                   \
         CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);    /*change back the order for bit operation*/ \
         buf_p += SRC_SIZE;                                                                      \
                                                                                                 \
         /* +/-QNaN */                                                                           \
-        H5T_bit_set(value, (size_t)(SRC_MANT_DIG - 2), (size_t)1, TRUE);                                            \
+        H5T__bit_set(value, (size_t)(SRC_MANT_DIG - 2), (size_t)1, TRUE);                                            \
         CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);    /*change order for big endian*/             \
         HDmemcpy(buf_p, value, SRC_SIZE*sizeof(unsigned char));                                   \
         CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);    /*change back the order for bit operation*/ \
@@ -634,7 +634,7 @@ test_hard_query(void)
 
     /* Unregister the hard conversion from int to float.  Verify the conversion
      * is a soft conversion. */
-    H5Tunregister(H5T_PERS_HARD, NULL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T_conv_int_float);
+    H5Tunregister(H5T_PERS_HARD, NULL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T__conv_int_float);
     if(H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != FALSE) {
         H5_FAILED();
         printf("Can't query conversion function\n");
@@ -643,7 +643,7 @@ test_hard_query(void)
 
     /* Register the hard conversion from int to float.  Verify the conversion
      * is a hard conversion. */
-    H5Tregister(H5T_PERS_HARD, "int_flt", H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T_conv_int_float);
+    H5Tregister(H5T_PERS_HARD, "int_flt", H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T__conv_int_float);
     if(H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != TRUE) {
         H5_FAILED();
         printf("Can't query conversion function\n");
@@ -2337,92 +2337,92 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
          */
         if (H5T_SGN_2==src_sign && H5T_SGN_2==dst_sign) {
             if (src_nbits>dst_nbits) {
-                if(0==H5T_bit_get_d(src_bits, src_nbits-1, (size_t)1) &&
-                        H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits),
+                if(0==H5T__bit_get_d(src_bits, src_nbits-1, (size_t)1) &&
+                        H5T__bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits),
                             H5T_BIT_MSB, 1)>=0) {
                     /*
                      * Source is positive and the magnitude is too large for
                      * the destination.  The destination should be set to the
                      * maximum possible value: 0x7f...f
                      */
-                    if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, (size_t)1) &&
-                            H5T_bit_find(dst_bits, (size_t)0, dst_nbits-1, H5T_BIT_LSB, 0) < 0)
+                    if (0==H5T__bit_get_d(dst_bits, dst_nbits-1, (size_t)1) &&
+                            H5T__bit_find(dst_bits, (size_t)0, dst_nbits-1, H5T_BIT_LSB, 0) < 0)
                         continue; /*no error*/
-                } else if (1==H5T_bit_get_d(src_bits, src_nbits-1, (size_t)1) &&
-                       H5T_bit_find(src_bits, (size_t)0, src_nbits-1, H5T_BIT_MSB,
+                } else if (1==H5T__bit_get_d(src_bits, src_nbits-1, (size_t)1) &&
+                       H5T__bit_find(src_bits, (size_t)0, src_nbits-1, H5T_BIT_MSB,
                             0)+1>=(ssize_t)dst_nbits) {
                     /*
                      * Source is negative but the magnitude is too large for
                      * the destination. The destination should be set to the
                      * smallest possible value: 0x80...0
                      */
-                    if (1==H5T_bit_get_d(dst_bits, dst_nbits-1, (size_t)1) &&
-                            H5T_bit_find(dst_bits, (size_t)0, dst_nbits-1, H5T_BIT_LSB, 1) < 0)
+                    if (1==H5T__bit_get_d(dst_bits, dst_nbits-1, (size_t)1) &&
+                            H5T__bit_find(dst_bits, (size_t)0, dst_nbits-1, H5T_BIT_LSB, 1) < 0)
                         continue; /*no error*/
                 }
             } else if(src_nbits<dst_nbits) {
                 /* Source is smaller than the destination */
-                if(0==H5T_bit_get_d(src_bits, src_nbits-1, (size_t)1)) {
+                if(0==H5T__bit_get_d(src_bits, src_nbits-1, (size_t)1)) {
                     /*
                      * Source is positive, so the excess bits in the
                      * destination should be set to 0's.
                      */
-                    if (0==H5T_bit_get_d(dst_bits, src_nbits-1, (size_t)1) &&
-                            H5T_bit_find(dst_bits, src_nbits, dst_nbits-src_nbits, H5T_BIT_LSB, 1) < 0)
+                    if (0==H5T__bit_get_d(dst_bits, src_nbits-1, (size_t)1) &&
+                            H5T__bit_find(dst_bits, src_nbits, dst_nbits-src_nbits, H5T_BIT_LSB, 1) < 0)
                         continue; /*no error*/
                 } else {
                     /*
                      * Source is negative, so the excess bits in the
                      * destination should be set to 1's.
                      */
-                    if (1==H5T_bit_get_d(dst_bits, src_nbits-1, (size_t)1) &&
-                            H5T_bit_find(dst_bits, src_nbits, dst_nbits-src_nbits, H5T_BIT_LSB, 0) < 0)
+                    if (1==H5T__bit_get_d(dst_bits, src_nbits-1, (size_t)1) &&
+                            H5T__bit_find(dst_bits, src_nbits, dst_nbits-src_nbits, H5T_BIT_LSB, 0) < 0)
                         continue; /*no error*/
                 }
             }
         } else if (H5T_SGN_2==src_sign && H5T_SGN_NONE==dst_sign) {
-            if (H5T_bit_get_d(src_bits, src_nbits-1, (size_t)1)) {
+            if (H5T__bit_get_d(src_bits, src_nbits-1, (size_t)1)) {
                 /*
                  * The source is negative so the result should be zero.
                  * The source is negative if the most significant bit is
                  * set.  The destination is zero if all bits are zero.
                  */
-                if (H5T_bit_find(dst_bits, (size_t)0, dst_nbits, H5T_BIT_LSB, 1) < 0)
+                if (H5T__bit_find(dst_bits, (size_t)0, dst_nbits, H5T_BIT_LSB, 1) < 0)
                     continue; /*no error*/
             } else if (src_nbits>dst_nbits &&
-                   H5T_bit_find(src_bits, dst_nbits-1,
+                   H5T__bit_find(src_bits, dst_nbits-1,
                         src_nbits-dst_nbits, H5T_BIT_LSB, 1)>=0) {
                 /*
                  * The source is a value with a magnitude too large for
                  * the destination.  The destination should be the
                  * largest possible value: 0xff...f
                  */
-                if (H5T_bit_find(dst_bits, (size_t)0, dst_nbits, H5T_BIT_LSB, 0) < 0)
+                if (H5T__bit_find(dst_bits, (size_t)0, dst_nbits, H5T_BIT_LSB, 0) < 0)
                     continue; /*no error*/
             }
         } else if (H5T_SGN_NONE==src_sign && H5T_SGN_2==dst_sign) {
             if (src_nbits>=dst_nbits &&
-                    H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits)+1,
+                    H5T__bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits)+1,
                         H5T_BIT_LSB, 1)>=0) {
                 /*
                  * The source value has a magnitude that is larger than
                  * the destination can handle.  The destination should be
                  * set to the largest possible positive value: 0x7f...f
                  */
-                if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, (size_t)1) &&
-                        H5T_bit_find(dst_bits, (size_t)0, dst_nbits-1, H5T_BIT_LSB, 0) < 0)
+                if (0==H5T__bit_get_d(dst_bits, dst_nbits-1, (size_t)1) &&
+                        H5T__bit_find(dst_bits, (size_t)0, dst_nbits-1, H5T_BIT_LSB, 0) < 0)
                     continue; /*no error*/
             }
         } else {
             if (src_nbits>dst_nbits &&
-                    H5T_bit_find(src_bits, dst_nbits, src_nbits-dst_nbits,
+                    H5T__bit_find(src_bits, dst_nbits, src_nbits-dst_nbits,
                          H5T_BIT_LSB, 1)>=0) {
                 /*
                  * The unsigned source has a value which is too large for
                  * the unsigned destination.  The destination should be
                  * set to the largest possible value: 0xff...f
                  */
-                if (H5T_bit_find(dst_bits, (size_t)0, dst_nbits, H5T_BIT_LSB, 0) < 0)
+                if (H5T__bit_find(dst_bits, (size_t)0, dst_nbits, H5T_BIT_LSB, 0) < 0)
                     continue; /*no error*/
             }
         }
@@ -2610,8 +2610,8 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_conv_int_2
  *
- * Purpose:	Tests overlap calculates in H5T_conv_i_i(), which should be
- *		the same as for H5T_conv_f_f() and H5T_conv_s_s().
+ * Purpose:	Tests overlap calculates in H5T__conv_i_i(), which should be
+ *		the same as for H5T__conv_f_f() and H5T__conv_s_s().
  *
  * Return:	Success:	0
  *
@@ -2648,7 +2648,7 @@ test_conv_int_2(void)
 
 	    /*
 	     * Conversion. If overlap calculations aren't right then an
-	     * assertion will fail in H5T_conv_i_i()
+	     * assertion will fail in H5T__conv_i_i()
 	     */
 	    H5Tconvert(src_type, dst_type, (size_t)100, buf, NULL, H5P_DEFAULT);
 	    H5Tclose(src_type);
@@ -2788,8 +2788,8 @@ my_isinf(int endian, unsigned char *val, size_t size,
         bits[size-(i+1)] = *(val + ENDIAN(size, i, endian));
 #endif /*H5_VMS*/
 
-    if(H5T_bit_find(bits, mpos, msize, H5T_BIT_LSB, 1) < 0 &&
-            H5T_bit_find(bits, epos, esize, H5T_BIT_LSB, 0) < 0)
+    if(H5T__bit_find(bits, mpos, msize, H5T_BIT_LSB, 1) < 0 &&
+            H5T__bit_find(bits, epos, esize, H5T_BIT_LSB, 0) < 0)
         retval = 1;
 
     free(bits);
@@ -3321,7 +3321,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 }
             }
 
-            expo = H5T_bit_get_d(tmp, src_epos, src_esize);
+            expo = H5T__bit_get_d(tmp, src_epos, src_esize);
             if(expo==0)
                 continue;   /* Denormalized floating-point value detected */
             else {
@@ -3341,7 +3341,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                     }
                 }
 
-                expo = H5T_bit_get_d(tmp, dst_epos, dst_esize);
+                expo = H5T__bit_get_d(tmp, dst_epos, dst_esize);
                 if(expo==0)
                     continue;   /* Denormalized floating-point value detected */
                 else {
@@ -4348,7 +4348,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                     )
                 && (INT_SCHAR==dst_type || INT_SHORT==dst_type || INT_INT==dst_type
                 || INT_LONG==dst_type || INT_LLONG==dst_type)) {
-            if(0==H5T_bit_get_d(src_bits, src_nbits-1, (size_t)1) &&
+            if(0==H5T__bit_get_d(src_bits, src_nbits-1, (size_t)1) &&
                     overflows(src_bits, src, dst_nbits-1)) {
                 /*
                  * Source is positive and the magnitude is too large for
@@ -4356,15 +4356,15 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                  * maximum possible value: 0x7f...f
                  */
                 if(!except_set) {
-                    if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, (size_t)1) &&
-                            H5T_bit_find(dst_bits, (size_t)0, dst_nbits-1, H5T_BIT_LSB, 0) < 0)
+                    if (0==H5T__bit_get_d(dst_bits, dst_nbits-1, (size_t)1) &&
+                            H5T__bit_find(dst_bits, (size_t)0, dst_nbits-1, H5T_BIT_LSB, 0) < 0)
                         continue; /*no error*/
                 } else {
                     /* fill_value is small so we know only the 1st byte is set */
                     if (dst_bits[0] == fill_value)
                         continue; /*no error*/
                 }
-            } else if (1==H5T_bit_get_d(src_bits, src_nbits-1, (size_t)1) &&
+            } else if (1==H5T__bit_get_d(src_bits, src_nbits-1, (size_t)1) &&
                     overflows(src_bits, src, dst_nbits-1)) {
                 /*
                  * Source is negative but the magnitude is too large for
@@ -4372,8 +4372,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                  * smallest possible value: 0x80...0
                  */
                 if(!except_set) {
-                    if (1==H5T_bit_get_d(dst_bits, dst_nbits-1, (size_t)1) &&
-                            H5T_bit_find(dst_bits, (size_t)0, dst_nbits-1, H5T_BIT_LSB, 1) < 0)
+                    if (1==H5T__bit_get_d(dst_bits, dst_nbits-1, (size_t)1) &&
+                            H5T__bit_find(dst_bits, (size_t)0, dst_nbits-1, H5T_BIT_LSB, 1) < 0)
                         continue; /*no error*/
                 } else {
                     if (dst_bits[0] == fill_value)
@@ -4389,14 +4389,14 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 )
                 && (INT_UCHAR==dst_type || INT_USHORT==dst_type || INT_UINT==dst_type
                 || INT_ULONG==dst_type || INT_ULLONG==dst_type)) {
-            if (H5T_bit_get_d(src_bits, src_nbits-1, (size_t)1)) {
+            if (H5T__bit_get_d(src_bits, src_nbits-1, (size_t)1)) {
                 /*
                  * The source is negative so the result should be zero.
                  * The source is negative if the most significant bit is
                  * set.  The destination is zero if all bits are zero.
                  */
                 if(!except_set) {
-                    if (H5T_bit_find(dst_bits, (size_t)0, dst_nbits, H5T_BIT_LSB, 1) < 0)
+                    if (H5T__bit_find(dst_bits, (size_t)0, dst_nbits, H5T_BIT_LSB, 1) < 0)
                         continue; /*no error*/
                 } else {
                     if (dst_bits[0] == fill_value)
@@ -4409,7 +4409,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                  * largest possible value: 0xff...f
                  */
                 if(!except_set) {
-                    if (H5T_bit_find(dst_bits, (size_t)0, dst_nbits, H5T_BIT_LSB, 0) < 0)
+                    if (H5T__bit_find(dst_bits, (size_t)0, dst_nbits, H5T_BIT_LSB, 0) < 0)
                         continue; /*no error*/
                 } else {
                     if (dst_bits[0] == fill_value)
@@ -4757,13 +4757,13 @@ overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits)
     HDmemcpy(bits, origin_bits, src_prec/8+1);
 
     /*Check for special cases: +Inf, -Inf*/
-    if (H5T_bit_find (bits, mpos, mant_digits, H5T_BIT_LSB, TRUE) < 0) {
-        if (H5T_bit_find (bits, epos, expt_digits, H5T_BIT_LSB, FALSE) < 0) {
+    if (H5T__bit_find (bits, mpos, mant_digits, H5T_BIT_LSB, TRUE) < 0) {
+        if (H5T__bit_find (bits, epos, expt_digits, H5T_BIT_LSB, FALSE) < 0) {
             ret_value=TRUE;
             goto done;
         }
-    } else if (H5T_NORM_NONE==norm && H5T_bit_find (bits, mpos, mant_digits-1,
-        H5T_BIT_LSB, TRUE) < 0 && H5T_bit_find (bits, epos, expt_digits,
+    } else if (H5T_NORM_NONE==norm && H5T__bit_find (bits, mpos, mant_digits-1,
+        H5T_BIT_LSB, TRUE) < 0 && H5T__bit_find (bits, epos, expt_digits,
         H5T_BIT_LSB, FALSE) < 0) {
         /*This is a special case for the source of no implied mantissa bit.
          *If the exponent bits are all 1s and only the 1st bit of mantissa
@@ -4773,7 +4773,7 @@ overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits)
     }
 
     /* get exponent */
-    expt = H5T_bit_get_d(bits, mant_digits, expt_digits) - bias;
+    expt = H5T__bit_get_d(bits, mant_digits, expt_digits) - bias;
 
     if(expt>=(dst_num_bits-1)) {
        ret_value=TRUE;
@@ -4781,19 +4781,19 @@ overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits)
     }
 
     /* get significand */
-    H5T_bit_copy (mant_bits, (size_t)0, bits, (size_t)0, mant_digits);
+    H5T__bit_copy (mant_bits, (size_t)0, bits, (size_t)0, mant_digits);
 
 
     /* restore implicit bit if normalization is implied*/
     if(norm == H5T_NORM_IMPLIED) {
-        H5T_bit_inc(mant_bits, mant_digits, (size_t)1);
+        H5T__bit_inc(mant_bits, mant_digits, (size_t)1);
         mant_digits++;
     }
 
     /* shift significand */
-    H5T_bit_shift (mant_bits, (ssize_t)(expt-expt_digits), (size_t)0, (size_t)(32 * 8));
+    H5T__bit_shift (mant_bits, (ssize_t)(expt-expt_digits), (size_t)0, (size_t)(32 * 8));
 
-    indx = H5T_bit_find(mant_bits, (size_t)0, (size_t)(32 * 8), H5T_BIT_MSB, 1);
+    indx = H5T__bit_find(mant_bits, (size_t)0, (size_t)(32 * 8), H5T_BIT_MSB, 1);
 
     if((size_t)indx>=dst_num_bits)
         ret_value=TRUE;
